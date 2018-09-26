@@ -49,7 +49,7 @@ public:
   ScriptBuilder(boost::shared_ptr<HistoryView> view,
                 std::string versionSpecificity = "old",
                 bool appendTimestamp = false,
-                bool ignoreGroupWorkspaces = false);
+                std::vector<std::string> ignoreTheseAlgs = {});
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
   const std::string build();
@@ -73,7 +73,7 @@ private:
   std::string m_output;
   std::string m_versionSpecificity;
   bool m_timestampCommands;
-  bool m_ignoreGroups;
+  std::vector<std::string> m_algsToIgnore;
 };
 
 } // namespace API

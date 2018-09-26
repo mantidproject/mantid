@@ -1,5 +1,5 @@
 #include "MantidKernel/make_unique.h"
-#include "MantidQtWidgets/Common/PythonSystemHeader.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include <boost/optional.hpp>
 #include <memory>
 #include <vector>

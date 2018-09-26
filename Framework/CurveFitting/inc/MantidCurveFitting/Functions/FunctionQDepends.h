@@ -51,8 +51,8 @@ namespace Functions {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport FunctionQDepends : public Mantid::API::IFunction1D,
-                                   public Mantid::API::ParamFunction {
+class DLLExport FunctionQDepends : virtual public Mantid::API::IFunction1D,
+                                   virtual public Mantid::API::ParamFunction {
 
 public:
   /* -------------------

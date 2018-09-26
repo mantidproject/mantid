@@ -16,7 +16,7 @@ type :ref:`Workspace2D <Workspace2D>`, grouped under a single
 :ref:`WorkspaceGroup <WorkspaceGroup>`. It is implied that the time unit is
 one **picosecond**.
 
-Sassena ouput files are in `HDF5 <http://www.hdfgroup.org/HDF5>`__ format, and can be made up of the
+Sassena output files are in `HDF5 <http://www.hdfgroup.org/HDF5>`__ format, and can be made up of the
 following datasets: *qvectors*, *fq*, *fq0*, *fq2*, and *fqt*
 
 The group workspace should contain workspaces **\_fqt.Re** and

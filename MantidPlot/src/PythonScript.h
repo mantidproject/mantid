@@ -29,10 +29,7 @@
 #ifndef PYTHON_SCRIPT_H
 #define PYTHON_SCRIPT_H
 
-// Python headers have to go first!
-#include "MantidQtWidgets/Common/PythonSystemHeader.h"
-#include "MantidQtWidgets/Common/PythonThreading.h"
-
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "Script.h"
 
@@ -125,14 +122,14 @@ private:
     }
 
     void appendPath(const QString &path) {
-      ScopedPythonGIL lock;
+      Mantid::PythonInterface::GlobalInterpreterLock lock;
       QString code = "if r'%1' not in sys.path:\n"
                      "    sys.path.append(r'%1')";
       code = code.arg(path);
       PyRun_SimpleString(code.toAscii().constData());
     }
     void removePath(const QString &path) {
-      ScopedPythonGIL lock;
+      Mantid::PythonInterface::GlobalInterpreterLock lock;
       QString code = "if r'%1' in sys.path:\n"
                      "    sys.path.remove(r'%1')";
       code = code.arg(path);
@@ -144,7 +141,6 @@ private:
   };
 
   inline PythonScripting *interp() const { return m_interp; }
-  PythonGIL &gil() const;
   void initialize(const QString &name, QObject *context);
   void beginStdoutRedirect();
   void endStdoutRedirect();
@@ -208,7 +204,7 @@ private:
   PythonPathHolder m_pathHolder;
   /// This must only be used by the recursiveAsync* methods
   /// as they need to store state between calls.
-  PythonGIL m_recursiveAsyncGIL;
+  PyGILState_STATE m_recursiveAsyncGIL;
 };
 
 #endif

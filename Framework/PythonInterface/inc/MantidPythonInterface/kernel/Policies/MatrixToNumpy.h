@@ -24,9 +24,9 @@
  */
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
 
 #include <type_traits>
 
@@ -64,9 +64,7 @@ struct MatrixRefToNumpyImpl {
                                        ConversionPolicy>()(cmatrix);
   }
 
-  inline PyTypeObject const *get_pytype() const {
-    return Converters::getNDArrayType();
-  }
+  inline PyTypeObject const *get_pytype() const { return ndarrayType(); }
 };
 
 template <typename T>
@@ -113,9 +111,7 @@ template <typename MatrixType> struct MatrixToNumpyImpl {
                                        Converters::Clone>()(cvector);
   }
 
-  inline PyTypeObject const *get_pytype() const {
-    return Converters::getNDArrayType();
-  }
+  inline PyTypeObject const *get_pytype() const { return ndarrayType(); }
 };
 
 template <typename T> struct MatrixToNumpy_Requires_Matrix_Return_By_Value {};

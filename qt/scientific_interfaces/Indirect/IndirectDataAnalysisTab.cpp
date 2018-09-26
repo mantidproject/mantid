@@ -162,7 +162,8 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
                             inputWs->getNumberHistograms()) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               static_cast<int>(m_selectedSpectrum));
-  }
+  } else
+    showMessageBox("Workspace not found - data may not be loaded.");
 }
 
 /**

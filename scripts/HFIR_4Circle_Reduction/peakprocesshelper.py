@@ -306,7 +306,7 @@ class PeakProcessRecord(object):
         """
         # get PeaksWorkspace
         if AnalysisDataService.doesExist(self._myPeakWorkspaceName) is False:
-            raise RuntimeError('PeaksWorkspace %s does ot exit.' % self._myPeakWorkspaceName)
+            raise RuntimeError('PeaksWorkspace %s does not exist.' % self._myPeakWorkspaceName)
 
         peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
 

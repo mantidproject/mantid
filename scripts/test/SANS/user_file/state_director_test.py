@@ -197,7 +197,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         if os.path.exists(user_file_path):
             os.remove(user_file_path)
 
-    def test_stat_can_be_crated_from_valid_user_file_and_later_on_reset(self):
+    def test_stat_can_be_created_from_valid_user_file_and_later_on_reset(self):
         # Arrange
         file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
         data_builder = get_data_builder(SANSFacility.ISIS, file_information)

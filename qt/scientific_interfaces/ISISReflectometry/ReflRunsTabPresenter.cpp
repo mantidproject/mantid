@@ -80,6 +80,13 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
     m_searcher.reset(new ReflCatalogSearcher());
+
+  updateViewWhenMonitorStopped();
+}
+
+ReflRunsTabPresenter::~ReflRunsTabPresenter() {
+  if (m_monitorAlg)
+    stopObserving(m_monitorAlg);
 }
 
 /** Accept a main presenter
@@ -138,6 +145,15 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     break;
   case IReflRunsTabPresenter::GroupChangedFlag:
     changeGroup();
+    break;
+  case IReflRunsTabPresenter::StartMonitorFlag:
+    startMonitor();
+    break;
+  case IReflRunsTabPresenter::StopMonitorFlag:
+    stopMonitor();
+    break;
+  case IReflRunsTabPresenter::StartMonitorCompleteFlag:
+    startMonitorComplete();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -660,6 +676,139 @@ void ReflRunsTabPresenter::changeGroup() {
   updateWidgetEnabledState();
   // Update the current menu commands based on the current group
   pushCommands(selectedGroup());
+}
+
+void ReflRunsTabPresenter::handleError(const std::string &message,
+                                       const std::exception &e) {
+  m_mainPresenter->giveUserCritical(message + ": " + std::string(e.what()),
+                                    "Error");
+}
+
+void ReflRunsTabPresenter::handleError(const std::string &message) {
+  m_mainPresenter->giveUserCritical(message, "Error");
+}
+
+std::string ReflRunsTabPresenter::liveDataReductionAlgorithm() {
+  return "ReflectometryReductionOneLiveData";
+}
+
+std::string
+ReflRunsTabPresenter::liveDataReductionOptions(const std::string &instrument) {
+  // Get the properties for the reduction algorithm from the settings tab. We
+  // don't have a group associated with live data. This is not ideal but for
+  // now just use the first group.
+  int const group = 0;
+  auto options = convertOptionsFromQMap(getProcessingOptions(group));
+  // Add other required input properties to the live data reduction algorithnm
+  options["Instrument"] = QString::fromStdString(instrument);
+  options["GetLiveValueAlgorithm"] = "GetLiveInstrumentValue";
+  // Convert the properties to a string to pass to the algorithm
+  auto const optionsString =
+      convertMapToString(options, ';', false).toStdString();
+  return optionsString;
+}
+
+IAlgorithm_sptr ReflRunsTabPresenter::setupLiveDataMonitorAlgorithm() {
+  auto alg = AlgorithmManager::Instance().create("StartLiveData");
+  alg->initialize();
+  alg->setChild(true);
+  alg->setLogging(false);
+  auto instrument = m_view->getSearchInstrument();
+  alg->setProperty("Instrument", instrument);
+  alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
+  alg->setProperty("AccumulationWorkspace", "TOF_live");
+  alg->setProperty("AccumulationMethod", "Replace");
+  alg->setProperty("UpdateEvery", "60");
+  alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
+  alg->setProperty("PostProcessingProperties",
+                   liveDataReductionOptions(instrument));
+  alg->setProperty("RunTransitionBehavior", "Restart");
+  auto errorMap = alg->validateInputs();
+  if (!errorMap.empty()) {
+    std::string errorString;
+    for (auto &kvp : errorMap)
+      errorString.append(kvp.first + ":" + kvp.second);
+    handleError(errorString);
+    return nullptr;
+  }
+  return alg;
+}
+
+void ReflRunsTabPresenter::updateViewWhenMonitorStarting() {
+  m_view->setStartMonitorButtonEnabled(false);
+  m_view->setStopMonitorButtonEnabled(false);
+}
+
+void ReflRunsTabPresenter::updateViewWhenMonitorStarted() {
+  m_view->setStartMonitorButtonEnabled(false);
+  m_view->setStopMonitorButtonEnabled(true);
+}
+
+void ReflRunsTabPresenter::updateViewWhenMonitorStopped() {
+  m_view->setStartMonitorButtonEnabled(true);
+  m_view->setStopMonitorButtonEnabled(false);
+}
+
+/** Start live data monitoring
+ */
+void ReflRunsTabPresenter::startMonitor() {
+  try {
+    auto alg = setupLiveDataMonitorAlgorithm();
+    if (!alg)
+      return;
+    auto algRunner = m_view->getMonitorAlgorithmRunner();
+    algRunner->startAlgorithm(alg);
+    updateViewWhenMonitorStarting();
+  } catch (std::exception &e) {
+    handleError("Error starting live data", e);
+  } catch (...) {
+    handleError("Error starting live data");
+  }
+}
+
+/** Callback called when the monitor algorithm has been started
+ */
+void ReflRunsTabPresenter::startMonitorComplete() {
+  auto algRunner = m_view->getMonitorAlgorithmRunner();
+  m_monitorAlg = algRunner->getAlgorithm()->getProperty("MonitorLiveData");
+  if (m_monitorAlg) {
+    observeError(m_monitorAlg);
+    updateViewWhenMonitorStarted();
+  } else {
+    updateViewWhenMonitorStopped();
+  }
+}
+
+/** Stop live data monitoring
+ */
+void ReflRunsTabPresenter::stopMonitor() {
+  if (!m_monitorAlg)
+    return;
+
+  stopObserving(m_monitorAlg);
+  m_monitorAlg->cancel();
+  m_monitorAlg.reset();
+  updateViewWhenMonitorStopped();
+}
+
+/** Handler called when the monitor algorithm finishes
+ */
+void ReflRunsTabPresenter::finishHandle(const IAlgorithm *alg) {
+  UNUSED_ARG(alg);
+  stopObserving(m_monitorAlg);
+  m_monitorAlg.reset();
+  updateViewWhenMonitorStopped();
+}
+
+/** Handler called when the monitor algorithm errors
+ */
+void ReflRunsTabPresenter::errorHandle(const IAlgorithm *alg,
+                                       const std::string &what) {
+  UNUSED_ARG(alg);
+  UNUSED_ARG(what);
+  stopObserving(m_monitorAlg);
+  m_monitorAlg.reset();
+  updateViewWhenMonitorStopped();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

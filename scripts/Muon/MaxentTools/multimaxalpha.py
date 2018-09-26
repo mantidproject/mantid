@@ -54,7 +54,7 @@ def MULTIMAX(
         else:
             (SENSE_phi, DETECT_a, DETECT_b, AMPS_amp) = MODAB(RUNDATA_hists, datum, sigma,
                                                               MISSCHANNELS_mm, MAXPAGE_f, PULSESHAPE_convol, DETECT_e, SAVETIME_i2, mylog)
-        # outout per-iteration debug info
+        # output per-iteration debug info
         if(phaseconvWS):
             offset = 0
             for k in range(POINTS_ngroups+len(deadDetectors)):

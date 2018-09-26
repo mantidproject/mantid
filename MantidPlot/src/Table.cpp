@@ -758,7 +758,7 @@ void Table::setColName(int col, const QString &text, bool enumerateRight) {
     if (enumerateRight)
       newLabel += QString::number(n);
 
-    if (col_label.contains(newLabel) > nullptr) {
+    if (col_label.contains(newLabel)) {
       auto msg = "There is already a column called : <b>" + newLabel +
                  "</b> in table <b>" + caption +
                  "</b>!<p>Please choose another name!";

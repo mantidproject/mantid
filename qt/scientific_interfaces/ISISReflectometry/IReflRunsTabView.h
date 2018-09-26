@@ -77,6 +77,8 @@ public:
   virtual void setInstrumentComboEnabled(bool enabled) = 0;
   virtual void setSearchTextEntryEnabled(bool enabled) = 0;
   virtual void setSearchButtonEnabled(bool enabled) = 0;
+  virtual void setStartMonitorButtonEnabled(bool enabled) = 0;
+  virtual void setStopMonitorButtonEnabled(bool enabled) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;
@@ -88,6 +90,8 @@ public:
   virtual IReflRunsTabPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
+  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  getMonitorAlgorithmRunner() const = 0;
 
   // Timer methods
   virtual void startTimer(const int millisecs) = 0;
@@ -95,6 +99,10 @@ public:
 
   // Start an ICAT search
   virtual void startIcatSearch() = 0;
+
+  // Start live data monitoring
+  virtual void startMonitor() = 0;
+  virtual void stopMonitor() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

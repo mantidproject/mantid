@@ -9,7 +9,7 @@
 %Include string.sip
 
 %ModuleHeaderCode
-#include "MantidQtWidgets/Common/PythonSystemHeader.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 %End
 
@@ -1612,7 +1612,7 @@ public:
                           const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
-
+    void removeAllRows();
     void replaceRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> replacementPoints,
                      std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>> replacementLocations);
     void appendSubtreesAt(const MantidQt::MantidWidgets::Batch::RowLocation& parent,
@@ -1655,6 +1655,10 @@ public:
 
   const std::string &contentText() const;
   void setContentText(const std::string& contentText);
+
+  const std::string &toolTip() const;
+  void setToolTip(const std::string &toolTip);
+
 
   const std::string & borderColor() const;
   void setBorderColor(const std::string& borderColor);
@@ -2292,6 +2296,43 @@ namespace MantidQt
 {
 namespace API
 {
+
+class TSVSerialiser
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+%End
+private:
+TSVSerialiser(const MantidQt::API::TSVSerialiser &);
+
+public:
+TSVSerialiser();
+TSVSerialiser(const std::string &lines);
+
+void clear();
+std::string outputLines() const;
+std::vector<std::string> sections(const std::string &name) const;
+
+MantidQt::API::TSVSerialiser &writeLine(const std::string &name);
+void writeSection(const std::string &name, const std::string &body);
+
+
+bool selectLine(const std::string &name);
+bool selectSection(const std::string &name);
+
+void storeDouble(const double value);
+void storeInt(const int value);
+void storeString(const std::string value);
+void storeBool(const bool value);
+
+double readDouble();
+int readInt();
+std::string readString();
+bool readBool();
+
+std::string lineAsString(const std::string &name) const;
+std::vector<std::string> values(const std::string &name) const;
+};
 
 class WidgetScrollbarDecorator
 {

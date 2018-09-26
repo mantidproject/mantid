@@ -31,6 +31,7 @@ private:
   void setupFitTab() override;
 
 protected:
+  void setRunEnabled(bool enabled) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 
@@ -40,6 +41,7 @@ protected slots:
   void fitFunctionChanged();
   void customBoolUpdated(const QString &key, bool value);
   void plotResult();
+  void runClicked();
 
 private:
   void setConstrainIntensitiesEnabled(bool enabled);

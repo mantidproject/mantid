@@ -89,6 +89,8 @@ public:
   void setInstrumentComboEnabled(bool enabled) override;
   void setSearchTextEntryEnabled(bool enabled) override;
   void setSearchButtonEnabled(bool enabled) override;
+  void setStartMonitorButtonEnabled(bool enabled) override;
+  void setStopMonitorButtonEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -105,6 +107,8 @@ public:
   IReflRunsTabPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
+  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  getMonitorAlgorithmRunner() const override;
 
   // Timer methods
   void startTimer(const int millisecs) override;
@@ -112,6 +116,10 @@ public:
 
   // Start an ICAT search
   void startIcatSearch() override;
+
+  // Live data monitor
+  void startMonitor() override;
+  void stopMonitor() override;
 
 private:
   /// initialise the interface
@@ -122,6 +130,7 @@ private:
   void timerEvent(QTimerEvent *event) override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
+  boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
   // the presenter
   IReflRunsTabPresenter *m_presenter;
 
@@ -147,9 +156,12 @@ private slots:
   void on_actionTransfer_triggered();
   void slitCalculatorTriggered();
   void icatSearchComplete();
+  void startMonitorComplete();
   void instrumentChanged(int index);
   void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
+  void on_buttonMonitor_clicked();
+  void on_buttonStopMonitor_clicked();
 };
 
 } // namespace CustomInterfaces
