@@ -32,10 +32,10 @@ ScalarMappable::ScalarMappable(const NormalizeBase &norm, const Colormap &cmap)
 }
 
 /**
- * @brief ScalarMappable::toRGBA
- * @param x
- * @param alpha
- * @return
+ * @brief Convert a data value to an RGBA value
+ * @param x The data value within the
+ * @param alpha The alpha value (default = 1)
+ * @return A QRgb value corresponding to this data point
  */
 QRgb ScalarMappable::toRGBA(double x, double alpha) const {
   // Sending the first argument as an iterable gives a numpy array back.

@@ -13,7 +13,6 @@ public:
   static void destroySuite(FigureTest *suite) { delete suite; }
 
 public:
-  // ----------------- success tests ---------------------
   void testDefaultFigureHasTightLayout() {
     Figure fig;
     TS_ASSERT_EQUALS(true, fig.pyobj().attr("get_tight_layout")());
@@ -22,6 +21,16 @@ public:
   void testConstructFigureWithNoTightLayout() {
     Figure fig{false};
     TS_ASSERT_EQUALS(false, fig.pyobj().attr("get_tight_layout")());
+  }
+
+  void testAddAxes() {
+    Figure fig{false};
+    TS_ASSERT_THROWS_NOTHING(auto axes{fig.addAxes(0.1, 0.1, 0.9, 0.9)});
+  }
+
+  void testSubPlot() {
+    Figure fig{false};
+    TS_ASSERT_THROWS_NOTHING(auto axes{fig.addSubPlot(111)});
   }
 };
 

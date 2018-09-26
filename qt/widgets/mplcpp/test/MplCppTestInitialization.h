@@ -3,9 +3,9 @@
 
 #include "cxxtest/GlobalFixture.h"
 
-#include <QApplication>
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
+#include <QApplication>
 
 /**
  * PythonInterpreter

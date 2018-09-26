@@ -16,8 +16,8 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 */
-#include "MantidQtWidgets/MplCpp/Axes.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
+#include "MantidQtWidgets/MplCpp/Figure.h"
 
 #include <QWidget>
 
@@ -36,12 +36,12 @@ class MANTID_MPLCPP_DLL FigureCanvasQt : public QWidget,
   Q_OBJECT
 public:
   FigureCanvasQt(int subplotspec, QWidget *parent = nullptr);
-  FigureCanvasQt(Axes axes, QWidget *parent = nullptr);
+  FigureCanvasQt(Figure fig, QWidget *parent = nullptr);
 
   /// Non-const access to the current active axes instance.
   inline Axes &gca() { return m_axes; }
 
-private: //members
+private: // members
   Axes m_axes;
 };
 

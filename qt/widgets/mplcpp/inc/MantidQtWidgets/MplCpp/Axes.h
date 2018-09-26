@@ -25,7 +25,7 @@ namespace MplCpp {
 
 class MANTID_MPLCPP_DLL Axes : public Python::InstanceHolder {
 public:
-  Axes(Python::Object obj);
+  explicit Axes(Python::Object obj);
 
   /// @name Formatting
   /// @{

@@ -31,7 +31,16 @@ class MANTID_MPLCPP_DLL Figure : public Python::InstanceHolder {
 public:
   Figure(bool tightLayout = true);
 
+  /**
+   * @param index The index of the axes to return
+   * @return The axes instance
+   */
+  inline Axes axes(size_t index) const {
+    return Axes{pyobj().attr("axes")[index]};
+  }
+
   Axes addAxes(double left, double bottom, double width, double height);
+  Axes addSubPlot(int subplotspec);
 };
 
 } // namespace MplCpp

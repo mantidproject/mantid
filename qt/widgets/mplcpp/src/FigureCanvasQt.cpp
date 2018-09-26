@@ -8,13 +8,27 @@
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
-
+namespace {
 /**
+ * @param fig An existing matplotlib Figure instance
  * @return A new FigureCanvasQT object
  */
-Python::Object createPyCanvas() {
-  return backendModule().attr("FigureCanvasQTAgg")(Figure(true).pyobj());
+Python::Object createPyCanvasFromFigure(Figure fig) {
+  return backendModule().attr("FigureCanvasQTAgg")(fig.pyobj());
 }
+
+/**
+ * @param subplotspec A matplotlib subplot spec defined as a 3-digit
+ * integer.
+ * @return A new FigureCanvasQT object
+ */
+Python::Object createPyCanvas(int subplotspec) {
+  Figure fig{true};
+  if (subplotspec > 0)
+    fig.addSubPlot(subplotspec);
+  return createPyCanvasFromFigure(std::move(fig));
+}
+} // namespace
 
 /**
  * @brief Common constructor code for FigureCanvasQt
@@ -37,8 +51,8 @@ void initLayout(FigureCanvasQt *cppCanvas) {
  * @param parent The owning parent widget
  */
 FigureCanvasQt::FigureCanvasQt(int subplotspec, QWidget *parent)
-    : QWidget(parent), InstanceHolder(createPyCanvas(), "draw"),
-      m_axes(pyobj().attr("figure").attr("add_subplot")(subplotspec)) {
+    : QWidget(parent), InstanceHolder(createPyCanvas(subplotspec), "draw"),
+      m_axes(pyobj().attr("figure").attr("axes")[0]) {
   // Cannot use delegating constructor here as InstanceHolder needs to be
   // initialized before the axes can be created
   initLayout(this);
@@ -50,9 +64,9 @@ FigureCanvasQt::FigureCanvasQt(int subplotspec, QWidget *parent)
  * @param axes An existing axes instance
  * @param parent The owning parent widget
  */
-FigureCanvasQt::FigureCanvasQt(Axes axes, QWidget *parent)
-    : QWidget(parent), InstanceHolder(createPyCanvas(), "draw"),
-      m_axes(std::move(axes)) {
+FigureCanvasQt::FigureCanvasQt(Figure fig, QWidget *parent)
+    : QWidget(parent), InstanceHolder(createPyCanvasFromFigure(fig), "draw"),
+      m_axes(fig.axes(0)) {
   initLayout(this);
 }
 

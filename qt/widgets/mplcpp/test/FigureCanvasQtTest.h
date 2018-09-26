@@ -3,8 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
+using MantidQt::Widgets::MplCpp::Figure;
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 
 class FigureCanvasQtTest : public CxxTest::TestSuite {
@@ -23,10 +25,9 @@ public:
 
   void testConstructionCapturesGivenAxesObject() {
     using namespace MantidQt::Widgets::MplCpp;
-    auto fig = Python::NewRef(PyImport_ImportModule("matplotlib.figure"))
-                   .attr("Figure")();
-    auto axes{fig.attr("add_subplot")(221)};
-    FigureCanvasQt canvas{std::move(axes)};
+    Figure fig;
+    fig.addSubPlot(221);
+    FigureCanvasQt canvas{std::move(fig)};
     auto geometry = canvas.gca().pyobj().attr("get_geometry")();
     TS_ASSERT_EQUALS(2, geometry[0]);
     TS_ASSERT_EQUALS(2, geometry[1]);
