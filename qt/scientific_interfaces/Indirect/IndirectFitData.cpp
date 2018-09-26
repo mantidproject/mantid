@@ -108,10 +108,42 @@ constructDiscontinuousSpectraString(std::vector<int> const &spectras) {
   return joinCompress(spectras.begin(), spectras.end());
 }
 
+std::vector<std::string> splitStringBy(std::string const &str,
+                                       std::string const &delimiter) {
+  std::vector<std::string> subStrings;
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
+  return subStrings;
+}
+
+std::string
+getFormattedSpectraRange(std::string const &subString,
+                         std::vector<std::string> const &rangeBounds) {
+  if (rangeBounds[0] > rangeBounds[1])
+    return rangeBounds[1] + "-" + rangeBounds[0];
+  else
+    return subString;
+}
+
+std::string rearrangeSpectraSubString(std::string const &subString) {
+  if (subString.find("-") != std::string::npos)
+    return getFormattedSpectraRange(subString, splitStringBy(subString, "-"));
+  else
+    return subString;
+}
+
+std::string rearrangeSpectraRangeStrings(std::string const &string) {
+  std::string spectraString;
+  std::vector<std::string> subStrings = splitStringBy(string, ",");
+  for (auto subString : subStrings)
+    spectraString += rearrangeSpectraSubString(subString) + ",";
+  return spectraString;
+}
+
 std::string createDiscontinuousSpectraString(std::string const &string) {
   std::string spectraString = string;
   std::remove_if(spectraString.begin(), spectraString.end(), isspace);
-  std::vector<int> spectras = parseRange(spectraString);
+  std::vector<int> spectras =
+      parseRange(rearrangeSpectraRangeStrings(spectraString));
   std::sort(spectras.begin(), spectras.end());
   // Remove duplicate entries
   spectras.erase(std::unique(spectras.begin(), spectras.end()), spectras.end());
@@ -193,13 +225,6 @@ tryPassFormatArgument(boost::basic_format<char> &formatString,
 
 std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
   return std::make_pair(workspace->x(0).front(), workspace->x(0).back());
-}
-
-std::vector<std::string> splitStringBy(std::string const &str,
-                                       std::string const &delimiter) {
-  std::vector<std::string> subStrings;
-  boost::split(subStrings, str, boost::is_any_of(delimiter));
-  return subStrings;
 }
 
 double convertBoundToDoubleAndFormat(std::string const &str) {
@@ -380,7 +405,7 @@ void IndirectFitData::setExcludeRegionString(
     m_excludeRegions[spectrum] = excludeRegionString;
 }
 
-IndirectFitData &IndirectFitData::combine(const IndirectFitData &fitData) {
+IndirectFitData &IndirectFitData::combine(IndirectFitData const &fitData) {
   m_workspace = fitData.m_workspace;
   setSpectra(
       boost::apply_visitor(CombineSpectra(), m_spectra, fitData.m_spectra));

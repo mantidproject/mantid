@@ -173,7 +173,7 @@ public:
   bool zeroSpectra() const;
   std::pair<double, double> getRange(std::size_t spectrum) const;
   std::string getExcludeRegion(std::size_t spectrum) const;
-  IndirectFitData &combine(const IndirectFitData &fitData);
+  IndirectFitData &combine(IndirectFitData const &fitData);
 
   std::vector<double> excludeRegionsVector(std::size_t spectrum) const;
 
@@ -194,6 +194,8 @@ public:
   void setEndX(double const &endX, std::size_t const &spectrum);
   void setExcludeRegionString(std::string const &excludeRegion,
                               std::size_t const &spectrum);
+
+  void showMessage(std::string const &str);
 
 private:
   void validateSpectra(Spectra const &spectra);
