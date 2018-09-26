@@ -7,11 +7,12 @@
 namespace Mantid {
 namespace DataHandling {
 
-class DLLExport LoadBinStl  {
+class DLLExport LoadBinStl {
 public:
-  LoadBinStl(std::string filename):m_filename(filename){}
+  LoadBinStl(std::string filename) : m_filename(filename) {}
   std::unique_ptr<Geometry::MeshObject> readStl();
   bool isBinarySTL();
+
 private:
   uint32_t getNumberTriangles(Kernel::BinaryStreamReader);
   void readTriangle(Kernel::BinaryStreamReader);
@@ -21,7 +22,7 @@ private:
   std::vector<Kernel::V3D> m_verticies;
 };
 uint16_t addSTLVertex(Kernel::V3D &vertex, std::vector<Kernel::V3D> &vertices);
-bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) ;
+bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2);
 
 } // namespace DataHandling
 } // namespace Mantid
