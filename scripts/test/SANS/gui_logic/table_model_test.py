@@ -4,9 +4,19 @@ import unittest
 
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel)
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
+from PyQt4.QtCore import QCoreApplication
+from sans.common.enums import RowState
+try:
+    from unittest import mock
+except:
+    import mock
 
 
 class TableModelTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.qApp = QCoreApplication(['test_app'])
+
     def test_user_file_can_be_set(self):
         self._do_test_file_setting(self._user_file_wrapper, "user_file")
 
@@ -131,6 +141,51 @@ class TableModelTest(unittest.TestCase):
                                   'it must be enclosed in quotes'})
 
         self.assertEqual(expected_hint_strategy, hint_strategy)
+
+    def test_that_get_thickness_for_rows_updates_table_correctly(self):
+        update_view = mock.MagicMock()
+        table_model = TableModel(update_view)
+        table_index_model = TableIndexModel("74044", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+
+        table_model.get_thickness_for_rows()
+        table_model.work_handler.wait_for_done()
+        self.qApp.processEvents()
+
+        self.assertEqual(table_index_model.sample_thickness, 1.0)
+
+    def test_that_get_thickness_for_rows_calls_update_view(self):
+        update_view = mock.MagicMock()
+        table_model = TableModel(update_view)
+        table_index_model = TableIndexModel("74044", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+
+        table_model.get_thickness_for_rows()
+        table_model.work_handler.wait_for_done()
+        self.qApp.processEvents()
+
+        update_view.assert_called_once_with()
+
+    @mock.patch('sans.gui_logic.presenter.create_file_information.SANSFileInformationFactory')
+    def test_that_get_thickness_for_row_handles_errors_correctly(self, file_information_factory_mock):
+        file_information_factory_instance = mock.MagicMock()
+        file_information_factory_instance.create_sans_file_information.side_effect = RuntimeError('File Error')
+        file_information_factory_mock.return_value = file_information_factory_instance
+        update_view = mock.MagicMock()
+        table_model = TableModel(update_view)
+        table_index_model = TableIndexModel("00000", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+
+        table_model.get_thickness_for_rows()
+        table_model.work_handler.wait_for_done()
+        self.qApp.processEvents()
+
+        self.assertEqual(table_index_model.tool_tip, 'File Error')
+        self.assertEqual(table_index_model.row_state, RowState.Error)
+        update_view.assert_called_once_with()
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string

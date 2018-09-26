@@ -720,6 +720,15 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
         self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, '')
 
+    def test_create_file_information_can_be_called(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+        run_number = 74404
+        callback_function = mock.MagicMock()
+
+        presenter.create_file_information(run_number, callback_function)
+
     @staticmethod
     def _clear_property_manager_data_service():
         for element in PropertyManagerDataService.getObjectNames():

@@ -12,6 +12,9 @@ import re
 from sans.common.constants import ALL_PERIODS
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from sans.common.enums import RowState
+import functools
+from sans.gui_logic.presenter.create_file_information import create_file_information
+from ui.sans_isis.work_handler import WorkHandler
 
 
 class TableModel(object):
@@ -26,6 +29,9 @@ class TableModel(object):
         self._user_file = ""
         self._batch_file = ""
         self._table_entries = []
+        self.work_handler = WorkHandler()
+        self._subscriber_list = []
+        self._id_count = 0
 
     @staticmethod
     def _validate_file_name(file_name):
@@ -60,10 +66,18 @@ class TableModel(object):
         return self._table_entries[index]
 
     def add_table_entry(self, row, table_index_model):
+        table_index_model.id = self._id_count
+        self._id_count += 1
         self._table_entries.insert(row, table_index_model)
+        self.get_thickness_for_rows([row])
+        self.notify_subscribers()
 
     def append_table_entry(self, table_index_model):
+        table_index_model.id = self._id_count
+        self._id_count += 1
         self._table_entries.append(table_index_model)
+        self.get_thickness_for_rows([self.get_number_of_rows() - 1])
+        self.notify_subscribers()
 
     def remove_table_entries(self, rows):
         # For speed rows should be a Set here but don't think it matters for the list sizes involved.
@@ -71,6 +85,7 @@ class TableModel(object):
         if not self._table_entries:
             row_index_model = self.create_empty_row()
             self.append_table_entry(row_index_model)
+        self.notify_subscribers()
 
     def replace_table_entries(self, row_to_replace_index, rows_to_insert):
         self.remove_table_entries(row_to_replace_index)
@@ -81,6 +96,7 @@ class TableModel(object):
         self._table_entries = []
         row_index_model = self.create_empty_row()
         self.append_table_entry(row_index_model)
+        self.notify_subscribers()
 
     def get_number_of_rows(self):
         return len(self._table_entries)
@@ -89,6 +105,9 @@ class TableModel(object):
         self._table_entries[row].update_attribute(self.column_name_converter[column], value)
         self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
         self._table_entries[row].update_attribute('tool_tip', '')
+        if column == 0:
+            self.get_thickness_for_rows([row])
+        self.notify_subscribers()
 
     def is_empty_row(self, row):
         return self._table_entries[row].is_empty()
@@ -104,14 +123,57 @@ class TableModel(object):
     def set_row_to_processed(self, row, tool_tip):
         self._table_entries[row].update_attribute('row_state', RowState.Processed)
         self._table_entries[row].update_attribute('tool_tip', tool_tip)
+        self.notify_subscribers()
 
     def reset_row_state(self, row):
         self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
         self._table_entries[row].update_attribute('tool_tip', '')
+        self.notify_subscribers()
 
     def set_row_to_error(self, row, tool_tip):
         self._table_entries[row].update_attribute('row_state', RowState.Error)
         self._table_entries[row].update_attribute('tool_tip', tool_tip)
+        self.notify_subscribers()
+
+    def get_thickness_for_rows(self, rows=None):
+        if not rows:
+            rows = range(len(self._table_entries))
+        for row in rows:
+            entry = self._table_entries[row]
+            if entry.is_empty():
+                continue
+            success_callback = functools.partial(self.update_thickness_from_file_information, entry.id)
+            error_callback = functools.partial(self.failure_handler, entry.id)
+            create_file_information(entry.sample_scatter, error_callback, success_callback, self.work_handler, entry.id)
+
+    def failure_handler(self, id, error):
+        row = self.get_row_from_id(id)
+        self.update_table_entry(row, 14, '')
+        self._table_entries[row].update_attribute('file_information', '')
+        self.set_row_to_error(row, str(error[1]))
+
+    def update_thickness_from_file_information(self, id, file_information):
+        row = self.get_row_from_id(id)
+        if file_information:
+            self.update_table_entry(row, 14, file_information.get_thickness())
+            self._table_entries[row].update_attribute('file_information', file_information)
+        self.notify_subscribers()
+
+    def subscribe_to_model_changes(self, subscriber):
+        self._subscriber_list.append(subscriber)
+
+    def notify_subscribers(self):
+        for subscriber in self._subscriber_list:
+            subscriber.on_update_rows()
+
+    def get_file_information_for_row(self, row):
+        return self._table_entries[row].file_information
+
+    def get_row_from_id(self, id):
+        for row, entry in enumerate(self._table_entries):
+            if entry.id == id:
+                return row
+        return None
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -129,6 +191,7 @@ class TableIndexModel(object):
                  can_direct, can_direct_period,
                  output_name="", user_file="", sample_thickness='0.0', options_column_string=""):
         super(TableIndexModel, self).__init__()
+        self.id = None
         self.sample_scatter = sample_scatter
         self.sample_scatter_period = sample_scatter_period
         self.sample_transmission = sample_transmission
@@ -151,6 +214,15 @@ class TableIndexModel(object):
 
         self.row_state = RowState.Unprocessed
         self.tool_tip = ''
+        self.file_information = None
+
+    @property
+    def sample_scatter(self):
+        return self._sample_scatter
+
+    @sample_scatter.setter
+    def sample_scatter(self, value):
+        self._sample_scatter = value
 
     # Options column entries
     @property
