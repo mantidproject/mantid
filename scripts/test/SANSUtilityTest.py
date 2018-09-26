@@ -141,7 +141,7 @@ class SANSUtilityTest(unittest.TestCase):
     #               '>1':[[1, -1]],       # just lower bound
     #               '<5':[[-1, 5]],      # just upper bound
     #               '<5,8-9': [[-1, 5], [8,9]],
-    #               '1:2:5': [[1,3], [3,5]] # sintax: start, step, stop
+    #               '1:2:5': [[1,3], [3,5]] # syntax: start, step, stop
     #        }
 
     #    for (k, v) in inputs.items():
@@ -370,7 +370,7 @@ class AddOperationTest(unittest.TestCase):
         times1 = prop_in1.times
         times2 = prop_in2.times
 
-        # Total time differnce is TIME1 - (TIME2 + extraShift)
+        # Total time difference is TIME1 - (TIME2 + extraShift)
         shift = 0.0
         if isOverlay:
             shift = time_duration.total_nanoseconds(DateAndTime(time1)- DateAndTime(time2))/1e9 - extra_time_shift

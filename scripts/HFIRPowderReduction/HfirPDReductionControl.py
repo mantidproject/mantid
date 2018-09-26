@@ -175,7 +175,7 @@ class PDRManager(object):
         return
 
     def setProcessedVanadiumData(self, wksp):
-        """ Set tempory processed vanadium data
+        """ Set temporary processed vanadium data
         Arguments:
          - vanws :: workspace
          - note  :: string as note
@@ -185,7 +185,7 @@ class PDRManager(object):
         return
 
     def setProcessedVanadiumDataTemp(self, vanws, note):
-        """ Set tempory processed vanadium data
+        """ Set temporary processed vanadium data
         Arguments:
          - vanws :: workspace
          - note  :: string as note
@@ -583,7 +583,7 @@ class HFIRPDRedControl(object):
 
     def mergeReduceSpiceData(self, expno, scannolist, unit, xmin, xmax, binsize):
         """ Merge and reduce SPICE data files
-        Arguements:
+        Arguments:
          - expscanfilelist: list of 3 tuples: expnumber, scannumber and file name
         """
         # Collect data MD workspaces and monitor MD workspaces
