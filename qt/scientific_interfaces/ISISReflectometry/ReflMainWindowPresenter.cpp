@@ -1,7 +1,7 @@
 #include "ReflMainWindowPresenter.h"
+#include "GUI/Event/IEventPresenter.h"
 #include "IReflMainWindowView.h"
 #include "IReflRunsTabPresenter.h"
-#include "GUI/Event/IEventPresenter.h"
 #include "IReflSaveTabPresenter.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
@@ -62,5 +62,5 @@ std::string
 ReflMainWindowPresenter::runPythonAlgorithm(const std::string &pythonCode) {
   return m_view->runPythonAlgorithm(pythonCode);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

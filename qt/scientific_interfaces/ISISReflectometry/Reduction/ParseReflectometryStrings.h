@@ -1,13 +1,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_PARSEREFLECTOMETRYSTRINGS_H_
 #define MANTID_CUSTOMINTERFACES_PARSEREFLECTOMETRYSTRINGS_H_
 #include "../DllConfig.h"
+#include "RangeInQ.h"
 #include "TransmissionRunPair.h"
 #include <boost/optional.hpp>
-#include <boost/variant.hpp>
 #include <boost/tokenizer.hpp>
-#include "RangeInQ.h"
-#include <vector>
+#include <boost/variant.hpp>
 #include <map>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -42,6 +42,6 @@ MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::optional<std::map<std::string, std::string>>
 parseOptions(std::string const &options);
 
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PARSEREFLECTOMETRYSTRINGS_H_

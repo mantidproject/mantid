@@ -41,13 +41,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IReflBatchView {
 public:
-  virtual IReflRunsTabView* runs() const = 0;
-  virtual IEventView* eventHandling() const = 0;
-  virtual IReflSaveTabView* save() const = 0;
-  virtual IExperimentView* experiment() const = 0;
+  virtual IReflRunsTabView *runs() const = 0;
+  virtual IEventView *eventHandling() const = 0;
+  virtual IReflSaveTabView *save() const = 0;
+  virtual IExperimentView *experiment() const = 0;
   virtual IInstrumentView *instrument() const = 0;
   virtual ~IReflBatchView() = default;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLBATCHVIEW_H */

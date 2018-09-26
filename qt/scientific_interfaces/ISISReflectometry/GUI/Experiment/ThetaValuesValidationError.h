@@ -3,11 +3,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-enum class ThetaValuesValidationError {
-  MultipleWildcards,
-  NonUniqueTheta
-};
-
+enum class ThetaValuesValidationError { MultipleWildcards, NonUniqueTheta };
 }
-}
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_THETAVALUESVALIDATIONERROR_H

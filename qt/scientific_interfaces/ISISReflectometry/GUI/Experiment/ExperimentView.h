@@ -2,12 +2,12 @@
 #define MANTID_CUSTOMINTERFACES_EXPERIMENTVIEW_H_
 
 #include "DllConfig.h"
-#include "ui_ExperimentWidget.h"
 #include "IExperimentView.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
-#include <memory>
+#include "ui_ExperimentWidget.h"
 #include <QCheckBox>
 #include <QShortcut>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -36,25 +36,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentView
-    : public QWidget,
-      public IExperimentView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentView : public QWidget,
+                                                      public IExperimentView {
   Q_OBJECT
 public:
-  ExperimentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent = nullptr);
+  ExperimentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
+                 QWidget *parent = nullptr);
   void subscribe(ExperimentViewSubscriber *notifyee) override;
 
   void
   createStitchHints(const std::vector<MantidWidgets::Hint> &hints) override;
 
   std::string getAnalysisMode() const override;
-  void setAnalysisMode(std::string const& analysisMode) override;
+  void setAnalysisMode(std::string const &analysisMode) override;
 
   std::string getSummationType() const override;
-  void setSummationType(std::string const& summationType) override;
+  void setSummationType(std::string const &summationType) override;
 
   std::string getReductionType() const override;
-  void setReductionType(std::string const& reductionType) override;
+  void setReductionType(std::string const &reductionType) override;
 
   std::vector<std::array<std::string, 8>> getPerAngleOptions() const override;
   void showPerAngleOptionsAsInvalid(int row, int column) override;
@@ -69,7 +69,7 @@ public:
   void setTransmissionEndOverlap(double end) override;
 
   std::string getPolarisationCorrectionType() const override;
-  void setPolarisationCorrectionType(std::string const& type) override;
+  void setPolarisationCorrectionType(std::string const &type) override;
   double getCRho() const override;
   void setCRho(double cRho) override;
   double getCAlpha() const override;
@@ -80,11 +80,12 @@ public:
   void setCPp(double cPp) override;
 
   std::string getStitchOptions() const override;
-  void setStitchOptions(std::string const& stitchOptions) override;
+  void setStitchOptions(std::string const &stitchOptions) override;
 
   void showOptionLoadErrors(
       std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
-      std::vector<MissingInstrumentParameterValue> const &missingValues) override;
+      std::vector<MissingInstrumentParameterValue> const &missingValues)
+      override;
 
   void showAllPerAngleOptionsAsValid() override;
 
@@ -108,8 +109,8 @@ public slots:
   void onPerAngleDefaultsChanged(int row, int column);
 
 private:
-  void initializeTableItems(QTableWidget& table);
-  void initializeTableRow(QTableWidget& table, int row);
+  void initializeTableItems(QTableWidget &table);
+  void initializeTableRow(QTableWidget &table, int row);
   QString messageFor(
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
@@ -139,17 +140,17 @@ private:
   void setText(QLineEdit &lineEdit, boost::optional<int> value);
   void setText(QLineEdit &lineEdit, boost::optional<double> value);
   void setText(QLineEdit &lineEdit, boost::optional<std::string> const &value);
-  std::string textFromCell(QTableWidgetItem const* maybeNullItem) const;
-//  void setText(QTableWidget &table, std::string const &propertyName,
-//               double value);
-//  void setText(QTableWidget &table, std::string const &propertyName,
-//               boost::optional<double> value);
-//  void setText(QTableWidget &table, std::string const &propertyName,
-//               boost::optional<std::string> value);
-//  void setText(QTableWidget &table, std::string const &propertyName,
-//               std::string const &value);
-//  void setText(QTableWidget &table, std::string const &propertyName,
-//               const QString &value);
+  std::string textFromCell(QTableWidgetItem const *maybeNullItem) const;
+  //  void setText(QTableWidget &table, std::string const &propertyName,
+  //               double value);
+  //  void setText(QTableWidget &table, std::string const &propertyName,
+  //               boost::optional<double> value);
+  //  void setText(QTableWidget &table, std::string const &propertyName,
+  //               boost::optional<std::string> value);
+  //  void setText(QTableWidget &table, std::string const &propertyName,
+  //               std::string const &value);
+  //  void setText(QTableWidget &table, std::string const &propertyName,
+  //               const QString &value);
   void setChecked(QCheckBox &checkBox, bool checked);
   std::string getText(QLineEdit const &lineEdit) const;
   std::string getText(QComboBox const &box) const;
@@ -161,7 +162,7 @@ private:
   ExperimentViewSubscriber *m_notifyee;
 };
 
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_EXPERIMENTVIEW_H_ */

@@ -1,7 +1,7 @@
 #include "ValidateRow.h"
+#include "../Parse.h"
 #include "AllInitialized.h"
 #include "Reduction/WorkspaceNamesFactory.h"
-#include "../Parse.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
@@ -117,13 +117,13 @@ validateRow(Jobs const &, WorkspaceNamesFactory const &workspaceNamesFactory,
             std::vector<std::string> const &cells) {
   auto validate = RowValidator();
   RowValidationResult result = validate(
-      cells, [&workspaceNamesFactory](
-                 std::vector<std::string> const &runNumbers,
-                 std::pair<std::string, std::string> const &transmissionRuns)
-                 -> boost::optional<ReductionWorkspaces> {
-                   return workspaceNamesFactory.makeNames(runNumbers,
-                                                          transmissionRuns);
-                 });
+      cells,
+      [&workspaceNamesFactory](
+          std::vector<std::string> const &runNumbers,
+          std::pair<std::string, std::string> const &transmissionRuns)
+          -> boost::optional<ReductionWorkspaces> {
+        return workspaceNamesFactory.makeNames(runNumbers, transmissionRuns);
+      });
   return result;
 }
 

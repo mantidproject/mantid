@@ -1,15 +1,15 @@
 #include "ExperimentView.h"
-#include <boost/algorithm/string/join.hpp>
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
 #include <QScrollBar>
+#include <boost/algorithm/string/join.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Constructor
-* @param parent :: [input] The parent of this widget
-*/
+ * @param parent :: [input] The parent of this widget
+ */
 ExperimentView::ExperimentView(
     Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent) {
   UNUSED_ARG(parent);
@@ -352,10 +352,11 @@ std::string toCsv(std::vector<T> const &values, StringConverter toString) {
 
 QString ExperimentView::messageFor(
     std::vector<MissingInstrumentParameterValue> const &missingValues) const {
-  auto missingNamesCsv =
-      toCsv(missingValues,
-            [](const MissingInstrumentParameterValue &missingValue)
-                -> std::string { return missingValue.parameterName(); });
+  auto missingNamesCsv = toCsv(
+      missingValues,
+      [](const MissingInstrumentParameterValue &missingValue) -> std::string {
+        return missingValue.parameterName();
+      });
 
   return QString::fromStdString(missingNamesCsv) +
          QString(missingValues.size() == 1 ? " is" : " are") +
@@ -383,8 +384,8 @@ QLineEdit &ExperimentView::stitchOptionsLineEdit() const {
 }
 
 /** Creates hints for 'Stitch1DMany'
-* @param hints :: Hints as a map
-*/
+ * @param hints :: Hints as a map
+ */
 void ExperimentView::createStitchHints(
     const std::vector<MantidWidgets::Hint> &hints) {
 
@@ -515,4 +516,4 @@ void showOptionLoadErrors(
     std::vector<MissingInstrumentParameterValue> const &missingValues);
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

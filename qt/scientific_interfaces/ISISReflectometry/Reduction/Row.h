@@ -23,20 +23,18 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_RUN_H_
 #define MANTID_CUSTOMINTERFACES_RUN_H_
 #include "../DllConfig.h"
+#include "RangeInQ.h"
+#include "ReductionOptionsMap.h"
+#include "ReductionWorkspaces.h"
+#include "WorkspaceNamesFactory.h"
+#include <boost/optional.hpp>
+#include <boost/range/algorithm/set_algorithm.hpp>
+#include <boost/variant.hpp>
 #include <string>
 #include <vector>
-#include <boost/variant.hpp>
-#include <boost/range/algorithm/set_algorithm.hpp>
-#include <boost/optional.hpp>
-#include "RangeInQ.h"
-#include "ReductionWorkspaces.h"
-#include "ReductionOptionsMap.h"
-#include "WorkspaceNamesFactory.h"
-#include "../DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
 
 // Immutability here makes update notification easier.
 class MANTIDQT_ISISREFLECTOMETRY_DLL Row {

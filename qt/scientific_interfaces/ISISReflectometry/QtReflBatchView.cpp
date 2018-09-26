@@ -1,13 +1,13 @@
 #include "QtReflBatchView.h"
 #include "GUI/Event/EventView.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/make_unique.h"
 #include "QtReflRunsTabView.h"
 #include "QtReflSaveTabView.h"
-#include "ReflSaveTabPresenter.h"
-#include "ReflBatchPresenter.h"
 #include "ReflAsciiSaver.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "ReflBatchPresenter.h"
 #include "ReflRunsTabPresenter.h"
+#include "ReflSaveTabPresenter.h"
 
 #include <QMessageBox>
 
@@ -27,7 +27,8 @@ void QtReflBatchView::initLayout() {
   m_eventHandling = createEventTab();
   m_ui.batchTabs->addTab(m_eventHandling.get(), "Event Handling");
 
-  m_experiment = Mantid::Kernel::make_unique<ExperimentView>(createReductionAlg(), this);
+  m_experiment =
+      Mantid::Kernel::make_unique<ExperimentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_experiment.get(), "Experiment Settings");
 
   m_instrument =
@@ -38,7 +39,7 @@ void QtReflBatchView::initLayout() {
   m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
 }
 
-IExperimentView* QtReflBatchView::experiment() const {
+IExperimentView *QtReflBatchView::experiment() const {
   return m_experiment.get();
 }
 
@@ -73,5 +74,5 @@ Mantid::API::IAlgorithm_sptr QtReflBatchView::createReductionAlg() {
 std::unique_ptr<QtReflSaveTabView> QtReflBatchView::createSaveTab() {
   return Mantid::Kernel::make_unique<QtReflSaveTabView>(this);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -15,11 +15,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-RunsTablePresenter::RunsTablePresenter(IRunsTableView *view,
-                               std::vector<std::string> const &instruments,
-                               double thetaTolerance,
-                               WorkspaceNamesFactory workspaceNamesFactory,
-                               Jobs jobs)
+RunsTablePresenter::RunsTablePresenter(
+    IRunsTableView *view, std::vector<std::string> const &instruments,
+    double thetaTolerance, WorkspaceNamesFactory workspaceNamesFactory,
+    Jobs jobs)
     : m_view(view), m_instruments(instruments), m_model(std::move(jobs)),
       m_thetaTolerance(thetaTolerance), m_jobViewUpdater(m_view->jobs()),
       m_workspaceNameFactory(std::move(workspaceNamesFactory)) {
@@ -144,7 +143,9 @@ void RunsTablePresenter::notifyInsertGroupRequested() {
   }
 }
 
-void RunsTablePresenter::appendEmptyGroupInModel() { appendEmptyGroup(m_model); }
+void RunsTablePresenter::appendEmptyGroupInModel() {
+  appendEmptyGroup(m_model);
+}
 
 void RunsTablePresenter::appendEmptyGroupInView() {
   auto location = m_view->jobs().appendChildRowOf(
@@ -167,7 +168,9 @@ void RunsTablePresenter::insertEmptyGroupInView(int beforeGroup) {
   applyGroupStylingToRow(location);
 }
 
-void RunsTablePresenter::notifyExpandAllRequested() { m_view->jobs().expandAll(); }
+void RunsTablePresenter::notifyExpandAllRequested() {
+  m_view->jobs().expandAll();
+}
 
 void RunsTablePresenter::notifyCollapseAllRequested() {
   m_view->jobs().collapseAll();
@@ -187,7 +190,8 @@ void RunsTablePresenter::clearInvalidCellStyling(
     clearInvalidCellStyling(cell);
 }
 
-void RunsTablePresenter::clearInvalidCellStyling(MantidWidgets::Batch::Cell &cell) {
+void RunsTablePresenter::clearInvalidCellStyling(
+    MantidWidgets::Batch::Cell &cell) {
   cell.setIconFilePath("");
   cell.setBorderColor("darkGrey");
 }
@@ -199,7 +203,8 @@ void RunsTablePresenter::showAllCellsOnRowAsValid(
   m_view->jobs().setCellsAt(itemIndex, cells);
 }
 
-void RunsTablePresenter::applyInvalidCellStyling(MantidWidgets::Batch::Cell &cell) {
+void RunsTablePresenter::applyInvalidCellStyling(
+    MantidWidgets::Batch::Cell &cell) {
   cell.setIconFilePath(":/invalid.png");
   cell.setBorderColor("darkRed");
 }
@@ -234,8 +239,7 @@ void RunsTablePresenter::updateRowField(
   auto const rowIndex = rowOf(itemIndex);
   auto rowValidationResult = validateRow(m_model, m_workspaceNameFactory,
                                          cellTextFromViewAt(itemIndex));
-  updateRow(m_model, groupIndex, rowIndex,
-            rowValidationResult.validElseNone());
+  updateRow(m_model, groupIndex, rowIndex, rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);
   } else {

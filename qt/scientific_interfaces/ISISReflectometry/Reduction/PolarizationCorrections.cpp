@@ -13,5 +13,5 @@ double PolarizationCorrections::cAlpha() const { return CAlpha; }
 double PolarizationCorrections::cAp() const { return CAp; }
 
 double PolarizationCorrections::cPp() const { return CPp; }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

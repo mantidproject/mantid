@@ -49,6 +49,6 @@ private:
   InstrumentPresenterFactory m_instrumentPresenterFactory;
   SavePresenterFactory m_savePresenterFactory;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_REFLBATCHPRESENTERFACTORY_H

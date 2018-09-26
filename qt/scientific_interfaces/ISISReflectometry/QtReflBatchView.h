@@ -48,7 +48,7 @@ public:
   IReflRunsTabView *runs() const override;
   IEventView *eventHandling() const override;
   IReflSaveTabView *save() const override;
-  IExperimentView* experiment() const override;
+  IExperimentView *experiment() const override;
   IInstrumentView *instrument() const override;
 
 private:
@@ -67,6 +67,6 @@ private:
   std::unique_ptr<ExperimentView> m_experiment;
   std::unique_ptr<InstrumentView> m_instrument;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_QTREFLBATCHVIEW_H */

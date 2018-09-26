@@ -4,7 +4,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 PerThetaDefaults::PerThetaDefaults(
-    boost::optional<double> theta, std::pair<std::string, std::string> transmissionRuns,
+    boost::optional<double> theta,
+    std::pair<std::string, std::string> transmissionRuns,
     boost::optional<RangeInQ> qRange, boost::optional<double> scaleFactor,
     ReductionOptionsMap reductionOptions)
     : m_theta(std::move(theta)),
@@ -17,9 +18,7 @@ PerThetaDefaults::transmissionWorkspaceNames() const {
   return m_transmissionRuns;
 }
 
-bool PerThetaDefaults::isWildcard() const {
-  return !m_theta.is_initialized();
-}
+bool PerThetaDefaults::isWildcard() const { return !m_theta.is_initialized(); }
 
 boost::optional<double> PerThetaDefaults::thetaOrWildcard() const {
   return m_theta;
@@ -36,5 +35,5 @@ boost::optional<double> PerThetaDefaults::scaleFactor() const {
 ReductionOptionsMap const &PerThetaDefaults::reductionOptions() const {
   return m_reductionOptions;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

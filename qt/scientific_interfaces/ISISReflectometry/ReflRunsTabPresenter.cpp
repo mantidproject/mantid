@@ -46,19 +46,19 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 }
 
 /** Constructor
-* @param mainView :: [input] The view we're managing
-* @param progressableView :: [input] The view reporting progress
-* @param makeRunsTablePresenter :: A generator for the child presenters.
-* @param workspaceNamesFactory :: A generator for the workspace names used in
-* the reduction.
-* @param thetaTolerance The tolerance used to determine if two runs should be
-* summed in a reduction.
-* @param instruments The names of the instruments to show as options for the
-* search.
-* @param defaultInstrumentIndex The index of the instrument to have selected by
-* default.
-* @param searcher :: [input] The search implementation
-*/
+ * @param mainView :: [input] The view we're managing
+ * @param progressableView :: [input] The view reporting progress
+ * @param makeRunsTablePresenter :: A generator for the child presenters.
+ * @param workspaceNamesFactory :: A generator for the workspace names used in
+ * the reduction.
+ * @param thetaTolerance The tolerance used to determine if two runs should be
+ * summed in a reduction.
+ * @param instruments The names of the instruments to show as options for the
+ * search.
+ * @param defaultInstrumentIndex The index of the instrument to have selected by
+ * default.
+ * @param searcher :: [input] The search implementation
+ */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
     RunsTablePresenterFactory makeRunsTablePresenter,
@@ -266,7 +266,7 @@ bool ReflRunsTabPresenter::requireNewAutoreduction() const {
 }
 
 bool ReflRunsTabPresenter::setupNewAutoreduction(
-     const std::string &searchString) {
+    const std::string &searchString) {
   return m_autoreduction.setupNewAutoreduction(searchString);
 }
 
@@ -295,7 +295,7 @@ void ReflRunsTabPresenter::autoreduceNewRuns() {
     //    tablePresenter->setPromptUser(false);
     //    tablePresenter->notify(DataProcessorPresenter::ProcessAllFlag);
   } else {
-    //confirmReductionCompleted();
+    // confirmReductionCompleted();
   }
 }
 
@@ -313,7 +313,6 @@ void ReflRunsTabPresenter::stopAutoreduction() {
 bool ReflRunsTabPresenter::isAutoreducing() const {
   return m_autoreduction.running();
 }
-
 
 bool ReflRunsTabPresenter::isProcessing() const {
   // TODO define this properly.
@@ -452,10 +451,10 @@ void ReflRunsTabPresenter::updateWidgetEnabledState() const {
 }
 
 /** Changes the current instrument in the data processor widget. Also clears
-* the
-* and the table selection model and updates the config service, printing an
-* information message
-*/
+ * the
+ * and the table selection model and updates the config service, printing an
+ * information message
+ */
 void ReflRunsTabPresenter::changeInstrument() {
   auto const instrument = m_view->getSearchInstrument();
   m_mainPresenter->setInstrumentName(instrument);

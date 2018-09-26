@@ -2,8 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
 
 #include "IEventView.h"
-#include "ui_EventWidget.h"
 #include "QWidgetGroup.h"
+#include "ui_EventWidget.h"
 #include <memory>
 
 namespace MantidQt {

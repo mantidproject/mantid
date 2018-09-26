@@ -51,8 +51,9 @@ PerThetaDefaults const *Experiment::defaultsForTheta(double thetaAngle,
   } else {
     auto wildcardMatch =
         std::find_if(m_perThetaDefaults.cbegin(), m_perThetaDefaults.cend(),
-                     [](PerThetaDefaults const &candidate)
-                         -> bool { return candidate.isWildcard(); });
+                     [](PerThetaDefaults const &candidate) -> bool {
+                       return candidate.isWildcard();
+                     });
     if (wildcardMatch != m_perThetaDefaults.cend()) {
       return &(*wildcardMatch);
     } else {
@@ -60,5 +61,5 @@ PerThetaDefaults const *Experiment::defaultsForTheta(double thetaAngle,
     }
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -45,17 +45,17 @@ class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
   Q_OBJECT
 public:
   explicit QtReflMainWindowView(QWidget *parent = nullptr);
-  void subscribe(ReflMainWindowSubscriber* notifyee) override;
+  void subscribe(ReflMainWindowSubscriber *notifyee) override;
 
   static std::string name() { return "ISIS Reflectometry"; }
   static QString categoryInfo() { return "Reflectometry"; }
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
-  virtual std::vector<IReflBatchView*> batches() const override;
+  virtual std::vector<IReflBatchView *> batches() const override;
 
   void closeEvent(QCloseEvent *event) override;
 
-  IReflBatchView* newBatch() override;
+  IReflBatchView *newBatch() override;
   void removeBatch(int batchIndex) override;
 
   void giveUserCritical(const std::string &prompt,
@@ -74,9 +74,9 @@ private:
   /// Interface definition with widgets for the main interface window
   Ui::ReflMainWindowWidget m_ui;
   /// The presenter handling this view
-  ReflMainWindowSubscriber* m_notifyee;
+  ReflMainWindowSubscriber *m_notifyee;
   boost::optional<ReflMainWindowPresenter> m_presenter;
-  std::vector<IReflBatchView*> m_batchViews;
+  std::vector<IReflBatchView *> m_batchViews;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

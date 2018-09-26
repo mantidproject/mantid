@@ -45,6 +45,6 @@ private:
   MonitorCorrections m_monitorCorrections;
   DetectorCorrections m_detectorCorrections;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_INSTRUMENT_H_

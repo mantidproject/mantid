@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H
 
+#include "IReflMainWindowView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-#include "IReflMainWindowView.h"
 #include <string>
 
 namespace MantidQt {
@@ -39,7 +39,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflMainWindowPresenter : public ReflMainWindowSubscriber {
 public:
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
-//  virtual void setInstrumentName(const std::string &instName) const = 0;
+  //  virtual void setInstrumentName(const std::string &instName) const = 0;
   virtual bool isProcessing() const = 0;
   virtual ~IReflMainWindowPresenter() = default;
 };

@@ -1,6 +1,6 @@
 #include "../../../ISISReflectometry/GUI/Event/IEventView.h"
-#include <gmock/gmock.h>
 #include "MantidKernel/WarningSuppressions.h"
+#include <gmock/gmock.h>
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -27,6 +27,6 @@ public:
   MOCK_METHOD0(enableSliceTypeSelection, void());
   MOCK_METHOD0(disableSliceTypeSelection, void());
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE

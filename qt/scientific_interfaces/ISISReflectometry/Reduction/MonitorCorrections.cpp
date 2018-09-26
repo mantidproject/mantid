@@ -12,8 +12,12 @@ size_t MonitorCorrections::monitorIndex() const { return m_monitorIndex; }
 
 bool MonitorCorrections::integrate() const { return m_integrate; }
 
-RangeInLambda MonitorCorrections::backgroundRange() const { return m_backgroundRange; }
+RangeInLambda MonitorCorrections::backgroundRange() const {
+  return m_backgroundRange;
+}
 
-RangeInLambda MonitorCorrections::integralRange() const { return m_integralRange; }
+RangeInLambda MonitorCorrections::integralRange() const {
+  return m_integralRange;
 }
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

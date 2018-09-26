@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWVIEW_H
 
+#include "IReflBatchView.h"
 #include <string>
 #include <vector>
-#include "IReflBatchView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

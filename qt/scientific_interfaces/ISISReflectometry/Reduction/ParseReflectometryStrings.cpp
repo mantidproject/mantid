@@ -1,7 +1,7 @@
 #include "ParseReflectometryStrings.h"
-#include "MantidQtWidgets/Common/ParseKeyValueString.h"
-#include "AllInitialized.h"
 #include "../Parse.h"
+#include "AllInitialized.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -138,5 +138,5 @@ parseTransmissionRuns(std::string const &firstTransmissionRun,
   }
 }
 
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

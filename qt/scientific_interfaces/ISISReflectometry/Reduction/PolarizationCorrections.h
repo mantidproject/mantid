@@ -19,6 +19,6 @@ private:
   double CAp;
   double CPp;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_POLARIZATIONCORRECTIONS_H_

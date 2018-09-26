@@ -2,12 +2,12 @@
 #define MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H
 
 #include "../../DllConfig.h"
-#include "IReflBatchPresenter.h"
-#include "IExperimentView.h"
-#include "IExperimentPresenter.h"
-#include "PerThetaDefaultsTableValidationError.h"
 #include "../../Reduction/Experiment.h"
 #include "../../ValidationResult.h"
+#include "IExperimentPresenter.h"
+#include "IExperimentView.h"
+#include "IReflBatchPresenter.h"
+#include "PerThetaDefaultsTableValidationError.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {
@@ -82,13 +82,13 @@ private:
   ExperimentValidationResult updateModelFromView();
 
   void showValidationResult(ExperimentValidationResult const &result);
-  void showPerThetaTableErrors(
-      PerThetaDefaultsTableValidationError const &errors);
+  void
+  showPerThetaTableErrors(PerThetaDefaultsTableValidationError const &errors);
 
   IExperimentView *m_view;
   boost::optional<Experiment> m_model;
   double m_thetaTolerance;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H

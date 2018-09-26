@@ -1,7 +1,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLSAVETABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLSAVETABPRESENTER_H
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "IReflBatchPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

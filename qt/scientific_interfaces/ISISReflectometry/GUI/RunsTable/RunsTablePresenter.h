@@ -36,10 +36,11 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenter
     : public RunsTableViewSubscriber {
 public:
-  RunsTablePresenter(IRunsTableView *view, std::vector<std::string> const &instruments,
-                 double thetaTolerance,
-                 WorkspaceNamesFactory workspaceNamesFactory,
-                 Jobs reductionJobs);
+  RunsTablePresenter(IRunsTableView *view,
+                     std::vector<std::string> const &instruments,
+                     double thetaTolerance,
+                     WorkspaceNamesFactory workspaceNamesFactory,
+                     Jobs reductionJobs);
 
   void notifyProcessRequested() override;
   void notifyPauseRequested() override;
@@ -122,6 +123,6 @@ private:
   JobsViewUpdater m_jobViewUpdater;
   WorkspaceNamesFactory m_workspaceNameFactory;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_

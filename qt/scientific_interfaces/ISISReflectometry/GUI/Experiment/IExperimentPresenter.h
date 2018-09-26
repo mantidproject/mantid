@@ -1,8 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H
 
-#include <string>
 #include "../../IReflBatchPresenter.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {

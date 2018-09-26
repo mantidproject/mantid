@@ -12,14 +12,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Constructor
-* @param view :: [input] The view we are managing
-* @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
-* @param eventPresenter :: [input] A pointer to the 'Event Handling' tab
-* presenter
-* @param instrumentPresenter :: [input] A pointer to the 'Instrument' tab
-* presenter
-* @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
-*/
+ * @param view :: [input] The view we are managing
+ * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
+ * @param eventPresenter :: [input] A pointer to the 'Event Handling' tab
+ * presenter
+ * @param instrumentPresenter :: [input] A pointer to the 'Instrument' tab
+ * presenter
+ * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
+ */
 ReflBatchPresenter::ReflBatchPresenter(
     IReflBatchView *view, std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
     std::unique_ptr<IEventPresenter> eventPresenter,
@@ -70,13 +70,13 @@ void ReflBatchPresenter::settingsChanged() {
 }
 
 /** Returns default values specified for 'Transmission run(s)' for the
-* given angle
-*
-* @param group :: Index of the group in 'Settings' tab from which to get the
-*values
-* @param angle :: the run angle to look up transmission runs for
-* @return :: Values passed for 'Transmission run(s)'
-*/
+ * given angle
+ *
+ * @param group :: Index of the group in 'Settings' tab from which to get the
+ *values
+ * @param angle :: the run angle to look up transmission runs for
+ * @return :: Values passed for 'Transmission run(s)'
+ */
 OptionsQMap
 ReflBatchPresenter::getOptionsForAngle(const double /*angle*/) const {
   return OptionsQMap(); // TODO m_settingsPresenter->getOptionsForAngle(angle);
@@ -105,5 +105,5 @@ Checks whether or not data is currently being processed in the Runs Tab
 bool ReflBatchPresenter::isProcessing() const {
   return m_runsPresenter->isProcessing();
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

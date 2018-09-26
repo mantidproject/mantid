@@ -23,11 +23,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
 #include "DllConfig.h"
+#include "IRunsTableView.h"
+#include "MantidQtWidgets/Common/Batch/JobTreeView.h"
+#include "ui_RunsTableView.h"
 #include <memory>
 #include <vector>
-#include "MantidQtWidgets/Common/Batch/JobTreeView.h"
-#include "IRunsTableView.h"
-#include "ui_RunsTableView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -87,6 +87,6 @@ public:
 private:
   std::vector<std::string> m_instruments;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_

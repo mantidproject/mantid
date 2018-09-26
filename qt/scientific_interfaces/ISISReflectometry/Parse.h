@@ -23,9 +23,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_PARSE_H_
 #define MANTID_CUSTOMINTERFACES_PARSE_H_
 #include "DllConfig.h"
-#include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -71,6 +71,6 @@ parseList(std::string commaSeparatedValues, ParseItemFunction parseItem) {
     return std::vector<ParsedItem>();
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PARSE_H_

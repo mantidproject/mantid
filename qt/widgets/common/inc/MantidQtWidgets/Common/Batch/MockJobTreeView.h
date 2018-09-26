@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_MOCKJOBTREEVIEW_H_
 #define MANTIDQTMANTIDWIDGETS_MOCKJOBTREEVIEW_H_
-#include <gmock/gmock.h>
-#include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
+#include <gmock/gmock.h>
 
 using testing::Return;
 
@@ -81,7 +81,7 @@ private:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_MOCKJOBTREEVIEW_H_

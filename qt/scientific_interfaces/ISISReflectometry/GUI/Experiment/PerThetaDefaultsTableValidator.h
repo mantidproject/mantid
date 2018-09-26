@@ -1,8 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H
 #define MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H
-#include "PerThetaDefaultsTableValidationError.h"
 #include "../../Reduction/PerThetaDefaults.h"
 #include "../../ValidationResult.h"
+#include "PerThetaDefaultsTableValidationError.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -37,6 +37,6 @@ public:
       std::vector<InvalidDefaultsError> &validationErrors,
       std::size_t rowCount) const;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H

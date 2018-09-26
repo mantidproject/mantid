@@ -18,5 +18,5 @@ boost::optional<ThetaValuesValidationError>
 PerThetaDefaultsTableValidationError::fullTableError() const {
   return m_fullTableError;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

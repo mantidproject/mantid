@@ -26,6 +26,6 @@ makeIfAllInitialized(boost::optional<Params> const &... params) {
     return boost::none;
 }
 
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_ALLINITIALIZED_H_

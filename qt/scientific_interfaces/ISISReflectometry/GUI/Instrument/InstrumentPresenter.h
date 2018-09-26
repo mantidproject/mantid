@@ -2,9 +2,9 @@
 #define MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H
 
 #include "../../DllConfig.h"
-#include "IReflBatchPresenter.h"
-#include "IInstrumentView.h"
 #include "IInstrumentPresenter.h"
+#include "IInstrumentView.h"
+#include "IReflBatchPresenter.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {
@@ -46,6 +46,6 @@ public:
 private:
   IInstrumentView *m_view;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H

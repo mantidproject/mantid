@@ -22,13 +22,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
 #define MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
-#include "Row.h"
-#include <boost/optional.hpp>
-#include "Reduction/ReductionJobs.h"
-#include "ValidationResult.h"
-#include "ParseReflectometryStrings.h"
-#include "TransmissionRunPair.h"
 #include "DllConfig.h"
+#include "ParseReflectometryStrings.h"
+#include "Reduction/ReductionJobs.h"
+#include "Row.h"
+#include "TransmissionRunPair.h"
+#include "ValidationResult.h"
+#include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {
 

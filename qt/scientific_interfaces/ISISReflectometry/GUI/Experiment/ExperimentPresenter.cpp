@@ -1,6 +1,6 @@
 #include "ExperimentPresenter.h"
-#include "../../Reduction/ValidatePerThetaDefaults.h"
 #include "../../Reduction/ParseReflectometryStrings.h"
+#include "../../Reduction/ValidatePerThetaDefaults.h"
 #include "PerThetaDefaultsTableValidator.h"
 
 namespace MantidQt {
@@ -116,5 +116,5 @@ void ExperimentPresenter::notifySummationTypeChanged() {
 Experiment const &ExperimentPresenter::experiment() const {
   return m_model.get();
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

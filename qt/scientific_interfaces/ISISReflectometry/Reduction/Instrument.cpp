@@ -20,5 +20,5 @@ MonitorCorrections Instrument::monitorCorrections() const {
 DetectorCorrections Instrument::detectorCorrections() const {
   return m_detectorCorrections;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

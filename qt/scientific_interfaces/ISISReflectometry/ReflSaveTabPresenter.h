@@ -5,12 +5,11 @@
 #include "IReflAsciiSaver.h"
 #include "IReflSaveTabPresenter.h"
 #include "IReflSaveTabView.h"
-#include <vector>
-#include <string>
-#include <memory>
 #include <MantidKernel/ConfigPropertyObserver.h>
 #include <boost/optional.hpp>
-#include "IReflAsciiSaver.h"
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -44,7 +43,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSaveTabPresenter
     : public IReflSaveTabPresenter {
 public:
-  ReflSaveTabPresenter(IReflSaveTabView* view,
+  ReflSaveTabPresenter(IReflSaveTabView *view,
                        std::unique_ptr<IReflAsciiSaver> saver);
   /// Accept a main presenter
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
@@ -88,7 +87,7 @@ private:
   bool shouldAutosave() const;
 
   /// The view
-  IReflSaveTabView* m_view;
+  IReflSaveTabView *m_view;
   std::unique_ptr<IReflAsciiSaver> m_saver;
   /// The main presenter
   IReflBatchPresenter *m_mainPresenter;

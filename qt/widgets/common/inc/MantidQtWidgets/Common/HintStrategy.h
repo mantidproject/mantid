@@ -1,10 +1,10 @@
 #ifndef MANTID_MANTIDWIDGETS_HINTSTRATEGY_H
 #define MANTID_MANTIDWIDGETS_HINTSTRATEGY_H
 
+#include "DllOption.h"
+#include "MantidQtWidgets/Common/Hint.h"
 #include <map>
 #include <string>
-#include "MantidQtWidgets/Common/Hint.h"
-#include "DllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

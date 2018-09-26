@@ -5,9 +5,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Constructor
-* @param group :: [input] The group on the parent tab this belongs to
-* @param parent :: [input] The parent of this widget
-*/
+ * @param group :: [input] The group on the parent tab this belongs to
+ * @param parent :: [input] The parent of this widget
+ */
 EventView::EventView(QWidget *parent) {
   UNUSED_ARG(parent);
   initLayout();
@@ -61,8 +61,7 @@ void EventView::onCustomChanged(QString const &listOfSlices) {
   m_notifyee->notifyCustomSliceValuesChanged(listOfSlices.toStdString());
 }
 
-void EventView::onLogValuesChanged(
-    QString const &listOfSliceBreakpoints) {
+void EventView::onLogValuesChanged(QString const &listOfSliceBreakpoints) {
   m_notifyee->notifyLogSliceBreakpointsChanged(
       listOfSliceBreakpoints.toStdString());
 }
@@ -158,17 +157,13 @@ void EventView::showCustomBreakpointsInvalid() {
   showAsInvalid(*m_ui.customEdit);
 }
 
-void EventView::showCustomBreakpointsValid() {
-  showAsValid(*m_ui.customEdit);
-}
+void EventView::showCustomBreakpointsValid() { showAsValid(*m_ui.customEdit); }
 
 void EventView::showLogBreakpointsInvalid() {
   showAsInvalid(*m_ui.logValueEdit);
 }
 
-void EventView::showLogBreakpointsValid() {
-  showAsValid(*m_ui.logValueEdit);
-}
+void EventView::showLogBreakpointsValid() { showAsValid(*m_ui.logValueEdit); }
 
 int EventView::uniformSliceCount() const {
   return m_ui.uniformEvenEdit->value();
@@ -186,9 +181,7 @@ void EventView::disableSliceTypeSelection() {
   m_sliceTypeRadioButtons.disable();
 }
 
-void EventView::enableSliceTypeSelection() {
-  m_sliceTypeRadioButtons.enable();
-}
+void EventView::enableSliceTypeSelection() { m_sliceTypeRadioButtons.enable(); }
 
 void EventView::toggleUniform(bool isChecked) {
   if (isChecked)
@@ -216,4 +209,4 @@ void EventView::toggleDisabledSlicing(bool isChecked) {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

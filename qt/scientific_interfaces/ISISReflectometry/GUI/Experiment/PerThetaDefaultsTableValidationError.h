@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATIONERROR_H
 #define MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATIONERROR_H
-#include <vector>
+#include "../../Reduction/PerThetaDefaults.h"
 #include "InvalidDefaultsError.h"
 #include "ThetaValuesValidationError.h"
-#include "../../Reduction/PerThetaDefaults.h"
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -11,7 +11,8 @@ namespace CustomInterfaces {
 class PerThetaDefaultsTableValidationError {
 public:
   PerThetaDefaultsTableValidationError(
-      std::vector<InvalidDefaultsError> validationErrors, boost::optional<ThetaValuesValidationError> fullTableError);
+      std::vector<InvalidDefaultsError> validationErrors,
+      boost::optional<ThetaValuesValidationError> fullTableError);
 
   std::vector<InvalidDefaultsError> const &errors() const;
   boost::optional<ThetaValuesValidationError> fullTableError() const;
@@ -21,6 +22,6 @@ private:
   boost::optional<ThetaValuesValidationError> m_fullTableError;
 };
 
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATIONERROR_H

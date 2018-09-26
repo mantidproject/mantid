@@ -24,14 +24,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "../DllConfig.h"
 #include "AnalysisMode.h"
-#include "ReductionType.h"
-#include "SummationType.h"
+#include "PerThetaDefaults.h"
 #include "PolarizationCorrections.h"
 #include "RangeInLambda.h"
-#include "PerThetaDefaults.h"
+#include "ReductionType.h"
+#include "SummationType.h"
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -67,6 +67,6 @@ private:
   std::map<std::string, std::string> m_stitchParameters;
   std::vector<PerThetaDefaults> m_perThetaDefaults;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_EXPERIMENT_H_

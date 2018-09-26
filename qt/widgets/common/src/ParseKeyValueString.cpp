@@ -210,5 +210,5 @@ std::string optionsToString(std::map<std::string, std::string> const &options) {
     return std::string();
   }
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

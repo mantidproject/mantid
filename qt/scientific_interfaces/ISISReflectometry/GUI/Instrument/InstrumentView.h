@@ -35,12 +35,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentView
-    : public QWidget,
-      public IInstrumentView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentView : public QWidget,
+                                                      public IInstrumentView {
   Q_OBJECT
 public:
-  InstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent = nullptr);
+  InstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
+                 QWidget *parent = nullptr);
   void subscribe(InstrumentViewSubscriber *notifyee) override;
 
   void disableAll() override;
@@ -85,7 +85,7 @@ private:
   InstrumentViewSubscriber *m_notifyee;
 };
 
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_INSTRUMENTVIEW_H_ */

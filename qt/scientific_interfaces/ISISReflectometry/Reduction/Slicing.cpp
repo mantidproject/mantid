@@ -119,5 +119,5 @@ std::ostream &operator<<(std::ostream &os, Slicing const &slicing) {
   os << "Slicing: ";
   return boost::apply_visitor(PrintSlicingVisitor(os), slicing);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

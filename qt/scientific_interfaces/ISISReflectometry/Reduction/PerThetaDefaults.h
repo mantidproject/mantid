@@ -1,9 +1,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
 #define MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
-#include <boost/optional.hpp>
-#include "ReductionOptionsMap.h"
-#include "RangeInQ.h"
 #include "../DllConfig.h"
+#include "RangeInQ.h"
+#include "ReductionOptionsMap.h"
+#include <boost/optional.hpp>
 #include <vector>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,7 +23,6 @@ public:
   boost::optional<double> scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
 
-
 private:
   boost::optional<double> m_theta;
   std::pair<std::string, std::string> m_transmissionRuns;
@@ -31,6 +30,6 @@ private:
   boost::optional<double> m_scaleFactor;
   ReductionOptionsMap m_reductionOptions;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_

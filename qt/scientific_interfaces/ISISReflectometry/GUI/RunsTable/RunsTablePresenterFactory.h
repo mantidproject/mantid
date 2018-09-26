@@ -23,11 +23,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #define MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #include "DllConfig.h"
+#include "RunsTablePresenter.h"
 #include <memory>
 #include <string>
 #include <vector>
-#include <string>
-#include "RunsTablePresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

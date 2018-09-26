@@ -2,14 +2,11 @@
 #define MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 
 #include "DllConfig.h"
+#include "GUI/RunsTable/RunsTableView.h"
 #include "IReflRunsTabView.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "DllConfig.h"
-#include "IReflRunsTabView.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
-#include "GUI/RunsTable/RunsTableView.h"
 
 #include "ui_ReflRunsTabWidget.h"
 
@@ -21,9 +18,9 @@ namespace MantidWidgets {
 namespace DataProcessor {
 // Forward decs
 class Command;
-}
+} // namespace DataProcessor
 class SlitCalculator;
-}
+} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }
@@ -69,7 +66,7 @@ public:
   QtReflRunsTabView(QWidget *parent, RunsTableViewFactory makeView);
 
   void subscribe(IReflRunsTabPresenter *presenter) override;
-  IRunsTableView * table() const override;
+  IRunsTableView *table() const override;
 
   // Connect the model
   void showSearch(boost::shared_ptr<ReflSearchModel> model) override;

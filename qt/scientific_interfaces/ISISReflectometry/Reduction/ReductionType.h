@@ -16,6 +16,6 @@ inline ReductionType reductionTypeFromString(std::string const &reductionType) {
   else
     throw std::runtime_error("Unexpected reduction type.");
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_REDUCTIONTYPE_H_

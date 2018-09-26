@@ -68,11 +68,11 @@ bool PerThetaDefaultsTableValidator::hasUniqueThetas(
     double tolerance) const {
   sortInPlaceWildcardsFirstThenByTheta(perThetaDefaults);
   auto thetasWithinTolerance =
-      [tolerance](PerThetaDefaults const &lhs, PerThetaDefaults const &rhs)
-          -> bool {
-            return std::abs(lhs.thetaOrWildcard().get() -
-                            rhs.thetaOrWildcard().get()) < tolerance;
-          };
+      [tolerance](PerThetaDefaults const &lhs,
+                  PerThetaDefaults const &rhs) -> bool {
+    return std::abs(lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get()) <
+           tolerance;
+  };
   return std::adjacent_find(perThetaDefaults.cbegin() + wildcardCount,
                             perThetaDefaults.cend(),
                             thetasWithinTolerance) == perThetaDefaults.cend();
@@ -82,21 +82,22 @@ int PerThetaDefaultsTableValidator::countWildcards(
     std::vector<PerThetaDefaults> const &perThetaDefaults) const {
   return static_cast<int>(
       std::count_if(perThetaDefaults.cbegin(), perThetaDefaults.cend(),
-                    [](PerThetaDefaults const &defaults)
-                        -> bool { return defaults.isWildcard(); }));
+                    [](PerThetaDefaults const &defaults) -> bool {
+                      return defaults.isWildcard();
+                    }));
 }
 
 void PerThetaDefaultsTableValidator::sortInPlaceWildcardsFirstThenByTheta(
     std::vector<PerThetaDefaults> &perThetaDefaults) const {
-  auto thetaLessThan =
-      [](PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) -> bool {
-        if (lhs.isWildcard())
-          return true;
-        else if (rhs.isWildcard())
-          return false;
-        else
-          return lhs.thetaOrWildcard().get() < rhs.thetaOrWildcard().get();
-      };
+  auto thetaLessThan = [](PerThetaDefaults const &lhs,
+                          PerThetaDefaults const &rhs) -> bool {
+    if (lhs.isWildcard())
+      return true;
+    else if (rhs.isWildcard())
+      return false;
+    else
+      return lhs.thetaOrWildcard().get() < rhs.thetaOrWildcard().get();
+  };
   std::sort(perThetaDefaults.begin(), perThetaDefaults.end(), thetaLessThan);
 }
 
@@ -106,5 +107,5 @@ void PerThetaDefaultsTableValidator::appendThetaErrorForAllRows(
   for (auto row = 0u; row < rowCount; ++row)
     validationErrors.emplace_back(row, std::vector<int>({0}));
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

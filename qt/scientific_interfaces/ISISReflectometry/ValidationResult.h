@@ -1,7 +1,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_RESULT_H
 #define MANTID_ISISREFLECTOMETRY_RESULT_H
-#include <boost/variant.hpp>
 #include <boost/optional.hpp>
+#include <boost/variant.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -63,6 +63,6 @@ ValidationResult<Validated, Error>::validElseNone() const {
   else
     return boost::none;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_RESULT_H

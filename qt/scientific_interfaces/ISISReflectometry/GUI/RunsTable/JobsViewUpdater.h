@@ -61,7 +61,7 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row) {
        MantidQt::MantidWidgets::Batch::Cell(
            MantidWidgets::optionsToString(row.reductionOptions()))});
 }
-} // unnamed
+} // namespace
 
 class JobsViewUpdater {
 public:

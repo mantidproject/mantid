@@ -1,8 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
 #define MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
-#include <cxxtest/TestSuite.h>
 #include "../../../ISISReflectometry/Parse.h"
 #include "../../../ISISReflectometry/Reduction/ValidateRow.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -15,7 +15,7 @@ public:
   static auto constexpr TOLERANCE = 0.000001;
 
   void test() {}
-  
+
   void testParsesTriviallyValidDoubles() {
     TS_ASSERT_DELTA(1.0, parseDouble("1.0").get(), TOLERANCE);
     TS_ASSERT_DELTA(6.4, parseDouble("6.4").get(), TOLERANCE);

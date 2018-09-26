@@ -1,13 +1,13 @@
 #ifndef MANTIDQTMANTIDWIDGETS_IJOBTREEVIEW_H_
 #define MANTIDQTMANTIDWIDGETS_IJOBTREEVIEW_H_
+#include "MantidQtWidgets/Common/Batch/Cell.h"
+#include "MantidQtWidgets/Common/Batch/Row.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
-#include "MantidQtWidgets/Common/HintStrategy.h"
-#include "MantidQtWidgets/Common/Batch/Cell.h"
-#include "MantidQtWidgets/Common/Batch/Row.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/HintStrategy.h"
 #include <boost/optional.hpp>
 
 namespace MantidQt {

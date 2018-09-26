@@ -3,8 +3,8 @@
 
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/Reduction/Slicing.h"
-#include "MockRunsTableView.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
+#include "MockRunsTableView.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

@@ -13,5 +13,5 @@ bool DetectorCorrections::correctPositions() const {
 DetectorCorrectionType DetectorCorrections::correctionType() const {
   return m_correctionType;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

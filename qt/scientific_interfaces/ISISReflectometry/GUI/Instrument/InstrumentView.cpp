@@ -1,14 +1,14 @@
 #include "InstrumentView.h"
-#include <boost/algorithm/string/join.hpp>
 #include <QMessageBox>
 #include <QScrollBar>
+#include <boost/algorithm/string/join.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Constructor
-* @param parent :: [input] The parent of this widget
-*/
+ * @param parent :: [input] The parent of this widget
+ */
 InstrumentView::InstrumentView(
     Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent) {
   UNUSED_ARG(parent);
@@ -23,9 +23,7 @@ void InstrumentView::subscribe(InstrumentViewSubscriber *notifyee) {
 /**
 Initialise the Interface
 */
-void InstrumentView::initLayout() {
-  m_ui.setupUi(this);
-}
+void InstrumentView::initLayout() { m_ui.setupUi(this); }
 
 void InstrumentView::connectSettingsChange(QLineEdit &edit) {
   connect(&edit, SIGNAL(textChanged(QString const &)), this,
@@ -168,14 +166,15 @@ std::string toCsv(std::vector<T> const &values, StringConverter toString) {
 
 QString InstrumentView::messageFor(
     std::vector<MissingInstrumentParameterValue> const &missingValues) const {
-  auto missingNamesCsv =
-      toCsv(missingValues,
-            [](const MissingInstrumentParameterValue &missingValue)
-                -> std::string { return missingValue.parameterName(); });
+  auto missingNamesCsv = toCsv(
+      missingValues,
+      [](const MissingInstrumentParameterValue &missingValue) -> std::string {
+        return missingValue.parameterName();
+      });
 
   return QString::fromStdString(missingNamesCsv) +
          QString(missingValues.size() == 1 ? " is" : " are") +
          " not set in the instrument parameter file but should be.\n";
 }
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

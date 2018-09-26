@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_HINT_H_
 #define MANTID_MANTIDWIDGETS_HINT_H_
-#include <string>
 #include "DllOption.h"
+#include <string>
 
 namespace MantidQt {
 namespace MantidWidgets {

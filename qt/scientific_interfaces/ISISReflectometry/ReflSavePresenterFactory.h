@@ -1,10 +1,10 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLSAVEPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_REFLSAVEPRESENTERFACTORY_H
 #include "DllConfig.h"
-#include "IReflSaveTabView.h"
 #include "IReflSaveTabPresenter.h"
-#include "ReflSaveTabPresenter.h"
+#include "IReflSaveTabView.h"
 #include "ReflAsciiSaver.h"
+#include "ReflSaveTabPresenter.h"
 #include <memory>
 
 namespace MantidQt {
@@ -17,6 +17,6 @@ public:
         view, Mantid::Kernel::make_unique<ReflAsciiSaver>());
   }
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTERFACTORY_H

@@ -9,12 +9,12 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
-using testing::Return;
 using testing::Mock;
 using testing::NiceMock;
+using testing::Return;
 using testing::_;
 
-class ExperimentPresenterTest : public CxxTest::TestSuite  {
+class ExperimentPresenterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests

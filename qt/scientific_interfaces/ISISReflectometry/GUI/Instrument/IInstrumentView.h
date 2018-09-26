@@ -50,6 +50,6 @@ public:
 
   virtual ~IInstrumentView() = default;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IINSTRUMENTVIEW_H */

@@ -12,5 +12,5 @@ std::vector<int> const &InvalidDefaultsError::invalidColumns() const {
 }
 
 int InvalidDefaultsError::row() const { return m_row; }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

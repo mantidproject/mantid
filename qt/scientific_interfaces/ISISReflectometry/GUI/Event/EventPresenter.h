@@ -2,10 +2,10 @@
 #define MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
 
 #include "../../DllConfig.h"
-#include "IEventPresenter.h"
-#include "IReflBatchPresenter.h"
-#include "IEventView.h"
 #include "../../Reduction/Slicing.h"
+#include "IEventPresenter.h"
+#include "IEventView.h"
+#include "IReflBatchPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

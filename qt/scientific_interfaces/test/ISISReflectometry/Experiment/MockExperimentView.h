@@ -1,6 +1,6 @@
 #include "../../../ISISReflectometry/GUI/Experiment/IExperimentView.h"
-#include <gmock/gmock.h>
 #include "MantidKernel/WarningSuppressions.h"
+#include <gmock/gmock.h>
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -54,6 +54,6 @@ public:
   MOCK_METHOD1(removePerThetaDefaultsRow, void(int));
   MOCK_METHOD1(showPerAngleThetasNonUnique, void(double));
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE

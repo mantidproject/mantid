@@ -60,9 +60,7 @@ public:
   /// Return global options for reduction
   virtual OptionsQMap getProcessingOptions() const { return OptionsQMap(); }
   /// Return global options for post-processing as a string
-  virtual QString getPostprocessingOptionsAsString() const {
-    return QString();
-  }
+  virtual QString getPostprocessingOptionsAsString() const { return QString(); }
   /// Return time-slicing values
   virtual QString getTimeSlicingValues() const { return QString(); }
   /// Return time-slicing type

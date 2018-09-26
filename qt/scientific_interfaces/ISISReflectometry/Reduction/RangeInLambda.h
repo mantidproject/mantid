@@ -13,6 +13,6 @@ public:
 private:
   double m_min, m_max;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_RANGEINLAMBDA_H_

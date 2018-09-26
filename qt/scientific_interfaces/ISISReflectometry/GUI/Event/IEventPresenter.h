@@ -1,8 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H
 
-#include <string>
 #include "../../IReflBatchPresenter.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -39,7 +39,7 @@ enum class SliceType { None, UniformEven, Uniform, Custom, LogValue };
 class IEventPresenter {
 public:
   virtual ~IEventPresenter() = default;
-  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) =0;
+  virtual void acceptMainPresenter(IReflBatchPresenter *mainPresenter) = 0;
   virtual void onReductionPaused() = 0;
   virtual void onReductionResumed() = 0;
 };

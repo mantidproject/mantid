@@ -26,7 +26,7 @@ public:
   MOCK_METHOD0(mustNotSelectGroup, void());
   MOCK_METHOD0(mustSelectGroupOrRow, void());
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 #endif // MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_

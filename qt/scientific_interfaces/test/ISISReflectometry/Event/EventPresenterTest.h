@@ -1,16 +1,16 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTERTEST_H_
 
-#include "MockEventView.h"
 #include "../../../ISISReflectometry/GUI/Event/EventPresenter.h"
+#include "MockEventView.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
-using testing::Return;
 using testing::Mock;
 using testing::NiceMock;
+using testing::Return;
 
 class EventPresenterTest : public CxxTest::TestSuite {
 public:
@@ -21,9 +21,7 @@ public:
 
   EventPresenter makePresenter() { return EventPresenter(&m_view); }
 
-  bool verifyAndClear() {
-    return Mock::VerifyAndClearExpectations(&m_view);
-  }
+  bool verifyAndClear() { return Mock::VerifyAndClearExpectations(&m_view); }
 
   void testNoEventSlicingByDefault() {
     auto presenter = makePresenter();

@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTERFACTORY_H
 #define MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTERFACTORY_H
 #include "DllConfig.h"
-#include "IExperimentView.h"
-#include "IExperimentPresenter.h"
 #include "ExperimentPresenter.h"
+#include "IExperimentPresenter.h"
+#include "IExperimentView.h"
 #include <memory>
 
 namespace MantidQt {
@@ -21,6 +21,6 @@ public:
 private:
   double m_thetaTolerance;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTERFACTORY_H

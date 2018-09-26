@@ -9,16 +9,15 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Constructor
-* @param view :: The view we are handling
-* @param group :: The group on the parent tab this belongs to
-*/
+ * @param view :: The view we are handling
+ * @param group :: The group on the parent tab this belongs to
+ */
 EventPresenter::EventPresenter(IEventView *view)
     : m_view(view), m_sliceType(SliceType::None) {
   m_view->subscribe(this);
 }
 
-void EventPresenter::acceptMainPresenter(
-    IReflBatchPresenter *mainPresenter) {
+void EventPresenter::acceptMainPresenter(IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
@@ -116,5 +115,5 @@ void EventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
   m_sliceType = newSliceType;
   setSlicingFromView();
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -11,11 +11,6 @@
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "ReflRunsTabPresenter.h"
 #include "ReflSearchModel.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtWidgets/Common/HintingLineEditFactory.h"
-#include "MantidQtWidgets/Common/SlitCalculator.h"
 #include <QMessageBox>
 
 namespace MantidQt {
@@ -25,9 +20,9 @@ using namespace MantidQt::MantidWidgets;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param parent :: The parent of this view
-* @param makeRunsTableView :: The factory for the RunsTableView.
-*/
+ * @param parent :: The parent of this view
+ * @param makeRunsTableView :: The factory for the RunsTableView.
+ */
 QtReflRunsTabView::QtReflRunsTabView(QWidget *parent,
                                      RunsTableViewFactory makeRunsTableView)
     : m_presenter(nullptr), m_calculator(new SlitCalculator(this)),
@@ -154,9 +149,9 @@ void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
 }
 
 /**
-* Sets the search text box enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the search text box enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setSearchTextEntryEnabled(bool enabled) {
 
   ui.textSearch->setEnabled(enabled);

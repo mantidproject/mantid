@@ -14,7 +14,7 @@ using testing::NiceMock;
 using testing::Return;
 
 class RunsTablePresenterRowInsertionTest : public CxxTest::TestSuite,
-                                       RunsTablePresenterTest {
+                                           RunsTablePresenterTest {
 public:
   static RunsTablePresenterRowInsertionTest *createSuite() {
     return new RunsTablePresenterRowInsertionTest();

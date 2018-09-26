@@ -33,7 +33,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
-#include "MantidQtWidgets/Common/Batch/Cell.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <boost/optional.hpp>
 

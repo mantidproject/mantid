@@ -113,6 +113,6 @@ public:
 
   virtual ~IExperimentView() = default;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IEXPERIMENTVIEW_H */

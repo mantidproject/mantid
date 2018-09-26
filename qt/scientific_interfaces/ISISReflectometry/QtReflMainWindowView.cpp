@@ -49,7 +49,8 @@ void QtReflMainWindowView::initLayout() {
   auto makeRunsTablePresenter = RunsTablePresenterFactory(
       instruments, thetaTolerance, makeWorkspaceNames);
   auto defaultInstrumentIndex = 0;
-  // TODO: Look this up properly by comparing the default instrument to the values in the list;
+  // TODO: Look this up properly by comparing the default instrument to the
+  // values in the list;
   auto searcher = boost::shared_ptr<IReflSearcher>();
   auto messageHandler = this;
 

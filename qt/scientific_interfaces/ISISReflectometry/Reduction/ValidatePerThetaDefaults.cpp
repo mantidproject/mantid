@@ -1,8 +1,8 @@
 #include "ValidatePerThetaDefaults.h"
-#include "AllInitialized.h"
-#include "Reduction/WorkspaceNamesFactory.h"
 #include "../Parse.h"
+#include "AllInitialized.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "Reduction/WorkspaceNamesFactory.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
@@ -112,5 +112,5 @@ validatePerThetaDefaults(CellText const &cells) {
   auto validate = PerThetaDefaultsValidator();
   return validate(cells);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

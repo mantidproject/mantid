@@ -21,7 +21,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 // Forward decs
 class ProgressableView;
-}
+} // namespace MantidWidgets
 
 namespace CustomInterfaces {
 

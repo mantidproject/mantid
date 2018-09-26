@@ -2,9 +2,9 @@
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
 #include "../ISISReflectometry/ExperimentOptionDefaults.h"
-#include "../ISISReflectometry/IReflAsciiSaver.h"
 #include "../ISISReflectometry/IEventPresenter.h"
 #include "../ISISReflectometry/IEventView.h"
+#include "../ISISReflectometry/IReflAsciiSaver.h"
 #include "../ISISReflectometry/IReflMainWindowPresenter.h"
 #include "../ISISReflectometry/IReflMainWindowView.h"
 #include "../ISISReflectometry/IReflRunsTabPresenter.h"

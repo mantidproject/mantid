@@ -20,7 +20,7 @@ Group &findOrMakeGroupWithName(Jobs &jobs, std::string const &groupName) {
   else
     return jobs.appendGroup(Group(groupName));
 } // unnamed
-}
+} // namespace
 
 Jobs::Jobs(std::vector<Group> groups) : m_groups(std::move(groups)) {}
 

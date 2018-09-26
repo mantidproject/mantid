@@ -6,7 +6,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 enum class AnalysisMode { PointDetector, MultiDetector };
 
-inline AnalysisMode analysisModeFromString(std::string const& analysisMode) {
+inline AnalysisMode analysisModeFromString(std::string const &analysisMode) {
   if (analysisMode == "PointDetectorAnalysis")
     return AnalysisMode::PointDetector;
   else if (analysisMode == "MultiDetectorAnalysis")
@@ -14,6 +14,6 @@ inline AnalysisMode analysisModeFromString(std::string const& analysisMode) {
   else
     throw std::runtime_error("Unexpected analysis mode.");
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_ANALYSISMODE_H_

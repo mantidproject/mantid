@@ -1,7 +1,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_INVALIDDEFAULTSERROR_H
 #define MANTID_ISISREFLECTOMETRY_INVALIDDEFAULTSERROR_H
-#include <vector>
 #include "../../DllConfig.h"
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -17,6 +17,6 @@ private:
   int m_row;
 };
 
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INVALIDDEFAULTSERROR_H

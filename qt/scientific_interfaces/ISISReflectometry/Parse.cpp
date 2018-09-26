@@ -63,5 +63,5 @@ boost::optional<int> parseNonNegativeInt(std::string string) {
   else
     return boost::none;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

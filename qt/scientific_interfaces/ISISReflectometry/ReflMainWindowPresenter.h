@@ -49,9 +49,10 @@ public:
   void notifyHelpPressed() override;
   void notifyNewBatchRequested() override;
   void notifyCloseBatchRequested(int batchIndex) override;
+
 private:
   void showHelp();
-  IReflMainWindowView* m_view;
+  IReflMainWindowView *m_view;
   ReflBatchPresenterFactory m_batchPresenterFactory;
   std::vector<std::unique_ptr<IReflBatchPresenter>> m_batchPresenters;
 };

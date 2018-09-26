@@ -22,13 +22,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_
 #define MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_
-#include "PerThetaDefaults.h"
-#include <boost/optional.hpp>
-#include "ValidationResult.h"
-#include "ParseReflectometryStrings.h"
-#include "TransmissionRunPair.h"
-#include "DllConfig.h"
 #include "../ValidationResult.h"
+#include "DllConfig.h"
+#include "ParseReflectometryStrings.h"
+#include "PerThetaDefaults.h"
+#include "TransmissionRunPair.h"
+#include "ValidationResult.h"
+#include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -40,9 +40,10 @@ public:
   operator()(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
 
 private:
-  boost::optional<boost::optional<double>> parseThetaOrWhitespace(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
-  boost::optional<TransmissionRunPair>
-  parseTransmissionRuns(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
+  boost::optional<boost::optional<double>> parseThetaOrWhitespace(
+      std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
+  boost::optional<TransmissionRunPair> parseTransmissionRuns(
+      std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<boost::optional<RangeInQ>>
   parseQRange(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<boost::optional<double>>
@@ -53,9 +54,10 @@ private:
   std::vector<int> m_invalidColumns;
 };
 
-ValidationResult<PerThetaDefaults, std::vector<int>>
-validatePerThetaDefaults(std::array<std::string, PerThetaDefaultsValidator::INPUT_FIELD_COUNT> const &cellText);
+ValidationResult<PerThetaDefaults, std::vector<int>> validatePerThetaDefaults(
+    std::array<std::string, PerThetaDefaultsValidator::INPUT_FIELD_COUNT> const
+        &cellText);
 
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_

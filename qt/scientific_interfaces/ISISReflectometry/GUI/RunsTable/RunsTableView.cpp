@@ -8,7 +8,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
-                     int defaultInstrumentIndex)
+                             int defaultInstrumentIndex)
     : m_jobs(), m_instruments(instruments) {
   m_ui.setupUi(this);
   m_jobs =
@@ -89,7 +89,7 @@ void RunsTableView::showAlgorithmPropertyHintsInOptionsColumn() {
 }
 
 QAction *RunsTableView::addToolbarItem(std::string const &iconPath,
-                                   std::string const &description) {
+                                       std::string const &description) {
   return m_ui.toolBar->addAction(QIcon(QString::fromStdString(iconPath)),
                                  QString::fromStdString(description));
 }
@@ -132,7 +132,9 @@ void RunsTableView::subscribe(RunsTableViewSubscriber *notifyee) {
           SLOT(onProcessPressed(bool)));
 }
 
-void RunsTableView::setProgress(int value) { m_ui.progressBar->setValue(value); }
+void RunsTableView::setProgress(int value) {
+  m_ui.progressBar->setValue(value);
+}
 
 void RunsTableView::onExpandAllGroupsPressed(bool) {
   m_notifyee->notifyExpandAllRequested();
@@ -142,7 +144,9 @@ void RunsTableView::onCollapseAllGroupsPressed(bool) {
   m_notifyee->notifyCollapseAllRequested();
 }
 
-void RunsTableView::onProcessPressed(bool) { m_notifyee->notifyProcessRequested(); }
+void RunsTableView::onProcessPressed(bool) {
+  m_notifyee->notifyProcessRequested();
+}
 void RunsTableView::onPausePressed(bool) { m_notifyee->notifyPauseRequested(); }
 
 void RunsTableView::onInsertRowPressed(bool) {
@@ -161,23 +165,31 @@ void RunsTableView::onDeleteGroupPressed(bool) {
   m_notifyee->notifyDeleteGroupRequested();
 }
 
-void RunsTableView::onCopyPressed(bool) { m_notifyee->notifyCopyRowsRequested(); }
+void RunsTableView::onCopyPressed(bool) {
+  m_notifyee->notifyCopyRowsRequested();
+}
 
 void RunsTableView::onCutPressed(bool) { m_notifyee->notifyCutRowsRequested(); }
 
-void RunsTableView::onPastePressed(bool) { m_notifyee->notifyPasteRowsRequested(); }
+void RunsTableView::onPastePressed(bool) {
+  m_notifyee->notifyPasteRowsRequested();
+}
 
-RunsTableViewFactory::RunsTableViewFactory(std::vector<std::string> const &instruments)
+RunsTableViewFactory::RunsTableViewFactory(
+    std::vector<std::string> const &instruments)
     : m_instruments(instruments) {}
 
 RunsTableView *RunsTableViewFactory::operator()() const {
   return new RunsTableView(m_instruments, defaultInstrumentFromConfig());
 }
 
-int RunsTableViewFactory::indexOfElseFirst(std::string const &instrument) const {
-  return indexOf(m_instruments, [&instrument](std::string const &inst) {
-    return instrument == inst;
-  }).get_value_or(0);
+int RunsTableViewFactory::indexOfElseFirst(
+    std::string const &instrument) const {
+  return indexOf(m_instruments,
+                 [&instrument](std::string const &inst) {
+                   return instrument == inst;
+                 })
+      .get_value_or(0);
 }
 
 int RunsTableViewFactory::defaultInstrumentFromConfig() const {
