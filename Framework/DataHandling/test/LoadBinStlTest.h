@@ -70,7 +70,14 @@ public:
     std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
     TS_ASSERT(!(Loader->isBinarySTL()));
   }
+
+  void test_fail_ascii_stl(){
+    std::string path =
+        FileFinder::Instance().getFullPath("cube.stl");
+    std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
+    TS_ASSERT(!(Loader->isBinarySTL()));
+  }
 };
-// add tests for isBinaryStl e.g. attempting to load an ascii .stl
+
 
 #endif /* LOAD_BINSTL_TEST_H_ */
