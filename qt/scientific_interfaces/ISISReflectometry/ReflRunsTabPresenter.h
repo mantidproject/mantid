@@ -80,8 +80,8 @@ public:
                        IReflMessageHandler *messageHandler,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
-
   ReflRunsTabPresenter(ReflRunsTabPresenter const &) = delete;
+  ~ReflRunsTabPresenter() override;
   ReflRunsTabPresenter const &operator=(ReflRunsTabPresenter const &) = delete;
 
   ReflRunsTabPresenter(ReflRunsTabPresenter &&) = default;
@@ -121,9 +121,9 @@ private:
   boost::shared_ptr<IReflSearcher> m_searcher;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
-  double m_thetaTolerance;
   /// The name to use for the live data workspace
   Mantid::API::IAlgorithm_sptr m_monitorAlg;
+  double m_thetaTolerance;
 
   /// searching
   bool search();

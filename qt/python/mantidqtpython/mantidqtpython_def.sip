@@ -9,7 +9,7 @@
 %Include string.sip
 
 %ModuleHeaderCode
-#include "MantidQtWidgets/Common/PythonSystemHeader.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 %End
 

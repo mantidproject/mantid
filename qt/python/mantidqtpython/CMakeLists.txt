@@ -14,9 +14,10 @@ set ( HEADER_DEPENDS
   SIPVector.h
   string.sip
   vector.sip
+  ../../../Framework/PythonInterface/core/inc/MantidPythonInterface/core/VersionCompat.h
+
   ${FACTORY_INC}/MantidQtWidgets/Factory/WidgetFactory.h
 
-  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/PythonSystemHeader.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/WorkspaceObserver.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/GraphOptions.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/AlgorithmDialog.h
@@ -89,7 +90,9 @@ mtd_add_sip_module (
   TARGET_NAME mantidqtpython
   SIP_SRCS mantidqtpython_def.sip
   HEADER_DEPS ${HEADER_DEPENDS}
-  INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}
+  INCLUDE_DIRS
+    ${CMAKE_CURRENT_LIST_DIR}
+    ../../../Framework/PythonInterface/core/inc
   PYQT_VERSION 4
   LINK_LIBS ${TCMALLOC_LIBRARIES_LINKTIME}
     MantidQtWidgetsCommonQt4

@@ -47,7 +47,7 @@ Among the examples, inside the :py:mod:`Examples` folder, the user is encouraged
   carry a calibration to the group of tubes.
 * :py:func:`~Examples.TubeCalibDemoMaps_All.completeCalibration` demonstrate how the **rangeList**, **overridePeaks**,
   may be used together to allow the calibration of the whole instrument, despite, its particularities in some cases.
-* :py:func:`~Examples.TubeCalibDemoMaps_All.findThoseTubesThatNeedSpecialCareForCalibration` show an aproach to find the
+* :py:func:`~Examples.TubeCalibDemoMaps_All.findThoseTubesThatNeedSpecialCareForCalibration` show an approach to find the
   tubes that will require special care on calibrating. It will also help to find detectors that are not working well.
 
 ========
@@ -92,7 +92,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     The calibration follows the following steps
 
     1. Finding the peaks on each tube
-    2. Fitting the peaks agains the Known Positions
+    2. Fitting the peaks against the Known Positions
     3. Defining the new position for the pixels(detectors)
 
     Let's consider the simplest way of calling calibrate:
@@ -182,7 +182,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     Although the examples consider only Gaussian peaks, it is possible to
     change the function factors to edges by passing the index of the
     known_position through the **funcForm**. Hence, considering three special
-    points, where there are one gaussian peak and thow edges, the calibrate
+    points, where there are one gaussian peak and two edges, the calibrate
     could be configured as
 
     .. code-block:: python
@@ -597,7 +597,7 @@ def findBadPeakFits(peaksTable, threshold=10):
 
     @param peakTable: the table containing fitted peak centers
     @param threshold: the tolerance on the difference from the mean value
-    @return A list of expected peak positions and a list of indicies of tubes
+    @return A list of expected peak positions and a list of indices of tubes
     to correct
     """
     n = len(peaksTable)
@@ -647,7 +647,7 @@ def correctMisalignedTubes(ws, calibrationTable, peaksTable, spec, idealTube,
     tube are recalculated.
 
     @param ws: the workspace to get the tube geometry from
-    @param calibrationTable: the calibration table ouput from running
+    @param calibrationTable: the calibration table output from running
     calibration
     @param peaksTable: the table containing the fitted peak centers from
     calibration
@@ -819,7 +819,7 @@ class _CalibrationParameterHelper(object):
                 raise RuntimeError(
                     "Wrong argument {0}. "
                     "It expects a number 1 for linear, 2 for quadratic, or 3 for 3rd polinomial order"
-                    "when fitting the pixels positions agains the known positions".format(self.FITPOLIN))
+                    "when fitting the pixels positions against the known positions".format(self.FITPOLIN))
             else:
                 return polin_fit
         else:
@@ -857,12 +857,12 @@ class _CalibrationParameterHelper(object):
                 exclude_short_tubes = float(exclude_short_tubes)
             except:
                 raise RuntimeError(
-                    "Wrong argument {0}. It expects a float value for the minimun size of tubes to be calibrated".
+                    "Wrong argument {0}. It expects a float value for the minimum size of tubes to be calibrated".
                     format(self.EXCLUDESHORT))
             else:
                 return exclude_short_tubes
         else:
-            # a tube with length 0 can not be calibrated, this is the minimun value
+            # a tube with length 0 can not be calibrated, this is the minimum value
             return 0.0
 
     def _get_plot_tube(self, args):

@@ -201,7 +201,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     runinfo = []
     for line in file_handle:
         # See how many pieces of information have been provided;
-        # brackets delineate the field seperator (nothing for space-delimited, ',' for comma-seperated)
+        # brackets delineate the field separator (nothing for space-delimited, ',' for comma-seperated)
         parts = line.rstrip().split(',')
         if addRunToStore(parts, runinfo) > 0:
             issueWarning('Incorrect structure detected in input file "' + filename + '" at line \n"' + line + '"\nEntry skipped\n')
