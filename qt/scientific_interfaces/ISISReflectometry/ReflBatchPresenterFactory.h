@@ -16,6 +16,7 @@ namespace CustomInterfaces {
 class ReflBatchPresenterFactory {
 public:
   ReflBatchPresenterFactory(
+      // cppcheck-suppress passedByValue
       RunsPresenterFactory runsPresenterFactory,
       EventPresenterFactory eventPresenterFactory,
       ExperimentPresenterFactory experimentPresenterFactory,

@@ -11,7 +11,7 @@ namespace CustomInterfaces {
 DECLARE_SUBWINDOW(QtReflMainWindowView)
 
 QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
-    : UserSubWindow(parent) {}
+    : UserSubWindow(parent), m_notifyee(NULL) {}
 
 IReflBatchView *QtReflMainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();

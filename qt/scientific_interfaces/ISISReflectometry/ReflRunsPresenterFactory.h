@@ -18,6 +18,7 @@ public:
   RunsPresenterFactory(RunsTablePresenterFactory runsTablePresenterFactory,
                        WorkspaceNamesFactory workspaceNamesFactory,
                        double thetaTolerance,
+                       // cppcheck-suppress passedByValue
                        std::vector<std::string> instruments,
                        int defaultInstrumentIndex,
                        IReflMessageHandler *messageHandler,

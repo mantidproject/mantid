@@ -16,6 +16,7 @@ namespace CustomInterfaces {
 class ExperimentValidationErrors {
 public:
   ExperimentValidationErrors(
+      // cppcheck-suppress passedByValue
       PerThetaDefaultsTableValidationError perThetaDefaultsErrors,
       bool stitchParametersResult)
       : m_perThetaDefaultsErrors(std::move(perThetaDefaultsErrors)),

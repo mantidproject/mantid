@@ -63,6 +63,7 @@ bool operator==(CustomSlicingByList const &lhs,
 std::ostream &operator<<(std::ostream &os, CustomSlicingByList const &slicing) {
   os << "slices at the following times\n";
   auto const &sliceTimes = slicing.sliceTimes();
+  // cppcheck-suppress ignoredReturnValue
   std::adjacent_find(sliceTimes.cbegin(), sliceTimes.cend(),
                      [&os](double start, double end) -> bool {
                        os << "  " << start << " to " << end << " seconds,\n";
@@ -95,6 +96,7 @@ std::ostream &operator<<(std::ostream &os, SlicingByEventLog const &slicing) {
   os << "slices at the times when the log value for the block '"
      << slicing.blockName() << "' is between\n";
   auto const &logValueBreakpoints = slicing.sliceAtValues();
+  // cppcheck-suppress ignoredReturnValue
   std::adjacent_find(logValueBreakpoints.cbegin(), logValueBreakpoints.cend(),
                      [&os](double start, double end) -> bool {
                        os << "  " << start << " and " << end << ",\n";
@@ -105,7 +107,7 @@ std::ostream &operator<<(std::ostream &os, SlicingByEventLog const &slicing) {
 
 class PrintSlicingVisitor : boost::static_visitor<std::ostream &> {
 public:
-  PrintSlicingVisitor(std::ostream &os) : m_os(os) {}
+  explicit PrintSlicingVisitor(std::ostream &os) : m_os(os) {}
 
   template <typename T> std::ostream &operator()(T const &slicing) const {
     return (m_os << slicing);

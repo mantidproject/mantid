@@ -87,7 +87,6 @@ PerThetaDefaultsValidator::parseOptions(CellText const &cellText) {
   return options;
 }
 
-// cppcheck-suppress syntaxError
 ValidationResult<PerThetaDefaults, std::vector<int>> PerThetaDefaultsValidator::
 operator()(CellText const &cellText) {
   auto maybeTheta = parseThetaOrWhitespace(cellText);
