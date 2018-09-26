@@ -107,7 +107,6 @@ void V3D::azimuth_polar_SNS(const double &R, const double &azimuth,
     z = 0.0;
 }
 
-
 /** Return the vector's position in spherical coordinates
  *  @param R ::     Returns the radial distance
  *  @param theta :: Returns the theta angle in degrees

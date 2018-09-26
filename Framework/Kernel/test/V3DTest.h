@@ -595,43 +595,43 @@ public:
     V3D direction(1.0, 1.0, 1.0);
     double sum = 0;
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum += direction[0] + direction[1] + direction[2];
+      sum += direction[0] + direction[1] + direction[2];
     }
-    TS_ASSERT_EQUALS(sum, 3*m_sampleSize);
+    TS_ASSERT_EQUALS(sum, 3 * m_sampleSize);
   }
 
   void testAddAssignOperatorV3D() {
     V3D direction(1.0, 1.0, 1.0);
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum += direction;
+      sum += direction;
     }
     TS_ASSERT_DELTA(sum.Y(), m_sampleSize, 1e-08);
   }
 
   void testSubAssignOperatorV3D() {
     V3D direction(1.0, 1.0, 1.0);
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum -= direction;
+      sum -= direction;
     }
     TS_ASSERT_DELTA(sum.Y(), -static_cast<int>(m_sampleSize), 1e-08);
   }
 
   void testMultiplyAssignOperatorV3D() {
     V3D direction(1.0, 1.0, 1.0);
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum *= direction;
+      sum *= direction;
     }
     TS_ASSERT_DELTA(sum.Y(), 0.0, 1e-08);
   }
 
   void testDivideAssignOperatorV3D() {
     V3D direction(1.0, 1.0, 1.0);
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum /= direction;
+      sum /= direction;
     }
     TS_ASSERT_DELTA(sum.Y(), 0.0, 1e-08);
   }
@@ -639,9 +639,9 @@ public:
   void testAddOperatorV3D() {
     V3D direction1(1.0, 1.0, 1.0);
     V3D direction2(2.0, 2.0, 2.0);
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum = direction1 + direction2;
+      sum = direction1 + direction2;
     }
     TS_ASSERT_DELTA(sum.Y(), 3.0, 1e-08);
   }
@@ -649,9 +649,9 @@ public:
   void testSubOperatorV3D() {
     V3D direction1(1.0, 1.0, 1.0);
     V3D direction2(2.0, 2.0, 2.0);
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum = direction1 - direction2;
+      sum = direction1 - direction2;
     }
     TS_ASSERT_DELTA(sum.Y(), -1.0, 1e-08);
   }
@@ -659,9 +659,9 @@ public:
   void testMultiplyOperatorV3D() {
     V3D direction1(1.0, 1.0, 1.0);
     V3D direction2(2.0, 2.0, 2.0);
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum = direction1 * direction2;
+      sum = direction1 * direction2;
     }
     TS_ASSERT_DELTA(sum.Y(), 2.0, 1e-08);
   }
@@ -669,9 +669,9 @@ public:
   void testDivideOperatorV3D() {
     V3D direction1(1.0, 1.0, 1.0);
     V3D direction2(2.0, 2.0, 2.0);
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum = direction1 / direction2;
+      sum = direction1 / direction2;
     }
     TS_ASSERT_DELTA(sum.Y(), 0.5, 1e-08);
   }
@@ -680,7 +680,7 @@ public:
     V3D direction(1.0, 1.0, 1.0);
     double scalar = 1.0;
     for (size_t i = 0; i < m_sampleSize; i++) {
-        direction *= scalar;
+      direction *= scalar;
     }
     TS_ASSERT_DELTA(direction.Y(), 1.0, 1e-08);
   }
@@ -689,7 +689,7 @@ public:
     V3D direction(1.0, 1.0, 1.0);
     double scalar = 1.0;
     for (size_t i = 0; i < m_sampleSize; i++) {
-        direction /= scalar;
+      direction /= scalar;
     }
     TS_ASSERT_DELTA(direction.Y(), 1.0, 1e-08);
   }
@@ -697,9 +697,9 @@ public:
   void testMultiplyOperatorScalar() {
     V3D direction1(1.0, 1.0, 1.0);
     double scalar = 0.1;
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum = direction1 * scalar;
+      sum = direction1 * scalar;
     }
     TS_ASSERT_DELTA(sum.Y(), 0.1, 1e-08);
   }
@@ -707,18 +707,18 @@ public:
   void testDivideOperatorScalar() {
     V3D direction1(1.0, 1.0, 1.0);
     double scalar = 0.1;
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum = direction1 / scalar;
+      sum = direction1 / scalar;
     }
     TS_ASSERT_DELTA(sum.Y(), 10, 1e-08);
   }
 
   void testNegationOperator() {
     V3D direction1(1.0, 1.0, 1.0);
-    V3D sum(0,0,0);
+    V3D sum(0, 0, 0);
     for (size_t i = 0; i < m_sampleSize; i++) {
-        sum = -direction1;
+      sum = -direction1;
     }
     TS_ASSERT_DELTA(sum.Y(), -1.0, 1e-08);
   }
@@ -728,7 +728,7 @@ public:
     V3D direction2(1.0, 1.0, 1.0);
     bool out = false;
     for (size_t i = 0; i < m_sampleSize; i++) {
-         out = direction1 == direction2;
+      out = direction1 == direction2;
     }
     TS_ASSERT(out)
   }
@@ -738,7 +738,7 @@ public:
     V3D direction2(1.0, 1.0, 1.0);
     bool out = false;
     for (size_t i = 0; i < m_sampleSize; i++) {
-         out = direction1 != direction2;
+      out = direction1 != direction2;
     }
     TS_ASSERT(!out)
   }
@@ -748,7 +748,7 @@ public:
     V3D direction2(1.0, 1.0, 1.0);
     bool out = false;
     for (size_t i = 0; i < m_sampleSize; i++) {
-         out = direction1 < direction2;
+      out = direction1 < direction2;
     }
     TS_ASSERT(!out)
   }
@@ -758,7 +758,7 @@ public:
     V3D direction2(1.0, 1.0, 1.0);
     bool out = false;
     for (size_t i = 0; i < m_sampleSize; i++) {
-        out = direction1 > direction2;
+      out = direction1 > direction2;
     }
     TS_ASSERT(!out)
   }

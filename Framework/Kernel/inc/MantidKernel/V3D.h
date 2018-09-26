@@ -222,9 +222,7 @@ public:
    *  @param other :: The V3D to compare against
    *  @returns True if the vectors are different
    */
-  bool operator!=(const V3D &other) const {
-    return !(this->operator==(other));
-  }
+  bool operator!=(const V3D &other) const { return !(this->operator==(other)); }
 
   /**
     compare
@@ -296,8 +294,7 @@ public:
     case 2:
       return z;
     default:
-      throw Kernel::Exception::IndexError(Index, 2,
-                                          "operator[] range error");
+      throw Kernel::Exception::IndexError(Index, 2, "operator[] range error");
     }
   }
 
@@ -315,8 +312,7 @@ public:
     case 2:
       return z;
     default:
-      throw Kernel::Exception::IndexError(Index, 2,
-                                          "operator[] range error");
+      throw Kernel::Exception::IndexError(Index, 2, "operator[] range error");
     }
   }
 
