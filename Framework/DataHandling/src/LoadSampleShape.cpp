@@ -201,7 +201,6 @@ void LoadSampleShape::exec() {
   if (filetype == "off") {
     shape = readOFFshape(file);
   } else /* stl */ {
-    std::string solidName = "";
     std::unique_ptr<LoadAsciiStl> asciiStlReader =
         Kernel::make_unique<LoadAsciiStl>(filename);
     std::unique_ptr<LoadBinStl> binaryStlReader =
@@ -214,8 +213,6 @@ void LoadSampleShape::exec() {
       throw std::runtime_error(
           "Could not read file, did not match either STL Format");
     }
-
-    // shape = readSTLSolid(file, solidName, filename);
   }
 
   // Put shape into sample.

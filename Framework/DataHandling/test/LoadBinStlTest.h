@@ -14,8 +14,7 @@ using namespace Mantid::Geometry;
 
 class LoadBinStlTest : public CxxTest::TestSuite {
 public:
-  static LoadBinStlTest *createSuite() { return new LoadBinStlTest(); }
-  static void destroySuite(LoadBinStlTest *suite) { delete suite; }
+  static LoadBinStlTest *createSuite() { return new LoadBinStlTest(); }  static void destroySuite(LoadBinStlTest *suite) { delete suite; }
 
   void testInit() {}
   void test_cube() {
