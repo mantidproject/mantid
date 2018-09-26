@@ -27,15 +27,15 @@ void QtReflBatchView::initLayout() {
   m_eventHandling = createEventTab();
   m_ui.batchTabs->addTab(m_eventHandling.get(), "Event Handling");
 
-  m_save = createSaveTab();
-  m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
-
   m_experiment = Mantid::Kernel::make_unique<ExperimentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_experiment.get(), "Experiment Settings");
 
   m_instrument =
       Mantid::Kernel::make_unique<InstrumentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_instrument.get(), "Instrument Settings");
+
+  m_save = createSaveTab();
+  m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
 }
 
 IExperimentView* QtReflBatchView::experiment() const {
