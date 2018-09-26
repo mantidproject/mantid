@@ -66,8 +66,8 @@ public:
 signals:
   /**\brief Emitted whenever a new message should be presented to the user.
    *
-   * You don't have to connect to this signal if you already specified a receiver
-   *during initialization.
+   * You don't have to connect to this signal if you already specified a
+   *receiver during initialization.
    */
   void statusText(const QString &);
 public slots:

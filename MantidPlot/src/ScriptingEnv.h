@@ -71,7 +71,8 @@ public:
   virtual Script *newScript(const QString &name, QObject *context,
                             const Script::InteractionType interact) const = 0;
 
-  //! If an exception / error occurred, return a nicely formatted stack backtrace.
+  //! If an exception / error occurred, return a nicely formatted stack
+  //! backtrace.
   virtual QString stackTraceString() { return QString::null; }
   /// Return a list of supported mathematical functions. These should be
   /// imported into the global namespace.

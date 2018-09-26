@@ -431,9 +431,10 @@ void ImportASCIIDialog::displayHelp() {
           "whitespaces (including the TAB character) will be replaced with a "
           "single space.");
 
-  s += "\n\n" +
-       tr("Warning: using these two last options leads to column overlapping if "
-          "the columns in the ASCII file don't have the same number of rows.");
+  s +=
+      "\n\n" +
+      tr("Warning: using these two last options leads to column overlapping if "
+         "the columns in the ASCII file don't have the same number of rows.");
   s += "\n" + tr("To avoid this problem you should precisely define the column "
                  "separator using TAB and SPACE characters.");
 

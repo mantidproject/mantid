@@ -2436,9 +2436,10 @@ void ConfigDialog::languageChange() {
 
   mdPlottingGeneralFrame->setTitle(
       "Use same default color map for Slice Viewer and VSI");
-  mdPlottingGeneralFrame->setToolTip("The specified color map will be available "
-                                     "for the Slice Viewer and the VSI when a "
-                                     "new instance of either is started.");
+  mdPlottingGeneralFrame->setToolTip(
+      "The specified color map will be available "
+      "for the Slice Viewer and the VSI when a "
+      "new instance of either is started.");
 }
 
 void ConfigDialog::accept() {
