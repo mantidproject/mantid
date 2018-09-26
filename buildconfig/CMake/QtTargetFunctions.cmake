@@ -254,7 +254,12 @@ function (mtd_add_qt_tests)
   _qt_versions(_qt_vers ${ARGN})
   # Create targets
   foreach(_ver ${_qt_vers})
-    mtd_add_qt_test_executable (QT_VERSION ${_ver} ${ARGN})
+    if (_ver EQUAL 4 AND ENABLE_MANTIDPLOT)
+      mtd_add_qt_test_executable (QT_VERSION ${_ver} ${ARGN})
+    endif ()
+    if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
+      mtd_add_qt_test_executable (QT_VERSION ${_ver} ${ARGN})
+    endif ()
   endforeach()
 endfunction()
 

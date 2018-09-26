@@ -15,7 +15,7 @@ set ( TEST_FILES
 
 set (CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/MplCppTestInitialization.h)
 
-mtd_add_qt_test_executable (TARGET_NAME MantidQtWidgetsMplCppTest
+mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsMplCppTest
   QT_VERSION 5
   INCLUDE_DIRS
     ${CMAKE_CURRENT_LIST_DIR}/../inc
