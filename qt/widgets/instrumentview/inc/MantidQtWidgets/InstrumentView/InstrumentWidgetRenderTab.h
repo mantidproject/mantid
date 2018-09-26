@@ -108,7 +108,7 @@ private: // methods
 private: // members
   QPushButton *m_surfaceTypeButton;
   QPushButton *mSaveImage;
-  ColorBar *m_colorMapWidget;
+  ColorBar *m_colorBarWidget;
   QFrame *m_resetViewFrame;
   QComboBox *mAxisCombo;
   QCheckBox *m_flipCheckBox;

@@ -1,0 +1,86 @@
+#include "MantidQtWidgets/MplCpp/ColorbarWidget.h"
+#include "MantidQtWidgets/MplCpp/Colors.h"
+#include "MantidQtWidgets/MplCpp/Figure.h"
+#include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
+#include "MantidQtWidgets/MplCpp/ScalarMappable.h"
+
+#include "MantidPythonInterface/core/ErrorHandling.h"
+
+#include <QVBoxLayout>
+
+namespace MantidQt {
+namespace Widgets {
+namespace MplCpp {
+
+namespace {
+// These values are pulled from trial and error
+constexpr double AXES_LEFT = 0.125;
+constexpr double AXES_BOTTOM = 0.125;
+constexpr double AXES_WIDTH = 0.1;
+constexpr double AXES_HEIGHT = 0.9;
+
+Python::Object cbModule() {
+  static auto cbModule{
+      Python::NewRef(PyImport_ImportModule("matplotlib.colorbar"))};
+  return cbModule;
+}
+
+} // namespace
+
+/**
+ * @brief Constructor to specify the scale type as an integer
+ * @param type An integer (0=Linear, 1=Log10, 2=Power)
+ * @param parent A pointer to the parent widget
+ */
+ColorbarWidget::ColorbarWidget(int type, QWidget *parent) : QWidget(parent) {
+  Figure fig{false};
+  auto cbAxes{fig.addAxes(AXES_LEFT, AXES_BOTTOM, AXES_WIDTH, AXES_HEIGHT)};
+
+  m_scaleMin = new QLineEdit;
+  m_scaleMax = new QLineEdit;
+  m_canvas = new FigureCanvasQt(std::move(fig));
+  try {
+    m_colorbar = cbModule().attr("Colorbar")(
+        cbAxes.pyobj(),
+        ScalarMappable{Normalize(0.0, 1.0), getCMap("viridis")}.pyobj());
+  } catch (Python::ErrorAlreadySet &) {
+    throw Mantid::PythonInterface::PythonRuntimeError();
+  }
+
+  setLayout(new QVBoxLayout());
+  layout()->addWidget(m_scaleMax);
+  layout()->addWidget(m_canvas);
+  layout()->addWidget(m_scaleMin);
+}
+
+/**
+ * Update the minimum value of the normalization scale
+ * @param vmin New minimum of the scale
+ */
+void ColorbarWidget::setMinValue(double vmin) {
+  m_colorbar.attr("mappable").attr("norm").attr("vmin") = vmin;
+}
+
+/**
+ * Update the maximum value of the normalization scale
+ * @param vmin New maximum of the scale
+ */
+void ColorbarWidget::setMaxValue(double vmax) {
+  m_colorbar.attr("mappable").attr("norm").attr("vmax") = vmax;
+}
+
+QString ColorbarWidget::getMinValue() const {
+  return QString::number(PyFloat_AsDouble(
+      Python::Object(m_colorbar.attr("mappable").attr("norm").attr("vmin"))
+          .ptr()));
+}
+
+QString ColorbarWidget::getMaxValue() const {
+  return QString::number(PyFloat_AsDouble(
+      Python::Object(m_colorbar.attr("mappable").attr("norm").attr("vmax"))
+          .ptr()));
+}
+
+} // namespace MplCpp
+} // namespace Widgets
+} // namespace MantidQt

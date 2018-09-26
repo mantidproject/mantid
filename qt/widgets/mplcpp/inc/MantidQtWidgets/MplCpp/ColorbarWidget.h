@@ -19,41 +19,54 @@
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Python/Object.h"
 
-#include <QWidget>
+#include <QLineEdit>
 
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
+class FigureCanvasQt;
 class MantidColorMap;
 
 /**
- * @brief Provides a widget to display a color map
- * on a defined scale with a configurable scale type. The implementation
- * uses matplotlib.colorbar
+ * @brief Provides a widget to display a color map on a defined scale with a
+ * configurable scale type. It contains controls the scale range
+ * and type.
+
+ * The implementation uses matplotlib.colorbar.
  */
-class MANTID_MPLCPP_DLL Colorbar : public QWidget {
+class MANTID_MPLCPP_DLL ColorbarWidget : public QWidget {
   Q_OBJECT
 public:
-  Colorbar(QWidget *parent = nullptr);
+  ColorbarWidget(QWidget *parent = nullptr);
 
   ///@name Legacy API to match DraggableColorBarWidget for instrument view
   ///@{
-  Colorbar(int type, QWidget *parent = nullptr);
+  ColorbarWidget(int type, QWidget *parent = nullptr);
   void setupColorBarScaling(const MantidColorMap &) {}
-  void setMinValue(double min) {}
-  void setMaxValue(double max) {}
-  QString getMinValue() const { return "NAN"; }
-  QString getMaxValue() const { return "NAN"; }
+  void setMinValue(double min);
+  void setMaxValue(double max);
+  QString getMinValue() const;
+  QString getMaxValue() const;
   QString getNthPower() const { return "NAN"; }
   void setMinPositiveValue(double){
-      // This should set the linthresh for synlog
+      // This should set the linthresh for symlog...
   };
   int getScaleType() const { return 0; }
   void setScaleType(int) {}
   void setNthPower(double) {}
   void loadFromProject(const std::string &) {}
   std::string saveToProject() const { return ""; }
+
+  // signals:
+  //  void scaleTypeChanged(int);
+  //  void minValueChanged(double);
+  //  void maxValueChanged(double);
+  //  void nthPowerChanged(double);
   ///@}
+private:
+  FigureCanvasQt *m_canvas{nullptr};
+  Python::Object m_colorbar;
+  QLineEdit *m_scaleMin, *m_scaleMax;
 };
 
 } // namespace MplCpp
