@@ -282,6 +282,7 @@ void MultiProcessEventLoader::fillFromFile(
 // vector representing each pixel allocated only once, so we have allocationFee
 // bytes extra overhead
 size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
+  //8 bytes pointer to allocator + 8 bytes pointer to metadata
   auto allocationFee = 8 + 8 + generateStoragename().length();
   std::size_t len{(eventCount / m_numProcesses + eventCount % m_numProcesses) *
                       sizeof(TofEvent) +
