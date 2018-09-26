@@ -1,22 +1,15 @@
 #ifndef LOAD_BINSTL_TEST_H_
 #define LOAD_BINSTL_TEST_H_
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadBinStl.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Objects/MeshObject.h"
-#include "MantidKernel/OptionalBool.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
-using namespace Mantid::DataObjects;
+
 using namespace Mantid::Geometry;
 
 class LoadBinStlTest : public CxxTest::TestSuite {

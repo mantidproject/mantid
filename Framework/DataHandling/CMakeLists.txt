@@ -418,6 +418,7 @@ set ( TEST_FILES
 	JoinISISPolarizationEfficienciesTest.h
 	LoadAscii2Test.h
 	LoadAsciiTest.h
+	LoadAsciiStlTest.h
 	LoadBBYTest.h
 	LoadBinStlTest.h
 	LoadCalFileTest.h
