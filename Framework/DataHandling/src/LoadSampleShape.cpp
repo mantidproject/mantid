@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSampleShape.h"
-#include "MantidDataHandling/LoadBinStl.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
+#include "MantidDataHandling/LoadBinStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -203,19 +203,19 @@ void LoadSampleShape::exec() {
   } else /* stl */ {
     std::string solidName = "";
     std::unique_ptr<LoadAsciiStl> asciiStlReader =
-          Kernel::make_unique<LoadAsciiStl>(filename);
+        Kernel::make_unique<LoadAsciiStl>(filename);
     std::unique_ptr<LoadBinStl> binaryStlReader =
-          Kernel::make_unique<LoadBinStl>(filename);
-      if(asciiStlReader->isAsciiSTL()){
-        shape = asciiStlReader->readStl();
-      }else if(binaryStlReader->isBinarySTL()){
-        shape = binaryStlReader->readStl();
-      }else{
-        throw std::runtime_error("Could not read file, did not match either STL Format");
-      }
-    
-    //shape = readSTLSolid(file, solidName, filename);
+        Kernel::make_unique<LoadBinStl>(filename);
+    if (asciiStlReader->isAsciiSTL()) {
+      shape = asciiStlReader->readStl();
+    } else if (binaryStlReader->isBinarySTL()) {
+      shape = binaryStlReader->readStl();
+    } else {
+      throw std::runtime_error(
+          "Could not read file, did not match either STL Format");
+    }
 
+    // shape = readSTLSolid(file, solidName, filename);
   }
 
   // Put shape into sample.
