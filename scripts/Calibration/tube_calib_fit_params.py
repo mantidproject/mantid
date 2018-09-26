@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 
 class TubeCalibFitParams(object):
 
-# This class is to take the fitting method and parameters for fitting the peaks crated by the calibration slits etc
+# This class is to take the fitting method and parameters for fitting the peaks created by the calibration slits etc
 # and to deliver them to TubeCalib, so it can fit the peaks appropriately
 
 # Author: Karl Palmen ISIS

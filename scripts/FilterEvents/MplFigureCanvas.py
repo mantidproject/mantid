@@ -43,6 +43,6 @@ class MplFigureCanvas(FigureCanvas):
         return
 
     def getPlot(self):
-        """ reture figure's axes to expose the matplotlib figure to PyQt client
+        """ return figure's axes to expose the matplotlib figure to PyQt client
         """
         return self.axes

@@ -1,7 +1,7 @@
 Tasks
 -----
   
-  6. Find out why the vanadium runs (379-10/11) look funny, i.e., oscilating curves;
+  6. Find out why the vanadium runs (379-10/11) look funny, i.e., oscillating curves;
   7. Talk with Clarina how to deal with vanadium spectrum with peaks striped; 
   8. Tab *Normalized*: **Normalization Monitor** should have a default value as the average of monitor counts
   9. Check whether a scan has been loaded as **Load** is pushed; 
@@ -47,7 +47,7 @@ Use cases for tabs
   5. **Vanadium**: strip vanadium peaks
     * Strip vanadium peak with unit 'Degrees' because of the binning (range and step size) must be respected;
     * Peaks' position should be calculated and indicated auotmatically;
-    * *Mantid::StripPeaks()* will be called instread of *StripVadadiumPeaks()* because
+    * *Mantid::StripPeaks()* will be called instead of *StripVadadiumPeaks()* because
       the later one only works in d-spacing;
   6. **Advanced Setup**
     * URL for raw data files; 
@@ -83,7 +83,7 @@ Here is the suggested workflow to reduce multiple scans and possibly merge them.
  1. Set up *Exp No* and range of scan numbers;
  2. Push button *Load All* to load and reduce all runs specified in previous step to single-spectrum diffraction pattern;
  3. Waterfall plot all reduced scans in default;
- 4. Optinally plot all data in 2D fill plot;
+ 4. Optionally plot all data in 2D fill plot;
  5. User can delete some scans from the reduced scans via GUI or input text edit;
  6. Push button *Merge* to merge the scans;
  7. Push button *Save All* to save all individual scans to files;
@@ -124,17 +124,17 @@ Raw data correction files
     - IJK is the experiment number
     - abc is the GE set up.  It can be 113, 115 or 117
     - XY is either IN or OUT. 
-    - Exmaple: *HB2A_exp0400__Ge_113_IN_vcorr.txt*
+    - Example: *HB2A_exp0400__Ge_113_IN_vcorr.txt*
    * Web address: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0IJK__Ge_abc_IN_vcorr.txt*
     - IJK is the experiment number
     - abc is the GE set up.  It can be 113, 115 or 117
     - XY is either IN or OUT. 
-    - Exmaple: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__Ge_113_IN_vcorr.txt*
+    - Example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__Ge_113_IN_vcorr.txt*
 
- 2. **Excluded detectors**:  Some detectors might be exluded from the experiment for some reason.  It is recorded in some excluded detectors' file.
+ 2. **Excluded detectors**:  Some detectors might be excluded from the experiment for some reason.  It is recorded in some excluded detectors' file.
    * File name: *HB2A_exp0IJK__exclude_detectors.txt*
     - IJK is the epxeriment number
-    - Exmaple: *HB2A_exp0400__exclude_detectors.txt*
+    - Example: *HB2A_exp0400__exclude_detectors.txt*
    * Web address: *http://neutron.ornl.gov/user_data/hb2a/expIJK/Datafiles/HB2A_exp0IJK__exclude_detectors.txt*
     - IJK is the experiment number
     - Example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__exclude_detectors.txt*

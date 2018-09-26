@@ -766,7 +766,7 @@ class MainWindow(QtGui.QMainWindow):
         # Set wavelength to GUI except 'multiple scans'
         self._set_wavelength(auto_wavelength, wavelength_error, exp_no, scan_no, err_msg)
 
-        # Optionally obtain and parse det effecient file
+        # Optionally obtain and parse det efficient file
         detector_efficiency_table_ws = self._get_and_parse_det_efficiency_file(van_corr_filename)
 
         # Parse SPICE data to MDEventWorkspaces
