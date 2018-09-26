@@ -166,21 +166,42 @@ std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
   return std::make_pair(workspace->x(0).front(), workspace->x(0).back());
 }
 
-std::string
-constructExcludeRegionString(const std::vector<std::size_t> &bounds) {
+std::vector<std::string> splitStringBy(std::string const &str,
+                                       std::string const &delimiter) {
+  std::vector<std::string> subStrings;
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
+  return subStrings;
+}
+
+double convertBoundToDoubleAndFormat(std::string const &str) {
+  return std::round(std::stod(str) * 10) / 10;
+}
+
+std::string constructExcludeRegionString(std::vector<double> const &bounds) {
   std::string excludeRegion;
   for (auto it = bounds.begin(); it < bounds.end(); ++it) {
-    excludeRegion += std::to_string(*it);
+    auto splitDouble = splitStringBy(std::to_string(*it), ".");
+    excludeRegion += splitDouble[0] + "." + splitDouble[1].front();
     excludeRegion += it == bounds.end() - 1 ? "" : ",";
   }
   return excludeRegion;
 }
 
-std::string orderExcludeRegionString(std::vector<std::size_t> &bounds) {
+std::string orderExcludeRegionString(std::vector<double> &bounds) {
   for (auto it = bounds.begin(); it < bounds.end() - 1; it += 2)
     if (*it > *(it + 1))
       std::iter_swap(it, it + 1);
   return constructExcludeRegionString(bounds);
+}
+
+std::string arrangeExcludeRegionString(std::string const &excludeRegionString) {
+  auto boundStrings = splitStringBy(excludeRegionString, ", ");
+
+  std::vector<double> bounds;
+  for (auto bound : boundStrings)
+    if (!bound.empty())
+      bounds.emplace_back(convertBoundToDoubleAndFormat(bound));
+  return orderExcludeRegionString(bounds);
 }
 
 } // namespace
@@ -236,7 +257,9 @@ std::size_t IndirectFitData::numberOfSpectra() const {
 }
 
 bool IndirectFitData::zeroSpectra() const {
-  return boost::apply_visitor(CheckZeroSpectrum(), m_spectra);
+  if (m_workspace->getNumberHistograms())
+    return boost::apply_visitor(CheckZeroSpectrum(), m_spectra);
+  return true;
 }
 
 std::pair<double, double>
@@ -265,7 +288,7 @@ void IndirectFitData::setSpectra(const std::string &spectra) {
     setSpectra(spec);
   } catch (std::exception &ex) {
     throw std::runtime_error("Spectra too large for cast: " +
-                             QString(ex.what()).toStdString());
+                             std::string(ex.what()));
   }
 }
 
@@ -291,7 +314,8 @@ void IndirectFitData::validateSpectra(const Spectra &spectra) {
   }
 }
 
-void IndirectFitData::setStartX(double startX, std::size_t spectrum) {
+void IndirectFitData::setStartX(double const &startX,
+                                std::size_t const &spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.first = startX;
@@ -302,7 +326,7 @@ void IndirectFitData::setStartX(double startX, std::size_t spectrum) {
         "Unable to set StartX: Workspace no longer exists.");
 }
 
-void IndirectFitData::setEndX(double endX, std::size_t spectrum) {
+void IndirectFitData::setEndX(double const &endX, std::size_t const &spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.second = endX;
@@ -313,20 +337,12 @@ void IndirectFitData::setEndX(double endX, std::size_t spectrum) {
 }
 
 void IndirectFitData::setExcludeRegionString(
-    const std::string &excludeRegionString, std::size_t spectrum) {
-  m_excludeRegions[spectrum] = validateExcludeRegionString(excludeRegionString);
-}
-
-std::string IndirectFitData::validateExcludeRegionString(
-    const std::string &excludeRegionString) const {
-  std::vector<std::string> boundStrings;
-  boost::split(boundStrings, excludeRegionString, boost::is_any_of(", "));
-
-  std::vector<std::size_t> bounds;
-  for (auto bound : boundStrings)
-    if (!bound.empty())
-      bounds.emplace_back(std::stoull(bound));
-  return orderExcludeRegionString(bounds);
+    std::string const &excludeRegionString, std::size_t const &spectrum) {
+  if (!excludeRegionString.empty())
+    m_excludeRegions[spectrum] =
+        arrangeExcludeRegionString(excludeRegionString);
+  else
+    m_excludeRegions[spectrum] = excludeRegionString;
 }
 
 IndirectFitData &IndirectFitData::combine(const IndirectFitData &fitData) {

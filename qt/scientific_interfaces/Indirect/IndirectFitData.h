@@ -66,6 +66,9 @@ public:
   }
   typename std::vector<T>::const_iterator end() const { return m_vec.end(); }
   const T &operator[](std::size_t index) const { return m_vec[index]; }
+  bool operator==(DiscontinuousSpectra<std::size_t> const &spec) const {
+    return this->getString() == spec.getString();
+  }
 
 private:
   std::string m_str;
@@ -184,18 +187,16 @@ public:
         ApplyEnumeratedSpectra<F>(std::forward<F>(functor), start), m_spectra);
   }
 
-  void setSpectra(const std::string &spectra);
+  void setSpectra(std::string const &spectra);
   void setSpectra(Spectra &&spectra);
-  void setSpectra(const Spectra &spectra);
-  void setStartX(double startX, std::size_t index);
-  void setEndX(double endX, std::size_t spectrum);
-  void setExcludeRegionString(const std::string &excludeRegion,
-                              std::size_t spectrum);
-  std::string
-  validateExcludeRegionString(const std::string &excludeRegionString) const;
+  void setSpectra(Spectra const &spectra);
+  void setStartX(double const &startX, std::size_t const &index);
+  void setEndX(double const &endX, std::size_t const &spectrum);
+  void setExcludeRegionString(std::string const &excludeRegion,
+                              std::size_t const &spectrum);
 
 private:
-  void validateSpectra(const Spectra &spectra);
+  void validateSpectra(Spectra const &spectra);
 
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   Spectra m_spectra;

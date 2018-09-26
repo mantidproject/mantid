@@ -79,6 +79,8 @@ IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
   connect(m_view.get(), SIGNAL(maskChanged(const std::string &)), this,
           SLOT(setBinMask(const std::string &)));
   connect(m_view.get(), SIGNAL(maskChanged(const std::string &)), this,
+          SLOT(displayBinMask()));
+  connect(m_view.get(), SIGNAL(maskChanged(const std::string &)), this,
           SIGNAL(maskChanged(const std::string &)));
 
   m_view->setSpectraRegex(Regexes::SPECTRA_LIST);
