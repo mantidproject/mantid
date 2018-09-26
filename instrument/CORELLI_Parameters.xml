@@ -20,16 +20,6 @@
      <value val="true"/>
     </parameter>
 
-    <!-- Multiplier for profile fitting for BVG polar angle -->
-    <parameter name="sigX0Scale">
-     <value val="2." />
-    </parameter>
-
-    <!-- Multiplier for profile fitting for BVG azimuthal angle -->
-    <parameter name="sigY0Scale">
-     <value val="2." />
-    </parameter>
-
     <!-- Number of rows between detector gaps for profile fitting -->
     <parameter name="numDetRows" type="int">
      <value val="255" />
@@ -52,7 +42,7 @@
 
     <!-- Fraction along (h,k,l) to use for profile fitting. 0.5 is the next peak. -->
     <parameter name="fracHKL">
-     <value val="0.4" />
+     <value val="0.25" />
     </parameter>
 
     <!-- Side length of each voxel for fitting in units of angstrom^-1 -->

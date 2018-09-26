@@ -45,7 +45,7 @@
 
 <!-- Fraction along (h,k,l) to use for profile fitting. 0.5 is the next peak. -->
 <parameter name="fracHKL">
- <value val="0.4" />
+ <value val="0.25" />
 </parameter>
 
 <!-- Side length of each voxel for fitting in units of angstrom^-1 -->
