@@ -239,14 +239,6 @@ class PlotView(QtWidgets.QWidget):
         self.plot_selector.addItem("All")
         self.plot_selector.addItems(list(self.plots.keys()))
 
-    def _add_workspace_name(self, name, workspace):
-        """ Adds a workspace to a plot's list of workspaces. """
-        try:
-            if workspace not in self.workspaces[name]:
-                self.workspaces[name].append(workspace)
-        except KeyError:
-            self.workspaces[name] = [workspace]
-
     @_redo_layout
     def plot(self, name, workspace):
         """ Plots a workspace to a subplot (with errors, if necessary). """
