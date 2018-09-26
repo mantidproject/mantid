@@ -14,8 +14,10 @@ EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
                                                  bool destroy)
     : EventsListsShmemManager(segmentName, elName, 0), destroyShared(destroy) {
   try {
+    boost::interprocess::permissions perm;
+    perm.set_unrestricted();
     m_segment = std::make_unique<ip::managed_shared_memory>(
-        ip::create_only, m_segmentName.c_str(), size);
+        ip::create_only, m_segmentName.c_str(), size, nullptr, perm);
     m_allocatorInstance =
         std::make_unique<VoidAllocator>(m_segment->get_segment_manager());
     m_chunks = m_segment->construct<Chunks>(m_chunksName.c_str())(
