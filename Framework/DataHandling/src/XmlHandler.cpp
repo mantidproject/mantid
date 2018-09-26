@@ -4,12 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-/*
- * XmlHandler.cpp
- *
- *  Created on: Nov 5, 2015
- *      Author: rhf
- */
 #include <algorithm>
 #include <iostream>
 #include <iterator>
