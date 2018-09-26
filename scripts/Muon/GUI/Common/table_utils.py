@@ -15,20 +15,20 @@ def setRowName(table,row,name):
     table.setItem(row,0, text)
 
 
-def addComboToTable(table,row,options):
+def addComboToTable(table,row,options,col=1):
     combo=QtGui.QComboBox()
     combo.addItems(options)
-    table.setCellWidget(row,1,combo)
+    table.setCellWidget(row,col,combo)
     return combo
 
 
-def addDoubleToTable(table,value,row):
+def addDoubleToTable(table,value,row,col=1):
     numberWidget = QtGui.QTableWidgetItem(str(value))
-    table.setItem(row,1, numberWidget)
+    table.setItem(row,col, numberWidget)
     return numberWidget
 
 
-def addCheckBoxToTable(table,state,row):
+def addCheckBoxToTable(table,state,row,col=1):
     box = QtGui.QTableWidgetItem()
     box.setFlags(QtCore.Qt.ItemIsUserCheckable |QtCore.Qt.ItemIsEnabled)
     if state:
@@ -36,16 +36,16 @@ def addCheckBoxToTable(table,state,row):
     else:
         box.setCheckState(QtCore.Qt.Unchecked)
 
-    table.setItem(row,1, box)
+    table.setItem(row,col, box)
     return box
 
 
-def addSpinBoxToTable(table,default,row):
+def addSpinBoxToTable(table,default,row,col=1):
     box = QtGui.QSpinBox()
     if default > 99:
         box.setMaximum(default*10)
     box.setValue(default)
-    table.setCellWidget(row,1,box)
+    table.setCellWidget(row,col,box)
     return box
 
 
