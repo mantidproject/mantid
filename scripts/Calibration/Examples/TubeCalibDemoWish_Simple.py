@@ -33,7 +33,7 @@ def CalibrateWish(RunNumber, PanelNumber):
     # Give y-positions of slit points (gotten for converting first tube's slit point to Y)
 
     # WISH instrument has a particularity. It is composed by a group of upper tubes and lower tubes,
-    # they are disposed 3 milimiters in difference one among the other
+    # they are disposed 3 millimeters in difference one among the other
     lower_tube = numpy.array([-0.41, -0.31, -0.21, -0.11, -0.02, 0.09, 0.18, 0.28, 0.39])
     upper_tube = numpy.array(lower_tube + 0.003)
     funcForm = 9 * [1]  # 9 gaussian peaks
@@ -65,7 +65,7 @@ def CalibrateWish(RunNumber, PanelNumber):
     # mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoWishResult.nxs', "Result of Running TubeCalibWishMerlin_Simple.py")
     # print("saved calibrated workspace (CalibInstWS) into Nexus file", nexusName)
 
-    # == Reset dafault instrument ==
+    # == Reset default instrument ==
     mantid.config['default.instrument'] = previousDefaultInstrument
 
     # ==== End of CalibrateWish() ====

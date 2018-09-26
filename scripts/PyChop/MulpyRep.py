@@ -255,6 +255,6 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
         if lines:
             for line in lines:
                 lines_all.append(line)
-    # ok, now we know the possible neutron velocities. we now ned their energies
+    # ok, now we know the possible neutron velocities. we now need their energies
     Ei = calcEnergy(lines_all, (dist[-1]+chop_samp))
     return Ei, chop_times, [chop_times[0][0], chop_times[-1][0]], dist[-1]-dist[0], lines_all

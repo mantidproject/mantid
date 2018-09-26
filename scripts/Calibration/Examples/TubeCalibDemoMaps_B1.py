@@ -22,7 +22,7 @@ ExpectedWidth = 8.0  # Expected width of Gaussian peaks in pixels  (initial valu
 ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
 # Expected positions of the edges and Gaussian peaks in pixels (initial values of fit parameters)
 
-# Set what we want to calibrate (e.g whole intrument or one door )
+# Set what we want to calibrate (e.g whole instrument or one door )
 CalibratedComponent = 'B1_window'  # Calibrate B1 window
 
 # Get calibration raw file and integrate it

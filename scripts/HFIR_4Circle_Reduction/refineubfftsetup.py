@@ -30,7 +30,7 @@ class RefineUBFFTSetupDialog(QtGui.QDialog):
         self.ui.lineEdit_maxD.setText('40.0')
         self.ui.lineEdit_tolerance.setText('0.15')
 
-        # connected to event hanlder
+        # connected to event handler
         self.connect(self.ui.buttonBox, QtCore.SIGNAL('accepted()'),
                      self.do_ok)
 

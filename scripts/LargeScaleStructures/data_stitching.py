@@ -271,7 +271,7 @@ class DataSet(object):
     def load(self, update_range=False, restricted_range=False):
         """
             Load a data set from file
-            @param upate_range: if True, the Q range of the data set will be udpated
+            @param upate_range: if True, the Q range of the data set will be updated
             @param restricted_range: if True, zeros at the beginning and end will be stripped
         """
         if os.path.isfile(self._file_path):

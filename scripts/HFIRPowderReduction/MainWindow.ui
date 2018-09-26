@@ -1154,7 +1154,7 @@
                 <item>
                  <widget class="QLabel" name="label_10">
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scan numbers that are excluded from merging beween 'from' and 'to'&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scan numbers that are excluded from merging between 'from' and 'to'&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="text">
                    <string>Excluded Scans</string>
