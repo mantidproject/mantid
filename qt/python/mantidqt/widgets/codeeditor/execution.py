@@ -116,8 +116,8 @@ class PythonCodeExecution(QObject):
 
         self.reset_context()
 
-        if startup_code:
-            self.execute(startup_code)
+        # the code is not executed initially so code completion won't work
+        # on variables until part is executed
 
     @property
     def globals_ns(self):
