@@ -116,6 +116,7 @@
 	src/LoadSpiceAscii.cpp
 	src/LoadSpiceXML2DDet.cpp
 	src/LoadSwans.cpp
+	src/LoadStl.cpp
 	src/LoadTBL.cpp
 	src/LoadTOFRawNexus.cpp
 	src/LoadVulcanCalFile.cpp
@@ -301,6 +302,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
 	inc/MantidDataHandling/LoadSpiceXML2DDet.h
+	inc/MantidDataHandling/LoadStl.h
 	inc/MantidDataHandling/LoadSwans.h
 	inc/MantidDataHandling/LoadTBL.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h

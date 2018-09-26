@@ -2,27 +2,22 @@
 #define MANTID_DATAHANDLING_LOADBINSTL_H_
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/BinaryStreamReader.h"
-#include <MantidKernel/V3D.h>
-
+#include "MantidKernel/V3D.h"
+#include "MantidDataHandling/LoadStl.h"
 namespace Mantid {
 namespace DataHandling {
 
-class DLLExport LoadBinStl {
+class DLLExport LoadBinStl :LoadStl{
 public:
-  LoadBinStl(std::string filename) : m_filename(filename) {}
-  std::unique_ptr<Geometry::MeshObject> readStl();
+  LoadBinStl(std::string filename) : LoadStl(filename) {}
+  std::unique_ptr<Geometry::MeshObject> readStl() override;
   bool isBinarySTL();
 
 private:
   uint32_t getNumberTriangles(Kernel::BinaryStreamReader);
   void readTriangle(Kernel::BinaryStreamReader);
-  std::string m_filename;
-
-  std::vector<uint16_t> m_triangle;
-  std::vector<Kernel::V3D> m_verticies;
 };
-uint16_t addSTLVertex(Kernel::V3D &vertex, std::vector<Kernel::V3D> &vertices);
-bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2);
+
 
 } // namespace DataHandling
 } // namespace Mantid
