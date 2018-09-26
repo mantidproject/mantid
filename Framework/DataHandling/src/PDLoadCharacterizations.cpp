@@ -344,8 +344,8 @@ int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
   // confirm that everything is the same length
   if (specIds.size() != l2.size() || specIds.size() != polar.size() ||
       specIds.size() != azi.size())
-    throw std::runtime_error(
-        "Found different number of spectra, L2 and polar angles");
+    throw Exception::FileError(
+        "Found different number of spectra, L2 and polar angles", filename);
 
   // set the values
   this->setProperty("SpectrumIDs", specIds);
@@ -483,7 +483,6 @@ int findRow(API::ITableWorkspace_sptr &wksp,
   // fall through behavior is -1
   return -1;
 }
-} // namespace
 
 void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
                const std::vector<std::string> &names,
@@ -497,6 +496,7 @@ void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
     wksp->getRef<std::string>(name, rowNum) = values[i + 6];
   }
 }
+} // namespace
 
 void PDLoadCharacterizations::readVersion1(const std::string &filename,
                                            API::ITableWorkspace_sptr &wksp) {
@@ -520,7 +520,8 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
     g_log.debug() << "Found version " << result[1] << "\n";
   } else {
     file.close();
-    throw std::runtime_error("file must have \"version=1\" as the first line");
+    throw Exception::ParseError(
+        "file must have \"version=1\" as the first line", filename, 0);
   }
 
   // store the names of the columns in order
@@ -547,7 +548,7 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
       }
     } else {
       if (columnNames.empty()) // should never happen
-        throw std::runtime_error("file missing column names");
+        throw Exception::FileError("file missing column names", filename);
 
       line = Strings::strip(line);
       Kernel::StringTokenizer tokenizer(
@@ -555,6 +556,13 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
       std::vector<std::string> valuesAsStr;
       for (const auto &token : tokenizer) {
         valuesAsStr.push_back(token);
+      }
+      if (valuesAsStr.size() < columnNames.size() + 6) {
+        std::stringstream msg;
+        msg << "Number of data columns (" << valuesAsStr.size()
+            << ") not compatible with number of column labels ("
+            << (columnNames.size() + 6) << ")";
+        throw Exception::ParseError(msg.str(), filename, linenum);
       }
 
       const int row = findRow(wksp, valuesAsStr);
