@@ -75,7 +75,8 @@ class D2B_LowCounts_ReductionTest(_DiffReductionTest):
 class D20_NoMask_ReductionTest(_DiffReductionTest):
 
     def runTest(self):
-        PowderDiffILLDetScanReduction(Run='967076', NormaliseTo='None', CropNegativeScatteringAngles=False, UseCalibratedData=False, InitialMask=0, OutputWorkspace='out')
+        PowderDiffILLDetScanReduction(Run='967076', NormaliseTo='None', CropNegativeScatteringAngles=False,
+                                      UseCalibratedData=False, InitialMask=0, OutputWorkspace='out')
 
     def validate(self):
         return ['out_1D', 'D20_NoMask.nxs']
