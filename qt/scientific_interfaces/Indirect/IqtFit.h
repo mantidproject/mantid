@@ -27,16 +27,6 @@ class DLLExport IqtFit : public IndirectFitAnalysisTab {
 public:
   IqtFit(QWidget *parent = nullptr);
 
-private:
-  void setupFitTab() override;
-
-protected:
-  bool shouldEnablePlotResult() override { return true; };
-
-  void setRunEnabled(bool enabled) override;
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
-
 protected slots:
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   void updatePlotOptions() override;
@@ -45,9 +35,24 @@ protected slots:
   void plotResult();
   void runClicked();
 
+protected:
+  bool shouldEnablePlotResult() override { return true; };
+
+  void setPlotResultEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
+
+  void setRunIsRunning(bool running) override;
+
 private:
   void setConstrainIntensitiesEnabled(bool enabled);
   std::string fitTypeString() const;
+
+  void setupFitTab() override;
+
+  void setRunEnabled(bool enabled);
+  void setFitSingleSpectrumEnabled(bool enabled);
+
+  void setPlotResultIsPlotting(bool plotting);
 
   IqtFitModel *m_iqtFittingModel;
   std::unique_ptr<Ui::IqtFit> m_uiForm;

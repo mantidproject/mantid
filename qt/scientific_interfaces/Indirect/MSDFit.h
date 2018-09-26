@@ -16,9 +16,6 @@ class DLLExport MSDFit : public IndirectFitAnalysisTab {
 public:
   MSDFit(QWidget *parent = nullptr);
 
-private:
-  void setupFitTab() override;
-
 protected slots:
   void plotClicked();
   void runClicked();
@@ -28,11 +25,19 @@ protected slots:
 protected:
   bool shouldEnablePlotResult() override;
 
-  void setRunEnabled(bool enabled) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 
+  void setRunIsRunning(bool running) override;
+
 private:
+  void setupFitTab() override;
+
+  void setRunEnabled(bool enabled);
+  void setFitSingleSpectrumEnabled(bool enabled);
+
+  void setPlotResultIsPlotting(bool plotting);
+
   MSDFitModel *m_msdFittingModel;
   std::unique_ptr<Ui::MSDFit> m_uiForm;
 };

@@ -117,15 +117,6 @@ void IqtFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
-void IqtFit::setPlotResultEnabled(bool enabled) {
-  m_uiForm->pbPlot->setEnabled(enabled);
-  m_uiForm->cbPlotType->setEnabled(enabled);
-}
-
-void IqtFit::setSaveResultEnabled(bool enabled) {
-  m_uiForm->pbSave->setEnabled(enabled);
-}
-
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   fitAlgorithm->setProperty("ExtractMembers",
                             boolSettingValue("ExtractMembers"));
@@ -133,13 +124,37 @@ void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
 }
 
 void IqtFit::plotResult() {
+  setPlotResultIsPlotting(true);
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
+  setPlotResultIsPlotting(false);
 }
 
 void IqtFit::setRunEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
   m_uiForm->pbRun->setEnabled(enabled);
-  m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
+}
+
+void IqtFit::setPlotResultEnabled(bool enabled) {
+  m_uiForm->pbPlot->setEnabled(enabled);
+  m_uiForm->cbPlotType->setEnabled(enabled);
+}
+
+void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
+}
+
+void IqtFit::setSaveResultEnabled(bool enabled) {
+  m_uiForm->pbSave->setEnabled(enabled);
+}
+
+void IqtFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setFitSingleSpectrumEnabled(!running);
+}
+
+void IqtFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setPlotResultEnabled(!plotting);
 }
 
 void IqtFit::runClicked() { runTab(); }

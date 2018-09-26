@@ -141,8 +141,11 @@ protected:
                       const QSet<QString> &options) const;
 
   virtual bool shouldEnablePlotResult() = 0;
+
   virtual void setPlotResultEnabled(bool enabled) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
+
+  virtual void setRunIsRunning(bool running) = 0;
 
 signals:
   void functionChanged();

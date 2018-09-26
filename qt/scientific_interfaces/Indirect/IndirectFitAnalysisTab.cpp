@@ -664,9 +664,9 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  * and completed within this interface.
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
-  setSaveResultEnabled(!error);
-  setRunEnabled(true);
+  setRunIsRunning(false);
   enablePlotResult(error);
+  setSaveResultEnabled(!error);
   updateParameterValues();
   m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
@@ -839,7 +839,7 @@ bool IndirectFitAnalysisTab::validate() {
  * Called when the 'Run' button is called in the IndirectTab.
  */
 void IndirectFitAnalysisTab::run() {
-  setRunEnabled(false);
+  setRunIsRunning(true);
   runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
 }
 

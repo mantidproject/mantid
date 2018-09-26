@@ -165,8 +165,14 @@
                </property>
                <property name="minimumSize">
                 <size>
-                 <width>120</width>
+                 <width>100</width>
                  <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
                 </size>
                </property>
                <item>
@@ -192,7 +198,7 @@
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Plot</string>
+                <string>Plot Result</string>
                </property>
               </widget>
              </item>
