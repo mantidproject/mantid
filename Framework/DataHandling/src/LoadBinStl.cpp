@@ -2,7 +2,6 @@
 #include <Poco/File.h>
 #include <fstream>
 
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -77,8 +76,6 @@ void LoadBinStl::readTriangle(Kernel::BinaryStreamReader streamReader) {
     m_triangle.push_back(addSTLVertex(vec));
   }
 }
-
-
 
 } // namespace DataHandling
 } // namespace Mantid

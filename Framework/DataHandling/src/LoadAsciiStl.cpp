@@ -6,17 +6,17 @@
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadAsciiStl::isAsciiSTL(){
+bool LoadAsciiStl::isAsciiSTL() {
   std::ifstream file(m_filename.c_str());
   std::string line;
   getline(file, line);
   boost::trim(line);
-  if (line.size() < 5 || line.substr(0, 5) != "solid"){ 
+  if (line.size() < 5 || line.substr(0, 5) != "solid") {
     return false;
-  } 
+  }
   return true;
 }
-std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl(){
+std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
   std::ifstream file(m_filename.c_str());
   std::string line;
   getline(file, line);
@@ -31,14 +31,15 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl(){
     }
   }
   // Use efficient constructor of MeshObject
-  std::unique_ptr<Geometry::MeshObject> retVal = std::unique_ptr<Geometry::MeshObject>(
-      new Geometry::MeshObject(std::move(m_triangle), std::move(m_verticies),
-                     Mantid::Kernel::Material()));
+  std::unique_ptr<Geometry::MeshObject> retVal =
+      std::unique_ptr<Geometry::MeshObject>(new Geometry::MeshObject(
+          std::move(m_triangle), std::move(m_verticies),
+          Mantid::Kernel::Material()));
   return retVal;
-
 }
 
-bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1, Kernel::V3D &v2, Kernel::V3D &v3){
+bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1,
+                                   Kernel::V3D &v2, Kernel::V3D &v3) {
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
     bool ok = (readSTLVertex(file, v1) && readSTLVertex(file, v2) &&
                readSTLVertex(file, v3));
@@ -90,5 +91,5 @@ bool LoadAsciiStl::readSTLLine(std::ifstream &file, std::string const &type) {
   }
 }
 
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

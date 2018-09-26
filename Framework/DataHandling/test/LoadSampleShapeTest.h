@@ -52,13 +52,10 @@ public:
     loadMeshObject(alg, true, "cube.stl");
   }
 
-
   void test_fail_invalid_stl_solid() {
     LoadSampleShape alg;
     loadFailureTest(alg, "invalid_solid.stl");
   }
-
-
 
   void test_off_cube() {
     LoadSampleShape alg;

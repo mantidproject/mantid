@@ -9,8 +9,7 @@ namespace DataHandling {
 class DLLExport LoadStl {
 public:
   LoadStl(std::string filename) : m_filename(filename) {}
-  virtual std::unique_ptr<Geometry::MeshObject> readStl()=0;
-
+  virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
 
 protected:
   uint16_t addSTLVertex(Kernel::V3D &vertex);
@@ -19,7 +18,6 @@ protected:
   std::vector<uint16_t> m_triangle;
   std::vector<Kernel::V3D> m_verticies;
 };
-
 
 } // namespace DataHandling
 } // namespace Mantid
