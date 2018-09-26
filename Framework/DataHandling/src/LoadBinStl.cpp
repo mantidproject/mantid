@@ -13,7 +13,7 @@ bool LoadBinStl::isBinarySTL() {
   // each triangle is 50 bytes
   const uint32_t SIZE_OF_TRIANGLE = 50;
   Poco::File stlFile = Poco::File(m_filename);
-  unsigned long fileSize = stlFile.getSize();
+  auto fileSize = stlFile.getSize();
   if (fileSize < 84) {
     // File is smaller than header plus number of triangles, cannot be binary
     // format stl
