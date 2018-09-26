@@ -121,12 +121,12 @@ detScale={13:1.046504,14:1.259293,16:1.02449,17:1.18898,18:0.88014,19:0.98665,\
 
 <!-- Fraction along (h,k,l) to use for profile fitting. 0.5 is the next peak. -->
 <parameter name="fracHKL">
- <value val="0.4" />
+ <value val="0.25" />
 </parameter>
 
 <!-- Side length of each voxel for fitting in units of angstrom^-1 -->
 <parameter name="dQPixel">
- <value val="0.01" />
+ <value val="0.006" />
 </parameter>
 
 <!-- Minimum spacing for profile fitting the TOF profile. Units of microseconds -->
@@ -141,7 +141,7 @@ detScale={13:1.046504,14:1.259293,16:1.02449,17:1.18898,18:0.88014,19:0.98665,\
 
 <!-- Size of peak mask for background calculation in units of dQPixel -->
 <parameter name="peakMaskSize" type="int">
- <value val="15" />
+ <value val="6" />
 </parameter>
 
 <!-- Initial guess parameters for coshPeakWidthModel -->
