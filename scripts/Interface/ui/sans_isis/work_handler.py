@@ -29,7 +29,7 @@ class WorkHandler(object):
 
     @pyqtSlot()
     def on_finished(self):
-        result = self._worker.result
+        result = self._worker.result if self._worker else None
         self._worker = None
         self._listener.on_processing_finished(result)
 
@@ -48,3 +48,6 @@ class WorkHandler(object):
         self._worker.signals.error.connect(self.on_error)
 
         QThreadPool.globalInstance().start(self._worker)
+
+    def wait_for_done(self):
+        QThreadPool.globalInstance().waitForDone()
