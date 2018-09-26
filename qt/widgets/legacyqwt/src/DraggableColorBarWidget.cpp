@@ -23,8 +23,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 /**
- * Constructor.
- * @param type The scale type, e.g. "Linear" or "Log10"
+ * Constructor giving a colorbar
+ * @param type An integer describing the scale type. Should
+ * match Mantid::ColorMap::ScaleType
  * @param parent A parent widget
  * @param minPositiveValue A minimum positive value for the Log10 scale
  */
@@ -207,7 +208,7 @@ QString DraggableColorBarWidget::getMaxValue() const {
 /**
  * returns the mnth powder as QString
  */
-QString DraggableColorBarWidget::getNth_power() const {
+QString DraggableColorBarWidget::getNthPower() const {
   return m_dspnN->text();
 }
 
@@ -341,7 +342,7 @@ void DraggableColorBarWidget::mouseReleaseEvent(QMouseEvent * /*e*/) {
 std::string DraggableColorBarWidget::saveToProject() const {
   API::TSVSerialiser tsv;
   tsv.writeLine("ScaleType") << getScaleType();
-  tsv.writeLine("Power") << getNth_power();
+  tsv.writeLine("Power") << getNthPower();
   tsv.writeLine("MinValue") << getMinValue();
   tsv.writeLine("MaxValue") << getMaxValue();
   return tsv.outputLines();

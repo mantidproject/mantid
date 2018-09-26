@@ -30,8 +30,6 @@
 #include "MantidQtWidgets/InstrumentView/BinDialog.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
-#include "MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h"
-
 #include <limits>
 
 namespace MantidQt {
@@ -230,7 +228,7 @@ QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
 
 void InstrumentWidgetRenderTab::setupColorMapWidget() {
   // Colormap widget
-  m_colorMapWidget = new DraggableColorBarWidget(0, this);
+  m_colorMapWidget = new ColorBar(0, this);
   connect(m_colorMapWidget, SIGNAL(scaleTypeChanged(int)), m_instrWidget,
           SLOT(changeScaleType(int)));
   connect(m_colorMapWidget, SIGNAL(nthPowerChanged(double)), m_instrWidget,

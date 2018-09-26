@@ -693,7 +693,8 @@ void InstrumentActor::loadSettings() {
   settings.beginGroup("Mantid/InstrumentWidget");
   m_scaleType = ColorMap::ScaleType(settings.value("ScaleType", 0).toInt());
   // Load Colormap. If the file is invalid the default stored colour map is used
-  m_currentCMap = settings.value("ColormapFile", "").toString();
+  m_currentCMap =
+      settings.value("ColormapFile", ColorMap::defaultColorMap()).toString();
   // Set values from settings
   m_showGuides = settings.value("ShowGuides", false).toBool();
   settings.endGroup();
