@@ -14,7 +14,7 @@ class IPeakFunction;
 
 /**
  * IFunctionWrapper is a wrapper for IFunction pointer which is a QObject
- * and can send and recieve signals.
+ * and can send and receive signals.
  */
 class IFunctionWrapper : public QObject {
   Q_OBJECT

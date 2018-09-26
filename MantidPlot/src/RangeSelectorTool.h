@@ -49,7 +49,7 @@ class QEvent;
  * active in parallel and possibly depending on each other should be generalized
  *somehow.
  *
- * In any case, gathering the code specific to range selection in a seperate
+ * In any case, gathering the code specific to range selection in a separate
  *class makes Graph/CanvasPicker
  * more manageable; maybe something similar can be done for zooming.
  */
@@ -88,7 +88,7 @@ public slots:
 signals:
   /** Emitted whenever a new message should be presented to the user.
    *
-   * You don't have to connect to this signal if you alreay specified a reciever
+   * You don't have to connect to this signal if you already specified a receiver
    *during initialization.
    */
   void statusText(const QString &);

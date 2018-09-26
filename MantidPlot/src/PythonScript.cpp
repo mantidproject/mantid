@@ -148,7 +148,7 @@ PyObject *PythonScript::createSipInstanceFromMe() {
 
 /**
  * @param code A lump of python code
- * @return True if the code forms a complete statment
+ * @return True if the code forms a complete statement
  */
 bool PythonScript::compilesToCompleteStatement(const QString &code) const {
   bool result(false);
@@ -263,7 +263,7 @@ void PythonScript::emit_error() {
     filename = TO_CSTRING(tb->tb_frame->f_code->co_filename);
   }
 
-  // the error message is the full (formated) traceback
+  // the error message is the full (formatted) traceback
   PyObject *str_repr = PyObject_Str(value);
   QString message;
   QTextStream msgStream(&message);

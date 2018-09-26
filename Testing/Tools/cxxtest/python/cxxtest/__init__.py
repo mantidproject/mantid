@@ -2,7 +2,7 @@
 
 .. _CxxTest: http://cxxtest.tigris.org/
 
-The _CxxTest testing framework is focussed on being a lightweight
+The _CxxTest testing framework is focused on being a lightweight
 framework that is well suited for integration into embedded systems
 development projects.
 

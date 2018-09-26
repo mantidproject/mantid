@@ -153,7 +153,7 @@ class SineLikeMuonExperimentAsymmetry(unittest.TestCase):
     rubbish results. This happens even with 0 noise.
 
     Initial values of w approximately <=5.25 or >=6.75 will make the minimizer fail.
-    This is very sensitive to inital conditions. The goodness of fit is highly non-convex on w.
+    This is very sensitive to initial conditions. The goodness of fit is highly non-convex on w.
     Any local minimizer should be very sensitive to the initial guess.
     """
     filename = 'sine_fitting_test_muon_asymmetry.txt'

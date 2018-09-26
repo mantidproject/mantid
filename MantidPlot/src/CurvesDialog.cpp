@@ -476,7 +476,7 @@ void CurvesDialog::enableAddBtn() {
                      !available->selectedItems().isEmpty());
 }
 
-/** Enables or disables the button when appopriate number of graphs are in graph
+/** Enables or disables the button when appropriate number of graphs are in graph
  *contents
  *
  */

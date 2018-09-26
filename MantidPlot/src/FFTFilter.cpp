@@ -157,7 +157,7 @@ void FFTFilter::calculateOutputData(double *x, double *y) {
     d_explanation += tr("Band Block FFT Filter");
 
     if (!d_offset)
-      y[0] = 0; // substract DC offset
+      y[0] = 0; // subtract DC offset
 
     for (int i = 1; i < d_n; i++)
       y[i] = ((i * df > d_low_freq) && (i * df < d_high_freq)) ? 0 : y[i];

@@ -72,7 +72,7 @@ private:
   //! Upper edge of the band for Band Pass and Band block filters.
   double d_high_freq;
 
-  //! Flag telling if the DC offset must be added/substracted when applying a
+  //! Flag telling if the DC offset must be added/subtracted when applying a
   // Band Pass/Band block filter respectively.
   bool d_offset;
 };
