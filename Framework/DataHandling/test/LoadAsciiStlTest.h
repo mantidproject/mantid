@@ -72,6 +72,14 @@ public:
     std::unique_ptr<LoadAsciiStl> Loader = std::make_unique<LoadAsciiStl>(path);
     TS_ASSERT(!(Loader->isAsciiSTL()));
   }
+  
+  //check that a file not starting with 'solid' is not considered an ascii.stl
+  void test_fail_invalid_solid() {
+    std::string path = FileFinder::Instance().getFullPath("invalid_solid.stl");
+    std::unique_ptr<LoadAsciiStl> Loader = std::make_unique<LoadAsciiStl>(path);
+    TS_ASSERT(!(Loader->isAsciiSTL()));
+  }
+  
 };
 
 #endif /* LOAD_ASCIISTL_TEST_H_ */
