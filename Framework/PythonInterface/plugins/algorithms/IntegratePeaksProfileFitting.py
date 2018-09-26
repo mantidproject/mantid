@@ -308,6 +308,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
             except:
                 #raise
+                logger.warning('Error fitting peak number ' + str(peakNumber))
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)
 
