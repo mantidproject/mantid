@@ -29,9 +29,9 @@ class WishMasking(stresstesting.MantidStressTest):
                 continue
 
     # Tests that the cal file is being created in the expected way.
-        #  1) Uses the masks to create a cal file
-        #  2) Read the cal file
-        #  3) Use the known masking boundaries to determine whether the cal file has been created propertly according to the function inputs.
+        # 1) Uses the masks to create a cal file
+        # 2) Read the cal file
+        # 3) Use the known masking boundaries to determine whether the cal file has been created propertly according to the function inputs.
         #pylint: disable=too-many-arguments
     def do_test_cal_file(self, masked_workspace, should_invert, expected_masking_identifier, expected_not_masking_identifier, masking_edge):
 
