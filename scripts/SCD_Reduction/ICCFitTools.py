@@ -999,7 +999,6 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                                                          pplmin_frac=minpplfrac, pplmax_frac=maxpplfrac,
                                                          constraintScheme=constraintScheme,
                                                          peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
-                # --IN PRINCIPLE!!! WE CALCULATE THIS BEFORE GETTING HERE
                 tofWS = mtd['__tofWS']
 
                 fitResults, fICC = doICCFit(

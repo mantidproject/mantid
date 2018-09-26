@@ -207,7 +207,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             peaksToFit = peaksToFit[runNumbers[peaksToFit]==sampleRun]
 
             # Initialize our strong peaks dictionary.  Set BVG Params to be None so that we fall back on
-            # instrument defaults until we have fit >=100 peaks.
+            # instrument defaults until we have fit >=30 peaks.
             strongPeakParams = np.empty([numPeaksCanFit, 9])
             sigX0Params, sigY0, sigP0Params = None, None, None
 

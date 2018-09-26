@@ -247,7 +247,6 @@ def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3):
     scaleLinear.constrain("A1>0")
     scaleX = YJOINT[goodIDX]
     scaleY = n_events[goodIDX]
-    # , dataE=np.sqrt(scaleY))
     CreateWorkspace(OutputWorkspace='__scaleWS', dataX=scaleX, dataY=scaleY)
     fitResultsScaling = Fit(Function=scaleLinear, InputWorkspace='__scaleWS',
                             Output='__scalefit', CostFunction='Unweighted least squares')
