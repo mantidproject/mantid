@@ -83,8 +83,8 @@ public:
                        int defaultInstrumentIndex,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
-
   ReflRunsTabPresenter(ReflRunsTabPresenter const &) = delete;
+  ~ReflRunsTabPresenter() override;
   ReflRunsTabPresenter const &operator=(ReflRunsTabPresenter const &) = delete;
 
   ReflRunsTabPresenter(ReflRunsTabPresenter &&) = default;
@@ -148,6 +148,8 @@ private:
   static const std::string MeasureTransferMethod;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
+  /// The name to use for the live data workspace
+  Mantid::API::IAlgorithm_sptr m_monitorAlg;
   double m_thetaTolerance;
 
   /// searching

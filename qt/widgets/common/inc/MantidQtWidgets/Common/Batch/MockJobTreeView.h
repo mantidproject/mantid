@@ -37,6 +37,7 @@ public:
 
   MOCK_METHOD1(removeRowAt, void(RowLocation const &));
   MOCK_METHOD1(removeRows, void(std::vector<RowLocation>));
+  MOCK_METHOD0(removeAllRows, void());
   MOCK_CONST_METHOD1(isOnlyChildOfRoot, bool(RowLocation const &));
 
   MOCK_METHOD2(replaceRows,
