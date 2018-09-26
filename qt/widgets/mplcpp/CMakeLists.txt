@@ -3,7 +3,7 @@ set ( LIB_SRCS
   src/Artist.cpp
   src/Axes.cpp
   src/Colors.cpp
-  src/Colorbar.cpp
+  src/ColorbarWidget.cpp
   src/Colormap.cpp
   src/Figure.cpp
   src/FigureCanvasQt.cpp
@@ -13,7 +13,7 @@ set ( LIB_SRCS
 )
 
 set ( MOC_HEADERS
-  inc/MantidQtWidgets/MplCpp/Colorbar.h
+  inc/MantidQtWidgets/MplCpp/ColorbarWidget.h
   inc/MantidQtWidgets/MplCpp/FigureCanvasQt.h
 )
 
