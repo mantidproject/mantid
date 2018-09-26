@@ -335,7 +335,7 @@ public:
   }
 
   void
-  test_that_the_spectra_of_two_datasets_are_combined_correctly_when_spectra_do_not_overlap() {
+  test_that_the_spectra_pair_of_two_datasets_are_combined_correctly_when_spectra_do_not_overlap() {
     auto data1 = getIndirectFitData(10, 3);
     auto data2 = getIndirectFitData(10, 3);
 
@@ -349,14 +349,85 @@ public:
   }
 
   void
-  test_that_the_spectra_of_two_datasets_with_discontinous_spectra_are_combined_correctly_when_spectra_do_not_overlap() {
+  test_that_the_spectra_pair_of_two_datasets_are_combined_correctly_when_spectra_are_discontinuous() {
     auto data1 = getIndirectFitData(10, 3);
     auto data2 = getIndirectFitData(10, 3);
 
-    data1.setSpectra(DiscontinuousSpectra<std::size_t>("1,4"));
-    data2.setSpectra(DiscontinuousSpectra<std::size_t>("5,9"));
+    data1.setSpectra(std::make_pair(0u, 4u));
+    data2.setSpectra(std::make_pair(8u, 9u));
     auto combinedData = data2.combine(data1);
-    Spectra spec(DiscontinuousSpectra<std::size_t>("5,9,1,4"));
+    Spectra spec(DiscontinuousSpectra<std::size_t>("0-4,8-9"));
+
+    TS_ASSERT(
+        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+  }
+
+  void
+  test_that_the_spectra_pair_of_two_datasets_are_combined_correctly_when_spectra_overlap() {
+    auto data1 = getIndirectFitData(10, 3);
+    auto data2 = getIndirectFitData(10, 3);
+
+    data1.setSpectra(std::make_pair(0u, 8u));
+    data2.setSpectra(std::make_pair(4u, 9u));
+    auto combinedData = data2.combine(data1);
+    // Spectra spec(std::make_pair(0u, 9u));
+    Spectra spec(DiscontinuousSpectra<std::size_t>("0-9"));
+
+    TS_ASSERT(
+        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+  }
+
+  void
+  test_that_the_DiscontinousSpectra_of_two_datasets_are_combined_correctly_when_spectra_do_not_overlap() {
+    auto data1 = getIndirectFitData(10, 3);
+    auto data2 = getIndirectFitData(10, 3);
+
+    data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-4"));
+    data2.setSpectra(DiscontinuousSpectra<std::size_t>("5-9"));
+    auto combinedData = data2.combine(data1);
+    Spectra spec(DiscontinuousSpectra<std::size_t>("0-9"));
+
+    TS_ASSERT(
+        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+  }
+
+  void
+  test_that_the_DiscontinousSpectra_of_two_datasets_are_combined_correctly_when_spectra_overlap() {
+    auto data1 = getIndirectFitData(10, 3);
+    auto data2 = getIndirectFitData(10, 3);
+
+    data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-7"));
+    data2.setSpectra(DiscontinuousSpectra<std::size_t>("2-9"));
+    auto combinedData = data2.combine(data1);
+    Spectra spec(DiscontinuousSpectra<std::size_t>("0-9"));
+
+    TS_ASSERT(
+        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+  }
+
+  void
+  test_that_a_SpectraPair_and_DiscontinousSpectra_dataset_are_combined_correctly_when_spectra_do_not_overlap() {
+    auto data1 = getIndirectFitData(10, 3);
+    auto data2 = getIndirectFitData(10, 3);
+
+    data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-4"));
+    data2.setSpectra(std::make_pair(5u, 9u));
+    auto combinedData = data2.combine(data1);
+    Spectra spec(DiscontinuousSpectra<std::size_t>("0-9"));
+
+    TS_ASSERT(
+        boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
+  }
+
+  void
+  test_that_a_SpectraPair_and_DiscontinousSpectra_dataset_are_combined_correctly_when_spectra_overlap() {
+    auto data1 = getIndirectFitData(10, 3);
+    auto data2 = getIndirectFitData(10, 3);
+
+    data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-7"));
+    data2.setSpectra(std::make_pair(4u, 9u));
+    auto combinedData = data2.combine(data1);
+    Spectra spec(DiscontinuousSpectra<std::size_t>("0-9"));
 
     TS_ASSERT(
         boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));

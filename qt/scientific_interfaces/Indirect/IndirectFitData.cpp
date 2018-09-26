@@ -1,5 +1,7 @@
 #include "IndirectFitData.h"
 
+#include "MantidKernel/Strings.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
@@ -9,6 +11,17 @@ using namespace Mantid::API;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
+using namespace Mantid::Kernel::Strings;
+
+std::vector<std::size_t>
+convertStringVectorToSizeT(std::vector<std::string> const &vec) {
+  std::vector<std::size_t> newVec;
+  newVec.reserve(vec.size());
+  for (auto element : vec)
+    if (!element.empty())
+      newVec.emplace_back(std::stoull(element));
+  return newVec;
+}
 
 std::string rangeToString(const std::pair<std::size_t, std::size_t> &range,
                           const std::string &delimiter = "-") {
@@ -90,6 +103,21 @@ private:
   const std::string m_rangeDelimiter;
 };
 
+std::string
+constructDiscontinuousSpectraString(std::vector<int> const &spectras) {
+  return joinCompress(spectras.begin(), spectras.end());
+}
+
+std::string createDiscontinuousSpectraString(std::string const &string) {
+  std::string spectraString = string;
+  std::remove_if(spectraString.begin(), spectraString.end(), isspace);
+  std::vector<int> spectras = parseRange(spectraString);
+  std::sort(spectras.begin(), spectras.end());
+  // Remove duplicate entries
+  spectras.erase(std::unique(spectras.begin(), spectras.end()), spectras.end());
+  return constructDiscontinuousSpectraString(spectras);
+}
+
 struct CombineSpectra : boost::static_visitor<Spectra> {
   Spectra
   operator()(const std::pair<std::size_t, std::size_t> &spectra1,
@@ -98,15 +126,16 @@ struct CombineSpectra : boost::static_visitor<Spectra> {
       return std::make_pair(spectra1.first, spectra2.second);
     else if (spectra2.second + 1 == spectra1.first)
       return std::make_pair(spectra2.first, spectra1.second);
-    else
-      return DiscontinuousSpectra<std::size_t>(rangeToString(spectra1) + "," +
-                                               rangeToString(spectra2));
+    else {
+      return DiscontinuousSpectra<std::size_t>(createDiscontinuousSpectraString(
+          rangeToString(spectra1) + "," + rangeToString(spectra2)));
+    }
   }
 
   Spectra operator()(const Spectra &spectra1, const Spectra &spectra2) const {
-    return DiscontinuousSpectra<std::size_t>(
+    return DiscontinuousSpectra<std::size_t>(createDiscontinuousSpectraString(
         boost::apply_visitor(SpectraToString(), spectra1) + "," +
-        boost::apply_visitor(SpectraToString(), spectra2));
+        boost::apply_visitor(SpectraToString(), spectra2)));
   }
 };
 
@@ -194,13 +223,19 @@ std::string orderExcludeRegionString(std::vector<double> &bounds) {
   return constructExcludeRegionString(bounds);
 }
 
-std::string arrangeExcludeRegionString(std::string const &excludeRegionString) {
-  auto boundStrings = splitStringBy(excludeRegionString, ", ");
-
+std::vector<double>
+getBoundsAsDoubleVector(std::vector<std::string> const &boundStrings) {
   std::vector<double> bounds;
+  bounds.reserve(boundStrings.size());
   for (auto bound : boundStrings)
-    if (!bound.empty())
-      bounds.emplace_back(convertBoundToDoubleAndFormat(bound));
+    bounds.emplace_back(convertBoundToDoubleAndFormat(bound));
+  return bounds;
+}
+
+std::string createExcludeRegionString(std::string const &string) {
+  std::string regionString = string;
+  std::remove_if(regionString.begin(), regionString.end(), isspace);
+  auto bounds = getBoundsAsDoubleVector(splitStringBy(regionString, ","));
   return orderExcludeRegionString(bounds);
 }
 
@@ -282,9 +317,10 @@ IndirectFitData::excludeRegionsVector(std::size_t spectrum) const {
   return vectorFromString<double>(getExcludeRegion(spectrum));
 }
 
-void IndirectFitData::setSpectra(const std::string &spectra) {
+void IndirectFitData::setSpectra(std::string const &spectra) {
   try {
-    const Spectra spec = DiscontinuousSpectra<std::size_t>(spectra);
+    const Spectra spec = DiscontinuousSpectra<std::size_t>(
+        createDiscontinuousSpectraString(spectra));
     setSpectra(spec);
   } catch (std::exception &ex) {
     throw std::runtime_error("Spectra too large for cast: " +
@@ -297,7 +333,7 @@ void IndirectFitData::setSpectra(Spectra &&spectra) {
   m_spectra = std::move(spectra);
 }
 
-void IndirectFitData::setSpectra(const Spectra &spectra) {
+void IndirectFitData::setSpectra(Spectra const &spectra) {
   validateSpectra(spectra);
   m_spectra = spectra;
 }
@@ -339,8 +375,7 @@ void IndirectFitData::setEndX(double const &endX, std::size_t const &spectrum) {
 void IndirectFitData::setExcludeRegionString(
     std::string const &excludeRegionString, std::size_t const &spectrum) {
   if (!excludeRegionString.empty())
-    m_excludeRegions[spectrum] =
-        arrangeExcludeRegionString(excludeRegionString);
+    m_excludeRegions[spectrum] = createExcludeRegionString(excludeRegionString);
   else
     m_excludeRegions[spectrum] = excludeRegionString;
 }

@@ -1,7 +1,7 @@
 #include "IndirectSpectrumSelectionPresenter.h"
 
 #include "MantidKernel/ArrayProperty.h"
-
+#include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <algorithm>
@@ -12,6 +12,7 @@
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
+using namespace Mantid::Kernel::Strings;
 
 struct SetViewSpectra : boost::static_visitor<> {
   explicit SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
@@ -35,6 +36,21 @@ std::string OR(const std::string &lhs, const std::string &rhs) {
 
 std::string NATURAL_NUMBER(std::size_t digits) {
   return OR("0", "[1-9][0-9]{," + std::to_string(digits - 1) + "}");
+}
+
+std::string
+constructDiscontinuousSpectraString(std::vector<int> const &spectras) {
+  return joinCompress(spectras.begin(), spectras.end());
+}
+
+std::string createDiscontinuousSpectraString(std::string const &string) {
+  std::string spectraString = string;
+  std::remove_if(spectraString.begin(), spectraString.end(), isspace);
+  std::vector<int> spectras = parseRange(spectraString);
+  std::sort(spectras.begin(), spectras.end());
+  // Remove duplicate entries
+  spectras.erase(std::unique(spectras.begin(), spectras.end()), spectras.end());
+  return constructDiscontinuousSpectraString(spectras);
 }
 
 namespace Regexes {
@@ -145,7 +161,8 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     const std::string &spectraList) {
-  setModelSpectra(DiscontinuousSpectra<std::size_t>(spectraList));
+  setModelSpectra(DiscontinuousSpectra<std::size_t>(
+      createDiscontinuousSpectraString(spectraList)));
   emit spectraChanged(m_activeIndex);
 }
 
