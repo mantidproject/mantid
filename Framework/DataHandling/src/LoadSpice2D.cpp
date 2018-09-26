@@ -44,8 +44,8 @@
 #include <utility>
 #include <vector>
 
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
 namespace Mantid {
@@ -170,8 +170,9 @@ void LoadSpice2D::exec() {
 
   setInputPropertiesAsMemberProperties();
   setTimes();
+  const std::vector<std::string> tags_to_ignore{"Detector", "DetectorWing"};
   std::map<std::string, std::string> metadata =
-      m_xmlHandler.get_metadata("Detector");
+      m_xmlHandler.get_metadata(tags_to_ignore);
 
   setSansSpiceXmlFormatVersion(metadata);
   setWavelength(metadata);
