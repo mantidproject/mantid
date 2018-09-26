@@ -70,7 +70,7 @@ class HRPDPowderDiffraction(stresstesting.MantidStressTest):
                            CylinderSampleRadius="0.4",AttenuationXSection="5.1",ScatteringXSection="5.08",
                            SampleNumberDensity="0.072",NumberOfSlices="10",NumberOfAnnuli="10",NumberOfWavelengthPoints="100")
         Divide(LHSWorkspace="Vanadium",RHSWorkspace="Transmission",OutputWorkspace="Vanadium")
-        #convert to dspacing and focus
+        #convert to dspacing and focuss
         ConvertUnits(InputWorkspace="Vanadium",OutputWorkspace="Vanadium",Target="dSpacing")
         DiffractionFocussing(InputWorkspace="Vanadium",OutputWorkspace="Vanadium",GroupingFileName="hrpd_new_072_01_corr.cal")
 
