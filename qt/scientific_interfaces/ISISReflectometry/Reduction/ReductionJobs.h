@@ -23,11 +23,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #include "../DllConfig.h"
-#include "../multivisitors.hpp"
 #include <boost/optional.hpp>
-// equivalent to
-//         #include <boost/variant/multivisitors.hpp>
-// available in boost 1.54+ - required for RHEL7.
 
 #include "Group.h"
 #include "WorkspaceNamesFactory.h"
