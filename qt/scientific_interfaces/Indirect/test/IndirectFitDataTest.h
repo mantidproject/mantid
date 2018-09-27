@@ -26,8 +26,8 @@ IndirectFitData getIndirectFitData(std::size_t const &numberOfSpectra,
 }
 
 /// Simple class to set up the ADS with the configuration required
-class SetUpADSWithWorkspace {
-public:
+struct SetUpADSWithWorkspace {
+
   SetUpADSWithWorkspace(std::string const &inputWSName,
                         IndirectFitData const &data) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, data.workspace());
@@ -38,6 +38,7 @@ public:
 
 /// This is used to compare Spectra which is implemented as a boost::variant
 struct AreSpectraEqual : public boost::static_visitor<bool> {
+
   template <typename T, typename U>
   bool operator()(const T &, const U &) const {
     return false; // cannot compare different types
@@ -129,7 +130,7 @@ public:
   void test_that_correct_spectrum_number_is_returned() {
     auto const data = getIndirectFitData(4, 3);
 
-    for (auto i = 0; i < data.numberOfSpectra(); ++i) {
+    for (auto i = 0u; i < data.numberOfSpectra(); ++i) {
       std::size_t const spectrumNum = data.getSpectrum(i);
       TS_ASSERT_EQUALS(spectrumNum, i);
     }

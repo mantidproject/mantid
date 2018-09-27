@@ -13,15 +13,6 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::Kernel::Strings;
 
-std::vector<std::size_t>
-convertStringVectorToSizeT(std::vector<std::string> const &vec) {
-  std::vector<std::size_t> newVec;
-  newVec.reserve(vec.size());
-  for (auto element : vec)
-    newVec.emplace_back(std::stoull(element));
-  return newVec;
-}
-
 std::string rangeToString(const std::pair<std::size_t, std::size_t> &range,
                           const std::string &delimiter = "-") {
   if (range.first != range.second)
