@@ -19,7 +19,7 @@ class LoadWidgetView(QtGui.QWidget):
         self.clear_button = QtGui.QPushButton(self)
         self.clear_button.setObjectName("clearButton")
         self.clear_button.setToolTip("Clear the currently loaded data")
-        self.clear_button.setText("Clear")
+        self.clear_button.setText("Clear All")
 
         self.multiple_loading_label = QtGui.QLabel(self)
         self.multiple_loading_label.setObjectName("multiple_loading_label")

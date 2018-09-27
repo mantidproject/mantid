@@ -6,9 +6,11 @@ from mantid.api import WorkspaceGroup
 from mantid.api import ITableWorkspace
 from mantid.simpleapi import mtd
 from mantid import api
+from mantid.kernel import ConfigServiceImpl
 import mantid.kernel as kernel
 import xml.etree.ElementTree as ET
 import Muon.GUI.Common.run_string_utils as run_string_utils
+import Muon.GUI.Common.muon_file_utils as file_utils
 
 from Muon.GUI.Common.muon_workspace import MuonWorkspace
 
@@ -102,6 +104,38 @@ class LoadUtils(object):
         return final_options
 
 
+def get_default_instrument():
+    default_instrument = ConfigServiceImpl.Instance().getInstrument().name()
+    if default_instrument not in file_utils.allowed_instruments:
+        default_instrument = "EMU"
+    return default_instrument
+
+
+def run_LoadInstrument(parameter_dict):
+    """
+    Apply the LoadInstrument algorithm with the properties supplied through
+    the input dictionary of {proeprty_name:property_value} pairs.
+    Returns the calculated value of alpha.
+    """
+    alg = mantid.AlgorithmManager.create("LoadInstrument")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    # alg.setProperty("Workspace", "__notUsed")
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("Workspace").value
+
+
+def __default_workspace():
+    default_instrument = get_default_instrument()
+    workspace = api.WorkspaceFactoryImpl.Instance().create("Workspace2D", 2, 10, 10)
+    workspace = run_LoadInstrument(
+        {"Workspace": workspace,
+         "RewriteSpectraMap": True,
+         "InstrumentName": default_instrument})
+    return MuonWorkspace(workspace)
+
+
 # Dictionary of (property name):(property value) pairs to put into Load algorithm
 # NOT including "OutputWorkspace" and "Filename"
 DEFAULT_INPUTS = {
@@ -115,7 +149,7 @@ DEFAULT_OUTPUTS = ["OutputWorkspace",
                    "FirstGoodData",
                    "MainFieldDirection"]
 # List of default values for the DEFAULT_OUTPUTS list
-DEFAULT_OUTPUT_VALUES = [MuonWorkspace(api.WorkspaceFactoryImpl.Instance().create("Workspace2D", 2, 10, 10)),
+DEFAULT_OUTPUT_VALUES = [__default_workspace(),
                          None,  # api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
                          api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
                          0.0,
@@ -154,10 +188,30 @@ def get_run_from_multi_period_data(workspace_list):
     else:
         return unique_runs[0]
 
-
 def load_dead_time_from_filename(filename):
-    # TODO : Implement
-    pass
+    """
+    From a neXus file, load the dead time ITableWorkspace from it and add to the ADS
+    with a name <Instrument><Run>_deadTimes , e.g. EMU0001234_deadTimes.
+
+    :param filename: The full path to the .nxs file.
+    :return: The name of the workspace in the ADS.
+    """
+    loaded_data, run, _ = load_workspace_from_filename(filename)
+
+    if is_workspace_group(loaded_data["OutputWorkspace"]):
+        dead_times = loaded_data["DataDeadTimeTable"][0]
+    else:
+        dead_times = loaded_data["DataDeadTimeTable"]
+
+    if dead_times is None:
+        return ""
+    assert isinstance(dead_times, ITableWorkspace)
+
+    instrument = loaded_data["OutputWorkspace"].workspace.getInstrument().getName()
+    name = str(instrument) + file_utils.format_run_for_file(run) + "_deadTimes"
+    api.AnalysisDataService.Instance().addOrReplace(name, dead_times)
+
+    return name
 
 
 def load_workspace_from_filename(filename,

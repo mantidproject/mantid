@@ -124,9 +124,21 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_dead_time_browse_clicked(self):
-        # TODO : Implement this functionality
-        self._view.show_file_browser_and_return_selection(
-            filter_for_extensions(['nxs']), [''], multiple_files=False)
+        """
+        User selects the option to Browse for a nexus file to load dead times from.
+        """
+        filename = self._view.show_file_browser_and_return_selection(
+            filter_for_extensions(['nxs']), [''], multiple_files=False)[0]
+        name = load_utils.load_dead_time_from_filename(filename)
+        if name == "":
+            self._view.warning_popup("File does not appear to contain dead time data.")
+            return
+
+        # switch the view to the "from table workspace" option
+        self._view.set_dead_time_selection(2)
+        is_set = self._view.set_dead_time_file_selection_text(name)
+        if not is_set:
+            self._view.warning_popup("Dead time table cannot be loaded")
 
     def handle_user_selects_dead_time_from_data(self):
         """

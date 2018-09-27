@@ -29,7 +29,7 @@ class MuonPair(object):
             self._workspace = new_workspace
         else:
             raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) +
-                             " but should be MuonWorkspace")
+                                 " but should be MuonWorkspace")
 
     @property
     def name(self):

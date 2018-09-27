@@ -32,19 +32,19 @@ class GroupingTabView(QtGui.QWidget):
         self.setup_description_layout()
 
         self.load_grouping_button = QtGui.QPushButton(self)
-        self.load_grouping_button.setText("Load Grouping")
+        self.load_grouping_button.setText("Load")
         self.load_grouping_button.setToolTip("Load a previously saved grouping (in XML format)")
 
         self.save_grouping_button = QtGui.QPushButton(self)
-        self.save_grouping_button.setText("Save Grouping")
+        self.save_grouping_button.setText("Save")
         self.save_grouping_button.setToolTip("Save the current state of the group/pair table to XML format")
 
         self.clear_grouping_button = QtGui.QPushButton(self)
-        self.clear_grouping_button.setText("Clear Grouping")
+        self.clear_grouping_button.setText("Clear")
         self.clear_grouping_button.setToolTip("Clear the grouping/pairing tables")
 
         self.default_grouping_button = QtGui.QPushButton(self)
-        self.default_grouping_button.setText("Default Grouping")
+        self.default_grouping_button.setText("Default")
         self.default_grouping_button.setToolTip("Restore the default grouping for the currently selected instrument.")
 
         self.horizontal_layout = QtGui.QHBoxLayout()

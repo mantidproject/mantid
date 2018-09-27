@@ -61,16 +61,39 @@ from Muon.GUI.Common.help_widget.help_widget_model import HelpWidgetModel
 from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidgetPresenter
 
+import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 muonGUI = None
+SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
+
+from mantid.kernel import ConfigServiceImpl
+
+
+def check_facility():
+    current_facility = ConfigServiceImpl.Instance().getFacility().name()
+    if current_facility not in SUPPORTED_FACILITIES:
+        raise AttributeError("Your facility {} is not supported by MuonAnalysis 2.0, so you"
+                             "will not be able to load any files. \n \n"
+                             "Supported facilities are :"
+                             + "\n - ".join(SUPPORTED_FACILITIES))
+
 
 
 class MuonAnalysis3Gui(QtGui.QMainWindow):
 
+    @staticmethod
+    def warning_popup(message):
+        message_box.warning(str(message))
+
     def __init__(self, parent=None):
         super(MuonAnalysis3Gui, self).__init__(parent)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+
+        try:
+            check_facility()
+        except AttributeError as error:
+            self.warning_popup(error.args[0])
 
         self.add_table_workspace()
 
@@ -78,8 +101,9 @@ class MuonAnalysis3Gui(QtGui.QMainWindow):
         self.data = self.context._loaded_data
 
         self.setup_load_widget()
+        self.load_widget.set_current_instrument(self.context.instrument)
         self.tabs = self.setup_tabs()
-        self.setup_help_widget() # self.help_widget = DummyLabelWidget("Help dummy", self)
+        self.setup_help_widget()  # self.help_widget = DummyLabelWidget("Help dummy", self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(self.load_widget_view)

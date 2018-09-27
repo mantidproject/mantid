@@ -35,13 +35,16 @@ class LoadWidgetPresenter(object):
         self.instrumentObserver = LoadWidgetPresenter.InstrumentObserver(self)
         self.loadNotifier = LoadWidgetPresenter.LoadNotifier(self)
 
+
     def set_load_run_widget(self, widget):
         self.load_run_widget = widget
         self.load_run_widget.enable_multiple_files(False)
+        self.load_run_widget.update_view_from_model([])
 
     def set_load_file_widget(self, widget):
         self.load_file_widget = widget
         self.load_file_widget.enable_multiple_files(False)
+        self.load_file_widget.update_view_from_model([])
 
     def handle_multiple_files_option_changed(self):
         if self._view.get_multiple_loading_state():
