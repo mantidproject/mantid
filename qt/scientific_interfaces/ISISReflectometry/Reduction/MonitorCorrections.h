@@ -12,6 +12,7 @@ public:
                      RangeInLambda backgroundRange,
                      RangeInLambda integralRange);
 
+  bool isValid() const;
   size_t monitorIndex() const;
   bool integrate() const;
   RangeInLambda backgroundRange() const;

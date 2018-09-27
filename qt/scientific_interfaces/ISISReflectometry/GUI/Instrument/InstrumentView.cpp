@@ -6,6 +6,24 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace {
+// TODO: these don't seem to work for spin boxes - is there another way to set
+// the backround colour?gg
+void showAsInvalid(QDoubleSpinBox &spinBox) {
+  auto palette = spinBox.palette();
+  palette.setColor(spinBox.backgroundRole(), QColor("#ffb8ad"));
+  spinBox.setAutoFillBackground(true);
+  spinBox.setPalette(palette);
+}
+
+void showAsValid(QDoubleSpinBox &spinBox) {
+  auto palette = spinBox.palette();
+  palette.setColor(spinBox.backgroundRole(), Qt::transparent);
+  spinBox.setAutoFillBackground(false);
+  spinBox.setPalette(palette);
+}
+} // namespace
+
 /** Constructor
  * @param parent :: [input] The parent of this widget
  */
@@ -175,6 +193,72 @@ QString InstrumentView::messageFor(
   return QString::fromStdString(missingNamesCsv) +
          QString(missingValues.size() == 1 ? " is" : " are") +
          " not set in the instrument parameter file but should be.\n";
+}
+
+int InstrumentView::getMonitorIndex() const {
+  return m_ui.I0MonitorIndex->value();
+}
+
+bool InstrumentView::getIntegrateMonitors() const {
+  return m_ui.intMonCheckBox->isChecked();
+}
+
+double InstrumentView::getLambdaMin() const { return m_ui.lamMinEdit->value(); }
+
+double InstrumentView::getLambdaMax() const { return m_ui.lamMaxEdit->value(); }
+
+void InstrumentView::showLambdaRangeInvalid() {
+  showAsInvalid(*m_ui.lamMinEdit);
+  showAsInvalid(*m_ui.lamMaxEdit);
+}
+
+void InstrumentView::showLambdaRangeValid() {
+  showAsValid(*m_ui.lamMinEdit);
+  showAsValid(*m_ui.lamMaxEdit);
+}
+
+double InstrumentView::getMonitorBackgroundMin() const {
+  return m_ui.monBgMinEdit->value();
+}
+
+double InstrumentView::getMonitorBackgroundMax() const {
+  return m_ui.monBgMaxEdit->value();
+}
+
+void InstrumentView::showMonitorBackgroundRangeInvalid() {
+  showAsInvalid(*m_ui.monBgMinEdit);
+  showAsInvalid(*m_ui.monBgMaxEdit);
+}
+
+void InstrumentView::showMonitorBackgroundRangeValid() {
+  showAsValid(*m_ui.monBgMinEdit);
+  showAsValid(*m_ui.monBgMaxEdit);
+}
+
+double InstrumentView::getMonitorIntegralMin() const {
+  return m_ui.monIntMinEdit->value();
+}
+
+double InstrumentView::getMonitorIntegralMax() const {
+  return m_ui.monIntMaxEdit->value();
+}
+
+void InstrumentView::showMonitorIntegralRangeInvalid() {
+  showAsInvalid(*m_ui.monIntMinEdit);
+  showAsInvalid(*m_ui.monIntMaxEdit);
+}
+
+void InstrumentView::showMonitorIntegralRangeValid() {
+  showAsValid(*m_ui.monIntMinEdit);
+  showAsValid(*m_ui.monIntMaxEdit);
+}
+
+bool InstrumentView::getCorrectDetectors() const {
+  return m_ui.correctDetectorsCheckBox->isChecked();
+}
+
+std::string InstrumentView::getDetectorCorrectionType() const {
+  return getText(*m_ui.detectorCorrectionTypeComboBox);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

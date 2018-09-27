@@ -43,6 +43,27 @@ public:
                  QWidget *parent = nullptr);
   void subscribe(InstrumentViewSubscriber *notifyee) override;
 
+  int getMonitorIndex() const override;
+  bool getIntegrateMonitors() const override;
+
+  double getLambdaMin() const override;
+  double getLambdaMax() const override;
+  void showLambdaRangeInvalid() override;
+  void showLambdaRangeValid() override;
+
+  double getMonitorBackgroundMin() const override;
+  double getMonitorBackgroundMax() const override;
+  void showMonitorBackgroundRangeInvalid() override;
+  void showMonitorBackgroundRangeValid() override;
+
+  double getMonitorIntegralMin() const override;
+  double getMonitorIntegralMax() const override;
+  void showMonitorIntegralRangeInvalid() override;
+  void showMonitorIntegralRangeValid() override;
+
+  bool getCorrectDetectors() const override;
+  std::string getDetectorCorrectionType() const override;
+
   void disableAll() override;
   void enableAll() override;
 

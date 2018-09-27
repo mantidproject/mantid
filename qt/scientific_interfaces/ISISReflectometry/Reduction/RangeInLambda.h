@@ -9,6 +9,7 @@ public:
   RangeInLambda(double min, double max);
   double min() const;
   double max() const;
+  bool isValid() const;
 
 private:
   double m_min, m_max;

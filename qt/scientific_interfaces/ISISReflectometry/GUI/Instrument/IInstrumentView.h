@@ -43,12 +43,33 @@ public:
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IInstrumentView {
 public:
+  virtual ~IInstrumentView() = default;
+
   virtual void subscribe(InstrumentViewSubscriber *notifyee) = 0;
+
+  virtual int getMonitorIndex() const = 0;
+  virtual bool getIntegrateMonitors() const = 0;
+
+  virtual double getLambdaMin() const = 0;
+  virtual double getLambdaMax() const = 0;
+  virtual void showLambdaRangeInvalid() = 0;
+  virtual void showLambdaRangeValid() = 0;
+
+  virtual double getMonitorBackgroundMin() const = 0;
+  virtual double getMonitorBackgroundMax() const = 0;
+  virtual void showMonitorBackgroundRangeInvalid() = 0;
+  virtual void showMonitorBackgroundRangeValid() = 0;
+
+  virtual double getMonitorIntegralMin() const = 0;
+  virtual double getMonitorIntegralMax() const = 0;
+  virtual void showMonitorIntegralRangeInvalid() = 0;
+  virtual void showMonitorIntegralRangeValid() = 0;
+
+  virtual bool getCorrectDetectors() const = 0;
+  virtual std::string getDetectorCorrectionType() const = 0;
 
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
-
-  virtual ~IInstrumentView() = default;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -2,6 +2,7 @@
 #define MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H
 
 #include "../../DllConfig.h"
+#include "../../Reduction/Instrument.h"
 #include "IInstrumentPresenter.h"
 #include "IInstrumentView.h"
 #include "IReflBatchPresenter.h"
@@ -45,6 +46,15 @@ public:
 
 private:
   IInstrumentView *m_view;
+  boost::optional<Instrument> m_model;
+
+  RangeInLambda wavelengthRangeFromView();
+  RangeInLambda monitorBackgroundRangeFromView();
+  RangeInLambda monitorIntegralRangeFromView();
+  MonitorCorrections monitorCorrectionsFromView();
+  DetectorCorrectionType detectorCorrectionTypeFromView();
+  DetectorCorrections detectorCorrectionsFromView();
+  void updateModelFromView();
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

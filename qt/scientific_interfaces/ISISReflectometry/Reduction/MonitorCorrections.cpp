@@ -8,6 +8,10 @@ MonitorCorrections::MonitorCorrections(size_t monitorIndex, bool integrate,
     : m_monitorIndex(monitorIndex), m_integrate(integrate),
       m_backgroundRange(backgroundRange), m_integralRange(integralRange) {}
 
+bool MonitorCorrections::isValid() const {
+  return m_backgroundRange.isValid() && m_integralRange.isValid();
+}
+
 size_t MonitorCorrections::monitorIndex() const { return m_monitorIndex; }
 
 bool MonitorCorrections::integrate() const { return m_integrate; }
