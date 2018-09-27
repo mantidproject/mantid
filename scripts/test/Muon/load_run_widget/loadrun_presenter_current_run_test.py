@@ -1,7 +1,7 @@
 import sys
-from Muon.GUI.MuonAnalysis.loadrun.load_run_model import LoadRunWidgetModel
-from Muon.GUI.MuonAnalysis.loadrun.load_run_view import LoadRunWidgetView
-from Muon.GUI.MuonAnalysis.loadrun.load_run_presenter import LoadRunWidgetPresenter
+from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
+from Muon.GUI.Common.load_run_widget.view import LoadRunWidgetView
+from Muon.GUI.Common.load_run_widget.presenter import LoadRunWidgetPresenter
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 import Muon.GUI.Common.muon_file_utils as fileUtils
