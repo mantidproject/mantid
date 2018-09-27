@@ -24,7 +24,7 @@ then
         # Copy "reference" results from master to keep numbers stable across builds
         REF_RESULTS=$WORKSPACE/master_pylint-logs.zip
         if [[ -f "$REF_RESULTS" ]] && [[ -d "$PYLINT_OUTPUT_DIR" ]]; then
-          echo "extracting refererence results from master build"
+          echo "extracting reference results from master build"
           cd $PYLINT_OUTPUT_DIR
           unzip $REF_RESULTS
         fi

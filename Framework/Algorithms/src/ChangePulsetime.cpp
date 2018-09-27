@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/ChangePulsetime.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"

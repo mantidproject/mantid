@@ -26,7 +26,7 @@ using HeldType = std::vector<std::vector<std::string>>;
  * @returns A string is there is only a single string in the Property's value,
  * and a list if there are multiple ones
  */
-boost::python::object valueAsPyObject(MultipleFileProperty &self) {
+boost::python::list valueAsPyObject(MultipleFileProperty &self) {
   const HeldType &propValue = self();
 
   // Build a list of lists to mimic the behaviour of MultipleFileProperty

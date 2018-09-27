@@ -100,7 +100,7 @@ class QECoverageGUI(QtGui.QWidget):
         self.direct_emin_label = QtGui.QLabel("Emin", self.direct_emin)
         self.direct_emin_grid.addWidget(self.direct_emin_label)
         self.direct_emin_input = QtGui.QLineEdit("-10", self.direct_emin)
-        self.direct_emin_input.setToolTip("Mininum energy transfer to plot down to.")
+        self.direct_emin_input.setToolTip("Minimum energy transfer to plot down to.")
         self.direct_emin_grid.addWidget(self.direct_emin_input)
         self.direct_grid.addWidget(self.direct_emin)
         self.direct_plotbtn = QtGui.QPushButton("Plot Q-E", self.tab_direct)

@@ -9,7 +9,7 @@ digraph ElasticWindow {
     ConvertAxis_Q2_Target [label="ElasticQSquared"]
   }
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     HaveBackgroundRange       [label="Have Background Range?"]
     VertAxisIsSpectraNumber   [label="Vertical Axis is Spectra Number?"]

@@ -1122,7 +1122,7 @@ void ApplicationWindow::initMainMenu() {
 
   newMenu = new QMenu(this);
   recentProjectsMenu = new QMenu(this);
-  recentFilesMenu = new QMenu(this);
+  recentFilesMenu = new MenuWithToolTips(this);
   newMenu->setObjectName("newMenu");
   exportPlotMenu = new QMenu(this);
   exportPlotMenu->setObjectName("exportPlotMenu");
@@ -3130,7 +3130,7 @@ Table *ApplicationWindow::newHiddenTable(const QString &name,
   return w;
 }
 
-/* Perfom initialization on a Table?
+/* Perform initialization on a Table?
  * @param w :: table that was created
  * @param caption :: title to set
  */
@@ -4404,7 +4404,7 @@ void ApplicationWindow::open() {
       QString pn = fi.absoluteFilePath();
       if (fn == pn) {
         QMessageBox::warning(
-            this, tr("MantidPlot - File openning error"), // Mantid
+            this, tr("MantidPlot - File opening error"), // Mantid
             tr("The file: <b>%1</b> is the current file!").arg(fn));
         return;
       }
@@ -4421,7 +4421,7 @@ void ApplicationWindow::open() {
         fn.endsWith(".mantid~", Qt::CaseInsensitive)) {
       if (!fi.exists()) {
         QMessageBox::critical(this,
-                              tr("MantidPlot - File openning error"), // Mantid
+                              tr("MantidPlot - File opening error"), // Mantid
                               tr("The file: <b>%1</b> doesn't exist!").arg(fn));
         return;
       }
@@ -4440,7 +4440,7 @@ void ApplicationWindow::open() {
       }
     } else {
       QMessageBox::critical(
-          this, tr("MantidPlot - File openning error"), // Mantid
+          this, tr("MantidPlot - File opening error"), // Mantid
           tr("The file: <b>%1</b> is not a MantidPlot or Origin project file!")
               .arg(fn));
       return;
@@ -5276,7 +5276,7 @@ void ApplicationWindow::readSettings() {
     settings.endGroup();
   }
 
-  // Mantid - Remember which interfaces the user explicitely removed
+  // Mantid - Remember which interfaces the user explicitly removed
   // from the Interfaces menu
   removed_interfaces = settings.value("RemovedInterfaces").toStringList();
 
@@ -5652,7 +5652,7 @@ void ApplicationWindow::saveSettings() {
     settings.endGroup();
   }
 
-  // Mantid - Remember which interfaces the user explicitely removed
+  // Mantid - Remember which interfaces the user explicitly removed
   // from the Interfaces menu
   settings.setValue("RemovedInterfaces", removed_interfaces);
 
@@ -9187,7 +9187,7 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
  * @param window :: the window to add
  */
 void ApplicationWindow::addSerialisableWindow(QObject *window) {
-  // Here we must store the window as a QObject to avoid multiple inheritence
+  // Here we must store the window as a QObject to avoid multiple inheritance
   // issues with Qt and the IProjectSerialisable class as well as being able
   // to respond to the destroyed signal
   // We can still check here that the window conforms to the interface and
@@ -9196,8 +9196,8 @@ void ApplicationWindow::addSerialisableWindow(QObject *window) {
     return;
 
   m_serialisableWindows.push_back(window);
-  // Note that destoryed is emitted directly before the QObject itself
-  // is destoryed. This means the destructor of the specific window type
+  // Note that destroyed is emitted directly before the QObject itself
+  // is destroyed. This means the destructor of the specific window type
   // will have already been called.
   connect(window, SIGNAL(destroyed(QObject *)), this,
           SLOT(removeSerialisableWindow(QObject *)));
@@ -11583,7 +11583,7 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   }
 }
 
-/** Fixes the colour pallete so that the hints are readable.
+/** Fixes the colour palette so that the hints are readable.
 
   On Linux Fedora 26+ and Ubuntu 14.4+ the palette colour for
   ToolTipBase has no effect on the colour of tooltips, but does change
@@ -11591,7 +11591,7 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   colour for ToolTipText on the other hand affects all three of
   these.
 
-  The default pallete shows light text on a pale background which, although
+  The default palette shows light text on a pale background which, although
   not affecting tooltips, makes LineEdit hints and 'What's This' boxes
   difficuilt if not impossible to read.
 
@@ -13703,42 +13703,25 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
     recentFiles.removeAll(fname);
     recentFiles.push_front(fname);
   }
-  while ((int)recentFiles.size() > MaxRecentFiles)
+  while ((int)recentFiles.size() > MaxRecentFiles) {
     recentFiles.pop_back();
+  }
 
   recentFilesMenu->clear();
-  int menuCount = 1;
+  const QString itemTemplate("&%1 %2");
+  const int maxItemLength(50);
   for (int i = 0; i < (int)recentFiles.size(); i++) {
-    std::ostringstream ostr;
-    try {
-      Mantid::API::MultipleFileProperty mfp("tester");
-      mfp.setValue(recentFiles[i].toStdString());
-      const std::vector<std::string> files =
-          Mantid::Kernel::VectorHelper::flattenVector(mfp());
-      if (files.size() == 1) {
-        ostr << "&" << menuCount << " " << files[0];
-      } else if (files.size() > 1) {
-        ostr << "&" << menuCount << " " << files[0] << " && "
-             << files.size() - 1 << " more";
-      } else {
-        // mfp.setValue strips out any filenames that cannot be resolved.
-        // So if your recent file history contains a file that you have
-        // since deleted or renamed, files will be empty so do not
-        // register this entry and go on to the next one
-        continue;
-      }
-    } catch (Poco::PathSyntaxException &) {
-      // mfp could not find the file
-      continue;
-    } catch (std::exception &) {
-      // The file property could not parse the string, use as is
-      ostr << "&" << menuCount << " " << recentFiles[i].toStdString();
+    QString filePath = recentFiles[i];
+    // elide the text if it is over the allowed limit
+    QString itemText = filePath;
+    if (filePath.size() > maxItemLength) {
+      itemText = "..." + filePath.right(maxItemLength);
     }
-    QString actionText = QString::fromStdString(ostr.str());
-    QAction *ma = new QAction(actionText, nullptr);
+    QString actionText = itemTemplate.arg(QString::number(i + 1), itemText);
+    QAction *ma = new QAction(actionText, recentFilesMenu);
+    ma->setToolTip("<p>" + filePath + "</p>");
     ma->setData(recentFiles[i]);
     recentFilesMenu->addAction(ma);
-    menuCount++;
   }
 }
 
@@ -13867,7 +13850,7 @@ void ApplicationWindow::showBugTracker() {
 
 /*
 @param arg: command argument
-@return TRUE if argument suggests execution and quiting
+@return TRUE if argument suggests execution and quitting
 */
 bool ApplicationWindow::shouldExecuteAndQuit(const QString &arg) {
   return arg.endsWith("--execandquit") || arg.endsWith("-xq");
@@ -15960,7 +15943,7 @@ void ApplicationWindow::tileMdiWindows() {
   shakeViewport();
   // QMdiArea::tileSubWindows() aranges the windows and enables automatic
   // tiling after subsequent resizing of the mdi area until a window is moved
-  // or resized separatly. Unfortunately Graph behaves badly during this. The
+  // or resized separately. Unfortunately Graph behaves badly during this. The
   // following code disables automatic tiling.
   auto winList = d_workspace->subWindowList();
   if (!winList.isEmpty()) {
@@ -16042,8 +16025,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer *w) {
     btnPointer->setChecked(true);
 }
 /**  save workspace data in nexus format
- *   @param wsName :: name of the ouput file.
- *   @param fileName :: name of the ouput file.
+ *   @param wsName :: name of the output file.
+ *   @param fileName :: name of the output file.
  */
 void ApplicationWindow::savedatainNexusFormat(const std::string &wsName,
                                               const std::string &fileName) {
@@ -16311,7 +16294,7 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const {
     // Get window which was added last
     FloatingWindow *lastWindow = m_floatingWindows.last();
 
-    if (lastWindow->isVisible()) { // If it is still visibile - can't use it's
+    if (lastWindow->isVisible()) { // If it is still visible - can't use it's
                                    // location, so need to find a new one
 
       QPoint diff = lastWindow->pos() - lastPoint;
@@ -16855,4 +16838,8 @@ void ApplicationWindow::checkForProjectRecovery() {
     m_projectRecovery.clearAllCheckpoints();
     m_projectRecovery.startProjectSaving();
   }
+}
+
+void ApplicationWindow::saveRecoveryCheckpoint() {
+  m_projectRecovery.saveAll(false);
 }

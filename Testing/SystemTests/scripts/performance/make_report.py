@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--path', dest='path', 
                         default="./Report",
-                        help='Path to the ouput HTML. Default "./Report".' )
+                        help='Path to the output HTML. Default "./Report".' )
 
     parser.add_argument('--x_field', dest='x_field', 
                         default="revision",

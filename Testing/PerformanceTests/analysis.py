@@ -1,5 +1,5 @@
 """ Module containing functions for test
-performance analyis, plotting, and saving
+performance analysis, plotting, and saving
 to other formats (CSV, PDF) """
 
 import testresult

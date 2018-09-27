@@ -30,7 +30,7 @@ create the necessary workspaces.
 .. testcode:: ExInstrumentBase
 
     # Grouping, offsets and masking workspaces are all made by default.
-    # WorkspaceName parameter is required inspite of docs not saying so.
+    # WorkspaceName parameter is required in spite of docs not saying so.
     ws = LoadCalFile(InstrumentName="GEM", CalFilename="offsets_2006_cycle064.cal",
                      WorkspaceName="ws")
     print("Total number of workspaces = {}".format(len(ws)))

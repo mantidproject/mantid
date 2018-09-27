@@ -124,7 +124,7 @@ Setup : ADARA Fake Event
 #. Instrument: ADARA_FakeEvent
 #. Start Time: now
 #. Update Every: 1 second
-#. Processing: Algorthim
+#. Processing: Algorithm
 
    #. Within the Processing step tab select the **Rebin** algorthm
    #. In the algorithm properties set **Params** to 40e3,1000,60e3
@@ -150,7 +150,7 @@ Setup : ADARA Fake Event
 #. Processing: Algorithm
 
    #. Within the Processing step tab select the **Rebin** algorthm
-   #. In the algorthim properties set **Params** to 40e3,500,60e3
+   #. In the algorithm properties set **Params** to 40e3,500,60e3
 
 #. PreserveEvents: Not Ticked
 #. Accumulation Method: Add

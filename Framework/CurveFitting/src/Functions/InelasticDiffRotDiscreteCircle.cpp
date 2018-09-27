@@ -41,9 +41,8 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
                          "energy in mili-eV");
   this->declareParameter("Shift", 0.0, "Shift in the centre of the peak");
 
-  this->declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
-  this->declareAttribute("WorkspaceIndex", API::IFunction::Attribute(0));
   this->declareAttribute("N", API::IFunction::Attribute(3));
+  declareAttributes();
 }
 
 /**

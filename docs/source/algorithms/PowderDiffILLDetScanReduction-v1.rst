@@ -24,11 +24,12 @@ Calibration
 -----------
 
 The NeXus files for D2B contain raw data and pre-calibrated data. Either of these can be used when loading.
+Note that, when reading the calibrated data, the even-numbered tubes will not be flipped, since they are flipped in the nexus files already.
 
 Normalisation Options
 ---------------------
 
-The default is for normalisation to monitor, but this can be skipped.
+The default is for normalisation to monitor, in which case the counts will be scaled up by 10ˆ6 after dividing by monitor counts.
 
 Output
 ------

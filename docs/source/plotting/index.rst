@@ -16,7 +16,7 @@ There are several advantages of using this software package:
 
 While Matplotlib is using data arrays for inputs in the plotting routines,
 it is now possible to also use several types on Mantid workspaces instead.
-For a detailed list of functions that use workspaces, see the documentaion
+For a detailed list of functions that use workspaces, see the documentation
 of the :ref:`mantid.plots <mantid.plots>` module. 
 
 This page is intended to provide examples about how to use different

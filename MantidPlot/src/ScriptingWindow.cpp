@@ -183,7 +183,7 @@ void ScriptingWindow::showEvent(QShowEvent *event) {
 }
 
 /**
- * Open a script directly. This is here for backwards compatability with the old
+ * Open a script directly. This is here for backwards compatibility with the old
  * ScriptWindow
  * class
  * @param filename :: The file name

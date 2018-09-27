@@ -65,7 +65,7 @@ Here is an example of fitting a 2D histogram:
     # Now we declare our function - we create one separately
     # so that later we have access to functions which are not 
     # accessible to Function1D (e.g. 2D and 3D versions of the
-    # function.  The paramters we set here are an initial guess.
+    # function.  The parameters we set here are an initial guess.
     bvg = BVG.BivariateGaussian()
     bvg.init()
     bvg['A'] = 1.

@@ -252,7 +252,7 @@ public slots:
 
   //! Return the matrix formula
   QString formula() { return formula_str; };
-  //! Set the matrix forumla
+  //! Set the matrix formula
   void setFormula(const QString &s) { formula_str = s; };
 
   //! Load the matrix from a string list (i.e. lines from a project file)
@@ -284,7 +284,7 @@ public slots:
 
   //! Insert a column before the current cell
   void insertColumn();
-  //! Delte the selected columns
+  //! Delete the selected columns
   void deleteSelectedColumns();
   //! Return the number of selected columns
   int numSelectedColumns();

@@ -68,7 +68,7 @@ class IdealTube(object):
        :param activeTubeLen: Active tube length in metres
 
        """
-       #Contruct Ideal tube for 3 point calibration of MERLIN standard tube (code could be put into a function)
+       #Construct Ideal tube for 3 point calibration of MERLIN standard tube (code could be put into a function)
         pixelLen = activeTubeLen/1024  # Pixel length
 
        # we then convert idealAP, idealCP and idealBP to Y coordinates and put into ideal tube array
@@ -78,12 +78,12 @@ class IdealTube(object):
 
     def getArray( self ):
         """
-       Reurn the array of of points where the peaks should be in Metres
+       Return the array of of points where the peaks should be in Metres
        """
         return self.positions
 
     def getFunctionalForms( self ):
         """
-       Reurn the array of of points where the peaks should be in Metres
+       Return the array of of points where the peaks should be in Metres
        """
         return self.functionalForms

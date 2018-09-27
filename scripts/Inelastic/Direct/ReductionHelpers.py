@@ -399,7 +399,7 @@ def parse_run_file_name(run_string):
 
 
 def process_prop_list(workspace,logName="CombinedSpectraIDList"):
-    """Method process log, which discribes list of spectra, attached to
+    """Method process log, which describes list of spectra, attached to
        the workspace
     """
     if workspace.run().hasProperty(logName):
