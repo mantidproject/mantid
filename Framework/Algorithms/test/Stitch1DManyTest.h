@@ -1048,7 +1048,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("UseManualScaleFactors", "1"));
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("ScaleFactorFromPeriod", 2));
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("OutputWorkspace", "outws"));
-    TS_ASSERT_THROWS_NOTHING(alg0.execute());
+    TS_ASSERT_THROWS(alg0.execute(), std::runtime_error);
     TS_ASSERT(!alg0.isExecuted());
 
     Stitch1DMany alg;
@@ -1064,7 +1064,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactorFromPeriod", 1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT(alg.isExecuted());
 
     // By keeping ManualScaleFactors empty (default value) it allows workspaces
     // in other periods to be scaled by scale factors from a specific period.
@@ -1082,33 +1082,31 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
     // First spectrum, Y values
-    TS_ASSERT_DELTA(stitched->y(0)[0], 1., 0.00001);
-    TS_ASSERT_DELTA(stitched->y(0)[9], 1.01589, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(0)[16], 0.97288, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(0)[24], 0.9375, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[0], 0.99999, 1.e-5);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 0.99999, 1.e-5);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 0.74860, 1.e-5);
+    TS_ASSERT_DELTA(stitched->y(0)[24], 0.66666, 1.e-5);
     // Second spectrum, Y values
-    TS_ASSERT_DELTA(stitched->y(1)[0], 2., 0.00001);
-    TS_ASSERT_DELTA(stitched->y(1)[9], 1.98375, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(1)[16], 1.70307, 0.00001);
-    TS_ASSERT_DELTA(stitched->y(1)[24], 1.56250, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2., 1.e-5);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 1.95132, 1.e-5);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 1.28787, 1.e-5);
+    TS_ASSERT_DELTA(stitched->y(1)[24], 1.11111, 1.e-5);
     // First spectrum, E values
-    TS_ASSERT_DELTA(stitched->e(0)[0], 1, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(0)[9], 0.70111, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(0)[16], 0.60401, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(0)[24], 0.76547, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1., 1.e-5);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.69006, 1.e-5);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.47271, 1.e-5);
+    TS_ASSERT_DELTA(stitched->e(0)[24], 0.54433, 1.e-5);
     // Second spectrum, E values
-    TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(1)[9], 0.97973, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(1)[16], 0.79916, 0.00001);
-    TS_ASSERT_DELTA(stitched->e(1)[24], 0.98821, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.414213, 1.e-5);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 0.963952, 1.e-5);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 0.62003, 1.e-5);
+    TS_ASSERT_DELTA(stitched->e(1)[24], 0.702728, 1.e-5);
 
     // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
-    TS_ASSERT_EQUALS(scales.size(), 4);
-    TS_ASSERT_DELTA(scales[0], 0.9375, 0.0001);
-    TS_ASSERT_DELTA(scales[1], 0.6249, 0.0001);
-    TS_ASSERT_DELTA(scales[2], 0.9375, 0.0001);
-    TS_ASSERT_DELTA(scales[3], 0.6249, 0.0001);
+    TS_ASSERT_EQUALS(scales.size(), 2);
+    TS_ASSERT_DELTA(scales[0], 0.90909, 1.e-5);
+    TS_ASSERT_DELTA(scales[1], 0.44444, 1.e-5);
 
     // Clear the ADS
     AnalysisDataService::Instance().clear();
@@ -1185,7 +1183,7 @@ public:
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
-    TS_ASSERT_EQUALS(histNames.size(), 8)
+    TS_ASSERT_EQUALS(histNames.size(), 7)
     TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[2], "GroupWorkspaces");
@@ -1193,7 +1191,6 @@ public:
     TS_ASSERT_EQUALS(histNames[4], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[5], "GroupWorkspaces");
     TS_ASSERT_EQUALS(histNames[6], "Stitch1DMany");
-    TS_ASSERT_EQUALS(histNames[7], "Stitch1DMany");
 
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();

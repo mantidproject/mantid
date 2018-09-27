@@ -92,9 +92,6 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   std::map<std::string, std::string> issues;
   const std::vector<std::string> inputWorkspacesStr =
       this->getProperty("InputWorkspaces");
-  int scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
-  // Period -1 corresponds to workspace index
-  m_scaleFactorFromPeriod = static_cast<size_t>(--scaleFactorFromPeriod);
   if (inputWorkspacesStr.size() < 2)
     issues["InputWorkspaces"] = "Nothing to stitch";
   else {
@@ -168,6 +165,9 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
             }
           }
         }
+        int scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
+        // Period -1 corresponds to workspace index
+        m_scaleFactorFromPeriod = static_cast<size_t>(--scaleFactorFromPeriod);
         if (m_scaleFactorFromPeriod >= m_inputWSMatrix.front().size()) {
           std::stringstream expectedRange;
           expectedRange << m_inputWSMatrix.front().size() + 1;
@@ -232,10 +232,8 @@ void Stitch1DMany::exec() {
 
     // Determine whether or not we are scaling workspaces using scale
     // factors from a specific period
-    Property *manualSF = this->getProperty("ManualScaleFactors");
-    bool usingScaleFromPeriod = m_useManualScaleFactors &&
-                                manualSF->isDefault() &&
-                                m_scaleFactorFromPeriod;
+    const bool usingScaleFromPeriod =
+        m_useManualScaleFactors && isDefault("ManualScaleFactors");
 
     if (!usingScaleFromPeriod) {
       for (size_t i = 0; i < m_inputWSMatrix.front().size(); ++i) {
@@ -255,9 +253,10 @@ void Stitch1DMany::exec() {
       // Obtain scale factors for the specified period
       std::string tempOutName;
       std::vector<double> periodScaleFactors;
+      constexpr bool storeInADS = false;
 
       doStitch1DMany(m_scaleFactorFromPeriod, false, tempOutName,
-                     periodScaleFactors);
+                     periodScaleFactors, storeInADS);
 
       // Iterate over each period
       for (size_t i = 0; i < m_inputWSMatrix.front().size(); ++i) {
@@ -267,9 +266,7 @@ void Stitch1DMany::exec() {
 
         outName = groupName;
         Workspace_sptr outStitchedWS;
-
         doStitch1D(inMatrix, periodScaleFactors, outStitchedWS, outName);
-
         // Add name of stitched workspaces to group list and ADS
         toGroup.emplace_back(outName);
         AnalysisDataService::Instance().addOrReplace(outName, outStitchedWS);
@@ -350,11 +347,13 @@ void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
  * factors
  * @param outName :: Output stitched workspace name
  * @param outScaleFactors :: Actual values used for scale factors
+ * @param storeInADS :: Whether to store in ADS or not
  */
 void Stitch1DMany::doStitch1DMany(const size_t period,
                                   const bool useManualScaleFactors,
                                   std::string &outName,
-                                  std::vector<double> &outScaleFactors) {
+                                  std::vector<double> &outScaleFactors,
+                                  const bool storeInADS) {
 
   // List of workspaces to stitch
   std::vector<std::string> toProcess;
@@ -367,7 +366,7 @@ void Stitch1DMany::doStitch1DMany(const size_t period,
 
   IAlgorithm_sptr alg = createChildAlgorithm("Stitch1DMany");
   alg->initialize();
-  alg->setChild(false);
+  alg->setAlwaysStoreInADS(storeInADS);
   alg->setProperty("InputWorkspaces", toProcess);
   if (!outName.empty())
     alg->setProperty("OutputWorkspace", outName);
