@@ -411,7 +411,7 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   m_uiForm.ckSaveSPE->setEnabled(true);
 }
 
-std::size_t ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
+int ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
   for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
     if (m_uiForm.cbGroupingOptions->itemText(i) == option)
       return i;

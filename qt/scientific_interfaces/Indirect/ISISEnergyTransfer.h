@@ -52,7 +52,7 @@ private slots:
   void algorithmComplete(bool error);
 
   void setCurrentGroupingOption(QString const &option);
-  std::size_t getGroupingOptionIndex(QString const &option);
+  int getGroupingOptionIndex(QString const &option);
   bool isOptionHidden(QString const &option);
   void removeGroupingOption(QString const &option);
   void includeExtraGroupingOption(bool includeOption, QString const &option);
