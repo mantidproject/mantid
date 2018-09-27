@@ -593,8 +593,17 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
                                "scientist!");
     }
   } else {
-    double wavelengthRes =
-        entry.getFloat(instrumentNamePath + "/selector/wavelength_res");
+    double wavelengthRes = 10.;
+    const std::string entryResolution = instrumentNamePath + "/selector/";
+    try {
+      wavelengthRes = entry.getFloat(entryResolution + "wavelength_res");
+    } catch (std::runtime_error) {
+      try {
+        wavelengthRes = entry.getFloat(entryResolution + "wave_length_res");
+      } catch (std::runtime_error) {
+        g_log.warning("Could not find wavelength resolution, assuming 10%");
+      }
+    }
     runDetails.addProperty<double>("wavelength", wavelength);
     double ei = m_loader.calculateEnergy(wavelength);
     runDetails.addProperty<double>("Ei", ei, true);
