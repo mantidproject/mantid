@@ -66,6 +66,7 @@ set ( TEST_PY_FILES
   LoadNMoldyn4AsciiTest.py
   LoadWANDSCDTest.py
   LRPeakSelectionTest.py
+  MatchSpectraTest.py
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
