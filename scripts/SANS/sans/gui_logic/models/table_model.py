@@ -216,14 +216,6 @@ class TableIndexModel(object):
         self.tool_tip = ''
         self.file_information = None
 
-    @property
-    def sample_scatter(self):
-        return self._sample_scatter
-
-    @sample_scatter.setter
-    def sample_scatter(self, value):
-        self._sample_scatter = value
-
     # Options column entries
     @property
     def options_column_model(self):

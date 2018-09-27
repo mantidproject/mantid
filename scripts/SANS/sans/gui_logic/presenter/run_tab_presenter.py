@@ -30,8 +30,6 @@ from sans.gui_logic.models.diagnostics_page_model import run_integral, create_st
 from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
 from ui.sans_isis.work_handler import WorkHandler
-from sans.common.file_information import SANSFileInformationFactory
-from sans.gui_logic.presenter.create_file_information import create_file_information
 
 try:
     import mantidplot
@@ -309,9 +307,6 @@ class RunTabPresenter(object):
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
         can_direct_period = get_string_period(get_string_entry(BatchReductionEntry.CanDirectPeriod, row))
         output_name = get_string_entry(BatchReductionEntry.Output, row)
-        # file_information_factory = SANSFileInformationFactory()
-        # file_information = file_information_factory.create_sans_file_information(sample_scatter)
-        # sample_thickness = file_information._thickness
         user_file = get_string_entry(BatchReductionEntry.UserFile, row)
 
         row_entry = [sample_scatter, sample_scatter_period, sample_transmission, sample_transmission_period,
@@ -438,8 +433,8 @@ class RunTabPresenter(object):
 
     def on_erase_rows(self):
         selected_rows = self._view.get_selected_rows()
-        empty_row = TableModel.create_empty_row()
         for row in selected_rows:
+            empty_row = TableModel.create_empty_row()
             self._table_model.replace_table_entries([row], [empty_row])
 
     def on_rows_removed(self, rows):

@@ -96,7 +96,7 @@ class BeamCentrePresenter(object):
         listener = BeamCentrePresenter.CentreFinderListener(self)
         state_copy = copy.copy(state)
 
-        self._work_handler.process(listener, self._beam_centre_model.find_beam_centre, state_copy)
+        self._work_handler.process(listener, self._beam_centre_model.find_beam_centre, 0, state_copy)
 
     def _update_beam_model_from_view(self):
         self._beam_centre_model.r_min = self._view.r_min
