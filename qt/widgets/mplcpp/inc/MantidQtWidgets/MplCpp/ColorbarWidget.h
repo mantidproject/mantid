@@ -18,8 +18,7 @@
 */
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Python/Object.h"
-
-#include <QLineEdit>
+#include "ui_Colorbar.h"
 
 namespace MantidQt {
 namespace Widgets {
@@ -64,9 +63,8 @@ public:
   //  void nthPowerChanged(double);
   ///@}
 private:
-  FigureCanvasQt *m_canvas{nullptr};
+  Ui::Colorbar m_ui;
   Python::Object m_colorbar;
-  QLineEdit *m_scaleMin, *m_scaleMax;
 };
 
 } // namespace MplCpp
