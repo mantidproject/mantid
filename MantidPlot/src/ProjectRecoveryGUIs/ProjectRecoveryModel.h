@@ -7,9 +7,10 @@
 namespace MantidQt {
 class ProjectRecovery;
 }
+class ProjectRecoveryPresenter;
 class ProjectRecoveryModel {
 public:
-  ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery);
+  ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery, ProjectRecoveryPresenter *presenter);
   std::vector<std::string> getRow(int i);
   void recoverLast();
   void openLastInEditor();
@@ -18,7 +19,10 @@ public:
   void openSelectedInEditor(std::string &selected);
 
 private:
-  MantidQt::ProjectRecovery* m_projRec;
+  void fillRows();
+  std::vector<std::vector<std::string>> m_rows;
+  MantidQt::ProjectRecovery *m_projRec;
+  ProjectRecoveryPresenter *m_presenter;
 };
 
 #endif // PROJECTRECOVERYMODEL_H

@@ -63,7 +63,7 @@
      </column>
      <column>
       <property name="text">
-       <string>Length of Recovery Script</string>
+       <string>Lines in Recovery Script</string>
       </property>
      </column>
     </widget>

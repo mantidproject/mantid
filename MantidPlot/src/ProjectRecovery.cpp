@@ -3,9 +3,9 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 #include "Process.h"
+#include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
 #include "ProjectSerialiser.h"
 #include "ScriptingWindow.h"
-#include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -249,17 +249,18 @@ namespace MantidQt {
 ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
     : m_backgroundSavingThread(), m_stopBackgroundThread(true),
       m_configKeyObserver(*this, &ProjectRecovery::configKeyChanged),
-      m_windowPtr(windowHandle),
-      m_recoveryGui(this) {}
+      m_windowPtr(windowHandle) {}
 
 /// Destructor which also stops any background threads currently in progress
-ProjectRecovery::~ProjectRecovery() { stopProjectSaving(); }
+ProjectRecovery::~ProjectRecovery() { stopProjectSaving(); 
+delete m_recoveryGui;}
 
 void ProjectRecovery::attemptRecovery() {
-  bool failed = m_recoveryGui.startRecoveryView();
+  m_recoveryGui = new ProjectRecoveryPresenter(this, m_windowPtr);
+  bool failed = m_recoveryGui->startRecoveryView();
 
   if (failed) {
-    m_recoveryGui.startRecoveryFailure();
+    m_recoveryGui->startRecoveryFailure();
   }
 }
 
@@ -272,17 +273,6 @@ bool ProjectRecovery::checkForRecovery() const noexcept {
   } catch (...) {
     g_log.warning("Project Recovery: Caught exception whilst attempting to "
                   "check for existing recovery");
-    return false;
-  }
-}
-
-bool ProjectRecovery::clearAllCheckpoints() const noexcept {
-  try {
-    deleteExistingCheckpoints(0);
-    return true;
-  } catch (...) {
-    g_log.warning("Project Recovery: Caught exception whilst attempting to "
-                  "clear existing checkpoints.");
     return false;
   }
 }
@@ -687,4 +677,21 @@ void ProjectRecovery::saveAll(bool autoSave) {
 std::string ProjectRecovery::getRecoveryFolderOutputPR() {
   return getRecoveryFolderOutput();
 }
+std::vector<Poco::Path> ProjectRecovery::getListOfFoldersInDirectoryPR(
+    const std::string &recoveryFolderPath) {
+  return getListOfFoldersInDirectory(recoveryFolderPath);
+}
+
+std::string ProjectRecovery::getRecoveryFolderCheckPR(){
+  return getRecoveryFolderCheck();
+}
+
+std::string ProjectRecovery::getRecoveryFolderLoadPR() {
+  return getRecoveryFolderLoad();
+}
+
+std::vector<Poco::Path> ProjectRecovery::getRecoveryFolderCheckpointsPR(const std::string &recoveryFolderPath){
+  return getRecoveryFolderCheckpoints(recoveryFolderPath);
+}
+
 } // namespace MantidQt

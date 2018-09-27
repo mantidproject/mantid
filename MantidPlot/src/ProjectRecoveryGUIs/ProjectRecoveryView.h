@@ -3,12 +3,13 @@
 
 #include "ProjectRecoveryPresenter.h"
 #include <QWidget>
+#include <QDialog>
 
 namespace Ui {
 class ProjectRecoveryWidget;
 }
 
-class ProjectRecoveryView : public QWidget {
+class ProjectRecoveryView : public QDialog {
   Q_OBJECT
 
 public:
@@ -23,6 +24,7 @@ private slots:
   void onClickStartMantidNormally();
 
 private:
+  void addDataToTable(Ui::ProjectRecoveryWidget *ui);
   Ui::ProjectRecoveryWidget *ui;
   ProjectRecoveryPresenter *m_presenter;
 };

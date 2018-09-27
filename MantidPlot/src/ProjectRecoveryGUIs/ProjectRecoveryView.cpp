@@ -3,21 +3,26 @@
 
 ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QWidget(parent), ui(new Ui::ProjectRecoveryWidget),
+    : QDialog(parent), ui(new Ui::ProjectRecoveryWidget),
       m_presenter(presenter) {
+  
   ui->setupUi(this);
   ui->tableWidget->horizontalHeader()->setResizeMode(
       QHeaderView::Stretch);
   ui->tableWidget->verticalHeader()->setResizeMode(
       QHeaderView::Stretch);
-  ui->tableWidget->verticalHeader()->setVisible(false);
+  //ui->tableWidget->verticalHeader()->setVisible(false);
   // Set the table information
-  QStringList row = presenter->getRow(0);
-  ui->tableWidget->setItem(0, 0, new QTableWidgetItem(row[0]));
-  ui->tableWidget->setItem(0, 1, new QTableWidgetItem(row[1]));
+  addDataToTable(ui);
 }
 
 ProjectRecoveryView::~ProjectRecoveryView() { delete ui; }
+
+void ProjectRecoveryView::addDataToTable(Ui::ProjectRecoveryWidget *ui){
+  QStringList row = m_presenter->getRow(0);
+  ui->tableWidget->setItem(0, 0, new QTableWidgetItem(row[0]));
+  ui->tableWidget->setItem(0, 1, new QTableWidgetItem(row[1]));
+}
 
 void ProjectRecoveryView::onClickLastCheckpoint() {
   // Recover last checkpoint
