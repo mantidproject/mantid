@@ -6,7 +6,7 @@ namespace MplCpp {
 
 namespace {
 Python::Object newFigure(bool tightLayout = true) {
-  static Python::Object figureModule{
+  Python::Object figureModule{
       Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
   auto fig = figureModule.attr("Figure")();
   if (tightLayout) {

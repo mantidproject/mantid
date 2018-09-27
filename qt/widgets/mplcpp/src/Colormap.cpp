@@ -19,7 +19,7 @@ Colormap::Colormap(Python::Object obj)
  * @return A reference to the matplotlib.cm module
  */
 Python::Object cmModule() {
-  static Python::Object cmModule{
+  Python::Object cmModule{
       Python::NewRef(PyImport_ImportModule("matplotlib.cm"))};
   return cmModule;
 }
