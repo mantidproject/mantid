@@ -31,10 +31,8 @@ Note also that an improved performance can be addressed after final validation.
 Support for automatic execution
 -------------------------------
 
-If the default slit names for :literal:`FirstSlitName` and :literal:`SecondSlitName` are given, this algorithm attempts to update the slit component names via the instrument's parameter file_,
+If the default slit names for :literal:`FirstSlitName` and :literal:`SecondSlitName` are given, this algorithm attempts to update the slit component names via :ref:`instrument parameter file (IPF) <InstrumentParameterFile>`,
 where the parameters :literal:`Workflow.slit1` and :literal:`Workflow.slit2` are searched for the instrument's slit component names.
-
-.. _file: http://docs.mantidproject.org/nightly/concepts/InstrumentParameterFile.html#instrumentparameterfile
 
 For example, if the instrument has slit components of names slit2 and slit3, which should be used for this algorithm, the following lines can be added to the parameter file:
 

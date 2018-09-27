@@ -112,8 +112,11 @@ string GravityCorrection::componentName(
     const string &inputName, Mantid::Geometry::Instrument_const_sptr &instr) {
   const string propName = this->getPropertyValue(inputName);
   const string compName = instr->getParameterAsString("Workflow." + propName);
-  if (!compName.empty())
+  if (!compName.empty()) {
+    g_log.information("Found " + propName + " in Parameter File. " + inputName +
+                      ": " + compName);
     return compName;
+  }
   return propName;
 }
 
@@ -285,7 +288,7 @@ void GravityCorrection::setCoordinate(V3D &pos, PointingAlong direction,
 /**
  * @brief GravityCorrection::slitCheck attempts to set the class member
  * variables m_slit1Name and m_slit2Name according to their position.
- * Errors get logged in case of insenible slit positions.
+ * Errors get logged in case of insensible slit positions.
  */
 void GravityCorrection::slitCheck() {
   const string sourceName = this->m_virtualInstrument->getSource()->getName();
@@ -294,34 +297,24 @@ void GravityCorrection::slitCheck() {
       this->componentName("FirstSlitName", this->m_virtualInstrument)};
   const string slit2{
       this->componentName("SecondSlitName", this->m_virtualInstrument)};
+  // initial guess
+  this->m_slit1Name = slit1;
+  this->m_slit2Name = slit2;
   // in beam directions
   const double sourceD = this->coordinate(sourceName, this->m_beamDirection);
   const double sampleD = this->coordinate(sampleName, this->m_beamDirection);
   const double slit1D = this->coordinate(slit1, this->m_beamDirection);
   const double slit2D = this->coordinate(slit2, this->m_beamDirection);
-  // Slits must be located between source and sample
-  if (sourceD < sampleD) {
-    // slit 1 should be the next component after source in beam direction
-    if (slit2D < slit1D) {
-      this->m_slit1Name = slit2;
-      this->m_slit2Name = slit1;
-    }
-    if ((slit1D < sourceD) && (slit1D > sampleD))
-      this->g_log.error("Slit " + this->m_slit1Name +
-                        " position is incorrect.");
-  } else {
-    // slit 1 should be the next component after source in beam direction
-    if (slit2D > slit1D) {
-      this->m_slit1Name = slit2;
-      this->m_slit2Name = slit1;
-    }
-    if ((slit1D > sourceD) && (slit1D < sampleD))
-      this->g_log.error("Position of " + this->m_slit2Name + " is incorrect.");
+  // slits must be located between source and sample
+  // source -> slit1 -> slit2 -> sample
+  if (abs(slit2D) < abs(slit1D)) {
+    this->m_slit1Name = slit2;
+    this->m_slit2Name = slit1;
   }
-  if (this->m_slit1Name.empty())
-    this->m_slit1Name = slit1;
-  if (this->m_slit2Name.empty())
-    this->m_slit2Name = slit2;
+  if (abs(slit1D) > abs(sourceD))
+    this->g_log.error(this->m_slit1Name + " position must be after source.");
+  if (abs(slit2D) < abs(sampleD))
+    this->g_log.error(this->m_slit2Name + " position must be before sample.");
 }
 
 /**
@@ -335,17 +328,15 @@ double GravityCorrection::finalAngle(const double k, size_t i) {
   // calculate slit pointing up coordinate
   const double tanAngle =
       tan(this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.);
-  int sign;
-  tanAngle < 0. ? sign = -1 : sign = 1;
   const double beamDiff = m_beam1 - m_beam2;
   // potential divide by zero avoided by input validation m_beam1 != m_beam2
   double beamShift =
       (k * (pow(m_beam1, 2.) - pow(m_beam2, 2.)) + (beamDiff * tanAngle)) /
       (2 * k * beamDiff);
-  const double up2 = m_beam2 * tanAngle; // sign
+  const double up2 = m_beam2 * tanAngle;
   double upShift = up2 + k * pow(m_beam2 - beamShift, 2.);
   // calculate final angle
-  return sign * atan(2. * k * sqrt(abs(upShift / k)));
+  return atan(2. * k * sqrt(abs(upShift / k)));
 }
 
 /**
@@ -478,22 +469,6 @@ void GravityCorrection::virtualInstrument() {
 }
 
 /**
- * @brief GravityCorrection::spectrumCheck
- * @param spectrumInfo :: reference spectrumInfo
- * @param i :: spectrum number
- * @return true if spectrum can be considered for gravity correction, false
- * otherwise
- */
-bool GravityCorrection::spectrumCheck(const SpectrumInfo &spectrumInfo,
-                                      size_t i) {
-  if (spectrumInfo.isMonitor(i))
-    this->g_log.debug("Found monitor spectrum, will be ignored.");
-  if (!spectrumInfo.hasDetectors(i))
-    this->g_log.debug("No detector(s) found");
-  return (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i));
-}
-
-/**
  * @brief GravityCorrection::spectrumNumber
  * @param angle :: a final angle for a specific detector in radians
  * @param spectrumInfo :: a reference to spectrum information
@@ -503,26 +478,33 @@ bool GravityCorrection::spectrumCheck(const SpectrumInfo &spectrumInfo,
 size_t GravityCorrection::spectrumNumber(const double angle,
                                          const SpectrumInfo &spectrumInfo,
                                          size_t i) {
+  // counts are dropping down -> only move counts up
   size_t n = i;
-  // counts are dropping down due to gravitation -> move counts
-  // up and n cannot be smaller than 0, only larger than
-  // m_ws->getNumberHistograms()
-
   const double signedCurrentAngle = spectrumInfo.signedTwoTheta(i) / 2.;
   // a starting index for an effective search that exists
   auto it = this->m_finalAngles.find(signedCurrentAngle);
-
-  double tol = 0.;
-  // the upper range for the updated final angle
-  if ((it->second < spectrumInfo.size()) &&
-      (this->spectrumCheck(spectrumInfo, it->second))) {
-    double signedNextAngle = spectrumInfo.signedTwoTheta(it->second) / 2;
-    tol = 0.5 * (signedNextAngle - signedCurrentAngle);
-  }
-  while (this->m_smallerThan((*it++).first + tol, angle) &&
+  // the upper bound to be added to the updated final angle:
+  /*                           |
+   *                          _|_
+   *                           |
+   *                 angle---->|
+   *                           |<---
+   *                           |
+   *                          _|_
+   *                           |
+   *                           |
+   *    signedCurrentAngle---->|<---it->second
+   * (lowest possible angle)   |
+   *                          _|_
+   *                           |
+   */
+  ++it;
+  double tol = .5 * ((++it)->first - it->first);
+  --it;
+  // determine new final angle
+  while (this->m_smallerThan((*(++it)).first + tol, angle) &&
          (it != this->m_finalAngles.end()))
     n = it->second;
-
   return n;
 }
 
@@ -556,7 +538,7 @@ void GravityCorrection::exec() {
   const auto &spectrumInfo = this->m_ws->spectrumInfo();
   this->m_progress->report("Setup OutputWorkspace ...");
   MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
-  outWS = DataObjects::create<MatrixWorkspace>(*this->m_ws);
+  outWS = this->m_ws->clone();
   outWS->setTitle(this->m_ws->getTitle() + " cancelled gravitation ");
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (spectrumInfo.isMonitor(i)) {
@@ -564,15 +546,16 @@ void GravityCorrection::exec() {
       outWS->mutableX(i) = this->m_ws->x(i);
       outWS->mutableY(i) = this->m_ws->y(i);
       outWS->mutableE(i) = this->m_ws->e(i);
-      m_numberOfMonitors++;
+      continue;
     }
-    if (!(this->spectrumCheck(spectrumInfo, i)))
+    if (!spectrumInfo.hasDetectors(i))
       continue;
 
     // setup map of initial final angles (y axis, spectra)
     // this map is sorted internally by its finalAngleValue's
     double finalAngleValue = spectrumInfo.signedTwoTheta(i) / 2.;
-    this->m_finalAngles.insert({finalAngleValue, i});
+    this->m_finalAngles.emplace_hint(this->m_finalAngles.end(),
+                                     std::make_pair(finalAngleValue, i));
 
     // unmask bins of OutputWorkspace
     if (outWS->hasMaskedBins(i)) {
@@ -588,21 +571,24 @@ void GravityCorrection::exec() {
     this->g_log.error(
         "Map of initial final angles and its corresponding spectrum "
         "number does not exist.");
-  // need a mutable copy of the input workspace here.
-  MatrixWorkspace_sptr clonedWS = this->m_ws->clone();
   this->m_progress->report("Perform gravity correction ...");
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-    if (!(this->spectrumCheck(spectrumInfo, i)))
+    if (spectrumInfo.isMonitor(i)) {
+      this->g_log.debug("Found monitor spectrum, will be ignored.");
       continue;
+    }
+    if (!spectrumInfo.hasDetectors(i)) {
+      this->g_log.debug("No detector(s) found");
+      continue;
+    }
 
     // take neutrons that hit the detector of spectrum i
     // get a const reference to X values
-    const HistogramX &tof = clonedWS->x(i); // make mutable?
-    // correct tof angles, velocity, characteristic length
-    size_t i_tofit{0};
-
+    const HistogramX &tof = this->m_ws->x(i);
     const auto y = this->m_ws->y(i);
     const auto e = this->m_ws->e(i);
+    // correct tof angles, velocity, characteristic length
+    size_t i_tofit{0};
     for (HistogramX::const_iterator tofit = tof.cbegin(); tofit < tof.cend();
          ++tofit) {
       // this velocity should take the real flight path into account
@@ -613,9 +599,9 @@ void GravityCorrection::exec() {
       }
 
       double v{((spectrumInfo.l1() + spectrumInfo.l2(i)) / *tofit) *
-               1.e6};                        // unit is m/s
-      double k = g / (2. * pow(v, 2.));      // unit is 1/m
-      double angle = this->finalAngle(k, i); // unit is radians
+               1.e6};                         // unit is m/s
+      double k = g * 100 / (2. * pow(v, 2.)); // unit is 1/m
+      double angle = this->finalAngle(k, i);  // unit is radians
       if (cos(angle) == 0.) {
         this->g_log.error("Cannot divide by zero for calculating new tof "
                           "values. Skip this bin.");
@@ -624,11 +610,6 @@ void GravityCorrection::exec() {
 
       // get new spectrum number for new final angle
       auto j = this->spectrumNumber(angle, spectrumInfo, i);
-      // Sanity checks: are spectrum and bin part of the output workspace?
-      if (j >= (spectrumInfo.size() - 1 - this->m_numberOfMonitors) && i != j)
-        continue;
-      if (i_tofit > outWS->mutableY(j).size())
-        continue;
 
       // straight path from virtual sample (0, 0, 0) to updated detector
       // position:
@@ -649,7 +630,7 @@ void GravityCorrection::exec() {
       double s2 = this->parabolaArcLength(2 * k * detZ) / (2 * k);
 
       // this value should be close to one
-      //const double cOne = (detZ - offset) / (s * cos(angle));
+      // const double cOne = (detZ - offset) / (s * cos(angle));
       const double cOne = detZ / (s2 * cos(angle));
       outWS->mutableX(j)[i_tofit] = cOne * *tofit; // mu sec
 

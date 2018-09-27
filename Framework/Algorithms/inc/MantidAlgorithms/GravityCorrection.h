@@ -81,7 +81,6 @@ private:
   Mantid::Geometry::Instrument_const_sptr m_virtualInstrument;
   double m_beam1;
   double m_beam2;
-  int m_numberOfMonitors{0};
 
   std::map<double, size_t> m_finalAngles;
   std::map<double, size_t>::key_compare m_smallerThan =
@@ -118,8 +117,6 @@ private:
   /// The corrected spectrum number for the initialSpectrumNumber
   size_t spectrumNumber(const double angle,
                         const Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
-  /// Tells if the corresponding spectrum will be considered for execution
-  bool spectrumCheck(const Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
   /// Parabola arc length
   double parabolaArcLength(const double arg, double constant = 1.) const;
   /// Execution code
