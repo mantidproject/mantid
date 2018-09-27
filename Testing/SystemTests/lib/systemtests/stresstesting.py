@@ -521,7 +521,10 @@ class ResultReporter(object):
                                                                       self._total_number_of_tests)
                 console_output += '{:.<{}} ({}: {}s)'.format(result.name+" ", self._maximum_name_length+2,
                                                              result.status, time_taken)
-            if ((self._output_on_failure and (result.status.count('fail') > 0)) or (not self._quiet)):
+            if ((self._output_on_failure
+                 and (result.status != 'success')
+                 and (result.status != 'skipped'))
+                 or (not self._quiet)):
                 nstars = 80
                 console_output += '\n' + ('*' * nstars) + '\n'
                 print_list = ['test_name', 'filename', 'test_date', 'host_name', 'environment',
