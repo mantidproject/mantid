@@ -181,7 +181,7 @@
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Plot Result</string>
+                <string>Plot</string>
                </property>
               </widget>
              </item>

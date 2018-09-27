@@ -115,7 +115,7 @@ void JumpFit::setRunIsRunning(bool running) {
 }
 
 void JumpFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
   setPlotResultEnabled(!plotting);
 }
 

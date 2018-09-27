@@ -245,7 +245,7 @@
              <item>
               <widget class="QPushButton" name="pbPlot">
                <property name="text">
-                <string>Plot Result</string>
+                <string>Plot</string>
                </property>
               </widget>
              </item>

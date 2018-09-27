@@ -153,7 +153,7 @@ void IqtFit::setRunIsRunning(bool running) {
 }
 
 void IqtFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
   setPlotResultEnabled(!plotting);
 }
 
