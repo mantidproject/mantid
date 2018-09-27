@@ -71,7 +71,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         minNumberPeaks entries.  If not, we return all None, which will fall back to the
         instrument defaults.
         """
-
         if strongPeakParams_ws.rowCount() > minNumberPeaks:
             # First, along the scattering direction
             theta = np.abs(strongPeakParams_ws.column('Theta'))
@@ -79,8 +78,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
             CreateWorkspace(DataX=theta, DataY=sigma_theta, OutputWorkspace='__ws_bvg0_scat')
             Fit(Function='name=UserFunction,Formula=A*(exp(((x-x0)/b))+exp( -((x-x0)/b)))+BG,A=0.0025,x0=1.54,b=1,BG=-1.26408e-15',
-                InputWorkspace='__ws_bvg0_scat', Output='__fitSigX0', StartX=np.min(theta), EndX=np.max(theta))
-            sigX0Params = mtd['__fitSigX0_Parameters'].column(1)[:-1]
+                InputWorkspace='__ws_bvg0_scat', Output='fitSigX0', StartX=np.min(theta), EndX=np.max(theta))
+            sigX0Params = mtd['fitSigX0_Parameters'].column(1)[:-1]
             # Second, along the azimuthal.  This is just a constant.
             sigY0 = np.median(strongPeakParams_ws.column('SigPhi'))
             # Finally, the interaction term.  This we just get from the instrument file.
@@ -100,6 +99,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         from mantid.simpleapi import LoadIsawUB
         import pickle
         from scipy.ndimage.filters import convolve
+        reload(BVGFT)
+        reload(ICCFT)
         MDdata = self.getProperty('InputWorkspace').value
         peaks_ws = self.getProperty('PeaksWorkspace').value
         fracStop = self.getProperty('FracStop').value
@@ -159,7 +160,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         # Strong peak profiles - we set up the workspace and determine which peaks we'll fit.
         strongPeakKeys =  ['Phi', 'Theta', 'Scale3d', 'FitPhi', 'FitTheta', 'SigTheta', 'SigPhi', 'SigP', 'PeakNumber']
         strongPeakDatatypes = ['float']*len(strongPeakKeys)
-        strongPeakParams_ws = CreateEmptyTableWorkspace(OutputWorkspace='__StrongPeakParameters')
+        strongPeakParams_ws = CreateEmptyTableWorkspace(OutputWorkspace='StrongPeakParameters')
         for key, datatype in zip(strongPeakKeys,strongPeakDatatypes):
             strongPeakParams_ws.addColumn(datatype, key)
 
@@ -288,19 +289,30 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 peak.setIntensity(intensity)
                 peak.setSigmaIntensity(sigma)
 
-                if generateStrongPeakParams and ~needsForcedProfile[peakNumber] and params['SigX']<0.1 and params['SigY']<0.1:
+                if generateStrongPeakParams and ~needsForcedProfile[peakNumber]:# and params['SigX']<0.1 and params['SigY']<0.1 and params['SigX']>0.0024:
                         qPeak = peak.getQLabFrame()
-                        strongPeakParams[fitNumber, 0] = np.arctan2(qPeak[1], qPeak[0]) # phi
-                        strongPeakParams[fitNumber, 1] = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #2theta
-                        strongPeakParams[fitNumber, 2] = params['scale3d']
-                        strongPeakParams[fitNumber, 3] = params['MuTH']
-                        strongPeakParams[fitNumber, 4] = params['MuPH']
-                        strongPeakParams[fitNumber, 5] = params['SigX']
-                        strongPeakParams[fitNumber, 6] = params['SigY']
-                        strongPeakParams[fitNumber, 7] = params['SigP']
-                        strongPeakParams[fitNumber, 8] = peakNumber
-                        strongPeakParams_ws.addRow(strongPeakParams[fitNumber])
-                        sigX0Params, sigY0, sigP0Params = self.getBVGInitialGuesses(peaks_ws, strongPeakParams_ws)
+                        theta = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #2theta
+                        try:
+                            p = mtd['fitSigX0_Parameters'].column(1)[:-1]
+                            tol = 0.2 #We should have a good idea now - only allow 20% variation
+                        except:
+                            p = peaks_ws.getInstrument().getStringParameter("sigSC0Params")
+                            p = np.array(str(p).strip('[]\'').split(),dtype=float)
+                            tol = 5.0 #High tolerance since we don't know what the answer will be
+                        predSigX = BVGFT.coshPeakWidthModel(theta, p[0],p[1],p[2],p[3])
+                        
+                        if np.abs((params['SigX'] - predSigX)/1./predSigX) < tol:
+                            strongPeakParams[fitNumber, 0] = np.arctan2(qPeak[1], qPeak[0]) # phi
+                            strongPeakParams[fitNumber, 1] = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #theta
+                            strongPeakParams[fitNumber, 2] = params['scale3d']
+                            strongPeakParams[fitNumber, 3] = params['MuTH']
+                            strongPeakParams[fitNumber, 4] = params['MuPH']
+                            strongPeakParams[fitNumber, 5] = params['SigX']
+                            strongPeakParams[fitNumber, 6] = params['SigY']
+                            strongPeakParams[fitNumber, 7] = params['SigP']
+                            strongPeakParams[fitNumber, 8] = peakNumber
+                            strongPeakParams_ws.addRow(strongPeakParams[fitNumber])
+                            sigX0Params, sigY0, sigP0Params = self.getBVGInitialGuesses(peaks_ws, strongPeakParams_ws)
 
             except KeyboardInterrupt:
                 np.warnings.filterwarnings('default') # Re-enable on exit
