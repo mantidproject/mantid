@@ -385,10 +385,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.dead_time_other_file_label = QtGui.QLabel(self)
         self.dead_time_other_file_label.setText("From other file : ")
-        # self.dead_time_file_other_layout = QtGui.QHBoxLayout()
-        # self.dead_time_file_other_layout.addSpacing(10)
-        # self.dead_time_file_other_layout.addWidget(self.deadtime_browse_button)
-        # self.dead_time_file_other_layout.addStretch(0)
 
         self.layout.addWidget(self.deadtime_label, 3, 0)
         self.layout.addWidget(self.deadtime_selector, 3, 1)
