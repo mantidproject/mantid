@@ -421,8 +421,8 @@ std::size_t ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
 bool ISISEnergyTransfer::isOptionHidden(QString const &option) {
   for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
     if (m_uiForm.cbGroupingOptions->itemText(i) == option)
-      return true;
-  return false;
+      return false;
+  return true;
 }
 
 void ISISEnergyTransfer::setCurrentGroupingOption(QString const &option) {
