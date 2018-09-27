@@ -22,13 +22,6 @@ constexpr double AXES_LEFT = 0.4;
 constexpr double AXES_BOTTOM = 0.05;
 constexpr double AXES_WIDTH = 0.2;
 constexpr double AXES_HEIGHT = 0.9;
-
-Python::Object cbModule() {
-  static auto cbModule{
-      Python::NewRef(PyImport_ImportModule("matplotlib.colorbar"))};
-  return cbModule;
-}
-
 } // namespace
 
 /**
@@ -38,22 +31,19 @@ Python::Object cbModule() {
  */
 ColorbarWidget::ColorbarWidget(int type, QWidget *parent)
     : QWidget(parent), m_ui(), m_colorbar() {
+  // Create figure and colorbar
   Figure fig{false};
   fig.pyobj().attr("set_facecolor")("w");
   Axes cbAxes{fig.addAxes(AXES_LEFT, AXES_BOTTOM, AXES_WIDTH, AXES_HEIGHT)};
+  m_colorbar = fig.colorbar(
+      ScalarMappable{Normalize(-1.0, 1.0), getCMap("viridis")}, cbAxes);
+
+  // Create widget layout including canvas to draw the figure
   m_ui.setupUi(this);
   // remove placeholder widget and add figure canvas
   delete m_ui.mplColorbar;
   m_ui.mplColorbar = new FigureCanvasQt(fig, this);
   m_ui.verticalLayout->insertWidget(1, m_ui.mplColorbar);
-  // draw matplotlib colorbar
-  try {
-    m_colorbar = cbModule().attr("Colorbar")(
-        cbAxes.pyobj(),
-        ScalarMappable{Normalize(0.0, 1.0), getCMap("viridis")}.pyobj());
-  } catch (Python::ErrorAlreadySet &) {
-    throw Mantid::PythonInterface::PythonRuntimeError();
-  }
 }
 
 /**

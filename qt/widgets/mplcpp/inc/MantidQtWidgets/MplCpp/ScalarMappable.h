@@ -21,6 +21,7 @@
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 
 #include <QRgb>
+#include <QString>
 
 namespace MantidQt {
 namespace Widgets {
@@ -34,6 +35,7 @@ namespace MplCpp {
 class MANTID_MPLCPP_DLL ScalarMappable : public Python::InstanceHolder {
 public:
   ScalarMappable(const NormalizeBase &norm, const Colormap &cmap);
+  ScalarMappable(const NormalizeBase &norm, const QString &cmap);
 
   QRgb toRGBA(double x, double alpha = 1.0) const;
 };

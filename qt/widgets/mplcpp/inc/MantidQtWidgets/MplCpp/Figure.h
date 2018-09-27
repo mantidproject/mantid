@@ -19,6 +19,7 @@
 #include "MantidQtWidgets/MplCpp/Axes.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Python/Object.h"
+#include "MantidQtWidgets/MplCpp/ScalarMappable.h"
 
 namespace MantidQt {
 namespace Widgets {
@@ -41,6 +42,7 @@ public:
 
   Axes addAxes(double left, double bottom, double width, double height);
   Axes addSubPlot(int subplotspec);
+  Python::Object colorbar(ScalarMappable mappable, Axes ax);
 };
 
 } // namespace MplCpp

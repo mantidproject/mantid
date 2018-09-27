@@ -25,6 +25,10 @@ public:
         ScalarMappable mappable(Normalize(-1, 1), getCMap("jet")));
   }
 
+  void testConstructionWithValidCMapAsStringAndNormalize() {
+    TS_ASSERT_THROWS_NOTHING(ScalarMappable mappable(Normalize(-1, 1), "jet"));
+  }
+
   void testtoRGBAWithNoAlphaGivesDefault() {
     ScalarMappable mappable(Normalize(-1, 1), getCMap("jet"));
     auto rgba = mappable.toRGBA(0.0);

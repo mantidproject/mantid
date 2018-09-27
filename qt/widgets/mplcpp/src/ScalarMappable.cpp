@@ -21,7 +21,7 @@ Python::Object createScalarMappable(const NormalizeBase &norm,
  * @brief Construct a ScalarMappable instance with the given normalization
  * type and colormap
  * @param norm Instance use to define the mapping from data to [0,1]
- * @param cmap A Colormap defning the RGBA values to use for drawing
+ * @param cmap A Colormap defining the RGBA values to use for drawing
  */
 ScalarMappable::ScalarMappable(const NormalizeBase &norm, const Colormap &cmap)
     : Python::InstanceHolder(createScalarMappable(norm, cmap), "to_rgba") {
@@ -30,6 +30,15 @@ ScalarMappable::ScalarMappable(const NormalizeBase &norm, const Colormap &cmap)
   // https://stackoverflow.com/questions/28801803/matplotlib-scalarmappable-why-need-to-set-array-if-norm-set
   pyobj().attr("set_array")(Python::NewRef(Py_BuildValue("()")));
 }
+
+/**
+ * @brief Construct a ScalarMappable instance with the given normalization
+ * type and colormap
+ * @param norm Instance use to define the mapping from data to [0,1]
+ * @param cmap A string name for a Colormap
+ */
+ScalarMappable::ScalarMappable(const NormalizeBase &norm, const QString &cmap)
+    : ScalarMappable(norm, getCMap(cmap)) {}
 
 /**
  * @brief Convert a data value to an RGBA value
