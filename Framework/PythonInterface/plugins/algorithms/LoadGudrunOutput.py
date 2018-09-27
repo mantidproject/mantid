@@ -18,10 +18,8 @@ class LoadGudrunOutput(PythonAlgorithm):
         return 'Loads the common outputs created from Gudrun'
 
     def PyInit(self):
-        data_files = r"*.dcs01 *.mdcs01 *.mint01 *.mdor01 *.mgor01"
         self.declareProperty(FileProperty(name='InputFile', defaultValue='', action=FileAction.Load,
-                                          extensions=[data_files,
-                                                      ".dcs01",
+                                          extensions=[".dcs01",
                                                       ".mdsc01",
                                                       ".mint01",
                                                       ".mdor01",
