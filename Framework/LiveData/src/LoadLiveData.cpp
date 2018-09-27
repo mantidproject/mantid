@@ -417,6 +417,17 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
   return accumWS;
 }
 
+namespace {
+bool shouldResetAllXToSingleBin(const EventWorkspace *workspace) {
+  // only check first spectrum
+  const auto &x = workspace->binEdges(0);
+  if (x.size() > 2)
+    return false;
+  // make sure that they are sorted
+  return (x.front() < x.back());
+}
+}
+
 //----------------------------------------------------------------------------------------------
 /** Resets all HistogramX in given EventWorkspace(s) to a single bin.
  *
@@ -430,13 +441,15 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
  */
 void LoadLiveData::resetAllXToSingleBin(API::Workspace *workspace) {
   if (auto *ws_event = dynamic_cast<EventWorkspace *>(workspace)) {
-    ws_event->resetAllXToSingleBin();
+    if (shouldResetAllXToSingleBin(ws_event))
+      ws_event->resetAllXToSingleBin();
   } else if (auto *ws_group = dynamic_cast<WorkspaceGroup *>(workspace)) {
     auto num_entries = static_cast<size_t>(ws_group->getNumberOfEntries());
     for (size_t i = 0; i < num_entries; ++i) {
       auto ws = ws_group->getItem(i);
       if (auto *ws_event = dynamic_cast<EventWorkspace *>(ws.get()))
-        ws_event->resetAllXToSingleBin();
+        if (shouldResetAllXToSingleBin(ws_event))
+          ws_event->resetAllXToSingleBin();
     }
   }
 }
@@ -494,8 +507,8 @@ void LoadLiveData::exec() {
   // For EventWorkspaces, we adjust the X values such that all events fit
   // within the bin boundaries. This is done both before and after the
   // "Process" step. Any custom rebinning should be done in Post-Processing.
-  bool PreserveEvents = this->getProperty("PreserveEvents");
-  if (PreserveEvents)
+  const bool preserveEvents = this->getProperty("PreserveEvents");
+  if (preserveEvents)
     this->resetAllXToSingleBin(chunkWS.get());
 
   // Now we process the chunk
@@ -503,7 +516,7 @@ void LoadLiveData::exec() {
 
   EventWorkspace_sptr processedEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(processed);
-  if (!PreserveEvents && processedEvent) {
+  if (!preserveEvents && processedEvent) {
     // Convert the monitor workspace, if there is one and it's necessary
     MatrixWorkspace_sptr monitorWS = processedEvent->monitorWorkspace();
     auto monitorEventWS =
@@ -548,18 +561,21 @@ void LoadLiveData::exec() {
   g_log.notice() << "Performing the " << accum << " operation.\n";
 
   // Perform the accumulation and set the AccumulationWorkspace workspace
-  if (accum == "Replace")
+  if (accum == "Replace") {
     this->replaceChunk(processed);
-  else if (accum == "Append")
+  } else if (accum == "Append") {
     this->appendChunk(processed);
-  else
+  } else {
     // Default to Add.
     this->addChunk(processed);
 
-  // For EventWorkspaces, we adjust the X values such that all events fit
-  // within the bin boundaries. This is done both before and after the
-  // "Process" step. Any custom rebinning should be done in Post-Processing.
-  this->resetAllXToSingleBin(m_accumWS.get());
+    // For EventWorkspaces, we adjust the X values such that all events fit
+    // within the bin boundaries. This is done both before and after the
+    // "Process" step. Any custom rebinning should be done in Post-Processing.
+    if (preserveEvents) {
+      this->resetAllXToSingleBin(m_accumWS.get());
+    }
+  }
 
   // At this point, m_accumWS is set.
 
