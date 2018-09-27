@@ -233,10 +233,10 @@ void MultiProcessEventLoader::GroupLoader<
           task->partitioner = task->loader.setBankIndex(bankIdx);
           task->partitioner->setEventOffset(cur);
           task->eventTimeOffset.resize(cnt);
-          task->loader.readEventTimeOffset(task->eventTimeOffset.data(), start,
+          task->loader.readEventTimeOffset(task->eventTimeOffset.data(), cur,
                                            cnt);
           task->eventId.resize(cnt);
-          task->loader.readEventID(task->eventId.data(), start, cnt);
+          task->loader.readEventID(task->eventId.data(), cur, cnt);
           detail::eventIdToGlobalSpectrumIndex(task->eventId.data(), cnt,
                                                bankOffsets[bankIdx]);
 
