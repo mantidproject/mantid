@@ -2,6 +2,7 @@
 # Testing
 ###########################################################################
 set ( TEST_FILES
+  IndirectFittingModelTest.h
   IndirectFitDataTest.h
 )
 
