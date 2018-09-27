@@ -18,8 +18,7 @@ convertStringVectorToSizeT(std::vector<std::string> const &vec) {
   std::vector<std::size_t> newVec;
   newVec.reserve(vec.size());
   for (auto element : vec)
-    if (!element.empty())
-      newVec.emplace_back(std::stoull(element));
+    newVec.emplace_back(std::stoull(element));
   return newVec;
 }
 
@@ -103,8 +102,7 @@ private:
   const std::string m_rangeDelimiter;
 };
 
-std::string
-constructDiscontinuousSpectraString(std::vector<int> const &spectras) {
+std::string constructSpectraString(std::vector<int> const &spectras) {
   return joinCompress(spectras.begin(), spectras.end());
 }
 
@@ -112,42 +110,42 @@ std::vector<std::string> splitStringBy(std::string const &str,
                                        std::string const &delimiter) {
   std::vector<std::string> subStrings;
   boost::split(subStrings, str, boost::is_any_of(delimiter));
+  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
+                                  [](std::string const &subString) {
+                                    return subString.empty();
+                                  }),
+                   subStrings.end());
   return subStrings;
 }
 
-std::string
-getFormattedSpectraRange(std::string const &subString,
-                         std::vector<std::string> const &rangeBounds) {
-  if (rangeBounds[0] > rangeBounds[1])
-    return rangeBounds[1] + "-" + rangeBounds[0];
-  else
-    return subString;
+std::string getSpectraRange(std::string const &string) {
+  auto bounds = splitStringBy(string, "-");
+  return bounds[0] > bounds[1] ? bounds[1] + "-" + bounds[0] : string;
 }
 
-std::string rearrangeSpectraSubString(std::string const &subString) {
-  if (subString.find("-") != std::string::npos)
-    return getFormattedSpectraRange(subString, splitStringBy(subString, "-"));
-  else
-    return subString;
+std::string rearrangeSpectraSubString(std::string const &string) {
+  return string.find("-") != std::string::npos ? getSpectraRange(string)
+                                               : string;
 }
 
 std::string rearrangeSpectraRangeStrings(std::string const &string) {
   std::string spectraString;
   std::vector<std::string> subStrings = splitStringBy(string, ",");
-  for (auto subString : subStrings)
-    spectraString += rearrangeSpectraSubString(subString) + ",";
+  for (auto it = subStrings.begin(); it < subStrings.end(); ++it) {
+    spectraString += rearrangeSpectraSubString(*it);
+    spectraString += it != subStrings.end() ? "," : "";
+  }
   return spectraString;
 }
 
-std::string createDiscontinuousSpectraString(std::string const &string) {
-  std::string spectraString = string;
-  std::remove_if(spectraString.begin(), spectraString.end(), isspace);
-  std::vector<int> spectras =
-      parseRange(rearrangeSpectraRangeStrings(spectraString));
+std::string createSpectraString(std::string string) {
+  string.erase(std::remove_if(string.begin(), string.end(), isspace),
+               string.end());
+  std::vector<int> spectras = parseRange(rearrangeSpectraRangeStrings(string));
   std::sort(spectras.begin(), spectras.end());
   // Remove duplicate entries
   spectras.erase(std::unique(spectras.begin(), spectras.end()), spectras.end());
-  return constructDiscontinuousSpectraString(spectras);
+  return constructSpectraString(spectras);
 }
 
 struct CombineSpectra : boost::static_visitor<Spectra> {
@@ -159,13 +157,13 @@ struct CombineSpectra : boost::static_visitor<Spectra> {
     else if (spectra2.second + 1 == spectra1.first)
       return std::make_pair(spectra2.first, spectra1.second);
     else {
-      return DiscontinuousSpectra<std::size_t>(createDiscontinuousSpectraString(
+      return DiscontinuousSpectra<std::size_t>(createSpectraString(
           rangeToString(spectra1) + "," + rangeToString(spectra2)));
     }
   }
 
   Spectra operator()(const Spectra &spectra1, const Spectra &spectra2) const {
-    return DiscontinuousSpectra<std::size_t>(createDiscontinuousSpectraString(
+    return DiscontinuousSpectra<std::size_t>(createSpectraString(
         boost::apply_visitor(SpectraToString(), spectra1) + "," +
         boost::apply_visitor(SpectraToString(), spectra2)));
   }
@@ -257,9 +255,10 @@ getBoundsAsDoubleVector(std::vector<std::string> const &boundStrings) {
   return bounds;
 }
 
-std::string createExcludeRegionString(std::string const &string) {
-  std::string regionString = string;
-  std::remove_if(regionString.begin(), regionString.end(), isspace);
+std::string createExcludeRegionString(std::string regionString) {
+  regionString.erase(
+      std::remove_if(regionString.begin(), regionString.end(), isspace),
+      regionString.end());
   auto bounds = getBoundsAsDoubleVector(splitStringBy(regionString, ","));
   return orderExcludeRegionString(bounds);
 }
@@ -344,8 +343,8 @@ IndirectFitData::excludeRegionsVector(std::size_t spectrum) const {
 
 void IndirectFitData::setSpectra(std::string const &spectra) {
   try {
-    const Spectra spec = DiscontinuousSpectra<std::size_t>(
-        createDiscontinuousSpectraString(spectra));
+    const Spectra spec =
+        DiscontinuousSpectra<std::size_t>(createSpectraString(spectra));
     setSpectra(spec);
   } catch (std::exception &ex) {
     throw std::runtime_error("Spectra too large for cast: " +
@@ -363,7 +362,7 @@ void IndirectFitData::setSpectra(Spectra const &spectra) {
   m_spectra = spectra;
 }
 
-void IndirectFitData::validateSpectra(const Spectra &spectra) {
+void IndirectFitData::validateSpectra(Spectra const &spectra) {
   const auto visitor =
       SpectraOutOfRange<std::size_t>(0, workspace()->getNumberHistograms() - 1);
   auto notInRange = boost::apply_visitor(visitor, spectra);

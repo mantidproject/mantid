@@ -38,8 +38,7 @@ std::string NATURAL_NUMBER(std::size_t digits) {
   return OR("0", "[1-9][0-9]{," + std::to_string(digits - 1) + "}");
 }
 
-std::string
-constructDiscontinuousSpectraString(std::vector<int> const &spectras) {
+std::string constructSpectraString(std::vector<int> const &spectras) {
   return joinCompress(spectras.begin(), spectras.end());
 }
 
@@ -47,42 +46,42 @@ std::vector<std::string> splitStringBy(std::string const &str,
                                        std::string const &delimiter) {
   std::vector<std::string> subStrings;
   boost::split(subStrings, str, boost::is_any_of(delimiter));
+  subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
+                                  [](std::string const &subString) {
+                                    return subString.empty();
+                                  }),
+                   subStrings.end());
   return subStrings;
 }
 
-std::string
-getFormattedSpectraRange(std::string const &subString,
-                         std::vector<std::string> const &rangeBounds) {
-  if (rangeBounds[0] > rangeBounds[1])
-    return rangeBounds[1] + "-" + rangeBounds[0];
-  else
-    return subString;
+std::string getSpectraRange(std::string const &string) {
+  auto bounds = splitStringBy(string, "-");
+  return bounds[0] > bounds[1] ? bounds[1] + "-" + bounds[0] : string;
 }
 
-std::string rearrangeSpectraSubString(std::string const &subString) {
-  if (subString.find("-") != std::string::npos)
-    return getFormattedSpectraRange(subString, splitStringBy(subString, "-"));
-  else
-    return subString;
+std::string rearrangeSpectraSubString(std::string const &string) {
+  return string.find("-") != std::string::npos ? getSpectraRange(string)
+                                               : string;
 }
 
 std::string rearrangeSpectraRangeStrings(std::string const &string) {
   std::string spectraString;
   std::vector<std::string> subStrings = splitStringBy(string, ",");
-  for (auto subString : subStrings)
-    spectraString += rearrangeSpectraSubString(subString) + ",";
+  for (auto it = subStrings.begin(); it < subStrings.end(); ++it) {
+    spectraString += rearrangeSpectraSubString(*it);
+    spectraString += it != subStrings.end() ? "," : "";
+  }
   return spectraString;
 }
 
-std::string createDiscontinuousSpectraString(std::string const &string) {
-  std::string spectraString = string;
-  std::remove_if(spectraString.begin(), spectraString.end(), isspace);
-  std::vector<int> spectras =
-      parseRange(rearrangeSpectraRangeStrings(spectraString));
+std::string createSpectraString(std::string string) {
+  string.erase(std::remove_if(string.begin(), string.end(), isspace),
+               string.end());
+  std::vector<int> spectras = parseRange(rearrangeSpectraRangeStrings(string));
   std::sort(spectras.begin(), spectras.end());
   // Remove duplicate entries
   spectras.erase(std::unique(spectras.begin(), spectras.end()), spectras.end());
-  return constructDiscontinuousSpectraString(spectras);
+  return constructSpectraString(spectras);
 }
 
 namespace Regexes {
@@ -195,8 +194,8 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     std::string const &spectraList) {
-  setModelSpectra(DiscontinuousSpectra<std::size_t>(
-      createDiscontinuousSpectraString(spectraList)));
+  setModelSpectra(
+      DiscontinuousSpectra<std::size_t>(createSpectraString(spectraList)));
   emit spectraChanged(m_activeIndex);
 }
 
@@ -216,7 +215,7 @@ void IndirectSpectrumSelectionPresenter::setMaskSpectraList(
 
 void IndirectSpectrumSelectionPresenter::displaySpectraList(
     std::string const &spectra) {
-  m_view->displaySpectra(createDiscontinuousSpectraString(spectra));
+  m_view->displaySpectra(createSpectraString(spectra));
 }
 
 void IndirectSpectrumSelectionPresenter::setBinMask(

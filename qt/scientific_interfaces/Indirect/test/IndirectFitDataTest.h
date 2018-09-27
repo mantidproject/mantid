@@ -16,11 +16,11 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 namespace {
 
-IndirectFitData getIndirectFitData(const std::size_t &numberOfSpectra,
-                                   const std::size_t &numberOfBins) {
-  const auto workspace = WorkspaceCreationHelper::create2DWorkspace123(
+IndirectFitData getIndirectFitData(std::size_t const &numberOfSpectra,
+                                   std::size_t const &numberOfBins) {
+  auto const workspace = WorkspaceCreationHelper::create2DWorkspace123(
       numberOfSpectra, numberOfBins);
-  const Spectra spec = std::make_pair(0u, workspace->getNumberHistograms() - 1);
+  Spectra const spec = std::make_pair(0u, workspace->getNumberHistograms() - 1);
   IndirectFitData data(workspace, spec);
   return data;
 }
@@ -37,8 +37,7 @@ public:
 };
 
 /// This is used to compare Spectra which is implemented as a boost::variant
-class AreSpectraEqual : public boost::static_visitor<bool> {
-public:
+struct AreSpectraEqual : public boost::static_visitor<bool> {
   template <typename T, typename U>
   bool operator()(const T &, const U &) const {
     return false; // cannot compare different types
@@ -60,20 +59,32 @@ public:
   static void destroySuite(IndirectFitDataTest *suite) { delete suite; }
 
   void test_data_is_instantiated_correctly() {
-    const auto workspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
-    const Spectra spec =
+    auto const workspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+    Spectra const spec =
         std::make_pair(0u, workspace->getNumberHistograms() - 1);
 
     workspace->setTitle("Test Title");
-    const IndirectFitData data(workspace, spec);
+    IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.workspace(), workspace);
     TS_ASSERT_EQUALS(data.workspace()->getTitle(), "Test Title");
     TS_ASSERT_EQUALS(data.workspace()->getNumberHistograms(), 1);
   }
 
+  void test_that_DiscontinuousSpectra_is_set_correctly() {
+    DiscontinuousSpectra<std::size_t> const spectra =
+        DiscontinuousSpectra<std::size_t>("0-5,8,10");
+
+    std::string const spectraString = "0-5,8,10";
+    std::vector<std::size_t> const spectraVec{0, 1, 2, 3, 4, 5, 8, 10};
+
+    TS_ASSERT_EQUALS(spectra.getString(), spectraString);
+    for (auto it = spectra.begin(); it < spectra.end(); ++it)
+      TS_ASSERT_EQUALS(*it, spectraVec[it - spectra.begin()]);
+  }
+
   void test_data_is_stored_correctly_in_the_ADS() {
-    const auto data = getIndirectFitData(1, 3);
+    auto const data = getIndirectFitData(1, 3);
     SetUpADSWithWorkspace ads("WorkspaceName", data);
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("WorkspaceName"));
@@ -84,12 +95,12 @@ public:
   }
 
   void test_displayName_returns_correct_name() {
-    const auto data = getIndirectFitData(1, 3);
+    auto const data = getIndirectFitData(1, 3);
 
-    std::vector<std::string> formatStrings{
+    std::vector<std::string> const formatStrings{
         "%1%_s%2%_Result", "%1%_f%2%,s%2%_Parameter", "%1%_s%2%_Parameter"};
-    const std::string rangeDelimiter = "_to_";
-    const std::size_t spectrum = 1;
+    std::string const rangeDelimiter = "_to_";
+    std::size_t const spectrum = 1;
 
     TS_ASSERT_EQUALS(data.displayName(formatStrings[0], rangeDelimiter),
                      "_s0_Result");
@@ -100,26 +111,26 @@ public:
   }
 
   void test_displayName_removes_correct_part_of_workspace_name() {
-    const auto data = getIndirectFitData(1, 3);
+    auto const data = getIndirectFitData(1, 3);
 
     SetUpADSWithWorkspace ads("Workspace_3456_red", data);
-    const std::string formatString = "%1%_s%2%_Result";
-    const std::string rangeDelimiter = "_to_";
+    std::string const formatString = "%1%_s%2%_Result";
+    std::string const rangeDelimiter = "_to_";
 
     TS_ASSERT_EQUALS(data.displayName(formatString, rangeDelimiter),
                      "Workspace_3456_s0_Result");
   }
 
   void test_that_correct_number_of_spectra_is_returned() {
-    const auto data = getIndirectFitData(10, 3);
+    auto const data = getIndirectFitData(10, 3);
     TS_ASSERT_EQUALS(data.numberOfSpectra(), 10);
   }
 
   void test_that_correct_spectrum_number_is_returned() {
-    const auto data = getIndirectFitData(4, 3);
+    auto const data = getIndirectFitData(4, 3);
 
     for (auto i = 0; i < data.numberOfSpectra(); ++i) {
-      const std::size_t spectrumNum = data.getSpectrum(i);
+      std::size_t const spectrumNum = data.getSpectrum(i);
       TS_ASSERT_EQUALS(spectrumNum, i);
     }
   }
@@ -127,17 +138,17 @@ public:
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_workspace() {
     auto workspace = boost::make_shared<Workspace2D>();
-    const Spectra spec = std::make_pair(0u, 0u);
-    const IndirectFitData data(workspace, spec);
+    Spectra const spec = std::make_pair(0u, 0u);
+    IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
   }
 
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_spectra() {
-    const auto workspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
-    const DiscontinuousSpectra<std::size_t> spec("");
-    const IndirectFitData data(workspace, spec);
+    auto const workspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+    DiscontinuousSpectra<std::size_t> const spec("");
+    IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
   }
@@ -145,7 +156,7 @@ public:
   void
   test_that_false_is_returned_from_zeroSpectra_if_data_contains_one_or_more_spectra() {
     for (auto i = 1u; i < 10; ++i) {
-      const auto data = getIndirectFitData(i, 3);
+      auto const data = getIndirectFitData(i, 3);
       TS_ASSERT_EQUALS(data.zeroSpectra(), false);
     }
   }
@@ -174,8 +185,8 @@ public:
 
     data.setExcludeRegionString("1,8", 0);
     data.setExcludeRegionString("2,5", 1);
-    std::vector<double> regionVector1{1.0, 8.0};
-    std::vector<double> regionVector2{2.0, 5.0};
+    std::vector<double> const regionVector1{1.0, 8.0};
+    std::vector<double> const regionVector2{2.0, 5.0};
 
     TS_ASSERT_EQUALS(data.excludeRegionsVector(0), regionVector1);
     TS_ASSERT_EQUALS(data.excludeRegionsVector(1), regionVector2);
@@ -190,7 +201,7 @@ public:
     data.setExcludeRegionString("6,2,1,2,3,4,7,6", 1);
     data.setExcludeRegionString("1,2,2,3,20,18,21,22,7,8", 2);
 
-    std::vector<double> regionVector{2.0, 6.0};
+    std::vector<double> const regionVector{2.0, 6.0};
 
     TS_ASSERT_EQUALS(data.getExcludeRegion(0), "2.0,6.0");
     TS_ASSERT_EQUALS(data.getExcludeRegion(1),
@@ -229,12 +240,11 @@ public:
   void test_throws_when_setSpectra_is_provided_an_out_of_range_spectra() {
     auto data = getIndirectFitData(10, 3);
 
-    std::vector<Spectra> spectraPairs{std::make_pair(0u, 11u),
-                                      std::make_pair(0u, 1000000000000000000u),
-                                      std::make_pair(10u, 10u)};
-    std::vector<std::string> spectraStrings{"-1", "10",
-                                            "100000000000000000000000000000",
-                                            "1,5,10", "1,2,3,4,5,6,22"};
+    std::vector<Spectra> const spectraPairs{
+        std::make_pair(0u, 11u), std::make_pair(0u, 1000000000000000000u),
+        std::make_pair(10u, 10u)};
+    std::vector<std::string> const spectraStrings{
+        "10", "100000000000000000000000000000", "1,5,10", "1,2,3,4,5,6,22"};
 
     for (auto i = 0u; i < spectraPairs.size(); ++i)
       TS_ASSERT_THROWS(data.setSpectra(spectraPairs[i]), std::runtime_error);
@@ -245,10 +255,10 @@ public:
   void test_no_throw_when_setSpectra_is_provided_a_valid_spectra() {
     auto data = getIndirectFitData(10, 3);
 
-    std::vector<Spectra> spectraPairs{
+    std::vector<Spectra> const spectraPairs{
         std::make_pair(0u, 9u), std::make_pair(4u, 4u), std::make_pair(7u, 4u)};
-    std::vector<std::string> spectraStrings{"0", "9", "0,9,6,4,5",
-                                            "1,2,3,4,5,6"};
+    std::vector<std::string> const spectraStrings{"0", "9", "0,9,6,4,5",
+                                                  "1,2,3,4,5,6"};
 
     for (auto i = 0u; i < spectraPairs.size(); ++i)
       TS_ASSERT_THROWS_NOTHING(data.setSpectra(spectraPairs[i]));
@@ -304,7 +314,7 @@ public:
 
     data1.setStartX(6.53, 0);
     data2.setStartX(5.0, 1);
-    auto combinedData = data2.combine(data1);
+    auto const combinedData = data2.combine(data1);
 
     TS_ASSERT_EQUALS(combinedData.getRange(0).first, 6.53);
     TS_ASSERT_EQUALS(combinedData.getRange(1).first, 5.0);
@@ -316,7 +326,7 @@ public:
 
     data1.setEndX(2.34, 0);
     data2.setEndX(5.9, 1);
-    auto combinedData = data2.combine(data1);
+    auto const combinedData = data2.combine(data1);
 
     TS_ASSERT_EQUALS(combinedData.getRange(0).second, 2.34);
     TS_ASSERT_EQUALS(combinedData.getRange(1).second, 5.9);
@@ -328,7 +338,7 @@ public:
 
     data1.setExcludeRegionString("1,2,6,5", 0);
     data1.setExcludeRegionString("6,2", 1);
-    auto combinedData = data2.combine(data1);
+    auto const combinedData = data2.combine(data1);
 
     TS_ASSERT_EQUALS(combinedData.getExcludeRegion(0), "1.0,2.0,5.0,6.0");
     TS_ASSERT_EQUALS(combinedData.getExcludeRegion(1), "2.0,6.0");
@@ -341,8 +351,8 @@ public:
 
     data1.setSpectra(std::make_pair(0u, 4u));
     data2.setSpectra(std::make_pair(5u, 9u));
-    auto combinedData = data2.combine(data1);
-    Spectra spec(std::make_pair(0u, 9u));
+    auto const combinedData = data2.combine(data1);
+    Spectra const spec(std::make_pair(0u, 9u));
 
     TS_ASSERT(
         boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
@@ -355,8 +365,8 @@ public:
 
     data1.setSpectra(std::make_pair(0u, 4u));
     data2.setSpectra(std::make_pair(8u, 9u));
-    auto combinedData = data2.combine(data1);
-    Spectra spec(DiscontinuousSpectra<std::size_t>("0-4,8-9"));
+    auto const combinedData = data2.combine(data1);
+    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-4,8-9"));
 
     TS_ASSERT(
         boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
@@ -369,65 +379,64 @@ public:
 
     data1.setSpectra(std::make_pair(0u, 8u));
     data2.setSpectra(std::make_pair(4u, 9u));
-    auto combinedData = data2.combine(data1);
-    // Spectra spec(std::make_pair(0u, 9u));
-    Spectra spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    auto const combinedData = data2.combine(data1);
+    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-9"));
 
     TS_ASSERT(
         boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
   }
 
   void
-  test_that_the_DiscontinousSpectra_of_two_datasets_are_combined_correctly_when_spectra_do_not_overlap() {
+  test_that_the_DiscontinuousSpectra_of_two_datasets_are_combined_correctly_when_spectra_do_not_overlap() {
     auto data1 = getIndirectFitData(10, 3);
     auto data2 = getIndirectFitData(10, 3);
 
     data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-4"));
     data2.setSpectra(DiscontinuousSpectra<std::size_t>("5-9"));
-    auto combinedData = data2.combine(data1);
-    Spectra spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    auto const combinedData = data2.combine(data1);
+    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-9"));
 
     TS_ASSERT(
         boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
   }
 
   void
-  test_that_the_DiscontinousSpectra_of_two_datasets_are_combined_correctly_when_spectra_overlap() {
+  test_that_the_DiscontinuousSpectra_of_two_datasets_are_combined_correctly_when_spectra_overlap() {
     auto data1 = getIndirectFitData(10, 3);
     auto data2 = getIndirectFitData(10, 3);
 
     data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-7"));
     data2.setSpectra(DiscontinuousSpectra<std::size_t>("2-9"));
-    auto combinedData = data2.combine(data1);
-    Spectra spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    auto const combinedData = data2.combine(data1);
+    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-9"));
 
     TS_ASSERT(
         boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
   }
 
   void
-  test_that_a_SpectraPair_and_DiscontinousSpectra_dataset_are_combined_correctly_when_spectra_do_not_overlap() {
+  test_that_a_SpectraPair_and_DiscontinuousSpectra_dataset_are_combined_correctly_when_spectra_do_not_overlap() {
     auto data1 = getIndirectFitData(10, 3);
     auto data2 = getIndirectFitData(10, 3);
 
     data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-4"));
     data2.setSpectra(std::make_pair(5u, 9u));
-    auto combinedData = data2.combine(data1);
-    Spectra spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    auto const combinedData = data2.combine(data1);
+    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-9"));
 
     TS_ASSERT(
         boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));
   }
 
   void
-  test_that_a_SpectraPair_and_DiscontinousSpectra_dataset_are_combined_correctly_when_spectra_overlap() {
+  test_that_a_SpectraPair_and_DiscontinuousSpectra_dataset_are_combined_correctly_when_spectra_overlap() {
     auto data1 = getIndirectFitData(10, 3);
     auto data2 = getIndirectFitData(10, 3);
 
     data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-7"));
     data2.setSpectra(std::make_pair(4u, 9u));
-    auto combinedData = data2.combine(data1);
-    Spectra spec(DiscontinuousSpectra<std::size_t>("0-9"));
+    auto const combinedData = data2.combine(data1);
+    Spectra const spec(DiscontinuousSpectra<std::size_t>("0-9"));
 
     TS_ASSERT(
         boost::apply_visitor(AreSpectraEqual(), combinedData.spectra(), spec));

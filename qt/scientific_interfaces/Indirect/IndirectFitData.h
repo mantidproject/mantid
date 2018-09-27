@@ -195,8 +195,6 @@ public:
   void setExcludeRegionString(std::string const &excludeRegion,
                               std::size_t const &spectrum);
 
-  void showMessage(std::string const &str);
-
 private:
   void validateSpectra(Spectra const &spectra);
 
