@@ -31,7 +31,7 @@ using namespace Mantid::DataHandling;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
-void run_multiprocess_load(const std::string &file) {
+void run_multiprocess_load(const std::string &file, bool precount) {
   Mantid::API::FrameworkManager::Instance();
   LoadEventNexus ld;
   ld.initialize();
@@ -39,7 +39,7 @@ void run_multiprocess_load(const std::string &file) {
   std::string outws_name = "multiprocess";
   ld.setPropertyValue("Filename", file);
   ld.setPropertyValue("OutputWorkspace", outws_name);
-  ld.setPropertyValue("Precount", "1");
+  ld.setPropertyValue("Precount", std::to_string(precount));
   ld.setProperty<bool>("LoadLogs", false); // Time-saver
   TS_ASSERT_THROWS_NOTHING(ld.execute());
   TS_ASSERT(ld.isExecuted())
@@ -898,8 +898,10 @@ public:
   }
 
   void test_multiprocess_load() {
-    run_multiprocess_load("SANS2D00022048.nxs");
-    run_multiprocess_load("LARMOR00003368.nxs");
+    run_multiprocess_load("SANS2D00022048.nxs", true);
+    run_multiprocess_load("SANS2D00022048.nxs", false);
+    run_multiprocess_load("LARMOR00003368.nxs", true);
+    run_multiprocess_load("LARMOR00003368.nxs", false);
   }
 
 private:

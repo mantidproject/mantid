@@ -59,7 +59,8 @@ MANTID_PARALLEL_DLL void
 load(const std::string &filename, const std::string &groupName,
      const std::vector<std::string> &bankNames,
      const std::vector<int32_t> &bankOffsets,
-     std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
+     std::vector<std::vector<Types::Event::TofEvent> *> eventLists,
+     bool precalcEvents);
 
 } // namespace EventLoader
 

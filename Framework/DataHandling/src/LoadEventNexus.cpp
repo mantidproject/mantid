@@ -813,7 +813,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     } else {
       try {
         ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name,
-                                              bankNames, event_id_is_spec);
+                                              bankNames, event_id_is_spec,
+                                              getProperty("Precount"));
         g_log.information() << "Used Multiprocess ParallelEventLoader.\n";
         loaded = true;
         shortest_tof = 0.0;

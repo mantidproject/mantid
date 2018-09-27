@@ -52,7 +52,7 @@ public:
                                const std::string &filename,
                                const std::string &groupName,
                                const std::vector<std::string> &bankNames,
-                               const bool eventIDIsSpectrumNumber);
+                               const bool eventIDIsSpectrumNumber, const bool precalcEvents);
 };
 
 } // namespace DataHandling

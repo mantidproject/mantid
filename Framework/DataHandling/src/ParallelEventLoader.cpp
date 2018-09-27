@@ -116,12 +116,12 @@ void ParallelEventLoader::loadMPI(DataObjects::EventWorkspace &ws,
 void ParallelEventLoader::loadMultiProcess(
     DataObjects::EventWorkspace &ws, const std::string &filename,
     const std::string &groupName, const std::vector<std::string> &bankNames,
-    const bool eventIDIsSpectrumNumber) {
+    const bool eventIDIsSpectrumNumber, const bool precalcEvents) {
   auto eventLists = getResultVector(ws);
   std::vector<int32_t> offsets =
       getOffsets(ws, filename, groupName, bankNames, eventIDIsSpectrumNumber);
   Parallel::IO::EventLoader::load(filename, groupName, bankNames, offsets,
-                                  std::move(eventLists));
+                                  std::move(eventLists), precalcEvents);
 }
 
 } // namespace DataHandling

@@ -1,10 +1,12 @@
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MantidVersion.h"
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
 
 #include <H5Cpp.h>
+#include <boost/dll/runtime_symbol_info.hpp>
 #include <thread>
 
 namespace Mantid {
@@ -52,14 +54,18 @@ void load(const Communicator &comm, const std::string &filename,
 void load(const std::string &filename, const std::string &groupname,
           const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
-          std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
+          std::vector<std::vector<Types::Event::TofEvent> *> eventLists,
+          bool precalcEvents) {
   auto concurencyNumber = std::thread::hardware_concurrency();
   std::string executableName =
-      Mantid::Kernel::ConfigService::Instance().getDirectoryOfExecutable() +
+      boost::dll::symbol_location(Mantid::Kernel::MantidVersion::version)
+          .parent_path()
+          .string() +
       "/MantidNexusParallelLoader";
+
   MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()),
                                  concurencyNumber / 2, concurencyNumber / 2,
-                                 executableName);
+                                 executableName, precalcEvents);
   loader.load(filename, groupname, bankNames, bankOffsets, eventLists);
 }
 
