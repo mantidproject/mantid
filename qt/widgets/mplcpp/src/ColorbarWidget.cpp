@@ -6,6 +6,8 @@
 
 #include "MantidPythonInterface/core/ErrorHandling.h"
 
+#include <QComboBox>
+#include <QLineEdit>
 #include <QVBoxLayout>
 
 namespace MantidQt {
@@ -13,10 +15,12 @@ namespace Widgets {
 namespace MplCpp {
 
 namespace {
-// These values are pulled from trial and error
-constexpr double AXES_LEFT = 0.125;
-constexpr double AXES_BOTTOM = 0.125;
-constexpr double AXES_WIDTH = 0.1;
+// These values control the dimensions of the axes used
+// to hold the colorbar. The aspect ratio is set to give
+// the usual long thin colobar
+constexpr double AXES_LEFT = 0.4;
+constexpr double AXES_BOTTOM = 0.05;
+constexpr double AXES_WIDTH = 0.2;
 constexpr double AXES_HEIGHT = 0.9;
 
 Python::Object cbModule() {
@@ -32,13 +36,17 @@ Python::Object cbModule() {
  * @param type An integer (0=Linear, 1=Log10, 2=Power)
  * @param parent A pointer to the parent widget
  */
-ColorbarWidget::ColorbarWidget(int type, QWidget *parent) : QWidget(parent) {
+ColorbarWidget::ColorbarWidget(int type, QWidget *parent)
+    : QWidget(parent), m_ui(), m_colorbar() {
   Figure fig{false};
-  auto cbAxes{fig.addAxes(AXES_LEFT, AXES_BOTTOM, AXES_WIDTH, AXES_HEIGHT)};
-
-  m_scaleMin = new QLineEdit;
-  m_scaleMax = new QLineEdit;
-  m_canvas = new FigureCanvasQt(std::move(fig));
+  fig.pyobj().attr("set_facecolor")("w");
+  Axes cbAxes{fig.addAxes(AXES_LEFT, AXES_BOTTOM, AXES_WIDTH, AXES_HEIGHT)};
+  m_ui.setupUi(this);
+  // remove placeholder widget and add figure canvas
+  delete m_ui.mplColorbar;
+  m_ui.mplColorbar = new FigureCanvasQt(fig, this);
+  m_ui.verticalLayout->insertWidget(1, m_ui.mplColorbar);
+  // draw matplotlib colorbar
   try {
     m_colorbar = cbModule().attr("Colorbar")(
         cbAxes.pyobj(),
@@ -46,11 +54,6 @@ ColorbarWidget::ColorbarWidget(int type, QWidget *parent) : QWidget(parent) {
   } catch (Python::ErrorAlreadySet &) {
     throw Mantid::PythonInterface::PythonRuntimeError();
   }
-
-  setLayout(new QVBoxLayout());
-  layout()->addWidget(m_scaleMax);
-  layout()->addWidget(m_canvas);
-  layout()->addWidget(m_scaleMin);
 }
 
 /**

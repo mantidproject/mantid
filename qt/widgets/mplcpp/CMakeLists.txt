@@ -28,14 +28,23 @@ set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/ScalarMappable.h
 )
 
+set ( UI_FILES
+  inc/MantidQtWidgets/MplCpp/Colorbar.ui
+)
+
 find_package ( BoostPython REQUIRED )
 
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
   QT_VERSION 5
-  SRC ${LIB_SRCS}
-  MOC ${MOC_HEADERS}
-  NOMOC ${NOMOC_HEADERS}
+  SRC
+    ${LIB_SRCS}
+  MOC
+    ${MOC_HEADERS}
+  NOMOC
+    ${NOMOC_HEADERS}
+  UI
+    ${UI_FILES}
   DEFS
     IN_MANTIDQT_MPLCPP
   INCLUDE_DIRS
