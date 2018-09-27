@@ -27,7 +27,7 @@ namespace IO {
  * main process in RAII style, but in the modern linux implementation you
  * can't create more than 1 NAMED shared memory segment in single process,
  * but we should use NAMED shared memory to fit other OS needs,
- * so in currenti mplementation all segments are created by child processes
+ * so in current implementation all segments are created by child processes
  * and destroyed by parent. This may be fixed in the future, then this class,
  * may be used for operating on segments from child processes.
  * EventsListsShmemManager base class for EventsListsShmemStorage,
