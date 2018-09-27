@@ -47,6 +47,17 @@ Axes Figure::addSubPlot(int subplotspec) {
   return Axes{pyobj().attr("add_subplot")(subplotspec)};
 }
 
+/**
+ * @brief Add a colorbar to this figure
+ * @param mappable An objet providing the mapping of data to rgb colors
+ * @param cax An axes instance to hold the color bar
+ * @return A reference to the matplotlib.colorbar.Colorbar object
+ */
+Python::Object Figure::colorbar(ScalarMappable mappable, Axes cax) {
+  return Python::Object(
+      pyobj().attr("colorbar")(mappable.pyobj(), cax.pyobj()));
+}
+
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt

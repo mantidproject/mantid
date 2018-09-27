@@ -61,7 +61,7 @@ FigureCanvasQt::FigureCanvasQt(int subplotspec, QWidget *parent)
 /**
  * @brief Constructor specifying an existing axes object and optional
  * parent.
- * @param axes An existing axes instance
+ * @param fig An existing figure instance containing an axes
  * @param parent The owning parent widget
  */
 FigureCanvasQt::FigureCanvasQt(Figure fig, QWidget *parent)
