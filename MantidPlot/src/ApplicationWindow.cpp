@@ -91,7 +91,6 @@
 #include "PlotWizard.h"
 #include "PolynomFitDialog.h"
 #include "PolynomialFit.h"
-#include "Process.h"
 #include "ProjectRecovery.h"
 #include "ProjectSerialiser.h"
 #include "QwtErrorPlotCurve.h"
@@ -183,6 +182,8 @@
 
 #include <boost/regex.hpp>
 #include <boost/scoped_ptr.hpp>
+
+#include <Poco/Path.h>
 
 // Mantid
 #include "Mantid/FirstTimeSetup.h"
@@ -9814,7 +9815,8 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     // Stop background saving thread, so it doesn't try to use a destroyed
     // resource
     m_projectRecovery.stopProjectSaving();
-    m_projectRecovery.clearAllCheckpoints();
+    m_projectRecovery.clearAllCheckpoints(
+        Poco::Path(m_projectRecovery.getRecoveryFolderOutputPR()));
   }
 
   // Close the remaining MDI windows. The Python API is required to be active
@@ -16665,21 +16667,9 @@ void ApplicationWindow::onAboutToStart() {
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
 
-  // Kick off project recovery iff we are able to determine if we are the only
-  // instance currently running
-  try {
-    if (!Process::isAnotherInstanceRunning()) {
-      g_log.debug("Starting project autosaving.");
-      checkForProjectRecovery();
-    } else {
-      g_log.debug("Another MantidPlot process is running. Project recovery is "
-                  "disabled.");
-    }
-  } catch (std::runtime_error &exc) {
-    g_log.warning("Unable to determine if other MantidPlot processes are "
-                  "running. Project recovery is disabled. Error msg: " +
-                  std::string(exc.what()));
-  }
+  // Kick off project recovery
+  g_log.debug("Starting project autosaving.");
+  checkForProjectRecovery();
 }
 
 /**
@@ -16816,6 +16806,9 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
  */
 void ApplicationWindow::checkForProjectRecovery() {
   m_projectRecoveryRunOnStart = true;
+
+  m_projectRecovery.removeOlderCheckpoints();
+
   if (!m_projectRecovery.checkForRecovery()) {
     m_projectRecovery.startProjectSaving();
     return;
@@ -16835,7 +16828,6 @@ void ApplicationWindow::checkForProjectRecovery() {
                              "OK");
 
     // Restart project recovery manually
-    m_projectRecovery.clearAllCheckpoints();
     m_projectRecovery.startProjectSaving();
   }
 }
