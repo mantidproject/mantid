@@ -37,6 +37,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
   INCLUDE_DIRS
       inc
       ../../../Framework/PythonInterface/core/inc
+      ${Boost_INCLUDE_DIRS}
       ${PYTHON_INCLUDE_PATH}
       ${PYTHON_NUMPY_INCLUDE_DIR}
   LINK_LIBS

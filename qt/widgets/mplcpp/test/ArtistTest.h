@@ -29,7 +29,8 @@ public:
   // ----------------- failure tests ---------------------
 
   void testConstructWithNonArtistThrowsInvalidArgument() {
-    TS_ASSERT_THROWS(Artist(Python::Object()), std::invalid_argument);
+    Python::Object none;
+    TS_ASSERT_THROWS(Artist artist(none), std::invalid_argument);
   }
 };
 
