@@ -300,7 +300,7 @@ void LoadAscii::fillInputValues(std::vector<double> &values,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadAscii::init() {
-  const std::vector<std::string> extensions{".dat", ".txt", ".csv", ""};
+  const std::vector<std::string> extensions{".dat", ".txt", ".csv"};
   declareProperty(Kernel::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Load, extensions),
                   "The name of the text file to read, including its full or "

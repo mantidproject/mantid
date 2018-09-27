@@ -35,7 +35,7 @@ void SaveDiffFittingAscii::init() {
 
   // Declare required parameters, filename with ext {.his} and input
   // workspace
-  const std::vector<std::string> exts{".txt", ".csv", ""};
+  const std::vector<std::string> exts{".txt", ".csv"};
   declareProperty(Kernel::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, exts),
                   "The filename to use for the saved data");

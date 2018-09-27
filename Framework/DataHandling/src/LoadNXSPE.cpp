@@ -88,7 +88,7 @@ int LoadNXSPE::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadNXSPE::init() {
-  const std::vector<std::string> exts{".nxspe", ""};
+  const std::vector<std::string> exts{".nxspe"};
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Load, exts),
                   "An NXSPE file");
