@@ -70,7 +70,7 @@ extra_columns(const std::vector<std::string> &filenames) {
       if (result.size() == 2) {
         line = Strings::strip(result[1]);
         Kernel::StringTokenizer tokenizer(
-            line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+            line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
         for (const auto &token : tokenizer) {
           columnSet.insert(token);
         }
@@ -541,7 +541,7 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
       if (result.size() == 2) {
         line = Strings::strip(result[1]);
         Kernel::StringTokenizer tokenizer(
-            line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+            line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
         for (const auto &token : tokenizer) {
           columnNames.push_back(token);
         }
@@ -552,7 +552,7 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
 
       line = Strings::strip(line);
       Kernel::StringTokenizer tokenizer(
-          line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+          line, " \t", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       std::vector<std::string> valuesAsStr;
       for (const auto &token : tokenizer) {
         valuesAsStr.push_back(token);
