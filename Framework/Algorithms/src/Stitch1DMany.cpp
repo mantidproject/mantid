@@ -8,7 +8,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
@@ -37,8 +36,7 @@ void Stitch1DMany::init() {
   declareProperty(
       make_unique<ArrayProperty<double>>("StartOverlaps", Direction::Input),
       "Start overlaps for stitched workspaces; if specified, the number of "
-      "StartOverlaps must be 1 less than the number of input workspaces. "
-      "Optional.");
+      "StartOverlaps must be 1 less than the number of input workspaces.");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("EndOverlaps", Direction::Input),
@@ -56,10 +54,9 @@ void Stitch1DMany::init() {
 
   declareProperty(make_unique<ArrayProperty<double>>("ManualScaleFactors",
                                                      Direction::Input),
-                  "Provided values for the scale factors; if specified, the "
-                  "number of ManualScaleFactors must either be one (in which "
-                  "case the provided value is applied to all input workspaces) "
-                  "or 1 less than the number of input workspaces");
+                  "Provided values for the scale factors; either a single "
+                  "value which will be to all input workspaces or individual "
+                  "values of the number of input workspaces minus one");
   setPropertySettings("ManualScaleFactors",
                       make_unique<VisibleWhenProperty>("UseManualScaleFactors",
                                                        IS_EQUAL_TO, "1"));
@@ -95,6 +92,9 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   std::map<std::string, std::string> issues;
   const std::vector<std::string> inputWorkspacesStr =
       this->getProperty("InputWorkspaces");
+  int scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
+  // Period -1 corresponds to workspace index
+  m_scaleFactorFromPeriod = static_cast<size_t>(--scaleFactorFromPeriod);
   if (inputWorkspacesStr.size() < 2)
     issues["InputWorkspaces"] = "Nothing to stitch";
   else {
@@ -103,7 +103,7 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
       /*
        * Column:    one column of MatrixWorkspaces or several columns of
        * MatrixWorkspaces from a group
-       * Row:       each period
+       * Row:       each period only for groups
        */
       m_inputWSMatrix.reserve(inputWorkspacesStr.size());
       std::vector<MatrixWorkspace_sptr> column;
@@ -128,11 +128,6 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
           column.emplace_back(inputMatrix);
         }
       }
-
-      // Either stitch MatrixWorkspaces or workspaces of the group
-      size_t numStitchableWS = (workspaces.size() == inputWorkspacesStr.size())
-                                   ? workspaces.size()
-                                   : inputWorkspacesStr.size();
 
       if (m_inputWSMatrix.empty()) { // no group workspaces
         // A column of matrix workspaces will be stitched
@@ -173,18 +168,13 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
             }
           }
         }
-      }
-
-      int scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
-      m_scaleFactorFromPeriod = static_cast<size_t>(scaleFactorFromPeriod);
-      m_scaleFactorFromPeriod--; // To account for period being indexed from
-                                 // 1
-      if (m_scaleFactorFromPeriod >= m_inputWSMatrix.size()) {
-        std::stringstream expectedRange;
-        expectedRange << m_inputWSMatrix.size();
-        issues["ScaleFactorFromPeriod"] =
-            "Period index out of range, must be smaller than " +
-            expectedRange.str();
+        if (m_scaleFactorFromPeriod >= m_inputWSMatrix.front().size()) {
+          std::stringstream expectedRange;
+          expectedRange << m_inputWSMatrix.front().size() + 1;
+          issues["ScaleFactorFromPeriod"] =
+              "Period index out of range, must be smaller than " +
+              expectedRange.str();
+        }
       }
 
       m_startOverlaps = this->getProperty("StartOverlaps");
@@ -192,6 +182,10 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
       m_scaleRHSWorkspace = this->getProperty("ScaleRHSWorkspace");
       m_params = this->getProperty("Params");
 
+      // Either stitch MatrixWorkspaces or workspaces of the group
+      size_t numStitchableWS = (workspaces.size() == inputWorkspacesStr.size())
+                                   ? workspaces.size()
+                                   : inputWorkspacesStr.size();
       std::stringstream expectedVal;
       expectedVal << numStitchableWS - 1;
       if (!m_startOverlaps.empty() &&
@@ -237,8 +231,7 @@ void Stitch1DMany::exec() {
     std::string outName;
 
     // Determine whether or not we are scaling workspaces using scale
-    // factors
-    // from a specific period
+    // factors from a specific period
     Property *manualSF = this->getProperty("ManualScaleFactors");
     bool usingScaleFromPeriod = m_useManualScaleFactors &&
                                 manualSF->isDefault() &&

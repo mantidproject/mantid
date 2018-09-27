@@ -1021,6 +1021,99 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_groups_containing_single_workspaces_scale_factor_from_period() {
+    // Three groups with one matrix workspaces each.
+    // Each matrix workspace has two spectra.
+
+    // First group
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    doGroupWorkspaces("ws1", "group1");
+    // Second group
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
+    doGroupWorkspaces("ws3", "group2");
+    // Third group
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws5");
+    doGroupWorkspaces("ws5", "group3");
+    // ws1 will be stitched with ws3 and ws5
+
+    Stitch1DMany alg0;
+    alg0.setChild(true);
+    alg0.initialize();
+    alg0.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(
+        alg0.setProperty("InputWorkspaces", "group1, group2, group3"));
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("Params", "0.1, 0.1, 2.6"));
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("StartOverlaps", "0.8, 1.6"));
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("EndOverlaps", "1.1, 1.9"));
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("UseManualScaleFactors", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("ScaleFactorFromPeriod", 2));
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("OutputWorkspace", "outws"));
+    TS_ASSERT_THROWS_NOTHING(alg0.execute());
+    TS_ASSERT(!alg0.isExecuted());
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspaces", "group1, group2, group3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 2.6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8, 1.6"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1, 1.9"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseManualScaleFactors", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactorFromPeriod", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(!alg.isExecuted());
+
+    // By keeping ManualScaleFactors empty (default value) it allows workspaces
+    // in other periods to be scaled by scale factors from a specific period.
+    // Periods 0 and 2 workspaces will be scaled by scale factors from period 1.
+
+    // Test output ws
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws);
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    TS_ASSERT_EQUALS(group->getNumberOfEntries(), 1);
+
+    // First item in the output group
+    auto stitched =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(stitched->blocksize(), 25);
+    // First spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(0)[0], 1., 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[9], 1.01589, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[16], 0.97288, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(0)[24], 0.9375, 0.00001);
+    // Second spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2., 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[9], 1.98375, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[16], 1.70307, 0.00001);
+    TS_ASSERT_DELTA(stitched->y(1)[24], 1.56250, 0.00001);
+    // First spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.70111, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.60401, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(0)[24], 0.76547, 0.00001);
+    // Second spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[9], 0.97973, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[16], 0.79916, 0.00001);
+    TS_ASSERT_DELTA(stitched->e(1)[24], 0.98821, 0.00001);
+
+    // Test out scale factors
+    std::vector<double> scales = alg.getProperty("OutScaleFactors");
+    TS_ASSERT_EQUALS(scales.size(), 4);
+    TS_ASSERT_DELTA(scales[0], 0.9375, 0.0001);
+    TS_ASSERT_DELTA(scales[1], 0.6249, 0.0001);
+    TS_ASSERT_DELTA(scales[2], 0.9375, 0.0001);
+    TS_ASSERT_DELTA(scales[3], 0.6249, 0.0001);
+
+    // Clear the ADS
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_two_workspaces_history() {
     // This test is functionally similar to test_two_workspaces
 
