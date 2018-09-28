@@ -508,7 +508,8 @@ void Iqt::setPlotSpectrumIndex(int spectrum) {
 }
 
 int Iqt::getPlotSpectrumIndex() {
-  return boost::numeric_cast<int>(m_uiForm.spSpectrum->text());
+  return boost::numeric_cast<int>(
+      std::stoull(m_uiForm.spSpectrum->text().toStdString()));
 }
 
 void Iqt::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
