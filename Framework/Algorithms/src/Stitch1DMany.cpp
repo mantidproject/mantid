@@ -35,18 +35,18 @@ void Stitch1DMany::init() {
 
   declareProperty(
       make_unique<ArrayProperty<double>>("StartOverlaps", Direction::Input),
-      "Start overlaps for stitched workspaces; if specified, the number of "
-      "StartOverlaps must be 1 less than the number of input workspaces.");
+      "Start overlaps for stitched workspaces "
+      "(number of input workspaces minus one).");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("EndOverlaps", Direction::Input),
-      "End overlaps for stitched workspaces; if specified, the number of "
-      "EndOverlaps must be the same as the number of StartOverlaps.");
+      "End overlaps for stitched workspaces "
+      "(number of input workspaces minus one).");
 
   declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
                                                        true, Direction::Input),
                   "Scaling either with respect to first (first hand side, LHS) "
-                  "or second (right hand side, RHS) workspace");
+                  "or second (right hand side, RHS) workspace.");
 
   declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactors",
                                                        false, Direction::Input),
@@ -54,9 +54,9 @@ void Stitch1DMany::init() {
 
   declareProperty(make_unique<ArrayProperty<double>>("ManualScaleFactors",
                                                      Direction::Input),
-                  "Provided values for the scale factors; either a single "
-                  "value which will be to all input workspaces or individual "
-                  "values of the number of input workspaces minus one");
+                  "Either a single scale factor which will be applied to all "
+                  "input workspaces or individual scale factors "
+                  "(number of input workspaces minus one)");
   setPropertySettings("ManualScaleFactors",
                       make_unique<VisibleWhenProperty>("UseManualScaleFactors",
                                                        IS_EQUAL_TO, "1"));
