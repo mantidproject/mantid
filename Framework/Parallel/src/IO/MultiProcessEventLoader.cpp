@@ -134,6 +134,17 @@ void MultiProcessEventLoader::load(
         processArgs.push_back(std::to_string(bankOffsets[j])); // bank size
       }
 
+      // to cleanup shared memory in this function
+      struct SharedMemoryDestroyer{
+        const std::vector<std::string>& segments;
+        SharedMemoryDestroyer(const std::vector<std::string>& sm) : segments(sm) {}
+        ~SharedMemoryDestroyer() {
+          for (const auto &name : segments)
+            ip::shared_memory_object::remove(name.c_str());
+        }
+      } shared_memory_destroyer(m_segmentNames);
+
+
       try {
         // launch child processes
         vChilds.emplace_back(
@@ -169,13 +180,7 @@ void MultiProcessEventLoader::load(
 
     // Assemble multiprocess data from shared memory
     assembleFromShared(eventLists);
-
-    // clean up shared memory
-    for (const auto &name : m_segmentNames)
-      ip::shared_memory_object::remove(name.c_str());
   } catch (std::exception const &ex) {
-    for (const auto &name : m_segmentNames)
-      ip::shared_memory_object::remove(name.c_str());
     std::rethrow_if_nested(ex);
   }
 }
