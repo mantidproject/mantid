@@ -1,22 +1,28 @@
+# pylint: disable=C0111
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_workspace import MuonWorkspace
 
 
 class MuonPair(object):
-    """Simple struct to store information on a detector group pair.
+    """
+    Simple structure to store information on a detector group pair.
 
-    The name is set at initialization and after that cannot be changed.
-    The detector list can be modified by passing a list of ints (type checks for this)
-    The number of detetors is stored
+    - The name is set at initialization and after that cannot be changed.
+    - The pair has two groups associated to it, and we store only their names.
+    - The "alpha" parameter is stored and modifiable.
+    - The workspace associated to the pair can be set, but must be of type MuonWorkspace.
     """
 
-    def __init__(self, pair_name, group1_name="", group2_name="", alpha=1.0):
-        self._pair_name = pair_name
-        self._group1_name = group1_name
-        self._group2_name = group2_name
-        self._alpha = float(alpha)
+    def __init__(self, pair_name,
+                 forward_group_name="",
+                 backward_group_name="",
+                 alpha=1.0):
 
+        self._pair_name = pair_name
+        self._forward_group_name = forward_group_name
+        self._backward_group_name = backward_group_name
+        self._alpha = float(alpha)
         self._workspace = None
 
     @property
@@ -36,20 +42,20 @@ class MuonPair(object):
         return self._pair_name
 
     @property
-    def group1(self):
-        return self._group1_name
+    def forward_group(self):
+        return self._forward_group_name
 
     @property
-    def group2(self):
-        return self._group2_name
+    def backward_group(self):
+        return self._backward_group_name
 
-    @group1.setter
-    def group1(self, new_name):
-        self._group1_name = new_name
+    @forward_group.setter
+    def forward_group(self, new_name):
+        self._forward_group_name = new_name
 
-    @group2.setter
-    def group2(self, new_name):
-        self._group2_name = new_name
+    @backward_group.setter
+    def backward_group(self, new_name):
+        self._backward_group_name = new_name
 
     @property
     def alpha(self):
