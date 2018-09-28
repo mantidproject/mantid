@@ -257,9 +257,10 @@ void IndirectTab::plotMultipleSpectra(
  * This uses the plotSpectrum function from the Python API.
  *
  * @param workspaceNames List of names of workspaces to plot
- * @param wsIndex Index of spectrum from each workspace to plot
+ * @param spectraIndex Index of spectrum from each workspace to plot
  */
-void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
+void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
+                               int spectraIndex) {
   if (workspaceNames.isEmpty())
     return;
 
@@ -268,7 +269,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
   pyInput += "plotSpectrum(['";
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
-  pyInput += QString::number(wsIndex);
+  pyInput += QString::number(spectraIndex);
   pyInput += ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
@@ -279,15 +280,15 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
  * index.
  *
  * @param workspaceName Names of workspace to plot
- * @param wsIndex Workspace Index of spectrum to plot
+ * @param spectraIndex Workspace Index of spectrum to plot
  */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int wsIndex) {
+void IndirectTab::plotSpectrum(const QString &workspaceName, int spectraIndex) {
   if (workspaceName.isEmpty())
     return;
 
   QStringList workspaceNames;
   workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, wsIndex);
+  plotSpectrum(workspaceNames, spectraIndex);
 }
 
 /**

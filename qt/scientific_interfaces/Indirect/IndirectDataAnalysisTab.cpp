@@ -146,6 +146,10 @@ void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) {
   m_maxSpectrum = spectrum;
 }
 
+int IndirectDataAnalysisTab::getNumberOfSpectra() {
+  return inputWorkspace()->getNumberHistograms();
+}
+
 /**
  * Plots the current preview workspace, if none is set, plots
  * the selected spectrum of the current input workspace.

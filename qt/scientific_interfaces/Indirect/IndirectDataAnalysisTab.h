@@ -87,6 +87,8 @@ protected:
   /// Retrieve the selected maximum spectrum
   int maximumSpectrum() const;
 
+  int getNumberOfSpectra();
+
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
 
   void clearAndPlotInput(MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
