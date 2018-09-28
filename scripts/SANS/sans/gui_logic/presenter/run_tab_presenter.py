@@ -943,6 +943,3 @@ class RunTabPresenter(object):
         self._view.set_instrument_settings(instrument)
         self._beam_centre_presenter.on_update_instrument(instrument)
         self._workspace_diagnostic_presenter.set_instrument_settings(instrument)
-
-    def get_file_information(self, run_number, callback_function):
-        self.work_handler()

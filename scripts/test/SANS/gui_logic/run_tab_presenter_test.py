@@ -666,7 +666,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_row_inserted(2, test_row_0)
 
         presenter.on_erase_rows()
-        self.maxDiff = None
+
         self.assertEqual(presenter._table_model.get_number_of_rows(), 3)
         self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), test_row_0)
         empty_row.id = 3
