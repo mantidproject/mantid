@@ -17,7 +17,16 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>5</number>
+   </property>
+   <property name="topMargin">
+    <number>5</number>
+   </property>
+   <property name="rightMargin">
+    <number>5</number>
+   </property>
+   <property name="bottomMargin">
     <number>5</number>
    </property>
    <item>
@@ -115,6 +124,12 @@
      </item>
      <item>
       <widget class="QComboBox" name="scaleTypeOpt">
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <item>
         <property name="text">
          <string>Linear</string>
@@ -139,6 +154,12 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
        </property>
       </widget>
      </item>

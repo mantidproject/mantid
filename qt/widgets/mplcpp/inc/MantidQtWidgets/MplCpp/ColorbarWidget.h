@@ -69,6 +69,7 @@ signals:
 private slots:
   void scaleMinimumEdited();
   void scaleMaximumEdited();
+  void scaleTypeSelectionChanged(int index);
 
 private:
   void initLayout();
