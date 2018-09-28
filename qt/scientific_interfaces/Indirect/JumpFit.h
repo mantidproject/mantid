@@ -26,11 +26,19 @@ protected slots:
   void runClicked();
 
 protected:
-  void setRunEnabled(bool enabled) override;
+  bool shouldEnablePlotResult() override;
+
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 
+  void setRunIsRunning(bool running) override;
+
 private:
+  void setRunEnabled(bool enabled);
+  void setFitSingleSpectrumEnabled(bool enabled);
+
+  void setPlotResultIsPlotting(bool plotting);
+
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
 };

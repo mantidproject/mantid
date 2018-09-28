@@ -111,8 +111,6 @@ protected:
                        const QString &startRangePropName = "",
                        const QString &endRangePropName = "");
 
-  virtual void setRunEnabled(bool enabled) = 0;
-
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
   /// QtCheckBoxFactory
