@@ -332,10 +332,18 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         return True
 
     def _on_wavelength_step_type_changed(self):
-        if self.wavelength_step_type == RangeStepType.RangeLin or self.wavelength_step_type == RangeStepType.RangeLog:
+        if self.wavelength_step_type == RangeStepType.RangeLin:
             self.wavelength_stacked_widget.setCurrentIndex(1)
-        else:
+            self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
+        elif self.wavelength_step_type == RangeStepType.RangeLog:
+            self.wavelength_stacked_widget.setCurrentIndex(1)
+            self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
+        elif self.wavelength_step_type == RangeStepType.Log:
             self.wavelength_stacked_widget.setCurrentIndex(0)
+            self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
+        elif self.wavelength_step_type == RangeStepType.Lin:
+            self.wavelength_stacked_widget.setCurrentIndex(0)
+            self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
 
     def create_data_table(self, show_periods):
         # Delete an already existing table
@@ -587,6 +595,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             self.q_1d_min_line_edit.setValidator(validator)
 
             self.q_min_label.setText("Rebin String")
+            self.q_step_label.setText(u'Step [\u00c5^-1]')
         else:
             # If rebin string data
             data_q_min = str(self.q_1d_min_line_edit.text())
@@ -598,6 +607,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
             label = u"Min [\u00c5^-1]"
             self.q_min_label.setText(label)
+
+            step_label = u'dQ/Q' if u'Log' in selection else u'Step [\u00c5^-1]'
+            self.q_step_label.setText(step_label)
 
     def set_q_resolution_shape_to_rectangular(self, is_rectangular):
         index = 1 if is_rectangular else 0
@@ -1487,7 +1499,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @property
     def q_xy_step_type(self):
         q_xy_step_type_as_string = self.q_xy_step_type_combo_box.currentText().encode('utf-8')
-        # Either the selection is something that can be converted to a SampleShape or we need to read from file
         try:
             return RangeStepType.from_string(q_xy_step_type_as_string)
         except RuntimeError:
