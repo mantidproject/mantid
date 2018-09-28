@@ -112,10 +112,14 @@ public:
         vecPropertyHistories, "MonitorIntegrationWavelengthMax");
     const int i0MonitorIndex =
         findPropertyValue<int>(vecPropertyHistories, "I0MonitorIndex");
-    const std::string processingInstructions = findPropertyValue<std::string>(
-        vecPropertyHistories, "ProcessingInstructions");
-    std::vector<std::string> pointDetectorStartStop;
-    boost::split(pointDetectorStartStop, processingInstructions,
+    const std::string processingInstructionsString =
+        findPropertyValue<std::string>(vecPropertyHistories,
+                                       "ProcessingInstructions");
+    // In workspace indices form the processing instructions should be the same
+    // However this has been changed to specNum and that is +1 of the instrument
+    // Parameter files value for PointDetectorStart
+    std::vector<std::string> processingInstructionsList;
+    boost::split(processingInstructionsList, processingInstructionsString,
                  boost::is_any_of(":"));
 
     auto inst = m_dataWS->getInstrument();
@@ -137,9 +141,10 @@ public:
                      monitorIntegrationWavelengthMax);
     TS_ASSERT_EQUALS(inst->getNumberParameter("I0MonitorIndex").at(0),
                      i0MonitorIndex);
-    TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStart").at(0),
-                     boost::lexical_cast<double>(pointDetectorStartStop.at(0)));
-    TS_ASSERT_EQUALS(pointDetectorStartStop.size(), 1);
+    TS_ASSERT_EQUALS(
+        inst->getNumberParameter("PointDetectorStart").at(0),
+        boost::lexical_cast<double>(processingInstructionsList.at(0)) - 1);
+    TS_ASSERT_EQUALS(processingInstructionsList.size(), 1);
 
     AnalysisDataService::Instance().remove("outWS");
   }
