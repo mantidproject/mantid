@@ -14,7 +14,7 @@ class RunSummation(object):
             pass
 
     def __call__(self, run_selection, settings, base_file_name):
-        self._work_handler.process(RunSummation.Listener(), self.run, run_selection, settings, base_file_name)
+        self._work_handler.process(RunSummation.Listener(), self.run, 0, run_selection, settings, base_file_name)
 
     def run(self, run_selection, settings, base_file_name):
         run_selection = self._run_selection_as_path_list(run_selection)
