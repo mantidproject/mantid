@@ -58,7 +58,8 @@ void RecoveryFailureView::onClickSelectedCheckpoint() {
     m_presenter->recoverSelectedCheckpoint(text);
   }
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryFailureWindow->RecoverSelectedCheckpoint", false);
+      "Feature", "ProjectRecoveryFailureWindow->RecoverSelectedCheckpoint",
+      false);
 }
 
 void RecoveryFailureView::onClickOpenSelectedInScriptWindow() {
@@ -72,7 +73,8 @@ void RecoveryFailureView::onClickOpenSelectedInScriptWindow() {
     m_presenter->openSelectedInEditor(text);
   }
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecoveryFailureWindow->OpenSelectedInScriptWindow", false);
+      "Feature", "ProjectRecoveryFailureWindow->OpenSelectedInScriptWindow",
+      false);
 }
 
 void RecoveryFailureView::onClickStartMantidNormally() {

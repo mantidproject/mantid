@@ -80,23 +80,26 @@ public:
   std::string getRecoveryFolderOutputPR();
 
   /// Get a list of poco paths based on recoveryFolderPaths' directory
-  std::vector<Poco::Path> getListOfFoldersInDirectoryPR(const std::string &recoveryFolderPath);
+  std::vector<Poco::Path>
+  getListOfFoldersInDirectoryPR(const std::string &recoveryFolderPath);
 
   /// get Recovery Folder to loads location
   std::string getRecoveryFolderLoadPR();
 
   /// Exposing the getRecoveryFolderCheckpoints function
-  std::vector<Poco::Path> getRecoveryFolderCheckpointsPR(const std::string &recoveryFolderPath);
+  std::vector<Poco::Path>
+  getRecoveryFolderCheckpointsPR(const std::string &recoveryFolderPath);
 
   /// Expose the getRecoveryFolderCheck function
   std::string getRecoveryFolderCheckPR();
-  
+
   /// Loads a recovery checkpoint in the given folder
   void loadRecoveryCheckpoint(const Poco::Path &path);
 
   /// Open a recovery checkpoint in the scripting window
   void openInEditor(const Poco::Path &inputFolder,
                     const Poco::Path &historyDest);
+
 private:
   /// Captures the current object in the background thread
   std::thread createBackgroundThread();

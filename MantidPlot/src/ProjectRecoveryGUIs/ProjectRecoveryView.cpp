@@ -1,6 +1,6 @@
 #include "ProjectRecoveryView.h"
-#include "ui_ProjectRecoveryWidget.h"
 #include "MantidKernel/UsageService.h"
+#include "ui_ProjectRecoveryWidget.h"
 
 ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)

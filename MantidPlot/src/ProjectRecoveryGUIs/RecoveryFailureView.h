@@ -13,9 +13,8 @@ class RecoveryFailureView : public QDialog {
   Q_OBJECT
 
 public:
-  explicit RecoveryFailureView(
-      QWidget *parent = 0,
-      ProjectRecoveryPresenter *presenter = nullptr);
+  explicit RecoveryFailureView(QWidget *parent = 0,
+                               ProjectRecoveryPresenter *presenter = nullptr);
   ~RecoveryFailureView();
   void reject() override;
 

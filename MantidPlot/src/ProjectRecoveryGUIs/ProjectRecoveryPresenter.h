@@ -2,8 +2,8 @@
 #define PROJECTRECOVERYPRESENTER_H
 
 #include "ProjectRecoveryModel.h"
-#include <memory>
 #include <QStringList>
+#include <memory>
 
 namespace MantidQt {
 class ProjectRecovery;
@@ -26,6 +26,7 @@ public:
   void recoverSelectedCheckpoint(QString &selected);
   void openSelectedInEditor(QString &selected);
   void closeView();
+
 private:
   ProjectRecoveryModel *m_model;
   ProjectRecoveryView *m_recView;

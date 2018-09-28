@@ -10,7 +10,8 @@ class ProjectRecovery;
 class ProjectRecoveryPresenter;
 class ProjectRecoveryModel {
 public:
-  ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery, ProjectRecoveryPresenter *presenter);
+  ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery,
+                       ProjectRecoveryPresenter *presenter);
   std::vector<std::string> getRow(int i);
   void recoverLast();
   void openLastInEditor();

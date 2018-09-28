@@ -2,8 +2,8 @@
 #define PROJECTRECOVERYVIEW_H
 
 #include "ProjectRecoveryPresenter.h"
-#include <QWidget>
 #include <QDialog>
+#include <QWidget>
 
 namespace Ui {
 class ProjectRecoveryWidget;
@@ -13,9 +13,8 @@ class ProjectRecoveryView : public QDialog {
   Q_OBJECT
 
 public:
-  explicit ProjectRecoveryView(
-      QWidget *parent = 0,
-      ProjectRecoveryPresenter *presenter = nullptr);
+  explicit ProjectRecoveryView(QWidget *parent = 0,
+                               ProjectRecoveryPresenter *presenter = nullptr);
   ~ProjectRecoveryView();
   void reject() override;
 
