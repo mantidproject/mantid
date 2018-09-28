@@ -426,7 +426,7 @@ bool shouldResetAllXToSingleBin(const EventWorkspace *workspace) {
   // make sure that they are sorted
   return (x.front() < x.back());
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Resets all HistogramX in given EventWorkspace(s) to a single bin.
