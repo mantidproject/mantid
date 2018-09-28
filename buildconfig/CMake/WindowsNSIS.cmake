@@ -15,18 +15,24 @@ set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\MantidPlot_Ic
 set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\MantidPlot_Icon_32offset.ico" )
 
 # Choose the proper suffix for the build.
-if ( CPACK_PACKAGE_SUFFIX STREQUAL "nightly" )
-  set ( WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "Nightly" )
-elseif ( CPACK_PACKAGE_SUFFIX STREQUAL "unstable" )
-  set ( WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "Unstable" )
-else()
-  # this is the release suffix, which is empty
+# if the string is not empty, capitalise the first letter
+if (NOT CPACK_PACKAGE_SUFFIX STREQUAL "" )
+  string(LENGTH ${CPACK_PACKAGE_SUFFIX} WINDOWS_NSIS_SUFFIX_LENGTH)
+  # get only first letter
+  string(SUBSTRING ${CPACK_PACKAGE_SUFFIX} 0 1 WINDOWS_NSIS_CAPITAL_FIRST_LETTER)
+  # capitalize the first letter in place
+  string(TOUPPER ${WINDOWS_NSIS_CAPITAL_FIRST_LETTER} WINDOWS_NSIS_CAPITAL_FIRST_LETTER)
+  # store the rest of the string (without the first letter that is being capitalized)
+  string(SUBSTRING ${CPACK_PACKAGE_SUFFIX} 1 ${WINDOWS_NSIS_SUFFIX_LENGTH} WINDOWS_NSIS_REST_OF_SUFFIX)
+  # concatenate the capitalized letter and the rest of the suffix
+  set(WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "${WINDOWS_NSIS_CAPITAL_FIRST_LETTER}${WINDOWS_NSIS_REST_OF_SUFFIX}")
+else() # if the string is empty, it is the release suffix, which should be empty
   set ( WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "" )
 endif()
 
 # have the properly capitalsed name for the start menu and install folder
 set( CPACK_NSIS_DISPLAY_NAME "Mantid${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}")
-set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}")
+set( CPACK_PACKAGE_INSTALL_DIRECTORY "Mantid${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}Install")
 
 ###########################################################################
 # Deployment type - currently only works for Release!
@@ -165,9 +171,12 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_m
 # On install. The blank lines seem to be required or it doesn't create the shortcut
 
 set ( MANTIDPLOT_LINK_NAME "MantidPlot${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
+set ( MANTIDNOTEBOOK_LINK_NAME "MantidNotebook${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
 
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
   CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
+
+  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDNOTEBOOK_LINK_NAME}' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\mantid_notebook.ico'
 ")
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDPLOT_LINK_NAME}\\\"
@@ -176,6 +185,8 @@ set (CPACK_NSIS_DELETE_ICONS_EXTRA "
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
   CreateShortCut '$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
 
+  CreateShortCut '$DESKTOP\\\\${MANTIDNOTEBOOK_LINK_NAME}' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\mantid_notebook.ico'
+
   CreateDirectory \\\"$INSTDIR\\\\logs\\\"
 
   CreateDirectory \\\"$INSTDIR\\\\docs\\\"
@@ -183,6 +194,7 @@ set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
 # On uninstall reverse stages listed above.
 set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
   Delete \\\"$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}\\\"
+  Delete \\\"$DESKTOP\\\\${MANTIDNOTEBOOK_LINK_NAME}\\\"
   RMDir \\\"$INSTDIR\\\\logs\\\"
   RMDir \\\"$INSTDIR\\\\docs\\\"
 ")

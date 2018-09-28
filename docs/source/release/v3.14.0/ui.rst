@@ -19,7 +19,6 @@ The following changes have been made _only_ on Windows, bringing it in line with
 
 - The Mantid Nightly build will now be installed in a different directory by default, to avoid overwriting the release Mantid installation.
 - The Mantid Nightly build desktop and start menu shortcuts will have the "Nightly" suffix appended, to distinguish from the release Mantid installation.
-- Building a package from a pull request has the "Unstable" suffix on the install directory and shortcuts.
 
 Project Recovery
 ----------------
