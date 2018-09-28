@@ -13,8 +13,8 @@ ExperimentPresenter::ExperimentPresenter(IExperimentView *view,
   notifySettingsChanged();
 }
 
-boost::optional<Experiment> ExperimentPresenter::experiment() const {
-  return m_model;
+Experiment const &ExperimentPresenter::experiment() const {
+  return m_model.get();
 }
 
 void ExperimentPresenter::notifySettingsChanged() {

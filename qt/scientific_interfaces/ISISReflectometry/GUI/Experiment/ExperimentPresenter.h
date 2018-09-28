@@ -69,7 +69,7 @@ public:
   // TODO Inject the Experiment model into the constructor.
   ExperimentPresenter(IExperimentView *view, double defaultsThetaTolerance);
 
-  boost::optional<Experiment> experiment() const;
+  Experiment const &experiment() const;
 
   void notifySettingsChanged() override;
   void notifySummationTypeChanged() override;

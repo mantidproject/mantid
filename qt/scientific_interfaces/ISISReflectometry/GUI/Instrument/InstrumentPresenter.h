@@ -41,14 +41,15 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter
     : public InstrumentViewSubscriber,
       public IInstrumentPresenter {
 public:
+  // TODO Inject the Instrument model into the constructor.
   InstrumentPresenter(IInstrumentView *view);
+
+  Instrument const &instrument() const;
 
   void notifySettingsChanged() override;
 
   void onReductionPaused() override;
   void onReductionResumed() override;
-
-  boost::optional<Instrument> instrument() const;
 
 private:
   IInstrumentView *m_view;

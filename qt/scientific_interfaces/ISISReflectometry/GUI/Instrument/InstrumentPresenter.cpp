@@ -11,8 +11,8 @@ InstrumentPresenter::InstrumentPresenter(IInstrumentView *view)
 
 void InstrumentPresenter::notifySettingsChanged() { updateModelFromView(); }
 
-boost::optional<Instrument> InstrumentPresenter::instrument() const {
-  return m_model;
+Instrument const &InstrumentPresenter::instrument() const {
+  return m_model.get();
 }
 
 void InstrumentPresenter::onReductionPaused() { m_view->enableAll(); }
