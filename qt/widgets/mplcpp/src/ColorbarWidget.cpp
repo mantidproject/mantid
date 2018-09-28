@@ -108,6 +108,17 @@ void ColorbarWidget::scaleMaximumEdited() {
 }
 
 /**
+ * Called when a new selection in the scale type box is made
+ */
+void ColorbarWidget::scaleTypeSelectionChanged(int index) {
+  if (index == 2) { // Power
+    m_ui.powerEdit->show();
+  } else {
+    m_ui.powerEdit->hide();
+  }
+}
+
+/**
  * Setup the layout of the child widgets
  */
 void ColorbarWidget::initLayout() {
@@ -128,6 +139,9 @@ void ColorbarWidget::initLayout() {
   // Set validators on the scale input
   m_ui.scaleMinEdit->setValidator(new QDoubleValidator());
   m_ui.scaleMaxEdit->setValidator(new QDoubleValidator());
+
+  // Set default properties for scale type 0
+  scaleTypeSelectionChanged(0);
 }
 
 /**
@@ -138,6 +152,9 @@ void ColorbarWidget::connectSignals() {
           SLOT(scaleMinimumEdited()));
   connect(m_ui.scaleMaxEdit, SIGNAL(editingFinished()), this,
           SLOT(scaleMaximumEdited()));
+
+  connect(m_ui.scaleTypeOpt, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(scaleTypeSelectionChanged(int)));
 }
 
 } // namespace MplCpp
