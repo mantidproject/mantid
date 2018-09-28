@@ -63,6 +63,7 @@ void JumpFit::setupFitTab() {
   m_uiForm->cbParameter->setEnabled(false);
 
   // Handle plotting and saving
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(this, SIGNAL(functionChanged()), this,
@@ -77,18 +78,48 @@ void JumpFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
+void JumpFit::plotClicked() {
+  setPlotResultIsPlotting(true);
+  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
+  setPlotResultIsPlotting(false);
+}
+
+bool JumpFit::shouldEnablePlotResult() {
+  for (auto i = 0u; i < m_jumpFittingModel->numberOfWorkspaces(); ++i)
+    if (m_jumpFittingModel->getNumberOfSpectra(i) > 1)
+      return true;
+  return false;
+}
+
+void JumpFit::setRunEnabled(bool enabled) {
+  m_uiForm->pbRun->setEnabled(enabled);
+}
+
 void JumpFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
   m_uiForm->cbPlotType->setEnabled(enabled);
+}
+
+void JumpFit::setFitSingleSpectrumEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
 }
 
 void JumpFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
 
-void JumpFit::plotClicked() {
-  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
+void JumpFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setFitSingleSpectrumEnabled(!running);
 }
+
+void JumpFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotResultEnabled(!plotting);
+}
+
+void JumpFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

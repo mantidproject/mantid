@@ -38,7 +38,7 @@ if __name__ == '__main__':
     from mantid.api import *
     from mantid.simpleapi import *
 
-    # Common imports (here for backwards compatability)
+    # Common imports (here for backwards compatibility)
     import os
     import sys
 

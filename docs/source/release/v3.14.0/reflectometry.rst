@@ -28,11 +28,27 @@ New
 - Added algorithm :ref:`algm-CreateFloodWorkspace` which makes a workspace for subsequent flood corrections.
 - Added algorithm :ref:`algm-ApplyFloodWorkspace` which applies flood corrections to a workspace.
 - :ref:`FindReflectometryLines <algm-FindReflectometryLines-v2>` has been rewritten and updated to version 2. The new version finds a single line by a Gaussian fit. Version 1 has been deprecated and will be removed in a future release.
+- Added algorithm :ref:`algm-ReflectometrySliceEventWorkspace` which slices an input event workspace into multiple slices, producing a histogram workspace suitable for use with :ref:`algm-ReflectometryReductionOneAuto`.
+
+Improved
+########
+
+- The ILL reduction workflow algorithms were reorganized to allow correct reflectivity calculation in the :literal:`SumInLambda` case.
+
+Bug fixes
+#########
+
+- Fixed the error propagation in :math:`Q` grouping in :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`
 
 Liquids Reflectometer
 ---------------------
 
 - Default x-direction pixel range for the scaling factor calculation is now set to the full width of the detector as opposed to a restricted guess.
+
+Magnetism Reflectometer
+-----------------------
+
+- Added option to overwrite :literal:`DIRPIX` and :literal:`DANGLE0`.
 
 ISIS Reflectometry Interface
 ----------------------------

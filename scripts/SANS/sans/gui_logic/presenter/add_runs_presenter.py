@@ -18,7 +18,9 @@ class AddRunsPagePresenter(object):
                  make_run_summation_presenter,
                  view,
                  parent_view):
+
         self._view = view
+        self._parent_view = parent_view
         self._sum_runs = sum_runs
         self._use_generated_file_name = True
         self._run_selector_presenter = \
@@ -46,7 +48,9 @@ class AddRunsPagePresenter(object):
         # Therefore assumes that file names all have the same number of
         # leading zeroes since a shorter string is sorted after a longer one.
         names = [run.display_name() for run in run_selection]
-        return (max(names) + '-add' if names else '')
+        instrument = self._parent_view.instrument.to_string(self._parent_view.instrument)
+
+        return (instrument + max(names) + '-add' if names else '')
 
     def _sum_base_file_name(self, run_selection):
         if self._use_generated_file_name:

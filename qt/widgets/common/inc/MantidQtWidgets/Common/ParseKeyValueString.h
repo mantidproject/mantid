@@ -49,7 +49,8 @@ void trimWhitespaceAndQuotes(const QString &valueIn);
 void trimWhitespaceQuotesAndEmptyValues(QStringList &values);
 /// Convert an options map to a string
 QString EXPORT_OPT_MANTIDQT_COMMON
-convertMapToString(const std::map<QString, QString> &optionsMap);
+convertMapToString(const std::map<QString, QString> &optionsMap,
+                   const char separator = ',', const bool quoteValues = true);
 std::string EXPORT_OPT_MANTIDQT_COMMON
 optionsToString(std::map<std::string, std::string> const &options);
 } // namespace MantidWidgets

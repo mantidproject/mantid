@@ -143,7 +143,7 @@ parameters together.
    :width: 300px
 
    Right clicking on a parameter shows the context menu with the fix, tie, and
-   contraint options
+   constraint options
 
 .. figure::  ../images/multidataset-fitting/multidataset-set-tie.png
    :align: center

@@ -4,6 +4,7 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
+#include "MantidCurveFitting/Functions/FunctionQDepends.h"
 // Mantid headers from other projects (N/A)
 // 3rd party library headers (N/A)
 // standard library headers (N/A)
@@ -40,7 +41,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 /**
  * @brief Elastic part of the DiffSphere function
  */
-class DLLExport ElasticDiffSphere : public DeltaFunction {
+class DLLExport ElasticDiffSphere : public DeltaFunction,
+                                    public FunctionQDepends {
 public:
   /// Constructor
   ElasticDiffSphere();

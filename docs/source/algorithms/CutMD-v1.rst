@@ -12,7 +12,7 @@ Description
 This algorithm performs slicing of multiDimensional data according to a chosen
 projection, limits and binning steps. 
 
-The synax is similar to that used by `Horace <http://horace.isis.rl.ac.uk/Manipulating_and_extracting_data_from_SQW_files_and_objects#cut_sqw>`__.
+The syntax is similar to that used by `Horace <http://horace.isis.rl.ac.uk/Manipulating_and_extracting_data_from_SQW_files_and_objects#cut_sqw>`__.
 
 Unlike most Mantid algorithms, CutMD can accept a list of workspaces as the
 input workspace, given as the name of a workspace in the analysis data service

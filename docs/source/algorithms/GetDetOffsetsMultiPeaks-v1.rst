@@ -70,7 +70,7 @@ If neither of these 2 properties are correctly specified, then then there won't 
 Uniform fit window
 ==================
 
-By specifying a postive float, maxWidth, for 'FitWindowMaxWidth',
+By specifying a positive float, maxWidth, for 'FitWindowMaxWidth',
 it is the definition of fit window for peaks indexed from 0 to N-1:
 
    -  Peak 0: window = :math:`\min((X0_0-dmin), maxWidth)`, :math:`\min((X0_1-X0_0)/2,maxWidth)`
@@ -134,7 +134,7 @@ Deviation of highest peaks
 
 We observed that in some situation, the calibrated peaks' positions of
 some spectra are far off to the targeted peak positions, while goodness
-of fit such as :math:`\chi^2` are still good. It is usally caused by the
+of fit such as :math:`\chi^2` are still good. It is usually caused by the
 bad fit of one or two peaks in that spectrum, which feeds some erroreous
 peak positions to peak offset fitting function.
 
@@ -150,7 +150,7 @@ defined as:
 where :math:`X^{(o)}` is the fitted centre of the highest peak of
 spectrum i, and :math:`X^{(c)}` is the theoretical centre of this peak.
 
-Collective quantities to illustrate goodness of fitting (still in developement)
+Collective quantities to illustrate goodness of fitting (still in development)
 ###############################################################################
 
 Be noticed that the idea of this section is still under development and

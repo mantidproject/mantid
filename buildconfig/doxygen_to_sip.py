@@ -72,7 +72,7 @@ def start_python_doc_section(out, line, look_for, section_header):
 def doxygen_to_docstring(doxygen, method):
     """ Takes an array of DOXYGEN lines, and converts
     them to a more pleasing python docstring format
-    @param doxygen :: list of strings contaning the doxygen
+    @param doxygen :: list of strings containing the doxygen
     @param method :: method declaration string """
     out = []
     if doxygen is None:

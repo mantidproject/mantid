@@ -38,7 +38,7 @@ template <>
 boost::shared_ptr<IFunction>
 PythonObjectInstantiator<IFunction>::createInstance() const {
   using namespace boost::python;
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
 
   // The class may instantiate different objects depending on whether
   // it is being created by the function factory or not

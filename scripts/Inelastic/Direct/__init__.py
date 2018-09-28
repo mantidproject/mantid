@@ -1,4 +1,4 @@
-""" Classes and funcions exported from Direct Reduction Package:
+""" Classes and functions exported from Direct Reduction Package:
 
 dgreduce               -- outdated functions, provided for compartibility with old qtiGenie
 DirectEnergyConversion -- main reduction class

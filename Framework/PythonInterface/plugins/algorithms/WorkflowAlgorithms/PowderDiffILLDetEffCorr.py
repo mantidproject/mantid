@@ -159,6 +159,10 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty(name='MaskCriterion', values=[], validator=maskCriterionValidator),
                              doc='Efficiency constants outside this range will be set to zero.')
 
+        self.declareProperty(name='UseCalibratedData',
+                             defaultValue=False,
+                             doc='Whether or not to use the calibrated data in the NeXus files (D2B only).')
+
     def validateInputs(self):
         issues = dict()
 
@@ -622,6 +626,9 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             2. Loop over tubes, make ratios wrt reference, obtain constants
             3. Apply the constants, and iterate over if requested
         """
+        data_type = 'Raw'
+        if self.getProperty('UseCalibratedData').value:
+            data_type = 'Calibrated'
         constants_ws = self._hide('constants')
         response_ws = self._hide('resp')
         calib_ws = self._hide('calib')
@@ -633,7 +640,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
             self._progress.report('Pre-processing detector scan '+numor[-10:-4])
             ws_name = '__raw_'+str(index)
             numors.append(ws_name)
-            LoadILLDiffraction(Filename=numor, OutputWorkspace=ws_name, DataType="Raw")
+            LoadILLDiffraction(Filename=numor, OutputWorkspace=ws_name, DataType=data_type)
             self._validate_scan(ws_name)
             if index == 0:
                 if mtd[ws_name].getInstrument().getName() != 'D2B':

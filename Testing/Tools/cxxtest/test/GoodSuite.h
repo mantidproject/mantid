@@ -105,7 +105,7 @@ public:
 
     void testThrowsNothingMessage()
     {
-        TSM_ASSERT_THROWS_NOTHING( "Empty functions dosn't throw", throwNothing() );
+        TSM_ASSERT_THROWS_NOTHING( "Empty functions doesn't throw", throwNothing() );
     }
 
     void throwNothing()

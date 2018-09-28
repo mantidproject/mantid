@@ -182,7 +182,7 @@ class CrystalField(object):
 
         if 'ResolutionModel' in kwargs and 'FWHM' in kwargs:
             msg = 'Both ''ResolutionModel'' and ''FWHM'' specified but can only accept one width option.'
-            msg += ' Prefering to use ResolutionModel, and ignoring FWHM.'
+            msg += ' Preferring to use ResolutionModel, and ignoring FWHM.'
             kwargs.pop('FWHM')
             warnings.warn(msg, SyntaxWarning)
 

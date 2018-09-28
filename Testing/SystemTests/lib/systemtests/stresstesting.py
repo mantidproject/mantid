@@ -38,6 +38,7 @@ import platform
 import re
 import shutil
 import subprocess
+import shutil
 import sys
 import tempfile
 import time
@@ -294,7 +295,7 @@ class MantidStressTest(unittest.TestCase):
 
     def validateWorkspaces(self, valNames=None, mismatchName=None):
         '''
-        Performs a check that two workspaces are equal using the CheckWorkspacesMatch
+        Performs a check that two workspaces are equal using the CompareWorkspaces
         algorithm. Loads one workspace from a nexus file if appropriate.
         Returns true if: the workspaces match
                       OR the validate method has not been overridden.
@@ -303,7 +304,7 @@ class MantidStressTest(unittest.TestCase):
         if valNames is None:
             valNames = self.validate()
 
-        checker = AlgorithmManager.create("CheckWorkspacesMatch")
+        checker = AlgorithmManager.create("CompareWorkspaces")
         checker.setLogging(True)
         checker.setPropertyValue("Workspace1", valNames[0])
         checker.setPropertyValue("Workspace2", valNames[1])
@@ -493,14 +494,16 @@ class ResultReporter(object):
     method.
     '''
 
-    def __init__(self):
+    def __init__(self, total_number_of_tests=0, maximum_name_length=0):
         '''Initialize a class instance, e.g. connect to a database'''
+        self._total_number_of_tests = total_number_of_tests
+        self._maximum_name_length = maximum_name_length
         pass
 
-    def dispatchResults(self, result, test_count):
+    def dispatchResults(self, result, number_of_completed_tests):
         raise NotImplementedError('"dispatchResults(self, result)" should be overridden in a derived class')
 
-    def printResultsToConsole(self, result, test_count):
+    def printResultsToConsole(self, result, number_of_completed_tests):
         '''
         Print the results to standard out
         '''
@@ -509,15 +512,19 @@ class ResultReporter(object):
         else:
             console_output = ''
             if self._quiet:
-                percentage = int(float(test_count[0])*100.0/float(test_count[1]))
+                percentage = int(float(number_of_completed_tests)*100.0/float(self._total_number_of_tests))
                 if len(result._results) < 6:
                     time_taken = " -- "
                 else:
                     time_taken = result._results[6][1]
-                # this is a super confusing way to make a string
-                console_output += '[{:>3d}%] {:>3d}/{:>3d} : '.format(percentage, test_count[0], test_count[1])
-                console_output += '{:.<{}} ({}: {}s)'.format(result.name+" ", test_count[2], result.status, time_taken)
-            if ((self._output_on_failure and (result.status.count('fail') > 0)) or (not self._quiet)):
+                console_output += '[{:>3d}%] {:>3d}/{:>3d} : '.format(percentage, number_of_completed_tests,
+                                                                      self._total_number_of_tests)
+                console_output += '{:.<{}} ({}: {}s)'.format(result.name+" ", self._maximum_name_length+2,
+                                                             result.status, time_taken)
+            if ((self._output_on_failure
+                and (result.status != 'success')
+                and (result.status != 'skipped'))
+                or (not self._quiet)):
                 nstars = 80
                 console_output += '\n' + ('*' * nstars) + '\n'
                 print_list = ['test_name', 'filename', 'test_date', 'host_name', 'environment',
@@ -547,11 +554,11 @@ class TextResultReporter(ResultReporter):
     Report the results of a test using standard out
     '''
 
-    def dispatchResults(self, result, test_count):
+    def dispatchResults(self, result, number_of_completed_tests):
         '''
         The default text reporter prints to standard out
         '''
-        self.printResultsToConsole(result, test_count)
+        self.printResultsToConsole(result, number_of_completed_tests)
         return
 
 # A class to report results as junit xml
@@ -610,7 +617,7 @@ class TestRunner(object):
 
 
 #########################################################################
-# Encapsulate the script for runnning a single test
+# Encapsulate the script for running a single test
 #########################################################################
 class TestScript(object):
 
@@ -733,9 +740,9 @@ class TestSuite(object):
         if msg is not None:
             self._result.output = msg
 
-    def reportResults(self, reporters, test_count):
+    def reportResults(self, reporters, number_of_completed_tests):
         for r in reporters:
-            r.dispatchResults(self._result, test_count)
+            r.dispatchResults(self._result, number_of_completed_tests)
 
 
 #########################################################################
@@ -746,11 +753,10 @@ class TestManager(object):
     This is the main interaction point for the framework.
     '''
 
-    def __init__(self, test_loc, runner, output=[TextResultReporter()],
-                 quiet=False, testsInclude=None, testsExclude=None,
-                 exclude_in_pr_builds=None, showSkipped=False,
-                 output_on_failure=False, clean=False,
-                 test_count=None, process_number=0, ncores=1):
+    def __init__(self, test_loc=None, runner=None, output=[TextResultReporter()],
+                 quiet=False, testsInclude=None, testsExclude=None, showSkipped=False,
+                 exclude_in_pr_builds=None, output_on_failure=False, clean=False,
+                 process_number=0, ncores=1, list_of_tests=None):
         '''Initialize a class instance'''
 
         # Runners and reporters
@@ -759,117 +765,159 @@ class TestManager(object):
         for r in self._reporters:
             r._quiet = quiet
             r._output_on_failure = output_on_failure
-        self._test_count = test_count
         self._clean = clean
+        self._showSkipped = showSkipped
 
-        # If given option is a directory
-        if os.path.isdir(test_loc) == True:
-            test_dir = os.path.abspath(test_loc).replace('\\', '/')
-            sys.path.append(test_dir)
-            runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromDir(test_dir)
-        else:
-            if os.path.exists(test_loc) == False:
-                print('Cannot find file ' + test_loc + '.py. Please check the path.')
-                exit(2)
-            test_dir = os.path.abspath(os.path.dirname(test_loc)).replace('\\', '/')
-            sys.path.append(test_dir)
-            runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))
-
-        self._testsInclude = testsInclude
-        self._testsExclude = testsExclude
-        # flag to exclude slow tests from pull requests
-        self._exclude_in_pr_builds = exclude_in_pr_builds
-
-        # Gather statistics on full test list
-        reduced_test_list = []
-        tid = 0
-        for t in full_test_list:
-            if self.__shouldTest(t) or showSkipped:
-                reduced_test_list.append(t)
-                tid += 1
-                t._id = tid
-
-        self._test_count[1] = len(reduced_test_list)
-        for t in reduced_test_list:
-            self._test_count[2] = max(self._test_count[2], len(t._fqtestname))
-
-        # When using multiprocessing, we have to split the list of tests among
-        # the processes into groups instead of test by test, to avoid issues
-        # with data being cleaned up before another process has finished.
-        #
-        # Because different modules (= different python files in the
-        # 'Testing/SystemTests/tests/analysis' directory) use the same input
-        # and output files, it is not enough to distribute each module to a
-        # separate core. The module have to ge gathered into groups, where a
-        # given test group will contain all tests that begin with the same name,
-        # i.e. the same first 8 (= min_length_for_group_name below) characters.
-        #
-        # This is not optimal, ideally we would like to distribute the runtimes
-        # evenly so that all cores finish in the same amount of time but this will
-        # do as a first step.
-        #
-        # First we need to count how many tests are in each module
-        # We also create on the fly a list of tests for each module
-        modcounts = dict()
-        modtests = dict()
-        # This is the length of characters to match at the start of test name
-        min_length_for_group_name = 4
-        for t in reduced_test_list:
-            not_found = True
-            for key in modcounts.keys():
-                if (t._modname).startswith(key):
-                    modcounts[key] += 1
-                    modtests[key].append(t)
-                    not_found = False
-                    break
-            if not_found:
-                key = (t._modname)[:min_length_for_group_name]
-                modcounts[key] = 1
-                modtests[key] = [t]
-
-        # Now we distribute the tests to each core
-        # This is done by sorting the modules by descending order of number of tests
-        # We then iterate through that list and give all the tests inside a given module
-        # to the core which currently has the lowest number of tests.
-        # The number of tests for that core is then incremented by the number of tests
-        # inside the module it has just received.
-        ntests_per_core = [0] * ncores
-        self._tests = []
-        reverse_sorted_dict = [(k, modcounts[k]) for k in sorted(modcounts, key=modcounts.get, reverse=True)]
-        for key, value in reverse_sorted_dict:
-            for i in range(ncores):
-                if(ntests_per_core[i] == min(ntests_per_core)):
-                    ntests_per_core[i] += value
-                    if (i == process_number):
-                        self._tests.extend(modtests[key])
-                    break
-
-        if len(reduced_test_list) == 0:
-            print('No tests defined in ' + test_dir +
-                  '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
-            exit(2)
-
-        if (not quiet) and (not clean):
-            hline = "========================================"
-            out_string = hline + "\n"
-            out_string += "Core %i will execute %i tests:\n" % (process_number, len(self._tests))
-            for t in self._tests:
-                out_string += ("%3i. " % t._id) + t._fqtestname + "\n"
-            out_string += hline
-            print(out_string)
-        sys.stdout.flush()
+        self._testDir = test_loc
+        self._quiet = quiet
+        self._testsInclude=testsInclude
+        self._testsExclude=testsExclude
+        self._exclude_in_pr_builds=exclude_in_pr_builds
 
         self._passedTests = 0
         self._skippedTests = 0
         self._failedTests = 0
         self._lastTestRun = 0
 
-    totalTests = property(lambda self: len(self._tests))
-    skippedTests = property(lambda self: (self.totalTests - self._passedTests - self._failedTests))
-    passedTests = property(lambda self: self._passedTests)
-    failedTests = property(lambda self: self._failedTests)
+        self._tests = list_of_tests
+
+    def generateMasterTestList(self):
+
+        # If given option is a directory
+        if os.path.isdir(self._testDir) == True:
+            test_dir = os.path.abspath(self._testDir).replace('\\', '/')
+            sys.path.append(test_dir)
+            self._runner.setTestDir(test_dir)
+            full_test_list = self.loadTestsFromDir(test_dir)
+        else:
+            if os.path.exists(self._testDir) == False:
+                print('Cannot find file ' + self._testDir + '.py. Please check the path.')
+                exit(2)
+            test_dir = os.path.abspath(os.path.dirname(self._testDir)).replace('\\', '/')
+            sys.path.append(test_dir)
+            self._runner.setTestDir(test_dir)
+            full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
+
+        # Gather statistics on full test list
+        test_stats = [0, 0, 0]
+        test_stats[2] = len(full_test_list)
+        reduced_test_list = []
+        for t in full_test_list:
+            if self.__shouldTest(t) or self._showSkipped:
+                reduced_test_list.append(t)
+
+        if len(reduced_test_list) == 0:
+            print('No tests defined in ' + test_dir +
+                  '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
+            exit(2)
+
+        test_stats[0] = len(reduced_test_list)
+        for t in reduced_test_list:
+            test_stats[1] = max(test_stats[1], len(t._fqtestname))
+
+        # When using multiprocessing, we have to split the list of tests among
+        # the processes into groups instead of test by test, to avoid issues
+        # with data being cleaned up before another process has finished.
+        #
+        # We create a list of test modules (= different python files in the
+        # 'Testing/SystemTests/tests/analysis' directory) and count how many
+        # tests are in each module. We also create on the fly a list of tests
+        # for each module.
+        modcounts = dict()
+        modtests = dict()
+        for t in reduced_test_list:
+            key = t._modname
+            if key in modcounts.keys():
+                modcounts[key] += 1
+                modtests[key].append(t)
+            else:
+                modcounts[key] = 1
+                modtests[key] = [t]
+
+        # Now we scan each test module (= python file) and list all the data files
+        # that are used by that module. The possible ways files are being specified
+        # are:
+        # 1. if the extension '.nxs' is present in the line
+        # 2. if there is a sequence of at least 4 digits inside a string
+        # In case number 2, we have to search for strings starting with 4 digits,
+        # i.e. "0123, or strings ending with 4 digits 0123".
+        # This might over-count, meaning some sequences of 4 digits might not be
+        # used for a file name specification, but it does not matter if it gets
+        # identified as a filename as the probability of the same sequence being
+        # present in another python file is small, and it would therefore not lock
+        # any other tests.
+
+        # Some dictionaries to store the info
+        files_required_by_test_module = dict()
+        data_file_lock_status = dict()
+        # The extension most commonly used
+        extensions = [".nxs", ".raw", ".RAW"]
+        # A regex check is used to iterate back from the position of '.nxs' and
+        # check that the current character is still part of a variable name. This
+        # is needed to find the start of the string, hence the total filename.
+        check = re.compile("[A-Za-z0-9_-]")
+        # In the case of looking for digits inside strings, the strings can start
+        # with either " or '
+        string_quotation_mark = ["'",'"']
+
+        # Now look through all the test modules and build the list of data files
+        for modkey in modtests.keys():
+
+            fname = modkey+".py"
+            files_required_by_test_module[modkey] = []
+            with open(os.path.join(os.path.dirname(self._testDir), "analysis", fname),"r") as pyfile:
+                for line in pyfile.readlines():
+
+                    # Search for all instances of '.nxs' or '.raw'
+                    for ext in extensions:
+                        for indx in [m.start() for m in re.finditer(ext, line)]:
+                            # When '.nxs' is found, iterate backwards to find the start
+                            # of the filename.
+                            for i in range(indx-1,1,-1):
+                                # If the present character is not either a letter, digit,
+                                # underscore, or hyphen then the beginning of the filename
+                                # has been found
+                                if not check.search(line[i]):
+                                    key = line[i+1:indx]+ext
+                                    if (key not in files_required_by_test_module[modkey]) and (key != ext):
+                                        files_required_by_test_module[modkey].append(key)
+                                        data_file_lock_status[key] = False
+                                    break
+
+                    # Search for '0123 or "0123
+                    for so in string_quotation_mark:
+                        p = re.compile(so+r"\d{4}")
+                        for m in p.finditer(line):
+                            # Iterate forwards to find the closing quotation mark
+                            for i in range(m.end(),len(line)):
+                                if line[i] == so:
+                                    key = line[m.start()+1:i]
+                                    if key not in files_required_by_test_module[modkey]:
+                                        files_required_by_test_module[modkey].append(key)
+                                        data_file_lock_status[key] = False
+                                    break
+
+                    # Search for 0123' or 0123"
+                    for so in string_quotation_mark:
+                        p = re.compile(r"\d{4}"+so)
+                        for m in p.finditer(line):
+                            # Iterate backwards to find the opening quotation mark
+                            for i in range(m.start(),1,-1):
+                                if line[i] == so:
+                                    key = line[i+1:m.end()-1]
+                                    if key not in files_required_by_test_module[modkey]:
+                                        files_required_by_test_module[modkey].append(key)
+                                        data_file_lock_status[key] = False
+                                    break
+
+        if (not self._quiet):
+            for key in files_required_by_test_module.keys():
+                print('=' * 45)
+                print(key)
+                for s in files_required_by_test_module[key]:
+                    print(s)
+
+        return modcounts, modtests, test_stats, files_required_by_test_module, data_file_lock_status
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
@@ -882,7 +930,7 @@ class TestManager(object):
                 return False
         return True
 
-    def executeTests(self):
+    def executeTests(self, tests_done=None):
         # Get the defined tests
         for suite in self._tests:
             if self.__shouldTest(suite):
@@ -893,15 +941,17 @@ class TestManager(object):
                 self._skippedTests += 1
             else:
                 self._failedTests += 1
-            self._test_count[0] += 1
+            with tests_done.get_lock():
+                tests_done.value += 1
             if not self._clean:
-                suite.reportResults(self._reporters, self._test_count)
+                suite.reportResults(self._reporters, tests_done.value)
             self._lastTestRun += 1
 
-    def markSkipped(self, reason=None):
+    def markSkipped(self, reason=None, tests_done_value=0):
         for suite in self._tests[self._lastTestRun:]:
             suite.setOutputMsg(reason)
-            suite.reportResults(self._reporters, self._test_count)  # just let people know you were skipped
+            # Just let people know you were skipped
+            suite.reportResults(self._reporters, tests_done_value)
 
     def loadTestsFromDir(self, test_dir):
         ''' Load all of the tests defined in the given directory'''
@@ -920,18 +970,18 @@ class TestManager(object):
         '''
         modname = os.path.basename(filename)
         modname = modname.split('.py')[0]
-        pyfile = open(filename, 'r')
         tests = []
         try:
-            mod = imp.load_module(modname, pyfile, filename, ("", "", imp.PY_SOURCE))
-            mod_attrs = dir(mod)
-            for key in mod_attrs:
-                value = getattr(mod, key)
-                if key is "MantidStressTest" or not inspect.isclass(value):
-                    continue
-                if self.isValidTestClass(value):
-                    test_name = key
-                    tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+            with open(filename, 'r') as pyfile:
+                mod = imp.load_module(modname, pyfile, filename, ("", "", imp.PY_SOURCE))
+                mod_attrs = dir(mod)
+                for key in mod_attrs:
+                    value = getattr(mod, key)
+                    if key is "MantidStressTest" or not inspect.isclass(value):
+                        continue
+                    if self.isValidTestClass(value):
+                        test_name = key
+                        tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
         except Exception as exc:
             print("Error importing module '%s': %s" % (modname, str(exc)))
             # Error loading the source, add fake unnamed test so that an error
@@ -1037,6 +1087,7 @@ class MantidFrameworkConfig:
 
     saveDir = property(lambda self: self.__saveDir)
     testDir = property(lambda self: self.__testDir)
+    dataDir = property(lambda self: self.__dataDirs)
 
     def config(self):
         # backup the existing user properties so we can step all over it
@@ -1072,11 +1123,11 @@ class MantidFrameworkConfig:
         config['filefinder.casesensitive'] = 'Off'
 
         # Maximum number of threads
-        config['MultiThreaded.MaxCores'] = '4'
+        config['MultiThreaded.MaxCores'] = '2'
 
         # datasearch
         if self.__datasearch:
-            # turn on for 'all' facilties, 'on' is only for default facility
+            # turn on for 'all' facilities, 'on' is only for default facility
             config["datasearch.searcharchive"] = 'all'
             config['network.default.timeout'] = '5'
 
@@ -1107,38 +1158,118 @@ def envAsString():
 
 
 #########################################################################
-# Function to spawn one test manager per core
+# Function to keep a pool of threads active in a loop to run the tests.
+# Each thread starts a loop and gathers a first test module from the
+# master test list which is stored in the tests_dict shared dictionary,
+# starting with the number in the module list equal to the process id.
+#
+# Each process then checks if all the data files required by the current
+# test module are available (i.e. have not been locked by another
+# thread). If all files are unlocked, the thread proceeds with that test
+# module. If not, it goes further down the list until it finds a module
+# whose files are all available.
+#
+# Once it has completed the work in the current module, it checks if the
+# number of modules that remains to be executed is greater than 0. If
+# there is some work left to do, the thread finds the next module that
+# still has not been executed (searches through the tests_lock array
+# and finds the next element that has a 0 value). This aims to have all
+# threads end calculation approximately at the same time.
 #########################################################################
-def testProcess(testDir, saveDir, options, res_array,
-                stat_dict, test_count, process_number):
+def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
+                    tests_lock, tests_left, res_array, stat_dict,
+                    total_number_of_tests, maximum_name_length,
+                    tests_done, process_number, lock, required_files_dict,
+                    locked_files_dict):
 
-    reporter = XmlResultReporter(showSkipped=options.showskipped)
+    reporter = XmlResultReporter(showSkipped=options.showskipped,
+                                 total_number_of_tests=total_number_of_tests,
+                                 maximum_name_length=maximum_name_length)
 
     runner = TestRunner(executable=options.executable, exec_args=options.execargs,
                         escape_quotes=True, clean=options.clean)
 
-    mgr = TestManager(testDir, runner,
-                      output=[reporter],
-                      quiet=options.quiet,
-                      testsInclude=options.testsInclude,
-                      testsExclude=options.testsExclude,
-                      exclude_in_pr_builds=options.exclude_in_pr_builds,
-                      showSkipped=options.showskipped,
-                      output_on_failure=options.output_on_failure,
-                      test_count=test_count,
-                      process_number=process_number,
-                      ncores=options.ncores,
-                      clean=options.clean)
-    try:
-        mgr.executeTests()
-    except KeyboardInterrupt:
-        mgr.markSkipped("KeyboardInterrupt")
+    # Make sure the status is 1 to begin with as it will be replaced
+    res_array[process_number + 2*options.ncores] = 1
 
-    # Update the test results in the array shared accross cores
-    res_array[process_number] = mgr.skippedTests
-    res_array[process_number + options.ncores] = mgr.failedTests
-    res_array[process_number + 2*options.ncores] = mgr.totalTests
-    res_array[process_number + 3*options.ncores] = int(reporter.reportStatus())
+    # Begin loop: as long as there are still some test modules that
+    # have not been run, keep looping
+    while (tests_left.value > 0):
+        # Empty test list
+        local_test_list = None
+        # Get the lock to inspect the global list of tests
+        lock.acquire()
+        # Run through the list of test modules, starting from the ith
+        # element where i is the process number.
+        for i in range(process_number,len(tests_lock)):
+            # If the lock for this particular module is 0, it means
+            # this module has not yet been run and it will be chosen
+            # for this particular loop
+            if tests_lock[i] == 0:
+                # Check for the lock status of the required files for this test module
+                modname = tests_dict[str(i)][0]._modname
+                no_files_are_locked = True
+                for f in required_files_dict[tests_dict[str(i)][0]._modname]:
+                    if locked_files_dict[f]:
+                        no_files_are_locked = False
+                        break
+                # If all failes are available, we can proceed with this module
+                if no_files_are_locked:
+                    # Lock the data files for this test module
+                    for f in required_files_dict[modname]:
+                        locked_files_dict[f] = True
+                    # Set the current test list to the chosen module
+                    local_test_list = tests_dict[str(i)]
+                    tests_lock[i] = 1
+                    imodule = i
+                    tests_left.value -= 1
+                    break
+        # Release the lock
+        lock.release()
+
+        # Check if local_test_list exists: if all data was locked,
+        # then there is no test list
+        if local_test_list:
+
+            if (not options.quiet):
+                print("##### Thread %2i will execute module: [%3i] %s (%i tests)" \
+                       % (process_number, imodule, modname, len(local_test_list)))
+                sys.stdout.flush()
+
+            # Create a TestManager, giving it a pre-compiled list_of_tests
+            mgr = TestManager(test_loc=testDir,
+                              runner=runner,
+                              output=[reporter],
+                              quiet=options.quiet,
+                              testsInclude=options.testsInclude,
+                              testsExclude=options.testsExclude,
+                              exclude_in_pr_builds=options.exclude_in_pr_builds,
+                              showSkipped=options.showskipped,
+                              output_on_failure=options.output_on_failure,
+                              process_number=process_number,
+                              ncores=options.ncores,
+                              clean=options.clean,
+                              list_of_tests=local_test_list)
+
+            try:
+                mgr.executeTests(tests_done)
+            except KeyboardInterrupt:
+                mgr.markSkipped("KeyboardInterrupt", tests_done.value)
+
+            # Update the test results in the array shared across cores
+            res_array[process_number] += mgr._skippedTests
+            res_array[process_number + options.ncores] += mgr._failedTests
+            res_array[process_number + 2*options.ncores] = min(int(reporter.reportStatus()),\
+                res_array[process_number + 2*options.ncores])
+
+            # Delete the TestManager
+            del mgr
+
+            # Unlock the data files
+            lock.acquire()
+            for f in required_files_dict[modname]:
+                locked_files_dict[f] = False
+            lock.release()
 
     # Report the errors
     local_dict = dict()

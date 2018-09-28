@@ -627,7 +627,7 @@ class PropertyManager(NonIDF_Properties):
             missing=[]
 #pylint: disable=unused-variable
             ok,missing,found=self.find_files_to_sum()
-            #Presence of Cashe sum ws assumes that you sum files to workspace as they appear
+            #Presence of cashe_sum_ws assumes that you sum files to workspace as they appear
             # This mean, that we should not expect all files to be there at the beginning
             if not ok and not self.cashe_sum_ws:
                 file_errors['missing_runs_toSum']=str(missing)
