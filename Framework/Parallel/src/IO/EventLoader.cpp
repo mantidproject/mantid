@@ -58,9 +58,7 @@ void load(const std::string &filename, const std::string &groupname,
           bool precalcEvents) {
   auto concurencyNumber = std::thread::hardware_concurrency();
   std::string executableName =
-      boost::dll::symbol_location(Mantid::Kernel::MantidVersion::version)
-          .parent_path()
-          .string() +
+      Kernel::ConfigService::Instance().getPropertiesDir() +
       "/MantidNexusParallelLoader";
 
   MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()),
