@@ -111,6 +111,17 @@ void MultiProcessEventLoader::load(
           }
         }
     */
+
+    // to cleanup shared memory in this function
+    struct SharedMemoryDestroyer{
+      const std::vector<std::string>& segments;
+      SharedMemoryDestroyer(const std::vector<std::string>& sm) : segments(sm) {}
+      ~SharedMemoryDestroyer() {
+        for (const auto &name : segments)
+          ip::shared_memory_object::remove(name.c_str());
+      }
+    } shared_memory_destroyer(m_segmentNames);
+
     std::vector<Poco::ProcessHandle> vChilds;
     for (unsigned i = 1; i < m_numProcesses; ++i) {
       std::size_t upperBound =
@@ -133,17 +144,6 @@ void MultiProcessEventLoader::load(
         processArgs.push_back(bankNames[j]);                   // bank name
         processArgs.push_back(std::to_string(bankOffsets[j])); // bank size
       }
-
-      // to cleanup shared memory in this function
-      struct SharedMemoryDestroyer{
-        const std::vector<std::string>& segments;
-        SharedMemoryDestroyer(const std::vector<std::string>& sm) : segments(sm) {}
-        ~SharedMemoryDestroyer() {
-          for (const auto &name : segments)
-            ip::shared_memory_object::remove(name.c_str());
-        }
-      } shared_memory_destroyer(m_segmentNames);
-
 
       try {
         // launch child processes
