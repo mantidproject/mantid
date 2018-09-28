@@ -57,8 +57,8 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.data.add_group(group3)
 
     def add_two_pairs_to_table(self):
-        pair1 = MuonPair(pair_name="my_pair_0", group1_name="my_group_0", group2_name="my_group_1", alpha=1.0)
-        pair2 = MuonPair(pair_name="my_pair_1", group1_name="my_group_1", group2_name="my_group_2", alpha=1.0)
+        pair1 = MuonPair(pair_name="my_pair_0", forward_group_name="my_group_0", backward_group_name="my_group_1", alpha=1.0)
+        pair2 = MuonPair(pair_name="my_pair_1", forward_group_name="my_group_1", backward_group_name="my_group_2", alpha=1.0)
         self.presenter.add_pair(pair1)
         self.presenter.add_pair(pair2)
 
@@ -297,8 +297,8 @@ class GroupSelectorTest(unittest.TestCase):
         self.data.add_group(group3)
 
     def add_two_pairs_to_table(self):
-        pair1 = MuonPair(pair_name="my_pair_0", group1_name="my_group_0", group2_name="my_group_1", alpha=1.0)
-        pair2 = MuonPair(pair_name="my_pair_1", group1_name="my_group_1", group2_name="my_group_2", alpha=1.0)
+        pair1 = MuonPair(pair_name="my_pair_0", forward_group_name="my_group_0", backward_group_name="my_group_1", alpha=1.0)
+        pair2 = MuonPair(pair_name="my_pair_1", forward_group_name="my_group_1", backward_group_name="my_group_2", alpha=1.0)
         self.presenter.add_pair(pair1)
         self.presenter.add_pair(pair2)
 
@@ -422,8 +422,8 @@ class AlphaTest(unittest.TestCase):
         self.data.add_group(group3)
 
     def add_two_pairs_to_table(self):
-        pair1 = MuonPair(pair_name="my_pair_0", group1_name="my_group_0", group2_name="my_group_1", alpha=1.0)
-        pair2 = MuonPair(pair_name="my_pair_1", group1_name="my_group_1", group2_name="my_group_2", alpha=1.0)
+        pair1 = MuonPair(pair_name="my_pair_0", forward_group_name="my_group_0", backward_group_name="my_group_1", alpha=1.0)
+        pair2 = MuonPair(pair_name="my_pair_1", forward_group_name="my_group_1", backward_group_name="my_group_2", alpha=1.0)
         self.presenter.add_pair(pair1)
         self.presenter.add_pair(pair2)
 

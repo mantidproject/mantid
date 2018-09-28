@@ -1,3 +1,4 @@
+# pylint: disable=C0111
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_workspace import MuonWorkspace
@@ -5,19 +6,20 @@ import six
 
 
 class MuonGroup(object):
-    """Simple structure to store information on a detector group.
+    """
+    Simple structure to store information on a detector group.
 
-    The name is set at initialization and after that cannot be changed.
-    The detector list can be modified by passing a list of ints (type checks for this)
-    The number of detectors is stored
+    - The name is set at initialization and after that cannot be changed.
+    - The detector list can be modified by passing a list of ints (type checks for this).
+    - The number of detectors is stored.
+    - The workspace associated to the group can be set, but must be of type MuonWorkspace.
     """
 
     def __init__(self, group_name, detector_ids=[]):
+
         self._group_name = group_name
-
-        self._detector_IDs = None
+        self._detector_ids = None
         self.detectors = detector_ids
-
         self._workspace = None
 
     @property
@@ -37,12 +39,14 @@ class MuonGroup(object):
         return self._group_name
 
     @name.setter
-    def name(self, _name):
-        raise AttributeError("Cannot change name of MuonGroup object")
+    def name(self, name):
+        raise AttributeError("Attempting to change name from {} to {}. "
+                             "Cannot change name of MuonGroup "
+                             "object".format(self._group_name, name))
 
     @property
     def detectors(self):
-        return self._detector_IDs
+        return self._detector_ids
 
     @property
     def n_detectors(self):
@@ -54,7 +58,7 @@ class MuonGroup(object):
             raise AttributeError("MuonGroup : detectors must be a list of ints.")
         elif isinstance(detector_ids, list):
             if sum([not isinstance(item, int) for item in detector_ids]) == 0:
-                self._detector_IDs = list(set(sorted(detector_ids)))
+                self._detector_ids = list(set(sorted(detector_ids)))
             else:
                 raise AttributeError("MuonGroup : detectors must be a list of ints.")
         else:

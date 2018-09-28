@@ -60,8 +60,8 @@ class PairingTablePresenter(object):
         self._model.clear_pairs()
         for entry in table:
             pair = MuonPair(pair_name=str(entry[0]),
-                            group1_name=str(entry[1]),
-                            group2_name=str(entry[2]),
+                            forward_group_name=str(entry[1]),
+                            backward_group_name=str(entry[2]),
                             alpha=float(entry[3]))
             self._model.add_pair(pair)
 
@@ -97,7 +97,7 @@ class PairingTablePresenter(object):
         self._view.disable_updates()
         self.update_group_selections()
         assert isinstance(pair, MuonPair)
-        entry = [str(pair.name), str(pair.group1), str(pair.group2), str(pair.alpha)]
+        entry = [str(pair.name), str(pair.forward_group), str(pair.backward_group), str(pair.alpha)]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 

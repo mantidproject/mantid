@@ -59,7 +59,7 @@ class SaveGroupingToXMLTest(unittest.TestCase):
         self.assertEqual(pair_xml.attrib['name'], 'mypair')
 
     def test_that_pair_group_names_saved_correctly(self):
-        pair = MuonPair(pair_name="mypair", group1_name="fwd", group2_name="bwd")
+        pair = MuonPair(pair_name="mypair", forward_group_name="fwd", backward_group_name="bwd")
 
         tree = load_utils.save_grouping_to_XML([], [pair], "file.xml", False)
 
@@ -69,7 +69,7 @@ class SaveGroupingToXMLTest(unittest.TestCase):
         self.assertEqual(pair_xml.find("backward-group").attrib["val"], 'bwd')
 
     def test_that_pair_alpha_saved_correctly(self):
-        pair = MuonPair(pair_name="mypair", group1_name="fwd", group2_name="bwd", alpha=1.5)
+        pair = MuonPair(pair_name="mypair", forward_group_name="fwd", backward_group_name="bwd", alpha=1.5)
 
         tree = load_utils.save_grouping_to_XML([], [pair], "file.xml", False)
 
@@ -78,7 +78,7 @@ class SaveGroupingToXMLTest(unittest.TestCase):
         self.assertEqual(pair_xml.find("alpha").attrib["val"], '1.5')
 
     def test_that_pair_alpha_saved_with_3_significant_figures_and_rounded_correctly(self):
-        pair = MuonPair(pair_name="mypair", group1_name="fwd", group2_name="bwd", alpha=1.1239)
+        pair = MuonPair(pair_name="mypair", forward_group_name="fwd", backward_group_name="bwd", alpha=1.1239)
 
         tree = load_utils.save_grouping_to_XML([], [pair], "file.xml", False)
 

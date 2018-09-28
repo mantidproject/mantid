@@ -33,16 +33,20 @@ class MuonGroupTest(unittest.TestCase):
             group.name = "new_name"
         self.assertEqual(group.name, "group1")
 
-    def test_that_can_only_set_workspace_if_MuonWorkspace_object(self):
+    def test_that_can_set_workspace_if_MuonWorkspace_object(self):
+        group = MuonGroup(group_name="group1")
+
+        self.assertIsNone(group.workspace)
+        group.workspace = MuonWorkspace([1, 2, 3])
+        self.assertIsNotNone(group.workspace)
+
+    def test_that_AttributeError_thrown_if_setting_workspace_to_non_MuonWorkspace_object(self):
         group = MuonGroup(group_name="group1")
         self.assertIsNone(group.workspace)
 
         with self.assertRaises(AttributeError):
             group.workspace = [1, 2, 3]
         self.assertIsNone(group.workspace)
-
-        group.workspace = MuonWorkspace([1, 2, 3])
-        self.assertIsNotNone(group.workspace)
 
     def test_that_detector_ids_cannot_be_set_as_string(self):
         group = MuonGroup(group_name="group1")

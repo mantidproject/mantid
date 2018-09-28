@@ -37,27 +37,31 @@ class MuonPairTest(unittest.TestCase):
     def test_that_can_get_and_set_group1_name(self):
         pair = MuonPair(pair_name="pair1")
 
-        pair.group1 = "group1"
+        pair.forward_group = "group1"
 
-        self.assertEqual(pair.group1, "group1")
+        self.assertEqual(pair.forward_group, "group1")
 
     def test_that_can_get_and_set_group2_name(self):
         pair = MuonPair(pair_name="pair1")
 
-        pair.group2 = "group2"
+        pair.backward_group = "group2"
 
-        self.assertEqual(pair.group2, "group2")
+        self.assertEqual(pair.backward_group, "group2")
 
     def test_that_can_only_set_workspace_if_MuonWorkspace_object(self):
         pair = MuonPair(pair_name="pair1")
         self.assertIsNone(pair.workspace)
 
+        pair.workspace = MuonWorkspace([1, 2, 3])
+        self.assertIsNotNone(pair.workspace)
+
+    def test_that_AttributeError_thrown_if_setting_workspace_to_non_MuonWorkspace_object(self):
+        pair = MuonPair(pair_name="pair1")
+
+        self.assertIsNone(pair.workspace)
         with self.assertRaises(AttributeError):
             pair.workspace = [1, 2, 3]
         self.assertIsNone(pair.workspace)
-
-        pair.workspace = MuonWorkspace([1, 2, 3])
-        self.assertIsNotNone(pair.workspace)
 
     def test_that_can_set_and_get_float_value_for_alpha(self):
         pair = MuonPair(pair_name="pair1")

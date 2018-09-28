@@ -292,8 +292,8 @@ def _create_XML_subElement_for_pairs(root_node, pairs):
     pair_nodes = []
     for pair in pairs:
         child = ET.SubElement(root_node, 'pair', name=pair.name)
-        fwd_group = ET.SubElement(child, 'forward-group', val=pair.group1)
-        bwd_group = ET.SubElement(child, 'backward-group', val=pair.group2)
+        fwd_group = ET.SubElement(child, 'forward-group', val=pair.forward_group)
+        bwd_group = ET.SubElement(child, 'backward-group', val=pair.backward_group)
         alpha = ET.SubElement(child, 'alpha', val=str(pair.alpha))
         child.extend(fwd_group)
         child.extend(bwd_group)
@@ -360,8 +360,8 @@ def load_grouping_from_XML(filename):
                              detector_ids=group_ids[i])]
     for i, pair_name in enumerate(pair_names):
         pairs += [MuonPair(pair_name=pair_name,
-                           group1_name=pair_groups[i][0],
-                           group2_name=pair_groups[i][1],
+                           forward_group_name=pair_groups[i][0],
+                           backward_group_name=pair_groups[i][1],
                            alpha=pair_alphas[i])]
     return groups, pairs
 

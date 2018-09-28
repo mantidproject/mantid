@@ -32,8 +32,8 @@ if __name__ == "__main__":
 
     pairing_table_view = PairingTableView()
     ui2 = PairingTablePresenter(pairing_table_view, model)
-    testpair1 = MuonPair(pair_name="long1", group1_name="fwd", group2_name="bwd")
-    testpair2 = MuonPair(pair_name="long2", group1_name="fwd", group2_name="top")
+    testpair1 = MuonPair(pair_name="long1", forward_group_name="fwd", backward_group_name="bwd")
+    testpair2 = MuonPair(pair_name="long2", forward_group_name="fwd", backward_group_name="top")
     ui2.add_pair(testpair1)
     ui2.add_pair(testpair2)
 

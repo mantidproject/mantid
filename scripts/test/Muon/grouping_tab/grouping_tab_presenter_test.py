@@ -59,8 +59,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.grouping_table_widget.add_group(testgroup3)
 
     def add_two_pairs(self):
-        testpair1 = MuonPair(pair_name="long1", group1_name="fwd", group2_name="bwd")
-        testpair2 = MuonPair(pair_name="long2", group1_name="fwd", group2_name="top")
+        testpair1 = MuonPair(pair_name="long1", forward_group_name="fwd", backward_group_name="bwd")
+        testpair2 = MuonPair(pair_name="long2", forward_group_name="fwd", backward_group_name="top")
         self.pairing_table_widget.add_pair(testpair1)
         self.pairing_table_widget.add_pair(testpair2)
 
@@ -85,8 +85,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
 
         pair_name = "pair_0"
 
-        self.assertEqual(self.context.pairs[pair_name].group1, "fwd")
-        self.assertEqual(self.context.pairs[pair_name].group2, "bwd")
+        self.assertEqual(self.context.pairs[pair_name].forward_group, "fwd")
+        self.assertEqual(self.context.pairs[pair_name].backward_group, "bwd")
 
     def test_that_clear_button_clears_model_and_view(self):
         self.view.clear_grouping_button.clicked.emit(True)
@@ -109,7 +109,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
         groups = [MuonGroup(group_name="grp1", detector_IDs=[1, 2, 3, 4, 5]),
                   MuonGroup(group_name="grp2", detector_IDs=[6, 7, 8, 9, 10])]
-        pairs = [MuonPair(pair_name="pair1", group1_name="grp1", group2_name="grp2")]
+        pairs = [MuonPair(pair_name="pair1", forward_group_name="grp1", backward_group_name="grp2")]
 
         with mock.patch("Muon.GUI.Common.load_utils.load_grouping_from_XML") as mock_load:
             # mock the loading to return set groups/pairs

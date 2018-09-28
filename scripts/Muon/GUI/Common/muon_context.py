@@ -355,8 +355,8 @@ class MuonContext(object):
         if pair:
             params["SpecifyGroupsManually"] = True
             params["PairName"] = str(pair_name)
-            detectors1 = ",".join([str(i) for i in self._groups[pair.group1].detectors])
-            detectors2 = ",".join([str(i) for i in self._groups[pair.group2].detectors])
+            detectors1 = ",".join([str(i) for i in self._groups[pair.forward_group].detectors])
+            detectors2 = ",".join([str(i) for i in self._groups[pair.backward_group].detectors])
             params["Group1"] = detectors1
             params["Group2"] = detectors2
             params["Alpha"] = str(pair.alpha)
@@ -436,4 +436,4 @@ class MuonContext(object):
             group1 = None
             group2 = None
         return MuonPair(pair_name=new_pair_name,
-                        group1_name=group1, group2_name=group2, alpha=1.0)
+                        forward_group_name=group1, backward_group_name=group2, alpha=1.0)
