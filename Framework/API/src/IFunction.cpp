@@ -44,7 +44,7 @@ Kernel::Logger g_log("IFunction");
 
 /// Struct that helps sort ties in correct order of application.
 struct TieNode {
-  // Iindex of the tied parameter
+  // Index of the tied parameter
   size_t left;
   // Indices of parameters on the right-hand-side of the expression
   std::vector<size_t> right;
@@ -1494,16 +1494,17 @@ void IFunction::sortTies() {
   m_orderedTies.clear();
   std::list<TieNode> orderedTieNodes;
   for (size_t i = 0; i < nParams(); ++i) {
-    auto tie = getTie(i);
+    auto const tie = getTie(i);
     if (!tie) {
       continue;
     }
-    std::vector<size_t> right;
-    auto rhsParameters = tie->getRHSParameters();
+    TieNode newNode;
+    newNode.left = getParameterIndex(*tie);
+    auto const rhsParameters = tie->getRHSParameters();
+    newNode.right.reserve(rhsParameters.size());
     for (auto &&p : rhsParameters) {
-      right.push_back(this->getParameterIndex(p));
+      newNode.right.emplace_back(this->getParameterIndex(p));
     }
-    TieNode newNode{getParameterIndex(*tie), right};
     if (newNode < newNode) {
       throw std::runtime_error("Parameter is tied to itself: " +
                                tie->asString(this));
@@ -1536,8 +1537,8 @@ void IFunction::sortTies() {
     }
   }
   for (auto &&node : orderedTieNodes) {
-    auto tie = getTie(node.left);
-    m_orderedTies.push_back(tie);
+    auto const tie = getTie(node.left);
+    m_orderedTies.emplace_back(tie);
   }
 }
 

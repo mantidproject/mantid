@@ -198,6 +198,7 @@ bool ParameterTie::isConstant() const { return m_varMap.empty(); }
  */
 std::vector<ParameterReference> ParameterTie::getRHSParameters() const {
   std::vector<ParameterReference> out;
+  out.reserve(m_varMap.size());
   for (auto &&varPair : m_varMap) {
     out.emplace_back(varPair.second);
   }
