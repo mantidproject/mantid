@@ -115,6 +115,7 @@ set ( TEST_PY_FILES
   PoldiCreatePeaksFromFileTest.py
   LoadCIFTest.py
   SaveYDATest.py
+  SANSMaskDTPTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
