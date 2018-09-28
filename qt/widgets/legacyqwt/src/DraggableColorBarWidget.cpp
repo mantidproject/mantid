@@ -171,7 +171,7 @@ void DraggableColorBarWidget::maxValueChanged() {
  * @param vmax New maximum of the scale
  */
 
-void DraggableColorBarWidget::setRange(double vmin, double vmax) {
+void DraggableColorBarWidget::setClim(double vmin, double vmax) {
   setMinValue(vmin);
   setMaxValue(vmax);
 }

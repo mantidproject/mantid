@@ -31,7 +31,7 @@ public:
 
   void testSetCLimSetsMinAndMaxWhenProvided() {
     ScalarMappable mappable(Normalize(-1, 1), "jet");
-    mappable.setCLim(-10, 10);
+    mappable.setClim(-10, 10);
     auto norm = mappable.pyobj().attr("norm");
     TS_ASSERT_EQUALS(-10, norm.attr("vmin"));
     TS_ASSERT_EQUALS(10, norm.attr("vmax"));
@@ -39,7 +39,7 @@ public:
 
   void testSetCLimSetsMinOnlyWhenMaxNotProvided() {
     ScalarMappable mappable(Normalize(-1, 1), "jet");
-    mappable.setCLim(-10);
+    mappable.setClim(-10);
     auto norm = mappable.pyobj().attr("norm");
     TS_ASSERT_EQUALS(-10, norm.attr("vmin"));
     TS_ASSERT_EQUALS(1, norm.attr("vmax"));
@@ -47,7 +47,7 @@ public:
 
   void testSetCLimSetsMaxOnlyWhenMinNotProvided() {
     ScalarMappable mappable(Normalize(-1, 1), "jet");
-    mappable.setCLim(boost::none, 10);
+    mappable.setClim(boost::none, 10);
     auto norm = mappable.pyobj().attr("norm");
     TS_ASSERT_EQUALS(-1, norm.attr("vmin"));
     TS_ASSERT_EQUALS(10, norm.attr("vmax"));
@@ -55,12 +55,12 @@ public:
 
   void testSetCLimSetsNothingWhenNothingProvided() {
     ScalarMappable mappable(Normalize(-1, 1), "jet");
-    mappable.setCLim(boost::none, boost::none);
+    mappable.setClim(boost::none, boost::none);
     auto norm = mappable.pyobj().attr("norm");
     TS_ASSERT_EQUALS(-1, norm.attr("vmin"));
     TS_ASSERT_EQUALS(1, norm.attr("vmax"));
 
-    mappable.setCLim();
+    mappable.setClim();
     TS_ASSERT_EQUALS(-1, norm.attr("vmin"));
     TS_ASSERT_EQUALS(1, norm.attr("vmax"));
   }

@@ -618,7 +618,7 @@ void InstrumentWidgetRenderTab::setupColorBar(const ColorMap &cmap,
                                               double minPositive,
                                               bool autoscaling) {
   m_colorBarWidget->blockSignals(true);
-  m_colorBarWidget->setRange(minValue, maxValue);
+  m_colorBarWidget->setClim(minValue, maxValue);
   m_colorBarWidget->blockSignals(false);
   m_colorBarWidget->setMinPositiveValue(minPositive);
   m_colorBarWidget->setupColorBarScaling(cmap);

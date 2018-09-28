@@ -20,6 +20,8 @@
 #include "MantidQtWidgets/MplCpp/ScalarMappable.h"
 #include "ui_Colorbar.h"
 
+#include <tuple>
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -38,7 +40,8 @@ class MANTID_MPLCPP_DLL ColorbarWidget : public QWidget {
 public:
   ColorbarWidget(QWidget *parent = nullptr);
 
-  void setRange(boost::optional<double> vmin, boost::optional<double> vmax);
+  void setClim(boost::optional<double> vmin, boost::optional<double> vmax);
+  std::tuple<double, double> clim() const;
 
   ///@name Legacy API to match DraggableColorBarWidget for instrument view
   ///@{
@@ -56,7 +59,6 @@ public:
   void setNthPower(double) {}
   void loadFromProject(const std::string &) {}
   std::string saveToProject() const { return ""; }
-
 signals:
   //  void scaleTypeChanged(int);
   void minValueChanged(double);
@@ -64,8 +66,17 @@ signals:
   //  void nthPowerChanged(double);
   ///@}
 
+private slots:
+  void scaleMinimumEdited();
+  void scaleMaximumEdited();
+
+private:
+  void initLayout();
+  void connectSignals();
+
 private: // data
   Ui::Colorbar m_ui;
+  FigureCanvasQt *m_canvas{nullptr};
   ScalarMappable m_mappable;
   Python::Object m_colorbar;
 };
