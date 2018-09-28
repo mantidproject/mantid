@@ -74,7 +74,7 @@ public:
   void notifyRemovePerAngleDefaultsRequested(int index) override;
   void notifyPerAngleDefaultsChanged(int row, int column) override;
 
-  Experiment const &experiment() const;
+  boost::optional<Experiment> const experiment() const;
 
 private:
   ExperimentValidationResult validateExperimentFromView();

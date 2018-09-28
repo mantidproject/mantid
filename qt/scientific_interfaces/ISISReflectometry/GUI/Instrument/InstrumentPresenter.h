@@ -44,6 +44,8 @@ public:
   InstrumentPresenter(IInstrumentView *view);
   void notifySettingsChanged() override;
 
+  boost::optional<Instrument> const instrument() const;
+
 private:
   IInstrumentView *m_view;
   boost::optional<Instrument> m_model;

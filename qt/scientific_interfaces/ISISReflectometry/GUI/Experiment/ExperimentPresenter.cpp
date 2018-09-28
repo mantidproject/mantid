@@ -113,8 +113,8 @@ void ExperimentPresenter::notifySummationTypeChanged() {
     m_view->disableReductionType();
 }
 
-Experiment const &ExperimentPresenter::experiment() const {
-  return m_model.get();
+boost::optional<Experiment> const ExperimentPresenter::experiment() const {
+  return m_model;
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

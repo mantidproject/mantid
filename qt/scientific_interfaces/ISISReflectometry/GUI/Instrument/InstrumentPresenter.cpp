@@ -74,5 +74,9 @@ void InstrumentPresenter::updateModelFromView() {
   else
     m_model = boost::none;
 }
+
+boost::optional<Instrument> InstrumentPresenter::instrument() {
+  return m_model;
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
