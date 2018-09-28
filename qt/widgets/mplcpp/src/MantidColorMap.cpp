@@ -7,10 +7,6 @@
 #include <QStringList>
 #include <QWidget>
 
-namespace {
-QString DEFAULT_CMAP = "viridis";
-}
-
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -40,7 +36,7 @@ QString MantidColorMap::chooseColorMap(const QString &previous,
 /**
  * @return The name of the default colormap
  */
-QString MantidColorMap::defaultColorMap() { return DEFAULT_CMAP; }
+QString MantidColorMap::defaultColorMap() { return defaultCMapName(); }
 
 /**
  * @brief Check if a given color map exists. This interface has to
@@ -59,12 +55,12 @@ QString MantidColorMap::exists(const QString &name) {
 /**
  * Construct a default colormap
  */
-MantidColorMap::MantidColorMap() : m_cmap(getCMap(DEFAULT_CMAP)) {}
+MantidColorMap::MantidColorMap() : m_cmap(getCMap(defaultCMapName())) {}
 
 /**
  * Reset the colormap to the default
  */
-void MantidColorMap::setupDefaultMap() { loadMap(DEFAULT_CMAP); }
+void MantidColorMap::setupDefaultMap() { loadMap(defaultCMapName()); }
 
 /**
  * Load the given colormap into the object

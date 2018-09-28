@@ -41,6 +41,24 @@ ScalarMappable::ScalarMappable(const NormalizeBase &norm, const QString &cmap)
     : ScalarMappable(norm, getCMap(cmap)) {}
 
 /**
+ * Reset the mappable limits
+ * @param vmin An optional new minmum value
+ * @param vmax An optional new maximum value
+ */
+void ScalarMappable::setCLim(boost::optional<double> vmin,
+                             boost::optional<double> vmax) {
+  Python::Object none;
+  auto setClimAttr = pyobj().attr("set_clim");
+  if (vmin.is_initialized() && vmax.is_initialized()) {
+    setClimAttr(vmin.get(), vmax.get());
+  } else if (vmin.is_initialized()) {
+    setClimAttr(vmin.get(), none);
+  } else if (vmax.is_initialized()) {
+    setClimAttr(none, vmax.get());
+  }
+}
+
+/**
  * @brief Convert a data value to an RGBA value
  * @param x The data value within the
  * @param alpha The alpha value (default = 1)

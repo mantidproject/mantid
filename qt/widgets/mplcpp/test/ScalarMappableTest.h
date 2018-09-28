@@ -29,6 +29,42 @@ public:
     TS_ASSERT_THROWS_NOTHING(ScalarMappable mappable(Normalize(-1, 1), "jet"));
   }
 
+  void testSetCLimSetsMinAndMaxWhenProvided() {
+    ScalarMappable mappable(Normalize(-1, 1), "jet");
+    mappable.setCLim(-10, 10);
+    auto norm = mappable.pyobj().attr("norm");
+    TS_ASSERT_EQUALS(-10, norm.attr("vmin"));
+    TS_ASSERT_EQUALS(10, norm.attr("vmax"));
+  }
+
+  void testSetCLimSetsMinOnlyWhenMaxNotProvided() {
+    ScalarMappable mappable(Normalize(-1, 1), "jet");
+    mappable.setCLim(-10);
+    auto norm = mappable.pyobj().attr("norm");
+    TS_ASSERT_EQUALS(-10, norm.attr("vmin"));
+    TS_ASSERT_EQUALS(1, norm.attr("vmax"));
+  }
+
+  void testSetCLimSetsMaxOnlyWhenMinNotProvided() {
+    ScalarMappable mappable(Normalize(-1, 1), "jet");
+    mappable.setCLim(boost::none, 10);
+    auto norm = mappable.pyobj().attr("norm");
+    TS_ASSERT_EQUALS(-1, norm.attr("vmin"));
+    TS_ASSERT_EQUALS(10, norm.attr("vmax"));
+  }
+
+  void testSetCLimSetsNothingWhenNothingProvided() {
+    ScalarMappable mappable(Normalize(-1, 1), "jet");
+    mappable.setCLim(boost::none, boost::none);
+    auto norm = mappable.pyobj().attr("norm");
+    TS_ASSERT_EQUALS(-1, norm.attr("vmin"));
+    TS_ASSERT_EQUALS(1, norm.attr("vmax"));
+
+    mappable.setCLim();
+    TS_ASSERT_EQUALS(-1, norm.attr("vmin"));
+    TS_ASSERT_EQUALS(1, norm.attr("vmax"));
+  }
+
   void testtoRGBAWithNoAlphaGivesDefault() {
     ScalarMappable mappable(Normalize(-1, 1), getCMap("jet"));
     auto rgba = mappable.toRGBA(0.0);
