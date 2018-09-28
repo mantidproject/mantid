@@ -76,8 +76,20 @@ template <typename T> struct CreateUsingNew {
 
 /// Return a reference to the Singleton instance, creating it if it does not
 /// already exist
-/// Creation is done using the CreateUsingNew policy at the moment
-template <typename T> inline T &SingletonHolder<T>::Instance() {
+/// Creation is done using the CreateUsingNew policy. Held types need
+/// to make CreateUsingNew<T> a friend.
+/// This method cannot be inlined due to the presence of a local static
+/// variable. Inlining causes each call site to receive a different
+/// copy of the static instance variable.
+template <typename T>
+#if defined(_MSC_VER)
+__declspec(noinline)
+#endif
+    T &
+#if defined(__GNUC__) // covers clang too
+    __attribute__((noinline))
+#endif
+    SingletonHolder<T>::Instance() {
   // Initialiazing a local static is thread-safe in C++11
   // The inline lambda call is used to create the singleton once
   // and register an atexit function to delete it
