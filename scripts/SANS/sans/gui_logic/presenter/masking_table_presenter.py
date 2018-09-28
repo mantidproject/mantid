@@ -170,7 +170,7 @@ class MaskingTablePresenter(object):
         # Run the task
         listener = MaskingTablePresenter.DisplayMaskListener(self)
         state_copy = copy.copy(state)
-        self._work_handler.process(listener, load_and_mask_workspace, state_copy, self.DISPLAY_WORKSPACE_NAME)
+        self._work_handler.process(listener, load_and_mask_workspace, 0, state_copy, self.DISPLAY_WORKSPACE_NAME)
 
     def on_processing_finished_masking_display(self, result):
         # Enable button
