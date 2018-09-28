@@ -35,5 +35,16 @@ boost::optional<double> PerThetaDefaults::scaleFactor() const {
 ReductionOptionsMap const &PerThetaDefaults::reductionOptions() const {
   return m_reductionOptions;
 }
+
+bool operator==(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) {
+  return lhs.thetaOrWildcard() == rhs.thetaOrWildcard() &&
+         lhs.qRange() == rhs.qRange() &&
+         lhs.scaleFactor() == rhs.scaleFactor() &&
+         lhs.reductionOptions() == rhs.reductionOptions();
+}
+
+bool operator!=(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) {
+  return !(lhs == rhs);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -30,6 +30,11 @@ private:
   boost::optional<double> m_scaleFactor;
   ReductionOptionsMap m_reductionOptions;
 };
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PerThetaDefaults const &lhs,
+                                               PerThetaDefaults const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PerThetaDefaults const &lhs,
+                                               PerThetaDefaults const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_

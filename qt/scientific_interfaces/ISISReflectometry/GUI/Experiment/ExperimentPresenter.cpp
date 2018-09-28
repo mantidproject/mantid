@@ -23,6 +23,7 @@ void ExperimentPresenter::notifySettingsChanged() {
 }
 
 void ExperimentPresenter::notifySummationTypeChanged() {
+  notifySettingsChanged();
   if (m_model.get().summationType() == SummationType::SumInQ)
     m_view->enableReductionType();
   else

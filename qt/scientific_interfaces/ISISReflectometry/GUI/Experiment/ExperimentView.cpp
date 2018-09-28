@@ -160,7 +160,6 @@ void ExperimentView::registerExperimentSettingsWidgets(
 
 void ExperimentView::summationTypeChanged(int reductionTypeIndex) {
   UNUSED_ARG(reductionTypeIndex);
-  m_notifyee->notifySettingsChanged();
   m_notifyee->notifySummationTypeChanged();
 }
 
