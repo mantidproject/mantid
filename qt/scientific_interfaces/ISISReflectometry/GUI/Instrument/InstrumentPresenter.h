@@ -42,9 +42,13 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter
       public IInstrumentPresenter {
 public:
   InstrumentPresenter(IInstrumentView *view);
+
   void notifySettingsChanged() override;
 
-  boost::optional<Instrument> const instrument() const;
+  void onReductionPaused() override;
+  void onReductionResumed() override;
+
+  boost::optional<Instrument> instrument() const;
 
 private:
   IInstrumentView *m_view;

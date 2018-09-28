@@ -11,6 +11,14 @@ InstrumentPresenter::InstrumentPresenter(IInstrumentView *view)
 
 void InstrumentPresenter::notifySettingsChanged() { updateModelFromView(); }
 
+boost::optional<Instrument> InstrumentPresenter::instrument() const {
+  return m_model;
+}
+
+void InstrumentPresenter::onReductionPaused() { m_view->enableAll(); }
+
+void InstrumentPresenter::onReductionResumed() { m_view->disableAll(); }
+
 RangeInLambda InstrumentPresenter::wavelengthRangeFromView() {
   auto const range =
       RangeInLambda(m_view->getLambdaMin(), m_view->getLambdaMax());
@@ -73,10 +81,6 @@ void InstrumentPresenter::updateModelFromView() {
         Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
   else
     m_model = boost::none;
-}
-
-boost::optional<Instrument> InstrumentPresenter::instrument() {
-  return m_model;
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

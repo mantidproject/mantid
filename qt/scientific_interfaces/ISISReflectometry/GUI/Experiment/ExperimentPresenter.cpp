@@ -13,6 +13,22 @@ ExperimentPresenter::ExperimentPresenter(IExperimentView *view,
   notifySettingsChanged();
 }
 
+boost::optional<Experiment> ExperimentPresenter::experiment() const {
+  return m_model;
+}
+
+void ExperimentPresenter::notifySettingsChanged() {
+  auto validationResult = updateModelFromView();
+  showValidationResult(validationResult);
+}
+
+void ExperimentPresenter::notifySummationTypeChanged() {
+  if (m_model.get().summationType() == SummationType::SumInQ)
+    m_view->enableReductionType();
+  else
+    m_view->disableReductionType();
+}
+
 void ExperimentPresenter::notifyNewPerAngleDefaultsRequested() {
   m_view->addPerThetaDefaultsRow();
   notifySettingsChanged();
@@ -22,6 +38,20 @@ void ExperimentPresenter::notifyRemovePerAngleDefaultsRequested(int index) {
   m_view->removePerThetaDefaultsRow(index);
   notifySettingsChanged();
 }
+
+void ExperimentPresenter::notifyPerAngleDefaultsChanged(int, int column) {
+  auto validationResult = updateModelFromView();
+  showValidationResult(validationResult);
+  if (column == 0 && !validationResult.isValid() &&
+      validationResult.assertError()
+              .perThetaValidationErrors()
+              .fullTableError() == ThetaValuesValidationError::NonUniqueTheta)
+    m_view->showPerAngleThetasNonUnique(m_thetaTolerance);
+}
+
+void ExperimentPresenter::onReductionPaused() { m_view->enableAll(); }
+
+void ExperimentPresenter::onReductionResumed() { m_view->disableAll(); }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const cRho = m_view->getCRho();
@@ -34,11 +64,6 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
 RangeInLambda ExperimentPresenter::transmissionRunRangeFromView() {
   return RangeInLambda(m_view->getTransmissionStartOverlap(),
                        m_view->getTransmissionEndOverlap());
-}
-
-void ExperimentPresenter::notifySettingsChanged() {
-  auto validationResult = updateModelFromView();
-  showValidationResult(validationResult);
 }
 
 ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
@@ -72,16 +97,6 @@ ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
   return validationResult;
 }
 
-void ExperimentPresenter::notifyPerAngleDefaultsChanged(int, int column) {
-  auto validationResult = updateModelFromView();
-  showValidationResult(validationResult);
-  if (column == 0 && !validationResult.isValid() &&
-      validationResult.assertError()
-              .perThetaValidationErrors()
-              .fullTableError() == ThetaValuesValidationError::NonUniqueTheta)
-    m_view->showPerAngleThetasNonUnique(m_thetaTolerance);
-}
-
 void ExperimentPresenter::showPerThetaTableErrors(
     PerThetaDefaultsTableValidationError const &errors) {
   m_view->showAllPerAngleOptionsAsValid();
@@ -104,17 +119,6 @@ void ExperimentPresenter::showValidationResult(
     else
       m_view->showStitchParametersInvalid();
   }
-}
-
-void ExperimentPresenter::notifySummationTypeChanged() {
-  if (m_model.get().summationType() == SummationType::SumInQ)
-    m_view->enableReductionType();
-  else
-    m_view->disableReductionType();
-}
-
-boost::optional<Experiment> const ExperimentPresenter::experiment() const {
-  return m_model;
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -68,13 +68,17 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter
 public:
   // TODO Inject the Experiment model into the constructor.
   ExperimentPresenter(IExperimentView *view, double defaultsThetaTolerance);
+
+  boost::optional<Experiment> experiment() const;
+
   void notifySettingsChanged() override;
   void notifySummationTypeChanged() override;
   void notifyNewPerAngleDefaultsRequested() override;
   void notifyRemovePerAngleDefaultsRequested(int index) override;
   void notifyPerAngleDefaultsChanged(int row, int column) override;
 
-  boost::optional<Experiment> const experiment() const;
+  void onReductionPaused() override;
+  void onReductionResumed() override;
 
 private:
   ExperimentValidationResult validateExperimentFromView();
