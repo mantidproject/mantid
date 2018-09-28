@@ -6,7 +6,6 @@ from mantid.kernel import Logger
 from ui.sans_isis.beam_centre import BeamCentre
 from ui.sans_isis.work_handler import WorkHandler
 
-
 class BeamCentrePresenter(object):
     class ConcreteBeamCentreListener(BeamCentre.BeamCentreListener):
         def __init__(self, presenter):
