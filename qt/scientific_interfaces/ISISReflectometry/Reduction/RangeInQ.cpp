@@ -1,4 +1,5 @@
 #include "RangeInQ.h"
+#include "MantidKernel/Tolerance.h"
 #include <cassert>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -6,6 +7,10 @@ namespace CustomInterfaces {
 RangeInQ::RangeInQ(double min, double step, double max)
     : m_min(min), m_step(step), m_max(max) {
   assert(min < max);
+}
+
+bool RangeInQ::isValid() const {
+  return m_min <= m_max + Mantid::Kernel::Tolerance;
 }
 
 double RangeInQ::min() const { return m_min; }

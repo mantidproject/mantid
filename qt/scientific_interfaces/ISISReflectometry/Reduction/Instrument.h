@@ -36,9 +36,14 @@ public:
              MonitorCorrections monitorCorrections,
              DetectorCorrections detectorCorrections);
 
+  bool isValid() const;
   RangeInLambda const &wavelengthRange() const;
-  MonitorCorrections monitorCorrections() const;
-  DetectorCorrections detectorCorrections() const;
+  bool integratedMonitors() const;
+  size_t monitorIndex() const;
+  RangeInLambda monitorIntegralRange() const;
+  RangeInLambda monitorBackgroundRange() const;
+  bool correctDetectors() const;
+  DetectorCorrectionType detectorCorrectionType() const;
 
 private:
   RangeInLambda m_wavelengthRange;

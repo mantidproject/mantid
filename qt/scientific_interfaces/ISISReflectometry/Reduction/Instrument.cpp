@@ -9,16 +9,37 @@ Instrument::Instrument(RangeInLambda wavelengthRange,
       m_monitorCorrections(monitorCorrections),
       m_detectorCorrections(detectorCorrections) {}
 
+bool Instrument::isValid() const {
+  return m_wavelengthRange.isValid() && m_monitorCorrections.isValid();
+}
+
 RangeInLambda const &Instrument::wavelengthRange() const {
   return m_wavelengthRange;
 }
 
-MonitorCorrections Instrument::monitorCorrections() const {
-  return m_monitorCorrections;
+bool Instrument::integratedMonitors() const {
+  return m_monitorCorrections.integrate();
 }
 
-DetectorCorrections Instrument::detectorCorrections() const {
-  return m_detectorCorrections;
+size_t Instrument::monitorIndex() const {
+  return m_monitorCorrections.monitorIndex();
 }
+
+RangeInLambda Instrument::monitorIntegralRange() const {
+  return m_monitorCorrections.integralRange();
+}
+
+RangeInLambda Instrument::monitorBackgroundRange() const {
+  return m_monitorCorrections.backgroundRange();
+}
+
+bool Instrument::correctDetectors() const {
+  return m_detectorCorrections.correctPositions();
+}
+
+DetectorCorrectionType Instrument::detectorCorrectionType() const {
+  return m_detectorCorrections.correctionType();
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

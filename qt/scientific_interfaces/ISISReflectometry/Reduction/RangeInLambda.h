@@ -7,13 +7,19 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda {
 public:
   RangeInLambda(double min, double max);
+
+  bool isValid() const;
   double min() const;
   double max() const;
-  bool isValid() const;
 
 private:
   double m_min, m_max;
 };
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(RangeInLambda const &lhs,
+                                               RangeInLambda const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(RangeInLambda const &lhs,
+                                               RangeInLambda const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_RANGEINLAMBDA_H_

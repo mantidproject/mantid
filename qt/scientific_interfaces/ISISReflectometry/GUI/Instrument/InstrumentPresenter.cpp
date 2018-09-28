@@ -75,12 +75,8 @@ void InstrumentPresenter::updateModelFromView() {
   auto const wavelengthRange = wavelengthRangeFromView();
   auto const monitorCorrections = monitorCorrectionsFromView();
   auto const detectorCorrections = detectorCorrectionsFromView();
-
-  if (wavelengthRange.isValid() && monitorCorrections.isValid())
-    m_model =
-        Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
-  else
-    m_model = boost::none;
+  m_model =
+      Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
