@@ -32,6 +32,9 @@ namespace IO {
  * 2. Load data from bank -> sort by pixels in local memory
  *      -> copy from local to shared memory: LoadType::producerConsumer
  *      (uses dynamic allocation in local memory that is not so bad).
+ *
+ * There 3 main time consuming parts: reading from file, pushing to shared
+ * memory, collecting from shared memory, the cost of sorting is small.
 
   @author Igor Gudich
   @date 2018
@@ -187,7 +190,7 @@ void MultiProcessEventLoader::GroupLoader<
                   const std::vector<std::string> &bankNames,
                   const std::vector<int32_t> &bankOffsets, const uint32_t from,
                   const uint32_t to) {
-  constexpr std::size_t chunksPerBank{100};
+  constexpr std::size_t chunksPerBank{10};
   const std::size_t chLen{
       std::max<std::size_t>((to - from) / chunksPerBank, 1)};
   auto bankSizes = EventLoader::readBankSizes(instrument, bankNames);
