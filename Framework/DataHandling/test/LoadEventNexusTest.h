@@ -896,14 +896,14 @@ public:
     auto hdf5Mutex = boost::make_shared<std::mutex>();
     runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
-
+#ifndef _WIN32
   void test_multiprocess_load() {
     run_multiprocess_load("SANS2D00022048.nxs", true);
     run_multiprocess_load("SANS2D00022048.nxs", false);
     run_multiprocess_load("LARMOR00003368.nxs", true);
     run_multiprocess_load("LARMOR00003368.nxs", false);
   }
-
+#endif // _WIN32
 private:
   std::string wsSpecFilterAndEventMonitors;
 };
@@ -914,6 +914,26 @@ private:
 
 class LoadEventNexusTestPerformance : public CxxTest::TestSuite {
 public:
+#ifndef _WIN32
+  void testMultiprocessLoadPrecount() {
+    LoadEventNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    loader.setPropertyValue("Loadtype", "multiprocess");
+    loader.setPropertyValue("Precount", std::to_string(true));
+    TS_ASSERT(loader.execute());
+  }
+  void testMultiprocessLoadProducerConsumer() {
+    LoadEventNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    loader.setPropertyValue("Loadtype", "multiprocess");
+    loader.setPropertyValue("Precount", std::to_string(false));
+    TS_ASSERT(loader.execute());
+  }
+#endif // _WIN32
   void testDefaultLoad() {
     LoadEventNexus loader;
     loader.initialize();
