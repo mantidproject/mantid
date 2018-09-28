@@ -45,7 +45,7 @@ ScalarMappable::ScalarMappable(const NormalizeBase &norm, const QString &cmap)
  * @param vmin An optional new minmum value
  * @param vmax An optional new maximum value
  */
-void ScalarMappable::setCLim(boost::optional<double> vmin,
+void ScalarMappable::setClim(boost::optional<double> vmin,
                              boost::optional<double> vmax) {
   Python::Object none;
   auto setClimAttr = pyobj().attr("set_clim");

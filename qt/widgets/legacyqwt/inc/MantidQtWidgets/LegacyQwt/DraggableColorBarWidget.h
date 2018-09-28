@@ -31,7 +31,7 @@ public:
   DraggableColorBarWidget(QWidget *parent,
                           const double &minPositiveValue = 0.0001);
   void setupColorBarScaling(const MantidColorMap &);
-  void setRange(double vmin, double vmax);
+  void setClim(double vmin, double vmax);
   void setMinValue(double);
   void setMaxValue(double);
   QString getMinValue() const;

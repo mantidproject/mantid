@@ -41,6 +41,9 @@ public:
   /// Non-const access to the current active axes instance.
   inline Axes &gca() { return m_axes; }
 
+  /// Redraw the canvas
+  inline void draw() { pyobj().attr("draw")(); }
+
 private: // members
   Axes m_axes;
 };
