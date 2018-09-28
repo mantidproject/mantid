@@ -25,6 +25,7 @@ Bug fixes
 * Fixed an issue where the run tab was difficult to select.
 * Changed the geometry names from CylinderAxisUP, Cuboid and CylinderAxisAlong to Cylinder, FlatPlate and Disc
 * The GUI now correctly resets to default values when a new user file is loaded.
+* The GUI no longer hangs whilst searching the archive for files.
 
 Improvements
 ############
