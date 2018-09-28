@@ -249,7 +249,7 @@ namespace MantidQt {
 ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
     : m_backgroundSavingThread(), m_stopBackgroundThread(true),
       m_configKeyObserver(*this, &ProjectRecovery::configKeyChanged),
-      m_windowPtr(windowHandle) {}
+      m_windowPtr(windowHandle), m_recoveryGui(nullptr) {}
 
 /// Destructor which also stops any background threads currently in progress
 ProjectRecovery::~ProjectRecovery() {
