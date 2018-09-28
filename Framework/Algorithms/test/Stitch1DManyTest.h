@@ -1318,11 +1318,12 @@ public:
 
     // Check workspaces in ADS
     auto wsInADS = AnalysisDataService::Instance().getObjectNames();
-    // In ADS: group1, group2, group3, outws, outws_ws1_ws3_ws5,
-    // outws_ws2_ws4_ws6, ws1, ws2, ws3, ws4, ws5, ws6
-    // TS_ASSERT_EQUALS(wsInADS[2], "outws")
-    // TS_ASSERT_EQUALS(wsInADS[3], "outws_ws1_ws3_ws5")
-    // TS_ASSERT_EQUALS(wsInADS[4], "outws_ws2_ws4_ws6")
+    // In ADS: group1, group2, group3,
+    // ws1, ws2, ws3, ws4, ws5, ws6 and
+    TS_ASSERT_EQUALS(wsInADS.size(), 12)
+    TS_ASSERT_EQUALS(wsInADS[3], "outws")
+    TS_ASSERT_EQUALS(wsInADS[4], "outws_ws1_ws3_ws5")
+    TS_ASSERT_EQUALS(wsInADS[5], "outws_ws2_ws4_ws6")
     TS_ASSERT_EQUALS(wsInADS.size(), 12)
     // Clear the ADS
     AnalysisDataService::Instance().clear();
