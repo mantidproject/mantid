@@ -163,6 +163,11 @@ install ( FILES ${QT_PLUGIN_DIR}/sqldrivers/qsqlite4.dll DESTINATION plugins/qt4
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
 
+###########################################################################	
+# Icons for shortcuts	
+###########################################################################	
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/mantid_notebook.ico DESTINATION bin )
+
 ###########################################################################
 # Extra NSIS commands for shortcuts, start menu items etc
 # Three backward slashes are required to escape a character to get the
@@ -180,6 +185,7 @@ set (CPACK_NSIS_CREATE_ICONS_EXTRA "
 ")
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDPLOT_LINK_NAME}\\\"
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDNOTEBOOK_LINK_NAME}\\\"
 ")
 # The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
