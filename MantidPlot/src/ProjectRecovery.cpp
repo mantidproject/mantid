@@ -252,21 +252,23 @@ ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
       m_windowPtr(windowHandle) {}
 
 /// Destructor which also stops any background threads currently in progress
-ProjectRecovery::~ProjectRecovery() { stopProjectSaving(); 
-delete m_recoveryGui;}
+ProjectRecovery::~ProjectRecovery() {
+  stopProjectSaving();
+  delete m_recoveryGui;
+}
 
 void ProjectRecovery::attemptRecovery() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "ProjectRecovery->AttemptRecovery", true);
-  m_recoveryGui = new ProjectRecoveryPresenter(this, m_windowPtr);
-  //bool failed = m_recoveryGui->startRecoveryView();
 
-  //if (failed) {
-      //while (failed){
-        //failed = 
-        m_recoveryGui->startRecoveryFailure();
-      //}
-  //}
+  m_recoveryGui = new ProjectRecoveryPresenter(this, m_windowPtr);
+  bool failed = m_recoveryGui->startRecoveryView();
+
+  if (failed) {
+    while (failed) {
+      failed = m_recoveryGui->startRecoveryFailure();
+    }
+  }
 }
 
 bool ProjectRecovery::checkForRecovery() const noexcept {
@@ -689,7 +691,7 @@ std::vector<Poco::Path> ProjectRecovery::getListOfFoldersInDirectoryPR(
   return getListOfFoldersInDirectory(recoveryFolderPath);
 }
 
-std::string ProjectRecovery::getRecoveryFolderCheckPR(){
+std::string ProjectRecovery::getRecoveryFolderCheckPR() {
   return getRecoveryFolderCheck();
 }
 
@@ -697,7 +699,8 @@ std::string ProjectRecovery::getRecoveryFolderLoadPR() {
   return getRecoveryFolderLoad();
 }
 
-std::vector<Poco::Path> ProjectRecovery::getRecoveryFolderCheckpointsPR(const std::string &recoveryFolderPath){
+std::vector<Poco::Path> ProjectRecovery::getRecoveryFolderCheckpointsPR(
+    const std::string &recoveryFolderPath) {
   return getRecoveryFolderCheckpoints(recoveryFolderPath);
 }
 
