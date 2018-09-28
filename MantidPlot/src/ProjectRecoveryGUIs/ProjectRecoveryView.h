@@ -17,6 +17,7 @@ public:
       QWidget *parent = 0,
       ProjectRecoveryPresenter *presenter = nullptr);
   ~ProjectRecoveryView();
+  void reject() override;
 
 private slots:
   void onClickLastCheckpoint();

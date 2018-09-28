@@ -256,12 +256,17 @@ ProjectRecovery::~ProjectRecovery() { stopProjectSaving();
 delete m_recoveryGui;}
 
 void ProjectRecovery::attemptRecovery() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ProjectRecovery->AttemptRecovery", true);
   m_recoveryGui = new ProjectRecoveryPresenter(this, m_windowPtr);
-  bool failed = m_recoveryGui->startRecoveryView();
+  //bool failed = m_recoveryGui->startRecoveryView();
 
-  if (failed) {
-    m_recoveryGui->startRecoveryFailure();
-  }
+  //if (failed) {
+      //while (failed){
+        //failed = 
+        m_recoveryGui->startRecoveryFailure();
+      //}
+  //}
 }
 
 bool ProjectRecovery::checkForRecovery() const noexcept {
@@ -476,9 +481,11 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   g_log.notice("Project Recovery finished");
 
   // Restart project recovery when the async part finishes
-  clearAllCheckpoints(Poco::Path(recoveryFolder).popDirectory());
+  Poco::Path deletePath = recoveryFolder;
+  deletePath.setFileName("");
+  clearAllCheckpoints(deletePath);
   startProjectSaving();
-} // namespace MantidQt
+}
 
 /**
  * Compiles the project recovery script from a given checkpoint

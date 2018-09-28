@@ -2,13 +2,14 @@
 #define RECOVERYFAILUREVIEW_H
 
 #include "ProjectRecoveryPresenter.h"
+#include <QDialog>
 #include <QWidget>
 
 namespace Ui {
 class RecoveryFailure;
 }
 
-class RecoveryFailureView : public QWidget {
+class RecoveryFailureView : public QDialog {
   Q_OBJECT
 
 public:
@@ -16,6 +17,7 @@ public:
       QWidget *parent = 0,
       ProjectRecoveryPresenter *presenter = nullptr);
   ~RecoveryFailureView();
+  void reject() override;
 
 private slots:
   void onClickLastCheckpoint();

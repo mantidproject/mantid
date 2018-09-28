@@ -1,8 +1,9 @@
 #include "ProjectRecoveryModel.h"
-#include "ProjectRecoveryPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
 #include "ProjectRecovery.h"
+#include "ProjectRecoveryPresenter.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
@@ -36,26 +37,25 @@ std::string lengthOfRecoveryFile(Poco::Path path) {
 } // namespace
 
 ProjectRecoveryModel::ProjectRecoveryModel(
-    MantidQt::ProjectRecovery *projectRecovery, ProjectRecoveryPresenter *presenter)
+    MantidQt::ProjectRecovery *projectRecovery,
+    ProjectRecoveryPresenter *presenter)
     : m_projRec(projectRecovery), m_presenter(presenter) {
-  this->fillRows();
+  fillRows();
 }
 
 std::vector<std::string> ProjectRecoveryModel::getRow(int i) {
-  if (m_rows.size() < 5) {
-    for (auto i = m_rows.size(); i < 5; ++i) {
-      std::vector<std::string> emptyVector = {"", "", ""};
-      m_rows.emplace_back(emptyVector);
-    }
-  }
   return m_rows.at(i);
 }
 
 void ProjectRecoveryModel::recoverLast() {
+  // Clear the ADS
+  Mantid::API::AnalysisDataService::Instance().clear();
+
   // Recover using the last checkpoint
   Poco::Path output(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
   output.append("ordered_recovery.py");
-  auto mostRecentCheckpoints = m_projRec->getRecoveryFolderCheckpointsPR(m_projRec->getRecoveryFolderLoadPR());
+  auto mostRecentCheckpoints = m_projRec->getRecoveryFolderCheckpointsPR(
+      m_projRec->getRecoveryFolderLoadPR());
   auto mostRecentCheckpoint = mostRecentCheckpoints.back();
   m_projRec->openInEditor(mostRecentCheckpoint, output);
   std::thread recoveryThread(
@@ -66,9 +66,13 @@ void ProjectRecoveryModel::recoverLast() {
   m_presenter->closeView();
 }
 void ProjectRecoveryModel::openLastInEditor() {
+  // Clear the ADS
+  Mantid::API::AnalysisDataService::Instance().clear();
+
   // Open the last made checkpoint in editor
   auto beforeCheckpoints = m_projRec->getRecoveryFolderLoadPR();
-  auto mostRecentCheckpoints = m_projRec->getRecoveryFolderCheckpointsPR(beforeCheckpoints);
+  auto mostRecentCheckpoints =
+      m_projRec->getRecoveryFolderCheckpointsPR(beforeCheckpoints);
   auto mostRecentCheckpoint = mostRecentCheckpoints.back();
   Poco::Path output(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
   output.append("ordered_recovery.py");
@@ -82,13 +86,16 @@ void ProjectRecoveryModel::openLastInEditor() {
 }
 void ProjectRecoveryModel::startMantidNormally() {
   // Close the window and save if nessercary (Probably not)
-  m_projRec->clearAllCheckpoints(m_projRec->getRecoveryFolderCheckPR());
+  m_projRec->clearAllUnusedCheckpoints();
   m_projRec->startProjectSaving();
 
   // Close view
   m_presenter->closeView();
 }
 void ProjectRecoveryModel::recoverSelectedCheckpoint(std::string &selected) {
+  // Clear the ADS
+  Mantid::API::AnalysisDataService::Instance().clear();
+
   // Recovery given the checkpoint selected here
   selected.replace(selected.find(" "), 1, "T");
   Poco::Path checkpoint(m_projRec->getRecoveryFolderLoadPR());
@@ -105,6 +112,9 @@ void ProjectRecoveryModel::recoverSelectedCheckpoint(std::string &selected) {
   m_presenter->closeView();
 }
 void ProjectRecoveryModel::openSelectedInEditor(std::string &selected) {
+  // Clear the ADS
+  Mantid::API::AnalysisDataService::Instance().clear();
+
   // Open editor for this checkpoint
   selected.replace(selected.find(" "), 1, "T");
   auto beforeCheckpoint = m_projRec->getRecoveryFolderLoadPR();
@@ -135,5 +145,10 @@ void ProjectRecoveryModel::fillRows() {
     std::vector<std::string> nextVector = {checkpointName, lengthOfFile,
                                            checked};
     m_rows.emplace_back(nextVector);
+  }
+
+  for (auto i = paths.size(); i < 5; ++i) {
+    std::vector<std::string> newVector = {"", "", ""};
+    m_rows.emplace_back(newVector);
   }
 }

@@ -1,16 +1,18 @@
 #include "RecoveryFailureView.h"
 #include "ui_RecoveryFailure.h"
 
+#include "MantidKernel/UsageService.h"
+
 RecoveryFailureView::RecoveryFailureView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QWidget(parent), ui(new Ui::RecoveryFailure) {
+    : QDialog(parent), ui(new Ui::RecoveryFailure), m_presenter(presenter) {
   ui->setupUi(this);
-  ui->tableWidget->horizontalHeader()->setResizeMode(
-      QHeaderView::Stretch);
+  ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-  ui->tableWidget->verticalHeader()->setVisible(false);
   // Set the table information
   addDataToTable(ui);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Interface", "ProjectRecoveryFailureWindow", true);
 }
 
 RecoveryFailureView::~RecoveryFailureView() { delete ui; }
@@ -41,19 +43,48 @@ void RecoveryFailureView::addDataToTable(Ui::RecoveryFailure *ui) {
 void RecoveryFailureView::onClickLastCheckpoint() {
   // Recover last checkpoint
   m_presenter->recoverLast();
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ProjectRecoveryFailureWindow->RecoverLastCheckpoint", false);
 }
 
 void RecoveryFailureView::onClickSelectedCheckpoint() {
   // Recover Selected
-  // m_presenter->recoverSelectedCheckpoint();
+  QList<QTableWidgetItem *> selectedRows = ui->tableWidget->selectedItems();
+  if (selectedRows.size() > 0) {
+    QString text = selectedRows[0]->text();
+    if (text.toStdString() == "") {
+      return;
+    }
+    m_presenter->recoverSelectedCheckpoint(text);
+  }
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ProjectRecoveryFailureWindow->RecoverSelectedCheckpoint", false);
 }
 
 void RecoveryFailureView::onClickOpenSelectedInScriptWindow() {
   // Open checkpoint in script window
-  // m_presenter->openSelectedInEditor();
+  QList<QTableWidgetItem *> selectedRows = ui->tableWidget->selectedItems();
+  if (selectedRows.size() > 0) {
+    QString text = selectedRows[0]->text();
+    if (text.toStdString() == "") {
+      return;
+    }
+    m_presenter->openSelectedInEditor(text);
+  }
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ProjectRecoveryFailureWindow->OpenSelectedInScriptWindow", false);
 }
 
 void RecoveryFailureView::onClickStartMantidNormally() {
   // Start save and close this, clear checkpoint that was offered for load
   m_presenter->startMantidNormally();
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ProjectRecoveryFailureWindow->StartMantidNormally", false);
+}
+
+void RecoveryFailureView::reject() {
+  // Do nothing just absorb request
+  m_presenter->startMantidNormally();
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ProjectRecoveryFailureWindow->StartMantidNormally", false);
 }

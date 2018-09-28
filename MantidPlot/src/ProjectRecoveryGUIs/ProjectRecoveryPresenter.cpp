@@ -1,28 +1,30 @@
 #include "ProjectRecoveryPresenter.h"
+#include "ApplicationWindow.h"
 #include "ProjectRecovery.h"
 #include "ProjectRecoveryModel.h"
 #include "ProjectRecoveryView.h"
 #include "RecoveryFailureView.h"
-#include "ApplicationWindow.h"
 
 #include <memory>
 
 ProjectRecoveryPresenter::ProjectRecoveryPresenter(
     MantidQt::ProjectRecovery *projectRecovery, ApplicationWindow *parentWindow)
-    : m_model(projectRecovery, this), m_mainWindow(parentWindow) {
-      m_recView = nullptr;
-      m_failureView = nullptr;
-    }
+    : m_mainWindow(parentWindow) {
+  m_recView = nullptr;
+  m_failureView = nullptr;
+  m_model = new ProjectRecoveryModel(projectRecovery, this);
+}
 
-ProjectRecoveryPresenter::~ProjectRecoveryPresenter(){
+ProjectRecoveryPresenter::~ProjectRecoveryPresenter() {
   delete m_recView;
   delete m_failureView;
+  delete m_model;
 }
 
 bool ProjectRecoveryPresenter::startRecoveryView() {
   try {
     m_recView = new ProjectRecoveryView(m_mainWindow, this);
-    m_recView->show();
+    m_recView->exec();
   } catch (...) {
     return true;
   }
@@ -32,7 +34,7 @@ bool ProjectRecoveryPresenter::startRecoveryView() {
 bool ProjectRecoveryPresenter::startRecoveryFailure() {
   try {
     m_failureView = new RecoveryFailureView(m_mainWindow, this);
-    m_failureView->show();
+    m_failureView->exec();
   } catch (...) {
     return true;
   }
@@ -40,7 +42,7 @@ bool ProjectRecoveryPresenter::startRecoveryFailure() {
 }
 
 QStringList ProjectRecoveryPresenter::getRow(int i) {
-  auto vec = m_model.getRow(i);
+  auto vec = m_model->getRow(i);
   QStringList returnVal;
   for (auto i = 0; i < 3; ++i) {
     QString newString = QString::fromStdString(vec[i]);
@@ -49,30 +51,31 @@ QStringList ProjectRecoveryPresenter::getRow(int i) {
   return returnVal;
 }
 
-void ProjectRecoveryPresenter::recoverLast() { m_model.recoverLast(); }
+void ProjectRecoveryPresenter::recoverLast() { m_model->recoverLast(); }
 
 void ProjectRecoveryPresenter::openLastInEditor() {
-  m_model.openLastInEditor();
+  m_model->openLastInEditor();
 }
 
 void ProjectRecoveryPresenter::startMantidNormally() {
-  m_model.startMantidNormally();
+  m_model->startMantidNormally();
 }
 
-void ProjectRecoveryPresenter::recoverSelectedCheckpoint(
-    std::string &selected) {
-  m_model.recoverSelectedCheckpoint(selected);
+void ProjectRecoveryPresenter::recoverSelectedCheckpoint(QString &selected) {
+  std::string stdString = selected.toStdString();
+  m_model->recoverSelectedCheckpoint(stdString);
 }
 
-void ProjectRecoveryPresenter::openSelectedInEditor(std::string &selected) {
-  m_model.openSelectedInEditor(selected);
+void ProjectRecoveryPresenter::openSelectedInEditor(QString &selected) {
+  std::string stdString = selected.toStdString();
+  m_model->openSelectedInEditor(stdString);
 }
 
-void ProjectRecoveryPresenter::closeView(){
-  if (m_recView != nullptr){
+void ProjectRecoveryPresenter::closeView() {
+  if (m_recView != nullptr) {
     m_recView->setVisible(false);
   }
-  if (m_failureView != nullptr){
+  if (m_failureView != nullptr) {
     m_failureView->setVisible(false);
   }
 }
