@@ -128,7 +128,7 @@ Mantid for different testing tasks.
 
 **Example - Convert Set of Event Workspaces (Horace scan) to 4D MD workspace, direct mode:**
 
-Meaningfull results can be obtained on the basis of CNCS\_7860\_event.nxs file, available in Mantid
+Meaningful results can be obtained on the basis of CNCS\_7860\_event.nxs file, available in Mantid
 test folder. The script below simulates workspace loading but would produce meaningfill result if real experimental data
 obtained in an experiment and stored in nxspe files are provided to it.
 

@@ -43,7 +43,7 @@ Usage
 -----
 
 Ordinarily, we'd get our peak parameters table from EnggFitPeaks, but
-we just mock one up here. See :ref:`EnggFitPeaks documenation
+we just mock one up here. See :ref:`EnggFitPeaks documentation
 <algm-EnggFitPeaks-v1>` for how to generate this table.
 
 **Example - Export fit params to a new HDF5 file:**

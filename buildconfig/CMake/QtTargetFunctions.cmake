@@ -7,7 +7,7 @@
 # is created.
 # The global ENABLE_WORKBENCH option controls if a Qt5 target
 # is created.
-# To limit the Qt version for a specfic library use
+# To limit the Qt version for a specific library use
 # QT_VERSION, e.g.
 #
 # mtd_add_qt_library ( QT_VERSION 5
@@ -35,7 +35,7 @@ endfunction()
 # is created.
 # The global ENABLE_WORKBENCH option controls if a Qt5 target
 # is created.
-# To limit the Qt version for a specfic library use
+# To limit the Qt version for a specific library use
 # QT_VERSION, e.g.
 #
 # mtd_add_qt_executable ( QT_VERSION 5
@@ -51,7 +51,7 @@ function (mtd_add_qt_executable)
       mtd_add_qt_target (EXECUTABLE QT_VERSION ${_ver} ${ARGN})
     endif ()
     if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
-      mtd_add_qt_target (EXCUTABLE QT_VERSION ${_ver} ${ARGN})
+      mtd_add_qt_target (EXECUTABLE QT_VERSION ${_ver} ${ARGN})
     endif ()
   endforeach()
 endfunction()

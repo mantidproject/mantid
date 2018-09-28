@@ -72,7 +72,8 @@ class Pearl(AbstractInst):
 
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs):
-        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
+        if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
+            self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         yield
         self._inst_settings = copy.deepcopy(self._default_inst_settings)

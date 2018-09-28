@@ -253,7 +253,7 @@ bool ImportOPJ::importTables(const OPJFile &opj) {
           case 1: // Scientific
             f = 2;
             break;
-          case 2: // Engeneering
+          case 2: // Engineering
           case 3: // Decimal 1,000
             f = 0;
             break;
@@ -460,7 +460,7 @@ bool ImportOPJ::importTables(const OPJFile &opj) {
     case 1: // Scientific
       format = 'e';
       break;
-    case 2: // Engeneering
+    case 2: // Engineering
     case 3: // Decimal 1,000
       format = 'g';
       break;
@@ -1073,7 +1073,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           case 1: // Scientific
             format = 2;
             break;
-          case 2: // Engeneering
+          case 2: // Engineering
           case 3: // Decimal 1,000
             format = 0;
             break;
@@ -1107,7 +1107,7 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
           case 1: // Scientific
             format = 2;
             break;
-          case 2: // Engeneering
+          case 2: // Engineering
           case 3: // Decimal 1,000
             format = 0;
             break;
@@ -1461,4 +1461,4 @@ QString ImportOPJ::parseOriginTags(const QString &str) {
 // TODO: bug in grid dialog
 //		scale/minor ticks checkbox
 //		histogram: autobin export
-//		if prec not setted - automac+4digits
+//		if prec not set - automac+4digits

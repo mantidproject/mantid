@@ -159,30 +159,24 @@ void IndirectFitPlotView::removeFromBottomPreview(const QString &name) {
   m_plotForm->ppPlotBottom->removeSpectrum(name);
 }
 
-void IndirectFitPlotView::disablePlotGuess() {
-  m_plotForm->ckPlotGuess->setDisabled(true);
-  m_plotForm->ckPlotGuess->setChecked(false);
+void IndirectFitPlotView::enablePlotGuess(bool enable) {
+  if (!enable)
+    m_plotForm->ckPlotGuess->setChecked(enable);
+  m_plotForm->ckPlotGuess->setEnabled(enable);
 }
 
-void IndirectFitPlotView::enablePlotGuess() {
-  m_plotForm->ckPlotGuess->setEnabled(true);
+void IndirectFitPlotView::enableFitSingleSpectrum(bool enable) {
+  m_plotForm->pbFitSingle->setEnabled(enable);
 }
 
-void IndirectFitPlotView::disableSpectrumSelection() {
-  m_plotForm->spPlotSpectrum->setValue(0);
-  m_plotForm->spPlotSpectrum->setDisabled(true);
+void IndirectFitPlotView::enableSpectrumSelection(bool enable) {
+  if (!enable)
+    m_plotForm->spPlotSpectrum->setValue(0);
+  m_plotForm->spPlotSpectrum->setEnabled(enable);
 }
 
-void IndirectFitPlotView::enableSpectrumSelection() {
-  m_plotForm->spPlotSpectrum->setEnabled(true);
-}
-
-void IndirectFitPlotView::disableFitRangeSelection() {
-  m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(false);
-}
-
-void IndirectFitPlotView::enableFitRangeSelection() {
-  m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(true);
+void IndirectFitPlotView::enableFitRangeSelection(bool enable) {
+  m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(enable);
 }
 
 void IndirectFitPlotView::clearTopPreview() { m_plotForm->ppPlotTop->clear(); }

@@ -10,7 +10,7 @@ Description
 -----------
 
 The inputs to this algorithm are single-spectra workspaces containing polarization efficiencies. They are combined and interpolated if
-neccessary to form a valid matrix workspace. The spectra of the output workspace are labeled with the names of the corresponding
+necessary to form a valid matrix workspace. The spectra of the output workspace are labeled with the names of the corresponding
 input properties.
 
 

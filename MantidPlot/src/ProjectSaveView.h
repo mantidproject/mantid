@@ -18,7 +18,7 @@ namespace MantidWidgets {
 
 /** @class ProjectSaveView
 
-ProjectSaveView is the interaces for defining the functions that the project
+ProjectSaveView is the interfaces for defining the functions that the project
 save view needs to implement.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -117,7 +117,7 @@ private:
   bool checkIfNewProject(const QString &projectName) const;
   /// Resize a QTreeWidgets columns to fit text correctly
   void resizeWidgetColumns(QTreeWidget *widget);
-  /// Connect up signals to the interface on initilisation
+  /// Connect up signals to the interface on initialisation
   void connectSignals();
   /// Update the checked state of the tree when an item is updated
   void updateWorkspaceListCheckState(QTreeWidgetItem *item);

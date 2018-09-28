@@ -51,6 +51,8 @@ public:
 
   virtual void removeRowAt(RowLocation const &location) = 0;
   virtual void removeRows(std::vector<RowLocation> rowsToRemove) = 0;
+  virtual void removeAllRows() = 0;
+
   virtual bool isOnlyChildOfRoot(RowLocation const &location) const = 0;
 
   virtual void replaceRows(std::vector<RowLocation> replacementPoints,

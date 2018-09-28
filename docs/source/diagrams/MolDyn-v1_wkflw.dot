@@ -2,7 +2,7 @@ digraph MolDyn {
   label="MolDyn Flowchart"
   $global_style
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     Version             [label="nMoldyn version"]
     IfSave              [label="Save?"]

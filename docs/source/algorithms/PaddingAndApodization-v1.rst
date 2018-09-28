@@ -14,7 +14,7 @@ This algorithm can prepare data for
 
 Padding is when the input data is extended by adding extra measurments of zero at regular intervals. For real data this is only done after the end of the input data. However, for complex data the padding should be shared between the start and end of the input data.
 
-`Apodization functions <http://mathworld.wolfram.com/ApodizationFunction.html>`_ can be used to remove data with large errors. These are usualy
+`Apodization functions <http://mathworld.wolfram.com/ApodizationFunction.html>`_ can be used to remove data with large errors. These are usually
 found at large time scales. These take a decay constant 
 (:math:`\tau` ) that determines the rate at which the data goes to zero. 
 The time the function is evaluated at is denoted by :math:`t`.

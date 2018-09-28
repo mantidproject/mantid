@@ -45,7 +45,7 @@ All workspaces are converted into wavelength using the appropriate
 mode of :ref:`ConvertUnits <algm-ConvertUnits>`. Then
 ``CanShiftFactor`` is added to wavelength of the ``CanWorkspace``.
 Then one of the two following equations is performed
-(dependant on the number of correction factors provided):
+(dependent on the number of correction factors provided):
 
 .. math:: I_s = \frac{1}{A_{s,sc}} \left( I_{sc}^E - I_c^E K_c \frac{A_{c,sc}}{A_{c,c}} \right)
 .. math:: I_s = \frac{1}{A_{s,s}} \left( I_{sc}^E \right) - \frac{1}{A_{c,c}} \left( I_{c}^E \right)
@@ -134,7 +134,7 @@ Usage
     corrections_ws = Load('irs26176_graphite002_cyl_Abs.nxs')
 
     # Interpolate each of the correction factor workspaces to match the
-    # binning of the smaple
+    # binning of the sample
     # Required to use corrections from the old indirect calculate
     # corrections routines
     for factor_ws in corrections_ws:

@@ -93,7 +93,7 @@ class CentreFinder(object):
         self.coord1_scale_factor = setup.instrument.beam_centre_scale_factor1
         self.coord2_scale_factor = setup.instrument.beam_centre_scale_factor2
 
-         # We are looking only at the differnce between the old position and the trial.
+         # We are looking only at the difference between the old position and the trial.
         self.move(setup, trial[0]-self._last_pos[0], trial[1]-self._last_pos[1])
 
         #phi masking will remove areas of the detector that we need
@@ -364,7 +364,7 @@ class CentrePositioner(object):
         '''
         return self.position_provider.provide_sign_policy()
 
-# Thes classes make sure that only the relevant directions are updated
+# These classes make sure that only the relevant directions are updated
 # They are not instrument dependent, they should only dependt on the user's choice.
 
 
@@ -758,7 +758,7 @@ class PositionProviderAngleY(PositionProvider):
         '''
         Get the sign policy for the angle, y translations. Displacing the beam by 5mm
         is equivalent to displacing the instrument by -5mm. The angle displacement in
-        LARMOR does the sign switch already. Hence we have a positve sign policy for
+        LARMOR does the sign switch already. Hence we have a positive sign policy for
         the angle direction
         '''
         return self.sign_policy_angle, self.sign_policy_y
