@@ -24,12 +24,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 /**
  * Constructor giving a colorbar
- * @param type An integer describing the scale type. Should
- * match Mantid::ColorMap::ScaleType
  * @param parent A parent widget
  * @param minPositiveValue A minimum positive value for the Log10 scale
  */
-DraggableColorBarWidget::DraggableColorBarWidget(int type, QWidget *parent,
+DraggableColorBarWidget::DraggableColorBarWidget(QWidget *parent,
                                                  const double &minPositiveValue)
     : QFrame(parent), m_minPositiveValue(minPositiveValue), m_dragging(false),
       m_y(0), m_dtype(), m_nth_power(2.0) {
@@ -66,7 +64,7 @@ DraggableColorBarWidget::DraggableColorBarWidget(int type, QWidget *parent,
   m_scaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
   m_scaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
   m_scaleOptions->addItem("Power", QVariant(GraphOptions::Power));
-  m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
+  m_scaleOptions->setCurrentIndex(1); // linear default
   connect(m_scaleOptions, SIGNAL(currentIndexChanged(int)), this,
           SLOT(scaleOptionsChanged(int)));
 
@@ -168,6 +166,17 @@ void DraggableColorBarWidget::maxValueChanged() {
 }
 
 /**
+ * Update the minimum and maximum range of the scale
+ * @param vmin New minimum of the scale
+ * @param vmax New maximum of the scale
+ */
+
+void DraggableColorBarWidget::setRange(double vmin, double vmax) {
+  setMinValue(vmin);
+  setMaxValue(vmax);
+}
+
+/**
  * Set a new min value and update the widget.
  * @param value :: The new value
  */
@@ -208,9 +217,7 @@ QString DraggableColorBarWidget::getMaxValue() const {
 /**
  * returns the mnth powder as QString
  */
-QString DraggableColorBarWidget::getNthPower() const {
-  return m_dspnN->text();
-}
+QString DraggableColorBarWidget::getNthPower() const { return m_dspnN->text(); }
 
 /**
  * Update the min value text box.

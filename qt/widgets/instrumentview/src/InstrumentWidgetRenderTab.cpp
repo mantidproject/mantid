@@ -228,7 +228,7 @@ QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
 
 void InstrumentWidgetRenderTab::setupColorMapWidget() {
   // Colormap widget
-  m_colorBarWidget = new ColorBar(0, this);
+  m_colorBarWidget = new ColorBar(this);
   connect(m_colorBarWidget, SIGNAL(scaleTypeChanged(int)), m_instrWidget,
           SLOT(changeScaleType(int)));
   connect(m_colorBarWidget, SIGNAL(nthPowerChanged(double)), m_instrWidget,
@@ -617,8 +617,9 @@ void InstrumentWidgetRenderTab::setupColorBar(const ColorMap &cmap,
                                               double minValue, double maxValue,
                                               double minPositive,
                                               bool autoscaling) {
-  setMinValue(minValue, false);
-  setMaxValue(maxValue, false);
+  m_colorBarWidget->blockSignals(true);
+  m_colorBarWidget->setRange(minValue, maxValue);
+  m_colorBarWidget->blockSignals(false);
   m_colorBarWidget->setMinPositiveValue(minPositive);
   m_colorBarWidget->setupColorBarScaling(cmap);
   m_autoscaling->blockSignals(true);

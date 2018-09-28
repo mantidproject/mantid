@@ -9,6 +9,7 @@
 using Mantid::PythonInterface::PythonRuntimeError;
 using MantidQt::Widgets::MplCpp::Colormap;
 using MantidQt::Widgets::MplCpp::Python::Object;
+using MantidQt::Widgets::MplCpp::cmapExists;
 using MantidQt::Widgets::MplCpp::getCMap;
 
 class ColormapTest : public CxxTest::TestSuite {
@@ -20,6 +21,12 @@ public:
   // ----------------------- Success tests ------------------------
   void testgetCMapKnownCMapIsSuccesful() {
     TS_ASSERT_THROWS_NOTHING(getCMap("jet"));
+  }
+
+  void testcmapExistsForKnownCMapReturnsTrue() { TS_ASSERT(cmapExists("jet")); }
+
+  void testcmapExistsForUnknownCMapReturnsFalse() {
+    TS_ASSERT(!cmapExists("NotAKnownCMap"));
   }
 
   void testConstructionColorMapInstanceIsSuccessful() {

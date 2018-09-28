@@ -35,8 +35,14 @@ public:
 /// Return the matplotlib.cm module
 MANTID_MPLCPP_DLL Python::Object cmModule();
 
+/// Check if the named colormap if it exists
+MANTID_MPLCPP_DLL bool cmapExists(const QString &name);
+
 /// Return the named colormap if it exists
 MANTID_MPLCPP_DLL Colormap getCMap(const QString &name);
+
+/// Return the named colormap if it exists
+MANTID_MPLCPP_DLL QString defaultCMapName();
 
 } // namespace MplCpp
 } // namespace Widgets

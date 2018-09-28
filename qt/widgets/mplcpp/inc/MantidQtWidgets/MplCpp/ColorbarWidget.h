@@ -17,7 +17,7 @@
   GNU General Public License for more details.
 */
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
+#include "MantidQtWidgets/MplCpp/ScalarMappable.h"
 #include "ui_Colorbar.h"
 
 namespace MantidQt {
@@ -38,9 +38,10 @@ class MANTID_MPLCPP_DLL ColorbarWidget : public QWidget {
 public:
   ColorbarWidget(QWidget *parent = nullptr);
 
+  void setRange(boost::optional<double> vmin, boost::optional<double> vmax);
+
   ///@name Legacy API to match DraggableColorBarWidget for instrument view
   ///@{
-  ColorbarWidget(int type, QWidget *parent = nullptr);
   void setupColorBarScaling(const MantidColorMap &) {}
   void setMinValue(double min);
   void setMaxValue(double max);
@@ -56,14 +57,16 @@ public:
   void loadFromProject(const std::string &) {}
   std::string saveToProject() const { return ""; }
 
-  // signals:
+signals:
   //  void scaleTypeChanged(int);
-  //  void minValueChanged(double);
-  //  void maxValueChanged(double);
+  void minValueChanged(double);
+  void maxValueChanged(double);
   //  void nthPowerChanged(double);
   ///@}
-private:
+
+private: // data
   Ui::Colorbar m_ui;
+  ScalarMappable m_mappable;
   Python::Object m_colorbar;
 };
 
