@@ -542,4 +542,3 @@ inline void FinishEventHistogramBuffer(
 
 #endif  // FLATBUFFERS_GENERATED_HISTOSCHEMA_H_
 // clang-format on
-
