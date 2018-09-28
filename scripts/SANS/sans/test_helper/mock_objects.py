@@ -243,6 +243,7 @@ def get_state_for_row_mock_with_real_state(row_index, file_lookup=True):
 def create_run_tab_presenter_mock(use_fake_state=True):
     presenter = mock.create_autospec(RunTabPresenter, spec_set=False)
     presenter.get_row_indices = mock.MagicMock(return_value=[0, 1, 3])
+    presenter._table_model = mock.MagicMock()
     presenter._facility = SANSFacility.ISIS
     if use_fake_state:
         presenter.get_state_for_row = mock.MagicMock(side_effect=get_state_for_row_mock)

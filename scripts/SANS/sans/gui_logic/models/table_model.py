@@ -69,6 +69,8 @@ class TableModel(object):
         table_index_model.id = self._id_count
         self._id_count += 1
         self._table_entries.insert(row, table_index_model)
+        if row >= self.get_number_of_rows():
+            row = self.get_number_of_rows() - 1
         self.get_thickness_for_rows([row])
         self.notify_subscribers()
 
@@ -155,7 +157,8 @@ class TableModel(object):
     def update_thickness_from_file_information(self, id, file_information):
         row = self.get_row_from_id(id)
         if file_information:
-            self.update_table_entry(row, 14, file_information.get_thickness())
+            rounded_file_thickness = round(file_information.get_thickness(), 2)
+            self.update_table_entry(row, 14, rounded_file_thickness)
             self._table_entries[row].update_attribute('file_information', file_information)
         self.notify_subscribers()
 
