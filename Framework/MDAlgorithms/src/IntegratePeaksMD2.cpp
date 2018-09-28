@@ -489,71 +489,40 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         }
         errorSquared = std::fabs(signal);
       } else {
-        API::IAlgorithm_sptr findpeaks =
-            createChildAlgorithm("FindPeaks", -1, -1, false);
-        findpeaks->setProperty("InputWorkspace", wsProfile2D);
-        findpeaks->setProperty<int>("FWHM", 7);
-        findpeaks->setProperty<int>("Tolerance", 4);
-        // FindPeaks will do the checking on the validity of WorkspaceIndex
-        findpeaks->setProperty("WorkspaceIndex", static_cast<int>(i));
 
-        // Get the specified peak positions, which is optional
-        findpeaks->setProperty<std::string>("PeakFunction", profileFunction);
-        // FindPeaks will use linear or flat if they are better
-        findpeaks->setProperty<std::string>("BackgroundType", "Quadratic");
-        findpeaks->setProperty<bool>("HighBackground", true);
-        findpeaks->setProperty<bool>("RawPeakParameters", true);
-        std::vector<double> peakPosToFit;
-        peakPosToFit.push_back(static_cast<double>(numSteps) / 2.0);
-        findpeaks->setProperty("PeakPositions", peakPosToFit);
-        findpeaks->setProperty<int>("MinGuessedPeakWidth", 4);
-        findpeaks->setProperty<int>("MaxGuessedPeakWidth", 4);
+  IAlgorithm_sptr fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
+  //fitAlgorithm->setProperty("CreateOutput", true);
+  //fitAlgorithm->setProperty("Output", "FitPeaks1D");
+  std::string myFunc = std::string("name=LinearBackground;name=")+profileFunction;
+  auto maxPeak = std::max_element(signal_fit.begin(), signal_fit.end());
+
+  std::ostringstream strs;
+strs << maxPeak[0];
+std::string strMax = strs.str();
+      if (profileFunction == "Gaussian") myFunc += ", PeakCentre=50, Height="+ strMax;
+      else if (profileFunction == "BackToBackExponential") myFunc += ", X0=50, I="+ strMax;
+      else if (profileFunction == "IkedaCarpenterPV") myFunc += ", X0=50, I="+ strMax;
+  fitAlgorithm->setProperty("CalcErrors", true);
+  fitAlgorithm->setProperty("Function", myFunc);
+  fitAlgorithm->setProperty("InputWorkspace", wsProfile2D);
+  fitAlgorithm->setProperty("WorkspaceIndex", static_cast<int>(i));
         try {
-          findpeaks->executeAsChildAlg();
+          fitAlgorithm->executeAsChildAlg();
         } catch (...) {
-          g_log.error("Can't execute FindPeaks algorithm");
+          g_log.error("Can't execute Fit algorithm");
           continue;
         }
 
-        API::ITableWorkspace_sptr paramws = findpeaks->getProperty("PeaksList");
-        if (paramws->rowCount() < 1)
-          continue;
-        std::ostringstream fun_str;
-        fun_str << "name=" << profileFunction;
-
-        size_t numcols = paramws->columnCount();
-        std::vector<std::string> paramsName = paramws->getColumnNames();
-        std::vector<double> paramsValue;
-        API::TableRow row = paramws->getRow(0);
-        int spectrum;
-        row >> spectrum;
-        for (size_t j = 1; j < numcols; ++j) {
-          double parvalue;
-          row >> parvalue;
-          if (j == numcols - 4)
-            fun_str << ";name=Quadratic";
-          // erase f0. or f1.
-          // if (j > 0 && j < numcols-1) fun_str << "," <<
-          // paramsName[j].erase(0,3) <<"="<<parvalue;
-          if (j > 0 && j < numcols - 1)
-            fun_str << "," << paramsName[j] << "=" << parvalue;
-          paramsValue.push_back(parvalue);
+     IFunction_sptr ifun = fitAlgorithm->getProperty("Function");
+     
+      /*double chi2 = fitAlgorithm->getProperty("OutputChi2overDoF");
+      if (chi2 > 10.0) {
+        if (replaceIntensity) {
+          p.setIntensity(0.0);
+          p.setSigmaIntensity(0.0);
         }
-        if (i == 0) {
-          for (size_t j = 0; j < numcols; ++j)
-            out << std::setw(20) << paramsName[j] << " ";
-          out << "\n";
-        }
-        out << std::setw(20) << i;
-        for (size_t j = 0; j < numcols - 1; ++j)
-          out << std::setw(20) << std::fixed << std::setprecision(10)
-              << paramsValue[j] << " ";
-        out << "\n";
-
-        // Evaluate fit at points
-
-        IFunction_sptr ifun =
-            FunctionFactory::Instance().createInitialized(fun_str.str());
+        continue;
+      }*/
         boost::shared_ptr<const CompositeFunction> fun =
             boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
 
@@ -593,10 +562,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         errorSquared = std::fabs(signal);
         // Get background counts
         for (size_t j = 0; j < numSteps; j++) {
-          // paramsValue[numcols-2] is chisq
-          double background = paramsValue[numcols - 3] * x[j] * x[j] +
-                              paramsValue[numcols - 4] * x[j] +
-                              paramsValue[numcols - 5];
+          double background = ifun->getParameter(0) +
+                              ifun->getParameter(1) * x[j];
           if (j < peakMin || j > peakMax)
             background_total = background_total + background;
         }
