@@ -41,6 +41,30 @@ ScalarMappable::ScalarMappable(const NormalizeBase &norm, const QString &cmap)
     : ScalarMappable(norm, getCMap(cmap)) {}
 
 /**
+ * Reset the underlying colormap
+ * @param cmap An instance of a Colormap
+ */
+void ScalarMappable::setCmap(const Colormap &cmap) {
+  pyobj().attr("set_cmap")(cmap.pyobj());
+}
+
+/**
+ * Reset the underlying colormap
+ * @param cmap The name of a colormap
+ */
+void ScalarMappable::setCmap(const QString &cmap) {
+  pyobj().attr("set_cmap")(cmap.toLatin1().constData());
+}
+
+/**
+ * @brief Reset the normalization instance
+ * @param norm A normalization type
+ */
+void ScalarMappable::setNorm(const NormalizeBase &norm) {
+  pyobj().attr("set_norm")(norm.pyobj());
+}
+
+/**
  * Reset the mappable limits
  * @param vmin An optional new minmum value
  * @param vmax An optional new maximum value

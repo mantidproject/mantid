@@ -21,8 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-#include "MantidQtWidgets/MplCpp/Colormap.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
+#include "MantidQtWidgets/MplCpp/ScalarMappable.h"
 
 #include <QRgb>
 #include <QString>
@@ -42,7 +42,7 @@ namespace MplCpp {
 class MANTID_MPLCPP_DLL MantidColorMap {
 public:
   /// Define the possible scale types
-  enum class ScaleType { Linear = 0, Log10, Power };
+  enum class ScaleType { Linear = 0, Log10 = 1, Power = 2 };
 
   static QString chooseColorMap(const QString &previous, QWidget *parent);
   static QString defaultColorMap();
@@ -54,14 +54,15 @@ public:
   bool loadMap(const QString &name);
   void changeScaleType(ScaleType type);
   ScaleType getScaleType() const;
-  void setNthPower(double gamma) {}
-  double getNthPower() const { return 2.0; }
+  void setNthPower(double gamma);
+  double getNthPower() const { return m_gamma; }
 
   QRgb rgb(double vmin, double vmax, double value) const;
 
 private:
-  Colormap m_cmap;
-  ScaleType m_scaleType = {ScaleType::Linear};
+  mutable ScalarMappable m_mappable;
+  ScaleType m_scaleType;
+  double m_gamma = {2.0};
 };
 
 } // namespace MplCpp
