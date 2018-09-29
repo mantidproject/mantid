@@ -39,6 +39,9 @@ public:
   ScalarMappable(const NormalizeBase &norm, const Colormap &cmap);
   ScalarMappable(const NormalizeBase &norm, const QString &cmap);
 
+  void setCmap(const Colormap &cmap);
+  void setCmap(const QString &cmap);
+  void setNorm(const NormalizeBase &norm);
   void setClim(boost::optional<double> vmin = boost::none,
                boost::optional<double> vmax = boost::none);
   QRgb toRGBA(double x, double alpha = 1.0) const;

@@ -10,8 +10,10 @@
 #include <cxxtest/TestSuite.h>
 
 using MantidQt::Widgets::MplCpp::Normalize;
+using MantidQt::Widgets::MplCpp::PowerNorm;
 using MantidQt::Widgets::MplCpp::ScalarMappable;
 using MantidQt::Widgets::MplCpp::getCMap;
+namespace Python = MantidQt::Widgets::MplCpp::Python;
 
 class ScalarMappableTest : public CxxTest::TestSuite {
 public:
@@ -27,6 +29,28 @@ public:
 
   void testConstructionWithValidCMapAsStringAndNormalize() {
     TS_ASSERT_THROWS_NOTHING(ScalarMappable mappable(Normalize(-1, 1), "jet"));
+  }
+
+  void testSetCMapAsStringResetsColormap() {
+    ScalarMappable mappable(Normalize(-1, 1), "jet");
+    mappable.setCmap("coolwarm");
+
+    TS_ASSERT_EQUALS("coolwarm", mappable.pyobj().attr("cmap").attr("name"));
+  }
+
+  void testSetCMapResetsColormap() {
+    ScalarMappable mappable(Normalize(-1, 1), "jet");
+    mappable.setCmap(getCMap("coolwarm"));
+
+    TS_ASSERT_EQUALS("coolwarm", mappable.pyobj().attr("cmap").attr("name"));
+  }
+
+  void testSetNormResetsNormalizeInstance() {
+    ScalarMappable mappable(Normalize(-1, 1), "jet");
+    mappable.setNorm(PowerNorm(2, 0, 1));
+
+    auto norm = Python::Object(mappable.pyobj().attr("norm"));
+    TS_ASSERT(PyObject_HasAttrString(norm.ptr(), "gamma"));
   }
 
   void testSetCLimSetsMinAndMaxWhenProvided() {

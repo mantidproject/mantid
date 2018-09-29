@@ -55,7 +55,8 @@ QString MantidColorMap::exists(const QString &name) {
 /**
  * Construct a default colormap
  */
-MantidColorMap::MantidColorMap() : m_cmap(getCMap(defaultCMapName())) {}
+MantidColorMap::MantidColorMap()
+    : m_mappable(Normalize(0, 1), getCMap(defaultCMapName())) {}
 
 /**
  * Reset the colormap to the default
@@ -68,10 +69,10 @@ void MantidColorMap::setupDefaultMap() { loadMap(defaultCMapName()); }
  * @return True if it suceeded, false otherwise
  */
 bool MantidColorMap::loadMap(const QString &name) {
-  try {
-    m_cmap = getCMap(name);
+  if (cmapExists(name)) {
+    m_mappable.setCmap(name);
     return true;
-  } catch (std::exception &) {
+  } else {
     return false;
   }
 }
@@ -81,7 +82,19 @@ bool MantidColorMap::loadMap(const QString &name) {
  * @param type An enumeration giving the type of scale to use
  */
 void MantidColorMap::changeScaleType(MantidColorMap::ScaleType type) {
+  if (type == m_scaleType)
+    return;
   m_scaleType = type;
+  switch (type) {
+  case ScaleType::Linear:
+    m_mappable.setNorm(Normalize(0, 1));
+    break;
+  case ScaleType::Log10:
+    m_mappable.setNorm(SymLogNorm(0.0001, 1.0, 0, 1));
+    break;
+  case ScaleType::Power:
+    m_mappable.setNorm(PowerNorm(m_gamma, 0, 1));
+  }
 }
 
 /**
@@ -92,6 +105,12 @@ MantidColorMap::ScaleType MantidColorMap::getScaleType() const {
 }
 
 /**
+ * @brief Set the value of the exponent for the power scale
+ * @param gamma The value of the exponent
+ */
+void MantidColorMap::setNthPower(double gamma) { m_gamma = gamma; }
+
+/**
  * @brief Compute an RGB color value on the current scale type for the given
  * data value
  * @param vmin The minimum value of the data range
@@ -100,8 +119,8 @@ MantidColorMap::ScaleType MantidColorMap::getScaleType() const {
  * @return An instance QRgb describing the color
  */
 QRgb MantidColorMap::rgb(double vmin, double vmax, double value) const {
-  ScalarMappable mappable(Normalize(vmin, vmax), m_cmap);
-  return mappable.toRGBA(value);
+  m_mappable.setClim(vmin, vmax);
+  return m_mappable.toRGBA(value);
 }
 
 } // namespace MplCpp
