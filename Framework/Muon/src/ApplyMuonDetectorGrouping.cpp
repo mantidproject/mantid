@@ -253,6 +253,8 @@ const std::string ApplyMuonDetectorGrouping::getNewWorkspaceName(
   params.itemType = Muon::ItemType::Group;
   params.itemName = options.groupPairName;
   params.plotType = options.plotType;
+  params.periods = generatePeriodAlgebraString(options.summedPeriods,
+                                               options.subtractedPeriods);
   params.version = 1;
   const std::string wsName = generateWorkspaceName(params);
   return wsName;

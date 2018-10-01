@@ -266,7 +266,7 @@ public:
         AnalysisDataService::Instance().retrieve("inputGroup"));
 
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+        wsGroup->getItem("inputGroup; Group; test; Counts; 1+2; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
@@ -302,7 +302,7 @@ public:
         AnalysisDataService::Instance().retrieve("inputGroup"));
 
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem("inputGroup; Group; test; Counts; #1_Raw"));
+        wsGroup->getItem("inputGroup; Group; test; Counts; 2+3-1; #1_Raw"));
 
     // Check values against calculation by hand.
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);

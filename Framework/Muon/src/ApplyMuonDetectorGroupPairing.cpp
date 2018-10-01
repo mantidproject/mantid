@@ -312,6 +312,8 @@ const std::string ApplyMuonDetectorGroupPairing::getPairWorkspaceName(
   params.itemType = Muon::ItemType::Pair;
   params.itemName = pairName;
   params.plotType = Muon::PlotType::Asymmetry;
+  params.periods = generatePeriodAlgebraString(
+      getPropertyValue("SummedPeriods"), getPropertyValue("subtractedPeriods"));
   params.version = 1;
   const std::string wsName = MuonAlgorithmHelper::generateWorkspaceName(params);
   return wsName;
@@ -326,6 +328,9 @@ const std::string ApplyMuonDetectorGroupPairing::getGroupWorkspaceNamesManually(
   params.itemType = Muon::ItemType::Group;
   params.itemName = groupName;
   params.plotType = Muon::PlotType::Counts;
+  params.periods =
+      generatePeriodAlgebraString(getPropertyValue("SummedPeriods"),
+                                  getPropertyValue("subtract edPeriods"));
   params.version = 1;
   const std::string wsName = generateWorkspaceName(params);
   return wsName;

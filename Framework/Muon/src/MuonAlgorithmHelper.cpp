@@ -220,6 +220,93 @@ void groupWorkspaces(const std::string &groupName,
   }
 }
 
+void periodStringVectorToIntVector(std::vector<std::string> &periodStrings,
+                                   std::vector<int> &periods) {
+  transform(periodStrings.begin(), periodStrings.end(), back_inserter(periods),
+            [](const std::string &period) {
+              if (std::all_of(period.begin(), period.end(), ::isdigit)) {
+                return std::stoi(period);
+              } else {
+                throw std::invalid_argument(
+                    "List contains a non-integer value : " + period);
+              }
+            });
+}
+
+/**
+ * Generate a string (to be included in workspace names) to signify the
+ * period algebra.
+ * Format: a sorted sequence of integers separated by only "+,-" in the form
+ * "<summed>-<sub>" with <summed>, <sub> e.g. 1+2+3.
+ * @param summedPeriods :: [input] comma separated string of integers.
+ * @param subtractedPeriods :: [input] comma separated string of integers.
+ * @returns :: string for use in workspace name.
+ */
+std::string generatePeriodAlgebraString(std::string summedPeriods,
+                                        std::string subtractedPeriods) {
+
+  if (summedPeriods.empty()) {
+    return "";
+  }
+  // the default for single period data
+  if (summedPeriods == "1" && subtractedPeriods == "") {
+    return "";
+  }
+
+  std::vector<int> summedPeriodVec, subtractedPeriodVec;
+  const char delimeter(',');
+
+  std::vector<std::string> summedPeriodStrVec;
+  boost::split(summedPeriodStrVec, summedPeriods,
+               [delimeter](char c) { return c == delimeter; });
+  if (!summedPeriodStrVec[0].empty()) {
+    periodStringVectorToIntVector(summedPeriodStrVec, summedPeriodVec);
+  }
+
+  std::vector<std::string> subtractedPeriodStrVec;
+  boost::split(subtractedPeriodStrVec, subtractedPeriods,
+               [delimeter](char c) { return c == delimeter; });
+  if (!subtractedPeriodStrVec[0].empty()) {
+    periodStringVectorToIntVector(subtractedPeriodStrVec, subtractedPeriodVec);
+  }
+
+  return generatePeriodAlgebraString(summedPeriodVec, subtractedPeriodVec);
+}
+
+std::string generatePeriodAlgebraString(std::vector<int> summedPeriods,
+                                        std::vector<int> subtractedPeriods) {
+
+  if (summedPeriods.empty()) {
+    return "";
+  }
+  // the default for single period data
+  if (summedPeriods[0] == 1 && subtractedPeriods.empty() &&
+      summedPeriods.size() == 1) {
+    return "";
+  }
+
+  std::sort(summedPeriods.begin(), summedPeriods.end());
+  std::sort(subtractedPeriods.begin(), subtractedPeriods.end());
+
+  std::stringstream periodStream;
+
+  std::string sep = "";
+  for (auto &&period : summedPeriods) {
+    periodStream << sep << period;
+    sep = "+";
+  }
+  if (!subtractedPeriods.empty()) {
+    periodStream << "-";
+  }
+  sep = "";
+  for (auto &&period : subtractedPeriods) {
+    periodStream << sep << period;
+    sep = "+";
+  }
+
+  return periodStream.str();
+}
+
 /**
  * Generate a workspace name from the given parameters
  * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
