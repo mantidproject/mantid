@@ -331,7 +331,7 @@ class LoadRun(object):
 
         try:
             if self._is_trans and reducer.instrument.name() != 'LOQ':
-                # Unfortunatelly, LOQ in transmission acquire 3 monitors the 3 monitor usually
+                # Unfortunately, LOQ in transmission acquire 3 monitors the 3 monitor usually
                 # is the first spectrum for detector. This causes the following method to fail
                 # when it tries to load only monitors. Hence, we are forced to skip this method
                 # for LOQ. ticket #8559
@@ -632,7 +632,7 @@ class Mask_ISIS(ReductionStep):
 
     def _infinite_plane(self, id, plane_pt, normal_pt, complement=False):
         """
-            Generates xml code for an infinte plane
+            Generates xml code for an infinite plane
             @param id: a string to refer to the shape by
             @param plane_pt: a point in the plane
             @param normal_pt: the direction of a normal to the plane
@@ -649,7 +649,7 @@ class Mask_ISIS(ReductionStep):
     def _infinite_cylinder(self, centre, radius, axis, id='shape'):
         """
             Generates xml code for an infintely long cylinder
-            @param centre: a tupple for a point on the axis
+            @param centre: a tuple for a point on the axis
             @param radius: cylinder radius
             @param axis: cylinder orientation
             @param id: a string to refer to the shape by
@@ -663,7 +663,7 @@ class Mask_ISIS(ReductionStep):
     def _finite_cylinder(self, centre, radius, height, axis, id='shape'):
         """
             Generates xml code for an infintely long cylinder
-            @param centre: a tupple for a point on the axis
+            @param centre: a tuple for a point on the axis
             @param radius: cylinder radius
             @param height: cylinder height
             @param axis: cylinder orientation
@@ -1179,7 +1179,7 @@ class DarkRunSubtraction(object):
     '''
     # The named tuple contains the information for a dark run subtraction for a single run number ( of
     # a dark run file)
-    # The relevant inforamtion is the run number, if we use time or uamp, if we use mean or tof, if we
+    # The relevant information is the run number, if we use time or uamp, if we use mean or tof, if we
     # apply this to all detectors, if we apply this to monitors and if so to which monitors
     DarkRunSubtractionSettings = namedtuple("DarkRunSettings", "run_number time mean detector mon mon_numbers")
 
@@ -3262,7 +3262,7 @@ class UserFile(ReductionStep):
                 raise RuntimeError("%s was specified in the MASK file (%s) but the file cannot be found." % (
                     line.rsplit()[0], file_handle.name))
 
-        # Check if one of the efficency files hasn't been set and assume the other is to be used
+        # Check if one of the efficiency files hasn't been set and assume the other is to be used
         reducer.instrument.copy_correction_files()
 
         # Run a consistency check
@@ -3347,7 +3347,7 @@ class UserFile(ReductionStep):
                 self._readFrontRescaleShiftSetup(det_specif, reducer)
             elif any(it == det_specif.strip() for it in ['FRONT', 'REAR', 'BOTH', 'MERGE', 'MERGED', 'MAIN', 'HAB']):
                 # for /DET/FRONT, /DET/REAR, /DET/BOTH, /DET/MERGE and /DET/MERGED commands
-                # we also accomodate DET/MAIN and DET/HAB here which are specificially for LOQ
+                # we also accommodate DET/MAIN and DET/HAB here which are specifically for LOQ
                 det_specif = det_specif.strip()
                 if det_specif == 'MERGE':
                     det_specif = 'MERGED'
@@ -3546,7 +3546,7 @@ class UserFile(ReductionStep):
 
     def _read_mon_line(self, details, reducer): # noqa: C901
 
-        # MON/LENTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
+        # MON/LENGTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
         interpolate = False
         interPlace = details.upper().find('/INTERPOLATE')
         if interPlace != -1:
@@ -3564,7 +3564,7 @@ class UserFile(ReductionStep):
             spectrum = int(options[1])
             #            reducer.instrument.monitor_zs[spectrum] = options[0]
 
-            # the settings here are overriden by MON/SPECTRUM
+            # the settings here are overridden by MON/SPECTRUM
             if not self._incid_monitor_lckd:
                 reducer.set_monitor_spectrum(
                     spectrum, interpolate, override=False)
@@ -3997,7 +3997,7 @@ class UserFile(ReductionStep):
         reducer.inst.reset_TOFs()
 
     def _read_calibfile_line(self, arguments, reducer):
-        # remove the equals from the beggining and any space around.
+        # remove the equals from the beginning and any space around.
         parts = re.split(r"\s?=\s?", arguments)
         if len(parts) != 2:
             return "Invalid input for TUBECALIBFILE" + str(arguments) + ". Expected TUBECALIBFILE = file_path"
@@ -4023,7 +4023,7 @@ class UserFile(ReductionStep):
     def _read_unwrap_monitors_line(self, arguments, reducer):
         """
         Checks if the montiors should be unwrapped. The arguments can be either ON or OFF. We don't care here about
-        any preceeding slash
+        any preceding slash
         Args:
             arguments: the arguments string
             reducer: a handle to the reducer (is not used)

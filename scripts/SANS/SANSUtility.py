@@ -968,7 +968,7 @@ class AddOperation(object):
     def __init__(self,isOverlay, time_shifts):
         """
         The AddOperation requires to know if the workspaces are to
-        be plainly added or to be overlayed. Additional time shifts can be
+        be plainly added or to be overlaid. Additional time shifts can be
         specified
         @param isOverlay :: true if the operation is an overlay operation
         @param time_shifts :: a string with comma-separted time shift values
@@ -1032,7 +1032,7 @@ class PlusWorkspaces(object):
         rhs_ws = self._get_workspace(RHS_workspace)
 
         # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
-        # cummulative time series correctly at this point
+        # cumulative time series correctly at this point
         cummulative_correction = CummulativeTimeSeriesPropertyAdder()
         cummulative_correction. extract_sample_logs_from_workspace(lhs_ws, rhs_ws)
         Plus(LHSWorkspace = LHS_workspace, RHSWorkspace = RHS_workspace, OutputWorkspace = output_workspace)
@@ -1049,7 +1049,7 @@ class PlusWorkspaces(object):
 class OverlayWorkspaces(object):
     """
     Overlays (in time) a workspace  on top of another workspace. The two
-    workspaces overlayed such that the first time entry of their proton_charge entry matches.
+    workspaces overlaid such that the first time entry of their proton_charge entry matches.
     This overlap can be shifted by the specified time_shift in seconds
     """
 
@@ -1070,11 +1070,11 @@ class OverlayWorkspaces(object):
         total_time_shift = time_difference + time_shift
 
         # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
-        # cummulative time series correctly at this point
+        # cumulative time series correctly at this point
         cummulative_correction = CummulativeTimeSeriesPropertyAdder()
         cummulative_correction. extract_sample_logs_from_workspace(lhs_ws, rhs_ws)
 
-        # Create a temporary workspace with shifted time values from RHS, if the shift is necesary
+        # Create a temporary workspace with shifted time values from RHS, if the shift is necessary
         temp = rhs_ws
         temp_ws_name = 'shifted'
         if total_time_shift != 0.0:
@@ -1185,7 +1185,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
 class CummulativeTimeSeriesPropertyAdder(object):
     '''
     Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
-    cummulative time series correctly at this point.
+    cumulative time series correctly at this point.
     '''
 
     def __init__(self, total_time_shift_seconds = 0):
@@ -1215,7 +1215,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         '''
         run_lhs = lhs.getRun()
         run_rhs = rhs.getRun()
-        # Get the cummulative time s
+        # Get the cumulative time s
         for element in self._time_series:
             if (run_lhs.hasProperty(element) and
                     run_rhs.hasProperty(element)):
@@ -1268,7 +1268,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
     def _update_single_valued_entries(self, workspace):
         '''
         We need to update single-valued entries which are based on the
-        cummulative time series
+        cumulative time series
         @param workspace: the workspace which requires the changes
         '''
         run = workspace.getRun()
@@ -1349,7 +1349,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
 
     def _get_raw_values(self, values):
         '''
-        We extract the original data from the cummulative
+        We extract the original data from the cumulative
         series.
         '''
         raw_values = []
@@ -1881,7 +1881,7 @@ def is_valid_user_file_extension(user_file):
 def createUnmanagedAlgorithm(name, **kwargs):
     '''
     This creates an unmanged child algorithm with the
-    provided proeprties set. The returned algorithm has
+    provided properties set. The returned algorithm has
     not been executed yet.
     '''
     alg = AlgorithmManager.createUnmanaged(name)
@@ -1924,7 +1924,7 @@ def check_has_bench_rot(workspace, log_dict=None):
         run = workspace.run()
         if not run.hasProperty("Bench_Rot"):
             raise RuntimeError("LARMOR Instrument: Bench_Rot does not seem to be available on {0}. There might be "
-                               "an issue with your data aquisition. Make sure that the sample_log entry "
+                               "an issue with your data acquisition. Make sure that the sample_log entry "
                                "Bench_Rot is available.".format(workspace.name()))
 
 
@@ -1980,7 +1980,7 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
     """
     We want to get the correct combinDet variable for batch reductions from a new detector selection.
 
-    @param instrument_name: the name of the intrument
+    @param instrument_name: the name of the instrument
     @param detector_selection: a detector selection comes directly from the reducer
     @return: a combinedet option
     """

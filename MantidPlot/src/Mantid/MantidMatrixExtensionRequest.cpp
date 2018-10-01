@@ -116,7 +116,7 @@ QChar MantidMatrixExtensionRequest::getFormat(
  * Get the preicson for the requested type
  * @param type: the type
  * @param extensions: the extensions
- * @param defaultValue: a defaut value
+ * @param defaultValue: a default value
  * @returns the precision
  */
 int MantidMatrixExtensionRequest::getPrecision(

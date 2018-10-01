@@ -198,7 +198,7 @@ void IFunctionAdapter::setAttribute(const std::string &attName,
  *    For a single domain function it should have a single element (self).
  * @return A python list of IFunction_sprs.
  */
-boost::python::object
+boost::python::list
 IFunctionAdapter::createPythonEquivalentFunctions(IFunction &self) {
   auto functions = self.createEquivalentFunctions();
   boost::python::list list;

@@ -1922,7 +1922,7 @@ def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
     try:
         masked_wksp.name()
 #pylint: disable=broad-except
-    except Exeption:
+    except Exception:
         prop_man.log("***WARNING: cached mask workspace invalidated. Incorrect masking reported")
         return (failed_spectra,0)
 

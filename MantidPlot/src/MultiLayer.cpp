@@ -1298,7 +1298,7 @@ void MultiLayer::dropEvent(QDropEvent *event) {
   }
 }
 
-/** Drop a workspace onto an exisiting MantidMDCurve (plot of a MDWorkspace)
+/** Drop a workspace onto an existing MantidMDCurve (plot of a MDWorkspace)
 @param g : Graph object
 @param originalCurve : the original MantidMDCurve onto which the new
 workspace(s) are to be dropped
@@ -1350,7 +1350,7 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
 }
 
 /*
-Drop a workspace onto an exisiting matrix curve
+Drop a workspace onto an existing matrix curve
 @param g : Graph object
 @param originalCurve : the original MantidMatrixCurve onto which the new
 workspace(s) are to be dropped
@@ -1477,7 +1477,7 @@ void MultiLayer::convertToWaterfall() {
 }
 
 /**
- * Assume we have a waterfall 1D plot and convert it to a standard overlayed
+ * Assume we have a waterfall 1D plot and convert it to a standard overlaid
  * layout
  */
 void MultiLayer::convertFromWaterfall() {
@@ -1788,7 +1788,7 @@ MultiLayer::loadFromProject(const std::string &lines, ApplicationWindow *app,
     multiLayer->setLayerCanvasSize(width, height);
   }
 
-  if (tsv.selectLine("Alignement")) {
+  if (tsv.selectLine("Alignment")) {
     int hor = 0, vert = 0;
     tsv >> hor >> vert;
     multiLayer->setAlignement(hor, vert);
@@ -1851,7 +1851,7 @@ std::string MultiLayer::saveToProject(ApplicationWindow *app) {
                            << bottom_margin;
   tsv.writeLine("Spacing") << rowsSpace << colsSpace;
   tsv.writeLine("LayerCanvasSize") << l_canvas_width << l_canvas_height;
-  tsv.writeLine("Alignement") << hor_align << vert_align;
+  tsv.writeLine("Alignment") << hor_align << vert_align;
 
   foreach (Graph *g, graphsList)
     tsv.writeSection("graph", g->saveToProject());

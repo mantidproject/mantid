@@ -326,7 +326,7 @@ private:
   /// Update the existing extensions
   void updateExtensions(Mantid::API::MatrixWorkspace_sptr ws);
 
-  /// ExtensioRequest handleer
+  /// ExtensioRequest handler
   MantidMatrixExtensionRequest m_extensionRequest;
 
   friend class MantidMatrixFunction;

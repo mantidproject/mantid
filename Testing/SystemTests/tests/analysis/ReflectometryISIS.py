@@ -36,7 +36,7 @@ class ReflectometryISIS(with_metaclass(ABCMeta, stresstesting.MantidStressTest))
         Io=mtd['Io']
         D=mtd['D']
 
-        # Peform the normaisation step
+        # Perform the normaisation step
         Divide(LHSWorkspace=D,RHSWorkspace=Io,OutputWorkspace='I',
                AllowDifferentNumberSpectra='1',ClearRHSWorkspace='1')
         I=mtd['I'][0]
@@ -55,7 +55,7 @@ class ReflectometryISIS(with_metaclass(ABCMeta, stresstesting.MantidStressTest))
         # Should now have signed theta vs Lambda
         ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
 
-        # Check that signed two theta is being caluclated correctly (not normalised)
+        # Check that signed two theta is being calculated correctly (not normalised)
         ws1 = mtd['SignedTheta_vs_Wavelength']
         upperHistogram = ws1.getNumberHistograms()-1
         for i in range(0, upperHistogram):

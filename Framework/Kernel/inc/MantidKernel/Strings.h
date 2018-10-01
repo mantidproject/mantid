@@ -160,7 +160,6 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
     {
       nThreads = static_cast<int>(PARALLEL_NUMBER_OF_THREADS);
       int idThread = static_cast<int>(PARALLEL_THREAD_NUMBER);
-      ITERATOR_TYPE it;
 
       // Initialise ostringstream
       std::ostringstream thread_stream;

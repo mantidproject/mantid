@@ -2,7 +2,7 @@
 
 """
 Bayes routines
-Fortran programs use fixed length arrays whereas Python has variable lenght lists
+Fortran programs use fixed length arrays whereas Python has variable length lists
 Input : the Python list is padded to Fortrans length using procedure PadArray
 Output : the Fortran numpy array is sliced to Python length using dataY = yout[:ny]
 """
@@ -40,7 +40,7 @@ def CalcErange(inWS,ns,erange,binWidth):
     rangeMask = (Xdata >= erange[0]) & (Xdata <= erange[1])
     Xin = Xdata[rangeMask]
 
-    #get indicies of the bounds of our energy range
+    #get indices of the bounds of our energy range
     minIndex = np.where(Xdata==Xin[0])[0][0]+1
     maxIndex = np.where(Xdata==Xin[-1])[0][0]
 
@@ -84,7 +84,7 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     nvan,ntc = CheckHistZero(vname)
     theta = GetThetaQ(vname)[0]
     efix = getEfixed(vname)
-    print("begining erange calc")
+    print("beginning erange calc")
     nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(vname,0,erange,nbin)
     print("end of erange calc")
     Ndat = nout[0]

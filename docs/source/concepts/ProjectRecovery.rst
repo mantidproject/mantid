@@ -36,11 +36,6 @@ The settings for project recovery, including switiching the feature on/off, and 
 Caveats
 -------
 
-* Multiple instances of Mantid
-	* Please allow first instance to start history writer before starting the next instance, otherwise it will not start for either. This usually means leaving Mantid until the GUI has opened fully.
-	* Only the first instance will have history writer enabled. There will be no project recovery for subsequent instances.
-	* All running instances of Mantid must be closed for project recovery to work after a crash.
-
 * Interfaces
 	* Muon - project recovery does not work at all with the existing Muon interfaces.
 	* Indirect analysis - project recovery does not work when performing fitting routines within the indirect analysis interface.

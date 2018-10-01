@@ -5,7 +5,7 @@
 // memsetClassFloat:/Users/builder/Jenkins/workspace/cppcheck-1.72/Framework/DataHandling/src/LoadRaw/isisraw.h
 
 
-// suppress in all files - BE CAREFULL not to leave trailing spaces after the rule id. or empty lines
+// suppress in all files - BE CAREFUL not to leave trailing spaces after the rule id. or empty lines
 // For a library this is not a problem per se
 // unusedFunction
 // cppcheck has problems handling the number of pre-processor definitions used in the DLL_EXPORTs

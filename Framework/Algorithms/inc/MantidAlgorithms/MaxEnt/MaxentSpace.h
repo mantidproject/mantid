@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_MAXENTSPACE_H_
 
 #include "MantidAlgorithms/DllConfig.h"
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
 namespace Mantid {
@@ -45,6 +46,8 @@ public:
   virtual std::vector<double>
   fromComplex(const std::vector<double> &values) = 0;
 };
+
+using MaxentSpace_sptr = boost::shared_ptr<MaxentSpace>;
 
 } // namespace Algorithms
 } // namespace Mantid

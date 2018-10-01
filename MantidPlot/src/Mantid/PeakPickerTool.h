@@ -94,7 +94,7 @@ public:
   Graph *graph() const { return d_graph; }
   /// Prepare a context menu
   void prepareContextMenu(QMenu &menu);
-  /// Was the tool created successfuly?
+  /// Was the tool created successfully?
   bool isInitialized() const { return m_init; }
 
 public slots:
