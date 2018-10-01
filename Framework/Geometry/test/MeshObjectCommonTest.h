@@ -48,6 +48,80 @@ public:
         MeshObjectCommon::solidAngle(V3D{0, 0, 0}, triangles, vertices);
     TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
   }
+
+  void test_ray_intersect_triangle_simple() {
+
+    const V3D start{0, 0, -1};
+    const V3D direction{0, 0, 1};
+    const V3D vertex1{-1, 0, 0};
+    const V3D vertex2{1, 0, 0};
+    const V3D vertex3{1, 1, 0};
+    V3D intersectionPoint;
+    int entryExitFlag;
+
+    // Direct intersection through triangle body
+    auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
+        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
+        entryExitFlag);
+    TS_ASSERT(doesIntersect);
+    TS_ASSERT_EQUALS(entryExitFlag, -1);
+    TS_ASSERT((start + (direction * 1) - intersectionPoint).norm2() < 1e-9);
+  }
+
+  void test_ray_intersect_triangle_edge() {
+
+    const V3D direction{0, 0, 1};
+    const V3D vertex1{-1, 0, 0};
+    const V3D vertex2{1, 0, 0};
+    const V3D vertex3{1, 1, 0};
+    V3D intersectionPoint;
+    int entryExitFlag;
+
+    // Test ray going through vertex of triangle
+    V3D start = vertex1 - direction;
+    auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
+        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
+        entryExitFlag);
+    TS_ASSERT(doesIntersect);
+
+    // Check another vertex
+    start = vertex3 - direction;
+    doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
+        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
+        entryExitFlag);
+    TS_ASSERT(doesIntersect);
+
+    // Check an edge
+    start = (vertex1 + vertex2) / 2 - direction; // along edge
+    doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
+        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
+        entryExitFlag);
+    TS_ASSERT(doesIntersect);
+
+    // Sanity check just outside.
+    start = (vertex1 + vertex2) / 2 - direction; // along edge
+    start += V3D(0, -1e-6, 0);                   // minor shift down in y
+    doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
+        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
+        entryExitFlag);
+    TS_ASSERT(!doesIntersect);
+  }
+
+  void test_no_ray_intersect_triangle_when_triangle_behind() {
+    V3D start{0, 0, -1};
+    V3D direction{0, 0, 1};
+    const V3D vertex1{-1, 0, 0};
+    const V3D vertex2{1, 0, 0};
+    const V3D vertex3{1, 1, 0};
+    V3D intersectionPoint;
+    int entryExitFlag;
+    // Triangle now behind start. Should not intersect
+    start = V3D{0, 0, 10};
+    auto doesIntersect = MeshObjectCommon::rayIntersectsTriangle(
+        start, direction, vertex1, vertex2, vertex3, intersectionPoint,
+        entryExitFlag);
+    TS_ASSERT(!doesIntersect);
+  }
 };
 
 #endif /* MANTID_GEOMETRY_MESHOBJECTCOMMONTEST_H_ */

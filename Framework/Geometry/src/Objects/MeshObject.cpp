@@ -200,7 +200,8 @@ void MeshObject::getIntersections(const Kernel::V3D &start,
  * @param v2 :: Second vertex of triangle
  * @param v3 :: Third vertex of triangle
  * @param intersection :: Intersection point
- * @param entryExit :: 1 if intersection is entry, -1 if exit
+ * @param entryExit :: 1 if intersection is entry, -1 if exit, 0 if no
+ * intersection
  * @returns true if there is an intersection
  */
 bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
@@ -209,29 +210,47 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
                                        const V3D &v3, V3D &intersection,
                                        int &entryExit) const {
   // Implements Möller–Trumbore intersection algorithm
-  V3D edge1, edge2, h, s, q;
-  double a, f, u, v;
-  edge1 = v2 - v1;
-  edge2 = v3 - v1;
-  h = direction.cross_prod(edge2);
-  a = edge1.scalar_prod(h);
+
+  // Eq line x = x0 + tV
+  //
+  // p = w*p0 + u*p1 + v*p2, where numbered p refers to vertices of triangle
+  // w+u+v == 1, so w = 1-u-v
+  // p = (1-u-v)p0 + u*p1 + v*p2, rearranging ...
+  // p = u(p1 - p0) + v(p2 - p0) + p0
+  // in change of basis, barycentric coordinates p = p0 + u*v0 + v*v1. v0 and
+  // v1 are basis vectors.
+
+  // For line to pass through triangle...
+  // (x0 + tV) = u(p1 - p0) + v(p2 - p0) + p0, yields
+  // (x0 - p0) = -tV + u(p1 - p0) + v(p2 - p0)
+
+  // rest is just to solve for u, v, t and check u and v are both >= 0 and <= 1
+  // and u+v <=1
+
+  entryExit = 0; // Neither in or out till specified otherwise
+  auto edge1 = v2 - v1;
+  auto edge2 = v3 - v1;
+  auto h = direction.cross_prod(edge2);
+  auto a = edge1.scalar_prod(h);
 
   const double EPSILON = 0.0000001 * edge1.norm();
   if (a > -EPSILON && a < EPSILON)
     return false; // Ray in or parallel to plane of triangle
-  f = 1 / a;
-  s = start - v1;
-  u = f * (s.scalar_prod(h));
+  auto f = 1 / a;
+  auto s = start - v1;
+  // Barycentric coordinate offset u
+  auto u = f * (s.scalar_prod(h));
   if (u < 0.0 || u > 1.0)
     return false; // Intersection with plane outside triangle
-  q = s.cross_prod(edge1);
-  v = f * direction.scalar_prod(q);
+  auto q = s.cross_prod(edge1);
+  // Barycentric coordinate offset v
+  auto v = f * direction.scalar_prod(q);
   if (v < 0.0 || u + v > 1.0)
     return false; // Intersection with plane outside triangle
 
   // At this stage we can compute t to find out where the intersection point is
   // on the line.
-  double t = f * edge2.scalar_prod(q);
+  auto t = f * edge2.scalar_prod(q);
   if (t >= -EPSILON) // ray intersection
   {
     intersection = start + direction * t;
