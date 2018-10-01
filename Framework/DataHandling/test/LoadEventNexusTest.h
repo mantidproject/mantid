@@ -897,10 +897,13 @@ public:
     runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 #ifndef _WIN32
-  void test_multiprocess_load() {
+  void test_multiprocess_load_precount() {
     run_multiprocess_load("SANS2D00022048.nxs", true);
-    run_multiprocess_load("SANS2D00022048.nxs", false);
     run_multiprocess_load("LARMOR00003368.nxs", true);
+  }
+
+  void test_multiprocess_load_producer_consumer() {
+    run_multiprocess_load("SANS2D00022048.nxs", false);
     run_multiprocess_load("LARMOR00003368.nxs", false);
   }
 #endif // _WIN32
