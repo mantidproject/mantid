@@ -98,7 +98,7 @@ An error report will be sent to errorreports.mantidproject.org. It will contain 
 - Operating System including version.
 - Mantid version including git Sha1.
 - System architecture.
-- The date and time at which the crash occured.
+- The date and time at which the crash occurred.
 - The mantid application you were using, currently this will always be mantidplot.
 - The default facility you have set.
 - The paraview version.

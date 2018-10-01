@@ -139,7 +139,9 @@ void ConvFit::saveClicked() { IndirectFitAnalysisTab::saveResult(); }
  * Handles plotting the workspace when plot is clicked
  */
 void ConvFit::plotClicked() {
+  setPlotResultIsPlotting(true);
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
+  setPlotResultIsPlotting(false);
 }
 
 void ConvFit::updatePlotOptions() {
@@ -170,19 +172,32 @@ std::string ConvFit::fitTypeString() const {
   return fitType;
 }
 
+void ConvFit::setRunEnabled(bool enabled) {
+  m_uiForm->pbRun->setEnabled(enabled);
+}
+
 void ConvFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
   m_uiForm->cbPlotType->setEnabled(enabled);
+}
+
+void ConvFit::setFitSingleSpectrumEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
 }
 
 void ConvFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
 
-void ConvFit::setRunEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
-  m_uiForm->pbRun->setEnabled(enabled);
-  m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
+void ConvFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setFitSingleSpectrumEnabled(!running);
+}
+
+void ConvFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotResultEnabled(!plotting);
 }
 
 void ConvFit::runClicked() { runTab(); }

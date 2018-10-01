@@ -13,7 +13,7 @@ it also provides the means to extract a re-executable python script from
 the GUI.
 
 #. Right click on HYS_11388_event and select 'Show History'. This will
-   open up the Algorihm History window. In the left-hand side Algorithms
+   open up the Algorithm History window. In the left-hand side Algorithms
    panel click on the arrow in front of Rebin v.1 and should see the
    following:
 

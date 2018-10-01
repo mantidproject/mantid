@@ -5,7 +5,7 @@ from PyQt4 import QtGui
 
 
 class ViewSpiceDialog(QtGui.QDialog):
-    """Dialog ot view SPICE """
+    """Dialog to view SPICE """
     def __init__(self, parent):
         """Initialization
 

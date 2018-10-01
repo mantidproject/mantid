@@ -106,7 +106,7 @@ Normalised Polygon Transformation
     Io=mtd['Io']
     D=mtd['D']
 
-    # Peform the normalisation step
+    # Perform the normalisation step
     Divide(LHSWorkspace=D,RHSWorkspace=Io,OutputWorkspace='I',AllowDifferentNumberSpectra='1',ClearRHSWorkspace='1')
     I=mtd['I'][0]
 
@@ -183,7 +183,7 @@ achieved by running the algorithm below.
         polygon_vertexes = list()   
 
         for vertex in vertex_table:
-            #Column of vertex i.e 'Qx' in this case, is dependant on the type of transform.
+            #Column of vertex i.e 'Qx' in this case, is dependent on the type of transform.
             #'Ki' and 'Kf' are used for the K transformation.
             #'Pi+Pf' and 'Pi-Pf' are used for the P transformation.
             polygon_vertexes.append((vertex['Qx'], vertex['Qy'] ))

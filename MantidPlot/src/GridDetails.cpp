@@ -20,12 +20,12 @@
 #include <QWidget>
 
 /** The constructor for a single set of widgets containing parameters for a
- * sigle direction of gridlines.
+ * single direction of gridlines.
  *  @param app :: the containing application window
  *  @param graph :: the graph the dialog is settign the options for
  *  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
  *  @param parent :: the QWidget that acts as this widget's parent in the
- * hierachy
+ * hierarchy
  */
 GridDetails::GridDetails(ApplicationWindow *app, Graph *graph, int alignment,
                          QWidget *parent)
@@ -202,14 +202,14 @@ void GridDetails::initWidgets() {
   }
 }
 
-/** Sets the modifed flag to true so that the changes may be applied.
+/** Sets the modified flag to true so that the changes may be applied.
  *
  */
 void GridDetails::setModified() { m_modified = true; }
 
-/** Applies the grid paremeters to the graphs
+/** Applies the grid parameters to the graphs
 *
-@param grid :: the gird to apply this formatting to
+@param grid :: the grid to apply this formatting to
 @bool antialias :: apply antialias to this formatting or not
 @bool multirun :: this will run multiple times for this dialog, and forces even
 if no modified

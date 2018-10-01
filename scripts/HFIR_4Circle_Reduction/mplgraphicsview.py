@@ -1352,7 +1352,7 @@ class Qt4MplCanvas(FigureCanvas):
                 try:
                     self.axes.lines.remove(plot)
                 except ValueError as e:
-                    print("[Error] Plot %s is not in axes.lines which has %d lines. Error mesage: %s" % (
+                    print("[Error] Plot %s is not in axes.lines which has %d lines. Error message: %s" % (
                         str(plot), len(self.axes.lines), str(e)))
                 del self._lineDict[ikey]
             else:
@@ -1421,7 +1421,7 @@ class Qt4MplCanvas(FigureCanvas):
         return self._lineIndex-1
 
     def getPlot(self):
-        """ reture figure's axes to expose the matplotlib figure to PyQt client
+        """ return figure's axes to expose the matplotlib figure to PyQt client
         """
         return self.axes
 
@@ -1664,7 +1664,7 @@ class Qt4MplCanvas(FigureCanvas):
     def _setup_legend(self, location='best', font_size=10):
         """
         Set up legend
-        self.axes.legend(): Handler is a Line2D object. Lable maps to the line object
+        self.axes.legend(): Handler is a Line2D object. Label maps to the line object
         Args:
             location:
             font_size:

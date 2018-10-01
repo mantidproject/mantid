@@ -40,7 +40,7 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
 
         # Replace the namespace declaration
         text = text.replace("namespace " + subproject, "namespace " + newproject)
-        # Replace the conents
+        # Replace the contents
         f = open(newfilename, 'w')
         f.write(text)
     except RuntimeError as err:

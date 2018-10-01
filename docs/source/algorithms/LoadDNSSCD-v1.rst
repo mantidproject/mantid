@@ -23,7 +23,7 @@ As a result, two workspaces are created:
 
 - `OutputWorkspace` contains the raw neutron counts.
 
-- `NormalizationWorkspace` contains the choosen normalization data (either monitor counts or experiment duration time).
+- `NormalizationWorkspace` contains the chosen normalization data (either monitor counts or experiment duration time).
 
 Both workspaces have :math:`(H,K,L,dE)` dimensions. The metadata are loaded into time series sample logs.
 

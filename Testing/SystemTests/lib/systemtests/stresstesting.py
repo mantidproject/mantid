@@ -295,7 +295,7 @@ class MantidStressTest(unittest.TestCase):
 
     def validateWorkspaces(self, valNames=None, mismatchName=None):
         '''
-        Performs a check that two workspaces are equal using the CheckWorkspacesMatch
+        Performs a check that two workspaces are equal using the CompareWorkspaces
         algorithm. Loads one workspace from a nexus file if appropriate.
         Returns true if: the workspaces match
                       OR the validate method has not been overridden.
@@ -304,7 +304,7 @@ class MantidStressTest(unittest.TestCase):
         if valNames is None:
             valNames = self.validate()
 
-        checker = AlgorithmManager.create("CheckWorkspacesMatch")
+        checker = AlgorithmManager.create("CompareWorkspaces")
         checker.setLogging(True)
         checker.setPropertyValue("Workspace1", valNames[0])
         checker.setPropertyValue("Workspace2", valNames[1])
@@ -521,7 +521,10 @@ class ResultReporter(object):
                                                                       self._total_number_of_tests)
                 console_output += '{:.<{}} ({}: {}s)'.format(result.name+" ", self._maximum_name_length+2,
                                                              result.status, time_taken)
-            if ((self._output_on_failure and (result.status.count('fail') > 0)) or (not self._quiet)):
+            if ((self._output_on_failure
+                and (result.status != 'success')
+                and (result.status != 'skipped'))
+                or (not self._quiet)):
                 nstars = 80
                 console_output += '\n' + ('*' * nstars) + '\n'
                 print_list = ['test_name', 'filename', 'test_date', 'host_name', 'environment',
@@ -614,7 +617,7 @@ class TestRunner(object):
 
 
 #########################################################################
-# Encapsulate the script for runnning a single test
+# Encapsulate the script for running a single test
 #########################################################################
 class TestScript(object):
 
@@ -775,7 +778,7 @@ class TestManager(object):
         self._skippedTests = 0
         self._failedTests = 0
         self._lastTestRun = 0
-        
+
         self._tests = list_of_tests
 
     def generateMasterTestList(self):
@@ -1124,7 +1127,7 @@ class MantidFrameworkConfig:
 
         # datasearch
         if self.__datasearch:
-            # turn on for 'all' facilties, 'on' is only for default facility
+            # turn on for 'all' facilities, 'on' is only for default facility
             config["datasearch.searcharchive"] = 'all'
             config['network.default.timeout'] = '5'
 
@@ -1178,7 +1181,7 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
                     total_number_of_tests, maximum_name_length,
                     tests_done, process_number, lock, required_files_dict,
                     locked_files_dict):
-    
+
     reporter = XmlResultReporter(showSkipped=options.showskipped,
                                  total_number_of_tests=total_number_of_tests,
                                  maximum_name_length=maximum_name_length)
@@ -1186,7 +1189,7 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
     runner = TestRunner(executable=options.executable, exec_args=options.execargs,
                         escape_quotes=True, clean=options.clean)
 
-    # Make sure the status is 1 to begin with as it will be replaced 
+    # Make sure the status is 1 to begin with as it will be replaced
     res_array[process_number + 2*options.ncores] = 1
 
     # Begin loop: as long as there are still some test modules that
@@ -1253,7 +1256,7 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
             except KeyboardInterrupt:
                 mgr.markSkipped("KeyboardInterrupt", tests_done.value)
 
-            # Update the test results in the array shared accross cores
+            # Update the test results in the array shared across cores
             res_array[process_number] += mgr._skippedTests
             res_array[process_number + options.ncores] += mgr._failedTests
             res_array[process_number + 2*options.ncores] = min(int(reporter.reportStatus()),\

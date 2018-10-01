@@ -2,8 +2,8 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
 #include "MantidTypes/Core/DateAndTime.h"
 #include <boost/python/list.hpp>

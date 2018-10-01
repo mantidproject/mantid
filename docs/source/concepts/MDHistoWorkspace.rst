@@ -168,7 +168,7 @@ Accessing the Data
    print(ws.signalAt(index))
    print(ws.errorSquaredAt(index))
 
-   # To extract the whole signal aray
+   # To extract the whole signal array
    signalArray =  ws.getSignalArray()
    # or the whole error squared array
    errorSquaredArray =  ws.getErrorSquaredArray()

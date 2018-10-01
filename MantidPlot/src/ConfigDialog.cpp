@@ -1192,7 +1192,7 @@ void ConfigDialog::populateProgramTree() {
 void ConfigDialog::updateProgramTree() {
   // Store into a map ready to go into config service when apply is clicked
   for (const auto &itr : m_sendToSettings) {
-    // creating the map of kvps needs to happen first as createing the item
+    // creating the map of kvps needs to happen first as creating the item
     // requires them.
     std::map<std::string, std::string> programKeysAndDetails = itr.second;
 
@@ -2436,9 +2436,10 @@ void ConfigDialog::languageChange() {
 
   mdPlottingGeneralFrame->setTitle(
       "Use same default color map for Slice Viewer and VSI");
-  mdPlottingGeneralFrame->setToolTip("The specifed color map will be available "
-                                     "for the Slice Viewer and the VSI when a "
-                                     "new instance of either is started.");
+  mdPlottingGeneralFrame->setToolTip(
+      "The specified color map will be available "
+      "for the Slice Viewer and the VSI when a "
+      "new instance of either is started.");
 }
 
 void ConfigDialog::accept() {

@@ -15,7 +15,7 @@ class ReductionOptions(BaseScriptElement):
     ny_pixels = 192
     pixel_size = 5.1
 
-    # Absoulte scale
+    # Absolute scale
     scaling_factor = 1.0
     calculate_scale = False
     scaling_direct_file = ''

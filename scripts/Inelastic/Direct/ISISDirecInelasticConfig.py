@@ -328,7 +328,7 @@ class UserProperties(object):
             error = True
         if error:
             raise RuntimeError("Experiment start date should be defined as"
-                               " a sting in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
+                               " a string in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
         return start_date
 
     def get_all_instruments(self):

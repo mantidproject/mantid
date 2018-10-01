@@ -33,7 +33,7 @@ numerical integration over the sample cylinder.
 
 The multiple scattering factor (if requested) is computed by simulating over a fixed number of 
 second order scattering events and computing the ratio of second order and first order scattering. 
-Since we have assumed the ratio is the same between succesive orders, the :math:`\frac{1}{1-\beta}` 
+Since we have assumed the ratio is the same between successive orders, the :math:`\frac{1}{1-\beta}` 
 factor simply comes from taking the sum of a geometric series.
 
 The cylinder radius :math:`r` combined with the inverse attenuation length :math:`\mu = \mu(E)` 

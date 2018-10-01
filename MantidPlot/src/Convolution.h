@@ -49,7 +49,7 @@ public:
 protected:
   //! Handles the graphical output
   void addResultCurve();
-  //! Performes the convolution of the two data sets and stores the result in
+  //! Performs the convolution of the two data sets and stores the result in
   // the signal data set
   void convlv(double *sig, int n, double *dres, int m, int sign);
 
