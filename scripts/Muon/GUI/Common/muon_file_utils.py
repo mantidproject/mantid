@@ -4,6 +4,7 @@ import os
 
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI"]
 allowed_extensions = ["nxs"]
+FILE_SEP = os.sep
 
 
 def filter_for_extensions(extensions):
@@ -40,7 +41,7 @@ def get_current_run_filename(instrument):
     if instrument_directory is None:
         return ""
 
-    autosave_file_name = _instrument_data_directory(instrument) + os.sep + "autosave.run"
+    autosave_file_name = _instrument_data_directory(instrument) + FILE_SEP + "autosave.run"
     autosave_points_to = ""
     if not check_file_exists(autosave_file_name):
         raise ValueError("Cannot find file : " + autosave_file_name)
@@ -50,11 +51,11 @@ def get_current_run_filename(instrument):
                 autosave_points_to = line
     if autosave_points_to == "":
         # Default to auto_A (replicates MuonAnalysis 1.0 behaviour)
-        current_run_filename = os.sep + os.sep + instrument_directory + os.sep + "data" \
-                               + os.sep + instrument_directory + "auto_A.tmp"
+        current_run_filename = FILE_SEP + FILE_SEP + instrument_directory + FILE_SEP + "data" \
+                               + FILE_SEP + instrument_directory + "auto_A.tmp"
     else:
-        current_run_filename = os.sep + os.sep + instrument_directory + os.sep + "data" \
-                               + os.sep + autosave_points_to
+        current_run_filename = FILE_SEP + FILE_SEP + instrument_directory + FILE_SEP + "data" \
+                               + FILE_SEP + autosave_points_to
     return current_run_filename
 
 
@@ -64,14 +65,14 @@ def format_run_for_file(run):
 
 def _instrument_data_directory(instrument):
     """The directory which stores the data for a particular instrument"""
-    return os.sep + os.sep + get_instrument_directory(instrument) + os.sep + "data"
+    return FILE_SEP + FILE_SEP + get_instrument_directory(instrument) + FILE_SEP + "data"
 
 
 def file_path_for_instrument_and_run(instrument, run):
     """Returns the path to the data file for a given instrument/run"""
     base_dir = _instrument_data_directory(instrument)
     file_name = instrument + format_run_for_file(run) + ".nxs"
-    return base_dir.lower() + os.sep + file_name
+    return base_dir.lower() + FILE_SEP + file_name
 
 
 def remove_duplicated_files_from_list(file_list):
