@@ -23,10 +23,14 @@ Line2D::Line2D(Python::Object obj, std::vector<double> xdataOwner,
  * if it is present
  */
 Line2D::~Line2D() {
-  try {
-    this->remove();
-  } catch (Python::ErrorAlreadySet &) {
-    // line is not attached to an axes
+  // If the Line2D has not been gutted by a std::move() then
+  // detach the line
+  if (!m_xOwner.empty()) {
+    try {
+      this->remove();
+    } catch (Python::ErrorAlreadySet &) {
+      // line is not attached to an axes
+    }
   }
 }
 
