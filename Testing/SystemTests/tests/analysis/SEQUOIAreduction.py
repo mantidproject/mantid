@@ -169,7 +169,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         flag_spe=False                                                  #flag to generate an spe file
         flag_nxspe=True                                                 #flag to generate an nxspe file
         do_powder=True                                                  #group detectors by angle
-        anglemin=0.				                                        #minumum angle
+        anglemin=0.				                                        #minimum angle
         anglemax=70.				                                    #maximum angle
         anglestep=1.				                                    #angle step - this can be fine tuned for pixel arc over detectors
 

@@ -9,7 +9,7 @@ class PolrefExample(stresstesting.MantidStressTest):
     Owen Arnold
     29/06/2012
     The analysis performed here is a subset of what is done in ReflectometryISIS.py.
-    We may want to remove this test in the furture to avoid duplication. However,
+    We may want to remove this test in the future to avoid duplication. However,
 
     I'm leaving this in here for now because Tim Charlton suggests making the ReflectometryISIS.py
     test more generic for every reflectometry instrument.

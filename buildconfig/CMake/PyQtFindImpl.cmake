@@ -45,7 +45,7 @@ function (find_pyqt major_version)
         "FindPyQt.py config gave:\n${_pyqt_config}")
     endif()
   else ()
-    message (FATAL_ERROR "Error encountered while determing PyQt confguration:\n${_pyqt_config_err}")
+    message (FATAL_ERROR "Error encountered while determining PyQt confguration:\n${_pyqt_config_err}")
   endif()
 
   find_package_handle_standard_args( PyQt${major_version}

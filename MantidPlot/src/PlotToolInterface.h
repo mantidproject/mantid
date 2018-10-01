@@ -57,7 +57,7 @@ class Graph;
  * when they are finished and to generalize the statusText signal provided by
  *most tools, but having
  * PlotToolInterface inherit from QObject would make it impossible for
- * plot tools to also inherit from other QObject decendants (such as
+ * plot tools to also inherit from other QObject descendants (such as
  *QwtPlotPicker).
  * As a workaround, plot tools can call Graph::setActiveTool(), carefully noting
  *that they are deleted

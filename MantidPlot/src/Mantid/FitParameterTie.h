@@ -31,11 +31,11 @@ public:
   QString parName() const;
   /// Returns the right-hand side of the expression
   QString exprRHS() const;
-  /// Mofifies the function indeces in response to insertion of a new function
+  /// Modifies the function indeces in response to insertion of a new function
   /// into
   /// the composite function
   void functionInserted(int i);
-  /// Mofifies the function indeces in response to deletion of a function from
+  /// Modifies the function indeces in response to deletion of a function from
   /// the composite function
   bool functionDeleted(int i);
   /// Set property

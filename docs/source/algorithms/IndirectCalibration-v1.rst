@@ -18,7 +18,7 @@ algorithm which are then merged into a single run using :ref:`MergeRuns
 the output workspace.
 
 .. note::
-  This algorithm only supports files containg histogram data.
+  This algorithm only supports files containing histogram data.
 
 Workflow
 --------

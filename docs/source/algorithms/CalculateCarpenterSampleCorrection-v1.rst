@@ -36,7 +36,7 @@ expansion coefficients:
 where the Chebyshev coefficients :math:`c_{s}(m,n)` up to  m + n 
 :math:`\leqslant` 5 have been tabulated and are stored as an array by the algorithm.
 
-This version of the correction follows the implemenation in [1]_ in that it only calculates for the correction in-plane, unlike [2]_, [3]_ that generalizes the correction to out-of-plane.
+This version of the correction follows the implementation in [1]_ in that it only calculates for the correction in-plane, unlike [2]_, [3]_ that generalizes the correction to out-of-plane.
 
 This algorithm calculates and outputs the absorption and/or multiple scattering correction workspaces to be applied to the InputWorkspace. Thus, there are, at most, two workspaces in the OutputWorkspaceBaseName group workspace. This allows for flexibility of applying either correction to a workspace without having to apply both (as is the case with :ref:`algm-CarpenterSampleCorrection`). For the case where both corrections are calculated, the output will be the following:
 
@@ -94,7 +94,7 @@ To reproduce what :ref:`algm-CarpenterSampleCorrection` does, you can calculate 
     # Apply absorption correction to workspace
     ws_abs_corrected = Divide(ws, absCorr)
 
-    # Apply multple scattering correction to workspace
+    # Apply multiple scattering correction to workspace
     ws_ms_corrected = Minus(ws, msCorr)
 
     # Apply both corrections
@@ -139,7 +139,7 @@ Output:
     # Apply absorption correction to workspace
     ws_abs_corrected = Divide(ws, absCorr)
 
-    # Apply multple scattering correction to workspace
+    # Apply multiple scattering correction to workspace
     ws_ms_corrected = Minus(ws, msCorr)
 
     # Apply both corrections

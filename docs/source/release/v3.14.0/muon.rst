@@ -12,6 +12,7 @@ Improvements
 ############
 - Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table.
 - TF Asymmetry mode now displays the chi squared value at the top of the browser.
+- ALC interface now sorts the data into ascending order.
 
 Bugfixes
 ########

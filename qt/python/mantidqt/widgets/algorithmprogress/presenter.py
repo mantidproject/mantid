@@ -23,7 +23,11 @@ class AlgorithmProgressPresenter(AlgorithmProgressPresenterBase):
         :param message: A message that may come from the algorithm.
         """
         if algorithm is self.algorithm:
-            self.need_update_progress_bar.emit(self.view.progress_bar, progress, message)
+            if message is None:
+                message = ''
+            else:
+                message = str(message)
+            self.need_update_progress_bar.emit(self.view.progress_bar, float(progress), message)
 
     def update_gui(self):
         """

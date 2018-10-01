@@ -84,7 +84,7 @@ bool FloatingWindow::event(QEvent *e) {
   } else if (e->type() == QEvent::WindowStateChange) {
     if (this->isMinimized()) {
 #ifdef Q_OS_WIN
-      // set parent to NULL wich makes it minimize nicely into a program bar
+      // set parent to NULL which makes it minimize nicely into a program bar
       // icon
       this->setParent(NULL);
       this->showMinimized();

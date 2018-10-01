@@ -28,7 +28,7 @@ is expressed in terms of the :math:`j_l(z)`
 The value of the momentum transfer can be obtained either through
 attribute :math:`Q`, or can be calculated from the input workspace
 using attribute  :math:`WorkspaceIndex`. The value calculated
-using the workspace is used whenever attibute :math:`Q` is set empty.
+using the workspace is used whenever attribute :math:`Q` is set empty.
 
 .. attributes::
 

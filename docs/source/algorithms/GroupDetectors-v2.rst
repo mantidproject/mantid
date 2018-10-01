@@ -50,7 +50,7 @@ incorrect, but other software may not. Mantid will warn you if the value
 given is incorrect.
 
 Each group's spectrum number is determined by the group's number. This
-behaviour can be overriden by enabling the IgnoreGroupNumber property, in
+behaviour can be overridden by enabling the IgnoreGroupNumber property, in
 which case the first group will be numbered 1, and the second 2, and so on.
 
 Blank lines and whitespace in the map file are ignored. Comments may be

@@ -305,7 +305,7 @@ def mask_beam_stop(mask_info, workspace, instrument, detector_names):
 
     :param mask_info: a SANSStateMask object.
     :param workspace: the workspace which is to be masked.
-    :param instrument: the instrument assoicated with the current workspace.
+    :param instrument: the instrument associated with the current workspace.
     :return: a masked workspace
     """
     beam_stop_arm_width = mask_info.beam_stop_arm_width

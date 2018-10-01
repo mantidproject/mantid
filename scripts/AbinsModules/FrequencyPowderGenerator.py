@@ -30,12 +30,12 @@ class FrequencyPowderGenerator(object):
                 len(fundamentals_array.shape) == 1 and
                 fundamentals_array.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
 
-            raise ValueError("Fundamentals in the form of one dimentional array are expected.")
+            raise ValueError("Fundamentals in the form of one dimensional array are expected.")
 
         if not (isinstance(fundamentals_coefficients, np.ndarray) and
                 len(fundamentals_coefficients.shape) == 1 and
                 fundamentals_coefficients.dtype.num == AbinsModules.AbinsConstants.INT_ID):
-            raise ValueError("Coefficients of fundamentals in the form of one dimentional array are expected.")
+            raise ValueError("Coefficients of fundamentals in the form of one dimensional array are expected.")
 
         if fundamentals_coefficients.size != fundamentals_array.size:
             raise ValueError("Inconsistent size of fundamentals and corresponding coefficients. "
@@ -59,7 +59,7 @@ class FrequencyPowderGenerator(object):
             if not (isinstance(previous_array, np.ndarray) and
                     len(previous_array.shape) == 1 and
                     previous_array.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
-                raise ValueError("One dimentional array is expected.")
+                raise ValueError("One dimensional array is expected.")
 
             if not (isinstance(previous_coefficients, np.ndarray) and
                     len(previous_coefficients.shape) == min(2, quantum_order - 1) and
