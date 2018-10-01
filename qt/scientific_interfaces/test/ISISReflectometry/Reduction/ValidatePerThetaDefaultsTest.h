@@ -18,6 +18,7 @@ public:
 
   static auto constexpr TOLERANCE = 0.000001;
 
+  // TODO
   void testThing() {}
 };
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEPERTHETADEFAULTSTEST_H_
