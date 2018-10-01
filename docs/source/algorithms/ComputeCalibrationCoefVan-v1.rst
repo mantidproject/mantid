@@ -31,7 +31,7 @@ Algorithm creates a workspace with  detector sensitivity correction coefficients
 
    :math:`S_i = \sum_{x = x_C - 3\,\mathrm{fwhm}}^{x_C + 3\,\mathrm{fwhm}} Y_i(x)`
 
-   where :math:`x_C` is the peak centre position and :math:`Y_i(x)` is the coresponding to :math:`x` :math:`Y` value for i-th detector.
+   where :math:`x_C` is the peak centre position and :math:`Y_i(x)` is the corresponding to :math:`x` :math:`Y` value for i-th detector.
 
 3. Finally, the correction coefficients :math:`K_i` are calculated as
 

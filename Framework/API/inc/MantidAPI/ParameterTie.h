@@ -7,6 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ParameterReference.h"
 #include <map>
+#include <vector>
 
 namespace mu {
 class Parser;
@@ -63,6 +64,8 @@ public:
   bool findParametersOf(const IFunction *fun) const;
   /// Check if the tie is a constant
   bool isConstant() const;
+  /// Get a list of parameters on the right-hand side of the equation
+  std::vector<ParameterReference> getRHSParameters() const;
 
 protected:
   mu::Parser *m_parser; ///< math parser

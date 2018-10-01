@@ -53,7 +53,7 @@ Usage
 
 .. testcode:: exSavePHX
 
-   # import os funcions to work with folders
+   # import os functions to work with folders
    import os
    # create sample workspace
    ws=CreateSampleWorkspace()

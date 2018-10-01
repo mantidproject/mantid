@@ -9,7 +9,7 @@ import ISISCommandInterface as ici
 class TestReductionStateTransferer(unittest.TestCase):
     def test_that_state_is_transfered(self):
         """
-        This test shows that some state can be transfered between the logic instances
+        This test shows that some state can be transferred between the logic instances
         of the ReducerSingelton. 
         """
         # 1. Create a ReudcerSingleton and apply the user file settings
@@ -20,7 +20,7 @@ class TestReductionStateTransferer(unittest.TestCase):
         # 2. Change a setting (simulates a gui change)
         ici.ReductionSingleton().to_Q._use_gravity = False
 
-        # 3. Creat a transfer object such that this change is stored when the user file is applied again
+        # 3. Create a transfer object such that this change is stored when the user file is applied again
         transfer_state = ReductionStateTransferer()
         transfer_state.get_copy_of_reducer(ici.ReductionSingleton())
 

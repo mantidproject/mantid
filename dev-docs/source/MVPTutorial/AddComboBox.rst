@@ -1,3 +1,5 @@
+.. _AddComboBox:
+
 ==============
 Add a ComboBox
 ==============

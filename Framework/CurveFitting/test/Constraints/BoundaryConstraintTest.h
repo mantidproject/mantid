@@ -7,7 +7,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"

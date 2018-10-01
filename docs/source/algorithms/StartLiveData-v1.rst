@@ -158,7 +158,7 @@ Usage
     # put back the facility
     ConfigService.setFacility(oldFacility)
 
-    #get the ouput workspace
+    #get the output workspace
     wsOut = mtd["wsOut"]
     print("The workspace contains %i events" % wsOut.getNumberEvents())
 
@@ -224,7 +224,7 @@ Output:
     # put back the facility
     ConfigService.setFacility(oldFacility)
 
-    #get the ouput workspace
+    #get the output workspace
     wsOut = mtd["wsOut"]
     print("The workspace contains %i periods" % wsOut.getNumberOfEntries())
     print("Each period   contains %i spectra" % wsOut.getItem(0).getNumberHistograms())

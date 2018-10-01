@@ -83,7 +83,7 @@ class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(stresstesting.MantidStressT
         SANS2DTUBES()
         Set1D()
         Detector("rear-detector")
-        # This contains two MASKFILE commands, each resulting in a seperate call to MaskDetectors.
+        # This contains two MASKFILE commands, each resulting in a separate call to MaskDetectors.
         MaskFile('SANS2DTube_ZerroErrorFreeTest.txt')
 
         # Saves a file which produces an output file which does not contain any zero errors

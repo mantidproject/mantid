@@ -121,6 +121,7 @@ public:
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
   void setClipboard(const QString &text) override;
+  void setItemDelegate() override;
 
   // Transfer runs
   void transfer(const QList<QString> &runs);

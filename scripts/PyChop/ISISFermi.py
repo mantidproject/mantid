@@ -236,7 +236,7 @@ class ISISFermi:
 
         Inputs:
             ei - incident energy in meV [default: preset incident energy]
-            omega - chopper frequncy in Hz  [default: preset frequency]
+            omega - chopper frequency in Hz  [default: preset frequency]
             etrans - list of numpy array of energy transfers to calculate for (meV) [default: 0]
 
         Output:
@@ -343,7 +343,7 @@ class ISISFermi:
         Inputs:
             etrans - list of numpy array of energy transfers to calculate for (meV) [default: linspace(0.05Ei, 0.95Ei, 19)]
             ei - incident energy in meV [default: preset energy]
-            omega - chopper frequncy in Hz  [default: preset frequency]
+            omega - chopper frequency in Hz  [default: preset frequency]
 
         Output:
             van - the incoherent (Vanadium) energy width at etrans in meV

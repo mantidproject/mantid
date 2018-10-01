@@ -284,7 +284,7 @@ def _raise_if_not_sequence(value, seq_name, element_type=None):
     is an instance of this type
     :raises ValueError: if the conditions are not met
     """
-    accepted_types = (list, tuple)
+    accepted_types = (list, tuple, range)
     if type(value) not in accepted_types:
         raise ValueError("{} should be a list or tuple".format(seq_name))
     if element_type is not None:

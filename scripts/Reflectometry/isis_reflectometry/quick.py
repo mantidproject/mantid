@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name, too-many-branches, too-few-public-methods, too-many-arguments, too-many-locals
 ''' SVN Info:      The variables below will only get subsituted at svn checkout if
-        the repository is configured for variable subsitution.
+        the repository is configured for variable substitution.
 
     $Id$
     $HeadURL$
@@ -147,8 +147,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max, background_min
         RunNumber = groupGet(_sample_ws.name(), 'samp', 'run_number')
 
     if not pointdet:
-        # Proccess Multi-Detector; assume MD goes to the end:
-        # if roi or db are given in the function then sum over the apropriate channels
+        # Process Multi-Detector; assume MD goes to the end:
+        # if roi or db are given in the function then sum over the appropriate channels
         print("This is a multidetector run.")
 
         _I0M = RebinToWorkspace(WorkspaceToRebin=_monitor_ws, WorkspaceToMatch=_detector_ws)

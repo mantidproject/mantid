@@ -4,10 +4,9 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
+#include "MantidCurveFitting/Functions/FunctionQDepends.h"
 // Mantid headers from other projects
-#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ParamFunction.h"
 // 3rd party library headers (N/A)
 // standard library headers (N/A)
 
@@ -58,8 +57,7 @@ struct linearJ {
  * @brief Inelastic part of the DiffSphere function. Contains the 98
  * Lorentzians.
  */
-class DLLExport InelasticDiffSphere : public API::ParamFunction,
-                                      public API::IFunction1D {
+class DLLExport InelasticDiffSphere : public FunctionQDepends {
 public:
   InelasticDiffSphere();
 

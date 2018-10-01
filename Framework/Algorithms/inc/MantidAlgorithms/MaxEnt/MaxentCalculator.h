@@ -5,13 +5,9 @@
 #include "MantidAlgorithms/MaxEnt/MaxentCoefficients.h"
 #include "MantidAlgorithms/MaxEnt/MaxentEntropy.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
-#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
-
-using MaxentEntropy_sptr = std::shared_ptr<MaxentEntropy>;
-using MaxentTransform_sptr = std::shared_ptr<MaxentTransform>;
 
 /** MaxentCalculator : This class performs one maxent iteration and calculates
   chi-sq, angle between gradient of S and gradient of chi-sq,  search directions
@@ -53,7 +49,9 @@ public:
   // Runs maxent iteration
   void iterate(const std::vector<double> &data,
                const std::vector<double> &errors,
-               const std::vector<double> &image, double background);
+               const std::vector<double> &image, double background,
+               const std::vector<double> &linearAdjustments,
+               const std::vector<double> &constAdjustments);
 
   // Getters
   // Returns the reconstructed (calculated) data

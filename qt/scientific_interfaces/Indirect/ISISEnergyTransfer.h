@@ -50,6 +50,13 @@ public slots:
 
 private slots:
   void algorithmComplete(bool error);
+
+  void setCurrentGroupingOption(QString const &option);
+  int getGroupingOptionIndex(QString const &option);
+  bool isOptionHidden(QString const &option);
+  void removeGroupingOption(QString const &option);
+  void includeExtraGroupingOption(bool includeOption, QString const &option);
+
   void
   setInstrumentDefault(); ///< Sets default parameters for current instrument
   void mappingOptionSelected(
@@ -75,7 +82,10 @@ private:
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
   std::vector<std::string>
       m_outputWorkspaces; ///< get a vector of workspaces to plot
-  QString validateDetectorGrouping();
+  bool numberInCorrectRange(std::size_t const &spectraNumber) const;
+  QString checkCustomGroupingNumbersInRange(
+      std::vector<std::size_t> const &customGroupingNumbers) const;
+  QString validateDetectorGrouping() const;
   std::string getDetectorGroupingString() const;
 };
 } // namespace CustomInterfaces

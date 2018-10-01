@@ -23,7 +23,7 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
-from mantidqt.utils.qt.test import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 
@@ -50,8 +50,7 @@ class ReceiverWithProgress(Receiver):
         self.lines_received.append(lineno)
 
 
-@requires_qapp
-class PythonCodeExecutionTest(unittest.TestCase):
+class PythonCodeExecutionTest(GuiTest):
 
     def test_default_construction_yields_empty_context(self):
         executor = PythonCodeExecution()
@@ -65,9 +64,9 @@ class PythonCodeExecutionTest(unittest.TestCase):
         executor.reset_context()
         self.assertEqual(0, len(executor.globals_ns))
 
-    def test_startup_code_executed_by_default(self):
+    def test_startup_code_not_executed_by_default(self):
         executor = PythonCodeExecution(startup_code="x=100")
-        self.assertEqual(100, executor.globals_ns['x'])
+        self.assertFalse('x' in executor.globals_ns)
 
     # ---------------------------------------------------------------------------
     # Successful execution tests
