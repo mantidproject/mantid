@@ -38,14 +38,16 @@ public:
   FigureCanvasQt(int subplotspec, QWidget *parent = nullptr);
   FigureCanvasQt(Figure fig, QWidget *parent = nullptr);
 
-  /// Non-const access to the current active axes instance.
-  inline Axes &gca() { return m_axes; }
+  /// Access to the current figure instance.
+  inline Figure gcf() { return m_figure; }
+  /// Access to the current active axes instance.
+  inline Axes gca() { return m_figure.gca(); }
 
   /// Redraw the canvas
   inline void draw() { pyobj().attr("draw")(); }
 
 private: // members
-  Axes m_axes;
+  Figure m_figure;
 };
 
 } // namespace MplCpp

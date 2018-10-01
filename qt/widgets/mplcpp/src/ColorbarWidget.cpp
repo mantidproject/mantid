@@ -2,9 +2,11 @@
 #include "MantidQtWidgets/MplCpp/Colors.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
+#include "MantidQtWidgets/MplCpp/MantidColorMap.h"
 
 #include <QComboBox>
 #include <QDoubleValidator>
+#include <QHash>
 #include <QLineEdit>
 #include <QVBoxLayout>
 
@@ -20,6 +22,14 @@ constexpr double AXES_LEFT = 0.4;
 constexpr double AXES_BOTTOM = 0.05;
 constexpr double AXES_WIDTH = 0.2;
 constexpr double AXES_HEIGHT = 0.9;
+
+// Background color for figure
+constexpr const char *FIGURE_FACECOLOR = "w";
+
+/// Define the available normalization option labels
+/// The order defines the order in the combo box. The index
+/// values is used as an integer representation
+QStringList NORM_OPTS = {"Linear", "Log10", "Power"};
 } // namespace
 
 /**
@@ -29,9 +39,21 @@ constexpr double AXES_HEIGHT = 0.9;
  */
 ColorbarWidget::ColorbarWidget(QWidget *parent)
     : QWidget(parent), m_ui(),
-      m_mappable(Normalize(0, 1), getCMap(defaultCMapName())), m_colorbar() {
+      m_mappable(Normalize(0, 1), getCMap(defaultCMapName())) {
   initLayout();
   connectSignals();
+}
+
+/**
+ * Set the normalization instance
+ * @param norm An instance of NormalizeBase. See Colors.h
+ */
+void ColorbarWidget::setNorm(const NormalizeBase &norm) {
+  m_mappable.setNorm(norm);
+  // matplotlib requires creating a brand new colorbar if the
+  // normalization type changes
+  createColorbar();
+  m_canvas->draw();
 }
 
 /**
@@ -62,6 +84,17 @@ std::tuple<double, double> ColorbarWidget::clim() const {
                                          m_ui.scaleMaxEdit->text().toDouble());
 }
 
+/**
+ * @brief Called to setup the widget based on the MantidColorMap instance
+ * @param mtdCMap A reference to the MantidColorMap wrapper
+ */
+void ColorbarWidget::setupColorBarScaling(const MantidColorMap &mtdCMap) {
+  // block signals to avoid infinite loop while setting scale type
+  this->blockSignals(true);
+  setScaleType(static_cast<int>(mtdCMap.getScaleType()));
+  this->blockSignals(false);
+}
+
 // ------------------------------ Legacy API -----------------------------------
 
 /**
@@ -90,6 +123,57 @@ QString ColorbarWidget::getMaxValue() const {
   return QString::number(std::get<1>(clim()));
 }
 
+/**
+ * @return The power value as a string
+ */
+QString ColorbarWidget::getNthPower() const { return m_ui.powerEdit->text(); }
+
+/**
+ * @return The scale type choice as an integer.
+ */
+int ColorbarWidget::getScaleType() const {
+  return m_ui.normTypeOpt->currentIndex();
+}
+
+/**
+ * @brief Set the scale type from an integer representation
+ * Linear=0, Log=1, Power=2, which is backwards compatible
+ * with the original Qwt version
+ * @param index The scale type as an integer
+ */
+void ColorbarWidget::setScaleType(int index) {
+  // Protection against a bad index.
+  if (index < 0 || index > 2)
+    return;
+  m_ui.normTypeOpt->setCurrentIndex(index);
+  auto range = clim();
+  const double vmin(std::get<0>(range)), vmax(std::get<1>(range));
+  switch (index) {
+  case 0:
+    setNorm(Normalize(vmin, vmax));
+    break;
+  case 1:
+    setNorm(SymLogNorm(0.0001, 1, vmin, vmax));
+    break;
+  case 2:
+    setNorm(PowerNorm(getNthPower().toDouble(), vmin, vmax));
+    break;
+  }
+
+  emit scaleTypeChanged(index);
+}
+
+/**
+ * @brief Set the power for the power scale
+ * @param gamma The value of the exponent
+ */
+void ColorbarWidget::setNthPower(double gamma) {
+  m_ui.powerEdit->setText(QString::number(gamma));
+  auto range = clim();
+  setNorm(PowerNorm(gamma, std::get<0>(range), std::get<1>(range)));
+  emit nthPowerChanged(gamma);
+}
+
 // --------------------------- Private slots -----------------------------------
 /**
  * Called when a user has edited the minimum scale value
@@ -116,32 +200,57 @@ void ColorbarWidget::scaleTypeSelectionChanged(int index) {
   } else {
     m_ui.powerEdit->hide();
   }
+  m_ui.normTypeOpt->blockSignals(true);
+  setScaleType(index);
+  m_ui.normTypeOpt->blockSignals(false);
 }
+
+/**
+ * Called when the power exponent input has been edited
+ */
+void ColorbarWidget::powerExponentEdited() { setScaleType(2); }
+
+// --------------------------- Private methods --------------------------------
 
 /**
  * Setup the layout of the child widgets
  */
 void ColorbarWidget::initLayout() {
-  // Create figure and colorbar
+  // Create colorbar (and figure if necessary)
   Figure fig{false};
-  fig.pyobj().attr("set_facecolor")("w");
-  Axes cbAxes{fig.addAxes(AXES_LEFT, AXES_BOTTOM, AXES_WIDTH, AXES_HEIGHT)};
-  m_colorbar = fig.colorbar(m_mappable, cbAxes);
-
-  // Create widget layout including canvas to draw the figure
+  fig.pyobj().attr("set_facecolor")(FIGURE_FACECOLOR);
   m_ui.setupUi(this);
   // remove placeholder widget and add figure canvas
   delete m_ui.mplColorbar;
-  m_canvas = new FigureCanvasQt(fig, this);
+  m_canvas = new FigureCanvasQt(std::move(fig), this);
   m_ui.mplColorbar = m_canvas;
   m_ui.verticalLayout->insertWidget(1, m_canvas);
+  createColorbar();
 
-  // Set validators on the scale input
+  // Set validators on the scale inputs
   m_ui.scaleMinEdit->setValidator(new QDoubleValidator());
   m_ui.scaleMaxEdit->setValidator(new QDoubleValidator());
-
-  // Set default properties for scale type 0
+  m_ui.powerEdit->setValidator(new QDoubleValidator());
+  // Setup normalization options
+  m_ui.normTypeOpt->addItems(NORM_OPTS);
   scaleTypeSelectionChanged(0);
+}
+
+/**
+ * (Re)-create a colorbar around the current mappable. It assumes the figure
+ * and canvas have been created
+ * @param fig The figure to receive the colobar
+ */
+void ColorbarWidget::createColorbar() {
+  assert(m_canvas);
+  auto cb = Python::Object(m_mappable.pyobj().attr("colorbar"));
+  if (!cb.is_none()) {
+    cb.attr("remove")();
+  }
+  // create the new one
+  auto fig = m_canvas->gcf();
+  Axes cbAxes{fig.addAxes(AXES_LEFT, AXES_BOTTOM, AXES_WIDTH, AXES_HEIGHT)};
+  fig.colorbar(m_mappable, cbAxes);
 }
 
 /**
@@ -153,8 +262,10 @@ void ColorbarWidget::connectSignals() {
   connect(m_ui.scaleMaxEdit, SIGNAL(editingFinished()), this,
           SLOT(scaleMaximumEdited()));
 
-  connect(m_ui.scaleTypeOpt, SIGNAL(currentIndexChanged(int)), this,
+  connect(m_ui.normTypeOpt, SIGNAL(currentIndexChanged(int)), this,
           SLOT(scaleTypeSelectionChanged(int)));
+  connect(m_ui.powerEdit, SIGNAL(editingFinished()), this,
+          SLOT(powerExponentEdited()));
 }
 
 } // namespace MplCpp

@@ -25,7 +25,8 @@ namespace Widgets {
 namespace MplCpp {
 
 /**
- * @brief Defines a wrapper
+ * @brief Defines a C++ wrapper for the matplotlib.cm.Colormap
+ * class
  */
 class MANTID_MPLCPP_DLL Colormap : public Python::InstanceHolder {
 public:

@@ -52,7 +52,7 @@ void initLayout(FigureCanvasQt *cppCanvas) {
  */
 FigureCanvasQt::FigureCanvasQt(int subplotspec, QWidget *parent)
     : QWidget(parent), InstanceHolder(createPyCanvas(subplotspec), "draw"),
-      m_axes(pyobj().attr("figure").attr("axes")[0]) {
+      m_figure(Figure(Python::Object(pyobj().attr("figure")))) {
   // Cannot use delegating constructor here as InstanceHolder needs to be
   // initialized before the axes can be created
   initLayout(this);
@@ -66,7 +66,7 @@ FigureCanvasQt::FigureCanvasQt(int subplotspec, QWidget *parent)
  */
 FigureCanvasQt::FigureCanvasQt(Figure fig, QWidget *parent)
     : QWidget(parent), InstanceHolder(createPyCanvasFromFigure(fig), "draw"),
-      m_axes(fig.axes(0)) {
+      m_figure(std::move(fig)) {
   initLayout(this);
 }
 
