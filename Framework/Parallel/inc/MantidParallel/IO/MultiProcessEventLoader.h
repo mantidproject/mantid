@@ -280,8 +280,7 @@ void MultiProcessEventLoader::GroupLoader<
       }
       for (unsigned i = 0; i < task->eventId.size(); ++i)
         pixels.at(task->eventId[i])
-            .emplace_back(task->eventTimeOffset[i],
-                          task->partitioner->next());
+            .emplace_back(task->eventTimeOffset[i], task->partitioner->next());
     }
   };
 
