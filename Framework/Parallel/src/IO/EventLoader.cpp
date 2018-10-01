@@ -6,7 +6,6 @@
 #include "MantidParallel/IO/NXEventDataLoader.h"
 
 #include <H5Cpp.h>
-#include <boost/dll/runtime_symbol_info.hpp>
 #include <thread>
 
 namespace Mantid {
