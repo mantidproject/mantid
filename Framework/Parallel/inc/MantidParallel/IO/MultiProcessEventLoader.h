@@ -280,7 +280,7 @@ void MultiProcessEventLoader::GroupLoader<
       }
       for (unsigned i = 0; i < task->eventId.size(); ++i)
         pixels.at(task->eventId[i])
-            .emplace_back((double)task->eventTimeOffset[i],
+            .emplace_back(task->eventTimeOffset[i],
                           task->partitioner->next());
     }
   };
@@ -304,7 +304,7 @@ void MultiProcessEventLoader::GroupLoader<
 
   });
 
-  producer.join();re #23268
+  producer.join();
   consumer.join();
 }
 
