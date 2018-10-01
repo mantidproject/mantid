@@ -662,7 +662,7 @@ def AdvancedProperties(adv_prop_definition):
 
 def iliad(reduce):
     """ This decorator wraps around main procedure and switch input from
-        web variables to properties or vise versa depending on web variables
+        web variables to properties or vice versa depending on web variables
         presence
     """
     def iliad_wrapper(*args):

@@ -112,7 +112,7 @@ public:
   void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
             const QRect &) const override;
 
-  /// Overriden virtual method
+  /// Overridden virtual method
   void itemChanged() override;
 
   /// saves the MantidMatrixCurve details to project file.
@@ -147,7 +147,7 @@ private:
       const std::string &wsName,
       const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
-  /// Handle an ADS clear notificiation
+  /// Handle an ADS clear notification
   void clearADSHandle() override { emit removeMe(this); }
 
 signals:

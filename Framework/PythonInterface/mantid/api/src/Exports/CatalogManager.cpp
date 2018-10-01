@@ -13,7 +13,7 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(CatalogManagerImpl)
 
-boost::python::object getActiveSessionsAsList(CatalogManagerImpl &self) {
+boost::python::list getActiveSessionsAsList(CatalogManagerImpl &self) {
   boost::python::list sessions;
   const auto vecSessions = self.getActiveSessions();
   for (const auto &vecSession : vecSessions) {

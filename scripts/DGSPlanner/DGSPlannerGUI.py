@@ -244,7 +244,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                     mantid.simpleapi.MaskDetectors(Workspace="__temp_instrument", MaskedWorkspace=__maskWS)
                 except (ValueError, RuntimeError) as e:
                     reply = QtGui.QMessageBox.critical(self, 'Error',
-                                                       "The following error has occured in loading the mask:\n" +
+                                                       "The following error has occurred in loading the mask:\n" +
                                                        str(e) + "\nDo you want to continue without mask?",
                                                        QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                                                        QtGui.QMessageBox.No)

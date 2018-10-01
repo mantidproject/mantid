@@ -412,7 +412,7 @@ class ISISIndirectInelasticResolution(with_metaclass(ABCMeta, ISISIndirectInelas
     The workflow is defined in the _run() method, simply
     define an __init__ method and set the following properties
     on the object
-        - self.instrument: a string giving the intrument name
+        - self.instrument: a string giving the instrument name
         - self.analyser: a string giving the name of the analyser
         - self.reflection: a string giving the name of the reflection
         - self.detector_range: a list of two integers, giving the range of detectors

@@ -660,7 +660,7 @@ void MultiTabScriptInterpreter::contextMenuEvent(QContextMenuEvent *event) {
 /**
  * A custom event handler, which in this case monitors for ScriptChangeEvent
  * signals
- * @param event :: The custome event
+ * @param event :: The custom event
  */
 void MultiTabScriptInterpreter::customEvent(QEvent *event) {
   if (!isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT) {

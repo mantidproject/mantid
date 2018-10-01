@@ -22,7 +22,7 @@ from sans.state.scale import StateScale
 from sans.state.convert_to_q import StateConvertToQ
 from sans.state.automatic_setters import (automatic_setters)
 
-# Note that the compatibiliy state is not part of the new reduction chain, but allows us to accurately compare
+# Note that the compatibility state is not part of the new reduction chain, but allows us to accurately compare
 # results obtained via the old and new reduction chain
 from sans.state.compatibility import (StateCompatibility, get_compatibility_builder)
 

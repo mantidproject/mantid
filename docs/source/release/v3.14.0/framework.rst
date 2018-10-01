@@ -39,7 +39,7 @@ Algorithms
 New Algorithms
 ##############
 
-
+- :ref:`MatchSpectra <algm-MatchSpectra>` is an algorithm that calculates factors to match all spectra to a reference spectrum.
 
 Improvements
 ############
@@ -63,7 +63,7 @@ Bugfixes
 - :ref:`FilterEvents <algm-FilterEvents-v1>` output workspaces now contain the goniometer.
 - Fixed an issue where if a workspace's history wouldn't update for some algorithms
 - Fixed a ``std::bad_cast`` error in :ref:`algm-LoadLiveData` when the data size changes.
-
+- Fixed a rare bug in :ref:`MaskDetectors <algm-MaskDetectors>` where a workspace could become invalidaded in Python if it was a ``MaskWorkspace``.
 
 
 Python

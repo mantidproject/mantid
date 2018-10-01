@@ -117,7 +117,9 @@ void MaskDetectors::exec() {
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
 
   // Is it a Mask Workspace ?
-  MaskWorkspace_sptr isMaskWS = boost::dynamic_pointer_cast<MaskWorkspace>(WS);
+  MaskWorkspace_sptr inputAsMaskWS =
+      boost::dynamic_pointer_cast<MaskWorkspace>(WS);
+  const auto isMaskWS = static_cast<bool>(inputAsMaskWS);
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
   auto spectraList =
@@ -212,13 +214,15 @@ void MaskDetectors::exec() {
   }
 
   if (isMaskWS) {
-    // If the input was a mask workspace, then extract the mask to ensure
-    // we are returning the correct thing.
-    IAlgorithm_sptr alg = createChildAlgorithm("ExtractMask");
-    alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-    alg->executeAsChildAlg();
-    MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
-    setProperty("Workspace", ws);
+    // When input is a MaskWorkspace, some special handling is needed.
+    auto &spectrumInfo = inputAsMaskWS->mutableSpectrumInfo();
+    for (size_t i = 0; i < inputAsMaskWS->getNumberHistograms(); ++i) {
+      const bool mask =
+          inputAsMaskWS->isMaskedIndex(i) || spectrumInfo.isMasked(i);
+      inputAsMaskWS->setMaskedIndex(i, mask);
+      // Always clear the mask flag from MaskWorkspace
+      spectrumInfo.setMasked(i, false);
+    }
   }
 }
 

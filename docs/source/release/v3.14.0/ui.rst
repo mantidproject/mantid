@@ -22,6 +22,7 @@ Changes
 - Project Recovery will no longer save groups, this fixes an issue where it would cause crashes if you deleted a workspace from a group.
 - MantidPlot no longer checks for the existence of files in the "Recent Files" menu. Fixes case where files on slow mounted network drives can cause a lag on MantidPlot startup.
 - Workspaces now save locally as a number of how many workspaces have already been saved instead of workspace names
+- Project Recovery will now attempt to recover multiple instances of mantid that are ran at the same time.
 
 Bugfixes
 ########
