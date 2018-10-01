@@ -52,6 +52,7 @@ FunctionFactoryImpl::createInitialized(const std::string &input) const {
   } catch (...) {
     inputError(input);
   }
+
   const Expression &e = expr.bracketsRemoved();
   std::map<std::string, std::string> parentAttributes;
   if (e.name() == ";") {
@@ -157,6 +158,7 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
   const std::vector<Expression> &terms = expr.terms();
   auto it = terms.cbegin();
   const Expression &term = it->bracketsRemoved();
+
   CompositeFunction_sptr cfun;
   if (term.name() == "=") {
     if (term.terms()[0].name() == "composite") {
@@ -292,6 +294,7 @@ void FunctionFactoryImpl::addConstraint(IFunction_sptr fun,
                                         const Expression &expr) const {
   auto c = std::unique_ptr<IConstraint>(
       ConstraintFactory::Instance().createInitialized(fun.get(), expr));
+  c->setPenaltyFactor(c->getDefaultPenaltyFactor());
   fun->addConstraint(std::move(c));
 }
 

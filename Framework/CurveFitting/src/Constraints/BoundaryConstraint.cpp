@@ -25,13 +25,13 @@ using namespace API;
 
 /// Default constructor
 BoundaryConstraint::BoundaryConstraint()
-    : API::IConstraint(), m_penaltyFactor(m_defaultPenaltyFactor), m_hasLowerBound(false),
+    : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(false),
       m_hasUpperBound(false), m_lowerBound(DBL_MAX), m_upperBound(-DBL_MAX) {}
 
 /// Constructor with no boundary arguments
 /// @param paramName :: The parameter name
 BoundaryConstraint::BoundaryConstraint(const std::string &paramName)
-    : API::IConstraint(), m_penaltyFactor(m_defaultPenaltyFactor), m_hasLowerBound(false),
+    : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(false),
       m_hasUpperBound(false) {
   UNUSED_ARG(paramName);
 }
@@ -49,7 +49,7 @@ BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
                                        const std::string paramName,
                                        const double lowerBound,
                                        const double upperBound, bool isDefault)
-    : m_penaltyFactor(m_defaultPenaltyFactor), m_hasLowerBound(true), m_hasUpperBound(true),
+    : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true), m_hasUpperBound(true),
       m_lowerBound(lowerBound), m_upperBound(upperBound) {
   reset(fun, fun->parameterIndex(paramName), isDefault);
 }
@@ -57,7 +57,7 @@ BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
 BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
                                        const std::string paramName,
                                        const double lowerBound, bool isDefault)
-    : m_penaltyFactor(m_defaultPenaltyFactor), m_hasLowerBound(true), m_hasUpperBound(false),
+    : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true), m_hasUpperBound(false),
       m_lowerBound(lowerBound), m_upperBound(-DBL_MAX) {
   reset(fun, fun->parameterIndex(paramName), isDefault);
 }
@@ -255,7 +255,8 @@ std::string BoundaryConstraint::asString() const {
   if (m_hasUpperBound) {
     ostr << '<' << m_upperBound;
   }
-  if (m_penaltyFactor != m_defaultPenaltyFactor){
+  if (m_penaltyFactor != getDefaultPenaltyFactor()){
+  //if(true){
     ostr <<", penalty="<<m_penaltyFactor;
   }
   return ostr.str();

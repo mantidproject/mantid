@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <limits>
 #include <sstream>
+
 namespace Mantid {
 namespace API {
 using namespace Geometry;
