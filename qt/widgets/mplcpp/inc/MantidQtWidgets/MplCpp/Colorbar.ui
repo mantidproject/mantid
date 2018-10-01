@@ -108,7 +108,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="scaleLayout" stretch="1,4,2,1">
+    <layout class="QHBoxLayout" name="scaleLayout" stretch="1,4,0,1">
      <item>
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
@@ -123,43 +123,25 @@
       </spacer>
      </item>
      <item>
-      <widget class="QComboBox" name="scaleTypeOpt">
+      <widget class="QComboBox" name="normTypeOpt">
        <property name="maximumSize">
         <size>
          <width>100</width>
          <height>16777215</height>
         </size>
        </property>
-       <item>
-        <property name="text">
-         <string>Linear</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Log</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Power</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>
       <widget class="QLineEdit" name="powerEdit">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
        <property name="maximumSize">
         <size>
          <width>50</width>
          <height>16777215</height>
         </size>
+       </property>
+       <property name="text">
+        <string>2</string>
        </property>
       </widget>
      </item>

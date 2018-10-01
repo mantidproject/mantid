@@ -30,8 +30,14 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL Figure : public Python::InstanceHolder {
 public:
+  Figure(Python::Object obj);
   Figure(bool tightLayout = true);
 
+  /**
+   * @brief Access (and create if necessar) the active Axes
+   * @return An instance of Axes attached to the figure
+   */
+  inline Axes gca() const { return Axes{pyobj().attr("gca")()}; }
   /**
    * @param index The index of the axes to return
    * @return The axes instance

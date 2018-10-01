@@ -9,6 +9,7 @@
 using MantidQt::Widgets::MplCpp::Figure;
 using MantidQt::Widgets::MplCpp::Normalize;
 using MantidQt::Widgets::MplCpp::ScalarMappable;
+namespace Python = MantidQt::Widgets::MplCpp::Python;
 
 class FigureTest : public CxxTest::TestSuite {
 public:
@@ -24,6 +25,11 @@ public:
   void testConstructFigureWithNoTightLayout() {
     Figure fig{false};
     TS_ASSERT_EQUALS(false, fig.pyobj().attr("get_tight_layout")());
+  }
+
+  void testGcaReturnsAxesIfNotAdded() {
+    Figure fig{false};
+    TS_ASSERT_THROWS_NOTHING(fig.gca());
   }
 
   void testAddAxes() {
@@ -42,6 +48,12 @@ public:
     ScalarMappable mappable(Normalize(-1, 1), "jet");
 
     TS_ASSERT_THROWS_NOTHING(fig.colorbar(mappable, cax));
+  }
+
+  // -------------------------- Failure tests ---------------------------
+  void testFigureConstructedWithNonFigureThrows() {
+    TS_ASSERT_THROWS(Figure fig(Python::NewRef(Py_BuildValue("(i)", 1))),
+                     std::invalid_argument);
   }
 };
 

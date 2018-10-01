@@ -18,6 +18,12 @@ Python::Object newFigure(bool tightLayout = true) {
 } // namespace
 
 /**
+ * Construct a C++ wrapper around an existing figure instance
+ * @param obj An existing Figure instance
+ */
+Figure::Figure(Python::Object obj) : Python::InstanceHolder(obj, "add_axes") {}
+
+/**
  * Construct a new default figure.
  * @param tightLayout If true set a tight layout on the matplotlib figure
  */

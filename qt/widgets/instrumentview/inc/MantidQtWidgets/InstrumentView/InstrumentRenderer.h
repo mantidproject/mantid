@@ -16,6 +16,7 @@
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include <QString>
 #include <map>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {

@@ -16,7 +16,9 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 */
+#include "MantidQtWidgets/MplCpp/Colors.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
+#include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidQtWidgets/MplCpp/ScalarMappable.h"
 #include "ui_Colorbar.h"
 
@@ -40,46 +42,47 @@ class MANTID_MPLCPP_DLL ColorbarWidget : public QWidget {
 public:
   ColorbarWidget(QWidget *parent = nullptr);
 
+  void setNorm(const NormalizeBase &norm);
   void setClim(boost::optional<double> vmin, boost::optional<double> vmax);
   std::tuple<double, double> clim() const;
 
   ///@name Legacy API to match DraggableColorBarWidget for instrument view
   ///@{
-  void setupColorBarScaling(const MantidColorMap &) {}
+  void setupColorBarScaling(const MantidColorMap &mtdCMap);
   void setMinValue(double min);
   void setMaxValue(double max);
   QString getMinValue() const;
   QString getMaxValue() const;
-  QString getNthPower() const { return "NAN"; }
-  void setMinPositiveValue(double){
-      // This should set the linthresh for symlog...
-  };
-  int getScaleType() const { return 0; }
-  void setScaleType(int) {}
-  void setNthPower(double) {}
+  QString getNthPower() const;
+  void setMinPositiveValue(double) { /*Unused in this implementation*/
+  }
+  int getScaleType() const;
+  void setScaleType(int);
+  void setNthPower(double);
   void loadFromProject(const std::string &) {}
   std::string saveToProject() const { return ""; }
 signals:
-  //  void scaleTypeChanged(int);
+  void scaleTypeChanged(int);
   void minValueChanged(double);
   void maxValueChanged(double);
-  //  void nthPowerChanged(double);
+  void nthPowerChanged(double);
   ///@}
 
 private slots:
   void scaleMinimumEdited();
   void scaleMaximumEdited();
   void scaleTypeSelectionChanged(int index);
+  void powerExponentEdited();
 
 private:
   void initLayout();
+  void createColorbar();
   void connectSignals();
 
 private: // data
   Ui::Colorbar m_ui;
   FigureCanvasQt *m_canvas{nullptr};
   ScalarMappable m_mappable;
-  Python::Object m_colorbar;
 };
 
 } // namespace MplCpp
