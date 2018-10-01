@@ -35,15 +35,20 @@ set ( QT5_SRC_FILES
   src/MessageDisplay.cpp
   src/MWRunFiles.cpp
   src/OptionsPropertyWidget.cpp
+  # check if used in QT5 and if so where
   src/PeriodicTableWidget.cpp
+  # check if used in QT5 and if so where
   src/pixmaps.cpp
   src/PluginLibraries.cpp
+  # check if used in QT5 and if so where
   src/pqHelpWindow.cxx
   src/ProcessingAlgoWidget.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
+  # check if used in QT5 and if so where
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
+  # check if used in QT5 and if so where
   src/RenameParDialog.cpp
   src/ScriptEditor.cpp
   src/SelectFunctionDialog.cpp
@@ -60,6 +65,7 @@ set ( QT5_SRC_FILES
   src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
   src/WorkspaceSelector.cpp
 
+  # todo check why/where this is used in qt5
   src/QtPropertyBrowser/DoubleDialogEditor.cpp
   src/QtPropertyBrowser/DoubleEditorFactory.cpp
   src/QtPropertyBrowser/FilenameDialogEditor.cpp
@@ -88,6 +94,7 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/DataSelector.h
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
@@ -788,6 +795,7 @@ set( TEST_FILES
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
+  QT_VERSION 4
   SRC ${TEST_FILES}
   INCLUDE_DIRS
     ../../../Framework/TestHelpers/inc
@@ -809,6 +817,40 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
   PARENT_DEPENDENCIES
     GUITests
 )
+
+set( QT5_TEST_FILES
+  test/BatchAlgorithmRunnerTest.h
+  test/FileDialogHandlerTest.h
+  test/FindFilesThreadPoolManagerTest.h
+  test/FindFilesWorkerTest.h
+  test/InterfaceManagerTest.h
+  test/WorkspacePresenter/ADSAdapterTest.h
+  test/WorkspacePresenter/WorkspacePresenterTest.h
+)
+
+mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
+  QT_VERSION 5
+  SRC ${QT5_TEST_FILES}
+  INCLUDE_DIRS
+    ../../../Framework/TestHelpers/inc
+    ../../../Framework/DataObjects/inc
+    ../../../Framework/Crystal/inc
+  TEST_HELPER_SRCS
+    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
+    DataObjects
+    ${GMOCK_LIBRARIES}
+    ${GTEST_LIBRARIES}
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+  PARENT_DEPENDENCIES
+    GUITests
+)
+
 
 ###########################################################################
 # Windows: Generate a qt.conf file so that the dev build finds the qt
