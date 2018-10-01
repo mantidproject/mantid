@@ -11,7 +11,7 @@ namespace DataHandling {
 
 bool LoadBinaryStl::isBinarySTL() {
   // each triangle is 50 bytes
-  
+
   Poco::File stlFile = Poco::File(m_filename);
   auto fileSize = stlFile.getSize();
   if (fileSize < M_HEADER_SIZE + M_NUM_OF_TRIANGLES) {
@@ -24,7 +24,8 @@ bool LoadBinaryStl::isBinarySTL() {
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
   numberTrianglesLong = getNumberTriangles(streamReader);
   myFile.close();
-  if (!(fileSize == (M_HEADER_SIZE + M_NUM_OF_TRIANGLES + (numberTrianglesLong * M_SIZE_OF_TRIANGLE)))) {
+  if (!(fileSize == (M_HEADER_SIZE + M_NUM_OF_TRIANGLES +
+                     (numberTrianglesLong * M_SIZE_OF_TRIANGLE)))) {
     // File is not the Header plus the number of triangles it claims to be long,
     // invalid binary Stl
     return false;
@@ -36,7 +37,7 @@ bool LoadBinaryStl::isBinarySTL() {
 uint32_t
 LoadBinaryStl::getNumberTriangles(Kernel::BinaryStreamReader streamReader) {
   uint32_t numberTrianglesLong;
-  
+
   // skip header
   streamReader.moveStreamToPosition(M_HEADER_SIZE);
   // Read the number of triangles
@@ -51,7 +52,6 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
   const auto numberTrianglesLong = getNumberTriangles(streamReader);
   uint32_t nextToRead = M_HEADER_SIZE + M_NUM_OF_TRIANGLES + SIZE_OF_NORMAL;
-
 
   // now read in all the triangles
   for (uint32_t i = 0; i < numberTrianglesLong; i++) {

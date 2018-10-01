@@ -27,7 +27,8 @@ public:
   void testInit() {}
   void test_cube() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    std::unique_ptr<LoadBinaryStl> loader =
+        std::make_unique<LoadBinaryStl>(path);
     auto cube = loader->readStl();
     TS_ASSERT(cube->hasValidShape());
     TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
@@ -37,7 +38,8 @@ public:
 
   void test_cylinder() {
     std::string path = FileFinder::Instance().getFullPath("cylinderBin.stl");
-    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    std::unique_ptr<LoadBinaryStl> loader =
+        std::make_unique<LoadBinaryStl>(path);
     auto cylinder = loader->readStl();
     TS_ASSERT(cylinder->hasValidShape());
     TS_ASSERT_EQUALS(cylinder->numberOfVertices(), 722);
@@ -47,7 +49,8 @@ public:
 
   void test_tube() {
     std::string path = FileFinder::Instance().getFullPath("tubeBin.stl");
-    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    std::unique_ptr<LoadBinaryStl> loader =
+        std::make_unique<LoadBinaryStl>(path);
     auto tube = loader->readStl();
     TS_ASSERT(tube->hasValidShape());
     TS_ASSERT_EQUALS(tube->numberOfVertices(), 1080);
@@ -59,7 +62,8 @@ public:
   void test_fail_invalid_vertex() {
     std::string path =
         FileFinder::Instance().getFullPath("invalid_vertexBin.stl");
-    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    std::unique_ptr<LoadBinaryStl> loader =
+        std::make_unique<LoadBinaryStl>(path);
     TS_ASSERT(!(loader->isBinarySTL()));
   }
   // check that isBinaryStl returns false if the file contains an incomplete
@@ -67,13 +71,15 @@ public:
   void test_fail_invalid_triangle() {
     std::string path =
         FileFinder::Instance().getFullPath("invalid_triangleBin.stl");
-    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    std::unique_ptr<LoadBinaryStl> loader =
+        std::make_unique<LoadBinaryStl>(path);
     TS_ASSERT(!(loader->isBinarySTL()));
   }
 
   void test_fail_ascii_stl() {
     std::string path = FileFinder::Instance().getFullPath("cube.stl");
-    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    std::unique_ptr<LoadBinaryStl> loader =
+        std::make_unique<LoadBinaryStl>(path);
     TS_ASSERT(!(loader->isBinarySTL()));
   }
 };
