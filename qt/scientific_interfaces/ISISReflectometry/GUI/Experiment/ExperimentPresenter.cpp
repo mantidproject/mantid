@@ -66,7 +66,7 @@ RangeInLambda ExperimentPresenter::transmissionRunRangeFromView() {
   auto const range = RangeInLambda(m_view->getTransmissionStartOverlap(),
                                    m_view->getTransmissionEndOverlap());
   if (range.isValid())
-      m_view->showTransmissionRangeValid();
+    m_view->showTransmissionRangeValid();
   else
     m_view->showTransmissionRangeInvalid();
   return range;

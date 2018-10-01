@@ -67,8 +67,9 @@ bool PerThetaDefaultsTableValidator::hasUniqueThetas(
     std::vector<PerThetaDefaults> perThetaDefaults, int wildcardCount,
     double tolerance) const {
   sortInPlaceWildcardsFirstThenByTheta(perThetaDefaults);
-  auto thetasWithinTolerance = [tolerance](
-      PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) -> bool {
+  auto thetasWithinTolerance =
+      [tolerance](PerThetaDefaults const &lhs,
+                  PerThetaDefaults const &rhs) -> bool {
     double const difference =
         lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get();
     return std::abs(difference) < tolerance;

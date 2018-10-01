@@ -25,9 +25,7 @@ PolarizationCorrections const &Experiment::polarizationCorrections() const {
   return m_polarizationCorrections;
 }
 
-bool Experiment::isValid() const {
-  return m_transmissionRunRange.isValid();
-}
+bool Experiment::isValid() const { return m_transmissionRunRange.isValid(); }
 
 RangeInLambda const &Experiment::transmissionRunRange() const {
   return m_transmissionRunRange;

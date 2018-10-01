@@ -113,8 +113,10 @@ public:
     RangeInLambda range(7.2, 10);
 
     expectViewReturnsDefaultValues();
-    EXPECT_CALL(m_view, getTransmissionStartOverlap()).WillOnce(Return(range.min()));
-    EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
+    EXPECT_CALL(m_view, getTransmissionStartOverlap())
+        .WillOnce(Return(range.min()));
+    EXPECT_CALL(m_view, getTransmissionEndOverlap())
+        .WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showTransmissionRangeValid()).Times(1);
     presenter.notifySettingsChanged();
 
@@ -127,8 +129,10 @@ public:
     RangeInLambda range(10.2, 7.1);
 
     expectViewReturnsDefaultValues();
-    EXPECT_CALL(m_view, getTransmissionStartOverlap()).WillOnce(Return(range.min()));
-    EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
+    EXPECT_CALL(m_view, getTransmissionStartOverlap())
+        .WillOnce(Return(range.min()));
+    EXPECT_CALL(m_view, getTransmissionEndOverlap())
+        .WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showTransmissionRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
 
