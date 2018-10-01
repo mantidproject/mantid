@@ -34,6 +34,7 @@ namespace boost {
 namespace detail { namespace variant {
 
     template <class VisitorT, class Visitable1T, class Visitable2T>
+    // cppcheck-suppress noConstructor
     struct two_variables_holder {
     private:
         VisitorT&       visitor_;
