@@ -30,7 +30,18 @@ public:
     return true;
   }
 
-  InstrumentPresenter makePresenter() { return InstrumentPresenter(&m_view); }
+  Instrument makeModel() {
+    auto wavelengthRange = RangeInLambda(0.0, 0.0);
+    auto monitorCorrections = MonitorCorrections(
+        0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0));
+    auto detectorCorrections =
+        DetectorCorrections(false, DetectorCorrectionType::VerticalShift);
+    return Instrument(wavelengthRange, monitorCorrections, detectorCorrections);
+  }
+
+  InstrumentPresenter makePresenter() {
+    return InstrumentPresenter(&m_view, makeModel());
+  }
 
   void testSetWavelengthRange() {
     auto presenter = makePresenter();

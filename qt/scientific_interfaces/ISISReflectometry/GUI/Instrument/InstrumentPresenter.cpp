@@ -3,17 +3,16 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-InstrumentPresenter::InstrumentPresenter(IInstrumentView *view)
-    : m_view(view), m_model() {
+InstrumentPresenter::InstrumentPresenter(IInstrumentView *view,
+                                         Instrument instrument)
+    : m_view(view), m_model(std::move(instrument)) {
   m_view->subscribe(this);
   notifySettingsChanged();
 }
 
 void InstrumentPresenter::notifySettingsChanged() { updateModelFromView(); }
 
-Instrument const &InstrumentPresenter::instrument() const {
-  return m_model.get();
-}
+Instrument const &InstrumentPresenter::instrument() const { return m_model; }
 
 void InstrumentPresenter::onReductionPaused() { m_view->enableAll(); }
 

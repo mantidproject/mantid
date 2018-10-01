@@ -42,7 +42,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter
       public IInstrumentPresenter {
 public:
   // TODO Inject the Instrument model into the constructor.
-  InstrumentPresenter(IInstrumentView *view);
+  InstrumentPresenter(IInstrumentView *view, Instrument instrument);
 
   Instrument const &instrument() const;
 
@@ -53,7 +53,7 @@ public:
 
 private:
   IInstrumentView *m_view;
-  boost::optional<Instrument> m_model;
+  Instrument m_model;
 
   RangeInLambda wavelengthRangeFromView();
   RangeInLambda monitorBackgroundRangeFromView();
