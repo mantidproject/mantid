@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
+#include "GUI/Instrument/IInstrumentPresenter.h"
 #include "IReflBatchPresenter.h"
 #include <memory>
 
@@ -12,7 +13,6 @@ namespace CustomInterfaces {
 class IReflBatchView;
 class IReflRunsTabPresenter;
 class IEventPresenter;
-class IInstrumentPresenter;
 class IReflSaveTabPresenter;
 
 /** @class ReflBatchPresenter
