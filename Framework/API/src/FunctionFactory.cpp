@@ -1,3 +1,4 @@
+#include <iostream>
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -52,7 +53,6 @@ FunctionFactoryImpl::createInitialized(const std::string &input) const {
   } catch (...) {
     inputError(input);
   }
-
   const Expression &e = expr.bracketsRemoved();
   std::map<std::string, std::string> parentAttributes;
   if (e.name() == ";") {
@@ -158,7 +158,6 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
   const std::vector<Expression> &terms = expr.terms();
   auto it = terms.cbegin();
   const Expression &term = it->bracketsRemoved();
-
   CompositeFunction_sptr cfun;
   if (term.name() == "=") {
     if (term.terms()[0].name() == "composite") {
@@ -266,10 +265,21 @@ void FunctionFactoryImpl::inputError(const std::string &str) const {
 void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
                                          const Expression &expr) const {
   if (expr.name() == ",") {
-    for (const auto &constraint : expr) {
-      addConstraint(fun, constraint);
-    }
-  } else {
+    for (auto it = expr.begin(); it != expr.end(); ++it) {
+      auto constraint = (*it);
+      if((it+1) != expr.end()){
+        auto next_constraint = *(it+1);
+        std::string next_term = next_constraint.terms()[0].str();
+        if(next_term.compare("penalty") == 0){
+          addConstraint(fun, constraint, next_constraint);
+          it++;
+        }
+        else{
+          addConstraint(fun, constraint);
+        }
+      }
+   }
+  } else { //There was a single constraint given, cannot contain a penalty
     addConstraint(fun, expr);
   }
 }
@@ -283,6 +293,22 @@ void FunctionFactoryImpl::addConstraint(IFunction_sptr fun,
                                         const Expression &expr) const {
   auto c = std::unique_ptr<IConstraint>(
       ConstraintFactory::Instance().createInitialized(fun.get(), expr));
+  fun->addConstraint(std::move(c));
+}
+
+/**
+ * Add a constraint to the function with non-default penalty
+ * @param fun :: The function
+ * @param constraint_expr :: The constraint expression.
+ * @param penalty_expr :: The penalty expression.
+ */
+void FunctionFactoryImpl::addConstraint(IFunction_sptr fun,
+                                        const Expression &constraint_expr,
+                                        const Expression &penalty_expr) const {
+  auto c = std::unique_ptr<IConstraint>(
+      ConstraintFactory::Instance().createInitialized(fun.get(), constraint_expr));
+  double penalty_factor = std::stof(penalty_expr.terms()[1].str(), NULL);
+  c->setPenaltyFactor(penalty_factor);
   fun->addConstraint(std::move(c));
 }
 
