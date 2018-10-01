@@ -93,7 +93,7 @@ if ( NOT TARGET mantidpython )
     set ( PARAVIEW_PYTHON_PATHS "" )
   endif ()
 
-  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython_osx_install @ONLY )
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY )
 endif ()
 
 
