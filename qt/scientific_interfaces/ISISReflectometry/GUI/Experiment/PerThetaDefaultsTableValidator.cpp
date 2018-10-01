@@ -70,9 +70,9 @@ bool PerThetaDefaultsTableValidator::hasUniqueThetas(
   auto thetasWithinTolerance =
       [tolerance](PerThetaDefaults const &lhs,
                   PerThetaDefaults const &rhs) -> bool {
-    double const difference =
-        lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get();
-    return std::abs(difference) < tolerance;
+    double const difference = std::abs(static_cast<double>(
+        lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get()));
+    return difference < tolerance;
   };
   return std::adjacent_find(perThetaDefaults.cbegin() + wildcardCount,
                             perThetaDefaults.cend(),
