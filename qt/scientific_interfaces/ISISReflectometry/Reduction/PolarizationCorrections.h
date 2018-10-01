@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_POLARIZATIONCORRECTIONS_H_
 #define MANTID_CUSTOMINTERFACES_POLARIZATIONCORRECTIONS_H_
 #include "../DllConfig.h"
+#include <boost/optional.hpp>
 #include <stdexcept>
 #include <string>
 namespace MantidQt {
@@ -24,21 +25,24 @@ polarizationCorrectionTypeFromString(std::string const &correctionType) {
 class MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections {
 public:
   PolarizationCorrections(PolarizationCorrectionType correctionType,
-                          double CRho, double CAlpha, double CAp, double CPp);
+                          boost::optional<double> CRho,
+                          boost::optional<double> CAlpha,
+                          boost::optional<double> CAp,
+                          boost::optional<double> CPp);
 
   PolarizationCorrectionType correctionType();
-  double cRho() const;
-  double cAlpha() const;
-  double cAp() const;
-  double cPp() const;
+  boost::optional<double> cRho() const;
+  boost::optional<double> cAlpha() const;
+  boost::optional<double> cAp() const;
+  boost::optional<double> cPp() const;
   bool enableInputs() const;
 
 private:
   PolarizationCorrectionType m_correctionType;
-  double m_cRho;
-  double m_cAlpha;
-  double m_cAp;
-  double m_cPp;
+  boost::optional<double> m_cRho;
+  boost::optional<double> m_cAlpha;
+  boost::optional<double> m_cAp;
+  boost::optional<double> m_cPp;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool

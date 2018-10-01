@@ -3,8 +3,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 PolarizationCorrections::PolarizationCorrections(
-    PolarizationCorrectionType correctionType, double CRho, double CAlpha,
-    double CAp, double CPp)
+    PolarizationCorrectionType correctionType, boost::optional<double> CRho,
+    boost::optional<double> CAlpha, boost::optional<double> CAp,
+    boost::optional<double> CPp)
     : m_correctionType(correctionType), m_cRho(CRho), m_cAlpha(CAlpha),
       m_cAp(CAp), m_cPp(CPp) {}
 
@@ -12,13 +13,15 @@ PolarizationCorrectionType PolarizationCorrections::correctionType() {
   return m_correctionType;
 }
 
-double PolarizationCorrections::cRho() const { return m_cRho; }
+boost::optional<double> PolarizationCorrections::cRho() const { return m_cRho; }
 
-double PolarizationCorrections::cAlpha() const { return m_cAlpha; }
+boost::optional<double> PolarizationCorrections::cAlpha() const {
+  return m_cAlpha;
+}
 
-double PolarizationCorrections::cAp() const { return m_cAp; }
+boost::optional<double> PolarizationCorrections::cAp() const { return m_cAp; }
 
-double PolarizationCorrections::cPp() const { return m_cPp; }
+boost::optional<double> PolarizationCorrections::cPp() const { return m_cPp; }
 
 bool PolarizationCorrections::enableInputs() const {
   return m_correctionType == PolarizationCorrectionType::PA ||

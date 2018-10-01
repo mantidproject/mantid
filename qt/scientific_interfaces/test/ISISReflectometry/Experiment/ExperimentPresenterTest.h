@@ -99,10 +99,10 @@ public:
                                     2.4, 2.5);
 
     expectViewReturnsDefaultValues();
-    EXPECT_CALL(m_view, getCRho()).WillOnce(Return(polCorr.cRho()));
-    EXPECT_CALL(m_view, getCAlpha()).WillOnce(Return(polCorr.cAlpha()));
-    EXPECT_CALL(m_view, getCAp()).WillOnce(Return(polCorr.cAp()));
-    EXPECT_CALL(m_view, getCPp()).WillOnce(Return(polCorr.cPp()));
+    EXPECT_CALL(m_view, getCRho()).WillOnce(Return(polCorr.cRho().get()));
+    EXPECT_CALL(m_view, getCAlpha()).WillOnce(Return(polCorr.cAlpha().get()));
+    EXPECT_CALL(m_view, getCAp()).WillOnce(Return(polCorr.cAp().get()));
+    EXPECT_CALL(m_view, getCPp()).WillOnce(Return(polCorr.cPp().get()));
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections(), polCorr);

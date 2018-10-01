@@ -25,8 +25,9 @@ private:
 
   Experiment makeModel() {
     // TODO get defaults from algorithm
-    auto polarizationCorrections = PolarizationCorrections(
-        PolarizationCorrectionType::None, 0.0, 0.0, 0.0, 0.0);
+    auto polarizationCorrections =
+        PolarizationCorrections(PolarizationCorrectionType::None, boost::none,
+                                boost::none, boost::none, boost::none);
     auto stitchParameters = std::map<std::string, std::string>();
     auto perThetaDefaults = std::vector<PerThetaDefaults>(
         {PerThetaDefaults(boost::none, std::pair<std::string, std::string>(),
