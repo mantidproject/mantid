@@ -55,11 +55,13 @@ void ExperimentPresenter::onReductionPaused() { m_view->enableAll(); }
 void ExperimentPresenter::onReductionResumed() { m_view->disableAll(); }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
+  auto const correctionType = polarizationCorrectionTypeFromString(
+      m_view->getPolarisationCorrectionType());
   auto const cRho = m_view->getCRho();
   auto const cAlpha = m_view->getCAlpha();
   auto const cAp = m_view->getCAp();
   auto const cPp = m_view->getCPp();
-  return PolarizationCorrections(cRho, cAlpha, cAp, cPp);
+  return PolarizationCorrections(correctionType, cRho, cAlpha, cAp, cPp);
 }
 
 boost::optional<RangeInLambda>

@@ -2,17 +2,23 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-PolarizationCorrections::PolarizationCorrections(double CRho, double CAlpha,
-                                                 double CAp, double CPp)
-    : CRho(CRho), CAlpha(CAlpha), CAp(CAp), CPp(CPp) {}
+PolarizationCorrections::PolarizationCorrections(
+    PolarizationCorrectionType correctionType, double CRho, double CAlpha,
+    double CAp, double CPp)
+    : m_correctionType(correctionType), m_cRho(CRho), m_cAlpha(CAlpha),
+      m_cAp(CAp), m_cPp(CPp) {}
 
-double PolarizationCorrections::cRho() const { return CRho; }
+PolarizationCorrectionType PolarizationCorrections::correctionType() {
+  return m_correctionType;
+}
 
-double PolarizationCorrections::cAlpha() const { return CAlpha; }
+double PolarizationCorrections::cRho() const { return m_cRho; }
 
-double PolarizationCorrections::cAp() const { return CAp; }
+double PolarizationCorrections::cAlpha() const { return m_cAlpha; }
 
-double PolarizationCorrections::cPp() const { return CPp; }
+double PolarizationCorrections::cAp() const { return m_cAp; }
+
+double PolarizationCorrections::cPp() const { return m_cPp; }
 
 bool operator!=(PolarizationCorrections const &lhs,
                 PolarizationCorrections const &rhs) {

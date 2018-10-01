@@ -95,7 +95,8 @@ public:
 
   void testSetPolarizationCorrections() {
     auto presenter = makePresenter();
-    PolarizationCorrections polCorr(1.2, 1.3, 2.4, 2.5);
+    PolarizationCorrections polCorr(PolarizationCorrectionType::PA, 1.2, 1.3,
+                                    2.4, 2.5);
 
     expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getCRho()).WillOnce(Return(polCorr.cRho()));
@@ -244,7 +245,8 @@ private:
   NiceMock<MockExperimentView> m_view;
 
   Experiment makeModel() {
-    auto polarizationCorrections = PolarizationCorrections(0.0, 0.0, 0.0, 0.0);
+    auto polarizationCorrections = PolarizationCorrections(
+        PolarizationCorrectionType::None, 0.0, 0.0, 0.0, 0.0);
     auto transmissionRunRange = RangeInLambda(0.0, 0.0);
     auto stitchParameters = std::map<std::string, std::string>();
     auto perThetaDefaults = std::vector<PerThetaDefaults>(
