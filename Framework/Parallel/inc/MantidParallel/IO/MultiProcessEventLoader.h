@@ -287,9 +287,9 @@ void MultiProcessEventLoader::GroupLoader<
 
   std::thread consumer([&]() {
     while (finished < 1) { // producer wants to produce smth
-     processQueue();
+      processQueue();
     }
-    processQueue(); //Clean up the queue
+    processQueue(); // Clean up the queue
 
     ++finished; // all is consumed
 
@@ -304,7 +304,7 @@ void MultiProcessEventLoader::GroupLoader<
 
   });
 
-  producer.join();
+  producer.join();re #23268
   consumer.join();
 }
 

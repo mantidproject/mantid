@@ -113,9 +113,10 @@ void MultiProcessEventLoader::load(
     */
 
     // to cleanup shared memory in this function
-    struct SharedMemoryDestroyer{
-      const std::vector<std::string>& segments;
-      SharedMemoryDestroyer(const std::vector<std::string>& sm) : segments(sm) {}
+    struct SharedMemoryDestroyer {
+      const std::vector<std::string> &segments;
+      SharedMemoryDestroyer(const std::vector<std::string> &sm)
+          : segments(sm) {}
       ~SharedMemoryDestroyer() {
         for (const auto &name : segments)
           ip::shared_memory_object::remove(name.c_str());
@@ -287,7 +288,7 @@ void MultiProcessEventLoader::fillFromFile(
 // vector representing each pixel allocated only once, so we have allocationFee
 // bytes extra overhead
 size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
-  //8 bytes pointer to allocator + 8 bytes pointer to metadata
+  // 8 bytes pointer to allocator + 8 bytes pointer to metadata
   auto allocationFee = 8 + 8 + generateStoragename().length();
   std::size_t len{(eventCount / m_numProcesses + eventCount % m_numProcesses) *
                       sizeof(TofEvent) +
