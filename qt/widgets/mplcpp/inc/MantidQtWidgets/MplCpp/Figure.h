@@ -46,6 +46,7 @@ public:
     return Axes{pyobj().attr("axes")[index]};
   }
 
+  void setFaceColor(const char *color);
   Axes addAxes(double left, double bottom, double width, double height);
   Axes addSubPlot(int subplotspec);
   Python::Object colorbar(const ScalarMappable &mappable, const Axes &cax,

@@ -37,6 +37,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(fig.addAxes(0.1, 0.1, 0.9, 0.9));
   }
 
+  void testSetFaceColor() {
+    Figure fig{false};
+    fig.setFaceColor("r");
+    auto rgb = fig.pyobj().attr("get_facecolor")();
+    TS_ASSERT_EQUALS(1.0, rgb[0]);
+    TS_ASSERT_EQUALS(0.0, rgb[1]);
+    TS_ASSERT_EQUALS(0.0, rgb[2]);
+  }
+
   void testSubPlot() {
     Figure fig{false};
     TS_ASSERT_THROWS_NOTHING(fig.addSubPlot(111));

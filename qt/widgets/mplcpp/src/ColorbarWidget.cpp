@@ -221,7 +221,7 @@ void ColorbarWidget::powerExponentEdited() { setScaleType(2); }
 void ColorbarWidget::initLayout() {
   // Create colorbar (and figure if necessary)
   Figure fig{false};
-  fig.pyobj().attr("set_facecolor")(FIGURE_FACECOLOR);
+  fig.setFaceColor(FIGURE_FACECOLOR);
   m_ui.setupUi(this);
   // remove placeholder widget and add figure canvas
   delete m_ui.mplColorbar;

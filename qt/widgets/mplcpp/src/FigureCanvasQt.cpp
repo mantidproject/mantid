@@ -9,6 +9,9 @@ namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 namespace {
+
+const char *DEFAULT_FACECOLOR = "w";
+
 /**
  * @param fig An existing matplotlib Figure instance
  * @return A new FigureCanvasQT object
@@ -24,6 +27,8 @@ Python::Object createPyCanvasFromFigure(Figure fig) {
  */
 Python::Object createPyCanvas(int subplotspec) {
   Figure fig{true};
+  fig.setFaceColor(DEFAULT_FACECOLOR);
+
   if (subplotspec > 0)
     fig.addSubPlot(subplotspec);
   return createPyCanvasFromFigure(std::move(fig));
@@ -48,6 +53,7 @@ void initLayout(FigureCanvasQt *cppCanvas) {
  * See
  * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.figure.Figure.html?highlight=add_subplot#matplotlib.figure.Figure.add_subplot
  * @param subplotspec A matplotlib subplot spec defined as a 3-digit integer
+ * @param facecolor String denoting the figure's facecolor
  * @param parent The owning parent widget
  */
 FigureCanvasQt::FigureCanvasQt(int subplotspec, QWidget *parent)
