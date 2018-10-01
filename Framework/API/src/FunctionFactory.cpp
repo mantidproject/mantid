@@ -267,13 +267,19 @@ void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
                                          const Expression &expr) const {
   if (expr.name() == ",") {
     for (auto it = expr.begin(); it != expr.end(); ++it) {
+      // If this is a penalty term, we used it on the previous iteration
+      // so we move on to the next term.
       auto constraint = (*it);
+      std::string constraint_term = constraint.terms()[0].str();
+      if (constraint_term.compare("penalty") == 0) {
+            continue;
+      }
+      
       if ((it + 1) != expr.end()) {
         auto next_constraint = *(it + 1);
         std::string next_term = next_constraint.terms()[0].str();
         if (next_term.compare("penalty") == 0) {
           addConstraint(fun, constraint, next_constraint);
-          ++it;
         } else {
           addConstraint(fun, constraint);
         }
