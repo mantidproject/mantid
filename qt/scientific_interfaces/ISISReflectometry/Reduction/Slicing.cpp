@@ -1,4 +1,8 @@
 #include "Slicing.h"
+#include "../multivisitors.hpp"
+// equivalent to
+//         #include <boost/variant/multivisitors.hpp>
+// available in boost 1.54+ - required for RHEL7.
 #include <vector>
 
 namespace MantidQt {

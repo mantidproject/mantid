@@ -4,6 +4,7 @@
 #include "RangeInQ.h"
 #include "ReductionOptionsMap.h"
 #include <boost/optional.hpp>
+#include <string>
 #include <vector>
 namespace MantidQt {
 namespace CustomInterfaces {
