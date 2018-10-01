@@ -133,6 +133,9 @@ private:
   double m_lowerBound;
   /// the upper bound
   double m_upperBound;
+
+  /// default penalty factor
+  const double m_defaultPenaltyFactor = 1000.0;
 };
 
 } // namespace Constraints
