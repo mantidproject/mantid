@@ -107,11 +107,15 @@ const std::string MeshObject2D::Id = "MeshObject2D";
 bool MeshObject2D::isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
                                 const Kernel::V3D &b, const Kernel::V3D &c) {
 
-  // in change of basis, barycentric coordinates p = A + u*v0 + v*v1. v0 and
-  // v1 are basis vectors
-  // rewrite as v0 = u*v0 + v*v1
-  // i) v0.v0 = u*v0.v0 + v*v1.v0
-  // ii) v0.v1 = u*v0.v1 + v*v1.v1
+  // p = w*p0 + u*p1 + v*p2, where numbered p refers to vertices of triangle
+  // w+u+v == 1, so w = 1-u-v
+  // p = (1-u-v)p0 + u*p1 + v*p2, rearranging ...
+  // p = u(p1 - p0) + v(p2 - p0) + p0
+  // in change of basis, barycentric coordinates p = p0 + u*v0 + v*v1. v0 and
+  // v1 are basis vectors. v2 = (p - p0)
+  // rewrite as v2 = u*v0 + v*v1
+  // i) v2.v0 = u*v0.v0 + v*v1.v0
+  // ii) v2.v1 = u*v0.v1 + v*v1.v1
   // solve for u, v and check u and v >= 0 and u+v <=1
 
   // TODO see MeshObject::rayIntersectsTriangle and compare!
@@ -126,6 +130,16 @@ bool MeshObject2D::isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
   auto dot02 = v0.scalar_prod(v2);
   auto dot11 = v1.scalar_prod(v1);
   auto dot12 = v1.scalar_prod(v2);
+
+  /* in matrix form
+   M = v0.v0 v1.v0
+       v0.v1 v1.v1
+   U = u
+       v
+   R = v2.v0
+       v2.v1
+   U = R*(M^-1)
+   */
 
   // Compute barycentric coordinates
   auto invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
