@@ -113,7 +113,7 @@ void ExperimentView::initOptionsTable() {
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
   table->setColumnCount(8);
-  table->setRowCount(3);
+  table->setRowCount(1);
   initializeTableItems(*table);
 
   auto header = table->horizontalHeader();
