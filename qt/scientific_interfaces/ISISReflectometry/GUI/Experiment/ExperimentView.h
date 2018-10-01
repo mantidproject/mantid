@@ -67,6 +67,8 @@ public:
   void setTransmissionStartOverlap(double start) override;
   double getTransmissionEndOverlap() const override;
   void setTransmissionEndOverlap(double end) override;
+  void showTransmissionRangeInvalid() override;
+  void showTransmissionRangeValid() override;
 
   std::string getPolarisationCorrectionType() const override;
   void setPolarisationCorrectionType(std::string const &type) override;

@@ -19,6 +19,13 @@ private:
   double CAp;
   double CPp;
 };
+
+MANTIDQT_ISISREFLECTOMETRY_DLL bool
+operator==(PolarizationCorrections const &lhs,
+           PolarizationCorrections const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool
+operator!=(PolarizationCorrections const &lhs,
+           PolarizationCorrections const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_POLARIZATIONCORRECTIONS_H_

@@ -46,10 +46,24 @@ public:
     verifyAndClear();
   }
 
+  void testModelUpdatedWhenAnalysisModeChanged() {
+    auto presenter = makePresenter();
+
+    expectViewReturnsSumInLambdaDefaults();
+    EXPECT_CALL(m_view, getAnalysisMode())
+        .WillOnce(Return(std::string("MultiDetectorAnalysis")));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().analysisMode(),
+                     AnalysisMode::MultiDetector);
+    verifyAndClear();
+  }
+
   void testModelUpdatedWhenSummationTypeChanged() {
     auto presenter = makePresenter();
 
-    expectViewReturnsDefaultValuesForSumInQ();
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInQDefaults();
     presenter.notifySummationTypeChanged();
 
     TS_ASSERT_EQUALS(presenter.experiment().summationType(),
@@ -60,7 +74,8 @@ public:
   void testReductionTypeDisabledWhenChangeToSumInLambda() {
     auto presenter = makePresenter();
 
-    expectViewReturnsDefaultValues();
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInLambdaDefaults();
     EXPECT_CALL(m_view, disableReductionType()).Times(1);
     presenter.notifySummationTypeChanged();
 
@@ -70,11 +85,72 @@ public:
   void testReductionTypeEnbledWhenChangeToSumInQ() {
     auto presenter = makePresenter();
 
-    expectViewReturnsDefaultValuesForSumInQ();
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInQDefaults();
     EXPECT_CALL(m_view, enableReductionType()).Times(1);
     presenter.notifySummationTypeChanged();
 
     verifyAndClear();
+  }
+
+  void testSetPolarizationCorrections() {
+    auto presenter = makePresenter();
+    PolarizationCorrections polCorr(1.2, 1.3, 2.4, 2.5);
+
+    expectViewReturnsDefaultValues();
+    EXPECT_CALL(m_view, getCRho()).WillOnce(Return(polCorr.cRho()));
+    EXPECT_CALL(m_view, getCAlpha()).WillOnce(Return(polCorr.cAlpha()));
+    EXPECT_CALL(m_view, getCAp()).WillOnce(Return(polCorr.cAp()));
+    EXPECT_CALL(m_view, getCPp()).WillOnce(Return(polCorr.cPp()));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections(), polCorr);
+    verifyAndClear();
+  }
+
+  void testSetTransmissionRunRange() {
+    auto presenter = makePresenter();
+    RangeInLambda range(7.2, 10);
+
+    expectViewReturnsDefaultValues();
+    EXPECT_CALL(m_view, getTransmissionStartOverlap()).WillOnce(Return(range.min()));
+    EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
+    EXPECT_CALL(m_view, showTransmissionRangeValid()).Times(1);
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), range);
+    verifyAndClear();
+  }
+
+  void testSetTransmissionRunRangeInvalid() {
+    auto presenter = makePresenter();
+    RangeInLambda range(10.2, 7.1);
+
+    expectViewReturnsDefaultValues();
+    EXPECT_CALL(m_view, getTransmissionStartOverlap()).WillOnce(Return(range.min()));
+    EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
+    EXPECT_CALL(m_view, showTransmissionRangeInvalid()).Times(1);
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), range);
+    verifyAndClear();
+  }
+
+  void testSetStitchOptions() {
+    auto presenter = makePresenter();
+    auto const optionsString = "Params=0.02";
+    std::map<std::string, std::string> optionsMap = {{"Params", "0.02"}};
+
+    expectViewReturnsDefaultValues();
+    EXPECT_CALL(m_view, getStitchOptions()).WillOnce(Return(optionsString));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().stitchParameters(), optionsMap);
+    verifyAndClear();
+  }
+
+  void testSetStitchOptionsInvalid() {
+    // TODO
   }
 
   void testNewPerAngleDefaultsRequested() {
@@ -123,6 +199,43 @@ public:
     verifyAndClear();
   }
 
+  // TODO
+  void testSetMultipleUniqueAngles() {}
+
+  void testSetMultipoleNonUniqueAngles() {}
+
+  void testSetAngleAndWildcardRow() {}
+
+  void testSetSingleWildcardRow() {}
+
+  void testSetMultipleWildcardRows() {}
+
+  void testSetFirstTransmissionRun() {}
+
+  void testSetSecondTransmissionRun() {}
+
+  void testSetBothTransmissionRuns() {}
+
+  void testSetQMin() {}
+
+  void testSetQMinInvalid() {}
+
+  void testSetQMax() {}
+
+  void testSetQMaxInvalid() {}
+
+  void testSetQStep() {}
+
+  void testSetQStepInvalid() {}
+
+  void testSetScale() {}
+
+  void testSetScaleInvalid() {}
+
+  void testSetProcessingInstructions() {}
+
+  void testSetProcessingInstructionsInvalid() {}
+
 private:
   NiceMock<MockExperimentView> m_view;
 
@@ -139,22 +252,28 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
   }
 
-  void expectViewReturnsDefaultValues() {
+  void expectViewReturnsDefaultAnalysisMode() {
     EXPECT_CALL(m_view, getAnalysisMode())
         .WillOnce(Return(std::string("PointDetectorAnalysis")));
+  }
+
+  void expectViewReturnsSumInLambdaDefaults() {
     EXPECT_CALL(m_view, getSummationType())
         .WillOnce(Return(std::string("SumInLambda")));
     EXPECT_CALL(m_view, getReductionType())
         .WillOnce(Return(std::string("Normal")));
   }
 
-  void expectViewReturnsDefaultValuesForSumInQ() {
-    EXPECT_CALL(m_view, getAnalysisMode())
-        .WillOnce(Return(std::string("PointDetectorAnalysis")));
+  void expectViewReturnsSumInQDefaults() {
     EXPECT_CALL(m_view, getSummationType())
         .WillOnce(Return(std::string("SumInQ")));
     EXPECT_CALL(m_view, getReductionType())
         .WillOnce(Return(std::string("DivergentBeam")));
+  }
+
+  void expectViewReturnsDefaultValues() {
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInLambdaDefaults();
   }
 
   // These functions create various rows in the per-theta defaults tables,

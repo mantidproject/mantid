@@ -7,6 +7,24 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace {
+// TODO: these don't seem to work for spin boxes - is there another way to set
+// the backround colour?gg
+void showAsInvalid(QDoubleSpinBox &spinBox) {
+  auto palette = spinBox.palette();
+  palette.setColor(spinBox.backgroundRole(), QColor("#ffb8ad"));
+  spinBox.setAutoFillBackground(true);
+  spinBox.setPalette(palette);
+}
+
+void showAsValid(QDoubleSpinBox &spinBox) {
+  auto palette = spinBox.palette();
+  palette.setColor(spinBox.backgroundRole(), Qt::transparent);
+  spinBox.setAutoFillBackground(false);
+  spinBox.setPalette(palette);
+}
+} // namespace
+
 /** Constructor
  * @param algorithmForTooltips :: [input] An algorithm that will be
  * used to find tooltips for the input properties
@@ -490,6 +508,16 @@ void ExperimentView::setTransmissionStartOverlap(double start) {
 
 double ExperimentView::getTransmissionEndOverlap() const {
   return m_ui.endOverlapEdit->value();
+}
+
+void ExperimentView::showTransmissionRangeInvalid() {
+  showAsInvalid(*m_ui.startOverlapEdit);
+  showAsInvalid(*m_ui.endOverlapEdit);
+}
+
+void ExperimentView::showTransmissionRangeValid() {
+  showAsValid(*m_ui.startOverlapEdit);
+  showAsValid(*m_ui.endOverlapEdit);
 }
 
 void ExperimentView::setTransmissionEndOverlap(double end) {

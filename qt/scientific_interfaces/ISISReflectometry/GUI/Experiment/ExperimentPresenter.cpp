@@ -63,8 +63,13 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
 }
 
 RangeInLambda ExperimentPresenter::transmissionRunRangeFromView() {
-  return RangeInLambda(m_view->getTransmissionStartOverlap(),
-                       m_view->getTransmissionEndOverlap());
+  auto const range = RangeInLambda(m_view->getTransmissionStartOverlap(),
+                                   m_view->getTransmissionEndOverlap());
+  if (range.isValid())
+      m_view->showTransmissionRangeValid();
+  else
+    m_view->showTransmissionRangeInvalid();
+  return range;
 }
 
 ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {

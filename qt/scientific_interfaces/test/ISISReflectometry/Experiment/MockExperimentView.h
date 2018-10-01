@@ -33,6 +33,8 @@ public:
   MOCK_METHOD1(setTransmissionStartOverlap, void(double));
   MOCK_CONST_METHOD0(getTransmissionEndOverlap, double());
   MOCK_METHOD1(setTransmissionEndOverlap, void(double));
+  MOCK_METHOD0(showTransmissionRangeValid, void(void));
+  MOCK_METHOD0(showTransmissionRangeInvalid, void(void));
   MOCK_CONST_METHOD0(getPolarisationCorrectionType, std::string());
   MOCK_METHOD1(setPolarisationCorrectionType, void(std::string const &));
   MOCK_CONST_METHOD0(getCRho, double());

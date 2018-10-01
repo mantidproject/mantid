@@ -84,6 +84,8 @@ public:
   virtual void setTransmissionStartOverlap(double start) = 0;
   virtual double getTransmissionEndOverlap() const = 0;
   virtual void setTransmissionEndOverlap(double end) = 0;
+  virtual void showTransmissionRangeInvalid() = 0;
+  virtual void showTransmissionRangeValid() = 0;
 
   virtual std::string getPolarisationCorrectionType() const = 0;
   virtual void setPolarisationCorrectionType(std::string const &type) = 0;

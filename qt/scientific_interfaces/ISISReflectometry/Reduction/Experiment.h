@@ -45,11 +45,12 @@ public:
              std::map<std::string, std::string> stitchParameters,
              std::vector<PerThetaDefaults> perThetaDefaults);
 
+  bool isValid() const;
   AnalysisMode analysisMode() const;
   ReductionType reductionType() const;
   SummationType summationType() const;
   PolarizationCorrections const &polarizationCorrections() const;
-  RangeInLambda const &transissionRunRange() const;
+  RangeInLambda const &transmissionRunRange() const;
   std::map<std::string, std::string> stitchParameters() const;
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
 
