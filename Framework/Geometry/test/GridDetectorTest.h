@@ -18,19 +18,6 @@ using Mantid::Kernel::V3D;
 
 class GridDetectorTest : public CxxTest::TestSuite {
 public:
-  void testEmptyConstructor() {
-    GridDetector q;
-    TS_ASSERT_EQUALS(q.nelements(), 0);
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
-
-    TS_ASSERT_EQUALS(q.getName(), "");
-    TS_ASSERT(!q.getParent());
-    TS_ASSERT_EQUALS(q.getRelativePos(), V3D(0, 0, 0));
-    TS_ASSERT_EQUALS(q.getRelativeRot(), Quat(1, 0, 0, 0));
-    // as there is no parent GetPos should equal getRelativePos
-    TS_ASSERT_EQUALS(q.getRelativePos(), q.getPos());
-  }
-
   void testNameValueConstructor() {
     GridDetector q("Name");
     TS_ASSERT_EQUALS(q.nelements(), 0);

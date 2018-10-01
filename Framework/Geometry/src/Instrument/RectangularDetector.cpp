@@ -39,9 +39,6 @@ namespace Geometry {
 using Kernel::Matrix;
 using Kernel::V3D;
 
-/** Empty constructor
- */
-RectangularDetector::RectangularDetector() : GridDetector() { init(); }
 
 /** Constructor for a parametrized RectangularDetector
  * @param base: the base (un-parametrized) RectangularDetector

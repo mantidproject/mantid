@@ -19,9 +19,9 @@ that is one pixel inside a GridDetector.
 The position of the pixel is calculated on the fly from the row/column/plane
 of the pixel and the size of the parent (which is parametrized).
 
-@date 2011-11-22
+@date 2018-09-28
 
-Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.

@@ -258,7 +258,7 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 }
 
 /**
- * Register a structured bank
+ * Register a rectangular bank
  * @param bank : Rectangular Detector
  * @return index assigned
  */
@@ -270,7 +270,7 @@ size_t InstrumentVisitor::registerRectangularBank(const ICompAssembly &bank) {
 }
 
 /**
- * Register a structured bank
+ * Register a grid bank
  * @param bank : Grid Detector
  * @return index assigned
  */

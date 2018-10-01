@@ -16,7 +16,7 @@ class QActionGroup;
 class QMenu;
 class QLineEdit;
 class QSlider;
-class QSpinBox;
+class QLabel;
 class QVBoxLayout;
 class QHBoxLayout;
 
@@ -131,7 +131,7 @@ private: // members
 
   QCheckBox *m_layerCheck;
   QSlider *m_layerSlide;
-  QSpinBox *m_layerSpin;
+  QLabel *m_layerDisplay;
 
   bool m_usingLayerStore;
 

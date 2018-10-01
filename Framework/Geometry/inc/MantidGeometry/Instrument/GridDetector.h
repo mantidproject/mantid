@@ -24,7 +24,7 @@ class ComponentVisitor;
 * @author Lamar Moore, ISIS
 * @date 2018-Jul-24
 
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -53,8 +53,6 @@ class MANTID_GEOMETRY_DLL GridDetector : public CompAssembly,
 public:
   /// String description of the type of component
   std::string type() const override { return "GridDetector"; }
-  //! Empty constructor
-  GridDetector();
 
   //! Constructor with a name and parent reference
   GridDetector(const std::string &name, IComponent *reference = nullptr);
@@ -79,7 +77,7 @@ public:
                                        const int z) const;
 
   detid_t getDetectorIDAtXYZ(const int x, const int y, const int z) const;
-  std::tuple<int, int, int> getXYZForDetectorID(const int detectorID) const;
+  std::tuple<int, int, int> getXYZForDetectorID(const detid_t detectorID) const;
 
   int xpixels() const;
   int ypixels() const;
@@ -108,16 +106,15 @@ public:
 
   Kernel::V3D getRelativePosAtXYZ(int x, int y, int z) const;
   /// minimum detector id
-  int minDetectorID();
+  detid_t minDetectorID();
   /// maximum detector id
-  int maxDetectorID();
+  detid_t maxDetectorID();
   boost::shared_ptr<const IComponent>
   getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
   // This should inherit the getBoundingBox implementation from  CompAssembly
-  // but
-  // the multiple inheritance seems to confuse it so we'll explicityly tell it
-  // that here
+  // but the multiple inheritance seems to confuse it so we'll explicityly tell
+  // it that here
   using CompAssembly::getBoundingBox;
 
   void testIntersectionWithChildren(
@@ -214,9 +211,9 @@ private:
   /// Pointer to the shape of the pixels in this detector array.
   boost::shared_ptr<IObject> m_shape;
   /// minimum detector id
-  int m_minDetId;
+  detid_t m_minDetId;
   /// maximum detector id
-  int m_maxDetId;
+  detid_t m_maxDetId;
 
   /// IDs start here
   int m_idstart;

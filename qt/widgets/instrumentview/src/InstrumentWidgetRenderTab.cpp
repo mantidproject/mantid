@@ -17,7 +17,6 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QSignalMapper>
-#include <QSpinBox>
 #include <QToolTip>
 #include <QVBoxLayout>
 
@@ -262,13 +261,12 @@ void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
 
   m_layerSlide = new QSlider(Qt::Orientation::Horizontal, this);
   m_layerCheck = new QCheckBox("Show Single Layer", this);
-  m_layerSpin = new QSpinBox(this);
+  m_layerDisplay = new QLabel("0", this);
 
   m_layerSlide->setRange(0,
                          static_cast<int>(actor.getNumberOfGridLayers() - 1));
-  m_layerSpin->setRange(0, m_layerSlide->maximum());
-  m_layerSpin->setReadOnly(true);
   m_layerSlide->setSingleStep(1);
+  m_layerSlide->setPageStep(1);
   m_layerSlide->setSliderPosition(0);
   m_layerSlide->setEnabled(false);
   m_layerCheck->setChecked(false);
@@ -277,12 +275,10 @@ void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
           SLOT(toggleLayerDisplay(bool)));
   connect(m_layerSlide, SIGNAL(valueChanged(int)), this,
           SLOT(setVisibleLayer(int)));
-  connect(m_layerSlide, SIGNAL(valueChanged(int)), m_layerSpin,
-          SLOT(setValue(int)));
   QHBoxLayout *voxelControlsLayout = new QHBoxLayout();
   voxelControlsLayout->addWidget(m_layerCheck);
   voxelControlsLayout->addWidget(m_layerSlide);
-  voxelControlsLayout->addWidget(m_layerSpin);
+  voxelControlsLayout->addWidget(m_layerDisplay);
 
   parentLayout->addLayout(voxelControlsLayout);
   m_usingLayerStore = false;
@@ -374,6 +370,7 @@ void InstrumentWidgetRenderTab::toggleLayerDisplay(bool on) {
   m_layerSlide->setEnabled(on);
   auto value = m_layerSlide->value();
   actor.setGridLayer(on, value);
+  m_layerDisplay->setNum(value);
   emit rescaleColorMap();
 }
 
@@ -383,7 +380,7 @@ void InstrumentWidgetRenderTab::setVisibleLayer(int layer) {
   actor.setGridLayer(true, layer);
   const auto &renderer = actor.getInstrumentRenderer();
   auto surfaceType = m_instrWidget->getSurfaceType();
-
+  m_layerDisplay->setNum(layer);
   // If in an unwrapped view the surface needs to be redrawn
   if (renderer.isUsingLayers() &&
       surfaceType != InstrumentWidget::SurfaceType::FULL3D)

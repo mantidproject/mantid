@@ -697,8 +697,7 @@ bool IntegratePeakTimeSlices::getNeighborPixIDs(
     return true;
   ;
 
-  boost::shared_ptr<Geometry::Detector> det =
-      boost::dynamic_pointer_cast<Geometry::Detector>(comp);
+  auto det = boost::dynamic_pointer_cast<Geometry::Detector>(comp);
 
   if (det) {
     V3D pos = det->getPos() - Center;
@@ -711,7 +710,7 @@ bool IntegratePeakTimeSlices::getNeighborPixIDs(
     return true;
   }
 
-  boost::shared_ptr<const Geometry::ICompAssembly> Assembly =
+  auto Assembly =
       boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(comp);
 
   if (!Assembly)

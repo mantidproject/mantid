@@ -24,16 +24,6 @@ namespace Geometry {
 using Kernel::Matrix;
 using Kernel::V3D;
 
-/** Empty constructor
- */
-GridDetector::GridDetector()
-    : CompAssembly(), IObjComponent(nullptr), m_gridBase(nullptr),
-      m_minDetId(0), m_maxDetId(0) {
-
-  init();
-  setGeometryHandler(new GeometryHandler(this));
-}
-
 /** Constructor for a parametrized GridDetector
  * @param base: the base (un-parametrized) GridDetector
  * @param map: pointer to the ParameterMap
@@ -63,9 +53,7 @@ GridDetector::GridDetector(const std::string &n, IComponent *reference)
 }
 
 bool GridDetector::compareName(const std::string &proposedMatch) {
-  static const boost::regex exp("GridDetector|gridDetector|"
-                                "griddetector|grid_detector");
-
+  static const boost::regex exp("grid_?detector", boost::regex::icase);
   return boost::regex_match(proposedMatch, exp);
 }
 
@@ -234,7 +222,7 @@ std::tuple<int, int, int> getXYZFillFirstX(const GridDetector *me, int col,
  * @return tuple of (x,y,z)
  */
 std::tuple<int, int, int>
-GridDetector::getXYZForDetectorID(const int detectorID) const {
+GridDetector::getXYZForDetectorID(const detid_t detectorID) const {
   const GridDetector *me = this;
   if (m_map)
     me = this->m_gridBase;
@@ -642,7 +630,7 @@ void GridDetector::initialize(boost::shared_ptr<IObject> shape, int xpixels,
 /** Returns the minimum detector id
  * @return minimum detector id
  */
-int GridDetector::minDetectorID() {
+detid_t GridDetector::minDetectorID() {
   if (m_map)
     return m_gridBase->m_minDetId;
   return m_minDetId;
@@ -652,7 +640,7 @@ int GridDetector::minDetectorID() {
 /** Returns the maximum detector id
  * @return maximum detector id
  */
-int GridDetector::maxDetectorID() {
+detid_t GridDetector::maxDetectorID() {
   if (m_map)
     return m_gridBase->m_maxDetId;
   return m_maxDetId;
@@ -844,11 +832,8 @@ void GridDetector::getBoundingBox(BoundingBox &assemblyBox) const {
  * nothing.
  */
 void GridDetector::draw() const {
-  // std::cout << "GridDetector::draw() called for " << this->getName()
-  // << "\n";
   if (Handle() == nullptr)
     return;
-  // Render the ObjComponent and then render the object
   Handle()->render();
 }
 
@@ -856,9 +841,7 @@ void GridDetector::draw() const {
  * Draws the Object
  */
 void GridDetector::drawObject() const {
-  // std::cout << "GridDetector::drawObject() called for " <<
-  // this->getName() << "\n";
-  // if(shape!=NULL)    shape->draw();
+  draw();
 }
 
 /**
@@ -866,12 +849,8 @@ void GridDetector::drawObject() const {
  * before rendering.
  */
 void GridDetector::initDraw() const {
-  // std::cout << "GridDetector::initDraw() called for " <<
-  // this->getName() << "\n";
   if (Handle() == nullptr)
     return;
-  // Render the ObjComponent and then render the object
-  // if(shape!=NULL)    shape->initDraw();
   Handle()->initialize();
 }
 
