@@ -12,11 +12,8 @@ namespace CustomInterfaces {
 
 /** Constructor
  * @param view :: [input] The view we are managing
- * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
- * @param eventPresenter :: [input] A pointer to the 'Event Handling' tab
- * presenter
- * @param settingsPresenter :: [input] A pointer to the 'Settings' tab presenter
- * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
+ * @param batchPresenterFactory :: [input] A factory to create the batches
+ * we will manage
  */
 ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view, ReflBatchPresenterFactory batchPresenterFactory)

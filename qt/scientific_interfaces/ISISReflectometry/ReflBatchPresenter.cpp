@@ -16,6 +16,8 @@ namespace CustomInterfaces {
  * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
  * @param eventPresenter :: [input] A pointer to the 'Event Handling' tab
  * presenter
+ * @param experimentPresenter :: [input] A pointer to the 'Experiment' tab
+ * presenter
  * @param instrumentPresenter :: [input] A pointer to the 'Instrument' tab
  * presenter
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
@@ -74,8 +76,6 @@ void ReflBatchPresenter::settingsChanged() {
 /** Returns default values specified for 'Transmission run(s)' for the
  * given angle
  *
- * @param group :: Index of the group in 'Settings' tab from which to get the
- *values
  * @param angle :: the run angle to look up transmission runs for
  * @return :: Values passed for 'Transmission run(s)'
  */

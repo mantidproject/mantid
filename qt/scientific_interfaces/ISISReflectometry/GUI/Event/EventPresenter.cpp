@@ -10,7 +10,6 @@ namespace CustomInterfaces {
 
 /** Constructor
  * @param view :: The view we are handling
- * @param group :: The group on the parent tab this belongs to
  */
 EventPresenter::EventPresenter(IEventView *view)
     : m_view(view), m_sliceType(SliceType::None) {

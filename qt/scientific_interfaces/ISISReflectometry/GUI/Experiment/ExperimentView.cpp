@@ -8,6 +8,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Constructor
+ * @param algorithmForTooltips :: [input] An algorithm that will be
+ * used to find tooltips for the input properties
  * @param parent :: [input] The parent of this widget
  */
 ExperimentView::ExperimentView(

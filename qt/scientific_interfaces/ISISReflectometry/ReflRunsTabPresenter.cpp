@@ -54,6 +54,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * search.
  * @param defaultInstrumentIndex The index of the instrument to have selected by
  * default.
+ * @param messageHandler :: A handler to pass messages to the user
  * @param searcher :: [input] The search implementation
  */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
@@ -395,13 +396,13 @@ RunDescriptionMetadata metadataFromDescription(std::string const &description) {
 /** Transfers the selected runs in the search results to the processing table
  * @param rowsToTransfer : a set of row indices in the search results to
  * transfer
- * @param group : the group number of the table to transfer to
  * @param matchType : an enum specifying how strictly to match runs against
  * the transfer criteria
  * @return : The runs to transfer as a vector of maps
  */
 void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
-                                    const TransferMatch) {
+                                    const TransferMatch matchType) {
+  UNUSED_ARG(matchType);
   if (validateRowsToTransfer(rowsToTransfer)) {
     auto progress = setupProgressBar(rowsToTransfer);
     auto jobs = tablePresenter()->reductionJobs();
