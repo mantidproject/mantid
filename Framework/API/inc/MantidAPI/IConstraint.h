@@ -81,11 +81,8 @@ public:
   virtual double getDefaultPenaltyFactor() const = 0;
 
 protected:
-
   /// default penalty factor for constraints
   const double m_defaultPenaltyFactor = 1000.0;
-
-
 };
 
 } // namespace API
