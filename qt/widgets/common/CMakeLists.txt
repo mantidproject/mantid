@@ -681,7 +681,6 @@ if ( ENABLE_WORKBENCH )
   find_package ( QScintillaQt5 REQUIRED )
 endif()
 
-# copy function below and split for QT4 and QT5 with QT_VERSION 4 and QT_VERSION 5 parameter
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
   QT_VERSION 4
   SRC ${SRC_FILES}
