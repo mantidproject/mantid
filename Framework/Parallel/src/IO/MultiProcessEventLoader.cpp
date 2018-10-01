@@ -115,7 +115,7 @@ void MultiProcessEventLoader::load(
     // to cleanup shared memory in this function
     struct SharedMemoryDestroyer {
       const std::vector<std::string> &segments;
-      SharedMemoryDestroyer(const std::vector<std::string> &sm)
+      explicit SharedMemoryDestroyer(const std::vector<std::string> &sm)
           : segments(sm) {}
       ~SharedMemoryDestroyer() {
         for (const auto &name : segments)
