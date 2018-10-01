@@ -48,7 +48,9 @@ public:
 
   Axes addAxes(double left, double bottom, double width, double height);
   Axes addSubPlot(int subplotspec);
-  Python::Object colorbar(ScalarMappable mappable, Axes ax);
+  Python::Object colorbar(const ScalarMappable &mappable, const Axes &cax,
+                          const Python::Object &ticks = Python::Object(),
+                          const Python::Object &format = Python::Object());
 };
 
 } // namespace MplCpp

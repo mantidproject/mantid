@@ -57,11 +57,20 @@ Axes Figure::addSubPlot(int subplotspec) {
  * @brief Add a colorbar to this figure
  * @param mappable An objet providing the mapping of data to rgb colors
  * @param cax An axes instance to hold the color bar
+ * @param ticks An optional array or ticker.Locator object to control tick
+ * placement
+ * @param format An optional object describing how to format the tick labels
  * @return A reference to the matplotlib.colorbar.Colorbar object
  */
-Python::Object Figure::colorbar(ScalarMappable mappable, Axes cax) {
-  return Python::Object(
-      pyobj().attr("colorbar")(mappable.pyobj(), cax.pyobj()));
+Python::Object Figure::colorbar(const ScalarMappable &mappable, const Axes &cax,
+                                const Python::Object &ticks,
+                                const Python::Object &format) {
+  auto args = Python::NewRef(
+      Py_BuildValue("(OO)", mappable.pyobj().ptr(), cax.pyobj().ptr()));
+  auto kwargs = Python::NewRef(
+      Py_BuildValue("{sOsO}", "ticks", ticks.ptr(), "format", format.ptr()));
+  Python::Object attr{pyobj().attr("colorbar")};
+  return Python::NewRef(PyObject_Call(attr.ptr(), args.ptr(), kwargs.ptr()));
 }
 
 } // namespace MplCpp
