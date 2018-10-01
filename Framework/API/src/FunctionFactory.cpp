@@ -273,7 +273,7 @@ void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
         std::string next_term = next_constraint.terms()[0].str();
         if (next_term.compare("penalty") == 0) {
           addConstraint(fun, constraint, next_constraint);
-          it++;
+          ++it;
         } else {
           addConstraint(fun, constraint);
         }
