@@ -66,8 +66,12 @@ class LoadGudrunOutputTest(unittest.TestCase):
             self.assertRaises(ValueError, LoadGudrunOutput, tmp.name, 'out_ws')
 
     def test_rename_with_default_output(self):
-        actual = LoadGudrunOutput(InputFile=self.file_name.format('.dcs'), OutputWorkspace='None')
+        actual = LoadGudrunOutput(InputFile=self.file_name.format('.dcs'), OutputWorkspace='')
         self.assertEqual(actual.name(), 'POLARIS00097947-dcs01')
+
+    def test_name_when_given(self):
+        actual = LoadGudrunOutput(InputFile=self.file_name.format('.dcs'), OutputWorkspace='actual')
+        self.assertEqual(actual.name(), 'actual')
 
 
 if __name__ == '__main__':

@@ -171,7 +171,7 @@ QString formatExtension(const std::string &extension) {
       formattedExtension.insert(1, ".");
     } else if (extension.at(0) == '.') {
       formattedExtension.prepend("*");
-	} else {
+    } else {
       formattedExtension.prepend("*.");
     }
   }

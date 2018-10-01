@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import FileProperty, WorkspaceProperty, PythonAlgorithm, AlgorithmFactory, FileAction
+from mantid.api import (FileProperty, WorkspaceProperty, PythonAlgorithm,
+                        AlgorithmFactory, FileAction, PropertyMode)
 from mantid.kernel import Direction
 from mantid.simpleapi import LoadAscii, CreateWorkspace
 
@@ -25,15 +26,16 @@ class LoadGudrunOutput(PythonAlgorithm):
                                                       ".mdor01",
                                                       ".mgor01"]),
                              doc="Gudrun output file to be loaded.")
-        self.declareProperty(WorkspaceProperty(name='OutputWorkspace', defaultValue='None',
-                                               direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty(name='OutputWorkspace', defaultValue='',
+                                               direction=Direction.Output,
+                                               optional=PropertyMode.Optional),
                              doc="If OutputWorkpsace is None,"
                                  " then the workpsace name will be obtained from the input file.")
 
     def PyExec(self):
         input_file = self.getProperty('InputFile').value
         output_ws = self.getPropertyValue('OutputWorkspace')
-        if output_ws == 'None':
+        if not output_ws:
             output_ws = self.get_title(input_file)
         number_of_columns, data_line_start = self.find_number_of_columns(input_file)
         self.load_gudrun_file(input_file, output_ws, number_of_columns, data_line_start)
