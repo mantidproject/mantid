@@ -39,7 +39,6 @@ namespace Geometry {
 using Kernel::Matrix;
 using Kernel::V3D;
 
-
 /** Constructor for a parametrized RectangularDetector
  * @param base: the base (un-parametrized) RectangularDetector
  * @param map: pointer to the ParameterMap
@@ -79,7 +78,7 @@ bool RectangularDetector::compareName(const std::string &proposedMatch) {
  *  Make a copy of the component assembly
  *  @return new(*this)
  */
-IComponent *RectangularDetector::clone() const {
+RectangularDetector *RectangularDetector::clone() const {
   return new RectangularDetector(*this);
 }
 

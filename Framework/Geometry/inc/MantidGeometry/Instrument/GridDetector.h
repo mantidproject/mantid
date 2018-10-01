@@ -17,7 +17,8 @@ class ComponentVisitor;
 /**
 *  GridDetector is a type of CompAssembly, an assembly of components.
 *  It is designed to be an easy way to specify a 3D grid (XYZ) array of
-*  Detector pixels.
+*  Detector pixels. Ragged grids are not allowed, pixels are uniform in each
+*  dimension.
 *
 * @class GridDetector
 * @brief Assembly of Detector objects in a 3D grid shape
@@ -71,7 +72,7 @@ public:
                   int idstep = 1);
 
   //! Make a clone of the present component
-  IComponent *clone() const override;
+  GridDetector *clone() const override;
 
   boost::shared_ptr<Detector> getAtXYZ(const int x, const int y,
                                        const int z) const;

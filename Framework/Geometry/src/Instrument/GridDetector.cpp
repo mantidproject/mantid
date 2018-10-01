@@ -73,7 +73,7 @@ void GridDetector::init() {
  *  Make a copy of the component assembly
  *  @return new(*this)
  */
-IComponent *GridDetector::clone() const { return new GridDetector(*this); }
+GridDetector *GridDetector::clone() const { return new GridDetector(*this); }
 
 //-------------------------------------------------------------------------------------------------
 /** Return a pointer to the component in the assembly at the
@@ -797,34 +797,30 @@ void GridDetector::getBoundingBox(BoundingBox &assemblyBox) const {
       return;
     }
   }
-  if (!m_cachedBoundingBox) {
-    m_cachedBoundingBox = new BoundingBox();
-    // Get all the corner
-    BoundingBox compBox;
-    getAtXYZ(0, 0, 0)->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-    getAtXYZ(this->xpixels() - 1, 0, 0)->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-    getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, 0)
-        ->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-    getAtXYZ(0, this->ypixels() - 1, 0)->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-    getAtXYZ(0, 0, this->zpixels() - 1)->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-    getAtXYZ(this->xpixels() - 1, 0, this->zpixels() - 1)
-        ->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-    getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, this->zpixels() - 1)
-        ->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-    getAtXYZ(0, this->ypixels() - 1, this->zpixels() - 1)
-        ->getBoundingBox(compBox);
-    m_cachedBoundingBox->grow(compBox);
-  }
+  BoundingBox bb;
+  BoundingBox compBox;
+  getAtXYZ(0, 0, 0)->getBoundingBox(compBox);
+  bb.grow(compBox);
+  getAtXYZ(this->xpixels() - 1, 0, 0)->getBoundingBox(compBox);
+  bb.grow(compBox);
+  getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, 0)
+      ->getBoundingBox(compBox);
+  bb.grow(compBox);
+  getAtXYZ(0, this->ypixels() - 1, 0)->getBoundingBox(compBox);
+  bb.grow(compBox);
+  getAtXYZ(0, 0, this->zpixels() - 1)->getBoundingBox(compBox);
+  bb.grow(compBox);
+  getAtXYZ(this->xpixels() - 1, 0, this->zpixels() - 1)
+      ->getBoundingBox(compBox);
+  bb.grow(compBox);
+  getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, this->zpixels() - 1)
+      ->getBoundingBox(compBox);
+  bb.grow(compBox);
+  getAtXYZ(0, this->ypixels() - 1, this->zpixels() - 1)
+      ->getBoundingBox(compBox);
+  bb.grow(compBox);
 
-  // Use cached box
-  assemblyBox = *m_cachedBoundingBox;
+  assemblyBox = bb;
 }
 
 /**
@@ -840,9 +836,7 @@ void GridDetector::draw() const {
 /**
  * Draws the Object
  */
-void GridDetector::drawObject() const {
-  draw();
-}
+void GridDetector::drawObject() const { draw(); }
 
 /**
  * Initializes the ObjComponent for rendering, this function should be called

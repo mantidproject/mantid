@@ -69,7 +69,7 @@ public:
                   int idstep = 1);
 
   //! Make a clone of the present component
-  IComponent *clone() const override;
+  RectangularDetector *clone() const override;
 
   boost::shared_ptr<Detector> getAtXY(const int X, const int Y) const;
 
