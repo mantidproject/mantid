@@ -32,9 +32,11 @@
 %Module _qti
 
 %UnitCode
-  #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-    #pragma GCC system_header
-  #endif
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
+GNU_DIAG_OFF("cast-align")
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("suggest-override")
 %End
 
 %Import QtCore/QtCoremod.sip
@@ -1241,7 +1243,7 @@ public:
   QString stemPlot(Table *t, const QString& colName, int power = 1001, int startRow = 0, int endRow = -1);
 
   void saveRecoveryCheckpoint();
-  
+
   //---- Mantid
   MantidUI* mantidUI;
   void addUserMenu(const QString &);

@@ -80,7 +80,7 @@ Output:
     removeFiles([file_name])
 
 
-**Example - an example using SaveNexusProcessed with additonal options.**
+**Example - an example using SaveNexusProcessed with additional options.**
 
 .. testcode:: ExSaveNexusProcessedOptions
 

@@ -73,7 +73,7 @@ private:
 
   /**
    * Compare the colormap names of the Slice Viewer and the VSI and extract all
-   * indicees of the list of Slice Viewer color maps
+   * indices of the list of Slice Viewer color maps
    * which also exist in the list of the VSI color maps.
    * @param colorMapNamesSliceViewer A list of color maps of the Slice Viewer.
    * @param colorMapNamesVsi A list of color maps for the VSI.

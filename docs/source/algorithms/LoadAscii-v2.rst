@@ -20,11 +20,11 @@ such a file.
 The format must be:
 
 -  A single integer or blank line to denote a new spectra
--  For each bin, between two and four columns of delimted data in the
+-  For each bin, between two and four columns of delimited data in the
    following order: 1st column=X, 2nd column=Y, 3rd column=E, 4th
    column=DX (X error)
 -  Comments can be included by prefixing the line with a non-numerical
-   character which must be consistant throughout the file and specified
+   character which must be consistent throughout the file and specified
    when you load the file. Defaults to "#"
 -  The number of bins is defined by the number of rows and must be
    identical for each spectra

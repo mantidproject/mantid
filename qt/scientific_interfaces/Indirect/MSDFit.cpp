@@ -60,20 +60,44 @@ void MSDFit::updateModelFitTypeString() {
 
 void MSDFit::updatePlotOptions() {}
 
-void MSDFit::plotClicked() { IndirectFitAnalysisTab::plotResult("All"); }
+void MSDFit::plotClicked() {
+  setPlotResultIsPlotting(true);
+  IndirectFitAnalysisTab::plotResult("All");
+  setPlotResultIsPlotting(false);
+}
+
+bool MSDFit::shouldEnablePlotResult() {
+  for (auto i = 0u; i < m_msdFittingModel->numberOfWorkspaces(); ++i)
+    if (m_msdFittingModel->getNumberOfSpectra(i) > 1)
+      return true;
+  return false;
+}
+
+void MSDFit::setRunEnabled(bool enabled) {
+  m_uiForm->pbRun->setEnabled(enabled);
+}
 
 void MSDFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
+}
+
+void MSDFit::setFitSingleSpectrumEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
 }
 
 void MSDFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
 
-void MSDFit::setRunEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
-  m_uiForm->pbRun->setEnabled(enabled);
-  m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
+void MSDFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setFitSingleSpectrumEnabled(!running);
+}
+
+void MSDFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setPlotResultEnabled(!plotting);
 }
 
 void MSDFit::runClicked() { runTab(); }

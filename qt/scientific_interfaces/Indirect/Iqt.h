@@ -13,9 +13,6 @@ class DLLExport Iqt : public IndirectDataAnalysisTab {
 public:
   Iqt(QWidget *parent = nullptr);
 
-protected:
-  void setRunEnabled(bool enabled) override;
-
 private:
   void run() override;
   void setup() override;
@@ -23,6 +20,15 @@ private:
   void loadSettings(const QSettings &settings) override;
 
   bool isErrorsEnabled();
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setTiledPlotEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+  void setTiledPlotIsPlotting(bool plotting);
 
 private slots:
   void algorithmComplete(bool error);
