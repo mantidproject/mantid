@@ -139,8 +139,8 @@ class LoadRunWidgetPresenter(object):
         self._model.loadData(filenames)
         try:
             self._model.execute()
-        except ValueError as e:
-            self._view.warning_popup(e.args[0])
+        except ValueError as error:
+            self._view.warning_popup(error.args[0])
         self.on_loading_finished()
 
     def on_loading_start(self):
@@ -151,12 +151,14 @@ class LoadRunWidgetPresenter(object):
         self.on_loading_start()
 
         self._load_thread = self.create_load_thread()
-        self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished)
+        self._load_thread.threadWrapperSetUp(self.disable_loading,
+                                             self.handle_load_thread_finished,
+                                             self._view.warning_popup)
         self._load_thread.loadData(filenames)
         self._load_thread.start()
 
     def handle_load_thread_finished(self):
-        self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished)
+
         self._load_thread.deleteLater()
         self._load_thread = None
 
@@ -210,8 +212,8 @@ class LoadRunWidgetPresenter(object):
 
         try:
             current_run_file = file_utils.get_current_run_filename(self.get_current_instrument())
-        except ValueError as e:
-            self._view.warning_popup(e.args[0])
+        except ValueError as error:
+            self._view.warning_popup(error.args[0])
             return
 
         if current_run_file == "":
@@ -231,21 +233,22 @@ class LoadRunWidgetPresenter(object):
         self._model.loadData(filenames)
         try:
             self._model.execute()
-        except ValueError as e:
-            self._view.warning_popup(e.args[0])
+        except ValueError as error:
+            self._view.warning_popup(error.args[0])
         self.on_loading_current_run_finished()
 
     def handle_load_current_run_thread_start(self, filenames):
         self.on_loading_start()
 
         self._load_thread = self.create_load_thread()
-        self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished_current_run)
+        self._load_thread.threadWrapperSetUp(self.disable_loading,
+                                             self.handle_load_thread_finished_current_run,
+                                             self._view.warning_popup)
         self._load_thread.loadData(filenames)
         self._load_thread.start()
 
     def handle_load_thread_finished_current_run(self):
 
-        self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished_current_run)
         self._load_thread.deleteLater()
         self._load_thread = None
 

@@ -32,8 +32,8 @@ class LoadRunWidgetView(QtGui.QWidget):
     def setup_interface_layout(self):
         self.setObjectName("LoadRunWidget")
         self.resize(468, 45)
-        self.load_current_run_button = QtGui.QPushButton(self)
 
+        self.load_current_run_button = QtGui.QPushButton(self)
         self.load_current_run_button.setText("Load Current Run")
         self.load_current_run_button.setToolTip("Load the current run for the current instrument")
         self.load_current_run_button.setObjectName("loadCurrentRunButton")
@@ -158,7 +158,7 @@ class LoadRunWidgetView(QtGui.QWidget):
         self._cached_text = tmp
 
     def get_run_edit_text(self):
-        return self.run_edit.text()
+        return str(self.run_edit.text())
 
     def warning_popup(self, message):
         warning(message, parent=self)
