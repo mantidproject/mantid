@@ -65,12 +65,15 @@ void run_multiprocess_load(const std::string &file, bool precount) {
 
   TSM_ASSERT_EQUALS("Different spectrum number in reference ws.",
                     wsRef->getNumberHistograms(), ws->getNumberHistograms());
-
+  if(wsRef->getNumberHistograms() != ws->getNumberHistograms())
+    return;
   for (size_t i = 0; i < wsRef->getNumberHistograms(); ++i) {
     auto &eventList = ws->getSpectrum(i).getEvents();
     auto &eventListRef = wsRef->getSpectrum(i).getEvents();
     TSM_ASSERT_EQUALS("Different events number in reference spectra",
                       eventList.size(), eventListRef.size());
+    if(eventList.size() != eventListRef.size())
+      return;
     for (size_t j = 0; j < eventListRef.size(); ++j) {
       TSM_ASSERT_EQUALS("Events are not equal", eventList[j].tof(),
                         eventListRef[j].tof());
@@ -192,6 +195,17 @@ private:
   }
 
 public:
+#ifndef _WIN32
+  void test_multiprocess_loader_precount() {
+    run_multiprocess_load("SANS2D00022048.nxs", true);
+    run_multiprocess_load("LARMOR00003368.nxs", true);
+  }
+
+  void test_multiprocess_loader_producer_consumer() {
+    run_multiprocess_load("SANS2D00022048.nxs", false);
+    run_multiprocess_load("LARMOR00003368.nxs", false);
+  }
+#endif // _WIN32
   void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
 
   void test_Normal_vs_Precount() {
@@ -896,17 +910,6 @@ public:
     auto hdf5Mutex = boost::make_shared<std::mutex>();
     runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
-#ifndef _WIN32
-  void test_multiprocess_load_precount() {
-    run_multiprocess_load("SANS2D00022048.nxs", true);
-    run_multiprocess_load("LARMOR00003368.nxs", true);
-  }
-
-  void test_multiprocess_load_producer_consumer() {
-    run_multiprocess_load("SANS2D00022048.nxs", false);
-    run_multiprocess_load("LARMOR00003368.nxs", false);
-  }
-#endif // _WIN32
 private:
   std::string wsSpecFilterAndEventMonitors;
 };
