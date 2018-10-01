@@ -65,14 +65,14 @@ void run_multiprocess_load(const std::string &file, bool precount) {
 
   TSM_ASSERT_EQUALS("Different spectrum number in reference ws.",
                     wsRef->getNumberHistograms(), ws->getNumberHistograms());
-  if(wsRef->getNumberHistograms() != ws->getNumberHistograms())
+  if (wsRef->getNumberHistograms() != ws->getNumberHistograms())
     return;
   for (size_t i = 0; i < wsRef->getNumberHistograms(); ++i) {
     auto &eventList = ws->getSpectrum(i).getEvents();
     auto &eventListRef = wsRef->getSpectrum(i).getEvents();
     TSM_ASSERT_EQUALS("Different events number in reference spectra",
                       eventList.size(), eventListRef.size());
-    if(eventList.size() != eventListRef.size())
+    if (eventList.size() != eventListRef.size())
       return;
     for (size_t j = 0; j < eventListRef.size(); ++j) {
       TSM_ASSERT_EQUALS("Events are not equal", eventList[j].tof(),
@@ -910,6 +910,7 @@ public:
     auto hdf5Mutex = boost::make_shared<std::mutex>();
     runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
+
 private:
   std::string wsSpecFilterAndEventMonitors;
 };
