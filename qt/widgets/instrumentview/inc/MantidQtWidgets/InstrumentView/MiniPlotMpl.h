@@ -17,6 +17,7 @@
   GNU General Public License for more details.
 */
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
+#include "MantidQtWidgets/MplCpp/Line2D.h"
 #include <QWidget>
 
 namespace MantidQt {
@@ -65,7 +66,8 @@ signals:
 
 private:
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
-
+  // Holds references to the plotted lines
+  std::vector<Widgets::MplCpp::Line2D> m_lines;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
