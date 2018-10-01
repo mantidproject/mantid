@@ -693,7 +693,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
   QT4_DEFS
     USE_QTWEBKIT
   INCLUDE_DIRS
-  inc
+    inc
     ${PYTHON_INCLUDE_PATH}
   LINK_LIBS
     ${TARGET_LIBRARIES}
