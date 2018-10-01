@@ -7,16 +7,23 @@ set ( TEST_PY_FILES
    AxisChangerView_test.py
    FFTModel_test.py
    FFTPresenter_test.py
+   load_file_widget/loadfile_model_test.py
+   load_file_widget/loadfile_presenter_single_file_test.py
+   load_file_widget/loadfile_presenter_multiple_file_test.py
+   load_file_widget/loadfile_view_test.py
    LoadWidgetModel_test.py
-   LoadWidgetPresenter_test.py  
+   LoadWidgetPresenter_test.py
    LoadWidgetView_test.py
    MaxEntModel_test.py
    MaxEntPresenter_test.py
-   PeriodicTableModel_test.py
+   muon_file_utils_test.py
+   muon_load_data_test.py
    PeriodicTablePresenter_test.py
+   PeriodicTableModel_test.py
    PlottingPresenter_test.py
    PlottingUtils_test.py
    PlottingView_test.py
+   run_string_utils_test.py
    thread_model_test.py
    transformWidget_test.py
 )
