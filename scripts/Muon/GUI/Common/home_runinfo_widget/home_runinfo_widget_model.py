@@ -61,7 +61,7 @@ class HomeRunInfoWidgetModel(object):
         temps = self._data.get_sample_log("Temp_Sample")
         try:
             temps = self._data.loaded_workspace.getRun().getProperty("Temp_Sample")
-        except ValueError:
+        except Exception:
             return None
         if temps:
             return temps.timeAverageValue()

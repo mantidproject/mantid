@@ -75,7 +75,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def setup_interface(self):
         self.setObjectName("InstrumentWidget")
-        # self.resize(500, 100)
 
         self.setup_instrument_row()
         self.setup_time_zero_row()
@@ -96,23 +95,14 @@ class InstrumentWidgetView(QtGui.QWidget):
                            "padding-right: 10px;"
                            ' color: grey; }')
 
-        # self.vertical_layout = QtGui.QVBoxLayout()
-        #
-        # self.vertical_layout.addItem(self.horizontal_layout)
-        # self.vertical_layout.addItem(self.horizontal_layout_2)
-        # self.vertical_layout.addItem(self.horizontal_layout_3)
-        # self.vertical_layout.addItem(self.horizontal_layout_4)
-        # self.vertical_layout.addItem(self.dead_time_file_layout)
-        # # self.vertical_layout.addItem(self.horizontal_layout_5)
-        # self.vertical_layout.addItem(self.horizontal_layout_6)
-
         self.group.setLayout(self.layout)
-        # self.group.setLayout(self.vertical_layout)
 
         self.group2 = QtGui.QGroupBox("Rebin")
         self.group2.setFlat(False)
-        #self.vertical_layout2 = QtGui.QVBoxLayout()
-        #self.vertical_layout2.addItem(self.horizontal_layout_5)
+        # ensure the rebin box does not stretch vertically
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+        size_policy.setVerticalStretch(0)
+        self.group2.setSizePolicy(size_policy)
         self.group2.setLayout(self.horizontal_layout_5)
 
         self.widget_layout = QtGui.QVBoxLayout(self)

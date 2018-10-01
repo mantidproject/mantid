@@ -90,5 +90,5 @@ class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
         if value:
             text = name_section + str.format(format_string, value)
         else:
-            text = name_section + "Log not found"
+            text = name_section + self._model.LOG_NOT_FOUND_MESSAGE
         return text
