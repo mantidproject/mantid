@@ -67,7 +67,8 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentPresenter
       public IExperimentPresenter {
 public:
   // TODO Inject the Experiment model into the constructor.
-  ExperimentPresenter(IExperimentView *view, double defaultsThetaTolerance);
+  ExperimentPresenter(IExperimentView *view, Experiment experiment,
+                      double defaultsThetaTolerance);
 
   Experiment const &experiment() const;
 
@@ -91,7 +92,7 @@ private:
   showPerThetaTableErrors(PerThetaDefaultsTableValidationError const &errors);
 
   IExperimentView *m_view;
-  boost::optional<Experiment> m_model;
+  Experiment m_model;
   double m_thetaTolerance;
 };
 } // namespace CustomInterfaces

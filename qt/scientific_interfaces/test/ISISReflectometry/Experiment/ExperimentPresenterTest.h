@@ -243,11 +243,26 @@ public:
 private:
   NiceMock<MockExperimentView> m_view;
 
+  Experiment makeModel() {
+    auto polarizationCorrections = PolarizationCorrections(0.0, 0.0, 0.0, 0.0);
+    auto transmissionRunRange = RangeInLambda(0.0, 0.0);
+    auto stitchParameters = std::map<std::string, std::string>();
+    auto perThetaDefaults = std::vector<PerThetaDefaults>(
+        {PerThetaDefaults(boost::none, std::pair<std::string, std::string>(),
+                          boost::none, boost::none, ReductionOptionsMap())});
+    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
+                      SummationType::SumInLambda,
+                      std::move(polarizationCorrections),
+                      std::move(transmissionRunRange),
+                      std::move(stitchParameters), std::move(perThetaDefaults));
+  }
+
   ExperimentPresenter makePresenter() {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
     expectViewReturnsDefaultValues();
-    auto presenter = ExperimentPresenter(&m_view, /*thetaTolerance=*/0.01);
+    auto presenter =
+        ExperimentPresenter(&m_view, makeModel(), /*thetaTolerance=*/0.01);
     verifyAndClear();
     return presenter;
   }

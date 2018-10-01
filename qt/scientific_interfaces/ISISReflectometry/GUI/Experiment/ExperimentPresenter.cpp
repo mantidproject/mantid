@@ -7,15 +7,15 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ExperimentPresenter::ExperimentPresenter(IExperimentView *view,
+                                         Experiment experiment,
                                          double defaultsThetaTolerance)
-    : m_view(view), m_model(), m_thetaTolerance(defaultsThetaTolerance) {
+    : m_view(view), m_model(std::move(experiment)),
+      m_thetaTolerance(defaultsThetaTolerance) {
   m_view->subscribe(this);
   notifySettingsChanged();
 }
 
-Experiment const &ExperimentPresenter::experiment() const {
-  return m_model.get();
-}
+Experiment const &ExperimentPresenter::experiment() const { return m_model; }
 
 void ExperimentPresenter::notifySettingsChanged() {
   auto validationResult = updateModelFromView();
@@ -24,7 +24,7 @@ void ExperimentPresenter::notifySettingsChanged() {
 
 void ExperimentPresenter::notifySummationTypeChanged() {
   notifySettingsChanged();
-  if (m_model.get().summationType() == SummationType::SumInQ)
+  if (m_model.summationType() == SummationType::SumInQ)
     m_view->enableReductionType();
   else
     m_view->disableReductionType();
@@ -99,7 +99,8 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
 
 ExperimentValidationResult ExperimentPresenter::updateModelFromView() {
   auto validationResult = validateExperimentFromView();
-  m_model = validationResult.validElseNone();
+  if (validationResult.isValid())
+    m_model = validationResult.assertValid();
   return validationResult;
 }
 
