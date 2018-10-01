@@ -499,9 +499,14 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   std::ostringstream strs;
 strs << maxPeak[0];
 std::string strMax = strs.str();
-      if (profileFunction == "Gaussian") myFunc += ", PeakCentre=50, Height="+ strMax;
-      else if (profileFunction == "BackToBackExponential") myFunc += ", X0=50, I="+ strMax;
-      else if (profileFunction == "IkedaCarpenterPV") myFunc += ", X0=50, I="+ strMax;
+      if (profileFunction == "Gaussian") {
+          myFunc += ", PeakCentre=50, Height="+ strMax;
+          fitAlgorithm->setProperty("Constraints", "40<f1.PeakCentre<60");
+      }
+      else if (profileFunction == "BackToBackExponential" || profileFunction == "IkedaCarpenterPV") {
+          myFunc += ", X0=50, I="+ strMax;
+          fitAlgorithm->setProperty("Constraints", "40<f1.X0<60");
+      }
   fitAlgorithm->setProperty("CalcErrors", true);
   fitAlgorithm->setProperty("Function", myFunc);
   fitAlgorithm->setProperty("InputWorkspace", wsProfile2D);
