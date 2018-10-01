@@ -30,7 +30,7 @@ class MiniPlotQwt : public QwtPlot {
 public:
   explicit MiniPlotQwt(QWidget *parent);
   ~MiniPlotQwt() override;
-  void setData(const double *x, const double *y, int dataSize,
+  void setData(std::vector<double> x, std::vector<double> y,
                const std::string &xUnits = "");
   void setLabel(const QString &label);
   QString label() const { return m_label; }

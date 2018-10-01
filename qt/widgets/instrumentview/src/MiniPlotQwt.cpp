@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/MiniPlotQwt.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
 #include <MantidQtWidgets/LegacyQwt/qwt_compat.h>
@@ -23,6 +24,10 @@
 #include <QPainter>
 
 #include <cmath>
+
+namespace {
+Mantid::Kernel::Logger g_log("MiniPlotQwt");
+}
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -197,20 +202,33 @@ void MiniPlotQwt::setYScale(double from, double to) {
 
 /**
  * Set the data for the curve to display
- * @param x :: A pointer to x values
- * @param y :: A pointer to y values
- * @param dataSize :: The size of the data
+ * @param x :: A vector of X values
+ * @param y :: A vector of Y values
  * @param xUnits :: Units for the data
  */
-void MiniPlotQwt::setData(const double *x, const double *y, int dataSize,
+void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y,
                           const std::string &xUnits) {
+  if (x.empty()){
+    g_log.warning("setData(): X array is empty!");
+    return;
+  }
+  if (y.empty()){
+    g_log.warning("setData(): Y array is empty!");
+    return;
+  }
+  if (x.size() != y.size()) {
+    g_log.warning(std::string(
+        "setData(): X/Y size mismatch! X=" + std::to_string(x.size()) + ", Y="
+        + std::to_string(y.size())));
+    return;
+  }
   m_xUnits = xUnits;
   if (!m_curve) {
     m_curve = new QwtPlotCurve();
     m_curve->attach(this);
   }
-
-  m_curve->setData(x, y, dataSize);
+  int dataSize = static_cast<int>(x.size());
+  m_curve->setData(x.data(), y.data(), dataSize);
   setXScale(x[0], x[dataSize - 1]);
   double from = y[0];
   double to = from;
