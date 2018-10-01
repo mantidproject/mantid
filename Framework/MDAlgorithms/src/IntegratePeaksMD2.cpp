@@ -521,6 +521,17 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         }
 
         IFunction_sptr ifun = fitAlgorithm->getProperty("Function");
+        if (i == 0) {
+          for (size_t j = 0; j < ifun->nParams(); ++j)
+            out << std::setw(20) << ifun->parameterName(j) << " ";
+          out << "\n";
+        }
+        out << std::setw(20) << i << "\n";
+        for (size_t j = 0; j < ifun->nParams(); ++j) {
+          out << std::setw(20) << std::fixed << std::setprecision(10)
+              << ifun->getParameter(j) << " ";
+        }
+        out << "\n";
 
         /*double chi2 = fitAlgorithm->getProperty("OutputChi2overDoF");
         if (chi2 > 10.0) {
