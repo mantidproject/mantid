@@ -39,15 +39,16 @@ using CellText =
 
 boost::optional<boost::optional<double>>
 PerThetaDefaultsValidator::parseThetaOrWhitespace(CellText const &cellText) {
-  auto theta = ::MantidQt::CustomInterfaces::parseTheta(cellText[0]);
-  if (theta.is_initialized()) {
-    return theta;
-  } else if (isEntirelyWhitespace(cellText[0])) {
+  if (isEntirelyWhitespace(cellText[0])) {
     return boost::optional<double>();
   } else {
-    m_invalidColumns.emplace_back(0);
-    return boost::none;
+    auto theta = ::MantidQt::CustomInterfaces::parseTheta(cellText[0]);
+    if (theta.is_initialized()) {
+      return theta;
+    }
   }
+  m_invalidColumns.emplace_back(0);
+  return boost::none;
 }
 
 boost::optional<TransmissionRunPair>

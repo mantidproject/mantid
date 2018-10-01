@@ -15,14 +15,10 @@ namespace CustomInterfaces {
 
 class ExperimentValidationErrors {
 public:
-  ExperimentValidationErrors(
+  explicit ExperimentValidationErrors(
       // cppcheck-suppress passedByValue
-      PerThetaDefaultsTableValidationError perThetaDefaultsErrors,
-      bool stitchParametersResult)
-      : m_perThetaDefaultsErrors(std::move(perThetaDefaultsErrors)),
-        m_stitchParametersResult(stitchParametersResult) {}
-
-  bool stitchParametersAreValid() const { return m_stitchParametersResult; }
+      PerThetaDefaultsTableValidationError perThetaDefaultsErrors)
+      : m_perThetaDefaultsErrors(std::move(perThetaDefaultsErrors)) {}
 
   PerThetaDefaultsTableValidationError const &perThetaValidationErrors() const {
     return m_perThetaDefaultsErrors;
@@ -30,7 +26,6 @@ public:
 
 private:
   PerThetaDefaultsTableValidationError m_perThetaDefaultsErrors;
-  bool m_stitchParametersResult;
 };
 
 using ExperimentValidationResult =
@@ -85,6 +80,8 @@ private:
   ExperimentValidationResult validateExperimentFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
   RangeInLambda transmissionRunRangeFromView();
+  std::map<std::string, std::string> stitchParametersFromView();
+
   ExperimentValidationResult updateModelFromView();
 
   void showValidationResult(ExperimentValidationResult const &result);

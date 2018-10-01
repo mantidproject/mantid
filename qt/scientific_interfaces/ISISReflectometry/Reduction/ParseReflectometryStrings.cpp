@@ -20,13 +20,14 @@ parseRunNumber(std::string const &runNumberString) {
 
 boost::optional<std::string>
 parseRunNumberOrWhitespace(std::string const &runNumberString) {
-  auto maybeRunNumber = parseRunNumber(runNumberString);
-  if (maybeRunNumber.is_initialized())
-    return maybeRunNumber;
-  else if (isEntirelyWhitespace(runNumberString))
+  if (isEntirelyWhitespace(runNumberString)) {
     return std::string();
-  else
-    return boost::none;
+  } else {
+    auto maybeRunNumber = parseRunNumber(runNumberString);
+    if (maybeRunNumber.is_initialized())
+      return maybeRunNumber;
+  }
+  return boost::none;
 }
 
 boost::optional<double> parseTheta(std::string const &theta) {
@@ -64,14 +65,14 @@ parseProcessingInstructions(std::string const &instructions) {
 
 boost::optional<boost::optional<double>>
 parseScaleFactor(std::string const &scaleFactor) {
-  auto value = parseDouble(scaleFactor);
-  if (value.is_initialized()) {
-    return value;
-  } else if (isEntirelyWhitespace(scaleFactor)) {
+  if (isEntirelyWhitespace(scaleFactor)) {
     return boost::optional<double>(boost::none);
   } else {
-    return boost::none;
+    auto value = parseDouble(scaleFactor);
+    if (value.is_initialized())
+      return value;
   }
+  return boost::none;
 }
 
 boost::variant<boost::optional<RangeInQ>, std::vector<int>>
