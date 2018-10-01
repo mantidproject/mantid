@@ -82,7 +82,7 @@ public:
   }
 
   Jobs const &jobsFromPresenter(RunsTablePresenter &presenter) {
-    return boost::get<Jobs>(presenter.reductionJobs());
+    return presenter.reductionJobs();
   }
 
   template <typename... Args>
