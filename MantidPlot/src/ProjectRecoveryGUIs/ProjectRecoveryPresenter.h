@@ -16,6 +16,7 @@ public:
   // Interestingly this nullptr should never be used
   ProjectRecoveryPresenter(MantidQt::ProjectRecovery *projectRecovery,
                            ApplicationWindow *parentWindow);
+  ProjectRecoveryPresenter(const ProjectRecoveryPresenter &obj);
   ~ProjectRecoveryPresenter();
   bool startRecoveryView();
   bool startRecoveryFailure();
