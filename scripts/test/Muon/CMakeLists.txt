@@ -10,6 +10,8 @@ set ( TEST_PY_FILES
    LoadWidgetModel_test.py
    LoadWidgetPresenter_test.py  
    LoadWidgetView_test.py
+   loadwidget_presenter_test.py
+   loadwidget_presenter_multiple_file_test.py
    MaxEntModel_test.py
    MaxEntPresenter_test.py
    PeriodicTableModel_test.py
