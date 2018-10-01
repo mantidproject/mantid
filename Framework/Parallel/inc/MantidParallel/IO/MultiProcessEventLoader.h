@@ -270,21 +270,26 @@ void MultiProcessEventLoader::GroupLoader<
     }
   });
 
+  auto processQueue = [&]() {
+    while (!queue.empty()) {
+      std::unique_ptr<Task> task;
+      {
+        std::lock_guard<std::mutex> lock(mutex);
+        task = std::move(queue.front());
+        queue.pop();
+      }
+      for (unsigned i = 0; i < task->eventId.size(); ++i)
+        pixels.at(task->eventId[i])
+            .emplace_back((double)task->eventTimeOffset[i],
+                          task->partitioner->next());
+    }
+  };
+
   std::thread consumer([&]() {
     while (finished < 1) { // producer wants to produce smth
-      while (!queue.empty()) {
-        std::unique_ptr<Task> task;
-        {
-          std::lock_guard<std::mutex> lock(mutex);
-          task = std::move(queue.front());
-          queue.pop();
-        }
-        for (unsigned i = 0; i < task->eventId.size(); ++i)
-          pixels.at(task->eventId[i])
-              .emplace_back((double)task->eventTimeOffset[i],
-                            task->partitioner->next());
-      }
+     processQueue();
     }
+    processQueue(); //Clean up the queue
 
     ++finished; // all is consumed
 
