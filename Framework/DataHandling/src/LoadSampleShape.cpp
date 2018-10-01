@@ -1,5 +1,5 @@
 #include "MantidDataHandling/LoadSampleShape.h"
-#include "MantidDataHandling/LoadBinStl.h"
+#include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -132,10 +132,10 @@ readSTLSolid(std::ifstream &file, std::string &name, std::string filename) {
     boost::trim(line);
     if (line.size() < 5 || line.substr(0, 5) != "solid") {
       // attempt to load stl binary instead
-      std::unique_ptr<LoadBinStl> binaryStlReader =
-          Kernel::make_unique<LoadBinStl>(filename);
+      std::unique_ptr<LoadBinaryStl> binaryStlReader =
+          Kernel::make_unique<LoadBinaryStl>(filename);
       if (binaryStlReader->isBinarySTL()) {
-        return binaryStlReader->LoadBinStl::readStl();
+        return binaryStlReader->LoadBinaryStl::readStl();
       } else {
         throw std::runtime_error("Expected start of solid");
       }

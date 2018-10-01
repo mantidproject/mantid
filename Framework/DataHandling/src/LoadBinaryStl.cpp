@@ -1,4 +1,4 @@
-#include "MantidDataHandling/LoadBinStl.h"
+#include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/BinaryStreamReader.h"
@@ -9,12 +9,12 @@
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadBinStl::isBinarySTL() {
+bool LoadBinaryStl::isBinarySTL() {
   // each triangle is 50 bytes
-  const uint32_t SIZE_OF_TRIANGLE = 50;
+  
   Poco::File stlFile = Poco::File(m_filename);
   auto fileSize = stlFile.getSize();
-  if (fileSize < 84) {
+  if (fileSize < M_HEADER_SIZE + M_NUM_OF_TRIANGLES) {
     // File is smaller than header plus number of triangles, cannot be binary
     // format stl
     return false;
@@ -24,7 +24,7 @@ bool LoadBinStl::isBinarySTL() {
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
   numberTrianglesLong = getNumberTriangles(streamReader);
   myFile.close();
-  if (!(fileSize == (84 + (numberTrianglesLong * SIZE_OF_TRIANGLE)))) {
+  if (!(fileSize == (M_HEADER_SIZE + M_NUM_OF_TRIANGLES + (numberTrianglesLong * M_SIZE_OF_TRIANGLE)))) {
     // File is not the Header plus the number of triangles it claims to be long,
     // invalid binary Stl
     return false;
@@ -34,29 +34,31 @@ bool LoadBinStl::isBinarySTL() {
 }
 
 uint32_t
-LoadBinStl::getNumberTriangles(Kernel::BinaryStreamReader streamReader) {
+LoadBinaryStl::getNumberTriangles(Kernel::BinaryStreamReader streamReader) {
   uint32_t numberTrianglesLong;
+  
   // skip header
-  streamReader.moveStreamToPosition(80);
+  streamReader.moveStreamToPosition(M_HEADER_SIZE);
   // Read the number of triangles
   streamReader >> numberTrianglesLong;
   return numberTrianglesLong;
 }
 
-std::unique_ptr<Geometry::MeshObject> LoadBinStl::readStl() {
+std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
   std::ifstream myFile(m_filename.c_str(), std::ios::in | std::ios::binary);
-  uint32_t numberTrianglesLong;
+  const uint32_t SIZE_OF_NORMAL = 12;
+
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
-  numberTrianglesLong = getNumberTriangles(streamReader);
-  uint32_t next = 96;
-  const int STEPSIZE = 50;
+  const auto numberTrianglesLong = getNumberTriangles(streamReader);
+  uint32_t nextToRead = M_HEADER_SIZE + M_NUM_OF_TRIANGLES + SIZE_OF_NORMAL;
+
 
   // now read in all the triangles
   for (uint32_t i = 0; i < numberTrianglesLong; i++) {
     // find next triangle, skipping the normal and attribute
-    streamReader.moveStreamToPosition(next);
+    streamReader.moveStreamToPosition(nextToRead);
     readTriangle(streamReader);
-    next += STEPSIZE;
+    nextToRead += M_SIZE_OF_TRIANGLE;
   }
   myFile.close();
   std::unique_ptr<Geometry::MeshObject> retVal =
@@ -66,7 +68,7 @@ std::unique_ptr<Geometry::MeshObject> LoadBinStl::readStl() {
   return retVal;
 }
 
-void LoadBinStl::readTriangle(Kernel::BinaryStreamReader streamReader) {
+void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader) {
   // read in the verticies
   for (int i = 0; i < 3; i++) {
     float xVal;

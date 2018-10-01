@@ -1,11 +1,11 @@
-#ifndef LOAD_BINSTL_TEST_H_
-#define LOAD_BINSTL_TEST_H_
+#ifndef LOAD_BinaryStl_TEST_H_
+#define LOAD_BinaryStl_TEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataHandling/LoadBinStl.h"
+#include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/OptionalBool.h"
@@ -19,16 +19,16 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-class LoadBinStlTest : public CxxTest::TestSuite {
+class LoadBinaryStlTest : public CxxTest::TestSuite {
 public:
-  static LoadBinStlTest *createSuite() { return new LoadBinStlTest(); }
-  static void destroySuite(LoadBinStlTest *suite) { delete suite; }
+  static LoadBinaryStlTest *createSuite() { return new LoadBinaryStlTest(); }
+  static void destroySuite(LoadBinaryStlTest *suite) { delete suite; }
 
   void testInit() {}
   void test_cube() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
-    std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
-    auto cube = Loader->readStl();
+    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    auto cube = loader->readStl();
     TS_ASSERT(cube->hasValidShape());
     TS_ASSERT_EQUALS(cube->numberOfVertices(), 8);
     TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
@@ -37,8 +37,8 @@ public:
 
   void test_cylinder() {
     std::string path = FileFinder::Instance().getFullPath("cylinderBin.stl");
-    std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
-    auto cylinder = Loader->readStl();
+    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    auto cylinder = loader->readStl();
     TS_ASSERT(cylinder->hasValidShape());
     TS_ASSERT_EQUALS(cylinder->numberOfVertices(), 722);
     TS_ASSERT_EQUALS(cylinder->numberOfTriangles(), 1440);
@@ -47,8 +47,8 @@ public:
 
   void test_tube() {
     std::string path = FileFinder::Instance().getFullPath("tubeBin.stl");
-    std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
-    auto tube = Loader->readStl();
+    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    auto tube = loader->readStl();
     TS_ASSERT(tube->hasValidShape());
     TS_ASSERT_EQUALS(tube->numberOfVertices(), 1080);
     TS_ASSERT_EQUALS(tube->numberOfTriangles(), 2160);
@@ -59,23 +59,23 @@ public:
   void test_fail_invalid_vertex() {
     std::string path =
         FileFinder::Instance().getFullPath("invalid_vertexBin.stl");
-    std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
-    TS_ASSERT(!(Loader->isBinarySTL()));
+    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    TS_ASSERT(!(loader->isBinarySTL()));
   }
   // check that isBinaryStl returns false if the file contains an incomplete
   // triangle
   void test_fail_invalid_triangle() {
     std::string path =
         FileFinder::Instance().getFullPath("invalid_triangleBin.stl");
-    std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
-    TS_ASSERT(!(Loader->isBinarySTL()));
+    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    TS_ASSERT(!(loader->isBinarySTL()));
   }
 
   void test_fail_ascii_stl() {
     std::string path = FileFinder::Instance().getFullPath("cube.stl");
-    std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
-    TS_ASSERT(!(Loader->isBinarySTL()));
+    std::unique_ptr<LoadBinaryStl> loader = std::make_unique<LoadBinaryStl>(path);
+    TS_ASSERT(!(loader->isBinarySTL()));
   }
 };
 
-#endif /* LOAD_BINSTL_TEST_H_ */
+#endif /* LOAD_BinaryStl_TEST_H_ */
