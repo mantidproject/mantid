@@ -10,8 +10,8 @@ Python::Object newFigure(bool tightLayout = true) {
       Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
   auto fig = figureModule.attr("Figure")();
   if (tightLayout) {
-    auto kwargs = Python::NewRef(Py_BuildValue("{s:f}", "pad", 0.5));
-    fig.attr("set_tight_layout")(kwargs);
+    auto tight = Python::NewRef(Py_BuildValue("{sf}", "pad", 0.5));
+    fig.attr("set_tight_layout")(tight);
   }
   return fig;
 }
@@ -29,6 +29,15 @@ Figure::Figure(Python::Object obj) : Python::InstanceHolder(obj, "add_axes") {}
  */
 Figure::Figure(bool tightLayout)
     : Python::InstanceHolder(newFigure(tightLayout)) {}
+
+/**
+ * Reset the background color of the figure.
+ * @param color A character string indicating the color.
+ * See https://matplotlib.org/api/colors_api.html
+ */
+void Figure::setFaceColor(const char *color) {
+  pyobj().attr("set_facecolor")(color);
+}
 
 /**
  * Add an Axes of the given dimensions to the current figure
