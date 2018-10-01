@@ -724,7 +724,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
   QT5_DEFS
     ${_webengine_def}
   INCLUDE_DIRS
-  inc
+    inc
     ${PYTHON_INCLUDE_PATH}
   LINK_LIBS
     ${TARGET_LIBRARIES}
@@ -790,9 +790,9 @@ set( TEST_FILES
 mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
   SRC ${TEST_FILES}
   INCLUDE_DIRS
-      inc
-      inc
-      inc
+    ../../../Framework/TestHelpers/inc
+    ../../../Framework/DataObjects/inc
+    ../../../Framework/Crystal/inc
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
