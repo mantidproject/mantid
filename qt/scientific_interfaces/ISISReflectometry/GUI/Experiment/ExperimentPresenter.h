@@ -79,7 +79,7 @@ public:
 private:
   ExperimentValidationResult validateExperimentFromView();
   PolarizationCorrections polarizationCorrectionsFromView();
-  RangeInLambda transmissionRunRangeFromView();
+  boost::optional<RangeInLambda> transmissionRunRangeFromView();
   std::map<std::string, std::string> stitchParametersFromView();
 
   ExperimentValidationResult updateModelFromView();

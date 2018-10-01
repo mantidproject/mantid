@@ -62,14 +62,17 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   return PolarizationCorrections(cRho, cAlpha, cAp, cPp);
 }
 
-RangeInLambda ExperimentPresenter::transmissionRunRangeFromView() {
+boost::optional<RangeInLambda>
+ExperimentPresenter::transmissionRunRangeFromView() {
   auto const range = RangeInLambda(m_view->getTransmissionStartOverlap(),
                                    m_view->getTransmissionEndOverlap());
-  if (range.isValid())
+  if (range.isValid()) {
     m_view->showTransmissionRangeValid();
-  else
-    m_view->showTransmissionRangeInvalid();
-  return range;
+    return range;
+  }
+
+  m_view->showTransmissionRangeInvalid();
+  return boost::none;
 }
 
 std::map<std::string, std::string>

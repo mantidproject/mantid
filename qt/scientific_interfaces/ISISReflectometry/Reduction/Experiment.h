@@ -41,16 +41,15 @@ public:
   Experiment(AnalysisMode analysisMode, ReductionType reductionType,
              SummationType summationType,
              PolarizationCorrections polarizationCorrections,
-             RangeInLambda transmissionRunRange,
+             boost::optional<RangeInLambda> transmissionRunRange,
              std::map<std::string, std::string> stitchParameters,
              std::vector<PerThetaDefaults> perThetaDefaults);
 
-  bool isValid() const;
   AnalysisMode analysisMode() const;
   ReductionType reductionType() const;
   SummationType summationType() const;
   PolarizationCorrections const &polarizationCorrections() const;
-  RangeInLambda const &transmissionRunRange() const;
+  boost::optional<RangeInLambda> transmissionRunRange() const;
   std::map<std::string, std::string> stitchParameters() const;
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
 
@@ -63,7 +62,7 @@ private:
   SummationType m_summationType;
 
   PolarizationCorrections m_polarizationCorrections;
-  RangeInLambda m_transmissionRunRange;
+  boost::optional<RangeInLambda> m_transmissionRunRange;
 
   std::map<std::string, std::string> m_stitchParameters;
   std::vector<PerThetaDefaults> m_perThetaDefaults;

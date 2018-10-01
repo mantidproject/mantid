@@ -8,7 +8,7 @@ namespace CustomInterfaces {
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType,
                        SummationType summationType,
                        PolarizationCorrections polarizationCorrections,
-                       RangeInLambda transmissionRunRange,
+                       boost::optional<RangeInLambda> transmissionRunRange,
                        std::map<std::string, std::string> stitchParameters,
                        std::vector<PerThetaDefaults> perThetaDefaults)
     : m_analysisMode(analysisMode), m_reductionType(reductionType),
@@ -25,9 +25,7 @@ PolarizationCorrections const &Experiment::polarizationCorrections() const {
   return m_polarizationCorrections;
 }
 
-bool Experiment::isValid() const { return m_transmissionRunRange.isValid(); }
-
-RangeInLambda const &Experiment::transmissionRunRange() const {
+boost::optional<RangeInLambda> Experiment::transmissionRunRange() const {
   return m_transmissionRunRange;
 }
 

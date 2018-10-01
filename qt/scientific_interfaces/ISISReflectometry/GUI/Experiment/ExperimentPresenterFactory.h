@@ -26,15 +26,13 @@ private:
   Experiment makeModel() {
     // TODO get defaults from algorithm
     auto polarizationCorrections = PolarizationCorrections(0.0, 0.0, 0.0, 0.0);
-    auto transmissionRunRange = RangeInLambda(0.0, 0.0);
     auto stitchParameters = std::map<std::string, std::string>();
     auto perThetaDefaults = std::vector<PerThetaDefaults>(
         {PerThetaDefaults(boost::none, std::pair<std::string, std::string>(),
                           boost::none, boost::none, ProcessingInstructions())});
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda,
-                      std::move(polarizationCorrections),
-                      std::move(transmissionRunRange),
+                      std::move(polarizationCorrections), boost::none,
                       std::move(stitchParameters), std::move(perThetaDefaults));
   }
 };
