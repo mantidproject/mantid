@@ -38,6 +38,11 @@ std::vector<double> getVertices(const std::vector<Kernel::V3D> &vertices);
 double solidAngle(const Kernel::V3D &observer,
                   const std::vector<uint16_t> &triangles,
                   const std::vector<Kernel::V3D> &vertices);
+
+double solidAngle(const Kernel::V3D &observer,
+                  const std::vector<uint16_t> &triangles,
+                  const std::vector<Kernel::V3D> &vertices,
+                  const Kernel::V3D scaleFactor);
 } // namespace MeshObjectCommon
 
 } // namespace Geometry

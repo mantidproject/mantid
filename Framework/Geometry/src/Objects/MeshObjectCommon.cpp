@@ -100,6 +100,21 @@ double solidAngle(const Kernel::V3D &observer,
   }
   return 0.5 * (solidAngleSum - solidAngleNegativeSum);
 }
+
+double solidAngle(const Kernel::V3D &observer,
+                  const std::vector<uint16_t> &triangles,
+                  const std::vector<Kernel::V3D> &vertices,
+                  const Kernel::V3D scaleFactor) {
+  std::vector<V3D> scaledVertices;
+  scaledVertices.reserve(vertices.size());
+  for (const auto &vertex : vertices) {
+    scaledVertices.emplace_back(scaleFactor.X() * vertex.X(),
+                                scaleFactor.Y() * vertex.Y(),
+                                scaleFactor.Z() * vertex.Z());
+  }
+  return solidAngle(observer, triangles, scaledVertices);
+}
+
 } // namespace MeshObjectCommon
 } // namespace Geometry
 } // namespace Mantid

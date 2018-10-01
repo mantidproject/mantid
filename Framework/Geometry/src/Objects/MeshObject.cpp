@@ -332,15 +332,8 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
                               const Kernel::V3D &scaleFactor) const
 
 {
-  std::vector<V3D> scaledVertices;
-  scaledVertices.reserve(m_vertices.size());
-  for (const auto &vertex : m_vertices) {
-    scaledVertices.emplace_back(scaleFactor.X() * vertex.X(),
-                                scaleFactor.Y() * vertex.Y(),
-                                scaleFactor.Z() * vertex.Z());
-  }
-  MeshObject scaledObject(m_triangles, scaledVertices, m_material);
-  return scaledObject.solidAngle(observer);
+  return MeshObjectCommon::solidAngle(observer, m_triangles, m_vertices,
+                                      scaleFactor);
 }
 
 /**
