@@ -227,7 +227,7 @@ MantidUI::MantidUI(ApplicationWindow *aw)
     qRegisterMetaType<Mantid::API::Workspace_sptr>();
     qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
     qRegisterMetaType<Mantid::API::MatrixWorkspace_const_sptr>();
-    // Register std::string as well as we use it alot
+    // Register std::string as well as we use it a lot
     qRegisterMetaType<std::string>();
   }
 
@@ -1629,7 +1629,7 @@ void MantidUI::executeSaveNexus() {
  *
  * @param algName :: name of the algorithm
  * @param version :: version number, -1 for latest
- * @return true if sucessful.
+ * @return true if successful.
  */
 void MantidUI::showAlgorithmDialog(const QString &algName, int version) {
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
@@ -1882,7 +1882,7 @@ void MantidUI::groupWorkspaces() {
     // get selected workspaces
     auto selectedItems = m_exploreMantid->getSelectedWorkspaceNames();
     if (selectedItems.size() < 2) {
-      throw std::runtime_error("Select atleast two workspaces to group ");
+      throw std::runtime_error("Select at least two workspaces to group ");
     }
     if (Mantid::API::AnalysisDataService::Instance().doesExist(sgrpName)) {
       if (QMessageBox::question(
@@ -2394,7 +2394,7 @@ void MantidUI::importString(const QString &logName, const QString &data) {
 /** Displays a string in a Qtiplot table
  *  @param logName :: the title of the table is based on this
  *  @param data :: the string to display
- *  @param sep :: the seperator character
+ *  @param sep :: the separator character
  *  @param wsName :: add workspace name to the table window title bar, defaults
  * to logname if left blank
  */
@@ -3214,7 +3214,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
 
 /* Get the log values and put into a curve spec list in preparation of
  *  the creation of the curves
- *  @param curveSpecList :: list of curve specs to recieve the logs
+ *  @param curveSpecList :: list of curve specs to receive the logs
  *  @param toPlot :: workspaces to plot
  *  @param log :: log value
  *  @param customLogValues :: custom log values
@@ -3887,7 +3887,7 @@ struct mem_block {
   int state;
 };
 
-///  Assess the virtual memeory of the current process.
+///  Assess the virtual memory of the current process.
 void countVirtual(vector<mem_block> &mem, int &total) {
 
   MEMORYSTATUSEX memStatus;
@@ -3899,14 +3899,14 @@ void countVirtual(vector<mem_block> &mem, int &total) {
   char *addr = 0;
   size_t free = 0;      // total free space
   size_t reserved = 0;  // total reserved space
-  size_t committed = 0; // total commited (used) space
+  size_t committed = 0; // total committed (used) space
   size_t size = 0;
   size_t free_max = 0;      // maximum contiguous block of free memory
   size_t reserved_max = 0;  // maximum contiguous block of reserved memory
   size_t committed_max = 0; // maximum contiguous block of committed memory
 
   size_t GB2 =
-      memStatus.ullTotalVirtual; // Maximum memeory available to the process
+      memStatus.ullTotalVirtual; // Maximum memory available to the process
   total = static_cast<int>(GB2);
 
   // Loop over all virtual memory to find out the status of every block.
@@ -4024,7 +4024,7 @@ void MantidUI::memoryImage2() {
 
 #endif
   //=======================================================================
-  // End of Windows specfic stuff
+  // End of Windows specific stuff
   //=======================================================================
 
 #include "MantidGeometry/Instrument.h"

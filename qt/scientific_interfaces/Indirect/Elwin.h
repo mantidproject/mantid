@@ -14,9 +14,6 @@ class DLLExport Elwin : public IndirectDataAnalysisTab {
 public:
   Elwin(QWidget *parent = nullptr);
 
-protected:
-  void setRunEnabled(bool enabled) override;
-
 private:
   void run() override;
   void setup() override;
@@ -25,6 +22,13 @@ private:
   void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
                             const QPair<double, double> &range);
   void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
 
 private slots:
   void newInputFiles();

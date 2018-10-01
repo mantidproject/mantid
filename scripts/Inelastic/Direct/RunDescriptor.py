@@ -934,7 +934,7 @@ class RunDescriptor(PropDescriptor):
                 mon_list = [monitors_ID]
         else:
             mon_list = self._holder.get_used_monitors_list()
-        # Check if all requested spectra are indeed availible
+        # Check if all requested spectra are indeed available
         for monID in mon_list:
             if monID in combined_spec_list:
                 continue

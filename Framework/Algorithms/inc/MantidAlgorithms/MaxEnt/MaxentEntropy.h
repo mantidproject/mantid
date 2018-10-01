@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_MAXENTENTROPY_H_
 
 #include "MantidAlgorithms/DllConfig.h"
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
 namespace Mantid {
@@ -47,6 +48,8 @@ public:
   virtual std::vector<double> correctValues(const std::vector<double> &value,
                                             double newValue) = 0;
 };
+
+using MaxentEntropy_sptr = boost::shared_ptr<MaxentEntropy>;
 
 } // namespace Algorithms
 } // namespace Mantid

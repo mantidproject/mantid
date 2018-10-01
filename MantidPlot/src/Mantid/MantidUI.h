@@ -579,7 +579,7 @@ public:
 #endif
 
 private slots:
-  // respond to the global Mantid properties being modifed
+  // respond to the global Mantid properties being modified
   void configModified();
 
   // slot for file open dialogs created from the main app menu, or the

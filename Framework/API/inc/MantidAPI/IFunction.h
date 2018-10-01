@@ -476,6 +476,8 @@ public:
   virtual bool removeTie(size_t i);
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const;
+  /// Put all ties in order in which they will be applied correctly.
+  void sortTies();
   /// Write a parameter tie to a string
   std::string writeTies() const;
   //@}
@@ -593,6 +595,8 @@ protected:
                               const API::IFunction::Attribute &value) const;
   /// Add a new tie. Derived classes must provide storage for ties
   virtual void addTie(std::unique_ptr<ParameterTie> tie);
+  bool hasOrderedTies() const;
+  void applyOrderedTies();
   /// Writes itself into a string
   virtual std::string
   writeToString(const std::string &parentLocalAttributesStr = "") const;
@@ -618,10 +622,12 @@ private:
   boost::shared_ptr<Kernel::Matrix<double>> m_covar;
   /// The chi-squared of the last fit
   double m_chiSquared;
-  /// Holds parameter ties as <parameter index,tie pointer>
+  /// Holds parameter ties
   std::vector<std::unique_ptr<ParameterTie>> m_ties;
   /// Holds the constraints added to function
   std::vector<std::unique_ptr<IConstraint>> m_constraints;
+  /// Ties ordered in order of correct application
+  std::vector<ParameterTie *> m_orderedTies;
 };
 
 /// shared pointer to the function base class

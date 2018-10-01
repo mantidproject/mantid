@@ -68,10 +68,10 @@ public slots:
 
 private:
   bool checkMonitorCache(
-      int row) const; // check the monitor cache and add to it if neccessary
+      int row) const; // check the monitor cache and add to it if necessary
 
   bool checkMaskedCache(
-      int row) const; // check the masked cache and add to it if neccessary
+      int row) const; // check the masked cache and add to it if necessary
 
   bool checkMaskedBinCache(int row, int bin) const;
 

@@ -99,8 +99,8 @@ class AdvancedSetupWidget(BaseWidget):
 
         self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
                      self._show_help)
-        # Hanlder for events
-        # TODO - Need to add an event hanlder for the change of instrument and facility
+        # Handler for events
+        # TODO - Need to add an event handler for the change of instrument and facility
 
         # Validated widgets
 

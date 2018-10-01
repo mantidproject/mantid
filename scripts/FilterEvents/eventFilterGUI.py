@@ -78,7 +78,7 @@ class MainWindow(QtGui.QMainWindow):
     _errMsgWindow = None
 
     def __init__(self, parent=None):
-        """ Intialization and set up
+        """ Initialization and set up
         """
         # Base class
         QtGui.QMainWindow.__init__(self,parent)
@@ -882,7 +882,7 @@ class MainWindow(QtGui.QMainWindow):
             iname = filename.split("_")[0]
             str_runnumber = filename.split("_")[1]
             if str_runnumber.isdigit() is True and int(str_runnumber) > 0:
-                # Acccepted format
+                # Accepted format
                 ishort = config.getInstrument(iname).shortName()
                 wsname = "%s_%s_event" % (ishort, str_runnumber)
             else:
@@ -927,7 +927,7 @@ class MainWindow(QtGui.QMainWindow):
             t0 = datetime.datetime.strptime(runstart, "%Y-%m-%dT%H:%M:%S")
             tf = datetime.datetime.strptime(runstop, "%Y-%m-%dT%H:%M:%S")
 
-            # Calcualte
+            # Calculate
             dt = tf-t0
             timeduration = dt.days*3600*24 + dt.seconds
 

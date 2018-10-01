@@ -208,7 +208,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         def f_nxs(workspace, filename):
             tReducer.test_name += (workspace.name()+'_file_nxs_' + filename)
 
-        # redefine test save methors to produce test ouptut
+        # redefine test save methors to produce test output
         tReducer._DirectEnergyConversion__save_formats['.spe']=lambda workspace,filename: f_spe(workspace,filename)
         tReducer._DirectEnergyConversion__save_formats['.nxspe']=lambda workspace,filename : f_nxspe(workspace,filename)
         tReducer._DirectEnergyConversion__save_formats['.nxs']=lambda workspace,filename : f_nxs(workspace,filename)
