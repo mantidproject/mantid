@@ -2,7 +2,6 @@
 #include "../Parse.h"
 #include "AllInitialized.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
-#include "Reduction/WorkspaceNamesFactory.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>

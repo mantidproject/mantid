@@ -73,7 +73,6 @@ public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
                        RunsTablePresenterFactory makeRunsTablePresenter,
-                       WorkspaceNamesFactory workspaceNamesFactory,
                        double thetaTolerance,
                        std::vector<std::string> const &instruments,
                        int defaultInstrumentIndex,
@@ -109,7 +108,6 @@ private:
   /// The progress view
   ProgressableView *m_progressView;
   RunsTablePresenterFactory m_makeRunsTablePresenter;
-  WorkspaceNamesFactory const &m_workspaceNamesFactory;
   /// The data processor presenters stored in a vector
   std::unique_ptr<RunsTablePresenter> m_tablePresenter;
   /// The main presenter

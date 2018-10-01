@@ -92,12 +92,11 @@ public:
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view) {
-    return RunsTablePresenter(&view, {}, 0.01, WorkspaceNamesFactory(), Jobs());
+    return RunsTablePresenter(&view, {}, 0.01, Jobs());
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view, Jobs jobs) {
-    return RunsTablePresenter(&view, {}, 0.01, WorkspaceNamesFactory(),
-                              std::move(jobs));
+    return RunsTablePresenter(&view, {}, 0.01, std::move(jobs));
   }
 
 protected:

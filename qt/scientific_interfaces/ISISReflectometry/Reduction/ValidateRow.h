@@ -34,10 +34,8 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidator {
 public:
-  template <typename WorkspaceNamesFactory>
   ValidationResult<Row, std::vector<int>>
-  operator()(std::vector<std::string> const &cellText,
-             WorkspaceNamesFactory const &workspaceNames);
+  operator()(std::vector<std::string> const &cellText);
 
 private:
   boost::optional<std::vector<std::string>>
@@ -57,15 +55,12 @@ private:
 
 using RowValidationResult = ValidationResult<Row, std::vector<int>>;
 
-RowValidationResult
-validateRow(Jobs const &jobs,
-            WorkspaceNamesFactory const &workspaceNamesFactory,
-            std::vector<std::string> const &cellText);
+RowValidationResult validateRow(Jobs const &jobs,
+                                std::vector<std::string> const &cellText);
 
-boost::optional<Row>
-validateRowFromRunAndTheta(Jobs const &jobs,
-                           WorkspaceNamesFactory const &workspaceNamesFactory,
-                           std::string const &run, std::string const &theta);
+boost::optional<Row> validateRowFromRunAndTheta(Jobs const &jobs,
+                                                std::string const &run,
+                                                std::string const &theta);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROW_H_

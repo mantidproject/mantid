@@ -17,11 +17,9 @@ namespace CustomInterfaces {
 
 RunsTablePresenter::RunsTablePresenter(
     IRunsTableView *view, std::vector<std::string> const &instruments,
-    double thetaTolerance, WorkspaceNamesFactory workspaceNamesFactory,
-    Jobs jobs)
+    double thetaTolerance, Jobs jobs)
     : m_view(view), m_instruments(instruments), m_model(std::move(jobs)),
-      m_thetaTolerance(thetaTolerance), m_jobViewUpdater(m_view->jobs()),
-      m_workspaceNameFactory(std::move(workspaceNamesFactory)) {
+      m_thetaTolerance(thetaTolerance), m_jobViewUpdater(m_view->jobs()) {
   m_view->subscribe(this);
 }
 
@@ -34,8 +32,7 @@ void RunsTablePresenter::mergeAdditionalJobs(Jobs const &additionalJobs) {
   std::cout << "Transfering:" << std::endl;
   prettyPrintModel(additionalJobs);
 
-  mergeJobsInto(m_model, additionalJobs, m_thetaTolerance,
-                m_workspaceNameFactory, m_jobViewUpdater);
+  mergeJobsInto(m_model, additionalJobs, m_thetaTolerance, m_jobViewUpdater);
 
   std::cout << "After Transfer:" << std::endl;
   prettyPrintModel(m_model);
@@ -237,8 +234,8 @@ void RunsTablePresenter::updateRowField(
     std::string const &, std::string const &) {
   auto const groupIndex = groupOf(itemIndex);
   auto const rowIndex = rowOf(itemIndex);
-  auto rowValidationResult = validateRow(m_model, m_workspaceNameFactory,
-                                         cellTextFromViewAt(itemIndex));
+  auto rowValidationResult =
+      validateRow(m_model, cellTextFromViewAt(itemIndex));
   updateRow(m_model, groupIndex, rowIndex, rowValidationResult.validElseNone());
   if (rowValidationResult.isValid()) {
     showAllCellsOnRowAsValid(itemIndex);

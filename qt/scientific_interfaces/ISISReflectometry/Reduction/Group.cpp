@@ -32,18 +32,6 @@ bool Group::allRowsAreValid() const {
                      });
 }
 
-std::string Group::postprocessedWorkspaceName(
-    WorkspaceNamesFactory const &workspaceNamesFactory) const {
-  assertOrThrow(allRowsAreValid(), "Attempted to get postprocessed workspace "
-                                   "name from group with invalid rows.");
-  auto runNumbers = map(
-      m_rows,
-      [](boost::optional<Row> const &row) -> std::vector<std::string> const * {
-        return &row.get().runNumbers();
-      });
-  return workspaceNamesFactory.makePostprocessedName(runNumbers);
-}
-
 std::vector<boost::optional<Row>> const &Group::rows() const { return m_rows; }
 
 void Group::appendRow(boost::optional<Row> const &row) {

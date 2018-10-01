@@ -1,4 +1,5 @@
 #include "Parse.h"
+#include <cctype>
 
 namespace MantidQt {
 namespace CustomInterfaces {

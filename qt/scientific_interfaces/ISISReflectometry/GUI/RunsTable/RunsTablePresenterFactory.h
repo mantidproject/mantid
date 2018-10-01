@@ -34,14 +34,12 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenterFactory {
 public:
   RunsTablePresenterFactory(std::vector<std::string> const &instruments,
-                            double thetaTolerance,
-                            WorkspaceNamesFactory const &workspaceNamesFactory);
+                            double thetaTolerance);
   std::unique_ptr<RunsTablePresenter> operator()(IRunsTableView *view) const;
 
 private:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;
-  WorkspaceNamesFactory m_workspaceNamesFactory;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

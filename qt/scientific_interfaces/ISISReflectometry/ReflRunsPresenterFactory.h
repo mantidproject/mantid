@@ -16,7 +16,6 @@ namespace CustomInterfaces {
 class RunsPresenterFactory {
 public:
   RunsPresenterFactory(RunsTablePresenterFactory runsTablePresenterFactory,
-                       WorkspaceNamesFactory workspaceNamesFactory,
                        double thetaTolerance,
                        // cppcheck-suppress passedByValue
                        std::vector<std::string> instruments,
@@ -24,7 +23,6 @@ public:
                        IReflMessageHandler *messageHandler,
                        boost::shared_ptr<IReflSearcher> searcher)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
-        m_workspaceNamesFactory(std::move(workspaceNamesFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),
         m_defaultInstrumentIndex(std::move(defaultInstrumentIndex)),
@@ -32,14 +30,12 @@ public:
 
   std::unique_ptr<IReflRunsTabPresenter> make(IReflRunsTabView *view) {
     return std::make_unique<ReflRunsTabPresenter>(
-        view, view, m_runsTablePresenterFactory, m_workspaceNamesFactory,
-        m_thetaTolerance, m_instruments, m_defaultInstrumentIndex,
-        m_messageHandler, m_searcher);
+        view, view, m_runsTablePresenterFactory, m_thetaTolerance,
+        m_instruments, m_defaultInstrumentIndex, m_messageHandler, m_searcher);
   }
 
 private:
   RunsTablePresenterFactory m_runsTablePresenterFactory;
-  WorkspaceNamesFactory m_workspaceNamesFactory;
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
   int m_defaultInstrumentIndex;

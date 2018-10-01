@@ -26,7 +26,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "RangeInQ.h"
 #include "ReductionOptionsMap.h"
 #include "ReductionWorkspaces.h"
-#include "WorkspaceNamesFactory.h"
 #include <boost/optional.hpp>
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/variant.hpp>
@@ -53,9 +52,7 @@ public:
   ReductionOptionsMap const &reductionOptions() const;
   ReductionWorkspaces const &reducedWorkspaceNames() const;
 
-  template <typename WorkspaceNamesFactory>
-  Row withExtraRunNumbers(std::vector<std::string> const &runNumbers,
-                          WorkspaceNamesFactory const &workspaceNames) const;
+  Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
 private:
   std::vector<std::string> m_runNumbers;
@@ -73,25 +70,7 @@ private:
 //  return os;
 //}
 
-template <typename WorkspaceNamesFactory>
-Row Row::withExtraRunNumbers(
-    std::vector<std::string> const &extraRunNumbers,
-    WorkspaceNamesFactory const &workspaceNamesFactory) const {
-  auto newRunNumbers = std::vector<std::string>();
-  newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
-  boost::range::set_union(m_runNumbers, extraRunNumbers,
-                          std::back_inserter(newRunNumbers));
-  auto wsNames = workspaceNamesFactory.template makeNames(
-      newRunNumbers, transmissionWorkspaceNames());
-  return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(),
-             scaleFactor(), reductionOptions(), wsNames);
-}
-
-template <typename WorkspaceNamesFactory>
-Row mergedRow(Row const &rowA, Row const &rowB,
-              WorkspaceNamesFactory const &workspaceNamesFactory) {
-  return rowA.withExtraRunNumbers(rowB.runNumbers(), workspaceNamesFactory);
-}
+MANTIDQT_ISISREFLECTOMETRY_DLL Row mergedRow(Row const &rowA, Row const &rowB);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACE_RUN_H_

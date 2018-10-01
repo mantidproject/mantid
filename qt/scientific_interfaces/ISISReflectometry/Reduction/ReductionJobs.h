@@ -26,7 +26,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include <boost/optional.hpp>
 
 #include "Group.h"
-#include "WorkspaceNamesFactory.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -64,12 +63,10 @@ std::string groupName(Jobs const &jobs, int groupIndex);
 void prettyPrintModel(Jobs const &jobs);
 
 void mergeRowIntoGroup(Jobs &jobs, Row const &row, double thetaTolerance,
-                       std::string const &groupName,
-                       WorkspaceNamesFactory const &workspaceNamesFactory);
+                       std::string const &groupName);
 
-template <typename WorkspaceNamesFactory, typename ModificationListener>
+template <typename ModificationListener>
 void mergeJobsInto(Jobs &intoHere, Jobs const &fromHere, double thetaTolerance,
-                   WorkspaceNamesFactory const &workspaceNamesFactory,
                    ModificationListener &listener) {
   for (auto const &group : fromHere.groups()) {
     auto maybeGroupIndex = intoHere.indexOfGroupWithName(group.name());
@@ -77,7 +74,7 @@ void mergeJobsInto(Jobs &intoHere, Jobs const &fromHere, double thetaTolerance,
       auto indexToUpdateAt = maybeGroupIndex.get();
       auto &intoGroup = intoHere.groups()[indexToUpdateAt];
       mergeRowsInto(intoGroup, group, indexToUpdateAt, thetaTolerance,
-                    workspaceNamesFactory, listener);
+                    listener);
     } else {
       intoHere.appendGroup(group);
       listener.groupAppended(static_cast<int>(intoHere.groups().size()) - 1,

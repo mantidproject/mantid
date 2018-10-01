@@ -1,7 +1,6 @@
 #include "ValidateRow.h"
 #include "../Parse.h"
 #include "AllInitialized.h"
-#include "Reduction/WorkspaceNamesFactory.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
@@ -86,10 +85,8 @@ RowValidator::parseOptions(std::vector<std::string> const &cellText) {
   return options;
 }
 
-template <typename WorkspaceNamesFactory>
 ValidationResult<Row, std::vector<int>> RowValidator::
-operator()(std::vector<std::string> const &cellText,
-           WorkspaceNamesFactory const &workspaceNames) {
+operator()(std::vector<std::string> const &cellText) {
   auto maybeRunNumbers = parseRunNumbers(cellText);
   auto maybeTheta = parseTheta(cellText);
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
@@ -102,7 +99,8 @@ operator()(std::vector<std::string> const &cellText,
         workspaceNames(maybeRunNumbers.get(), maybeTransmissionRuns.get());
     auto maybeRow = makeIfAllInitialized<Row>(
         maybeRunNumbers, maybeTheta, maybeTransmissionRuns, maybeQRange,
-        maybeScaleFactor, maybeOptions, wsNames);
+        maybeScaleFactor, maybeOptions,
+        boost::optional<ReductionWorkspaces>(wsNames));
     if (maybeRow.is_initialized())
       return RowValidationResult(maybeRow.get());
     else
@@ -112,27 +110,18 @@ operator()(std::vector<std::string> const &cellText,
   }
 }
 
-RowValidationResult
-validateRow(Jobs const &, WorkspaceNamesFactory const &workspaceNamesFactory,
-            std::vector<std::string> const &cells) {
+RowValidationResult validateRow(Jobs const &,
+                                std::vector<std::string> const &cells) {
   auto validate = RowValidator();
-  RowValidationResult result = validate(
-      cells,
-      [&workspaceNamesFactory](
-          std::vector<std::string> const &runNumbers,
-          std::pair<std::string, std::string> const &transmissionRuns)
-          -> boost::optional<ReductionWorkspaces> {
-        return workspaceNamesFactory.makeNames(runNumbers, transmissionRuns);
-      });
+  RowValidationResult result = validate(cells);
   return result;
 }
 
-boost::optional<Row>
-validateRowFromRunAndTheta(Jobs const &jobs,
-                           WorkspaceNamesFactory const &workspaceNamesFactory,
-                           std::string const &run, std::string const &theta) {
+boost::optional<Row> validateRowFromRunAndTheta(Jobs const &jobs,
+                                                std::string const &run,
+                                                std::string const &theta) {
   std::vector<std::string> cells = {run, theta, "", "", "", "", "", "", ""};
-  return validateRow(jobs, workspaceNamesFactory, cells).validElseNone();
+  return validateRow(jobs, cells).validElseNone();
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

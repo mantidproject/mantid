@@ -1,7 +1,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
 #include "../../../ISISReflectometry/Reduction/ReductionJobs.h"
-#include "../../../ISISReflectometry/Reduction/WorkspaceNamesFactory.h"
 #include "../../../ISISReflectometry/ZipRange.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -21,7 +20,7 @@ public:
 
 class ReductionJobsMergeTest : public CxxTest::TestSuite {
 public:
-  ReductionJobsMergeTest() : m_thetaTolerance(0.001), m_nameFactory() {}
+  ReductionJobsMergeTest() : m_thetaTolerance(0.001) {}
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ReductionJobsMergeTest *createSuite() {
@@ -49,7 +48,7 @@ public:
     auto target = Jobs();
     auto addition = Jobs();
     NiceMock<MockModificationListener> listener;
-    mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
+    mergeJobsInto(target, addition, m_thetaTolerance, listener);
 
     TS_ASSERT(target.groups().empty());
   }
@@ -60,7 +59,7 @@ public:
     NiceMock<MockModificationListener> listener;
     addition.appendGroup(Group("A"));
 
-    mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
+    mergeJobsInto(target, addition, m_thetaTolerance, listener);
 
     TS_ASSERT_EQUALS(1u, target.groups().size());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
@@ -73,7 +72,7 @@ public:
     auto addition = Jobs();
     addition.appendGroup(Group("B"));
 
-    mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
+    mergeJobsInto(target, addition, m_thetaTolerance, listener);
 
     TS_ASSERT_EQUALS(2u, target.groups().size());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
@@ -88,7 +87,7 @@ public:
 
     EXPECT_CALL(listener, groupAppended(1, _));
 
-    mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
+    mergeJobsInto(target, addition, m_thetaTolerance, listener);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
   }
 
@@ -99,7 +98,7 @@ public:
     auto addition = Jobs();
     addition.appendGroup(Group("A"));
 
-    mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
+    mergeJobsInto(target, addition, m_thetaTolerance, listener);
 
     TS_ASSERT_EQUALS(1u, target.groups().size());
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
@@ -112,7 +111,7 @@ public:
     auto addition = Jobs();
     addition.appendGroup(Group("A", {rowWithAngle(0.2)}));
 
-    mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
+    mergeJobsInto(target, addition, m_thetaTolerance, listener);
 
     TS_ASSERT_EQUALS(1u, target.groups().size());
     TS_ASSERT_EQUALS(2u, target.groups()[0].rows().size());
@@ -128,7 +127,7 @@ public:
 
     EXPECT_CALL(listener, rowAppended(0, 1, _)).Times(1);
 
-    mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
+    mergeJobsInto(target, addition, m_thetaTolerance, listener);
 
     TS_ASSERT_EQUALS(1u, target.groups().size());
     TS_ASSERT_EQUALS(2u, target.groups()[0].rows().size());
@@ -142,7 +141,7 @@ public:
     auto addition = Jobs();
     addition.appendGroup(Group("A", {rowWithNameAndAngle("D", 0.1)}));
 
-    mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
+    mergeJobsInto(target, addition, m_thetaTolerance, listener);
 
     TS_ASSERT_EQUALS(1u, target.groups().size());
     TS_ASSERT_EQUALS(1u, target.groups()[0].rows().size());
@@ -159,7 +158,7 @@ public:
     addition.appendGroup(Group("A", {rowWithNameAndAngle("D", 0.1)}));
 
     EXPECT_CALL(listener, rowModified(0, 0, _));
-    mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
+    mergeJobsInto(target, addition, m_thetaTolerance, listener);
 
     TS_ASSERT_EQUALS(1u, target.groups().size());
     TS_ASSERT_EQUALS(1u, target.groups()[0].rows().size());
@@ -190,7 +189,7 @@ public:
 
   void testMergingRowsProducesUnionOfRunNumbers() {
     auto row = mergedRow(rowWithNamesAndAngle({"A", "B"}, 0.0),
-                         rowWithNamesAndAngle({"B", "C"}, 0.0), m_nameFactory);
+                         rowWithNamesAndAngle({"B", "C"}, 0.0));
 
     TS_ASSERT_EQUALS(std::vector<std::string>({"A", "B", "C"}),
                      row.runNumbers());
@@ -207,7 +206,7 @@ public:
         Group("S2 SI/ D20 ", {rowWithNamesAndAngle({"47450", "47453"}, 0.7)}));
 
     auto addition = target;
-    mergeJobsInto(target, addition, m_thetaTolerance, m_nameFactory, listener);
+    mergeJobsInto(target, addition, m_thetaTolerance, listener);
 
     TS_ASSERT(haveEqualRunNumbers(target, addition))
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
@@ -215,6 +214,5 @@ public:
 
 private:
   double m_thetaTolerance;
-  WorkspaceNamesFactory m_nameFactory;
 };
 #endif // MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_

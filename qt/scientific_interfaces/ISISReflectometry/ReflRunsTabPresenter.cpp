@@ -30,7 +30,6 @@
 #include <vector>
 
 #include "Reduction/ValidateRow.h"
-#include "Reduction/WorkspaceNamesFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -49,8 +48,6 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param mainView :: [input] The view we're managing
  * @param progressableView :: [input] The view reporting progress
  * @param makeRunsTablePresenter :: A generator for the child presenters.
- * @param workspaceNamesFactory :: A generator for the workspace names used in
- * the reduction.
  * @param thetaTolerance The tolerance used to determine if two runs should be
  * summed in a reduction.
  * @param instruments The names of the instruments to show as options for the
@@ -61,16 +58,15 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
-    RunsTablePresenterFactory makeRunsTablePresenter,
-    WorkspaceNamesFactory workspaceNamesFactory, double thetaTolerance,
+    RunsTablePresenterFactory makeRunsTablePresenter, double thetaTolerance,
     std::vector<std::string> const &instruments, int defaultInstrumentIndex,
     IReflMessageHandler *messageHandler,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_makeRunsTablePresenter(makeRunsTablePresenter),
-      m_workspaceNamesFactory(workspaceNamesFactory), m_mainPresenter(nullptr),
-      m_messageHandler(messageHandler), m_searcher(searcher),
-      m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
+      m_mainPresenter(nullptr), m_messageHandler(messageHandler),
+      m_searcher(searcher), m_instrumentChanged(false),
+      m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -413,12 +409,11 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
     for (auto rowIndex : rowsToTransfer) {
       auto &result = (*m_searchModel)[rowIndex];
       auto resultMetadata = metadataFromDescription(result.description);
-      auto row =
-          validateRowFromRunAndTheta(jobs, m_workspaceNamesFactory,
-                                     result.runNumber, resultMetadata.theta);
+      auto row = validateRowFromRunAndTheta(jobs, result.runNumber,
+                                            resultMetadata.theta);
       if (row.is_initialized()) {
         mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
-                          resultMetadata.groupName, m_workspaceNamesFactory);
+                          resultMetadata.groupName);
       } else {
         m_searchModel->setError(rowIndex,
                                 "Theta was not specified in the description.");

@@ -28,7 +28,6 @@ set ( REDUCTION_INC_FILES
     Row.h
     Slicing.h
     ValidateRow.h
-    WorkspaceNamesFactory.h
     ParseReflectometryStrings.h
     ValidatePerThetaDefaults.h
 

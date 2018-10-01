@@ -45,9 +45,8 @@ void QtReflMainWindowView::initLayout() {
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
 
   auto thetaTolerance = 0.01;
-  auto makeWorkspaceNames = WorkspaceNamesFactory();
-  auto makeRunsTablePresenter = RunsTablePresenterFactory(
-      instruments, thetaTolerance, makeWorkspaceNames);
+  auto makeRunsTablePresenter =
+      RunsTablePresenterFactory(instruments, thetaTolerance);
   auto defaultInstrumentIndex = 0;
   // TODO: Look this up properly by comparing the default instrument to the
   // values in the list;
@@ -55,9 +54,8 @@ void QtReflMainWindowView::initLayout() {
   auto messageHandler = this;
 
   auto makeRunsPresenter = RunsPresenterFactory(
-      std::move(makeRunsTablePresenter), std::move(makeWorkspaceNames),
-      thetaTolerance, instruments, defaultInstrumentIndex, messageHandler,
-      searcher);
+      std::move(makeRunsTablePresenter), thetaTolerance, instruments,
+      defaultInstrumentIndex, messageHandler, searcher);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();

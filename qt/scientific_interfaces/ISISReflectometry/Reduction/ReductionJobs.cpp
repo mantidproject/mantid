@@ -84,15 +84,13 @@ void updateRow(Jobs &jobs, int groupIndex, int rowIndex,
 }
 
 void mergeRowIntoGroup(Jobs &jobs, Row const &row, double thetaTolerance,
-                       std::string const &groupName,
-                       WorkspaceNamesFactory const &workspaceNames) {
+                       std::string const &groupName) {
   auto &group = findOrMakeGroupWithName(jobs, groupName);
   auto indexOfRowToUpdate =
       group.indexOfRowWithTheta(row.theta(), thetaTolerance);
 
   if (indexOfRowToUpdate.is_initialized()) {
-    auto newRowValue =
-        mergedRow(group[indexOfRowToUpdate.get()].get(), row, workspaceNames);
+    auto newRowValue = mergedRow(group[indexOfRowToUpdate.get()].get(), row);
     group.updateRow(indexOfRowToUpdate.get(), newRowValue);
   } else {
     group.appendRow(row);

@@ -39,5 +39,20 @@ ReductionOptionsMap const &Row::reductionOptions() const {
 ReductionWorkspaces const &Row::reducedWorkspaceNames() const {
   return m_reducedWorkspaceNames;
 }
+
+Row Row::withExtraRunNumbers(
+    std::vector<std::string> const &extraRunNumbers) const {
+  auto newRunNumbers = std::vector<std::string>();
+  newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
+  boost::range::set_union(m_runNumbers, extraRunNumbers,
+                          std::back_inserter(newRunNumbers));
+  auto wsNames = workspaceNames(newRunNumbers, transmissionWorkspaceNames());
+  return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(),
+             scaleFactor(), reductionOptions(), wsNames);
+}
+
+Row mergedRow(Row const &rowA, Row const &rowB) {
+  return rowA.withExtraRunNumbers(rowB.runNumbers());
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -24,7 +24,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #define MANTID_CUSTOMINTERFACES_GROUP_H_
 #include "../DllConfig.h"
 #include "Row.h"
-#include "WorkspaceNamesFactory.h"
 #include <boost/optional.hpp>
 #include <string>
 #include <vector>
@@ -39,8 +38,7 @@ public:
 
   std::string const &name() const;
   void setName(std::string const &name);
-  std::string postprocessedWorkspaceName(
-      WorkspaceNamesFactory const &workspaceNamesFactory) const;
+  std::string postprocessedWorkspaceName() const;
 
   void appendEmptyRow();
   void appendRow(boost::optional<Row> const &row);
@@ -60,11 +58,9 @@ private:
   std::vector<boost::optional<Row>> m_rows;
 };
 
-template <typename WorkspaceNamesFactory, typename ModificationListener>
+template <typename ModificationListener>
 void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex,
-                   double thetaTolerance,
-                   WorkspaceNamesFactory const &workspaceNamesFactory,
-                   ModificationListener &listener) {
+                   double thetaTolerance, ModificationListener &listener) {
   for (auto const &maybeRow : fromHere.rows()) {
     if (maybeRow.is_initialized()) {
       auto const &fromRow = maybeRow.get();
@@ -73,7 +69,7 @@ void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex,
       if (index.is_initialized()) {
         auto const updateAtIndex = index.get();
         auto const &intoRow = intoHere[updateAtIndex].get();
-        auto updatedRow = mergedRow(intoRow, fromRow, workspaceNamesFactory);
+        auto updatedRow = mergedRow(intoRow, fromRow);
         intoHere.updateRow(updateAtIndex, updatedRow);
         listener.rowModified(groupIndex, updateAtIndex, updatedRow);
       } else {
