@@ -61,4 +61,4 @@ class ValidateGroupingFiles(stresstesting.MantidStressTest):
             raise RuntimeError("Failed Validation for %d of %d files"
                                % (len(failed), len(files)))
         else:
-            print("Succesfully Validated %d files" % len(files))
+            print("Successfully Validated %d files" % len(files))

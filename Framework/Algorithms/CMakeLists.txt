@@ -189,6 +189,7 @@ set ( SRC_FILES
 	src/MaxEnt/MaxentSpaceComplex.cpp
 	src/MaxEnt/MaxentSpaceReal.cpp
 	src/MaxEnt/MaxentTransformFourier.cpp
+	src/MaxEnt/MaxentTransformMultiFourier.cpp
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
@@ -523,6 +524,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaxEnt/MaxentSpaceReal.h
 	inc/MantidAlgorithms/MaxEnt/MaxentTransform.h
 	inc/MantidAlgorithms/MaxEnt/MaxentTransformFourier.h
+	inc/MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
@@ -857,6 +859,7 @@ set ( TEST_FILES
 	MaxEnt/MaxentSpaceComplexTest.h
 	MaxEnt/MaxentSpaceRealTest.h
 	MaxEnt/MaxentTransformFourierTest.h
+	MaxEnt/MaxentTransformMultiFourierTest.h
 	MaxEntTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h

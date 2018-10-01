@@ -77,7 +77,7 @@ Sum Files
   treated as a single run.
 
 Load Log Files
-  If selected the sample logs will be laoded from each of the run files.
+  If selected the sample logs will be loaded from each of the run files.
 
 Efixed
   This option allows you to override the default fixed final energy for the
@@ -105,7 +105,7 @@ Scale
   Gives the option to scale the output by a given factor.
 
 Spectra Min & Spectra Max
-  Selecte the range of detectors you are interested in, default values are
+  Select the range of detectors you are interested in, default values are
   chosen based on the instrument and analyser bank selected.
 
 Rebin Steps
@@ -119,7 +119,7 @@ Plot Output
 
 Fold Multiple Frames
   This option is only relevant for TOSCA. If checked, then multiple-framed data
-  will be folded back into a single spectra, if unchecked the frames wil lbe
+  will be folded back into a single spectra, if unchecked the frames will be
   left as is with the frame number given at the end of the workspace name.
 
 Output in :math:`cm^{-1}`
@@ -128,7 +128,7 @@ Output in :math:`cm^{-1}`
 
 Select Save Formats
   Allows you to select multiple output save formats to save the reduced data as,
-  in all cases the file will be saved in the defaut save directory.
+  in all cases the file will be saved in the default save directory.
 
 Grouping
 ~~~~~~~~
@@ -254,7 +254,7 @@ FWS-only Options
 ~~~~~~~~~~~~~~~~
 
 Observable
-  This is the scanning ovservable, that will become the x-axis of the final result.
+  This is the scanning observable, that will become the x-axis of the final result.
   It can be any numeric sample parameter defined in Sample Logs (e.g. sample.*) or a time-stamp string (e.g. start_time).
   It can also be the run number. It can not be an instrument parameter.
 
@@ -274,7 +274,7 @@ ISIS Calibration & Resolution
 
 This tab gives you the ability to create Calibration and Resolution files.
 
-The calibrtion file is normalised to an average of 1.
+The calibration file is normalised to an average of 1.
 
 Options
 ~~~~~~~
@@ -369,7 +369,7 @@ Input
   Transfer tab.
 
 Use Calibration
-  Allows you to select either a calibrtion file or workspace to apply to the raw
+  Allows you to select either a calibration file or workspace to apply to the raw
   files.
 
 Preview Spectrum
@@ -390,7 +390,7 @@ Use Two Ranges
   If selected, enables subtraction of the background range.
 
 Background
-  An optional range denoting background noice that is to be removed from the raw
+  An optional range denoting background noise that is to be removed from the raw
   data before the integration is performed. A default starting value is generally
   provided from the instrument's parameter file.
 

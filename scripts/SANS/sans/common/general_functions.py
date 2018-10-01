@@ -223,7 +223,7 @@ def add_to_sample_log(workspace, log_name, log_value, log_type):
     """
     Adds a sample log to the workspace
 
-    :param workspace: the workspace to whcih the sample log is added
+    :param workspace: the workspace to which the sample log is added
     :param log_name: the name of the log
     :param log_value: the value of the log in string format
     :param log_type: the log value type which can be String, Number, Number Series

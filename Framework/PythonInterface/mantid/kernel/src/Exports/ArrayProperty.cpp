@@ -1,10 +1,10 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
 
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
@@ -18,8 +18,8 @@ using Mantid::Kernel::Direction;
 using Mantid::Kernel::IValidator_sptr;
 using Mantid::Kernel::NullValidator;
 using Mantid::Kernel::PropertyWithValue;
+using Mantid::PythonInterface::NDArray;
 namespace Converters = Mantid::PythonInterface::Converters;
-namespace NumPy = Mantid::PythonInterface::NumPy;
 namespace Policies = Mantid::PythonInterface::Policies;
 using namespace boost::python;
 
@@ -125,7 +125,7 @@ ArrayProperty<T> *createArrayPropertyFromList(const std::string &name,
  */
 template <typename T>
 ArrayProperty<T> *createArrayPropertyFromNDArray(const std::string &name,
-                                                 const NumPy::NdArray &values,
+                                                 const NDArray &values,
                                                  IValidator_sptr validator,
                                                  const unsigned int direction) {
   return new ArrayProperty<T>(name, Converters::NDArrayToVector<T>(values)(),

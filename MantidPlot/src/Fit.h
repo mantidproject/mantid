@@ -122,7 +122,7 @@ public:
   //! Returns R^2
   double rSquare();
 
-  //! Specifies wheather the errors must be scaled with sqrt(chi_2/dof)
+  //! Specifies whether the errors must be scaled with sqrt(chi_2/dof)
   void scaleErrors(bool yes = true) { d_scale_errors = yes; };
 
   Table *parametersTable(const QString &tableName);
@@ -239,7 +239,7 @@ protected:
   //! The sum of squares of the residuals from the best-fit line
   double chi_2;
 
-  //! Specifies wheather the errors must be scaled with sqrt(chi_2/dof)
+  //! Specifies whether the errors must be scaled with sqrt(chi_2/dof)
   bool d_scale_errors;
 
   //! Table window used for the output of fit parameters

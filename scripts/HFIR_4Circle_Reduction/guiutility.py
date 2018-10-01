@@ -128,7 +128,7 @@ def map_to_color(data_array, base_color, change_color_flag):
                 color_value = min(1.0 - 1.E-10, color_value)
                 step_list_index += 1
             else:
-                # use bae color
+                # use base color
                 color_value = base_color[i_color]
             # ENDIF
 

@@ -18,7 +18,7 @@ filename = 'MAP14919.raw'  # Name of calibration run
 rangeLower = 2000  # Integrate counts in each spectra from rangeLower to rangeUpper
 rangeUpper = 10000  #
 
-# Set what we want to calibrate (e.g whole intrument or one door )
+# Set what we want to calibrate (e.g whole instrument or one door )
 CalibratedComponent1 = 'C4_window'  # Calibrate C4 window
 CalibratedComponent2 = 'C3_window'  # Calibrate C3 window
 

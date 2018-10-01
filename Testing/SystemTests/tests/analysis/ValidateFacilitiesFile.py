@@ -41,4 +41,4 @@ class ValidateFacilitiesFile(stresstesting.MantidStressTest):
             print("SUMMARY OF FAILED FILES")
             raise RuntimeError("Failed Validation of Facilities.xml")
         else:
-            print("Succesfully Validated Facilities.xml")
+            print("Successfully Validated Facilities.xml")

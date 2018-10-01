@@ -19,10 +19,10 @@ This algorithm is one of the workflow algorithms that helps
 :ref:`algm-SNSPowderReduction` and its child algorithm
 :ref:`algm-AlignAndFocusPowder`.
 
-Determing Frequency and Wavelength
-##################################
+Determining Frequency and Wavelength
+####################################
 
-The freqency is found by inspecting the logs (in order)
+The frequency is found by inspecting the logs (in order)
 ``SpeedRequest1``, ``Speed1``, and ``frequency``. Whichever one has a
 nonzero value is used.  Simlilarly, the wavelength is taken by
 inspecting ``LambdaRequest`` then ``Lambda``. If either the frequency

@@ -6,6 +6,7 @@ namespace Batch {
 void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item) {
   item.setText(QString::fromStdString(cell.contentText()));
   item.setEditable(cell.isEditable());
+  item.setToolTip(QString::fromStdString(cell.toolTip()));
   setBorderThickness(item, cell.borderThickness());
   setBackgroundColor(item, cell.backgroundColor());
   setBorderColor(item, cell.borderColor(), cell.borderOpacity());
@@ -23,6 +24,7 @@ Cell extractCellPropertiesFromItem(QStandardItem const &item) {
   cell.setBorderOpacity(borderColor.alpha());
 
   cell.setEditable(item.isEditable());
+  cell.setToolTip(item.toolTip().toStdString());
   return cell;
 }
 

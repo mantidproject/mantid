@@ -2644,7 +2644,7 @@ bool Graph::addCurves(Table *w, const QStringList &names, int style,
         // If X column is given - use it
         xColName = xColNameGiven;
       else
-        // Otherise, use associated one
+        // Otherwise, use associated one
         xColName = w->colName(w->colX(colIndex));
 
       if (xColName.isEmpty() || yColName.isEmpty())

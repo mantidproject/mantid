@@ -192,7 +192,16 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
       throw std::runtime_error(result.error());
     }
 
-    m_loadedData = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr tmp = alg->getProperty("OutputWorkspace");
+
+    IAlgorithm_sptr sortAlg = AlgorithmManager::Instance().create("SortXAxis");
+    sortAlg->setChild(true); // Don't want workspaces in the ADS
+    sortAlg->setProperty("InputWorkspace", tmp);
+    sortAlg->setProperty("Ordering", "Ascending");
+    sortAlg->setProperty("OutputWorkspace", "__NotUsed__");
+
+    sortAlg->execute();
+    m_loadedData = sortAlg->getProperty("OutputWorkspace");
 
     // If errors are properly caught, shouldn't happen
     assert(m_loadedData);

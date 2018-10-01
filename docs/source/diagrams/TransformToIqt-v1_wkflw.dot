@@ -2,7 +2,7 @@ digraph TransformToIqt {
   label="TransformToIqt Flowchart"
   $global_style
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     IsDryRun                        [label="DryRun?"]
   }

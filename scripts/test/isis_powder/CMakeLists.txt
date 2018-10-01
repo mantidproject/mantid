@@ -13,6 +13,7 @@ set ( TEST_PY_FILES
     ISISPowderRunDetailsTest.py
     ISISPowderSampleDetailsTest.py
     ISISPowderYamlParserTest.py
+    ISISPowderFocusCropTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

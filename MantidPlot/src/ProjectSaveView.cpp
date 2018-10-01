@@ -231,7 +231,7 @@ void ProjectSaveView::workspaceItemChanged(QTreeWidgetItem *item, int column) {
  * then only a subset of the workspaces/windows will be passed to the project
  * serialiser.
  *
- * @param checked :: unused arguement
+ * @param checked :: unused argument
  */
 void ProjectSaveView::save(bool checked) {
   UNUSED_ARG(checked);

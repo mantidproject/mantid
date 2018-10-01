@@ -1027,6 +1027,7 @@ Peak &Peak::operator=(const Peak &other) {
     m_orig_L = other.m_orig_L;
     m_detIDs = other.m_detIDs;
     convention = other.convention;
+    m_peakNumber = other.m_peakNumber;
     m_peakShape.reset(other.m_peakShape->clone());
   }
   return *this;

@@ -118,6 +118,19 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_thickness() == 1.0)
         self.assertTrue(file_information.get_shape() is SampleShape.FlatPlate)
 
+    def test_that_can_find_data_with_numbers_but_no_instrument(self):
+        # Arrange
+        # The file is a single period, histogram-based and added
+
+        file_name = "74044-add"
+        factory = SANSFileInformationFactory()
+
+        # Act
+        file_information = factory.create_sans_file_information(file_name)
+
+        # Assert
+        self.assertTrue(file_information)
+
 
 class SANSFileInformationGeneralFunctionsTest(unittest.TestCase):
     def test_that_finds_idf_and_ipf_paths(self):

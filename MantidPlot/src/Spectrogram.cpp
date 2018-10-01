@@ -883,7 +883,7 @@ void Spectrogram::updateLabels(
   }
 }
 /**
-     for setting the lables color on contour lines
+     for setting the labels color on contour lines
  */
 void Spectrogram::setLabelsColor(const QColor &c) {
   if (c == d_labels_color)

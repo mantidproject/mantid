@@ -19,7 +19,7 @@ be used.
 
         doSomethingSignal = QtCore.pyqtSignal()
 
-	def __init__(self, parent=None):
+        def __init__(self, parent=None):
             super(view, self).__init__(parent)
 
             self.button = QtGui.QPushButton('Hi', self)
@@ -45,12 +45,12 @@ be used.
             # set the layout for the view widget
             self.setLayout(grid)
  
-	#send signals
-	def btn_click(self):
+        #send signals
+        def btn_click(self):
             print ("hellow from view")
-	    self.doSomethingSignal.emit()
+            self.doSomethingSignal.emit()
 
-	def getValue(self):
+            def getValue(self):
             return float(self.value.text())
 
 The last function ``getValue`` returns the value of the line
