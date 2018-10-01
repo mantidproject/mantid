@@ -11,7 +11,7 @@ import re
 
 from sans.common.constants import ALL_PERIODS
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
-from sans.common.enums import RowState
+from sans.common.enums import RowState, SampleShape
 import functools
 from sans.gui_logic.presenter.create_file_information import create_file_information
 from ui.sans_isis.work_handler import WorkHandler
@@ -22,7 +22,8 @@ class TableModel(object):
                              "sample_transmission_period", "sample_direct", "sample_direct_period",
                              "can_scatter", "can_scatter_period",
                              "can_transmission", "can_transmission_period", "can_direct", "can_direct_period",
-                             "output_name", "user_file", "sample_thickness", "options_column_model"]
+                             "output_name", "user_file", "sample_thickness", "sample_height", "sample_width",
+                             "sample_shape", "options_column_model"]
 
     def __init__(self):
         super(TableModel, self).__init__()
@@ -151,6 +152,9 @@ class TableModel(object):
     def failure_handler(self, id, error):
         row = self.get_row_from_id(id)
         self.update_table_entry(row, 14, '')
+        self.update_table_entry(row, 15, '')
+        self.update_table_entry(row, 16, '')
+        self.update_table_entry(row, 17, '')
         self._table_entries[row].update_attribute('file_information', '')
         self.set_row_to_error(row, str(error[1]))
 
@@ -158,7 +162,12 @@ class TableModel(object):
         row = self.get_row_from_id(id)
         if file_information:
             rounded_file_thickness = round(file_information.get_thickness(), 2)
+            rounded_file_height = round(file_information.get_height(), 2)
+            rounded_file_width = round(file_information.get_width(), 2)
             self.update_table_entry(row, 14, rounded_file_thickness)
+            self.update_table_entry(row, 15, rounded_file_height)
+            self.update_table_entry(row, 16, rounded_file_width)
+            self.update_table_entry(row, 17, file_information.get_shape())
             self._table_entries[row].update_attribute('file_information', file_information)
         self.notify_subscribers()
 
@@ -192,7 +201,8 @@ class TableIndexModel(object):
                  can_scatter, can_scatter_period,
                  can_transmission, can_transmission_period,
                  can_direct, can_direct_period,
-                 output_name="", user_file="", sample_thickness='0.0', options_column_string=""):
+                 output_name="", user_file="", sample_thickness='', sample_height='', sample_width='',
+                 sample_shape='', options_column_string=""):
         super(TableIndexModel, self).__init__()
         self.id = None
         self.sample_scatter = sample_scatter
@@ -211,6 +221,9 @@ class TableIndexModel(object):
 
         self.user_file = user_file
         self.sample_thickness = sample_thickness
+        self.sample_height = sample_height
+        self.sample_width = sample_width
+        self.sample_shape = sample_shape
         self.output_name = output_name
 
         self.options_column_model = options_column_string
@@ -244,7 +257,14 @@ class TableIndexModel(object):
                 self._string_period(self.can_scatter_period), self.can_transmission,
                 self._string_period(self.can_transmission_period), self.can_direct,
                 self._string_period(self.can_direct_period), self.output_name, self.user_file, self.sample_thickness,
+                self.sample_height, self.sample_width, self._convert_sample_shape_to_string(self.sample_shape),
                 self.options_column_model.get_options_string()]
+
+    def _convert_sample_shape_to_string(self, shape):
+        if shape:
+            return SampleShape.to_string(shape)
+        else:
+            return ''
 
     def isMultiPeriod(self):
         return any ((self.sample_scatter_period, self.sample_transmission_period ,self.sample_direct_period,

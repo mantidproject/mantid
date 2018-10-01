@@ -92,6 +92,9 @@ class RunTabPresenter(object):
         def on_cut_rows(self):
             self._presenter.on_cut_rows_requested()
 
+        def on_sample_geometry_selection(self, show_geometry):
+            self._presenter.on_sample_geometry_view_changed(show_geometry)
+
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ProcessListener, self).__init__()
@@ -461,6 +464,12 @@ class RunTabPresenter(object):
 
     def on_manage_directories(self):
         self._view.show_directory_manager()
+
+    def on_sample_geometry_view_changed(self, show_geometry):
+        if show_geometry:
+            self._view.show_geometry()
+        else:
+            self._view.hide_geometry()
 
     def get_row_indices(self):
         """
