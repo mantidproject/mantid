@@ -394,6 +394,8 @@ class MuonContext(object):
 
     def get_default_grouping(self, _instrument):
         parameter_name = "Default grouping file"
+        if self.instrument == "MUSR":
+            parameter_name += " - " + self.main_field_direction
         workspace = self.loaded_workspace
         try:
             grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
