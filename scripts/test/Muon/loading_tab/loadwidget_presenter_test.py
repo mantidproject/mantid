@@ -8,17 +8,17 @@ except ImportError:
 from PyQt4 import QtGui
 from PyQt4.QtGui import QApplication
 
-from Muon.GUI.MuonAnalysis.loadwidget.load_widget_model import LoadWidgetModel
-from Muon.GUI.MuonAnalysis.loadwidget.load_widget_view import LoadWidgetView
-from Muon.GUI.MuonAnalysis.loadwidget.load_widget_presenter import LoadWidgetPresenter
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 
-from Muon.GUI.MuonAnalysis.loadrun.load_run_model import LoadRunWidgetModel
-from Muon.GUI.MuonAnalysis.loadrun.load_run_presenter import LoadRunWidgetPresenter
-from Muon.GUI.MuonAnalysis.loadrun.load_run_view import LoadRunWidgetView
+from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
+from Muon.GUI.Common.load_run_widget.presenter import LoadRunWidgetPresenter
+from Muon.GUI.Common.load_run_widget.view import LoadRunWidgetView
 
-from Muon.GUI.MuonAnalysis.loadfile.load_file_model import BrowseFileWidgetModel
-from Muon.GUI.MuonAnalysis.loadfile.load_file_presenter import BrowseFileWidgetPresenter
-from Muon.GUI.MuonAnalysis.loadfile.load_file_view import BrowseFileWidgetView
+from Muon.GUI.Common.load_file_widget import BrowseFileWidgetModel
+from Muon.GUI.Common.load_file_widget import BrowseFileWidgetPresenter
+from Muon.GUI.Common.load_file_widget import BrowseFileWidgetView
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 import Muon.GUI.Common.muon_file_utils as file_utils

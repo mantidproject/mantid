@@ -8,7 +8,7 @@ if sys.version_info.major == 3:
 else:
     import mock
 
-from Muon.GUI.MuonAnalysis.loadfile.load_file_model import BrowseFileWidgetModel
+from Muon.GUI.Common.load_file_widget import BrowseFileWidgetModel
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 
