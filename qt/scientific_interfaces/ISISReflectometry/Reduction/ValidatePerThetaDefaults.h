@@ -50,6 +50,8 @@ private:
   parseScaleFactor(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<std::map<std::string, std::string>>
   parseOptions(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
+  boost::optional<boost::optional<std::string>> parseProcessingInstructions(
+      std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
 
   std::vector<int> m_invalidColumns;
 };

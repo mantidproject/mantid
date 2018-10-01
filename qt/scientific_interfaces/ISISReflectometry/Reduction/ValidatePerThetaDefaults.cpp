@@ -78,12 +78,14 @@ PerThetaDefaultsValidator::parseScaleFactor(CellText const &cellText) {
   return optionalScaleFactorOrNoneIfError;
 }
 
-boost::optional<std::map<std::string, std::string>>
-PerThetaDefaultsValidator::parseOptions(CellText const &cellText) {
-  auto options = ::MantidQt::CustomInterfaces::parseOptions(cellText[7]);
-  if (!options.is_initialized())
+boost::optional<boost::optional<std::string>>
+PerThetaDefaultsValidator::parseProcessingInstructions(
+    CellText const &cellText) {
+  auto optionalInstructionsOrNoneIfError =
+      ::MantidQt::CustomInterfaces::parseProcessingInstructions(cellText[7]);
+  if (!optionalInstructionsOrNoneIfError.is_initialized())
     m_invalidColumns.emplace_back(7);
-  return options;
+  return optionalInstructionsOrNoneIfError;
 }
 
 ValidationResult<PerThetaDefaults, std::vector<int>> PerThetaDefaultsValidator::
@@ -92,10 +94,10 @@ operator()(CellText const &cellText) {
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
   auto maybeQRange = parseQRange(cellText);
   auto maybeScaleFactor = parseScaleFactor(cellText);
-  auto maybeOptions = parseOptions(cellText);
+  auto maybeProcessingInstructions = parseProcessingInstructions(cellText);
   auto maybeDefaults = makeIfAllInitialized<PerThetaDefaults>(
       maybeTheta, maybeTransmissionRuns, maybeQRange, maybeScaleFactor,
-      maybeOptions);
+      maybeProcessingInstructions);
 
   if (maybeDefaults.is_initialized())
     return ValidationResult<PerThetaDefaults, std::vector<int>>(

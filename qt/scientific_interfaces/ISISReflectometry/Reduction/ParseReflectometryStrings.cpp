@@ -1,7 +1,9 @@
 #include "ParseReflectometryStrings.h"
 #include "../Parse.h"
 #include "AllInitialized.h"
+#include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include <set>
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -42,6 +44,22 @@ parseOptions(std::string const &options) {
   } catch (std::runtime_error &) {
     return boost::none;
   }
+}
+
+boost::optional<boost::optional<std::string>>
+parseProcessingInstructions(std::string const &instructions) {
+  if (isEntirelyWhitespace(instructions)) {
+    return boost::optional<std::string>(boost::none);
+  } else {
+    try {
+      auto const groups =
+          Mantid::Kernel::Strings::parseGroups<size_t>(instructions);
+      return boost::optional<std::string>(instructions);
+    } catch (std::runtime_error &) {
+      return boost::none;
+    }
+  }
+  return boost::none;
 }
 
 boost::optional<boost::optional<double>>

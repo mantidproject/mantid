@@ -42,6 +42,10 @@ MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::optional<std::map<std::string, std::string>>
 parseOptions(std::string const &options);
 
+MANTIDQT_ISISREFLECTOMETRY_DLL
+boost::optional<boost::optional<std::string>>
+parseProcessingInstructions(std::string const &instructions);
+
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PARSEREFLECTOMETRYSTRINGS_H_

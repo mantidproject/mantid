@@ -29,6 +29,7 @@ set ( REDUCTION_INC_FILES
     Slicing.h
     ValidateRow.h
     ParseReflectometryStrings.h
+    ProcessingInstructions.h
     ValidatePerThetaDefaults.h
 
     AnalysisMode.h

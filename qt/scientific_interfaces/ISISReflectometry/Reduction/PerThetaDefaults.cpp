@@ -7,11 +7,11 @@ PerThetaDefaults::PerThetaDefaults(
     boost::optional<double> theta,
     std::pair<std::string, std::string> transmissionRuns,
     boost::optional<RangeInQ> qRange, boost::optional<double> scaleFactor,
-    ReductionOptionsMap reductionOptions)
+    boost::optional<ProcessingInstructions> processingInstructions)
     : m_theta(std::move(theta)),
       m_transmissionRuns(std::move(transmissionRuns)),
       m_qRange(std::move(qRange)), m_scaleFactor(std::move(scaleFactor)),
-      m_reductionOptions(std::move(reductionOptions)) {}
+      m_processingInstructions(std::move(processingInstructions)) {}
 
 std::pair<std::string, std::string> const &
 PerThetaDefaults::transmissionWorkspaceNames() const {
@@ -32,15 +32,16 @@ boost::optional<double> PerThetaDefaults::scaleFactor() const {
   return m_scaleFactor;
 }
 
-ReductionOptionsMap const &PerThetaDefaults::reductionOptions() const {
-  return m_reductionOptions;
+boost::optional<ProcessingInstructions>
+PerThetaDefaults::processingInstructions() const {
+  return m_processingInstructions;
 }
 
 bool operator==(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) {
   return lhs.thetaOrWildcard() == rhs.thetaOrWildcard() &&
          lhs.qRange() == rhs.qRange() &&
          lhs.scaleFactor() == rhs.scaleFactor() &&
-         lhs.reductionOptions() == rhs.reductionOptions();
+         lhs.processingInstructions() == rhs.processingInstructions();
 }
 
 bool operator!=(PerThetaDefaults const &lhs, PerThetaDefaults const &rhs) {

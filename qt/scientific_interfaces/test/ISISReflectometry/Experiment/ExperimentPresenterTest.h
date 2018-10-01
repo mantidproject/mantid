@@ -249,7 +249,7 @@ private:
     auto stitchParameters = std::map<std::string, std::string>();
     auto perThetaDefaults = std::vector<PerThetaDefaults>(
         {PerThetaDefaults(boost::none, std::pair<std::string, std::string>(),
-                          boost::none, boost::none, ReductionOptionsMap())});
+                          boost::none, boost::none, boost::none)});
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda,
                       std::move(polarizationCorrections),
@@ -299,16 +299,14 @@ private:
   // either as an input array of strings or an output model
   OptionsRow optionsWithAngleAndOneTrans() { return {"0.5", "13463"}; }
   PerThetaDefaults defaultsWithAngleAndOneTrans() {
-    return PerThetaDefaults(0.5, std::make_pair("13463", ""),
-                            boost::optional<RangeInQ>(),
-                            boost::optional<double>(), ReductionOptionsMap());
+    return PerThetaDefaults(0.5, std::make_pair("13463", ""), boost::none,
+                            boost::none, boost::none);
   }
 
   OptionsRow optionsWithAngleAndTwoTrans() { return {"2.3", "13463", "13464"}; }
   PerThetaDefaults defaultsWithAngleAndTwoTrans() {
-    return PerThetaDefaults(2.3, std::make_pair("13463", "13464"),
-                            boost::optional<RangeInQ>(),
-                            boost::optional<double>(), ReductionOptionsMap());
+    return PerThetaDefaults(2.3, std::make_pair("13463", "13464"), boost::none,
+                            boost::none, boost::none);
   }
 };
 
