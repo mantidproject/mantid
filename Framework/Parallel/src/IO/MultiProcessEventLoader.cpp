@@ -239,49 +239,12 @@ void MultiProcessEventLoader::fillFromFile(
   auto type =
       EventLoader::readDataType(instrument, bankNames, "event_time_offset");
 
-  if (precalc) {
-    if (type == H5::PredType::NATIVE_INT32)
-      return GroupLoader<LoadType::preCalcEvents>::loadFromGroup<int32_t>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    if (type == H5::PredType::NATIVE_INT64)
-      return GroupLoader<LoadType::preCalcEvents>::loadFromGroup<int64_t>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    if (type == H5::PredType::NATIVE_UINT32)
-      return GroupLoader<LoadType::preCalcEvents>::loadFromGroup<uint32_t>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    if (type == H5::PredType::NATIVE_UINT64)
-      return GroupLoader<LoadType::preCalcEvents>::loadFromGroup<uint64_t>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    if (type == H5::PredType::NATIVE_FLOAT)
-      return GroupLoader<LoadType::preCalcEvents>::loadFromGroup<float>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    if (type == H5::PredType::NATIVE_DOUBLE)
-      return GroupLoader<LoadType::preCalcEvents>::loadFromGroup<double>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    throw std::runtime_error(
-        "Unsupported H5::DataType for event_time_offset in NXevent_data");
-  } else {
-    if (type == H5::PredType::NATIVE_INT32)
-      return GroupLoader<LoadType::producerConsumer>::loadFromGroup<int32_t>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    if (type == H5::PredType::NATIVE_INT64)
-      return GroupLoader<LoadType::producerConsumer>::loadFromGroup<int64_t>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    if (type == H5::PredType::NATIVE_UINT32)
-      return GroupLoader<LoadType::producerConsumer>::loadFromGroup<uint32_t>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    if (type == H5::PredType::NATIVE_UINT64)
-      return GroupLoader<LoadType::producerConsumer>::loadFromGroup<uint64_t>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    if (type == H5::PredType::NATIVE_FLOAT)
-      return GroupLoader<LoadType::producerConsumer>::loadFromGroup<float>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    if (type == H5::PredType::NATIVE_DOUBLE)
-      return GroupLoader<LoadType::producerConsumer>::loadFromGroup<double>(
-          storage, instrument, bankNames, bankOffsets, from, to);
-    throw std::runtime_error(
-        "Unsupported H5::DataType for event_time_offset in NXevent_data");
-  }
+  if (precalc)
+    return GroupLoader<LoadType::preCalcEvents>::loadFromGroupWrapper(
+        type, storage, instrument, bankNames, bankOffsets, from, to);
+  else
+    return GroupLoader<LoadType::producerConsumer>::loadFromGroupWrapper(
+        type, storage, instrument, bankNames, bankOffsets, from, to);
 }
 
 // Estimates the memory amount for shared memory segments

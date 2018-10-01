@@ -93,6 +93,13 @@ private:
                               const std::vector<std::string> &bankNames,
                               const std::vector<int32_t> &bankOffsets,
                               uint32_t from, uint32_t to);
+
+    static void loadFromGroupWrapper(const H5::DataType &type,
+                                     EventsListsShmemStorage &storage,
+                                     const H5::Group &group,
+                                     const std::vector<std::string> &bankNames,
+                                     const std::vector<int32_t> &bankOffsets,
+                                     uint32_t from, uint32_t to);
   };
 
   void assembleFromShared(
@@ -109,6 +116,34 @@ private:
   std::vector<std::string> m_segmentNames;
   std::string m_storageName;
 };
+
+/// Wrapper to avoid manual processing of all cases of 2 template arguments
+template <typename MultiProcessEventLoader::LoadType LT>
+void MultiProcessEventLoader::GroupLoader<LT>::loadFromGroupWrapper(
+    const H5::DataType &type, EventsListsShmemStorage &storage,
+    const H5::Group &instrument, const std::vector<std::string> &bankNames,
+    const std::vector<int32_t> &bankOffsets, uint32_t from, uint32_t to) {
+  if (type == H5::PredType::NATIVE_INT32)
+    return loadFromGroup<int32_t>(storage, instrument, bankNames, bankOffsets,
+                                  from, to);
+  if (type == H5::PredType::NATIVE_INT64)
+    return loadFromGroup<int64_t>(storage, instrument, bankNames, bankOffsets,
+                                  from, to);
+  if (type == H5::PredType::NATIVE_UINT32)
+    return loadFromGroup<uint32_t>(storage, instrument, bankNames, bankOffsets,
+                                   from, to);
+  if (type == H5::PredType::NATIVE_UINT64)
+    return loadFromGroup<uint64_t>(storage, instrument, bankNames, bankOffsets,
+                                   from, to);
+  if (type == H5::PredType::NATIVE_FLOAT)
+    return loadFromGroup<float>(storage, instrument, bankNames, bankOffsets,
+                                from, to);
+  if (type == H5::PredType::NATIVE_DOUBLE)
+    return loadFromGroup<double>(storage, instrument, bankNames, bankOffsets,
+                                 from, to);
+  throw std::runtime_error(
+      "Unsupported H5::DataType for event_time_offset in NXevent_data");
+}
 
 /**Loades the portion of data from hdf5 given group and banks list to shared
  * memory, 'from' and 'to' represent the range in global number of events.
@@ -232,7 +267,7 @@ void MultiProcessEventLoader::GroupLoader<
           if (cur + chLen >= finish)
             cnt = finish - cur;
 
-          auto task{std::make_unique<Task>(instrument, bankNames)};
+          auto task = std::make_unique<Task>(instrument, bankNames);
           task->partitioner = task->loader.setBankIndex(bankIdx);
           task->partitioner->setEventOffset(cur);
           task->eventTimeOffset.resize(cnt);
