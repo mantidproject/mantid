@@ -50,6 +50,7 @@ public:
     auto presenter = makePresenter();
 
     expectViewReturnsSumInLambdaDefaults();
+    expectViewReturnsDefaultPolarizationCorrectionType();
     EXPECT_CALL(m_view, getAnalysisMode())
         .WillOnce(Return(std::string("MultiDetectorAnalysis")));
     presenter.notifySettingsChanged();
@@ -64,6 +65,7 @@ public:
 
     expectViewReturnsDefaultAnalysisMode();
     expectViewReturnsSumInQDefaults();
+    expectViewReturnsDefaultPolarizationCorrectionType();
     presenter.notifySummationTypeChanged();
 
     TS_ASSERT_EQUALS(presenter.experiment().summationType(),
@@ -76,6 +78,7 @@ public:
 
     expectViewReturnsDefaultAnalysisMode();
     expectViewReturnsSumInLambdaDefaults();
+    expectViewReturnsDefaultPolarizationCorrectionType();
     EXPECT_CALL(m_view, disableReductionType()).Times(1);
     presenter.notifySummationTypeChanged();
 
@@ -87,6 +90,7 @@ public:
 
     expectViewReturnsDefaultAnalysisMode();
     expectViewReturnsSumInQDefaults();
+    expectViewReturnsDefaultPolarizationCorrectionType();
     EXPECT_CALL(m_view, enableReductionType()).Times(1);
     presenter.notifySummationTypeChanged();
 
@@ -98,7 +102,9 @@ public:
     PolarizationCorrections polCorr(PolarizationCorrectionType::PA, 1.2, 1.3,
                                     2.4, 2.5);
 
-    expectViewReturnsDefaultValues();
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInLambdaDefaults();
+    EXPECT_CALL(m_view, getPolarisationCorrectionType()).WillOnce(Return("PA"));
     EXPECT_CALL(m_view, getCRho()).WillOnce(Return(polCorr.cRho().get()));
     EXPECT_CALL(m_view, getCAlpha()).WillOnce(Return(polCorr.cAlpha().get()));
     EXPECT_CALL(m_view, getCAp()).WillOnce(Return(polCorr.cAp().get()));
@@ -137,7 +143,8 @@ public:
     EXPECT_CALL(m_view, showTransmissionRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
 
-    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), range);
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(),
+                     boost::none);
     verifyAndClear();
   }
 
@@ -245,13 +252,12 @@ private:
   NiceMock<MockExperimentView> m_view;
 
   Experiment makeModel() {
-    auto polarizationCorrections = PolarizationCorrections(
-        PolarizationCorrectionType::None, 0.0, 0.0, 0.0, 0.0);
-    auto transmissionRunRange = RangeInLambda(0.0, 0.0);
+    auto polarizationCorrections =
+        PolarizationCorrections(PolarizationCorrectionType::None, boost::none,
+                                boost::none, boost::none, boost::none);
+    auto transmissionRunRange = boost::none;
     auto stitchParameters = std::map<std::string, std::string>();
-    auto perThetaDefaults = std::vector<PerThetaDefaults>(
-        {PerThetaDefaults(boost::none, std::pair<std::string, std::string>(),
-                          boost::none, boost::none, boost::none)});
+    auto perThetaDefaults = std::vector<PerThetaDefaults>();
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda,
                       std::move(polarizationCorrections),
@@ -292,9 +298,15 @@ private:
         .WillOnce(Return(std::string("DivergentBeam")));
   }
 
+  void expectViewReturnsDefaultPolarizationCorrectionType() {
+    EXPECT_CALL(m_view, getPolarisationCorrectionType())
+        .WillOnce(Return(std::string("None")));
+  }
+
   void expectViewReturnsDefaultValues() {
     expectViewReturnsDefaultAnalysisMode();
     expectViewReturnsSumInLambdaDefaults();
+    expectViewReturnsDefaultPolarizationCorrectionType();
   }
 
   // These functions create various rows in the per-theta defaults tables,
