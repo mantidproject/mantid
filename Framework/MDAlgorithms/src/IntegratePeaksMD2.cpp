@@ -490,27 +490,29 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         errorSquared = std::fabs(signal);
       } else {
 
-  IAlgorithm_sptr fitAlgorithm = createChildAlgorithm("Fit", -1, -1, false);
-  //fitAlgorithm->setProperty("CreateOutput", true);
-  //fitAlgorithm->setProperty("Output", "FitPeaks1D");
-  std::string myFunc = std::string("name=LinearBackground;name=")+profileFunction;
-  auto maxPeak = std::max_element(signal_fit.begin(), signal_fit.end());
+        IAlgorithm_sptr fitAlgorithm =
+            createChildAlgorithm("Fit", -1, -1, false);
+        // fitAlgorithm->setProperty("CreateOutput", true);
+        // fitAlgorithm->setProperty("Output", "FitPeaks1D");
+        std::string myFunc =
+            std::string("name=LinearBackground;name=") + profileFunction;
+        auto maxPeak = std::max_element(signal_fit.begin(), signal_fit.end());
 
-  std::ostringstream strs;
-strs << maxPeak[0];
-std::string strMax = strs.str();
-      if (profileFunction == "Gaussian") {
-          myFunc += ", PeakCentre=50, Height="+ strMax;
+        std::ostringstream strs;
+        strs << maxPeak[0];
+        std::string strMax = strs.str();
+        if (profileFunction == "Gaussian") {
+          myFunc += ", PeakCentre=50, Height=" + strMax;
           fitAlgorithm->setProperty("Constraints", "40<f1.PeakCentre<60");
-      }
-      else if (profileFunction == "BackToBackExponential" || profileFunction == "IkedaCarpenterPV") {
-          myFunc += ", X0=50, I="+ strMax;
+        } else if (profileFunction == "BackToBackExponential" ||
+                   profileFunction == "IkedaCarpenterPV") {
+          myFunc += ", X0=50, I=" + strMax;
           fitAlgorithm->setProperty("Constraints", "40<f1.X0<60");
-      }
-  fitAlgorithm->setProperty("CalcErrors", true);
-  fitAlgorithm->setProperty("Function", myFunc);
-  fitAlgorithm->setProperty("InputWorkspace", wsProfile2D);
-  fitAlgorithm->setProperty("WorkspaceIndex", static_cast<int>(i));
+        }
+        fitAlgorithm->setProperty("CalcErrors", true);
+        fitAlgorithm->setProperty("Function", myFunc);
+        fitAlgorithm->setProperty("InputWorkspace", wsProfile2D);
+        fitAlgorithm->setProperty("WorkspaceIndex", static_cast<int>(i));
         try {
           fitAlgorithm->executeAsChildAlg();
         } catch (...) {
@@ -518,16 +520,16 @@ std::string strMax = strs.str();
           continue;
         }
 
-     IFunction_sptr ifun = fitAlgorithm->getProperty("Function");
-     
-      /*double chi2 = fitAlgorithm->getProperty("OutputChi2overDoF");
-      if (chi2 > 10.0) {
-        if (replaceIntensity) {
-          p.setIntensity(0.0);
-          p.setSigmaIntensity(0.0);
-        }
-        continue;
-      }*/
+        IFunction_sptr ifun = fitAlgorithm->getProperty("Function");
+
+        /*double chi2 = fitAlgorithm->getProperty("OutputChi2overDoF");
+        if (chi2 > 10.0) {
+          if (replaceIntensity) {
+            p.setIntensity(0.0);
+            p.setSigmaIntensity(0.0);
+          }
+          continue;
+        }*/
         boost::shared_ptr<const CompositeFunction> fun =
             boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
 
@@ -567,8 +569,8 @@ std::string strMax = strs.str();
         errorSquared = std::fabs(signal);
         // Get background counts
         for (size_t j = 0; j < numSteps; j++) {
-          double background = ifun->getParameter(0) +
-                              ifun->getParameter(1) * x[j];
+          double background =
+              ifun->getParameter(0) + ifun->getParameter(1) * x[j];
           if (j < peakMin || j > peakMax)
             background_total = background_total + background;
         }
