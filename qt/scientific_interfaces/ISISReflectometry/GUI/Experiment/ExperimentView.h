@@ -99,6 +99,8 @@ public:
 
   void enablePolarisationCorrections() override;
   void disablePolarisationCorrections() override;
+  void enablePolarisationCorrectionInputs() override;
+  void disablePolarisationCorrectionInputs() override;
 
   void addPerThetaDefaultsRow() override;
   void removePerThetaDefaultsRow(int rowIndex) override;

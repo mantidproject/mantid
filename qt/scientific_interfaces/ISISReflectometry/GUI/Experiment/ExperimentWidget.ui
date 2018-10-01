@@ -289,6 +289,11 @@
          <string>PNR</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>ParameterFile</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item row="7" column="0">

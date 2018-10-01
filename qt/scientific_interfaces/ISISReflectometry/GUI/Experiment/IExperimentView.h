@@ -79,6 +79,8 @@ public:
 
   virtual void enablePolarisationCorrections() = 0;
   virtual void disablePolarisationCorrections() = 0;
+  virtual void enablePolarisationCorrectionInputs() = 0;
+  virtual void disablePolarisationCorrectionInputs() = 0;
 
   virtual double getTransmissionStartOverlap() const = 0;
   virtual void setTransmissionStartOverlap(double start) = 0;

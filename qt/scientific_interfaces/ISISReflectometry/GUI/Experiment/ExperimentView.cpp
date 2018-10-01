@@ -302,19 +302,12 @@ void ExperimentView::setChecked(QCheckBox &checkBox, bool checked) {
 
 void ExperimentView::enablePolarisationCorrections() {
   m_ui.polCorrComboBox->setEnabled(true);
-  m_ui.CRhoEdit->setEnabled(true);
-  m_ui.CAlphaEdit->setEnabled(true);
-  m_ui.CApEdit->setEnabled(true);
-  m_ui.CPpEdit->setEnabled(true);
+  enablePolarisationCorrectionInputs();
 }
 
 void ExperimentView::disablePolarisationCorrections() {
   m_ui.polCorrComboBox->setEnabled(false);
-  m_ui.CRhoEdit->setEnabled(false);
-  m_ui.CAlphaEdit->setEnabled(false);
-  m_ui.CApEdit->setEnabled(false);
-  m_ui.CPpEdit->setEnabled(false);
-
+  disablePolarisationCorrectionInputs();
   // Set polarisation corrections text to 'None' when disabled
   setSelected(*m_ui.polCorrComboBox, "None");
   // Clear all parameters as well
@@ -322,6 +315,20 @@ void ExperimentView::disablePolarisationCorrections() {
   m_ui.CAlphaEdit->clear();
   m_ui.CApEdit->clear();
   m_ui.CPpEdit->clear();
+}
+
+void ExperimentView::enablePolarisationCorrectionInputs() {
+  m_ui.CRhoEdit->setEnabled(true);
+  m_ui.CAlphaEdit->setEnabled(true);
+  m_ui.CApEdit->setEnabled(true);
+  m_ui.CPpEdit->setEnabled(true);
+}
+
+void ExperimentView::disablePolarisationCorrectionInputs() {
+  m_ui.CRhoEdit->setEnabled(false);
+  m_ui.CAlphaEdit->setEnabled(false);
+  m_ui.CApEdit->setEnabled(false);
+  m_ui.CPpEdit->setEnabled(false);
 }
 
 void ExperimentView::onPerAngleDefaultsChanged(int row, int column) {

@@ -31,6 +31,7 @@ public:
   double cAlpha() const;
   double cAp() const;
   double cPp() const;
+  bool enableInputs() const;
 
 private:
   PolarizationCorrectionType m_correctionType;

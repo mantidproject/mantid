@@ -20,6 +20,11 @@ double PolarizationCorrections::cAp() const { return m_cAp; }
 
 double PolarizationCorrections::cPp() const { return m_cPp; }
 
+bool PolarizationCorrections::enableInputs() const {
+  return m_correctionType == PolarizationCorrectionType::PA ||
+         m_correctionType == PolarizationCorrectionType::PNR;
+}
+
 bool operator!=(PolarizationCorrections const &lhs,
                 PolarizationCorrections const &rhs) {
   return !(lhs == rhs);

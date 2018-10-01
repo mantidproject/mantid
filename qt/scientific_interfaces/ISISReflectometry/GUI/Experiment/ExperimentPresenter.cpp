@@ -61,7 +61,13 @@ PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const cAlpha = m_view->getCAlpha();
   auto const cAp = m_view->getCAp();
   auto const cPp = m_view->getCPp();
-  return PolarizationCorrections(correctionType, cRho, cAlpha, cAp, cPp);
+  auto corrections =
+      PolarizationCorrections(correctionType, cRho, cAlpha, cAp, cPp);
+  if (corrections.enableInputs())
+    m_view->enablePolarisationCorrectionInputs();
+  else
+    m_view->disablePolarisationCorrectionInputs();
+  return corrections;
 }
 
 boost::optional<RangeInLambda>

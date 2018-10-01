@@ -29,6 +29,8 @@ public:
   MOCK_METHOD0(showStitchParametersInvalid, void());
   MOCK_METHOD0(enablePolarisationCorrections, void());
   MOCK_METHOD0(disablePolarisationCorrections, void());
+  MOCK_METHOD0(enablePolarisationCorrectionInputs, void());
+  MOCK_METHOD0(disablePolarisationCorrectionInputs, void());
   MOCK_CONST_METHOD0(getTransmissionStartOverlap, double());
   MOCK_METHOD1(setTransmissionStartOverlap, void(double));
   MOCK_CONST_METHOD0(getTransmissionEndOverlap, double());
