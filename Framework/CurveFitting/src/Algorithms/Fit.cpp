@@ -17,7 +17,6 @@
 #include "MantidKernel/StartsWithValidator.h"
 
 #include <boost/make_shared.hpp>
-#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -113,7 +112,6 @@ void Fit::readProperties() {
   }
   std::string contstraints = getPropertyValue("Constraints");
   if (!contstraints.empty()) {
-    std::cout<<"11: "<<contstraints<<std::endl;
     m_function->addConstraints(contstraints);
   }
 

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
