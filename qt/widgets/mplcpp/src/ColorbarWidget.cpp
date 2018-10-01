@@ -6,9 +6,9 @@
 
 #include <QComboBox>
 #include <QDoubleValidator>
-#include <QHash>
 #include <QLineEdit>
 #include <QVBoxLayout>
+#include <QVector>
 
 namespace MantidQt {
 namespace Widgets {
@@ -26,10 +26,12 @@ constexpr double AXES_HEIGHT = 0.9;
 // Background color for figure
 constexpr const char *FIGURE_FACECOLOR = "w";
 
-/// Define the available normalization option labels
-/// The order defines the order in the combo box. The index
-/// values is used as an integer representation
-QStringList NORM_OPTS = {"Linear", "Log10", "Power"};
+// Define the available normalization option labels and tooltips
+// The order defines the order in the combo box. The index
+// values is used as an integer representation. See the setScaleType
+// method if this is changed.
+QStringList NORM_OPTS = {"Linear", "SymmetricLog10", "Power"};
+
 } // namespace
 
 /**
@@ -52,7 +54,7 @@ void ColorbarWidget::setNorm(const NormalizeBase &norm) {
   m_mappable.setNorm(norm);
   // matplotlib requires creating a brand new colorbar if the
   // normalization type changes
-  createColorbar();
+  createColorbar(norm.tickLocator(), norm.labelFormatter());
   m_canvas->draw();
 }
 
@@ -153,7 +155,8 @@ void ColorbarWidget::setScaleType(int index) {
     setNorm(Normalize(vmin, vmax));
     break;
   case 1:
-    setNorm(SymLogNorm(0.0001, 1, vmin, vmax));
+    setNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold,
+                       SymLogNorm::DefaultLinearScale, vmin, vmax));
     break;
   case 2:
     setNorm(PowerNorm(getNthPower().toDouble(), vmin, vmax));
@@ -239,9 +242,13 @@ void ColorbarWidget::initLayout() {
 /**
  * (Re)-create a colorbar around the current mappable. It assumes the figure
  * and canvas have been created
- * @param fig The figure to receive the colobar
+ * @param ticks An optional matplotlib.ticker.*Locator object. Default=None to
+ * autoselect the most appropriate
+ * @param format An optional matplotlib.ticker.*Format object. Default=None to
+ * autoselect the most appropriate
  */
-void ColorbarWidget::createColorbar() {
+void ColorbarWidget::createColorbar(const Python::Object &ticks,
+                                    const Python::Object &format) {
   assert(m_canvas);
   auto cb = Python::Object(m_mappable.pyobj().attr("colorbar"));
   if (!cb.is_none()) {
@@ -250,7 +257,7 @@ void ColorbarWidget::createColorbar() {
   // create the new one
   auto fig = m_canvas->gcf();
   Axes cbAxes{fig.addAxes(AXES_LEFT, AXES_BOTTOM, AXES_WIDTH, AXES_HEIGHT)};
-  fig.colorbar(m_mappable, cbAxes);
+  fig.colorbar(m_mappable, cbAxes, ticks, format);
 }
 
 /**
