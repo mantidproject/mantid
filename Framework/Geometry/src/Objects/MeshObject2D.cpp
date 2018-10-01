@@ -93,45 +93,6 @@ validatePointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
 }
 } // namespace CoplanarChecks
 
-namespace {
-using Mantid::Kernel::V3D;
-
-/**
- * Find the solid angle of a triangle defined by vectors a,b,c from point
- *"observer"
- *
- * formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
- *
- * @param a :: first point of triangle
- * @param b :: second point of triangle
- * @param c :: third point of triangle
- * @param observer :: point from which solid angle is required
- * @return :: solid angle of triangle in Steradians.
- *
- * This duplicates code in CSGOjbect both need a place to be merged.
- * To aid this, this function has been defined as a non-member.
- */
-double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
-                             const V3D &observer) {
-  const V3D ao = a - observer;
-  const V3D bo = b - observer;
-  const V3D co = c - observer;
-  const double modao = ao.norm();
-  const double modbo = bo.norm();
-  const double modco = co.norm();
-  const double aobo = ao.scalar_prod(bo);
-  const double aoco = ao.scalar_prod(co);
-  const double boco = bo.scalar_prod(co);
-  const double scalTripProd = ao.scalar_prod(bo.cross_prod(co));
-  const double denom =
-      modao * modbo * modco + modco * aobo + modbo * aoco + modao * boco;
-  if (denom != 0.0)
-    return 2.0 * atan2(scalTripProd, denom);
-  else
-    return 0.0; // not certain this is correct
-}
-} // namespace
-
 const double MeshObject2D::MinThickness = 0.001;
 const std::string MeshObject2D::Id = "MeshObject2D";
 
@@ -331,23 +292,12 @@ int MeshObject2D::getName() const {
 }
 
 double MeshObject2D::solidAngle(const Kernel::V3D &observer) const {
-  double solidAngleSum(0), solidAngleNegativeSum(0);
-  for (size_t i = 0; i < m_vertices.size(); i += 3) {
-    auto sa = getTriangleSolidAngle(m_vertices[m_triangles[i]],
-                                    m_vertices[m_triangles[i + 1]],
-                                    m_vertices[m_triangles[i + 2]], observer);
-    if (sa > 0.0) {
-      solidAngleSum += sa;
-    } else {
-      solidAngleNegativeSum += sa;
-    }
-  }
-  return 0.5 * (solidAngleSum - solidAngleNegativeSum);
+  return MeshObjectCommon::solidAngle(observer, m_triangles, m_vertices);
 }
 
 double MeshObject2D::solidAngle(const Kernel::V3D &observer,
                                 const Kernel::V3D &scaleFactor) const {
-  std::vector<V3D> scaledVertices;
+  std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
   for (const auto &vertex : m_vertices) {
     scaledVertices.emplace_back(scaleFactor.X() * vertex.X(),

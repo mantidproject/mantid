@@ -33,10 +33,12 @@ namespace Geometry {
 */
 namespace MeshObjectCommon {
 
-/// Get vertices as one strided array from V3Ds. Output size 3x input.
 std::vector<double> getVertices(const std::vector<Kernel::V3D> &vertices);
 
-}; // namespace MeshObjectCommon
+double solidAngle(const Kernel::V3D &observer,
+                  const std::vector<uint16_t> &triangles,
+                  const std::vector<Kernel::V3D> &vertices);
+} // namespace MeshObjectCommon
 
 } // namespace Geometry
 } // namespace Mantid
