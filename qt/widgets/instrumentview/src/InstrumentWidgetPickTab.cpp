@@ -1137,7 +1137,7 @@ void DetectorPlotController::setPlotData(
   actor.sumDetectors(detIndices, x, y, static_cast<size_t>(m_plot->width()));
   QApplication::restoreOverrideCursor();
   if (!x.empty()) {
-    m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
+    m_plot->setData(std::move(x), std::move(y),
                     actor.getWorkspace()->getAxis(0)->unit()->unitID());
   }
   m_plot->setLabel("multiple");
@@ -1172,7 +1172,7 @@ void DetectorPlotController::plotSingle(size_t detindex) {
 
   const auto &actor = m_instrWidget->getInstrumentActor();
   // set the data
-  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
+  m_plot->setData(std::move(x), std::move(y),
                   actor.getWorkspace()->getAxis(0)->unit()->unitID());
   auto detid = actor.getDetID(detindex);
   m_plot->setLabel("Detector " + QString::number(detid));
@@ -1242,7 +1242,7 @@ void DetectorPlotController::plotTubeSums(size_t detindex) {
   auto detid = actor.getDetID(detindex);
   QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
                   QString::number(detid) + ") Sum";
-  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
+  m_plot->setData(std::move(x), std::move(y),
                   actor.getWorkspace()->getAxis(0)->unit()->unitID());
   m_plot->setLabel(label);
 }
@@ -1271,8 +1271,7 @@ void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
   if (!xAxisUnits.isEmpty()) {
     xAxisCaption += " (" + xAxisUnits + ")";
   }
-  m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  xAxisCaption.toStdString());
+  m_plot->setData(std::move(x), std::move(y), xAxisCaption.toStdString());
   auto parent = componentInfo.parent(detindex);
   // curve label: "tube_name (detid) Integrals"
   // detid is included to distiguish tubes with the same name
