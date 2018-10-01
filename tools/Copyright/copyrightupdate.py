@@ -30,6 +30,9 @@ regex_other_style = re.compile("^.*?Copyright\s.*?(\d{4}).*?$",
 #lines to skip when determining where to put the copyright statement (they must be from the start of the file)
 regex_lines_to_skip = [re.compile("^#!.*?$[\s]*",re.MULTILINE)]
 
+#Finds empty C++ comments
+regex_empty_comments = re.compile("\/[\/\s\*]{2,}\/+",re.MULTILINE)
+
 #Directories to ignore - any pathss including these strings will be ignored, so it will cascade
 directories_to_ignore = ["external","CMake"]
 #Accepted file extensions
@@ -127,6 +130,7 @@ def process_file(filename):
     year = None
     if match_old:
         file_text = remove_text_section(file_text,match_old.start(),match_old.end())
+        file_text = regex_empty_comments.sub('',file_text)
         year = match_old.group(1)
         print("\t\tOld statement", year)
         report_old_statements_updated[filename] = year
@@ -140,6 +144,7 @@ def process_file(filename):
                 report_new_statement_current[filename] = year
                 return
             file_text = remove_text_section(file_text,match_new.start(),match_new.end())
+            file_text = regex_empty_comments.sub('',file_text)
             print("\t\tNew statement", year)
             report_new_statements_updated[filename] = year
         else:
@@ -178,7 +183,6 @@ def add_copyright_statement(copyright_statement, file_text):
     for regex in regex_lines_to_skip:
         match = regex.match(file_text)
         if match:
-            print("FOUND A MATCH",match.end(0))
             if match.end(0) > start_pos:
                 start_pos = match.end(0)
 
