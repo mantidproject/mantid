@@ -10,11 +10,11 @@ https://stackoverflow.com/questions/47267195/in-pyqt4-is-it-possible-to-detach-t
 class DetachableTabWidget(QtGui.QTabWidget):
     """
 
-    The detached tabs are QMainWindow type
+    The detached tabs are QMainWindow type.
     """
 
     def __init__(self, parent=None):
-        QtGui.QTabWidget.__init__(self, parent)
+        super(DetachableTabWidget, self).__init__(parent)
 
         self.tab_bar = self.TabBar(self)
 
@@ -29,11 +29,13 @@ class DetachableTabWidget(QtGui.QTabWidget):
         self.detachedTabs = {}
 
         # Close all detached tabs if the application is closed explicitly
-        QtGui.qApp.aboutToQuit.connect(self.close_detached_tabs)  # @UndefinedVariable
+        #QtGui.qApp.aboutToQuit.connect(self.close_detached_tabs)  # @UndefinedVariable
 
     def closeEvent(self, event):
-        print("closeEvent in detatchable tab widget")
+        print("tabs close event")
         self.close_detached_tabs()
+        self.detachedTabs = {}
+        self.tab_bar=None
 
     def setMovable(self, movable):
         """
@@ -218,7 +220,7 @@ class DetachableTabWidget(QtGui.QTabWidget):
         """
         Close all tabs that are currently detached.
         """
-        print("close detatched tabs")
+        print("close detached tabs")
         list_of_detached_tabs = []
 
         for key in self.detachedTabs:

@@ -26,7 +26,7 @@ class MuonContext(object):
     # ADS base directory for all workspaces
     base_directory = "Muon Data"
 
-    def __init__(self):
+    def __init__(self, load_data=MuonLoadData()):
         """
         Currently, only a single run is loaded into the Home/Grouping tab at once. This is held in the _current_data
         member. The load widget may load multiple runs at once, these are stored in the _loaded_data member.
@@ -35,7 +35,7 @@ class MuonContext(object):
         self._groups = OrderedDict()
         self._pairs = OrderedDict()
 
-        self._loaded_data = MuonLoadData()
+        self._loaded_data = load_data
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
     def is_data_loaded(self):

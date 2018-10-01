@@ -6,6 +6,7 @@ import sys
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 
+from mantid.kernel import ConfigServiceImpl
 import mantid.simpleapi as simpleapi
 
 from Muon.GUI.Common.muon_context import MuonContext
@@ -67,10 +68,12 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 muonGUI = None
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 
-from mantid.kernel import ConfigServiceImpl
-
 
 def check_facility():
+    """
+    Get the currently set facility and check if it is in the list
+    of supported facilities, raising an AttributeError if not.
+    """
     current_facility = ConfigServiceImpl.Instance().getFacility().name()
     if current_facility not in SUPPORTED_FACILITIES:
         raise AttributeError("Your facility {} is not supported by MuonAnalysis 2.0, so you"
@@ -79,15 +82,17 @@ def check_facility():
                              + "\n - ".join(SUPPORTED_FACILITIES))
 
 
-
-class MuonAnalysis3Gui(QtGui.QMainWindow):
+class MuonAnalysis4Gui(QtGui.QMainWindow):
+    """
+    The Muon Analaysis 2.0 interface.
+    """
 
     @staticmethod
     def warning_popup(message):
         message_box.warning(str(message))
 
     def __init__(self, parent=None):
-        super(MuonAnalysis3Gui, self).__init__(parent)
+        super(MuonAnalysis4Gui, self).__init__(parent)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         try:
@@ -95,42 +100,35 @@ class MuonAnalysis3Gui(QtGui.QMainWindow):
         except AttributeError as error:
             self.warning_popup(error.args[0])
 
-        self.add_table_workspace()
+        # initialise the data storing classes of the interface
+        self.loaded_data = MuonLoadData()
+        self.context = MuonContext(load_data=self.loaded_data)
 
-        self.context = MuonContext()
-        self.data = self.context._loaded_data
-
+        # construct all the widgets.
         self.setup_load_widget()
-        self.load_widget.set_current_instrument(self.context.instrument)
-        self.tabs = self.setup_tabs()
-        self.setup_help_widget()  # self.help_widget = DummyLabelWidget("Help dummy", self)
+        self.setup_help_widget()
+        self.setup_home_tab()
+        self.setup_grouping_tab()
+        # set up the tabbing structure
+        self.setup_tabs()
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(self.load_widget_view)
         splitter.addWidget(self.tabs)
         splitter.addWidget(self.help_widget)
-        splitter.setCollapsible(0, False)
-        splitter.setCollapsible(1, False)
-        splitter.setCollapsible(2, False)
-
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
 
+        # Set up observer/observables
+        #   - Home tab notifies if instrument changes
+        #   - Home tab notifies if user changes alpha for a pair
+        self.group_widget.pairAlphaNotifier.add_subscriber(self.group_tab_presenter.loadObserver)
+        self.group_tab_presenter.groupingNotifier.add_subscriber(self.home_tab_widget.groupingObserver)
+        self.instrument_widget.instrumentNotifier.add_subscriber(self.home_tab_widget.instrumentObserver)
         self.instrument_widget.instrumentNotifier.add_subscriber(self.load_widget.instrumentObserver)
         self.instrument_widget.instrumentNotifier.add_subscriber(self.group_tab_presenter.instrumentObserver)
         self.load_widget.loadNotifier.add_subscriber(self.home_tab_widget.loadObserver)
         self.load_widget.loadNotifier.add_subscriber(self.group_tab_presenter.loadObserver)
-        self.group_tab_presenter.groupingNotifier.add_subscriber(self.home_tab_widget.groupingObserver)
-
-    def add_table_workspace(self):
-        # add dead time tables
-        correctTable = simpleapi.CreateEmptyTableWorkspace()
-        incorrectTable = simpleapi.CreateEmptyTableWorkspace()
-
-        correctTable.addColumn("int", "spectrum", 0)
-        correctTable.addColumn("float", "dead-time", 0)
-        for i in range(96):
-            correctTable.addRow([i + 1, 0.1])
 
     def setup_load_widget(self):
         # set up the views
@@ -140,47 +138,20 @@ class MuonAnalysis3Gui(QtGui.QMainWindow):
                                                load_file_view=self.load_file_view,
                                                load_run_view=self.load_run_view)
         self.load_widget = LoadWidgetPresenter(self.load_widget_view,
-                                               LoadWidgetModel(self.data))
+                                               LoadWidgetModel(self.loaded_data))
 
-        self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(self.data))
-        self.run_widget = LoadRunWidgetPresenter(self.load_run_view, LoadRunWidgetModel(self.data))
+        self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(self.loaded_data))
+        self.run_widget = LoadRunWidgetPresenter(self.load_run_view, LoadRunWidgetModel(self.loaded_data))
 
         self.load_widget.set_load_file_widget(self.file_widget)
         self.load_widget.set_load_run_widget(self.run_widget)
 
-    def focusInEvent(self, event):
-        self.setFocus()
-        self.raise_()
-        self.isActiveWindow()
+        self.load_widget.set_current_instrument(self.context.instrument)
 
-    def setup_home_tab(self):
-        inst_view = InstrumentWidgetView(self)
-        grp_view = HomeGroupingWidgetView(self)
-        plot_view = HomePlotWidgetView(self)
-        run_info_view = HomeRunInfoWidgetView(self)
-
-        # keep a handle to the presenters of sub-widgets
-        self.instrument_widget = InstrumentWidgetPresenter(inst_view, InstrumentWidgetModel(muon_data=self.context))
-        self.group_widget = HomeGroupingWidgetPresenter(grp_view, HomeGroupingWidgetModel(muon_data=self.context))
-        self.plot_widget = HomePlotWidgetPresenter(plot_view, HomePlotWidgetModel())
-        self.run_info_widget = HomeRunInfoWidgetPresenter(run_info_view, HomeRunInfoWidgetModel(muon_data=self.context))
-
-        self.home_tab_view = HomeTabView(parent=None,
-                                         instrument_widget=inst_view,
-                                         grouping_widget=grp_view,
-                                         plot_widget=plot_view,
-                                         run_info_widget=run_info_view)
-        self.home_tab_model = HomeTabModel(muon_data=self.context)
-        self.home_tab_widget = HomeTabPresenter(self.home_tab_view, self.home_tab_model,
-                                                subwidgets=[self.instrument_widget,
-                                                            self.group_widget,
-                                                            self.plot_widget,
-                                                            self.run_info_widget])
-
-        # Set up observer/observables
-        #   - Home tab notifies if instrument changes
-        #   - Home tab notifies if user changes alpha for a pair
-        self.instrument_widget.instrumentNotifier.add_subscriber(self.home_tab_widget.instrumentObserver)
+    def setup_help_widget(self):
+        self.help_widget_model = HelpWidgetModel()
+        self.help_widget = HelpWidgetView()
+        self.help_widget_presenter = HelpWidgetPresenter(self.help_widget, self.help_widget_model)
 
     def setup_grouping_tab(self):
         # Share a single model between the sub-widgets
@@ -198,33 +169,53 @@ class MuonAnalysis3Gui(QtGui.QMainWindow):
                                                         self.grouping_table_widget,
                                                         self.pairing_table_widget)
 
-    def setup_help_widget(self):
-        self.help_widget_model = HelpWidgetModel()
-        self.help_widget = HelpWidgetView()
-        self.help_widget_presenter = HelpWidgetPresenter(self.help_widget, self.help_widget_model)
+    def setup_home_tab(self):
+        self.inst_view = InstrumentWidgetView()
+        self.grp_view = HomeGroupingWidgetView()
+        self.plot_view = HomePlotWidgetView()
+        self.run_info_view = HomeRunInfoWidgetView()
+
+        # keep a handle to the presenters of sub-widgets
+        self.instrument_widget = InstrumentWidgetPresenter(self.inst_view,
+                                                           InstrumentWidgetModel(muon_data=self.context))
+        self.group_widget = HomeGroupingWidgetPresenter(self.grp_view, HomeGroupingWidgetModel(muon_data=self.context))
+        self.plot_widget = HomePlotWidgetPresenter(self.plot_view, HomePlotWidgetModel())
+        self.run_info_widget = HomeRunInfoWidgetPresenter(self.run_info_view,
+                                                          HomeRunInfoWidgetModel(muon_data=self.context))
+
+        self.home_tab_view = HomeTabView(parent=None,
+                                         widget_list=[self.inst_view,
+                                                      self.grp_view,
+                                                      self.plot_view,
+                                                      self.run_info_view])
+        self.home_tab_model = HomeTabModel(muon_data=self.context)
+        self.home_tab_widget = HomeTabPresenter(self.home_tab_view, self.home_tab_model,
+                                                subwidgets=[self.instrument_widget,
+                                                            self.group_widget,
+                                                            self.plot_widget,
+                                                            self.run_info_widget])
 
     def setup_tabs(self):
-        self.setup_home_tab()
-        self.setup_grouping_tab()
-        self.group_widget.pairAlphaNotifier.add_subscriber(self.group_tab_presenter.loadObserver)
-        self.group_tab_presenter.groupingNotifier.add_subscriber(self.home_tab_widget.groupingObserver)
-
-        tabWidget = DetachableTabWidget(self)
-
-        tab1 = QtGui.QLabel('Test Widget 1')
-        tabWidget.addTab(self.home_tab_view, 'Home')
-
-        tab2 = QtGui.QLabel('Test Widget 2')
-        tabWidget.addTab(self.group_tab_view, 'Grouping')
-
-        self.setCentralWidget(tabWidget)
-        return tabWidget
+        """
+        Set up the tabbing structure; the tabs work similarly to conventional
+        web browsers.
+        """
+        self.tabs = DetachableTabWidget(self)
+        self.tabs.addTab(self.home_tab_view, 'Home')
+        self.tabs.addTab(self.group_tab_view, 'Grouping')
 
     def closeEvent(self, event):
+        print("Muon Analysis Close Event")
         self.tabs.closeEvent(event)
-        self.load_widget_view.close()
-        self.load_run_view.close()
-        self.load_file_view.close()
+        self.load_widget_view = None
+        self.load_run_view = None
+        self.load_file_view = None
+
+        self.inst_view = None
+        self.grp_view = None
+        self.plot_view = None
+        self.run_info_view = None
+        self.home_tab_view = None
 
 
 class MuonAnalysis2Gui(QtGui.QMainWindow):
@@ -323,7 +314,7 @@ def main():
     app = qapp()
     try:
         global muonGUI
-        muonGUI = MuonAnalysis3Gui()
+        muonGUI = MuonAnalysis4Gui()
         muonGUI.resize(700, 700)
         muonGUI.show()
         app.exec_()

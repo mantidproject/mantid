@@ -14,9 +14,8 @@ class InstrumentWidgetView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(InstrumentWidgetView, self).__init__(parent)
 
-        self.layout = QtGui.QGridLayout(self)
+        self.layout = QtGui.QGridLayout()
 
-        self._button_height = 40
         self._cached_instrument = ["None", "None"]
 
         self._button = QtGui.QMessageBox.Ok
@@ -54,12 +53,13 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.deadtime_file_selector.currentIndexChanged.connect(self.on_dead_time_file_combo_changed)
 
     def apply_to_all_hidden(self, hidden=True):
-        if hidden:
-            self.apply_all_label.hide()
-            self.apply_all_checkbox.hide()
-        if not hidden:
-            self.apply_all_label.setVisible(True)
-            self.apply_all_checkbox.setVisible(True)
+        pass
+        # if hidden:
+        #     self.apply_all_label.hide()
+        #     self.apply_all_checkbox.hide()
+        # if not hidden:
+        #     self.apply_all_label.setVisible(True)
+        #     self.apply_all_checkbox.setVisible(True)
 
     def setup_filter_row(self):
         self.apply_all_label = QtGui.QLabel(self)
@@ -82,7 +82,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.setup_first_good_data_row()
         self.setup_dead_time_row()
         self.setup_rebin_row()
-        self.setup_filter_row()
+        #self.setup_filter_row()
 
         self.group = QtGui.QGroupBox("Run Pre-processing Parameters")
         self.group.setFlat(False)
@@ -96,23 +96,23 @@ class InstrumentWidgetView(QtGui.QWidget):
                            "padding-right: 10px;"
                            ' color: grey; }')
 
-        self.vertical_layout = QtGui.QVBoxLayout()
-
-        self.vertical_layout.addItem(self.horizontal_layout)
-        self.vertical_layout.addItem(self.horizontal_layout_2)
-        self.vertical_layout.addItem(self.horizontal_layout_3)
-        self.vertical_layout.addItem(self.horizontal_layout_4)
-        self.vertical_layout.addItem(self.dead_time_file_layout)
-        # self.vertical_layout.addItem(self.horizontal_layout_5)
-        self.vertical_layout.addItem(self.horizontal_layout_6)
+        # self.vertical_layout = QtGui.QVBoxLayout()
+        #
+        # self.vertical_layout.addItem(self.horizontal_layout)
+        # self.vertical_layout.addItem(self.horizontal_layout_2)
+        # self.vertical_layout.addItem(self.horizontal_layout_3)
+        # self.vertical_layout.addItem(self.horizontal_layout_4)
+        # self.vertical_layout.addItem(self.dead_time_file_layout)
+        # # self.vertical_layout.addItem(self.horizontal_layout_5)
+        # self.vertical_layout.addItem(self.horizontal_layout_6)
 
         self.group.setLayout(self.layout)
         # self.group.setLayout(self.vertical_layout)
 
         self.group2 = QtGui.QGroupBox("Rebin")
         self.group2.setFlat(False)
-        self.vertical_layout2 = QtGui.QVBoxLayout()
-        self.vertical_layout2.addItem(self.horizontal_layout_5)
+        #self.vertical_layout2 = QtGui.QVBoxLayout()
+        #self.vertical_layout2.addItem(self.horizontal_layout_5)
         self.group2.setLayout(self.horizontal_layout_5)
 
         self.widget_layout = QtGui.QVBoxLayout(self)
@@ -168,11 +168,11 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.instrument_label.setObjectName("instrumentLabel")
         self.instrument_label.setText("Instrument : ")
 
-        self.horizontal_layout = QtGui.QHBoxLayout()
-        self.horizontal_layout.setObjectName("horizontalLayout")
-        self.horizontal_layout.addWidget(self.instrument_label)
-        self.horizontal_layout.addWidget(self.instrument_selector)
-        self.horizontal_layout.addStretch(0)
+        # self.horizontal_layout = QtGui.QHBoxLayout()
+        # self.horizontal_layout.setObjectName("horizontalLayout")
+        # self.horizontal_layout.addWidget(self.instrument_label)
+        # self.horizontal_layout.addWidget(self.instrument_selector)
+        # self.horizontal_layout.addStretch(0)
 
         self.layout.addWidget(self.instrument_label, 0, 0)
         self.layout.addWidget(self.instrument_selector, 0, 1)
@@ -521,7 +521,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_help_button.setObjectName("rebinHelpButton")
         self.rebin_help_button.setText("?")
 
-        self.horizontal_layout_5 = QtGui.QHBoxLayout()
+        self.horizontal_layout_5 = QtGui.QHBoxLayout(self)
         self.horizontal_layout_5.setObjectName("horizontalLayout3")
         self.horizontal_layout_5.addSpacing(10)
 
