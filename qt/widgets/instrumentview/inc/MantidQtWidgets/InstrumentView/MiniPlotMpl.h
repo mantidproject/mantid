@@ -17,6 +17,7 @@
   GNU General Public License for more details.
 */
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
+#include "MantidQtWidgets/MplCpp/Cycler.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
 #include <QWidget>
 
@@ -36,13 +37,13 @@ public:
 
   void setData(std::vector<double> x, std::vector<double> y,
                QString xunit, QString curveLabel);
-  QString label() const { return "LABEL"; }
+  QString label() const { return m_activeCurveLabel; }
   void setYAxisLabelRotation(double degrees) {}
   void addPeakLabel(const PeakMarker2D *) {}
   void clearPeakLabels() {}
-  bool hasCurve() const { return false; }
-  void store() {}
-  bool hasStored() const { return false; }
+  bool hasCurve() const;
+  void store();
+  bool hasStored() const;
   QStringList getLabels() const { return {}; }
   void removeCurve(const QString &label) {}
   QColor getCurveColor(const QString &label) const { return QColor(); }
@@ -62,12 +63,13 @@ signals:
   void showContextMenu();
   void clickedAt(double, double);
 
-private:
+private: // data
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
   std::vector<Widgets::MplCpp::Line2D> m_lines;
+  Widgets::MplCpp::Cycler m_colorCycler;
   QString m_xunit;
   QString m_activeCurveLabel;
-
+  QStringList m_storedCurveLabels;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

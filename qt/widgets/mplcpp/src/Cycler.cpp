@@ -1,0 +1,56 @@
+#include "MantidQtWidgets/MplCpp/Cycler.h"
+
+namespace MantidQt {
+namespace Widgets {
+namespace MplCpp {
+
+namespace {
+Python::Object cyclerModule() {
+  return Python::NewRef(PyImport_ImportModule("cycler"));
+}
+
+/**
+ * Creates an iterable from a plain Cycler object
+ * @param rawCycler A Cycler object
+ * @return An iterable returned from itertools.cycle
+ */
+Python::Object cycleIterator(const Python::Object &rawCycler) {
+  auto itertools = Python::NewRef(PyImport_ImportModule("itertools"));
+  try {
+    return Python::Object(itertools.attr("cycle")(rawCycler));
+
+  } catch (Python::ErrorAlreadySet &) {
+    throw std::invalid_argument("itertools.cycle() - Object not iterable");
+  }
+}
+} // namespace
+
+/**
+ * Create a wrapper around an existing matplotlib.cycler.Cycler object
+ * that produces an iterable
+ * @param obj An existing instance of a Cycler object
+ */
+Cycler::Cycler(Python::Object obj)
+    : Python::InstanceHolder(cycleIterator(std::move(obj))) {}
+
+/**
+ * Advance the iterator and return the previous item
+ * @return The next item in the cycle
+ */
+Python::Dict Cycler::operator()() const {
+  return Python::Dict(pyobj().attr("next")());
+}
+
+/**
+ * @param label A string label to assign to the cycler. It forms the key for
+ * each item return by the cycler
+ * @param iterable A string sequence of values to form a cycle
+ * @return A new cycler object wrapping the given iterable sequence
+ */
+Cycler cycler(const char *label, const char *iterable) {
+  return cyclerModule().attr("cycler")(label, iterable);
+}
+
+} // namespace MplCpp
+} // namespace Widgets
+} // namespace MantidQt
