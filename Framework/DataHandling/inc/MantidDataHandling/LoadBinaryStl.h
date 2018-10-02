@@ -12,7 +12,7 @@ public:
   static constexpr int HEADER_SIZE = 80;
   static constexpr uint32_t SIZE_OF_TRIANGLE = 50;
   static constexpr uint32_t NUM_OF_TRIANGLES = 4;
-  LoadBinaryStl(std::string filename) : m_filename(filename){}
+  LoadBinaryStl(std::string filename) : m_filename(filename) {}
   std::unique_ptr<Geometry::MeshObject> readStl();
   bool isBinarySTL();
 
