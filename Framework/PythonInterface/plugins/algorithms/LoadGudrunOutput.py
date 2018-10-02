@@ -29,8 +29,8 @@ class LoadGudrunOutput(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty(name='OutputWorkspace', defaultValue='',
                                                direction=Direction.Output,
                                                optional=PropertyMode.Optional),
-                             doc="If OutputWorkpsace is None,"
-                                 " then the workpsace name will be obtained from the input file.")
+                             doc="If No OutputWorkspace is provided, then the workpsace name "
+                                 "will be obtained from the meta data in the input file.")
 
     def PyExec(self):
         input_file = self.getProperty('InputFile').value
