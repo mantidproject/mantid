@@ -201,14 +201,14 @@ public:
   bool windows = false;
 #endif // _WIN32
   void test_multiprocess_loader_precount() {
-    if(!windows) {
+    if (!windows) {
       run_multiprocess_load("SANS2D00022048.nxs", true);
       run_multiprocess_load("LARMOR00003368.nxs", true);
     }
   }
 
   void test_multiprocess_loader_producer_consumer() {
-    if(!windows) {
+    if (!windows) {
       run_multiprocess_load("SANS2D00022048.nxs", false);
       run_multiprocess_load("LARMOR00003368.nxs", false);
     }
