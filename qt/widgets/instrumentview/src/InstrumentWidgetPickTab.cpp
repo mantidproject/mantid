@@ -90,9 +90,6 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 
   // set up the plot widget
   m_plot = new MiniPlot(this);
-  m_plot->setYAxisLabelRotation(-90);
-  m_plot->setXScale(0, 1);
-  m_plot->setYScale(-1.2, 1.2);
   connect(m_plot, SIGNAL(showContextMenu()), this, SLOT(plotContextMenu()));
 
   // Plot context menu actions

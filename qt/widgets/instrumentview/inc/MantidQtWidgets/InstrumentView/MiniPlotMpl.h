@@ -38,7 +38,6 @@ public:
   void setData(std::vector<double> x, std::vector<double> y, QString xunit,
                QString curveLabel);
   QString label() const { return m_activeCurveLabel; }
-  void setYAxisLabelRotation(double degrees) {}
   void addPeakLabel(const PeakMarker2D *) {}
   void clearPeakLabels() {}
   bool hasCurve() const;
@@ -52,8 +51,6 @@ public:
   bool isYLogScale() const { return false; }
   void replot();
 public slots:
-  void setXScale(double from, double to) {}
-  void setYScale(double from, double to) {}
   void clearCurve();
   void recalcAxisDivs() {}
   void setYLogScale() {}

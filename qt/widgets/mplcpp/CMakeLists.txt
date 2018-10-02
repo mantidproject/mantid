@@ -5,6 +5,7 @@ set ( LIB_SRCS
   src/Colors.cpp
   src/ColorbarWidget.cpp
   src/Colormap.cpp
+  src/ColorConverter.cpp
   src/Cycler.cpp
   src/Figure.cpp
   src/FigureCanvasQt.cpp
@@ -23,6 +24,7 @@ set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/Axes.h
   inc/MantidQtWidgets/MplCpp/Colors.h
   inc/MantidQtWidgets/MplCpp/Colormap.h
+  inc/MantidQtWidgets/MplCpp/ColorConverter.h
   inc/MantidQtWidgets/MplCpp/Cycler.h
   inc/MantidQtWidgets/MplCpp/Figure.h
   inc/MantidQtWidgets/MplCpp/Line2D.h
