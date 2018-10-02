@@ -214,8 +214,6 @@ public:
     }
   }
 
-  void test_empty(){}
-
   void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
 
   void test_Normal_vs_Precount() {
