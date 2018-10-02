@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/Common/PeriodicTableWidget.h"
+#include "MantidQtWidgets/Plugins/AlgorithmDialogs/PeriodicTableWidget.h"
 #include <QVector>
 
 /**

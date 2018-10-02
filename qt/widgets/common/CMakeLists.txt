@@ -17,6 +17,7 @@ set ( QT5_SRC_FILES
   src/FlowLayout.cpp
   src/FunctionBrowser.cpp
   src/GenericDialog.cpp
+  # Used in Qt5 by LoadDialog
   src/HelpWindow.cpp
   src/InterfaceFactory.cpp
   src/InterfaceManager.cpp
@@ -25,37 +26,41 @@ set ( QT5_SRC_FILES
   src/ManageUserDirectories.cpp
   src/MantidDesktopServices.cpp
   src/MantidHelpInterface.cpp
-  src/MantidHelpWindow.cpp
   src/MantidTreeModel.cpp
   src/MantidTreeWidget.cpp
   src/MantidTreeWidgetItem.cpp
+  # todo comment
   src/MantidWidget.cpp
+  # todo comment
   src/MantidWSIndexDialog.cpp
   src/Message.cpp
   src/MessageDisplay.cpp
   src/MWRunFiles.cpp
   src/OptionsPropertyWidget.cpp
-  # check if used in QT5 and if so where
-  src/PeriodicTableWidget.cpp
-  # check if used in QT5 and if so where
+  # used in QT5: GetNegMuMuonicXRDDialog
+
+  # used in QT5: in WorkspaceTreeWidget for getIcon
   src/pixmaps.cpp
   src/PluginLibraries.cpp
-  # check if used in QT5 and if so where
-  src/pqHelpWindow.cxx
   src/ProcessingAlgoWidget.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
-  # check if used in QT5 and if so where
+  # used in QT5: used in many files - MantidWidget/MantidDialog
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
-  # check if used in QT5 and if so where
+  # used in QT5: used by UserFunctionDialog
   src/RenameParDialog.cpp
   src/ScriptEditor.cpp
   src/SelectFunctionDialog.cpp
   src/TextPropertyWidget.cpp
+  # used in QT5: by FunctionBrowser
   src/UserFunctionDialog.cpp
+
+  # todo comment
   src/UserSubWindow.cpp
+  # todo comment
   src/VatesViewerInterface.cpp
+  # todo comment
   src/WidgetScrollbarDecorator.cpp
   src/WorkspaceIcons.cpp
   src/WorkspaceObserver.cpp
@@ -104,7 +109,6 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
   inc/MantidQtWidgets/Common/ManageUserDirectories.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
-  inc/MantidQtWidgets/Common/MantidHelpWindow.h
   inc/MantidQtWidgets/Common/MantidTreeModel.h
   inc/MantidQtWidgets/Common/MantidTreeWidget.h
   inc/MantidQtWidgets/Common/MantidWidget.h
@@ -112,8 +116,6 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MWRunFiles.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
-  inc/MantidQtWidgets/Common/PeriodicTableWidget.h
-  inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
@@ -182,9 +184,8 @@ set ( QT5_INC_FILES
 set ( QT5_UI_FILES
   inc/MantidQtWidgets/Common/DataSelector.ui
   inc/MantidQtWidgets/Common/MWRunFiles.ui
-  inc/MantidQtWidgets/Common/PeriodicTableWidget.ui
-  inc/MantidQtWidgets/Common/pqHelpWindow.ui
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
+  inc/MantidQtWidgets/Common/RenameParDialog.ui
   inc/MantidQtWidgets/Common/SelectFunctionDialog.ui
 )
 
@@ -312,7 +313,8 @@ set ( SRC_FILES
   src/MuonFitDataSelector.cpp
   src/MuonFitPropertyBrowser.cpp
   src/MuonFunctionBrowser.cpp
-  src/PeriodicTableWidget.cpp
+  # todo check if it can be removed from qt4
+
   src/ProcessingAlgoWidget.cpp
   src/ProgressableView.cpp
   src/ProjectSavePresenter.cpp
@@ -421,7 +423,8 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
   inc/MantidQtWidgets/Common/MWDiag.h
-  inc/MantidQtWidgets/Common/PeriodicTableWidget.h
+  # todo check if it can be removed from qt4
+
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
@@ -630,7 +633,8 @@ set ( UI_FILES
   inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.ui
   inc/MantidQtWidgets/Common/SlitCalculator.ui
   inc/MantidQtWidgets/Common/UserFunctionDialog.ui
-  inc/MantidQtWidgets/Common/PeriodicTableWidget.ui
+  # todo check if it can be removed from qt4
+
   inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
 
