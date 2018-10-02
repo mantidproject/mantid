@@ -33,28 +33,32 @@ class BoundingBox;
 */
 namespace MeshObjectCommon {
 
-std::vector<double> getVertices(const std::vector<Kernel::V3D> &vertices);
+MANTID_GEOMETRY_DLL std::vector<double>
+getVertices(const std::vector<Kernel::V3D> &vertices);
+MANTID_GEOMETRY_DLL double solidAngle(const Kernel::V3D &observer,
+                                      const std::vector<uint16_t> &triangles,
+                                      const std::vector<Kernel::V3D> &vertices);
 
-double solidAngle(const Kernel::V3D &observer,
-                  const std::vector<uint16_t> &triangles,
-                  const std::vector<Kernel::V3D> &vertices);
+MANTID_GEOMETRY_DLL double solidAngle(const Kernel::V3D &observer,
+                                      const std::vector<uint16_t> &triangles,
+                                      const std::vector<Kernel::V3D> &vertices,
+                                      const Kernel::V3D scaleFactor);
 
-double solidAngle(const Kernel::V3D &observer,
-                  const std::vector<uint16_t> &triangles,
-                  const std::vector<Kernel::V3D> &vertices,
-                  const Kernel::V3D scaleFactor);
+MANTID_GEOMETRY_DLL bool isOnTriangle(const Kernel::V3D &point,
+                                      const Kernel::V3D &v1,
+                                      const Kernel::V3D &v2,
+                                      const Kernel::V3D &v3);
+MANTID_GEOMETRY_DLL bool
+rayIntersectsTriangle(const Kernel::V3D &start, const Kernel::V3D &direction,
+                      const Kernel::V3D &v1, const Kernel::V3D &v2,
+                      const Kernel::V3D &v3, Kernel::V3D &intersection,
+                      int &entryExit);
 
-bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &v1,
-                  const Kernel::V3D &v2, const Kernel::V3D &v3);
-bool rayIntersectsTriangle(const Kernel::V3D &start,
-                           const Kernel::V3D &direction, const Kernel::V3D &v1,
-                           const Kernel::V3D &v2, const Kernel::V3D &v3,
-                           Kernel::V3D &intersection, int &entryExit);
-
-void checkVertexLimit(size_t nVertices);
-std::vector<uint32_t> getTriangles_uint32(const std::vector<uint16_t> &input);
-const BoundingBox &getBoundingBox(const std::vector<Kernel::V3D> &vertices,
-                                  BoundingBox &cacheBB);
+MANTID_GEOMETRY_DLL void checkVertexLimit(size_t nVertices);
+MANTID_GEOMETRY_DLL std::vector<uint32_t>
+getTriangles_uint32(const std::vector<uint16_t> &input);
+MANTID_GEOMETRY_DLL const BoundingBox &
+getBoundingBox(const std::vector<Kernel::V3D> &vertices, BoundingBox &cacheBB);
 } // namespace MeshObjectCommon
 
 } // namespace Geometry
