@@ -1,12 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator, WorkspaceGroupProperty, \
-    PropertyMode, MatrixWorkspace
+    PropertyMode, MatrixWorkspace, NumericAxis
 from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, StringListValidator, \
     IntBoundedValidator, FloatBoundedValidator, PropertyCriterion, LogicOperator
 from mantid.simpleapi import *
 from MildnerCarpenter import *
-import math
 
 
 class ILLSANSIntegration(DataProcessorAlgorithm):
@@ -38,13 +37,17 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
                 issues['InputWorkspace'] = 'The input workspace does not have a run object attached.'
             instrument = self.getProperty('InputWorkspace').value.getInstrument()
             if not instrument:
-                issues['InputWorkspace'] += 'The input workspace does not instrument attached.'
-        if self.getPropertyValue('OutputType') == 'I(Q)':
+                issues['InputWorkspace'] += 'The input workspace does not have an instrument attached.'
+        output_type = self.getPropertyValue('OutputType')
+        if output_type == 'I(Q)':
             if self.getProperty('NumberOfWedges').value != 0 and not self.getPropertyValue('WedgeWorkspace'):
                 issues['WedgeWorkspace'] = 'This is required when NumberOfWedges is not 0.'
+        if output_type == 'I(Q)' or output_type == 'I(Phi,Q)':
             binning = self.getProperty('OutputBinning').value
             if len(binning) > 3 and len(binning) % 2 == 0:
                 issues['OutputBinning'] = 'If specifying binning explicitly, the array should have odd number of items.'
+        if output_type == 'I(Phi,Q)' and self.getProperty('NumberOfWedges').value == 0:
+            issues['NumberOfWedges'] = 'This is required for I(Phi,Q) output.'
         return issues
 
     def PyInit(self):
@@ -57,7 +60,7 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
                              doc='The output workspace.')
 
         self.declareProperty(name='OutputType', defaultValue='I(Q)',
-                             validator=StringListValidator(['I(Q)', 'I(QxQy)']),
+                             validator=StringListValidator(['I(Q)', 'I(Qx,Qy)', 'I(Phi,Q)']),
                              doc='Choose the output type.')
 
         self.declareProperty(name='CalculateResolution',
@@ -66,14 +69,15 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
                              doc='Choose to calculate the Q resolution.')
 
         output_iq = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'I(Q)')
-        output_iqxy = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'I(QxQy)')
+        output_iphiq = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'I(Phi,Q)')
+        output_iqxy = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'I(Qx,Qy)')
 
         self.declareProperty(FloatArrayProperty('OutputBinning'), doc='The Q binning of the output')
-        self.setPropertySettings('OutputBinning', output_iq)
+        self.setPropertySettings('OutputBinning', EnabledWhenProperty(output_iq, output_iphiq, LogicOperator.Or))
 
         self.declareProperty(name='NumberOfWedges', defaultValue=0, validator=IntBoundedValidator(lower=0),
                              doc='Number of wedges to integrate separately.')
-        self.setPropertySettings('NumberOfWedges', output_iq)
+        self.setPropertySettings('NumberOfWedges', EnabledWhenProperty(output_iq, output_iphiq, LogicOperator.Or))
 
         iq_with_wedges = EnabledWhenProperty(output_iq,
                                              EnabledWhenProperty('NumberOfWedges',
@@ -94,17 +98,12 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         self.declareProperty(name='AsymmetricWedges', defaultValue=False, doc='Whether to have asymmetric wedges.')
         self.setPropertySettings('AsymmetricWedges', iq_with_wedges)
 
-        self.declareProperty(name='ErrorWeighting', defaultValue=False,
-                             doc='Perform error weighted average in integration.')
-        self.setPropertySettings('ErrorWeighting', output_iq)
-
         self.setPropertyGroup('OutputBinning', 'I(Q) Options')
         self.setPropertyGroup('NumberOfWedges', 'I(Q) Options')
         self.setPropertyGroup('WedgeWorkspace', 'I(Q) Options')
         self.setPropertyGroup('WedgeAngle', 'I(Q) Options')
         self.setPropertyGroup('WedgeOffset', 'I(Q) Options')
         self.setPropertyGroup('AsymmetricWedges', 'I(Q) Options')
-        self.setPropertyGroup('ErrorWeighting', 'I(Q) Options')
 
         self.declareProperty(name='MaxQxy', defaultValue=-0.1, validator=FloatBoundedValidator(lower=0.),
                              doc='Maximum of absolute Qx and Qy.')
@@ -118,18 +117,18 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
                              doc='I(Qx, Qy) log binning when binning is not specified.')
         self.setPropertySettings('IQxQyLogBinning', output_iqxy)
 
-        self.setPropertyGroup('MaxQxy', 'I(QxQy) Options')
-        self.setPropertyGroup('DeltaQ', 'I(QxQy) Options')
-        self.setPropertyGroup('IQxQyLogBinning', 'I(QxQy) Options')
+        self.setPropertyGroup('MaxQxy', 'I(Qx,Qy) Options')
+        self.setPropertyGroup('DeltaQ', 'I(Qx,Qy) Options')
+        self.setPropertyGroup('IQxQyLogBinning', 'I(Qx,Qy) Options')
 
     def PyExec(self):
         self._input_ws = self.getPropertyValue('InputWorkspace')
         self._output_type = self.getPropertyValue('OutputType')
         self._resolution = self.getPropertyValue('CalculateResolution')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
-        if self._output_type == 'I(Q)':
+        if self._output_type == 'I(Q)' or self._output_type == 'I(Phi,Q)':
             self._integrate_iq()
-        elif self._output_type == 'I(QxQy)':
+        elif self._output_type == 'I(Qx,Qy)':
             self._integrate_iqxy()
         self.setProperty('OutputWorkspace', self._output_ws)
 
@@ -155,13 +154,13 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
     def _mildner_carpenter_q_binning(self, qmin, qmax):
         if qmin < 0. or qmin >= qmax:
             raise ValueError('qmin must be positive and smaller than qmax. '
-                             'Given qmin={0:.2f}, qmax={0:.2f}'.format(qmin, qmax))
+                             'Given qmin={0:.2f}, qmax={0:.2f}.'.format(qmin, qmax))
         q = qmin
         result = [qmin]
         while q < qmax:
-            bin = 2 * self._deltaQ(q)
-            result.append(bin)
-            q += bin
+            bin_width = 2 * self._deltaQ(q)
+            result.append(bin_width)
+            q += bin_width
             result.append(q)
         return result
 
@@ -180,6 +179,7 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
             self.log().information('No TOF flag available, assuming monochromatic.')
         else:
             is_tof = run.getLogData('tof_mode').value == 'TOF'
+        to_meter = 0.001
         is_rectangular = True
         if 'x' not in source_aperture:
             is_rectangular = False
@@ -187,10 +187,10 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
             pos1 = source_aperture.find('(') + 1
             pos2 = source_aperture.find('x')
             pos3 = source_aperture.find(')')
-            x1 = float(source_aperture[pos1:pos2]) * 0.001
-            y1 = float(source_aperture[pos2 + 1:pos3]) * 0.001
-            x2 = run.getLogData('Beam.sample_ap_x_or_diam').value * 0.001
-            y2 = run.getLogData('Beam.sample_ap_y').value * 0.001
+            x1 = float(source_aperture[pos1:pos2]) * to_meter
+            y1 = float(source_aperture[pos2 + 1:pos3]) *to_meter
+            x2 = run.getLogData('Beam.sample_ap_x_or_diam').value * to_meter
+            y2 = run.getLogData('Beam.sample_ap_y').value * to_meter
             if is_tof:
                 raise RuntimeError('TOF resolution is not supported yet')
             else:
@@ -198,8 +198,8 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         else:
             pos1 = source_aperture.find('(') + 1
             pos3 = source_aperture.find(')')
-            r1 = float(source_aperture[pos1:pos3]) * 0.001
-            r2 = run.getLogData('Beam.sample_ap_x_or_diam').value * 0.001
+            r1 = float(source_aperture[pos1:pos3]) * to_meter
+            r2 = run.getLogData('Beam.sample_ap_x_or_diam').value * to_meter
             if is_tof:
                 raise RuntimeError('TOF resolution is not supported yet')
             else:
@@ -219,26 +219,43 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         q_max = run.getLogData('qmax').value
         self.log().information('Using qmin={0:.2f}, qmax={1:.2f}'.format(q_min, q_max))
         q_binning = self._get_iq_binning(q_min, q_max)
-        self.log().information(str(q_binning))
         n_wedges = self.getProperty('NumberOfWedges').value
-        wedge_ws = self.getPropertyValue('WedgeWorkspace')
-        wedge_angle = self.getProperty('WedgeAngle').value
-        wedge_offset = self.getProperty('WedgeOffset').value
-        asymm_wedges = self.getProperty('AsymmetricWedges').value
-        error_weighting = self.getProperty('ErrorWeighting').value
-        Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws, NumberOfWedges=n_wedges,
-                    WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, WedgeOffset=wedge_offset, AsymmetricWedges=asymm_wedges,
-                    ErrorWeighting=error_weighting, OutputBinning=q_binning)
-        if self._resolution == 'MildnerCarpenter':
-            x = mtd[self._output_ws].readX(0)
-            mid_x = (x[1:] + x[:-1]) / 2
-            res = self._deltaQ(mid_x)
-            mtd[self._output_ws].setDx(0, res)
+        if self._output_type == 'I(Q)':
+            wedge_ws = self.getPropertyValue('WedgeWorkspace')
+            wedge_angle = self.getProperty('WedgeAngle').value
+            wedge_offset = self.getProperty('WedgeOffset').value
+            asymm_wedges = self.getProperty('AsymmetricWedges').value
+            Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws, NumberOfWedges=n_wedges, OutputBinning=q_binning,
+                        WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, WedgeOffset=wedge_offset, AsymmetricWedges=asymm_wedges)
+            if self._resolution == 'MildnerCarpenter':
+                x = mtd[self._output_ws].readX(0)
+                mid_x = (x[1:] + x[:-1]) / 2
+                res = self._deltaQ(mid_x)
+                mtd[self._output_ws].setDx(0, res)
+                if n_wedges != 0:
+                    for wedge_ws in mtd[wedge_ws]:
+                        wedge_ws.setDx(0, res)
             if n_wedges != 0:
-                for wedge_ws in mtd[wedge_ws]:
-                    wedge_ws.setDx(0, res)
-        if n_wedges != 0:
-            self.setProperty('WedgeWorkspace', mtd[wedge_ws])
+                self.setProperty('WedgeWorkspace', mtd[wedge_ws])
+        elif self._output_type == 'I(Phi,Q)':
+            wedge_ws = '__wedges' + self._input_ws
+            iq_ws = '__iq' + self._input_ws
+            wedge_angle = 360./n_wedges
+            azimuth_axis = NumericAxis.create(n_wedges)
+            for i in range(n_wedges):
+                azimuth_axis.setValue(i, i * wedge_angle)
+            Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=iq_ws, NumberOfWedges=n_wedges,
+                        OutputBinning=q_binning, WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, AsymmetricWedges=True)
+            DeleteWorkspace(iq_ws)
+            ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=self._output_ws)
+            mtd[self._output_ws].replaceAxis(1, azimuth_axis)
+            DeleteWorkspace(wedge_ws)
+            if self._resolution == 'MildnerCarpenter':
+                x = mtd[self._output_ws].readX(0)
+                mid_x = (x[1:] + x[:-1]) / 2
+                res = self._deltaQ(mid_x)
+                for i in range(mtd[self._output_ws].getNumberHistograms()):
+                    mtd[self._output_ws].setDx(i, res)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ILLSANSIntegration)
