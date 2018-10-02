@@ -13,6 +13,7 @@ set ( SRC_FILES
         src/MuonAlgorithmHelper.cpp
 	src/MuonAsymmetryHelper.cpp
 	src/MuonGroupDetectors.cpp
+	src/MuonGroupingAsymmetry.cpp
 	src/PhaseQuadMuon.cpp
 	src/PlotAsymmetryByLogValue.cpp
 	src/RemoveExpDecay.cpp
@@ -34,6 +35,7 @@ set ( INC_FILES
         inc/MantidMuon/MuonAlgorithmHelper.h
 	inc/MantidMuon/MuonAsymmetryHelper.h
 	inc/MantidMuon/MuonGroupDetectors.h
+	inc/MantidMuon/MuonGroupingAsymmetry.h
 	inc/MantidMuon/PhaseQuadMuon.h
 	inc/MantidMuon/PlotAsymmetryByLogValue.h
 	inc/MantidMuon/RemoveExpDecay.h
@@ -54,6 +56,7 @@ set ( TEST_FILES
         MuonAlgorithmHelperTest.h
 	EstimateMuonAsymmetryFromCountsTest.h
 	MuonGroupDetectorsTest.h
+	MuonGroupingAsymmetryTest.h
 	PhaseQuadMuonTest.h
 	PlotAsymmetryByLogValueTest.h
 	RemoveExpDecayTest.h
