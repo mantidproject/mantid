@@ -36,6 +36,10 @@ private:
   void setPlotSpectrumIsPlotting(bool plotting);
   void setTiledPlotIsPlotting(bool plotting);
 
+  void setTiledPlotFirstIndex(int value);
+  void setTiledPlotLastIndex(int value);
+  void setMinMaxOfTiledPlotFirstIndex(int minimum, int maximum);
+  void setMinMaxOfTiledPlotLastIndex(int minimum, int maximum);
   void setPlotSpectrumIndexMax(int maximum);
   void setPlotSpectrumIndex(int value);
   int getPlotSpectrumIndex();
@@ -47,8 +51,8 @@ private slots:
   void updateRS(QtProperty *prop, double val);
   void updatePropertyValues(QtProperty *prop, double val);
   void updateDisplayedBinParameters();
-  void setTiledPlotRangeMin(int value);
-  void setTiledPlotRangeMax(int value);
+  void setTiledPlotFirstPlot(int value);
+  void setTiledPlotLastPlot(int value);
   void runClicked();
   void saveClicked();
   void plotClicked();
@@ -59,6 +63,7 @@ private:
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
   bool m_iqtResFileType;
+  int m_maxTiledPlots = 17;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

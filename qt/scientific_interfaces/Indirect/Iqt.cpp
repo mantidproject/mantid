@@ -138,11 +138,10 @@ void Iqt::setup() {
           SLOT(plotCurrentPreview()));
   connect(m_uiForm.cbCalculateErrors, SIGNAL(clicked()), this,
           SLOT(errorsClicked()));
-
   connect(m_uiForm.spTiledPlotFirst, SIGNAL(valueChanged(int)), this,
-          SLOT(setTiledPlotRangeMinMax(int)));
+          SLOT(setTiledPlotFirstPlot(int)));
   connect(m_uiForm.spTiledPlotLast, SIGNAL(valueChanged(int)), this,
-          SLOT(setTiledPlotRangeMax(int)));
+          SLOT(setTiledPlotLastPlot(int)));
 }
 
 void Iqt::run() {
@@ -200,6 +199,8 @@ void Iqt::algorithmComplete(bool error) {
   } else {
     setPlotSpectrumIndexMax(getNumberOfSpectra() - 1);
     setPlotSpectrumIndex(selectedSpectrum());
+    setTiledPlotFirstIndex(selectedSpectrum());
+    setTiledPlotLastIndex(getNumberOfSpectra() - 1);
   }
 } // namespace IDA
 /**
@@ -231,27 +232,40 @@ bool Iqt::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
 void Iqt::plotTiled() {
   setTiledPlotIsPlotting(true);
 
+  auto const firstTiledPlot = m_uiForm.spTiledPlotFirst->text().toInt();
+  auto const lastTiledPlot = m_uiForm.spTiledPlotLast->text().toInt();
+
   MatrixWorkspace_const_sptr outWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           m_pythonExportWsName);
 
-  // Find x value where y > 1 in 0th spectra
-  const auto tiledPlotWsName = outWs->getName() + "_tiled";
-  const auto y_data = outWs->y(0);
-  const auto y_data_length = y_data.size();
+  // Find x value where y > 1 in first spectra
+  auto const tiledPlotWsName = outWs->getName() + "_tiled";
+  auto const y_data = outWs->y(firstTiledPlot);
+  auto const y_data_length = y_data.size();
   auto crop_index = y_data.size();
-  for (size_t i = 0; i < y_data_length; i++) {
+  for (std::size_t i = 0; i < y_data_length; ++i) {
     if (y_data[i] > 1) {
-      crop_index = i - 1;
+      crop_index = i > 0 ? i - 1 : i;
       break;
     }
   }
-  const auto crop_value = outWs->x(0)[crop_index];
+  auto const crop_value = outWs->x(firstTiledPlot)[crop_index];
+
+  // Extract spectra which need a tiled plot before cloning workspace
+  IAlgorithm_sptr extractSpectra =
+      AlgorithmManager::Instance().create("ExtractSpectra");
+  extractSpectra->initialize();
+  extractSpectra->setProperty("InputWorkspace", outWs->getName());
+  extractSpectra->setProperty("OutputWorkspace", tiledPlotWsName);
+  extractSpectra->setProperty("StartWorkspaceIndex", firstTiledPlot);
+  extractSpectra->setProperty("EndWorkspaceIndex", lastTiledPlot);
+  extractSpectra->execute();
 
   // Clone workspace before cropping to keep in ADS
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->initialize();
-  clone->setProperty("InputWorkspace", outWs->getName());
+  clone->setProperty("InputWorkspace", tiledPlotWsName);
   clone->setProperty("OutputWorkspace", tiledPlotWsName);
   clone->execute();
 
@@ -267,22 +281,21 @@ void Iqt::plotTiled() {
           tiledPlotWsName);
 
   // Plot tiledwindow
-  const size_t nPlots = tiledPlotWs->getNumberHistograms();
-  if (nPlots == 0)
-    return;
-  QString pyInput = "from mantidplot import newTiledWindow\n";
-  pyInput += "newTiledWindow(sources=[";
-  for (size_t index = 0; index < nPlots; ++index) {
-    if (index > 0) {
-      pyInput += ",";
+  std::size_t const numberOfPlots = lastTiledPlot - firstTiledPlot + 1;
+  if (numberOfPlots != 0) {
+    QString pyInput = "from mantidplot import newTiledWindow\n";
+    pyInput += "newTiledWindow(sources=[";
+    for (std::size_t index = firstTiledPlot; index <= lastTiledPlot; ++index) {
+      if (index > firstTiledPlot) {
+        pyInput += ",";
+      }
+      std::string const pyInStr =
+          "(['" + tiledPlotWsName + "'], " + std::to_string(index) + ")";
+      pyInput += QString::fromStdString(pyInStr);
     }
-    const std::string pyInStr =
-        "(['" + tiledPlotWsName + "'], " + std::to_string(index) + ")";
-    pyInput += QString::fromStdString(pyInStr);
+    pyInput += "])\n";
+    runPythonCode(pyInput);
   }
-  pyInput += "])\n";
-  runPythonCode(pyInput);
-
   setTiledPlotIsPlotting(false);
 }
 
@@ -474,27 +487,50 @@ void Iqt::updateRS(QtProperty *prop, double val) {
     xRangeSelector->setMaximum(val);
 }
 
-// void Iqt::setTiledPlotMinimum(std::size_t value) {
-//	MantidQt::API::SignalBlocker<QObject>
-// blocker(m_uiForm.spTiledPlotFirst);
-//	m_uiForm->spTiledPlotFirst->setValue(boost::numeric_cast<int>(value));
-//}
-
-// void Iqt::setTiledPlotMaximum(std::size_t value) {
-//	MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
-//	m_uiForm->spTiledPlotLast->setValue(boost::numeric_cast<int>(value));
-//}
-
-void Iqt::setTiledPlotRangeMin(int value) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
-  m_uiForm.spTiledPlotFirst->setMinimum(value);
-  m_uiForm.spTiledPlotLast->setMinimum(value);
+void Iqt::setTiledPlotFirstPlot(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  auto lastPlotIndex = m_uiForm.spTiledPlotLast->text().toInt();
+  auto firstPlotMinimum = lastPlotIndex - m_maxTiledPlots >= 0
+                              ? lastPlotIndex - m_maxTiledPlots
+                              : 0;
+  setMinMaxOfTiledPlotFirstIndex(firstPlotMinimum, lastPlotIndex);
+  if (lastPlotIndex - value <= m_maxTiledPlots)
+    setMinMaxOfTiledPlotLastIndex(value, value + m_maxTiledPlots);
+  setTiledPlotFirstIndex(value);
 }
 
-void Iqt::setTiledPlotRangeMax(int value) {
+void Iqt::setTiledPlotLastPlot(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  auto firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
+  setMinMaxOfTiledPlotLastIndex(firstPlotIndex,
+                                firstPlotIndex + m_maxTiledPlots);
+  if (value - firstPlotIndex <= m_maxTiledPlots && value - m_maxTiledPlots >= 0)
+    setMinMaxOfTiledPlotFirstIndex(value - m_maxTiledPlots, value);
+  setTiledPlotLastIndex(value);
+}
+
+void Iqt::setMinMaxOfTiledPlotFirstIndex(int minimum, int maximum) {
+  m_uiForm.spTiledPlotFirst->setMinimum(minimum);
+  m_uiForm.spTiledPlotFirst->setMaximum(maximum);
+}
+
+void Iqt::setMinMaxOfTiledPlotLastIndex(int minimum, int maximum) {
+  m_uiForm.spTiledPlotLast->setMinimum(minimum);
+  m_uiForm.spTiledPlotLast->setMaximum(maximum);
+}
+
+void Iqt::setTiledPlotFirstIndex(int value) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
-  m_uiForm.spTiledPlotFirst->setMaximum(value);
-  m_uiForm.spTiledPlotLast->setMaximum(value);
+  m_uiForm.spTiledPlotFirst->setValue(value);
+}
+
+void Iqt::setTiledPlotLastIndex(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  auto firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
+  auto lastPlotIndex = value - m_maxTiledPlots > firstPlotIndex
+                           ? firstPlotIndex + m_maxTiledPlots
+                           : value;
+  m_uiForm.spTiledPlotLast->setValue(lastPlotIndex);
 }
 
 void Iqt::setPlotSpectrumIndexMax(int maximum) {
@@ -504,13 +540,10 @@ void Iqt::setPlotSpectrumIndexMax(int maximum) {
 
 void Iqt::setPlotSpectrumIndex(int spectrum) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
-  m_uiForm.spSpectrum->setValue(boost::numeric_cast<int>(spectrum));
+  m_uiForm.spSpectrum->setValue(spectrum);
 }
 
-int Iqt::getPlotSpectrumIndex() {
-  return boost::numeric_cast<int>(
-      std::stoull(m_uiForm.spSpectrum->text().toStdString()));
-}
+int Iqt::getPlotSpectrumIndex() { return m_uiForm.spSpectrum->text().toInt(); }
 
 void Iqt::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
