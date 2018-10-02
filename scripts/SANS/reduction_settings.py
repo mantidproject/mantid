@@ -73,7 +73,7 @@ REDUCTION_SETTINGS_OBJ_NAME = "ISISSANSReductionSettings"
 def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
     """
     Returns the PropertyManager object with the given name.  This could be used
-    to store settings used by the reduction, or to seperately store some
+    to store settings used by the reduction, or to separately store some
     temporary or backup settings.  If a PropertyManager object does not exist,
     then one is created.
 

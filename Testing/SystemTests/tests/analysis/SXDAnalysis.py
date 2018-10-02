@@ -40,16 +40,16 @@ class SXDAnalysis(stresstesting.MantidStressTest):
         unitcell_angle = 90
         length_tolerance = 0.1
         #
-        angle_tolelerance = 0.25  # Actual tolernce seems is 0.17
+        angle_tolerance = 0.25  # Actual tolerance seems is 0.17
         #
         # Check results.
         latt = peaks_qLab.sample().getOrientedLattice()
         self.assertDelta( latt.a(), unitcell_length, length_tolerance, "a length is different from expected")
         self.assertDelta( latt.b(), unitcell_length, length_tolerance, "b length is different from expected")
         self.assertDelta( latt.c(), unitcell_length, length_tolerance, "c length is different from expected")
-        self.assertDelta( latt.alpha(), unitcell_angle, angle_tolelerance, "alpha angle is different from expected")
-        self.assertDelta( latt.beta(), unitcell_angle, angle_tolelerance, "beta angle is different from expected")
-        self.assertDelta( latt.gamma(), unitcell_angle, angle_tolelerance, "gamma angle length is different from expected")
+        self.assertDelta( latt.alpha(), unitcell_angle, angle_tolerance, "alpha angle is different from expected")
+        self.assertDelta( latt.beta(), unitcell_angle, angle_tolerance, "beta angle is different from expected")
+        self.assertDelta( latt.gamma(), unitcell_angle, angle_tolerance, "gamma angle length is different from expected")
 
     def doValidation(self):
         # If we reach here, no validation failed

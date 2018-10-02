@@ -50,8 +50,13 @@ public slots:
 
 private slots:
   void algorithmComplete(bool error);
-  void removeGroupingOption(const QString &option);
-  void includeExtraGroupingOption(bool includeOption, const QString &option);
+
+  void setCurrentGroupingOption(QString const &option);
+  int getGroupingOptionIndex(QString const &option);
+  bool isOptionHidden(QString const &option);
+  void removeGroupingOption(QString const &option);
+  void includeExtraGroupingOption(bool includeOption, QString const &option);
+
   void
   setInstrumentDefault(); ///< Sets default parameters for current instrument
   void mappingOptionSelected(

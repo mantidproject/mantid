@@ -124,7 +124,7 @@ PropertyVector apiOrderedProperties(const IAlgorithm &propMgr) {
  * @return A Python list of strings
  */
 
-object getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
+list getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
   GlobalInterpreterLock gil;
@@ -145,7 +145,7 @@ object getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-object getAlgorithmPropertiesOrdered(IAlgorithm &self) {
+list getAlgorithmPropertiesOrdered(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
   GlobalInterpreterLock gil;
@@ -162,7 +162,7 @@ object getAlgorithmPropertiesOrdered(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-object getOutputProperties(IAlgorithm &self) {
+list getOutputProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
 
   GlobalInterpreterLock gil;
@@ -181,7 +181,7 @@ object getOutputProperties(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-object getInOutProperties(IAlgorithm &self) {
+list getInOutProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
 
   GlobalInterpreterLock gil;
@@ -346,7 +346,7 @@ std::string getWikiSummary(IAlgorithm &self) {
  * @param self Reference to the calling object
  * @return validation error dictionary
  */
-boost::python::object validateInputs(IAlgorithm &self) {
+boost::python::dict validateInputs(IAlgorithm &self) {
   auto map = self.validateInputs();
   using MapToPyDictionary =
       Mantid::PythonInterface::Converters::MapToPyDictionary<std::string,

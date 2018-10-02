@@ -149,12 +149,15 @@ MaxentCalculator::calculateImage(const std::vector<double> &data) const {
  * @param errors : [input] The experimental errors as a vector (real or complex)
  * @param image : [input] The image as a vector (real or complex)
  * @param background : [input] The background
+ * @param linearAdjustments: [input] Optional linear adjustments (complex)
+ * @param constAdjustments: [input] Optional constant adjustments (complex)
  */
 void MaxentCalculator::iterate(const std::vector<double> &data,
                                const std::vector<double> &errors,
                                const std::vector<double> &image,
-                               double background) {
-
+                               double background,
+                               const std::vector<double> &linearAdjustments,
+                               const std::vector<double> &constAdjustments) {
   // Some checks
   if (data.empty() || errors.empty() || (data.size() != errors.size())) {
     throw std::invalid_argument(
@@ -177,6 +180,31 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   // Set to -1, these will be calculated later
   m_angle = -1.;
   m_chisq = -1.;
+
+  // adjust calculated data, if required
+  if (!linearAdjustments.empty()) {
+    if (linearAdjustments.size() < m_dataCalc.size()) {
+      throw std::invalid_argument(
+          "Cannot adjust calculated data: too few linear adjustments");
+    }
+    for (size_t j = 0; j < m_dataCalc.size() / 2; ++j) {
+      double yr = m_dataCalc[2 * j];
+      double yi = m_dataCalc[2 * j + 1];
+      m_dataCalc[2 * j] =
+          yr * linearAdjustments[2 * j] - yi * linearAdjustments[2 * j + 1];
+      m_dataCalc[2 * j + 1] =
+          yi * linearAdjustments[2 * j] + yr * linearAdjustments[2 * j + 1];
+    }
+  }
+  if (!constAdjustments.empty()) {
+    if (constAdjustments.size() < m_dataCalc.size()) {
+      throw std::invalid_argument(
+          "Cannot adjust calculated data: too few constant adjustments");
+    }
+    for (size_t i = 0; i < m_dataCalc.size(); ++i) {
+      m_dataCalc[i] += constAdjustments[i];
+    }
+  }
 
   // Two search directions
   const size_t dim = 2;

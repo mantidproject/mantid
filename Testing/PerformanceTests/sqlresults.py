@@ -260,7 +260,7 @@ class SQLResultReporter(reporters.ResultReporter):
 
     def dispatchResults(self, result):
         '''
-        Construct the SQL commands and send them to the databse
+        Construct the SQL commands and send them to the database
         '''
         dbcxn = SQLgetConnection()
         cur = dbcxn.cursor()

@@ -57,6 +57,7 @@ Bugfixes
 ########
 
 - multiple_scattering flag is now optional for Polaris focus when absorb_correction is true.
+- Normalisation is fixed in :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`, which was causing very low peak to background ratio for reduced D2B data.
 
 New
 ###

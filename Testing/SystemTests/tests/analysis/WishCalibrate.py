@@ -112,7 +112,7 @@ class WishCalibration(stresstesting.MantidStressTest):
 
             @param peakTable: the table containing fitted peak centers
             @param threshold: the tolerance on the difference from the mean value
-            @return A list of expected peak positions and a list of indicies of tubes
+            @return A list of expected peak positions and a list of indices of tubes
             to correct
             """
             n = len(peaksTable)
@@ -150,7 +150,7 @@ class WishCalibration(stresstesting.MantidStressTest):
             tube are recalculated.
 
             @param ws: the workspace to get the tube geometry from
-            @param calibrationTable: the calibration table ouput from running calibration
+            @param calibrationTable: the calibration table output from running calibration
             @param peaksTable: the table containing the fitted peak centers from calibration
             @param spec: the tube spec for the instrument
             @param idealTube: the ideal tube for the instrument

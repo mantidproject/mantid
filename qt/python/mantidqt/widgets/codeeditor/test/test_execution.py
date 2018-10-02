@@ -64,9 +64,9 @@ class PythonCodeExecutionTest(GuiTest):
         executor.reset_context()
         self.assertEqual(0, len(executor.globals_ns))
 
-    def test_startup_code_executed_by_default(self):
+    def test_startup_code_not_executed_by_default(self):
         executor = PythonCodeExecution(startup_code="x=100")
-        self.assertEqual(100, executor.globals_ns['x'])
+        self.assertFalse('x' in executor.globals_ns)
 
     # ---------------------------------------------------------------------------
     # Successful execution tests
