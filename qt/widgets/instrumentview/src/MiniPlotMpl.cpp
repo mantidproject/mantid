@@ -1,8 +1,10 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlotMpl.h"
+#include "MantidQtWidgets/MplCpp/ColorConverter.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
 #include "MantidKernel/Logger.h"
-
+#include <QContextMenuEvent>
+#include <QMouseEvent>
 #include <QVBoxLayout>
 
 namespace {
@@ -34,8 +36,9 @@ bool warnDataInvalid(const std::vector<double> &x,
 } // namespace
 
 namespace MantidQt {
-using Widgets::MplCpp::cycler;
+using Widgets::MplCpp::ColorConverter;
 using Widgets::MplCpp::FigureCanvasQt;
+using Widgets::MplCpp::cycler;
 
 namespace MantidWidgets {
 
@@ -49,6 +52,7 @@ MiniPlotMpl::MiniPlotMpl(QWidget *parent)
       m_activeCurveLabel(), m_storedCurveLabels() {
   setLayout(new QVBoxLayout);
   layout()->addWidget(m_canvas);
+  m_canvas->installEventFilterToMplCanvas(this);
 }
 
 void MiniPlotMpl::setData(std::vector<double> x, std::vector<double> y,
@@ -89,6 +93,31 @@ void MiniPlotMpl::store() {
 bool MiniPlotMpl::hasStored() const { return !m_storedCurveLabels.isEmpty(); }
 
 /**
+ * Remove the stored curve with the given label. If the label is not found this
+ * does nothing
+ * @param label A string label for a curve
+ */
+void MiniPlotMpl::removeCurve(const QString &label) {
+  auto labelIndex = m_storedCurveLabels.indexOf(label);
+  if (labelIndex < 0)
+    return;
+  // The line is at the same position in the vector
+  m_lines.erase(std::next(std::begin(m_lines), labelIndex));
+}
+
+/**
+ * Retrieve the color of the curve with the given label
+ * @param label
+ * @return A QColor defining the color of the curve
+ */
+QColor MiniPlotMpl::getCurveColor(const QString &label) const {
+  auto labelIndex = m_storedCurveLabels.indexOf(label);
+  if (labelIndex < 0)
+    return QColor();
+  return ColorConverter::toRGB(m_lines[labelIndex].pyobj().attr("get_color")());
+}
+
+/**
  * Redraws the canvas
  */
 void MiniPlotMpl::replot() { m_canvas->draw(); }
@@ -111,6 +140,48 @@ void MiniPlotMpl::clearAll() {
   m_lines.clear();
   replot();
 }
+
+/**
+ * Override the contextMenuEvent handler. Ignores the events as they are handled
+ * by mousePressEvent as right click also controls zoom level
+ * @param evt A pointer to a QContextMenuEvent describing the event
+ */
+void MiniPlotMpl::contextMenuEvent(QContextMenuEvent *evt) { evt->accept(); }
+
+/**
+ * Filter events from the underlying matplotlib canvas
+ * @param watched A pointer to the object being watched
+ * @param evt A pointer to the generated event
+ * @return True if the event was filtered, false otherwise
+ */
+bool MiniPlotMpl::eventFilter(QObject *watched, QEvent *evt) {
+  Q_UNUSED(watched);
+  bool filtered{false};
+  switch (evt->type()) {
+  case QEvent::MouseButtonPress:
+    mousePressEvent(static_cast<QMouseEvent *>(evt));
+    filtered = true;
+    break;
+  default:
+    filtered = false;
+  }
+
+  return filtered;
+}
+
+/**
+ * Override the contextMenuEvent handler. Ignores the events as they are handled
+ * by mousePressEvent as right click also controls zoom level
+ * @param evt A pointer to a QMouseEvent describing the event
+ */
+void MiniPlotMpl::mousePressEvent(QMouseEvent *evt) {
+  if (evt->buttons() & Qt::RightButton) {
+    evt->accept();
+    // plot owner will display and process context menu
+    emit showContextMenu();
+  }
+}
+
 
 } // namespace MantidWidgets
 } // namespace MantidQt

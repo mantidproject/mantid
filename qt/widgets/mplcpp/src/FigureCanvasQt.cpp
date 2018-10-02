@@ -38,13 +38,14 @@ Python::Object createPyCanvas(int subplotspec) {
 /**
  * @brief Common constructor code for FigureCanvasQt
  * @param cppCanvas A pointer to the FigureCanvasQt object
+ * @return A pointer to the C++ widget extract from the Python FigureCanvasQT
+ * object
  */
-void initLayout(FigureCanvasQt *cppCanvas) {
+QWidget *initLayout(FigureCanvasQt *cppCanvas) {
   cppCanvas->setLayout(new QVBoxLayout());
   QWidget *pyCanvas = Python::extract<QWidget>(cppCanvas->pyobj());
   cppCanvas->layout()->addWidget(pyCanvas);
-  pyCanvas->setMouseTracking(false);
-  pyCanvas->installEventFilter(cppCanvas);
+  return pyCanvas;
 }
 
 /**
@@ -61,7 +62,7 @@ FigureCanvasQt::FigureCanvasQt(int subplotspec, QWidget *parent)
       m_figure(Figure(Python::Object(pyobj().attr("figure")))) {
   // Cannot use delegating constructor here as InstanceHolder needs to be
   // initialized before the axes can be created
-  initLayout(this);
+  m_mplCanvas = initLayout(this);
 }
 
 /**
@@ -73,7 +74,20 @@ FigureCanvasQt::FigureCanvasQt(int subplotspec, QWidget *parent)
 FigureCanvasQt::FigureCanvasQt(Figure fig, QWidget *parent)
     : QWidget(parent), InstanceHolder(createPyCanvasFromFigure(fig), "draw"),
       m_figure(std::move(fig)) {
-  initLayout(this);
+  m_mplCanvas = initLayout(this);
+}
+
+/**
+ * Allows events destined for the child canvas to be intercepted by a filter
+ * object. The Matplotlib canvas defines its own event handlers for certain
+ * events but FigureCanvasQt does not directly inherit from the matplotlib
+ * canvas so we cannot use the standard virtual event methods to intercept them.
+ * Instead the event filter allows an object to capture and process them.
+ * @param filter A pointer to an object overriding the eventFilter method
+ */
+void FigureCanvasQt::installEventFilterToMplCanvas(QObject *filter) {
+  assert(m_mplCanvas);
+  m_mplCanvas->installEventFilter(filter);
 }
 
 } // namespace MplCpp
