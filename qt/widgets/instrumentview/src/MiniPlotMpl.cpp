@@ -6,9 +6,8 @@
 #include <QVBoxLayout>
 
 namespace {
-// Active curve format
 const char *ACTIVE_CURVE_FORMAT = "k-";
-// Logger
+const char *STORED_LINE_COLOR_CYCLE = "bgrcmyk";
 Mantid::Kernel::Logger g_log("MiniPlotQwt");
 
 /**
@@ -35,6 +34,7 @@ bool warnDataInvalid(const std::vector<double> &x,
 } // namespace
 
 namespace MantidQt {
+using Widgets::MplCpp::cycler;
 using Widgets::MplCpp::FigureCanvasQt;
 
 namespace MantidWidgets {
@@ -44,8 +44,9 @@ namespace MantidWidgets {
  * @param parent A pointer to its parent widget
  */
 MiniPlotMpl::MiniPlotMpl(QWidget *parent)
-    : QWidget(parent), m_canvas(new FigureCanvasQt(111)), m_lines(), m_xunit(),
-      m_activeCurveLabel() {
+    : QWidget(parent), m_canvas(new FigureCanvasQt(111)), m_lines(),
+      m_colorCycler(cycler("color", STORED_LINE_COLOR_CYCLE)), m_xunit(),
+      m_activeCurveLabel(), m_storedCurveLabels() {
   setLayout(new QVBoxLayout);
   layout()->addWidget(m_canvas);
 }
@@ -55,17 +56,37 @@ void MiniPlotMpl::setData(std::vector<double> x, std::vector<double> y,
   if (warnDataInvalid(x, y))
     return;
 
-  m_lines.clear();
+  clearCurve();
   auto axes = m_canvas->gca();
+  axes.relim();
+  // plot automatically calls "scalex=True, scaley=True"
   m_lines.emplace_back(
       axes.plot(std::move(x), std::move(y), ACTIVE_CURVE_FORMAT));
   m_xunit = std::move(xunit);
   m_activeCurveLabel = curveLabel;
   axes.setXLabel(m_xunit.toLatin1().constData());
-  axes.relim();
-  axes.autoscaleView();
   replot();
 }
+
+/**
+ * @return True if an active curve exists
+ */
+bool MiniPlotMpl::hasCurve() const { return !m_activeCurveLabel.isEmpty(); }
+
+/**
+ * Store the active curve so it is not overridden
+ * by future plotting. The curve's color is updated using the color cycler
+ */
+void MiniPlotMpl::store() {
+  m_storedCurveLabels.append(m_activeCurveLabel);
+  m_activeCurveLabel.clear();
+  m_lines.back().set(m_colorCycler());
+}
+
+/**
+ * @return True if the plot has stored curves
+ */
+bool MiniPlotMpl::hasStored() const { return !m_storedCurveLabels.isEmpty(); }
 
 /**
  * Redraws the canvas
@@ -76,7 +97,10 @@ void MiniPlotMpl::replot() { m_canvas->draw(); }
  * Remove the active curve, keeping any stored curves
  */
 void MiniPlotMpl::clearCurve() {
-  m_lines.clear();
+  // setData places the latest curve at the back of the vector
+  if (hasCurve()) {
+    m_lines.pop_back();
+  }
   m_activeCurveLabel.clear();
 }
 

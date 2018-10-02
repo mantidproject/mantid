@@ -5,6 +5,7 @@ set ( TEST_FILES
   ArtistTest.h
   AxesTest.h
   ColormapTest.h
+  CyclerTest.h
   FigureTest.h
   Line2DTest.h
   MantidColormapTest.h
