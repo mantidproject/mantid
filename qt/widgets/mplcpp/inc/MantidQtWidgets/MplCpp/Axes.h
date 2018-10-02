@@ -39,6 +39,13 @@ public:
   Line2D plot(std::vector<double> xdata, std::vector<double> ydata,
               const char *format = "b-");
   /// @}
+
+  ///@name Scaling
+  /// @{
+  void relim(bool visibleOnly = false);
+  void autoscaleView(bool scaleX = true, bool scaleY = true);
+  void autoscaleView(bool tight, bool scaleX = true, bool scaleY = true);
+  /// @}
 };
 
 } // namespace MplCpp

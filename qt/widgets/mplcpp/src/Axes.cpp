@@ -72,6 +72,35 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
   }
 }
 
+/**
+ * @brief Recompute the data limits from the current artists.
+ * @param visibleOnly If true then only include visble artists in the
+ * calculation
+ */
+void Axes::relim(bool visibleOnly) { pyobj().attr("relim")(visibleOnly); }
+
+/**
+ * Autoscale the view based on the current data limits. Calls
+ * Axes.autoscale_view with the tight argument set to None
+ * @param scaleX If true (default) scale the X axis limits
+ * @param scaleY If true (default) scale the Y axis limits
+ */
+void Axes::autoscaleView(bool scaleX, bool scaleY) {
+  pyobj().attr("autoscale_view")(Python::Object(), scaleX, scaleY);
+}
+
+/**
+ * Autoscale the view based on the current data limits. Calls
+ * Axes.autoscale_view
+ * @param tight If true tight is False, the axis major locator will be used to
+ * expand the view limits
+ * @param scaleX If true (default) scale the X axis limits
+ * @param scaleY If true (default) scale the Y axis limits
+ */
+void Axes::autoscaleView(bool tight, bool scaleX, bool scaleY) {
+  pyobj().attr("autoscale_view")(tight, scaleX, scaleY);
+}
+
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt
