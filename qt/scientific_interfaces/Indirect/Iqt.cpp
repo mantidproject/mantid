@@ -223,6 +223,8 @@ void Iqt::plotClicked() {
   setPlotSpectrumIsPlotting(false);
 }
 
+void Iqt::runClicked() { runTab(); }
+
 void Iqt::errorsClicked() {
   m_uiForm.spIterations->setEnabled(isErrorsEnabled());
 }
@@ -589,8 +591,6 @@ void Iqt::setTiledPlotIsPlotting(bool plotting) {
   m_uiForm.pbTile->setText(plotting ? "Plotting..." : "Tiled Plot");
   setButtonsEnabled(!plotting);
 }
-
-void Iqt::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces
