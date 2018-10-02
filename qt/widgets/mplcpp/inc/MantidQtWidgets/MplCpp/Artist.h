@@ -31,7 +31,7 @@ public:
   // Holds a reference to the matplotlib artist object
   explicit Artist(Python::Object obj);
 
-  // Remove the artist from the canvas
+  void set(Python::Dict kwargs);
   void remove();
 };
 

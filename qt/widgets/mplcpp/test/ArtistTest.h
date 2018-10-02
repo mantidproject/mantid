@@ -21,6 +21,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(Artist drawer(pyartist));
   }
 
+  void testSetCallsArtistSet() {
+    auto textModule(Python::NewRef(PyImport_ImportModule("matplotlib.text")));
+    Artist label(textModule.attr("Text")());
+    Python::Dict kwargs;
+    kwargs["color"] = "r";
+    label.set(kwargs);
+
+    TS_ASSERT_EQUALS("r", label.pyobj().attr("get_color")());
+  }
+
   void testArtistCallsRemoveOnPyObject() {
     auto textModule(Python::NewRef(PyImport_ImportModule("matplotlib.text")));
     Artist label(textModule.attr("Text")());
