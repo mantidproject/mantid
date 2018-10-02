@@ -20,7 +20,7 @@ regex_old_style = re.compile("\n?\s*Copyright\s.{0,20}?(\d{4}).{100,1000}?Licens
                              "(.*http://doxygen.mantidproject.org.*?($|(?=\*\/))){0,1}",            #optional code doc line
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #new style statement, year in group 1
-regex_new_style = re.compile("^\W*Mantid.{0,20}?(\d{4}).{100,300}?SPDX - License - Identifier.*?$[\s]*",
+regex_new_style = re.compile("^\W*Mantid.{0,100}?(\d{4}).{100,300}?SPDX - License - Identifier.*?$[\s]*",
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #Other copyright statement
 regex_other_style = re.compile("^.*?Copyright\s.{0,200}?(\d{4}).{0,400}?$",
