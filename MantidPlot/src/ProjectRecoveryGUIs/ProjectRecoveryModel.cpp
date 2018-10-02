@@ -62,6 +62,9 @@ void ProjectRecoveryModel::recoverLast() {
       [=] { m_projRec->loadRecoveryCheckpoint(mostRecentCheckpoint); });
   recoveryThread.detach();
 
+  updateCheckpointTried(
+      mostRecentCheckpoint.directory(mostRecentCheckpoint.depth() - 1));
+
   // Close View
   m_presenter->closeView();
 }
@@ -80,6 +83,9 @@ void ProjectRecoveryModel::openLastInEditor() {
   // Restart project recovery as we stay synchronous
   m_projRec->clearAllCheckpoints(beforeCheckpoints);
   m_projRec->startProjectSaving();
+
+  updateCheckpointTried(
+      mostRecentCheckpoint.directory(mostRecentCheckpoint.depth() - 1));
 
   // Close View
   m_presenter->closeView();
@@ -108,6 +114,9 @@ void ProjectRecoveryModel::recoverSelectedCheckpoint(std::string &selected) {
       [=] { m_projRec->loadRecoveryCheckpoint(checkpoint); });
   recoveryThread.detach();
 
+  selected.replace(selected.find("T"), 1, " ");
+  updateCheckpointTried(selected);
+
   // Close View
   m_presenter->closeView();
 }
@@ -127,6 +136,9 @@ void ProjectRecoveryModel::openSelectedInEditor(std::string &selected) {
   // Restart project recovery as we stay synchronous
   m_projRec->clearAllCheckpoints(beforeCheckpoint);
   m_projRec->startProjectSaving();
+
+  selected.replace(selected.find("T"), 1, " ");
+  updateCheckpointTried(selected);
 
   // Close View
   m_presenter->closeView();
@@ -150,5 +162,14 @@ void ProjectRecoveryModel::fillRows() {
   for (auto i = paths.size(); i < 5; ++i) {
     std::vector<std::string> newVector = {"", "", ""};
     m_rows.emplace_back(newVector);
+  }
+}
+
+void ProjectRecoveryModel::updateCheckpointTried(
+    const std::string &checkpointName) {
+  for (auto c : m_rows) {
+    if (c[0] == checkpointName) {
+      c[3] == "Yes";
+    }
   }
 }

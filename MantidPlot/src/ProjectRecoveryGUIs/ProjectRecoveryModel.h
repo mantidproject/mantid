@@ -21,6 +21,7 @@ public:
 
 private:
   void fillRows();
+  void updateCheckpointTried(const std::string &checkpointName);
   std::vector<std::vector<std::string>> m_rows;
   MantidQt::ProjectRecovery *m_projRec;
   ProjectRecoveryPresenter *m_presenter;

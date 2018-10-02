@@ -27,7 +27,7 @@ public:
   void recoverSelectedCheckpoint(QString &selected);
   void openSelectedInEditor(QString &selected);
   void closeView();
-  ProjectRecoveryPresenter& operator=(const ProjectRecoveryPresenter &obj);
+  ProjectRecoveryPresenter &operator=(const ProjectRecoveryPresenter &obj);
 
 private:
   ProjectRecoveryModel *m_model;

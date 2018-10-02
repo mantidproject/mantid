@@ -485,7 +485,7 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   // Restart project recovery when the async part finishes
   Poco::Path deletePath = recoveryFolder;
   deletePath.setFileName("");
-  clearAllCheckpoints(deletePath);
+  clearAllCheckpoints(deletePath.popDirectory());
   startProjectSaving();
 }
 
