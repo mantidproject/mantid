@@ -418,7 +418,7 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
 }
 
 namespace {
-bool shouldResetAllXToSingleBin(const EventWorkspace *workspace) {
+bool isUsingDefaultBinBoundaries(const EventWorkspace *workspace) {
   // only check first spectrum
   const auto &x = workspace->binEdges(0);
   if (x.size() > 2)
@@ -439,16 +439,16 @@ bool shouldResetAllXToSingleBin(const EventWorkspace *workspace) {
  *
  * @param workspace :: Workspace(Group) that will have its bins reset
  */
-void LoadLiveData::resetAllXToSingleBin(API::Workspace *workspace) {
+void LoadLiveData::updateDefaultBinBoundaries(API::Workspace *workspace) {
   if (auto *ws_event = dynamic_cast<EventWorkspace *>(workspace)) {
-    if (shouldResetAllXToSingleBin(ws_event))
+    if (isUsingDefaultBinBoundaries(ws_event))
       ws_event->resetAllXToSingleBin();
   } else if (auto *ws_group = dynamic_cast<WorkspaceGroup *>(workspace)) {
     auto num_entries = static_cast<size_t>(ws_group->getNumberOfEntries());
     for (size_t i = 0; i < num_entries; ++i) {
       auto ws = ws_group->getItem(i);
       if (auto *ws_event = dynamic_cast<EventWorkspace *>(ws.get()))
-        if (shouldResetAllXToSingleBin(ws_event))
+        if (isUsingDefaultBinBoundaries(ws_event))
           ws_event->resetAllXToSingleBin();
     }
   }
@@ -505,11 +505,10 @@ void LoadLiveData::exec() {
   this->setPropertyValue("LastTimeStamp", lastTimeStamp.toISO8601String());
 
   // For EventWorkspaces, we adjust the X values such that all events fit
-  // within the bin boundaries. This is done both before and after the
-  // "Process" step. Any custom rebinning should be done in Post-Processing.
+  // within the bin boundaries
   const bool preserveEvents = this->getProperty("PreserveEvents");
   if (preserveEvents)
-    this->resetAllXToSingleBin(chunkWS.get());
+    this->updateDefaultBinBoundaries(chunkWS.get());
 
   // Now we process the chunk
   Workspace_sptr processed = this->processChunk(chunkWS);
@@ -569,11 +568,10 @@ void LoadLiveData::exec() {
     // Default to Add.
     this->addChunk(processed);
 
-    // For EventWorkspaces, we adjust the X values such that all events fit
-    // within the bin boundaries. This is done both before and after the
-    // "Process" step. Any custom rebinning should be done in Post-Processing.
+    // When adding events, the default bin boundaries may need to be updated.
+    // The function itself checks to see if it is appropriate
     if (preserveEvents) {
-      this->resetAllXToSingleBin(m_accumWS.get());
+      this->updateDefaultBinBoundaries(m_accumWS.get());
     }
   }
 
