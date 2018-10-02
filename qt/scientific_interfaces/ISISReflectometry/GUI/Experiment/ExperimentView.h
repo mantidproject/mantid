@@ -70,8 +70,8 @@ public:
   void showTransmissionRangeInvalid() override;
   void showTransmissionRangeValid() override;
 
-  std::string getPolarisationCorrectionType() const override;
-  void setPolarisationCorrectionType(std::string const &type) override;
+  std::string getPolarizationCorrectionType() const override;
+  void setPolarizationCorrectionType(std::string const &type) override;
   double getCRho() const override;
   void setCRho(double cRho) override;
   double getCAlpha() const override;
@@ -97,10 +97,10 @@ public:
   void enableReductionType() override;
   void disableReductionType() override;
 
-  void enablePolarisationCorrections() override;
-  void disablePolarisationCorrections() override;
-  void enablePolarisationCorrectionInputs() override;
-  void disablePolarisationCorrectionInputs() override;
+  void enablePolarizationCorrections() override;
+  void disablePolarizationCorrections() override;
+  void enablePolarizationCorrectionInputs() override;
+  void disablePolarizationCorrectionInputs() override;
 
   void addPerThetaDefaultsRow() override;
   void removePerThetaDefaultsRow(int rowIndex) override;

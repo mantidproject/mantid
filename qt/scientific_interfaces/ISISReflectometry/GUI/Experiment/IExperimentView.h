@@ -77,10 +77,10 @@ public:
   virtual void showStitchParametersValid() = 0;
   virtual void showStitchParametersInvalid() = 0;
 
-  virtual void enablePolarisationCorrections() = 0;
-  virtual void disablePolarisationCorrections() = 0;
-  virtual void enablePolarisationCorrectionInputs() = 0;
-  virtual void disablePolarisationCorrectionInputs() = 0;
+  virtual void enablePolarizationCorrections() = 0;
+  virtual void disablePolarizationCorrections() = 0;
+  virtual void enablePolarizationCorrectionInputs() = 0;
+  virtual void disablePolarizationCorrectionInputs() = 0;
 
   virtual double getTransmissionStartOverlap() const = 0;
   virtual void setTransmissionStartOverlap(double start) = 0;
@@ -89,8 +89,8 @@ public:
   virtual void showTransmissionRangeInvalid() = 0;
   virtual void showTransmissionRangeValid() = 0;
 
-  virtual std::string getPolarisationCorrectionType() const = 0;
-  virtual void setPolarisationCorrectionType(std::string const &type) = 0;
+  virtual std::string getPolarizationCorrectionType() const = 0;
+  virtual void setPolarizationCorrectionType(std::string const &type) = 0;
   virtual double getCRho() const = 0;
   virtual void setCRho(double cRho) = 0;
   virtual double getCAlpha() const = 0;

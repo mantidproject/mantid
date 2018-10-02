@@ -104,7 +104,7 @@ public:
 
     expectViewReturnsDefaultAnalysisMode();
     expectViewReturnsSumInLambdaDefaults();
-    EXPECT_CALL(m_view, getPolarisationCorrectionType()).WillOnce(Return("PA"));
+    EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return("PA"));
     EXPECT_CALL(m_view, getCRho()).WillOnce(Return(polCorr.cRho().get()));
     EXPECT_CALL(m_view, getCAlpha()).WillOnce(Return(polCorr.cAlpha().get()));
     EXPECT_CALL(m_view, getCAp()).WillOnce(Return(polCorr.cAp().get()));
@@ -299,7 +299,7 @@ private:
   }
 
   void expectViewReturnsDefaultPolarizationCorrectionType() {
-    EXPECT_CALL(m_view, getPolarisationCorrectionType())
+    EXPECT_CALL(m_view, getPolarizationCorrectionType())
         .WillOnce(Return(std::string("None")));
   }
 

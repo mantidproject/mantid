@@ -300,15 +300,15 @@ void ExperimentView::setChecked(QCheckBox &checkBox, bool checked) {
   checkBox.setCheckState(checkedAsCheckState);
 }
 
-void ExperimentView::enablePolarisationCorrections() {
+void ExperimentView::enablePolarizationCorrections() {
   m_ui.polCorrComboBox->setEnabled(true);
-  enablePolarisationCorrectionInputs();
+  enablePolarizationCorrectionInputs();
 }
 
-void ExperimentView::disablePolarisationCorrections() {
+void ExperimentView::disablePolarizationCorrections() {
   m_ui.polCorrComboBox->setEnabled(false);
-  disablePolarisationCorrectionInputs();
-  // Set polarisation corrections text to 'None' when disabled
+  disablePolarizationCorrectionInputs();
+  // Set polarization corrections text to 'None' when disabled
   setSelected(*m_ui.polCorrComboBox, "None");
   // Clear all parameters as well
   m_ui.CRhoEdit->clear();
@@ -317,14 +317,14 @@ void ExperimentView::disablePolarisationCorrections() {
   m_ui.CPpEdit->clear();
 }
 
-void ExperimentView::enablePolarisationCorrectionInputs() {
+void ExperimentView::enablePolarizationCorrectionInputs() {
   m_ui.CRhoEdit->setEnabled(true);
   m_ui.CAlphaEdit->setEnabled(true);
   m_ui.CApEdit->setEnabled(true);
   m_ui.CPpEdit->setEnabled(true);
 }
 
-void ExperimentView::disablePolarisationCorrectionInputs() {
+void ExperimentView::disablePolarizationCorrectionInputs() {
   m_ui.CRhoEdit->setEnabled(false);
   m_ui.CAlphaEdit->setEnabled(false);
   m_ui.CApEdit->setEnabled(false);
@@ -531,11 +531,11 @@ void ExperimentView::setTransmissionEndOverlap(double end) {
   m_ui.endOverlapEdit->setValue(end);
 }
 
-void ExperimentView::setPolarisationCorrectionType(std::string const &type) {
+void ExperimentView::setPolarizationCorrectionType(std::string const &type) {
   setSelected(*m_ui.polCorrComboBox, type);
 }
 
-std::string ExperimentView::getPolarisationCorrectionType() const {
+std::string ExperimentView::getPolarizationCorrectionType() const {
   return getText(*m_ui.polCorrComboBox);
 }
 
