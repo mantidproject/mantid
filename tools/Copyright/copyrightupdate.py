@@ -20,17 +20,17 @@ regex_old_style = re.compile("\n?\s*Copyright\s.{0,20}?(\d{4}).{100,1000}?Licens
                              "(.*http://doxygen.mantidproject.org.*?($|(?=\*\/))){0,1}",            #optional code doc line
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #new style statement, year in group 1
-regex_new_style = re.compile("^\W*Mantid.*?(\d{4}).*?SPDX - License - Identifier.*?$[\s]*",
+regex_new_style = re.compile("^\W*Mantid.{0,20}?(\d{4}).{100,300}?SPDX - License - Identifier.*?$[\s]*",
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #Other copyright statement
-regex_other_style = re.compile("^.*?Copyright\s.*?(\d{4}).*?$",
+regex_other_style = re.compile("^.*?Copyright\s.{0,200}?(\d{4}).{0,400}?$",
                              re.IGNORECASE |  re.MULTILINE)
 
 #lines to skip when determining where to put the copyright statement (they must be from the start of the file)
 regex_lines_to_skip = [re.compile("^#!.*?$[\s]*",re.MULTILINE)]
 
 #Finds empty C++ multiline comments
-regex_empty_comments = re.compile("(\/\*)[\/\s\*]*?(\*\/)",re.MULTILINE)
+regex_empty_comments = re.compile("(\/\*)[\/\s\*]{0,1000}?(\*\/)",re.MULTILINE)
 
 #Directories to ignore - any pathss including these strings will be ignored, so it will cascade
 directories_to_ignore = ["external","CMake","GSoapGenerated"]
