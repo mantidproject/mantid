@@ -264,9 +264,8 @@ std::vector<uint32_t> getTriangles_uint32(const std::vector<uint16_t> &input) {
   return faces;
 }
 
-const BoundingBox &
-MeshObjectCommon::getBoundingBox(const std::vector<Kernel::V3D> &vertices,
-                                 BoundingBox &cacheBB) {
+const BoundingBox &getBoundingBox(const std::vector<Kernel::V3D> &vertices,
+                                  BoundingBox &cacheBB) {
 
   if (cacheBB.isNull()) {
     static const double MinThickness = 0.001;
