@@ -48,7 +48,15 @@ void InstrumentView::subscribe(InstrumentViewSubscriber *notifyee) {
 /**
 Initialise the Interface
 */
-void InstrumentView::initLayout() { m_ui.setupUi(this); }
+void InstrumentView::initLayout() {
+  m_ui.setupUi(this);
+  m_ui.monIntMinEdit->setSpecialValueText("Unset");
+  m_ui.monIntMaxEdit->setSpecialValueText("Unset");
+  m_ui.monBgMinEdit->setSpecialValueText("Unset");
+  m_ui.monBgMaxEdit->setSpecialValueText("Unset");
+  m_ui.lamMinEdit->setSpecialValueText("Unset");
+  m_ui.lamMaxEdit->setSpecialValueText("Unset");
+}
 
 void InstrumentView::connectSettingsChange(QLineEdit &edit) {
   connect(&edit, SIGNAL(textChanged(QString const &)), this,

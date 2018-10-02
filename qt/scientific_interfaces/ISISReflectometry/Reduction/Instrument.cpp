@@ -10,7 +10,7 @@ Instrument::Instrument(RangeInLambda wavelengthRange,
       m_detectorCorrections(detectorCorrections) {}
 
 bool Instrument::isValid() const {
-  return m_wavelengthRange.isValid() && m_monitorCorrections.isValid();
+  return m_wavelengthRange.isValid(false) && m_monitorCorrections.isValid();
 }
 
 RangeInLambda const &Instrument::wavelengthRange() const {

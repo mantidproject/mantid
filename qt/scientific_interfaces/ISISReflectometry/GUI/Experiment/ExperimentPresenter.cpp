@@ -73,7 +73,7 @@ boost::optional<RangeInLambda>
 ExperimentPresenter::transmissionRunRangeFromView() {
   auto const range = RangeInLambda(m_view->getTransmissionStartOverlap(),
                                    m_view->getTransmissionEndOverlap());
-  if (range.isValid()) {
+  if (range.isValid(false)) {
     m_view->showTransmissionRangeValid();
     return range;
   }

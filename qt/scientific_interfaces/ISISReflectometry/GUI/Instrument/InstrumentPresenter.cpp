@@ -21,7 +21,7 @@ void InstrumentPresenter::onReductionResumed() { m_view->disableAll(); }
 RangeInLambda InstrumentPresenter::wavelengthRangeFromView() {
   auto const range =
       RangeInLambda(m_view->getLambdaMin(), m_view->getLambdaMax());
-  if (range.isValid())
+  if (range.isValid(false))
     m_view->showLambdaRangeValid();
   else
     m_view->showLambdaRangeInvalid();
@@ -31,7 +31,7 @@ RangeInLambda InstrumentPresenter::wavelengthRangeFromView() {
 RangeInLambda InstrumentPresenter::monitorBackgroundRangeFromView() {
   auto const range = RangeInLambda(m_view->getMonitorBackgroundMin(),
                                    m_view->getMonitorBackgroundMax());
-  if (range.isValid())
+  if (range.isValid(true))
     m_view->showMonitorBackgroundRangeValid();
   else
     m_view->showMonitorBackgroundRangeInvalid();
@@ -41,7 +41,7 @@ RangeInLambda InstrumentPresenter::monitorBackgroundRangeFromView() {
 RangeInLambda InstrumentPresenter::monitorIntegralRangeFromView() {
   auto const range = RangeInLambda(m_view->getMonitorIntegralMin(),
                                    m_view->getMonitorIntegralMax());
-  if (range.isValid())
+  if (range.isValid(false))
     m_view->showMonitorIntegralRangeValid();
   else
     m_view->showMonitorIntegralRangeInvalid();

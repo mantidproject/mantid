@@ -8,9 +8,13 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda {
 public:
   RangeInLambda(double min, double max);
 
-  bool isValid() const;
+  bool isValid(bool bothOrNoneMustBeSet) const;
   double min() const;
   double max() const;
+  bool minSet() const;
+  bool maxSet() const;
+  bool bothSet() const;
+  bool unset() const;
 
 private:
   double m_min, m_max;

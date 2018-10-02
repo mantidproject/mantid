@@ -92,6 +92,9 @@ void ExperimentView::initLayout() {
   MantidWidgets::AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
   createStitchHints(strategy.createHints());
 
+  m_ui.startOverlapEdit->setSpecialValueText("Unset");
+  m_ui.endOverlapEdit->setSpecialValueText("Unset");
+
   // connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
   //         SLOT(requestExpDefaults()));
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
