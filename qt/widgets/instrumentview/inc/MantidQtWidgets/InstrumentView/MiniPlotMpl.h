@@ -35,8 +35,8 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW MiniPlotMpl : public QWidget {
 public:
   explicit MiniPlotMpl(QWidget *parent = nullptr);
 
-  void setData(std::vector<double> x, std::vector<double> y,
-               QString xunit, QString curveLabel);
+  void setData(std::vector<double> x, std::vector<double> y, QString xunit,
+               QString curveLabel);
   QString label() const { return m_activeCurveLabel; }
   void setYAxisLabelRotation(double degrees) {}
   void addPeakLabel(const PeakMarker2D *) {}
@@ -44,9 +44,9 @@ public:
   bool hasCurve() const;
   void store();
   bool hasStored() const;
-  QStringList getLabels() const { return {}; }
-  void removeCurve(const QString &label) {}
-  QColor getCurveColor(const QString &label) const { return QColor(); }
+  QStringList getLabels() const { return m_storedCurveLabels; }
+  void removeCurve(const QString &label);
+  QColor getCurveColor(const QString &label) const;
   void recalcXAxisDivs() {}
   void recalcYAxisDivs() {}
   bool isYLogScale() const { return false; }
@@ -62,6 +62,11 @@ public slots:
 signals:
   void showContextMenu();
   void clickedAt(double, double);
+
+protected:
+  void contextMenuEvent(QContextMenuEvent *e) override;
+  bool eventFilter(QObject *watched, QEvent *evt) override;
+  void mousePressEvent(QMouseEvent *) override;
 
 private: // data
   Widgets::MplCpp::FigureCanvasQt *m_canvas;

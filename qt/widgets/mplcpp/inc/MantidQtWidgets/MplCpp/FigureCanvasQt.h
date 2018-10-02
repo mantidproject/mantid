@@ -38,6 +38,8 @@ public:
   FigureCanvasQt(int subplotspec, QWidget *parent = nullptr);
   FigureCanvasQt(Figure fig, QWidget *parent = nullptr);
 
+  void installEventFilterToMplCanvas(QObject *filter);
+
   /// Access to the current figure instance.
   inline Figure gcf() { return m_figure; }
   /// Access to the current active axes instance.
@@ -48,6 +50,8 @@ public:
 
 private: // members
   Figure m_figure;
+  // A pointer to the C++ widget extract from the Python FigureCanvasQT object
+  QWidget *m_mplCanvas;
 };
 
 } // namespace MplCpp
