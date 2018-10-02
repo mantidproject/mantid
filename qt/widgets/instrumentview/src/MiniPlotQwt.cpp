@@ -37,6 +37,7 @@ MiniPlotQwt::MiniPlotQwt(QWidget *parent)
   const QFont &font = parent->font();
   setAxisFont(QwtPlot::xBottom, font);
   setAxisFont(QwtPlot::yLeft, font);
+  setYAxisLabelRotation(-90);
   QwtText dummyText;
   dummyText.setFont(font);
   setAxisTitle(xBottom, dummyText);
@@ -55,6 +56,11 @@ MiniPlotQwt::MiniPlotQwt(QWidget *parent)
   m_colorIndex = 0;
   m_x0 = 0;
   m_y0 = 0;
+
+  // Initial scales so the plot looks sensible
+  setXScale(0, 1);
+  setYScale(-1.2, 1.2);
+
 }
 
 /**
