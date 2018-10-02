@@ -51,7 +51,7 @@ class WishAnalysis(stresstesting.MantidStressTest):
         RebinToWorkspace(WorkspaceToRebin="vana",WorkspaceToMatch="w16748-1foc",OutputWorkspace="vana")
         Divide(LHSWorkspace="w16748-1foc",RHSWorkspace="vana",OutputWorkspace="w16748-1foc")
         DeleteWorkspace(Workspace="vana")
-        #convert back to TOF for ouput to GSAS/Fullprof
+        #convert back to TOF for output to GSAS/Fullprof
         ConvertUnits(InputWorkspace="w16748-1foc",OutputWorkspace="w16748-1foc",Target="TOF")
 
     def validate(self):

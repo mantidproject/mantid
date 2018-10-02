@@ -57,7 +57,7 @@ namespace CxxTest
             std::ostringstream o;
             o << ticksElapsed;
             std::string s = o.str();
-            //ouput it
+            //output it
             (*_o) << "Elapsed: " << s.c_str() << " seconds"<< endl;
             return tracker().failedTests();
         }

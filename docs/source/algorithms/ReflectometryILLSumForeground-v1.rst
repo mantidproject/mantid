@@ -35,7 +35,7 @@ Foreground pixels
 
 If *InputWorkspace* has been processed by :ref:`ReflectometryILLPreprocess <algm-ReflectometryILLPreprocess>`, the foreground information is available in the sample logs under the entries starting with ``foreground.``. By default these are used automatically.
 
-The sample logs can be overriden using the *Foreground* property. It is a list of three integers defining the range and centre pixels as workspace indices: [start, centre, end]. The start and end values are inclusive.
+The sample logs can be overridden using the *Foreground* property. It is a list of three integers defining the range and centre pixels as workspace indices: [start, centre, end]. The start and end values are inclusive.
 
 Usage
 -----

@@ -454,7 +454,7 @@ class MainWindow(QtGui.QMainWindow):
         # about pre-processed data
         self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
 
-        # hide and disable some push buttons for future implemetation
+        # hide and disable some push buttons for future implementation
         self.ui.pushButton_viewScan3D.hide()
         self.ui.pushButton_plotSelectedData.hide()
 
@@ -495,7 +495,7 @@ class MainWindow(QtGui.QMainWindow):
                 try:
                     calculated_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, False)
                 except RuntimeError as run_err:
-                    errmsg = '[ERROR] Failed to get calculated HKL from UB calcualtion table due to {0}'.format(run_err)
+                    errmsg = '[ERROR] Failed to get calculated HKL from UB calculation table due to {0}'.format(run_err)
                     self.pop_one_button_dialog(errmsg)
                     return None
                 peak_info.set_hkl_np_array(numpy.array(calculated_hkl))
@@ -3681,7 +3681,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def save_settings(self):
         """
-        Save settings (parameter set) upon quiting
+        Save settings (parameter set) upon quitting
         :return:
         """
         settings = QtCore.QSettings()

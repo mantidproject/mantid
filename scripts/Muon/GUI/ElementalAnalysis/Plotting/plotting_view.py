@@ -248,7 +248,7 @@ class PlotView(QtWidgets.QWidget):
             self.workspace_plots[name] = lines
 
     def plot_workspace_errors(self, name, workspace):
-        """ Plots a workspace with errrors, and appends caps/bars to the subplot list. """
+        """ Plots a workspace with errors, and appends caps/bars to the subplot list. """
         subplot = self.get_subplot(name)
         line, cap_lines, bar_lines = plots.plotfunctions.errorbar(
             subplot, workspace, specNum=1)

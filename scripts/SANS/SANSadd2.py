@@ -207,7 +207,7 @@ def handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_dat
     workspace_type = get_workspace_type(filename)
     if workspace_type is WorkspaceType.MultiperiodEvent:
         # If we are dealing with multi-period event workspaces then there is no way of getting any other
-        # sample log inforamtion hence we use make a copy of the monitor workspace and use that instead
+        # sample log information hence we use make a copy of the monitor workspace and use that instead
         # of the reloading the first file again
         CloneWorkspace(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS, OutputWorkspace=ADD_FILES_SUM_TEMPORARY)
     else:

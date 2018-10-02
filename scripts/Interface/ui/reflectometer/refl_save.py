@@ -314,7 +314,7 @@ class Ui_SaveWindow(object):
                     except:
                         print("Journal does not exist or is unreachable, please check your network connection.")
 
-#--------- If "Save" button pressed, selcted workspaces are saved -------------
+#--------- If "Save" button pressed, selected workspaces are saved -------------
     def buttonClickHandler1(self):
         prefix = str(self.lineEdit2.text())
         if not (self.lineEdit.text() and os.path.exists(self.lineEdit.text())):

@@ -1,6 +1,6 @@
 # This file can be used to override any properties for this installation.
 # Any properties found in this file will override any that are found in the Mantid.Properties file
-# As this file will not be replaced with futher installations of Mantid it is a safe place to put 
+# As this file will not be replaced with further installations of Mantid it is a safe place to put 
 # properties that suit your particular installation.
 
 # Where to find mantid plugin libraries

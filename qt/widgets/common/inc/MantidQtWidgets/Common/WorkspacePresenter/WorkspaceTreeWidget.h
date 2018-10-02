@@ -18,6 +18,7 @@
 #include <QHash>
 #include <QMap>
 #include <QMetaType>
+#include <QMutex>
 #include <boost/shared_ptr.hpp>
 #include <map>
 
@@ -278,6 +279,8 @@ private:
   QStringList m_selectedNames;
   /// Keep a map of renamed workspaces between updates
   QHash<QString, QString> m_renameMap;
+  /// A mutex to lock m_renameMap and m_selectedNames for reading/writing
+  mutable QMutex m_mutex;
 
 private slots:
   void handleUpdateTree(const TopLevelItems &);

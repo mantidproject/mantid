@@ -5,7 +5,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 # ----------------------------------------
-# Proeprty names for Algorithms
+# Property names for Algorithms
 # ---------------------------------------
 MONITOR_SUFFIX = "_monitors"
 INPUT_WORKSPACE = "InputWorkspace"

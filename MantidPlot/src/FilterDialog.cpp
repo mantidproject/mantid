@@ -79,7 +79,7 @@ FilterDialog::FilterDialog(int type, QWidget *parent, Qt::WFlags fl)
     if (type == FFTFilter::BandPass)
       gl1->addWidget(new QLabel(tr("Add DC Offset")), 3, 0);
     else
-      gl1->addWidget(new QLabel(tr("Substract DC Offset")), 3, 0);
+      gl1->addWidget(new QLabel(tr("Subtract DC Offset")), 3, 0);
 
     boxOffset = new QCheckBox();
     gl1->addWidget(boxOffset, 3, 1);
