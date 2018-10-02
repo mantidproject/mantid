@@ -10,9 +10,8 @@ namespace IO {
 EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
                                                  const std::string &elName,
                                                  size_t size, size_t chunksCnt,
-                                                 size_t pixelsCount,
-                                                 bool destroy)
-    : EventsListsShmemManager(segmentName, elName, 0), destroyShared(destroy) {
+                                                 size_t pixelsCount)
+    : EventsListsShmemManager(segmentName, elName, 0) {
   try {
     boost::interprocess::permissions perm;
     perm.set_unrestricted();
@@ -29,11 +28,6 @@ EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
   }
 }
 
-/// Destructor
-EventsListsShmemStorage::~EventsListsShmemStorage() {
-  if (destroyShared)
-    ip::shared_memory_object::remove(m_segmentName.c_str());
-}
 
 /// Reserves memory for ToF events in given pixel and chunk
 void EventsListsShmemStorage::reserve(std::size_t chunkN, std::size_t pixelN,

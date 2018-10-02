@@ -157,7 +157,7 @@ void MultiProcessEventLoader::load(
 
     // Do self piece of multiprocess work
     EventsListsShmemStorage storage(m_segmentNames[0], m_storageName,
-                                    storageSize, 1, m_numPixels, false);
+                                    storageSize, 1, m_numPixels);
     fillFromFile(storage, filename, groupname, bankNames, bankOffsets, 0,
                  numEvents / m_numProcesses, m_precalculateEvents);
 

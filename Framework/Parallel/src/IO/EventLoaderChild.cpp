@@ -26,8 +26,7 @@ int main(int argc, char **argv) {
     bankOffsets.emplace_back(std::atoi(argv[i + 1]));
   }
 
-  EventsListsShmemStorage storage(segmentName, storageName, size, 1, numPixels,
-                                  false);
+  EventsListsShmemStorage storage(segmentName, storageName, size, 1, numPixels);
   try {
     MultiProcessEventLoader::fillFromFile(storage, fileName, groupName,
                                           bankNames, bankOffsets, firstEvent,
