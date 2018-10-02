@@ -49,16 +49,15 @@ public:
   void recalcXAxisDivs() {}
   void recalcYAxisDivs() {}
   bool isYLogScale() const { return false; }
-  const std::string &getXUnits() const { return "UNIT"; }
-  void replot(){};
+  void replot();
 public slots:
   void setXScale(double from, double to) {}
   void setYScale(double from, double to) {}
-  void clearCurve() {}
+  void clearCurve();
   void recalcAxisDivs() {}
   void setYLogScale() {}
   void setYLinearScale() {}
-  void clearAll() {}
+  void clearAll();
 signals:
   void showContextMenu();
   void clickedAt(double, double);
