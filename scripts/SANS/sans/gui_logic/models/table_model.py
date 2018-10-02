@@ -88,7 +88,8 @@ class TableModel(object):
         if not self._table_entries:
             row_index_model = self.create_empty_row()
             self.append_table_entry(row_index_model)
-        self.notify_subscribers()
+        else:
+            self.notify_subscribers()
 
     def replace_table_entries(self, row_to_replace_index, rows_to_insert):
         self.remove_table_entries(row_to_replace_index)
@@ -99,7 +100,6 @@ class TableModel(object):
         self._table_entries = []
         row_index_model = self.create_empty_row()
         self.append_table_entry(row_index_model)
-        self.notify_subscribers()
 
     def get_number_of_rows(self):
         return len(self._table_entries)
@@ -145,17 +145,19 @@ class TableModel(object):
             entry = self._table_entries[row]
             if entry.is_empty():
                 continue
+            entry.file_finding = True
             success_callback = functools.partial(self.update_thickness_from_file_information, entry.id)
             error_callback = functools.partial(self.failure_handler, entry.id)
             create_file_information(entry.sample_scatter, error_callback, success_callback, self.work_handler, entry.id)
 
     def failure_handler(self, id, error):
         row = self.get_row_from_id(id)
-        self.update_table_entry(row, 14, '')
-        self.update_table_entry(row, 15, '')
-        self.update_table_entry(row, 16, '')
-        self.update_table_entry(row, 17, '')
         self._table_entries[row].update_attribute('file_information', '')
+        self._table_entries[row].update_attribute('sample_thickness', '')
+        self._table_entries[row].update_attribute('sample_height', '')
+        self._table_entries[row].update_attribute('sample_width', '')
+        self._table_entries[row].update_attribute('sample_shape', '')
+        self._table_entries[row].file_finding = False
         self.set_row_to_error(row, str(error[1]))
 
     def update_thickness_from_file_information(self, id, file_information):
@@ -164,12 +166,13 @@ class TableModel(object):
             rounded_file_thickness = round(file_information.get_thickness(), 2)
             rounded_file_height = round(file_information.get_height(), 2)
             rounded_file_width = round(file_information.get_width(), 2)
-            self.update_table_entry(row, 14, rounded_file_thickness)
-            self.update_table_entry(row, 15, rounded_file_height)
-            self.update_table_entry(row, 16, rounded_file_width)
-            self.update_table_entry(row, 17, file_information.get_shape())
             self._table_entries[row].update_attribute('file_information', file_information)
-        self.notify_subscribers()
+            self._table_entries[row].update_attribute('sample_thickness', rounded_file_thickness)
+            self._table_entries[row].update_attribute('sample_height', rounded_file_height)
+            self._table_entries[row].update_attribute('sample_width', rounded_file_width)
+            self._table_entries[row].update_attribute('sample_shape', file_information.get_shape())
+            self._table_entries[row].file_finding = False
+            self.reset_row_state(row)
 
     def subscribe_to_model_changes(self, subscriber):
         self._subscriber_list.append(subscriber)
@@ -186,6 +189,13 @@ class TableModel(object):
             if entry.id == id:
                 return row
         return None
+
+    def wait_for_file_finding_done(self):
+        self.work_handler.wait_for_done()
+
+    def wait_for_file_information(self, row):
+        if self._table_entries[row].file_finding:
+            self.wait_for_file_finding_done()
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -231,6 +241,7 @@ class TableIndexModel(object):
         self.row_state = RowState.Unprocessed
         self.tool_tip = ''
         self.file_information = None
+        self.file_finding = False
 
     # Options column entries
     @property

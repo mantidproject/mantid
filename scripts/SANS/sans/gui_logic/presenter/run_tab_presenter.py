@@ -616,10 +616,6 @@ class RunTabPresenter(object):
         self._set_on_view("wavelength_step")
 
         self._set_on_view("absolute_scale")
-        self._set_on_view("sample_shape")
-        self._set_on_view("sample_height")
-        self._set_on_view("sample_width")
-        self._set_on_view("sample_thickness")
         self._set_on_view("z_offset")
 
         # Adjustment tab
@@ -807,10 +803,6 @@ class RunTabPresenter(object):
         self._set_on_state_model("wavelength_range", state_model)
 
         self._set_on_state_model("absolute_scale", state_model)
-        self._set_on_state_model("sample_shape", state_model)
-        self._set_on_state_model("sample_height", state_model)
-        self._set_on_state_model("sample_width", state_model)
-        self._set_on_state_model("sample_thickness", state_model)
         self._set_on_state_model("z_offset", state_model)
 
         # Adjustment tab

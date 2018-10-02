@@ -28,10 +28,8 @@ class GuiStateDirector(object):
     def create_state(self, row, file_lookup=True, instrument=SANSInstrument.SANS2D):
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         table_index_model = self._table_model.get_table_entry(row)
-        file_name = table_index_model.sample_scatter
         if file_lookup:
-            file_information_factory = SANSFileInformationFactory()
-            file_information = file_information_factory.create_sans_file_information(file_name)
+            file_information = table_index_model.file_information
         else:
             file_information = SANSFileInformationMock(instrument=instrument, facility=self._facility)
 
@@ -64,6 +62,12 @@ class GuiStateDirector(object):
 
         if table_index_model.sample_thickness:
             state_gui_model.sample_thickness = float(table_index_model.sample_thickness)
+        if table_index_model.sample_height:
+            state_gui_model.sample_height = float(table_index_model.sample_height)
+        if table_index_model.sample_width:
+            state_gui_model.sample_width = float(table_index_model.sample_width)
+        if table_index_model.sample_shape:
+            state_gui_model.sample_shape = table_index_model.sample_shape
 
         # 4. Create the rest of the state based on the builder.
         user_file_state_director = StateDirectorISIS(data, file_information)
