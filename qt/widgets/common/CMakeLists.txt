@@ -17,7 +17,6 @@ set ( QT5_SRC_FILES
   src/FlowLayout.cpp
   src/FunctionBrowser.cpp
   src/GenericDialog.cpp
-  # Used in Qt5 by LoadDialog
   src/HelpWindow.cpp
   src/InterfaceFactory.cpp
   src/InterfaceManager.cpp
@@ -29,38 +28,26 @@ set ( QT5_SRC_FILES
   src/MantidTreeModel.cpp
   src/MantidTreeWidget.cpp
   src/MantidTreeWidgetItem.cpp
-  # todo comment
   src/MantidWidget.cpp
-  # todo comment
   src/MantidWSIndexDialog.cpp
   src/Message.cpp
   src/MessageDisplay.cpp
   src/MWRunFiles.cpp
   src/OptionsPropertyWidget.cpp
-  # used in QT5: GetNegMuMuonicXRDDialog
-
-  # used in QT5: in WorkspaceTreeWidget for getIcon
   src/pixmaps.cpp
   src/PluginLibraries.cpp
   src/ProcessingAlgoWidget.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
-  # used in QT5: used in many files - MantidWidget/MantidDialog
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
-  # used in QT5: used by UserFunctionDialog
   src/RenameParDialog.cpp
   src/ScriptEditor.cpp
   src/SelectFunctionDialog.cpp
   src/TextPropertyWidget.cpp
-  # used in QT5: by FunctionBrowser
   src/UserFunctionDialog.cpp
-
-  # todo comment
   src/UserSubWindow.cpp
-  # todo comment
   src/VatesViewerInterface.cpp
-  # todo comment
   src/WidgetScrollbarDecorator.cpp
   src/WorkspaceIcons.cpp
   src/WorkspaceObserver.cpp
@@ -70,7 +57,6 @@ set ( QT5_SRC_FILES
   src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
   src/WorkspaceSelector.cpp
 
-  # todo check why/where this is used in qt5
   src/QtPropertyBrowser/DoubleDialogEditor.cpp
   src/QtPropertyBrowser/DoubleEditorFactory.cpp
   src/QtPropertyBrowser/FilenameDialogEditor.cpp
@@ -130,7 +116,6 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/WorkspaceIcons.h
   inc/MantidQtWidgets/Common/WorkspaceObserver.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
-  inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
   inc/MantidQtWidgets/Common/WorkspaceSelector.h
   
@@ -151,7 +136,6 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
-
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
