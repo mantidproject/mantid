@@ -38,11 +38,7 @@ MeshObject::MeshObject(std::vector<uint16_t> &&faces,
 // Do things that need to be done in constructor
 void MeshObject::initialize() {
 
-  if (m_vertices.size() > std::numeric_limits<uint16_t>::max()) {
-    throw std::invalid_argument(
-        "Too many vertices (" + std::to_string(m_vertices.size()) +
-        "). MeshObject cannot have more than 65535 vertices.");
-  }
+  MeshObjectCommon::checkVertexLimit(m_vertices.size());
   m_handler = boost::make_shared<GeometryHandler>(*this);
 }
 
@@ -160,6 +156,7 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
   if (intersectionPoints.empty())
     return 0; // Quit if no intersections found
 
+  // For a 3D mesh, a ray may intersect several segments
   for (size_t i = 0; i < intersectionPoints.size(); ++i) {
     UT.addPoint(entryExitFlags[i], intersectionPoints[i], *this);
   }
@@ -497,13 +494,7 @@ size_t MeshObject::numberOfTriangles() const { return m_triangles.size() / 3; }
  * get faces
  */
 std::vector<uint32_t> MeshObject::getTriangles() const {
-  std::vector<uint32_t> faces;
-  size_t nFaceCorners = m_triangles.size();
-  faces.resize(static_cast<std::size_t>(nFaceCorners));
-  for (size_t i = 0; i < nFaceCorners; ++i) {
-    faces[i] = static_cast<int>(m_triangles[i]);
-  }
-  return faces;
+  return MeshObjectCommon::getTriangles_uint32(m_triangles);
 }
 
 /**

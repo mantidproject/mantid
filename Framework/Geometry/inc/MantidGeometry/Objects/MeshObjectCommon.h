@@ -50,6 +50,9 @@ bool rayIntersectsTriangle(const Kernel::V3D &start,
                            const Kernel::V3D &direction, const Kernel::V3D &v1,
                            const Kernel::V3D &v2, const Kernel::V3D &v3,
                            Kernel::V3D &intersection, int &entryExit);
+
+void checkVertexLimit(size_t nVertices);
+std::vector<uint32_t> getTriangles_uint32(const std::vector<uint16_t> &input);
 } // namespace MeshObjectCommon
 
 } // namespace Geometry

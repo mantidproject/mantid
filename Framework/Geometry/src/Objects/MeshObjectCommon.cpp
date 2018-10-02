@@ -1,4 +1,6 @@
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
+#include <limits>
+#include <string>
 
 namespace Mantid {
 namespace Geometry {
@@ -239,6 +241,26 @@ bool rayIntersectsTriangle(const Kernel::V3D &start,
   }
   // The triangle is behind the start point. Forward ray does not intersect.
   return false;
+}
+
+void checkVertexLimit(size_t nVertices) {
+  if (nVertices > std::numeric_limits<uint16_t>::max()) {
+    throw std::invalid_argument(
+        "Too many vertices (" + std::to_string(nVertices) +
+        "). MeshObject cannot have more than 65535 vertices.");
+  }
+}
+
+std::vector<uint32_t> getTriangles_uint32(const std::vector<uint16_t> &input) {
+  std::vector<uint32_t> faces;
+  size_t nFaceCorners = input.size();
+  if (nFaceCorners > 0) {
+    faces.resize(static_cast<std::size_t>(nFaceCorners));
+    for (size_t i = 0; i < nFaceCorners; ++i) {
+      faces[i] = static_cast<int>(input[i]);
+    }
+  }
+  return faces;
 }
 
 } // namespace MeshObjectCommon

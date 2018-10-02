@@ -18,7 +18,7 @@ bool sufficientPoints(const std::vector<Mantid::Kernel::V3D> &vertices) {
 }
 
 /**
- * Establish the first surface normal. Tries to establish normal fron
+ * Establish the first surface normal. Tries to establish normal from
  * non-colinear points
  * @param vertices : All vertices
  * @return surface normal, or 0,0,0 if not found
@@ -155,12 +155,7 @@ void MeshObject2D::initialize() {
   parameters.p0 = v0;
   m_planeParameters = parameters;
 
-  if (m_vertices.size() >
-      std::numeric_limits<typename decltype(m_triangles)::value_type>::max()) {
-    throw std::invalid_argument(
-        "Too many vertices (" + std::to_string(m_vertices.size()) +
-        "). MeshObject cannot have more than 65535 vertices.");
-  }
+  MeshObjectCommon::checkVertexLimit(m_vertices.size());
   m_handler = boost::make_shared<GeometryHandler>(*this);
 }
 bool MeshObject2D::hasValidShape() const {
@@ -379,15 +374,8 @@ std::vector<double> MeshObject2D::getVertices() const {
 }
 
 std::vector<uint32_t> MeshObject2D::getTriangles() const {
-  std::vector<uint32_t> faces;
-  size_t nFaceCorners = m_triangles.size();
-  if (nFaceCorners > 0) {
-    faces.resize(static_cast<std::size_t>(nFaceCorners));
-    for (size_t i = 0; i < nFaceCorners; ++i) {
-      faces[i] = static_cast<int>(m_triangles[i]);
-    }
-  }
-  return faces;
+
+  return MeshObjectCommon::getTriangles_uint32(m_triangles);
 }
 
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
