@@ -2,6 +2,7 @@
 #define MANTID_PARALLEL_MULTIPROCESSEVENTLOADER_H_
 
 #include <atomic>
+#include <boost/lockfree/spsc_queue.hpp>
 #include <mutex>
 #include <queue>
 #include <string>
@@ -242,8 +243,11 @@ void MultiProcessEventLoader::GroupLoader<
 
   std::vector<std::vector<TofEvent>> pixels(storage.pixelCount());
   std::atomic<std::size_t> pixNum{0};
-  std::queue<std::unique_ptr<Task>> queue;
-  std::mutex mutex;
+  constexpr uint32_t ringBufLen{10};
+  // Here row pointer is used becouse spsc_queue doesn't support
+  // moveable objects (there is a feature request on this)
+  // item has to be deleted after consuming
+  boost::lockfree::spsc_queue<Task *> queue(ringBufLen);
   std::atomic<int> finished{0};
   std::size_t portion{std::max<std::size_t>(pixels.size() / 16, 1)};
 
@@ -267,7 +271,7 @@ void MultiProcessEventLoader::GroupLoader<
           if (cur + chLen >= finish)
             cnt = finish - cur;
 
-          auto task = std::make_unique<Task>(instrument, bankNames);
+          auto task = new Task(instrument, bankNames);
           task->partitioner = task->loader.setBankIndex(bankIdx);
           task->partitioner->setEventOffset(cur);
           task->eventTimeOffset.resize(cnt);
@@ -277,11 +281,7 @@ void MultiProcessEventLoader::GroupLoader<
           task->loader.readEventID(task->eventId.data(), cur, cnt);
           detail::eventIdToGlobalSpectrumIndex(task->eventId.data(), cnt,
                                                bankOffsets[bankIdx]);
-
-          {
-            std::lock_guard<std::mutex> lock(mutex);
-            queue.push(std::move(task));
-          }
+          queue.push(task);
           cur += cnt;
         }
       }
@@ -305,21 +305,22 @@ void MultiProcessEventLoader::GroupLoader<
     }
   });
 
-  auto processQueue = [&]() {
-    while (!queue.empty()) {
-      std::unique_ptr<Task> task;
-      {
-        std::lock_guard<std::mutex> lock(mutex);
-        task = std::move(queue.front());
-        queue.pop();
-      }
-      for (unsigned i = 0; i < task->eventId.size(); ++i)
-        pixels.at(task->eventId[i])
-            .emplace_back(task->eventTimeOffset[i], task->partitioner->next());
-    }
-  };
-
   std::thread consumer([&]() {
+
+    auto processQueue = [&]() {
+      while (!queue.empty()) {
+        Task *task{nullptr};
+        if (queue.pop(task)) {
+          for (unsigned i = 0; i < task->eventId.size(); ++i)
+            pixels.at(task->eventId[i])
+                .emplace_back(task->eventTimeOffset[i],
+                              task->partitioner->next());
+          // delete element after consuming
+          delete task;
+        }
+      }
+    };
+
     while (finished < 1) { // producer wants to produce smth
       processQueue();
     }
