@@ -97,7 +97,7 @@ public:
     verifyAndClear();
   }
 
-  void testSetPolarizationCorrections() {
+  void testSetPolarizationCorrectionsUpdatesModel() {
     auto presenter = makePresenter();
     PolarizationCorrections polCorr(PolarizationCorrectionType::PA, 1.2, 1.3,
                                     2.4, 2.5);
@@ -112,6 +112,74 @@ public:
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections(), polCorr);
+    verifyAndClear();
+  }
+
+  void testSettingPolarizationCorrectionsToNoneDisablesInputs() {
+    auto presenter = makePresenter();
+    PolarizationCorrections polCorr(PolarizationCorrectionType::None);
+
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInLambdaDefaults();
+    EXPECT_CALL(m_view, getPolarizationCorrectionType())
+        .WillOnce(Return("None"));
+    EXPECT_CALL(m_view, disablePolarizationCorrectionInputs()).Times(1);
+    EXPECT_CALL(m_view, getCRho()).Times(0);
+    EXPECT_CALL(m_view, getCAlpha()).Times(0);
+    EXPECT_CALL(m_view, getCAp()).Times(0);
+    EXPECT_CALL(m_view, getCPp()).Times(0);
+    presenter.notifySettingsChanged();
+
+    verifyAndClear();
+  }
+
+  void testSetPolarizationCorrectionsToParameterFileDisablesInputs() {
+    auto presenter = makePresenter();
+
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInLambdaDefaults();
+    EXPECT_CALL(m_view, getPolarizationCorrectionType())
+        .WillOnce(Return("ParameterFile"));
+    EXPECT_CALL(m_view, disablePolarizationCorrectionInputs()).Times(1);
+    EXPECT_CALL(m_view, getCRho()).Times(0);
+    EXPECT_CALL(m_view, getCAlpha()).Times(0);
+    EXPECT_CALL(m_view, getCAp()).Times(0);
+    EXPECT_CALL(m_view, getCPp()).Times(0);
+    presenter.notifySettingsChanged();
+
+    verifyAndClear();
+  }
+
+  void testSettingPolarizationCorrectionsToPAEnablesInputs() {
+    auto presenter = makePresenter();
+
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInLambdaDefaults();
+    EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return("PA"));
+    EXPECT_CALL(m_view, enablePolarizationCorrectionInputs()).Times(1);
+    EXPECT_CALL(m_view, getCRho()).Times(1);
+    EXPECT_CALL(m_view, getCAlpha()).Times(1);
+    EXPECT_CALL(m_view, getCAp()).Times(1);
+    EXPECT_CALL(m_view, getCPp()).Times(1);
+    presenter.notifySettingsChanged();
+
+    verifyAndClear();
+  }
+
+  void testSettingPolarizationCorrectionsToPNREnablesInputs() {
+    auto presenter = makePresenter();
+
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInLambdaDefaults();
+    EXPECT_CALL(m_view, getPolarizationCorrectionType())
+        .WillOnce(Return("PNR"));
+    EXPECT_CALL(m_view, enablePolarizationCorrectionInputs()).Times(1);
+    EXPECT_CALL(m_view, getCRho()).Times(1);
+    EXPECT_CALL(m_view, getCAlpha()).Times(1);
+    EXPECT_CALL(m_view, getCAp()).Times(1);
+    EXPECT_CALL(m_view, getCPp()).Times(1);
+    presenter.notifySettingsChanged();
+
     verifyAndClear();
   }
 

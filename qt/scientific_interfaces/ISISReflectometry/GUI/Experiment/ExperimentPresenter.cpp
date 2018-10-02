@@ -57,17 +57,16 @@ void ExperimentPresenter::onReductionResumed() { m_view->disableAll(); }
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
   auto const correctionType = polarizationCorrectionTypeFromString(
       m_view->getPolarizationCorrectionType());
-  auto const cRho = m_view->getCRho();
-  auto const cAlpha = m_view->getCAlpha();
-  auto const cAp = m_view->getCAp();
-  auto const cPp = m_view->getCPp();
-  auto corrections =
-      PolarizationCorrections(correctionType, cRho, cAlpha, cAp, cPp);
-  if (corrections.enableInputs())
+
+  if (polarizationCorrectionRequiresInputs(correctionType)) {
     m_view->enablePolarizationCorrectionInputs();
-  else
-    m_view->disablePolarizationCorrectionInputs();
-  return corrections;
+    return PolarizationCorrections(correctionType, m_view->getCRho(),
+                                   m_view->getCAlpha(), m_view->getCAp(),
+                                   m_view->getCPp());
+  }
+
+  m_view->disablePolarizationCorrectionInputs();
+  return PolarizationCorrections(correctionType);
 }
 
 boost::optional<RangeInLambda>

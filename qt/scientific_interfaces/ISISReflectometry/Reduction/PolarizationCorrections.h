@@ -22,20 +22,25 @@ polarizationCorrectionTypeFromString(std::string const &correctionType) {
     throw std::runtime_error("Unexpected polarization correction type.");
 }
 
+inline bool polarizationCorrectionRequiresInputs(
+    PolarizationCorrectionType correctionType) {
+  return (correctionType == PolarizationCorrectionType::PA ||
+          correctionType == PolarizationCorrectionType::PNR);
+}
+
 class MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections {
 public:
   PolarizationCorrections(PolarizationCorrectionType correctionType,
-                          boost::optional<double> CRho,
-                          boost::optional<double> CAlpha,
-                          boost::optional<double> CAp,
-                          boost::optional<double> CPp);
+                          boost::optional<double> CRho = boost::none,
+                          boost::optional<double> CAlpha = boost::none,
+                          boost::optional<double> CAp = boost::none,
+                          boost::optional<double> CPp = boost::none);
 
   PolarizationCorrectionType correctionType();
   boost::optional<double> cRho() const;
   boost::optional<double> cAlpha() const;
   boost::optional<double> cAp() const;
   boost::optional<double> cPp() const;
-  bool enableInputs() const;
 
 private:
   PolarizationCorrectionType m_correctionType;
