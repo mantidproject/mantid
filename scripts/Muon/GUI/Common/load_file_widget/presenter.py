@@ -94,12 +94,13 @@ class BrowseFileWidgetPresenter(object):
             return
         self._view.notify_loading_started()
         self._load_thread = self.create_load_thread()
-        self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished)
+        self._load_thread.threadWrapperSetUp(self.disable_loading,
+                                             self.handle_load_thread_finished,
+                                             self._view.warning_popup)
         self._load_thread.loadData(filenames)
         self._load_thread.start()
 
     def handle_load_thread_finished(self):
-        self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished)
         self._load_thread.deleteLater()
         self._load_thread = None
 
