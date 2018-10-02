@@ -1,5 +1,5 @@
-#ifndef LOAD_BinaryStl_TEST_H_
-#define LOAD_BinaryStl_TEST_H_
+#ifndef LOAD_BINARYSTL_TEST_H_
+#define LOAD_BINARYSTL_TEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
@@ -84,4 +84,4 @@ public:
   }
 };
 
-#endif /* LOAD_BinaryStl_TEST_H_ */
+#endif /* LOAD_BINARYSTL_TEST_H_ */

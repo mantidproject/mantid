@@ -10,11 +10,9 @@ namespace Mantid {
 namespace DataHandling {
 
 bool LoadBinaryStl::isBinarySTL() {
-  // each triangle is 50 bytes
-
   Poco::File stlFile = Poco::File(m_filename);
   auto fileSize = stlFile.getSize();
-  if (fileSize < M_HEADER_SIZE + M_NUM_OF_TRIANGLES) {
+  if (fileSize < HEADER_SIZE + NUM_OF_TRIANGLES) {
     // File is smaller than header plus number of triangles, cannot be binary
     // format stl
     return false;
@@ -24,8 +22,8 @@ bool LoadBinaryStl::isBinarySTL() {
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
   numberTrianglesLong = getNumberTriangles(streamReader);
   myFile.close();
-  if (!(fileSize == (M_HEADER_SIZE + M_NUM_OF_TRIANGLES +
-                     (numberTrianglesLong * M_SIZE_OF_TRIANGLE)))) {
+  if (!(fileSize == (HEADER_SIZE + NUM_OF_TRIANGLES +
+                     (numberTrianglesLong * SIZE_OF_TRIANGLE)))) {
     // File is not the Header plus the number of triangles it claims to be long,
     // invalid binary Stl
     return false;
@@ -39,7 +37,7 @@ LoadBinaryStl::getNumberTriangles(Kernel::BinaryStreamReader streamReader) {
   uint32_t numberTrianglesLong;
 
   // skip header
-  streamReader.moveStreamToPosition(M_HEADER_SIZE);
+  streamReader.moveStreamToPosition(HEADER_SIZE);
   // Read the number of triangles
   streamReader >> numberTrianglesLong;
   return numberTrianglesLong;
@@ -51,14 +49,14 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
 
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
   const auto numberTrianglesLong = getNumberTriangles(streamReader);
-  uint32_t nextToRead = M_HEADER_SIZE + M_NUM_OF_TRIANGLES + SIZE_OF_NORMAL;
+  uint32_t nextToRead = HEADER_SIZE + NUM_OF_TRIANGLES + SIZE_OF_NORMAL;
 
   // now read in all the triangles
   for (uint32_t i = 0; i < numberTrianglesLong; i++) {
     // find next triangle, skipping the normal and attribute
     streamReader.moveStreamToPosition(nextToRead);
     readTriangle(streamReader);
-    nextToRead += M_SIZE_OF_TRIANGLE;
+    nextToRead += SIZE_OF_TRIANGLE;
   }
   myFile.close();
   std::unique_ptr<Geometry::MeshObject> retVal =
