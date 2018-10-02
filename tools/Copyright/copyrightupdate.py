@@ -3,7 +3,6 @@
 # Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge
 #     National Laboratory, European Spallation Source & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from __future__ import (absolute_import, division, print_function)
 import datetime
 import argparse
@@ -15,13 +14,13 @@ import re
 
 #Compiled Regexes
 #old style statement, year in group 1
-regex_old_style = re.compile("\n?\s*Copyright\s.*?(\d{4}).*License for more details.*?($|(?=\*\/))" + #required section
+regex_old_style = re.compile("\n?\s*Copyright\s.{0,20}?(\d{4}).{100,1000}?License (for) more details.*?($|(?=\*\/))" + #required section
                              "(.*licenses(\/){0,1}\>.*?($|(?=\*\/))){0,1}" +                        #optional license link section
                              "(.*mantid\>.*?($|(?=\*\/))){0,1}" +                                   #optional change history line
                              "(.*http://doxygen.mantidproject.org.*?($|(?=\*\/))){0,1}",            #optional code doc line
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #new style statement, year in group 1
-regex_new_style = re.compile("^\W*Mantid.*?(\d{4}).*SPDX - License - Identifier.*?$[\s]*",
+regex_new_style = re.compile("^\W*Mantid.*?(\d{4}).*?SPDX - License - Identifier.*?$[\s]*",
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #Other copyright statement
 regex_other_style = re.compile("^.*?Copyright\s.*?(\d{4}).*?$",
@@ -130,7 +129,8 @@ def process_file(filename):
     year = None
     if match_old:
         file_text = remove_text_section(file_text,match_old.start(),match_old.end())
-        file_text = regex_empty_comments.sub('',file_text)
+        if comment_prefix == r'//':
+            file_text = regex_empty_comments.sub('',file_text)
         year = match_old.group(1)
         print("\t\tOld statement", year)
         report_old_statements_updated[filename] = year
@@ -139,12 +139,13 @@ def process_file(filename):
         match_new = regex_new_style.search(file_text)
         if match_new:
             year = match_new.group(1)
-            if get_copyright(year,comment_prefix)==match_new.group(0):
+            if get_copyright(year,comment_prefix).strip()==match_new.group(0).strip():
                 print("\t\tStatement up to date",filename)
                 report_new_statement_current[filename] = year
                 return
             file_text = remove_text_section(file_text,match_new.start(),match_new.end())
-            file_text = regex_empty_comments.sub('',file_text)
+            if comment_prefix == r'//':
+                file_text = regex_empty_comments.sub('',file_text)
             print("\t\tNew statement", year)
             report_new_statements_updated[filename] = year
         else:
