@@ -275,6 +275,8 @@ void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
           SLOT(toggleLayerDisplay(bool)));
   connect(m_layerSlide, SIGNAL(valueChanged(int)), this,
           SLOT(setVisibleLayer(int)));
+  connect(m_layerSlide, SIGNAL(valueChanged(int)), m_layerDisplay,
+          SLOT(setNum(int)));
   QHBoxLayout *voxelControlsLayout = new QHBoxLayout();
   voxelControlsLayout->addWidget(m_layerCheck);
   voxelControlsLayout->addWidget(m_layerSlide);
@@ -380,7 +382,6 @@ void InstrumentWidgetRenderTab::setVisibleLayer(int layer) {
   actor.setGridLayer(true, layer);
   const auto &renderer = actor.getInstrumentRenderer();
   auto surfaceType = m_instrWidget->getSurfaceType();
-  m_layerDisplay->setNum(layer);
   // If in an unwrapped view the surface needs to be redrawn
   if (renderer.isUsingLayers() &&
       surfaceType != InstrumentWidget::SurfaceType::FULL3D)

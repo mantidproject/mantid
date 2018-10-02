@@ -44,6 +44,7 @@ namespace MantidWidgets {
 class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
+class InstrumentWidgetMaskTab;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;
@@ -246,6 +247,7 @@ protected:
   /// Control tabs
   QList<InstrumentWidgetTab *> m_tabs;
   InstrumentWidgetRenderTab *m_renderTab;
+  InstrumentWidgetMaskTab *m_maskTab;
   XIntegrationControl *m_xIntegration;
   /// The OpenGL widget to display the instrument
   MantidGLWidget *m_InstrumentDisplay;

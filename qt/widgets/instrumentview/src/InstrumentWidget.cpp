@@ -418,9 +418,15 @@ void InstrumentWidget::setSurfaceType(int type) {
       auto sample_pos = componentInfo.samplePosition();
       auto axis = getSurfaceAxis(surfaceType);
 
+      m_maskTab->setDisabled(false);
+
       // create the surface
       if (surfaceType == FULL3D) {
         m_renderTab->forceLayers(false);
+
+        if (m_instrumentActor->hasGridBank())
+          m_maskTab->setDisabled(true);
+
         surface = new Projection3D(m_instrumentActor.get(),
                                    getInstrumentDisplayWidth(),
                                    getInstrumentDisplayHeight());
@@ -1186,13 +1192,13 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   pickTab->loadSettings(settings);
 
   // Mask controls
-  InstrumentWidgetMaskTab *maskTab = new InstrumentWidgetMaskTab(this);
-  mControlsTab->addTab(maskTab, QString("Draw"));
-  connect(maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
+  m_maskTab = new InstrumentWidgetMaskTab(this);
+  mControlsTab->addTab(m_maskTab, QString("Draw"));
+  connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
-  connect(m_xIntegration, SIGNAL(changed(double, double)), maskTab,
+  connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
           SLOT(changedIntegrationRange(double, double)));
-  maskTab->loadSettings(settings);
+  m_maskTab->loadSettings(settings);
 
   // Instrument tree controls
   InstrumentWidgetTreeTab *treeTab = new InstrumentWidgetTreeTab(this);
@@ -1202,7 +1208,7 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
 
-  m_tabs << m_renderTab << pickTab << maskTab << treeTab;
+  m_tabs << m_renderTab << pickTab << m_maskTab << treeTab;
 }
 
 /**
