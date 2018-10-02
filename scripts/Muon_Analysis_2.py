@@ -16,9 +16,9 @@ from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 
-from Muon.GUI.Common.load_file_widget.load_file_model import BrowseFileWidgetModel
-from Muon.GUI.Common.load_file_widget.load_file_view import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget.load_file_presenter import BrowseFileWidgetPresenter
+from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
+from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 
 from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.view import LoadRunWidgetView
