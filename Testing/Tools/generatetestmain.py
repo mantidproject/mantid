@@ -80,7 +80,7 @@ if __name__ == "__main__":
     if len(args) <= 0:
         parser.error("Must specify an output file")
     if len(args) > 1:
-        parser.error("Can only produce a single ouput file")
+        parser.error("Can only produce a single output file")
     filename = args[0]
     if not filename.endswith(".cpp"):
         parser.error("Filename '%s' must end with '.cpp'" % filename)

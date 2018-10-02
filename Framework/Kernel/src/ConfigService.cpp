@@ -2069,8 +2069,11 @@ template DLLExport boost::optional<int>
 ConfigServiceImpl::getValue(const std::string &);
 template DLLExport boost::optional<size_t>
 ConfigServiceImpl::getValue(const std::string &);
+#ifdef _MSC_VER
 template DLLExport boost::optional<bool>
 ConfigServiceImpl::getValue(const std::string &);
+#endif
+
 /// \endcond TEMPLATE
 
 } // namespace Kernel

@@ -161,7 +161,7 @@ private:
   //        mantidplot.runPythonScript('test=CreateSampleWorkspace()', True)
   //
   // To circumvent this we must release the GIL on the main thread
-  // before starting the async thread and then reaquire it when that thread
+  // before starting the async thread and then reacquire it when that thread
   // has finished and the main thread must keep executing. These methods
   // are used for this purpose and are NOT used by the general executeAsync
   // methods where the GILState API functions can cope and there is no

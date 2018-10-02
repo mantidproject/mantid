@@ -390,7 +390,7 @@ class MantidGeom(object):
         step2, ...]. If no step is required, use None.
         """
         if len(idlist) % 3 != 0:
-            raise IndexError("Please specifiy list as [start1, end1, step1, "
+            raise IndexError("Please specify list as [start1, end1, step1, "
                              + "start2, end2, step2, ...]. If no step is"
                              + "required, use None.")
         num_ids = len(idlist) / 3

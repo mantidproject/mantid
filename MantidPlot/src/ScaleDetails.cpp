@@ -28,7 +28,7 @@ Mantid::Kernel::Logger g_log("ScaleDetails");
  *  @param graph :: the graph the dialog is settign the options for
  *  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
  *  @param parent :: the QWidget that acts as this widget's parent in the
- * hierachy
+ * hierarchy
  */
 ScaleDetails::ScaleDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
                            QWidget *parent)
@@ -581,7 +581,7 @@ void ScaleDetails::apply() {
   }
 }
 
-/** Sets the modifed flag to true so that the changes may be applied.
+/** Sets the modified flag to true so that the changes may be applied.
  *
  */
 void ScaleDetails::setModified() { m_modified = true; }
