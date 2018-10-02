@@ -1138,9 +1138,10 @@ void DetectorPlotController::setPlotData(
   QApplication::restoreOverrideCursor();
   if (!x.empty()) {
     m_plot->setData(std::move(x), std::move(y),
-                    actor.getWorkspace()->getAxis(0)->unit()->unitID());
+                    QString::fromStdString(
+                        actor.getWorkspace()->getAxis(0)->unit()->unitID()),
+                    "multiple");
   }
-  m_plot->setLabel("multiple");
 }
 
 /**
@@ -1172,10 +1173,11 @@ void DetectorPlotController::plotSingle(size_t detindex) {
 
   const auto &actor = m_instrWidget->getInstrumentActor();
   // set the data
-  m_plot->setData(std::move(x), std::move(y),
-                  actor.getWorkspace()->getAxis(0)->unit()->unitID());
   auto detid = actor.getDetID(detindex);
-  m_plot->setLabel("Detector " + QString::number(detid));
+  m_plot->setData(std::move(x), std::move(y),
+                  QString::fromStdString(
+                      actor.getWorkspace()->getAxis(0)->unit()->unitID()),
+                  "Detector " + QString::number(detid));
 
   // find any markers
   auto surface = m_tab->getSurface();
@@ -1243,8 +1245,9 @@ void DetectorPlotController::plotTubeSums(size_t detindex) {
   QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
                   QString::number(detid) + ") Sum";
   m_plot->setData(std::move(x), std::move(y),
-                  actor.getWorkspace()->getAxis(0)->unit()->unitID());
-  m_plot->setLabel(label);
+                  QString::fromStdString(
+                      actor.getWorkspace()->getAxis(0)->unit()->unitID()),
+                  std::move(label));
 }
 
 /**
@@ -1271,14 +1274,14 @@ void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
   if (!xAxisUnits.isEmpty()) {
     xAxisCaption += " (" + xAxisUnits + ")";
   }
-  m_plot->setData(std::move(x), std::move(y), xAxisCaption.toStdString());
   auto parent = componentInfo.parent(detindex);
   // curve label: "tube_name (detid) Integrals"
   // detid is included to distiguish tubes with the same name
   QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
                   QString::number(actor.getDetID(detindex)) + ") Integrals/" +
                   getTubeXUnitsName();
-  m_plot->setLabel(label);
+  m_plot->setData(std::move(x), std::move(y), std::move(xAxisCaption),
+                  std::move(label));
 }
 
 /**
@@ -1656,7 +1659,6 @@ QString DetectorPlotController::getTubeXUnitsUnits() const {
   default:
     return "";
   }
-  return "";
 }
 
 /**

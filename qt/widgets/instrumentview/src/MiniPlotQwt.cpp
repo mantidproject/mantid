@@ -205,24 +205,26 @@ void MiniPlotQwt::setYScale(double from, double to) {
  * @param x :: A vector of X values
  * @param y :: A vector of Y values
  * @param xUnits :: Units for the data
+ * @param curveLabel :: A label for hthe die
  */
 void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y,
-                          const std::string &xUnits) {
-  if (x.empty()){
+                          QString xunit, QString curveLabel) {
+  if (x.empty()) {
     g_log.warning("setData(): X array is empty!");
     return;
   }
-  if (y.empty()){
+  if (y.empty()) {
     g_log.warning("setData(): Y array is empty!");
     return;
   }
   if (x.size() != y.size()) {
     g_log.warning(std::string(
-        "setData(): X/Y size mismatch! X=" + std::to_string(x.size()) + ", Y="
-        + std::to_string(y.size())));
+        "setData(): X/Y size mismatch! X=" + std::to_string(x.size()) +
+        ", Y=" + std::to_string(y.size())));
     return;
   }
-  m_xUnits = xUnits;
+  m_xUnits = xunit;
+  m_label = curveLabel;
   if (!m_curve) {
     m_curve = new QwtPlotCurve();
     m_curve->attach(this);
@@ -240,13 +242,8 @@ void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y,
       to = yy;
   }
   setYScale(from, to);
-  this->setAxisTitle(xBottom, QString::fromStdString(m_xUnits));
+  this->setAxisTitle(xBottom, m_xUnits);
 }
-
-/**
- * Set a label which will identify the curve when it is stored.
- */
-void MiniPlotQwt::setLabel(const QString &label) { m_label = label; }
 
 /**
  * Remove the curve. Rescale the axes if there are stored curves.
@@ -484,7 +481,7 @@ void PeakLabel::draw(QPainter *painter, const QwtScaleMap &xMap,
                      const QwtScaleMap &yMap, const QRect &canvasRect) const {
   (void)yMap;
   double peakX;
-  if (m_plot->getXUnits().empty())
+  if (m_plot->getXUnits().isEmpty())
     return;
   if (m_plot->getXUnits() == "dSpacing") {
     peakX = m_marker->getPeak().getDSpacing();

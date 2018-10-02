@@ -35,8 +35,7 @@ public:
   explicit MiniPlotMpl(QWidget *parent = nullptr);
 
   void setData(std::vector<double> x, std::vector<double> y,
-               const std::string & xUnits = "");
-  void setLabel(const QString &label) {}
+               QString xunit, QString curveLabel);
   QString label() const { return "LABEL"; }
   void setYAxisLabelRotation(double degrees) {}
   void addPeakLabel(const PeakMarker2D *) {}
@@ -66,8 +65,10 @@ signals:
 
 private:
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
-  // Holds references to the plotted lines
   std::vector<Widgets::MplCpp::Line2D> m_lines;
+  QString m_xunit;
+  QString m_activeCurveLabel;
+
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
