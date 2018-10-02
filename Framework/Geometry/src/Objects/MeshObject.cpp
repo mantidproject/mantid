@@ -311,35 +311,7 @@ double MeshObject::volume() const {
  * @returns A reference to a bounding box for this shape.
  */
 const BoundingBox &MeshObject::getBoundingBox() const {
-
-  if (m_boundingBox.isNull())
-    // As the shape of MeshObject is immutable, we need only calculate
-    // bounding box, if the cached bounding box is null.
-    if (numberOfVertices() > 0) {
-      // Initial extents to be overwritten by loop
-      constexpr double huge = 1e10;
-      double minX, maxX, minY, maxY, minZ, maxZ;
-      minX = minY = minZ = huge;
-      maxX = maxY = maxZ = -huge;
-
-      // Loop over all vertices and determine minima and maxima on each axis
-      for (const auto &vertex : m_vertices) {
-        auto vx = vertex.X();
-        auto vy = vertex.Y();
-        auto vz = vertex.Z();
-
-        minX = std::min(minX, vx);
-        maxX = std::max(maxX, vx);
-        minY = std::min(minY, vy);
-        maxY = std::max(maxY, vy);
-        minZ = std::min(minZ, vz);
-        maxZ = std::max(maxZ, vz);
-      }
-      // Cache bounding box, so we do not need to repeat calculation
-      m_boundingBox = BoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
-    }
-
-  return m_boundingBox;
+  return MeshObjectCommon::getBoundingBox(m_vertices, m_boundingBox);
 }
 
 /**

@@ -7,7 +7,7 @@
 
 namespace Mantid {
 namespace Geometry {
-
+class BoundingBox;
 /** MeshObjectCommon : Performs functions common to 3D and 2D closed meshes
 
   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -53,6 +53,8 @@ bool rayIntersectsTriangle(const Kernel::V3D &start,
 
 void checkVertexLimit(size_t nVertices);
 std::vector<uint32_t> getTriangles_uint32(const std::vector<uint16_t> &input);
+const BoundingBox &getBoundingBox(const std::vector<Kernel::V3D> &vertices,
+                                  BoundingBox &cacheBB);
 } // namespace MeshObjectCommon
 
 } // namespace Geometry

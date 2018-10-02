@@ -1,4 +1,5 @@
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <limits>
 #include <string>
 
@@ -261,6 +262,43 @@ std::vector<uint32_t> getTriangles_uint32(const std::vector<uint16_t> &input) {
     }
   }
   return faces;
+}
+
+const BoundingBox &
+MeshObjectCommon::getBoundingBox(const std::vector<Kernel::V3D> &vertices,
+                                 BoundingBox &cacheBB) {
+
+  if (cacheBB.isNull()) {
+    static const double MinThickness = 0.001;
+    double minX, maxX, minY, maxY, minZ, maxZ;
+    minX = minY = minZ = std::numeric_limits<double>::max();
+    maxX = maxY = maxZ = std::numeric_limits<double>::min();
+
+    // Loop over all vertices and determine minima and maxima on each axis
+    for (const auto &vertex : vertices) {
+      auto vx = vertex.X();
+      auto vy = vertex.Y();
+      auto vz = vertex.Z();
+
+      minX = std::min(minX, vx);
+      maxX = std::max(maxX, vx);
+      minY = std::min(minY, vy);
+      maxY = std::max(maxY, vy);
+      minZ = std::min(minZ, vz);
+      maxZ = std::max(maxZ, vz);
+    }
+    if (minX == maxX)
+      maxX += MinThickness;
+    if (minY == maxY)
+      maxY += MinThickness;
+    if (minZ == maxZ)
+      maxZ += MinThickness;
+
+    // Cache bounding box, so we do not need to repeat calculation
+    cacheBB = BoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+  }
+
+  return cacheBB;
 }
 
 } // namespace MeshObjectCommon
