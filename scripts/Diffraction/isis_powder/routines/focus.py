@@ -79,6 +79,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     # Tidy workspaces from Mantid
     common.remove_intermediate_workspace(input_workspace)
     common.remove_intermediate_workspace(aligned_ws)
+    print(("Remove " + str(focused_ws)))
     common.remove_intermediate_workspace(focused_ws)
     common.remove_intermediate_workspace(output_spectra)
 
@@ -120,8 +121,10 @@ def _divide_one_spectrum_by_spline(spectrum, spline, instrument):
     if instrument.get_instrument_prefix() == "GEM":
         divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum,
                                 StoreInADS=False)
-        return _crop_spline_to_percent_of_max(rebinned_spline, divided, spectrum)
-
+        output =_crop_spline_to_percent_of_max(rebinned_spline, divided, spectrum)
+        mantid.mtd['output'] = output
+        common.remove_intermediate_workspace(divided)
+        return output
     divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum)
     return divided
 
@@ -169,7 +172,7 @@ def _test_splined_vanadium_exists(instrument, run_details):
 def _crop_spline_to_percent_of_max(spline, input_ws, output_workspace):
     spline_spectrum = spline.readY(0)
     y_val = numpy.amax(spline_spectrum)
-    y_val = y_val / 100
+    y_val = y_val / 50
     x_list = input_ws.readX(0)
     small_spline_indecies = numpy.nonzero(spline_spectrum > y_val)[0]
     x_max = x_list[small_spline_indecies[-1]]
