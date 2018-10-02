@@ -107,7 +107,7 @@ class LoadUtils(object):
 def get_default_instrument():
     default_instrument = ConfigServiceImpl.Instance().getInstrument().name()
     if default_instrument not in file_utils.allowed_instruments:
-        default_instrument = "EMU"
+        default_instrument = "None"
     return default_instrument
 
 
