@@ -13,9 +13,9 @@ chopper_system:
       distance: 7.85            # Distance from moderator to this chopper in metres
       slot_width: 65            # Slot width in mm
       guide_width: 60           # Width of guide after chopper in mm
-      nslot: 4                  # Number of slots. If slot_ang_pos is specified can ommit this entry
+      nslot: 4                  # Number of slots. If slot_ang_pos is specified can omit this entry
                                 # Next line has the angular position of the slots in degrees
-                                #   Must be monotonically increasing. Can omit if nslot is specifed,
+                                #   Must be monotonically increasing. Can omit if nslot is specified,
                                 #   in which case it will be assumed that the slits are equally spaced.
       slot_ang_pos: [0, 36.48, 72.76, 145.52]
       radius: 367               # Disk radius
@@ -121,7 +121,7 @@ moderator:
   mod_pars: [38.6, 0.5226]      # Parameters for time profile
   theta: 13.0                   # Angle beamline makes with moderator face (degrees)
   source_rep: 50                # Frequency of source (Hz)
-  measured_width:               # Table of measured moderator time widths in microseconds. If present will overide imod and mod_pars
+  measured_width:               # Table of measured moderator time widths in microseconds. If present will override imod and mod_pars
     isSigma: False              # Indicates measurements are FWHM
     wavelength: [4.0240, 5.6898, 2.3250, 2.8480, 1.5224, 3.4331, 1.8009, 1.1167]
     width: [53.2, 62, 39.2, 44.8, 18.8, 48.8, 27.2, 12.4]

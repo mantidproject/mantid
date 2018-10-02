@@ -63,10 +63,17 @@ void ConvertToMatrixWorkspace::exec() {
     }
     PARALLEL_CHECK_INTERUPT_REGION
   } else {
-    g_log.information() << "Input workspace does not need converting. Pointing "
-                           "OutputWorkspace property to input.\n";
-    outputWorkspace =
-        boost::const_pointer_cast<MatrixWorkspace>(inputWorkspace);
+    outputWorkspace = getProperty("OutputWorkspace");
+    if (inputWorkspace == outputWorkspace) {
+      g_log.information("InputWorkspace does not need converting. Pointing "
+                        "OutputWorkspace property to input.");
+      outputWorkspace =
+          boost::const_pointer_cast<MatrixWorkspace>(inputWorkspace);
+    } else {
+      g_log.information(
+          "InputWorkspace does not need converting. Cloning InputWorkspace.");
+      outputWorkspace = inputWorkspace->clone();
+    }
   }
 
   setProperty("OutputWorkspace", outputWorkspace);

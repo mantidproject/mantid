@@ -52,7 +52,7 @@ Usage
                 det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
   
   
-   # Copy paremeters from 1st workspace to 2nd workspace
+   # Copy parameters from 1st workspace to 2nd workspace
    CopyInstrumentParameters( ws1, ws2 )
 
 

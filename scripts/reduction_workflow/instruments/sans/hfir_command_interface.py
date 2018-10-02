@@ -514,7 +514,7 @@ def NoIQxQy():
 
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0, component_name=""):
     '''
-    Maks edges of a component_name
+    Mask edges of a component_name
     By default is the main detector for both GPSANS and BioSans
     '''
     ReductionSingleton().reduction_properties["MaskedEdges"] = [

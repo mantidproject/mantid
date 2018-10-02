@@ -21,7 +21,7 @@ name and an appendix _1, _2, etc., incremented sequentially as new
 files are loaded with the same OutputWorkspace property.
 
 The way image pixels are loaded into the resulting workspaces depends
-on the porperty LoadAsRectImg. If it is set as false, one spectrum
+on the property LoadAsRectImg. If it is set as false, one spectrum
 will be created for every image pixel. Otherwise, one spectrum will be
 created for every image row.
 

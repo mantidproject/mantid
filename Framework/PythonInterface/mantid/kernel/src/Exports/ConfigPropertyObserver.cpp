@@ -1,13 +1,13 @@
 #include "MantidKernel/ConfigPropertyObserver.h"
-#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/pure_virtual.hpp>
 
 using namespace boost::python;
 using Mantid::Kernel::ConfigPropertyObserver;
-using Mantid::PythonInterface::Environment::callMethod;
+using Mantid::PythonInterface::callMethod;
 
 class ConfigPropertyObserverWrapper : public ConfigPropertyObserver {
 public:

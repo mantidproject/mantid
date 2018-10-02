@@ -7,19 +7,21 @@
 ###########################################################################
 # Set local dependencies
 ###########################################################################
+# boost python
 set ( old_boost ${Boost_LIBRARIES} )
 set ( Boost_LIBRARIES ) # Empty out the variable after previous use
-
 find_package ( BoostPython REQUIRED )
-
 set ( Boost_LIBRARIES ${Boost_LIBRARIES} ${old_boost})
 
-include_directories ( SYSTEM ${PYTHON_INCLUDE_PATH} )
-
+# NumPy
 find_package ( Numpy REQUIRED )
+include_directories ( SYSTEM ${PYTHON_INCLUDE_PATH} )
 include_directories ( SYSTEM ${PYTHON_NUMPY_INCLUDE_DIR} )
+
+# Base of the subproject include dir
 set ( HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface )
-include_directories ( inc )
+
+# Common definitions
 add_definitions ( -DBOOST_PYTHON_NO_LIB -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION )
 if ( CMAKE_COMPILER_IS_GNUCXX AND Boost_MAJOR_VERSION EQUAL "1" AND
      Boost_MINOR_VERSION GREATER "63" AND Boost_MINOR_VERSION LESS "66" )
@@ -27,7 +29,11 @@ if ( CMAKE_COMPILER_IS_GNUCXX AND Boost_MAJOR_VERSION EQUAL "1" AND
   # this definition:   https://github.com/boostorg/python/issues/131
   add_definitions ( -DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY )
 endif ()
+
 set ( PYTHON_DEPS ${MPI_CXX_LIBRARIES} )
+
+# First, common Python code
+add_subdirectory ( core )
 
 ####################################################################################
 # A function for generating the exports
@@ -89,6 +95,11 @@ endfunction()
 ###########################################################################
 # mantid package
 ###########################################################################
+# All targets can see these includes
+include_directories ( core/inc )
+# TODO: Move all common code to the core library to
+# remove the need for linking submodules together
+include_directories ( inc )
 add_subdirectory ( mantid )
 
 ###########################################################################
