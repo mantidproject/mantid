@@ -662,16 +662,16 @@ void ReflectometryReductionOne2::findDetectorGroups() {
   }
 
   for (const auto &group : m_detectorGroups) {
-    for (const auto &spIdx : group) {
-      if (m_spectrumInfo->isMonitor(spIdx)) {
-        throw std::invalid_argument("A detector is expected at spectrum " +
-                                    std::to_string(spIdx) +
-                                    ", found a monitor");
+    for (const auto &wsIdx : group) {
+      if (m_spectrumInfo->isMonitor(wsIdx)) {
+        throw std::invalid_argument(
+            m_processingInstructions +
+            " is not a valid spectrum number, because it is a monitor.");
       }
-      if (spIdx > m_spectrumInfo->size() - 1) {
+      if (wsIdx > m_spectrumInfo->size() - 1) {
         throw std::runtime_error(
             "ProcessingInstructions contains an out-of-range index: " +
-            std::to_string(spIdx));
+            std::to_string(wsIdx));
       }
     }
   }

@@ -19,6 +19,20 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
+namespace {
+int convertStringNumToInt(const std::string string) {
+  try {
+    auto returnValue = std::stoi(string.c_str());
+    return returnValue;
+  } catch (std::invalid_argument &) {
+    throw std::runtime_error("Invalid argument for processing instructions");
+  } catch (std::out_of_range &) {
+    throw std::runtime_error(
+        "Out of range value given for processing instructions");
+  }
+}
+} // namespace
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -394,17 +408,22 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
     wavelengthMin = getProperty("WavelengthMin");
     wavelengthMax = getProperty("WavelengthMax");
   }
+  try {
+    auto cropWorkspaceAlg = createChildAlgorithm("CropWorkspace");
+    cropWorkspaceAlg->initialize();
+    cropWorkspaceAlg->setProperty("InputWorkspace", inputWS);
+    cropWorkspaceAlg->setProperty("XMin", wavelengthMin);
+    cropWorkspaceAlg->setProperty("XMax", wavelengthMax);
+    cropWorkspaceAlg->execute();
+    MatrixWorkspace_sptr outputWS =
+        cropWorkspaceAlg->getProperty("OutputWorkspace");
 
-  auto cropWorkspaceAlg = createChildAlgorithm("CropWorkspace");
-  cropWorkspaceAlg->initialize();
-  cropWorkspaceAlg->setProperty("InputWorkspace", inputWS);
-  cropWorkspaceAlg->setProperty("XMin", wavelengthMin);
-  cropWorkspaceAlg->setProperty("XMax", wavelengthMax);
-  cropWorkspaceAlg->execute();
-  MatrixWorkspace_sptr outputWS =
-      cropWorkspaceAlg->getProperty("OutputWorkspace");
-
-  return outputWS;
+    return outputWS;
+  } catch (std::out_of_range &e) {
+    throw std::runtime_error("The processing instruction(s) are likely out of "
+                             "bounds on the workspace, actual error: " +
+                             std::string(e.what()));
+  }
 }
 
 /** Process an input workspace in TOF according to specified processing commands
@@ -698,9 +717,10 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndexes(
 std::string ReflectometryWorkflowBase2::workspaceIndexesToSpecNum(
     const std::string &num, MatrixWorkspace_const_sptr ws) const {
   if (num == "0") {
-    return "0";
+    throw std::runtime_error(
+        "0 is not a valid WorkspaceIndex, so cannot be converted to SpecNum");
   }
-  auto specNum = std::stoi(num.c_str());
+  auto specNum = convertStringNumToInt(num);
   std::string wsIdx = std::to_string(
       ws->getIndexFromSpectrumNumber(static_cast<specnum_t>(specNum)));
   return wsIdx;
@@ -729,10 +749,7 @@ std::string ReflectometryWorkflowBase2::convertWorkspaceIndexProcInstToSpecNum(
 }
 std::string ReflectometryWorkflowBase2::specNumToWorkspaceIndexes(
     const std::string &num, Mantid::API::MatrixWorkspace_const_sptr ws) const {
-  if (num == "0") {
-    return "0";
-  }
-  auto wsIndx = std::stoi(num.c_str());
+  auto wsIndx = convertStringNumToInt(num);
   std::string specId = std::to_string(
       static_cast<int32_t>(ws->indexInfo().spectrumNumber(wsIndx)));
   return specId;

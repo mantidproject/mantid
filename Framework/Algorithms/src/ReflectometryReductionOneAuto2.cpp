@@ -862,7 +862,6 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   alg->setProperty("FirstTransmissionRun", "");
   alg->setProperty("SecondTransmissionRun", "");
   alg->setProperty("CorrectionAlgorithm", "None");
-  alg->setProperty("ProcessingInstructions", "0");
   auto outputIvsLamNames = workspaceNamesInGroup(outputIvsLam);
   for (size_t i = 0; i < outputIvsLamNames.size(); ++i) {
     const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);

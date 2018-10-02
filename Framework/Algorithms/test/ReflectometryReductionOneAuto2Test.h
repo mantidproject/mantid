@@ -1131,7 +1131,7 @@ public:
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     TS_ASSERT_THROWS_EQUALS(
         alg.execute(), std::invalid_argument & e, std::string(e.what()),
-        "A detector is expected at spectrum 0, found a monitor");
+        "1 is not a valid spectrum number, because it is a monitor.");
   }
 
   void test_I0MonitorIndex_is_detector() {
