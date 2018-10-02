@@ -20,7 +20,8 @@ ProjectRecoveryPresenter::ProjectRecoveryPresenter(
   /// Copy constructor can only copy the Model
   m_recView = obj.m_recView;
   m_failureView = obj.m_failureView;
-  m_model = obj.m_model;
+  m_model = new ProjectRecoveryModel(nullptr, this);
+  *m_model = *obj.m_model;
   m_mainWindow = obj.m_mainWindow;
 }
 
@@ -87,4 +88,16 @@ void ProjectRecoveryPresenter::closeView() {
   if (m_failureView != nullptr) {
     m_failureView->setVisible(false);
   }
+}
+
+ProjectRecoveryPresenter &ProjectRecoveryPresenter::
+operator=(const ProjectRecoveryPresenter &obj) {
+  if (&obj != this) {
+    m_recView = obj.m_recView;
+    m_failureView = obj.m_failureView;
+    m_model = new ProjectRecoveryModel(nullptr, this);
+    *m_model = *obj.m_model;
+    m_mainWindow = obj.m_mainWindow;
+  }
+  return *this;
 }
