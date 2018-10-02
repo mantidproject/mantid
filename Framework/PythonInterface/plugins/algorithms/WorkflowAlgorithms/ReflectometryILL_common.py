@@ -81,7 +81,13 @@ def correctForChopperOpenings(ws, directWS, names, cleanup, logging):
 
 
 def detectorResolution():
+    """Return the detector resolution in mm."""
     return 0.0022
+
+
+def pixelSize(instrumentName):
+    """Return the pixel size in mm."""
+    return 0.001195 if instrumentName == 'D17' else 0.0012
 
 
 def slitSizeLogEntry(instrumentName, slitNumber):
@@ -90,6 +96,14 @@ def slitSizeLogEntry(instrumentName, slitNumber):
         raise RuntimeError('Slit number out of range.')
     entry = 'VirtualSlitAxis.s{}w_actual_width' if instrumentName == 'D17' else 'VirtualSlitAxis.S{}H_actual_height'
     return entry.format(slitNumber + 1)
+
+
+def instrumentName(ws):
+    """Return the instrument's name validating it is either D17 or FIGARO."""
+    name = ws.getInstrument().getName()
+    if name != 'D17' and name != 'FIGARO':
+        raise RuntimeError('Unrecognized instrument {}. Only D17 and FIGARO are supported.'.format(name))
+    return name
 
 
 class SampleLogs:
