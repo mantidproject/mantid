@@ -18,8 +18,10 @@ ProjectRecoveryPresenter::ProjectRecoveryPresenter(
 ProjectRecoveryPresenter::ProjectRecoveryPresenter(
     const ProjectRecoveryPresenter &obj) {
   /// Copy constructor can only copy the Model
-  m_model = new ProjectRecoveryModel(nullptr, this);
-  *m_model = *obj.m_model;
+  m_recView = obj.m_recView;
+  m_failureView = obj.m_failureView;
+  m_model = obj.m_model;
+  m_mainWindow = obj.m_mainWindow;
 }
 
 ProjectRecoveryPresenter::~ProjectRecoveryPresenter() {
