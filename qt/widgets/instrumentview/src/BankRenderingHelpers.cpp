@@ -337,7 +337,6 @@ void renderGridBankLayer(const Mantid::Geometry::ComponentInfo &compInfo,
   auto steps = findSteps(shapeInfo.points());
   auto xstep = std::get<0>(steps);
   auto ystep = std::get<1>(steps);
-  auto zstep = std::get<2>(steps);
   auto baseCorner = findGridCorners(compInfo, index, GridTextureFace::Front);
 
   render2DTexture(c, bank.nX, bank.nY, V3D((xstep * -0.5), (ystep * -0.5), 0.0),
@@ -396,15 +395,10 @@ void renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
   auto layers = compInfo.children(index);
   auto firstLayerIndex = layers.back();
   auto bank = compInfo.quadrilateralComponent(firstLayerIndex);
-  auto steps = findGridBankSteps(compInfo, index);
-  auto xstep = std::get<0>(steps);
-  auto ystep = std::get<1>(steps);
-  auto zstep = std::get<2>(steps);
 
   // All positions referenced from bottomLeft of front face
   auto basePos = baseCorner.bottomLeft();
   auto nZ = layers.size();
-
   auto offsets = getGridFaceOffsets(compInfo, index, gridFace);
   switch (gridFace) {
   case GridTextureFace::Front:
