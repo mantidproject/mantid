@@ -628,7 +628,7 @@ void IndirectTab::algorithmFinished(bool error) {
 /**
  * Run Python code and return anything printed to stdout.
  *
- * @param code Python code the execute
+ * @param code Python code to execute
  * @param no_output Enable to ignore any output
  * @returns What was printed to stdout
  */

@@ -146,7 +146,7 @@ void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) {
   m_maxSpectrum = spectrum;
 }
 
-int IndirectDataAnalysisTab::getNumberOfSpectra() {
+std::size_t IndirectDataAnalysisTab::getNumberOfSpectra() {
   return inputWorkspace()->getNumberHistograms();
 }
 

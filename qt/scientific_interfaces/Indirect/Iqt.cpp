@@ -197,10 +197,10 @@ void Iqt::algorithmComplete(bool error) {
     setTiledPlotEnabled(false);
     setSaveResultEnabled(false);
   } else {
-    setPlotSpectrumIndexMax(getNumberOfSpectra() - 1);
+    setPlotSpectrumIndexMax(static_cast<int>(getNumberOfSpectra()) - 1);
     setPlotSpectrumIndex(selectedSpectrum());
     setTiledPlotFirstIndex(selectedSpectrum());
-    setTiledPlotLastIndex(getNumberOfSpectra() - 1);
+    setTiledPlotLastIndex(static_cast<int>(getNumberOfSpectra()) - 1);
   }
 } // namespace IDA
 /**
@@ -229,52 +229,58 @@ void Iqt::errorsClicked() {
 
 bool Iqt::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
 
+std::size_t Iqt::getXMinIndex(Mantid::MantidVec const &yData,
+                              std::vector<double>::const_iterator iter) {
+  auto cropIndex = yData.size() - 1;
+  if (iter != yData.end()) {
+    auto const index = iter - yData.begin();
+    cropIndex = index > 0 ? index - 1 : index;
+  } else
+    showMessageBox(
+        "Incorrect data provided for Tiled Plot: y values are out of range");
+  return cropIndex;
+}
+
+double Iqt::getXMinValue(MatrixWorkspace_const_sptr workspace,
+                         std::size_t const &index) {
+  auto const firstSpectraYData = workspace->dataY(index);
+  auto const positionIter =
+      std::find_if(firstSpectraYData.begin(), firstSpectraYData.end(),
+                   [&](double const &value) { return value < 1.0; });
+  auto const cropIndex = getXMinIndex(firstSpectraYData, positionIter);
+  return workspace->dataX(index)[cropIndex];
+}
+
 void Iqt::plotTiled() {
   setTiledPlotIsPlotting(true);
-
-  auto const firstTiledPlot = m_uiForm.spTiledPlotFirst->text().toInt();
-  auto const lastTiledPlot = m_uiForm.spTiledPlotLast->text().toInt();
 
   MatrixWorkspace_const_sptr outWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           m_pythonExportWsName);
 
-  // Find x value where y > 1 in first spectra
   auto const tiledPlotWsName = outWs->getName() + "_tiled";
-  auto const y_data = outWs->y(firstTiledPlot);
-  auto const y_data_length = y_data.size();
-  auto crop_index = y_data.size();
-  for (std::size_t i = 0; i < y_data_length; ++i) {
-    if (y_data[i] > 1) {
-      crop_index = i > 0 ? i - 1 : i;
-      break;
-    }
-  }
-  auto const crop_value = outWs->x(firstTiledPlot)[crop_index];
+  auto const firstTiledPlot = m_uiForm.spTiledPlotFirst->text().toInt();
+  auto const lastTiledPlot = m_uiForm.spTiledPlotLast->text().toInt();
 
-  // Extract spectra which need a tiled plot before cloning workspace
-  IAlgorithm_sptr extractSpectra =
-      AlgorithmManager::Instance().create("ExtractSpectra");
-  extractSpectra->initialize();
-  extractSpectra->setProperty("InputWorkspace", outWs->getName());
-  extractSpectra->setProperty("OutputWorkspace", tiledPlotWsName);
-  extractSpectra->setProperty("StartWorkspaceIndex", firstTiledPlot);
-  extractSpectra->setProperty("EndWorkspaceIndex", lastTiledPlot);
-  extractSpectra->execute();
+  // Get first x value which corresponds to a y value below 1
+  auto const cropValue =
+      getXMinValue(outWs, static_cast<std::size_t>(firstTiledPlot));
 
   // Clone workspace before cropping to keep in ADS
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->initialize();
-  clone->setProperty("InputWorkspace", tiledPlotWsName);
+  clone->setProperty("InputWorkspace", outWs->getName());
   clone->setProperty("OutputWorkspace", tiledPlotWsName);
   clone->execute();
 
-  // Crop based on crop_value
+  // Crop based on selected first and last spectra
   IAlgorithm_sptr crop = AlgorithmManager::Instance().create("CropWorkspace");
   crop->initialize();
   crop->setProperty("InputWorkspace", tiledPlotWsName);
   crop->setProperty("OutputWorkspace", tiledPlotWsName);
-  crop->setProperty("XMax", crop_value);
+  crop->setProperty("StartWorkspaceIndex", firstTiledPlot);
+  crop->setProperty("EndWorkspaceIndex", lastTiledPlot);
+  crop->setProperty("XMin", cropValue);
   crop->execute();
   MatrixWorkspace_const_sptr tiledPlotWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -285,7 +291,7 @@ void Iqt::plotTiled() {
   if (numberOfPlots != 0) {
     QString pyInput = "from mantidplot import newTiledWindow\n";
     pyInput += "newTiledWindow(sources=[";
-    for (std::size_t index = firstTiledPlot; index <= lastTiledPlot; ++index) {
+    for (auto index = firstTiledPlot; index <= lastTiledPlot; ++index) {
       if (index > firstTiledPlot) {
         pyInput += ",";
       }

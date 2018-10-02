@@ -27,6 +27,11 @@ private:
 
   bool isErrorsEnabled();
 
+  std::size_t getXMinIndex(Mantid::MantidVec const &firstSpectraYData,
+                           std::vector<double>::const_iterator iter);
+  double getXMinValue(Mantid::API::MatrixWorkspace_const_sptr workspace,
+                      std::size_t const &index);
+
   void setRunEnabled(bool enabled);
   void setPlotSpectrumEnabled(bool enabled);
   void setTiledPlotEnabled(bool enabled);
