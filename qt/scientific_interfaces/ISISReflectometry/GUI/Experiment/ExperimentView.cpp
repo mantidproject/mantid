@@ -11,17 +11,20 @@ namespace {
 // TODO: these don't seem to work for spin boxes - is there another way to set
 // the backround colour?gg
 void showAsInvalid(QDoubleSpinBox &spinBox) {
+  /// TODO This works but also changes the font
   spinBox.setStyleSheet("QDoubleSpinBox { background-color: #ffb8ad; }");
-  // auto palette = spinBox.palette();
-  // palette.setColor(spinBox.backgroundRole(), QColor("#ffb8ad"));
+
+  /// This doesn't work
+  //auto palette = spinBox.palette();
+  //palette.setColor(spinBox.backgroundRole(), QColor("#ffb8ad"));
   // spinBox.setAutoFillBackground(true);
-  // spinBox.setPalette(palette);
+  //parent->setPalette(palette);
 }
 
 void showAsValid(QDoubleSpinBox &spinBox) {
-  spinBox.setStyleSheet("QDoubleSpinBox { background-color: transparent; }");
+  spinBox.setStyleSheet("");
   // auto palette = spinBox.palette();
-  // palette.setColor(spinBox.backgroundRole(), Qt::transparent);
+  // palette.setColor(spinBox.foregroundRole(), Qt::transparent);
   // spinBox.setAutoFillBackground(false);
   // spinBox.setPalette(palette);
 }
