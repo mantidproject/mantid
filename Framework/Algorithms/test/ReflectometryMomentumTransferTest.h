@@ -291,12 +291,12 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("ChopperRadius", CHOPPER_RADIUS))
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("ChopperpairDistance", CHOPPER_GAP))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Slit1Name", "slit1"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("FirstSlitName", "slit1"))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("Slit1SizeSampleLog", "slit1.size"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Slit2Name", "slit2"))
+        alg->setProperty("FirstSlitSizeSampleLog", "slit1.size"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitName", "slit2"))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("Slit2SizeSampleLog", "slit2.size"))
+        alg->setProperty("SecondSlitSizeSampleLog", "slit2.size"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH))
     return alg;
   }
@@ -524,10 +524,10 @@ private:
     alg->setProperty("ChopperOpening", CHOPPER_OPENING_ANGLE);
     alg->setProperty("ChopperRadius", CHOPPER_RADIUS);
     alg->setProperty("ChopperpairDistance", CHOPPER_GAP);
-    alg->setProperty("Slit1Name", "slit1");
-    alg->setProperty("Slit1SizeSampleLog", "slit1.size");
-    alg->setProperty("Slit2Name", "slit2");
-    alg->setProperty("Slit2SizeSampleLog", "slit2.size");
+    alg->setProperty("FirstSlitName", "slit1");
+    alg->setProperty("FirstSlitSizeSampleLog", "slit1.size");
+    alg->setProperty("SecondSlitName", "slit2");
+    alg->setProperty("SecondSlitSizeSampleLog", "slit2.size");
     alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH);
     return alg;
   }
