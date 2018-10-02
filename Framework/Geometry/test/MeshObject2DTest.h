@@ -210,36 +210,28 @@ public:
     TSM_ASSERT("Just outside", !mesh.isValid(V3D{1, 1 + delta, 0}));
   }
 
-  void test_isOnTriangle() {
-    auto p1 = V3D{-1, -1, 0};
-    auto p2 = V3D{1, -1, 0};
-    auto p3 = V3D{0, 1, 0};
-    TS_ASSERT(MeshObject2D::isOnTriangle(V3D{0, 0, 0}, p1, p2, p3));
-    TS_ASSERT(MeshObject2D::isOnTriangle(p1, p1, p2, p3));
-    TS_ASSERT(MeshObject2D::isOnTriangle(p2, p1, p2, p3));
-    TS_ASSERT(MeshObject2D::isOnTriangle(p3, p1, p2, p3));
-    TS_ASSERT(!MeshObject2D::isOnTriangle(p1 - V3D(0.0001, 0, 0), p1, p2, p3));
-    TS_ASSERT(!MeshObject2D::isOnTriangle(p1 - V3D(0, 0.0001, 0), p1, p2, p3));
-    TS_ASSERT(!MeshObject2D::isOnTriangle(p2 + V3D(0.0001, 0, 0), p1, p2, p3));
-    TS_ASSERT(!MeshObject2D::isOnTriangle(p2 - V3D(0, 0.0001, 0), p1, p2, p3));
-    TS_ASSERT(!MeshObject2D::isOnTriangle(p3 + V3D(0.0001, 0, 0), p1, p2, p3));
-    TS_ASSERT(!MeshObject2D::isOnTriangle(p3 + V3D(0, 0.0001, 0), p1, p2, p3));
-  }
-
   void test_interceptSurface() {
 
     auto mesh = makeSimpleTriangleMesh();
 
+    // Track goes through triangle body
     Mantid::Geometry::Track onTargetTrack(V3D{0.5, 0.5, -1},
                                           V3D{0, 0, 1} /*along z*/);
     TS_ASSERT_EQUALS(mesh.interceptSurface(onTargetTrack), 1);
     TS_ASSERT_EQUALS(onTargetTrack.count(), 1);
 
+    // Track completely misses
     Mantid::Geometry::Track missTargetTrack(
         V3D{50, 0.5, -1},
         V3D{0, 0, 1} /*along z*/); // Intersects plane but no triangles
     TS_ASSERT_EQUALS(mesh.interceptSurface(missTargetTrack), 0);
     TS_ASSERT_EQUALS(missTargetTrack.count(), 0);
+
+    // Track goes through edge
+    Mantid::Geometry::Track edgeTargetTrack(
+        V3D{0, 0, -1}, V3D{0, 0, 1} /*along z*/); // Passes through lower edge
+    TS_ASSERT_EQUALS(mesh.interceptSurface(edgeTargetTrack), 1);
+    TS_ASSERT_EQUALS(edgeTargetTrack.count(), 1);
   }
 
   void test_equals() {

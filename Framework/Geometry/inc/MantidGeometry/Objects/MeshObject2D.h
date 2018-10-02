@@ -56,8 +56,6 @@ public:
 
   double volume() const override;
 
-  static bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
-                           const Kernel::V3D &b, const Kernel::V3D &c);
   static bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices);
 
   bool hasValidShape() const override;

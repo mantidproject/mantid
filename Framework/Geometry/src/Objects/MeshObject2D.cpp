@@ -97,60 +97,6 @@ const double MeshObject2D::MinThickness = 0.001;
 const std::string MeshObject2D::Id = "MeshObject2D";
 
 /**
- * @brief isOnTriangle
- * @param point : point to test
- * @param a : first vertex of triangle
- * @param b : second vertex of triangle
- * @param c : thrid vertex of triangle
- * @return True only point if is on triangle
- */
-bool MeshObject2D::isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
-                                const Kernel::V3D &b, const Kernel::V3D &c) {
-
-  // p = w*p0 + u*p1 + v*p2, where numbered p refers to vertices of triangle
-  // w+u+v == 1, so w = 1-u-v
-  // p = (1-u-v)p0 + u*p1 + v*p2, rearranging ...
-  // p = u(p1 - p0) + v(p2 - p0) + p0
-  // in change of basis, barycentric coordinates p = p0 + u*v0 + v*v1. v0 and
-  // v1 are basis vectors. v2 = (p - p0)
-  // rewrite as v2 = u*v0 + v*v1
-  // i) v2.v0 = u*v0.v0 + v*v1.v0
-  // ii) v2.v1 = u*v0.v1 + v*v1.v1
-  // solve for u, v and check u and v >= 0 and u+v <=1
-
-  // TODO see MeshObject::rayIntersectsTriangle and compare!
-
-  auto v0 = c - a;
-  auto v1 = b - a;
-  auto v2 = point - a;
-
-  // Compute dot products
-  auto dot00 = v0.scalar_prod(v0);
-  auto dot01 = v0.scalar_prod(v1);
-  auto dot02 = v0.scalar_prod(v2);
-  auto dot11 = v1.scalar_prod(v1);
-  auto dot12 = v1.scalar_prod(v2);
-
-  /* in matrix form
-   M = v0.v0 v1.v0
-       v0.v1 v1.v1
-   U = u
-       v
-   R = v2.v0
-       v2.v1
-   U = R*(M^-1)
-   */
-
-  // Compute barycentric coordinates
-  auto invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-  auto u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-  auto v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-  // Check if point is in or on triangle
-  return (u >= 0) && (v >= 0) && (u + v <= 1);
-}
-
-/**
  * Estalish if points are coplanar.
  * @param vertices : All vertices to consider
  * @return : Return True only if all coplanar
@@ -240,8 +186,9 @@ bool MeshObject2D::isValid(const Kernel::V3D &point) const {
   static const double tolerance = 1e-9;
   if (distanceToPlane(point) < tolerance) {
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
-      if (isOnTriangle(point, m_vertices[i], m_vertices[i + 1],
-                       m_vertices[i + 2]))
+
+      if (MeshObjectCommon::isOnTriangle(point, m_vertices[i],
+                                         m_vertices[i + 1], m_vertices[i + 2]))
         return true;
     }
   }
@@ -271,14 +218,16 @@ int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
              m_planeParameters.p0.scalar_prod(norm)) /
            ut.direction().scalar_prod(norm);
 
-  // Intersects infinite plane
+  // Intersects infinite plane. No point evaluating individual segements if this
+  // fails
   if (t >= 0) {
-    auto pIntersects = ut.startPoint() + ut.direction();
+    Kernel::V3D intersection;
+    int entryExit;
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
-      // Need to know that this corresponds to a finite segment
-      if (isOnTriangle(pIntersects, m_vertices[i], m_vertices[i + 1],
-                       m_vertices[i + 2])) {
-        ut.addPoint(-1 /*HACK as exit*/, pIntersects, *this);
+      if (MeshObjectCommon::rayIntersectsTriangle(
+              ut.startPoint(), ut.direction(), m_vertices[i], m_vertices[i + 1],
+              m_vertices[i + 2], intersection, entryExit)) {
+        ut.addPoint(entryExit, intersection, *this);
         ut.buildLink();
         // All vertices on plane. So only one triangle intersection possible
         break;

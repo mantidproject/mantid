@@ -44,6 +44,8 @@ double solidAngle(const Kernel::V3D &observer,
                   const std::vector<Kernel::V3D> &vertices,
                   const Kernel::V3D scaleFactor);
 
+bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &v1,
+                  const Kernel::V3D &v2, const Kernel::V3D &v3);
 bool rayIntersectsTriangle(const Kernel::V3D &start,
                            const Kernel::V3D &direction, const Kernel::V3D &v1,
                            const Kernel::V3D &v2, const Kernel::V3D &v3,

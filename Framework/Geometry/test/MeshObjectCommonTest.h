@@ -122,6 +122,27 @@ public:
         entryExitFlag);
     TS_ASSERT(!doesIntersect);
   }
+  void test_isOnTriangle() {
+    auto p1 = V3D{-1, -1, 0};
+    auto p2 = V3D{1, -1, 0};
+    auto p3 = V3D{0, 1, 0};
+    TS_ASSERT(MeshObjectCommon::isOnTriangle(V3D{0, 0, 0}, p1, p2, p3));
+    TS_ASSERT(MeshObjectCommon::isOnTriangle(p1, p1, p2, p3));
+    TS_ASSERT(MeshObjectCommon::isOnTriangle(p2, p1, p2, p3));
+    TS_ASSERT(MeshObjectCommon::isOnTriangle(p3, p1, p2, p3));
+    TS_ASSERT(
+        !MeshObjectCommon::isOnTriangle(p1 - V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(
+        !MeshObjectCommon::isOnTriangle(p1 - V3D(0, 0.0001, 0), p1, p2, p3));
+    TS_ASSERT(
+        !MeshObjectCommon::isOnTriangle(p2 + V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(
+        !MeshObjectCommon::isOnTriangle(p2 - V3D(0, 0.0001, 0), p1, p2, p3));
+    TS_ASSERT(
+        !MeshObjectCommon::isOnTriangle(p3 + V3D(0.0001, 0, 0), p1, p2, p3));
+    TS_ASSERT(
+        !MeshObjectCommon::isOnTriangle(p3 + V3D(0, 0.0001, 0), p1, p2, p3));
+  }
 };
 
 #endif /* MANTID_GEOMETRY_MESHOBJECTCOMMONTEST_H_ */

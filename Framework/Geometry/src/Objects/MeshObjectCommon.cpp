@@ -116,6 +116,58 @@ double solidAngle(const Kernel::V3D &observer,
 }
 
 /**
+ * @brief isOnTriangle
+ * @param point : point to test
+ * @param v1 : first vertex of triangle
+ * @param v2 : second vertex of triangle
+ * @param v3 : thrid vertex of triangle
+ * @return True only point if is on triangle
+ */
+bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &v1,
+                  const Kernel::V3D &v2, const Kernel::V3D &v3) {
+
+  // p = w*p0 + u*p1 + v*p2, where numbered p refers to vertices of triangle
+  // w+u+v == 1, so w = 1-u-v
+  // p = (1-u-v)p0 + u*p1 + v*p2, rearranging ...
+  // p = u(p1 - p0) + v(p2 - p0) + p0
+  // in change of basis, barycentric coordinates p = p0 + u*e0 + v*e1. e0 and
+  // e1 are basis vectors. e2 = (p - p0)
+  // rewrite as e2 = u*e0 + v*e1
+  // i) e2.e0 = u*e0.e0 + v*e1.e0
+  // ii) e2.e1 = u*e0.e1 + v*e1.e1
+  // solve for u, v and check u and v >= 0 and u+v <=1
+
+  auto e0 = v3 - v1;
+  auto e1 = v2 - v1;
+  auto e2 = point - v1;
+
+  // Compute dot products
+  auto dot00 = e0.scalar_prod(e0);
+  auto dot01 = e0.scalar_prod(e1);
+  auto dot02 = e0.scalar_prod(e2);
+  auto dot11 = e1.scalar_prod(e1);
+  auto dot12 = e1.scalar_prod(e2);
+
+  /* in matrix form
+   M = e0.e0 e1.e0
+       e0.e1 e1.e1
+   U = u
+       v
+   R = e2.e0
+       e2.e1
+   U = R*(M^-1)
+   */
+
+  // Compute barycentric coordinates
+  auto invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+  auto u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+  auto v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+  // Check if point is in or on triangle
+  return (u >= 0) && (v >= 0) && (u + v <= 1);
+}
+
+/**
  * Get intersection points and their in out directions on the given ray
  * @param start :: Start point of ray
  * @param direction :: Direction of ray

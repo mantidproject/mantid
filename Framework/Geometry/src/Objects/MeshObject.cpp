@@ -183,89 +183,14 @@ void MeshObject::getIntersections(const Kernel::V3D &start,
   V3D vertex1, vertex2, vertex3, intersection;
   int entryExit;
   for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
-    if (rayIntersectsTriangle(start, direction, vertex1, vertex2, vertex3,
-                              intersection, entryExit)) {
+    if (MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1,
+                                                vertex2, vertex3, intersection,
+                                                entryExit)) {
       intersectionPoints.push_back(intersection);
       entryExitFlags.push_back(entryExit);
     }
   }
   // still need to deal with edge cases
-}
-
-/**
- * Get intersection points and their in out directions on the given ray
- * @param start :: Start point of ray
- * @param direction :: Direction of ray
- * @param v1 :: First vertex of triangle
- * @param v2 :: Second vertex of triangle
- * @param v3 :: Third vertex of triangle
- * @param intersection :: Intersection point
- * @param entryExit :: 1 if intersection is entry, -1 if exit, 0 if no
- * intersection
- * @returns true if there is an intersection
- */
-bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
-                                       const Kernel::V3D &direction,
-                                       const V3D &v1, const V3D &v2,
-                                       const V3D &v3, V3D &intersection,
-                                       int &entryExit) const {
-  // Implements Möller–Trumbore intersection algorithm
-
-  // Eq line x = x0 + tV
-  //
-  // p = w*p0 + u*p1 + v*p2, where numbered p refers to vertices of triangle
-  // w+u+v == 1, so w = 1-u-v
-  // p = (1-u-v)p0 + u*p1 + v*p2, rearranging ...
-  // p = u(p1 - p0) + v(p2 - p0) + p0
-  // in change of basis, barycentric coordinates p = p0 + u*v0 + v*v1. v0 and
-  // v1 are basis vectors.
-
-  // For line to pass through triangle...
-  // (x0 + tV) = u(p1 - p0) + v(p2 - p0) + p0, yields
-  // (x0 - p0) = -tV + u(p1 - p0) + v(p2 - p0)
-
-  // rest is just to solve for u, v, t and check u and v are both >= 0 and <= 1
-  // and u+v <=1
-
-  entryExit = 0; // Neither in or out till specified otherwise
-  auto edge1 = v2 - v1;
-  auto edge2 = v3 - v1;
-  auto h = direction.cross_prod(edge2);
-  auto a = edge1.scalar_prod(h);
-
-  const double EPSILON = 0.0000001 * edge1.norm();
-  if (a > -EPSILON && a < EPSILON)
-    return false; // Ray in or parallel to plane of triangle
-  auto f = 1 / a;
-  auto s = start - v1;
-  // Barycentric coordinate offset u
-  auto u = f * (s.scalar_prod(h));
-  if (u < 0.0 || u > 1.0)
-    return false; // Intersection with plane outside triangle
-  auto q = s.cross_prod(edge1);
-  // Barycentric coordinate offset v
-  auto v = f * direction.scalar_prod(q);
-  if (v < 0.0 || u + v > 1.0)
-    return false; // Intersection with plane outside triangle
-
-  // At this stage we can compute t to find out where the intersection point is
-  // on the line.
-  auto t = f * edge2.scalar_prod(q);
-  if (t >= -EPSILON) // ray intersection
-  {
-    intersection = start + direction * t;
-
-    // determine entry exit assuming anticlockwise triangle view from outside
-    V3D normalDirection = edge1.cross_prod(edge2);
-    if (normalDirection.scalar_prod(direction) > 0.0) {
-      entryExit = -1; // exit
-    } else {
-      entryExit = 1; // entry
-    }
-    return true;
-  }
-  // Here the intersection occurs on the line of the ray behind the ray.
-  return false;
 }
 
 /*
