@@ -1050,7 +1050,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
 }
 
 void ReflectometryReductionOneAuto2::applyFloodCorrection(
-    MatrixWorkspace_sptr flood, std::string const &prop) {
+    MatrixWorkspace_sptr const &flood, std::string const &prop) {
   MatrixWorkspace_sptr ws = getProperty(prop);
   auto alg = createChildAlgorithm("ApplyFloodWorkspace");
   alg->initialize();

@@ -741,14 +741,17 @@ template <> MANTID_KERNEL_DLL std::string toString(const UnitLabel &value) {
   return value;
 }
 
+/// Template overload for a vector of strings.
+/// @param value :: A value to convert to a string.
+/// @return :: A string with comma separated items of the value vector.
 template <>
 MANTID_KERNEL_DLL std::string toString(const std::vector<std::string> &value) {
   if (value.empty()) {
     return "";
   }
   std::ostringstream mess;
-  auto it = value.begin();
-  auto last = value.end();
+  auto it = value.cbegin();
+  const auto last = value.cend();
   mess << *it;
   ++it;
   for (; it != last; ++it) {
