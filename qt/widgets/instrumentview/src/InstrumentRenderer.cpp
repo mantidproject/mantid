@@ -176,6 +176,7 @@ void InstrumentRenderer::drawGridBank(size_t bankIndex, bool picking) {
   if (m_isUsingLayers) { // Render single layer
     tex.uploadTextures(picking);
     BankRenderingHelpers::renderGridBankLayer(compInfo, bankIndex, m_layer);
+    BankRenderingHelpers::renderGridBankOutline(compInfo, bankIndex);
   } else { // Render 6 faces representing grid box
     tex.uploadTextures(picking, detail::GridTextureFace::Front);
     BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,

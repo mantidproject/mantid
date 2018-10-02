@@ -142,6 +142,20 @@ void addVertex(const V3D &pos) {
              static_cast<GLfloat>(pos.Z()));
 }
 
+void drawGridOutlineFace(const Corners &corners, const V3D &basePos,
+                         const V3D &bottomLeftOffset,
+                         const V3D &bottomRightOffset,
+                         const V3D &topRightOffset, const V3D &topLeftOffset) {
+  auto vert = corners.bottomLeft() - basePos;
+  addVertex(vert + bottomLeftOffset);
+  vert = corners.bottomRight() - basePos;
+  addVertex(vert + bottomRightOffset);
+  vert = corners.topRight() - basePos;
+  addVertex(vert + topRightOffset);
+  vert = corners.topLeft() - basePos;
+  addVertex(vert + topLeftOffset);
+}
+
 void setBankNormal(const V3D &pos1, const V3D &pos2, const V3D &basePos) {
   // Set the bank normal to facilitate lighting effects
   auto vec1 = pos1 - basePos;
@@ -239,6 +253,67 @@ std::tuple<double, double, double> findSteps(const std::vector<V3D> &points) {
   return std::tuple<double, double, double>(xstep, ystep, zstep);
 }
 
+std::tuple<double, double, double>
+findGridBankSteps(const Mantid::Geometry::ComponentInfo &compInfo,
+                  size_t index) {
+  auto layers = compInfo.children(index);
+  auto firstLayerIndex = layers.back();
+  auto bank = compInfo.quadrilateralComponent(firstLayerIndex);
+
+  // find the shape of a detector in the bank.
+  const auto &detShape = compInfo.shape(bank.bottomLeft);
+  const auto &shapeInfo = detShape.getGeometryHandler()->shapeInfo();
+  return findSteps(shapeInfo.points());
+}
+
+std::tuple<V3D, V3D, V3D, V3D>
+getGridFaceOffsets(const Mantid::Geometry::ComponentInfo &compInfo,
+                   size_t bankIndex, GridTextureFace face) {
+  auto steps = findGridBankSteps(compInfo, bankIndex);
+  auto xstep = std::get<0>(steps);
+  auto ystep = std::get<1>(steps);
+  auto zstep = std::get<2>(steps);
+
+  switch (face) {
+  case GridTextureFace::Front:
+    return std::tuple<V3D, V3D, V3D, V3D>{
+        V3D((xstep * -0.5), (ystep * -0.5), (zstep * 0.5)),
+        V3D((xstep * 0.5), (ystep * -0.5), (zstep * 0.5)),
+        V3D((xstep * 0.5), (ystep * 0.5), (zstep * 0.5)),
+        V3D((xstep * -0.5), (ystep * 0.5), (zstep * 0.5))};
+  case GridTextureFace::Back:
+    return std::tuple<V3D, V3D, V3D, V3D>{
+        V3D((xstep * -0.5), (ystep * -0.5), (zstep * -0.5)),
+        V3D((xstep * 0.5), (ystep * -0.5), (zstep * -0.5)),
+        V3D((xstep * 0.5), (ystep * 0.5), (zstep * -0.5)),
+        V3D((xstep * -0.5), (ystep * 0.5), (zstep * -0.5))};
+  case GridTextureFace::Top:
+    return std::tuple<V3D, V3D, V3D, V3D>{
+        V3D((xstep * -0.5), (ystep * +0.5), (zstep * 0.5)),
+        V3D((xstep * 0.5), (ystep * +0.5), (zstep * 0.5)),
+        V3D((xstep * 0.5), (ystep * +0.5), (zstep * -0.5)),
+        V3D((xstep * -0.5), (ystep * +0.5), (zstep * -0.5))};
+  case GridTextureFace::Bottom:
+    return std::tuple<V3D, V3D, V3D, V3D>{
+        V3D((xstep * -0.5), (ystep * -0.5), (zstep * 0.5)),
+        V3D((xstep * 0.5), (ystep * -0.5), (zstep * 0.5)),
+        V3D((xstep * 0.5), (ystep * -0.5), (zstep * -0.5)),
+        V3D((xstep * -0.5), (ystep * -0.5), (zstep * -0.5))};
+  case GridTextureFace::Left:
+    return std::tuple<V3D, V3D, V3D, V3D>{
+        V3D((xstep * -0.5), (ystep * -0.5), (zstep * -0.5)),
+        V3D((xstep * -0.5), (ystep * -0.5), (zstep * 0.5)),
+        V3D((xstep * -0.5), (ystep * 0.5), (zstep * 0.5)),
+        V3D((xstep * -0.5), (ystep * 0.5), (zstep * -0.5))};
+  case GridTextureFace::Right:
+    return std::tuple<V3D, V3D, V3D, V3D>{
+        V3D((xstep * 0.5), (ystep * -0.5), (zstep * -0.5)),
+        V3D((xstep * 0.5), (ystep * -0.5), (zstep * 0.5)),
+        V3D((xstep * 0.5), (ystep * 0.5), (zstep * 0.5)),
+        V3D((xstep * 0.5), (ystep * 0.5), (zstep * -0.5))};
+  }
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -269,6 +344,48 @@ void renderGridBankLayer(const Mantid::Geometry::ComponentInfo &compInfo,
                   baseCorner.bottomLeft());
 }
 
+void renderGridBankOutline(const Mantid::Geometry::ComponentInfo &compInfo,
+                           size_t index) {
+  auto baseCorner = findGridCorners(compInfo, index, GridTextureFace::Front);
+  auto basePos = baseCorner.bottomLeft();
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glBegin(GL_QUADS);
+  glColor3f(1.0, 1.0, 1.0); // draw white outline
+
+  // front
+  auto offsets = getGridFaceOffsets(compInfo, index, GridTextureFace::Front);
+  drawGridOutlineFace(baseCorner, basePos, std::get<0>(offsets),
+                      std::get<1>(offsets), std::get<2>(offsets),
+                      std::get<3>(offsets));
+  // Back
+  offsets = getGridFaceOffsets(compInfo, index, GridTextureFace::Back);
+  drawGridOutlineFace(findGridCorners(compInfo, index, GridTextureFace::Back),
+                      basePos, std::get<0>(offsets), std::get<1>(offsets),
+                      std::get<2>(offsets), std::get<3>(offsets));
+  // Top
+  offsets = getGridFaceOffsets(compInfo, index, GridTextureFace::Top);
+  drawGridOutlineFace(findGridCorners(compInfo, index, GridTextureFace::Top),
+                      basePos, std::get<0>(offsets), std::get<1>(offsets),
+                      std::get<2>(offsets), std::get<3>(offsets));
+  // Bottom
+  offsets = getGridFaceOffsets(compInfo, index, GridTextureFace::Bottom);
+  drawGridOutlineFace(findGridCorners(compInfo, index, GridTextureFace::Bottom),
+                      basePos, std::get<0>(offsets), std::get<1>(offsets),
+                      std::get<2>(offsets), std::get<3>(offsets));
+  // Left
+  offsets = getGridFaceOffsets(compInfo, index, GridTextureFace::Left);
+  drawGridOutlineFace(findGridCorners(compInfo, index, GridTextureFace::Left),
+                      basePos, std::get<0>(offsets), std::get<1>(offsets),
+                      std::get<2>(offsets), std::get<3>(offsets));
+  // Right
+  offsets = getGridFaceOffsets(compInfo, index, GridTextureFace::Right);
+  drawGridOutlineFace(findGridCorners(compInfo, index, GridTextureFace::Right),
+                      basePos, std::get<0>(offsets), std::get<1>(offsets),
+                      std::get<2>(offsets), std::get<3>(offsets));
+  glEnd();
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
 void renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
                         size_t index, GridTextureFace gridFace) {
   auto baseCorner = findGridCorners(compInfo, index, GridTextureFace::Front);
@@ -276,10 +393,7 @@ void renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
   auto layers = compInfo.children(index);
   auto firstLayerIndex = layers.back();
   auto bank = compInfo.quadrilateralComponent(firstLayerIndex);
-  // find the shape of a detector in the bank.
-  const auto &detShape = compInfo.shape(bank.bottomLeft);
-  const auto &shapeInfo = detShape.getGeometryHandler()->shapeInfo();
-  auto steps = findSteps(shapeInfo.points());
+  auto steps = findGridBankSteps(compInfo, index);
   auto xstep = std::get<0>(steps);
   auto ystep = std::get<1>(steps);
   auto zstep = std::get<2>(steps);
@@ -288,52 +402,37 @@ void renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
   auto basePos = baseCorner.bottomLeft();
   auto nZ = layers.size();
 
+  auto offsets = getGridFaceOffsets(compInfo, index, gridFace);
   switch (gridFace) {
   case GridTextureFace::Front:
-    render2DTexture(corners, bank.nX, bank.nY,
-                    V3D((xstep * -0.5), (ystep * -0.5), (zstep * 0.5)),
-                    V3D((xstep * 0.5), (ystep * -0.5), (zstep * 0.5)),
-                    V3D((xstep * 0.5), (ystep * 0.5), (zstep * 0.5)),
-                    V3D((xstep * -0.5), (ystep * 0.5), (zstep * 0.5)), basePos);
+    render2DTexture(corners, bank.nX, bank.nY, std::get<0>(offsets),
+                    std::get<1>(offsets), std::get<2>(offsets),
+                    std::get<3>(offsets), basePos);
     break;
   case GridTextureFace::Back:
-    render2DTexture(corners, bank.nX, bank.nY,
-                    V3D((xstep * -0.5), (ystep * -0.5), (zstep * -0.5)),
-                    V3D((xstep * 0.5), (ystep * -0.5), (zstep * -0.5)),
-                    V3D((xstep * 0.5), (ystep * 0.5), (zstep * -0.5)),
-                    V3D((xstep * -0.5), (ystep * 0.5), (zstep * -0.5)),
-                    basePos);
+    render2DTexture(corners, bank.nX, bank.nY, std::get<0>(offsets),
+                    std::get<1>(offsets), std::get<2>(offsets),
+                    std::get<3>(offsets), basePos);
     break;
   case GridTextureFace::Left:
-    render2DTexture(corners, nZ, bank.nY,
-                    V3D((xstep * -0.5), (ystep * -0.5), (zstep * -0.5)),
-                    V3D((xstep * -0.5), (ystep * -0.5), (zstep * 0.5)),
-                    V3D((xstep * -0.5), (ystep * 0.5), (zstep * 0.5)),
-                    V3D((xstep * -0.5), (ystep * 0.5), (zstep * -0.5)),
-                    basePos);
+    render2DTexture(corners, nZ, bank.nY, std::get<0>(offsets),
+                    std::get<1>(offsets), std::get<2>(offsets),
+                    std::get<3>(offsets), basePos);
     break;
   case GridTextureFace::Right:
-    render2DTexture(corners, nZ, bank.nY,
-                    V3D((xstep * 0.5), (ystep * -0.5), (zstep * -0.5)),
-                    V3D((xstep * 0.5), (ystep * -0.5), (zstep * 0.5)),
-                    V3D((xstep * 0.5), (ystep * 0.5), (zstep * 0.5)),
-                    V3D((xstep * 0.5), (ystep * 0.5), (zstep * -0.5)), basePos);
+    render2DTexture(corners, nZ, bank.nY, std::get<0>(offsets),
+                    std::get<1>(offsets), std::get<2>(offsets),
+                    std::get<3>(offsets), basePos);
     break;
   case GridTextureFace::Top:
-    render2DTexture(corners, bank.nX, nZ,
-                    V3D((xstep * -0.5), (ystep * +0.5), (zstep * 0.5)),
-                    V3D((xstep * 0.5), (ystep * +0.5), (zstep * 0.5)),
-                    V3D((xstep * 0.5), (ystep * +0.5), (zstep * -0.5)),
-                    V3D((xstep * -0.5), (ystep * +0.5), (zstep * -0.5)),
-                    basePos);
+    render2DTexture(corners, bank.nX, nZ, std::get<0>(offsets),
+                    std::get<1>(offsets), std::get<2>(offsets),
+                    std::get<3>(offsets), basePos);
     break;
   case GridTextureFace::Bottom:
-    render2DTexture(corners, bank.nX, nZ,
-                    V3D((xstep * -0.5), (ystep * -0.5), (zstep * 0.5)),
-                    V3D((xstep * 0.5), (ystep * -0.5), (zstep * 0.5)),
-                    V3D((xstep * 0.5), (ystep * -0.5), (zstep * -0.5)),
-                    V3D((xstep * -0.5), (ystep * -0.5), (zstep * -0.5)),
-                    basePos);
+    render2DTexture(corners, bank.nX, nZ, std::get<0>(offsets),
+                    std::get<1>(offsets), std::get<2>(offsets),
+                    std::get<3>(offsets), basePos);
     break;
   }
 }

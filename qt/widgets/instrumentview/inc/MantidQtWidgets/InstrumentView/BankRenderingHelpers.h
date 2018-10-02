@@ -27,6 +27,10 @@ renderGridBankLayer(const Mantid::Geometry::ComponentInfo &compInfo,
                     size_t index, size_t layer);
 
 EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
+renderGridBankOutline(const Mantid::Geometry::ComponentInfo &compInfo,
+                      size_t index);
+
+EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
 renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
                    size_t index, detail::GridTextureFace gridFace);
 
