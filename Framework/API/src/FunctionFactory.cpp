@@ -283,6 +283,8 @@ void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
         } else {
           addConstraint(fun, constraint);
         }
+      } else {
+        addConstraint(fun, constraint);
       }
     }
   } else { // There was a single constraint given, cannot contain a penalty
