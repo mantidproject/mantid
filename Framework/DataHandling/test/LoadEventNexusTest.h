@@ -196,16 +196,24 @@ private:
 
 public:
 #ifndef _WIN32
+  bool windows = true;
+#else
+  bool windows = false;
+#endif // _WIN32
   void test_multiprocess_loader_precount() {
-    run_multiprocess_load("SANS2D00022048.nxs", true);
-    run_multiprocess_load("LARMOR00003368.nxs", true);
+    if(!windows) {
+      run_multiprocess_load("SANS2D00022048.nxs", true);
+      run_multiprocess_load("LARMOR00003368.nxs", true);
+    }
   }
 
   void test_multiprocess_loader_producer_consumer() {
-    run_multiprocess_load("SANS2D00022048.nxs", false);
-    run_multiprocess_load("LARMOR00003368.nxs", false);
+    if(!windows) {
+      run_multiprocess_load("SANS2D00022048.nxs", false);
+      run_multiprocess_load("LARMOR00003368.nxs", false);
+    }
   }
-#endif // _WIN32
+
   void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
 
   void test_Normal_vs_Precount() {
