@@ -306,7 +306,13 @@ void MultiProcessEventLoader::GroupLoader<
   });
 
   auto processQueue = [&]() {
-    while (!queue.empty()) {
+    std::size_t qsz{0};
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      qsz = queue.size();
+    }
+
+    while (qsz > 0) {
       std::unique_ptr<Task> task;
       {
         std::lock_guard<std::mutex> lock(mutex);
@@ -316,6 +322,7 @@ void MultiProcessEventLoader::GroupLoader<
       for (unsigned i = 0; i < task->eventId.size(); ++i)
         pixels.at(task->eventId[i])
             .emplace_back(task->eventTimeOffset[i], task->partitioner->next());
+      --qsz;
     }
   };
 
