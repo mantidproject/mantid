@@ -30,8 +30,8 @@ regex_other_style = re.compile("^.*?Copyright\s.*?(\d{4}).*?$",
 #lines to skip when determining where to put the copyright statement (they must be from the start of the file)
 regex_lines_to_skip = [re.compile("^#!.*?$[\s]*",re.MULTILINE)]
 
-#Finds empty C++ comments
-regex_empty_comments = re.compile("\/[\/\s\*]{2,}\/+",re.MULTILINE)
+#Finds empty C++ multiline comments
+regex_empty_comments = re.compile("(\/\*)[\/\s\*]*?(\*\/)",re.MULTILINE)
 
 #Directories to ignore - any pathss including these strings will be ignored, so it will cascade
 directories_to_ignore = ["external","CMake","GSoapGenerated"]
