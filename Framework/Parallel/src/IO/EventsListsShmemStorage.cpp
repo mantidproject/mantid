@@ -28,7 +28,6 @@ EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
   }
 }
 
-
 /// Reserves memory for ToF events in given pixel and chunk
 void EventsListsShmemStorage::reserve(std::size_t chunkN, std::size_t pixelN,
                                       std::size_t size) {
