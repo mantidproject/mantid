@@ -522,10 +522,12 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
         IFunction_sptr ifun = fitAlgorithm->getProperty("Function");
         if (i == 0) {
-          out << std::setw(20) << "spectrum" << " ";
+          out << std::setw(20) << "spectrum"
+              << " ";
           for (size_t j = 0; j < ifun->nParams(); ++j)
             out << std::setw(20) << ifun->parameterName(j) << " ";
-          out << std::setw(20) << "chi2" << " ";
+          out << std::setw(20) << "chi2"
+              << " ";
           out << "\n";
         }
         out << std::setw(20) << i << " ";
@@ -534,7 +536,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
               << ifun->getParameter(j) << " ";
         }
         double chi2 = fitAlgorithm->getProperty("OutputChi2overDoF");
-        out << std::setw(20) << std::fixed << std::setprecision(10) << chi2 << "\n";
+        out << std::setw(20) << std::fixed << std::setprecision(10) << chi2
+            << "\n";
 
         boost::shared_ptr<const CompositeFunction> fun =
             boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
