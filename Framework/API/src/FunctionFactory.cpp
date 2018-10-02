@@ -297,7 +297,7 @@ void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
  * @param fun :: The function
  * @param expr :: The constraint expression.
  */
-void FunctionFactoryImpl::addConstraint(IFunction_sptr fun,
+void FunctionFactoryImpl::addConstraint(boost::shared_ptr<IFunction> fun,
                                         const Expression &expr) const {
   auto c = std::unique_ptr<IConstraint>(
       ConstraintFactory::Instance().createInitialized(fun.get(), expr));
@@ -311,7 +311,7 @@ void FunctionFactoryImpl::addConstraint(IFunction_sptr fun,
  * @param constraint_expr :: The constraint expression.
  * @param penalty_expr :: The penalty expression.
  */
-void FunctionFactoryImpl::addConstraint(IFunction_sptr fun,
+void FunctionFactoryImpl::addConstraint(boost::shared_ptr<IFunction> fun,
                                         const Expression &constraint_expr,
                                         const Expression &penalty_expr) const {
   auto c = std::unique_ptr<IConstraint>(
