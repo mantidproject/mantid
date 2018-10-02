@@ -111,6 +111,8 @@ void JumpFit::setSaveResultEnabled(bool enabled) {
 void JumpFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
   setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
   setFitSingleSpectrumEnabled(!running);
 }
 

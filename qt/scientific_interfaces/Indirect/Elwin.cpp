@@ -526,6 +526,8 @@ void Elwin::setSaveResultEnabled(bool enabled) {
 void Elwin::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
 }
 
 void Elwin::setPlotResultIsPlotting(bool plotting) {
