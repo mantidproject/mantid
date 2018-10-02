@@ -930,25 +930,32 @@ private:
 class LoadEventNexusTestPerformance : public CxxTest::TestSuite {
 public:
 #ifndef _WIN32
+  bool windows = true;
+#else
+  bool windows = false;
+#endif // _WIN32
   void testMultiprocessLoadPrecount() {
-    LoadEventNexus loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
-    loader.setPropertyValue("OutputWorkspace", "ws");
-    loader.setPropertyValue("Loadtype", "multiprocess");
-    loader.setPropertyValue("Precount", std::to_string(true));
-    TS_ASSERT(loader.execute());
+    if (!windows) {
+      LoadEventNexus loader;
+      loader.initialize();
+      loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
+      loader.setPropertyValue("OutputWorkspace", "ws");
+      loader.setPropertyValue("Loadtype", "multiprocess");
+      loader.setPropertyValue("Precount", std::to_string(true));
+      TS_ASSERT(loader.execute());
+    }
   }
   void testMultiprocessLoadProducerConsumer() {
-    LoadEventNexus loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
-    loader.setPropertyValue("OutputWorkspace", "ws");
-    loader.setPropertyValue("Loadtype", "multiprocess");
-    loader.setPropertyValue("Precount", std::to_string(false));
-    TS_ASSERT(loader.execute());
+    if (!windows) {
+      LoadEventNexus loader;
+      loader.initialize();
+      loader.setPropertyValue("Filename", "SANS2D00022048.nxs");
+      loader.setPropertyValue("OutputWorkspace", "ws");
+      loader.setPropertyValue("Loadtype", "multiprocess");
+      loader.setPropertyValue("Precount", std::to_string(false));
+      TS_ASSERT(loader.execute());
+    }
   }
-#endif // _WIN32
   void testDefaultLoad() {
     LoadEventNexus loader;
     loader.initialize();
