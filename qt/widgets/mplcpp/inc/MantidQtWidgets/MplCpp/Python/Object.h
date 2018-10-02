@@ -17,6 +17,7 @@
  GNU General Public License for more details.
 */
 #include <boost/python/borrowed.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/object.hpp>
 #include <stdexcept>
 
@@ -27,6 +28,9 @@ namespace Python {
 
 // Alias for boost python object wrapper
 using Object = boost::python::object;
+
+// Alias for boost python dict wrapper
+using Dict = boost::python::dict;
 
 // Alias for handle wrapping a raw PyObject*
 template <typename T = PyObject> using Handle = boost::python::handle<T>;
