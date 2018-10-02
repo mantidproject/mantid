@@ -79,7 +79,6 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     # Tidy workspaces from Mantid
     common.remove_intermediate_workspace(input_workspace)
     common.remove_intermediate_workspace(aligned_ws)
-    print(("Remove " + str(focused_ws)))
     common.remove_intermediate_workspace(focused_ws)
     common.remove_intermediate_workspace(output_spectra)
 
@@ -172,7 +171,7 @@ def _test_splined_vanadium_exists(instrument, run_details):
 def _crop_spline_to_percent_of_max(spline, input_ws, output_workspace):
     spline_spectrum = spline.readY(0)
     y_val = numpy.amax(spline_spectrum)
-    y_val = y_val / 50
+    y_val = y_val / 100
     x_list = input_ws.readX(0)
     small_spline_indecies = numpy.nonzero(spline_spectrum > y_val)[0]
     x_max = x_list[small_spline_indecies[-1]]
