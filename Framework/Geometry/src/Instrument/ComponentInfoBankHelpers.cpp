@@ -10,7 +10,7 @@ namespace ComponentInfoBankHelpers {
 bool isDetectorFixedInBank(const ComponentInfo &compInfo,
                            const size_t detIndex) {
   auto parent = compInfo.parent(detIndex);
-  auto grandParent = compInfo.parent(detIndex);
+  auto grandParent = compInfo.parent(parent);
   auto grandParentType = compInfo.componentType(grandParent);
 
   if (compInfo.isDetector(detIndex) &&
