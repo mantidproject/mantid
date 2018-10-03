@@ -3,6 +3,16 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace {
+boost::optional<RangeInLambda> rangeOrNone(RangeInLambda &range,
+                                           bool bothOrNoneMustBeSet) {
+  if (range.unset() || !range.isValid(bothOrNoneMustBeSet))
+    return boost::none;
+  else
+    return range;
+}
+}
+
 InstrumentPresenter::InstrumentPresenter(IInstrumentView *view,
                                          Instrument instrument)
     : m_view(view), m_model(std::move(instrument)) {
@@ -18,34 +28,44 @@ void InstrumentPresenter::onReductionPaused() { m_view->enableAll(); }
 
 void InstrumentPresenter::onReductionResumed() { m_view->disableAll(); }
 
-RangeInLambda InstrumentPresenter::wavelengthRangeFromView() {
-  auto const range =
-      RangeInLambda(m_view->getLambdaMin(), m_view->getLambdaMax());
-  if (range.isValid(false))
+boost::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {
+  auto range = RangeInLambda(m_view->getLambdaMin(), m_view->getLambdaMax());
+  auto const bothOrNoneMustBeSet = false;
+
+  if (range.isValid(bothOrNoneMustBeSet))
     m_view->showLambdaRangeValid();
   else
     m_view->showLambdaRangeInvalid();
-  return range;
+
+  return rangeOrNone(range, bothOrNoneMustBeSet);
 }
 
-RangeInLambda InstrumentPresenter::monitorBackgroundRangeFromView() {
-  auto const range = RangeInLambda(m_view->getMonitorBackgroundMin(),
-                                   m_view->getMonitorBackgroundMax());
-  if (range.isValid(true))
+boost::optional<RangeInLambda>
+InstrumentPresenter::monitorBackgroundRangeFromView() {
+  auto range = RangeInLambda(m_view->getMonitorBackgroundMin(),
+                             m_view->getMonitorBackgroundMax());
+  auto const bothOrNoneMustBeSet = true;
+
+  if (range.isValid(bothOrNoneMustBeSet))
     m_view->showMonitorBackgroundRangeValid();
   else
     m_view->showMonitorBackgroundRangeInvalid();
-  return range;
+
+  return rangeOrNone(range, bothOrNoneMustBeSet);
 }
 
-RangeInLambda InstrumentPresenter::monitorIntegralRangeFromView() {
-  auto const range = RangeInLambda(m_view->getMonitorIntegralMin(),
-                                   m_view->getMonitorIntegralMax());
-  if (range.isValid(false))
+boost::optional<RangeInLambda>
+InstrumentPresenter::monitorIntegralRangeFromView() {
+  auto range = RangeInLambda(m_view->getMonitorIntegralMin(),
+                             m_view->getMonitorIntegralMax());
+  auto const bothOrNoneMustBeSet = false;
+
+  if (range.isValid(bothOrNoneMustBeSet))
     m_view->showMonitorIntegralRangeValid();
   else
     m_view->showMonitorIntegralRangeInvalid();
-  return range;
+
+  return rangeOrNone(range, bothOrNoneMustBeSet);
 }
 
 MonitorCorrections InstrumentPresenter::monitorCorrectionsFromView() {

@@ -25,10 +25,163 @@ public:
 
   InstrumentPresenterTest() : m_view() {}
 
-  bool verifyAndClear() {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-    return true;
+  void testSetValidWavelengthRange() {
+    auto const range = RangeInLambda(1.5, 14);
+    runTestForValidWavelengthRange(range, range);
   }
+
+  void testWavelengthRangeIsInvalidIfStartGreaterThanEnd() {
+    auto const range = RangeInLambda(7.5, 2);
+    runTestForInvalidWavelengthRange(range);
+  }
+
+  void testWavelengthRangeIsInvalidIfZeroLength() {
+    auto const range = RangeInLambda(7.5, 7.5);
+    runTestForInvalidWavelengthRange(range);
+  }
+
+  void testWavelengthRangeIsValidIfStartUnset() {
+    auto const range = RangeInLambda(0.0, 7.5);
+    runTestForValidWavelengthRange(range, range);
+  }
+
+  void testWavelengthRangeIsValidIfEndUnset() {
+    auto const range = RangeInLambda(7.5, 0.0);
+    runTestForValidWavelengthRange(range, range);
+  }
+
+  void testWavelengthRangeIsValidButNotUpdatedIfUnset() {
+    auto const range = RangeInLambda(0.0, 0.0);
+    runTestForValidWavelengthRange(range, boost::none);
+  }
+
+  void testIntegratedMonitorsToggled() {
+    auto presenter = makePresenter();
+    auto const integrate = !presenter.instrument().integratedMonitors();
+
+    EXPECT_CALL(m_view, getIntegrateMonitors()).WillOnce(Return(integrate));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.instrument().integratedMonitors(), integrate);
+    verifyAndClear();
+  }
+
+  void testSetMonitorIndex() {
+    auto presenter = makePresenter();
+    auto const monitorIndex = 3;
+
+    EXPECT_CALL(m_view, getMonitorIndex()).WillOnce(Return(monitorIndex));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.instrument().monitorIndex(), monitorIndex);
+    verifyAndClear();
+  }
+
+  void testSetValidMonitorIntegralRange() {
+    auto const range = RangeInLambda(3.4, 12.2);
+    runTestForValidMonitorIntegralRange(range, range);
+  }
+
+  void testMonitorIntegralRangeIsInvalidIfStartGreaterThanEnd() {
+    auto const range = RangeInLambda(7.5, 4);
+    runTestForInvalidMonitorIntegralRange(range);
+  }
+
+  void testMonitorIntegralRangeIsInvalidIfZeroLength() {
+    auto const range = RangeInLambda(7.5, 7.5);
+    runTestForInvalidMonitorIntegralRange(range);
+  }
+
+  void testMonitorIntegralRangeIsValidIfStartUnset() {
+    auto const range = RangeInLambda(0.0, 4.5);
+    runTestForValidMonitorIntegralRange(range, range);
+  }
+
+  void testMonitorIntegralRangeIsValidIfEndUnset() {
+    auto const range = RangeInLambda(4.5, 0.0);
+    runTestForValidMonitorIntegralRange(range, range);
+  }
+
+  void testMonitorIntegralRangeIsValidButNotUpdatedIfUnset() {
+    auto const range = RangeInLambda(0.0, 0.0);
+    runTestForValidMonitorIntegralRange(range, boost::none);
+  }
+
+  void testSetValidMonitorBackgroundRange() {
+    auto const range = RangeInLambda(2.0, 13);
+    runTestForValidMonitorBackgroundRange(range, range);
+  }
+
+  void testMonitorBackgroundRangeIsInvalidIfStartGreaterThanEnd() {
+    auto const range = RangeInLambda(3.5, 3.4);
+    runTestForInvalidMonitorBackgroundRange(range);
+  }
+
+  void testMonitorBackgroundRangeIsInvalidIfZeroLength() {
+    auto const range = RangeInLambda(2.0, 2.0);
+    runTestForInvalidMonitorBackgroundRange(range);
+  }
+
+  void testMonitorBackgroundRangeIsInvalidIfOnlyStartSet() {
+    auto const range = RangeInLambda(2.001, 0.0);
+    runTestForInvalidMonitorBackgroundRange(range);
+  }
+
+  void testMonitorBackgroundRangeIsInvalidIfOnlyEndSet() {
+    auto const range = RangeInLambda(0.0, 7.8);
+    runTestForInvalidMonitorBackgroundRange(range);
+  }
+
+  void testMonitorBackgroundRangeIsValidButNotUpdatedIfUnset() {
+    auto const range = RangeInLambda(0.0, 0.0);
+    runTestForValidMonitorBackgroundRange(range, boost::none);
+  }
+
+  void testCorrectDetectorsToggled() {
+    auto presenter = makePresenter();
+    auto const correctDetectors = !presenter.instrument().correctDetectors();
+
+    EXPECT_CALL(m_view, getCorrectDetectors())
+        .WillOnce(Return(correctDetectors));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.instrument().correctDetectors(),
+                     correctDetectors);
+    verifyAndClear();
+  }
+
+  void testSetDetectorCorrectionType() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getDetectorCorrectionType())
+        .WillOnce(Return("RotateAroundSample"));
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.instrument().detectorCorrectionType(),
+                     DetectorCorrectionType::RotateAroundSample);
+    verifyAndClear();
+  }
+
+  void testAllWidgetsAreEnabledWhenReductionPaused() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, enableAll()).Times(1);
+    presenter.onReductionPaused();
+
+    verifyAndClear();
+  }
+
+  void testAllWidgetsAreDisabledWhenReductionResumed() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, disableAll()).Times(1);
+    presenter.onReductionResumed();
+
+    verifyAndClear();
+  }
+
+private:
+  NiceMock<MockInstrumentView> m_view;
 
   Instrument makeModel() {
     auto wavelengthRange = RangeInLambda(0.0, 0.0);
@@ -43,165 +196,81 @@ public:
     return InstrumentPresenter(&m_view, makeModel());
   }
 
-  void testSetWavelengthRange() {
-    auto presenter = makePresenter();
-    auto const range = RangeInLambda(1.5, 14);
+  void verifyAndClear() {
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+  }
 
+  void
+  runTestForValidWavelengthRange(RangeInLambda const &range,
+                                 boost::optional<RangeInLambda> const &result) {
+    auto presenter = makePresenter();
     EXPECT_CALL(m_view, getLambdaMin()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getLambdaMax()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showLambdaRangeValid()).Times(1);
     presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(), range);
-    TS_ASSERT(presenter.instrument().isValid());
-    TS_ASSERT(verifyAndClear());
+    TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(), result);
+    verifyAndClear();
   }
 
-  void testSetWavelengthRangeInvalid() {
+  void runTestForInvalidWavelengthRange(RangeInLambda const &range) {
     auto presenter = makePresenter();
-    auto const range = RangeInLambda(7.5, 2);
-
     EXPECT_CALL(m_view, getLambdaMin()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getLambdaMax()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showLambdaRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(), range);
-    TS_ASSERT(!presenter.instrument().isValid());
-    TS_ASSERT(verifyAndClear());
+    TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(), boost::none);
+    verifyAndClear();
   }
 
-  void testIntegratedMonitorsToggled() {
+  void runTestForValidMonitorIntegralRange(
+      RangeInLambda const &range,
+      boost::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
-    auto const integrate = !presenter.instrument().integratedMonitors();
-
-    EXPECT_CALL(m_view, getIntegrateMonitors()).WillOnce(Return(integrate));
-    presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.instrument().integratedMonitors(), integrate);
-    TS_ASSERT(presenter.instrument().isValid());
-    TS_ASSERT(verifyAndClear());
-  }
-
-  void testSetMonitorIndex() {
-    auto presenter = makePresenter();
-    auto const monitorIndex = 3;
-
-    EXPECT_CALL(m_view, getMonitorIndex()).WillOnce(Return(monitorIndex));
-    presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.instrument().monitorIndex(), monitorIndex);
-    TS_ASSERT(presenter.instrument().isValid());
-    TS_ASSERT(verifyAndClear());
-  }
-
-  void testSetMonitorIntegralRange() {
-    auto presenter = makePresenter();
-    auto const range = RangeInLambda(3.4, 12.2);
-
     EXPECT_CALL(m_view, getMonitorIntegralMin()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getMonitorIntegralMax()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showMonitorIntegralRangeValid()).Times(1);
     presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(), range);
-    TS_ASSERT(presenter.instrument().isValid());
-    TS_ASSERT(verifyAndClear());
+    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(), result);
+    verifyAndClear();
   }
 
-  void testSetMonitorIntegralRangeInvalid() {
+  void runTestForInvalidMonitorIntegralRange(RangeInLambda const &range) {
     auto presenter = makePresenter();
-    auto const range = RangeInLambda(7, 4);
-
     EXPECT_CALL(m_view, getMonitorIntegralMin()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getMonitorIntegralMax()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showMonitorIntegralRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(), range);
-    TS_ASSERT(!presenter.instrument().isValid());
-    TS_ASSERT(verifyAndClear());
+    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(),
+                     boost::none);
+    verifyAndClear();
   }
 
-  void testSetMonitorBackgroundRange() {
+  void runTestForValidMonitorBackgroundRange(
+      RangeInLambda const &range,
+      boost::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
-    auto const range = RangeInLambda(2.0, 13);
-
     EXPECT_CALL(m_view, getMonitorBackgroundMin())
         .WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getMonitorBackgroundMax())
         .WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showMonitorBackgroundRangeValid()).Times(1);
     presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), range);
-    TS_ASSERT(presenter.instrument().isValid());
-    TS_ASSERT(verifyAndClear());
+    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), result);
+    verifyAndClear();
   }
 
-  void testSetMonitorBackgroundRangeInvalid() {
+  void runTestForInvalidMonitorBackgroundRange(RangeInLambda const &range) {
     auto presenter = makePresenter();
-    auto const range = RangeInLambda(2.001, 2.000);
-
     EXPECT_CALL(m_view, getMonitorBackgroundMin())
         .WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getMonitorBackgroundMax())
         .WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showMonitorBackgroundRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), range);
-    TS_ASSERT(!presenter.instrument().isValid());
-    TS_ASSERT(verifyAndClear());
+    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(),
+                     boost::none);
+    verifyAndClear();
   }
-
-  void testCorrectDetectorsToggled() {
-    auto presenter = makePresenter();
-    auto const correctDetectors = !presenter.instrument().correctDetectors();
-
-    EXPECT_CALL(m_view, getCorrectDetectors())
-        .WillOnce(Return(correctDetectors));
-    presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.instrument().correctDetectors(),
-                     correctDetectors);
-    TS_ASSERT(presenter.instrument().isValid());
-    TS_ASSERT(verifyAndClear());
-  }
-
-  void testSetDetectorCorrectionType() {
-    auto presenter = makePresenter();
-
-    EXPECT_CALL(m_view, getDetectorCorrectionType())
-        .WillOnce(Return("RotateAroundSample"));
-    presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.instrument().detectorCorrectionType(),
-                     DetectorCorrectionType::RotateAroundSample);
-    TS_ASSERT(presenter.instrument().isValid());
-    TS_ASSERT(verifyAndClear());
-  }
-
-  void testAllWidgetsAreEnabledWhenReductionPaused() {
-    auto presenter = makePresenter();
-
-    EXPECT_CALL(m_view, enableAll()).Times(1);
-    presenter.onReductionPaused();
-
-    TS_ASSERT(verifyAndClear());
-  }
-
-  void testAllWidgetsAreDisabledWhenReductionResumed() {
-    auto presenter = makePresenter();
-
-    EXPECT_CALL(m_view, disableAll()).Times(1);
-    presenter.onReductionResumed();
-
-    TS_ASSERT(verifyAndClear());
-  }
-
-protected:
-  NiceMock<MockInstrumentView> m_view;
 };
 
 #endif // MANTID_CUSTOMINTERFACES_INSTRUMENTPRESENTERTEST_H_

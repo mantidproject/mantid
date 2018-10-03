@@ -2,18 +2,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-Instrument::Instrument(RangeInLambda wavelengthRange,
+Instrument::Instrument(boost::optional<RangeInLambda> wavelengthRange,
                        MonitorCorrections monitorCorrections,
                        DetectorCorrections detectorCorrections)
     : m_wavelengthRange(wavelengthRange),
       m_monitorCorrections(monitorCorrections),
       m_detectorCorrections(detectorCorrections) {}
 
-bool Instrument::isValid() const {
-  return m_wavelengthRange.isValid(false) && m_monitorCorrections.isValid();
-}
-
-RangeInLambda const &Instrument::wavelengthRange() const {
+boost::optional<RangeInLambda> const &Instrument::wavelengthRange() const {
   return m_wavelengthRange;
 }
 
@@ -25,11 +21,11 @@ size_t Instrument::monitorIndex() const {
   return m_monitorCorrections.monitorIndex();
 }
 
-RangeInLambda Instrument::monitorIntegralRange() const {
+boost::optional<RangeInLambda> Instrument::monitorIntegralRange() const {
   return m_monitorCorrections.integralRange();
 }
 
-RangeInLambda Instrument::monitorBackgroundRange() const {
+boost::optional<RangeInLambda> Instrument::monitorBackgroundRange() const {
   return m_monitorCorrections.backgroundRange();
 }
 

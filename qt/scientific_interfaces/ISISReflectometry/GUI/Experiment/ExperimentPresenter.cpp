@@ -73,13 +73,17 @@ boost::optional<RangeInLambda>
 ExperimentPresenter::transmissionRunRangeFromView() {
   auto const range = RangeInLambda(m_view->getTransmissionStartOverlap(),
                                    m_view->getTransmissionEndOverlap());
-  if (range.isValid(false)) {
-    m_view->showTransmissionRangeValid();
-    return range;
-  }
+  auto const bothOrNoneMustBeSet = false;
 
-  m_view->showTransmissionRangeInvalid();
-  return boost::none;
+  if (range.isValid(bothOrNoneMustBeSet))
+    m_view->showTransmissionRangeValid();
+  else
+    m_view->showTransmissionRangeInvalid();
+
+  if (range.unset() || !range.isValid(bothOrNoneMustBeSet))
+    return boost::none;
+  else
+    return range;
 }
 
 std::map<std::string, std::string>

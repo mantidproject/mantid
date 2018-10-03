@@ -9,20 +9,19 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL MonitorCorrections {
 public:
   MonitorCorrections(size_t monitorIndex, bool integrate,
-                     RangeInLambda backgroundRange,
-                     RangeInLambda integralRange);
+                     boost::optional<RangeInLambda> backgroundRange,
+                     boost::optional<RangeInLambda> integralRange);
 
-  bool isValid() const;
   size_t monitorIndex() const;
   bool integrate() const;
-  RangeInLambda backgroundRange() const;
-  RangeInLambda integralRange() const;
+  boost::optional<RangeInLambda> backgroundRange() const;
+  boost::optional<RangeInLambda> integralRange() const;
 
 private:
   size_t m_monitorIndex;
   bool m_integrate;
-  RangeInLambda m_backgroundRange;
-  RangeInLambda m_integralRange;
+  boost::optional<RangeInLambda> m_backgroundRange;
+  boost::optional<RangeInLambda> m_integralRange;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

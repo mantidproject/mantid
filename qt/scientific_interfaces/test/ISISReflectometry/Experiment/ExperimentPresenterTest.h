@@ -183,37 +183,34 @@ public:
     verifyAndClear();
   }
 
-  void testSetTransmissionRunRange() {
-    auto presenter = makePresenter();
+  void testSetValidTransmissionRunRange() {
     RangeInLambda range(7.2, 10);
-
-    expectViewReturnsDefaultValues();
-    EXPECT_CALL(m_view, getTransmissionStartOverlap())
-        .WillOnce(Return(range.min()));
-    EXPECT_CALL(m_view, getTransmissionEndOverlap())
-        .WillOnce(Return(range.max()));
-    EXPECT_CALL(m_view, showTransmissionRangeValid()).Times(1);
-    presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), range);
-    verifyAndClear();
+    runTestForValidTransmissionRunRange(range, range);
   }
 
-  void testSetTransmissionRunRangeInvalid() {
-    auto presenter = makePresenter();
+  void testTransmissionRunRangeIsInvalidIfStartGreaterThanEnd() {
     RangeInLambda range(10.2, 7.1);
+    runTestForInvalidTransmissionRunRange(range);
+  }
 
-    expectViewReturnsDefaultValues();
-    EXPECT_CALL(m_view, getTransmissionStartOverlap())
-        .WillOnce(Return(range.min()));
-    EXPECT_CALL(m_view, getTransmissionEndOverlap())
-        .WillOnce(Return(range.max()));
-    EXPECT_CALL(m_view, showTransmissionRangeInvalid()).Times(1);
-    presenter.notifySettingsChanged();
+  void testTransmissionRunRangeIsInvalidIfZeroLength() {
+    RangeInLambda range(7.1, 7.1);
+    runTestForInvalidTransmissionRunRange(range);
+  }
 
-    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(),
-                     boost::none);
-    verifyAndClear();
+  void testTransmissionRunRangeIsValidIfStartUnset() {
+    RangeInLambda range(0.0, 7.1);
+    runTestForValidTransmissionRunRange(range, range);
+  }
+
+  void testTransmissionRunRangeIsValidIfEndUnset() {
+    RangeInLambda range(5, 0.0);
+    runTestForValidTransmissionRunRange(range, range);
+  }
+
+  void testTransmissionRunRangeIsValidButNotUpdatedIfUnset() {
+    RangeInLambda range(0.0, 0.0);
+    runTestForValidTransmissionRunRange(range, boost::none);
   }
 
   void testSetStitchOptions() {
@@ -389,6 +386,35 @@ private:
   PerThetaDefaults defaultsWithAngleAndTwoTrans() {
     return PerThetaDefaults(2.3, std::make_pair("13463", "13464"), boost::none,
                             boost::none, boost::none);
+  }
+
+  void runTestForValidTransmissionRunRange(
+      RangeInLambda const &range,
+      boost::optional<RangeInLambda> const &result) {
+    auto presenter = makePresenter();
+    expectViewReturnsDefaultValues();
+    EXPECT_CALL(m_view, getTransmissionStartOverlap())
+        .WillOnce(Return(range.min()));
+    EXPECT_CALL(m_view, getTransmissionEndOverlap())
+        .WillOnce(Return(range.max()));
+    EXPECT_CALL(m_view, showTransmissionRangeValid()).Times(1);
+    presenter.notifySettingsChanged();
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(), result);
+    verifyAndClear();
+  }
+
+  void runTestForInvalidTransmissionRunRange(RangeInLambda const &range) {
+    auto presenter = makePresenter();
+    expectViewReturnsDefaultValues();
+    EXPECT_CALL(m_view, getTransmissionStartOverlap())
+        .WillOnce(Return(range.min()));
+    EXPECT_CALL(m_view, getTransmissionEndOverlap())
+        .WillOnce(Return(range.max()));
+    EXPECT_CALL(m_view, showTransmissionRangeInvalid()).Times(1);
+    presenter.notifySettingsChanged();
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(),
+                     boost::none);
+    verifyAndClear();
   }
 };
 

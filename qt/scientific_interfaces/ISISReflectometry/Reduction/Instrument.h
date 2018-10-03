@@ -32,21 +32,20 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Instrument {
 public:
-  Instrument(RangeInLambda wavelengthRange,
+  Instrument(boost::optional<RangeInLambda> wavelengthRange,
              MonitorCorrections monitorCorrections,
              DetectorCorrections detectorCorrections);
 
-  bool isValid() const;
-  RangeInLambda const &wavelengthRange() const;
+  boost::optional<RangeInLambda> const &wavelengthRange() const;
   bool integratedMonitors() const;
   size_t monitorIndex() const;
-  RangeInLambda monitorIntegralRange() const;
-  RangeInLambda monitorBackgroundRange() const;
+  boost::optional<RangeInLambda> monitorIntegralRange() const;
+  boost::optional<RangeInLambda> monitorBackgroundRange() const;
   bool correctDetectors() const;
   DetectorCorrectionType detectorCorrectionType() const;
 
 private:
-  RangeInLambda m_wavelengthRange;
+  boost::optional<RangeInLambda> m_wavelengthRange;
   MonitorCorrections m_monitorCorrections;
   DetectorCorrections m_detectorCorrections;
 };

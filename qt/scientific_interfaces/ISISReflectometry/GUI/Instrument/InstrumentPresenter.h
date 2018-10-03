@@ -55,9 +55,9 @@ private:
   IInstrumentView *m_view;
   Instrument m_model;
 
-  RangeInLambda wavelengthRangeFromView();
-  RangeInLambda monitorBackgroundRangeFromView();
-  RangeInLambda monitorIntegralRangeFromView();
+  boost::optional<RangeInLambda> wavelengthRangeFromView();
+  boost::optional<RangeInLambda> monitorBackgroundRangeFromView();
+  boost::optional<RangeInLambda> monitorIntegralRangeFromView();
   MonitorCorrections monitorCorrectionsFromView();
   DetectorCorrectionType detectorCorrectionTypeFromView();
   DetectorCorrections detectorCorrectionsFromView();
