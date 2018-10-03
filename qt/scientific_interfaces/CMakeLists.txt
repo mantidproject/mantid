@@ -52,6 +52,7 @@ set ( TEST_FILES
 
   test/ISISReflectometry/Reduction/GroupTest.h
   test/ISISReflectometry/Reduction/ValidateRowTest.h
+  test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
   test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
   test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
   test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
