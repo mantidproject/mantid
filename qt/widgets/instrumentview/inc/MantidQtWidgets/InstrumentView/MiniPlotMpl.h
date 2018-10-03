@@ -46,16 +46,16 @@ public:
   QStringList getLabels() const { return m_storedCurveLabels; }
   void removeCurve(const QString &label);
   QColor getCurveColor(const QString &label) const;
-  void recalcXAxisDivs() {}
-  void recalcYAxisDivs() {}
-  bool isYLogScale() const { return false; }
+  bool isYLogScale() const;
   void replot();
 public slots:
   void clearCurve();
-  void recalcAxisDivs() {}
-  void setYLogScale() {}
-  void setYLinearScale() {}
+  void setYLogScale();
+  void setYLinearScale();
   void clearAll();
+  // Required to match the interface with MiniPlotQwt but matplotlib
+  // handles this for us so it is a noop
+  void recalcAxisDivs() {}
 signals:
   void showContextMenu();
   void clickedAt(double, double);

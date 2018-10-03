@@ -19,6 +19,8 @@
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
 
+#include <QString>
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -40,8 +42,12 @@ public:
               const char *format = "b-");
   /// @}
 
-  ///@name Scaling
+  ///@name Scales
   /// @{
+  void setXScale(const char *value);
+  QString getXScale() const;
+  void setYScale(const char *value);
+  QString getYScale() const;
   void relim(bool visibleOnly = false);
   void autoscaleView(bool scaleX = true, bool scaleY = true);
   void autoscaleView(bool tight, bool scaleX = true, bool scaleY = true);

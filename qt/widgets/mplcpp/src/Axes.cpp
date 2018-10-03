@@ -2,6 +2,7 @@
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 
 namespace MantidQt {
 namespace Widgets {
@@ -10,6 +11,17 @@ namespace MplCpp {
 using Mantid::PythonInterface::Converters::VectorToNDArray;
 using Mantid::PythonInterface::Converters::WrapReadOnly;
 using Mantid::PythonInterface::PythonRuntimeError;
+
+namespace {
+/**
+ * Create a QString from a Python string object
+ * @param pystr A Python string object. This is not checked
+ * @return A new QString
+ */
+QString toQString(const Python::Object &pystr) {
+  return QString::fromLatin1(TO_CSTRING(pystr.ptr()));
+}
+} // namespace
 
 /**
  * Construct an Axes wrapper around an existing Axes instance
@@ -70,6 +82,46 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
   } catch (Python::ErrorAlreadySet &) {
     throw PythonRuntimeError();
   }
+}
+
+/**
+ * @brief Set the X-axis scale to the given value.
+ * @param value New scale type. See
+ * https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xscale.html
+ * @raises std::invalid_argument if the value is unknown
+ */
+void Axes::setXScale(const char *value) {
+  try {
+    pyobj().attr("set_xscale")(value);
+  } catch (Python::ErrorAlreadySet &) {
+    throw std::invalid_argument(std::string("setXScale: Unknown scale type ") +
+                                value);
+  }
+}
+
+/// @return The scale type of the X axis as a string
+QString Axes::getXScale() const {
+  return toQString(pyobj().attr("get_xscale")());
+}
+
+/**
+ * @brief Set the Y-axis scale to the given value.
+ * @param value New scale type. See
+ * https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xscale.html
+ * @raises std::invalid_argument if the value is unknown
+ */
+void Axes::setYScale(const char *value) {
+  try {
+    pyobj().attr("set_yscale")(value);
+  } catch (Python::ErrorAlreadySet &) {
+    throw std::invalid_argument(std::string("setYScale: Unknown scale type ") +
+                                value);
+  }
+}
+
+/// @return The scale type of the Y axis as a string
+QString Axes::getYScale() const {
+  return toQString(pyobj().attr("get_yscale")());
 }
 
 /**

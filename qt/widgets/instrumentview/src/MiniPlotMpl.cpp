@@ -10,6 +10,8 @@
 namespace {
 const char *ACTIVE_CURVE_FORMAT = "k-";
 const char *STORED_LINE_COLOR_CYCLE = "bgrcmyk";
+const char *LIN_SCALE_NAME = "linear";
+const char *LOG_SCALE_NAME = "symlog";
 Mantid::Kernel::Logger g_log("MiniPlotQwt");
 
 /**
@@ -118,6 +120,13 @@ QColor MiniPlotMpl::getCurveColor(const QString &label) const {
 }
 
 /**
+ * @return True if the Y scale is logarithmic
+ */
+bool MiniPlotMpl::isYLogScale() const {
+  return m_canvas->gca().getYScale() == LOG_SCALE_NAME;
+}
+
+/**
  * Redraws the canvas
  */
 void MiniPlotMpl::replot() { m_canvas->draw(); }
@@ -131,6 +140,18 @@ void MiniPlotMpl::clearCurve() {
     m_lines.pop_back();
   }
   m_activeCurveLabel.clear();
+}
+
+/**
+ * Set the Y scale to logarithmic
+ */
+void MiniPlotMpl::setYLogScale() { m_canvas->gca().setYScale(LOG_SCALE_NAME); }
+
+/**
+ * Set the Y scale to linear
+ */
+void MiniPlotMpl::setYLinearScale() {
+  m_canvas->gca().setYScale(LIN_SCALE_NAME);
 }
 
 /**
@@ -181,7 +202,6 @@ void MiniPlotMpl::mousePressEvent(QMouseEvent *evt) {
     emit showContextMenu();
   }
 }
-
 
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -62,12 +62,32 @@ public:
     TS_ASSERT_EQUALS(format[1], line.pyobj().attr("get_marker")());
   }
 
+  void testSetXScaleWithKnownScaleType() {
+    Axes axes(pyAxes());
+    axes.setXScale("symlog");
+  }
+
+  void testSetYScaleWithKnownScaleType() {
+    Axes axes(pyAxes());
+    axes.setYScale("symlog");
+  }
+
   // ----------------- failure tests ---------------------
   void testPlotThrowsWithEmptyData() {
     Axes axes(pyAxes());
     TS_ASSERT_THROWS(axes.plot({}, {}), std::invalid_argument);
     TS_ASSERT_THROWS(axes.plot({1}, {}), std::invalid_argument);
     TS_ASSERT_THROWS(axes.plot({}, {1}), std::invalid_argument);
+  }
+
+  void testSetXScaleWithUnknownScaleTypeThrows() {
+    Axes axes(pyAxes());
+    TS_ASSERT_THROWS(axes.setXScale("notascaletype"), std::invalid_argument);
+  }
+
+  void testSetYScaleWithUnknownScaleTypeThrows() {
+    Axes axes(pyAxes());
+    TS_ASSERT_THROWS(axes.setYScale("notascaletype"), std::invalid_argument);
   }
 
 private:
