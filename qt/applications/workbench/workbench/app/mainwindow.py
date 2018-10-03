@@ -113,9 +113,6 @@ class MainWindow(QMainWindow):
         # -- instance attributes --
         self.setWindowTitle("Mantid Workbench")
 
-        # uses default configuration as necessary
-        self.readSettings(CONF)
-
         # widgets
         self.messagedisplay = None
         self.ipythonconsole = None
@@ -183,6 +180,9 @@ class MainWindow(QMainWindow):
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
+
+        # uses default configuration as necessary
+        self.readSettings(CONF)
 
         self.setup_layout()
         self.create_actions()
@@ -397,16 +397,22 @@ class MainWindow(QMainWindow):
         else:
             self.setWindowState(Qt.WindowMaximized)
 
-        # have algorithm dialogs do their thing
+        # read in settings for children
         AlgorithmInputHistory().readSettings(settings)
+        for widget in self.widgets:
+            if hasattr(widget, 'readSettings'):
+                widget.readSettings(settings)
 
     def writeSettings(self, settings):
         settings.set('main/window/size', self.size()) # QSize
         settings.set('main/window/position', self.pos()) # QPoint
         settings.set('main/window/state', self.saveState()) # QByteArray
 
-        # have algorithm dialogs do their thing
+        # write out settings for children
         AlgorithmInputHistory().writeSettings(settings)
+        for widget in self.widgets:
+            if hasattr(widget, 'writeSettings'):
+                widget.writeSettings(settings)
 
 
 def initialize():

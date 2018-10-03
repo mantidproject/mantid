@@ -9,19 +9,10 @@
 #
 from __future__ import (absolute_import)
 
-from mantidqt.utils.qt import import_qt
+from mantidqt.utils.qt import import_qt, toQSettings
 
 
 _AlgorithmInputHistory = import_qt('._common', 'mantidqt', 'AlgorithmInputHistory')
-
-
-def _toQSettings(settings):
-    '''Utility function to convert supplied settings object to a qtpy.QtCore.QSettings
-    '''
-    try: # workbench.config.user
-        return settings.qsettings
-    except: # must be a QSettings already
-        return settings
 
 
 class AlgorithmInputHistory(object):
@@ -33,7 +24,7 @@ class AlgorithmInputHistory(object):
         pass
 
     def readSettings(self, settings):
-        self._singleton.readSettings(_toQSettings(settings))
+        self._singleton.readSettings(toQSettings(settings))
 
     def writeSettings(self, settings):
-        self._singleton.writeSettings(_toQSettings(settings))
+        self._singleton.writeSettings(toQSettings(settings))
