@@ -92,6 +92,81 @@ void checkIntersectionWithRectangularBank(Track &track,
                 componentInfo.componentID(childrenY[yIndex])->getComponentID());
 }
 
+void checkIntersectionWithOutlineComposite(Track &track,
+                                           const ComponentInfo &componentInfo,
+                                           size_t componentIndex) {
+
+  // Get the corners of the bank
+  ComponentInfo::QuadrilateralComponent corners;
+  const auto &innerRangeComp = componentInfo.children(componentIndex);
+  // nSubComponents, subtract off self hence -1. nSubComponents = number of
+  // horizontal columns.
+  corners.nY = innerRangeComp.size();
+  corners.nX = 0;
+
+  corners.bottomLeft = innerRangeComp.front();
+  corners.topRight = innerRangeComp.back();
+  corners.topLeft = innerRangeComp.back();
+  corners.bottomRight = innerRangeComp.front();
+
+  // Store points of the bank
+  V3D bottomLeft = componentInfo.position(corners.bottomLeft);
+  V3D bottomRight = componentInfo.position(corners.bottomRight);
+  V3D topLeft = componentInfo.position(corners.topLeft);
+
+  // Vertical (y-axis) basis vector of the detector
+  V3D vertical = topLeft - bottomLeft;
+
+  // Horizontal (x-axis) basis vector of the detector
+  V3D horizontal = bottomRight.cross_prod(vertical);
+
+  // The beam direction
+  V3D beam = track.direction();
+
+  // From: http://en.wikipedia.org/wiki/Line-plane_intersection (taken on May
+  // 4, 2011), We build a matrix to solve the linear equation:
+  Matrix<double> mat(3, 3);
+  mat.setColumn(0, beam * -1.0);
+  mat.setColumn(1, horizontal);
+  mat.setColumn(2, vertical);
+  mat.Invert();
+
+  // Multiply by the inverted matrix to find t,u,v
+  V3D tuv = mat * (track.startPoint() - bottomLeft);
+
+  // Intersection point
+  V3D intersec = beam;
+  intersec *= tuv[0];
+
+  // t = coordinate along the line
+  // u,v = coordinates along horizontal, vertical
+  // (and correct for it being between 0, xpixels-1).  The +0.5 is because the
+  // bottomLeft is at the CENTER of pixel 0,0.
+  /* double u = (double(corners.nX - 1) * tuv[1] + 0.5); */
+  double v = (double(corners.nY - 1) * tuv[2] + 0.5);
+
+  if (std::isnan(v))
+    return;
+
+  // In indices
+  /* size_t xIndex = size_t(u); */
+  size_t yIndex = size_t(v);
+
+  // Out of range?
+  /* if (xIndex >= corners.nX) */
+  /*   return; */
+  if (yIndex >= corners.nY)
+    return;
+
+  // Get the componentIndex of the component in the assembly at the (X, Y)
+  // pixel position.
+  auto det = innerRangeComp[yIndex];
+
+  // Create a link and add it to the track
+  track.addLink(intersec, intersec, 0.0, componentInfo.shape(det),
+                componentInfo.componentID(det)->getComponentID());
+}
+
 /**
  * Checks whether the track given will pass through the given Component.
  *
@@ -170,28 +245,34 @@ Links getResults(Track &resultsTrack) {
  * Add a link to the track for the intersected component
  *
  * @param track :: a track to add a link to for the intersected component
- * @param componentInfo :: a ComponentInfo instance containing the intersected component
+ * @param componentInfo :: a ComponentInfo instance containing the intersected
+ * component
  * @param index :: the index of the interesected component
- * @return whether the intersected component has children that need to be searched.
+ * @return whether the intersected component has children that need to be
+ * searched.
  */
-bool addLink(Track &track, const ComponentInfo &componentInfo, const size_t index) {
-    // Store the type of the child component
-    auto componentType = componentInfo.componentType(index);
+bool addLink(Track &track, const ComponentInfo &componentInfo,
+             const size_t index) {
+  // Store the type of the child component
+  auto componentType = componentInfo.componentType(index);
 
-    // Process a rectangular bank or normal component
-    if (componentType == Types::Rectangular) {
-        checkIntersectionWithRectangularBank(track, componentInfo, index);
-        return false; // Rectangular panel: we don't need to look at any children
-    } else {
-        checkIntersectionWithComponent(track, componentInfo, index);
-        return true; // We don't know what the children of this are
-    }
+  // Process a rectangular bank or normal component
+  if (componentType == Types::Rectangular) {
+    checkIntersectionWithRectangularBank(track, componentInfo, index);
+    return false; // Rectangular panel: we don't need to look at any children
+  } else if (componentType == Types::OutlineComposite) {
+    checkIntersectionWithOutlineComposite(track, componentInfo, index);
+    return false; // Tube detector: we don't need to look at any children
+  } else {
+    checkIntersectionWithComponent(track, componentInfo, index);
+    return true; // We don't know what the children of this are
+  }
 }
 
 /**
  * Get the bounding box for the component.
  *
- * This will first attempt to retrieve the bounding box from the cache. If 
+ * This will first attempt to retrieve the bounding box from the cache. If
  * no entry is found then it will query ComponentInfo and ask for the bounding
  * box to be recomputed.
  *
@@ -220,23 +301,29 @@ BoundingBox getBoundingBox(size_t componentIndex,
  * Recursively search for the intersection of the component.
  *
  * @param track :: a track to add a links to for any intersected component
- * @param componentInfo :: a ComponentInfo instance containing components to search for intersection with the test ray.
- * @param children :: the children of the previous component to search for intersections.
- * @param cache :: a cache of precomputed bounding boxes to help speed up the trace.
+ * @param componentInfo :: a ComponentInfo instance containing components to
+ * search for intersection with the test ray.
+ * @param children :: the children of the previous component to search for
+ * intersections.
+ * @param cache :: a cache of precomputed bounding boxes to help speed up the
+ * trace.
  */
-void fireRayInner(Track &track, const ComponentInfo &componentInfo, const std::vector<size_t>& children, BoundingBoxCache& cache) {
-    for (const auto& index : children) {
-        auto boundingBox = getBoundingBox(index, componentInfo, cache);
-        if (boundingBox.doesLineIntersect(track)) {
-            // add link to this component
-            const auto lookAtChildren = addLink(track, componentInfo, index);
-            // If we're not at the bottom, recurse and look at the children of this component
-            if (lookAtChildren) {
-                const auto& nextChildren = componentInfo.children(index);
-                fireRayInner(track, componentInfo, nextChildren, cache);
-            }
-        }
+void fireRayInner(Track &track, const ComponentInfo &componentInfo,
+                  const std::vector<size_t> &children,
+                  BoundingBoxCache &cache) {
+  for (const auto &index : children) {
+    auto boundingBox = getBoundingBox(index, componentInfo, cache);
+    if (boundingBox.doesLineIntersect(track)) {
+      // add link to this component
+      const auto lookAtChildren = addLink(track, componentInfo, index);
+      // If we're not at the bottom, recurse and look at the children of this
+      // component
+      if (lookAtChildren) {
+        const auto &nextChildren = componentInfo.children(index);
+        fireRayInner(track, componentInfo, nextChildren, cache);
+      }
     }
+  }
 }
 
 /**
@@ -247,12 +334,14 @@ void fireRayInner(Track &track, const ComponentInfo &componentInfo, const std::v
  * accumulates the intersection results.
  * @param componentInfo :: The object that will provide access to component
  * information.
- * @param cache :: a cache of precomputed bounding boxes to help speed up the trace.
+ * @param cache :: a cache of precomputed bounding boxes to help speed up the
+ * trace.
  */
-void fireRay(Track &track, const ComponentInfo &componentInfo, BoundingBoxCache& cache) {
-    const auto root = componentInfo.root();
-    const auto& children = componentInfo.children(root);
-    fireRayInner(track, componentInfo, children, cache);
+void fireRay(Track &track, const ComponentInfo &componentInfo,
+             BoundingBoxCache &cache) {
+  const auto root = componentInfo.root();
+  const auto &children = componentInfo.children(root);
+  fireRayInner(track, componentInfo, children, cache);
 }
 
 } // namespace
@@ -265,12 +354,13 @@ namespace BeamlineRayTracer {
  * @param dir :: A directional vector. The starting point is defined by the
  * instrument source.
  * @param componentInfo :: The object used to access the source position.
- * @param cache :: a cache of precomputed bounding boxes to help speed up the trace.
+ * @param cache :: a cache of precomputed bounding boxes to help speed up the
+ * trace.
  * @return Links :: A collection of links defining intersection information.
  */
 Links traceFromSource(const Kernel::V3D &dir,
                       const ComponentInfo &componentInfo,
-                      BoundingBoxCache& cache) {
+                      BoundingBoxCache &cache) {
 
   // Create a results track
   Track resultsTrack(componentInfo.sourcePosition(), dir);
@@ -290,9 +380,9 @@ Links traceFromSource(const Kernel::V3D &dir,
  * @return Links :: A collection of links defining intersection information.
  */
 Links traceFromSource(const Kernel::V3D &dir,
-                      const ComponentInfo &componentInfo) { 
-    BoundingBoxCache cache;
-    return traceFromSource(dir, componentInfo, cache);
+                      const ComponentInfo &componentInfo) {
+  BoundingBoxCache cache;
+  return traceFromSource(dir, componentInfo, cache);
 }
 
 /**
@@ -301,12 +391,13 @@ Links traceFromSource(const Kernel::V3D &dir,
  * @param dir :: A directional vector. The starting point is defined by the
  * source.
  * @param componentInfo :: The object used to access the source position.
- * @param cache :: a cache of precomputed bounding boxes to help speed up the trace.
+ * @param cache :: a cache of precomputed bounding boxes to help speed up the
+ * trace.
  * @return Links :: A collection of links defining intersection information.
  */
 Links traceFromSample(const Kernel::V3D &dir,
                       const ComponentInfo &componentInfo,
-                      BoundingBoxCache& cache) {
+                      BoundingBoxCache &cache) {
 
   // Create a new results track
   Track resultsTrack(componentInfo.samplePosition(), dir);
@@ -326,9 +417,9 @@ Links traceFromSample(const Kernel::V3D &dir,
  * @return Links :: A collection of links defining intersection information.
  */
 Links traceFromSample(const Kernel::V3D &dir,
-                      const ComponentInfo &componentInfo) { 
-    BoundingBoxCache cache;
-    return traceFromSample(dir, componentInfo, cache);
+                      const ComponentInfo &componentInfo) {
+  BoundingBoxCache cache;
+  return traceFromSample(dir, componentInfo, cache);
 }
 
 /**
@@ -361,10 +452,11 @@ size_t getDetectorResult(const ComponentInfo &componentInfo,
 /**
  * Trace a given track from the source position in the given directions.
  *
- * @param dirs :: A collections of direction vectors. The starting point for each is defined by the
- * source.
+ * @param dirs :: A collections of direction vectors. The starting point for
+ * each is defined by the source.
  * @param componentInfo :: The object used to access the source position.
- * @return Links :: A vector of collections of links defining intersection information.
+ * @return Links :: A vector of collections of links defining intersection
+ * information.
  */
 std::vector<Links> traceFromSource(const std::vector<Kernel::V3D> &dirs,
                                    const ComponentInfo &componentInfo) {
@@ -384,10 +476,11 @@ std::vector<Links> traceFromSource(const std::vector<Kernel::V3D> &dirs,
 /**
  * Trace a given track from the sample position in the given directions.
  *
- * @param dirs :: A collections of direction vectors. The starting point for each is defined by the
- * sample.
+ * @param dirs :: A collections of direction vectors. The starting point for
+ * each is defined by the sample.
  * @param componentInfo :: The object used to access the sample position.
- * @return Links :: A vector of collections of links defining intersection information.
+ * @return Links :: A vector of collections of links defining intersection
+ * information.
  */
 std::vector<Links> traceFromSample(const std::vector<Kernel::V3D> &dirs,
                                    const ComponentInfo &componentInfo) {

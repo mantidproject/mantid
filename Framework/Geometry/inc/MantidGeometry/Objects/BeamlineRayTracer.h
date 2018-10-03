@@ -69,17 +69,19 @@ MANTID_GEOMETRY_DLL size_t getDetectorResult(const ComponentInfo &componentInfo,
                                              const DetectorInfo &detectorInfo,
                                              Track &resultsTrack);
 /**
- * Trace a collection of tracks from the instrument source in the given directions
- * and compile a list of results that each track intersects.
+ * Trace a collection of tracks from the instrument source in the given
+ * directions and compile a list of results that each track intersects.
  */
-MANTID_GEOMETRY_DLL std::vector<Links> traceFromSource(const std::vector<Kernel::V3D> &dirs,
-                      const ComponentInfo &componentInfo);
+MANTID_GEOMETRY_DLL std::vector<Links>
+traceFromSource(const std::vector<Kernel::V3D> &dirs,
+                const ComponentInfo &componentInfo);
 /**
- * Trace a collection of tracks from the instrument sample in the given directions
- * and compile a list of results that each track intersects.
+ * Trace a collection of tracks from the instrument sample in the given
+ * directions and compile a list of results that each track intersects.
  */
-MANTID_GEOMETRY_DLL std::vector<Links> traceFromSample(const std::vector<Kernel::V3D> &dirs,
-                      const ComponentInfo &componentInfo);
+MANTID_GEOMETRY_DLL std::vector<Links>
+traceFromSample(const std::vector<Kernel::V3D> &dirs,
+                const ComponentInfo &componentInfo);
 
 } // namespace BeamlineRayTracer
 
