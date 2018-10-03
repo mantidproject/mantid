@@ -8,16 +8,16 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <vector>
-#include "MantidAlgorithms/EQSANSUnfoldFrame.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/EQSANSUnfoldFrame.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <vector>
 
 #include <vector>
 
@@ -27,7 +27,6 @@ namespace Algorithms {
 // #########################################
 // ###############   EQSANSWBand   ###############
 // #########################################
-
 
 /// Default constructor
 EQSANSWBand::EQSANSWBand() : m_min(0.0), m_max(0.0) {}
@@ -42,7 +41,7 @@ EQSANSWBand::EQSANSWBand() : m_min(0.0), m_max(0.0) {}
  */
 EQSANSWBand::EQSANSWBand(const double &lMin, const double &lMax)
     : m_min(lMin), m_max(lMax) {
-  if(lMin < 0.0 || lMax < 0.0)
+  if (lMin < 0.0 || lMax < 0.0)
     throw std::domain_error("Negative wavelengths are unphysical");
   if (lMin > lMax)
     throw std::range_error("Negative bandwidths are unphysical");
@@ -59,7 +58,7 @@ double EQSANSWBand::width() { return m_max - m_min; }
 EQSANSWBand EQSANSWBand::intersect(const EQSANSWBand &band) const {
   double a = m_min > band.m_min ? m_min : band.m_min;
   double b = m_max < band.m_max ? m_max : band.m_max;
-  if(a >= b){
+  if (a >= b) {
     a = 0.0;
     b = 0.0;
   }
@@ -76,7 +75,8 @@ EQSANSTransWBands::EQSANSTransWBands() : m_bands(0) {}
 size_t EQSANSTransWBands::size() { return m_bands.size(); }
 
 /// common band(s) between the transmissions bands and one external band
-EQSANSTransWBands EQSANSTransWBands::intersect(const EQSANSWBand &otherBand) const {
+EQSANSTransWBands
+EQSANSTransWBands::intersect(const EQSANSWBand &otherBand) const {
   EQSANSTransWBands wg;
   for (const EQSANSWBand &band : m_bands) {
     auto b = band.intersect(otherBand);
@@ -90,7 +90,8 @@ EQSANSTransWBands EQSANSTransWBands::intersect(const EQSANSWBand &otherBand) con
  * Find the common wavelength bands between two transmission bands set
  * @param gates transmission bands set acting as wavelength filtering gates
  */
-EQSANSTransWBands EQSANSTransWBands::intersect(const EQSANSTransWBands &gates) const {
+EQSANSTransWBands
+EQSANSTransWBands::intersect(const EQSANSTransWBands &gates) const {
   EQSANSTransWBands wg;
   for (const EQSANSWBand &gate : gates.m_bands) {
     auto g = this->intersect(gate);
@@ -132,7 +133,8 @@ double EQSANSDiskChopper::closingPhase() const {
 /**
  * Rewind the chopper to obtain the minimum positive time for the closing
  * edge of the transmission window to hit axis defined by the neutron beam
- * @return phase of the opening edge when the chopper is rewound. Can return negative valu
+ * @return phase of the opening edge when the chopper is rewound. Can return
+ * negative valu
  */
 double EQSANSDiskChopper::rewind() const {
   double t_opening;
@@ -214,16 +216,17 @@ void EQSANSDiskChopper::setPhase(const API::Run &run, double offset) {
  * @param pulsed : include the correction due to delayed emission of neutrons
  * from the moderator
  */
-EQSANSTransWBands EQSANSDiskChopper::transmissionBands(double maxWl, double delay,
-                                                 bool pulsed) const {
+EQSANSTransWBands EQSANSDiskChopper::transmissionBands(double maxWl,
+                                                       double delay,
+                                                       bool pulsed) const {
   double t_opening = rewind();
   // shortest wavelength obtained with pulsed correction, if needed
   double openingWl = tofToWavelength(t_opening, delay, pulsed);
   EQSANSTransWBands wg;
-  while(openingWl < maxWl) {
+  while (openingWl < maxWl) {
     // slowest wavelength obtained with no pulse correction
     double closingWl =
-            tofToWavelength(t_opening + transmissionDuration(), delay, false);
+        tofToWavelength(t_opening + transmissionDuration(), delay, false);
     if (closingWl > maxWl)
       closingWl = maxWl;
     wg.m_bands.emplace_back(EQSANSWBand(openingWl, closingWl));
@@ -246,9 +249,9 @@ using namespace DataObjects;
 using Types::Event::TofEvent;
 
 EQSANSUnfoldFrame::EQSANSUnfoldFrame()
-    : API::Algorithm(), m_lowTOFcut(0.), m_highTOFcut(0.),
-    m_pulsePeriod(0.), m_frameWidth(0.), m_frameOffset(0.),
-    m_frameSkippingMode(false), m_choppers(NCHOPPERS) {}
+    : API::Algorithm(), m_lowTOFcut(0.), m_highTOFcut(0.), m_pulsePeriod(0.),
+      m_frameWidth(0.), m_frameOffset(0.), m_frameSkippingMode(false),
+      m_choppers(NCHOPPERS) {}
 
 /// Source pulse frequency (60Hz)
 double EQSANSUnfoldFrame::getPulseFrequency() {
@@ -261,7 +264,7 @@ double EQSANSUnfoldFrame::getPulseFrequency() {
   return frequencyLog->getStatistics().mean;
 }
 
-void EQSANSUnfoldFrame::setPulsePeriod(){
+void EQSANSUnfoldFrame::setPulsePeriod() {
   m_pulsePeriod = 1.0e6 / getPulseFrequency(); // 1.0e6/60 micro-seconds
 }
 
@@ -276,10 +279,11 @@ void EQSANSUnfoldFrame::setFrameSkippingMode() {
   }
   const double chopperSpeed =
       chopperSpeedLog->getStatistics().mean; // 30 Hz in frame-skipping mode
-  m_frameSkippingMode = std::fabs(chopperSpeed - getPulseFrequency() / 2.0) < 1.0 ? true : false;
+  m_frameSkippingMode =
+      std::fabs(chopperSpeed - getPulseFrequency() / 2.0) < 1.0 ? true : false;
 }
 
-void EQSANSUnfoldFrame::setFrameWidth(){
+void EQSANSUnfoldFrame::setFrameWidth() {
   m_frameWidth = m_frameSkippingMode ? m_pulsePeriod * 2.0
                                      : m_pulsePeriod; // 1.0e6/30 or 1.0e6/60 ms
 }
@@ -430,10 +434,10 @@ void EQSANSUnfoldFrame::exec() {
   m_highTOFcut = getProperty("HighTOFCut");
 
   // Properties for all detectors
-  setPulsePeriod();  // initialize m_pulsePeriod
-  setFrameSkippingMode();  // initialize m_frameSkippingMode
-  setFrameWidth();  // initialize m_frameWidth
-  initializeChoppers(); // Generate and initialize the disk chopper objects
+  setPulsePeriod();       // initialize m_pulsePeriod
+  setFrameSkippingMode(); // initialize m_frameSkippingMode
+  setFrameWidth();        // initialize m_frameWidth
+  initializeChoppers();   // Generate and initialize the disk chopper objects
 
   this->execEvent();
 }
@@ -453,11 +457,12 @@ void EQSANSUnfoldFrame::execEvent() {
   EQSANSWBand transBand = transmittedBand();
   // Neutron wavelength band transmitted through the choppers for the skipped
   // frame
-  EQSANSWBand transBandSk =
-          m_frameSkippingMode ? transmittedBand(m_pulsePeriod) : EQSANSWBand(0.0, 0.0);
+  EQSANSWBand transBandSk = m_frameSkippingMode ? transmittedBand(m_pulsePeriod)
+                                                : EQSANSWBand(0.0, 0.0);
   // Find the offset time if we are not operating in the first frame
   /// m_frameOffset is zero when operating in the first frame
-  m_frameOffset = static_cast<double>(frameOperating(transBand.m_min)) * m_frameWidth;
+  m_frameOffset =
+      static_cast<double>(frameOperating(transBand.m_min)) * m_frameWidth;
 
   // Loop through the spectra and apply correction
   const size_t numHists = inputWS->getNumberHistograms();
@@ -466,94 +471,94 @@ void EQSANSUnfoldFrame::execEvent() {
   for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec) {
     PARALLEL_START_INTERUPT_REGION
 
-        if (!spectrumInfo.hasDetectors(ispec)) {
-          g_log.warning()
-                  << "Workspace index " << ispec
-                  << " has no detector assigned to eventsIterator - discarding\n";
-          continue;
-        }
+    if (!spectrumInfo.hasDetectors(ispec)) {
+      g_log.warning()
+          << "Workspace index " << ispec
+          << " has no detector assigned to eventsIterator - discarding\n";
+      continue;
+    }
 
-        double sampleToDetectorDistance = spectrumInfo.l2(ispec);
-        double flightPath = moderatorToSampleDistance + sampleToDetectorDistance;
-        // Shortest and longest TOF for neutrons originating in the leading frame
-        double sTof = travelTime(transBand.m_min, flightPath, true);
-        double lTof = travelTime(transBand.m_max, flightPath);
-        // Shortest and longest TOF for neutrons originating in the skipped frame
-        double sTofSk = m_frameSkippingMode
+    double sampleToDetectorDistance = spectrumInfo.l2(ispec);
+    double flightPath = moderatorToSampleDistance + sampleToDetectorDistance;
+    // Shortest and longest TOF for neutrons originating in the leading frame
+    double sTof = travelTime(transBand.m_min, flightPath, true);
+    double lTof = travelTime(transBand.m_max, flightPath);
+    // Shortest and longest TOF for neutrons originating in the skipped frame
+    double sTofSk = m_frameSkippingMode
                         ? travelTime(transBandSk.m_min, flightPath, true)
                         : 0.0;
-        double lTofSk =
-                m_frameSkippingMode ? travelTime(transBandSk.m_max, flightPath) : 0.0;
+    double lTofSk =
+        m_frameSkippingMode ? travelTime(transBandSk.m_max, flightPath) : 0.0;
 
-        // Only neutrons arriving at the nominal detector have no overlap. However,
-        // there is overlap for all other detectors because their flight paths are
-        // longer.
-        double frame_overlap =
-                m_pulsePeriod * (flightPath - nominalPath) / nominalPath;
-        // The skipped pulse originates one pulse period behind, thus 2 *
-        // m_pulsePeriod
-        double frame_overlapSk = 2 * frame_overlap; // overlap for the skipped pulse
+    // Only neutrons arriving at the nominal detector have no overlap. However,
+    // there is overlap for all other detectors because their flight paths are
+    // longer.
+    double frame_overlap =
+        m_pulsePeriod * (flightPath - nominalPath) / nominalPath;
+    // The skipped pulse originates one pulse period behind, thus 2 *
+    // m_pulsePeriod
+    double frame_overlapSk = 2 * frame_overlap; // overlap for the skipped pulse
 
-        // Get the pointer to the output event list
-        std::vector<TofEvent> &events = inputWS->getSpectrum(ispec).getEvents();
-        std::vector<TofEvent>::iterator eventsIterator;
-        std::vector<TofEvent> correctedEvents;
+    // Get the pointer to the output event list
+    std::vector<TofEvent> &events = inputWS->getSpectrum(ispec).getEvents();
+    std::vector<TofEvent>::iterator eventsIterator;
+    std::vector<TofEvent> correctedEvents;
 
-        for (eventsIterator = events.begin(); eventsIterator < events.end();
-             ++eventsIterator) {
+    for (eventsIterator = events.begin(); eventsIterator < events.end();
+         ++eventsIterator) {
 
-          // Shift TOF to the correct frame (first, second, third, or fourth frame)
-          double newTOF = eventsIterator->tof();
-          newTOF += m_frameOffset;
+      // Shift TOF to the correct frame (first, second, third, or fourth frame)
+      double newTOF = eventsIterator->tof();
+      newTOF += m_frameOffset;
 
-          // Slow neutrons that were assigned a TOF smaller than that of the fastest
-          // neutrons must be shifted by the TOF frame width
-          if (newTOF < sTof)
-            newTOF += m_frameWidth;
+      // Slow neutrons that were assigned a TOF smaller than that of the fastest
+      // neutrons must be shifted by the TOF frame width
+      if (newTOF < sTof)
+        newTOF += m_frameWidth;
 
-          // if the neutron originated at the skipped pulse, its TOF must be
-          // increased by a pulse period
-          if (m_frameSkippingMode && newTOF > lTof)
-            newTOF += m_pulsePeriod;
+      // if the neutron originated at the skipped pulse, its TOF must be
+      // increased by a pulse period
+      if (m_frameSkippingMode && newTOF > lTof)
+        newTOF += m_pulsePeriod;
 
-          // Discard event if TOF within any of the overlapping-frame regions
-          if (newTOF < sTof + frame_overlap)
-            continue; // event within the long-time frame-overlap region
-          if (newTOF > lTof - frame_overlap && newTOF < lTof)
-            continue; // event within the long-time frame-overlap region
-          if (m_frameSkippingMode) {
-            if (newTOF > sTofSk && newTOF < sTofSk + frame_overlapSk)
+      // Discard event if TOF within any of the overlapping-frame regions
+      if (newTOF < sTof + frame_overlap)
+        continue; // event within the long-time frame-overlap region
+      if (newTOF > lTof - frame_overlap && newTOF < lTof)
+        continue; // event within the long-time frame-overlap region
+      if (m_frameSkippingMode) {
+        if (newTOF > sTofSk && newTOF < sTofSk + frame_overlapSk)
+          continue;
+        if (newTOF > lTofSk - frame_overlapSk)
+          continue;
+
+        // Optionally, discard event if falling within the input TOF cuts
+        if (m_lowTOFcut > 0.0) {
+          if (newTOF < sTof + m_lowTOFcut)
+            continue;
+          if (newTOF > sTofSk && newTOF < sTofSk + m_lowTOFcut)
+            continue;
+          if (m_highTOFcut > 0.0) {
+            if (newTOF > lTof - m_highTOFcut && newTOF < lTof)
               continue;
-            if (newTOF > lTofSk - frame_overlapSk)
+            if (newTOF > lTofSk - m_highTOFcut)
               continue;
-
-            // Optionally, discard event if falling within the input TOF cuts
-            if (m_lowTOFcut > 0.0) {
-              if (newTOF < sTof + m_lowTOFcut)
-                continue;
-              if (newTOF > sTofSk && newTOF < sTofSk + m_lowTOFcut)
-                continue;
-              if (m_highTOFcut > 0.0) {
-                if (newTOF > lTof - m_highTOFcut && newTOF < lTof)
-                  continue;
-                if (newTOF > lTofSk - m_highTOFcut)
-                  continue;
-              }
-            }
           }
-          correctedEvents.emplace_back(newTOF, eventsIterator->pulseTime());
         }
+      }
+      correctedEvents.emplace_back(newTOF, eventsIterator->pulseTime());
+    }
 
-        // Replace contents of list events with that of correctedEvents
-        events.clear();
-        events.reserve(correctedEvents.size());
-        for (eventsIterator = correctedEvents.begin();
-             eventsIterator < correctedEvents.end(); ++eventsIterator)
-          events.push_back(*eventsIterator);
+    // Replace contents of list events with that of correctedEvents
+    events.clear();
+    events.reserve(correctedEvents.size());
+    for (eventsIterator = correctedEvents.begin();
+         eventsIterator < correctedEvents.end(); ++eventsIterator)
+      events.push_back(*eventsIterator);
 
-        progress.report("TOF structure");
+    progress.report("TOF structure");
     PARALLEL_END_INTERUPT_REGION
-  }  // ispec == numHists
+  } // ispec == numHists
   PARALLEL_CHECK_INTERUPT_REGION
 } // EQSANSUnfoldFrame::execevent()
 
