@@ -891,6 +891,7 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotMdiSubWindowTest.py
     MantidPlotTiledWindowTest.py
     MantidPlotInputArgsCheck.py
+    MantidPlotProjectRecovery.py
     TSVSerialiserTest.py
 )
 

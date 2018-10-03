@@ -181,6 +181,34 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             else:
                 self.assertEquals(ys[0], 0)
 
+    def testMaskedComponents(self):
+        inWS = mtd[self._RAW_WS_NAME]
+        spectraCount = inWS.getNumberHistograms()
+        outWSName = 'diagnosticsWS'
+        kwargs = {
+            'InputWorkspace': self._RAW_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'ElasticPeakDiagnostics': 'Peak Diagnostics OFF',
+            'BkgDiagnostics': 'Bkg Diagnostics OFF',
+            'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF',
+            'DefaultMask': 'Default Mask OFF',
+            'MaskedComponents': 'tube_1',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLDiagnostics', **kwargs)
+        self.assertTrue(mtd.doesExist(outWSName))
+        outWS = mtd[outWSName]
+        self.assertEquals(outWS.getNumberHistograms(), spectraCount)
+        self.assertEquals(outWS.blocksize(), 1)
+        for i in range(spectraCount):
+            Ys = outWS.readY(i)
+            detector = outWS.getDetector(i)
+            componentName = detector.getFullName()
+            if 'tube_1' in componentName:
+                self.assertEquals(Ys[0], 1)
+            else:
+                self.assertEquals(Ys[0], 0)
+
     def testOutputIsUsable(self):
         inWS = mtd[self._RAW_WS_NAME]
         spectraCount = inWS.getNumberHistograms()
