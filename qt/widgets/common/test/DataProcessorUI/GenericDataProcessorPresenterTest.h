@@ -255,7 +255,7 @@ private:
         << "1.6"
         << "0.04"
         << "1"
-        << "ProcessingInstructions='0'";
+        << "ProcessingInstructions='1'";
     row = ws->appendRow();
     row << "0"
         << "12346"
@@ -265,7 +265,7 @@ private:
         << "2.9"
         << "0.04"
         << "1"
-        << "ProcessingInstructions='0'";
+        << "ProcessingInstructions='1'";
     row = ws->appendRow();
     row << "1"
         << "24681"
@@ -275,7 +275,7 @@ private:
         << "1.6"
         << "0.04"
         << "1"
-        << "ProcessingInstructions='0'";
+        << "ProcessingInstructions='1'";
     row = ws->appendRow();
     row << "1"
         << "24682"
@@ -285,7 +285,7 @@ private:
         << "2.9"
         << "0.04"
         << "1"
-        << "ProcessingInstructions='0'";
+        << "ProcessingInstructions='1'";
 
     return ws;
   }
@@ -1646,7 +1646,7 @@ public:
         << "1.6"
         << "0.04"
         << "1"
-        << "ProcessingInstructions='0'";
+        << "ProcessingInstructions='1'";
     row = ws->appendRow();
     row << "1"
         << "dataB"
@@ -1656,7 +1656,7 @@ public:
         << "2.9"
         << "0.04"
         << "1"
-        << "ProcessingInstructions='0'";
+        << "ProcessingInstructions='1'";
 
     createTOFWorkspace("dataA");
     createTOFWorkspace("dataB");
@@ -2415,7 +2415,7 @@ public:
     rowlist[0].insert(1);
 
     const auto expected = QString(
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t");
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2464,10 +2464,10 @@ public:
     rowlist[1].insert(1);
 
     const auto expected = QString(
-        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t");
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t\n"
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t\n"
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t\n"
+        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2495,7 +2495,7 @@ public:
     rowlist[0].insert(1);
 
     const auto expected = QString(
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t");
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2536,9 +2536,9 @@ public:
     rowlist[1].insert(0);
 
     const auto expected = QString(
-        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t");
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t\n"
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='1'\t\n"
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='1'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
