@@ -58,11 +58,13 @@ void MSDFit::updateModelFitTypeString() {
   m_msdFittingModel->setFitType(selectedFitType().toStdString());
 }
 
-void MSDFit::updatePlotOptions() {}
+void MSDFit::updatePlotOptions() {
+  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
+}
 
 void MSDFit::plotClicked() {
   setPlotResultIsPlotting(true);
-  IndirectFitAnalysisTab::plotResult("All");
+  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
   setPlotResultIsPlotting(false);
 }
 
@@ -79,6 +81,7 @@ void MSDFit::setRunEnabled(bool enabled) {
 
 void MSDFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
+  m_uiForm->cbPlotType->setEnabled(enabled);
 }
 
 void MSDFit::setFitSingleSpectrumEnabled(bool enabled) {
@@ -96,7 +99,7 @@ void MSDFit::setRunIsRunning(bool running) {
 }
 
 void MSDFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
   setPlotResultEnabled(!plotting);
 }
 
