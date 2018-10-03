@@ -15,6 +15,7 @@
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <valgrind/callgrind.h>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::ConfigService;
@@ -231,6 +232,63 @@ public:
     doTestRectangularDetector("Zero-beam", V3D(0.0, 0.0, 0.0), -1, -1);
   }
 
+  void test_rectangular_detector_multiple_rays() {
+    using DetectorCoordinates = std::vector<std::pair<int, int>>;
+    // Towards the detector lower-left corner
+    double w = 0.008;
+    std::vector<V3D> testDirections = {V3D(0.0, 0.0, 5.0),
+                                       V3D(w * 1, w * 0, 5.0),
+                                       V3D(w * 1, w * 2, 5.0),
+                                       V3D(w * 0.45, w * 0.45, 5.0),
+                                       V3D(w * 0.55, w * 1.55, 5.0),
+                                       V3D(w * 99, w * 99, 5.0),
+                                       V3D(-w, 0, 5.0),
+                                       V3D(0, -w, 5.0),
+                                       V3D(0, w * 100, 5.0),
+                                       V3D(w * 100, w, 5.0),
+                                       V3D(1.0, 0.0, 0.0),
+                                       V3D(0.0, 1.0, 0.0),
+                                       V3D(0.0, 0.0, 0.0)};
+
+    DetectorCoordinates expectedResults = {
+        {0, 0},   {1, 0},   {1, 2},   {0, 0},   {1, 2},   {99, 99}, {-1, -1},
+        {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1},
+    };
+
+    auto traces = RayTracer::traceFromSample(testDirections, *m_compInfoRectangular);
+
+    DetectorCoordinates actualResults;
+    actualResults.reserve(traces.size());
+
+    // Transform from ray tracer Links to XY detector coordinates
+    std::transform(traces.begin(), traces.end(),
+                   std::back_inserter(actualResults), [this](const Links &result) -> std::pair<int, int> {
+                     Link res = *result.begin();
+
+                    if (result.size() < 2)
+                        return {-1, -1};
+
+                     // Get the detector
+                     IDetector_const_sptr det =
+                         boost::dynamic_pointer_cast<const IDetector>(
+                             m_testInstrumentRectangular->getComponentByID(
+                                 res.componentID));
+
+                    if (!det)
+                        return {-1, -1};
+
+                     // Parent bank
+                     RectangularDetector_const_sptr rect =
+                         boost::dynamic_pointer_cast<const RectangularDetector>(
+                             det->getParent()->getParent());
+
+                     // Find the xy index from the detector ID
+                     return rect->getXYForDetectorID(det->getID());
+                   });
+
+    TS_ASSERT_EQUALS(expectedResults, actualResults);
+  }
+
 private:
   /**
    * Helper methods for tests
@@ -351,6 +409,23 @@ public:
     m_detInfoWish = std::move(infos3.second);
   }
 
+  std::vector<V3D> makeTestDirections() {
+      std::vector<V3D> testDirections;
+      testDirections.reserve((360 / 3) * (180 / 3));
+
+      // Directly in Z+ = towards the detector center
+      for (int azimuth = 0; azimuth < 360; azimuth += 3) {
+          for (int elev = -89; elev < 89; elev += 3) {
+              // Make a vector pointing in every direction
+              V3D testDir;
+              testDir.spherical(1, double(elev), double(azimuth));
+              testDirections.push_back(testDir);
+
+          }
+      }
+      return testDirections;
+  }
+
   Instrument_sptr loadInstrumentDefinition(const std::string& idfName) {
     // Parse test file
     std::string filename = ConfigService::Instance().getInstrumentDirectory() +
@@ -385,63 +460,35 @@ public:
   }
 
   void test_TOPAZ() {
-    // Directly in Z+ = towards the detector center
-    for (int azimuth = 0; azimuth < 360; azimuth += 3) {
-      for (int elev = -89; elev < 89; elev += 3) {
-        // Make a vector pointing in every direction
-        V3D testDir;
-        testDir.spherical(1, double(elev), double(azimuth));
-
-        // Track it
-        Links results = RayTracer::traceFromSample(testDir, *m_compInfoTopaz);
-      }
-    }
+    auto testDirections = makeTestDirections();
+    auto results = RayTracer::traceFromSample(testDirections, *m_compInfoTopaz);
   }
 
   void test_TOPAZ_instrument_v1() {
     // Directly in Z+ = towards the detector center
     InstrumentRayTracer tracer(m_instTopaz);
 
-    for (int azimuth = 0; azimuth < 360; azimuth += 3) {
-      for (int elev = -89; elev < 89; elev += 3) {
-        // Make a vector pointing in every direction
-        V3D testDir;
-        testDir.spherical(1, double(elev), double(azimuth));
-
+    auto testDirections = makeTestDirections();
+    for (const auto& testDir : testDirections) {
         // Track it
         tracer.traceFromSample(testDir);
         Links results = tracer.getResults();
-      }
     }
   }
 
   void test_WISH() {
-    // Directly in Z+ = towards the detector center
-    for (int azimuth = 0; azimuth < 360; azimuth += 3) {
-      for (int elev = -89; elev < 89; elev += 3) {
-        // Make a vector pointing in every direction
-        V3D testDir;
-        testDir.spherical(1, double(elev), double(azimuth));
-
-        // Track it
-        Links results = RayTracer::traceFromSample(testDir, *m_compInfoWish);
-      }
-    }
+    auto testDirections = makeTestDirections();
+    auto results = RayTracer::traceFromSample(testDirections, *m_compInfoWish);
   }
 
   void test_WISH_instrument_v1() {
     // Directly in Z+ = towards the detector center
     InstrumentRayTracer tracer(m_instWish);
-    for (int azimuth = 0; azimuth < 360; azimuth += 3) {
-      for (int elev = -89; elev < 89; elev += 3) {
-        // Make a vector pointing in every direction
-        V3D testDir;
-        testDir.spherical(1, double(elev), double(azimuth));
-
+    auto testDirections = makeTestDirections();
+    for (const auto& testDir : testDirections) {
         // Track it
         tracer.traceFromSample(testDir);
         Links results = tracer.getResults();
-      }
     }
   }
 

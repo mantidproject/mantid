@@ -15,6 +15,9 @@ namespace {
 using Mantid::Kernel::Matrix;
 using Mantid::Kernel::Quat;
 using Types = Mantid::Beamline::ComponentType;
+// Type alias for caching bounding boxes when making
+// multiple ray traces
+using BoundingBoxCache = std::unordered_map<size_t, BoundingBox>;
 
 /**
  * Tests the intersection of the ray with a rectangular bank of detectors.
@@ -186,21 +189,51 @@ bool addLink(Track &track, const ComponentInfo &componentInfo, const size_t inde
 }
 
 /**
+ * Get the bounding box for the component.
+ *
+ * This will first attempt to retrieve the bounding box from the cache. If 
+ * no entry is found then it will query ComponentInfo and ask for the bounding
+ * box to be recomputed.
+ *
+ * @param componentIndex :: the component to get the bounding box for.
+ * @param componentInfo :: the componentInfo object to query for a bounding box.
+ * @param cache :: a cache of precomputed bounding boxes to query.
+ */
+BoundingBox getBoundingBox(size_t componentIndex,
+                           const ComponentInfo &componentInfo,
+                           BoundingBoxCache &cache) {
+  // First check if a precomputed bounding box for this object exists in the
+  // cache. The cache will be empty if the component info object has not yet
+  // been visited
+  auto cacheIterator = cache.find(componentIndex);
+  if (cacheIterator != cache.end())
+    return cacheIterator->second;
+
+  // Otherwise get the bounding box from the component info. This will recompute
+  // the bounding box for the component from the bottom up
+  auto boundingBox = componentInfo.boundingBox(componentIndex);
+  cache.emplace(componentIndex, boundingBox);
+  return boundingBox;
+}
+
+/**
  * Recursively search for the intersection of the component.
  *
  * @param track :: a track to add a links to for any intersected component
  * @param componentInfo :: a ComponentInfo instance containing components to search for intersection with the test ray.
  * @param children :: the children of the previous component to search for intersections.
+ * @param cache :: a cache of precomputed bounding boxes to help speed up the trace.
  */
-void fireRayInner(Track &track, const ComponentInfo &componentInfo, const std::vector<size_t>& children) {
+void fireRayInner(Track &track, const ComponentInfo &componentInfo, const std::vector<size_t>& children, BoundingBoxCache& cache) {
     for (const auto& index : children) {
-        auto boundingBox = componentInfo.boundingBox(index);
+        auto boundingBox = getBoundingBox(index, componentInfo, cache);
         if (boundingBox.doesLineIntersect(track)) {
             // add link to this component
             const auto lookAtChildren = addLink(track, componentInfo, index);
+            // If we're not at the bottom, recurse and look at the children of this component
             if (lookAtChildren) {
                 const auto& nextChildren = componentInfo.children(index);
-                fireRayInner(track, componentInfo, nextChildren);
+                fireRayInner(track, componentInfo, nextChildren, cache);
             }
         }
     }
@@ -214,11 +247,12 @@ void fireRayInner(Track &track, const ComponentInfo &componentInfo, const std::v
  * accumulates the intersection results.
  * @param componentInfo :: The object that will provide access to component
  * information.
+ * @param cache :: a cache of precomputed bounding boxes to help speed up the trace.
  */
-void fireRay(Track &track, const ComponentInfo &componentInfo) {
+void fireRay(Track &track, const ComponentInfo &componentInfo, BoundingBoxCache& cache) {
     const auto root = componentInfo.root();
     const auto& children = componentInfo.children(root);
-    fireRayInner(track, componentInfo, children);
+    fireRayInner(track, componentInfo, children, cache);
 }
 
 } // namespace
@@ -231,16 +265,54 @@ namespace BeamlineRayTracer {
  * @param dir :: A directional vector. The starting point is defined by the
  * instrument source.
  * @param componentInfo :: The object used to access the source position.
+ * @param cache :: a cache of precomputed bounding boxes to help speed up the trace.
  * @return Links :: A collection of links defining intersection information.
  */
 Links traceFromSource(const Kernel::V3D &dir,
-                      const ComponentInfo &componentInfo) {
+                      const ComponentInfo &componentInfo,
+                      BoundingBoxCache& cache) {
 
   // Create a results track
   Track resultsTrack(componentInfo.sourcePosition(), dir);
 
   // Fire the test ray at the instrument
-  fireRay(resultsTrack, componentInfo);
+  fireRay(resultsTrack, componentInfo, cache);
+
+  return getResults(resultsTrack);
+}
+
+/**
+ * Trace a given track from the sample position in the given direction.
+ *
+ * @param dir :: A directional vector. The starting point is defined by the
+ * source.
+ * @param componentInfo :: The object used to access the source position.
+ * @return Links :: A collection of links defining intersection information.
+ */
+Links traceFromSource(const Kernel::V3D &dir,
+                      const ComponentInfo &componentInfo) { 
+    BoundingBoxCache cache;
+    return traceFromSource(dir, componentInfo, cache);
+}
+
+/**
+ * Trace a given track from the sample position in the given direction.
+ *
+ * @param dir :: A directional vector. The starting point is defined by the
+ * source.
+ * @param componentInfo :: The object used to access the source position.
+ * @param cache :: a cache of precomputed bounding boxes to help speed up the trace.
+ * @return Links :: A collection of links defining intersection information.
+ */
+Links traceFromSample(const Kernel::V3D &dir,
+                      const ComponentInfo &componentInfo,
+                      BoundingBoxCache& cache) {
+
+  // Create a new results track
+  Track resultsTrack(componentInfo.samplePosition(), dir);
+
+  // Fire the test ray at the instrument
+  fireRay(resultsTrack, componentInfo, cache);
 
   return getResults(resultsTrack);
 }
@@ -254,15 +326,9 @@ Links traceFromSource(const Kernel::V3D &dir,
  * @return Links :: A collection of links defining intersection information.
  */
 Links traceFromSample(const Kernel::V3D &dir,
-                      const ComponentInfo &componentInfo) {
-
-  // Create a new results track
-  Track resultsTrack(componentInfo.samplePosition(), dir);
-
-  // Fire the test ray at the instrument
-  fireRay(resultsTrack, componentInfo);
-
-  return getResults(resultsTrack);
+                      const ComponentInfo &componentInfo) { 
+    BoundingBoxCache cache;
+    return traceFromSample(dir, componentInfo, cache);
 }
 
 /**
@@ -290,6 +356,52 @@ size_t getDetectorResult(const ComponentInfo &componentInfo,
   // Return an invalid index
   // If no detector is found
   return -1;
+}
+
+/**
+ * Trace a given track from the source position in the given directions.
+ *
+ * @param dirs :: A collections of direction vectors. The starting point for each is defined by the
+ * source.
+ * @param componentInfo :: The object used to access the source position.
+ * @return Links :: A vector of collections of links defining intersection information.
+ */
+std::vector<Links> traceFromSource(const std::vector<Kernel::V3D> &dirs,
+                                   const ComponentInfo &componentInfo) {
+
+  std::vector<Links> results;
+  results.reserve(dirs.size());
+
+  BoundingBoxCache cache;
+  std::transform(dirs.begin(), dirs.end(), std::back_inserter(results),
+                 [&componentInfo, &cache](const auto &dir) {
+                   return traceFromSource(dir, componentInfo, cache);
+                 });
+
+  return results;
+}
+
+/**
+ * Trace a given track from the sample position in the given directions.
+ *
+ * @param dirs :: A collections of direction vectors. The starting point for each is defined by the
+ * sample.
+ * @param componentInfo :: The object used to access the sample position.
+ * @return Links :: A vector of collections of links defining intersection information.
+ */
+std::vector<Links> traceFromSample(const std::vector<Kernel::V3D> &dirs,
+                                   const ComponentInfo &componentInfo) {
+
+  std::vector<Links> results;
+  results.reserve(dirs.size());
+
+  BoundingBoxCache cache;
+  std::transform(dirs.begin(), dirs.end(), std::back_inserter(results),
+                 [&componentInfo, &cache](const auto &dir) {
+                   return traceFromSample(dir, componentInfo, cache);
+                 });
+
+  return results;
 }
 
 } // namespace BeamlineRayTracer

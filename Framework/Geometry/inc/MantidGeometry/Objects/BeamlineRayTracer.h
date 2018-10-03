@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/Track.h"
+#include <vector>
 
 /**
 BeamlineRayTracer contains a set of free functions that are responsible for
@@ -54,14 +55,12 @@ namespace BeamlineRayTracer {
  */
 MANTID_GEOMETRY_DLL Links traceFromSource(const Kernel::V3D &dir,
                                           const ComponentInfo &componentInfo);
-
 /**
  * Trace a given track from the instrument sample in the given direction
  * and compile a list of results that this track intersects.
  */
 MANTID_GEOMETRY_DLL Links traceFromSample(const Kernel::V3D &dir,
                                           const ComponentInfo &componentInfo);
-
 /**
  * Using the results of the trace, return the first detector
  * (that is NOT a monitor) found in the results.
@@ -69,6 +68,19 @@ MANTID_GEOMETRY_DLL Links traceFromSample(const Kernel::V3D &dir,
 MANTID_GEOMETRY_DLL size_t getDetectorResult(const ComponentInfo &componentInfo,
                                              const DetectorInfo &detectorInfo,
                                              Track &resultsTrack);
+/**
+ * Trace a collection of tracks from the instrument source in the given directions
+ * and compile a list of results that each track intersects.
+ */
+MANTID_GEOMETRY_DLL std::vector<Links> traceFromSource(const std::vector<Kernel::V3D> &dirs,
+                      const ComponentInfo &componentInfo);
+/**
+ * Trace a collection of tracks from the instrument sample in the given directions
+ * and compile a list of results that each track intersects.
+ */
+MANTID_GEOMETRY_DLL std::vector<Links> traceFromSample(const std::vector<Kernel::V3D> &dirs,
+                      const ComponentInfo &componentInfo);
+
 } // namespace BeamlineRayTracer
 
 } // namespace Geometry
