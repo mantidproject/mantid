@@ -18,10 +18,10 @@ New
 - Project recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
 - If project recovery fails when attempting to recover a checkpoint it will open a new GUI offering multiple checkpoints to the user and the ability to open them in a script window. (See image below)
 
-.. image:: ../images/ProjectRecoveryFailureDialog.png
-    :width: 400px
-    :align: center
-    :alt: alternate text
+.. figure:: ../../images/ProjectRecoveryFailureDialog.png
+    :class: screenshot
+    :align: right
+    :figwidth: 70%
 
 Changes
 #######
@@ -31,10 +31,10 @@ Changes
 - Project Recovery will now attempt to recover multiple instances of mantid that are ran at the same time.
 - The project recovery prompt on mantid restart is improved and shows which checkpoint you will be getting. (See image below)
 
-.. image:: ../images/ProjectRecoveryDialog.png
-    :width: 400px
-    :align: center
-    :alt: alternate text
+.. figure:: ../../images/ProjectRecoveryDialog.png
+    :class: screenshot
+    :align: right
+    :figwidth: 70%
 
 Bugfixes
 ########

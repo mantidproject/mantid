@@ -169,7 +169,7 @@ void ProjectRecoveryModel::updateCheckpointTried(
     const std::string &checkpointName) {
   for (auto c : m_rows) {
     if (c[0] == checkpointName) {
-      c[3] == "Yes";
+      c[3] = "Yes";
     }
   }
 }
