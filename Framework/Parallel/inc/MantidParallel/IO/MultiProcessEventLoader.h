@@ -2,6 +2,7 @@
 #define MANTID_PARALLEL_MULTIPROCESSEVENTLOADER_H_
 
 #include <atomic>
+#include <boost/numeric/conversion/cast.hpp>
 #include <mutex>
 #include <queue>
 #include <string>
@@ -201,8 +202,11 @@ void MultiProcessEventLoader::GroupLoader<
       part->setEventOffset(start);
       for (unsigned i = 0; i < eventId.size(); ++i) {
         try {
-          TofEvent event{(double)eventTimeOffset[i], part->next()};
-          storage.appendEvent(0, eventId[i], event);
+          using ToFType = decltype(std::declval<TofEvent>().tof());
+          storage.appendEvent(
+              0, eventId[i],
+              TofEvent{boost::numeric_cast<ToFType>(eventTimeOffset[i]),
+                       part->next()});
         } catch (std::exception const &ex) {
           std::rethrow_if_nested(ex);
         }
