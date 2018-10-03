@@ -27,6 +27,9 @@ class WriteToSignal(QObject):
     used to transform write requests to
     Qt-signals. Mainly used to communicate
     stdout/stderr across threads"""
+    def __init__(self, original_out):
+        QObject.__init__(self)
+        self.__original_out = original_out
 
     sig_write_received = Signal(str)
 
@@ -40,4 +43,7 @@ class WriteToSignal(QObject):
         return False
 
     def write(self, txt):
+        # write to the console
+        self.__original_out.write(txt)
+        # emit the signal which will write to logging
         self.sig_write_received.emit(txt)

@@ -29,6 +29,8 @@ from workbench.plugins.base import PluginWidget
 
 # Default logs at notice
 DEFAULT_LOG_PRIORITY = 5
+ORIGINAL_STDOUT = sys.stdout
+ORIGINAL_STDERR = sys.stderr
 
 
 class LogMessageDisplay(PluginWidget):
@@ -44,10 +46,10 @@ class LogMessageDisplay(PluginWidget):
         self.setWindowTitle(self.get_plugin_title())
 
         # output capture
-        stdout_capture, stderr_capture = WriteToSignal(), WriteToSignal()
-        stdout_capture.sig_write_received.connect(self.display.appendNotice)
-        stderr_capture.sig_write_received.connect(self.display.appendError)
-        self.stdout, self.stderr = stdout_capture, stderr_capture
+        self.stdout = WriteToSignal(ORIGINAL_STDOUT)
+        self.stdout.sig_write_received.connect(self.display.appendNotice)
+        self.stderr = WriteToSignal(ORIGINAL_STDERR)
+        self.stderr.sig_write_received.connect(self.display.appendError)
 
     def get_plugin_title(self):
         return "Messages"
