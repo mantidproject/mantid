@@ -267,7 +267,8 @@ void SaveIsawPeaks::exec() {
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
     // Start of a new run
-    if (maxPeakNumb > 0) appendPeakNumb += maxPeakNumb + 1;
+    if (maxPeakNumb > 0)
+      appendPeakNumb += maxPeakNumb + 1;
     int run = runMap_it->first;
     bankMap_t &bankMap = runMap_it->second;
 
