@@ -15,10 +15,10 @@ void showAsInvalid(QDoubleSpinBox &spinBox) {
   spinBox.setStyleSheet("QDoubleSpinBox { background-color: #ffb8ad; }");
 
   /// This doesn't work
-  //auto palette = spinBox.palette();
-  //palette.setColor(spinBox.backgroundRole(), QColor("#ffb8ad"));
+  // auto palette = spinBox.palette();
+  // palette.setColor(spinBox.backgroundRole(), QColor("#ffb8ad"));
   // spinBox.setAutoFillBackground(true);
-  //parent->setPalette(palette);
+  // parent->setPalette(palette);
 }
 
 void showAsValid(QDoubleSpinBox &spinBox) {

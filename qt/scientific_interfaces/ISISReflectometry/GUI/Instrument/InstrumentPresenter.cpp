@@ -11,7 +11,7 @@ boost::optional<RangeInLambda> rangeOrNone(RangeInLambda &range,
   else
     return range;
 }
-}
+} // namespace
 
 InstrumentPresenter::InstrumentPresenter(IInstrumentView *view,
                                          Instrument instrument)
