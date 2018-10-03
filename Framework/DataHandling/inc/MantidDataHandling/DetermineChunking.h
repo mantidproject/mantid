@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAHANDLING_DetermineChunking_H_
 #define MANTID_DATAHANDLING_DetermineChunking_H_
 
+#include "MantidAPI/IEventWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidKernel/System.h"
 #include <string>
 #include <vector>
-#include "MantidKernel/System.h"
-#include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidAPI/IEventWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {

@@ -3,9 +3,9 @@
 
 #include "MantidKernel/System.h"
 
+#include "ALCDataLoadingPresenter.h"
 #include "DllConfig.h"
 #include "IALCDataLoadingView.h"
-#include "ALCDataLoadingPresenter.h"
 
 #include "ui_ALCDataLoadingView.h"
 
@@ -15,8 +15,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 class ErrorCurve;
 class LogValueSelector;
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 namespace MantidQt {
 namespace CustomInterfaces {

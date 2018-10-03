@@ -1,13 +1,13 @@
 #ifndef NDPSEUDORANDOMNUMBERGENERATORTEST_H_
 #define NDPSEUDORANDOMNUMBERGENERATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/NDPseudoRandomNumberGenerator.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/NDPseudoRandomNumberGenerator.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 using Mantid::Kernel::NDRandomNumberGenerator;
 

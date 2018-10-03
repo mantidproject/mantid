@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTTOMDMINMAX_LOCAL_H_
 #define MANTID_MDALGORITHMS_CONVERTTOMDMINMAX_LOCAL_H_
 
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

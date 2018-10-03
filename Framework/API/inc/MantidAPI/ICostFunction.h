@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
 #include "MantidAPI/CostFunctionFactory.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {

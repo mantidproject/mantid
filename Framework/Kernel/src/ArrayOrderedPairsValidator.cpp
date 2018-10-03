@@ -50,5 +50,5 @@ template class ArrayOrderedPairsValidator<int64_t>;
 template class ArrayOrderedPairsValidator<long>;
 #endif
 
-} // Kernel
-} // Mantid
+} // namespace Kernel
+} // namespace Mantid

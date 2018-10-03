@@ -1,7 +1,7 @@
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/IPropertyManager.h"
 
 using Mantid::coord_t;
@@ -59,7 +59,7 @@ const std::string IMDEventWorkspace::toString() const {
 
 //-----------------------------------------------------------------------------------------------
 
-} // namespace MDEvents
+} // namespace API
 
 } // namespace Mantid
 

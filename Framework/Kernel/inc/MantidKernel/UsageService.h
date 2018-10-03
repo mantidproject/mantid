@@ -10,8 +10,8 @@
 #include <Poco/ActiveMethod.h>
 #include <Poco/Timer.h>
 
-#include <queue>
 #include <mutex>
+#include <queue>
 
 namespace Mantid {
 namespace Kernel {

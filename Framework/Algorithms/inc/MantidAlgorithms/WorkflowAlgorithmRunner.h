@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_WORKFLOWALGORITHMRUNNER_H_
 #define MANTID_ALGORITHMS_WORKFLOWALGORITHMRUNNER_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {

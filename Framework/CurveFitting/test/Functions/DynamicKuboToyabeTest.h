@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/DynamicKuboToyabe.h"
-#include "MantidCurveFitting/Functions/StaticKuboToyabe.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Functions/DynamicKuboToyabe.h"
+#include "MantidCurveFitting/Functions/StaticKuboToyabe.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

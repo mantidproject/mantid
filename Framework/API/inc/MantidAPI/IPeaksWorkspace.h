@@ -7,8 +7,8 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -189,6 +189,6 @@ protected:
 private:
   IPeaksWorkspace *doClone() const override = 0;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 #endif

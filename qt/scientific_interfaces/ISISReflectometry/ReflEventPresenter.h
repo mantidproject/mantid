@@ -66,6 +66,6 @@ private:
   SliceType m_sliceType;
   int m_group;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H */

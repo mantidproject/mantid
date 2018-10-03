@@ -43,7 +43,7 @@ SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
 }
 
 /**
-* Adds a can definition to the known list
+ * Adds a can definition to the known list
  * @param can A pointer to a Container object
  * @throws std::invalid::argument if the id is empty
  */

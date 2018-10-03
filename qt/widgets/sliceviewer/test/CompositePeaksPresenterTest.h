@@ -1,13 +1,13 @@
 #ifndef SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
 #define SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <boost/make_shared.hpp>
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/NullPeaksPresenter.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MockObjects.h"
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid;

@@ -14,9 +14,11 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(TableWorkspace)
 
-ITableWorkspace_sptr makeTableWorkspace() {
+namespace {
+Mantid::API::Workspace_sptr makeTableWorkspace() {
   return WorkspaceFactory::Instance().createTable();
 }
+} // namespace
 
 void export_TableWorkspace() {
 

@@ -7,9 +7,9 @@
 #include "MantidKernel/PropertyManager.h"
 #include <cxxtest/TestSuite.h>
 
-using Mantid::Kernel::MatrixProperty;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::IntMatrix;
+using Mantid::Kernel::MatrixProperty;
 using Mantid::Kernel::PropertyManager;
 
 class MatrixPropertyTest : public CxxTest::TestSuite {

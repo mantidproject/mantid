@@ -16,11 +16,11 @@ NotebookWriter::NotebookWriter() : m_cell_buffer(Json::arrayValue) {
 }
 
 /**
-* Add a code cell to the buffer of cells to write to the notebook
-*
-* @param array_code :: Json array of strings containing python code
+ * Add a code cell to the buffer of cells to write to the notebook
+ *
+ * @param array_code :: Json array of strings containing python code
  * for the code cell
-*/
+ */
 void NotebookWriter::codeCell(Json::Value array_code) {
 
   Json::Value cell_data;
@@ -37,10 +37,10 @@ void NotebookWriter::codeCell(Json::Value array_code) {
 }
 
 /**
-* Add a code cell to the buffer of cells to write to the notebook
-*
-* @param string_code :: string containing the python for the code cell
-*/
+ * Add a code cell to the buffer of cells to write to the notebook
+ *
+ * @param string_code :: string containing the python for the code cell
+ */
 std::string NotebookWriter::codeCell(std::string string_code) {
 
   Json::Value cell_data;
@@ -59,11 +59,11 @@ std::string NotebookWriter::codeCell(std::string string_code) {
 }
 
 /**
-* Add a markdown cell to the buffer of cells to write to the notebook
-*
-* @param string_array :: json array of strings containing the python
+ * Add a markdown cell to the buffer of cells to write to the notebook
+ *
+ * @param string_array :: json array of strings containing the python
  * code for the code cell
-*/
+ */
 void NotebookWriter::markdownCell(Json::Value string_array) {
 
   Json::Value cell_data;
@@ -77,10 +77,10 @@ void NotebookWriter::markdownCell(Json::Value string_array) {
 }
 
 /**
-* Add a markdown cell to the buffer of cells to write to the notebook
-*
-* @param string_text :: string containing the python code for the code cell
-*/
+ * Add a markdown cell to the buffer of cells to write to the notebook
+ *
+ * @param string_text :: string containing the python code for the code cell
+ */
 std::string NotebookWriter::markdownCell(std::string string_text) {
 
   Json::Value cell_data;
@@ -96,9 +96,9 @@ std::string NotebookWriter::markdownCell(std::string string_text) {
 }
 
 /**
-* Add a markdown cell of information for the user to the buffer of cells to
+ * Add a markdown cell of information for the user to the buffer of cells to
  * write to the notebook
-*/
+ */
 void NotebookWriter::headerComment() {
 
   Json::Value strings(Json::arrayValue);
@@ -121,11 +121,11 @@ void NotebookWriter::headerComment() {
 }
 
 /**
-* Add code cells to the buffer of cells to write to the notebook
+ * Add code cells to the buffer of cells to write to the notebook
  * These are to import Mantid and matplotlib, and to warn the
  * user if the version of Mantid being used does not match the
  * version which generated the notebook.
-*/
+ */
 void NotebookWriter::headerCode() {
 
   Json::Value import_mantid(Json::arrayValue);
@@ -143,9 +143,9 @@ void NotebookWriter::headerCode() {
 }
 
 /**
-* Create a Json value containing the whole notebook
-*@return a Json value containing the whole notebook
-*/
+ * Create a Json value containing the whole notebook
+ *@return a Json value containing the whole notebook
+ */
 Json::Value NotebookWriter::buildNotebook() {
 
   Json::Value output;
@@ -169,10 +169,10 @@ Json::Value NotebookWriter::buildNotebook() {
 }
 
 /**
-* Create a formatted string of Json which describes a notebook
+ * Create a formatted string of Json which describes a notebook
  * @return a formatted string of the Json which describes
  * the whole notebook
-*/
+ */
 std::string NotebookWriter::writeNotebook() {
 
   const Json::Value root = buildNotebook();
@@ -182,5 +182,5 @@ std::string NotebookWriter::writeNotebook() {
 
   return output_string;
 }
-}
-}
+} // namespace API
+} // namespace Mantid

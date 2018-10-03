@@ -17,7 +17,7 @@
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidApplication");
-}
+} // namespace
 
 /// Constructor
 MantidApplication::MantidApplication(int &argc, char **argv)
@@ -29,21 +29,23 @@ MantidApplication::MantidApplication(int &argc, char **argv)
                      "is probably a sign that this Mantid is not fully or "
                      "correctly set up. "
                      "Error details: " +
-                         std::string(rexc.what()) << '\n';
+                         std::string(rexc.what())
+                  << '\n';
   }
 }
 
 void MantidApplication::errorHandling(bool continueWork, int share,
-                                      QString name, QString email) {
+                                      QString name, QString email,
+                                      QString textbox) {
   if (share == 0) {
     Mantid::Kernel::ErrorReporter errorReporter(
         "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
-        true, name.toStdString(), email.toStdString());
+        true, name.toStdString(), email.toStdString(), textbox.toStdString());
     errorReporter.sendErrorReport();
   } else if (share == 1) {
     Mantid::Kernel::ErrorReporter errorReporter(
         "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
-        false, name.toStdString(), email.toStdString());
+        false, name.toStdString(), email.toStdString(), textbox.toStdString());
     errorReporter.sendErrorReport();
   }
 

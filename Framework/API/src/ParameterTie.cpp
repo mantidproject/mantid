@@ -1,5 +1,5 @@
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
@@ -194,5 +194,16 @@ bool ParameterTie::findParametersOf(const IFunction *fun) const {
  */
 bool ParameterTie::isConstant() const { return m_varMap.empty(); }
 
-} // namespace CurveFitting
+/** Get a list of parameters on the right-hand side of the equation
+ */
+std::vector<ParameterReference> ParameterTie::getRHSParameters() const {
+  std::vector<ParameterReference> out;
+  out.reserve(m_varMap.size());
+  for (auto &&varPair : m_varMap) {
+    out.emplace_back(varPair.second);
+  }
+  return out;
+}
+
+} // namespace API
 } // namespace Mantid

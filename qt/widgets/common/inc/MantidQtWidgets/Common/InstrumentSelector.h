@@ -2,9 +2,9 @@
 #define MANTIDQTMANTIDWIDGETS_INSTRUMENTSELECTOR_H_
 
 #include "DllOption.h"
+#include "MantidKernel/ConfigService.h"
 #include <QComboBox>
 #include <QStringList>
-#include "MantidKernel/ConfigService.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -16,7 +16,7 @@ namespace Mantid {
 namespace Kernel {
 class FacilityInfo;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -100,7 +100,8 @@ private:
 private: // members
   /// Poco Observer for Config Service Notifications
   Poco::NObserver<InstrumentSelector,
-                  Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+                  Mantid::Kernel::ConfigValChangeNotification>
+      m_changeObserver;
   /// A list of technqiues. Only those instruments supporting these techniques
   /// are shown.
   QStringList m_techniques;
@@ -115,7 +116,7 @@ private: // members
   /// The last selected instrument
   QString m_selectedInstrument;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_INSTRUMENTSELECTOR_H_

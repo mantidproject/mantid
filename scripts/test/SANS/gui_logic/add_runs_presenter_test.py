@@ -1,6 +1,7 @@
 import unittest
 import sys
 from ui.sans_isis.add_runs_page import AddRunsPage
+from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_file import SummableRunFile
@@ -10,6 +11,7 @@ from sans.gui_logic.presenter.summation_settings_presenter import SummationSetti
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from fake_signal import FakeSignal
 from assert_called import assert_called
+from sans.common.enums import SANSInstrument
 
 if sys.version_info.major == 2:
     import mock
@@ -23,6 +25,11 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         mock_view.sum = FakeSignal()
         mock_view.outFileChanged = FakeSignal()
         return mock_view
+
+    def _make_mock_parent_view(self):
+        mock_parent_view = mock.create_autospec(SANSDataProcessorGui, spec_set=True)
+        mock_parent_view.instrument.to_string.return_value = 'LOQ'
+        return mock_parent_view
 
     def setUpMockChildPresenters(self):
         self._summation_settings_presenter = \
@@ -83,6 +90,7 @@ class InitializationTest(AddRunsPagePresenterTestCase):
         self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.run_summation = self._make_mock_run_summation()
         self.view = self._make_mock_view()
+        self._parent_view = self._make_mock_parent_view()
 
     def _make_presenter_with_child_presenters(self,
                                               run_selection,
@@ -143,6 +151,7 @@ class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
     def setUp(self):
         self.setUpMockChildPresenters()
         self._view = self._make_mock_view()
+        self._parent_view = self._make_mock_parent_view()
         self._event_run = self._make_fake_event_run()
         self._histogram_run = self._make_fake_histogram_run()
         self._make_presenter()
@@ -167,7 +176,7 @@ class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
                                     self._capture_on_change_callback(self.run_selector_presenter),
                                     self._just_use_summation_settings_presenter(),
                                     self._view,
-                                    None)
+                                    self._parent_view)
 
     def test_disables_summation_settings_when_no_event_data(self):
         runs = self._make_mock_run_selection([self._histogram_run,
@@ -192,6 +201,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
     def setUp(self):
         self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.view = self._make_mock_view()
+        self.parent_view = self._make_mock_parent_view()
 
     def _make_presenter(self,
                         run_summation,
@@ -201,7 +211,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
                                     run_selection,
                                     summation_settings,
                                     self.view,
-                                    None)
+                                    self.parent_view)
 
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self._summation_settings_presenter)
@@ -220,7 +230,7 @@ class SummationConfigurationTest(SelectionMockingTestCase):
         self.view.sum.emit()
         run_summation.assert_called_with(fake_run_selection,
                                          self._summation_settings,
-                                         '3-add')
+                                         'LOQ3-add')
 
     def test_shows_error_when_empty_default_directory(self):
         summation_settings_model = self._summation_settings_with_save_directory('')
@@ -238,6 +248,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
     def setUp(self):
         self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.view = self._make_mock_view()
+        self.parent_view = self._make_mock_parent_view()
 
     def _make_presenter(self,
                         run_summation):
@@ -246,7 +257,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
             self._capture_on_change_callback(self.run_selector_presenter),
             self._just_use_summation_settings_presenter(),
             self.view,
-            None)
+            self.parent_view)
 
     def _just_use_summation_settings_presenter(self):
         return self._just_use(self._summation_settings_presenter)
@@ -269,7 +280,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
 
     def test_generates_correct_base_name(self):
         generated_name = self._retrieve_generated_name_for(['1', '2', '3'])
-        self.assertEqual('3-add', generated_name)
+        self.assertEqual('LOQ3-add', generated_name)
 
     def test_regenerates_correct_base_name_after_highest_removed(self):
         run_summation = mock.Mock()
@@ -277,7 +288,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
         self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5', '6']))
         self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5']))
         self.view.sum.emit()
-        self.assertEqual('5-add', self._base_file_name_arg(run_summation))
+        self.assertEqual('LOQ5-add', self._base_file_name_arg(run_summation))
 
     def test_correct_base_name_after_set_by_user(self):
         user_out_file_name = 'Output'
@@ -309,9 +320,9 @@ class BaseFileNameTest(SelectionMockingTestCase):
         run_summation = mock.Mock()
         presenter = self._make_presenter(run_summation)
         self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '6', '5']))
-        self.view.set_out_file_name.assert_called_with('6-add')
+        self.view.set_out_file_name.assert_called_with('LOQ6-add')
         self._update_selection_model(self._make_mock_run_selection_from_paths(['5', '4']))
-        self.view.set_out_file_name.assert_called_with('5-add')
+        self.view.set_out_file_name.assert_called_with('LOQ5-add')
 
 
 class SumButtonTest(SelectionMockingTestCase):
@@ -319,6 +330,7 @@ class SumButtonTest(SelectionMockingTestCase):
         self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.run_summation = self._make_mock_run_summation()
         self.view = self._make_mock_view()
+        self.parent_view = self._make_mock_parent_view()
         self.presenter = self._make_presenter()
 
     def _make_presenter(self):
@@ -327,7 +339,7 @@ class SumButtonTest(SelectionMockingTestCase):
             self._capture_on_change_callback(self.run_selector_presenter),
             self._just_use_summation_settings_presenter(),
             self.view,
-            None)
+            self.parent_view)
 
     def test_enables_sum_button_when_row_added(self):
         fake_run_selection = self._make_mock_run_selection_from_paths(['5'])

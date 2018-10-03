@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/TabulatedFunction.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/Functions/TabulatedFunction.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 
@@ -26,7 +26,7 @@ namespace {
 struct Fun {
   double operator()(double x, int i) { return exp(-x * x) + double(i); }
 };
-}
+} // namespace
 
 class TabulatedFunctionTest : public CxxTest::TestSuite {
 public:

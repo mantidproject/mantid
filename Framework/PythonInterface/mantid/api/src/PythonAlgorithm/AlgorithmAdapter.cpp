@@ -1,13 +1,14 @@
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
-#include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
-#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAPI/SerialAlgorithm.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/WrapperHelpers.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
@@ -18,8 +19,6 @@
 namespace Mantid {
 namespace PythonInterface {
 using namespace boost::python;
-using Environment::callMethod;
-using Environment::UndefinedAttributeError;
 
 /**
  * Construct the "wrapper" and stores the reference to the PyObject
@@ -32,7 +31,7 @@ AlgorithmAdapter<BaseAlgorithm>::AlgorithmAdapter(PyObject *self)
   // Only cache the isRunning attribute if it is overridden by the
   // inheriting type otherwise we end up with an infinite recursive call
   // as isRunning always exists from the interface
-  if (Environment::typeHasAttribute(self, "isRunning"))
+  if (typeHasAttribute(self, "isRunning"))
     m_isRunningObj = PyObject_GetAttrString(self, "isRunning");
 }
 
@@ -94,16 +93,16 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
 }
 
 /**
-* Returns seeAlso related algorithms. If not overridden
-* it returns an empty vector of strings
-*/
+ * Returns seeAlso related algorithms. If not overridden
+ * it returns an empty vector of strings
+ */
 template <typename BaseAlgorithm>
 const std::vector<std::string>
 AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
   try {
     // The GIL is required so that the the reference count of the
     // list object can be decremented safely
-    Environment::GlobalInterpreterLock gil;
+    GlobalInterpreterLock gil;
     return Converters::PySequenceToVector<std::string>(
         callMethod<list>(getSelf(), "seeAlso"))();
   } catch (UndefinedAttributeError &) {
@@ -137,27 +136,32 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::helpURL() const {
 }
 
 /**
-*@return True if the algorithm is considered to be running
-*/
+ *@return True if the algorithm is considered to be running
+ */
 template <typename BaseAlgorithm>
 bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
   if (!m_isRunningObj) {
     return SuperClass::isRunning();
   } else {
-    Environment::GlobalInterpreterLock gil;
+    GlobalInterpreterLock gil;
+
+    GNU_DIAG_OFF("parentheses-equality")
     PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
-      throw Environment::PythonException();
+      throw PythonException();
     if (PyBool_Check(result)) {
+
 #if PY_MAJOR_VERSION >= 3
       return static_cast<bool>(PyLong_AsLong(result));
 #else
       return static_cast<bool>(PyInt_AsLong(result));
 #endif
+
     } else
       throw std::runtime_error(
           "Algorithm.isRunning - Expected bool return type.");
   }
+  GNU_DIAG_ON("parentheses-equality")
 }
 
 /**
@@ -181,7 +185,7 @@ AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
   std::map<std::string, std::string> resultMap;
 
   try {
-    Environment::GlobalInterpreterLock gil;
+    GlobalInterpreterLock gil;
     dict resultDict = callMethod<dict>(getSelf(), "validateInputs");
     // convert to a map<string,string>
     boost::python::list keys = resultDict.keys();
@@ -340,5 +344,5 @@ template class AlgorithmAdapter<API::DataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::SerialDataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::ParallelDataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::DistributedDataProcessorAlgorithm>;
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

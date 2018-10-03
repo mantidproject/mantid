@@ -7,16 +7,16 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidDataHandling/FilterEventsByLogValuePreNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/FilterEventsByLogValuePreNexus.h"
-#include <cxxtest/TestSuite.h>
+#include "MantidKernel/Timer.h"
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;

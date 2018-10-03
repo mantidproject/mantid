@@ -1,12 +1,12 @@
 #ifndef FLATBACKGROUNDTEST_H_
 #define FLATBACKGROUNDTEST_H_
 
-#include "MantidAlgorithms/CalculateFlatBackground.h"
-#include "MantidAlgorithms/CompareWorkspaces.h"
-#include "MantidAlgorithms/Minus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/CalculateFlatBackground.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
+#include "MantidAlgorithms/Minus.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/MersenneTwister.h"
@@ -759,10 +759,10 @@ private:
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
               "Removed1");
       for (size_t j = 0; j < spectraCount; ++j) {
-        const double expected = (movingAverageSpecialY(j) +
-                                 (static_cast<double>(windowWidth) - 1) *
-                                     movingAverageStandardY(j)) /
-                                static_cast<double>(windowWidth);
+        const double expected =
+            (movingAverageSpecialY(j) + (static_cast<double>(windowWidth) - 1) *
+                                            movingAverageStandardY(j)) /
+            static_cast<double>(windowWidth);
         TS_ASSERT_DELTA(outputWS->y(j)[0], expected, 1e-12)
         const double expectedError = std::sqrt(
             static_cast<double>(windowWidth) * movingAverageStandardY(j) /

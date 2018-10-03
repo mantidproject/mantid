@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
 #include "ComptonProfileTestHelpers.h"
+#include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
 
 using Mantid::CurveFitting::Functions::ComptonPeakProfile;
 

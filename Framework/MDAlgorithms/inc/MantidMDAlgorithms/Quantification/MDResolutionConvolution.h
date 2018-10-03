@@ -22,11 +22,11 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidKernel/System.h"
-#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
 
@@ -129,8 +129,8 @@ private:
   /// A pointer to the foreground model
   ForegroundModel *m_foreground;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 /*
  * Register a class into the factory using a global RegistrationHelper

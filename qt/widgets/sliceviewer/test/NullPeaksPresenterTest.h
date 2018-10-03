@@ -1,10 +1,10 @@
 #ifndef SLICE_VIEWER_NULLPEAKSPRESENTER_TEST_H_
 #define SLICE_VIEWER_NULLPEAKSPRESENTER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MockObjects.h"
-#include <gmock/gmock.h>
 #include "MantidQtWidgets/SliceViewer/NullPeaksPresenter.h"
+#include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 
 using namespace MantidQt::SliceViewer;
 

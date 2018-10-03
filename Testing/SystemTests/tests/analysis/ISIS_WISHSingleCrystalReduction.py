@@ -1,9 +1,11 @@
-from mantid.simpleapi import *
-import stresstesting
+from collections import namedtuple
+from stresstesting import MantidStressTest
+
+from mantid.simpleapi import (ConvertUnits, LoadRaw, FilterPeaks, PredictPeaks, SetUB)
 import numpy as np
 
 
-class WISHSingleCrystalPeakPredictionTest(stresstesting.MantidStressTest):
+class WISHSingleCrystalPeakPredictionTest(MantidStressTest):
     """
     At the time of writing WISH users rely quite heavily on the PredictPeaks
     algorithm. As WISH has tubes rather than rectangular detectors sometimes
@@ -42,12 +44,19 @@ class WISHSingleCrystalPeakPredictionTest(stresstesting.MantidStressTest):
     def validate(self):
         self.assertEqual(self._peaks.rowCount(), 510)
         self.assertEqual(self._filtered.rowCount(), 6)
-        peak = self._filtered.row(2)
 
-        # This is an example of a peak that is known to fall between the gaps
-        # in WISH tubes. Specifically check this one is predicted to exist
-        # because past bugs have been found in the ray tracing
-        peakMatches = peak['h'] == -5 and peak['k'] == -1 and peak['l'] == -7
-        self.assertTrue(peakMatches)
+        # The peak at [-5 -1 -7] is known to fall between the gaps of WISH's tubes
+        # Specifically check this one is predicted to exist because past bugs have
+        # been found in the ray tracing.
+        Peak = namedtuple('Peak', ('DetID', 'BankName', 'h', 'k', 'l'))
+        expected = Peak(DetID=9202086, BankName='WISHpanel09', h=-5.0, k=-1.0, l=-7.0)
+        expected_peak_found = False
+        for row in self._filtered:
+            peak = Peak(DetID=row['DetID'], BankName=row['BankName'], h=row['h'], k=row['k'], l=row['l'])
+            if peak == expected:
+                expected_peak_found = True
+                break
+        #endfor
+        self.assertTrue(expected_peak_found, msg="Peak at {} expected but it was not found".format(expected))
 
         return self._peaks.name(), "WISHPredictedSingleCrystalPeaks.nxs"

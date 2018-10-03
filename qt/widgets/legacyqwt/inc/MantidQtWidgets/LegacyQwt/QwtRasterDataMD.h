@@ -1,13 +1,13 @@
 #ifndef QwtRasterDataMD_H_
 #define QwtRasterDataMD_H_
 
-#include "MantidQtWidgets/LegacyQwt/DllOption.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidQtWidgets/LegacyQwt/DllOption.h"
 
 #include <qwt_double_interval.h>
 #include <qwt_raster_data.h>
@@ -116,7 +116,7 @@ protected:
   Mantid::API::MDNormalization m_normalization;
 };
 
-} // namespace SliceViewer
-} // namespace Mantid
+} // namespace API
+} // namespace MantidQt
 
 #endif /* QwtRasterDataMD_H_ */

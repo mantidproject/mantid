@@ -7,7 +7,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadIsawDetCal.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -41,7 +40,7 @@ void loadEmptyInstrument(const std::string &filename,
   loaderCAL.execute();
   TS_ASSERT(loaderCAL.isExecuted());
 }
-}
+} // namespace
 
 class LoadIsawDetCalTest : public CxxTest::TestSuite {
 public:

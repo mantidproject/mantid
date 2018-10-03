@@ -16,7 +16,7 @@ class Histogram;
 class HistogramE;
 class HistogramY;
 class Points;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 

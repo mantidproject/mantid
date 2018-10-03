@@ -1,18 +1,18 @@
 #ifndef BINARYFILETEST_H_
 #define BINARYFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/BinaryFile.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
+#include <cxxtest/TestSuite.h>
 #include <sys/stat.h>
 
 using namespace Mantid::Kernel;
 
+using std::cout;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using std::cout;
 
 //==========================================================================================
 /// Make the code clearer by having this an explicit type

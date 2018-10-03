@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -72,7 +71,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", "test_outLn2");
         alg.setPropertyValue("Natural", "1");
 
-        );
+    );
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());

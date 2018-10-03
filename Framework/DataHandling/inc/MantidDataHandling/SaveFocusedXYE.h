@@ -118,6 +118,6 @@ private:
   /// Comment character
   std::string m_comment;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // DATAHANDING_SAVEFOCUSEDXYE_H_

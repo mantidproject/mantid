@@ -1,11 +1,11 @@
 #ifndef MANTID_CURVEFITTING_SEQDOMAINSPECTRUMCREATOR_H_
 #define MANTID_CURVEFITTING_SEQDOMAINSPECTRUMCREATOR_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

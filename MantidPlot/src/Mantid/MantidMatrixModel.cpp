@@ -2,9 +2,9 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/RefAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
 
@@ -235,7 +235,7 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
 }
 
 Qt::ItemFlags MantidMatrixModel::flags(const QModelIndex &index) const {
-  // MG: For item selection to work correclty in later Qt versions it must be
+  // MG: For item selection to work correctly in later Qt versions it must be
   // marked as enabled
   if (index.isValid())
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;

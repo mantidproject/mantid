@@ -128,6 +128,6 @@ void LocalParameterItemDelegate::prepareForPastedData() {
   }
 }
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

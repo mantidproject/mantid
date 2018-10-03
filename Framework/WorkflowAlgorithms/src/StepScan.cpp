@@ -40,13 +40,15 @@ void StepScan::init() {
 
   declareProperty("XMin", EMPTY_DBL(),
                   "The minimum value of X for which an event will be counted.");
-  declareProperty("XMax", EMPTY_DBL(), "The maximum value of X for which an "
-                                       "event will be counted. Must be greater "
-                                       "than XMin.");
+  declareProperty("XMax", EMPTY_DBL(),
+                  "The maximum value of X for which an "
+                  "event will be counted. Must be greater "
+                  "than XMin.");
   // N.B. The choice of units is restricted by the upstream StepScan interface,
   // but in fact any convertible unit will work so is allowed here
-  declareProperty("RangeUnit", "TOF", boost::make_shared<StringListValidator>(
-                                          UnitFactory::Instance().getKeys()),
+  declareProperty("RangeUnit", "TOF",
+                  boost::make_shared<StringListValidator>(
+                      UnitFactory::Instance().getKeys()),
                   "The units in which XMin and XMax is being given.");
 }
 

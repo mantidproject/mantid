@@ -15,7 +15,7 @@ class Sample;
 namespace Geometry {
 class IDetector;
 class IObject;
-}
+} // namespace Geometry
 
 namespace Algorithms {
 /** A base class for absorption correction algorithms.

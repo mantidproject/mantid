@@ -1,9 +1,9 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpBeta.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/System.h"
 
-#include <gsl/gsl_sf_erf.h>
 #include <cmath>
+#include <gsl/gsl_sf_erf.h>
 
 using namespace std;
 
@@ -23,7 +23,7 @@ DECLARE_FUNCTION(ThermalNeutronBk2BkExpBeta)
 
 //----------------------------------------------------------------------------------------------
 /** Defintion of parameter
-  */
+ */
 void ThermalNeutronBk2BkExpBeta::init() {
   declareParameter("Width", 1.0);
   declareParameter("Tcross", 1.0);
@@ -36,7 +36,7 @@ void ThermalNeutronBk2BkExpBeta::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Function 1D
-  */
+ */
 void ThermalNeutronBk2BkExpBeta::function1D(double *out, const double *xValues,
                                             const size_t nData) const {
   double width = getParameter("Width");
@@ -53,7 +53,7 @@ void ThermalNeutronBk2BkExpBeta::function1D(double *out, const double *xValues,
 }
 
 /** Derivative: use numerical derivative
-  */
+ */
 void ThermalNeutronBk2BkExpBeta::functionDeriv(const FunctionDomain &domain,
                                                Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
@@ -61,7 +61,7 @@ void ThermalNeutronBk2BkExpBeta::functionDeriv(const FunctionDomain &domain,
 
 //----------------------------------------------------------------------------------------------
 /** Core function
-  */
+ */
 double ThermalNeutronBk2BkExpBeta::corefunction(double dh, double width,
                                                 double tcross, double beta0,
                                                 double beta1, double beta0t,

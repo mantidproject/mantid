@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_PDFFourierTransform_H_
 #define MANTID_ALGORITHMS_PDFFourierTransform_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -41,7 +41,7 @@ private:
   double determineRho0();
 };
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_PDFFourierTransform_H_ */

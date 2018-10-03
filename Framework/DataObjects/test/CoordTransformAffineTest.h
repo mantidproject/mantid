@@ -2,14 +2,14 @@
 #define MANTID_DATAOBJECTS_COORDTRANSFORMAFFINETEST_H_
 
 #include "MantidAPI/CoordTransform.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/VMD.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/VMD.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_ptr.hpp>

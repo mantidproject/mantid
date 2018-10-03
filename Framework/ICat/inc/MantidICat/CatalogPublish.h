@@ -88,6 +88,6 @@ private:
   const std::string
   generateWorkspaceHistory(Mantid::API::Workspace_sptr &workspace);
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 #endif

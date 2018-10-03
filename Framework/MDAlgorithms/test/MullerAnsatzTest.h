@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_MULLERANSATZTEST_H_
 #define MANTID_MDALGORITHMS_MULLERANSATZTEST_H_
 
-#include "MantidMDAlgorithms/Quantification/Models/MullerAnsatz.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MDFittingTestHelpers.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidMDAlgorithms/Quantification/Models/MullerAnsatz.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -55,8 +55,8 @@ public:
   }
 
   void test_MANS_Has_DefaultIon_As_Cu2() {
-    using Mantid::MDAlgorithms::MullerAnsatz;
     using Mantid::MDAlgorithms::ForegroundModel;
+    using Mantid::MDAlgorithms::MullerAnsatz;
     MullerAnsatz Cu2Default;
     Cu2Default.initialize();
     Cu2Default.setParameter("Amplitude", 0.67);

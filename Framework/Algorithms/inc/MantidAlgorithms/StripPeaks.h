@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_STRIPPEAKS_H_
 #define MANTID_ALGORITHMS_STRIPPEAKS_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {

@@ -43,7 +43,7 @@ public:
   virtual PoldiAbstractChopper *createChopper(std::string chopperType);
 };
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid
 
 #endif /* MANTID_SINQ_POLDICHOPPERFACTORY_H_ */

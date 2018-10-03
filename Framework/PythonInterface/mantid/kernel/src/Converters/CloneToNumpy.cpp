@@ -2,8 +2,8 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
 #include "MantidTypes/Core/DateAndTime.h"
 #include <boost/python/list.hpp>
@@ -169,7 +169,7 @@ INSTANTIATE_CLONEND(Types::Core::DateAndTime)
 // Need further ND specialisation for bool
 INSTANTIATE_CLONEND(bool)
 ///@endcond
-}
-}
-}
-}
+} // namespace Impl
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

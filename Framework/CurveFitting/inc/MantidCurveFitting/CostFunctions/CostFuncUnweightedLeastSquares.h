@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARES_H_
 #define MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARES_H_
 
-#include "MantidKernel/System.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

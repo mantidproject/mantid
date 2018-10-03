@@ -66,6 +66,6 @@ public:
   /// return the error message
   const char *what() const noexcept override;
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 #endif

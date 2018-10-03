@@ -144,5 +144,5 @@ void SassenaFFT::exec() {
   }
 }
 
-} // namespacce Mantid
 } // namespace Algorithms
+} // namespace Mantid

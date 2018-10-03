@@ -1,20 +1,20 @@
 #ifndef IFUNCTIONWRAPPER_H
 #define IFUNCTIONWRAPPER_H
 
-#include <boost/shared_ptr.hpp>
 #include <QObject>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
 class IFunction;
 class CompositeFunction;
 class IPeakFunction;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 /**
  * IFunctionWrapper is a wrapper for IFunction pointer which is a QObject
- * and can send and recieve signals.
+ * and can send and receive signals.
  */
 class IFunctionWrapper : public QObject {
   Q_OBJECT

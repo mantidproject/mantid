@@ -88,7 +88,7 @@ void isend_irecv(const Communicator &comm) {
   TS_ASSERT_THROWS_NOTHING(recv_req.wait());
   TS_ASSERT_EQUALS(result, expected);
 }
-}
+} // namespace
 
 class CommunicatorTest : public CxxTest::TestSuite {
 public:

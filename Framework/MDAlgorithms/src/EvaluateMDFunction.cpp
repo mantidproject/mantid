@@ -1,16 +1,16 @@
 #include "MantidMDAlgorithms/EvaluateMDFunction.h"
-#include "MantidAPI/FunctionProperty.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FunctionDomainMD.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EvaluateMDFunction)

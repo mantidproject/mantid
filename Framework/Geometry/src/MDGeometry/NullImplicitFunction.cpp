@@ -8,5 +8,5 @@ std::string NullImplicitFunction::getName() const {
 }
 
 std::string NullImplicitFunction::toXMLString() const { return std::string(); }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

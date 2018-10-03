@@ -1,22 +1,22 @@
 #include "MantidAlgorithms/MergeRuns.h"
 
-#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
-#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -738,5 +738,5 @@ std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
   return newAddeeSpecDefs;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -379,5 +379,5 @@ const char EnggDiffGSASFittingViewQtWidget::GSAS_HOME_SETTING_NAME[] =
 const char EnggDiffGSASFittingViewQtWidget::SETTINGS_NAME[] =
     "EnggGUIGSASTabSettings";
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

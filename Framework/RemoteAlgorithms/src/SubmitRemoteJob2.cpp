@@ -1,10 +1,10 @@
+#include "MantidRemoteAlgorithms/SubmitRemoteJob2.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidRemoteAlgorithms/SubmitRemoteJob2.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -92,9 +92,10 @@ void SubmitRemoteJob2::exec() {
   } catch (std::exception &e) {
     throw std::runtime_error("Could not set the output property JobID with the "
                              "ID value returned from the compute resource: '" +
-                             jid + "'. This looks as if there has been "
-                                   "an error in the job submission. Error "
-                                   "description: " +
+                             jid +
+                             "'. This looks as if there has been "
+                             "an error in the job submission. Error "
+                             "description: " +
                              e.what());
   }
   g_log.information() << "Job submitted.  Job ID =  " << jid

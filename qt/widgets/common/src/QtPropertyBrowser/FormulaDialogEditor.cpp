@@ -17,5 +17,5 @@ void FormulaDialogEditor::runDialog() {
     updateProperty();
   }
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

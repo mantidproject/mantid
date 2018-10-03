@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h"
 #include "MantidAPI/ICostFunction.h"
+#include "MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h"
 
 #include <sstream>
 

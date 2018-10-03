@@ -7,8 +7,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 // STL
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
 #endif // MANTID_DATAOBJECTSTEST_PRECOMPILED_HEADER_H_

@@ -43,8 +43,8 @@ public:
   }
 
   /**
-  * @brief Test default constraints are implemented
-  */
+   * @brief Test default constraints are implemented
+   */
   void test_constraints() {
     auto func = createTestInelasticIsoRotDiff();
     std::vector<std::string> parameters{"Height", "Radius", "Tau"};

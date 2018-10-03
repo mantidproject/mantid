@@ -1,8 +1,8 @@
 #include "MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters3.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -32,7 +32,7 @@ RefinePowderInstrumentParameters3::RefinePowderInstrumentParameters3()
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties
-  */
+ */
 void RefinePowderInstrumentParameters3::init() {
   // Peak position workspace
   declareProperty(
@@ -88,8 +88,9 @@ void RefinePowderInstrumentParameters3::init() {
       "Algorithm to calculate the standard error of peak positions.");
 
   // Damping factor
-  declareProperty("Damping", 1.0, "Damping factor for (1) minimizer 'Damped "
-                                  "Gauss-Newton'. (2) Monte Carlo. ");
+  declareProperty("Damping", 1.0,
+                  "Damping factor for (1) minimizer 'Damped "
+                  "Gauss-Newton'. (2) Monte Carlo. ");
 
   // Anealing temperature
   declareProperty("AnnealingTemperature", 1.0,
@@ -105,7 +106,7 @@ void RefinePowderInstrumentParameters3::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main execution body
-  */
+ */
 void RefinePowderInstrumentParameters3::exec() {
   // 1. Process input
   processInputProperties();
@@ -164,7 +165,7 @@ void RefinePowderInstrumentParameters3::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Process input properties
-  */
+ */
 void RefinePowderInstrumentParameters3::processInputProperties() {
   // Data Workspace
   m_dataWS = getProperty("InputPeakPositionWorkspace");
@@ -213,7 +214,7 @@ void RefinePowderInstrumentParameters3::processInputProperties() {
 
 //----------------------------------------------------------------------------------------------
 /** Parse TableWorkspaces
-  */
+ */
 void RefinePowderInstrumentParameters3::parseTableWorkspaces() {
   m_profileParameters.clear();
 
@@ -222,7 +223,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspaces() {
 
 //----------------------------------------------------------------------------------------------
 /** Parse table workspace to a map of Parameters
-  */
+ */
 void RefinePowderInstrumentParameters3::parseTableWorkspace(
     TableWorkspace_sptr tablews, map<string, Parameter> &parammap) {
   // 1. Process Table column names
@@ -287,7 +288,7 @@ void RefinePowderInstrumentParameters3::parseTableWorkspace(
 
 //----------------------------------------------------------------------------------------------
 /** Fit instrument parameters by non Monte Carlo algorithm
-  * Requirement:  m_positionFunc should have the best fit result;
+ * Requirement:  m_positionFunc should have the best fit result;
  */
 double RefinePowderInstrumentParameters3::execFitParametersNonMC() {
   // 1. Set up constraints
@@ -309,7 +310,7 @@ double RefinePowderInstrumentParameters3::execFitParametersNonMC() {
 
 //----------------------------------------------------------------------------------------------
 /** Refine instrument parameters by Monte Carlo/simulated annealing method
-  */
+ */
 double RefinePowderInstrumentParameters3::execFitParametersMC() {
   // 1. Monte Carlo simulation
   double chisq = doSimulatedAnnealing(m_profileParameters);
@@ -325,10 +326,10 @@ double RefinePowderInstrumentParameters3::execFitParametersMC() {
 
 //----------------------------------------------------------------------------------------------
 /** Do MC/simulated annealing to refine parameters
-  *
-  * Helpful:     double curchi2 = calculateD2TOFFunction(mFunction, domain,
-  *values, rawY, rawE);
-  */
+ *
+ * Helpful:     double curchi2 = calculateD2TOFFunction(mFunction, domain,
+ *values, rawY, rawE);
+ */
 double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
     map<string, Parameter> inparammap) {
   // 1. Prepare/initialization
@@ -491,12 +492,12 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 
 //----------------------------------------------------------------------------------------------
 /** Propose new parameters
-  *
-  * @param mcgroup:     list of parameters to have new values proposed
-  * @param currchisq:  present chi^2 (as a factor in step size)
-  * @param curparammap: current parameter maps
-  * @param newparammap: parameters map containing new/proposed value
-  */
+ *
+ * @param mcgroup:     list of parameters to have new values proposed
+ * @param currchisq:  present chi^2 (as a factor in step size)
+ * @param curparammap: current parameter maps
+ * @param newparammap: parameters map containing new/proposed value
+ */
 void RefinePowderInstrumentParameters3::proposeNewValues(
     vector<string> mcgroup, map<string, Parameter> &curparammap,
     map<string, Parameter> &newparammap, double currchisq) {
@@ -599,11 +600,11 @@ void RefinePowderInstrumentParameters3::proposeNewValues(
 
 //----------------------------------------------------------------------------------------------
 /** Determine whether the proposed value should be accepted or denied
-  *
-  * @param curchisq:  present chi^2 (as a factor in step size)
-  * @param newchisq:  new chi^2 (as a factor in step size)
-  * @param temperature:  annealing temperature
-  */
+ *
+ * @param curchisq:  present chi^2 (as a factor in step size)
+ * @param newchisq:  new chi^2 (as a factor in step size)
+ * @param temperature:  annealing temperature
+ */
 bool RefinePowderInstrumentParameters3::acceptOrDenyChange(double curchisq,
                                                            double newchisq,
                                                            double temperature) {
@@ -624,7 +625,7 @@ bool RefinePowderInstrumentParameters3::acceptOrDenyChange(double curchisq,
 
 //----------------------------------------------------------------------------------------------
 /** Book keep the best fitting result
-  */
+ */
 void RefinePowderInstrumentParameters3::bookKeepMCResult(
     map<string, Parameter> parammap, double chisq, int istep, int igroup,
     map<string, Parameter> &bestparammap)
@@ -669,7 +670,7 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
 
 //----------------------------------------------------------------------------------------------
 /** Set up Monte Carlo random walk strategy
-  */
+ */
 void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(
     map<string, Parameter> &parammap, vector<vector<string>> &mcgroups) {
   stringstream dboutss;
@@ -737,13 +738,13 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(
 
 //----------------------------------------------------------------------------------------------
 /** Add parameter (to a vector of string/name) for MC random walk
-  * according to Fit in Parameter
-  *
-  * @param parnamesforMC: vector of parameter for MC minimizer
-  * @param parname: name of parameter to check whether to put into refinement
-  *list
-  * @param parammap :: parammap
-  */
+ * according to Fit in Parameter
+ *
+ * @param parnamesforMC: vector of parameter for MC minimizer
+ * @param parname: name of parameter to check whether to put into refinement
+ *list
+ * @param parammap :: parammap
+ */
 void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
     vector<string> &parnamesforMC, string parname,
     map<string, Parameter> parammap) {
@@ -763,11 +764,11 @@ void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
 
 //----------------------------------------------------------------------------------------------
 /** Implement parameter values, calculate function and its chi square.
-  *
-  * @param parammap:  if size = 0, there is no action to set function parameter.
-  * @param vecY :: vecY
-  * Return: chi^2
-  */
+ *
+ * @param parammap:  if size = 0, there is no action to set function parameter.
+ * @param vecY :: vecY
+ * Return: chi^2
+ */
 double RefinePowderInstrumentParameters3::calculateFunction(
     map<string, Parameter> parammap, vector<double> &vecY) {
   // 1. Implement parameter values to m_positionFunc
@@ -791,7 +792,7 @@ double RefinePowderInstrumentParameters3::calculateFunction(
 
 //----------------------------------------------------------------------------------------------
 /** Calculate Chi^2
-  */
+ */
 double calculateFunctionChiSquare(const vector<double> &modelY,
                                   const vector<double> &dataY,
                                   const vector<double> &dataE) {
@@ -814,7 +815,7 @@ double calculateFunctionChiSquare(const vector<double> &modelY,
 
 //----------------------------------------------------------------------------------------------
 /** Calculate Chi^2 of the a function with all parameters are fixed
-  */
+ */
 double RefinePowderInstrumentParameters3::calculateFunctionError(
     IFunction_sptr function, Workspace2D_sptr dataws, int wsindex) {
   // 1. Record the fitting information
@@ -852,15 +853,15 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(
 
 //----------------------------------------------------------------------------------------------
 /** Fit a function by trying various minimizer or minimizer combination
-  *
-  * @param function :: an instance of a function to fit
-  * @param dataws :: a workspace with the data
-  * @param wsindex :: a histogram index
-  * @param powerfit :: a flag to choose a robust algorithm to fit function
-  *
-  * Return: double chi2 of the final (best) solution.  If fitting fails, chi2
-  *wil be maximum double
-  */
+ *
+ * @param function :: an instance of a function to fit
+ * @param dataws :: a workspace with the data
+ * @param wsindex :: a histogram index
+ * @param powerfit :: a flag to choose a robust algorithm to fit function
+ *
+ * Return: double chi2 of the final (best) solution.  If fitting fails, chi2
+ *wil be maximum double
+ */
 double RefinePowderInstrumentParameters3::fitFunction(IFunction_sptr function,
                                                       Workspace2D_sptr dataws,
                                                       int wsindex,
@@ -962,7 +963,7 @@ double RefinePowderInstrumentParameters3::fitFunction(IFunction_sptr function,
 
 //----------------------------------------------------------------------------------------------
 /** Fit function
-  * Minimizer: "Levenberg-MarquardtMD"/"Simplex"
+ * Minimizer: "Levenberg-MarquardtMD"/"Simplex"
  */
 bool RefinePowderInstrumentParameters3::doFitFunction(
     IFunction_sptr function, Workspace2D_sptr dataws, int wsindex,
@@ -1021,7 +1022,7 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
 
 //----------------------------------------------------------------------------------------------
 /** Construct an output TableWorkspace for fitting result (profile parameters)
-  */
+ */
 TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
     map<string, Parameter> parameters, double startchi2, double finalchi2) {
   // 1. Create TableWorkspace
@@ -1061,11 +1062,11 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(
 //----------------------------------------------------------------------------------------------
 /** Add a parameter to parameter map.  If this parametere does exist, then
  * replace the value
-  * of it.
-  * @param parameters:  map
-  * @param parname:     string, parameter name
-  * @param parvalue:    double, parameter value
-  */
+ * of it.
+ * @param parameters:  map
+ * @param parname:     string, parameter name
+ * @param parvalue:    double, parameter value
+ */
 void RefinePowderInstrumentParameters3::addOrReplace(
     map<string, Parameter> &parameters, string parname, double parvalue) {
   auto pariter = parameters.find(parname);
@@ -1251,8 +1252,8 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
 //----------------------------------------------------------------------------------------------
 /** Copy parameters from source to target, i.e., clear the target and make it
  * exacly same as
-  * source;
-  */
+ * source;
+ */
 void duplicateParameters(map<string, Parameter> source,
                          map<string, Parameter> &target) {
   target.clear();
@@ -1270,8 +1271,8 @@ void duplicateParameters(map<string, Parameter> source,
 //----------------------------------------------------------------------------------------------
 /** Copy parameters from source to target, i.e., clear the target and make it
  * exacly same as
-  * source;
-  */
+ * source;
+ */
 void copyParametersValues(map<string, Parameter> source,
                           map<string, Parameter> &target) {
   // 1. Check
@@ -1327,7 +1328,7 @@ int getStringIndex(map<string, size_t> lookupdict, string key) {
 
 //----------------------------------------------------------------------------------------------
 /** Store function parameter values to a map
-  */
+ */
 void storeFunctionParameterValue(
     IFunction_sptr function, map<string, pair<double, double>> &parvaluemap) {
   parvaluemap.clear();
@@ -1344,8 +1345,8 @@ void storeFunctionParameterValue(
 //----------------------------------------------------------------------------------------------
 /** Restore function parameter values saved in a (string,double) map to a
  * function object
-  * and a (string, Parameter) map
-  */
+ * and a (string, Parameter) map
+ */
 void restoreFunctionParameterValue(
     map<string, pair<double, double>> parvaluemap, IFunction_sptr function,
     map<string, Parameter> &parammap) {

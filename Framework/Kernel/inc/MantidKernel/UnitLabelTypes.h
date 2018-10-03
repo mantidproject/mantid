@@ -64,7 +64,7 @@ public:
 };
 
 } // namespace Units
-}
-} // namespace Mantid::Kernel
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_UNITLABELTYPES_H_ */

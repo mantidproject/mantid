@@ -1,11 +1,11 @@
 #ifndef MDBOX_FLAT_TREE_H_
 #define MDBOX_FLAT_TREE_H_
 
-#include "MantidKernel/Matrix.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidDataObjects/MDBox.h"
-#include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDGridBox.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -154,6 +154,6 @@ public:
 template <typename T>
 void saveMatrix(::NeXus::File *const file, std::string name,
                 Kernel::Matrix<T> &m, ::NeXus::NXnumtype type, std::string tag);
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 #endif

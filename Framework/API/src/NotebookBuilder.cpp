@@ -1,19 +1,19 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/NotebookBuilder.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/HistoryItem.h"
-#include "MantidAPI/NotebookBuilder.h"
-#include "MantidKernel/Property.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Property.h"
 
 #include <boost/utility.hpp>
 
 namespace Mantid {
 namespace API {
 
-using Mantid::Kernel::PropertyHistory_sptr;
 using Mantid::Kernel::PropertyHistory_const_sptr;
+using Mantid::Kernel::PropertyHistory_sptr;
 
 namespace {
 Mantid::Kernel::Logger g_log("NotebookBuilder");

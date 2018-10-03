@@ -1,11 +1,11 @@
 #include "MantidDataHandling/LoadILLIndirect2.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -47,11 +47,11 @@ const std::string LoadILLIndirect2::category() const {
 //----------------------------------------------------------------------------------------------
 
 /**
-* Return the confidence with with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadILLIndirect2::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
@@ -125,8 +125,8 @@ void LoadILLIndirect2::exec() {
 }
 
 /**
-* Set member variable with the instrument name
-*/
+ * Set member variable with the instrument name
+ */
 void LoadILLIndirect2::setInstrumentName(
     const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
 
@@ -142,9 +142,9 @@ void LoadILLIndirect2::setInstrumentName(
 }
 
 /**
-* Load Data details (number of tubes, channels, etc)
-* @param entry First entry of nexus file
-*/
+ * Load Data details (number of tubes, channels, etc)
+ * @param entry First entry of nexus file
+ */
 void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
   // read in the data
   NXData dataGroup = entry.openNXData("data");
@@ -182,11 +182,11 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
 }
 
 /**
-   * Load monitors data found in nexus file
-   *
-   * @param entry :: The Nexus entry
-   *
-   */
+ * Load monitors data found in nexus file
+ *
+ * @param entry :: The Nexus entry
+ *
+ */
 std::vector<std::vector<int>>
 LoadILLIndirect2::loadMonitors(NeXus::NXEntry &entry) {
   // read in the data
@@ -208,13 +208,13 @@ LoadILLIndirect2::loadMonitors(NeXus::NXEntry &entry) {
 }
 
 /**
-   * Creates the workspace and initialises member variables with
-   * the corresponding values
-   *
-   * @param entry :: The Nexus entry
-   * @param monitorsData :: Monitors data already loaded
-   *
-   */
+ * Creates the workspace and initialises member variables with
+ * the corresponding values
+ *
+ * @param entry :: The Nexus entry
+ * @param monitorsData :: Monitors data already loaded
+ *
+ */
 void LoadILLIndirect2::initWorkSpace(
     NeXus::NXEntry & /*entry*/, std::vector<std::vector<int>> monitorsData) {
 
@@ -243,12 +243,12 @@ void LoadILLIndirect2::initWorkSpace(
 }
 
 /**
-   * Load data found in nexus file
-   *
-   * @param entry :: The Nexus entry
-   * @param monitorsData :: Monitors data already loaded
-   *
-   */
+ * Load data found in nexus file
+ *
+ * @param entry :: The Nexus entry
+ * @param monitorsData :: Monitors data already loaded
+ *
+ */
 void LoadILLIndirect2::loadDataIntoTheWorkSpace(
     NeXus::NXEntry &entry, std::vector<std::vector<int>> monitorsData) {
 
@@ -270,9 +270,9 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(
 
   size_t spec = 0;
 
-  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube +
-                                        m_numberOfMonitors +
-                                        m_numberOfSimpleDetectors);
+  Progress progress(this, 0.0, 1.0,
+                    m_numberOfTubes * m_numberOfPixelsPerTube +
+                        m_numberOfMonitors + m_numberOfSimpleDetectors);
 
   // Assign fake values to first X axis <<to be completed>>
   for (size_t i = 0; i <= m_numberOfChannels; ++i) {
@@ -288,8 +288,8 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(
 
     // Assign Y
     int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->dataY(im)
-        .assign(monitor_p, monitor_p + m_numberOfChannels);
+    m_localWorkspace->dataY(im).assign(monitor_p,
+                                       monitor_p + m_numberOfChannels);
 
     // Assign Error
     MantidVec &E = m_localWorkspace->dataE(im);
@@ -368,8 +368,8 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(
 }
 
 /**
-   * Run the Child Algorithm LoadInstrument.
-   */
+ * Run the Child Algorithm LoadInstrument.
+ */
 void LoadILLIndirect2::runLoadInstrument() {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
@@ -439,8 +439,8 @@ void LoadILLIndirect2::moveSingleDetectors(NeXus::NXEntry &entry) {
 
     angleSD.load();
 
-    g_log.debug("Moving single detector " + std::to_string(i) + " to t=" +
-                std::to_string(angleSD[0]));
+    g_log.debug("Moving single detector " + std::to_string(i) +
+                " to t=" + std::to_string(angleSD[0]));
     moveComponent(prefix + std::to_string(index), angleSD[0]);
     index++;
   }

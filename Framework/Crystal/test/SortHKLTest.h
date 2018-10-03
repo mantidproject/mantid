@@ -1,22 +1,22 @@
 #ifndef MANTID_CRYSTAL_SORTHKLTEST_H_
 #define MANTID_CRYSTAL_SORTHKLTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/SortHKL.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include <cxxtest/TestSuite.h>
-#include <fstream>
 #include <Poco/File.h>
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;

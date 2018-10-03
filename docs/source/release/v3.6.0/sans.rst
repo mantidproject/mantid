@@ -44,7 +44,7 @@ Extensions and Improvements
    for details
 
 -  Handle cumulative sample logs for SANS: Adding files using the Add
-   Tabs GUI now ensures that cummulative sample log entries
+   Tabs GUI now ensures that cumulative sample log entries
    (``good_frames``, ``good_uah_log``, ...) are added up in a
    cumulative manner and not just concatenated and then sorted via
    time-stamp.

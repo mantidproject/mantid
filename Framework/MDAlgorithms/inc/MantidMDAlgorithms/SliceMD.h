@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_SLICEMD_H_
 #define MANTID_MDALGORITHMS_SLICEMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
 namespace Mantid {
@@ -89,7 +89,7 @@ protected: // for testing
     chunkMax);*/
 };
 
-} // namespace DataObjects
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_SLICEMD_H_ */

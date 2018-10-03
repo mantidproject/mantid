@@ -25,8 +25,9 @@ void FindSubtreeRoots::removeIfDepthNotEqualTo(std::vector<RowLocation> &region,
                                                int expectedDepth) const {
   region.erase(
       std::remove_if(region.begin(), region.end(),
-                     [expectedDepth](RowLocation const &location)
-                         -> bool { return location.depth() != expectedDepth; }),
+                     [expectedDepth](RowLocation const &location) -> bool {
+                       return location.depth() != expectedDepth;
+                     }),
       region.end());
 }
 

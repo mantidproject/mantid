@@ -1,8 +1,8 @@
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
-#include "MantidVatesAPI/ProgressAction.h"
 #include "MantidKernel/Logger.h"
+#include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 
 using namespace Mantid::API;
 
@@ -42,5 +42,5 @@ void vtkMD0DFactory::initialize(
 
 /// Validate the workspace
 void vtkMD0DFactory::validate() const {}
-}
-}
+} // namespace VATES
+} // namespace Mantid

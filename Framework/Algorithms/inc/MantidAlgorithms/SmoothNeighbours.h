@@ -161,7 +161,7 @@ private:
   std::unique_ptr<Mantid::API::Progress> m_progress = nullptr;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SmoothNeighbours_H_*/

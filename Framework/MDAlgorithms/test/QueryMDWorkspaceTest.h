@@ -4,9 +4,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidMDAlgorithms/QueryMDWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidDataObjects/TableWorkspace.h"
 
 #include <cxxtest/TestSuite.h>
 

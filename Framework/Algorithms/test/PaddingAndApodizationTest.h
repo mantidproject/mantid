@@ -1,19 +1,19 @@
 #ifndef PADDINGANDAPODIZATIONTEST_H_
 #define PADDINGANDAPODIZATIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/PaddingAndApodization.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/PaddingAndApodization.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include <vector>
 
 using namespace Mantid::API;
-using Mantid::MantidVec;
 using Mantid::Algorithms::PaddingAndApodization;
+using Mantid::MantidVec;
 
 namespace {
 struct yData {
@@ -40,7 +40,7 @@ IAlgorithm_sptr setUpAlg() {
   FFTPreProcess->setProperty("OutputWorkspace", "PaddingAndApodization_output");
   return FFTPreProcess;
 }
-}
+} // namespace
 
 class PaddingAndApodizationTest : public CxxTest::TestSuite {
 public:

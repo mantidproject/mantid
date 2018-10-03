@@ -5,15 +5,15 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/VMD.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -167,7 +167,7 @@ private:
                       const std::string &units) const;
 };
 
-} // namespace DataObjects
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_SLICINGALGORITHM_H_ */

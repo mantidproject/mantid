@@ -4,10 +4,10 @@
 namespace Mantid {
 namespace Algorithms {
 
+using Mantid::API::Workspace;
+using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::MandatoryValidator;
-using Mantid::API::WorkspaceProperty;
-using Mantid::API::Workspace;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Comment)

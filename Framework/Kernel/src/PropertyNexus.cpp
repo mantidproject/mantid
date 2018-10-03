@@ -61,12 +61,12 @@ makeProperty(::NeXus::File *file, const std::string &name,
 }
 
 /** Helper method to create a time series property from a boolean
-*
-* @param file :: nexus file handle
-* @param name :: name of the property being created
-* @param times :: vector of times, empty = single property with value
-* @return Property *
-*/
+ *
+ * @param file :: nexus file handle
+ * @param name :: name of the property being created
+ * @param times :: vector of times, empty = single property with value
+ * @return Property *
+ */
 std::unique_ptr<Property>
 makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
                            const std::vector<Types::Core::DateAndTime> &times) {
@@ -216,5 +216,5 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
 
 } // namespace PropertyNexus
 
+} // namespace Kernel
 } // namespace Mantid
-} // namespace API

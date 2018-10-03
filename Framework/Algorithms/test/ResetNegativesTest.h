@@ -1,12 +1,12 @@
 #ifndef MANTID_ALGORITHMS_RESETNEGATIVESTEST_H_
 #define MANTID_ALGORITHMS_RESETNEGATIVESTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 #include <string>
 
 #include "MantidAlgorithms/ResetNegatives.h"

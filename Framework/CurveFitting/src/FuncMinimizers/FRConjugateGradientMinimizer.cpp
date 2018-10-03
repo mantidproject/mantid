@@ -14,7 +14,7 @@ namespace FuncMinimisers {
 namespace {
 /// static logger
 Kernel::Logger g_log("FRConjugateGradientMinimizer");
-}
+} // namespace
 
 // clang-format off
 ///@cond nodoc

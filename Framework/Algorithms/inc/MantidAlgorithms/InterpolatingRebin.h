@@ -13,7 +13,7 @@ class HistogramE;
 class Histogram;
 class BinEdges;
 class Points;
-}
+} // namespace HistogramData
 namespace Algorithms {
 /**Uses cubic splines to interpolate the mean rate of change of the integral
   over the inputed data bins to that for the user supplied bins.

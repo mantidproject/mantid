@@ -12,8 +12,8 @@
 
 namespace Mantid {
 namespace Geometry {
-using Kernel::V3D;
 using Kernel::Quat;
+using Kernel::V3D;
 
 /** Constructor for a parametrized ObjComponent
  * @param base: the base (un-parametrized) IComponent
@@ -23,18 +23,18 @@ ObjComponent::ObjComponent(const IComponent *base, const ParameterMap *map)
     : Component(base, map), m_shape() {}
 
 /** Constructor
-*  @param name ::   The name of the component
-*  @param parent :: The Parent geometry object of this component
-*/
+ *  @param name ::   The name of the component
+ *  @param parent :: The Parent geometry object of this component
+ */
 ObjComponent::ObjComponent(const std::string &name, IComponent *parent)
     : IObjComponent(), Component(name, parent), m_shape() {}
 
 /** Constructor
-*  @param name ::   The name of the component
-*  @param shape ::  A pointer to the object describing the shape of this
-* component
-*  @param parent :: The Parent geometry object of this component
-*/
+ *  @param name ::   The name of the component
+ *  @param shape ::  A pointer to the object describing the shape of this
+ * component
+ *  @param parent :: The Parent geometry object of this component
+ */
 ObjComponent::ObjComponent(const std::string &name,
                            boost::shared_ptr<const IObject> shape,
                            IComponent *parent)
@@ -93,14 +93,14 @@ bool ObjComponent::isOnSide(const V3D &point) const {
 }
 
 /** Checks whether the track given will pass through this Component.
-*  @param track :: The Track Iobject to test (N.B. Will be modified if hits are
-* found)
-*  @returns The number of track segments added (i.e. 1 if the track enters and
-* exits the Iobject once each)
-*  @throw NullPointerException if the underlying geometrical IObject has not
-* been
-* set
-*/
+ *  @param track :: The Track Iobject to test (N.B. Will be modified if hits are
+ * found)
+ *  @returns The number of track segments added (i.e. 1 if the track enters and
+ * exits the Iobject once each)
+ *  @throw NullPointerException if the underlying geometrical IObject has not
+ * been
+ * set
+ */
 int ObjComponent::interceptSurface(Track &track) const {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
@@ -135,12 +135,12 @@ int ObjComponent::interceptSurface(Track &track) const {
 }
 
 /** Finds the approximate solid angle covered by the component when viewed from
-* the point given
-*  @param observer :: The position from which the component is being viewed
-*  @returns The solid angle in steradians
-*  @throw NullPointerException if the underlying geometrical Object has not been
-* set
-*/
+ * the point given
+ *  @param observer :: The position from which the component is being viewed
+ *  @returns The solid angle in steradians
+ *  @throw NullPointerException if the underlying geometrical Object has not
+ * been set
+ */
 double ObjComponent::solidAngle(const V3D &observer) const {
   if (m_map) {
     if (hasComponentInfo()) {
@@ -165,18 +165,18 @@ double ObjComponent::solidAngle(const V3D &observer) const {
 }
 
 /**
-  * Given an input estimate of the axis aligned (AA) bounding box (BB), return
+ * Given an input estimate of the axis aligned (AA) bounding box (BB), return
  * an improved set of values.
-  * The AA BB is determined in the frame of the object and the initial estimate
+ * The AA BB is determined in the frame of the object and the initial estimate
  * will be transformed there.
-  * The returned BB will be the frame of the ObjComponent and may not be
+ * The returned BB will be the frame of the ObjComponent and may not be
  * optimal.
-  * @param absoluteBB :: [InOut] The bounding box for this object component will
+ * @param absoluteBB :: [InOut] The bounding box for this object component will
  * be stored here.
-  * if BB alignment is different from axis alignment, the system of coordinates
+ * if BB alignment is different from axis alignment, the system of coordinates
  * to alighn is taken fron
-  * the absoluteBB
-  */
+ * the absoluteBB
+ */
 void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
   if (m_map) {
     if (hasComponentInfo()) {
@@ -231,37 +231,37 @@ void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
 }
 
 /**
-* Gets the Height of the object by querying the underlying BoundingBox.
-* @return height of object
-*/
+ * Gets the Height of the object by querying the underlying BoundingBox.
+ * @return height of object
+ */
 double ObjComponent::getHeight() const {
   const BoundingBox &bbox = shape()->getBoundingBox();
   return (bbox.yMax() - bbox.yMin()) / getScaleFactor().Y();
 }
 
 /**
-* Gets the Width of the object by querying the underlying BoundingBox.
-* @return width of object
-*/
+ * Gets the Width of the object by querying the underlying BoundingBox.
+ * @return width of object
+ */
 double ObjComponent::getWidth() const {
   const BoundingBox &bbox = shape()->getBoundingBox();
   return (bbox.xMax() - bbox.xMin()) / getScaleFactor().X();
 }
 
 /**
-* Gets the Depth of the object by querying the underlying BoundingBox.
-* @return depth of object
-*/
+ * Gets the Depth of the object by querying the underlying BoundingBox.
+ * @return depth of object
+ */
 double ObjComponent::getDepth() const {
   const BoundingBox &bbox = shape()->getBoundingBox();
   return (bbox.zMax() - bbox.zMin()) / getScaleFactor().Z();
 }
 
 /**
-* Try to find a point that lies within (or on) the object
-* @param point :: On exit, set to the point value (if found)
-* @return 1 if point found, 0 otherwise
-*/
+ * Try to find a point that lies within (or on) the object
+ * @param point :: On exit, set to the point value (if found)
+ * @return 1 if point found, 0 otherwise
+ */
 int ObjComponent::getPointInObject(V3D &point) const {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
@@ -307,9 +307,9 @@ const V3D ObjComponent::takeOutRotation(V3D point) const {
 }
 
 /**
-* Draws the objcomponent, If the handler is not set then this function does
-* nothing.
-*/
+ * Draws the objcomponent, If the handler is not set then this function does
+ * nothing.
+ */
 void ObjComponent::draw() const {
   if (Handle() == nullptr)
     return;
@@ -318,17 +318,17 @@ void ObjComponent::draw() const {
 }
 
 /**
-* Draws the Object
-*/
+ * Draws the Object
+ */
 void ObjComponent::drawObject() const {
   if (shape() != nullptr)
     shape()->draw();
 }
 
 /**
-* Initializes the ObjComponent for rendering, this function should be called
-* before rendering.
-*/
+ * Initializes the ObjComponent for rendering, this function should be called
+ * before rendering.
+ */
 void ObjComponent::initDraw() const {
   if (Handle() == nullptr)
     return;

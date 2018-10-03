@@ -16,7 +16,7 @@ namespace Mantid {
 namespace Geometry {
 class IObject;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace CustomDialogs {
@@ -100,7 +100,7 @@ private:
   /// The centre of the bounding box
   GLdouble m_bb_centres[3];
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMDIALOGS_MANTIDGLWIDGET_H_

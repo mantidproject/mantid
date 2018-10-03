@@ -369,7 +369,7 @@ operator()(const std::vector<unsigned int> &runs) {
 
   std::transform(runs.begin(), runs.end(), std::back_inserter(fileNames),
                  (*this) // Call other overloaded function operator.
-                 );
+  );
 
   return fileNames;
 }
@@ -444,7 +444,7 @@ void RunRangeList::addRunRange(
 /////////////////////////////////////////////////////////////////////////////
 
 namespace // anonymous
-    {
+{
 /**
  * Parses a string containing a run "token" and adds the runs to the parsedRuns
  * vector.
@@ -549,9 +549,9 @@ generateRange(unsigned int const from, unsigned int const to,
         "Unable to generate a range with a step size of zero.");
 
   size_t limit;
-  std::string limitStr;
-  ConfigService::Instance().getValue("loading.multifilelimit", limitStr);
-  if (!Strings::convert(limitStr, limit)) {
+  auto limitStr =
+      ConfigService::Instance().getValue<std::string>("loading.multifilelimit");
+  if (!limitStr.is_initialized() || !Strings::convert(limitStr.get(), limit)) {
     limit = ConfigService::Instance().getFacility().multiFileLimit();
   }
 

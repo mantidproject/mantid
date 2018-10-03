@@ -1,33 +1,28 @@
 #ifndef MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_
 #define MANTID_GEOMETRY_INDEXING_UTILS_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <MantidKernel/Timer.h>
-#include <MantidKernel/System.h>
-#include <MantidKernel/V3D.h>
-#include <MantidKernel/Matrix.h>
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <MantidGeometry/Crystal/IndexingUtils.h>
+#include <MantidKernel/Matrix.h>
+#include <MantidKernel/System.h>
+#include <MantidKernel/Timer.h>
+#include <MantidKernel/V3D.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 class IndexingUtilsTest : public CxxTest::TestSuite {
 public:
   static std::vector<V3D> getNatroliteQs() {
-    std::vector<V3D> q_vectors{{-0.57582, -0.35322, -0.19974},
-                               {-1.41754, -0.78704, -0.75974},
-                               {-1.12030, -0.53578, -0.27559},
-                               {-0.68911, -0.59397, -0.12716},
-                               {-1.06863, -0.43255, 0.01688},
-                               {-1.82007, -0.49671, -0.06266},
-                               {-1.10465, -0.73708, -0.01939},
-                               {-0.12747, -0.32380, 0.00821},
-                               {-0.84210, -0.37038, 0.15403},
-                               {-0.54099, -0.46900, 0.11535},
-                               {-0.90478, -0.50667, 0.51072},
-                               {-0.50387, -0.58561, 0.43502}};
+    std::vector<V3D> q_vectors{
+        {-0.57582, -0.35322, -0.19974}, {-1.41754, -0.78704, -0.75974},
+        {-1.12030, -0.53578, -0.27559}, {-0.68911, -0.59397, -0.12716},
+        {-1.06863, -0.43255, 0.01688},  {-1.82007, -0.49671, -0.06266},
+        {-1.10465, -0.73708, -0.01939}, {-0.12747, -0.32380, 0.00821},
+        {-0.84210, -0.37038, 0.15403},  {-0.54099, -0.46900, 0.11535},
+        {-0.90478, -0.50667, 0.51072},  {-0.50387, -0.58561, 0.43502}};
     // Dec 2011: Change convention for Q = 2 pi / wavelength
     for (auto &q_vector : q_vectors)
       q_vector *= (2.0 * M_PI);
@@ -35,18 +30,10 @@ public:
   }
 
   static std::vector<V3D> getNatroliteIndices() {
-    std::vector<V3D> correct_indices{{1, 9, -9},
-                                     {4, 20, -24},
-                                     {2, 18, -14},
-                                     {0, 12, -12},
-                                     {1, 19, -9},
-                                     {3, 31, -13},
-                                     {0, 20, -14},
-                                     {-1, 3, -5},
-                                     {0, 16, -6},
-                                     {-1, 11, -7},
-                                     {-2, 20, -4},
-                                     {-3, 13, -5}};
+    std::vector<V3D> correct_indices{{1, 9, -9},   {4, 20, -24}, {2, 18, -14},
+                                     {0, 12, -12}, {1, 19, -9},  {3, 31, -13},
+                                     {0, 20, -14}, {-1, 3, -5},  {0, 16, -6},
+                                     {-1, 11, -7}, {-2, 20, -4}, {-3, 13, -5}};
     return correct_indices;
   }
 
@@ -325,8 +312,8 @@ public:
   }
 
   void test_GetMagFFT() {
-#define N_FFT_STEPS 256
-#define HALF_FFT_STEPS 128
+    constexpr size_t N_FFT_STEPS = 256;
+    constexpr size_t HALF_FFT_STEPS = 128;
 
     double projections[N_FFT_STEPS];
     double magnitude_fft[HALF_FFT_STEPS];

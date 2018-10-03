@@ -5,11 +5,11 @@
 #include "MantidAPI/DetectorSearcher.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/NearestNeighbours.h"
+#include "MantidKernel/System.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidGeometry/Crystal/StructureFactorCalculator.h>
-#include "MantidKernel/Matrix.h"
 
 #include <tuple>
 
@@ -67,8 +67,7 @@ private:
 
   void calculateQAndAddToOutput(const Kernel::V3D &hkl,
                                 const Kernel::DblMatrix &orientedUB,
-                                const Kernel::DblMatrix &goniometerMatrix,
-                                int &seqNum);
+                                const Kernel::DblMatrix &goniometerMatrix);
 
 private:
   /// Get the predicted detector direction from Q
@@ -100,7 +99,7 @@ private:
   double m_qConventionFactor;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_PREDICTPEAKS_H_ */

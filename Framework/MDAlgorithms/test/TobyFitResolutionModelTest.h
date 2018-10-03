@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_TOBYFITRESOLUTIONMODELTEST_H_
 #define MANTID_MDALGORITHMS_TOBYFITRESOLUTIONMODELTEST_H_
 
-#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
+#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
 #include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
 
 #include "MDFittingTestHelpers.h"

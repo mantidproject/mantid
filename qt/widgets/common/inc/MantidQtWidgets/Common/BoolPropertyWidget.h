@@ -1,8 +1,8 @@
 #ifndef MANTID_API_BOOLPROPERTYWIDGET_H_
 #define MANTID_API_BOOLPROPERTYWIDGET_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 #include <QCheckBox>
 

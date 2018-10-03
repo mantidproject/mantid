@@ -13,10 +13,10 @@ namespace Mantid {
 namespace DataHandling {
 
 using Mantid::API::FileProperty;
-using Mantid::API::PropertyMode;
-using Mantid::API::WorkspaceProperty;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_const_sptr;
+using Mantid::API::PropertyMode;
+using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::GroupingWorkspace;
 using Mantid::DataObjects::GroupingWorkspace_const_sptr;
 using Mantid::DataObjects::MaskWorkspace;

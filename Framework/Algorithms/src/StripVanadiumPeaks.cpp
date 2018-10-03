@@ -37,9 +37,10 @@ void StripVanadiumPeaks::init() {
   auto min = boost::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
   // The estimated width of a peak in terms of number of channels
-  declareProperty("PeakWidthPercent", 1.0, min, "The estimated peak width as a "
-                                                "percentage of the d-spacing "
-                                                "of the center of the peak.");
+  declareProperty("PeakWidthPercent", 1.0, min,
+                  "The estimated peak width as a "
+                  "percentage of the d-spacing "
+                  "of the center of the peak.");
 
   declareProperty(
       "AlternativePeakPositions", "",

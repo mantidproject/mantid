@@ -4,12 +4,12 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_StartLiveDataDialog.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/WidgetScrollbarDecorator.h"
+#include "ui_StartLiveDataDialog.h"
 
 namespace MantidQt {
 namespace CustomDialogs {
@@ -69,7 +69,7 @@ private:
   /// Constant used for custom listener connection setups
   static const QString CUSTOM_CONNECTION;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMDIALOGS_STARTLIVEDATADIALOG_H_

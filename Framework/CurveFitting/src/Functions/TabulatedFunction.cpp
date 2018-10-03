@@ -2,11 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/TabulatedFunction.h"
-#include "MantidKernel/FileValidator.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/FileValidator.h"
 
 #include <algorithm>
 #include <cmath>
@@ -26,7 +26,7 @@ using namespace API;
 namespace {
 /// static logger
 Logger g_log("TabulatedFunction");
-}
+} // namespace
 
 DECLARE_FUNCTION(TabulatedFunction)
 
@@ -314,8 +314,8 @@ void TabulatedFunction::loadWorkspace(
 }
 
 /**
-  * Fill in the x and y value containers (m_xData and m_yData)
-  */
+ * Fill in the x and y value containers (m_xData and m_yData)
+ */
 void TabulatedFunction::setupData() const {
   if (m_setupFinished) {
     if (m_xData.size() != m_yData.size()) {

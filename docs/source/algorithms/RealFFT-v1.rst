@@ -9,7 +9,7 @@
 Description
 -----------
 
-This is an algorithm for Fourier transfom of real data. It uses the GSL
+This is an algorithm for Fourier transform of real data. It uses the GSL
 routines gsl\_fft\_real\_transform and gsl\_fft\_halfcomplex\_inverse.
 The result of a forward transform is a three-spectra workspace with the
 real and imaginary parts of the transform in position 0 and 1

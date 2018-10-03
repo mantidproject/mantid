@@ -3,12 +3,12 @@
 
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/SingleValueParameter.h"
+#include "MantidDataObjects/AffineMatrixParameter.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include "MantidDataObjects/AffineMatrixParameter.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -69,7 +69,7 @@ protected:
   void copyRawMatrix();
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_COORDTRANSFORMAFFINE_H_ */

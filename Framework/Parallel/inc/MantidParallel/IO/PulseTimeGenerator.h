@@ -47,8 +47,8 @@ constexpr char nanosecond[] = "nanosecond";
 template <class TimeZeroType>
 double scaleFromUnit(
     const std::string &unit,
-    typename std::enable_if<
-        std::is_floating_point<TimeZeroType>::value>::type * = nullptr) {
+    typename std::enable_if<std::is_floating_point<TimeZeroType>::value>::type
+        * = nullptr) {
   if (unit == second)
     return 1.0;
   if (unit == microsecond)
@@ -75,7 +75,7 @@ int64_t scaleFromUnit(
 template <class T> struct IntOrFloat64Bit { using type = int64_t; };
 template <> struct IntOrFloat64Bit<float> { using type = double; };
 template <> struct IntOrFloat64Bit<double> { using type = double; };
-}
+} // namespace detail
 
 template <class IndexType, class TimeZeroType> class PulseTimeGenerator {
 public:

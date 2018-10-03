@@ -172,5 +172,5 @@ size_t EventWorkspaceMRU::MRUSize() const {
   }
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

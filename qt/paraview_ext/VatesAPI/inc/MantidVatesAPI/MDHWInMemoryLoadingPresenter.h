@@ -73,7 +73,7 @@ private:
   /// transpose.
   boost::shared_ptr<Mantid::API::IMDHistoWorkspace> m_cachedVisualHistoWs;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

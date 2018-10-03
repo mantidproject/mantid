@@ -51,6 +51,6 @@ private:
   // Meta data field flag
   const std::string metaDataId;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

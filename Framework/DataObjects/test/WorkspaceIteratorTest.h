@@ -2,14 +2,14 @@
 #define TRIPLEITERATORTEST_
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/WorkspaceIterator.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MantidVec;

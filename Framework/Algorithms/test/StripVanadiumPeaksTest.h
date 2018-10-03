@@ -1,13 +1,13 @@
 #ifndef STRIPVANADIUMPEAKSTEST_H_
 #define STRIPVANADIUMPEAKSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/StripVanadiumPeaks.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/StripVanadiumPeaks.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel::VectorHelper;

@@ -22,7 +22,7 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
   endif()
   set( GCC_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION} CACHE INTERNAL "")
   message( STATUS "gcc version: ${GCC_COMPILER_VERSION}" )
-  if ( GCC_COMPILER_VERSION VERSION_LESS "5.1.0" )
+  if ( NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1.0") )
     # Add an option to use the old C++ ABI if gcc is 5 series
     option ( USE_CXX98_ABI "If enabled, sets the _GLIBCXX_USE_CXX11_ABI=0 compiler flag" OFF)
     if ( USE_CXX98_ABI )
@@ -96,10 +96,7 @@ if(WITH_UBSAN)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${SAN_FLAGS}" )
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED 11)
-
-# XCode isn't picking up the standard set above.
+# XCode isn't picking up the c++ standard by CMAKE_CXX_STANDARD
 if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "${GNUFLAGS} -Woverloaded-virtual -fno-operator-names")
   set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")

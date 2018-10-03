@@ -3,9 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SumNeighbours.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/SumNeighbours.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::API;

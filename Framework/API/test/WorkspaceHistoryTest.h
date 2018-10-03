@@ -1,15 +1,15 @@
 #ifndef WORKSPACEHISTORYTEST_H_
 #define WORKSPACEHISTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Property.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "Poco/File.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

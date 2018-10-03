@@ -687,7 +687,7 @@ void Graph3D::resetNonEmptyStyle() {
   if (sp->plotStyle() != Qwt3D::NOPLOT)
     return; // the plot was not previousely emptied
 
-  if (style_ == Qwt3D::USER) { // reseting the right user plot style
+  if (style_ == Qwt3D::USER) { // resetting the right user plot style
     switch (pointStyle) {
     case None:
       break;
@@ -2868,7 +2868,7 @@ int Graph3D::read3DPlotStyle(MantidQt::API::TSVSerialiser &tsv) {
 
 Graph3D::SurfaceFunctionParams
 Graph3D::readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv) {
-  // We cant use {0} to zero initialise as GCC incorrectly thinks
+  // We can't use {0} to zero initialise as GCC incorrectly thinks
   // the members are still uninitialised
   SurfaceFunctionParams params = SurfaceFunctionParams();
   tsv >> params.formula;
@@ -2922,7 +2922,7 @@ Graph3D::readSurfaceFunctionType(const std::string &formula) {
   QString func = QString::fromStdString(formula);
   if (func.endsWith("(Y)", Qt::CaseSensitive))
     type = SurfaceFunctionType::Plot3D;
-  else if (func.contains("(Z)", Qt::CaseSensitive) > nullptr)
+  else if (func.contains("(Z)", Qt::CaseSensitive))
     type = SurfaceFunctionType::XYZ;
   else if (func.startsWith("matrix<", Qt::CaseSensitive) &&
            func.endsWith(">", Qt::CaseInsensitive))
@@ -3088,8 +3088,8 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
   fnt = sp->coordinates()->axes[Z1].labelFont();
   tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
 
-  tsv.writeLine("rotation") << sp->xRotation() << sp->yRotation()
-                            << sp->zRotation();
+  tsv.writeLine("rotation")
+      << sp->xRotation() << sp->yRotation() << sp->zRotation();
   tsv.writeLine("zoom") << sp->zoom();
   tsv.writeLine("scaling") << sp->xScale() << sp->yScale() << sp->zScale();
   tsv.writeLine("shift") << sp->xShift() << sp->yShift() << sp->zShift();

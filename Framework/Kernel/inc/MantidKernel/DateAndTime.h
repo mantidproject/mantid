@@ -5,9 +5,9 @@
 #include "MantidTypes/Core/DateAndTime.h"
 
 #include <cstdint>
+#include <ctime>
 #include <iosfwd>
 #include <string>
-#include <ctime>
 #include <vector>
 
 namespace Mantid {

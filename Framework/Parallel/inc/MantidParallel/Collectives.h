@@ -88,7 +88,7 @@ void all_to_all(const Communicator &comm, const std::vector<T> &in_values,
     comm.send(rank, tag, in_values[rank]);
   wait_all(requests.begin(), requests.end());
 }
-}
+} // namespace detail
 
 template <typename... T> void gather(const Communicator &comm, T &&... args) {
 #ifdef MPI_EXPERIMENTAL

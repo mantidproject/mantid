@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_SETBEAM_H_
 #define MANTID_DATAHANDLING_SETBEAM_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 namespace Mantid {
 namespace DataHandling {
 

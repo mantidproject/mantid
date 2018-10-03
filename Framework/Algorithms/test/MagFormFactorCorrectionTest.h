@@ -1,14 +1,14 @@
 #ifndef MAGFORMFACTORCORRECTION_H_
 #define MAGFORMFACTORCORRECTION_H_
 
-#include <cmath>
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/MagFormFactorCorrection.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/MagFormFactorCorrection.h"
 #include "MantidKernel/UnitFactory.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

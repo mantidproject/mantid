@@ -6,8 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/IObjComponent.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -15,7 +15,7 @@ namespace Kernel {
 // Forward declaration
 //----------------------------------------------------------------------
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 /** Describes the topology of a detectors group used to calculate angular

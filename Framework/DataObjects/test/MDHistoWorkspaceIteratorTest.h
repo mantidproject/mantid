@@ -1,31 +1,31 @@
 #ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATORTEST_H_
 #define MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATORTEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/VMD.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
-#include <boost/function.hpp>
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/VMD.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::Kernel::VMD;
 using Mantid::Geometry::MDHistoDimension;
-using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDHistoDimension_sptr;
+using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
 using Mantid::Geometry::MDPlane;
+using Mantid::Kernel::VMD;
 
 class MDHistoWorkspaceIteratorTest : public CxxTest::TestSuite {
 private:
@@ -363,8 +363,9 @@ public:
     TS_ASSERT(!iterator.isWithinBounds(end));
   }
 
-  void do_test_neighbours_1d(boost::function<std::vector<size_t>(
-      MDHistoWorkspaceIterator *)> findNeighbourMemberFunction) {
+  void do_test_neighbours_1d(
+      boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)>
+          findNeighbourMemberFunction) {
     const size_t nd = 1;
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);

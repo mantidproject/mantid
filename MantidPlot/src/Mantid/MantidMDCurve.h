@@ -107,7 +107,7 @@ private:
       const std::string &wsName,
       const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
-  /// Handle an ADS clear notificiation
+  /// Handle an ADS clear notification
   void clearADSHandle() override { emit removeMe(this); }
 
 signals:

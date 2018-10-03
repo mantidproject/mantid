@@ -96,6 +96,6 @@ private:
   /// progress indicator
   double m_prog;
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 #endif

@@ -7,13 +7,13 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 
-#include <cxxtest/TestSuite.h>
 #include "MockObjects.h"
-#include "vtkPVChangeOfBasisHelper.h"
 #include "vtkMatrix4x4.h"
+#include "vtkPVChangeOfBasisHelper.h"
 #include "vtkUnstructuredGrid.h"
-#include <vector>
+#include <cxxtest/TestSuite.h>
 #include <string>
+#include <vector>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
@@ -46,7 +46,7 @@ public:
     return MOCK_INSTRUMENT_MD_LOADING_PRESENTER;
   }
 };
-}
+} // namespace
 
 class MDLoadingPresenterTest : public CxxTest::TestSuite {
 private:

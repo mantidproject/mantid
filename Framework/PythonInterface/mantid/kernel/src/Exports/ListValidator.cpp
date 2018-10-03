@@ -2,25 +2,25 @@
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/default_call_policies.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
-#include <boost/python/default_call_policies.hpp>
 
 #include <string>
 
-using Mantid::Kernel::ListValidator;
 using Mantid::Kernel::IValidator;
+using Mantid::Kernel::ListValidator;
 namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
 namespace {
 
 /**
-  * Factory function to allow the allowed values to be specified as a python
+ * Factory function to allow the allowed values to be specified as a python
  * list
-  * @param allowedValues :: The list of allowed values
-  * @return A new ListValidator instance
-  */
+ * @param allowedValues :: The list of allowed values
+ * @return A new ListValidator instance
+ */
 template <typename T>
 ListValidator<T> *
 createListValidator(const boost::python::list &allowedValues) {
@@ -37,7 +37,7 @@ createListValidator(const boost::python::list &allowedValues) {
       .def("addAllowedValue", &ListValidator<type>::addAllowedValue,           \
            (arg("self"), arg("value")),                                        \
            "Adds a value to the list of accepted values");
-}
+} // namespace
 
 void export_ListValidator() {
   EXPORT_LISTVALIDATOR(std::string, String);

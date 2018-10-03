@@ -56,7 +56,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport PlotPeakByLogValue : public API::Algorithm {
   /** Structure to identify data for fitting
-    */
+   */
   struct InputData {
     /// Constructor
     InputData(const std::string &nam, int ix, int s, int p, double st = 0,

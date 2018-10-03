@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_ADDLOGDERIVATIVE_H_
 #define MANTID_ALGORITHMS_ADDLOGDERIVATIVE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {

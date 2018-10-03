@@ -13,8 +13,8 @@
 #include <boost/algorithm/string.hpp>
 
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeFilter.h>
@@ -212,13 +212,15 @@ void LoadSpiceXML2DDet::init() {
       "Amount of shift of the distance between source and detector centre."
       "It is used to apply instrument calibration.");
 
-  declareProperty("DetectorCenterXShift", 0.0, "The amount of shift of "
-                                               "detector center along X "
-                                               "direction in the unit meter.");
+  declareProperty("DetectorCenterXShift", 0.0,
+                  "The amount of shift of "
+                  "detector center along X "
+                  "direction in the unit meter.");
 
-  declareProperty("DetectorCenterYShift", 0.0, "The amount of shift of "
-                                               "detector center along Y "
-                                               "direction in the unit meter.");
+  declareProperty("DetectorCenterYShift", 0.0,
+                  "The amount of shift of "
+                  "detector center along Y "
+                  "direction in the unit meter.");
 }
 
 /** Process inputs arguments

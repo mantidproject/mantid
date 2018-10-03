@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/Comment.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/Comment.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;

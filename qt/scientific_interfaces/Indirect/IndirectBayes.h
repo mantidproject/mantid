@@ -4,12 +4,12 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_IndirectBayes.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IndirectBayesTab.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_IndirectBayes.h"
 
-#include <Poco/NObserver.h>
 #include "MantidKernel/ConfigService.h"
+#include <Poco/NObserver.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -89,7 +89,7 @@ private:
   /// Main interface window
   Ui::IndirectBayes m_uiForm;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif

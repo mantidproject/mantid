@@ -40,7 +40,7 @@ public:
   virtual bool getLoadInMemory() const = 0;
   virtual ~MDLoadingView() {}
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

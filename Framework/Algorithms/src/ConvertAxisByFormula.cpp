@@ -8,10 +8,10 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <sstream>
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -33,8 +33,8 @@ const std::string ConvertAxisByFormula::category() const {
 }
 
 /** Initialisation method. Declares properties to be used in algorithm.
-*
-*/
+ *
+ */
 void ConvertAxisByFormula::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -50,11 +50,12 @@ void ConvertAxisByFormula::init() {
                   boost::make_shared<StringListValidator>(axisOptions),
                   "The axis to modify");
 
-  declareProperty("Formula", "", "The formula to use to convert the values, x "
-                                 "or y may be used to refer to the axis "
-                                 "values.  l1, l2, twotheta and signedtwotheta"
-                                 "may be used to provide values from the "
-                                 "instrument geometry.");
+  declareProperty("Formula", "",
+                  "The formula to use to convert the values, x "
+                  "or y may be used to refer to the axis "
+                  "values.  l1, l2, twotheta and signedtwotheta"
+                  "may be used to provide values from the "
+                  "instrument geometry.");
   declareProperty(
       "AxisTitle", "",
       "The label of he new axis. If not set then the title will not change.");
@@ -64,8 +65,8 @@ void ConvertAxisByFormula::init() {
 }
 
 /** Execution of the algorithm
-*
-*/
+ *
+ */
 void ConvertAxisByFormula::exec() {
   // get the property values
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");

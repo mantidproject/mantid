@@ -1,6 +1,6 @@
+#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadNexus.h"
-#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexus/NexusClasses.h"

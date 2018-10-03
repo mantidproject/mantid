@@ -1,10 +1,10 @@
 #ifndef MANTID_LIVEDATA_LIVEDATAALGORITHM_H_
 #define MANTID_LIVEDATA_LIVEDATAALGORITHM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/ILiveListener.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace LiveData {

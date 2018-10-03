@@ -4,8 +4,8 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <QObject>
 #include <QMenu>
+#include <QObject>
 #include <QToolBar>
 #include <memory>
 #include <vector>
@@ -47,9 +47,9 @@ class EXPORT_OPT_MANTIDQT_COMMON QtCommandAdapter : public QObject {
   Q_OBJECT
 public:
   /** Constructor: Adds actions to a menu
-  * @param menu :: The menu where the actions will be added
-  * @param adaptee :: The action to add
-  */
+   * @param menu :: The menu where the actions will be added
+   * @param adaptee :: The action to add
+   */
   QtCommandAdapter(QMenu *menu, Command_uptr adaptee)
       : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
@@ -62,9 +62,9 @@ public:
   };
 
   /** Constructor: Adds actions to a toolbar
-  * @param toolbar :: The toolbar where actions will be added
-  * @param adaptee :: The action to add
-  */
+   * @param toolbar :: The toolbar where actions will be added
+   * @param adaptee :: The action to add
+   */
   QtCommandAdapter(QToolBar *toolbar, Command_uptr adaptee)
       : m_action(nullptr), m_adaptee(std::move(adaptee)) {
 
@@ -156,7 +156,7 @@ private:
   // The child adaptors
   std::vector<std::unique_ptr<QtCommandAdapter>> m_childAdapters;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDADAPTER_H*/

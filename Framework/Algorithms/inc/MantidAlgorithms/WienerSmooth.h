@@ -2,8 +2,8 @@
 #define MANTID_ALGORITHMS_WIENERSMOOTH_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/HistogramX.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {

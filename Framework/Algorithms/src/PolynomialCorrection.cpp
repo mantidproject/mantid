@@ -3,9 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PolynomialCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
-#include <cmath>
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -1,8 +1,8 @@
 #ifndef MANTID_SUPPORTTEST_H_
 #define MANTID_SUPPORTTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 
 #include "MantidKernel/Strings.h"
@@ -265,6 +265,44 @@ public:
 
     out = join(v.begin(), v.end(), ",");
     TS_ASSERT_EQUALS(out, "Help,Me,I'm,Stuck,Inside,A,Test");
+  }
+
+  void test_joinSet() {
+    std::set<std::string> v;
+    std::string out;
+
+    out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS(out, "");
+
+    v.insert("Help");
+    v.insert("Me");
+    v.insert("I'm");
+    v.insert("Stuck");
+    v.insert("Inside");
+    v.insert("A");
+    v.insert("Test");
+
+    out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS(out, "A,Help,I'm,Inside,Me,Stuck,Test");
+  }
+
+  void test_joinLong() {
+    std::vector<std::string> v;
+    std::string out;
+    std::string ans;
+
+    out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS(out, "");
+
+    int n = 100000;
+    for (int i = 0; i < n; i++) {
+      v.emplace_back(std::to_string(i));
+      ans += std::to_string(i) + ",";
+    }
+
+    out = join(v.begin(), v.end(), ",");
+    ans.pop_back();
+    TS_ASSERT_EQUALS(out, ans);
   }
 
   void test_joinCompress() {
@@ -588,6 +626,22 @@ public:
     TSM_ASSERT_EQUALS("Strings::getLine didn't return empty string after eof.",
                       line, "");
   }
+};
+
+class StringsTestPerformance : public CxxTest::TestSuite {
+public:
+  static StringsTestPerformance *createSuite() {
+    return new StringsTestPerformance();
+  }
+  static void destroySuite(StringsTestPerformance *suite) { delete suite; }
+  void setUp() override { input = std::vector<double>(50000000, 0.123456); }
+  void test_join_double() {
+    auto result = join(input.begin(), input.end(), separator);
+  }
+
+private:
+  std::vector<double> input;
+  std::string separator{","};
 };
 
 #endif // MANTID_SUPPORTTEST_H_

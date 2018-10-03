@@ -1,16 +1,16 @@
 #ifndef DATAHANDING_SAVEGSS_H_
 #define DATAHANDING_SAVEGSS_H_
 
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SerialAlgorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/Run.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <iosfwd>
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 // Forward declare
 namespace Mantid {
@@ -180,6 +180,6 @@ private:
   /// flag to overwrite standard GSAS bank header
   bool m_overwrite_std_bank_header;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // DATAHANDING_SAVEGSS_H_

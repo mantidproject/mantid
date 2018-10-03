@@ -10,9 +10,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include "../Muon/IALCPeakFittingView.h"
-#include "../Muon/IALCPeakFittingModel.h"
 #include "../Muon/ALCPeakFittingPresenter.h"
+#include "../Muon/IALCPeakFittingModel.h"
+#include "../Muon/IALCPeakFittingView.h"
 
 #include <qwt_data.h>
 
@@ -30,9 +30,9 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe->toStdString();
   return out;
 }
-}
+} // namespace boost
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCPeakFittingView : public IALCPeakFittingView {
 public:
@@ -359,5 +359,5 @@ public:
     m_model->setError("Test error");
   }
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGTEST_H_ */

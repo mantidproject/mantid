@@ -5,10 +5,10 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
-#include <boost/python/return_internal_reference.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_internal_reference.hpp>
 #include <boost/python/self.hpp>
 
 using Mantid::API::AlgorithmHistory;
@@ -20,12 +20,12 @@ using namespace boost::python;
  * @param self :: A reference to the AlgorithmHistory that called this method
  * @returns A python list created from the set of child algorithm histories
  */
-boost::python::object
+boost::python::list
 getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self) {
   boost::python::list names;
   const auto histories = self->getChildHistories();
-  for (const auto &historie : histories) {
-    names.append(historie);
+  for (const auto &history : histories) {
+    names.append(history);
   }
   return names;
 }
@@ -36,11 +36,11 @@ getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self) {
  * @param self :: A reference to the AlgorithmHistory that called this method
  * @returns A python list created from the set of property histories
  */
-boost::python::object getPropertiesAsList(AlgorithmHistory &self) {
+boost::python::list getPropertiesAsList(AlgorithmHistory &self) {
   boost::python::list names;
   const auto &histories = self.getProperties();
-  for (const auto &historie : histories) {
-    names.append(historie);
+  for (const auto &history : histories) {
+    names.append(history);
   }
   return names;
 }

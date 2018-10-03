@@ -63,7 +63,7 @@ private:
   std::string m_wsTypeName;
   int m_specialCoords;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

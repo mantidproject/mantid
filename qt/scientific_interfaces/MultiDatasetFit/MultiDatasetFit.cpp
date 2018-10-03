@@ -1,7 +1,7 @@
 #include "MultiDatasetFit.h"
 #include "MDFDataController.h"
-#include "MDFPlotController.h"
 #include "MDFEditLocalParameterDialog.h"
+#include "MDFPlotController.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,8 +20,8 @@
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 
 #include <QMessageBox>
-#include <QToolBar>
 #include <QSettings>
+#include <QToolBar>
 
 namespace {
 // tool options pages
@@ -81,7 +81,7 @@ void formatParametersForPlotting(const Mantid::API::IFunction &function,
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
       parametersPropertyName + "_vs_dataset", table);
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -392,10 +392,11 @@ void MultiDatasetFit::fit() {
 
   } else if (fittingType == MantidWidgets::FitOptionsBrowser::Sequential) {
     if (n > 100 && m_fitAllSettings == QMessageBox::No) {
-      fitAll = QMessageBox::question(
-          this, "Fit All?", "Are you sure you would like to fit " +
-                                QString::number(n) + " spectrum sequentially?",
-          QMessageBox::Yes, QMessageBox::No);
+      fitAll = QMessageBox::question(this, "Fit All?",
+                                     "Are you sure you would like to fit " +
+                                         QString::number(n) +
+                                         " spectrum sequentially?",
+                                     QMessageBox::Yes, QMessageBox::No);
 
       if (fitAll == QMessageBox::Yes)
         m_fitAllSettings = QMessageBox::Yes;
@@ -477,7 +478,8 @@ void MultiDatasetFit::setFitStatusInfo(const QString &status,
     color = "red";
   }
   m_fitStatus = QString("Status: <span style='color:%2'>%1</span>"
-                        "<br>Chi Squared: %4").arg(text, color, chiSquared);
+                        "<br>Chi Squared: %4")
+                    .arg(text, color, chiSquared);
   showInfo("");
 }
 
@@ -826,5 +828,5 @@ void MultiDatasetFit::updateGuessFunction(const QString &, const QString &) {
 /// @param msg :: A warning message to log.
 void MultiDatasetFit::logWarning(const std::string &msg) { g_log.warning(msg); }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

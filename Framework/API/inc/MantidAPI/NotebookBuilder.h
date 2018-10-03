@@ -28,12 +28,12 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/HistoryView.h"
-#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/NotebookWriter.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/PropertyHistory.h"
-#include "MantidAPI/NotebookWriter.h"
 
 #include <sstream>
 

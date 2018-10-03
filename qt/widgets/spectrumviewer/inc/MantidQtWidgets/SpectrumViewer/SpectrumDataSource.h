@@ -1,13 +1,13 @@
 #ifndef SPECTRUM_DATA_SOURCE_H
 #define SPECTRUM_DATA_SOURCE_H
 
-#include <boost/shared_ptr.hpp>
-#include <cstddef>
-#include <vector>
-#include <string>
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/SpectrumViewer/DataArray.h"
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include <boost/shared_ptr.hpp>
+#include <cstddef>
+#include <string>
+#include <vector>
 
 /**
     @class SpectrumDataSource

@@ -70,7 +70,7 @@ private:
 
 }; // class SassenaFFT
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif // MANTID_ALGORITHM_SASSENAFFT_H_

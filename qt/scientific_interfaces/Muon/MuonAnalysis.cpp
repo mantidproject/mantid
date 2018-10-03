@@ -20,16 +20,16 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
+#include "MantidQtWidgets/Common/MuonFitDataSelector.h"
+#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/MuonFunctionBrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h"
 #include "MuonAnalysisFitDataPresenter.h"
 #include "MuonAnalysisFitDataTab.h"
 #include "MuonAnalysisFitFunctionPresenter.h"
 #include "MuonAnalysisOptionTab.h"
 #include "MuonAnalysisResultTableTab.h"
 #include "MuonSequentialFitDialog.h"
-#include "MantidQtWidgets/Common/MuonFitDataSelector.h"
-#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
-#include "MantidQtWidgets/Common/MuonFunctionBrowser.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -68,8 +68,8 @@ using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Muon;
 using namespace Mantid::Geometry;
 using namespace MuonAnalysisHelper;
-using Mantid::API::Workspace_sptr;
 using Mantid::API::Grouping;
+using Mantid::API::Workspace_sptr;
 
 namespace {
 /// static logger
@@ -112,7 +112,7 @@ void zoomYAxis(const QString &wsName, QMap<QString, QString> &params) {
     params["YAxisAuto"] = "True";
   }
 }
-}
+} // namespace
 
 // Static constants
 const QString MuonAnalysis::NOT_AVAILABLE("N/A");
@@ -372,16 +372,16 @@ void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
 }
 
 /**
-* Muon Analysis help (slot)
-*/
+ * Muon Analysis help (slot)
+ */
 void MuonAnalysis::muonAnalysisHelpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
                                                  QString("Muon Analysis"));
 }
 
 /**
-* Muon Analysis Grouping help (slot)
-*/
+ * Muon Analysis Grouping help (slot)
+ */
 void MuonAnalysis::muonAnalysisHelpGroupingClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
       nullptr, QString("Muon Analysis"), QString("grouping-options"));
@@ -401,8 +401,8 @@ void MuonAnalysis::setCurrentDataName(const QString &name) {
 }
 
 /**
-* Front plot button (slot)
-*/
+ * Front plot button (slot)
+ */
 void MuonAnalysis::runFrontPlotButton() {
   if (m_updating)
     return;
@@ -440,11 +440,11 @@ void MuonAnalysis::plotSelectedGroupPair() {
   plotItem(itemType, tableRow, plotType);
 }
 /**
-* Creates workspace for specified group/pair and adds it to the ADS;
-* @param itemType :: Whether it's a group or pair
-* @param tableRow :: Row in the group/pair table which contains the item
-* @param plotType :: What kind of plot we want to analyse
-*/
+ * Creates workspace for specified group/pair and adds it to the ADS;
+ * @param itemType :: Whether it's a group or pair
+ * @param tableRow :: Row in the group/pair table which contains the item
+ * @param plotType :: What kind of plot we want to analyse
+ */
 std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
                                   PlotType plotType) {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
@@ -604,10 +604,10 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
 }
 
 /**
-* If the instrument selection has changed (slot)
-*
-* @param prefix :: instrument name from QComboBox object
-*/
+ * If the instrument selection has changed (slot)
+ *
+ * @param prefix :: instrument name from QComboBox object
+ */
 void MuonAnalysis::userSelectInstrument(const QString &prefix) {
   // Set file browsing to current instrument
   m_uiForm.mwRunFiles->setInstrumentOverride(prefix);
@@ -640,9 +640,11 @@ void MuonAnalysis::runSaveGroupButton() {
   // Get value for "dir". If the setting doesn't exist then use
   // the the path in "defaultsave.directory"
   QString prevPath =
-      prevValues.value("dir", QString::fromStdString(
-                                  ConfigService::Instance().getString(
-                                      "defaultsave.directory"))).toString();
+      prevValues
+          .value("dir",
+                 QString::fromStdString(ConfigService::Instance().getString(
+                     "defaultsave.directory")))
+          .toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -679,9 +681,11 @@ void MuonAnalysis::runLoadGroupButton() {
   // Get value for "dir". If the setting doesn't exist then use
   // the the path in "defaultsave.directory"
   QString prevPath =
-      prevValues.value("dir", QString::fromStdString(
-                                  ConfigService::Instance().getString(
-                                      "defaultload.directory"))).toString();
+      prevValues
+          .value("dir",
+                 QString::fromStdString(ConfigService::Instance().getString(
+                     "defaultload.directory")))
+          .toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -877,19 +881,19 @@ void MuonAnalysis::groupTableClicked(int row, int column) {
 }
 
 /**
-* Group table clicked (slot)
-*/
+ * Group table clicked (slot)
+ */
 void MuonAnalysis::groupTableClicked(int row) { m_groupTableRowInFocus = row; }
 
 /**
-* Group table changed, e.g. if:         (slot)
-*
-*    1) user changed detector sequence
-*    2) user type in a group name
-*
-* @param row :: row number
-* @param column :: column number
-*/
+ * Group table changed, e.g. if:         (slot)
+ *
+ *    1) user changed detector sequence
+ *    2) user type in a group name
+ *
+ * @param row :: row number
+ * @param column :: column number
+ */
 void MuonAnalysis::groupTableChanged(int row, int column) {
   if (column == 2) {
     // Ignore changes to Ndet column, as they will only be made programmatically
@@ -982,14 +986,14 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
 }
 
 /**
-* Pair table changed, e.g. if:         (slot)
-*
-*    1) user changed alpha value
-*    2) pair name changed
-*
-* @param row :: row number
-* @param column:: column number
-*/
+ * Pair table changed, e.g. if:         (slot)
+ *
+ *    1) user changed alpha value
+ *    2) pair name changed
+ *
+ * @param row :: row number
+ * @param column:: column number
+ */
 void MuonAnalysis::pairTableChanged(int row, int column) {
   // alpha been modified
   if (column == 3) {
@@ -1624,8 +1628,8 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
   }
 }
 /**
-* sets the selected groups and pairs
-*/
+ * sets the selected groups and pairs
+ */
 void MuonAnalysis::setGroupsAndPairs() {
   auto names = m_groupingHelper.parseGroupingTable().pairNames;
   auto tmp = m_groupingHelper.parseGroupingTable().groupNames;
@@ -2021,11 +2025,12 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName, const bool update,
 
   QString code;
 
-  code += "g = graph('" + wsName + "-1')\n"
-                                   "if g != None:\n"
-                                   "  g.show()\n"
-                                   "  g.setFocus()\n"
-                                   "  selectMultiPeak(g)\n";
+  code += "g = graph('" + wsName +
+          "-1')\n"
+          "if g != None:\n"
+          "  g.show()\n"
+          "  g.setFocus()\n"
+          "  selectMultiPeak(g)\n";
 
   runPythonCode(code);
 }
@@ -2042,12 +2047,12 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName) {
 }
 
 /**
-* Pass through to selectMultiPeak(wsName, update, filePath) where filePath is
-* set
-* to blank. Enables connection as a slot without Qt understanding
-* boost::optional. This will not update the data selector
-* @param wsName Name of the selected workspace
-*/
+ * Pass through to selectMultiPeak(wsName, update, filePath) where filePath is
+ * set
+ * to blank. Enables connection as a slot without Qt understanding
+ * boost::optional. This will not update the data selector
+ * @param wsName Name of the selected workspace
+ */
 void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
   selectMultiPeak(wsName, false, boost::optional<QString>());
 }
@@ -2113,9 +2118,9 @@ int MuonAnalysis::numOfDetectors(const std::string &str) const {
 }
 
 /**
-* Set start up interface look and populate local attributes
-* initiated from info set in QT designer
-*/
+ * Set start up interface look and populate local attributes
+ * initiated from info set in QT designer
+ */
 void MuonAnalysis::startUpLook() {
   // populate group plot functions
   for (int i = 0; i < m_uiForm.groupTablePlotChoice->count(); i++)
@@ -2159,8 +2164,8 @@ void MuonAnalysis::startUpLook() {
 }
 
 /**
-* Time zero returned in ms
-*/
+ * Time zero returned in ms
+ */
 double MuonAnalysis::timeZero() {
   return getValidatedDouble(m_uiForm.timeZeroFront, TIME_ZERO_DEFAULT,
                             "time zero", g_log);
@@ -2270,9 +2275,9 @@ void MuonAnalysis::loadAutoSavedValues(const QString &group) {
 }
 
 /**
-* Loads up the options for fit browser so that it works in muon analysis tab
-* and set up data selector widget and fit data helper
-*/
+ * Loads up the options for fit browser so that it works in muon analysis tab
+ * and set up data selector widget and fit data helper
+ */
 void MuonAnalysis::loadFittings() {
   // Title of the fitting dock widget that now lies within the fittings tab.
   // Should be made dynamic so that the Chi-sq can be displayed alongside like
@@ -2317,9 +2322,9 @@ void MuonAnalysis::loadFittings() {
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
 }
 /**
-* Handle "groups" selected/deselected
-* Update stored value
-*/
+ * Handle "groups" selected/deselected
+ * Update stored value
+ */
 void MuonAnalysis::handleGroupBox() {
   // send the group to dataselector
   m_dataSelector->setGroupsSelected(m_uiForm.fitBrowser->getChosenGroups());
@@ -2332,9 +2337,9 @@ void MuonAnalysis::handleGroupBox() {
   m_dataSelector->checkForMultiGroupPeriodSelection();
 }
 /**
-* Handle"periods" selected/deselected
-* Update stored value
-*/
+ * Handle"periods" selected/deselected
+ * Update stored value
+ */
 void MuonAnalysis::handlePeriodBox() {
   // send the group to dataselector
   m_dataSelector->setPeriodsSelected(m_uiForm.fitBrowser->getChosenPeriods());
@@ -2346,11 +2351,11 @@ void MuonAnalysis::handlePeriodBox() {
   m_fitDataPresenter->handleSelectedDataChanged(true);
 }
 /**
-* Updates the labels (legend and ws) for
-* a single fit when within the mulit-
-* fit GUI.
-* @param name :: the name for the label.
-*/
+ * Updates the labels (legend and ws) for
+ * a single fit when within the mulit-
+ * fit GUI.
+ * @param name :: the name for the label.
+ */
 void MuonAnalysis::updateLabels(std::string &name) {
   m_uiForm.fitBrowser->setOutputName(name);
 }
@@ -2365,15 +2370,15 @@ void MuonAnalysis::allowLoading(bool enabled) {
 }
 
 /**
-*   Check to see if the appending option is true when the previous button has
-* been pressed and acts accordingly
-*/
+ *   Check to see if the appending option is true when the previous button has
+ * been pressed and acts accordingly
+ */
 void MuonAnalysis::checkAppendingPreviousRun() { checkAppendingRun(-1); }
 
 /**
-*   Check to see if the appending option is true when the next button has been
-* pressed and acts accordingly
-*/
+ *   Check to see if the appending option is true when the next button has been
+ * pressed and acts accordingly
+ */
 void MuonAnalysis::checkAppendingNextRun() { checkAppendingRun(1); }
 
 /**
@@ -2398,12 +2403,12 @@ void MuonAnalysis::checkAppendingRun(const int direction) {
 }
 
 /**
-*   This sets up an appending lot of files so that when the user hits enter
-*   all files within the range will open.
-*
-*   @param inc :: The number to increase the run by, this can be
-*   -1 if previous has been selected.
-*/
+ *   This sets up an appending lot of files so that when the user hits enter
+ *   all files within the range will open.
+ *
+ *   @param inc :: The number to increase the run by, this can be
+ *   -1 if previous has been selected.
+ */
 void MuonAnalysis::setAppendingRun(int inc) {
   QString filePath("");
 
@@ -2462,11 +2467,11 @@ void MuonAnalysis::setAppendingRun(int inc) {
 }
 
 /**
-*   Opens up the next file if clicked next or previous on the muon analysis
-*
-*   @param amountToChange :: if clicked next then you need to open the next
-*   file so 1 is passed, -1 is passed if previous was clicked by the user.
-*/
+ *   Opens up the next file if clicked next or previous on the muon analysis
+ *
+ *   @param amountToChange :: if clicked next then you need to open the next
+ *   file so 1 is passed, -1 is passed if previous was clicked by the user.
+ */
 void MuonAnalysis::changeRun(int amountToChange) {
   QString filePath("");
   QString currentFile = m_uiForm.mwRunFiles->getFirstFilename();
@@ -2517,15 +2522,15 @@ void MuonAnalysis::changeRun(int amountToChange) {
 }
 
 /**
-*   Seperates the a given file into instrument, code and size of the code.
-*   i.e c:/data/MUSR0002419.nxs becomes c:/data/, MUSR0002419.nxs, 2419, 7.
-*
-*   @param filePath :: The file path of the data file.
-*   @param currentFile :: This is the file with path. Can be network path.
-* Return as file with extension.
-*   @param run :: The run as a string without 0's at the beginning.
-*   @param runSize :: contains the size of the run number.
-*/
+ *   Seperates the a given file into instrument, code and size of the code.
+ *   i.e c:/data/MUSR0002419.nxs becomes c:/data/, MUSR0002419.nxs, 2419, 7.
+ *
+ *   @param filePath :: The file path of the data file.
+ *   @param currentFile :: This is the file with path. Can be network path.
+ * Return as file with extension.
+ *   @param run :: The run as a string without 0's at the beginning.
+ *   @param runSize :: contains the size of the run number.
+ */
 void MuonAnalysis::separateMuonFile(QString &filePath, QString &currentFile,
                                     QString &run, int &runSize) {
   int fileStart(-1);
@@ -2566,12 +2571,12 @@ void MuonAnalysis::separateMuonFile(QString &filePath, QString &currentFile,
 }
 
 /**
-* Adds the 0's back onto the run which were lost when converting it to an
-* integer.
-*
-* @param originalSize :: The size of the original run before conversion
-* @param run :: This is the run after it was incremented or decremented.
-*/
+ * Adds the 0's back onto the run which were lost when converting it to an
+ * integer.
+ *
+ * @param originalSize :: The size of the original run before conversion
+ * @param run :: This is the run after it was incremented or decremented.
+ */
 void MuonAnalysis::getFullCode(int originalSize, QString &run) {
   while (originalSize > run.size()) {
     run = "0" + run;
@@ -2579,11 +2584,11 @@ void MuonAnalysis::getFullCode(int originalSize, QString &run) {
 }
 
 /**
-* Sets the fitting ranges on the dataselectot and fitbrowser
-*
-* @param xmin :: The minimum x value
-* @param xmax :: The maximum x value
-*/
+ * Sets the fitting ranges on the dataselectot and fitbrowser
+ *
+ * @param xmin :: The minimum x value
+ * @param xmax :: The maximum x value
+ */
 void MuonAnalysis::setFittingRanges(double xmin, double xmax) {
   if (xmin == 0.0 && xmax == 0.0) {
     // A previous fitting range of [0,0] means this is the first time the
@@ -2711,8 +2716,8 @@ void MuonAnalysis::updateNormalization(QString name) {
 }
 
 /**
-* Set up the signals and slots for auto updating the plots
-*/
+ * Set up the signals and slots for auto updating the plots
+ */
 void MuonAnalysis::connectAutoUpdate() {
   // Home tab Auto Updates
   connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(activated(int)), this,
@@ -3009,10 +3014,10 @@ void MuonAnalysis::deadTimeTypeAutoUpdate(int choice) {
 }
 
 /**
-* If the user selects/changes the file to be used to apply the dead times then
-* see if the plot needs updating and make sure next time the user plots that the
-* dead times are applied.
-*/
+ * If the user selects/changes the file to be used to apply the dead times then
+ * see if the plot needs updating and make sure next time the user plots that
+ * the dead times are applied.
+ */
 void MuonAnalysis::deadTimeFileSelected() {
   if (!m_uiForm.mwRunDeadTimeFile->isValid())
     return;
@@ -3309,10 +3314,10 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
 }
 /**
-* Checks if the run is set and if the plot name is valid.
-* If they are not valid then the loadAllGroups and loadAllPairs
-* methods should do nothing.
-*/
+ * Checks if the run is set and if the plot name is valid.
+ * If they are not valid then the loadAllGroups and loadAllPairs
+ * methods should do nothing.
+ */
 
 bool MuonAnalysis::safeToLoadAllGroupsOrPairs() {
   std::string plotTypeName =
@@ -3327,9 +3332,9 @@ bool MuonAnalysis::safeToLoadAllGroupsOrPairs() {
 }
 
 /**
-* Load all of the pairs if the all pairs tickbox is ticked
-* @param state :: [input] (not used) Setting of combo box
-*/
+ * Load all of the pairs if the all pairs tickbox is ticked
+ * @param state :: [input] (not used) Setting of combo box
+ */
 void MuonAnalysis::loadAllGroups(int state) {
   Q_UNUSED(state);
 
@@ -3343,9 +3348,9 @@ void MuonAnalysis::loadAllGroups(int state) {
   }
 }
 /**
-* Load all of the pairs if the all pairs tickbox is ticked
-* @param state :: [input] (not used) Setting of combo box
-*/
+ * Load all of the pairs if the all pairs tickbox is ticked
+ * @param state :: [input] (not used) Setting of combo box
+ */
 void MuonAnalysis::loadAllPairs(int state) {
 
   Q_UNUSED(state);
@@ -3393,5 +3398,5 @@ bool MuonAnalysis::getIfTFAsymmStore() const {
   return value;
 }
 
-} // namespace MantidQt
 } // namespace CustomInterfaces
+} // namespace MantidQt

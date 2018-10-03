@@ -3,7 +3,7 @@
 
 /*
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -28,7 +28,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/Instantiator.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
 #include <boost/python/extract.hpp>
 #include <boost/python/object.hpp>
@@ -52,7 +52,7 @@ struct GILSharedPtrDeleter {
    * @param data A pointer to the data to be deleted
    */
   void operator()(void const *data) {
-    Environment::GlobalInterpreterLock gil;
+    GlobalInterpreterLock gil;
     m_deleter(data);
   }
   /// Main deleter object
@@ -88,7 +88,7 @@ private:
 template <typename Base>
 boost::shared_ptr<Base> PythonObjectInstantiator<Base>::createInstance() const {
   using namespace boost::python;
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
 
   object instance = m_classObject();
   // The instantiator assumes that the exported type uses a
@@ -120,7 +120,7 @@ Base *PythonObjectInstantiator<Base>::createUnwrappedInstance() const {
   throw std::runtime_error(
       "Unable to create unwrapped instance of Python object");
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_PYTHONALGORITHMINSTANTIATOR_H_ */

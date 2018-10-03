@@ -3,7 +3,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -11,6 +10,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Exception.h"
@@ -28,8 +28,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using Mantid::HistogramData::Points;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::Points;
 
 class LoadInstrumentTest : public CxxTest::TestSuite {
 public:

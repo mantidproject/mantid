@@ -1,7 +1,7 @@
 #include "MantidAPI/MuParserUtils.h"
 
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/make_unique.h"
 #include <gsl/gsl_sf.h>
 
 using namespace Mantid::PhysicalConstants;

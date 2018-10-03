@@ -3,12 +3,21 @@
 #include <complex>
 #include <vector>
 
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/V3D.h"
+#include <boost/version.hpp>
+
+#if BOOST_VERSION < 106700
 #include <boost/math/common_factor.hpp>
+using boost::math::gcd;
+#else
+#include <boost/integer/common_factor.hpp>
+using boost::integer::gcd;
+#endif
+
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -96,255 +105,6 @@ void V3D::azimuth_polar_SNS(const double &R, const double &azimuth,
     y = 0.0;
   if (std::abs(z) < Tolerance)
     z = 0.0;
-}
-
-/**
-  Addtion operator
-   @param v :: Vector to add
-   @return *this+v;
-*/
-V3D V3D::operator+(const V3D &v) const {
-  V3D out(*this);
-  out += v;
-  return out;
-}
-
-/**
-  Subtraction operator
-  @param v :: Vector to sub.
-  @return *this-v;
-*/
-V3D V3D::operator-(const V3D &v) const {
-  V3D out(*this);
-  out -= v;
-  return out;
-}
-
-/**
-  Inner product
-  @param v :: Vector to sub.
-  @return *this * v;
-*/
-V3D V3D::operator*(const V3D &v) const {
-  V3D out(*this);
-  out *= v;
-  return out;
-}
-
-/**
-  Inner division
-  @param v :: Vector to divide
-  @return *this * v;
-*/
-V3D V3D::operator/(const V3D &v) const {
-  V3D out(*this);
-  out /= v;
-  return out;
-}
-
-/**
-  Self-Addition operator
-  @param v :: Vector to add.
-  @return *this+=v;
-*/
-V3D &V3D::operator+=(const V3D &v) {
-  x += v.x;
-  y += v.y;
-  z += v.z;
-  return *this;
-}
-
-/**
-  Self-Subtraction operator
-  @param v :: Vector to sub.
-  @return *this-v;
-*/
-V3D &V3D::operator-=(const V3D &v) {
-  x -= v.x;
-  y -= v.y;
-  z -= v.z;
-  return *this;
-}
-
-/**
-  Self-Inner product
-  @param v :: Vector to multiply
-  @return *this*=v;
-*/
-V3D &V3D::operator*=(const V3D &v) {
-  x *= v.x;
-  y *= v.y;
-  z *= v.z;
-  return *this;
-}
-
-/**
-  Self-Inner division
-  @param v :: Vector to divide
-  @return *this*=v;
-*/
-V3D &V3D::operator/=(const V3D &v) {
-  x /= v.x;
-  y /= v.y;
-  z /= v.z;
-  return *this;
-}
-
-/**
-  Scalar product
-  @param D :: value to scale
-  @return this * D
- */
-V3D V3D::operator*(const double D) const {
-  V3D out(*this);
-  out *= D;
-  return out;
-}
-
-/**
-  Scalar divsion
-  @param D :: value to scale
-  @return this / D
-*/
-V3D V3D::operator/(const double D) const {
-  V3D out(*this);
-  out /= D;
-  return out;
-}
-
-/**
-  Scalar product
-  @param D :: value to scale
-  @return this *= D
-*/
-V3D &V3D::operator*=(const double D) {
-  x *= D;
-  y *= D;
-  z *= D;
-  return *this;
-}
-
-/**
-  Scalar division
-  @param D :: value to scale
-  @return this /= D
-  \todo ADD TOLERANCE
-*/
-V3D &V3D::operator/=(const double D) {
-  if (D != 0.0) {
-    x /= D;
-    y /= D;
-    z /= D;
-  }
-  return *this;
-}
-
-/**
-  Negation
- * @return a vector with same magnitude but in opposite direction
- */
-V3D V3D::operator-() const noexcept { return V3D(-x, -y, -z); }
-
-/**
-  Equals operator with tolerance factor
-  @param v :: V3D for comparison
-  @return true if the items are equal
-*/
-bool V3D::operator==(const V3D &v) const {
-  using namespace std;
-  return !(fabs(x - v.x) > Tolerance || fabs(y - v.y) > Tolerance ||
-           fabs(z - v.z) > Tolerance);
-}
-
-/** Not equals operator with tolerance factor.
- *  @param other :: The V3D to compare against
- *  @returns True if the vectors are different
- */
-bool V3D::operator!=(const V3D &other) const {
-  return !(this->operator==(other));
-}
-
-/**
-  compare
-  @return true if V is greater
- */
-bool V3D::operator<(const V3D &V) const {
-  if (x != V.x)
-    return x < V.x;
-  if (y != V.y)
-    return y < V.y;
-  return z < V.z;
-}
-
-/// Comparison operator greater than.
-bool V3D::operator>(const V3D &rhs) const { return rhs < *this; }
-
-/**
-  Sets the vector position from a triplet of doubles x,y,z
-  @param xx :: The X coordinate
-  @param yy :: The Y coordinate
-  @param zz :: The Z coordinate
-*/
-void V3D::operator()(const double xx, const double yy, const double zz) {
-  x = xx;
-  y = yy;
-  z = zz;
-}
-
-/**
-  Set is x position
-  @param xx :: The X coordinate
-*/
-void V3D::setX(const double xx) { x = xx; }
-
-/**
-  Set is y position
-  @param yy :: The Y coordinate
-*/
-void V3D::setY(const double yy) { y = yy; }
-
-/**
-  Set is z position
-  @param zz :: The Z coordinate
-*/
-void V3D::setZ(const double zz) { z = zz; }
-
-/**
-  Returns the axis value based in the index provided
-  @param Index :: 0=x, 1=y, 2=z
-  @return a double value of the requested axis
-*/
-const double &V3D::operator[](const size_t Index) const {
-  switch (Index) {
-  case 0:
-    return x;
-  case 1:
-    return y;
-  case 2:
-    return z;
-  default:
-    throw Kernel::Exception::IndexError(Index, 2,
-                                        "V3D::operator[] range error");
-  }
-}
-
-/**
-  Returns the axis value based in the index provided
-  @param Index :: 0=x, 1=y, 2=z
-  @return a double value of the requested axis
-*/
-double &V3D::operator[](const size_t Index) {
-  switch (Index) {
-  case 0:
-    return x;
-  case 1:
-    return y;
-  case 2:
-    return z;
-  default:
-    throw Kernel::Exception::IndexError(Index, 2,
-                                        "V3D::operator[] range error");
-  }
 }
 
 /** Return the vector's position in spherical coordinates
@@ -705,13 +465,13 @@ void V3D::loadNexus(::NeXus::File *file, const std::string &name) {
 }
 
 /** transform vector into form, used to describe directions in crystallogaphical
-  *coodinate system, assuming that
-  * the vector describes perpendicular to a crystallogaphic plain or is close to
-  *such plain.
-  *
-  *  As crystallographical coordinate sytem is based on 3 integers, eps is used
-  *as accuracy to convert into integers
-*/
+ *coodinate system, assuming that
+ * the vector describes perpendicular to a crystallogaphic plain or is close to
+ *such plain.
+ *
+ *  As crystallographical coordinate sytem is based on 3 integers, eps is used
+ *as accuracy to convert into integers
+ */
 double nearInt(double val, double eps, double mult) {
   if (val > 0) {
     if (val < 1) {
@@ -764,7 +524,7 @@ double V3D::toMillerIndexes(double eps) {
   size_t iay = std::lround(ay * mult / eps);
   size_t iaz = std::lround(az * mult / eps);
 
-  size_t div = boost::math::gcd(iax, boost::math::gcd(iay, iaz));
+  size_t div = gcd(iax, gcd(iay, iaz));
   mult /= (static_cast<double>(div) * eps);
   x *= mult;
   y *= mult;

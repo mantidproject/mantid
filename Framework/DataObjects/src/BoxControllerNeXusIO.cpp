@@ -1,12 +1,12 @@
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
+#include "MantidDataObjects/MDEvent.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/FileFinder.h"
-#include "MantidDataObjects/MDEvent.h"
 
 #include <string>
 
@@ -95,7 +95,7 @@ void BoxControllerNeXusIO::setDataType(const size_t blockSize,
  *in save/load operations
  *@return typeName  -- the name of the event used in the operations. The name
  *itself defines the size and the format of the event
-*/
+ */
 
 void BoxControllerNeXusIO::getDataType(size_t &CoordSize,
                                        std::string &typeName) const {
@@ -110,7 +110,7 @@ void BoxControllerNeXusIO::getDataType(size_t &CoordSize,
  *@param mode  -- opening mode (read or read/write)
  *
  *
-*/
+ */
 bool BoxControllerNeXusIO::openFile(const std::string &fileName,
                                     const std::string &mode) {
   // file already opened
@@ -232,7 +232,7 @@ void BoxControllerNeXusIO::prepareNxSToWrite_CurVersion() {
   }
 }
 /** Open the NXS data blocks for loading/saving.
-  * The data should have been created before.     */
+ * The data should have been created before.     */
 void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
   // Open the data
   m_File->openData("event_data");
@@ -323,9 +323,9 @@ void BoxControllerNeXusIO::getDiskBufferFileData() {
 
 //-------------------------------------------------------------------------------------------------------------------------------------
 /** Save generc data block on specific position within properly opened NeXus
-  *data array
-  *@param DataBlock     -- the vector with data to write
-  *@param blockPosition -- The starting place to save data to   */
+ *data array
+ *@param DataBlock     -- the vector with data to write
+ *@param blockPosition -- The starting place to save data to   */
 template <typename Type>
 void BoxControllerNeXusIO::saveGenericBlock(
     const std::vector<Type> &DataBlock, const uint64_t blockPosition) const {
@@ -350,17 +350,17 @@ void BoxControllerNeXusIO::saveGenericBlock(
 }
 
 /** Save float data block on specific position within properly opened NeXus data
-  *array
-   *@param DataBlock     -- the vector with data to write
-   *@param blockPosition -- The starting place to save data to   */
+ *array
+ *@param DataBlock     -- the vector with data to write
+ *@param blockPosition -- The starting place to save data to   */
 void BoxControllerNeXusIO::saveBlock(const std::vector<float> &DataBlock,
                                      const uint64_t blockPosition) const {
   this->saveGenericBlock(DataBlock, blockPosition);
 }
 /** Save double precision data block on specific position within properly opened
-  *NeXus data array
-   *@param DataBlock     -- the vector with data to write
-   *@param blockPosition -- The starting place to save data to   */
+ *NeXus data array
+ *@param DataBlock     -- the vector with data to write
+ *@param blockPosition -- The starting place to save data to   */
 void BoxControllerNeXusIO::saveBlock(const std::vector<double> &DataBlock,
                                      const uint64_t blockPosition) const {
   this->saveGenericBlock(DataBlock, blockPosition);
@@ -492,5 +492,5 @@ void BoxControllerNeXusIO::closeFile() {
 }
 
 BoxControllerNeXusIO::~BoxControllerNeXusIO() { this->closeFile(); }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

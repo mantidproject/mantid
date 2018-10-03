@@ -1,5 +1,5 @@
 #include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
-#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
+#include "MantidPythonInterface/core/CallMethod.h"
 
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
@@ -10,8 +10,6 @@
 //-----------------------------------------------------------------------------
 namespace Mantid {
 namespace PythonInterface {
-using Environment::callMethod;
-using Environment::callMethodNoCheck;
 using namespace boost::python;
 
 /**

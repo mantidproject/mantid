@@ -156,5 +156,5 @@ const Mantid::Kernel::V3D &PeakRepresentationCross::getOrigin() const {
 void PeakRepresentationCross::showBackgroundRadius(const bool) {
   // Do nothing
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

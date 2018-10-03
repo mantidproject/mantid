@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Points.h"
 
 using namespace Mantid;
 using namespace HistogramData;

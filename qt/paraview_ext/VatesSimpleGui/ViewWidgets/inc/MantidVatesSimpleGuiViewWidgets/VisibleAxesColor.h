@@ -48,8 +48,8 @@ public:
 private:
   void backgroundColorChangeCallback(vtkObject *caller, unsigned long, void *);
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // MANTID_VISIBLEAXESCOLOR_H_

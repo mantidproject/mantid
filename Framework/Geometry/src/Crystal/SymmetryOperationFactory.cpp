@@ -1,9 +1,9 @@
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
-#include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/LibraryManager.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {

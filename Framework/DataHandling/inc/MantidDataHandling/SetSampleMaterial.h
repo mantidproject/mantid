@@ -64,7 +64,7 @@ private:
   void fixNeutron(PhysicalConstants::NeutronAtom &neutron, double coh_xs,
                   double inc_xs, double abs_xs, double tot_xs);
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_SetSampleMaterial_H_*/

@@ -110,10 +110,10 @@
 //  basic includes
 //----------------------------------------------------------------------
 
-#include <cstdlib> // standard lib includes
 #include <cmath>   // math includes
-#include <iosfwd>  // I/O streams
+#include <cstdlib> // standard lib includes
 #include <cstring> // C-style strings
+#include <iosfwd>  // I/O streams
 
 //----------------------------------------------------------------------
 // Limits
@@ -134,8 +134,8 @@
 #include <cvalues>                    // replacement for limits.h
 const double ANN_DBL_MAX = MAXDOUBLE; // insert maximum double
 #else
-#include <climits>
 #include <cfloat>
+#include <climits>
 const double ANN_DBL_MAX = DBL_MAX;
 #endif
 

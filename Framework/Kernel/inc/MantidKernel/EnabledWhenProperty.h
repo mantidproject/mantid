@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_ENABLEDWHENPROPERTY_H_
 #define MANTID_KERNEL_ENABLEDWHENPROPERTY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/System.h"
 #include <memory>
 #include <string>
 

@@ -1,8 +1,8 @@
 #include "MantidQtWidgets/Common/MdConstants.h"
+#include <QColor>
 #include <QSettings>
 #include <QString>
 #include <QStringList>
-#include <QColor>
 
 namespace MantidQt {
 namespace API {
@@ -83,21 +83,21 @@ QStringList MdConstants::getVsiColorMaps() const { return m_vsiColorMaps; }
 QString MdConstants::getStandardView() const { return m_standardView; }
 
 /**
-* Get the multi slice view.
-*@returns The multi slice view in the VSI.
-*/
+ * Get the multi slice view.
+ *@returns The multi slice view in the VSI.
+ */
 QString MdConstants::getMultiSliceView() const { return m_multiSliceView; }
 
 /**
-* Get the three slice view.
-*@returns The three slice view in the VSI.
-*/
+ * Get the three slice view.
+ *@returns The three slice view in the VSI.
+ */
 QString MdConstants::getThreeSliceView() const { return m_threeSliceView; }
 
 /**
-* Get the splatter plot view.
-*@returns The splatter plot view in the VSI.
-*/
+ * Get the splatter plot view.
+ *@returns The splatter plot view in the VSI.
+ */
 QString MdConstants::getSplatterPlotView() const { return m_splatterPlotView; }
 
 double MdConstants::getColorScaleStandardMax() {
@@ -107,17 +107,17 @@ double MdConstants::getColorScaleStandardMax() {
 double MdConstants::getLogScaleDefaultValue() { return m_logScaleDefaultValue; }
 
 /**
-* Get the technique dependence.
-*@returns The technique dependence.
-*/
+ * Get the technique dependence.
+ *@returns The technique dependence.
+ */
 QString MdConstants::getTechniqueDependence() const {
   return m_techniqueDependence;
 }
 
 /**
-* Get a list of all initial views.
-*@returns A list of all viewss, including a technique-dependent view
-*/
+ * Get a list of all initial views.
+ *@returns A list of all viewss, including a technique-dependent view
+ */
 QStringList MdConstants::getAllInitialViews() const {
   QStringList views;
 
@@ -129,5 +129,5 @@ QStringList MdConstants::getAllInitialViews() const {
 
   return views;
 }
-}
-}
+} // namespace API
+} // namespace MantidQt

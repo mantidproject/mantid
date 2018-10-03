@@ -4,9 +4,9 @@
 #include "MantidQtWidgets/SpectrumViewer/ISliderHandler.h"
 #include <QRect>
 
-#include "ui_SpectrumView.h"
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "ui_SpectrumView.h"
 
 /**
     @class SliderHandler

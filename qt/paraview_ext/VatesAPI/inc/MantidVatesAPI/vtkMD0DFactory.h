@@ -1,9 +1,9 @@
 #ifndef MANTID_VATES_VTK_MD_0D_FACTORY_H_
 #define MANTID_VATES_VTK_MD_0D_FACTORY_H_
 
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "vtkUnstructuredGrid.h"
 
 namespace Mantid {
@@ -51,6 +51,6 @@ public:
 protected:
   void validate() const override;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

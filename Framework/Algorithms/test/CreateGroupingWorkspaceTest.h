@@ -1,12 +1,12 @@
 #ifndef MANTID_ALGORITHMS_CREATEGROUPINGWORKSPACETEST_H_
 #define MANTID_ALGORITHMS_CREATEGROUPINGWORKSPACETEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Algorithms;

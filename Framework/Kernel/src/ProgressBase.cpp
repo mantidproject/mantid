@@ -1,8 +1,8 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Timer.h"
+#include <algorithm>
 #include <sstream>
 #include <stdexcept>
-#include <algorithm>
 
 namespace Mantid {
 namespace Kernel {
@@ -79,7 +79,7 @@ ProgressBase::~ProgressBase() { delete m_timeElapsed; }
  * sends the progress notification on behalf of its algorithm.
  *
  * @param msg :: message string that will be displayed in GUI, for example
-*/
+ */
 void ProgressBase::report(const std::string &msg) {
   if (++m_i - m_last_reported < m_notifyStep)
     return;
@@ -207,5 +207,5 @@ double ProgressBase::getEstimatedTime() const {
   }
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

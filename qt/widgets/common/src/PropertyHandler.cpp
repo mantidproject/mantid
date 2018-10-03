@@ -1,23 +1,23 @@
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/ParameterReference.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParameterReference.h"
+#include "MantidAPI/ParameterTie.h"
 
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include <QMessageBox>
 
@@ -90,8 +90,8 @@ void PropertyHandler::init() {
       m_browser->m_enumManager->setEnumNames(m_type, functionNames);
     }
   }
-  int itype = m_browser->m_enumManager->enumNames(m_type)
-                  .indexOf(QString::fromStdString(m_fun->name()));
+  int itype = m_browser->m_enumManager->enumNames(m_type).indexOf(
+      QString::fromStdString(m_fun->name()));
   m_browser->m_enumManager->setValue(m_type, itype);
   // create worspace and workspace index properties if parent is a MultiBG
   initWorkspace();
@@ -330,10 +330,10 @@ void PropertyHandler::initWorkspace() {
 }
 
 /**
-  * Add a function to the function handled by this handler.
-  * @param fnName :: A function name or full initialization string
-  *   in the form name=FunctionName,param1=Value,param2=Value,...
-  */
+ * Add a function to the function handled by this handler.
+ * @param fnName :: A function name or full initialization string
+ *   in the form name=FunctionName,param1=Value,param2=Value,...
+ */
 PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
   if (!m_cf)
     return nullptr;
@@ -526,9 +526,9 @@ PropertyHandler *PropertyHandler::getHandler(std::size_t i) const {
   return ph;
 }
 /** Returns 'this' if item == m_item and this is a composite function or
-* calls findCompositeFunction recursively with all its children or
-* zero
-*/
+ * calls findCompositeFunction recursively with all its children or
+ * zero
+ */
 Mantid::API::CompositeFunction_const_sptr
 PropertyHandler::findCompositeFunction(QtBrowserItem *item) const {
   if (!m_cf)
@@ -544,9 +544,9 @@ PropertyHandler::findCompositeFunction(QtBrowserItem *item) const {
   return Mantid::API::CompositeFunction_sptr();
 }
 /** Returns 'this' if item == m_item or
-* calls findFunction recursively with all its children or
-* zero
-*/
+ * calls findFunction recursively with all its children or
+ * zero
+ */
 Mantid::API::IFunction_const_sptr
 PropertyHandler::findFunction(QtBrowserItem *item) const {
   if (item == m_item)
@@ -628,10 +628,10 @@ PropertyHandler::findHandler(const Mantid::API::IFunction *fun) {
 }
 
 /**
-* Set function parameter value read from a QtProperty
-* @param prop :: The (double) property with the new parameter value
-* @return true if successfull
-*/
+ * Set function parameter value read from a QtProperty
+ * @param prop :: The (double) property with the new parameter value
+ * @return true if successfull
+ */
 bool PropertyHandler::setParameter(QtProperty *prop) {
   if (m_parameters.contains(prop)) {
     std::string parName = prop->propertyName().toStdString();
@@ -750,12 +750,12 @@ private:
 };
 
 /**
-* Set function attribute value read from a QtProperty
-* @param prop :: The property with the new attribute value
-* @param resetProperties :: Flag to reset all properties of the handled
-* function.
-* @return true if successfull
-*/
+ * Set function attribute value read from a QtProperty
+ * @param prop :: The property with the new attribute value
+ * @param resetProperties :: Flag to reset all properties of the handled
+ * function.
+ * @return true if successfull
+ */
 bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
   if (m_attributes.contains(prop)) {
     QString attName = prop->propertyName();
@@ -910,9 +910,9 @@ void PropertyHandler::clearError(QtProperty *prop) {
 }
 
 /**
-* Change the type of the function (replace the function)
-* @param prop :: The "Type" property with new value
-*/
+ * Change the type of the function (replace the function)
+ * @param prop :: The "Type" property with new value
+ */
 Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
   if (prop == m_type) {
     // if (!m_parent) return m_browser->compositeFunction();// dont replace the
@@ -1084,11 +1084,11 @@ void PropertyHandler::fix(const QString &parName) {
 }
 
 /**
-* Remove the tie.
-* @param prop :: The tie property to remove
-* @param globalName :: Name of the parameter in compoite function
-* (e.g. f1.omega)
-*/
+ * Remove the tie.
+ * @param prop :: The tie property to remove
+ * @param globalName :: Name of the parameter in compoite function
+ * (e.g. f1.omega)
+ */
 void PropertyHandler::removeTie(QtProperty *prop, std::string globalName) {
   QString parName = m_ties.key(prop, "");
   if (parName.isEmpty())
@@ -1108,9 +1108,9 @@ void PropertyHandler::removeTie(QtProperty *prop, std::string globalName) {
   }
 }
 /**
-* Remove the tie.
-* @param prop :: The tie property to remove
-*/
+ * Remove the tie.
+ * @param prop :: The tie property to remove
+ */
 void PropertyHandler::removeTie(QtProperty *prop) {
   QString parName = m_ties.key(prop, "");
   if (parName.isEmpty())
@@ -1549,5 +1549,5 @@ void PropertyHandler::setFunctionWorkspace() {
   }
 }
 
-} // MantidQt
-} // API
+} // namespace MantidWidgets
+} // namespace MantidQt

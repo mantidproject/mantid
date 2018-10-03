@@ -38,5 +38,5 @@ std::string PeakOverlayViewFactoryBase::getPlotYLabel() const {
 }
 
 PeakOverlayViewFactoryBase::~PeakOverlayViewFactoryBase() {}
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

@@ -11,6 +11,6 @@ PoldiChopperFactory::createChopper(std::string chopperType) {
 
   return new PoldiBasicChopper();
 }
-}
+} // namespace Poldi
 // namespace Poldi
 } // namespace Mantid

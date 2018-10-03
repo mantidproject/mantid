@@ -1,11 +1,11 @@
 #ifndef MANTID_TESTALGEBRA__
 #define MANTID_TESTALGEBRA__
 
-#include <cxxtest/TestSuite.h>
+#include <algorithm>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 #include <ostream>
 #include <vector>
-#include <algorithm>
 
 //#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Math/Algebra.h"

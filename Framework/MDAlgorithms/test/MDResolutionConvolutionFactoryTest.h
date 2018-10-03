@@ -1,9 +1,9 @@
 #ifndef MDRESOLUTIONCONVOLUTIONFACTORYTEST_H_
 #define MDRESOLUTIONCONVOLUTIONFACTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
 #include "MDFittingTestHelpers.h"
+#include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::MDAlgorithms::MDResolutionConvolutionFactory;
 

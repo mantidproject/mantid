@@ -1,5 +1,5 @@
-#include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
+#include "MantidDataHandling/DataBlock.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -77,5 +77,5 @@ void DataBlockGenerator::next() { ++(*this); }
 bool DataBlockGenerator::isDone() { return !m_currentIntervalIndex; }
 
 int64_t DataBlockGenerator::getValue() { return m_currentSpectrum; }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

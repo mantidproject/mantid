@@ -76,7 +76,7 @@ private:
   /// Allocated object for save state calls
   gsl_qrng *m_savedGenerator;
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_SOBOLSEQUENCE_H_ */

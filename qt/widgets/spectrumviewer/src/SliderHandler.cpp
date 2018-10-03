@@ -1,7 +1,7 @@
 
-#include <QScrollBar>
 #include "MantidQtWidgets/SpectrumViewer/SliderHandler.h"
 #include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
+#include <QScrollBar>
 
 namespace MantidQt {
 namespace SpectrumView {

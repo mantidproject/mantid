@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -74,6 +74,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::CostFunctionFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /*MANTID_API_COSTFUNCTIONFACTORY_H_*/

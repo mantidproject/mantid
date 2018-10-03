@@ -44,7 +44,7 @@ namespace API {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL FunctionDomain //: public Kernel::PropertyManager
-    {
+{
 public:
   /// Virtual destructor
   virtual ~FunctionDomain() = default;

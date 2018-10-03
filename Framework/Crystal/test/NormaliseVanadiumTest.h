@@ -12,8 +12,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 #include <random>
 
 using namespace Mantid;
@@ -30,9 +30,9 @@ using Mantid::Types::Event::TofEvent;
 
 namespace {
 /** Create an EventWorkspace containing fake data of single-crystal diffraction.
-*
-* @return EventWorkspace_sptr
-*/
+ *
+ * @return EventWorkspace_sptr
+ */
 EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   FacilityHelper::ScopedFacilities loadTESTFacility(
       "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
@@ -77,9 +77,9 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
         numEvents / std::sqrt((pix / 100 - 50.5) * (pix / 100 - 50.5) +
                               (pix % 100 - 50.5) * (pix % 100 - 50.5)));
     for (int i = 0; i < r; i++) {
-      el += TofEvent(
-          0.75 + binDelta * ((flat(rng) + flat(rng) + flat(rng)) * 2. - 3.),
-          run_start + double(i));
+      el += TofEvent(0.75 + binDelta *
+                                ((flat(rng) + flat(rng) + flat(rng)) * 2. - 3.),
+                     run_start + double(i));
     }
   }
 
@@ -96,10 +96,10 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
 }
 
 /** Creates an instance of the NormaliseVanadium algorithm and sets its
-* properties.
-*
-* @return NormaliseVanadium alg
-*/
+ * properties.
+ *
+ * @return NormaliseVanadium alg
+ */
 IAlgorithm_sptr createAlgorithm() {
   int numEventsPer = 100;
   MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
@@ -114,7 +114,7 @@ IAlgorithm_sptr createAlgorithm() {
 
   return alg;
 }
-}
+} // namespace
 
 class NormaliseVanadiumTest : public CxxTest::TestSuite {
 public:

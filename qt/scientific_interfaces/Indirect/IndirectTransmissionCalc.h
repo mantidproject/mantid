@@ -1,9 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTTRANSMISSIONCALC_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTTRANSMISSIONCALC_H_
 
-#include "ui_IndirectTransmissionCalc.h"
 #include "IndirectToolsTab.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "ui_IndirectTransmissionCalc.h"
 
 #include <QComboBox>
 #include <QMap>

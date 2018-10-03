@@ -2,8 +2,8 @@
 #define MANTID_ALGORITHMS_NORMALISEBYDETECTORTEST_H_
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Timer.h"
 #include <boost/format.hpp>
 #include <cxxtest/TestSuite.h>

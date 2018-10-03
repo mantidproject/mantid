@@ -2,9 +2,9 @@
 #define MANTID_ALGORITHM_GROUP_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -57,6 +57,8 @@ public:
     return "Transforms\\Grouping;Utility\\Workspaces";
   }
 
+  std::map<std::string, std::string> validateInputs() override;
+
 protected:
   Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes)
@@ -72,12 +74,13 @@ private:
   /// Add a workspace to the new group, checking for a WorkspaceGroup and
   /// unrolling it
   void addToGroup(const API::Workspace_sptr &workspace);
-
+  /// Use a glob pattern to select workspaces in the ADS
+  void addToGroup(const std::string &globExpression);
   /// A pointer to the new group
   API::WorkspaceGroup_sptr m_group;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REGROUP_H_*/

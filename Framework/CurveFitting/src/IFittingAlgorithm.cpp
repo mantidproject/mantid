@@ -55,7 +55,7 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
   }
   return creator;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -303,6 +303,7 @@ void IFittingAlgorithm::declareCostFunctionProperty() {
 boost::shared_ptr<CostFunctions::CostFuncFitting>
 IFittingAlgorithm::getCostFunctionInitialized() const {
   // Function may need some preparation.
+  m_function->sortTies();
   m_function->setUpForFit();
 
   API::FunctionDomain_sptr domain;

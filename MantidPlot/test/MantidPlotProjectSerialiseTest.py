@@ -55,7 +55,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         self.assert_project_files_saved(workspace_name)
         contents = read_project_file(self._project_folder)
 
-        # Check corrent number of windows
+        # Check current number of windows
         self.assertEqual(int(contents['<windows>']), 1)
 
         # Check workspace list was written
@@ -86,7 +86,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         self.assert_project_files_saved(workspace_name)
         contents = read_project_file(self._project_folder)
 
-        # Check corrent number of windows
+        # Check current number of windows
         self.assertEqual(int(contents['<windows>']), 1)
 
         # Check plot title is correct

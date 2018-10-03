@@ -44,7 +44,7 @@ class PyChop2Tests(unittest.TestCase):
         flux = []
         for inc, variant in enumerate(variants):
             chopobj = PyChop2('LET', variant)
-            # Checks that it instanciates the correct variant
+            # Checks that it instantiates the correct variant
             self.assertTrue(variant in chopobj.getChopper())
             # Code should give an error if the chopper settings and Ei have
             # not been set.

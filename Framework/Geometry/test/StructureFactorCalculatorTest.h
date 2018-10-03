@@ -2,8 +2,8 @@
 #define MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculator.h"
@@ -12,8 +12,8 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using ::testing::Mock;
-using ::testing::_;
 using ::testing::Return;
+using ::testing::_;
 
 class StructureFactorCalculatorTest : public CxxTest::TestSuite {
 public:
@@ -99,11 +99,11 @@ private:
    */
   class MockStructureFactorCalculator : public StructureFactorCalculator {
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(getF, StructureFactor(const V3D &hkl));
     MOCK_METHOD1(crystalStructureSetHook,
                  void(const CrystalStructure &crystalStructure));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

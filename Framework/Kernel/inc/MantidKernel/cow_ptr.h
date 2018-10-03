@@ -4,8 +4,8 @@
 #include "MultiThreaded.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
 
 #include <mutex>
@@ -100,7 +100,7 @@ public:
   } ///< Pointer dereference access
   const DataType *operator->() const {
     return Data.get();
-  } ///<indirectrion dereference access
+  } ///< indirectrion dereference access
   bool operator==(const cow_ptr<DataType> &A) const noexcept {
     return Data == A.Data;
   } ///< Based on ptr equality
@@ -115,15 +115,13 @@ public:
  resource is a sink.
  */
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(DataType *resourcePtr)
-    : Data(resourcePtr) {}
+cow_ptr<DataType>::cow_ptr(DataType *resourcePtr) : Data(resourcePtr) {}
 
 /**
   Constructor : creates new data() object
 */
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr()
-    : Data(boost::make_shared<DataType>()) {}
+cow_ptr<DataType>::cow_ptr() : Data(boost::make_shared<DataType>()) {}
 
 /**
   Copy constructor : double references the data object

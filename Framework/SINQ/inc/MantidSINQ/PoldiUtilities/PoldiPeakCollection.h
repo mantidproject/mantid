@@ -1,11 +1,11 @@
 #ifndef MANTID_SINQ_POLDIPEAKCOLLECTION_H
 #define MANTID_SINQ_POLDIPEAKCOLLECTION_H
 
-#include "MantidSINQ/DllConfig.h"
-#include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidKernel/V3D.h"
+#include "MantidSINQ/DllConfig.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "boost/shared_ptr.hpp"
 
 namespace Mantid {
@@ -119,7 +119,7 @@ protected:
   Geometry::PointGroup_sptr m_pointGroup;
   Geometry::UnitCell m_unitCell;
 };
-}
-}
+} // namespace Poldi
+} // namespace Mantid
 
 #endif // MANTID_SINQ_POLDIPEAKCOLLECTION_H

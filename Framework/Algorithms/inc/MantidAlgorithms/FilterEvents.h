@@ -1,15 +1,15 @@
 #ifndef MANTID_ALGORITHMS_FILTEREVENTS_H_
 #define MANTID_ALGORITHMS_FILTEREVENTS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ISplittersWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/ISplittersWorkspace.h"
-#include "MantidKernel/TimeSplitter.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid {
 namespace Algorithms {

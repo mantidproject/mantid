@@ -73,5 +73,5 @@ void LoadSampleDetailsFromRaw::exec() {
   progress(1.);
 }
 
-} // namespace
-}
+} // namespace DataHandling
+} // namespace Mantid

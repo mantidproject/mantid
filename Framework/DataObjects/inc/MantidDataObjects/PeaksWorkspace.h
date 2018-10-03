@@ -15,10 +15,10 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include <boost/optional.hpp>
 #include <string>
 #include <utility>
 #include <vector>
-#include <boost/optional.hpp>
 
 // IsamplePosition should be IsampleOrientation
 namespace Mantid {
@@ -299,6 +299,6 @@ using PeaksWorkspace_sptr = boost::shared_ptr<PeaksWorkspace>;
 
 /// Typedef for a shared pointer to a const peaks workspace.
 using PeaksWorkspace_const_sptr = boost::shared_ptr<const PeaksWorkspace>;
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 #endif

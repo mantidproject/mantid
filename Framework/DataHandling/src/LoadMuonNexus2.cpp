@@ -49,11 +49,11 @@ using Mantid::Types::Core::DateAndTime;
 LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus() {}
 
 /** Executes the right version of the muon nexus loader: versions 1 or 2.
-*
-*  @throw Exception::FileError If the Nexus file cannot be found/opened
-*  @throw std::invalid_argument If the optional properties are set to invalid
-*values
-*/
+ *
+ *  @throw Exception::FileError If the Nexus file cannot be found/opened
+ *  @throw std::invalid_argument If the optional properties are set to invalid
+ *values
+ */
 void LoadMuonNexus2::exec() {
   std::string filePath = getPropertyValue("Filename");
   LoadMuonNexus1 load1;
@@ -85,11 +85,11 @@ void LoadMuonNexus2::exec() {
 }
 
 /** Read in a muon nexus file of the version 2.
-*
-*  @throw Exception::FileError If the Nexus file cannot be found/opened
-*  @throw std::invalid_argument If the optional properties are set to invalid
-*values
-*/
+ *
+ *  @throw Exception::FileError If the Nexus file cannot be found/opened
+ *  @throw std::invalid_argument If the optional properties are set to invalid
+ *values
+ */
 void LoadMuonNexus2::doExec() {
   // Create the root Nexus class
   NXRoot root(getPropertyValue("Filename"));
@@ -303,8 +303,8 @@ void LoadMuonNexus2::doExec() {
 }
 
 /** loadData
-*  Load the counts data from an NXInt into a workspace
-*/
+ *  Load the counts data from an NXInt into a workspace
+ */
 Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
                                    const Mantid::NeXus::NXInt &counts,
                                    int period, int spec) {
@@ -325,11 +325,11 @@ Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
 }
 
 /**  Load logs from Nexus file. Logs are expected to be in
-*   /run/sample group of the file.
-*   @param ws :: The workspace to load the logs to.
-*   @param entry :: The Nexus entry
-*   @param period :: The period of this workspace
-*/
+ *   /run/sample group of the file.
+ *   @param ws :: The workspace to load the logs to.
+ *   @param entry :: The Nexus entry
+ *   @param period :: The period of this workspace
+ */
 void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
                               int period) {
   // Avoid compiler warning
@@ -365,8 +365,8 @@ void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
 }
 
 /**  Log the run details from the file
-* @param localWorkspace :: The workspace details to use
-*/
+ * @param localWorkspace :: The workspace details to use
+ */
 void LoadMuonNexus2::loadRunDetails(
     DataObjects::Workspace2D_sptr localWorkspace) {
   API::Run &runDetails = localWorkspace->mutableRun();

@@ -9,8 +9,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -442,9 +442,10 @@ private:
     SymmetryOperation symOpMatrix = symOp * identity;
     int determinant = abs(symOpMatrix.matrix().determinant());
 
-    TSM_ASSERT_EQUALS(symOp.identifier() + ": Determinant of symmetry "
-                                           "operation matrix is expected to be "
-                                           "1. Actual value: " +
+    TSM_ASSERT_EQUALS(symOp.identifier() +
+                          ": Determinant of symmetry "
+                          "operation matrix is expected to be "
+                          "1. Actual value: " +
                           boost::lexical_cast<std::string>(determinant),
                       determinant, 1);
   }

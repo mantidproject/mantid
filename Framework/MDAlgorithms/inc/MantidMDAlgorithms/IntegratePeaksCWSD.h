@@ -2,12 +2,12 @@
 #define MANTID_MDALGORITHMS_INTEGRATEPEAKSCWSD_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidAPI/CompositeFunction.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -109,7 +109,7 @@ private:
   bool m_haveInputPeakWS;
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSCWSD_H_ */

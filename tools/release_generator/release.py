@@ -47,8 +47,8 @@ Citation
 
 Please cite any usage of Mantid as follows: **TODO update with current version doi**
 
-- *Mantid {version}: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID{version}
-   <http://dx.doi.org/10.5286/SOFTWARE/MANTID{version}>`_
+- *Mantid {version}: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. `doi: 10.5286/SOFTWARE/MANTID{version_maj_min}
+   <http://dx.doi.org/10.5286/SOFTWARE/MANTID{version_maj_min}>`_
 
 - Arnold, O. et al. *Mantid-Data Analysis and Visualization Package for Neutron Scattering and mu-SR Experiments.* Nuclear Instruments
   and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment 764 (2014): 156-166
@@ -285,7 +285,7 @@ if __name__ == '__main__':
     release_link = '\n:ref:`Release {0} <{1}>`'.format(args.release[1:], args.release)
 
     for filename in DOCS.keys():
-        contents = DOCS[filename].format(milestone=args.milestone, version=args.release[1:])
+        contents = DOCS[filename].format(milestone=args.milestone, version=args.release[1:], version_maj_min=args.release[1:-2])
         filename = os.path.join(release_root, filename)
         print('making', filename)
         with open(filename, 'w') as handle:

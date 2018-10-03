@@ -2,8 +2,8 @@
 #define MANTID_HISTOGRAMDATA_VARIANCEVECTOROF_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VectorOf.h"
 #include "MantidHistogramData/Iterable.h"
+#include "MantidHistogramData/VectorOf.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -59,17 +59,17 @@ public:
   // the using declaration above, so we need them here explicitly.
   VarianceVectorOf(const VarianceVectorOf &) = default;
   VarianceVectorOf(VarianceVectorOf &&) = default;
-  VarianceVectorOf &operator=(const VarianceVectorOf &)& = default;
-  VarianceVectorOf &operator=(VarianceVectorOf &&)& = default;
+  VarianceVectorOf &operator=(const VarianceVectorOf &) & = default;
+  VarianceVectorOf &operator=(VarianceVectorOf &&) & = default;
 
   /// Copy construct from sigmas, taking the square of each sigma value.
   VarianceVectorOf(const Sigmas &sigmas);
   /// Move construct from sigmas, taking the square of each sigma value.
   VarianceVectorOf(Sigmas &&sigmas);
   /// Copy assignment from sigmas, taking the square of each sigma value.
-  VarianceVectorOf &operator=(const Sigmas &sigmas) & ;
+  VarianceVectorOf &operator=(const Sigmas &sigmas) &;
   /// Move assignment from sigmas, taking the square of each sigma value.
-  VarianceVectorOf &operator=(Sigmas &&sigmas) & ;
+  VarianceVectorOf &operator=(Sigmas &&sigmas) &;
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so

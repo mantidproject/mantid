@@ -1,8 +1,8 @@
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include <stdexcept>
 #include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 
@@ -24,13 +24,13 @@ namespace Conversions {
  *tests.
  */
 /** Converts TOF to d, given a distance and sin(theta). Throws std::domain_error
-  * when distance or sin(theta) <= 0.
-  *
-  * @param tof :: Time of flight in microseconds.
-  * @param distance :: Neutron flight path in mm.
-  * @param sinTheta :: sin(theta).
-  * @return d in Angstrom.
-  */
+ * when distance or sin(theta) <= 0.
+ *
+ * @param tof :: Time of flight in microseconds.
+ * @param distance :: Neutron flight path in mm.
+ * @param sinTheta :: sin(theta).
+ * @return d in Angstrom.
+ */
 double TOFtoD(double tof, double distance, double sinTheta) {
   if (distance <= 0 || sinTheta <= 0.0) {
     throw std::domain_error(
@@ -42,24 +42,24 @@ double TOFtoD(double tof, double distance, double sinTheta) {
 }
 
 /** Converts d to TOF, given a distance and sin(theta)
-  *
-  * @param d :: d in Angstrom.
-  * @param distance :: Neutron flight path in mm.
-  * @param sinTheta :: sin(theta).
-  * @return TOF in microseconds.
-  */
+ *
+ * @param d :: d in Angstrom.
+ * @param distance :: Neutron flight path in mm.
+ * @param sinTheta :: sin(theta).
+ * @return TOF in microseconds.
+ */
 double dtoTOF(double d, double distance, double sinTheta) {
   return 2.0 * distance * sinTheta * d * PhysicalConstants::NeutronMass /
          (PhysicalConstants::h * 1e7);
 }
 
 /** Converts d-spacing in Angstrom to momentum transfer Q (in reciprocal
-  *Angstrom). Throws std::domain_error
-  * when d <= 0 is supplied.
-  *
-  * @param d :: d-spacing in Angstrom
-  * @return Q in reciprocal Angstrom
-  */
+ *Angstrom). Throws std::domain_error
+ * when d <= 0 is supplied.
+ *
+ * @param d :: d-spacing in Angstrom
+ * @return Q in reciprocal Angstrom
+ */
 double dToQ(double d) {
   if (d <= 0.0) {
     throw std::domain_error(
@@ -70,12 +70,12 @@ double dToQ(double d) {
 }
 
 /** Converts momentum transfer Q (in reciprocal Angstrom) to d-spacing in
-  *Angstrom. Throws std::domain_error
-  * when Q <= 0 is supplied.
-  *
-  * @param q :: Q-value in reciprocal Angstrom
-  * @return d in Angstrom
-  */
+ *Angstrom. Throws std::domain_error
+ * when Q <= 0 is supplied.
+ *
+ * @param q :: Q-value in reciprocal Angstrom
+ * @return d in Angstrom
+ */
 double qToD(double q) {
   if (q <= 0.0) {
     throw std::domain_error(
@@ -86,16 +86,16 @@ double qToD(double q) {
 }
 
 /** Converts degrees to radians
-  * @param degree :: angle in degree
-  * @return angle in radians
-  */
+ * @param degree :: angle in degree
+ * @return angle in radians
+ */
 double degToRad(double degree) { return degree / 180.0 * M_PI; }
 
 /** Converts radians to degrees
-  * @param radians :: angle in radians
-  * @return angle in degrees
-  */
+ * @param radians :: angle in radians
+ * @return angle in degrees
+ */
 double radToDeg(double radians) { return radians / M_PI * 180.0; }
-}
-}
-}
+} // namespace Conversions
+} // namespace Poldi
+} // namespace Mantid

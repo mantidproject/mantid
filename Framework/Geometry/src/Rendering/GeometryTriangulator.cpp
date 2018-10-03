@@ -2,6 +2,7 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Rendering/RenderingMesh.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <climits>
@@ -23,26 +24,23 @@
 #endif
 #endif
 
-GCC_DIAG_OFF(conversion)
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
-#include <gp_Trsf.hxx>
-#include <gp_Pnt.hxx>
-#include <gp_Pln.hxx>
-#include <StdFail_NotDone.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Face.hxx>
-#include <TopExp_Explorer.hxx>
-#include <BRepMesh_IncrementalMesh.hxx>
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
+
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepMesh_IncrementalMesh.hxx>
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
-GCC_DIAG_ON(conversion)
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+#include <StdFail_NotDone.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <gp_Pln.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191
@@ -65,8 +63,8 @@ GeometryTriangulator::GeometryTriangulator(const CSGObject *obj)
 #endif
 }
 
-GeometryTriangulator::GeometryTriangulator(const MeshObject *obj)
-    : m_isTriangulated(false), m_meshObj(obj) {}
+GeometryTriangulator::GeometryTriangulator(std::unique_ptr<RenderingMesh> obj)
+    : m_isTriangulated(false), m_meshObj(std::move(obj)) {}
 
 GeometryTriangulator::~GeometryTriangulator() {}
 
@@ -135,7 +133,7 @@ void GeometryTriangulator::OCAnalyzeObject() {
   if (m_csgObj != nullptr) // If object exists
   {
     // Get the top rule tree in Obj
-    const Rule *top = m_csgObj->topRule();
+    const auto *top = m_csgObj->topRule();
     if (top == nullptr) {
       m_objSurface.reset(new TopoDS_Shape());
       return;

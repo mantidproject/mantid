@@ -1,10 +1,8 @@
 #include "MantidPythonInterface/api/Algorithms/AlgorithmObserverAdapter.h"
-#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
+#include "MantidPythonInterface/core/CallMethod.h"
 
 namespace Mantid {
 namespace PythonInterface {
-using Environment::callMethod;
-using Environment::UndefinedAttributeError;
 
 AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self)
     : API::AlgorithmObserver(), m_self(self) {}

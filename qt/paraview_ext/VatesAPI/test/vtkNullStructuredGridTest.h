@@ -7,9 +7,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <vtkStructuredGrid.h>
 #include <vtkPoints.h>
 #include <vtkSmartPointer.h>
+#include <vtkStructuredGrid.h>
 
 using namespace Mantid::VATES;
 

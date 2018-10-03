@@ -1,9 +1,9 @@
 #ifndef MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUND_H_
 #define MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUND_H_
 
-#include "MantidSINQ/DllConfig.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 
 namespace Mantid {

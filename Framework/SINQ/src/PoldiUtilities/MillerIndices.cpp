@@ -1,7 +1,7 @@
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
 
-#include <stdexcept>
 #include "boost/format.hpp"
+#include <stdexcept>
 
 namespace Mantid {
 namespace Poldi {
@@ -64,5 +64,5 @@ void MillerIndices::populateVector() {
   m_asVector[1] = m_k;
   m_asVector[2] = m_l;
 }
-}
-}
+} // namespace Poldi
+} // namespace Mantid

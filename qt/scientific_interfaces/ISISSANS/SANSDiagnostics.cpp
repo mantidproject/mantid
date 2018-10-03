@@ -1,25 +1,25 @@
 #include "SANSDiagnostics.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/UserStringParser.h"
-#include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/UserStringParser.h"
 
-#include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
-using Mantid::specnum_t;
 using Mantid::detid_t;
+using Mantid::specnum_t;
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("SANSDiagnostics");
-}
+} // namespace
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -113,8 +113,8 @@ void SANSDiagnostics::setToolTips() {
 }
 
 /** This method loads the first spectrum
-  * and displays periods and rectangular detectors if any.
-  */
+ * and displays periods and rectangular detectors if any.
+ */
 void SANSDiagnostics::loadFirstSpectrum() {
 
   // get the file names using the filefinder plugin
@@ -198,9 +198,9 @@ int SANSDiagnostics::getPeriodNumber() {
   return periodNum;
 }
 /**This method returns the member workspace name for the period
-*  @param period - period number
-*  @returns name of the member workspace.
-*/
+ *  @param period - period number
+ *  @returns name of the member workspace.
+ */
 QString SANSDiagnostics::getMemberWorkspace(int period) {
   Mantid::API::Workspace_sptr ws_sptr;
   try {
@@ -209,7 +209,8 @@ QString SANSDiagnostics::getMemberWorkspace(int period) {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         m_outws_load.toStdString() << '\n';
+                         m_outws_load.toStdString()
+                  << '\n';
     return "";
   }
   if (Mantid::API::WorkspaceGroup_sptr wsgrp_sptr =
@@ -278,7 +279,8 @@ void SANSDiagnostics::displayRectangularDetectors(const QString &wsName) {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         wsName.toStdString() << '\n';
+                         wsName.toStdString()
+                  << '\n';
   }
   if (!ws_sptr) {
     return;
@@ -322,9 +324,9 @@ void SANSDiagnostics::displayRectangularDetectors(const QString &wsName) {
 
 /** This method returns the detector name from list of detctors for a given
  * index
-  * @param index of the rectangular detector
-  * @return detector name
-  */
+ * @param index of the rectangular detector
+ * @return detector name
+ */
 const QString SANSDiagnostics::getDetectorName(int index) {
   boost::shared_ptr<RectDetectorDetails> rectDet;
   try {
@@ -339,9 +341,9 @@ const QString SANSDiagnostics::getDetectorName(int index) {
 
 /** This method returns a vector of rectanglar detector's name, min & max
  * detector id.
-  * @param ws_sptr shared pointer to workspace
-  * @returns vector of rectangular detectors details
-  */
+ * @param ws_sptr shared pointer to workspace
+ * @returns vector of rectangular detectors details
+ */
 std::vector<boost::shared_ptr<RectDetectorDetails>>
 SANSDiagnostics::rectangularDetectorDetails(
     Mantid::API::Workspace_sptr &ws_sptr) {
@@ -392,10 +394,10 @@ SANSDiagnostics::rectangularDetectorDetails(
 }
 
 /** This method returns spectrum list for the selected detector
-  * @param mws_sptr shared pointer to workspace
-  * @param detNum number used to identify detector
-  * @param specList  -list of spectrum
-  */
+ * @param mws_sptr shared pointer to workspace
+ * @param detNum number used to identify detector
+ * @param specList  -list of spectrum
+ */
 void SANSDiagnostics::getSpectraList(
     const Mantid::API::MatrixWorkspace_sptr &mws_sptr, const detid_t detNum,
     std::vector<specnum_t> &specList) {
@@ -456,10 +458,10 @@ void SANSDiagnostics::getSpectraList(
   specList.push_back(max_spec_index);
 }
 /** This method returns the minimum and maximum spectrum Nos
-  * @param specList - list of spectra.
-  * @param minSpec - minimum spectrum number
-  * @param maxSpec - maximum spectrum number
-  */
+ * @param specList - list of spectra.
+ * @param minSpec - minimum spectrum number
+ * @param maxSpec - maximum spectrum number
+ */
 void SANSDiagnostics::minandMaxSpectrumNos(
     const std::vector<specnum_t> &specList, QString &minSpec,
     QString &maxSpec) {
@@ -486,11 +488,11 @@ void SANSDiagnostics::minandMaxSpectrumNos(
 }
 
 /** This method returns workspace Indexes for the given spectrum indexes
-  * @param mws_sptr - shared pointer to workspace
-  * @param specList - list of spectra
-  * @param startWSIndex - start index of workspace
-  * @param endWSIndex  - end index of the workspace
-*/
+ * @param mws_sptr - shared pointer to workspace
+ * @param specList - list of spectra
+ * @param startWSIndex - start index of workspace
+ * @param endWSIndex  - end index of the workspace
+ */
 
 void SANSDiagnostics::getWorkspaceIndexes(
     const Mantid::API::MatrixWorkspace_sptr &mws_sptr,
@@ -535,9 +537,9 @@ QString SANSDiagnostics::getFileName() {
 }
 
 /**This method returns workspace name from the  file name
-  * @param fileName name of the file
-  * @returns workspace name
-  */
+ * @param fileName name of the file
+ * @returns workspace name
+ */
 QString SANSDiagnostics::getWorkspaceNameFileName(const QString &fileName) {
   // construct workspace name from the file name.
   int index1 = fileName.lastIndexOf(".");
@@ -573,10 +575,10 @@ QString SANSDiagnostics::getWorkspaceToProcess() {
 }
 
 /**This method checks the spec min and are in valid range
-  * @param specMin - minimum spectrum number
-  * @param specMax - maximum spectrum number
-  * @returns true if the spectra is in valid range.
-  */
+ * @param specMin - minimum spectrum number
+ * @param specMax - maximum spectrum number
+ * @returns true if the spectra is in valid range.
+ */
 bool SANSDiagnostics::isValidSpectra(const QString &specMin,
                                      const QString &specMax) {
   int spec_min = 0;
@@ -615,7 +617,8 @@ void SANSDiagnostics::firstDetectorHorizontalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString() << '\n';
+                         ipwsName.toStdString()
+                  << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -657,7 +660,8 @@ void SANSDiagnostics::firstDetectorVerticalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString() << '\n';
+                         ipwsName.toStdString()
+                  << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -698,7 +702,8 @@ void SANSDiagnostics::firstDetectorTimeIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString() << '\n';
+                         ipwsName.toStdString()
+                  << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -837,11 +842,11 @@ void SANSDiagnostics::IntegralClicked(
   plotSpectrum(wsPlotString, specNum);
 }
 /** Get values of HVMin and HvMax values for sumrowcolumn algorithm
-  * @param minVal spectrum min value
-  * @param maxVal spectrum maximum value
-  * @param hvMin  spectrum min string
-  * @param hvMax  spectrum max string
-*/
+ * @param minVal spectrum min value
+ * @param maxVal spectrum maximum value
+ * @param hvMin  spectrum min string
+ * @param hvMax  spectrum max string
+ */
 void SANSDiagnostics::HVMinHVMaxStringValues(const int minVal, const int maxVal,
                                              QString &hvMin, QString &hvMax) {
   try {
@@ -885,7 +890,8 @@ void SANSDiagnostics::TimeIntegralClicked(const QString &range,
         loadedws.toStdString());
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         loadedws.toStdString() << '\n';
+                         loadedws.toStdString()
+                  << '\n';
     return;
   }
 
@@ -966,10 +972,10 @@ void SANSDiagnostics::TimeIntegralClicked(const QString &range,
 }
 
 /** This method applys time channel masks to the detector bank selected.
-   * @param wsName - name of the workspace.
-   * @param bMask - boolean flag to indicate the mask check box selected
-   * @param time_pixel - time channel to mask
-   */
+ * @param wsName - name of the workspace.
+ * @param bMask - boolean flag to indicate the mask check box selected
+ * @param time_pixel - time channel to mask
+ */
 void SANSDiagnostics::maskDetector(const QString &wsName, bool bMask,
                                    bool time_pixel) {
   // if  mask control selected
@@ -979,9 +985,9 @@ void SANSDiagnostics::maskDetector(const QString &wsName, bool bMask,
 }
 
 /**This method plots spectrum for the given workspace
-  * @param wsName - name of the workspace
-  * @param specNum - spectrum number
-  */
+ * @param wsName - name of the workspace
+ * @param specNum - spectrum number
+ */
 void SANSDiagnostics::plotSpectrum(const QString &wsName, int specNum) {
   QString plotspec = "plotSpectrum([";
   plotspec += wsName;
@@ -1006,7 +1012,8 @@ void SANSDiagnostics::secondDetectorHorizontalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString() << '\n';
+                         ipwsName.toStdString()
+                  << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -1046,7 +1053,8 @@ void SANSDiagnostics::secondDetectorVerticalIntegralClicked() {
 
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         ipwsName.toStdString() << '\n';
+                         ipwsName.toStdString()
+                  << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -1086,7 +1094,8 @@ void SANSDiagnostics::secondDetectorTimeIntegralClicked() {
         initialwsName.toStdString());
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Error when accessing the Workspace " +
-                         initialwsName.toStdString() << '\n';
+                         initialwsName.toStdString()
+                  << '\n';
     return;
   }
   Mantid::API::MatrixWorkspace_sptr mws_sptr =
@@ -1164,11 +1173,11 @@ void SANSDiagnostics::saveSettings() {
 }
 
 /**Execute sumrowcolumn algorithm
-* @param values a vector containing the values for hvmin,hvmax
-* @param ipws - name of the i/p workspace
-* @param opws - name of the o/p workspace
-* @param orientation - orientation of the detector
-*/
+ * @param values a vector containing the values for hvmin,hvmax
+ * @param ipws - name of the i/p workspace
+ * @param opws - name of the o/p workspace
+ * @param orientation - orientation of the detector
+ */
 bool SANSDiagnostics::executeSumRowColumn(
     const std::vector<unsigned int> &values, const QString ipws,
     const QString &opws, const QString &orientation) {
@@ -1208,12 +1217,12 @@ bool SANSDiagnostics::executeSumRowColumn(
 }
 
 /**Execute sumrowcolumn algorithm with the vales
-  * @param ipwsName name of the input workspace
-  * @param opwsName name of the output workspace
-  * @param orientation indicates row or columns to sum
-  * @param hvMin minimum value of
-  * @param hvMax
-  */
+ * @param ipwsName name of the input workspace
+ * @param opwsName name of the output workspace
+ * @param orientation indicates row or columns to sum
+ * @param hvMin minimum value of
+ * @param hvMax
+ */
 bool SANSDiagnostics::runsumRowColumn(const QString ipwsName,
                                       const QString &opwsName,
                                       const QString &orientation,
@@ -1273,12 +1282,12 @@ bool SANSDiagnostics::runsumRowColumn(const QString ipwsName,
 }
 
 /** This method creates script string for sumspectra algorithm
-  * @param ipwsName - name of the input workspace
-  * @param opwsName - name of the ooutput workspace
-  * @param wsStartIndex - start workspace index
-  * @param wsEndIndex - end workspace Index
-  * @returns - sumspectra script string
-  */
+ * @param ipwsName - name of the input workspace
+ * @param opwsName - name of the ooutput workspace
+ * @param wsStartIndex - start workspace index
+ * @param wsEndIndex - end workspace Index
+ * @returns - sumspectra script string
+ */
 bool SANSDiagnostics::runsumSpectra(const QString &ipwsName,
                                     const QString &opwsName,
                                     const QString &wsStartIndex,
@@ -1322,10 +1331,10 @@ bool SANSDiagnostics::runsumSpectra(const QString &ipwsName,
 }
 
 /**This method executes load algorithm with filename,specmin,specmax
-  * @param fileName - name of the file
-  * @param specMin  - spectrum minimum
-  * @param specMax  - spectrum maximum
-  */
+ * @param fileName - name of the file
+ * @param specMin  - spectrum minimum
+ * @param specMax  - spectrum maximum
+ */
 bool SANSDiagnostics::runLoadAlgorithm(const QString &fileName,
                                        const QString &specMin,
                                        const QString &specMax) {
@@ -1372,9 +1381,9 @@ bool SANSDiagnostics::runLoadAlgorithm(const QString &fileName,
   return true;
 }
 /**Checks the values in the given vector is sequential
-* @param values  vector containing numbers
-* @returns true if the vector is sequential
-*/
+ * @param values  vector containing numbers
+ * @returns true if the vector is sequential
+ */
 bool SANSDiagnostics::isSequentialValues(
     const std::vector<unsigned int> &values) {
   try {
@@ -1395,7 +1404,7 @@ bool SANSDiagnostics::isSequentialValues(
 }
 
 /** This method enables the mask controls in teh diagnostics UI
-  */
+ */
 void SANSDiagnostics::enableMaskFileControls() {
   // enable time and pixel check masks
   m_SANSForm->tcmask1->setEnabled(true);
@@ -1433,7 +1442,8 @@ QString SANSDiagnostics::createOutputWorkspaceName(
   } catch (...) {
     g_log.error()
         << "Error when extracting the run number from the Workspace " +
-               originalWorkspaceName.toStdString() << '\n';
+               originalWorkspaceName.toStdString()
+        << '\n';
   }
 
   // Build the output name
@@ -1460,5 +1470,5 @@ QString SANSDiagnostics::createOutputWorkspaceName(
 
   return outputWorkspaceName;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

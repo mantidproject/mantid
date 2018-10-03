@@ -25,10 +25,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_ROWLOCATIONADAPTER_H_
 #define MANTIDQTMANTIDWIDGETS_ROWLOCATIONADAPTER_H_
-#include "MantidQtWidgets/Common/DllOption.h"
-#include <QStandardItemModel>
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
+#include "MantidQtWidgets/Common/DllOption.h"
+#include <QStandardItemModel>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -48,7 +48,7 @@ private:
   QModelIndex walkFromRootToParentIndexOf(RowLocation const &location) const;
   QStandardItemModel const &m_model;
 };
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_ROWLOCATIONADAPTER_H_

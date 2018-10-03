@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURE_H_
 #define MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURE_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/BraggScatterer.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidGeometry/DllConfig.h"
 
 namespace Mantid {
 namespace Geometry {

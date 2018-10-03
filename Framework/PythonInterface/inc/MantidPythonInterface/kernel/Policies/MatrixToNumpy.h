@@ -24,21 +24,21 @@
  */
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
 
 #include <type_traits>
 
-#include <boost/mpl/if.hpp>
 #include <boost/mpl/and.hpp>
+#include <boost/mpl/if.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
 namespace Policies {
 
 namespace // anonymous
-    {
+{
 //-----------------------------------------------------------------------
 // MPL helper structs
 //-----------------------------------------------------------------------
@@ -64,14 +64,12 @@ struct MatrixRefToNumpyImpl {
                                        ConversionPolicy>()(cmatrix);
   }
 
-  inline PyTypeObject const *get_pytype() const {
-    return Converters::getNDArrayType();
-  }
+  inline PyTypeObject const *get_pytype() const { return ndarrayType(); }
 };
 
 template <typename T>
 struct MatrixRefToNumpy_Requires_Reference_To_Matrix_Return_Type {};
-}
+} // namespace
 
 /**
  * Implements a return value policy that
@@ -113,9 +111,7 @@ template <typename MatrixType> struct MatrixToNumpyImpl {
                                        Converters::Clone>()(cvector);
   }
 
-  inline PyTypeObject const *get_pytype() const {
-    return Converters::getNDArrayType();
-  }
+  inline PyTypeObject const *get_pytype() const { return ndarrayType(); }
 };
 
 template <typename T> struct MatrixToNumpy_Requires_Matrix_Return_By_Value {};
@@ -139,8 +135,8 @@ struct MatrixToNumpy {
         MatrixToNumpy_Requires_Matrix_Return_By_Value<T>>::type;
   };
 };
-}
-}
-}
+} // namespace Policies
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_MATRIXTONUMPY_H_ */

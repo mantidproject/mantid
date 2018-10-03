@@ -45,7 +45,7 @@ PyObject *wrapWithNDArray(const ContainerType &cdata,
 INSTANTIATE_MATRIX_WRAP(int);
 INSTANTIATE_MATRIX_WRAP(float);
 INSTANTIATE_MATRIX_WRAP(double);
-}
-}
-}
-}
+} // namespace Impl
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

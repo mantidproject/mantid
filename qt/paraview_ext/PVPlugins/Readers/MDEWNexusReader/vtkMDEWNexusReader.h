@@ -1,9 +1,9 @@
 #ifndef _vtkMDEWNexusReader_h
 #define _vtkMDEWNexusReader_h
-#include "vtkUnstructuredGridAlgorithm.h"
-#include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
+#include "MantidVatesAPI/Normalization.h"
+#include "vtkUnstructuredGridAlgorithm.h"
 #include <mutex>
 
 class vtkImplicitFunction;

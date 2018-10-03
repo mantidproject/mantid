@@ -1,10 +1,10 @@
 #include "MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h"
-#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 

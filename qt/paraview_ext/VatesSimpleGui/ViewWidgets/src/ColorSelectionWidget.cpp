@@ -7,9 +7,9 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 
 #include "pqPresetDialog.h"
-#include "vtk_jsoncpp.h"
-#include "vtkSMTransferFunctionPresets.h"
 #include "vtkNew.h"
+#include "vtkSMTransferFunctionPresets.h"
+#include "vtk_jsoncpp.h"
 
 #include <QDir>
 #include <QDoubleValidator>
@@ -491,6 +491,6 @@ void ColorSelectionWidget::loadFromProject(const std::string &lines) {
   m_ui.maxValLineEdit->setText(QString::number(max));
 }
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

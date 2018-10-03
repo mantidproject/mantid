@@ -11,7 +11,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 // forward declarations from other Mantid modules
 namespace Kernel {
 class Unit;

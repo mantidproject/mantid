@@ -13,18 +13,18 @@
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Unit.h"
 
-#include <QRgb>
-#include <QSet>
 #include <QMenu>
+#include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
-#include <QMessageBox>
+#include <QRgb>
+#include <QSet>
 
-#include <cfloat>
-#include <limits>
-#include <cmath>
-#include <algorithm>
 #include "MantidKernel/V3D.h"
+#include <algorithm>
+#include <cfloat>
+#include <cmath>
+#include <limits>
 
 using Mantid::Kernel::V3D;
 
@@ -32,10 +32,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /**
-* The constructor.
-* @param rootActor :: The instrument actor containing all info about the
-* instrument
-*/
+ * The constructor.
+ * @param rootActor :: The instrument actor containing all info about the
+ * instrument
+ */
 ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
     : m_instrActor(rootActor), m_viewImage(nullptr), m_pickImage(nullptr),
       m_viewRect(), m_selectRect(), m_interactionMode(MoveMode),
@@ -146,9 +146,9 @@ ProjectionSurface::~ProjectionSurface() {
 }
 
 /**
-* Resets the instrument actor. The caller must ensure that the instrument
-* stays the same and workspace dimensions also don't change.
-*/
+ * Resets the instrument actor. The caller must ensure that the instrument
+ * stays the same and workspace dimensions also don't change.
+ */
 void ProjectionSurface::resetInstrumentActor(const InstrumentActor *rootActor) {
   m_instrActor = rootActor;
   connect(rootActor, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
@@ -170,9 +170,9 @@ void ProjectionSurface::clear() {
 }
 
 /**
-* Draw the surface on an OpenGL widget
-* @param widget :: A widget to draw on.
-*/
+ * Draw the surface on an OpenGL widget
+ * @param widget :: A widget to draw on.
+ */
 void ProjectionSurface::draw(MantidGLWidget *widget) const {
   if (m_viewChanged &&
       (m_redrawPicking || m_interactionMode == PickSingleMode ||
@@ -188,10 +188,10 @@ void ProjectionSurface::draw(MantidGLWidget *widget) const {
 }
 
 /**
-* Draw the surface on an OpenGL widget.
-* @param widget :: A widget to draw on.
-* @param picking :: Picking / normal drawing switch.
-*/
+ * Draw the surface on an OpenGL widget.
+ * @param widget :: A widget to draw on.
+ * @param picking :: Picking / normal drawing switch.
+ */
 void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
   QImage **image = picking ? &m_pickImage : &m_viewImage;
 
@@ -238,9 +238,9 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
 }
 
 /**
-* Draw the surface onto a normal widget without OpenGL
-* @param widget :: A widget to draw on.
-*/
+ * Draw the surface onto a normal widget without OpenGL
+ * @param widget :: A widget to draw on.
+ */
 void ProjectionSurface::drawSimple(QWidget *widget) const {
   if (m_viewChanged) {
     if (!m_viewImage || m_viewImage->width() != widget->width() ||
@@ -280,10 +280,10 @@ void ProjectionSurface::drawSimple(QWidget *widget) const {
 void ProjectionSurface::resize(int, int) { updateView(); }
 
 /**
-* Draw the surface onto an image without OpenGL
-* @param image :: Image to draw on.
-* @param picking :: If true draw a picking image.
-*/
+ * Draw the surface onto an image without OpenGL
+ * @param image :: Image to draw on.
+ * @param picking :: If true draw a picking image.
+ */
 void ProjectionSurface::drawSimpleToImage(QImage *, bool) const {}
 
 void ProjectionSurface::mousePressEvent(QMouseEvent *e) {
@@ -315,11 +315,11 @@ void ProjectionSurface::leaveEvent(QEvent *e) {
 }
 
 /**
-* Update the view of the surface at the next redraw.
-* @param picking :: Set to true to update the picking image regardless the
-* interaction
-*   mode of the surface.
-*/
+ * Update the view of the surface at the next redraw.
+ * @param picking :: Set to true to update the picking image regardless the
+ * interaction
+ *   mode of the surface.
+ */
 void ProjectionSurface::updateView(bool picking) {
   m_viewChanged = true;
   if (picking) {
@@ -409,9 +409,9 @@ void ProjectionSurface::colorMapChanged() {
 }
 
 /**
-* Set an interaction mode for the surface.
-* @param mode :: A new mode.
-*/
+ * Set an interaction mode for the surface.
+ * @param mode :: A new mode.
+ */
 void ProjectionSurface::setInteractionMode(int mode) {
   if (mode < 0 || mode >= m_inputControllers.size()) {
     throw std::logic_error("Invalid interaction mode requested.");
@@ -434,8 +434,8 @@ void ProjectionSurface::setInteractionMode(int mode) {
 }
 
 /**
-* Return detector id at image coordinats x,y if in pick mode. -1 otherwise
-*/
+ * Return detector id at image coordinats x,y if in pick mode. -1 otherwise
+ */
 int ProjectionSurface::getDetectorID(int x, int y) const {
   size_t pickID = getPickID(x, y);
   return m_instrActor->getDetID(pickID);
@@ -447,8 +447,8 @@ size_t ProjectionSurface::getDetector(int x, int y) const {
 }
 
 /**
-* Return info text for interactions common to all surfaces.
-*/
+ * Return info text for interactions common to all surfaces.
+ */
 QString ProjectionSurface::getInfoText() const {
   switch (m_interactionMode) {
   case PickSingleMode:
@@ -473,19 +473,19 @@ QString ProjectionSurface::getInfoText() const {
 
 //------------------------------------------------------------------------------
 /** Return the detector position (in real-space) at the pixel coordinates.
-*
-* @param x :: x pixel coordinate
-* @param y :: y pixel coordinate
-* @return V3D of the detector position
-*/
+ *
+ * @param x :: x pixel coordinate
+ * @param y :: y pixel coordinate
+ * @return V3D of the detector position
+ */
 Mantid::Kernel::V3D ProjectionSurface::getDetectorPos(int x, int y) const {
   size_t pickID = getPickID(x, y);
   return m_instrActor->getDetPos(pickID);
 }
 
 /**
-* Is context menu allowed?
-*/
+ * Is context menu allowed?
+ */
 bool ProjectionSurface::canShowContextMenu() const {
   InputController *controller = m_inputControllers[m_interactionMode];
   if (controller) {
@@ -503,20 +503,20 @@ size_t ProjectionSurface::getPickID(int x, int y) const {
 }
 
 /**
-* Adds an input controller to the controller list.
-* @param mode :: The interaction mode which is the index of the controller in
-* the list.
-* @param controller :: A pointer to the controller to be set.
-*/
+ * Adds an input controller to the controller list.
+ * @param mode :: The interaction mode which is the index of the controller in
+ * the list.
+ * @param controller :: A pointer to the controller to be set.
+ */
 void ProjectionSurface::setInputController(int mode,
                                            InputController *controller) {
   m_inputControllers[mode] = controller;
 }
 
 /**
-* Set visibility of the peak markers according to the integration range
-* in the instrument actor.
-*/
+ * Set visibility of the peak markers according to the integration range
+ * in the instrument actor.
+ */
 void ProjectionSurface::setPeakVisibility() const {
   if (hasPeakOverlays()) {
     Mantid::Kernel::Unit_sptr unit =
@@ -643,9 +643,9 @@ void ProjectionSurface::drawPeakAlignmentMarkers(QPainter &painter) const {
 }
 
 /**
-* Returns the current controller. If the controller doesn't exist throws a
-* logic_error exceotion.
-*/
+ * Returns the current controller. If the controller doesn't exist throws a
+ * logic_error exceotion.
+ */
 InputController *ProjectionSurface::getController() const {
   InputController *controller = m_inputControllers[m_interactionMode];
   if (!controller) {
@@ -685,9 +685,9 @@ void ProjectionSurface::loadShapesFromTableWorkspace(
 }
 
 /**
-* Return a combined list of peak parkers from all overlays
-* @param detID :: The detector ID of interest
-*/
+ * Return a combined list of peak parkers from all overlays
+ * @param detID :: The detector ID of interest
+ */
 QList<PeakMarker2D *> ProjectionSurface::getMarkersWithID(int detID) const {
   QList<PeakMarker2D *> out;
   for (int i = 0; i < m_peakShapes.size(); ++i) {
@@ -697,8 +697,8 @@ QList<PeakMarker2D *> ProjectionSurface::getMarkersWithID(int detID) const {
 }
 
 /**
-* Get peaks workspace for manually editing.
-*/
+ * Get peaks workspace for manually editing.
+ */
 boost::shared_ptr<Mantid::API::IPeaksWorkspace>
 ProjectionSurface::getEditPeaksWorkspace() const {
   if (!m_peakShapes.isEmpty()) {
@@ -708,9 +708,9 @@ ProjectionSurface::getEditPeaksWorkspace() const {
 }
 
 /**
-* Remove an overlay if its peaks workspace is deleted.
-* @param ws :: Shared pointer to the deleted peaks workspace.
-*/
+ * Remove an overlay if its peaks workspace is deleted.
+ * @param ws :: Shared pointer to the deleted peaks workspace.
+ */
 void ProjectionSurface::deletePeaksWorkspace(
     boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws) {
   const int npeaks = m_peakShapes.size();
@@ -727,8 +727,8 @@ void ProjectionSurface::deletePeaksWorkspace(
 }
 
 /**
-* Remove all peak overlays.
-*/
+ * Remove all peak overlays.
+ */
 void ProjectionSurface::clearPeakOverlays() {
   if (!m_peakShapes.isEmpty()) {
     for (int i = 0; i < m_peakShapes.size(); ++i) {
@@ -762,10 +762,10 @@ void ProjectionSurface::clearComparisonPeaks() {
 }
 
 /**
-* Set the precision (significant digits) with which the HKL peak labels are
-* displayed.
-* @param n :: Precision, > 0
-*/
+ * Set the precision (significant digits) with which the HKL peak labels are
+ * displayed.
+ * @param n :: Precision, > 0
+ */
 void ProjectionSurface::setPeakLabelPrecision(int n) {
   if (n < 1) {
     QMessageBox::critical(nullptr, "MantidPlot - Error",
@@ -779,8 +779,8 @@ void ProjectionSurface::setPeakLabelPrecision(int n) {
 }
 
 /**
-* Enable or disable the show peak row flag
-*/
+ * Enable or disable the show peak row flag
+ */
 void ProjectionSurface::setShowPeakRowsFlag(bool on) {
   m_showPeakRows = on;
   for (int i = 0; i < m_peakShapes.size(); ++i) {
@@ -789,8 +789,8 @@ void ProjectionSurface::setShowPeakRowsFlag(bool on) {
 }
 
 /**
-* Enable or disable the show peak label flag
-*/
+ * Enable or disable the show peak label flag
+ */
 void ProjectionSurface::setShowPeakLabelsFlag(bool on) {
   m_showPeakLabels = on;
   for (int i = 0; i < m_peakShapes.size(); ++i) {
@@ -799,8 +799,8 @@ void ProjectionSurface::setShowPeakLabelsFlag(bool on) {
 }
 
 /**
-* Enable or disable the show peak label flag
-*/
+ * Enable or disable the show peak label flag
+ */
 void ProjectionSurface::setShowPeakRelativeIntensityFlag(bool on) {
   m_showPeakRelativeIntensity = on;
   for (int i = 0; i < m_peakShapes.size(); ++i) {
@@ -809,9 +809,9 @@ void ProjectionSurface::setShowPeakRelativeIntensityFlag(bool on) {
 }
 
 /**
-* Set the selection rect in screen corrds.
-* @param rect :: New selection rectangle.
-*/
+ * Set the selection rect in screen corrds.
+ * @param rect :: New selection rectangle.
+ */
 void ProjectionSurface::setSelectionRect(const QRect &rect) {
   if (m_interactionMode != DrawRegularMode || !m_maskShapes.hasSelection()) {
     m_selectRect = rect;
@@ -819,14 +819,14 @@ void ProjectionSurface::setSelectionRect(const QRect &rect) {
 }
 
 /**
-* Delete selection rectanle.
-*/
+ * Delete selection rectanle.
+ */
 void ProjectionSurface::emptySelectionRect() { m_selectRect = QRect(); }
 
 /**
-* Select multiple mask shapes as a result of a rubber-band selection
-* @param rect :: The rubber band rect.
-*/
+ * Select multiple mask shapes as a result of a rubber-band selection
+ * @param rect :: The rubber band rect.
+ */
 void ProjectionSurface::selectMultipleMasks(const QRect &rect) {
   if (!m_maskShapes.hasSelection()) {
     m_maskShapes.selectIn(rect);
@@ -835,8 +835,8 @@ void ProjectionSurface::selectMultipleMasks(const QRect &rect) {
 }
 
 /**
-* Pick a detector at a pointe on the screen.
-*/
+ * Pick a detector at a pointe on the screen.
+ */
 void ProjectionSurface::pickComponentAt(int x, int y) {
   size_t pickID = getPickID(x, y);
   emit singleComponentPicked(pickID);
@@ -978,14 +978,14 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
 }
 
 /**
-* Enable or disable lighting in non-picking mode
-* @param on :: True for enabling, false for disabling.
-*/
+ * Enable or disable lighting in non-picking mode
+ * @param on :: True for enabling, false for disabling.
+ */
 void ProjectionSurface::enableLighting(bool on) { m_isLightingOn = on; }
 
 /**
-* Return names of attached peaks workspaces.
-*/
+ * Return names of attached peaks workspaces.
+ */
 QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   QStringList names;
   foreach (PeakOverlay *po, m_peakShapes) {
@@ -1056,5 +1056,5 @@ std::string ProjectionSurface::saveToProject() const {
   return tsv.outputLines();
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

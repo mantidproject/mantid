@@ -12,7 +12,7 @@ using Kernel::V2D;
 namespace {
 // Smallest possible double value
 const double EPSILON = std::numeric_limits<double>::epsilon();
-}
+} // namespace
 
 //-----------------------------------------------------------------------------
 // Public methods
@@ -68,13 +68,13 @@ PointClassification classify(const V2D &pt, const PolygonEdge &edge) {
 }
 
 /**
-* Calculate the orientation type of this edge with another.
-* @param focusEdge :: A reference to the PolygonEdge to test
-* @param refEdge :: A reference to another PolygonEdge object to compare with
-* @param t [Out] :: If an intersection is found this value is set to the ratio
-* of the dot products between the normal to the other line
-* @returns An enumeration denoting the orientation type
-*/
+ * Calculate the orientation type of this edge with another.
+ * @param focusEdge :: A reference to the PolygonEdge to test
+ * @param refEdge :: A reference to another PolygonEdge object to compare with
+ * @param t [Out] :: If an intersection is found this value is set to the ratio
+ * of the dot products between the normal to the other line
+ * @returns An enumeration denoting the orientation type
+ */
 PolygonEdge::Orientation orientation(const PolygonEdge &focusEdge,
                                      const PolygonEdge &refEdge, double &t) {
   V2D normalToRef((refEdge.end().Y() - refEdge.start().Y()),
@@ -95,16 +95,16 @@ PolygonEdge::Orientation orientation(const PolygonEdge &focusEdge,
 }
 
 /**
-* Calculate the crossing point of this edge with another
-* @param edgeOne :: The first polygon edge
-* @param edgeTwo :: The second polygon edge
-* @param crossPoint [Out] :: If found the point of intersection is filled here
-*/
+ * Calculate the crossing point of this edge with another
+ * @param edgeOne :: The first polygon edge
+ * @param edgeTwo :: The second polygon edge
+ * @param crossPoint [Out] :: If found the point of intersection is filled here
+ */
 PolygonEdge::Orientation crossingPoint(const PolygonEdge &edgeOne,
                                        const PolygonEdge &edgeTwo,
                                        V2D &crossPoint) {
-  using Kernel::ltEquals;
   using Kernel::gtEquals;
+  using Kernel::ltEquals;
 
   double s(0.0);
   PolygonEdge::Orientation classe = orientation(edgeOne, edgeTwo, s);

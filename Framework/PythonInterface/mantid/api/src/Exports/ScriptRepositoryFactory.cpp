@@ -4,8 +4,8 @@
 
 #include <boost/python/class.hpp>
 
-using Mantid::API::ScriptRepositoryFactoryImpl;
 using Mantid::API::ScriptRepositoryFactory;
+using Mantid::API::ScriptRepositoryFactoryImpl;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(ScriptRepositoryFactoryImpl)
@@ -16,7 +16,7 @@ namespace {
 //------------------------------------------------------------------------------------------------------
 
 ///@endcond
-}
+} // namespace
 
 void export_ScriptRepositoryFactory() {
   class_<ScriptRepositoryFactoryImpl, boost::noncopyable>(

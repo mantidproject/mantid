@@ -166,7 +166,8 @@ std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
 
 /** Convert an options map to a comma-separated list of key=value pairs
  */
-QString convertMapToString(const std::map<QString, QString> &optionsMap) {
+QString convertMapToString(const std::map<QString, QString> &optionsMap,
+                           const char separator, const bool quoteValues) {
   QString result;
   bool first = true;
 
@@ -175,20 +176,36 @@ QString convertMapToString(const std::map<QString, QString> &optionsMap) {
       continue;
 
     if (!first)
-      result += ", ";
+      result += separator;
     else
       first = false;
 
     const auto key = kvp.first;
     auto value = kvp.second;
 
-    // Put quotes around the value
-    value = "'" + value + "'";
+    if (quoteValues)
+      value = "'" + value + "'";
 
     result += key + "=" + value;
   }
 
   return result;
 }
+
+std::string optionsToString(std::map<std::string, std::string> const &options) {
+  if (!options.empty()) {
+    std::ostringstream resultStream;
+    auto optionsKvpIt = options.cbegin();
+    auto const &firstKvp = (*optionsKvpIt);
+    resultStream << firstKvp.first << "='" << firstKvp.second << '\'';
+    for (; optionsKvpIt != options.cend(); ++optionsKvpIt) {
+      auto kvp = (*optionsKvpIt);
+      resultStream << ", " << kvp.first << "='" << kvp.second << '\'';
+    }
+    return resultStream.str();
+  } else {
+    return std::string();
+  }
 }
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -7,8 +7,8 @@ namespace CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param parent :: [input] The parent of this widget
-*/
+ * @param parent :: [input] The parent of this widget
+ */
 QtReflEventTabView::QtReflEventTabView(QWidget *parent) {
 
   UNUSED_ARG(parent);
@@ -17,7 +17,7 @@ QtReflEventTabView::QtReflEventTabView(QWidget *parent) {
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
-*/
+ */
 QtReflEventTabView::~QtReflEventTabView() {}
 
 /**
@@ -40,8 +40,8 @@ void QtReflEventTabView::initLayout() {
 }
 
 /** Returns the presenter managing this view
-* @return :: A pointer to the presenter
-*/
+ * @return :: A pointer to the presenter
+ */
 IReflEventTabPresenter *QtReflEventTabView::getPresenter() const {
 
   return m_presenter.get();

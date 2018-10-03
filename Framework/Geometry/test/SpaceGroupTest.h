@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/SpaceGroup.h"
-#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidGeometry/Crystal/CenteringGroup.h"
 #include "MantidGeometry/Crystal/CyclicGroup.h"
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
-#include "MantidGeometry/Crystal/CenteringGroup.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 #include "MantidKernel/V3D.h"
 

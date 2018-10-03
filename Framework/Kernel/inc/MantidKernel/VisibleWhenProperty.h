@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_VISIBLEWHENPROPERTY_H_
 #define MANTID_KERNEL_VISIBLEWHENPROPERTY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Kernel {

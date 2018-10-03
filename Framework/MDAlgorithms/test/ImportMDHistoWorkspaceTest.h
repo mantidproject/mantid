@@ -3,9 +3,9 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidMDAlgorithms/ImportMDHistoWorkspace.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/Path.h>

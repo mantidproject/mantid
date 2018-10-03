@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidSINQ/PoldiCreatePeaksFromCell.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidSINQ/PoldiCreatePeaksFromCell.h"
 
 using Mantid::Poldi::PoldiCreatePeaksFromCell;
 using namespace Mantid::API;

@@ -1,17 +1,17 @@
 #include "MantidGeometry/Crystal/CrystalStructure.h"
+#include <algorithm>
 #include <boost/bind.hpp>
 #include <stdexcept>
-#include <algorithm>
 
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 namespace Mantid {
 namespace Geometry {

@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
 #include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
 #include "MantidKernel/Material.h"
 
 #include "Poco/AutoPtr.h"
-#include "Poco/SAX/InputSource.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NodeList.h"
+#include "Poco/SAX/InputSource.h"
 
 #include <sstream>
 

@@ -1,6 +1,6 @@
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidAPI/MatrixWorkspace.h"
 
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::WorkspaceProperty; // NOLINT

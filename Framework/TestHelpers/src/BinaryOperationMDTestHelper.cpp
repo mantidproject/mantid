@@ -5,8 +5,8 @@
  *********************************************************************************/
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
@@ -84,7 +84,7 @@ MDHistoWorkspace_sptr doTest(std::string algoName, std::string lhs,
   }
 }
 
-} // (end namespace)
+} // namespace BinaryOperationMDTestHelper
 
 namespace UnaryOperationMDTestHelper {
 
@@ -125,4 +125,4 @@ MDHistoWorkspace_sptr doTest(std::string algoName, std::string inName,
     return (MDHistoWorkspace_sptr());
   }
 }
-} // (end namespace)
+} // namespace UnaryOperationMDTestHelper

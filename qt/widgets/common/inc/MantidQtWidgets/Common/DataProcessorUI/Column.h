@@ -51,7 +51,7 @@ private:
   QString const &m_description;
   bool m_isKey;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLUMN_H

@@ -52,7 +52,7 @@ inline bool isNone(const boost::python::object &obj) {
   return isNone(obj.ptr());
 #endif
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* #ifndef MANTID_PYTHONINTERFACE_KERNEL_ISNONE_H_ */

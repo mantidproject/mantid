@@ -1,8 +1,8 @@
+#include "MantidKernel/make_unique.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
+#include <boost/optional.hpp>
 #include <memory>
 #include <vector>
-#include <boost/optional.hpp>
-#include "MantidKernel/make_unique.h"
-#include "MantidQtWidgets/Common/PythonSystemHeader.h"
 
 bool isIterable(PyObject *iterable) {
   PyObject *iterator = PyObject_GetIter(iterable);

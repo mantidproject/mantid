@@ -16,8 +16,8 @@ DECLARE_ALGORITHM(FilterBadPulses)
 using namespace Kernel;
 using namespace API;
 using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
+using DataObjects::EventWorkspace_sptr;
 using std::size_t;
 
 namespace { // anonymous namespace for some internal variables
@@ -25,7 +25,7 @@ namespace { // anonymous namespace for some internal variables
 const std::string INT_CHARGE_NAME("gd_prtn_chrg");
 /// Name of log for proton charge
 const std::string LOG_CHARGE_NAME("proton_charge");
-}
+} // namespace
 
 /// Algorithm's name for identification overriding a virtual method
 const std::string FilterBadPulses::name() const { return "FilterBadPulses"; }

@@ -56,7 +56,7 @@ class TubeSpec:
         """
         Define the sets of tube from the workspace.
 
-        Sets tube specification by string. The string specifies a component of the intrument
+        Sets tube specification by string. The string specifies a component of the instrument
         as in the instrument tree of its IDF file. This component may contain one or more tubes
         and possibly all the tunes in the instrument.
         If the tube specification is not empty this component is added to those already
@@ -305,7 +305,7 @@ class TubeSpec:
         firstDet, numDet, step = self.getDetectorInfoFromTube( tubeIx )
         wkIds = []
         skipped = []
-        # print " First dectector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
+        # print " First detector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
         # print "Histograms", self.ws.getNumberHistograms()
 
         # First check we have one detector per histogram/workpsaceID/spectrum

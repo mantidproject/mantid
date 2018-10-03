@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/NormaliseByPeakArea.h"
 #include "../Functions/ComptonProfileTestHelpers.h"
+#include "MantidCurveFitting/Algorithms/NormaliseByPeakArea.h"
 
 using Mantid::CurveFitting::Algorithms::NormaliseByPeakArea;
 
@@ -27,7 +27,7 @@ Mantid::API::IAlgorithm_sptr createAlgorithm() {
   alg->setPropertyValue("SymmetrisedWorkspace", "__UNUSED__");
   return alg;
 }
-}
+} // namespace
 
 class NormaliseByPeakAreaTest : public CxxTest::TestSuite {
 public:

@@ -1,9 +1,9 @@
 #ifndef MANTID_GEOMETRY_PEAKTRANSFORMHKL_H_
 #define MANTID_GEOMETRY_PEAKTRANSFORMHKL_H_
 
-#include "MantidKernel/System.h"
-#include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/ConcretePeakTransformFactory.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -32,7 +32,7 @@ public:
 
 /// Typedef a factory for type of PeaksTransform.
 using PeakTransformHKLFactory = ConcretePeakTransformFactory<PeakTransformHKL>;
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_PEAKTRANSFORMHKL_H_ */

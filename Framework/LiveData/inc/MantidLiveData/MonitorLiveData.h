@@ -1,8 +1,8 @@
 #ifndef MANTID_LIVEDATA_MONITORLIVEDATA_H_
 #define MANTID_LIVEDATA_MONITORLIVEDATA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 #include "MantidLiveData/LiveDataAlgorithm.h"
 
 namespace Mantid {

@@ -3,8 +3,8 @@
 
 #include "../PlotCurve.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
 
 class Graph;
 class ErrorBarSettings;
@@ -48,7 +48,7 @@ public:
   virtual const MantidQwtWorkspaceData *mantidData() const = 0;
   /// Get mantid data
   virtual MantidQwtWorkspaceData *mantidData() = 0;
-  /// Overriden virtual method
+  /// Overridden virtual method
   void itemChanged() override;
 
   /// Returns whether the curve has error bars

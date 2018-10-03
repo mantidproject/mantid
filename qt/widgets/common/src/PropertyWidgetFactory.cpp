@@ -1,12 +1,12 @@
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
-#include "MantidQtWidgets/Common/BoolPropertyWidget.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
-#include "MantidQtWidgets/Common/TextPropertyWidget.h"
-#include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidQtWidgets/Common/BoolPropertyWidget.h"
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
 #include "MantidQtWidgets/Common/ListPropertyWidget.h"
+#include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
+#include "MantidQtWidgets/Common/TextPropertyWidget.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -65,5 +65,5 @@ PropertyWidgetFactory::createWidget(Mantid::Kernel::Property *prop,
   }
 }
 
-} // namespace MantidQt
 } // namespace API
+} // namespace MantidQt

@@ -4,9 +4,9 @@
 #include "MantidCurveFitting/Functions/BackToBackExponential.h"
 #include "MantidAPI/FunctionFactory.h"
 
-#include <gsl/gsl_sf_erf.h>
-#include <gsl/gsl_multifit_nlin.h>
 #include <cmath>
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_sf_erf.h>
 #include <limits>
 
 namespace Mantid {

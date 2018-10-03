@@ -1,11 +1,11 @@
 #ifndef TEST_INVALID_PARAMETER_PARSER_H_
 #define TEST_INVALID_PARAMETER_PARSER_H_
 
+#include "MantidMDAlgorithms/InvalidParameter.h"
+#include "MantidMDAlgorithms/InvalidParameterParser.h"
+#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <boost/scoped_ptr.hpp>
-#include "MantidMDAlgorithms/InvalidParameterParser.h"
-#include "MantidMDAlgorithms/InvalidParameter.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

@@ -1,11 +1,11 @@
 #include "MantidWorkflowAlgorithms/IMuonAsymmetryCalculator.h"
 
+using Mantid::API::AlgorithmManager;
+using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::Workspace_sptr;
-using Mantid::API::IAlgorithm_sptr;
-using Mantid::API::AlgorithmManager;
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -25,10 +25,10 @@ IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(
       m_subtractedPeriods(subtractedPeriods) {}
 
 /**
-* Sums the specified periods of the input workspace group
-* @param periodsToSum :: [input] List of period indexes (1-based) to be summed
-* @returns Workspace containing the sum
-*/
+ * Sums the specified periods of the input workspace group
+ * @param periodsToSum :: [input] List of period indexes (1-based) to be summed
+ * @returns Workspace containing the sum
+ */
 MatrixWorkspace_sptr IMuonAsymmetryCalculator::sumPeriods(
     const std::vector<int> &periodsToSum) const {
   MatrixWorkspace_sptr outWS;
@@ -53,11 +53,11 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::sumPeriods(
 }
 
 /**
-* Subtracts one workspace from another: lhs - rhs.
-* @param lhs :: [input] Workspace on LHS of subtraction
-* @param rhs :: [input] Workspace on RHS of subtraction
-* @returns Result of the subtraction
-*/
+ * Subtracts one workspace from another: lhs - rhs.
+ * @param lhs :: [input] Workspace on LHS of subtraction
+ * @param rhs :: [input] Workspace on RHS of subtraction
+ * @returns Result of the subtraction
+ */
 MatrixWorkspace_sptr IMuonAsymmetryCalculator::subtractWorkspaces(
     const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs) const {
   MatrixWorkspace_sptr outWS;
@@ -74,11 +74,11 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::subtractWorkspaces(
 }
 
 /**
-* Extracts a single spectrum from the given workspace.
-* @param inputWS :: [input] Workspace to extract spectrum from
-* @param index :: [input] Index of spectrum to extract
-* @returns Result of the extraction
-*/
+ * Extracts a single spectrum from the given workspace.
+ * @param inputWS :: [input] Workspace to extract spectrum from
+ * @param index :: [input] Index of spectrum to extract
+ * @returns Result of the extraction
+ */
 MatrixWorkspace_sptr
 IMuonAsymmetryCalculator::extractSpectrum(const Workspace_sptr &inputWS,
                                           const int index) const {

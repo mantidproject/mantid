@@ -221,7 +221,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
   std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>>
       dMap;
   std::map<std::string,
-           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>> sMap;
+           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>>
+      sMap;
   kind l_kind(LoadLog::empty);
   bool isNumeric(false);
 

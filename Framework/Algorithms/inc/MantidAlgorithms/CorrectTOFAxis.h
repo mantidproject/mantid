@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_CORRECTTOFAXIS_H_
 #define MANTID_ALGORITHMS_CORRECTTOFAXIS_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 #include <vector>
 

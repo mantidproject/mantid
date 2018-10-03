@@ -100,7 +100,7 @@ private:
   std::string centering;
 };
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_REDUCED_CELL_H_ */

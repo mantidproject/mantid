@@ -4,8 +4,7 @@ import mantid.simpleapi as mantid
 
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
-from isis_powder.routines.run_details import create_run_details_object, \
-                                             CustomFuncForRunDetails, RunDetailsWrappedCommonFuncs
+from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 from isis_powder.polaris_routines import polaris_advanced_config
 from six import PY3
 
@@ -21,32 +20,34 @@ def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vana
     return ws_to_correct
 
 
+def _get_run_numbers_for_key(current_mode_run_numbers, key):
+    err_message = "this must be under the relevant Rietveld or PDF mode."
+    return common.cal_map_dictionary_key_helper(current_mode_run_numbers, key=key,
+                                                append_to_error_message=err_message)
+
+
+def _get_current_mode_dictionary(run_number_string, inst_settings):
+    mapping_dict = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
+    # Get the current mode "Rietveld" or "PDF" run numbers
+    return common.cal_map_dictionary_key_helper(mapping_dict, inst_settings.mode)
+
+
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
-    cal_mapping_callable = CustomFuncForRunDetails().add_to_func_chain(
-        user_function=RunDetailsWrappedCommonFuncs.get_cal_mapping_dict, run_number_string=run_number_string,
-        inst_settings=inst_settings
-    ).add_to_func_chain(user_function=polaris_get_chopper_config, inst_settings=inst_settings)
+    mode_run_numbers = _get_current_mode_dictionary(run_number_string, inst_settings)
 
     # Get empty and vanadium
     err_message = "this must be under the relevant Rietveld or PDF mode."
 
-    empty_run_callable = cal_mapping_callable.add_to_func_chain(
-        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="empty_run_numbers",
-        append_to_error_message=err_message)
+    empty_runs = common.cal_map_dictionary_key_helper(mode_run_numbers,
+                                                      key="empty_run_numbers", append_to_error_message=err_message)
+    vanadium_runs = common.cal_map_dictionary_key_helper(mode_run_numbers, key="vanadium_run_numbers",
+                                                         append_to_error_message=err_message)
 
-    vanadium_run_callable = cal_mapping_callable.add_to_func_chain(
-        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="vanadium_run_numbers",
-        append_to_error_message=err_message)
+    grouping_file_name = inst_settings.grouping_file_name
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                     is_vanadium_run=is_vanadium_run, empty_run_call=empty_run_callable,
-                                     vanadium_run_call=vanadium_run_callable)
-
-
-def polaris_get_chopper_config(forwarded_value, inst_settings):
-    # Forwarded value should be a cal mapping
-    cal_mapping = forwarded_value
-    return common.cal_map_dictionary_key_helper(cal_mapping, inst_settings.mode)
+                                     is_vanadium_run=is_vanadium_run, empty_run_number=empty_runs,
+                                     vanadium_string=vanadium_runs, grouping_file_name=grouping_file_name)
 
 
 def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):

@@ -11,7 +11,7 @@ namespace DataObjects {
 namespace {
 /// static logger
 Kernel::Logger g_log("SplittersWorkspace");
-}
+} // namespace
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -64,8 +64,8 @@ bool SplittersWorkspace::removeSplitter(size_t index) {
   return removed;
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 ///\cond TEMPLATE
 

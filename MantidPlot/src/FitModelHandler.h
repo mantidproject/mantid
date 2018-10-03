@@ -29,8 +29,8 @@
 #ifndef FITMODELHANDLER_H
 #define FITMODELHANDLER_H
 
-#include <QXmlDefaultHandler>
 #include <QVarLengthArray>
+#include <QXmlDefaultHandler>
 
 class Fit;
 

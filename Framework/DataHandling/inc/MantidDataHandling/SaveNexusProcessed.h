@@ -1,12 +1,12 @@
 #ifndef MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
 #define MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
 
-#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <nexus/NeXusFile.hpp>
 #include <boost/optional.hpp>
 #include <climits>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace NeXus {

@@ -1,10 +1,10 @@
 #include "MantidDataHandling/LoadMuonLog.h"
-#include "MantidNexus/MuonNexusReader.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexus/MuonNexusReader.h"
 
 #include <ctime>
 
@@ -15,12 +15,12 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadMuonLog)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
+using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
-using API::FileProperty;
-using DataObjects::Workspace2D_sptr;
 using API::Progress;
+using API::WorkspaceProperty;
+using DataObjects::Workspace2D_sptr;
 
 /// Empty default constructor
 LoadMuonLog::LoadMuonLog() {}
@@ -102,9 +102,9 @@ void LoadMuonLog::exec() {
 }
 
 /** change each element of the string to lower case
-* @param strToConvert :: The input string
-* @returns The string but with all characters in lower case
-*/
+ * @param strToConvert :: The input string
+ * @returns The string but with all characters in lower case
+ */
 std::string LoadMuonLog::stringToLower(std::string strToConvert) {
   std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(),
                  ::tolower);
@@ -112,10 +112,10 @@ std::string LoadMuonLog::stringToLower(std::string strToConvert) {
 }
 
 /** check if first 19 characters of a string is data-time string according to
-* yyyy-mm-ddThh:mm:ss
-* @param str :: The string to test
-* @returns true if the strings format matched the expected date format
-*/
+ * yyyy-mm-ddThh:mm:ss
+ * @param str :: The string to test
+ * @returns true if the strings format matched the expected date format
+ */
 bool LoadMuonLog::isDateTimeString(const std::string &str) {
   if (str.size() >= 19)
     if (str.compare(4, 1, "-") == 0 && str.compare(7, 1, "-") == 0 &&

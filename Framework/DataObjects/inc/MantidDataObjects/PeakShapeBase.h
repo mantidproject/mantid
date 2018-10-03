@@ -1,16 +1,16 @@
 #ifndef MANTID_DATAOBJECTS_PEAKSHAPEBASE_H_
 #define MANTID_DATAOBJECTS_PEAKSHAPEBASE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/System.h"
 
 #include <string>
 
 namespace Json {
 // Forward declaration
 class Value;
-}
+} // namespace Json
 
 namespace Mantid {
 namespace DataObjects {

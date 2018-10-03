@@ -2,8 +2,8 @@
 #define MANTID_SINQ_POLDIINSTRUMENTADAPTERTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"

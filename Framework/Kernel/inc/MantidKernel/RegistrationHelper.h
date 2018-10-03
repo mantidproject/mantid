@@ -41,7 +41,7 @@ public:
    */
   inline RegistrationHelper(int i) { UNUSED_ARG(i); }
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_REGISTRATIONHELPER_H_ */

@@ -1,7 +1,7 @@
+#include "MantidCrystal/LoadHKL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidCrystal/LoadHKL.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/Material.h"
@@ -159,9 +159,8 @@ void LoadHKL::exec() {
     radius1 = x1;
   else if (x2 > 0)
     radius1 = x2;
-  double frac =
-      theta -
-      static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
+  double frac = theta - static_cast<double>(static_cast<int>(theta / 5.)) *
+                            5.; // theta%5.
   frac = frac / 5.;
   radius = radius * (1 - frac) + radius1 * frac;
   radius /= mu1;
@@ -181,5 +180,5 @@ void LoadHKL::exec() {
               boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

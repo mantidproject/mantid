@@ -109,5 +109,5 @@ void PoldiHeliumDetector::initializeCalibratedParameters(
   m_phiCenter = phi(m_calibratedCenterTwoTheta);
   m_phiStart = m_phiCenter - m_totalOpeningAngle / 2.0;
 }
-}
-}
+} // namespace Poldi
+} // namespace Mantid

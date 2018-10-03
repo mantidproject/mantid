@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_COMPOSITECLUSTER_H_
 #define MANTID_CRYSTAL_COMPOSITECLUSTER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidCrystal/ICluster.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Crystal {

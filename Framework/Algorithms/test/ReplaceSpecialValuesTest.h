@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <limits>
+#include "MantidAlgorithms/ReplaceSpecialValues.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
+#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

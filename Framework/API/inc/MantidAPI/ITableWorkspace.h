@@ -4,16 +4,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllConfig.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/Column.h"
-#include "MantidKernel/V3D.h"
-#include "MantidAPI/LogManager.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/LogManager.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidKernel/V3D.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
 
 #include <sstream>
@@ -236,7 +236,8 @@ public:
     Column_sptr c = getColumn(col);
     if (!c->isType<T>()) {
       std::ostringstream ostr;
-      ostr << "cell: Type mismatch:\n" << typeid(T).name() << " != \n"
+      ostr << "cell: Type mismatch:\n"
+           << typeid(T).name() << " != \n"
            << c->get_type_info().name() << '\n';
       throw std::runtime_error(ostr.str());
     }

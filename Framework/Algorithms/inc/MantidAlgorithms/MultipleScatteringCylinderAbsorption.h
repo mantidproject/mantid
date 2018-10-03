@@ -9,7 +9,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 /** Multiple scattering absorption correction, originally used to
     correct vanadium spectrum at IPNS.  Algorithm originally worked
@@ -77,7 +77,7 @@ private:
                             HistogramData::HistogramE &errors);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_*/

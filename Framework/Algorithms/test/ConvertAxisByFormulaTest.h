@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/Axis.h"
 #include <MantidAPI/SpectrumInfo.h>
 #include <MantidKernel/PhysicalConstants.h>
 #include <math.h>

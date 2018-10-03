@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 #include "MantidGeometry/Crystal/CyclicGroup.h"
+#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 using namespace Mantid::Geometry;

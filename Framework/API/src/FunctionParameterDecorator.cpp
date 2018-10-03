@@ -1,6 +1,6 @@
 #include "MantidAPI/FunctionParameterDecorator.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterReference.h"
 #include "MantidAPI/ParameterTie.h"

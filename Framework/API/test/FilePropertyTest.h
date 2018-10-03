@@ -10,8 +10,8 @@
 #include <cstdlib>
 #include <fstream>
 
-using Mantid::API::FileProperty;
 using Mantid::API::FileFinder;
+using Mantid::API::FileProperty;
 using Mantid::Kernel::ConfigService;
 
 class FilePropertyTest : public CxxTest::TestSuite {
@@ -166,7 +166,11 @@ public:
     std::string TestDir("my_nonexistent_folder");
     std::string msg = fp.setValue(TestDir);
     // It gives an error message starting "Directory "X" not found".
-    TS_ASSERT_EQUALS(msg.substr(0, 3), "Dir");
+    auto pos = msg.find("Directory");
+    TS_ASSERT(pos != std::string::npos);
+    // "not found" comes after "Directory"
+    TS_ASSERT(msg.find("not found", pos) !=
+              std::string::npos); //.substr(0, 3), "Dir");
   }
 
   void testDirectoryPasses() {

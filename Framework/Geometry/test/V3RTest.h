@@ -7,8 +7,8 @@
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::IntMatrix;
+using Mantid::Kernel::V3D;
 
 class V3RTest : public CxxTest::TestSuite {
 public:

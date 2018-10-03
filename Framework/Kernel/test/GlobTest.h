@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/Glob.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Glob.h"
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 using namespace Mantid::Kernel;
 

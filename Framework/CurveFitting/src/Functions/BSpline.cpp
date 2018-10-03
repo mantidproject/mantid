@@ -2,9 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/BSpline.h"
-#include "MantidCurveFitting/GSLVector.h"
-#include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/GSLVector.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -33,7 +33,7 @@ struct ReleaseBSplineDerivativeWorkspace {
   }
 };
 #endif
-}
+} // namespace
 
 /**
  * Constructor

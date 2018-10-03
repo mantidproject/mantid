@@ -1,15 +1,15 @@
 #ifndef MANTID_LIVEDATA_LIVEDATAALGORITHMTEST_H_
 #define MANTID_LIVEDATA_LIVEDATAALGORITHMTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidLiveData/LiveDataAlgorithm.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/FacilityHelper.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidLiveData/LiveDataAlgorithm.h"
+#include "MantidTestHelpers/FacilityHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::LiveData;

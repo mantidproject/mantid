@@ -212,6 +212,112 @@ e.g.
 
 would run all of the tests whose name contains SNS.
 
+Running the tests on multiple cores
+-----------------------------------
+
+Running the System Tests can be sped up by distributing the list of
+tests across multiple cores. This is done in a similar way to ``ctest``
+using the ``-j N`` option, where ``N`` is the number of cores you want
+to use, e.g.
+
+.. code-block:: sh
+
+   ./systemtest -j 8
+
+would run the tests on 8 cores.
+
+Some tests write or delete in the same directories, using the same file
+names, which causes issues when running in parallel. To resolve this,
+a global list of test modules (= different python files in the
+``Testing/SystemTests/tests/analysis`` directory) is first created.
+Now we scan each test module line by line and list all the data files
+that are used by that module. The possible ways files are being
+specified are:
+1. if the extensions ``.nxs``, ``.raw`` or ``.RAW`` are present
+2. if there is a sequence of at least 4 digits inside a string
+In case number 2, we have to search for strings starting with 4 digits,
+i.e. "0123, or strings ending with 4 digits 0123".
+This might over-count, meaning some sequences of 4 digits might not be
+used for a file name specification, but it does not matter if it gets
+identified as a filename as the probability of the same sequence being
+present in another python file is small, and it would therefore not lock
+any other tests. A dict is created with an entry for each module name
+that contains the list of files that this module requires.
+An accompanying dict with an entry for each data file stores a lock
+status for that particular datafile.
+
+Finally, a scheduler spawns ``N`` threads who each start a loop and
+gather a first test module from the master test list which is stored in
+a shared dictionary, starting with the number in the module list equal
+to the process id.
+
+Each process then checks if all the data files required by the current
+test module are available (i.e. have not been locked by another
+thread). If all files are unlocked, the thread locks all these files
+and proceeds with that test module. If not, it goes further down the
+list until it finds a module whose files are all available.
+
+Once it has completed the work in the current module, it unlocks the
+data files and checks if the number of modules that remains to be
+executed is greater than 0. If there is some work left to do, the
+thread finds the next module that still has not been executed
+(searches through the tests_lock array and finds the next element
+that has a 0 value). This aims to have all threads end calculation
+approximately at the same time.
+
+Reducing the size of console output
+-----------------------------------
+
+The ``systemtests`` can be run in "quiet" mode using the ``-q`` or
+``--quiet`` option. This will print only one line per test instead of
+the full log.
+
+.. code-block:: sh
+
+   ./systemtest --quiet
+   Updating testing data...
+   [100%] Built target StandardTestData
+   [100%] Built target SystemTestData
+   Running tests...
+   FrameworkManager-[Notice] Welcome to Mantid 3.13.20180820.2132
+   FrameworkManager-[Notice] Please cite: http://dx.doi.org/10.1016/j.nima.2014.07.029 and this release: http://dx.doi.org/10.5286/Software/Mantid
+   [  0%]   1/435 : DOSTest.DOSCastepTest ............................................... (success: 0.05s)
+   [  0%]   2/435 : ISISIndirectBayesTest.JumpCETest .................................... (success: 0.06s)
+   [  0%]   3/435 : ISISIndirectInelastic.IRISCalibration ............................... (success: 0.03s)
+   [  0%]   4/435 : HFIRTransAPIv2.HFIRTrans1 ........................................... (success: 1.30s)
+   [  1%]   5/435 : DOSTest.DOSIRActiveTest ............................................. (success: 0.04s)
+   [  1%]   6/435 : ISISIndirectBayesTest.JumpFickTest .................................. (success: 0.06s)
+   [  1%]   7/435 : AbinsTest.AbinsBinWidth ............................................. (success: 1.65s)
+   [  1%]   8/435 : ISIS_PowderPearlTest.CreateCalTest .................................. (success: 1.65s)
+   [  2%]   9/435 : ISISIndirectInelastic.IRISConvFit ................................... (success: 0.56s)
+   [  2%]  10/435 : LiquidsReflectometryReductionWithBackgroundTest.BadDataTOFRangeTest . (success: 2.94s)
+   [  2%]  11/435 : DOSTest.DOSPartialCrossSectionScaleTest ............................. (success: 0.23s)
+   [  2%]  12/435 : ISISIndirectBayesTest.JumpHallRossTest .............................. (success: 0.07s)
+   [  2%]  13/435 : ISISIndirectInelastic.IRISDiagnostics ............................... (success: 0.03s)
+   [  3%]  14/435 : HFIRTransAPIv2.HFIRTrans2 ........................................... (success: 0.83s)
+   [  3%]  15/435 : DOSTest.DOSPartialSummedContributionsCrossSectionScaleTest .......... (success: 0.15s)
+   [  3%]  16/435 : ISISIndirectBayesTest.JumpTeixeiraTest .............................. (success: 0.07s)
+   [  3%]  17/435 : ISISIndirectInelastic.IRISElwinAndMSDFit ............................ (success: 0.29s)
+   [  4%]  18/435 : MagnetismReflectometryReductionTest.MRFilterCrossSectionsTest ....... (success: 5.30s)
+   [  4%]  19/435 : DOSTest.DOSPartialSummedContributionsTest ........................... (success: 0.16s)
+
+One can recover the full log when a test fails by using the ``--ouptut-on-failure`` option.
+
+Running a cleanup run
+---------------------
+
+A cleanup run will go through all the tests and call the
+``.cleanup()`` function for each test. It will not run the tests
+(i.e. call the ``execute()`` function) themselves. This is achieved
+by using the ``-c`` or ``--clean`` option, e.g.
+
+.. code-block:: sh
+
+   ./systemtest -c
+
+This is useful if some old data is left over from a previous run,
+where some tests were not cleanly exited.
+
 Adding New Data & References Files
 ----------------------------------
 

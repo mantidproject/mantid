@@ -1,9 +1,9 @@
 #include "MantidDataObjects/PeakColumn.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 #include <boost/variant/get.hpp>
 
@@ -69,7 +69,7 @@ const std::string typeFromName(const std::string &name) {
         "Peak column names/types must be explicitly marked in PeakColumn.cpp");
   }
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -80,14 +80,15 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
     : m_peaks(peaks), m_oldRows() {
   this->m_name = name;
   this->m_type = typeFromName(name); // Throws if the name is unknown
-  this->m_hklPrec = 2;
   const std::string key = "PeakColumn.hklPrec";
-  int gotit = ConfigService::Instance().getValue(key, this->m_hklPrec);
-  if (!gotit)
+  auto hklPrec = ConfigService::Instance().getValue<int>(key);
+  this->m_hklPrec = hklPrec.get_value_or(2);
+  if (!hklPrec.is_initialized()) {
     g_log.information()
         << "In PeakColumn constructor, did not find any value for '" << key
         << "' from the Config Service. Using default: " << this->m_hklPrec
         << "\n";
+  }
 }
 
 /// Returns typeid for the data in the column
@@ -135,7 +136,7 @@ const std::type_info &PeakColumn::get_pointer_type_info() const {
  */
 void PeakColumn::print(size_t index, std::ostream &s) const {
   Peak &peak = m_peaks[index];
-
+  s.imbue(std::locale("C"));
   std::ios::fmtflags fflags(s.flags());
   if (m_name == "RunNumber")
     s << peak.getRunNumber();
@@ -346,5 +347,5 @@ void PeakColumn::setPeakHKLOrRunNumber(const size_t index, const double val) {
     throw std::runtime_error("Unexpected column " + m_name + " being set.");
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

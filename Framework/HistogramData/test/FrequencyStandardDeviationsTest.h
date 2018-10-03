@@ -25,9 +25,9 @@ public:
 
   void test_has_correct_mixins() {
     FrequencyStandardDeviations data;
-    TS_ASSERT_THROWS_NOTHING(
-        UNUSED_ARG((dynamic_cast<detail::StandardDeviationVectorOf<
-            FrequencyStandardDeviations, HistogramE, FrequencyVariances> &>(
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
+        (dynamic_cast<detail::StandardDeviationVectorOf<
+             FrequencyStandardDeviations, HistogramE, FrequencyVariances> &>(
             data))));
   }
 

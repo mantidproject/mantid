@@ -1,13 +1,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
 #define MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
 
-#include "MantidQtWidgets/Common/WorkspaceSelector.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
+#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
 using MantidQt::API::MWRunFiles;
-using MantidQt::MantidWidgets::WorkspaceSelector;
 using MantidQt::MantidWidgets::DataSelector;
+using MantidQt::MantidWidgets::WorkspaceSelector;
 
 class QLineEdit;
 class QLabel;
@@ -97,7 +97,7 @@ private:
   /// Any raised error messages.
   QStringList m_errorMessages;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_

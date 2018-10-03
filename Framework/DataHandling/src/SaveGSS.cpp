@@ -5,10 +5,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -235,8 +236,8 @@ void SaveGSS::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** process user specified headers
-*@brief SaveGSS::processUserSpecifiedHeaders
-*/
+ *@brief SaveGSS::processUserSpecifiedHeaders
+ */
 void SaveGSS::processUserSpecifiedHeaders() {
 
   // user specified GSAS
@@ -257,11 +258,11 @@ void SaveGSS::processUserSpecifiedHeaders() {
 
 //----------------------------------------------------------------------------------------------
 /**
-  * Returns if each spectra contains a valid detector
-  * and implicitly if the instrument is valid
-  *
-  * @return :: True if every spectra has a detector. Else false
-  */
+ * Returns if each spectra contains a valid detector
+ * and implicitly if the instrument is valid
+ *
+ * @return :: True if every spectra has a detector. Else false
+ */
 bool SaveGSS::areAllDetectorsValid() const {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const size_t numHist = m_inputWS->getNumberHistograms();
@@ -293,16 +294,16 @@ bool SaveGSS::areAllDetectorsValid() const {
 
 //----------------------------------------------------------------------------------------------
 /**
-  * Generates a string stream in GSAS format containing the
-  * data for the specified bank from the workspace. This
-  * can either be in RALF or SLOG format.
-  *
-  * @param outBuf :: The string stream to write to
-  * @param specIndex :: The index of the bank to convert into
-  * @param outputFormat :: output format
-  * @param slog_xye_precisions :: the precision of output XYE for SLOG data only
-  * a string stream
-  */
+ * Generates a string stream in GSAS format containing the
+ * data for the specified bank from the workspace. This
+ * can either be in RALF or SLOG format.
+ *
+ * @param outBuf :: The string stream to write to
+ * @param specIndex :: The index of the bank to convert into
+ * @param outputFormat :: output format
+ * @param slog_xye_precisions :: the precision of output XYE for SLOG data only
+ * a string stream
+ */
 void SaveGSS::generateBankData(
     std::stringstream &outBuf, size_t specIndex,
     const std::string &outputFormat,
@@ -341,13 +342,13 @@ void SaveGSS::generateBankData(
 }
 
 /**
-  * Generates the bank header (which precedes bank data)
-  * for the spectra index specified.
-  *
-  * @param out :: The stream to write to
-  * @param spectrumInfo :: The input workspace spectrum info object
-  * @param specIndex :: The bank index to generate a header for
-  */
+ * Generates the bank header (which precedes bank data)
+ * for the spectra index specified.
+ *
+ * @param out :: The stream to write to
+ * @param spectrumInfo :: The input workspace spectrum info object
+ * @param specIndex :: The bank index to generate a header for
+ */
 void SaveGSS::generateBankHeader(std::stringstream &out,
                                  const API::SpectrumInfo &spectrumInfo,
                                  size_t specIndex) const {
@@ -371,12 +372,12 @@ void SaveGSS::generateBankHeader(std::stringstream &out,
 }
 
 /**
-  * Generates the GSAS file and populates the output buffer
-  * with the data to be written to the file(s) in subsequent methods
-  *
-  * @param numOutFiles :: The number of file to be written
-  * @param numOutSpectra :: The number of spectra per file to be written
-  */
+ * Generates the GSAS file and populates the output buffer
+ * with the data to be written to the file(s) in subsequent methods
+ *
+ * @param numOutFiles :: The number of file to be written
+ * @param numOutSpectra :: The number of spectra per file to be written
+ */
 void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
   // Generate the output buffer for each histogram (spectrum)
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
@@ -429,14 +430,14 @@ void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
 }
 
 /**
-  * Creates the file header information, which should be at the top of
-  * each GSAS output file from the given workspace.
-  *
-  * @param out :: The stringstream to write the header to
-  * @param l1 :: Value for the moderator to sample distance
-  * @return :: A string stream containing the bank header details to be
-  * written to the start of the file
-*/
+ * Creates the file header information, which should be at the top of
+ * each GSAS output file from the given workspace.
+ *
+ * @param out :: The stringstream to write the header to
+ * @param l1 :: Value for the moderator to sample distance
+ * @return :: A string stream containing the bank header details to be
+ * written to the start of the file
+ */
 void SaveGSS::generateInstrumentHeader(std::stringstream &out,
                                        double l1) const {
 
@@ -528,14 +529,14 @@ void SaveGSS::generateInstrumentHeader(std::stringstream &out,
 }
 
 /**
-  * Generates the out filename(s). If only one file is specified
-  * this is the user specified filename. However when >1 file
-  * is required (in split mode) generates the new file name
-  * as 'name-n.ext' (where n is the current bank). This is stored
-  * as a member variable
-  *
-  * @param numberOfOutFiles :: The number of output files required
-  */
+ * Generates the out filename(s). If only one file is specified
+ * this is the user specified filename. However when >1 file
+ * is required (in split mode) generates the new file name
+ * as 'name-n.ext' (where n is the current bank). This is stored
+ * as a member variable
+ *
+ * @param numberOfOutFiles :: The number of output files required
+ */
 void SaveGSS::generateOutFileNames(size_t numberOfOutFiles) {
   const std::string outputFileName = getProperty("Filename");
   assert(numberOfOutFiles > 0);
@@ -579,17 +580,17 @@ void SaveGSS::generateOutFileNames(size_t numberOfOutFiles) {
 }
 
 /**
-  * Gets the value from a RunInfo property (i.e., log) and turns it
-  * into a string stream. If the property is unknown by default
-  * UNKNOWN is written. However an alternative value can be
-  * specified to be written out.
-  *
-  * @param out :: The stream to write to
-  * @param runInfo :: Reference to the associated runInfo
-  * @param name :: Name of the property to use
-  * @param failsafeValue :: The value to use if the property cannot be
-  * found. Defaults to 'UNKNOWN'
-*/
+ * Gets the value from a RunInfo property (i.e., log) and turns it
+ * into a string stream. If the property is unknown by default
+ * UNKNOWN is written. However an alternative value can be
+ * specified to be written out.
+ *
+ * @param out :: The stream to write to
+ * @param runInfo :: Reference to the associated runInfo
+ * @param name :: Name of the property to use
+ * @param failsafeValue :: The value to use if the property cannot be
+ * found. Defaults to 'UNKNOWN'
+ */
 void SaveGSS::getLogValue(std::stringstream &out, const API::Run &runInfo,
                           const std::string &name,
                           const std::string &failsafeValue) const {
@@ -625,10 +626,10 @@ void SaveGSS::getLogValue(std::stringstream &out, const API::Run &runInfo,
 }
 
 /**
-  * Returns if the input workspace instrument is valid
-  *
-  * @return :: True if the instrument is valid, else false
-  */
+ * Returns if the input workspace instrument is valid
+ *
+ * @return :: True if the instrument is valid, else false
+ */
 bool SaveGSS::isInstrumentValid() const {
   // Instrument related
   Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
@@ -643,16 +644,16 @@ bool SaveGSS::isInstrumentValid() const {
 }
 
 /**
-  * Attempts to open an output stream at the user specified path.
-  * This uses the append property to determine whether to append
-  * or overwrite the file at the given path. The caller is
-  * responsible for closing to stream when finished.
-  *
-  * @param outFilePath :: The full path of the file to open a stream out
-  * @param outStream :: The stream to open at the specified file
-  * @throws :: If the fail bit is set on the out stream. Additionally
-  * logs the system reported error as a Mantid error.
-  */
+ * Attempts to open an output stream at the user specified path.
+ * This uses the append property to determine whether to append
+ * or overwrite the file at the given path. The caller is
+ * responsible for closing to stream when finished.
+ *
+ * @param outFilePath :: The full path of the file to open a stream out
+ * @param outStream :: The stream to open at the specified file
+ * @throws :: If the fail bit is set on the out stream. Additionally
+ * logs the system reported error as a Mantid error.
+ */
 void SaveGSS::openFileStream(const std::string &outFilePath,
                              std::ofstream &outStream) {
   // We have to take the ofstream as a parameter instead of returning
@@ -668,13 +669,11 @@ void SaveGSS::openFileStream(const std::string &outFilePath,
   // Have to wrap this in a unique pointer as GCC 4.x (RHEL 7) does
   // not support the move operator on iostreams
   outStream.open(outFilePath, mode);
-
   if (outStream.fail()) {
     // Get the error message from library and log before throwing
     const std::string error = strerror(errno);
-    g_log.error("Failed to open file. Error was: " + error);
-    throw std::runtime_error("Could not open the file at the following path: " +
-                             outFilePath);
+    throw Kernel::Exception::FileError(
+        "Failed to open file. Error was: " + error, outFilePath);
   }
 
   // Stream is good at this point
@@ -682,13 +681,13 @@ void SaveGSS::openFileStream(const std::string &outFilePath,
 
 //----------------------------------------------------------------------------
 /** Ensures that when a workspace group is passed as output to this workspace
-*  everything is saved to one file and the bank number increments for each
-*  group member.
-*  @param alg ::           Pointer to the algorithm
-*  @param propertyName ::  Name of the property
-*  @param propertyValue :: Value  of the property
-*  @param periodNum ::     Effectively a counter through the group members
-*/
+ *  everything is saved to one file and the bank number increments for each
+ *  group member.
+ *  @param alg ::           Pointer to the algorithm
+ *  @param propertyName ::  Name of the property
+ *  @param propertyValue :: Value  of the property
+ *  @param periodNum ::     Effectively a counter through the group members
+ */
 void SaveGSS::setOtherProperties(IAlgorithm *alg,
                                  const std::string &propertyName,
                                  const std::string &propertyValue,
@@ -708,12 +707,12 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
 }
 
 /**
-  * Validates the user input is matches certain constraints
-  * in length and type and logs a warning or throws depending on
-  * whether we can continue.
-  *
-  * @throws :: If for any reason we cannot run the algorithm
-  */
+ * Validates the user input is matches certain constraints
+ * in length and type and logs a warning or throws depending on
+ * whether we can continue.
+ *
+ * @throws :: If for any reason we cannot run the algorithm
+ */
 std::map<std::string, std::string> SaveGSS::validateInputs() {
   std::map<std::string, std::string> result;
 
@@ -751,29 +750,14 @@ std::map<std::string, std::string> SaveGSS::validateInputs() {
   return result;
 }
 
-namespace { // anonymous
-// throw an exception if file cannot be written
-void checkWritable(const std::string &filename) {
-  const auto fileobj = Poco::File(filename);
-  if (fileobj.exists()) {
-    if (!fileobj.canWrite())
-      throw std::runtime_error("Cannot write to " + filename);
-  } else {
-    const auto pathobj = Poco::Path(filename).makeAbsolute().parent();
-    if (!Poco::File(pathobj.toString()).canWrite())
-      throw std::runtime_error("Cannot write to " + pathobj.toString());
-  }
-}
-} // anonymous
-
 /**
-  * Writes all the spectra to the file(s) from the buffer to the
-  * list of output file paths.
-  *
-  * @param numOutFiles :: The number of files to be written
-  * @param numSpectra :: The number of spectra per file to write
-  * @throws :: If the file writing fails at all
-  */
+ * Writes all the spectra to the file(s) from the buffer to the
+ * list of output file paths.
+ *
+ * @param numOutFiles :: The number of files to be written
+ * @param numSpectra :: The number of spectra per file to write
+ * @throws :: If the file writing fails at all
+ */
 void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   // When there are multiple files we can open them all in parallel
   // Check that either the number of files or spectra is greater than
@@ -782,13 +766,10 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
 
   const auto numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
 
-  // verify that all paths can be written to
-  for (const auto &filename : m_outFileNames) {
-    checkWritable(filename);
-  }
-
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t fileIndex = 0; fileIndex < numOutFilesInt64; fileIndex++) {
+    PARALLEL_START_INTERUPT_REGION
+
     // Open each file when there are multiple
     std::ofstream fileStream;
     openFileStream(m_outFileNames[fileIndex], fileStream);
@@ -807,7 +788,9 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
           "Failed to close the file at " + m_outFileNames[fileIndex] +
           " - this file may be empty, corrupted or incorrect.");
     }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 void SaveGSS::writeRALFHeader(std::stringstream &out, int bank,
@@ -850,7 +833,6 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
   std::vector<std::unique_ptr<std::stringstream>> outLines;
   outLines.resize(numberOfOutLines);
 
-  PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < numberOfOutLines; i++) {
     outLines[i] = makeStringStream();
     auto &outLine = *outLines[i];

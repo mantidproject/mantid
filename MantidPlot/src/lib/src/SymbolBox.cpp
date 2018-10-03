@@ -29,8 +29,8 @@
 #include "SymbolBox.h"
 #include <algorithm>
 
-#include <qpixmap.h>
 #include <qpainter.h>
+#include <qpixmap.h>
 
 const QwtSymbol::Style SymbolBox::symbols[] = {
     QwtSymbol::NoSymbol,  QwtSymbol::Ellipse,   QwtSymbol::Rect,

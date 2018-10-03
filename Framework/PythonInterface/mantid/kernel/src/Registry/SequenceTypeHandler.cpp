@@ -2,9 +2,9 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 
 // See
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
@@ -12,8 +12,8 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-#include <boost/python/extract.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/python/extract.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -30,7 +30,7 @@ template <> struct StdVectorExtractor<bool> {
         "Unable to supported extracting std::vector<bool> from python object");
   }
 };
-}
+} // namespace
 
 /**
  * Set function to handle Python -> C++ calls to a property manager and get the
@@ -52,9 +52,9 @@ void SequenceTypeHandler<ContainerType>::set(
   }
   // numpy arrays requires special handling to extract their types. Hand-off to
   // a more appropriate handler
-  else if (NumPy::NdArray::check(value)) {
-    alg->setProperty(name, Converters::NDArrayToVector<DestElementType>(
-                               NumPy::NdArray(value))());
+  else if (NDArray::check(value)) {
+    alg->setProperty(
+        name, Converters::NDArrayToVector<DestElementType>(NDArray(value))());
   } else if (PySequence_Check(value.ptr())) {
     alg->setProperty(name,
                      Converters::PySequenceToVector<DestElementType>(value)());
@@ -129,6 +129,6 @@ INSTANTIATE(double)
 INSTANTIATE(std::string)
 INSTANTIATE(bool)
 ///@endcond
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid

@@ -29,5 +29,5 @@ void MetadataToFieldData::execute(vtkFieldData *fieldData,
     newArray->SetValue(i, metaData[i]);
   }
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

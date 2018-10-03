@@ -1,17 +1,17 @@
 #ifndef MANTID_DATAHANDLING_SAVECALFILETEST_H_
 #define MANTID_DATAHANDLING_SAVECALFILETEST_H_
 
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <iosfwd>
 

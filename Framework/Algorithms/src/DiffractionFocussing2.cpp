@@ -22,8 +22,8 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using std::vector;
 using Mantid::HistogramData::BinEdges;
+using std::vector;
 
 namespace Mantid {
 
@@ -663,5 +663,5 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
   return totalHistProcess;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -78,5 +78,5 @@ void RayTracerTester::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

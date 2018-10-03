@@ -1,5 +1,5 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidAPI/CatalogManager.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -13,7 +13,7 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(CatalogManagerImpl)
 
-boost::python::object getActiveSessionsAsList(CatalogManagerImpl &self) {
+boost::python::list getActiveSessionsAsList(CatalogManagerImpl &self) {
   boost::python::list sessions;
   const auto vecSessions = self.getActiveSessions();
   for (const auto &vecSession : vecSessions) {

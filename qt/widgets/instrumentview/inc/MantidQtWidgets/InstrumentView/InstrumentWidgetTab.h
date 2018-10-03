@@ -1,7 +1,6 @@
 #ifndef INSTRUMENTWIDGETTAB_H
 #define INSTRUMENTWIDGETTAB_H
 
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
 #include "InstrumentWidgetTypes.h"
 
 #include <QFrame>
@@ -47,7 +46,7 @@ protected:
   /// The parent InstrumentWidget
   InstrumentWidget *m_instrWidget;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // INSTRUMENTWIDGETTAB_H

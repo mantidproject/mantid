@@ -1,22 +1,22 @@
 #ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_
 #define MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
 class WorkspaceGroup;
 class MatrixWorkspace;
-}
+} // namespace API
 namespace Algorithms {
 
 /** PolarizationCorrectionFredrikze : Algorithm to perform polarisation
  corrections on
  multi-period group workspaces that implements the Fredrikze (Dutch) method.
- Fredrikze, H, et al. “Calibration of a polarized neutron reflectometer” Physica
+ Fredrikze, H, et al. "Calibration of a polarized neutron reflectometer" Physica
  B 297 (2001)
 
  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge

@@ -1,9 +1,9 @@
 #ifndef MANTID_MANTIDQT_API_NON_ORTHOGONAL_H_
 #define MANTID_MANTIDQT_API_NON_ORTHOGONAL_H_
 
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <array>
 
 namespace MantidQt {
@@ -18,13 +18,11 @@ provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
 bool EXPORT_OPT_MANTIDQT_COMMON
 requiresSkewMatrix(const Mantid::API::IMDWorkspace &workspace);
 
-bool EXPORT_OPT_MANTIDQT_COMMON
-isHKLDimensions(const Mantid::API::IMDWorkspace &workspace, size_t dimX,
-                size_t dimY);
+bool EXPORT_OPT_MANTIDQT_COMMON isHKLDimensions(
+    const Mantid::API::IMDWorkspace &workspace, size_t dimX, size_t dimY);
 
-size_t EXPORT_OPT_MANTIDQT_COMMON
-getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
-                            size_t dimX, size_t dimY);
+size_t EXPORT_OPT_MANTIDQT_COMMON getMissingHKLDimensionIndex(
+    Mantid::API::IMDWorkspace_const_sptr workspace, size_t dimX, size_t dimY);
 
 void EXPORT_OPT_MANTIDQT_COMMON
 transformFromDoubleToCoordT(const Mantid::Kernel::DblMatrix &skewMatrix,
@@ -59,7 +57,7 @@ void transformLookpointToWorkspaceCoord(
 std::pair<double, double> EXPORT_OPT_MANTIDQT_COMMON
 getGridLineAnglesInRadian(const std::array<Mantid::coord_t, 9> &skewMatrixCoord,
                           size_t dimX, size_t dimY);
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif

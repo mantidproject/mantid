@@ -3,8 +3,8 @@
 
 #include "MantidKernel/TypedValidator.h"
 #include <boost/make_shared.hpp>
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {

@@ -1,14 +1,14 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTERTEST_H
 
+#include <boost/algorithm/string.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <boost/algorithm/string.hpp>
 
+#include "../ISISReflectometry/ReflSettingsTabPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "../ISISReflectometry/ReflSettingsTabPresenter.h"
 #include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;

@@ -46,8 +46,8 @@ void LoadSpec::init() {
 }
 
 /**
-*   Executes the algorithm.
-*/
+ *   Executes the algorithm.
+ */
 void LoadSpec::exec() {
   std::string filename = getProperty("Filename");
   std::ifstream file(filename.c_str());

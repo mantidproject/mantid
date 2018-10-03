@@ -3,14 +3,14 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include <vtkSmartPointer.h>
-#include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;

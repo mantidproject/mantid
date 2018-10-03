@@ -10,22 +10,22 @@
 
 #include "MantidKernel/System.h"
 
-#include <iostream>
 #include <fstream>
-#include <string>
+#include <iostream>
 #include <sstream>
+#include <string>
 
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NamedNodeMap.h>
+#include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/Node.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/AutoPtr.h>
 #include <Poco/SAX/InputSource.h>
-#include <Poco/DOM/NamedNodeMap.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -46,7 +46,7 @@ public:
 private:
   Poco::AutoPtr<Poco::XML::Document> pDoc;
 };
-}
+} // namespace DataHandling
 /* namespace DataHandling */
 } /* namespace Mantid */
 

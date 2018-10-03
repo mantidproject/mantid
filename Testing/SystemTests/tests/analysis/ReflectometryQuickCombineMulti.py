@@ -48,7 +48,7 @@ class ReflectometryQuickCombineMulti(stresstesting.MantidStressTest):
         IvsQ2 = self.doQuickOnRun(runNumber=13462, transmissionNumbers=[13463,13464], instrument='INTER', incidentAngle=2.3)
         IvsQ2Binned = Rebin(InputWorkspace=IvsQ2, Params=self.createBinningParam(run2QLow, -step, run2QHigh))
 
-        # Peform the stitching
+        # Perform the stitching
         combineMulti.combineDataMulti([IvsQ1Binned.name(), IvsQ2Binned.name()], self.__stitchedWorkspaceName,
                                       [run1QLow, run2QLow], [run1QHigh, run2QHigh], run1QLow, run2QHigh, -step, 1)
 

@@ -1,5 +1,5 @@
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/System.h"
 
@@ -101,8 +101,8 @@ void MultipleExperimentInfos::copyExperimentInfos(
 
 //-----------------------------------------------------------------------------------------------
 /* Does this class have any oriented lattice associated with it?
-* Returns true if any experiment info sample has an oriented lattice attached
-*/
+ * Returns true if any experiment info sample has an oriented lattice attached
+ */
 bool MultipleExperimentInfos::hasOrientedLattice() const {
   for (uint16_t i = 0; i < getNumExperimentInfo(); i++) {
     if (getExperimentInfo(i)->sample().hasOrientedLattice()) {
@@ -127,5 +127,5 @@ const std::string MultipleExperimentInfos::toString() const {
   return os.str();
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

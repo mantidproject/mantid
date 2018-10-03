@@ -230,7 +230,7 @@ namespace CxxTest
 
             // Add the CPU fraction measurement
             o << "> <measurement><name>CPUFraction</name><value>" << CPUFraction_stream.str().c_str() << "</value></measurement>";
-            elts = true; // force there to alway be elements, since I just wrote one
+            elts = true; // force there to always be elements, since I just wrote one
 
             element_t curr = elements.begin();
             element_t end  = elements.end();

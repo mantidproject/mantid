@@ -86,7 +86,7 @@ void FirstTimeSetup::initLayout() {
 
   QString stlyeName = QApplication::style()->metaObject()->className();
   if ((stlyeName == "QMotifStyle") || (stlyeName == "QCDEStyle")) {
-    // add stylesheet formatting for other environemnts
+    // add stylesheet formatting for other environments
     QString ss = this->styleSheet();
     ss += "\n"
           "QDialog#FirstTimeSetup QCommandLinkButton {"

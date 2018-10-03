@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
-#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

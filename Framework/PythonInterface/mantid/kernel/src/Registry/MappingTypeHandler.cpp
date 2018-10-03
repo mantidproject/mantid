@@ -51,6 +51,6 @@ MappingTypeHandler::create(const std::string &name, const object &defaultValue,
           name, createPropertyManager(dict(defaultValue)), direction);
   return valueProp;
 }
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid

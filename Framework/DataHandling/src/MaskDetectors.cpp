@@ -3,8 +3,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/LegacyConversion.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
@@ -34,7 +34,7 @@ void constrainIndexInRange(std::vector<size_t> &sourceList,
     }
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -57,12 +57,11 @@ void MaskDetectors::init() {
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
   declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList"),
-                  "An ArrayProperty containing a list of spectra to mask");
-  declareProperty(
-      make_unique<ArrayProperty<detid_t>>("DetectorList"),
-      "An ArrayProperty containing a list of detector ID's to mask");
+                  "A list of spectra to mask");
+  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
+                  "A list of detector ID's to mask");
   declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
-                  "An ArrayProperty containing the workspace indices to mask");
+                  "A list of the workspace indices to mask");
   declareProperty(make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
                                                    Direction::Input,
                                                    PropertyMode::Optional),
@@ -95,9 +94,8 @@ void MaskDetectors::init() {
       "Default is number of histograms in target workspace if other masks are"
       " present "
       "or ignored if not.");
-  declareProperty(
-      make_unique<ArrayProperty<std::string>>("ComponentList"),
-      "An ArrayProperty containing a list of component names to mask");
+  declareProperty(make_unique<ArrayProperty<std::string>>("ComponentList"),
+                  "A list names of components to mask");
 }
 
 /*
@@ -119,7 +117,9 @@ void MaskDetectors::exec() {
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
 
   // Is it a Mask Workspace ?
-  MaskWorkspace_sptr isMaskWS = boost::dynamic_pointer_cast<MaskWorkspace>(WS);
+  MaskWorkspace_sptr inputAsMaskWS =
+      boost::dynamic_pointer_cast<MaskWorkspace>(WS);
+  const auto isMaskWS = static_cast<bool>(inputAsMaskWS);
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
   auto spectraList =
@@ -214,13 +214,15 @@ void MaskDetectors::exec() {
   }
 
   if (isMaskWS) {
-    // If the input was a mask workspace, then extract the mask to ensure
-    // we are returning the correct thing.
-    IAlgorithm_sptr alg = createChildAlgorithm("ExtractMask");
-    alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-    alg->executeAsChildAlg();
-    MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
-    setProperty("Workspace", ws);
+    // When input is a MaskWorkspace, some special handling is needed.
+    auto &spectrumInfo = inputAsMaskWS->mutableSpectrumInfo();
+    for (size_t i = 0; i < inputAsMaskWS->getNumberHistograms(); ++i) {
+      const bool mask =
+          inputAsMaskWS->isMaskedIndex(i) || spectrumInfo.isMasked(i);
+      inputAsMaskWS->setMaskedIndex(i, mask);
+      // Always clear the mask flag from MaskWorkspace
+      spectrumInfo.setMasked(i, false);
+    }
   }
 }
 
@@ -310,13 +312,13 @@ void MaskDetectors::handleMaskByMatrixWorkspace(
 }
 
 /* Verifies input ranges are defined and returns these ranges if they are.
-*
-* @return tuple containing min/max ranges provided to algorithm
-*        (from 0 to max histogram range) and Boolean value,
-*        containing true if the ranges are
-*        constrained (or defined in other words)
-*        and false if they are not.
-*/
+ *
+ * @return tuple containing min/max ranges provided to algorithm
+ *        (from 0 to max histogram range) and Boolean value,
+ *        containing true if the ranges are
+ *        constrained (or defined in other words)
+ *        and false if they are not.
+ */
 std::tuple<size_t, size_t, bool>
 MaskDetectors::getRanges(const MatrixWorkspace_sptr &targWS) {
   int endIndex = getProperty("EndWorkspaceIndex");
@@ -346,13 +348,13 @@ MaskDetectors::getRanges(const MatrixWorkspace_sptr &targWS) {
   }
 }
 /* Do constrain masked indexes by limits, provided as input
-* @param indexList  :: list of indexes to verify against constrain on input
-*                      and list of constrained indexes on the output.
-* @param startIndex :: minimal index (inclusive) to include in the constrained
-*                      list.
-* @param endIndex   :: maximal index (inclusive) to include in the constrained
-*                      list.
-*/
+ * @param indexList  :: list of indexes to verify against constrain on input
+ *                      and list of constrained indexes on the output.
+ * @param startIndex :: minimal index (inclusive) to include in the constrained
+ *                      list.
+ * @param endIndex   :: maximal index (inclusive) to include in the constrained
+ *                      list.
+ */
 void MaskDetectors::constrainMaskedIndexes(
     std::vector<size_t> &indexList,
     const std::tuple<size_t, size_t, bool> &range_info) {
@@ -491,7 +493,7 @@ void MaskDetectors::fillIndexListFromSpectra(
  * @param sourceWS  :: An workspace with masked spectra.
  * @param range_info :: tuple containing the range of spectra to process and
  *                            Boolean indicating if these ranges are defined
-*/
+ */
 void MaskDetectors::appendToIndexListFromWS(
     std::vector<size_t> &indexList, const MatrixWorkspace_const_sptr sourceWS,
     const std::tuple<size_t, size_t, bool> &range_info) {
@@ -524,16 +526,16 @@ void MaskDetectors::appendToIndexListFromWS(
 }
 
 /**
-* Append the indices of a workspace corresponding to detector IDs to the
-* given list
-*
-* @param detectorList :: An existing list of detector IDs
-* @param inputWs :: A workspace to mask detectors in
-* @param maskWs :: A workspace with masked spectra
-* @param range_info    :: tuple containing the information on
-*                      if copied indexes are constrained by ranges and if yes
-*                       -- the range of indexes to topy
-*/
+ * Append the indices of a workspace corresponding to detector IDs to the
+ * given list
+ *
+ * @param detectorList :: An existing list of detector IDs
+ * @param inputWs :: A workspace to mask detectors in
+ * @param maskWs :: A workspace with masked spectra
+ * @param range_info    :: tuple containing the information on
+ *                      if copied indexes are constrained by ranges and if yes
+ *                       -- the range of indexes to topy
+ */
 void MaskDetectors::appendToDetectorListFromWS(
     std::vector<detid_t> &detectorList,
     const MatrixWorkspace_const_sptr inputWs,
@@ -556,14 +558,14 @@ void MaskDetectors::appendToDetectorListFromWS(
 }
 
 /**
-* Append the indices of the masked spectra from the given workspace list to the
-* given list
-* @param indexList :: An existing list of indices
-* @param maskedWorkspace :: An workspace with masked spectra
-* @param range_info    :: tuple containing the information on
-*                      if copied indexes are constrained by ranges and if yes
-*                       -- the range of indexes to topy
-*/
+ * Append the indices of the masked spectra from the given workspace list to the
+ * given list
+ * @param indexList :: An existing list of indices
+ * @param maskedWorkspace :: An workspace with masked spectra
+ * @param range_info    :: tuple containing the information on
+ *                      if copied indexes are constrained by ranges and if yes
+ *                       -- the range of indexes to topy
+ */
 void MaskDetectors::appendToIndexListFromMaskWS(
     std::vector<size_t> &indexList,
     const DataObjects::MaskWorkspace_const_sptr maskedWorkspace,

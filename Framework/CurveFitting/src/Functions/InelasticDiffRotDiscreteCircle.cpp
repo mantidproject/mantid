@@ -1,15 +1,15 @@
 #include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
@@ -41,9 +41,8 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
                          "energy in mili-eV");
   this->declareParameter("Shift", 0.0, "Shift in the centre of the peak");
 
-  this->declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
-  this->declareAttribute("WorkspaceIndex", API::IFunction::Attribute(0));
   this->declareAttribute("N", API::IFunction::Attribute(3));
+  declareAttributes();
 }
 
 /**

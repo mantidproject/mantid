@@ -55,8 +55,8 @@ private:
   /// Map
   MapType m_map;
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINERFACE_MAPTOPYDICTIONARY_H_ */

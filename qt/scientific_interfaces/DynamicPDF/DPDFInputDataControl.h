@@ -4,8 +4,8 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 // Mantid headers from other projects
-#include "MantidAPI/AnalysisDataService.h"
 #include "DllConfig.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 // 3rd party library headers
@@ -89,8 +89,8 @@ private:
   std::vector<std::pair<int, int>> m_domain;
 
 }; // class InputDataControl
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_INPUTDATACONTROL_H_

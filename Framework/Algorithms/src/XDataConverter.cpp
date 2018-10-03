@@ -9,11 +9,11 @@
 namespace Mantid {
 namespace Algorithms {
 
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace_const_sptr;
-using API::WorkspaceFactory;
+using API::MatrixWorkspace_sptr;
 using API::Progress;
+using API::WorkspaceFactory;
+using API::WorkspaceProperty;
 using Mantid::MantidVecPtr;
 
 //------------------------------------------------------------------------------
@@ -110,5 +110,5 @@ void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS,
     outputWS->setSharedX(index, calculateXPoints(inputWS->sharedX(index)));
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

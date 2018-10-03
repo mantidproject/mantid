@@ -1,12 +1,12 @@
 #ifndef MANTID_API_MultiPeriodGroupAlgorithmTEST_H_
 #define MANTID_API_MultiPeriodGroupAlgorithmTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MultiPeriodGroupTestBase.h"
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidTestHelpers/FakeObjects.h"
+#include "MultiPeriodGroupTestBase.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -27,15 +27,15 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include <iostream>
 #include <QApplication>
 #include <QBitmap>
-#include <QFontDatabase>
-#include <QSplashScreen>
-#include <QMessageBox>
 #include <QDir>
+#include <QFontDatabase>
+#include <QMessageBox>
+#include <QSplashScreen>
 #include <QThread>
 #include <QTimer>
+#include <iostream>
 
 #include "ApplicationWindow.h"
 #include "MantidKernel/Logger.h"
@@ -114,7 +114,7 @@ scripts.
   %Note about modularization: this is mainly about internal reorganizations.
   Most of the current features should remain part of the main executable, but
 use interfaces similar or
-  identical to those used by plug-ins. This should ease maintanance and make
+  identical to those used by plug-ins. This should ease maintenance and make
 adding new features
   to the core application a no-brainer once they're available as plug-ins.
   Support for Python, liborigin and zlib could be real, external plug-ins since

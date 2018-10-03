@@ -1,21 +1,21 @@
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/CoordTransform.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <vtkUnstructuredGrid.h>
-#include <vtkFloatArray.h>
-#include <vtkQuad.h>
+#include <boost/shared_ptr.hpp>
 #include <vtkCellData.h>
+#include <vtkFloatArray.h>
 #include <vtkNew.h>
-#include "MantidKernel/ReadLock.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
+#include <vtkQuad.h>
+#include <vtkUnstructuredGrid.h>
 
 using namespace Mantid::API;
 
@@ -182,5 +182,5 @@ void vtkMDQuadFactory::validate() const {
         "vtkMDQuadFactory has no workspace to run against");
   }
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

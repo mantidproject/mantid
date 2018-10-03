@@ -53,7 +53,7 @@ public:
     // Do not delete adaptee.
   }
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

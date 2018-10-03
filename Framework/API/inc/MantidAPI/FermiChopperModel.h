@@ -83,7 +83,7 @@ private:
   /// Incident energy log
   std::string m_incidentEnergyLog;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_API_FERMICHOPPERMODEL_H_ */

@@ -23,7 +23,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/System.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
+#include "MantidPythonInterface/core/NDArray.h"
 #include <vector>
 
 namespace Mantid {
@@ -39,7 +39,7 @@ template <typename DestElementType> struct DLLExport NDArrayToVector {
   using TypedVectorIterator = typename std::vector<DestElementType>::iterator;
 
   /// Constructor
-  NDArrayToVector(const NumPy::NdArray &value);
+  NDArrayToVector(const NDArray &value);
   /// Create a new vector from the contents of the array
   const TypedVector operator()();
   /// Fill the container with data from the array
@@ -49,10 +49,10 @@ private:
   void throwIfSizeMismatched(const TypedVector &dest) const;
 
   // reference to the held array
-  NumPy::NdArray m_arr;
+  NDArray m_arr;
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_NDARRAYTOVECTORCONVERTER_H_ */

@@ -8,7 +8,7 @@ namespace Mantid {
 namespace Geometry {
 // Forward declaration.
 class MDImplicitFunction;
-}
+} // namespace Geometry
 namespace VATES {
 
 /** @class vtkDataSetToImplicitFunction
@@ -54,7 +54,7 @@ public:
 private:
   vtkDataSet *m_dataset;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

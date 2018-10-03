@@ -3,13 +3,13 @@
 //----------------------
 #include "Background.h"
 #include "MantidAPI/FrameworkManager.h"
-#include <QLabel>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QDoubleValidator>
 #include <QCloseEvent>
+#include <QDoubleValidator>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
 #include <QShowEvent>
+#include <QVBoxLayout>
 
 #include <QMessageBox>
 

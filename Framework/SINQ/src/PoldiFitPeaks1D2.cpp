@@ -1,14 +1,14 @@
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
-#include "MantidSINQ/PoldiFitPeaks1D2.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidSINQ/PoldiFitPeaks1D2.h"
 
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
@@ -16,8 +16,8 @@
 #include "MantidAPI/CompositeFunction.h"
 #include <boost/make_shared.hpp>
 
-#include <functional>
 #include <boost/math/distributions/normal.hpp>
+#include <functional>
 
 namespace Mantid {
 namespace Poldi {
@@ -231,9 +231,9 @@ PoldiFitPeaks1D2::getRangeProfile(const RefinedRange_sptr &range, int n) const {
   }
 
   totalProfile->addFunction(FunctionFactory::Instance().createInitialized(
-      "name=Chebyshev,n=" + std::to_string(n) + ",StartX=" +
-      boost::lexical_cast<std::string>(range->getXStart()) + ",EndX=" +
-      boost::lexical_cast<std::string>(range->getXEnd())));
+      "name=Chebyshev,n=" + std::to_string(n) +
+      ",StartX=" + boost::lexical_cast<std::string>(range->getXStart()) +
+      ",EndX=" + boost::lexical_cast<std::string>(range->getXEnd())));
 
   return totalProfile;
 }

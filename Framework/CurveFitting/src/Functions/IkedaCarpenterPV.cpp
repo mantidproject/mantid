@@ -2,24 +2,22 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/IkedaCarpenterPV.h"
-#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidCurveFitting/SpecialFunctionSupport.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
-#include "MantidKernel/UnitFactory.h"
-#include <cmath>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_sf_erf.h>
-#include <gsl/gsl_multifit_nlin.h>
-#include <limits>
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/SpecialFunctionSupport.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
+#include <cmath>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_sf_erf.h>
 #include <limits>
 
 namespace Mantid {
@@ -31,7 +29,7 @@ using namespace CurveFitting;
 namespace {
 /// static logger
 Kernel::Logger g_log("IkedaCarpenterPV");
-}
+} // namespace
 
 using namespace Kernel;
 
@@ -102,9 +100,10 @@ void IkedaCarpenterPV::setFwhm(const double w) {
 void IkedaCarpenterPV::setCentre(const double c) { setParameter("X0", c); }
 
 void IkedaCarpenterPV::init() {
-  declareParameter("I", 0.0, "The integrated intensity of the peak. I.e. "
-                             "approximately equal to HWHM times height of "
-                             "peak");
+  declareParameter("I", 0.0,
+                   "The integrated intensity of the peak. I.e. "
+                   "approximately equal to HWHM times height of "
+                   "peak");
   this->lowerConstraint0("I");
   declareParameter("Alpha0", 1.6, "Used to model fast decay constant");
   this->lowerConstraint0("Alpha0");
@@ -287,14 +286,16 @@ void IkedaCarpenterPV::constFunction(double *out, const double *xValues,
 
     double N = 0.25 * alpha * (1 - k * k) / (k * k);
 
-    out[i] = I * N * ((1 - eta) * (Nu * exp(u + gsl_sf_log_erfc(yu)) +
-                                   Nv * exp(v + gsl_sf_log_erfc(yv)) +
-                                   Ns * exp(s + gsl_sf_log_erfc(ys)) +
-                                   Nr * exp(r + gsl_sf_log_erfc(yr))) -
-                      eta * 2.0 / M_PI * (Nu * exponentialIntegral(zu).imag() +
-                                          Nv * exponentialIntegral(zv).imag() +
-                                          Ns * exponentialIntegral(zs).imag() +
-                                          Nr * exponentialIntegral(zr).imag()));
+    out[i] = I * N *
+             ((1 - eta) * (Nu * exp(u + gsl_sf_log_erfc(yu)) +
+                           Nv * exp(v + gsl_sf_log_erfc(yv)) +
+                           Ns * exp(s + gsl_sf_log_erfc(ys)) +
+                           Nr * exp(r + gsl_sf_log_erfc(yr))) -
+              eta * 2.0 / M_PI *
+                  (Nu * exponentialIntegral(zu).imag() +
+                   Nv * exponentialIntegral(zv).imag() +
+                   Ns * exponentialIntegral(zs).imag() +
+                   Nr * exponentialIntegral(zr).imag()));
   }
 }
 
@@ -369,14 +370,16 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues,
 
     double N = 0.25 * alpha * (1 - k * k) / (k * k);
 
-    out[i] = I * N * ((1 - eta) * (Nu * exp(u + gsl_sf_log_erfc(yu)) +
-                                   Nv * exp(v + gsl_sf_log_erfc(yv)) +
-                                   Ns * exp(s + gsl_sf_log_erfc(ys)) +
-                                   Nr * exp(r + gsl_sf_log_erfc(yr))) -
-                      eta * 2.0 / M_PI * (Nu * exponentialIntegral(zu).imag() +
-                                          Nv * exponentialIntegral(zv).imag() +
-                                          Ns * exponentialIntegral(zs).imag() +
-                                          Nr * exponentialIntegral(zr).imag()));
+    out[i] = I * N *
+             ((1 - eta) * (Nu * exp(u + gsl_sf_log_erfc(yu)) +
+                           Nv * exp(v + gsl_sf_log_erfc(yv)) +
+                           Ns * exp(s + gsl_sf_log_erfc(ys)) +
+                           Nr * exp(r + gsl_sf_log_erfc(yr))) -
+              eta * 2.0 / M_PI *
+                  (Nu * exponentialIntegral(zu).imag() +
+                   Nv * exponentialIntegral(zv).imag() +
+                   Ns * exponentialIntegral(zs).imag() +
+                   Nr * exponentialIntegral(zr).imag()));
   }
 }
 

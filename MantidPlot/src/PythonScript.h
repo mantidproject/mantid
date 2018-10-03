@@ -29,15 +29,12 @@
 #ifndef PYTHON_SCRIPT_H
 #define PYTHON_SCRIPT_H
 
-// Python headers have to go first!
-#include "MantidQtWidgets/Common/PythonSystemHeader.h"
-#include "MantidQtWidgets/Common/PythonThreading.h"
-
-#include "Script.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "Script.h"
 
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
 
 class ScriptingEnv;
 class PythonScripting;
@@ -125,14 +122,14 @@ private:
     }
 
     void appendPath(const QString &path) {
-      ScopedPythonGIL lock;
+      Mantid::PythonInterface::GlobalInterpreterLock lock;
       QString code = "if r'%1' not in sys.path:\n"
                      "    sys.path.append(r'%1')";
       code = code.arg(path);
       PyRun_SimpleString(code.toAscii().constData());
     }
     void removePath(const QString &path) {
-      ScopedPythonGIL lock;
+      Mantid::PythonInterface::GlobalInterpreterLock lock;
       QString code = "if r'%1' in sys.path:\n"
                      "    sys.path.remove(r'%1')";
       code = code.arg(path);
@@ -144,7 +141,6 @@ private:
   };
 
   inline PythonScripting *interp() const { return m_interp; }
-  PythonGIL &gil() const;
   void initialize(const QString &name, QObject *context);
   void beginStdoutRedirect();
   void endStdoutRedirect();
@@ -165,7 +161,7 @@ private:
   //        mantidplot.runPythonScript('test=CreateSampleWorkspace()', True)
   //
   // To circumvent this we must release the GIL on the main thread
-  // before starting the async thread and then reaquire it when that thread
+  // before starting the async thread and then reacquire it when that thread
   // has finished and the main thread must keep executing. These methods
   // are used for this purpose and are NOT used by the general executeAsync
   // methods where the GILState API functions can cope and there is no
@@ -208,7 +204,7 @@ private:
   PythonPathHolder m_pathHolder;
   /// This must only be used by the recursiveAsync* methods
   /// as they need to store state between calls.
-  PythonGIL m_recursiveAsyncGIL;
+  PyGILState_STATE m_recursiveAsyncGIL;
 };
 
 #endif

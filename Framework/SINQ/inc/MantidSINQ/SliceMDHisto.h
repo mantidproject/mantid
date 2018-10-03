@@ -28,10 +28,10 @@
 #ifndef SLICEMDHISTO_H_
 #define SLICEMDHISTO_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidSINQ/DllConfig.h"
 
 class MANTID_SINQ_DLL SliceMDHisto : public Mantid::API::Algorithm {
 public:

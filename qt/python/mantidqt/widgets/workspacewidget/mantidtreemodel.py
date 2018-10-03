@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import)
 
-from mantidqt.utils.qt import import_qtlib
+from mantidqt.utils.qt import import_qt
 
 
-MantidTreeModel = import_qtlib('_widgetscore', 'mantidqt.widgets.workspacewidgets', 'MantidTreeModel')
+MantidTreeModel = import_qt('.._common', 'mantidqt.widgets.workspacewidget', 'MantidTreeModel')

@@ -31,7 +31,7 @@ Settings passed to :ref:`GSASIIRefineFitPeaks
 - **XMin** - the minimum TOF value used for refinement. Note this may
   not be the same as the **XMin** that you passed to
   GSASIIRefineFitPeaks, as **XMin** in GSASIIRefineFitPeaks will be
-  overriden by **PawleyDMin** if the latter corresponds to a greater
+  overridden by **PawleyDMin** if the latter corresponds to a greater
   TOF value
 - **XMax** - the maximum TOF value used for refinement
 

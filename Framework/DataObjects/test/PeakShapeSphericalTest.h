@@ -14,8 +14,8 @@
 #include <json/json.h>
 
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/V3D.h"
 
 using Mantid::DataObjects::PeakShapeSpherical;
 using namespace Mantid::Kernel;

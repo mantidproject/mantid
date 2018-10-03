@@ -4,17 +4,17 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QList>
 #include <QMap>
 #include <QString>
-#include <QGroupBox>
 #include <QVBoxLayout>
 #include <QValidator>
 
@@ -451,6 +451,6 @@ private:
   QHBoxLayout *m_buttonBox;
   QVBoxLayout *m_outer;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDWSINDEXDIALOG_H_

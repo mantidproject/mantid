@@ -1,5 +1,5 @@
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IndirectSimulationTab.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 using namespace Mantid::API;
 
@@ -15,5 +15,5 @@ IndirectSimulationTab::IndirectSimulationTab(QWidget *parent)
 /** Destructor
  */
 IndirectSimulationTab::~IndirectSimulationTab() {}
-}
+} // namespace CustomInterfaces
 } // namespace MantidQt

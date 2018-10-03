@@ -12,7 +12,7 @@ enum SpecialCoordinateSystem {
   QSample = 2,
   HKL = 3
 }; // Do NOT alter existing values
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif

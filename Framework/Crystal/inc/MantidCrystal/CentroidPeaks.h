@@ -2,9 +2,9 @@
 #define MANTID_CRYSTAL_CENTROIDPEAKS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -51,7 +51,7 @@ private:
   Mantid::detid2index_map wi_to_detid_map;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_CENTROIDPEAKS_H_ */

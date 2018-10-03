@@ -1,8 +1,8 @@
 #ifndef MANTID_CONFIGOBSERVERTEST_H_
 #define MANTID_CONFIGOBSERVERTEST_H_
 
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ConfigObserver.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 
 #include <cxxtest/TestSuite.h>
@@ -49,14 +49,14 @@ public:
     auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 2;
     auto observer = makeMockObserver(
         [&callCount](const std::string &name, const std::string &newValue,
-                     const std::string &prevValue, ConfigObserver *self)
-            -> void {
-              UNUSED_ARG(name);
-              UNUSED_ARG(newValue);
-              UNUSED_ARG(prevValue);
-              UNUSED_ARG(self);
-              callCount++;
-            });
+                     const std::string &prevValue,
+                     ConfigObserver *self) -> void {
+          UNUSED_ARG(name);
+          UNUSED_ARG(newValue);
+          UNUSED_ARG(prevValue);
+          UNUSED_ARG(self);
+          callCount++;
+        });
     ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
     TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, callCount);
   }

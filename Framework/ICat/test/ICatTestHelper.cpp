@@ -31,4 +31,4 @@ void logout() {
   logoutobj.initialize();
   logoutobj.execute();
 }
-}
+} // namespace ICatTestHelper

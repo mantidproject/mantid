@@ -4,10 +4,10 @@
 //---------------------------------------------------------
 // Includes
 //---------------------------------------------------------
-#include <QTabWidget>
-#include <QDialog>
-#include "Scripted.h"
 #include "Script.h"
+#include "Scripted.h"
+#include <QDialog>
+#include <QTabWidget>
 
 //---------------------------------------------------------
 // Forward declarations

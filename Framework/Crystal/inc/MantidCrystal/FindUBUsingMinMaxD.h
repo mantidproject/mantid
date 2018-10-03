@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_H_
 #define MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {

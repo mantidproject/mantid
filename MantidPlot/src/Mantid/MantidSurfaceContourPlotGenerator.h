@@ -5,13 +5,13 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidMatrix.h"
-#include <MantidQtWidgets/Common/MantidWSIndexDialog.h>
 #include <MantidQtWidgets/Common/MantidDisplayBase.h>
+#include <MantidQtWidgets/Common/MantidWSIndexDialog.h>
 
 /**
-* This utility class generates a surface or contour plot from a group of
-* workspaces.
-*/
+ * This utility class generates a surface or contour plot from a group of
+ * workspaces.
+ */
 class MantidSurfaceContourPlotGenerator {
 public:
   /// Constructor
@@ -22,15 +22,15 @@ public:
   void plotSurface(bool accepted, int plotIndex, const QString &axisName,
                    const QString &logName,
                    const std::set<double> &customLogValues,
-                   const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &
-                       workspaces) const;
+                   const std::vector<Mantid::API::MatrixWorkspace_const_sptr>
+                       &workspaces) const;
 
   /// Plots a contour plot from the given workspace group
   void plotContour(bool accepted, int plotIndex, const QString &axisName,
                    const QString &logName,
                    const std::set<double> &customLogValues,
-                   const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &
-                       workspaces) const;
+                   const std::vector<Mantid::API::MatrixWorkspace_const_sptr>
+                       &workspaces) const;
 
   /// Validates the given options and returns an error string
   static std::string validatePlotOptions(

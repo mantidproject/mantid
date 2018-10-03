@@ -1,8 +1,8 @@
 #include "MantidAPI/CatalogSession.h"
 
-#include <boost/shared_ptr.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/shared_ptr.hpp>
 
 using Mantid::API::CatalogSession;
 using namespace boost::python;

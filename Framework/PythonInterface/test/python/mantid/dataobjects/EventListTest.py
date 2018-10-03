@@ -9,6 +9,12 @@ from mantid.dataobjects import EventList
 
 class EventListTest(unittest.TestCase):
 
+    def createRandomEventList(self, length):
+        el = EventList()
+        for i in range(length):
+            el.addEventQuickly(float(i), DateAndTime(i))
+        return el
+
     def test_event_list_constructor(self):
         el = EventList()
         self.assertEquals(el.getNumberEvents(), 0)
@@ -22,6 +28,32 @@ class EventListTest(unittest.TestCase):
         self.assertEquals(el.getTofs()[0], float(0.123))
         self.assertEquals(el.getPulseTimes()[0], DateAndTime(42))
 
+
+    def test_event_list_iadd(self):
+        left = self.createRandomEventList(10)
+        rght = self.createRandomEventList(20)
+
+        left += rght
+
+        self.assertEquals(left.getEventType(), EventType.TOF)
+        self.assertEquals(rght.getEventType(), EventType.TOF)
+
+        self.assertEquals(left.getNumberEvents(), 30)
+        self.assertEquals(rght.getNumberEvents(), 20)
+
+    def test_event_list_isub(self):
+        left = self.createRandomEventList(10)
+        rght = self.createRandomEventList(20)
+
+        left -= rght
+
+        self.assertEquals(left.getEventType(), EventType.WEIGHTED)
+        self.assertEquals(rght.getEventType(), EventType.TOF)
+
+        self.assertEquals(left.getNumberEvents(), 30)
+        self.assertEquals(rght.getNumberEvents(), 20)
+
+        self.assertEquals(left.integrate(-1.,31., True), -10.)
 
 if __name__ == '__main__':
     unittest.main()

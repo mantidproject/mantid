@@ -2,8 +2,8 @@
 #define MANTID_DATAHANDLING_LOADDETECTORINFO_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 namespace Mantid {
 namespace DataHandling {

@@ -12,7 +12,7 @@ namespace Kernel {
 namespace Units {
 class Label;
 }
-}
+} // namespace Kernel
 
 namespace Algorithms {
 /** This algorithm permits the linearisation of reduced SANS data by applying a

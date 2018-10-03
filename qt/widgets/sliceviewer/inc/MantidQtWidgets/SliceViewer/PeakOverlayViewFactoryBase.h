@@ -54,7 +54,7 @@ public:
   std::string getPlotXLabel() const override;
   std::string getPlotYLabel() const override;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /*MANTID_SLICEVIEWER_PEAKOVERLAYVIEWFACTORYBASE_H_*/

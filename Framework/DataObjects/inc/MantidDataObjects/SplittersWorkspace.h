@@ -2,8 +2,8 @@
 #define MANTID_DATAOBJECTS_SPLITTERSWORKSPACE_H_
 
 #include "MantidAPI/ISplittersWorkspace.h"
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/TimeSplitter.h"
 
 #ifdef _MSC_VER
 #pragma warning(                                                               \

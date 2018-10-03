@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/MaskSpectra.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/Algorithm.tcc"
-#include "MantidAPI/SpectrumInfo.h"
 
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
@@ -58,7 +58,7 @@ MatrixWorkspace_sptr runMaskSpectra(MatrixWorkspace_sptr inputWS) {
   MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
   return outputWS;
 }
-}
+} // namespace
 
 class MaskSpectraTest : public CxxTest::TestSuite {
 public:

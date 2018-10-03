@@ -11,9 +11,9 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+using Mantid::CurveFitting::Functions::PawleyFunction;
 using Mantid::CurveFitting::Functions::PawleyParameterFunction;
 using Mantid::CurveFitting::Functions::PawleyParameterFunction_sptr;
-using Mantid::CurveFitting::Functions::PawleyFunction;
 
 class PawleyFunctionTest : public CxxTest::TestSuite {
 public:

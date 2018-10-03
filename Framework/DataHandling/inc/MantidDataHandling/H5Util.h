@@ -3,9 +3,9 @@
 
 #include "MantidDataHandling/DllConfig.h"
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 // forward declarations
 namespace H5 {
@@ -15,7 +15,7 @@ class DSetCreatPropList;
 class DataType;
 class Group;
 class H5File;
-}
+} // namespace H5
 
 namespace Mantid {
 namespace DataHandling {

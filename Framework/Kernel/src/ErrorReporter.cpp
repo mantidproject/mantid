@@ -3,11 +3,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/InternetHelper.h"
-#include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/ParaViewVersion.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/ParaViewVersion.h"
 
 #include <Poco/ActiveResult.h>
 
@@ -19,48 +19,52 @@ namespace Kernel {
 namespace {
 /// static logger
 Logger g_log("ErrorReporter");
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 // Constructor for ErrorReporter
 /** Constructor
-*/
+ */
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share)
-    : ErrorReporter(application, upTime, exitCode, share, "", "") {}
+    : ErrorReporter(application, upTime, exitCode, share, "", "", "") {}
 
 /** Constructor
-*/
+ */
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share, std::string name,
-                             std::string email)
+                             std::string email, std::string textBox)
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
-      m_share(share), m_name(name), m_email(email) {
-  int retval = Mantid::Kernel::ConfigService::Instance().getValue(
-      "errorreports.rooturl", m_url);
-  if (retval == 0) {
+      m_share(share), m_name(name), m_email(email), m_textbox(textBox) {
+  auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
+      "errorreports.rooturl");
+  if (!url.is_initialized()) {
     g_log.debug() << "Failed to load error report url\n";
+  } else {
+    m_url = url.get();
   }
 }
 
 /** Generates an error message and then calls an internet helper to send it
-*/
-void ErrorReporter::sendErrorReport() {
+ */
+int ErrorReporter::sendErrorReport() {
   try {
     std::string message = this->generateErrorMessage();
 
     // send the report
     // Poco::ActiveResult<int> result = m_errorActiveMethod(message);
-    this->sendReport(message, m_url + "/api/error");
+    auto status = this->sendReport(message, m_url + "/api/error");
+    return status;
   } catch (std::exception &ex) {
     g_log.debug() << "Send error report failure. " << ex.what() << '\n';
+    return -1;
   }
 }
 
 /** Generates an error message in json format
-*/
+ */
 std::string ErrorReporter::generateErrorMessage() {
   ::Json::Value message;
 
@@ -100,11 +104,13 @@ std::string ErrorReporter::generateErrorMessage() {
   message["exitCode"] = m_exitCode;
 
   if (m_share) {
+    message["textBox"] = m_textbox;
     message["email"] = m_email;
     message["name"] = m_name;
   } else {
     message["email"] = "";
     message["name"] = "";
+    message["textBox"] = "";
   }
 
   ::Json::FastWriter writer;
@@ -127,7 +133,8 @@ int ErrorReporter::sendReport(const std::string &message,
   } catch (Mantid::Kernel::Exception::InternetError &e) {
     status = e.errorCode();
     g_log.information() << "Call to \"" << url << "\" responded with " << status
-                        << "\n" << e.what() << "\n";
+                        << "\n"
+                        << e.what() << "\n";
   }
 
   return status;

@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
+#include "MantidPythonInterface/core/NDArray.h"
 
 #include <boost/python/extract.hpp>
 
@@ -16,7 +16,6 @@ using boost::python::extract;
 
 namespace Mantid {
 namespace PythonInterface {
-using namespace NumPy;
 
 namespace Converters {
 /**
@@ -35,7 +34,7 @@ PyObjectToMatrix::PyObjectToMatrix(const boost::python::object &p)
     return;
   }
   // Is it a 2D numpy array
-  if (!NumPy::NdArray::check(p)) {
+  if (!NDArray::check(p)) {
     std::ostringstream msg;
     msg << "Cannot convert object to Matrix. Expected numpy array, found "
         << p.ptr()->ob_type->tp_name;
@@ -45,7 +44,8 @@ PyObjectToMatrix::PyObjectToMatrix(const boost::python::object &p)
   if (ndim != 2) {
     std::ostringstream msg;
     msg << "Error converting numpy array to Matrix. Expected ndim=2, found "
-           "ndim=" << ndim << " dimensions.";
+           "ndim="
+        << ndim << " dimensions.";
     throw std::invalid_argument(msg.str());
   }
 }
@@ -74,6 +74,6 @@ Kernel::Matrix<double> PyObjectToMatrix::operator()() {
   }
   return matrix;
 }
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

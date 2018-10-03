@@ -57,7 +57,7 @@ Generating inexplicit filters
 
 * :ref:`algm-FilterEvents` is able to filter neutron events by either
   their pulse times or their absolute times.  An neutron event's
-  abolute time is the summation of its pulse time and TOF.
+  absolute time is the summation of its pulse time and TOF.
 
 * :ref:`algm-FilterByLogValue` and :ref:`algm-FilterByTime` can only
   split neutron events by their pulse time.

@@ -3,15 +3,15 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SetupHFIRReduction.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include <boost/algorithm/string/predicate.hpp>
 #include "MantidKernel/VisibleWhenProperty.h"
+#include <boost/algorithm/string/predicate.hpp>
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
@@ -141,9 +141,10 @@ void SetupHFIRReduction::init() {
   declareProperty(
       "MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
-  declareProperty("UseDefaultDC", true, "If true, the dark current subtracted "
-                                        "from the sample data will also be "
-                                        "subtracted from the flood field.");
+  declareProperty("UseDefaultDC", true,
+                  "If true, the dark current subtracted "
+                  "from the sample data will also be "
+                  "subtracted from the flood field.");
   declareProperty(
       make_unique<API::FileProperty>("SensitivityDarkCurrentFile", "",
                                      API::FileProperty::OptionalLoad, ".xml"),

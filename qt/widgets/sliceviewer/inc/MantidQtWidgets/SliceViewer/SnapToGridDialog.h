@@ -1,9 +1,9 @@
 #ifndef SNAPTOGRIDDIALOG_H
 #define SNAPTOGRIDDIALOG_H
 
-#include <QDialog>
-#include "ui_SnapToGridDialog.h"
 #include "DllOption.h"
+#include "ui_SnapToGridDialog.h"
+#include <QDialog>
 
 /** Dialog that prompts the user
  * to enter the X and Y snap-to

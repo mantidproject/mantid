@@ -2,12 +2,12 @@
 #define MANTID_CRYSTAL_OptimizeLatticeForCellType_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/System.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -72,7 +72,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithm
+} // namespace Crystal
 } // namespace Mantid
 
 #endif /*MANTID_CRYSTAL_OptimizeLatticeForCellType_H_*/

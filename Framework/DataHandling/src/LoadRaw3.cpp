@@ -1,20 +1,20 @@
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "LoadRaw/isisraw2.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/FileProperty.h"
-#include "LoadRaw/isisraw2.h"
-#include "MantidDataHandling/LoadLog.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <boost/shared_ptr.hpp>
 #include <Poco/Path.h>
+#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
 
@@ -313,9 +313,8 @@ void LoadRaw3::excludeMonitors(FILE *file, const int &period,
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     specnum_t histToRead = i + period * (m_numberOfSpectra + 1);
     if ((i >= m_spec_min && i < m_spec_max) ||
-        (m_list &&
-         find(m_spec_list.begin(), m_spec_list.end(), i) !=
-             m_spec_list.end())) {
+        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
+                       m_spec_list.end())) {
       progress(m_prog, "Reading raw file data...");
       // skip monitor spectrum
       if (isMonitor(monitorList, i)) {
@@ -362,9 +361,8 @@ void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + period * (m_numberOfSpectra + 1);
     if ((i >= m_spec_min && i < m_spec_max) ||
-        (m_list &&
-         find(m_spec_list.begin(), m_spec_list.end(), i) !=
-             m_spec_list.end())) {
+        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
+                       m_spec_list.end())) {
       progress(m_prog, "Reading raw file data...");
 
       // read spectrum from raw file
@@ -410,9 +408,8 @@ void LoadRaw3::separateMonitors(FILE *file, const int64_t &period,
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + period * (m_numberOfSpectra + 1);
     if ((i >= m_spec_min && i < m_spec_max) ||
-        (m_list &&
-         find(m_spec_list.begin(), m_spec_list.end(), i) !=
-             m_spec_list.end())) {
+        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
+                       m_spec_list.end())) {
       progress(m_prog, "Reading raw file data...");
 
       // read spectrum from raw file

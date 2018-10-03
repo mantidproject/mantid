@@ -77,7 +77,7 @@ class FocusTest(stresstesting.MantidStressTest):
         self.focus_results = run_focus()
 
     def validate(self):
-        return self.focus_results.getName(), "ISIS_Powder-GEM83605_FocusSempty.nxs"
+        return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty.nxs"
 
     def cleanup(self):
         try:

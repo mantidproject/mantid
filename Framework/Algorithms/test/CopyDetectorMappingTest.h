@@ -1,9 +1,9 @@
 #ifndef COPYDETECTORMAPPINGTEST_H_
 #define COPYDETECTORMAPPINGTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CopyDetectorMapping.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -8,7 +8,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -53,6 +53,6 @@ public:
   MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETVIEWMOCK_H_

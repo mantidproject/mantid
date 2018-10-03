@@ -18,7 +18,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 
@@ -51,7 +51,7 @@ private:
   // fitted peak and background parameters
   std::vector<std::vector<double>> m_function_parameters_vector;
 };
-}
+} // namespace FitPeaksAlgorithm
 
 class DLLExport FitPeaks : public API::Algorithm {
 public:
@@ -207,16 +207,18 @@ private:
       boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
 
   /// calculate peak+background for fitted
-  void calculateFittedPeaks(std::vector<
-      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results);
+  void calculateFittedPeaks(
+      std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+          fit_results);
 
   /// Get the parameter name for peak height (I or height or etc)
   std::string
   getPeakHeightParameterName(API::IPeakFunction_const_sptr peak_function);
 
   /// Set the workspaces and etc to output properties
-  void processOutputs(std::vector<
-      boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_result_vec);
+  void processOutputs(
+      std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+          fit_result_vec);
 
   /// Write result of peak fit per spectrum to output analysis workspaces
   void writeFitResult(

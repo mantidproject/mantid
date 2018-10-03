@@ -4,10 +4,10 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/DateTimeFormatter.h>
-#include <Poco/DateTimeFormat.h>
-#include <Poco/DateTimeParser.h>
 #include <MantidKernel/StringTokenizer.h>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeFormatter.h>
+#include <Poco/DateTimeParser.h>
 
 // jsoncpp
 #include <json/json.h>
@@ -99,8 +99,8 @@ void CheckMantidVersion::exec() {
       // formatting issues like missing quotes or brackets.
       g_log.warning() << "Error found when parsing version information "
                          "retrieved from GitHub as a JSON string. "
-                         "Error trying to parse this JSON string: " << json
-                      << "\n. Parsing error details: "
+                         "Error trying to parse this JSON string: "
+                      << json << "\n. Parsing error details: "
                       << r.getFormattedErrorMessages() << '\n';
     }
 
@@ -138,10 +138,10 @@ void CheckMantidVersion::exec() {
 }
 
 /** Cleans the tag name from github to make it similar to that from
-* MantidVersion
-* @param versionTag the version tag that needs cleaning
-* @returns a clean string
-*/
+ * MantidVersion
+ * @param versionTag the version tag that needs cleaning
+ * @returns a clean string
+ */
 std::string
 CheckMantidVersion::cleanVersionTag(const std::string &versionTag) const {
   std::string retVal = versionTag;
@@ -154,9 +154,9 @@ CheckMantidVersion::cleanVersionTag(const std::string &versionTag) const {
 }
 
 /** splits a . separated version string into a vector of integers
-* @param versionString Something like "2.3.4"
-* @returns a vector of [2,3,4]
-*/
+ * @param versionString Something like "2.3.4"
+ * @returns a vector of [2,3,4]
+ */
 std::vector<int>
 CheckMantidVersion::splitVersionString(const std::string &versionString) const {
   std::vector<int> retVal;
@@ -180,10 +180,10 @@ CheckMantidVersion::splitVersionString(const std::string &versionString) const {
 }
 
 /** Compare two version strings, tests if the gitHubVersion is more recent
-* @param localVersion Something like "2.3.4"
-* @param gitHubVersion Something like "2.3.4"
-* @returns True if gitHubVersion is more recent
-*/
+ * @param localVersion Something like "2.3.4"
+ * @param gitHubVersion Something like "2.3.4"
+ * @returns True if gitHubVersion is more recent
+ */
 bool CheckMantidVersion::isVersionMoreRecent(
     const std::string &localVersion, const std::string &gitHubVersion) const {
   auto localVersionParts = splitVersionString(localVersion);

@@ -38,8 +38,8 @@
 #include "muParserScripting.h"
 #endif
 
-#include "ScriptingEnv.h"
 #include "Script.h"
+#include "ScriptingEnv.h"
 
 #include <cstring>
 

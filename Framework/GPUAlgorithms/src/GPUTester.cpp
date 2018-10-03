@@ -138,14 +138,16 @@ void GPUTester::exec() {
 
   if (result)
     g_log.notice() << "GPUTester runKernel succeeded - the output from the GPU "
-                      "matched the expected values." << std::endl;
+                      "matched the expected values."
+                   << std::endl;
   else
     g_log.notice() << "GPUTester runKernel failed - the output from the GPU "
-                      "did not match the expected values." << std::endl;
+                      "did not match the expected values."
+                   << std::endl;
 
   // Set the output
   setProperty("Result", result);
 }
 
-} // namespace Mantid
 } // namespace GPUAlgorithms
+} // namespace Mantid

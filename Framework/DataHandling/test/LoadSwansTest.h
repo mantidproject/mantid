@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LOADSWANSTEST_H_
 #define MANTID_DATAHANDLING_LOADSWANSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataHandling/LoadSwans.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/LoadSwans.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include <Poco/TemporaryFile.h>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::DataHandling::LoadSwans;
 

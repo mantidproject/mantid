@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/IdentifyNoisyDetectors.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

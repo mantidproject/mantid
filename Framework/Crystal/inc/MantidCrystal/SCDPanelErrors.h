@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/System.h"
 #include <cmath>
 
 namespace Mantid {

@@ -72,7 +72,7 @@ private:
   int m_nYPixel;
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_RefRoi_H_*/

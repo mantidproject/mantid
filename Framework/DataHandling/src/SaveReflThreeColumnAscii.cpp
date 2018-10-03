@@ -1,10 +1,8 @@
 #include "MantidDataHandling/SaveReflThreeColumnAscii.h"
-#include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidKernel/ArrayProperty.h"
-
-#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -44,16 +42,12 @@ void SaveReflThreeColumnAscii::extraHeaders(std::ofstream &file) {
 
 /** virtual method to add information to the file before the data
  *  @param file :: pointer to output file stream
- *  @param XData :: pointer to a std::vector<double> containing the point data
- * to be printed
  *  @param exportDeltaQ :: bool on whether deltaQ column to be printed
  * (permanantly false in this case)
  */
-void SaveReflThreeColumnAscii::data(std::ofstream &file,
-                                    const std::vector<double> &XData,
-                                    bool exportDeltaQ) {
+void SaveReflThreeColumnAscii::data(std::ofstream &file, bool exportDeltaQ) {
   exportDeltaQ = false;
-  AsciiPointBase::data(file, XData, exportDeltaQ);
+  AsciiPointBase::data(file, exportDeltaQ);
 }
 
 } // namespace DataHandling

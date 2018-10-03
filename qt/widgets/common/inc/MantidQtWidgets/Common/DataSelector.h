@@ -52,34 +52,34 @@ class EXPORT_OPT_MANTIDQT_COMMON DataSelector : public API::MantidWidget {
   Q_OBJECT
 
   // These are properties of the file browser sub-widget
-  Q_PROPERTY(QStringList fileBrowserSuffixes READ getFBSuffixes WRITE
-                 setFBSuffixes)
+  Q_PROPERTY(
+      QStringList fileBrowserSuffixes READ getFBSuffixes WRITE setFBSuffixes)
   Q_PROPERTY(bool showLoad READ willShowLoad WRITE setShowLoad)
   Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE
                  setInstrumentOverride)
-  Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE
-                 allowMultipleFiles)
+  Q_PROPERTY(
+      bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
   Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)
   Q_PROPERTY(bool findDirectory READ isForDirectory WRITE isForDirectory)
   Q_PROPERTY(QString label READ getLabelText WRITE setLabelText)
   Q_PROPERTY(bool multiEntry READ doMultiEntry WRITE doMultiEntry)
   Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE
                  setAlgorithmProperty)
-  Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE
-                 extsAsSingleOption)
+  Q_PROPERTY(
+      bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
   Q_PROPERTY(ButtonOpts buttonOpts READ doButtonOpt WRITE doButtonOpt)
-  Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE
-                 liveButtonState)
+  Q_PROPERTY(
+      LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
   Q_ENUMS(ButtonOpts)
   Q_ENUMS(LiveButtonOpts)
 
   // These are properties of the workspace selector sub-widget
-  Q_PROPERTY(QStringList workspaceSuffixes READ getWSSuffixes WRITE
-                 setWSSuffixes)
-  Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE
-                 setWorkspaceTypes)
-  Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE
-                 showHiddenWorkspaces)
+  Q_PROPERTY(
+      QStringList workspaceSuffixes READ getWSSuffixes WRITE setWSSuffixes)
+  Q_PROPERTY(
+      QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
+  Q_PROPERTY(
+      bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
   Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
   Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE
                  setValidatingAlgorithm)
@@ -130,34 +130,35 @@ public:
 
   // These are accessors/modifiers of the child MWRunFiles
   /**
-  * Return whether this widget allows multiple files to be specified within the
-  * edit box
-  * @returns True if multiple files can be specified, false otherwise
-  */
+   * Return whether this widget allows multiple files to be specified within the
+   * edit box
+   * @returns True if multiple files can be specified, false otherwise
+   */
   bool allowMultipleFiles() const {
     return m_uiForm.rfFileInput->allowMultipleFiles();
   }
 
   /**
-  * Set whether this widget allows multiple files to be specifed or not
-  * @param allow :: If true then the widget will accept multiple files else only
-  * a
-  * single file may be specified
-  */
+   * Set whether this widget allows multiple files to be specifed or not
+   * @param allow :: If true then the widget will accept multiple files else
+   * only
+   * a
+   * single file may be specified
+   */
   void allowMultipleFiles(const bool allow) {
     m_uiForm.rfFileInput->allowMultipleFiles(allow);
   }
 
   /**
-  * Returns if this widget is for run file searching or not
-  * @returns True if this widget searches for run files, false otherwise
-  */
+   * Returns if this widget is for run file searching or not
+   * @returns True if this widget searches for run files, false otherwise
+   */
   bool isForRunFiles() const { return m_uiForm.rfFileInput->isForRunFiles(); }
 
   /**
-  * Sets whether this widget is for run file searching or not
-  * @param mode :: True if this widget searches for run files, false otherwise
-  */
+   * Sets whether this widget is for run file searching or not
+   * @param mode :: True if this widget searches for run files, false otherwise
+   */
   void isForRunFiles(const bool mode) {
     m_uiForm.rfFileInput->isForRunFiles(mode);
   }
@@ -177,47 +178,47 @@ public:
   }
 
   /**
-  * Return the label text on the widget
-  * @returns The current value of the text on the label
-  */
+   * Return the label text on the widget
+   * @returns The current value of the text on the label
+   */
   QString getLabelText() const { return m_uiForm.rfFileInput->getLabelText(); }
 
   /**
-  * Set the text on the label
-  * @param text :: A string giving the label to use for the text
-  */
+   * Set the text on the label
+   * @param text :: A string giving the label to use for the text
+   */
   void setLabelText(const QString &text) {
     m_uiForm.rfFileInput->setLabelText(text);
   }
 
   /**
-  * Whether to find the number of entries in the file or assume (the
-  * normal situation) of one entry
-  * @return true if the widget is to look for multiple entries
-  */
+   * Whether to find the number of entries in the file or assume (the
+   * normal situation) of one entry
+   * @return true if the widget is to look for multiple entries
+   */
   bool doMultiEntry() const { return m_uiForm.rfFileInput->doMultiEntry(); }
 
   /**
-  * Set to true to enable the period number box
-  * @param multiEntry whether to show the multiperiod box
-  */
+   * Set to true to enable the period number box
+   * @param multiEntry whether to show the multiperiod box
+   */
   void doMultiEntry(const bool multiEntry) {
     m_uiForm.rfFileInput->doMultiEntry(multiEntry);
   }
 
   /**
-  * Returns the algorithm name
-  * @returns The algorithm name
-  */
+   * Returns the algorithm name
+   * @returns The algorithm name
+   */
   QString getAlgorithmProperty() const {
     return m_uiForm.rfFileInput->getAlgorithmProperty();
   }
 
   /**
-  * Sets an algorithm name that can be tied to this widget
-  * @param text :: The name of the algorithm and property in the form
-  * [AlgorithmName|PropertyName]
-  */
+   * Sets an algorithm name that can be tied to this widget
+   * @param text :: The name of the algorithm and property in the form
+   * [AlgorithmName|PropertyName]
+   */
   void setAlgorithmProperty(const QString &text) {
     m_uiForm.rfFileInput->setAlgorithmProperty(text);
   }
@@ -278,26 +279,26 @@ public:
   }
 
   /**
-  * Returns the preference for how the dialog control should be
-  * @return the setting
-  */
+   * Returns the preference for how the dialog control should be
+   * @return the setting
+   */
   ButtonOpts doButtonOpt() const { return m_uiForm.rfFileInput->doButtonOpt(); }
 
   /**
-  * Set how the browse should appear
-  * @param buttonOpt :: the preference for the control, if there will be one, to
-  * activate the dialog box
-  */
+   * Set how the browse should appear
+   * @param buttonOpt :: the preference for the control, if there will be one,
+   * to activate the dialog box
+   */
 
   void doButtonOpt(const ButtonOpts buttonOpt) {
     m_uiForm.rfFileInput->doButtonOpt(buttonOpt);
   }
 
   /**
-  * Gets the live button state
-  *
-  * @return live button option
-  */
+   * Gets the live button state
+   *
+   * @return live button option
+   */
   LiveButtonOpts liveButtonState() const {
     return m_uiForm.rfFileInput->liveButtonState();
   }

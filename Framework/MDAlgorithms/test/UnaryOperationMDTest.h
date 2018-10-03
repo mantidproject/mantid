@@ -23,11 +23,11 @@ using namespace testing;
 
 class MockUnaryOperationMD : public UnaryOperationMD {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(execEvent, void(Mantid::API::IMDEventWorkspace_sptr));
   MOCK_METHOD0(checkInputs, void());
   MOCK_METHOD1(execHisto, void(Mantid::DataObjects::MDHistoWorkspace_sptr));
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
   void exec() override { UnaryOperationMD::exec(); }
 };
 

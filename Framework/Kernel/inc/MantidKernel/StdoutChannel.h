@@ -38,5 +38,5 @@ public:
   /// Constructor for StdChannel
   StdoutChannel();
 };
-}
+} // namespace Poco
 #endif // STDOUTCHANNEL_H

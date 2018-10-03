@@ -2,12 +2,12 @@
 #define MANTID_MDALGORITHMS_INTEGRATEPEAKSMDHKL_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -57,7 +57,7 @@ private:
                      double &errorSquared);
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMDHKL_H_ */

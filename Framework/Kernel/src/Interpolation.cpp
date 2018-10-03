@@ -12,7 +12,7 @@ namespace Kernel {
 namespace {
 /// static logger
 Logger g_log("Interpolation");
-}
+} // namespace
 
 /* Functor for findIndexOfNextLargerValue, used in std::lower_bound to replicate
    the original behavior.
@@ -51,9 +51,9 @@ void Interpolation::setYUnit(const std::string &unit) {
 }
 
 /** Get interpolated value at location at
-* @param at :: Location where to get interpolated value
-* @return the value
-*/
+ * @param at :: Location where to get interpolated value
+ * @return the value
+ */
 double Interpolation::value(const double &at) const {
   size_t N = m_x.size();
 
@@ -74,28 +74,26 @@ double Interpolation::value(const double &at) const {
   }
 
   if (at >= m_x[N - 1]) {
-    return m_y[N - 1] +
-           (at - m_x[N - 1]) * (m_y[N - 1] - m_y[N - 2]) /
-               (m_x[N - 1] - m_x[N - 2]);
+    return m_y[N - 1] + (at - m_x[N - 1]) * (m_y[N - 1] - m_y[N - 2]) /
+                            (m_x[N - 1] - m_x[N - 2]);
   }
 
   try {
     // otherwise
     // General case. Find index of next largest value by std::lower_bound.
     size_t idx = findIndexOfNextLargerValue(m_x, at);
-    return m_y[idx - 1] +
-           (at - m_x[idx - 1]) * (m_y[idx] - m_y[idx - 1]) /
-               (m_x[idx] - m_x[idx - 1]);
+    return m_y[idx - 1] + (at - m_x[idx - 1]) * (m_y[idx] - m_y[idx - 1]) /
+                              (m_x[idx] - m_x[idx - 1]);
   } catch (const std::range_error &) {
     return 0.0;
   }
 }
 
 /** Add point in the interpolation.
-*
-* @param xx :: x-value
-* @param yy :: y-value
-*/
+ *
+ * @param xx :: x-value
+ * @param yy :: y-value
+ */
 void Interpolation::addPoint(const double &xx, const double &yy) {
   size_t N = m_x.size();
   std::vector<double>::iterator it;

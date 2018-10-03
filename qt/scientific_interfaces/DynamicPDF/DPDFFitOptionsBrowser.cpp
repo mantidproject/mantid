@@ -2,8 +2,8 @@
 // Mantid Headers from the same project
 #include "DPDFFitOptionsBrowser.h"
 // Mantid headers from other projects
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 // 3rd party library headers
 #include "MantidKernel/Logger.h"
 // System headers
@@ -55,6 +55,6 @@ void DPDFFitOptionsBrowser::customizeBrowser() {
   this->setProperty("CreateOutput", "true");
 }
 
-} // DynamicPDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

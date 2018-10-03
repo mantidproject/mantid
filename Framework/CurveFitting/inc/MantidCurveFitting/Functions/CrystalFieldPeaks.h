@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_
 
-#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
 #include "MantidAPI/IFunctionGeneral.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
 
 namespace Mantid {
 namespace CurveFitting {

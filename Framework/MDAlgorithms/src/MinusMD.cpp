@@ -138,5 +138,5 @@ void MinusMD::execHistoScalar(
   out->subtract(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

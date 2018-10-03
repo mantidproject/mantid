@@ -1,13 +1,13 @@
 #ifndef _vtkMDEWNexusReader_h
 #define _vtkMDEWNexusReader_h
-#include "vtkUnstructuredGridAlgorithm.h"
-#include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
-#include "MantidMDAlgorithms/WidthParameter.h"
-#include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidMDAlgorithms/WidthParameter.h"
+#include "MantidVatesAPI/EscalatingRebinningActionManager.h"
+#include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
+#include "MantidVatesAPI/ThresholdRange.h"
+#include "vtkUnstructuredGridAlgorithm.h"
 
 class vtkImplicitFunction;
 class VTK_EXPORT vtkMDEWNexusReader : public vtkUnstructuredGridAlgorithm {
@@ -133,7 +133,8 @@ private:
   /// Converts dimension objects into well-formed xml describing the overall
   /// geometry
   Mantid::Geometry::MDGeometryBuilderXML<
-      Mantid::Geometry::StrictDimensionPolicy> m_geometryXmlBuilder;
+      Mantid::Geometry::StrictDimensionPolicy>
+      m_geometryXmlBuilder;
 
   /// Sets the rebinning action to rebin if the number of bins has changed on a
   /// dimension.

@@ -7,8 +7,8 @@
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "Script.h"
 
-#include <boost/optional.hpp>
 #include <QMainWindow>
+#include <boost/optional.hpp>
 
 //----------------------------------------------------------
 // Forward declarations
@@ -25,7 +25,7 @@ class QShowEvent;
 class QHideEvent;
 
 /** @class ScriptingWindow
-    This class displays a seperate window for editing and executing scripts
+    This class displays a separate window for editing and executing scripts
 */
 class ScriptingWindow : public QMainWindow {
   /// Qt macro

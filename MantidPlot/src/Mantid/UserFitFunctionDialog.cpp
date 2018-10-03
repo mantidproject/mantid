@@ -5,8 +5,8 @@
 #include "UserFitFunctionDialog.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include <qcheckbox.h>
-#include <qmessagebox.h>
 #include <qheaderview.h>
+#include <qmessagebox.h>
 
 //---------------------------------------
 // Public member functions
@@ -43,7 +43,7 @@ void UserFitFunctionDialog::addFunction(const QString &op, bool brackets) {
   QTreeWidgetItem *parentItem = item->parent();
 
   if (parentItem == nullptr)
-    return; // this sould never happen, just in case
+    return; // this should never happen, just in case
 
   if (parentItem->parent() != nullptr)
     item = parentItem;

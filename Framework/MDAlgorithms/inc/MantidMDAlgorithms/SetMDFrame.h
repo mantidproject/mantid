@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_SetMDFrame_H_
 #define MANTID_MDALGORITHMS_SetMDFrame_H_
 
-#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

@@ -11,7 +11,7 @@ Description
 
 This algorithm is designed to normalise a workspace via detector
 efficiency functions. **For this algorithm to work, the Instrument
-Defintion File `IDF <http://www.mantidproject.org/IDF>`_ must have fitting functions on the
+Definition File `IDF <http://www.mantidproject.org/IDF>`_ must have fitting functions on the
 component tree**. The setup information for this, as well as some
 examples, are provided below.
 
@@ -50,7 +50,7 @@ components, mean that fitting functions do not necessarily have to be
 assigned on a detector-by-detector basis. Applying a fit function to the
 instrument, will ensure that all subcomponents (including detectors),
 pick-up that function. However, functions assigned to lower-level
-components (such as detectors) take precidence over and exising
+components (such as detectors) take precedence over and existing
 functions that might exist on parent components (such as the
 instrument). You can even, have some parameters for a function provided
 against the detector, and pick up defaults from the bank, or instrument

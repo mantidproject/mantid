@@ -1,13 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/ApodizationFunctions.h"
 #include "MantidAlgorithms/PaddingAndApodization.h"
+#include "MantidAlgorithms/ApodizationFunctions.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -127,11 +127,11 @@ void PaddingAndApodization::exec() {
 
 using fptr = double (*)(const double, const double);
 /**
-* Gets a pointer to the relevant
-* apodization function
-* @param method :: [input] The name of the chosen function
-* @returns :: pointer to the function
-*/
+ * Gets a pointer to the relevant
+ * apodization function
+ * @param method :: [input] The name of the chosen function
+ * @returns :: pointer to the function
+ */
 fptr PaddingAndApodization::getApodizationFunction(const std::string method) {
   if (method == "None") {
     return ApodizationFunctions::none;
@@ -144,12 +144,12 @@ fptr PaddingAndApodization::getApodizationFunction(const std::string method) {
                               " is not a valid option");
 }
 /**
-* Applies the appodization function to the data.
-* @param histogram :: [input] Input histogram.
-* @param function :: [input] the apodization function
-* @param decayConstant :: [input] the decay constant for apodization function
-* @returns :: Histogram of the apodized data
-*/
+ * Applies the appodization function to the data.
+ * @param histogram :: [input] Input histogram.
+ * @param function :: [input] the apodization function
+ * @param decayConstant :: [input] the decay constant for apodization function
+ * @returns :: Histogram of the apodized data
+ */
 HistogramData::Histogram PaddingAndApodization::applyApodizationFunction(
     const HistogramData::Histogram &histogram, const double decayConstant,
     fptr function) {
@@ -167,14 +167,14 @@ HistogramData::Histogram PaddingAndApodization::applyApodizationFunction(
   return result;
 }
 /**
-* Adds padding to the data. The padding is
-* an integer multiple of the original data set.
-* i.e. padding =0 => none
-* padding = 2 => 2/3 of the output will be zero.
-* @param histogram :: [input] Input histogram
-* @param padding :: [input] the amount of padding to add
-* @returns :: Histogram of the padded data
-*/
+ * Adds padding to the data. The padding is
+ * an integer multiple of the original data set.
+ * i.e. padding =0 => none
+ * padding = 2 => 2/3 of the output will be zero.
+ * @param histogram :: [input] Input histogram
+ * @param padding :: [input] the amount of padding to add
+ * @returns :: Histogram of the padded data
+ */
 HistogramData::Histogram
 PaddingAndApodization::addPadding(const HistogramData::Histogram &histogram,
                                   const int padding) {
@@ -235,5 +235,5 @@ PaddingAndApodization::addPadding(const HistogramData::Histogram &histogram,
   return result;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

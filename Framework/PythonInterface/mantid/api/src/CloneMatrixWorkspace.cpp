@@ -15,8 +15,8 @@
 
 namespace Mantid {
 namespace PythonInterface {
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_sptr;
 
 // ----------------------------------------------------------------------------------------------------------
 namespace {
@@ -74,7 +74,7 @@ PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
   }
   return nparray;
 }
-}
+} // namespace
 
 // -------------------------------------- Cloned
 // arrays---------------------------------------------------
@@ -116,5 +116,5 @@ PyObject *cloneDx(MatrixWorkspace &self) {
   return reinterpret_cast<PyObject *>(
       cloneArray(self, DxValues, 0, self.getNumberHistograms()));
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

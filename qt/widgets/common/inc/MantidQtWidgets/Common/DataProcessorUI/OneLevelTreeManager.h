@@ -143,7 +143,7 @@ private:
                      size_t whitelistColumns) const;
   TreeData constructTreeData(std::set<int> rows);
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H*/

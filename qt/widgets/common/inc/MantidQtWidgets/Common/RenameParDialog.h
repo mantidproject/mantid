@@ -1,11 +1,11 @@
 #ifndef MANTIDQTMANTIDWIDGETS_RENAMEPARDIALOG_H_
 #define MANTIDQTMANTIDWIDGETS_RENAMEPARDIALOG_H_
 
-#include "ui_RenameParDialog.h"
 #include "DllOption.h"
+#include "ui_RenameParDialog.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -34,7 +34,7 @@ protected:
   const std::vector<std::string> m_old_params;
   const std::vector<std::string> m_new_params;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_RENAMEPARDIALOG_H_

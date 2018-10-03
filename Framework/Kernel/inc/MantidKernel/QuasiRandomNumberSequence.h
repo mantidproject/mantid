@@ -42,7 +42,7 @@ public:
   QuasiRandomNumberSequence(const unsigned int ndims)
       : NDRandomNumberGenerator(ndims) {}
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_QUASIRANDOMNUMBERSEQUENCE_H_ */

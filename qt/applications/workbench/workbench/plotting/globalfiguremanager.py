@@ -23,6 +23,41 @@ import gc
 # 3rdparty imports
 import six
 
+from mantidqt.py3compat import Enum
+from .observabledictionary import DictionaryAction, ObservableDictionary
+
+
+class FigureAction(Enum):
+    Unknown = 0
+    New = 1
+    Closed = 2
+    Renamed = 3
+    OrderChanged = 4
+    VisibilityChanged = 5
+
+
+class GlobalFigureManagerObserver(object):
+    def notify(self, action, key):
+        """
+        This method is called when a dictionary entry is added,
+        removed or changed
+        :param action: An enum with the type of dictionary action
+        :param key: The key in the dictionary that was changed
+        :param old_value: Old value(s) removed
+        """
+        gcf = GlobalFigureManager
+
+        if action == DictionaryAction.Create:
+            gcf.notify_observers(FigureAction.New, key)
+        elif action == DictionaryAction.Set:
+            gcf.notify_observers(FigureAction.Renamed, key)
+        elif action == DictionaryAction.Removed:
+            gcf.notify_observers(FigureAction.Closed, key)
+        else:
+            # Not expecting clear or update to be used, so we are
+            # being lazy here and just updating the entire plot list
+            gcf.notify_observers(FigureAction.Unknown, key)
+
 
 class GlobalFigureManager(object):
     """
@@ -44,7 +79,8 @@ class GlobalFigureManager(object):
 
     """
     _activeQue = []
-    figs = {}
+    figs = ObservableDictionary({})
+    figs.add_observer(GlobalFigureManagerObserver())
     observers = []
 
     @classmethod
@@ -82,7 +118,7 @@ class GlobalFigureManager(object):
         del cls.figs[num]
         manager.destroy()
         gc.collect(1)
-        cls.notify_observers()
+        cls.notify_observers(FigureAction.OrderChanged, -1)
 
     @classmethod
     def destroy_fig(cls, fig):
@@ -151,7 +187,7 @@ class GlobalFigureManager(object):
                 cls._activeQue.append(m)
         cls._activeQue.append(manager)
         cls.figs[manager.num] = manager
-        cls.notify_observers()
+        cls.notify_observers(FigureAction.OrderChanged, manager.num)
 
     @classmethod
     def draw_all(cls, force=False):
@@ -166,30 +202,22 @@ class GlobalFigureManager(object):
     # ------------------ Our additional interface -----------------
 
     @classmethod
-    def get_figure_number_from_name(cls, figure_title):
+    def last_active_values(cls):
         """
-        Returns the figure number corresponding to the figure title
-        passed in as a string
-        :param figure_title: A String containing the figure title
-        :return: The figure number (int)
+        Returns a dictionary where the keys are the plot numbers and
+        the values are the last shown (active) order, the most recent
+        being 1, the oldest being N, where N is the number of figure
+        managers
+        :return: A dictionary with the values as plot number and keys
+                 as the opening order
         """
-        for num, figure_manager in cls.figs.items():
-            if figure_manager.get_window_title() == figure_title:
-                return num
-        return None
+        last_shown_order_dict = {}
+        num_figure_managers = len(cls._activeQue)
 
-    @classmethod
-    def get_figure_manager_from_name(cls, figure_title):
-        """
-        Returns the figure manager corresponding to the figure title
-        passed in as a string
-        :param figure_title: A String containing the figure title
-        :return: The figure manager
-        """
-        for figure_manager in cls.figs.values():
-            if figure_manager.get_window_title() == figure_title:
-                return figure_manager
-        return None
+        for index in range(num_figure_managers):
+            last_shown_order_dict[cls._activeQue[index].num] = num_figure_managers - index
+
+        return last_shown_order_dict
 
     # ---------------------- Observer methods ---------------------
     # This is currently very simple as the only observer is
@@ -205,11 +233,30 @@ class GlobalFigureManager(object):
         cls.observers.append(observer)
 
     @classmethod
-    def notify_observers(cls):
+    def notify_observers(cls, action, figure_number):
         """
         Calls notify method on all observers
+        :param action: A FigureAction enum for the action called
+        :param figure_number: The unique fig number (key in the dict)
         """
         for observer in cls.observers:
-            observer.notify()
+            observer.notify(action, figure_number)
+
+    @classmethod
+    def figure_title_changed(cls, figure_number):
+        """
+        Notify the observers that a figure title was changed
+        :param figure_number: The unique number in GlobalFigureManager
+        """
+        cls.notify_observers(FigureAction.Renamed, figure_number)
+
+    @classmethod
+    def figure_visibility_changed(cls, figure_number):
+        """
+        Notify the observers that a figure was shown or hidden
+        :param figure_number: The unique number in GlobalFigureManager
+        """
+        cls.notify_observers(FigureAction.VisibilityChanged, figure_number)
+
 
 atexit.register(GlobalFigureManager.destroy_all)

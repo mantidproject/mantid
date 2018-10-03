@@ -11,14 +11,14 @@ namespace Mantid {
 namespace Kernel {
 // Forward dec
 class ProgressBase;
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /**
-* The SearchResult struct provides search metadata information
-*/
+ * The SearchResult struct provides search metadata information
+ */
 struct SearchResult {
   SearchResult() {}
   SearchResult(const std::string &desc, const std::string &loc)
@@ -86,11 +86,11 @@ public:
   }
 
   /**
-  * Filter. Individual transfer strategies may veto file types they
-  * do not understand and will be unable to extract metadata for.
-  * @param filename : Full name of the file.
-  * @return True only if the file type is known.
-  */
+   * Filter. Individual transfer strategies may veto file types they
+   * do not understand and will be unable to extract metadata for.
+   * @param filename : Full name of the file.
+   * @return True only if the file type is known.
+   */
   virtual bool knownFileType(const std::string &filename) const = 0;
 
 private:
@@ -100,7 +100,7 @@ private:
    */
   virtual ReflTransferStrategy *doClone() const = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif

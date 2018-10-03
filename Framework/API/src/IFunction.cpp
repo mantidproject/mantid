@@ -30,9 +30,9 @@
 
 #include <MantidKernel/StringTokenizer.h>
 
+#include <algorithm>
 #include <limits>
 #include <sstream>
-#include <algorithm>
 
 namespace Mantid {
 namespace API {
@@ -41,7 +41,21 @@ using namespace Geometry;
 namespace {
 /// static logger
 Kernel::Logger g_log("IFunction");
-}
+
+/// Struct that helps sort ties in correct order of application.
+struct TieNode {
+  // Index of the tied parameter
+  size_t left;
+  // Indices of parameters on the right-hand-side of the expression
+  std::vector<size_t> right;
+  // This tie must be applied before the other if the RHS of the other
+  // contains this (left) parameter.
+  bool operator<(TieNode const &other) const {
+    return std::find(other.right.begin(), other.right.end(), left) !=
+           other.right.end();
+  }
+};
+} // namespace
 
 /**
  * Destructor
@@ -252,12 +266,24 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   }
 }
 
+bool IFunction::hasOrderedTies() const { return !m_orderedTies.empty(); }
+
+void IFunction::applyOrderedTies() {
+  for (auto &&tie : m_orderedTies) {
+    tie->eval();
+  }
+}
+
 /**
  * Apply the ties.
  */
 void IFunction::applyTies() {
-  for (auto &m_tie : m_ties) {
-    m_tie->eval();
+  if (hasOrderedTies()) {
+    applyOrderedTies();
+  } else {
+    for (auto &tie : m_ties) {
+      tie->eval();
+    }
   }
 }
 
@@ -533,7 +559,7 @@ protected:
     return "std::vector<double>";
   }
 };
-}
+} // namespace
 
 std::string IFunction::Attribute::type() const {
   AttType tmp;
@@ -582,7 +608,7 @@ private:
   /// Flag to quote a string value returned
   bool m_quoteString;
 };
-}
+} // namespace
 
 /// Copy assignment. Do not copy m_quoteValue flag.
 /// @param attr :: The attribute to copy from.
@@ -606,8 +632,9 @@ std::string IFunction::Attribute::asString() const {
   try {
     return boost::get<std::string>(m_data);
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as string");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as string");
   }
 }
 
@@ -620,8 +647,9 @@ std::string IFunction::Attribute::asQuotedString() const {
   try {
     attr = boost::get<std::string>(m_data);
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as string");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as string");
   }
 
   if (attr.empty())
@@ -645,8 +673,9 @@ std::string IFunction::Attribute::asUnquotedString() const {
   try {
     attr = boost::get<std::string>(m_data);
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as string");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as string");
   }
   std::string unquoted(attr);
   if (attr.empty())
@@ -666,8 +695,9 @@ int IFunction::Attribute::asInt() const {
   try {
     return boost::get<int>(m_data);
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as int");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as int");
   }
 }
 
@@ -678,8 +708,9 @@ double IFunction::Attribute::asDouble() const {
   try {
     return boost::get<double>(m_data);
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as double");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as double");
   }
 }
 
@@ -690,8 +721,9 @@ bool IFunction::Attribute::asBool() const {
   try {
     return boost::get<bool>(m_data);
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as bool");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as bool");
   }
 }
 
@@ -702,8 +734,9 @@ std::vector<double> IFunction::Attribute::asVector() const {
   try {
     return boost::get<std::vector<double>>(m_data);
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as vector");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as vector");
   }
 }
 
@@ -715,8 +748,9 @@ void IFunction::Attribute::setString(const std::string &str) {
   try {
     boost::get<std::string>(m_data) = str;
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as string");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as string");
   }
 }
 
@@ -728,8 +762,9 @@ void IFunction::Attribute::setDouble(const double &d) {
   try {
     boost::get<double>(m_data) = d;
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as double");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as double");
   }
 }
 
@@ -741,8 +776,9 @@ void IFunction::Attribute::setInt(const int &i) {
   try {
     boost::get<int>(m_data) = i;
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as int");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as int");
   }
 }
 
@@ -754,8 +790,9 @@ void IFunction::Attribute::setBool(const bool &b) {
   try {
     boost::get<bool>(m_data) = b;
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as bool");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as bool");
   }
 }
 
@@ -769,8 +806,9 @@ void IFunction::Attribute::setVector(const std::vector<double> &v) {
     auto &value = boost::get<std::vector<double>>(m_data);
     value.assign(v.begin(), v.end());
   } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() + " attribute "
-                                                              "as vector");
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute "
+                             "as vector");
   }
 }
 
@@ -843,9 +881,9 @@ protected:
   }
 
 private:
-  mutable std::string m_value; ///<the value as a string
+  mutable std::string m_value; ///< the value as a string
 };
-}
+} // namespace
 
 /** Set value from a string. Throws exception if the string has wrong format
  * @param str :: String representation of the new value
@@ -1063,13 +1101,13 @@ void IFunction::setMatrixWorkspace(
                 // so from look up table
                 Kernel::Unit_sptr resultUnit =
                     fitParam.getLookUpTable().getYUnit(); // from table
-                g_log.debug() << "The FitParameter " << parameterName(i)
-                              << " = " << paramValue
-                              << " before y-unit convertion\n";
+                g_log.debug()
+                    << "The FitParameter " << parameterName(i) << " = "
+                    << paramValue << " before y-unit convertion\n";
                 paramValue /= convertValue(1.0, resultUnit, workspace, wi);
-                g_log.debug() << "The FitParameter " << parameterName(i)
-                              << " = " << paramValue
-                              << " after y-unit convertion\n";
+                g_log.debug()
+                    << "The FitParameter " << parameterName(i) << " = "
+                    << paramValue << " after y-unit convertion\n";
               } else {
                 // so from formula
 
@@ -1098,9 +1136,9 @@ void IFunction::setMatrixWorkspace(
                                   << " before result-unit convertion (using "
                                   << resultUnitStr << ")\n";
                     paramValue *= p.Eval();
-                    g_log.debug() << "The FitParameter " << parameterName(i)
-                                  << " = " << paramValue
-                                  << " after result-unit convertion\n";
+                    g_log.debug()
+                        << "The FitParameter " << parameterName(i) << " = "
+                        << paramValue << " after result-unit convertion\n";
                   } catch (mu::Parser::exception_type &e) {
                     g_log.error()
                         << "Cannot convert formula unit to workspace unit"
@@ -1237,8 +1275,8 @@ void IFunction::convertValue(std::vector<double> &values,
 }
 
 /**
-* Returns the number of attributes associated with the function
-*/
+ * Returns the number of attributes associated with the function
+ */
 size_t IFunction::nAttributes() const { return m_attrs.size(); }
 
 /// Check if attribute named exists
@@ -1247,10 +1285,10 @@ bool IFunction::hasAttribute(const std::string &name) const {
 }
 
 /**
-  * Overload for const char* values.
-  * @param attName :: Attribute name
-  * @param value :: New attribute value to set
-  */
+ * Overload for const char* values.
+ * @param attName :: Attribute name
+ * @param value :: New attribute value to set
+ */
 void IFunction::setAttributeValue(const std::string &attName,
                                   const char *value) {
   std::string str(value);
@@ -1258,10 +1296,10 @@ void IFunction::setAttributeValue(const std::string &attName,
 }
 
 /**
-  * Set string attribute by value. Make sure that quoted style doesn't change.
-  * @param attName :: Attribute name
-  * @param value :: New attribute value to set
-  */
+ * Set string attribute by value. Make sure that quoted style doesn't change.
+ * @param attName :: Attribute name
+ * @param value :: New attribute value to set
+ */
 void IFunction::setAttributeValue(const std::string &attName,
                                   const std::string &value) {
   Attribute att = getAttribute(attName);
@@ -1280,9 +1318,9 @@ std::vector<std::string> IFunction::getAttributeNames() const {
 }
 
 /**
-* Return a value of attribute attName
-* @param name :: Returns the named attribute
-*/
+ * Return a value of attribute attName
+ * @param name :: Returns the named attribute
+ */
 API::IFunction::Attribute
 IFunction::getAttribute(const std::string &name) const {
   if (hasAttribute(name)) {
@@ -1295,22 +1333,22 @@ IFunction::getAttribute(const std::string &name) const {
 }
 
 /**
-*  Set a value to a named attribute. Can be overridden in the inheriting class,
-* the default
-*  just stores the value
-*  @param name :: The name of the attribute
-*  @param value :: The value of the attribute
-*/
+ *  Set a value to a named attribute. Can be overridden in the inheriting class,
+ * the default
+ *  just stores the value
+ *  @param name :: The name of the attribute
+ *  @param value :: The value of the attribute
+ */
 void IFunction::setAttribute(const std::string &name,
                              const API::IFunction::Attribute &value) {
   storeAttributeValue(name, value);
 }
 
 /**
-* Declares a single attribute
-* @param name :: The name of the attribute
-* @param defaultValue :: A default value
-*/
+ * Declares a single attribute
+ * @param name :: The name of the attribute
+ * @param defaultValue :: A default value
+ */
 void IFunction::declareAttribute(
     const std::string &name, const API::IFunction::Attribute &defaultValue) {
   m_attrs.emplace(name, defaultValue);
@@ -1323,10 +1361,10 @@ void IFunction::init() {
 }
 
 /**
-*  Set a value to a named attribute
-*  @param name :: The name of the attribute
-*  @param value :: The value of the attribute
-*/
+ *  Set a value to a named attribute
+ *  @param name :: The name of the attribute
+ *  @param value :: The value of the attribute
+ */
 void IFunction::storeAttributeValue(const std::string &name,
                                     const API::IFunction::Attribute &value) {
   if (hasAttribute(name)) {
@@ -1339,11 +1377,11 @@ void IFunction::storeAttributeValue(const std::string &name,
 }
 
 /**
-*  Store a value to a named attribute if it can be considered "mutable" or
-*  read only, which simply reflects the current state of the function.
-*  @param name :: The name of the attribute
-*  @param value :: The value of the attribute
-*/
+ *  Store a value to a named attribute if it can be considered "mutable" or
+ *  read only, which simply reflects the current state of the function.
+ *  @param name :: The name of the attribute
+ *  @param value :: The value of the attribute
+ */
 void IFunction::storeReadOnlyAttribute(
     const std::string &name, const API::IFunction::Attribute &value) const {
   const_cast<IFunction *>(this)->storeAttributeValue(name, value);
@@ -1449,6 +1487,59 @@ size_t IFunction::getNumberDomains() const { return 1; }
 std::vector<IFunction_sptr> IFunction::createEquivalentFunctions() const {
   return std::vector<IFunction_sptr>(
       1, FunctionFactory::Instance().createInitialized(asString()));
+}
+
+/// Put all ties in order in which they will be applied correctly.
+void IFunction::sortTies() {
+  m_orderedTies.clear();
+  std::list<TieNode> orderedTieNodes;
+  for (size_t i = 0; i < nParams(); ++i) {
+    auto const tie = getTie(i);
+    if (!tie) {
+      continue;
+    }
+    TieNode newNode;
+    newNode.left = getParameterIndex(*tie);
+    auto const rhsParameters = tie->getRHSParameters();
+    newNode.right.reserve(rhsParameters.size());
+    for (auto &&p : rhsParameters) {
+      newNode.right.emplace_back(this->getParameterIndex(p));
+    }
+    if (newNode < newNode) {
+      throw std::runtime_error("Parameter is tied to itself: " +
+                               tie->asString(this));
+    }
+    bool before(false), after(false);
+    size_t indexBefore(0), indexAfter(0);
+    for (auto &&node : orderedTieNodes) {
+      if (newNode < node) {
+        before = true;
+        indexBefore = node.left;
+      }
+      if (node < newNode) {
+        after = true;
+        indexAfter = node.left;
+      }
+    }
+    if (before) {
+      if (after) {
+        std::string message =
+            "Circular dependency in ties:\n" + tie->asString(this) + '\n';
+        message += getTie(indexBefore)->asString(this);
+        if (indexAfter != indexBefore) {
+          message += '\n' + getTie(indexAfter)->asString(this);
+        }
+        throw std::runtime_error(message);
+      }
+      orderedTieNodes.push_front(newNode);
+    } else {
+      orderedTieNodes.push_back(newNode);
+    }
+  }
+  for (auto &&node : orderedTieNodes) {
+    auto const tie = getTie(node.left);
+    m_orderedTies.emplace_back(tie);
+  }
 }
 
 } // namespace API

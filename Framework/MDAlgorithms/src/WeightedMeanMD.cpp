@@ -81,5 +81,5 @@ void WeightedMeanMD::execEvent() {
                            " can only be run on a MDHistoWorkspace.");
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

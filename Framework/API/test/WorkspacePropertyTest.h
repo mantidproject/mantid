@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/WorkspaceProperty.h"
-#include <boost/shared_ptr.hpp>
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include <boost/shared_ptr.hpp>
 
 // Property implementations
-#include "MantidKernel/PropertyWithValue.tcc"
 #include "MantidAPI/WorkspaceProperty.tcc"
+#include "MantidKernel/PropertyWithValue.tcc"
 
 using Mantid::MantidVec;
 using namespace Mantid::Kernel;

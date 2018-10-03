@@ -2,10 +2,10 @@
 #define MANTID_CRYSTAL_INDEX_SX_PEAKS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include <boost/tuple/tuple.hpp>
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
+#include <boost/tuple/tuple.hpp>
 
 #include <iterator>
 #include <set>
@@ -182,7 +182,7 @@ private:
   //
 };
 
-} // namespace Algorithm
+} // namespace Crystal
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_IndexSXPeaks_H_*/

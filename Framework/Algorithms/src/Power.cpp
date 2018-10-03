@@ -37,5 +37,5 @@ void Power::performUnaryOperation(const double XIn, const double YIn,
 inline double Power::calculatePower(const double base, const double exponent) {
   return std::pow(base, exponent);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

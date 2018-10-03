@@ -57,8 +57,9 @@ void FFT::init() {
   declareProperty("Transform", "Forward",
                   boost::make_shared<StringListValidator>(fft_dir),
                   "Direction of the transform: forward or backward");
-  declareProperty("Shift", 0.0, "Apply an extra phase equal to this quantity "
-                                "times 2*pi to the transform");
+  declareProperty("Shift", 0.0,
+                  "Apply an extra phase equal to this quantity "
+                  "times 2*pi to the transform");
   declareProperty("AutoShift", false,
                   "Automatically calculate and apply phase shift. Zero on the "
                   "X axis is assumed to be in the centre - if it is not, "
@@ -154,18 +155,18 @@ void FFT::transformForward(boost::shared_array<double> &data, const int xSize,
                            const bool isComplex, const int iReal,
                            const int iImag, const double df, const double dx) {
   /* If we translate the X-axis by -dx*ySize/2 and assume that our function is
-  * periodic
-  * along the X-axis with period equal to ySize, then dataY values must be
-  * rearranged such that
-  * dataY[i] = dataY[(ySize/2 + i + dys) % ySize]. However, we do not
-  * overwrite dataY but
-  * store the rearranged values in array 'data'.
-  * When index 'i' runs from 0 to ySize/2, data[2*i] will store dataY[j] with
-  * j running from
-  * ySize/2 to ySize.  When index 'i' runs from ySize/2+1 to ySize, data[2*i]
-  * will store
-  * dataY[j] with j running from 0 to ySize.
-  */
+   * periodic
+   * along the X-axis with period equal to ySize, then dataY values must be
+   * rearranged such that
+   * dataY[i] = dataY[(ySize/2 + i + dys) % ySize]. However, we do not
+   * overwrite dataY but
+   * store the rearranged values in array 'data'.
+   * When index 'i' runs from 0 to ySize/2, data[2*i] will store dataY[j] with
+   * j running from
+   * ySize/2 to ySize.  When index 'i' runs from ySize/2+1 to ySize, data[2*i]
+   * will store
+   * dataY[j] with j running from 0 to ySize.
+   */
   for (int i = 0; i < ySize; i++) {
     int j = centerShift ? (ySize / 2 + i) % ySize : i;
     data[2 * i] = m_inWS->y(iReal)[j]; // even indexes filled with the real part
@@ -180,15 +181,15 @@ void FFT::transformForward(boost::shared_array<double> &data, const int xSize,
   gsl_fft_complex_forward(data.get(), 1, ySize, m_wavetable, m_workspace);
 
   /* The Fourier transform overwrites array 'data'. Recall that the Fourier
-  * transform is
-  * periodic along the frequency axis. Thus, 'data' takes the same values
-  * when index j runs
-  * from ySize/2 to ySize than if index j would run from -ySize/2 to 0. Thus,
-  * for negative
-  * frequencies running from -ySize/2 to 0, we use the values stored in array
-  * 'data'
-  * for index j running from ySize/2 to ySize.
-  */
+   * transform is
+   * periodic along the frequency axis. Thus, 'data' takes the same values
+   * when index j runs
+   * from ySize/2 to ySize than if index j would run from -ySize/2 to 0. Thus,
+   * for negative
+   * frequencies running from -ySize/2 to 0, we use the values stored in array
+   * 'data'
+   * for index j running from ySize/2 to ySize.
+   */
   for (int i = 0; i < ySize; i++) {
     int j = (ySize / 2 + i + dys) % ySize;
     m_outWS->mutableX(m_iRe)[i] =
@@ -416,5 +417,5 @@ double FFT::getPhaseShift(const HistogramData::Points &xPoints) {
   return shift;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

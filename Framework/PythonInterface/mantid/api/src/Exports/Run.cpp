@@ -22,14 +22,14 @@ namespace {
 namespace bpl = boost::python;
 
 /**
-   * Add a property with the given name and value
-   * @param self A reference to the run object that we have been called on
-   * @param name The name of the new property
-   * @param value The value of the property
-   * @param units A string representing a unit
-   * @param replace If true, replace an existing property with this one else
+ * Add a property with the given name and value
+ * @param self A reference to the run object that we have been called on
+ * @param name The name of the new property
+ * @param value The value of the property
+ * @param units A string representing a unit
+ * @param replace If true, replace an existing property with this one else
  * raise an error
-   */
+ */
 void addPropertyWithUnit(Run &self, const std::string &name,
                          const bpl::object &value, const std::string &units,
                          bool replace) {
@@ -114,21 +114,16 @@ bpl::list keys(Run &self) {
   }
   return names;
 }
-}
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+} // namespace
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(integrateProtonCharge_Overload,
                                        integrateProtonCharge, 0, 1)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 void export_Run() {
   // Pointer
@@ -149,16 +144,17 @@ void export_Run() {
            "Returns True if the given log value is contained within the run")
 
       .def("getProperty", &Run::getProperty, (arg("self"), arg("name")),
-           return_value_policy<return_by_value>(), "Returns the named property "
-                                                   "(log value). Use '.value' "
-                                                   "to return the value.")
+           return_value_policy<return_by_value>(),
+           "Returns the named property "
+           "(log value). Use '.value' "
+           "to return the value.")
 
       .def("getProperties", &Run::getProperties, arg("self"),
            return_internal_reference<>(),
            "Return the list of run properties managed by this object.")
 
       .def("getLogData",
-           (Property * (Run::*)(const std::string &) const) & Run::getLogData,
+           (Property * (Run::*)(const std::string &)const) & Run::getLogData,
            (arg("self"), arg("name")), return_value_policy<return_by_value>(),
            "Returns the named log. Use '.value' to return the value. The same "
            "as getProperty.")

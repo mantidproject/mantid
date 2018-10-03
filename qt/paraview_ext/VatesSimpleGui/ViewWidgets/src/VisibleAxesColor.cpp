@@ -51,7 +51,7 @@ std::vector<double> getBackgroundColor(pqView *view) {
   vtkSMProperty *prop = view->getProxy()->GetProperty("Background");
   return vtkSMPropertyHelper(prop).GetDoubleArray();
 }
-}
+} // namespace
 
 unsigned long VisibleAxesColor::setAndObserveAxesColor(pqView *view) {
   auto color = getContrastingColor(getBackgroundColor(view));
@@ -122,6 +122,6 @@ void VisibleAxesColor::backgroundColorChangeCallback(vtkObject *caller,
   this->setScalarBarColor(view, color);
 }
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

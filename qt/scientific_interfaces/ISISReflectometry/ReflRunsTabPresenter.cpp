@@ -22,13 +22,13 @@
 #include "ReflSearchModel.h"
 
 #include <QStringList>
+#include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
+#include <iterator>
 #include <sstream>
 #include <vector>
-#include <algorithm>
-#include <iterator>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -76,14 +76,14 @@ std::string getRunErrorMessage(
 
   return std::string();
 }
-}
+} // unnamed namespace
 
 /** Constructor
-* @param mainView :: [input] The view we're managing
-* @param progressableView :: [input] The view reporting progress
-* @param tablePresenters :: [input] The data processor presenters
-* @param searcher :: [input] The search implementation
-*/
+ * @param mainView :: [input] The view we're managing
+ * @param progressableView :: [input] The view reporting progress
+ * @param tablePresenters :: [input] The data processor presenters
+ * @param searcher :: [input] The search implementation
+ */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
     std::vector<DataProcessorPresenter *> tablePresenters,
@@ -129,13 +129,18 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     for (const auto &presenter : m_tablePresenters)
       presenter->setInstrumentList(fromStdStringVector(instruments), "INTER");
   }
+
+  updateViewWhenMonitorStopped();
 }
 
-ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
+ReflRunsTabPresenter::~ReflRunsTabPresenter() {
+  if (m_monitorAlg)
+    stopObserving(m_monitorAlg);
+}
 
 /** Accept a main presenter
-* @param mainPresenter :: [input] A main presenter
-*/
+ * @param mainPresenter :: [input] A main presenter
+ */
 void ReflRunsTabPresenter::acceptMainPresenter(
     IReflMainWindowPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
@@ -188,6 +193,15 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     break;
   case IReflRunsTabPresenter::GroupChangedFlag:
     changeGroup();
+    break;
+  case IReflRunsTabPresenter::StartMonitorFlag:
+    startMonitor();
+    break;
+  case IReflRunsTabPresenter::StopMonitorFlag:
+    stopMonitor();
+    break;
+  case IReflRunsTabPresenter::StartMonitorCompleteFlag:
+    startMonitorComplete();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -283,8 +297,8 @@ bool ReflRunsTabPresenter::search() {
 }
 
 /** Populates the search results table
-* @param searchAlg : [input] The search algorithm
-*/
+ * @param searchAlg : [input] The search algorithm
+ */
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (!searchAlg->isExecuted())
     return;
@@ -308,8 +322,8 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 }
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers
-* runs to table and processes them. Clears any existing table data first.
-*/
+ * runs to table and processes them. Clears any existing table data first.
+ */
 void ReflRunsTabPresenter::startNewAutoreduction() {
 
   auto const group = selectedGroup();
@@ -332,9 +346,9 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
-* either the search number, transfer method or instrument has changed
-* @return : Boolean on whether to start a new autoreduction
-*/
+ * either the search number, transfer method or instrument has changed
+ * @return : Boolean on whether to start a new autoreduction
+ */
 bool ReflRunsTabPresenter::requireNewAutoreduction() const {
   bool searchNumChanged =
       m_autoreduction.searchStringChanged(m_view->getSearchString());
@@ -551,7 +565,7 @@ ReflRunsTabPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
  * @param matchType : an enum specifying how strictly to match runs against
  * the transfer criteria
  * @return : The runs to transfer as a vector of maps
-*/
+ */
 void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
                                     int group, const TransferMatch matchType) {
   if (!validateRowsToTransfer(rowsToTransfer))
@@ -570,16 +584,16 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
   updateErrorStateInSearchModel(rowsToTransfer, transferDetails.getErrorRuns());
 
   // Do the transfer
-  getTablePresenter(group)
-      ->transfer(::MantidQt::CustomInterfaces::fromStdStringVectorMap(
+  getTablePresenter(group)->transfer(
+      ::MantidQt::CustomInterfaces::fromStdStringVectorMap(
           transferDetails.getTransferRuns()));
 }
 
 /**
-* Select and make a transfer strategy on demand based. Pick up the
-* user-provided transfer strategy to do this.
-* @return new TransferStrategy
-*/
+ * Select and make a transfer strategy on demand based. Pick up the
+ * user-provided transfer strategy to do this.
+ * @return new TransferStrategy
+ */
 std::unique_ptr<ReflTransferStrategy>
 ReflRunsTabPresenter::getTransferStrategy() {
   std::unique_ptr<ReflTransferStrategy> rtnStrategy;
@@ -613,11 +627,11 @@ ReflRunsTabPresenter::getTransferStrategy() {
 }
 
 /** Used to tell the presenter something has changed in the ADS
-*
-* @param workspaceList :: the list of table workspaces in the ADS that could be
-* loaded into the interface
-* @param group :: the group that the notification came from
-*/
+ *
+ * @param workspaceList :: the list of table workspaces in the ADS that could be
+ * loaded into the interface
+ * @param group :: the group that the notification came from
+ */
 void ReflRunsTabPresenter::notifyADSChanged(const QSet<QString> &workspaceList,
                                             int group) {
 
@@ -632,13 +646,13 @@ void ReflRunsTabPresenter::notifyADSChanged(const QSet<QString> &workspaceList,
 }
 
 /** Requests global pre-processing options. Options are supplied by
-  * the main presenter and there can be multiple sets of options for different
-  * columns that need to be preprocessed.
-  * @return :: A map of the column name to the global pre-processing options
-  * for that column
-  * the main presenter.
-  * @return :: Global pre-processing options
-  */
+ * the main presenter and there can be multiple sets of options for different
+ * columns that need to be preprocessed.
+ * @return :: A map of the column name to the global pre-processing options
+ * for that column
+ * the main presenter.
+ * @return :: Global pre-processing options
+ */
 ColumnOptionsQMap
 ReflRunsTabPresenter::getPreprocessingOptions(int group) const {
   ColumnOptionsQMap result;
@@ -655,9 +669,9 @@ ReflRunsTabPresenter::getPreprocessingOptions(int group) const {
 }
 
 /** Requests global processing options. Options are supplied by the main
-* presenter
-* @return :: Global processing options
-*/
+ * presenter
+ * @return :: Global processing options
+ */
 OptionsQMap ReflRunsTabPresenter::getProcessingOptions(int group) const {
   assert(m_mainPresenter != nullptr &&
          "The main presenter must be set with acceptMainPresenter.");
@@ -665,10 +679,10 @@ OptionsQMap ReflRunsTabPresenter::getProcessingOptions(int group) const {
 }
 
 /** Requests global post-processing options as a string. Options are supplied by
-* the main
-* presenter
-* @return :: Global post-processing options as a string
-*/
+ * the main
+ * presenter
+ * @return :: Global post-processing options as a string
+ */
 QString
 ReflRunsTabPresenter::getPostprocessingOptionsAsString(int group) const {
 
@@ -676,23 +690,23 @@ ReflRunsTabPresenter::getPostprocessingOptionsAsString(int group) const {
 }
 
 /** Requests time-slicing values. Values are supplied by the main presenter
-* @return :: Time-slicing values
-*/
+ * @return :: Time-slicing values
+ */
 QString ReflRunsTabPresenter::getTimeSlicingValues(int group) const {
   return QString::fromStdString(m_mainPresenter->getTimeSlicingValues(group));
 }
 
 /** Requests time-slicing type. Type is supplied by the main presenter
-* @return :: Time-slicing values
-*/
+ * @return :: Time-slicing values
+ */
 QString ReflRunsTabPresenter::getTimeSlicingType(int group) const {
   return QString::fromStdString(m_mainPresenter->getTimeSlicingType(group));
 }
 
 /** Requests transmission runs for a particular run angle. Values are supplied
-* by the main presenter
-* @return :: Transmission run(s) as a comma-separated list
-*/
+ * by the main presenter
+ * @return :: Transmission run(s) as a comma-separated list
+ */
 OptionsQMap ReflRunsTabPresenter::getOptionsForAngle(const double angle,
                                                      int group) const {
   return m_mainPresenter->getOptionsForAngle(group, angle);
@@ -729,7 +743,7 @@ void ReflRunsTabPresenter::updateWidgetEnabledState() const {
 
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is not in progress
-*/
+ */
 void ReflRunsTabPresenter::pause(int group) {
   if (m_autoreduction.pause(group)) {
     m_view->stopTimer();
@@ -745,16 +759,16 @@ void ReflRunsTabPresenter::pause(int group) {
 void ReflRunsTabPresenter::resume(int group) const { UNUSED_ARG(group); }
 
 /** Notifies main presenter that data reduction is confirmed to be finished
-* i.e. after all rows have been reduced
-*/
+ * i.e. after all rows have been reduced
+ */
 void ReflRunsTabPresenter::confirmReductionCompleted(int group) {
   UNUSED_ARG(group);
   m_view->startTimer(10000);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
-* via a user command to pause reduction
-*/
+ * via a user command to pause reduction
+ */
 void ReflRunsTabPresenter::confirmReductionPaused(int group) {
   updateWidgetEnabledState();
   m_mainPresenter->notifyReductionPaused(group);
@@ -767,16 +781,16 @@ void ReflRunsTabPresenter::confirmReductionPaused(int group) {
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
-*/
+ */
 void ReflRunsTabPresenter::confirmReductionResumed(int group) {
   updateWidgetEnabledState();
   m_mainPresenter->notifyReductionResumed(group);
 }
 
 /** Changes the current instrument in the data processor widget. Also clears the
-* and the table selection model and updates the config service, printing an
-* information message
-*/
+ * and the table selection model and updates the config service, printing an
+ * information message
+ */
 void ReflRunsTabPresenter::changeInstrument() {
   auto const instrument = m_view->getSearchInstrument();
   m_mainPresenter->setInstrumentName(instrument);
@@ -792,7 +806,140 @@ void ReflRunsTabPresenter::changeGroup() {
   pushCommands(selectedGroup());
 }
 
+void ReflRunsTabPresenter::handleError(const std::string &message,
+                                       const std::exception &e) {
+  m_mainPresenter->giveUserCritical(message + ": " + std::string(e.what()),
+                                    "Error");
+}
+
+void ReflRunsTabPresenter::handleError(const std::string &message) {
+  m_mainPresenter->giveUserCritical(message, "Error");
+}
+
+std::string ReflRunsTabPresenter::liveDataReductionAlgorithm() {
+  return "ReflectometryReductionOneLiveData";
+}
+
+std::string
+ReflRunsTabPresenter::liveDataReductionOptions(const std::string &instrument) {
+  // Get the properties for the reduction algorithm from the settings tab. We
+  // don't have a group associated with live data. This is not ideal but for
+  // now just use the first group.
+  int const group = 0;
+  auto options = convertOptionsFromQMap(getProcessingOptions(group));
+  // Add other required input properties to the live data reduction algorithnm
+  options["Instrument"] = QString::fromStdString(instrument);
+  options["GetLiveValueAlgorithm"] = "GetLiveInstrumentValue";
+  // Convert the properties to a string to pass to the algorithm
+  auto const optionsString =
+      convertMapToString(options, ';', false).toStdString();
+  return optionsString;
+}
+
+IAlgorithm_sptr ReflRunsTabPresenter::setupLiveDataMonitorAlgorithm() {
+  auto alg = AlgorithmManager::Instance().create("StartLiveData");
+  alg->initialize();
+  alg->setChild(true);
+  alg->setLogging(false);
+  auto instrument = m_view->getSearchInstrument();
+  alg->setProperty("Instrument", instrument);
+  alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
+  alg->setProperty("AccumulationWorkspace", "TOF_live");
+  alg->setProperty("AccumulationMethod", "Replace");
+  alg->setProperty("UpdateEvery", "60");
+  alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
+  alg->setProperty("PostProcessingProperties",
+                   liveDataReductionOptions(instrument));
+  alg->setProperty("RunTransitionBehavior", "Restart");
+  auto errorMap = alg->validateInputs();
+  if (!errorMap.empty()) {
+    std::string errorString;
+    for (auto &kvp : errorMap)
+      errorString.append(kvp.first + ":" + kvp.second);
+    handleError(errorString);
+    return nullptr;
+  }
+  return alg;
+}
+
+void ReflRunsTabPresenter::updateViewWhenMonitorStarting() {
+  m_view->setStartMonitorButtonEnabled(false);
+  m_view->setStopMonitorButtonEnabled(false);
+}
+
+void ReflRunsTabPresenter::updateViewWhenMonitorStarted() {
+  m_view->setStartMonitorButtonEnabled(false);
+  m_view->setStopMonitorButtonEnabled(true);
+}
+
+void ReflRunsTabPresenter::updateViewWhenMonitorStopped() {
+  m_view->setStartMonitorButtonEnabled(true);
+  m_view->setStopMonitorButtonEnabled(false);
+}
+
+/** Start live data monitoring
+ */
+void ReflRunsTabPresenter::startMonitor() {
+  try {
+    auto alg = setupLiveDataMonitorAlgorithm();
+    if (!alg)
+      return;
+    auto algRunner = m_view->getMonitorAlgorithmRunner();
+    algRunner->startAlgorithm(alg);
+    updateViewWhenMonitorStarting();
+  } catch (std::exception &e) {
+    handleError("Error starting live data", e);
+  } catch (...) {
+    handleError("Error starting live data");
+  }
+}
+
+/** Callback called when the monitor algorithm has been started
+ */
+void ReflRunsTabPresenter::startMonitorComplete() {
+  auto algRunner = m_view->getMonitorAlgorithmRunner();
+  m_monitorAlg = algRunner->getAlgorithm()->getProperty("MonitorLiveData");
+  if (m_monitorAlg) {
+    observeError(m_monitorAlg);
+    updateViewWhenMonitorStarted();
+  } else {
+    updateViewWhenMonitorStopped();
+  }
+}
+
+/** Stop live data monitoring
+ */
+void ReflRunsTabPresenter::stopMonitor() {
+  if (!m_monitorAlg)
+    return;
+
+  stopObserving(m_monitorAlg);
+  m_monitorAlg->cancel();
+  m_monitorAlg.reset();
+  updateViewWhenMonitorStopped();
+}
+
+/** Handler called when the monitor algorithm finishes
+ */
+void ReflRunsTabPresenter::finishHandle(const IAlgorithm *alg) {
+  UNUSED_ARG(alg);
+  stopObserving(m_monitorAlg);
+  m_monitorAlg.reset();
+  updateViewWhenMonitorStopped();
+}
+
+/** Handler called when the monitor algorithm errors
+ */
+void ReflRunsTabPresenter::errorHandle(const IAlgorithm *alg,
+                                       const std::string &what) {
+  UNUSED_ARG(alg);
+  UNUSED_ARG(what);
+  stopObserving(m_monitorAlg);
+  m_monitorAlg.reset();
+  updateViewWhenMonitorStopped();
+}
+
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";
 const std::string ReflRunsTabPresenter::LegacyTransferMethod = "Description";
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

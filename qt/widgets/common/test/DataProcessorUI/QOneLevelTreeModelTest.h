@@ -14,6 +14,12 @@ using namespace Mantid::API;
 class QOneLevelTreeModelTest : public CxxTest::TestSuite {
 
 public:
+  // This means the constructor isn't called when running other tests
+  static QOneLevelTreeModelTest *createSuite() {
+    return new QOneLevelTreeModelTest();
+  }
+  static void destroySuite(QOneLevelTreeModelTest *suite) { delete suite; }
+
   // Create a white list
   QOneLevelTreeModelTest() {
     m_whitelist.addElement("Column1", "Property1", "Description1");
