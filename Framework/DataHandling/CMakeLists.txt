@@ -48,6 +48,7 @@
 	src/LoadDiffCal.cpp
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
+	src/LoadEMU.cpp
 	src/LoadEventNexus.cpp
 	src/LoadEventNexusIndexSetup.cpp
 	src/LoadEventPreNexus2.cpp
@@ -224,6 +225,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
 	inc/MantidDataHandling/Load.h
+	inc/MantidDataHandling/LoadANSTOEventFile.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
@@ -238,6 +240,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDiffCal.h
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
+	inc/MantidDataHandling/LoadEMU.h
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventNexusIndexSetup.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
@@ -421,6 +424,7 @@ set ( TEST_FILES
 	LoadDiffCalTest.h
 	LoadDspacemapTest.h
 	LoadEmptyInstrumentTest.h
+	LoadEMUauTest.h
 	LoadEventNexusIndexSetupTest.h
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
