@@ -1,7 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge
-#     National Laboratory, European Spallation Source & Institut Laue - Langevin
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import datetime
@@ -24,7 +25,7 @@ regex_new_style = re.compile("^\W*Mantid.{0,100}?(\d{4}).{100,300}?SPDX - Licens
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #Other copyright statement
 regex_other_style = re.compile("^.*?Copyright\s.{0,200}?(\d{4}).{0,400}?$",
-                             re.IGNORECASE |  re.MULTILINE)
+                               re.IGNORECASE |  re.MULTILINE)
 
 #lines to skip when determining where to put the copyright statement (they must be from the start of the file)
 regex_lines_to_skip = [re.compile("^#!.*?$[\s]*",re.MULTILINE)]
@@ -43,8 +44,6 @@ exts_to_ignore = [".txt",".pyc",".sh",".template",".png",".odg",".md",
                   ".doxyfile",".properties",".pbs",".rst",".md5",".xml",
                   ".dot",".ui",".jpg",".png",".svg"]
 
-
-
 #global reporting dictionaries
 report_new_statements_updated = {}
 report_old_statements_updated = {}
@@ -60,8 +59,10 @@ reporting_dictionaries = {"new_statements_updated.txt":report_new_statements_upd
                           "unrecognized_statement.txt":report_unrecognized_statement,
                           "unmatched_files.txt":report_unmatched_files
                           }
+
 ######################################################################################################################
 # Functions
+
 
 def get_copyright(year,comment_prefix = "//"):
     """
@@ -69,9 +70,11 @@ def get_copyright(year,comment_prefix = "//"):
     """
     return """{0} Mantid Repository : https://github.com/mantidproject/mantid
 {0}
-{0} Copyright &copy; {1} ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge
-{0}     National Laboratory, European Spallation Source & Institut Laue - Langevin
+{0} Copyright &copy; {1} ISIS Rutherford Appleton Laboratory UKRI,
+{0)     NScD Oak Ridge National Laboratory, European Spallation Source
+{0}     & Institut Laue - Langevin
 {0} SPDX - License - Identifier: GPL - 3.0 +""".format(comment_prefix,year)
+
 
 def process_file_tree(path):
     """
@@ -92,7 +95,6 @@ def process_file_tree(path):
         for filename in file_list:
             print('\t%s' % filename)
             basename, file_extension = os.path.splitext(filename)
-            comment_prefix = r'//'
             if file_extension.lower() in accepted_file_extensions:
                 process_file(os.path.join(dir_name,filename))
             elif file_extension.lower() in exts_to_ignore:
@@ -100,6 +102,7 @@ def process_file_tree(path):
             else:
                 print("\t\tunknown extension", file_extension)
                 report_unmatched_files[os.path.join(dir_name,filename)] = file_extension.lower()
+
 
 def process_file(filename):
     """
@@ -122,7 +125,6 @@ def process_file(filename):
     file_text = ""
     with open (filename, "r") as myfile:
         file_text=myfile.read()
-
 
     #find old style statement - remove and replace
     match_old = regex_old_style.search(file_text)
@@ -203,6 +205,7 @@ def remove_text_section(text,start,end):
     :return: the string after the section has been removed
     """
     return text[:start] + text[end:]
+
 
 ######################################################################################################################
 # Main function
