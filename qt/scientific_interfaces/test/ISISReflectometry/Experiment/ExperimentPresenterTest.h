@@ -116,71 +116,19 @@ public:
   }
 
   void testSettingPolarizationCorrectionsToNoneDisablesInputs() {
-    auto presenter = makePresenter();
-    PolarizationCorrections polCorr(PolarizationCorrectionType::None);
-
-    expectViewReturnsDefaultAnalysisMode();
-    expectViewReturnsSumInLambdaDefaults();
-    EXPECT_CALL(m_view, getPolarizationCorrectionType())
-        .WillOnce(Return("None"));
-    EXPECT_CALL(m_view, disablePolarizationCorrectionInputs()).Times(1);
-    EXPECT_CALL(m_view, getCRho()).Times(0);
-    EXPECT_CALL(m_view, getCAlpha()).Times(0);
-    EXPECT_CALL(m_view, getCAp()).Times(0);
-    EXPECT_CALL(m_view, getCPp()).Times(0);
-    presenter.notifySettingsChanged();
-
-    verifyAndClear();
+    runWithPolarizationCorrectionInputsDisabled("None");
   }
 
   void testSetPolarizationCorrectionsToParameterFileDisablesInputs() {
-    auto presenter = makePresenter();
-
-    expectViewReturnsDefaultAnalysisMode();
-    expectViewReturnsSumInLambdaDefaults();
-    EXPECT_CALL(m_view, getPolarizationCorrectionType())
-        .WillOnce(Return("ParameterFile"));
-    EXPECT_CALL(m_view, disablePolarizationCorrectionInputs()).Times(1);
-    EXPECT_CALL(m_view, getCRho()).Times(0);
-    EXPECT_CALL(m_view, getCAlpha()).Times(0);
-    EXPECT_CALL(m_view, getCAp()).Times(0);
-    EXPECT_CALL(m_view, getCPp()).Times(0);
-    presenter.notifySettingsChanged();
-
-    verifyAndClear();
+    runWithPolarizationCorrectionInputsDisabled("ParameterFile");
   }
 
   void testSettingPolarizationCorrectionsToPAEnablesInputs() {
-    auto presenter = makePresenter();
-
-    expectViewReturnsDefaultAnalysisMode();
-    expectViewReturnsSumInLambdaDefaults();
-    EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return("PA"));
-    EXPECT_CALL(m_view, enablePolarizationCorrectionInputs()).Times(1);
-    EXPECT_CALL(m_view, getCRho()).Times(1);
-    EXPECT_CALL(m_view, getCAlpha()).Times(1);
-    EXPECT_CALL(m_view, getCAp()).Times(1);
-    EXPECT_CALL(m_view, getCPp()).Times(1);
-    presenter.notifySettingsChanged();
-
-    verifyAndClear();
+    runWithPolarizationCorrectionInputsEnabled("PA");
   }
 
   void testSettingPolarizationCorrectionsToPNREnablesInputs() {
-    auto presenter = makePresenter();
-
-    expectViewReturnsDefaultAnalysisMode();
-    expectViewReturnsSumInLambdaDefaults();
-    EXPECT_CALL(m_view, getPolarizationCorrectionType())
-        .WillOnce(Return("PNR"));
-    EXPECT_CALL(m_view, enablePolarizationCorrectionInputs()).Times(1);
-    EXPECT_CALL(m_view, getCRho()).Times(1);
-    EXPECT_CALL(m_view, getCAlpha()).Times(1);
-    EXPECT_CALL(m_view, getCAp()).Times(1);
-    EXPECT_CALL(m_view, getCPp()).Times(1);
-    presenter.notifySettingsChanged();
-
-    verifyAndClear();
+    runWithPolarizationCorrectionInputsEnabled("PNR");
   }
 
   void testSetValidTransmissionRunRange() {
@@ -386,6 +334,38 @@ private:
   PerThetaDefaults defaultsWithAngleAndTwoTrans() {
     return PerThetaDefaults(2.3, std::make_pair("13463", "13464"), boost::none,
                             boost::none, boost::none);
+  }
+
+  void runWithPolarizationCorrectionInputsDisabled(std::string const &type) {
+    auto presenter = makePresenter();
+
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInLambdaDefaults();
+    EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return(type));
+    EXPECT_CALL(m_view, disablePolarizationCorrectionInputs()).Times(1);
+    EXPECT_CALL(m_view, getCRho()).Times(0);
+    EXPECT_CALL(m_view, getCAlpha()).Times(0);
+    EXPECT_CALL(m_view, getCAp()).Times(0);
+    EXPECT_CALL(m_view, getCPp()).Times(0);
+    presenter.notifySettingsChanged();
+
+    verifyAndClear();
+  }
+
+  void runWithPolarizationCorrectionInputsEnabled(std::string const &type) {
+    auto presenter = makePresenter();
+
+    expectViewReturnsDefaultAnalysisMode();
+    expectViewReturnsSumInLambdaDefaults();
+    EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return(type));
+    EXPECT_CALL(m_view, enablePolarizationCorrectionInputs()).Times(1);
+    EXPECT_CALL(m_view, getCRho()).Times(1);
+    EXPECT_CALL(m_view, getCAlpha()).Times(1);
+    EXPECT_CALL(m_view, getCAp()).Times(1);
+    EXPECT_CALL(m_view, getCPp()).Times(1);
+    presenter.notifySettingsChanged();
+
+    verifyAndClear();
   }
 
   void runTestForValidTransmissionRunRange(
