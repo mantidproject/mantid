@@ -30,6 +30,7 @@ private slots:
   void validateChemical();
   void saveClicked();
   void plotClicked();
+  void runClicked();
   void changeSampleDensityUnit(int);
   void changeCanDensityUnit(int);
 

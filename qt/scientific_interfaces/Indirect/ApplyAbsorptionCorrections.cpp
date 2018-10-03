@@ -19,6 +19,7 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
     : CorrectionsTab(parent) {
   m_spectra = 0;
   m_uiForm.setupUi(parent);
+
   connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
           SLOT(handleGeometryChange(int)));
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
@@ -41,6 +42,7 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
           SLOT(updateContainer()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
 
@@ -543,9 +545,7 @@ void ApplyAbsorptionCorrections::plotPreview(int wsIndex) {
 
   m_spectra = boost::numeric_cast<size_t>(wsIndex);
 }
-/**
- * Handles saving of the workspace
- */
+
 void ApplyAbsorptionCorrections::saveClicked() {
 
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
@@ -553,9 +553,6 @@ void ApplyAbsorptionCorrections::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/**
- * Handles mantid plotting of workspace
- */
 void ApplyAbsorptionCorrections::plotClicked() {
 
   QString plotType = m_uiForm.cbPlotOutput->currentText();
@@ -569,6 +566,8 @@ void ApplyAbsorptionCorrections::plotClicked() {
       plot2D(QString::fromStdString(m_pythonExportWsName));
   }
 }
+
+void ApplyAbsorptionCorrections::runClicked() { runTab(); }
 
 /**
  * Plots the current spectrum displayed in the preview plot

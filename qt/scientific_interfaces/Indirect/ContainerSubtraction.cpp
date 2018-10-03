@@ -17,7 +17,6 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
     : CorrectionsTab(parent), m_spectra(0) {
   m_uiForm.setupUi(parent);
 
-  // Connect slots
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(newSample(const QString &)));
   connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this,
@@ -30,6 +29,7 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
           SLOT(updateCan()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
 
@@ -321,9 +321,6 @@ void ContainerSubtraction::containerSubtractionComplete() {
   m_uiForm.pbSave->setEnabled(true);
 }
 
-/**
- * Handles saving of workspace
- */
 void ContainerSubtraction::saveClicked() {
 
   // Check workspace exists
@@ -332,9 +329,6 @@ void ContainerSubtraction::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/**
- * Handles Mantid plotting of workspace
- */
 void ContainerSubtraction::plotClicked() {
   QString plotType = m_uiForm.cbPlotOutput->currentText();
 
@@ -347,6 +341,8 @@ void ContainerSubtraction::plotClicked() {
       plot2D(QString::fromStdString(m_pythonExportWsName));
   }
 }
+
+void ContainerSubtraction::runClicked() { runTab(); }
 
 /**
  * Plots the current spectrum displayed in the preview plot

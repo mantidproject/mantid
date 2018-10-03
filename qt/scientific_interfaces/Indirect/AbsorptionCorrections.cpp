@@ -78,9 +78,10 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
-  // Handle plotting and saving
+  // Handle running, plotting and saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
   // Handle density units
   connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
@@ -463,9 +464,6 @@ void AbsorptionCorrections::setMaxAttemptsValue(
   }
 }
 
-/**
- * Handle saving of workspace
- */
 void AbsorptionCorrections::saveClicked() {
 
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
@@ -479,9 +477,6 @@ void AbsorptionCorrections::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/**
- * Handle mantid plotting
- */
 void AbsorptionCorrections::plotClicked() {
   const auto plotType = m_uiForm.cbPlotOutput->currentText();
 
@@ -493,6 +488,8 @@ void AbsorptionCorrections::plotClicked() {
       plotTimeBin(QString::fromStdString("__mc_corrections_wavelength"));
   }
 }
+
+void AbsorptionCorrections::runClicked() { runTab(); }
 
 /**
  * Handle changing of the sample density unit

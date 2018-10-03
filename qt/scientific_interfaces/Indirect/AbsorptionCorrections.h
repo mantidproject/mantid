@@ -27,6 +27,7 @@ private slots:
   virtual void algorithmComplete(bool error);
   void saveClicked();
   void plotClicked();
+  void runClicked();
   void getBeamDefaults(const QString &dataName);
   void getMonteCarloDefaults(const QString &dataName);
   void setWavelengthsValue(Mantid::Geometry::Instrument_const_sptr instrument,

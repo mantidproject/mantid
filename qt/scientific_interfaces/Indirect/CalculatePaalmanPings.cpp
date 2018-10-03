@@ -41,9 +41,10 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
           SLOT(validateChemical()));
   connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
           SLOT(validateChemical()));
-  // Connect slots for plot and save
+  // Connect slots for run, plot and save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
   // Connect slots for toggling the mass/number density unit
   connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
@@ -538,9 +539,6 @@ void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
   }
 }
 
-/**
- * Handles saving of workspace
- */
 void CalculatePaalmanPings::saveClicked() {
 
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
@@ -548,9 +546,6 @@ void CalculatePaalmanPings::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/**
- * Handles mantid plotting of workspace
- */
 void CalculatePaalmanPings::plotClicked() {
 
   QString plotType = m_uiForm.cbPlotOutput->currentText();
@@ -564,6 +559,8 @@ void CalculatePaalmanPings::plotClicked() {
       plotTimeBin(QString::fromStdString(m_pythonExportWsName));
   }
 }
+
+void CalculatePaalmanPings::runClicked() { runTab(); }
 
 /**
  * Handle changing of the sample density unit

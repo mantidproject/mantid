@@ -32,6 +32,7 @@ private slots:
   /// Handles mantid plot and save
   void saveClicked();
   void plotClicked();
+  void runClicked();
   void plotCurrentPreview();
 
 private:

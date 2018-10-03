@@ -28,12 +28,12 @@ private slots:
   void plotPreview(int wsIndex);
   /// Handle abs. correction algorithm completion
   void containerSubtractionComplete();
-  /// Handles saving workspace
-  void saveClicked();
-  /// Handles mantid plotting
-  void plotClicked();
   /// Handles plotting the preview.
   void plotCurrentPreview();
+
+  void saveClicked();
+  void plotClicked();
+  void runClicked();
 
 private:
   void setup() override;
