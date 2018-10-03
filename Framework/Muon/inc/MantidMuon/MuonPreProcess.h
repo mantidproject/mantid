@@ -50,6 +50,9 @@ private:
   /// Add the correction inputs into the logs
   void addPreProcessSampleLogs(WorkspaceGroup_sptr group);
 
+  /// Perform validation of inputs to the algorithm
+  std::map<std::string, std::string> validateInputs() override;
+
   /// Allow WorkspaceGroup property to function correctly.
   bool checkGroups() override;
 };
