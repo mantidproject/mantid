@@ -64,9 +64,11 @@ PyObject *clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
   for (Py_intptr_t i = 0; i < dims[0]; ++i) {
     void *itemPtr = PyArray_GETPTR1(nparray, i);
     npy_datetime abstime = Converters::to_npy_datetime(cvector[i]);
+    auto scalar = PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr, nullptr);
     PyArray_SETITEM(
         nparray, reinterpret_cast<char *>(itemPtr),
-        PyArray_Scalar(reinterpret_cast<char *>(&abstime), descr, nullptr));
+        scalar);
+    Py_DecRef(scalar);
   }
   return reinterpret_cast<PyObject *>(nparray);
 }
