@@ -271,7 +271,8 @@ public:
   }
 
   void testFirstTransmissionRunInvalid() {
-    OptionsTable const optionsTable = {optionsRowWithFirstTransmissionRunInvalid()};
+    OptionsTable const optionsTable = {
+        optionsRowWithFirstTransmissionRunInvalid()};
     runTestForInvalidPerAngleOptions(optionsTable, 0, 1);
   }
 
@@ -281,7 +282,8 @@ public:
   }
 
   void testSecondTransmissionRunInvalid() {
-    OptionsTable const optionsTable = {optionsRowWithSecondTransmissionRunInvalid()};
+    OptionsTable const optionsTable = {
+        optionsRowWithSecondTransmissionRunInvalid()};
     runTestForInvalidPerAngleOptions(optionsTable, 0, 2);
   }
 
@@ -320,17 +322,26 @@ public:
     runTestForInvalidPerAngleOptions(optionsTable, 0, 5);
   }
 
-  // todo
   void testSetScale() {
-    OptionsTable const optionsTable = {optionsRowWithQStepInvalid()};
-    runTestForInvalidPerAngleOptions(optionsTable, 0, 5);
+    OptionsTable const optionsTable = {optionsRowWithScale()};
+    runTestForValidPerAngleOptions(optionsTable);
   }
 
-  void testSetScaleInvalid() {}
+  void testSetScaleInvalid() {
+    OptionsTable const optionsTable = {optionsRowWithScaleInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, 6);
+  }
 
-  void testSetProcessingInstructions() {}
+  void testSetProcessingInstructions() {
+    OptionsTable const optionsTable = {optionsRowWithProcessingInstructions()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
 
-  void testSetProcessingInstructionsInvalid() {}
+  void testSetProcessingInstructionsInvalid() {
+    OptionsTable const optionsTable = {
+        optionsRowWithProcessingInstructionsInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, 7);
+  }
 
 private:
   NiceMock<MockExperimentView> m_view;
@@ -463,20 +474,18 @@ private:
                             boost::none, boost::none);
   }
 
-  OptionsRow optionsRowWithSecondAngle() {
-    return {"2.3", "13463", "13464"};
-  }
+  OptionsRow optionsRowWithSecondAngle() { return {"2.3", "13463", "13464"}; }
   PerThetaDefaults defaultsWithSecondAngle() {
     return PerThetaDefaults(2.3, std::make_pair("13463", "13464"), boost::none,
                             boost::none, boost::none);
   }
-  OptionsRow optionsRowWithWildcard() {
-    return {"", "13463", "13464"};
-  }
+  OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
   OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }
   OptionsRow optionsRowWithFirstTransmissionRunInvalid() { return {"", "bad"}; }
   OptionsRow optionsRowWithSecondTransmissionRun() { return {"", "", "13464"}; }
-  OptionsRow optionsRowWithSecondTransmissionRunInvalid() { return {"", "", "bad"}; }
+  OptionsRow optionsRowWithSecondTransmissionRunInvalid() {
+    return {"", "", "bad"};
+  }
   OptionsRow optionsRowWithBothTransmissionRuns() {
     return {"", "13463", "13464"};
   }
@@ -485,13 +494,20 @@ private:
   OptionsRow optionsRowWithQMax() { return {"", "", "", "", "0.1"}; }
   OptionsRow optionsRowWithQMaxInvalid() { return {"", "", "", "", "bad"}; }
   OptionsRow optionsRowWithQStep() { return {"", "", "", "", "", "0.02"}; }
-  OptionsRow optionsRowWithQStepInvalid() { return {"", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithQStepInvalid() {
+    return {"", "", "", "", "", "bad"};
+  }
   OptionsRow optionsRowWithScale() { return {"", "", "", "", "", "", "1.4"}; }
-  OptionsRow optionsRowWithScaleInvalid() { return {"", "", "", "", "", "", "bad"}; }
-  OptionsRow optionsRowWithProcessingInstructions() { return {"", "", "", "", "", "", "", "1-4"}; }
-    OptionsRow optionsRowWithProcessingInstructionsInvalid() { return {"", "", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithScaleInvalid() {
+    return {"", "", "", "", "", "", "bad"};
+  }
+  OptionsRow optionsRowWithProcessingInstructions() {
+    return {"", "", "", "", "", "", "", "1-4"};
+  }
+  OptionsRow optionsRowWithProcessingInstructionsInvalid() {
+    return {"", "", "", "", "", "", "", "bad"};
+  }
 
-  // TODO
   void runTestForValidPerAngleOptions(OptionsTable const &optionsTable) {
     auto presenter = makePresenter();
     expectViewReturnsDefaultValues();
