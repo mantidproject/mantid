@@ -20,7 +20,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 namespace {
-int convertStringNumToInt(const std::string string) {
+int convertStringNumToInt(const std::string &string) {
   try {
     auto returnValue = std::stoi(string.c_str());
     return returnValue;
