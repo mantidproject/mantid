@@ -71,7 +71,7 @@ def get_copyright(year,comment_prefix = "//"):
     return """{0} Mantid Repository : https://github.com/mantidproject/mantid
 {0}
 {0} Copyright &copy; {1} ISIS Rutherford Appleton Laboratory UKRI,
-{0)     NScD Oak Ridge National Laboratory, European Spallation Source
+{0}     NScD Oak Ridge National Laboratory, European Spallation Source
 {0}     & Institut Laue - Langevin
 {0} SPDX - License - Identifier: GPL - 3.0 +""".format(comment_prefix,year)
 
