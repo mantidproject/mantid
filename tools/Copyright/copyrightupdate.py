@@ -34,9 +34,10 @@ regex_lines_to_skip = [re.compile("^#!.*?$[\s]*",re.MULTILINE)]
 regex_empty_comments = re.compile("(\/\*)[\/\s\*]{0,1000}?(\*\/)",re.MULTILINE)
 
 #Directories to ignore - any pathss including these strings will be ignored, so it will cascade
-directories_to_ignore = ["external","CMake","GSoapGenerated","buildconfig"]
 #Accepted file extensions
 accepted_file_extensions = [".py",".cpp",".h",".tcc",".in",".hh"]
+#excluded_file_tokens
+excluded_files = [".cmake.in", ".rb.in"]
 #python file exxtensions
 python_file_extensions = [".py"]
 #extensions to ignore, don't even report these
@@ -116,6 +117,12 @@ def process_file(filename):
     :param filename: The file to process
     :return: None
     """
+    #Skip the file if it contains an excluded token
+    for excluded_file in excluded_files:
+        if excluded_file in filename:
+            print("\t\tFile excluded by token",excluded_file)
+            return
+
     comment_prefix = r'//'
     basename, file_extension = os.path.splitext(filename)
     if file_extension.lower() in python_file_extensions:

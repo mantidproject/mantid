@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
 set(BU_CHMOD_BUNDLE_ITEMS True)
 set ( bundle ${CMAKE_INSTALL_PREFIX}/MantidPlot.app )
 execute_process(COMMAND chmod +x package_python_macports.py WORKING_DIRECTORY ${bundle})
