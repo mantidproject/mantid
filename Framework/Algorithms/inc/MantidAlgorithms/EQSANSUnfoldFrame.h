@@ -40,7 +40,9 @@ public:
   EQSANSWBand(const double &lMin, const double &lMax);
   double width();
   EQSANSWBand intersect(const EQSANSWBand &otherBand) const;
-  inline bool operator==(const EQSANSWBand& b) const {return (m_min==b.m_min && m_max==b.m_max);}
+  inline bool operator==(const EQSANSWBand &b) const {
+    return (m_min == b.m_min && m_max == b.m_max);
+  }
   double m_min;
   double m_max;
 };
@@ -52,7 +54,9 @@ public:
   size_t size();
   EQSANSTransWBands intersect(const EQSANSWBand &otherBand) const;
   EQSANSTransWBands intersect(const EQSANSTransWBands &otherGates) const;
-  inline bool operator==(const EQSANSTransWBands& b) const {return (m_bands == b.m_bands);}
+  inline bool operator==(const EQSANSTransWBands &b) const {
+    return (m_bands == b.m_bands);
+  }
 
   std::vector<EQSANSWBand> m_bands;
 };
@@ -70,7 +74,7 @@ public:
   void setSpeed(const API::Run &run);
   void setPhase(const API::Run &run, double offset);
   EQSANSTransWBands transmissionBands(double maxWl, double delay = 0.0,
-                                bool pulsed = true) const;
+                                      bool pulsed = true) const;
 
   /// chopper index, from zero to (NCHOPPERS - 1)
   size_t m_index;
@@ -103,7 +107,7 @@ public:
   const std::string category() const override { return "SANS"; }
   double getPulseFrequency();
   void setPulsePeriod();
-  double getPulsePeriod() const {return m_pulsePeriod; }
+  double getPulsePeriod() const { return m_pulsePeriod; }
   void setFrameSkippingMode();
   bool getFrameSkippingMode() const { return m_frameSkippingMode; }
   void setFrameWidth();
