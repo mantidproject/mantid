@@ -242,6 +242,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     strongPeakParamsToSend = strongPeakParams
 
                 # Will allow forced weak and edge peaks to be fit using a neighboring peak profile
+                print(sigX0Params, sigY0)
+
                 Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients,qMask,
                                                                   nTheta=nTheta, nPhi=nPhi, plotResults=False,
                                                                   zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
@@ -319,7 +321,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 raise
 
             except:
-                #raise
+                raise
                 logger.warning('Error fitting peak number ' + str(peakNumber))
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)
