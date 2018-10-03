@@ -109,7 +109,7 @@ void read(T *buffer, const H5::Group &group, const std::string &dataSetName,
   read(buffer, dataSet, start, count);
 }
 
-std::string readAttribute(const H5::DataSet &dataSet,
+std::string MANTID_PARALLEL_DLL readAttribute(const H5::DataSet &dataSet,
                           const std::string &attributeName);
 
 template <class TimeOffsetType, class IndexType, class TimeZeroType>
