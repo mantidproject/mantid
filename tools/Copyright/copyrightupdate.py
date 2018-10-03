@@ -34,7 +34,7 @@ regex_lines_to_skip = [re.compile("^#!.*?$[\s]*",re.MULTILINE)]
 regex_empty_comments = re.compile("(\/\*)[\/\s\*]{0,1000}?(\*\/)",re.MULTILINE)
 
 #Directories to ignore - any pathss including these strings will be ignored, so it will cascade
-directories_to_ignore = ["external","CMake","GSoapGenerated"]
+directories_to_ignore = ["external","CMake","GSoapGenerated","buildconfig"]
 #Accepted file extensions
 accepted_file_extensions = [".py",".cpp",".h",".tcc",".in",".hh"]
 #python file exxtensions
