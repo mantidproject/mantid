@@ -34,25 +34,44 @@ const double CHOPPER_ANGLE[4] = {129.605, 179.989, 230.010, 230.007};
 const double CHOPPER_LOCATION[4] = {5700., 7800., 9497., 9507.};
 
 /// Wavelength band
-struct WBand {
+class DLLExport EQSANSWBand {
+public:
+  EQSANSWBand();
+  EQSANSWBand(const double &lMin, const double &lMax);
+  double width();
+  EQSANSWBand intersect(const EQSANSWBand &otherBand) const;
+  inline bool operator==(const EQSANSWBand& b) const {return (m_min==b.m_min && m_max==b.m_max);}
   double m_min;
   double m_max;
-
-  WBand(const double &lMin, const double &lMax);
-  double width();
-  WBand intersect(const WBand &otherBand) const;
 };
 
 /// Set of wavelength bands transmitted by a chopper
-struct transWBands {
-  std::vector<WBand> m_bands;
-  transWBands();
+class DLLExport EQSANSTransWBands {
+public:
+  EQSANSTransWBands();
   size_t size();
-  transWBands intersect(const WBand &otherBand) const;
-  transWBands intersect(const transWBands &otherGates) const;
+  EQSANSTransWBands intersect(const EQSANSWBand &otherBand) const;
+  EQSANSTransWBands intersect(const EQSANSTransWBands &otherGates) const;
+  inline bool operator==(const EQSANSTransWBands& b) const {return (m_bands == b.m_bands);}
+
+  std::vector<EQSANSWBand> m_bands;
 };
 
-struct EQSANSDiskChopper {
+class DLLExport EQSANSDiskChopper {
+public:
+  EQSANSDiskChopper();
+  double period() const;
+  double transmissionDuration() const;
+  double openingPhase() const;
+  double closingPhase() const;
+  double rewind() const;
+  double tofToWavelength(double tof, double delay = 0.0,
+                         bool pulsed = false) const;
+  void setSpeed(const API::Run &run);
+  void setPhase(const API::Run &run, double offset);
+  EQSANSTransWBands transmissionBands(double maxWl, double delay = 0.0,
+                                bool pulsed = true) const;
+
   /// chopper index, from zero to (NCHOPPERS - 1)
   size_t m_index;
   /// distance to the moderator in meters
@@ -64,19 +83,6 @@ struct EQSANSDiskChopper {
   double m_phase;
   /// rotational speed, in Hz
   double m_speed;
-
-  EQSANSDiskChopper();
-  double period() const;
-  double transmissionDuration() const;
-  double openingPhase() const;
-  double closingPhase() const;
-  double rewind() const;
-  double tof_to_wavelength(double tof, double delay = 0.0,
-                           bool pulsed = false) const;
-  void setSpeed(const API::Run &run);
-  void setPhase(const API::Run &run, double offset);
-  transWBands transmissionBands(double maxWl, double delay = 0.0,
-                                bool pulsed = true) const;
 };
 
 class DLLExport EQSANSUnfoldFrame : public API::Algorithm {
@@ -95,29 +101,28 @@ public:
   int version() const override { return (1); }
   /// Algorithm's category for identification
   const std::string category() const override { return "SANS"; }
+  double getPulseFrequency();
+  void setPulsePeriod();
+  double getPulsePeriod() const {return m_pulsePeriod; }
+  void setFrameSkippingMode();
+  bool getFrameSkippingMode() const { return m_frameSkippingMode; }
+  void setFrameWidth();
+  double getFrameWidth() const { return m_frameWidth; }
+  void initializeChoppers();
 
 private:
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
-  void fractional_detector_distances();
-  double getPulseFrequency();
-  double getPulsePeriod();
-  bool isFrameSkippingMode();
-  void initializeChoppers();
-  WBand transmittedBand(double delay = 0.0) const;
+  EQSANSWBand transmittedBand(double delay = 0.0) const;
   double travelTime(double wavelength, double flightPath,
-                    bool pulsed = False) const;
+                    bool pulsed = false) const;
   double tof_to_wavelength(double tof, double flightPath, double delay = 0.0,
-                           bool pulsed = False) const;
+                           bool pulsed = false) const;
   double nominalDetectorDistance() const;
   size_t frameOperating(double wavelength) const;
   void execEvent();
-  /// time-of-flight of fastest neutrons allowed to arrive to the detector
-  double m_frameTOF0;
-  /// Assuming all detectors are at the same distance from the sample flange
-  bool m_sphericalDetectorArray;
   /// Minimal allowed TOF
   double m_lowTOFcut;
   /// Maximal allowed TOF under one pulse period
