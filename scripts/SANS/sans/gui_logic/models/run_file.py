@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
+
 class SummableRunFile(object):
     def __init__(self, path, run_number, is_event_mode):
         assert(type(path) == str)

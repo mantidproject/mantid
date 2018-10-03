@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
+
 class RunSelection(object):
     def __init__(self, on_change, runs = None):
         self._on_change = on_change
