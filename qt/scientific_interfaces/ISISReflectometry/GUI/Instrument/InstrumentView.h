@@ -66,6 +66,8 @@ public:
 
   void disableAll() override;
   void enableAll() override;
+  void enableDetectorCorrectionType() override;
+  void disableDetectorCorrectionType() override;
 
 public slots:
   void onSettingsChanged();

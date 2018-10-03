@@ -28,6 +28,8 @@ public:
   MOCK_CONST_METHOD0(getDetectorCorrectionType, std::string());
   MOCK_METHOD0(disableAll, void());
   MOCK_METHOD0(enableAll, void());
+  MOCK_METHOD0(enableDetectorCorrectionType, void());
+  MOCK_METHOD0(disableDetectorCorrectionType, void());
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

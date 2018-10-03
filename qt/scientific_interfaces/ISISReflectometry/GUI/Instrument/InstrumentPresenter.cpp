@@ -87,6 +87,10 @@ DetectorCorrectionType InstrumentPresenter::detectorCorrectionTypeFromView() {
 DetectorCorrections InstrumentPresenter::detectorCorrectionsFromView() {
   auto const correctPositions = m_view->getCorrectDetectors();
   auto const correctionType = detectorCorrectionTypeFromView();
+  if (correctPositions)
+    m_view->enableDetectorCorrectionType();
+  else
+    m_view->disableDetectorCorrectionType();
   return DetectorCorrections(correctPositions, correctionType);
 }
 

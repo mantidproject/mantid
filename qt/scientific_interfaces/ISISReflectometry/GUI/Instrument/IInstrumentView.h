@@ -70,6 +70,8 @@ public:
 
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
+  virtual void enableDetectorCorrectionType() = 0;
+  virtual void disableDetectorCorrectionType() = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

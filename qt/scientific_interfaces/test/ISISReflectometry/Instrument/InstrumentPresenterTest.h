@@ -137,7 +137,7 @@ public:
     runTestForValidMonitorBackgroundRange(range, boost::none);
   }
 
-  void testCorrectDetectorsToggled() {
+  void testCorrectDetectorsToggledUpdatesModel() {
     auto presenter = makePresenter();
     auto const correctDetectors = !presenter.instrument().correctDetectors();
 
@@ -150,7 +150,27 @@ public:
     verifyAndClear();
   }
 
-  void testSetDetectorCorrectionType() {
+  void testEnablingCorrectDetectorsEnablesCorrectionType() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getCorrectDetectors()).WillOnce(Return(true));
+    EXPECT_CALL(m_view, enableDetectorCorrectionType()).Times(1);
+    presenter.notifySettingsChanged();
+
+    verifyAndClear();
+  }
+
+  void testDiablingCorrectDetectorsDisablesCorrectionType() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getCorrectDetectors()).WillOnce(Return(false));
+    EXPECT_CALL(m_view, disableDetectorCorrectionType()).Times(1);
+    presenter.notifySettingsChanged();
+
+    verifyAndClear();
+  }
+
+  void testSetDetectorCorrectionTypeUpdatesModel() {
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_view, getDetectorCorrectionType())

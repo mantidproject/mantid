@@ -90,6 +90,14 @@ void InstrumentView::disableAll() { m_ui.instSettingsGroup->setEnabled(false); }
 
 void InstrumentView::enableAll() { m_ui.instSettingsGroup->setEnabled(true); }
 
+void InstrumentView::enableDetectorCorrectionType() {
+  m_ui.detectorCorrectionTypeComboBox->setEnabled(true);
+}
+
+void InstrumentView::disableDetectorCorrectionType() {
+  m_ui.detectorCorrectionTypeComboBox->setEnabled(false);
+}
+
 void InstrumentView::registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg) {
   registerInstrumentSettingsWidgets(alg);
 }
