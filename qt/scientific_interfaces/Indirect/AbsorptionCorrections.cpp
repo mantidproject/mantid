@@ -74,15 +74,13 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(getBeamDefaults(const QString &)));
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(getMonteCarloDefaults(const QString &)));
-
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   // Handle running, plotting and saving
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   // Handle density units
   connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
           SLOT(changeSampleDensityUnit(int)));
@@ -115,6 +113,8 @@ MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
 void AbsorptionCorrections::setup() { doValidation(); }
 
 void AbsorptionCorrections::run() {
+  setRunIsRunning(true);
+
   // Get correct corrections algorithm
   QString sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
 
@@ -355,25 +355,21 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
  * @param error True if algorithm has failed.
  */
 void AbsorptionCorrections::algorithmComplete(bool error) {
-  if (error) {
+  setRunIsRunning(false);
+  if (!error) {
+    auto correctionsWorkspace =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            m_pythonExportWsName);
+
+    if (correctionsWorkspace) {
+      auto wavelengthWorkspace =
+          convertUnits(correctionsWorkspace, "Wavelength");
+      AnalysisDataService::Instance().addOrReplace(
+          "__mc_corrections_wavelength", wavelengthWorkspace);
+    }
+  } else {
     emit showMessageBox(
         "Could not run absorption corrections.\nSee Results Log for details.");
-    return;
-  }
-
-  auto correctionsWorkspace =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          m_pythonExportWsName);
-
-  if (correctionsWorkspace) {
-    auto wavelengthWorkspace = convertUnits(correctionsWorkspace, "Wavelength");
-    AnalysisDataService::Instance().addOrReplace("__mc_corrections_wavelength",
-                                                 wavelengthWorkspace);
-
-    // Enable plot and save
-    m_uiForm.pbPlot->setEnabled(true);
-    m_uiForm.cbPlotOutput->setEnabled(true);
-    m_uiForm.pbSave->setEnabled(true);
   }
 }
 
@@ -478,6 +474,7 @@ void AbsorptionCorrections::saveClicked() {
 }
 
 void AbsorptionCorrections::plotClicked() {
+  setPlotResultIsPlotting(true);
   const auto plotType = m_uiForm.cbPlotOutput->currentText();
 
   if (checkADSForPlotSaveWorkspace("__mc_corrections_wavelength", false)) {
@@ -487,6 +484,7 @@ void AbsorptionCorrections::plotClicked() {
     if (plotType == "Both" || plotType == "Angle")
       plotTimeBin(QString::fromStdString("__mc_corrections_wavelength"));
   }
+  setPlotResultIsPlotting(false);
 }
 
 void AbsorptionCorrections::runClicked() { runTab(); }
@@ -513,6 +511,32 @@ void AbsorptionCorrections::changeCanDensityUnit(int index) {
   } else {
     m_uiForm.spCanDensity->setSuffix(" 1/A3");
   }
+}
+
+void AbsorptionCorrections::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void AbsorptionCorrections::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotOutput->setEnabled(enabled);
+}
+
+void AbsorptionCorrections::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void AbsorptionCorrections::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
+}
+
+void AbsorptionCorrections::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotResultEnabled(!plotting);
+  setSaveResultEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces
