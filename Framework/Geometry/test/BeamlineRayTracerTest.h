@@ -15,7 +15,6 @@
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
-#include <valgrind/callgrind.h>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::ConfigService;
@@ -166,6 +165,53 @@ public:
    * @param expectX :: expected x index, -1 if off
    * @param expectY :: expected y index, -1 if off
    */
+  void doTestOutlinedDetector(std::string message, V3D testDir,
+                              const double expectX, const double expectY) {
+
+    // Force to be unit vector
+    testDir.normalize();
+
+    // Do a trace and store the results
+    Links results = RayTracer::traceFromSample(testDir, *m_compInfoOutlined);
+
+    // Expect no intersection
+    if (expectY == -1) {
+      TSM_ASSERT_LESS_THAN(message, results.size(), 2);
+      return;
+    }
+
+    // Check size is correct, otherwise quit
+    TSM_ASSERT_EQUALS(message, results.size(), 2);
+    if (results.size() < 2) {
+      TS_FAIL("Did not hit a detector when we should have.");
+      return;
+    }
+
+    // Get the first result
+    Link res = *results.begin();
+
+    // Get the detector
+    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(
+        m_testInstrumentOutlined->getComponentByID(res.componentID));
+
+    if (!det) {
+      TS_FAIL("Expected a detector but found none");
+      return;
+    }
+
+    // Find the xy index from the detector ID
+    TSM_ASSERT_EQUALS(message, det->getPos().X(), expectX);
+    TSM_ASSERT_EQUALS(message, det->getPos().Y(), expectY);
+  }
+
+  /**
+   * Test ray tracing into a rectangular detector.
+   *
+   * @param message :: a string for debug information
+   * @param testDir :: direction of track
+   * @param expectX :: expected x index, -1 if off
+   * @param expectY :: expected y index, -1 if off
+   */
   void doTestRectangularDetector(std::string message, V3D testDir, int expectX,
                                  int expectY) {
 
@@ -232,8 +278,42 @@ public:
     doTestRectangularDetector("Zero-beam", V3D(0.0, 0.0, 0.0), -1, -1);
   }
 
+  void test_OutlinedDetector() {
+    // Create an instrument with some tubes
+    createOutlinedInstrument();
+
+    const size_t numPixels = 50;
+
+    // Test valid cases of test ray pointing into tube pixels
+    const double h = 0.003;
+    for (size_t i = 0; i < numPixels; ++i) {
+      const double index = static_cast<double>(i);
+      // Iterate over all pixels in each of the three tubes
+      doTestOutlinedDetector("Tube 1, Pixel " + std::to_string(i),
+                             V3D(0.0, index * h, 1.0), 0, index * h);
+      const double tube2XZ = sin((M_PI / 2.0) * 0.5);
+      doTestOutlinedDetector("Tube 2, Pixel " + std::to_string(index),
+                             V3D(tube2XZ, index * h, tube2XZ), tube2XZ,
+                             index * h);
+      doTestOutlinedDetector("Tube 3, Pixel " + std::to_string(index),
+                             V3D(1.0, index * h, 0.0), 1.0, index * h);
+    }
+
+    // Test boundries of tube
+    doTestOutlinedDetector("Just below tube detector", V3D(0.0, -h, 1.0), -1,
+                           -1);
+    doTestOutlinedDetector("Just above tube detector",
+                           V3D(0.0, numPixels * h, 1.0), -1, -1);
+
+    // Test extreme cases
+    doTestOutlinedDetector("Beam parallel to panel", V3D(0.0, 1.0, 0.0), -1,
+                           -1);
+    doTestOutlinedDetector("Zero-beam", V3D(0.0, 0.0, 0.0), -1, -1);
+  }
+
   void test_rectangular_detector_multiple_rays() {
     using DetectorCoordinates = std::vector<std::pair<int, int>>;
+    create_rectangular_instrument();
     // Towards the detector lower-left corner
     double w = 0.008;
     std::vector<V3D> testDirections = {V3D(0.0, 0.0, 5.0),
@@ -255,18 +335,20 @@ public:
         {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1},
     };
 
-    auto traces = RayTracer::traceFromSample(testDirections, *m_compInfoRectangular);
+    auto traces =
+        RayTracer::traceFromSample(testDirections, *m_compInfoRectangular);
 
     DetectorCoordinates actualResults;
     actualResults.reserve(traces.size());
 
     // Transform from ray tracer Links to XY detector coordinates
     std::transform(traces.begin(), traces.end(),
-                   std::back_inserter(actualResults), [this](const Links &result) -> std::pair<int, int> {
+                   std::back_inserter(actualResults),
+                   [this](const Links &result) -> std::pair<int, int> {
                      Link res = *result.begin();
 
-                    if (result.size() < 2)
-                        return {-1, -1};
+                     if (result.size() < 2)
+                       return {-1, -1};
 
                      // Get the detector
                      IDetector_const_sptr det =
@@ -274,8 +356,8 @@ public:
                              m_testInstrumentRectangular->getComponentByID(
                                  res.componentID));
 
-                    if (!det)
-                        return {-1, -1};
+                     if (!det)
+                       return {-1, -1};
 
                      // Parent bank
                      RectangularDetector_const_sptr rect =
@@ -293,6 +375,23 @@ private:
   /**
    * Helper methods for tests
    */
+  void createOutlinedInstrument() {
+
+    m_testInstrumentOutlined =
+        ComponentCreationHelper::createInstrumentWithPSDTubes();
+    InstrumentVisitor visitor{m_testInstrumentOutlined};
+
+    // Visit everything
+    visitor.walkInstrument();
+
+    // Get ComponentInfo and DetectorInfo objects and set them
+    auto infos =
+        InstrumentVisitor::makeWrappers(*m_testInstrumentOutlined, nullptr);
+
+    // Unpack the pair
+    m_compInfoOutlined = std::move(infos.first);
+    m_detInfoOutlined = std::move(infos.second);
+  }
 
   // Creates the objects to use in the tests
   void create_instrument_and_componentInfo() {
@@ -338,14 +437,17 @@ private:
    */
   // Holds the Instrument
   Instrument_sptr m_testInstrument;
+  Instrument_sptr m_testInstrumentOutlined;
   Instrument_sptr m_testInstrumentRectangular;
 
   // Holds the ComponentInfo
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_compInfo;
+  std::unique_ptr<Mantid::Geometry::ComponentInfo> m_compInfoOutlined;
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_compInfoRectangular;
 
   // Holds the DetectorInfo
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfo;
+  std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfoOutlined;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfoRectangular;
 };
 
@@ -410,41 +512,43 @@ public:
   }
 
   std::vector<V3D> makeTestDirections() {
-      std::vector<V3D> testDirections;
-      testDirections.reserve((360 / 3) * (180 / 3));
+    std::vector<V3D> testDirections;
+    testDirections.reserve((360 / 3) * (180 / 3));
 
-      // Directly in Z+ = towards the detector center
-      for (int azimuth = 0; azimuth < 360; azimuth += 3) {
-          for (int elev = -89; elev < 89; elev += 3) {
-              // Make a vector pointing in every direction
-              V3D testDir;
-              testDir.spherical(1, double(elev), double(azimuth));
-              testDirections.push_back(testDir);
-
-          }
+    // Directly in Z+ = towards the detector center
+    for (int azimuth = 0; azimuth < 360; azimuth += 3) {
+      for (int elev = -89; elev < 89; elev += 3) {
+        // Make a vector pointing in every direction
+        V3D testDir;
+        testDir.spherical(1, double(elev), double(azimuth));
+        testDirections.push_back(testDir);
       }
-      return testDirections;
+    }
+    return testDirections;
   }
 
-  Instrument_sptr loadInstrumentDefinition(const std::string& idfName) {
+  Instrument_sptr loadInstrumentDefinition(const std::string &idfName) {
     // Parse test file
-    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           idfName;
+    std::string filename =
+        ConfigService::Instance().getInstrumentDirectory() + idfName;
     std::string xmlText = Mantid::Kernel::Strings::loadFile(filename);
     InstrumentDefinitionParser IDP(filename, "UnitTesting", xmlText);
 
     // Get the instrument
     return IDP.parseXML(nullptr);
-  } 
+  }
 
   void test_RectangularDetector() {
-
-    // Directly in Z+ = towards the detector center
+    std::vector<V3D> testDirections;
+    testDirections.reserve(100);
     V3D testDir(0.0, 0.0, 1.0);
     for (size_t i = 0; i < 100; i++) {
-      Links results = RayTracer::traceFromSample(testDir, *m_compInfo);
-      TS_ASSERT_EQUALS(results.size(), 3);
+      testDirections.push_back(testDir);
     }
+
+    // Directly in Z+ = towards the detector center
+    auto results = RayTracer::traceFromSample(testDirections, *m_compInfo);
+    TS_ASSERT_EQUALS(results[0].size(), 3);
   }
 
   void test_RectangularDetector_instrument_v1() {
@@ -453,9 +557,9 @@ public:
     // Directly in Z+ = towards the detector center
     V3D testDir(0.0, 0.0, 1.0);
     for (size_t i = 0; i < 100; i++) {
-        tracer.traceFromSample(testDir);
-        Links results = tracer.getResults();
-        TS_ASSERT_EQUALS(results.size(), 3);
+      tracer.traceFromSample(testDir);
+      Links results = tracer.getResults();
+      TS_ASSERT_EQUALS(results.size(), 3);
     }
   }
 
@@ -469,10 +573,9 @@ public:
     InstrumentRayTracer tracer(m_instTopaz);
 
     auto testDirections = makeTestDirections();
-    for (const auto& testDir : testDirections) {
-        // Track it
-        tracer.traceFromSample(testDir);
-        Links results = tracer.getResults();
+    for (const auto &testDir : testDirections) {
+      tracer.traceFromSample(testDir);
+      Links results = tracer.getResults();
     }
   }
 
@@ -485,10 +588,10 @@ public:
     // Directly in Z+ = towards the detector center
     InstrumentRayTracer tracer(m_instWish);
     auto testDirections = makeTestDirections();
-    for (const auto& testDir : testDirections) {
-        // Track it
-        tracer.traceFromSample(testDir);
-        Links results = tracer.getResults();
+    for (const auto &testDir : testDirections) {
+      // Track it
+      tracer.traceFromSample(testDir);
+      Links results = tracer.getResults();
     }
   }
 

@@ -744,8 +744,8 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     if (i == 0 && xDirection < 0)
       x = -1e-32;
     const auto z = radius * cos(theta);
-    CompAssembly *tube = new CompAssembly(lexer.str());
-    tube->setPos(V3D(x, 0.0, z));
+    auto tube = new ObjCompAssembly(lexer.str());
+
     for (size_t j = 0; j < nPixelsPerTube; ++j) {
       lexer.str("");
       lexer << "pixel-" << i * nPixelsPerTube + j;
@@ -757,6 +757,12 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
       tube->add(pixel);
       testInst->markAsDetector(pixel);
     }
+
+    auto objAss = dynamic_cast<ObjCompAssembly *>(tube);
+    auto obj = objAss->createOutline();
+    objAss->setOutline(obj);
+
+    tube->setPos(V3D(x, 0.0, z));
     testInst->add(tube);
   }
   addSourceToInstrument(testInst, V3D(0.0, 0.0, -1.0));
