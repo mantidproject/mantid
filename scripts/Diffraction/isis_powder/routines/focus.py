@@ -166,7 +166,7 @@ def _test_splined_vanadium_exists(instrument, run_details):
                          " \nHave you run the method to create a Vanadium spline with these settings yet?\n")
 
 
-def _crop_spline_to_percent_of_max(spline, input_ws, spectrum):
+def _crop_spline_to_percent_of_max(spline, input_ws, output_workspace):
     spline_spectrum = spline.readY(0)
     y_val = numpy.amax(spline_spectrum)
     y_val = y_val / 100
@@ -174,5 +174,5 @@ def _crop_spline_to_percent_of_max(spline, input_ws, spectrum):
     small_spline_indecies = numpy.nonzero(spline_spectrum > y_val)[0]
     x_max = x_list[small_spline_indecies[-1]]
     x_min = x_list[small_spline_indecies[0]]
-    output = mantid.CropWorkspace(inputWorkspace=input_ws, XMin=x_min, XMax=x_max, OutputWorkspace=spectrum)
+    output = mantid.CropWorkspace(inputWorkspace=input_ws, XMin=x_min, XMax=x_max, OutputWorkspace=output_workspace)
     return output
