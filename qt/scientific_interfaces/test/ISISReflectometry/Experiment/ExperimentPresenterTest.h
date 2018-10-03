@@ -236,7 +236,6 @@ public:
     verifyAndClear();
   }
 
-  // TODO
   void testMultipleUniqueAnglesAreValid() {
     OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
                                        optionsRowWithSecondAngle()};
@@ -263,28 +262,69 @@ public:
   void testMultipleWildcardRowsAreInvalid() {
     OptionsTable const optionsTable = {optionsRowWithWildcard(),
                                        optionsRowWithWildcard()};
-    runTestForNonUniqueAngles(optionsTable);
+    runTestForInvalidPerAngleOptions(optionsTable, {0, 1}, 0);
   }
 
-  void testSetFirstTransmissionRun() {}
+  void testSetFirstTransmissionRun() {
+    OptionsTable const optionsTable = {optionsRowWithFirstTransmissionRun()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
 
-  void testSetSecondTransmissionRun() {}
+  void testFirstTransmissionRunInvalid() {
+    OptionsTable const optionsTable = {optionsRowWithFirstTransmissionRunInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, 1);
+  }
 
-  void testSetBothTransmissionRuns() {}
+  void testSetSecondTransmissionRun() {
+    OptionsTable const optionsTable = {optionsRowWithSecondTransmissionRun()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, 1);
+  }
 
-  void testSetQMin() {}
+  void testSecondTransmissionRunInvalid() {
+    OptionsTable const optionsTable = {optionsRowWithSecondTransmissionRunInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, 2);
+  }
 
-  void testSetQMinInvalid() {}
+  void testSetBothTransmissionRuns() {
+    OptionsTable const optionsTable = {optionsRowWithBothTransmissionRuns()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
 
-  void testSetQMax() {}
+  void testSetQMin() {
+    OptionsTable const optionsTable = {optionsRowWithQMin()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
 
-  void testSetQMaxInvalid() {}
+  void testSetQMinInvalid() {
+    OptionsTable const optionsTable = {optionsRowWithQMinInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, 3);
+  }
 
-  void testSetQStep() {}
+  void testSetQMax() {
+    OptionsTable const optionsTable = {optionsRowWithQMax()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
 
-  void testSetQStepInvalid() {}
+  void testSetQMaxInvalid() {
+    OptionsTable const optionsTable = {optionsRowWithQMaxInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, 4);
+  }
 
-  void testSetScale() {}
+  void testSetQStep() {
+    OptionsTable const optionsTable = {optionsRowWithQStep()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
+
+  void testSetQStepInvalid() {
+    OptionsTable const optionsTable = {optionsRowWithQStepInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, 5);
+  }
+
+  // todo
+  void testSetScale() {
+    OptionsTable const optionsTable = {optionsRowWithQStepInvalid()};
+    runTestForInvalidPerAngleOptions(optionsTable, 0, 5);
+  }
 
   void testSetScaleInvalid() {}
 
@@ -417,7 +457,7 @@ private:
 
   // These functions create various rows in the per-theta defaults tables,
   // either as an input array of strings or an output model
-  OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463"}; }
+  OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463", ""}; }
   PerThetaDefaults defaultsWithFirstAngle() {
     return PerThetaDefaults(0.5, std::make_pair("13463", ""), boost::none,
                             boost::none, boost::none);
@@ -433,6 +473,23 @@ private:
   OptionsRow optionsRowWithWildcard() {
     return {"", "13463", "13464"};
   }
+  OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }
+  OptionsRow optionsRowWithFirstTransmissionRunInvalid() { return {"", "bad"}; }
+  OptionsRow optionsRowWithSecondTransmissionRun() { return {"", "", "13464"}; }
+  OptionsRow optionsRowWithSecondTransmissionRunInvalid() { return {"", "", "bad"}; }
+  OptionsRow optionsRowWithBothTransmissionRuns() {
+    return {"", "13463", "13464"};
+  }
+  OptionsRow optionsRowWithQMin() { return {"", "", "", "0.008"}; }
+  OptionsRow optionsRowWithQMinInvalid() { return {"", "", "", "bad"}; }
+  OptionsRow optionsRowWithQMax() { return {"", "", "", "", "0.1"}; }
+  OptionsRow optionsRowWithQMaxInvalid() { return {"", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithQStep() { return {"", "", "", "", "", "0.02"}; }
+  OptionsRow optionsRowWithQStepInvalid() { return {"", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithScale() { return {"", "", "", "", "", "", "1.4"}; }
+  OptionsRow optionsRowWithScaleInvalid() { return {"", "", "", "", "", "", "bad"}; }
+  OptionsRow optionsRowWithProcessingInstructions() { return {"", "", "", "", "", "", "", "1-4"}; }
+    OptionsRow optionsRowWithProcessingInstructionsInvalid() { return {"", "", "", "", "", "", "", "bad"}; }
 
   // TODO
   void runTestForValidPerAngleOptions(OptionsTable const &optionsTable) {
@@ -440,6 +497,25 @@ private:
     expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
     EXPECT_CALL(m_view, showAllPerAngleOptionsAsValid()).Times(1);
+    presenter.notifyPerAngleDefaultsChanged(1, 1);
+    verifyAndClear();
+  }
+
+  void runTestForInvalidPerAngleOptions(OptionsTable const &optionsTable,
+                                        std::vector<int> rows, int column) {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
+    for (auto row : rows)
+      EXPECT_CALL(m_view, showPerAngleOptionsAsInvalid(row, column)).Times(1);
+    presenter.notifyPerAngleDefaultsChanged(1, 1);
+    verifyAndClear();
+  }
+
+  void runTestForInvalidPerAngleOptions(OptionsTable const &optionsTable,
+                                        int row, int column) {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
+    EXPECT_CALL(m_view, showPerAngleOptionsAsInvalid(row, column)).Times(1);
     presenter.notifyPerAngleDefaultsChanged(1, 1);
     verifyAndClear();
   }

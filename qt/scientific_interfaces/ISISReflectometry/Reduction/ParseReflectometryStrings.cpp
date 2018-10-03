@@ -78,37 +78,47 @@ parseScaleFactor(std::string const &scaleFactor) {
 boost::variant<boost::optional<RangeInQ>, std::vector<int>>
 parseQRange(std::string const &min, std::string const &max,
             std::string const &step) {
-  if (!(isEntirelyWhitespace(min) && isEntirelyWhitespace(max) &&
-        isEntirelyWhitespace(step))) {
-    auto minimum = parseNonNegativeDouble(min);
-    auto maximum = parseNonNegativeNonZeroDouble(max);
-    auto stepValue = parseDouble(step);
+  auto invalidParams = std::vector<int>();
+  double minimum = 0.0, maximum = 0.0, stepValue = 0.0;
 
-    auto invalidParams = std::vector<int>();
-    if (allInitialized(minimum, maximum, stepValue)) {
-      if (maximum.get() > minimum.get()) {
-        return boost::optional<RangeInQ>(
-            RangeInQ(minimum.get(), stepValue.get(), maximum.get()));
-      } else {
-        invalidParams.emplace_back(0);
-        invalidParams.emplace_back(1);
-        return invalidParams;
-      }
-    } else {
-      if (!minimum.is_initialized())
-        invalidParams.emplace_back(0);
-
-      if (!maximum.is_initialized())
-        invalidParams.emplace_back(1);
-
-      if (!stepValue.is_initialized())
-        invalidParams.emplace_back(2);
-
-      return invalidParams;
-    }
-  } else {
-    return boost::optional<RangeInQ>();
+  // If any values are set, check they parse ok
+  if (!isEntirelyWhitespace(min)) {
+    auto optional = parseNonNegativeDouble(min);
+    if (optional.is_initialized())
+      minimum = optional.get();
+    else
+      invalidParams.emplace_back(0);
   }
+
+  if (!isEntirelyWhitespace(max)) {
+    auto optional = parseNonNegativeDouble(max);
+    if (optional.is_initialized())
+      maximum = optional.get();
+    else
+      invalidParams.emplace_back(1);
+  }
+
+  if (!isEntirelyWhitespace(step)) {
+    auto optional = parseNonNegativeDouble(step);
+    if (optional.is_initialized())
+      stepValue = optional.get();
+    else
+      invalidParams.emplace_back(2);
+  }
+
+  // Check max is not less than min
+  if (maximum != 0.0 && minimum != 0.0 && maximum < minimum) {
+    invalidParams.emplace_back(0);
+    invalidParams.emplace_back(1);
+  }
+
+  // Return errors, valid range, or unset if nothing was specified
+  if (!invalidParams.empty())
+    return invalidParams;
+  else if (minimum == 0.0 && maximum == 0.0 && stepValue == 0.0)
+    return boost::optional<RangeInQ>();
+  else
+    return boost::optional<RangeInQ>(RangeInQ(minimum, stepValue, maximum));
 }
 
 boost::optional<std::vector<std::string>>

@@ -29,7 +29,7 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL RangeInQ {
 public:
-  RangeInQ(double min, double step, double max);
+  RangeInQ(double min = 0.0, double step = 0.0, double max = 0.0);
 
   bool isValid() const;
   double min() const;
