@@ -64,7 +64,7 @@ def qapplication():
     if app is None:
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
         argv = sys.argv[:]
-        argv[0] = APPNAME # replace application name
+        argv[0] = APPNAME  # replace application name
         app = QApplication(argv)
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
@@ -328,11 +328,11 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         # Close editors
         if self.editor.app_closing():
-            self.writeSettings(CONF) # write current window information to global settings object
+            self.writeSettings(CONF)  # write current window information to global settings object
 
             # Close all open plots
             # We don't want this at module scope here
-            import matplotlib.pyplot as plt  #noqa
+            import matplotlib.pyplot as plt  # noqa
             plt.close('all')
 
             event.accept()
@@ -360,13 +360,13 @@ class MainWindow(QMainWindow):
         qapp = QApplication.instance()
         qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
         if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('main/high_dpi_scaling'))
+            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('high_dpi_scaling'))
 
         # get the saved window geometry
-        window_size = settings.get('main/window/size')
+        window_size = settings.get('MainWindow/size')
         if not isinstance(window_size, QSize):
             window_size = QSize(*window_size)
-        window_pos = settings.get('main/window/position')
+        window_pos = settings.get('MainWindow/position')
         if not isinstance(window_pos, QPoint):
             window_pos = QPoint(*window_pos)
 
@@ -392,8 +392,8 @@ class MainWindow(QMainWindow):
         self.move(window_pos)
 
         # restore window state
-        if settings.has('main/window/state'):
-            self.restoreState(settings.get('main/window/state'))
+        if settings.has('MainWindow/state'):
+            self.restoreState(settings.get('MainWindow/state'))
         else:
             self.setWindowState(Qt.WindowMaximized)
 
@@ -404,9 +404,9 @@ class MainWindow(QMainWindow):
                 widget.readSettings(settings)
 
     def writeSettings(self, settings):
-        settings.set('main/window/size', self.size()) # QSize
-        settings.set('main/window/position', self.pos()) # QPoint
-        settings.set('main/window/state', self.saveState()) # QByteArray
+        settings.set('MainWindow/size', self.size())        # QSize
+        settings.set('MainWindow/position', self.pos())     # QPoint
+        settings.set('MainWindow/state', self.saveState())  # QByteArray
 
         # write out settings for children
         AlgorithmInputHistory().writeSettings(settings)
