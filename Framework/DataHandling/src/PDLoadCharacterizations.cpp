@@ -33,6 +33,9 @@ static const std::string ZERO("0.");
 static const std::string EXP_INI_VAN_KEY("Vana");
 static const std::string EXP_INI_EMPTY_KEY("VanaBg");
 static const std::string EXP_INI_CAN_KEY("MTc");
+/// the offset difference between the information in the table and the the
+/// information in version=1 files
+static const size_t INFO_OFFSET_V1(6);
 // in the filenames vector, each index has a unique location
 static const int F_INDEX_V0 = 0;
 static const int F_INDEX_V1 = 1;
@@ -493,7 +496,7 @@ void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
   wksp->getRef<std::string>("empty_instrument", rowNum) = values[5];
   for (size_t i = 0; i < names.size(); ++i) {
     const auto name = names[i];
-    wksp->getRef<std::string>(name, rowNum) = values[i + 6];
+    wksp->getRef<std::string>(name, rowNum) = values[i + INFO_OFFSET_V1];
   }
 }
 } // namespace
@@ -557,11 +560,11 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
       for (const auto &token : tokenizer) {
         valuesAsStr.push_back(token);
       }
-      if (valuesAsStr.size() < columnNames.size() + 6) {
+      if (valuesAsStr.size() < columnNames.size() + INFO_OFFSET_V1) {
         std::stringstream msg;
         msg << "Number of data columns (" << valuesAsStr.size()
             << ") not compatible with number of column labels ("
-            << (columnNames.size() + 6) << ")";
+            << (columnNames.size() + INFO_OFFSET_V1) << ")";
         throw Exception::ParseError(msg.str(), filename, linenum);
       }
 
@@ -589,7 +592,7 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
         row << 0.;                              // wavelength_min
         row << 0.;                              // wavelength_max
         // insert all the extras
-        for (size_t i = 6; i < valuesAsStr.size(); ++i) {
+        for (size_t i = INFO_OFFSET_V1; i < valuesAsStr.size(); ++i) {
           row << valuesAsStr[i];
         }
       }
