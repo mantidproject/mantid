@@ -243,7 +243,7 @@ std::size_t Iqt::getXMinIndex(Mantid::MantidVec const &yData,
                               std::vector<double>::const_iterator iter) {
   auto cropIndex = 0;
   if (iter != yData.end()) {
-    auto const index = iter - yData.begin();
+    auto const index = static_cast<int>(iter - yData.begin());
     cropIndex = index > 0 ? index - 1 : index;
   } else
     showMessageBox(
