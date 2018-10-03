@@ -1,12 +1,14 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import six
 
-from Muon.GUI.Common.muon_workspace import MuonWorkspace, add_directory_structure
-
 import mantid.simpleapi as simpleapi
-from mantid.api import ITableWorkspace, WorkspaceGroup
 import mantid.api as api
+from mantid.api import ITableWorkspace, WorkspaceGroup
 from mantid.dataobjects import Workspace2D
+
+from Muon.GUI.Common.muon_workspace import MuonWorkspace, add_directory_structure
 
 
 class MuonWorkspaceTest(unittest.TestCase):
@@ -319,7 +321,7 @@ class MuonWorkspaceAddDirectoryTest(unittest.TestCase):
         self.assert_group1_is_inside_group2("testGroup2", "testGroup1")
 
     # ----------------------------------------------------------------------------------------------
-    # Test directory structure functionality in Muonworkspace
+    # Test directory structure functionality in MuonWorkspace
     # ----------------------------------------------------------------------------------------------
 
     def test_that_if_workspace_exists_with_same_name_as_group_then_it_is_replaced(self):

@@ -1,3 +1,4 @@
+# pylint: disable=F0401
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import mtd
@@ -55,26 +56,37 @@ class MuonWorkspace(object):
     A basic muon workspace which is either the workspace or the name of the workspace in the ADS
     """
 
-    # TODO : add __str__ to print useful info, i.e. in ADS or not and directory structure.
-
     def __init__(self, workspace):
-        self._is_in_ADS = False
+        self._is_in_ads = False
         self._workspace = None
         self._directory_structure = ""
         self._workspace_name = ""
 
         self.workspace = workspace
 
+    def __str__(self):
+        return "MuonWorkspace Object \n" \
+               "In ADS         : {}\n" \
+               "Name           : {}\n" \
+               "Directory      : {}\n" \
+               "Workspace Type : {}\n".format(self._is_in_ads,
+                                              self._workspace_name,
+                                              self._directory_structure,
+                                              type(self._workspace))
+
     @property
     def is_hidden(self):
-        return not self._is_in_ADS
+        """Is the workspace hidden (i.e. not in the ADS)."""
+        return not self._is_in_ads
 
     @property
     def name(self):
+        """The current name of the workspace."""
         return self._directory_structure + self._workspace_name
 
     @property
     def workspace(self):
+        """The Workspace object."""
         if not self.is_hidden:
             return mtd[self._workspace_name]
         else:
@@ -92,7 +104,7 @@ class MuonWorkspace(object):
         if not self.is_hidden:
             if mtd.doesExist(self._workspace_name):
                 mtd.remove(self._workspace_name)
-            self._is_in_ADS = False
+            self._is_in_ads = False
             self.name = ""
             self._directory_structure = ""
         if isinstance(value, Workspace) and not isinstance(value, WorkspaceGroup):
@@ -124,7 +136,7 @@ class MuonWorkspace(object):
                 mtd[group].add(self._workspace_name)
 
             self._workspace = None
-            self._is_in_ADS = True
+            self._is_in_ads = True
         else:
             raise ValueError("Cannot store workspace in ADS with name : ",
                              str(name))
@@ -136,7 +148,7 @@ class MuonWorkspace(object):
         if mtd.doesExist(self._workspace_name):
             self._workspace = mtd[self._workspace_name]
             mtd.remove(self._workspace_name)
-            self._is_in_ADS = False
+            self._is_in_ads = False
             self._workspace_name = ""
             self._directory_structure = ""
         else:
