@@ -58,17 +58,14 @@ void MoveInstrumentComponent::exec() {
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
-  const Mantid::Geometry::ComponentInfo *componentInfo;
   Instrument_const_sptr inst;
   if (inputW) {
     inst = inputW->getInstrument();
-    componentInfo = &inputW->componentInfo();
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "MatrixWorkspace provided as input");
   } else if (inputP) {
     inst = inputP->getInstrument();
-    componentInfo = &inputP->componentInfo();
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "PeaksWorkspace provided as input");
@@ -109,11 +106,13 @@ void MoveInstrumentComponent::exec() {
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  auto compIndex = componentInfo->indexOf(comp->getComponentID());
-  auto parent = componentInfo->parent(compIndex);
-  auto grandParent = componentInfo->parent(parent);
-  auto grandParentType = componentInfo->componentType(grandParent);
-  if (componentInfo->isDetector(compIndex) &&
+  const auto &componentInfo =
+      inputW ? inputW->componentInfo() : inputP->componentInfo();
+  auto compIndex = componentInfo.indexOf(comp->getComponentID());
+  auto parent = componentInfo.parent(compIndex);
+  auto grandParent = componentInfo.parent(parent);
+  auto grandParentType = componentInfo.componentType(grandParent);
+  if (componentInfo.isDetector(compIndex) &&
       (grandParentType == Mantid::Beamline::ComponentType::Grid ||
        grandParentType == Mantid::Beamline::ComponentType::Rectangular ||
        grandParentType == Mantid::Beamline::ComponentType::Structured)) {
