@@ -112,7 +112,6 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
             self.hab_centre_label.setText('Centre Position {}'.format(component_list[1]))
             self.update_hab_check_box.setText('Update {}'.format(component_list[1]))
 
-
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
     # ------------------------------------------------------------------------------------------------------------------
