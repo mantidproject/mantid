@@ -35,6 +35,12 @@ digraph ReflectometryReductionOne {
 
   subgraph decisions {
     $decision_style
+    checkPolarizationCor   [label="Is PC required?"]
+  }
+
+  subgraph {
+      node[shape=circle, fillcolor=none]
+      stop [label="Stop"]
   }
 
   inputWorkspace -> applyFloodI
@@ -59,10 +65,12 @@ digraph ReflectometryReductionOne {
   IvsLam_1       -> groupIvsLam
   groupIvsLam    -> IvsLam_temp
 
-  IvsLam_temp    -> polCorr
+  IvsLam_temp    -> checkPolarizationCor
+  checkPolarizationCor -> polCorr  [label="Yes"]
+  checkPolarizationCor -> stop     [label="No"]
   polCorr        -> IvsLam_final
-  IvsLam_final   -> reflRedOne_2 [label="[0]"]
-  IvsLam_final   -> reflRedOne_3 [label="[1]"]
+  IvsLam_final   -> reflRedOne_2   [label="[0]"]
+  IvsLam_final   -> reflRedOne_3   [label="[1]"]
   reflRedOne_2   -> IvsQ_2
   reflRedOne_3   -> IvsQ_3
   IvsQ_2         -> groupFinal

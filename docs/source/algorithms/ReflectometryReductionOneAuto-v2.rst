@@ -84,12 +84,12 @@ The diagram below illustrates this process (note that, for the sake of clarity, 
 workspace in Q, :literal:`OutputWorkspaceBinned`, is not represented but it is handled analogously to
 :literal:`OutputWorkspace` and :literal:`OutputWorkspaceWavelength`):
 
-.. diagram:: ReflectometryReductionOneAuto-v2-Groups_noPA_wkflw.dot
+.. diagram:: ReflectometryReductionOneAuto-v2-Groups_wkflw.dot
 
 Polarization Analysis Off
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If :literal:`PolarizationAnalysis = None` the reduction stops here. Note that if
+If :literal:`PolarizationAnalysis = None` the reduction stops. Note that if
 transmission runs are given in the form of a workspace group, then the first 
 element in the group will be used on every input workspace. If transmission runs
 are provided as matrix workspaces the specified runs will be used for all members
@@ -123,8 +123,6 @@ workspace that will be used as the transmission run for all items in the input
 workspace group, as illustrated in the diagram below (note that, for the sake of 
 clarity, the rebinned output workspace in Q, :literal:`OutputWorkspaceBinned`, is 
 not represented but it is handled analogously to :literal:`OutputWorkspace`).
-
-.. diagram:: ReflectometryReductionOneAuto-v2-Groups_PA_wkflw.dot
 
 Previous Versions
 -----------------
