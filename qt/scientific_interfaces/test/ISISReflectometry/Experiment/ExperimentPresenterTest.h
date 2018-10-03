@@ -222,8 +222,8 @@ public:
 
     auto const row = 1;
     auto const column = 2;
-    OptionsTable const optionsTable = {optionsWithAngleAndOneTrans(),
-                                       optionsWithAngleAndTwoTrans()};
+    OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
+                                       optionsRowWithSecondAngle()};
     expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
     presenter.notifyPerAngleDefaultsChanged(row, column);
@@ -231,21 +231,40 @@ public:
     // Check the model contains the per-theta defaults returned by the view
     auto const perThetaDefaults = presenter.experiment().perThetaDefaults();
     TS_ASSERT_EQUALS(perThetaDefaults.size(), 2);
-    TS_ASSERT_EQUALS(perThetaDefaults[0], defaultsWithAngleAndOneTrans());
-    TS_ASSERT_EQUALS(perThetaDefaults[1], defaultsWithAngleAndTwoTrans());
+    TS_ASSERT_EQUALS(perThetaDefaults[0], defaultsWithFirstAngle());
+    TS_ASSERT_EQUALS(perThetaDefaults[1], defaultsWithSecondAngle());
     verifyAndClear();
   }
 
   // TODO
-  void testSetMultipleUniqueAngles() {}
+  void testMultipleUniqueAnglesAreValid() {
+    OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
+                                       optionsRowWithSecondAngle()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
 
-  void testSetMultipoleNonUniqueAngles() {}
+  void testMultipleNonUniqueAnglesAreInvalid() {
+    OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
+                                       optionsRowWithFirstAngle()};
+    runTestForNonUniqueAngles(optionsTable);
+  }
 
-  void testSetAngleAndWildcardRow() {}
+  void testSingleWildcardRowIsValid() {
+    OptionsTable const optionsTable = {optionsRowWithWildcard()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
 
-  void testSetSingleWildcardRow() {}
+  void testAngleAndWildcardRowAreValid() {
+    OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
+                                       optionsRowWithWildcard()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
 
-  void testSetMultipleWildcardRows() {}
+  void testMultipleWildcardRowsAreInvalid() {
+    OptionsTable const optionsTable = {optionsRowWithWildcard(),
+                                       optionsRowWithWildcard()};
+    runTestForNonUniqueAngles(optionsTable);
+  }
 
   void testSetFirstTransmissionRun() {}
 
@@ -275,6 +294,7 @@ public:
 
 private:
   NiceMock<MockExperimentView> m_view;
+  double m_thetaTolerance{0.01};
 
   Experiment makeModel() {
     auto polarizationCorrections =
@@ -295,7 +315,7 @@ private:
     // return something sensible
     expectViewReturnsDefaultValues();
     auto presenter =
-        ExperimentPresenter(&m_view, makeModel(), /*thetaTolerance=*/0.01);
+        ExperimentPresenter(&m_view, makeModel(), m_thetaTolerance);
     verifyAndClear();
     return presenter;
   }
@@ -332,20 +352,6 @@ private:
     expectViewReturnsDefaultAnalysisMode();
     expectViewReturnsSumInLambdaDefaults();
     expectViewReturnsDefaultPolarizationCorrectionType();
-  }
-
-  // These functions create various rows in the per-theta defaults tables,
-  // either as an input array of strings or an output model
-  OptionsRow optionsWithAngleAndOneTrans() { return {"0.5", "13463"}; }
-  PerThetaDefaults defaultsWithAngleAndOneTrans() {
-    return PerThetaDefaults(0.5, std::make_pair("13463", ""), boost::none,
-                            boost::none, boost::none);
-  }
-
-  OptionsRow optionsWithAngleAndTwoTrans() { return {"2.3", "13463", "13464"}; }
-  PerThetaDefaults defaultsWithAngleAndTwoTrans() {
-    return PerThetaDefaults(2.3, std::make_pair("13463", "13464"), boost::none,
-                            boost::none, boost::none);
   }
 
   void runWithPolarizationCorrectionInputsDisabled(std::string const &type) {
@@ -406,6 +412,43 @@ private:
     presenter.notifySettingsChanged();
     TS_ASSERT_EQUALS(presenter.experiment().transmissionRunRange(),
                      boost::none);
+    verifyAndClear();
+  }
+
+  // These functions create various rows in the per-theta defaults tables,
+  // either as an input array of strings or an output model
+  OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463"}; }
+  PerThetaDefaults defaultsWithFirstAngle() {
+    return PerThetaDefaults(0.5, std::make_pair("13463", ""), boost::none,
+                            boost::none, boost::none);
+  }
+
+  OptionsRow optionsRowWithSecondAngle() {
+    return {"2.3", "13463", "13464"};
+  }
+  PerThetaDefaults defaultsWithSecondAngle() {
+    return PerThetaDefaults(2.3, std::make_pair("13463", "13464"), boost::none,
+                            boost::none, boost::none);
+  }
+  OptionsRow optionsRowWithWildcard() {
+    return {"", "13463", "13464"};
+  }
+
+  // TODO
+  void runTestForValidPerAngleOptions(OptionsTable const &optionsTable) {
+    auto presenter = makePresenter();
+    expectViewReturnsDefaultValues();
+    EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
+    EXPECT_CALL(m_view, showAllPerAngleOptionsAsValid()).Times(1);
+    presenter.notifyPerAngleDefaultsChanged(1, 1);
+    verifyAndClear();
+  }
+
+  void runTestForNonUniqueAngles(OptionsTable const &optionsTable) {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
+    EXPECT_CALL(m_view, showPerAngleThetasNonUnique(m_thetaTolerance)).Times(1);
+    presenter.notifyPerAngleDefaultsChanged(0, 0);
     verifyAndClear();
   }
 };
