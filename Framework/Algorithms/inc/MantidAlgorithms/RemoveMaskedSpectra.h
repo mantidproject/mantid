@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** RemoveMaskedSpectra removes all masked spectra.
-*/
+ */
 class DLLExport RemoveMaskedSpectra : public API::Algorithm {
 public:
   const std::string name() const override;

@@ -15,7 +15,7 @@ namespace Kernel {
 
 /** Same as EnabledWhenProperty, but returns the value for the
  * isVisible() property instead of the isEnabled() property.
-*/
+ */
 class DLLExport VisibleWhenProperty : public EnabledWhenProperty {
 public:
   /// Constructs a VisibleWhenProperty object which checks the property

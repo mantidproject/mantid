@@ -18,7 +18,7 @@ namespace Algorithms {
  *  that recorded data which spills over from the previous frame.
  *  This can occur when dealing with different time regimes for detectors
  *  and monitors.
-*/
+ */
 class MANTID_ALGORITHMS_DLL UnwrapMonitorsInTOF : public API::Algorithm {
 public:
   const std::string name() const override;

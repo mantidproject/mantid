@@ -10,7 +10,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 /** @class ReflDataProcessorMainPresenter
-*/
+ */
 class ReflDataProcessorMainPresenter {
 public:
   virtual ~ReflDataProcessorMainPresenter(){};

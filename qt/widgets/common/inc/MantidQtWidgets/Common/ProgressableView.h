@@ -13,7 +13,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /** ProgressableView : Abstract view useful for indicating progress
-*/
+ */
 class EXPORT_OPT_MANTIDQT_COMMON ProgressableView {
 public:
   /// The style of the progress bar: either a standard percentage progress bar

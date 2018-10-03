@@ -16,7 +16,7 @@ namespace CurveFitting {
 namespace Functions {
 
 /** Polynomial : N-th polynomial background function.
-*/
+ */
 class DLLExport Polynomial : public BackgroundFunction {
 public:
   Polynomial();

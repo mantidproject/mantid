@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Kernel {
 
 /** ICatalogInfo : An abstract class that holds information about catalogs.
-*/
+ */
 class MANTID_KERNEL_DLL ICatalogInfo {
 public:
   /// Obtain catalog name from the facility file.

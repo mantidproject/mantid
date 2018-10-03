@@ -17,7 +17,7 @@ class EventWorkspace;
 namespace MDAlgorithms {
 
 /** MDNormSCD : Generate MD normalization for single crystal diffraction
-  */
+ */
 class DLLExport MDNormDirectSC : public SlicingAlgorithm {
 public:
   MDNormDirectSC();

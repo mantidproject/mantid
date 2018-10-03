@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Crystal {
 
 /** IntegratePeaksHybrid : Integrate single crystal peaks algorithm
-*/
+ */
 class DLLExport IntegratePeaksHybrid : public API::Algorithm {
 public:
   const std::string name() const override;

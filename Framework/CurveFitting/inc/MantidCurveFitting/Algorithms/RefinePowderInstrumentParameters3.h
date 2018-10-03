@@ -23,7 +23,7 @@ namespace CurveFitting {
 namespace Algorithms {
 
 /** RefinePowderInstrumentParameters3 :
-*/
+ */
 class DLLExport RefinePowderInstrumentParameters3 : public API::Algorithm {
 public:
   RefinePowderInstrumentParameters3();

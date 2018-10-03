@@ -13,7 +13,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** MaxentSpaceComplex : Defines a space of complex numbers.
-*/
+ */
 class MANTID_ALGORITHMS_DLL MaxentSpaceComplex : public MaxentSpace {
 public:
   // Converts a given vector to a complex vector

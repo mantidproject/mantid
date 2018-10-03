@@ -16,7 +16,7 @@ namespace Mantid {
 namespace Kernel {
 
 /** OptionalBool : Tri-state bool. Defaults to unset.
-*/
+ */
 class MANTID_KERNEL_DLL OptionalBool {
 public:
   enum Value { Unset, True, False };

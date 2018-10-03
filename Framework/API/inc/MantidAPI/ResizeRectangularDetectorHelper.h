@@ -16,7 +16,7 @@ class IComponent;
 } // namespace Geometry
 namespace API {
 /** Helpers for resizing RectangularDetectors
-*/
+ */
 MANTID_API_DLL void applyRectangularDetectorScaleToComponentInfo(
     Geometry::ComponentInfo &componentInfo, Geometry::IComponent *componentId,
     const double scaleX, const double scaleY);

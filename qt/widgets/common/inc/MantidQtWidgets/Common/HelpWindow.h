@@ -18,7 +18,6 @@ class QWidget;
 namespace MantidQt {
 namespace API {
 
-
 class EXPORT_OPT_MANTIDQT_COMMON HelpWindow {
 public:
   static void showPage(QWidget *parent, const std::string &url = std::string());

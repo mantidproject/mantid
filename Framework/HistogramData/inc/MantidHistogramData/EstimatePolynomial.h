@@ -15,7 +15,7 @@ namespace Mantid {
 namespace HistogramData {
 
 /** EstimatePolynomial : TODO: DESCRIPTION
-*/
+ */
 
 /**
  * @brief estimateBackground Estimate a polynomial using Gauss-Markov.

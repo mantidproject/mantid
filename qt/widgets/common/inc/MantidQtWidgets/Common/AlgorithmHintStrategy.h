@@ -14,7 +14,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 /** AlgorithmHintStrategy : Produces hints using a given algorithm's properties.
-*/
+ */
 class AlgorithmHintStrategy : public HintStrategy {
 public:
   AlgorithmHintStrategy(Mantid::API::IAlgorithm_sptr algorithm,

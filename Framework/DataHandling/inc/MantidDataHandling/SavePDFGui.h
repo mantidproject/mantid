@@ -14,7 +14,7 @@ namespace Mantid {
 namespace DataHandling {
 
 /** SavePDFGui : TODO: DESCRIPTION
-*/
+ */
 class DLLExport SavePDFGui : public API::Algorithm {
 public:
   const std::string name() const override;

@@ -21,7 +21,7 @@ namespace MantidQt {
 namespace SliceViewer {
 
 /** PeakViewFactory : Creates an appropriate PeakView object
-*/
+ */
 class PeakViewFactory : public PeakOverlayViewFactoryBase {
 public:
   PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,

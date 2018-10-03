@@ -67,7 +67,7 @@ extern void MANTID_MDALGORITHMS_DLL padParameterVector(
     std::vector<double> &param_vector, const size_t grow_to_size);
 
 /** AccumulateMD : Algorithm for appending new data to a MDHistoWorkspace
-*/
+ */
 class DLLExport AccumulateMD : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;

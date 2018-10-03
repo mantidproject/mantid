@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** CropToComponent : Crops a workspace to a set of components.
-*/
+ */
 class MANTID_ALGORITHMS_DLL CropToComponent final
     : public API::DistributedAlgorithm {
 public:

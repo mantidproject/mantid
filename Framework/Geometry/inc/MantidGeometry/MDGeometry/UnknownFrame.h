@@ -18,7 +18,7 @@ namespace Mantid {
 namespace Geometry {
 
 /** UnknownFrame : Unknown MDFrame
-*/
+ */
 class MANTID_GEOMETRY_DLL UnknownFrame : public MDFrame {
 public:
   UnknownFrame(std::unique_ptr<Kernel::MDUnit> unit);

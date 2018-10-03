@@ -21,7 +21,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
 /** Trust Region minimizer class using the DTRS method of GALAHAD.
-*/
+ */
 class DLLExport TrustRegionMinimizer : public API::IFuncMinimizer {
 public:
   /// constructor and destructor

@@ -15,7 +15,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** Controls the data flow and the order of algorithm execution.
-*/
+ */
 class MANTID_ALGORITHMS_DLL WorkflowAlgorithmRunner : public API::Algorithm {
 public:
   /// Algorithm's name

@@ -44,7 +44,6 @@ public:
   //
   void initialize(const MDWSDescription &ConvParams) override;
 
-  
   std::vector<double> getExtremumPoints(const double xMin, const double xMax,
                                         size_t det_num) const override;
 

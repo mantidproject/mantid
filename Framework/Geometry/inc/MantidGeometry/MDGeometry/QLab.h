@@ -18,7 +18,7 @@ namespace Mantid {
 namespace Geometry {
 
 /** QLab : Q in the lab frame MDFrame.
-*/
+ */
 class MANTID_GEOMETRY_DLL QLab : public MDFrame {
 public:
   QLab();

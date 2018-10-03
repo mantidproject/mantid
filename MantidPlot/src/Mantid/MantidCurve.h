@@ -16,7 +16,7 @@ class Graph;
 class ErrorBarSettings;
 
 /** Base class for MantidCurve types.
-*/
+ */
 class MantidCurve : public PlotCurve, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:

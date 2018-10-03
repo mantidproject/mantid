@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** ClearMaskFlag : Delete the mask flag/bit on all spectra in a workspace
-*/
+ */
 class DLLExport ClearMaskFlag : public API::Algorithm {
 public:
   const std::string name() const override;

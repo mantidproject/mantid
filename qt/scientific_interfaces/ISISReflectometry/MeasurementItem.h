@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Measurement : Immutable measurement type
-*/
+ */
 class MANTIDQT_ISISREFLECTOMETRY_DLL MeasurementItem {
 
 public:

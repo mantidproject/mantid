@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Geometry {
 
 /** RenderingMesh : Mesh abstraction required for rendering
-*/
+ */
 class MANTID_GEOMETRY_DLL RenderingMesh {
 
 public:

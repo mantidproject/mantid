@@ -15,7 +15,7 @@ namespace Algorithms {
 
 /** MostLikelyMean : Computes the most likely mean of the array by
  * minimizing the taxicab distance of the elements from the rest.
-*/
+ */
 class MANTID_ALGORITHMS_DLL MostLikelyMean : public API::Algorithm {
 public:
   const std::string name() const override;

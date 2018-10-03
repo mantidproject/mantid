@@ -26,7 +26,6 @@ class OrientedLattice;
 
 namespace MDAlgorithms {
 
-
 class DLLExport LoadSQW2 : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   const std::string name() const override;

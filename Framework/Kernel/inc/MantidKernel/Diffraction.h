@@ -15,7 +15,7 @@ namespace Kernel {
 namespace Diffraction {
 
 /** Diffraction : Collection of functions useful in diffraction scattering
-*/
+ */
 
 MANTID_KERNEL_DLL double calcTofMin(const double difc, const double difa,
                                     const double tzero,

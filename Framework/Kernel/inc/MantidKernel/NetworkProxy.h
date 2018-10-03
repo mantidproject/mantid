@@ -15,7 +15,7 @@ namespace Mantid {
 namespace Kernel {
 
 /** NetworkProxy : Network proxy utility for getting network proxy information.
-*/
+ */
 class DLLExport NetworkProxy {
 public:
   /// Constructor

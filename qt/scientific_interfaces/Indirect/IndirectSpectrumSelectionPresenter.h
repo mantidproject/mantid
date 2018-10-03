@@ -23,7 +23,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 /** IndirectSpectrumSelectionPresenter
-*/
+ */
 class DLLExport IndirectSpectrumSelectionPresenter : public QObject {
   Q_OBJECT
 public:

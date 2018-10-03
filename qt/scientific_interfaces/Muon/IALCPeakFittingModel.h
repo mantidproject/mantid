@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** IALCPeakFittingModel : ALC peak fitting step model interface.
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL IALCPeakFittingModel : public QObject {
   Q_OBJECT
 

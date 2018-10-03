@@ -14,7 +14,7 @@ namespace Mantid {
 namespace DataObjects {
 
 /** PeakShapeNone : No peak shape. Null Object. For unintegrated peaks.
-*/
+ */
 class DLLExport NoShape : public Mantid::Geometry::PeakShape {
 
 public:

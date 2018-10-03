@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** CalculateZscore : Calculate Zscore for a Matrix Workspace
-*/
+ */
 class DLLExport CalculateZscore : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method

@@ -18,7 +18,7 @@ namespace MDAlgorithms {
 
 /** Abstract base class for unary operations (e.g. Log or Exp)
  * on MDWorkspaces.
-*/
+ */
 class DLLExport UnaryOperationMD : public API::Algorithm {
 public:
   const std::string name() const override;

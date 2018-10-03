@@ -52,7 +52,7 @@ struct AnalysisOptions {
 } // namespace Muon
 
 /** MuonAnalysisDataLoader : Loads and processes muon data for MuonAnalysis
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL MuonAnalysisDataLoader {
 public:
   /// constructor

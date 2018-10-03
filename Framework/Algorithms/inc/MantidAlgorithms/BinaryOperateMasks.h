@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** BinaryOperateMasks : TODO: DESCRIPTION
-*/
+ */
 class DLLExport BinaryOperateMasks : public API::Algorithm {
 public:
   BinaryOperateMasks();

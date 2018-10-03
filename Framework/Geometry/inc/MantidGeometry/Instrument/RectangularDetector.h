@@ -28,7 +28,7 @@ class ComponentVisitor;
  * @brief Assembly of Detector objects in a rectangular shape
  * @author Janik Zikovsky, SNS
  * @date 2010-Oct-06
-*/
+ */
 
 class MANTID_GEOMETRY_DLL RectangularDetector : public CompAssembly,
                                                 public IObjComponent {

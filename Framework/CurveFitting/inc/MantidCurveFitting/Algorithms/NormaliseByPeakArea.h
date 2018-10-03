@@ -21,7 +21,6 @@ class HistogramE;
 namespace CurveFitting {
 namespace Algorithms {
 
-
 class DLLExport NormaliseByPeakArea : public API::Algorithm {
 public:
   NormaliseByPeakArea();

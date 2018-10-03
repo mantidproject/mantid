@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** AverageLogData : TODO: DESCRIPTION
-*/
+ */
 class DLLExport AverageLogData : public API::Algorithm {
 public:
   AverageLogData();

@@ -14,7 +14,7 @@ namespace Mantid {
 namespace DataHandling {
 
 /** LoadMcStasNexus : TODO: DESCRIPTION
-*/
+ */
 class DLLExport LoadMcStasNexus
     : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:

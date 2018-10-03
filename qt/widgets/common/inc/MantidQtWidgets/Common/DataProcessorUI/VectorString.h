@@ -8,7 +8,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORVECTORSTRING_H
 
 /** @class VectorString
-*/
+ */
 
 #include <QString>
 #include <QStringList>

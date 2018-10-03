@@ -13,7 +13,7 @@ namespace Mantid {
 namespace API {
 
 /** A validator which checks that a workspace contains raw counts in its bins.
-*/
+ */
 class MANTID_API_DLL RawCountValidator : public MatrixWorkspaceValidator {
 public:
   explicit RawCountValidator(const bool &mustNotBeDistribution = true);

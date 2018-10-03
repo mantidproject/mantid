@@ -15,7 +15,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /** EvaluateMDFunction : TODO: DESCRIPTION
-*/
+ */
 class DLLExport EvaluateMDFunction : public API::Algorithm,
                                      public API::DeprecatedAlgorithm {
 public:

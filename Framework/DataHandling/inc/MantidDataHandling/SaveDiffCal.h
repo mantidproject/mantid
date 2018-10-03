@@ -20,7 +20,7 @@ namespace Mantid {
 namespace DataHandling {
 
 /** SaveDiffCal : TODO: DESCRIPTION
-*/
+ */
 class DLLExport SaveDiffCal : public API::Algorithm {
 public:
   const std::string name() const override;

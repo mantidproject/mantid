@@ -13,7 +13,6 @@
 
 #include <QTabWidget>
 
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {

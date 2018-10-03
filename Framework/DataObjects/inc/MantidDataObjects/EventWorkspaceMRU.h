@@ -58,7 +58,7 @@ public:
 //============================================================================
 /** This is a container for the MRU (most-recently-used) list
  * of generated histograms.
-*/
+ */
 class DLLExport EventWorkspaceMRU {
 public:
   using YType = Kernel::cow_ptr<HistogramData::HistogramY>;

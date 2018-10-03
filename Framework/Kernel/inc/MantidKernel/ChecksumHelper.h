@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Kernel {
 
 /** ChecksumHelper : A selection of helper methods for calculating checksums
-*/
+ */
 namespace ChecksumHelper {
 // loads a file, optionally converting line endings
 MANTID_KERNEL_DLL std::string loadFile(const std::string &filepath,

@@ -13,7 +13,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** ClearCache : TODO: DESCRIPTION
-*/
+ */
 class MANTID_ALGORITHMS_DLL ClearCache final : public API::Algorithm {
 public:
   const std::string name() const override final;

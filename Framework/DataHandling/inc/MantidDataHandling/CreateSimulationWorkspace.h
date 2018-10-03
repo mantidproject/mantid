@@ -17,7 +17,6 @@ class BinEdges;
 }
 namespace DataHandling {
 
-
 class DLLExport CreateSimulationWorkspace : public API::Algorithm {
 public:
   const std::string name() const override;

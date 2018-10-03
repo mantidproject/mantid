@@ -23,7 +23,7 @@ namespace CustomInterfaces {
 class MuonAnalysisFitDataPresenter;
 
 /** MuonSequentialFitDialog : Dialog for running sequential fits for Muon data
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL MuonSequentialFitDialog : public QDialog {
 
   Q_OBJECT

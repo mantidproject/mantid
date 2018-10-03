@@ -7,8 +7,6 @@
 #ifndef MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEEXPORTER_H_
 #define MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEEXPORTER_H_
 
-
-
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 

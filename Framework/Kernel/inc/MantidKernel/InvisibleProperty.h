@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Kernel {
 
 /** This property setting object makes a property invisible in the GUI.
-*/
+ */
 class MANTID_KERNEL_DLL InvisibleProperty : public IPropertySettings {
 public:
   bool isVisible(const IPropertyManager *) const override;

@@ -17,7 +17,7 @@ namespace Mantid {
 namespace Geometry {
 
 /** PeakShape : Abstract type to describes the shape of a peak.
-*/
+ */
 class DLLExport PeakShape {
 public:
   /// Coordinte frame used upon creation

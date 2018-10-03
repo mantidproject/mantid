@@ -33,7 +33,7 @@ using time_duration = boost::posix_time::time_duration;
  *
  * @author Janik Zikovsky, SNS
  * @date November 12, 2010
-*/
+ */
 
 // Make the compiler pack the data size aligned to 1-byte, to use as little
 // space as possible

@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** ALCLatestFileFinder : Utility to find most recent file in a directory
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL ALCLatestFileFinder {
 public:
   /// Constructor - takes filename of first run

@@ -15,7 +15,7 @@ namespace Mantid {
 namespace Crystal {
 
 /** IntegratePeaksUsingClusters : Uses clustering to integrate peaks.
-*/
+ */
 class DLLExport IntegratePeaksUsingClusters : public API::Algorithm {
 public:
   const std::string name() const override;

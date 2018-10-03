@@ -20,7 +20,7 @@ class InternetHelper;
 namespace DataHandling {
 
 /** DownloadFile : Downloads a file from a url to the file system
-*/
+ */
 class DLLExport DownloadFile : public API::Algorithm {
 public:
   DownloadFile();

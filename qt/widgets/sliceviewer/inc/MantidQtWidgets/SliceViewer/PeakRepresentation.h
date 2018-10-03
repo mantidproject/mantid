@@ -33,7 +33,7 @@ class PeakBoundingBox;
 using optional_double = boost::optional<double>;
 
 /** PeakRepresentation : Allows the draw a general visual peak shape.
-*/
+ */
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentation {
 public:
   virtual ~PeakRepresentation() {}

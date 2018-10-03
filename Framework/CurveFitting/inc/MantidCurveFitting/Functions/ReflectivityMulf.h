@@ -19,7 +19,7 @@ namespace CurveFitting {
 namespace Functions {
 
 /** ReflectivityMulf : Calculate the ReflectivityMulf from a simple layer model.
-*/
+ */
 class DLLExport ReflectivityMulf : public API::IFunction1D,
                                    public API::ParamFunction {
 public:

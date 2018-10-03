@@ -14,7 +14,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /** ThresholdMD : TODO: DESCRIPTION
-*/
+ */
 class DLLExport ThresholdMD : public API::Algorithm {
 public:
   const std::string name() const override;

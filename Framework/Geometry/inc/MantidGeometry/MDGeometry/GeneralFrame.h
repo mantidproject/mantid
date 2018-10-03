@@ -18,7 +18,7 @@ namespace Mantid {
 namespace Geometry {
 
 /** GeneralFrame : Any MDFrame that isn't related to momemtum transfer
-*/
+ */
 class MANTID_GEOMETRY_DLL GeneralFrame : public MDFrame {
 public:
   static const std::string GeneralFrameDistance;

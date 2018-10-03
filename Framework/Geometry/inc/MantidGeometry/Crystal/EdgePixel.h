@@ -12,8 +12,6 @@
 namespace Mantid {
 namespace Geometry {
 
-
-
 /// Function to find peaks near detector edge
 MANTID_GEOMETRY_DLL bool edgePixel(Geometry::Instrument_const_sptr inst,
                                    std::string bankName, int col, int row,

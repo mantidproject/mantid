@@ -17,7 +17,6 @@ class Run;
 
 namespace Algorithms {
 
-
 class DLLExport AddTimeSeriesLog : public API::Algorithm {
 public:
   const std::string name() const override;

@@ -14,7 +14,6 @@
 namespace Mantid {
 namespace PythonInterface {
 
-
 class DLLExport RunPythonScript : public API::Algorithm {
 public:
   const std::string name() const override;

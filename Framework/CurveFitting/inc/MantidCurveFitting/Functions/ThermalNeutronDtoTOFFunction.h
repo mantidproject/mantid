@@ -23,7 +23,7 @@ namespace CurveFitting {
 namespace Functions {
 
 /** ThermalNeutronDtoTOFFunction : TODO: DESCRIPTION
-*/
+ */
 class DLLExport ThermalNeutronDtoTOFFunction : virtual public API::IFunction1D,
                                                public API::ParamFunction {
 public:

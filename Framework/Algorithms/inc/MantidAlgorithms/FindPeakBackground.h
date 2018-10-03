@@ -22,7 +22,7 @@ class HistogramY;
 namespace Algorithms {
 
 /** FindPeakBackground : Calculate Zscore for a Matrix Workspace
-*/
+ */
 class DLLExport FindPeakBackground : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method

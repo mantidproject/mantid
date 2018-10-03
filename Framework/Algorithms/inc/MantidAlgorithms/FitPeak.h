@@ -231,7 +231,7 @@ private:
 };
 
 /** FitPeak : Fit a single peak
-*/
+ */
 class DLLExport FitPeak : public API::Algorithm {
 public:
   FitPeak();

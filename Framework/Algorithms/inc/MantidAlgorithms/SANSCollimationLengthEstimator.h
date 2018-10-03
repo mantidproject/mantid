@@ -11,7 +11,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
 /**Helper class which provides the Collimation Length for SANS instruments
-*/
+ */
 namespace Mantid {
 namespace Algorithms {
 class DLLExport SANSCollimationLengthEstimator {

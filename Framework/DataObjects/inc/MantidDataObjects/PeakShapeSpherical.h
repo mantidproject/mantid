@@ -17,7 +17,7 @@ namespace Mantid {
 namespace DataObjects {
 
 /** PeakShapeSpherical : PeakShape for a spherical peak
-*/
+ */
 class DLLExport PeakShapeSpherical : public PeakShapeBase {
 public:
   /// Constructor

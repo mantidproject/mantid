@@ -12,8 +12,6 @@
 namespace Mantid {
 namespace Algorithms {
 
-
-
 /**
  * @brief SortXAxis will take Histogram or Point data and reorder it based on
  * the X Axis' values, whilst maintaining it's Dx, Y and E axis relative values.

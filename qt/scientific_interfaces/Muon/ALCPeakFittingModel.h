@@ -17,7 +17,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** ALCPeakFittingModel : Concrete model for ALC peak fitting
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingModel
     : public IALCPeakFittingModel {
 public:

@@ -16,7 +16,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** CalculateDIFC : Calculate the DIFC for every pixel
-*/
+ */
 class DLLExport CalculateDIFC : public API::Algorithm {
 public:
   /// Algorithms name for identification. @see Algorithm::name

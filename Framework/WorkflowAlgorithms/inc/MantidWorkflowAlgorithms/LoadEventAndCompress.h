@@ -15,7 +15,7 @@ namespace Mantid {
 namespace WorkflowAlgorithms {
 
 /** LoadEventAndCompress : TODO: DESCRIPTION
-*/
+ */
 class DLLExport LoadEventAndCompress : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;

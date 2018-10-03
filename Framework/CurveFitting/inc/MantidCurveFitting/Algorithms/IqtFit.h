@@ -13,7 +13,6 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
 
-
 template <typename Base> class DLLExport IqtFit : public Base {
 public:
   const std::string name() const override;

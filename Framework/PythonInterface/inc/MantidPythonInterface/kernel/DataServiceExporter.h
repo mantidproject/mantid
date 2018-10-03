@@ -7,7 +7,6 @@
 #ifndef MANTID_PYTHONINTERFACE_DATASERVICEEXPORTER_H_
 #define MANTID_PYTHONINTERFACE_DATASERVICEEXPORTER_H_
 
-
 #include "MantidKernel/Exception.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"

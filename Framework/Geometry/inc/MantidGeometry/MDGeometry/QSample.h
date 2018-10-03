@@ -18,7 +18,7 @@ namespace Mantid {
 namespace Geometry {
 
 /** QSample : Q in the sample frame
-*/
+ */
 class MANTID_GEOMETRY_DLL QSample : public MDFrame {
 public:
   static const std::string QSampleName;

@@ -151,5 +151,3 @@ private:
 } // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_ALGORITHMSELECTORWIDGET_H_ */
-
-

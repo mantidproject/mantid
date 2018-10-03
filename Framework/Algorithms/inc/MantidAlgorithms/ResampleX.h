@@ -17,7 +17,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** ResampleX : TODO: DESCRIPTION
-*/
+ */
 class DLLExport ResampleX : public Algorithms::Rebin {
 public:
   const std::string name() const override;

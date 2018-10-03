@@ -20,7 +20,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /** ConvertCWSDMDtoHKL : TODO: DESCRIPTION
-*/
+ */
 class MANTID_MDALGORITHMS_DLL ConvertCWSDMDtoHKL : public API::Algorithm {
 public:
   /// Algorithm's name

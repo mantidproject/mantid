@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace API {
 
 /** SignalBlocker : RAII signal blocker. Not available in Qt until 5.3
-*/
+ */
 template <typename Type> class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker {
 
 private:

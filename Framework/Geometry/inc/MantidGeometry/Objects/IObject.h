@@ -33,7 +33,7 @@ class vtkGeometryCacheReader;
 class vtkGeometryCacheWriter;
 
 /** IObject : Interface for geometry objects
-*/
+ */
 
 /**
  * Interface for Geometry Objects

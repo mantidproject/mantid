@@ -17,7 +17,7 @@ namespace Mantid {
 namespace DataHandling {
 
 /** LoadSpiceAscii : TODO: DESCRIPTION
-*/
+ */
 class DLLExport LoadSpiceAscii : public API::Algorithm {
 public:
   const std::string name() const override;

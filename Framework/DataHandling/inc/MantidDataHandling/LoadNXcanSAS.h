@@ -19,7 +19,7 @@ namespace DataHandling {
 
 /** LoadNXcanSAS : Tries to load an NXcanSAS file type into a Workspace2D.
  *  This can load either 1D or 2D data
-*/
+ */
 class MANTID_DATAHANDLING_DLL LoadNXcanSAS
     : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:

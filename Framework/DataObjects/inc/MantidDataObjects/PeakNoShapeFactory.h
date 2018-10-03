@@ -17,7 +17,7 @@ class PeakShape;
 } // namespace Geometry
 namespace DataObjects {
 /** PeakNoShapeFactory : Factory method for types of NoShape
-*/
+ */
 class DLLExport PeakNoShapeFactory : public PeakShapeFactory {
 public:
   // Factory method

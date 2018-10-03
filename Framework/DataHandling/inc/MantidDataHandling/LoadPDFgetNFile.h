@@ -15,7 +15,7 @@ namespace Mantid {
 namespace DataHandling {
 
 /** LoadPDFgetNFile : TODO: DESCRIPTION
-*/
+ */
 class DLLExport LoadPDFgetNFile
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:

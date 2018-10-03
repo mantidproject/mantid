@@ -7,7 +7,6 @@
 #ifndef MANTIDQTAPI_MANTIDQWTWORKSPACEDATA_H
 #define MANTIDQTAPI_MANTIDQWTWORKSPACEDATA_H
 
-
 #include "DllOption.h"
 #include "qwt_data.h"
 

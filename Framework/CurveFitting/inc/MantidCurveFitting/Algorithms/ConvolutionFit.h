@@ -16,7 +16,7 @@ namespace CurveFitting {
 namespace Algorithms {
 
 /** ConvolutionFit : Performs a QENS convolution fit
-*/
+ */
 template <typename Base> class DLLExport ConvolutionFit : public Base {
 public:
   const std::string name() const override;

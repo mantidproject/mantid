@@ -15,7 +15,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /** ConvertToMDMinMaxLocal : Algorithm to calculate limits for ConvertToMD
-*/
+ */
 class DLLExport ConvertToMDMinMaxLocal : public ConvertToMDParent {
 public:
   const std::string name() const override;

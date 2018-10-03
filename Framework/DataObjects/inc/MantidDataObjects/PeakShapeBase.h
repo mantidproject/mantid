@@ -22,7 +22,7 @@ namespace Mantid {
 namespace DataObjects {
 
 /** PeakShapeBase : Base class for concrete PeakShapes containing common code.
-*/
+ */
 
 class DLLExport PeakShapeBase : public Mantid::Geometry::PeakShape {
 

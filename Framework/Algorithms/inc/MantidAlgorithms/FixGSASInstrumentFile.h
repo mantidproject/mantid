@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** FixGSASInstrumentFile : TODO: DESCRIPTION
-*/
+ */
 class DLLExport FixGSASInstrumentFile : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method

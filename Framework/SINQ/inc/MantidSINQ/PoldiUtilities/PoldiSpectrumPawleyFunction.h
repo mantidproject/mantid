@@ -15,7 +15,7 @@ namespace Mantid {
 namespace Poldi {
 
 /** PoldiSpectrumPawleyFunction : TODO: DESCRIPTION
-*/
+ */
 class MANTID_SINQ_DLL PoldiSpectrumPawleyFunction
     : public PoldiSpectrumDomainFunction {
 public:

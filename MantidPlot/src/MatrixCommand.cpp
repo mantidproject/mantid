@@ -20,7 +20,6 @@
 #include <QApplication>
 #include <gsl/gsl_math.h>
 
-
 /*           Class MatrixEditCellCommand                                 */
 
 MatrixEditCellCommand::MatrixEditCellCommand(MatrixModel *model,
@@ -56,7 +55,6 @@ void MatrixEditCellCommand::undo() {
   }
 }
 
-
 /*           Class MatrixSetFormulaCommand                               */
 
 MatrixSetFormulaCommand::MatrixSetFormulaCommand(Matrix *m,
@@ -82,7 +80,6 @@ void MatrixSetFormulaCommand::undo() {
   d_matrix->setFormula(d_old_formula);
 }
 
-
 /*           Class MatrixSetViewCommand                                  */
 
 MatrixSetViewCommand::MatrixSetViewCommand(Matrix *m, Matrix::ViewType oldView,
@@ -106,7 +103,6 @@ void MatrixSetViewCommand::undo() {
 
   d_matrix->setViewType(d_old_view);
 }
-
 
 /*           Class MatrixSetHeaderViewCommand                            */
 
@@ -132,7 +128,6 @@ void MatrixSetHeaderViewCommand::undo() {
   d_matrix->setHeaderViewType(d_old_view);
 }
 
-
 /*           Class MatrixSetColWidthCommand                              */
 
 MatrixSetColWidthCommand::MatrixSetColWidthCommand(Matrix *m, int oldWidth,
@@ -156,7 +151,6 @@ void MatrixSetColWidthCommand::undo() {
 
   d_matrix->setColumnsWidth(d_old_width);
 }
-
 
 /*           Class MatrixSetPrecisionCommand                             */
 
@@ -184,7 +178,6 @@ void MatrixSetPrecisionCommand::undo() {
   d_matrix->setNumericFormat(d_old_format, d_old_prec);
 }
 
-
 /*           Class MatrixSetCoordinatesCommand                           */
 
 MatrixSetCoordinatesCommand::MatrixSetCoordinatesCommand(
@@ -209,7 +202,6 @@ void MatrixSetCoordinatesCommand::undo() {
 
   d_matrix->setCoordinates(d_old_xs, d_old_xe, d_old_ys, d_old_ye);
 }
-
 
 /*           Class MatrixSetColorMapCommand                              */
 
@@ -263,7 +255,6 @@ void MatrixSetColorMapCommand::undo() {
   }
 }
 
-
 /*           Class MatrixDeleteRowsCommand                               */
 
 MatrixDeleteRowsCommand::MatrixDeleteRowsCommand(MatrixModel *model,
@@ -301,7 +292,6 @@ void MatrixDeleteRowsCommand::undo() {
   QApplication::restoreOverrideCursor();
 }
 
-
 /*           Class MatrixInsertRowCommand                                */
 
 MatrixInsertRowCommand::MatrixInsertRowCommand(MatrixModel *model, int startRow,
@@ -327,7 +317,6 @@ void MatrixInsertRowCommand::undo() {
   d_model->removeRows(d_start_row, 1);
   QApplication::restoreOverrideCursor();
 }
-
 
 /*           Class MatrixDeleteColsCommand                               */
 
@@ -368,7 +357,6 @@ void MatrixDeleteColsCommand::undo() {
   QApplication::restoreOverrideCursor();
 }
 
-
 /*           Class MatrixInsertColCommand                                */
 
 MatrixInsertColCommand::MatrixInsertColCommand(MatrixModel *model, int startCol,
@@ -394,7 +382,6 @@ void MatrixInsertColCommand::undo() {
   d_model->removeColumns(d_start_col, 1);
   QApplication::restoreOverrideCursor();
 }
-
 
 /*           Class MatrixSetSizeCommand                                */
 
@@ -438,7 +425,6 @@ void MatrixSetSizeCommand::undo() {
   d_model->matrix()->resetView();
   QApplication::restoreOverrideCursor();
 }
-
 
 /*           Class MatrixUndoCommand                           */
 
@@ -493,7 +479,6 @@ void MatrixUndoCommand::undo() {
   QApplication::restoreOverrideCursor();
 }
 
-
 /*           Class MatrixFftCommand                                      */
 
 MatrixFftCommand::MatrixFftCommand(bool inverse, MatrixModel *model,
@@ -510,7 +495,6 @@ void MatrixFftCommand::redo() {
 
   d_model->fft(d_inverse);
 }
-
 
 /*           Class MatrixSetImageCommand                           */
 
@@ -544,7 +528,6 @@ void MatrixSetImageCommand::redo() {
   m->displayImage(d_image);
 }
 
-
 /*           Class MatrixImportAsciiCommand                              */
 
 MatrixImportAsciiCommand::MatrixImportAsciiCommand(
@@ -568,7 +551,6 @@ void MatrixImportAsciiCommand::redo() {
                        d_simplify_spaces, d_comment, d_mode, d_locale,
                        d_end_line, d_max_rows);
 }
-
 
 /*           Class MatrixSymmetryOperation                                */
 
@@ -636,7 +618,6 @@ void MatrixSymmetryOperation::undo() {
   }
   d_model->matrix()->resetView();
 }
-
 
 /*           Class MatrixPasteCommand                               	 */
 

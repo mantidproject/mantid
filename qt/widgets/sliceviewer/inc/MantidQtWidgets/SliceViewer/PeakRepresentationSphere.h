@@ -13,7 +13,7 @@ namespace MantidQt {
 namespace SliceViewer {
 
 /** PeakRepresentationSphere : Draws a circle for spherical peaks.
-*/
+ */
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationSphere
     : public PeakRepresentation {
 public:

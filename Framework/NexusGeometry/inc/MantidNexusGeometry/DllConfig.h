@@ -8,7 +8,7 @@
 #define MANTID_NEXUSGEOMETRY_DLLCONFIG_H_
 
 /** DLLConfig : Import Export configurations for Nexus Geometry
-*/
+ */
 #include "MantidKernel/System.h"
 
 #ifdef IN_MANTID_NEXUS_GEOMETRY

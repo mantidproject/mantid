@@ -26,7 +26,7 @@ class Unit;
 namespace Algorithms {
 
 /** Estimate all incident energies, used by chopper instrument.
-*/
+ */
 class DLLExport GetAllEi : public API::Algorithm {
 public:
   GetAllEi();

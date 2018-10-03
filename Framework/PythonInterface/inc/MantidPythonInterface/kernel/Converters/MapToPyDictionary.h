@@ -8,7 +8,7 @@
 #define MANTID_PYTHONINERFACE_MAPTOPYDICTIONARY_H_
 
 /** Converter to generate a python dictionary from a std::map
-*/
+ */
 
 #include "MantidKernel/System.h"
 #include <boost/python/dict.hpp>

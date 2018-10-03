@@ -16,7 +16,7 @@ namespace Mantid {
 namespace Kernel {
 
 /** ChainableFactory : Chain of Responsiblity generic factory
-*/
+ */
 template <typename Factory, typename Product, typename Argument>
 class DLLExport ChainableFactory : public Chainable<Factory> {
 public:

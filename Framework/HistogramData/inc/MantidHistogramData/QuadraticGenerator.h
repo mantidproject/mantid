@@ -13,7 +13,7 @@ namespace Mantid {
 namespace HistogramData {
 
 /** QuadraticGenerator : Makes quadratics
-*/
+ */
 class QuadraticGenerator {
 public:
   QuadraticGenerator(double a0, double a1, double a2)

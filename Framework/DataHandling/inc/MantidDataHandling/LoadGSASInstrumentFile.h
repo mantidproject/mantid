@@ -22,7 +22,7 @@ namespace Mantid {
 namespace DataHandling {
 
 /** LoadGSASInstrumentFile : Load GSAS instrument file to TableWorkspace(s)
-*/
+ */
 class DLLExport LoadGSASInstrumentFile : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method

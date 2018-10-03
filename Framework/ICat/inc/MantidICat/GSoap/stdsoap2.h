@@ -1833,8 +1833,6 @@ struct soap_xlist {
 };
 #endif
 
-
-
 #ifndef WITH_LEANER
 #ifdef __cplusplus
 class soap_dom_attribute_iterator {
@@ -1950,8 +1948,6 @@ extern std::ostream &operator<<(std::ostream &,
 extern std::istream &operator>>(std::istream &, struct soap_dom_element &);
 extern "C" {
 #endif
-
-
 
 #ifdef WIN32
 #ifdef SOAP_STD_EXPORTS
@@ -2669,7 +2665,6 @@ SOAP_FMAC1 void SOAP_FMAC2 soap_set_sent_logfile(struct soap *, const char *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_set_test_logfile(struct soap *, const char *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_close_logfiles(struct soap *);
 SOAP_FMAC1 void SOAP_FMAC2 soap_open_logfile(struct soap *, int);
-
 
 SOAP_FMAC1 const char *SOAP_FMAC2 soap_value(struct soap *);
 

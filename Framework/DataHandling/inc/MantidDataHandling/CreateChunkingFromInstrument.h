@@ -15,7 +15,7 @@ namespace Mantid {
 namespace DataHandling {
 
 /** CreateChunkingFromInstrument : TODO: DESCRIPTION
-*/
+ */
 class DLLExport CreateChunkingFromInstrument : public API::Algorithm {
 public:
   const std::string name() const override;

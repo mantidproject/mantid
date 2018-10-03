@@ -15,7 +15,7 @@ namespace Mantid {
 namespace DataHandling {
 
 /** SaveFullprofResolution : TODO: DESCRIPTION
-*/
+ */
 class DLLExport SaveFullprofResolution : public API::Algorithm {
 public:
   SaveFullprofResolution();

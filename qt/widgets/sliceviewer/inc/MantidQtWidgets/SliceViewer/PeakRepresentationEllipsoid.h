@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace SliceViewer {
 
 /** PeakRepresentationEllipsoid : Draws an ellipse for elliptical peaks.
-*/
+ */
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationEllipsoid
     : public PeakRepresentation {
 public:

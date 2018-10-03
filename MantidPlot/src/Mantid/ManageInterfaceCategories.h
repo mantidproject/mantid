@@ -16,8 +16,6 @@
 
 class ApplicationWindow;
 
-
-
 /**
  * This is a Model class that wraps the available interface categories along
  * with the user's preferences about which categories to display.  It

@@ -14,7 +14,7 @@ namespace Mantid {
 namespace DataObjects {
 
 /** PeakShapeEllipsoidFactory : Create ellipsoid peak shapes
-*/
+ */
 class DLLExport PeakShapeEllipsoidFactory : public PeakShapeFactory {
 public:
   // PeakShapeFactory interface

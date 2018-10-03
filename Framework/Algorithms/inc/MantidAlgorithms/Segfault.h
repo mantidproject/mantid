@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** Segfault : TODO: DESCRIPTION
-*/
+ */
 class DLLExport Segfault : public API::Algorithm {
 public:
   const std::string name() const override;

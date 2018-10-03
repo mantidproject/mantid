@@ -14,7 +14,7 @@ namespace Mantid {
 namespace DataHandling {
 
 /** SortTableWorkspace : TODO: DESCRIPTION
-*/
+ */
 class DLLExport SortTableWorkspace : public API::ParallelAlgorithm {
 public:
   const std::string name() const override { return "SortTableWorkspace"; }

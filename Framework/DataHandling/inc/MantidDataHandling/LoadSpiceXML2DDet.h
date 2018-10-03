@@ -43,7 +43,7 @@ public:
 };
 
 /** LoadSpiceXML2DDet : Load 2D detector data in XML format form SPICE
-*/
+ */
 class DLLExport LoadSpiceXML2DDet : public API::Algorithm {
 public:
   LoadSpiceXML2DDet();

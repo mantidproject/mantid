@@ -15,7 +15,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** ExtractQENSMembers : Extracts the fit members from a QENS fit
-*/
+ */
 class DLLExport ExtractQENSMembers : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;

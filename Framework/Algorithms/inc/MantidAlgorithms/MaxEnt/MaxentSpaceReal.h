@@ -13,7 +13,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** MaxentSpaceReal : Defines the space of real numbers.
-*/
+ */
 class MANTID_ALGORITHMS_DLL MaxentSpaceReal : public MaxentSpace {
 public:
   // Converts a real vector to a complex vector

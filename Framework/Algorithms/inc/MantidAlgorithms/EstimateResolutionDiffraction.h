@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Algorithms {
 /** EstimateResolutionDiffraction : TODO: DESCRIPTION
-*/
+ */
 class DLLExport EstimateResolutionDiffraction : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method

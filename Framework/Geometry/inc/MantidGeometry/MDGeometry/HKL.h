@@ -18,7 +18,7 @@ namespace Mantid {
 namespace Geometry {
 
 /** HKL : HKL MDFrame
-*/
+ */
 class MANTID_GEOMETRY_DLL HKL : public MDFrame {
 public:
   HKL(const HKL &other);

@@ -20,7 +20,7 @@ namespace Algorithms {
 /** RunCombinationHelper : This holds some useful utilities for operations
  * involving transformations of lists of workspaces into single one.
  * E.g. this is used commonly between MergeRuns and JoinRuns
-*/
+ */
 
 namespace RunCombinationOptions {
 static const std::string SKIP_BEHAVIOUR = "Skip File";

@@ -21,7 +21,7 @@ class SpectrumInfo;
 namespace Algorithms {
 
 /** TimeAtSampleStrategyElastic : Time at sample stragegy for elastic scattering
-*/
+ */
 class DLLExport TimeAtSampleStrategyElastic
     : public Mantid::Algorithms::TimeAtSampleStrategy {
 public:

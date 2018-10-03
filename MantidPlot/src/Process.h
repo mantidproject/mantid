@@ -7,7 +7,6 @@
 #ifndef PROCESS_H_
 #define PROCESS_H_
 
-
 /*
  * Access information about the process and others
  */

@@ -41,7 +41,7 @@ public:
 };
 
 /** GroupingLoader : Loads instrument grouping from IDF file
-*/
+ */
 class MANTID_API_DLL GroupingLoader {
 public:
   explicit GroupingLoader(Geometry::Instrument_const_sptr instrument);

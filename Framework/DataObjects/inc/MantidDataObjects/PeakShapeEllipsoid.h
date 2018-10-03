@@ -16,7 +16,7 @@ namespace Mantid {
 namespace DataObjects {
 
 /** PeakShapeEllipsoid : PeakShape representing a 3D ellipsoid
-*/
+ */
 class DLLExport PeakShapeEllipsoid : public PeakShapeBase {
 public:
   /// Constructor

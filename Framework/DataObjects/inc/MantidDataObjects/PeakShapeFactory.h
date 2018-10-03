@@ -18,7 +18,7 @@ class PeakShape;
 namespace DataObjects {
 
 /** PeakShapeFactory : Factory for creating peak shapes
-*/
+ */
 class DLLExport PeakShapeFactory {
 public:
   /// Destructor

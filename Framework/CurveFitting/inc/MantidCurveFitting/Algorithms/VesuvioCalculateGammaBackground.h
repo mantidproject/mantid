@@ -29,7 +29,6 @@ namespace Algorithms {
 //---------------------------------------------------------------------------
 struct DetectorParams;
 
-
 class DLLExport VesuvioCalculateGammaBackground : public API::Algorithm {
 public:
   VesuvioCalculateGammaBackground();

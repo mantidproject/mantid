@@ -27,7 +27,7 @@ using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
 namespace Algorithms {
 
 /** PDDetermineCharacterizations
-*/
+ */
 class DLLExport PDDetermineCharacterizations
     : public API::DistributedAlgorithm {
 public:

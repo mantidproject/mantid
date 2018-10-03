@@ -7,8 +7,6 @@
 #ifndef MANTID_PYTHONINTERFACE_PYTHONALGORITHMINSTANTIATOR_H_
 #define MANTID_PYTHONINTERFACE_PYTHONALGORITHMINSTANTIATOR_H_
 
-
-
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------

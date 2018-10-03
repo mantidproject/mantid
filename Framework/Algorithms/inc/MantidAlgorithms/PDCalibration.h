@@ -19,7 +19,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** PDCalibration : TODO: DESCRIPTION
-*/
+ */
 class MANTID_ALGORITHMS_DLL PDCalibration : public API::Algorithm {
 public:
   PDCalibration();

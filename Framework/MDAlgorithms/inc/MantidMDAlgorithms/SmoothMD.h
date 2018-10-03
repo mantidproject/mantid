@@ -25,7 +25,7 @@ renormaliseKernel(std::vector<double> kernel,
                   const std::vector<bool> &validity);
 
 /** SmoothMD : Algorithm for smoothing MDHistoWorkspaces
-*/
+ */
 class DLLExport SmoothMD : public API::Algorithm {
 public:
   const std::string name() const override;

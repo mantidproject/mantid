@@ -15,7 +15,7 @@
 namespace Mantid {
 namespace Kernel {
 /** Helper class providing interface to ISAveable
-*/
+ */
 class DLLExport INode {
 public:
   virtual ~INode(){};

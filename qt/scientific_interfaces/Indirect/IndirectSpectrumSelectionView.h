@@ -23,7 +23,7 @@ namespace IDA {
 enum class SpectrumSelectionMode { RANGE, STRING };
 
 /** IndirectSpectrumSelectionView
-*/
+ */
 class DLLExport IndirectSpectrumSelectionView : public API::MantidWidget {
   Q_OBJECT
 public:

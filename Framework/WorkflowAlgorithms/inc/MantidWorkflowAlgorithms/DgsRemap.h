@@ -16,7 +16,7 @@ namespace WorkflowAlgorithms {
 /** DgsRemap : This algorithm takes a workspace and masks and groups that
  * workspace if appropriate information is passed. It can be run in reverse
  * (group then mask) mode.
-*/
+ */
 class DLLExport DgsRemap : public API::Algorithm {
 public:
   const std::string name() const override;

@@ -16,7 +16,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** CalculateSlits
-*/
+ */
 
 class DLLExport CalculateSlits : public API::DataProcessorAlgorithm {
 public:

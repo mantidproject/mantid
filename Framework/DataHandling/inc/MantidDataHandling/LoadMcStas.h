@@ -18,7 +18,7 @@ namespace Mantid {
 namespace DataHandling {
 
 /** LoadMcStas : TODO: DESCRIPTION
-*/
+ */
 class DLLExport LoadMcStas : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   const std::string name() const override;

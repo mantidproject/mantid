@@ -13,7 +13,6 @@
 namespace Mantid {
 namespace Algorithms {
 
-
 class DLLExport CalculateIqt : public API::Algorithm {
 public:
   const std::string name() const override;

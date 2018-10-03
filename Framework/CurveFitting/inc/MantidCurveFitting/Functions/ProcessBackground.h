@@ -45,7 +45,7 @@ private:
 };
 
 /** ProcessBackground : Process background obtained from LeBailFit
-*/
+ */
 class DLLExport ProcessBackground : public API::Algorithm {
 public:
   ProcessBackground();

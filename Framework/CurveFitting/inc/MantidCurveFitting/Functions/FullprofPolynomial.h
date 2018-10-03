@@ -15,7 +15,7 @@ namespace CurveFitting {
 namespace Functions {
 
 /** FullprofPolynomial : Polynomial background defined in Fullprof
-*/
+ */
 class DLLExport FullprofPolynomial : public BackgroundFunction {
 public:
   FullprofPolynomial();

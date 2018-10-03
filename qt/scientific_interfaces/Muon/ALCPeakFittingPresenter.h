@@ -18,7 +18,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** ALCPeakFittingPresenter : Presenter for Peak Fitting step of ALC interface.
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingPresenter : public QObject {
   Q_OBJECT
 

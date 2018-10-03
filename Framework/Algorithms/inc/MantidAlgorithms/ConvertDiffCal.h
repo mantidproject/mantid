@@ -13,7 +13,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** ConvertDiffCal : TODO: DESCRIPTION
-*/
+ */
 class DLLExport ConvertDiffCal : public API::ParallelAlgorithm {
 public:
   const std::string name() const override;

@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /** MuonFunctionBrowser : Subclasses FunctionBrowser for muon-specific use
-*/
+ */
 class EXPORT_OPT_MANTIDQT_COMMON MuonFunctionBrowser : public FunctionBrowser {
   Q_OBJECT
 

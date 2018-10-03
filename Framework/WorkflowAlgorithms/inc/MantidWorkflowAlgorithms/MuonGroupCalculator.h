@@ -13,7 +13,7 @@ namespace Mantid {
 namespace WorkflowAlgorithms {
 
 /** MuonGroupCalculator : Base class for Muon group counts/asymmetry calculators
-*/
+ */
 class DLLExport MuonGroupCalculator : public IMuonAsymmetryCalculator {
 public:
   MuonGroupCalculator(const Mantid::API::WorkspaceGroup_sptr inputWS,

@@ -13,7 +13,6 @@
 namespace Mantid {
 namespace Kernel {
 
-
 class MANTID_KERNEL_DLL PropertyManagerProperty final
     : public PropertyWithValue<PropertyManager_sptr> {
 public:

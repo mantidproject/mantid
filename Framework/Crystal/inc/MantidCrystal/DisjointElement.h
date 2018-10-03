@@ -13,7 +13,7 @@ namespace Mantid {
 namespace Crystal {
 
 /** DisjointElement : Cluster item used in a disjoint-set data structure.
-*/
+ */
 class DLLExport DisjointElement {
 public:
   /// Default constructor

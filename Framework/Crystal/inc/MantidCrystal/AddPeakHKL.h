@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Crystal {
 
 /** AddPeakHKL : Algorithm to add a peaks to a PeaksWorkspace in the HKL frame
-*/
+ */
 class DLLExport AddPeakHKL : public API::Algorithm {
 public:
   const std::string name() const override;

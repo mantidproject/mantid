@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Algorithms {
 /** Filters events in an EventWorkspace using values in a SampleLog.
-*/
+ */
 class DLLExport FilterByLogValue : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method

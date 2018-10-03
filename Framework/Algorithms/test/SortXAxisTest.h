@@ -15,8 +15,6 @@
 #include "MantidHistogramData/Histogram.h"
 #include <cxxtest/TestSuite.h>
 
-
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

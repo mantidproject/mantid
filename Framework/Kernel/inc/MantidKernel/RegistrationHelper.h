@@ -7,7 +7,6 @@
 #ifndef MANTID_KERNEL_REGISTRATIONHELPER_H_
 #define MANTID_KERNEL_REGISTRATIONHELPER_H_
 
-
 #include "MantidKernel/System.h"
 
 namespace Mantid {

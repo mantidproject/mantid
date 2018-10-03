@@ -22,7 +22,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** IALCPeakFittingView : Interface for ALC Peak Fitting step view.
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL IALCPeakFittingView : public QObject {
   Q_OBJECT
 

@@ -15,7 +15,7 @@
 namespace Mantid {
 namespace WorkflowAlgorithms {
 /** MuonProcess : Processes and analyses Muon workspace.
-*/
+ */
 class DLLExport MuonProcess : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;

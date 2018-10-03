@@ -17,7 +17,7 @@ namespace Mantid {
 namespace Kernel {
 
 /** ErrorReporter : The error reporter is responsible for sending error reports
-*/
+ */
 
 class MANTID_KERNEL_DLL ErrorReporter {
 public:

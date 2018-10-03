@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-
 #ifndef MANTID_VATES_VTKDATASETFACTORY_H_
 #define MANTID_VATES_VTKDATASETFACTORY_H_
 

@@ -19,7 +19,6 @@ class FunctionValues;
 
 namespace MDAlgorithms {
 
-
 class DLLExport SimulateResolutionConvolvedModel
     : public FitResolutionConvolvedModel {
 public:

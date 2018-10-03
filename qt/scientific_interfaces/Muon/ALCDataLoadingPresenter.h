@@ -21,7 +21,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** ALCDataLoadingPresenter : Presenter for ALC Data Loading step
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingPresenter : public QObject {
   Q_OBJECT
 

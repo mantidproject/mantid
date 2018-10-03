@@ -15,7 +15,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** CorelliCrossCorrelate : TODO: DESCRIPTION
-*/
+ */
 class DLLExport CorelliCrossCorrelate : public API::Algorithm {
 public:
   const std::string name() const override { return "CorelliCrossCorrelate"; };

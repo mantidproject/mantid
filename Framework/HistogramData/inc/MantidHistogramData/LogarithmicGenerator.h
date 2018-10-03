@@ -13,7 +13,7 @@ namespace Mantid {
 namespace HistogramData {
 
 /** LogarithmicGenerator : TODO: DESCRIPTION
-*/
+ */
 class LogarithmicGenerator {
 public:
   LogarithmicGenerator(double start, double increment)

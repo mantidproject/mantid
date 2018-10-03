@@ -27,7 +27,7 @@ namespace Mantid {
 namespace DataHandling {
 namespace H5Util {
 /** H5Util : TODO: DESCRIPTION
-*/
+ */
 
 /// Create a 1D data-space to hold data of length.
 MANTID_DATAHANDLING_DLL H5::DataSpace getDataSpace(const size_t length);

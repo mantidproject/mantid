@@ -16,7 +16,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /** LogValueSelector : Select a log name and mean/min/max/first/last
-*/
+ */
 class EXPORT_OPT_MANTIDQT_COMMON LogValueSelector
     : public MantidQt::API::MantidWidget {
   Q_OBJECT

@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace WorkflowAlgorithms {
 /** Beam Finder for SANS instruments
-*/
+ */
 
 class DLLExport SANSBeamFinder : public API::Algorithm {
 public:

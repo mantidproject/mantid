@@ -13,8 +13,6 @@ namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
 
-
-
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS VisibleAxesColor {
 public:
   /**

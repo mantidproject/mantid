@@ -16,7 +16,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** NRCalculateSlitResolution
-*/
+ */
 
 class DLLExport NRCalculateSlitResolution : public API::DataProcessorAlgorithm {
 public:

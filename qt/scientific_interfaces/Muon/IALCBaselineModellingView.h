@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** IALCBaselineModellingView : Interface for ALC Baseline Modelling view step
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingView : public QObject {
   Q_OBJECT
 

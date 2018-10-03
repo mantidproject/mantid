@@ -18,7 +18,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /** ConvertCWSDExpToMomentum : TODO: DESCRIPTION
-*/
+ */
 class DLLExport ConvertCWSDExpToMomentum : public API::Algorithm {
 public:
   ConvertCWSDExpToMomentum();

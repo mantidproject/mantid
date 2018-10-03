@@ -31,7 +31,7 @@ class ALCPeakFittingPresenter;
 class ALCPeakFittingModel;
 
 /** ALCInterface : Custom interface for Avoided Level Crossing analysis
-*/
+ */
 class MANTIDQT_MUONINTERFACE_DLL ALCInterface : public API::UserSubWindow {
   Q_OBJECT
 

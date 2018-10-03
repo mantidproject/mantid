@@ -7,7 +7,6 @@
 #ifndef MANTIDQT_WIDGETS_COMMON_PLUGINLIBRARIES_H
 #define MANTIDQT_WIDGETS_COMMON_PLUGINLIBRARIES_H
 
-
 #include "MantidQtWidgets/Common/DllOption.h"
 
 #include <string>

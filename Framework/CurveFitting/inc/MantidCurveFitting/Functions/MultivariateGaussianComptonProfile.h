@@ -16,7 +16,6 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 
-
 class MANTID_CURVEFITTING_DLL MultivariateGaussianComptonProfile
     : public ComptonProfile {
 public:

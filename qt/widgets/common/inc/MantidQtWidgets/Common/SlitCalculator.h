@@ -19,7 +19,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 /** SlitCalculator : A calculator for Reflectometry instrument slits
-*/
+ */
 class EXPORT_OPT_MANTIDQT_COMMON SlitCalculator : public QDialog {
   Q_OBJECT
 public:

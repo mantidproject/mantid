@@ -18,7 +18,7 @@ namespace Mantid {
 namespace API {
 
 /** This class provides an interface to a MaskWorkspace.
-*/
+ */
 class DLLExport IMaskWorkspace {
 public:
   IMaskWorkspace() = default;

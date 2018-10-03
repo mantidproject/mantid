@@ -18,7 +18,7 @@ namespace Mantid {
 namespace Crystal {
 
 /** Cluster : Image cluster used by connected component labeling
-*/
+ */
 class DLLExport Cluster : public ICluster {
 
 public:

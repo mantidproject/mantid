@@ -23,7 +23,7 @@ class SplittingInterval;
 class TimeInterval;
 class Property;
 /** A non-templated interface to a TimeSeriesProperty.
-*/
+ */
 class ITimeSeriesProperty {
 public:
   /// Fill a TimeSplitterType that will filter the events by matching

@@ -16,7 +16,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /** Save a MDEventWorkspace to a .nxs file.
-*/
+ */
 class DLLExport ChangeQConvention : public API::Algorithm {
 public:
   /// Algorithm's name for identification

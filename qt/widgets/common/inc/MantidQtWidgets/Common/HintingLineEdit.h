@@ -25,7 +25,7 @@ class QLabel;
 namespace MantidQt {
 namespace MantidWidgets {
 /** HintingLineEdit : A QLineEdit widget providing autocompletion.
-*/
+ */
 class EXPORT_OPT_MANTIDQT_COMMON HintingLineEdit : public QLineEdit {
   Q_OBJECT
 public:

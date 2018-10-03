@@ -15,7 +15,7 @@ namespace DataHandling {
 
 /** SaveNXcanSAS : Saves a reduced workspace in the NXcanSAS format. Currently
  * only MatrixWorkspaces resulting from 1D and 2D reductions are supported.
-*/
+ */
 class MANTID_DATAHANDLING_DLL SaveNXcanSAS : public API::Algorithm {
 public:
   /// Constructor

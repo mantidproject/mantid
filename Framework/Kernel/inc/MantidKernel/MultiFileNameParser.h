@@ -18,7 +18,6 @@
 #include <utility>
 #include <vector>
 
-
 namespace Mantid {
 namespace Kernel {
 namespace MultiFileNameParsing {

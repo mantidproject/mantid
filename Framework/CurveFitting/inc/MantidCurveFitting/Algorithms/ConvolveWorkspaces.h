@@ -23,7 +23,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
 /** Convolution of two workspaces
-*/
+ */
 
 class DLLExport ConvolveWorkspaces : public API::Algorithm {
 public:

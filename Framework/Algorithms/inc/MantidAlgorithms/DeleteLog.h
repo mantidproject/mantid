@@ -12,7 +12,6 @@
 namespace Mantid {
 namespace Algorithms {
 
-
 class DLLExport DeleteLog : public API::Algorithm {
 public:
   const std::string name() const override;
