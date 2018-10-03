@@ -106,10 +106,20 @@ void MoveInstrumentComponent::exec() {
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  if (dynamic_cast<const Geometry::GridDetectorPixel *>(comp.get())) {
+  const auto &componentInfo = inputW->componentInfo();
+  auto compIndex = componentInfo.indexOf(comp->getComponentID());
+  auto parent = componentInfo.parent(compIndex);
+  auto grandParent = componentInfo.parent(parent);
+  if (componentInfo.isDetector(compIndex) &&
+      (componentInfo.componentType(grandParent) ==
+           Mantid::Beamline::ComponentType::Grid ||
+       componentInfo.componentType(grandParent) ==
+           Mantid::Beamline::ComponentType::Rectangular ||
+       componentInfo.componentType(grandParent) ==
+           Mantid::Beamline::ComponentType::Structured)) {
     // DetectorInfo makes changing positions possible but we keep the old
     // behavior of ignoring position changes for GridDetectorPixel.
-    g_log.warning("Component is a GridDetectorPixel, moving is not "
+    g_log.warning("Component is fixed within a structured bank, moving is not "
                   "possible, doing nothing.");
     return;
   }
