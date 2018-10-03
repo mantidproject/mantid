@@ -1,5 +1,6 @@
 from ui.sans_isis.work_handler import WorkHandler
 
+
 class GenericWorkHandlerListener(WorkHandler.WorkListener):
     def __init__(self, error_callback, success_callback):
         super(GenericWorkHandlerListener, self).__init__()
