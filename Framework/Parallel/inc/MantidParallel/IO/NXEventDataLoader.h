@@ -110,7 +110,7 @@ void read(T *buffer, const H5::Group &group, const std::string &dataSetName,
 }
 
 std::string MANTID_PARALLEL_DLL readAttribute(const H5::DataSet &dataSet,
-                          const std::string &attributeName);
+                                              const std::string &attributeName);
 
 template <class TimeOffsetType, class IndexType, class TimeZeroType>
 std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>>
