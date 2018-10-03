@@ -75,39 +75,36 @@ parseScaleFactor(std::string const &scaleFactor) {
   return boost::none;
 }
 
-boost::variant<boost::optional<RangeInQ>, std::vector<int>>
+boost::variant<RangeInQ, std::vector<int>>
 parseQRange(std::string const &min, std::string const &max,
             std::string const &step) {
   auto invalidParams = std::vector<int>();
-  double minimum = 0.0, maximum = 0.0, stepValue = 0.0;
+  boost::optional<double> minimum;
+  boost::optional<double> maximum;
+  boost::optional<double> stepValue;
 
   // If any values are set, check they parse ok
   if (!isEntirelyWhitespace(min)) {
-    auto optional = parseNonNegativeDouble(min);
-    if (optional.is_initialized())
-      minimum = optional.get();
-    else
+    minimum = parseNonNegativeDouble(min);
+    if (!minimum.is_initialized())
       invalidParams.emplace_back(0);
   }
 
   if (!isEntirelyWhitespace(max)) {
-    auto optional = parseNonNegativeDouble(max);
-    if (optional.is_initialized())
-      maximum = optional.get();
-    else
+    maximum = parseNonNegativeDouble(max);
+    if (!maximum.is_initialized())
       invalidParams.emplace_back(1);
   }
 
   if (!isEntirelyWhitespace(step)) {
-    auto optional = parseNonNegativeDouble(step);
-    if (optional.is_initialized())
-      stepValue = optional.get();
-    else
+    stepValue = parseNonNegativeDouble(step);
+    if (!stepValue.is_initialized())
       invalidParams.emplace_back(2);
   }
 
   // Check max is not less than min
-  if (maximum != 0.0 && minimum != 0.0 && maximum < minimum) {
+  if (maximum.is_initialized() && minimum.is_initialized() &&
+      maximum.get() < minimum.get()) {
     invalidParams.emplace_back(0);
     invalidParams.emplace_back(1);
   }
@@ -115,10 +112,8 @@ parseQRange(std::string const &min, std::string const &max,
   // Return errors, valid range, or unset if nothing was specified
   if (!invalidParams.empty())
     return invalidParams;
-  else if (minimum == 0.0 && maximum == 0.0 && stepValue == 0.0)
-    return boost::optional<RangeInQ>();
   else
-    return boost::optional<RangeInQ>(RangeInQ(minimum, stepValue, maximum));
+    return RangeInQ(minimum, stepValue, maximum);
 }
 
 boost::optional<std::vector<std::string>>

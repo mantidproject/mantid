@@ -39,15 +39,14 @@ namespace CustomInterfaces {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Row {
 public:
   Row(std::vector<std::string> number, double theta,
-      std::pair<std::string, std::string> tranmissionRuns,
-      boost::optional<RangeInQ> qRange, boost::optional<double> scaleFactor,
-      ReductionOptionsMap reductionOptions,
+      std::pair<std::string, std::string> tranmissionRuns, RangeInQ qRange,
+      boost::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
       ReductionWorkspaces reducedWorkspaceNames);
 
   std::vector<std::string> const &runNumbers() const;
   std::pair<std::string, std::string> const &transmissionWorkspaceNames() const;
   double theta() const;
-  boost::optional<RangeInQ> const &qRange() const;
+  RangeInQ const &qRange() const;
   boost::optional<double> scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
   ReductionWorkspaces const &reducedWorkspaceNames() const;
@@ -57,7 +56,7 @@ public:
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;
-  boost::optional<RangeInQ> m_qRange;
+  RangeInQ m_qRange;
   boost::optional<double> m_scaleFactor;
   std::pair<std::string, std::string> m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;

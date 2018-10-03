@@ -31,7 +31,7 @@ private:
     auto stitchParameters = std::map<std::string, std::string>();
     auto perThetaDefaults = std::vector<PerThetaDefaults>(
         {PerThetaDefaults(boost::none, std::pair<std::string, std::string>(),
-                          boost::none, boost::none, ProcessingInstructions())});
+                          RangeInQ(), boost::none, ProcessingInstructions())});
     return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
                       SummationType::SumInLambda,
                       std::move(polarizationCorrections), boost::none,

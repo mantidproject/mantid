@@ -5,8 +5,8 @@ namespace CustomInterfaces {
 
 PerThetaDefaults::PerThetaDefaults(
     boost::optional<double> theta,
-    std::pair<std::string, std::string> transmissionRuns,
-    boost::optional<RangeInQ> qRange, boost::optional<double> scaleFactor,
+    std::pair<std::string, std::string> transmissionRuns, RangeInQ qRange,
+    boost::optional<double> scaleFactor,
     boost::optional<ProcessingInstructions> processingInstructions)
     : m_theta(std::move(theta)),
       m_transmissionRuns(std::move(transmissionRuns)),
@@ -24,9 +24,7 @@ boost::optional<double> PerThetaDefaults::thetaOrWildcard() const {
   return m_theta;
 }
 
-boost::optional<RangeInQ> const &PerThetaDefaults::qRange() const {
-  return m_qRange;
-}
+RangeInQ const &PerThetaDefaults::qRange() const { return m_qRange; }
 
 boost::optional<double> PerThetaDefaults::scaleFactor() const {
   return m_scaleFactor;

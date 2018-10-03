@@ -7,8 +7,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 Row::Row(std::vector<std::string> runNumbers, double theta,
-         std::pair<std::string, std::string> transmissionRuns,
-         boost::optional<RangeInQ> qRange, boost::optional<double> scaleFactor,
+         std::pair<std::string, std::string> transmissionRuns, RangeInQ qRange,
+         boost::optional<double> scaleFactor,
          ReductionOptionsMap reductionOptions,
          ReductionWorkspaces reducedWorkspaceNames)
     : m_runNumbers(std::move(runNumbers)), m_theta(std::move(theta)),
@@ -28,7 +28,7 @@ Row::transmissionWorkspaceNames() const {
 
 double Row::theta() const { return m_theta; }
 
-boost::optional<RangeInQ> const &Row::qRange() const { return m_qRange; }
+RangeInQ const &Row::qRange() const { return m_qRange; }
 
 boost::optional<double> Row::scaleFactor() const { return m_scaleFactor; }
 

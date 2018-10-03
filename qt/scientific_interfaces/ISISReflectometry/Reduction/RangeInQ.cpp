@@ -1,23 +1,19 @@
 #include "RangeInQ.h"
-#include "MantidKernel/Tolerance.h"
 #include <cassert>
 namespace MantidQt {
 namespace CustomInterfaces {
 
-RangeInQ::RangeInQ(double min, double step, double max)
+RangeInQ::RangeInQ(boost::optional<double> min, boost::optional<double> step,
+                   boost::optional<double> max)
     : m_min(min), m_step(step), m_max(max) {
-  assert(min == 0.0 || max == 0.0 || min < max);
+  assert(!(m_min.is_initialized() && m_max.is_initialized() && m_max < m_min));
 }
 
-bool RangeInQ::isValid() const {
-  return m_min <= m_max + Mantid::Kernel::Tolerance;
-}
+boost::optional<double> RangeInQ::min() const { return m_min; }
 
-double RangeInQ::min() const { return m_min; }
+boost::optional<double> RangeInQ::max() const { return m_max; }
 
-double RangeInQ::max() const { return m_max; }
-
-double RangeInQ::step() const { return m_step; }
+boost::optional<double> RangeInQ::step() const { return m_step; }
 
 bool operator==(RangeInQ const &lhs, RangeInQ const &rhs) {
   return lhs.min() == rhs.min() && lhs.max() == rhs.max() &&

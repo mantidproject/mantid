@@ -43,7 +43,7 @@ private:
   boost::optional<double> parseTheta(std::vector<std::string> const &cellText);
   boost::optional<TransmissionRunPair>
   parseTransmissionRuns(std::vector<std::string> const &cellText);
-  boost::optional<boost::optional<RangeInQ>>
+  boost::optional<RangeInQ>
   parseQRange(std::vector<std::string> const &cellText);
   boost::optional<boost::optional<double>>
   parseScaleFactor(std::vector<std::string> const &cellText);

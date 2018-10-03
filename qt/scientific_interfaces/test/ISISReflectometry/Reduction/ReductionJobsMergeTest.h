@@ -35,13 +35,13 @@ public:
     auto wsNames =
         ReductionWorkspaces({"TOF_" + name}, {"", ""}, "", "IvsLam_" + name,
                             "IvsQ_" + name, "IvsQ_binned_" + name);
-    return Row({name}, angle, {"", ""}, boost::none, boost::none, {}, wsNames);
+    return Row({name}, angle, {"", ""}, RangeInQ(), boost::none, {}, wsNames);
   }
 
   Row rowWithNamesAndAngle(std::vector<std::string> const &names,
                            double angle) {
     auto wsNames = ReductionWorkspaces(names, {"", ""}, "", "", "", "");
-    return Row(names, angle, {"", ""}, boost::none, boost::none, {}, wsNames);
+    return Row(names, angle, {"", ""}, RangeInQ(), boost::none, {}, wsNames);
   }
 
   void testMergeEmptyModels() {

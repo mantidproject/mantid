@@ -61,13 +61,12 @@ PerThetaDefaultsValidator::parseTransmissionRuns(CellText const &cellText) {
       transmissionRunsOrError);
 }
 
-boost::optional<boost::optional<RangeInQ>>
+boost::optional<RangeInQ>
 PerThetaDefaultsValidator::parseQRange(CellText const &cellText) {
   auto qRangeOrError = ::MantidQt::CustomInterfaces::parseQRange(
       cellText[3], cellText[4], cellText[5]);
   return boost::apply_visitor(
-      AppendErrorIfNotType<boost::optional<RangeInQ>>(m_invalidColumns, 3),
-      qRangeOrError);
+      AppendErrorIfNotType<RangeInQ>(m_invalidColumns, 3), qRangeOrError);
 }
 
 boost::optional<boost::optional<double>>

@@ -44,7 +44,7 @@ private:
       std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<TransmissionRunPair> parseTransmissionRuns(
       std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
-  boost::optional<boost::optional<RangeInQ>>
+  boost::optional<RangeInQ>
   parseQRange(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);
   boost::optional<boost::optional<double>>
   parseScaleFactor(std::array<std::string, INPUT_FIELD_COUNT> const &cellText);

@@ -59,13 +59,12 @@ RowValidator::parseTransmissionRuns(std::vector<std::string> const &cellText) {
       transmissionRunsOrError);
 }
 
-boost::optional<boost::optional<RangeInQ>>
+boost::optional<RangeInQ>
 RowValidator::parseQRange(std::vector<std::string> const &cellText) {
   auto qRangeOrError = ::MantidQt::CustomInterfaces::parseQRange(
       cellText[4], cellText[5], cellText[6]);
   return boost::apply_visitor(
-      AppendErrorIfNotType<boost::optional<RangeInQ>>(m_invalidColumns, 4),
-      qRangeOrError);
+      AppendErrorIfNotType<RangeInQ>(m_invalidColumns, 4), qRangeOrError);
 }
 
 boost::optional<boost::optional<double>>

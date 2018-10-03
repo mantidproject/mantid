@@ -47,15 +47,12 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row) {
            row.transmissionWorkspaceNames().first),
        MantidQt::MantidWidgets::Batch::Cell(
            row.transmissionWorkspaceNames().second),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(
-           map(row.qRange(),
-               [](RangeInQ const &range) -> double { return range.min(); }))),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(
-           map(row.qRange(),
-               [](RangeInQ const &range) -> double { return range.max(); }))),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(
-           map(row.qRange(),
-               [](RangeInQ const &range) -> double { return range.step(); }))),
+       MantidQt::MantidWidgets::Batch::Cell(
+           optionalToString(row.qRange().min())),
+       MantidQt::MantidWidgets::Batch::Cell(
+           optionalToString(row.qRange().max())),
+       MantidQt::MantidWidgets::Batch::Cell(
+           optionalToString(row.qRange().step())),
        MantidQt::MantidWidgets::Batch::Cell(
            optionalToString(row.scaleFactor())),
        MantidQt::MantidWidgets::Batch::Cell(

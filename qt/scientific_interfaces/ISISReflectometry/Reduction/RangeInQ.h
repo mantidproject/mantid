@@ -23,23 +23,25 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_RANGEINQ_H_
 #define MANTID_CUSTOMINTERFACES_RANGEINQ_H_
 #include "../DllConfig.h"
+#include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL RangeInQ {
 public:
-  RangeInQ(double min = 0.0, double step = 0.0, double max = 0.0);
+  RangeInQ(boost::optional<double> min = boost::none,
+           boost::optional<double> step = boost::none,
+           boost::optional<double> max = boost::none);
 
-  bool isValid() const;
-  double min() const;
-  double max() const;
-  double step() const;
+  boost::optional<double> min() const;
+  boost::optional<double> max() const;
+  boost::optional<double> step() const;
 
 private:
-  double m_min;
-  double m_step;
-  double m_max;
+  boost::optional<double> m_min;
+  boost::optional<double> m_step;
+  boost::optional<double> m_max;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(RangeInQ const &lhs,

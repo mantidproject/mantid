@@ -30,9 +30,9 @@ parseTransmissionRuns(std::string const &firstTransmissionRun,
                       std::string const &secondTransmissionRun);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-boost::variant<boost::optional<RangeInQ>, std::vector<int>>
-parseQRange(std::string const &min, std::string const &max,
-            std::string const &step);
+boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min,
+                                                       std::string const &max,
+                                                       std::string const &step);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::optional<boost::optional<double>>

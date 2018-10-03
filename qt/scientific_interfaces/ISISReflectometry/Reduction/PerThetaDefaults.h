@@ -13,21 +13,21 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
 public:
   PerThetaDefaults(
       boost::optional<double> theta,
-      std::pair<std::string, std::string> tranmissionRuns,
-      boost::optional<RangeInQ> qRange, boost::optional<double> scaleFactor,
+      std::pair<std::string, std::string> tranmissionRuns, RangeInQ qRange,
+      boost::optional<double> scaleFactor,
       boost::optional<ProcessingInstructions> processingInstructions);
 
   std::pair<std::string, std::string> const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
   boost::optional<double> thetaOrWildcard() const;
-  boost::optional<RangeInQ> const &qRange() const;
+  RangeInQ const &qRange() const;
   boost::optional<double> scaleFactor() const;
   boost::optional<ProcessingInstructions> processingInstructions() const;
 
 private:
   boost::optional<double> m_theta;
   std::pair<std::string, std::string> m_transmissionRuns;
-  boost::optional<RangeInQ> m_qRange;
+  RangeInQ m_qRange;
   boost::optional<double> m_scaleFactor;
   boost::optional<ProcessingInstructions> m_processingInstructions;
 };
