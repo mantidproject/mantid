@@ -231,122 +231,119 @@ void MultiProcessEventLoader::GroupLoader<
   auto bankSizes = EventLoader::readBankSizes(instrument, bankNames);
 
   struct Task {
+    unsigned bankIdx;
+    std::size_t from;
     std::vector<int32_t> eventId;
     std::vector<T> eventTimeOffset;
     IO::NXEventDataLoader<T> loader;
     decltype(loader.setBankIndex(0)) partitioner;
 
-    Task(const H5::Group &instrument, const std::vector<std::string> &bankNames)
-        : loader(1, instrument, bankNames) {}
+    Task(const H5::Group &instrument, const std::vector<std::string> &bankNames,
+         unsigned bank, std::size_t cur, std::size_t cnt)
+        : bankIdx(bank), from(cur), eventId(cnt), eventTimeOffset(cnt),
+          loader(1, instrument, bankNames) {}
   };
 
   std::vector<std::vector<TofEvent>> pixels(storage.pixelCount());
   std::atomic<std::size_t> pixNum{0};
-  std::queue<std::unique_ptr<Task>> queue;
-  std::mutex mutex;
+  std::atomic<std::size_t> taskCount{0};
   std::atomic<int> finished{0};
   std::size_t portion{std::max<std::size_t>(pixels.size() / 16, 1)};
 
-  std::thread producer([&]() {
-    std::size_t eventCounter{0};
-    for (unsigned bankIdx = 0; bankIdx < bankNames.size(); ++bankIdx) {
-      auto count = bankSizes[bankIdx];
-      bool isFirstBank = (eventCounter < from);
+  std::vector<Task> tasks;
 
-      if (eventCounter + count > from) {
-        size_t start{0};
-        size_t finish{count};
-        if (isFirstBank)
-          start = from - eventCounter;
-        if (eventCounter + count > to)
-          finish = to - eventCounter;
+  // prepare tasks: determine chunks of data to be loaded and sorted by pixel
+  // number
+  std::size_t eventCounter{0};
+  for (unsigned bankIdx = 0; bankIdx < bankNames.size(); ++bankIdx) {
+    auto count = bankSizes[bankIdx];
+    bool isFirstBank = (eventCounter < from);
 
-        std::size_t cur = start;
-        while (cur < finish) {
-          auto cnt(chLen);
-          if (cur + chLen >= finish)
-            cnt = finish - cur;
+    if (eventCounter + count > from) {
+      size_t start{0};
+      size_t finish{count};
+      if (isFirstBank)
+        start = from - eventCounter;
+      if (eventCounter + count > to)
+        finish = to - eventCounter;
 
-          auto task = std::make_unique<Task>(instrument, bankNames);
-          task->partitioner = task->loader.setBankIndex(bankIdx);
-          task->partitioner->setEventOffset(cur);
-          task->eventTimeOffset.resize(cnt);
-          task->loader.readEventTimeOffset(task->eventTimeOffset.data(), cur,
-                                           cnt);
-          task->eventId.resize(cnt);
-          task->loader.readEventID(task->eventId.data(), cur, cnt);
-          detail::eventIdToGlobalSpectrumIndex(task->eventId.data(), cnt,
-                                               bankOffsets[bankIdx]);
+      std::size_t cur = start;
+      while (cur < finish) {
+        auto cnt(chLen);
+        if (cur + chLen >= finish)
+          cnt = finish - cur;
 
-          {
-            std::lock_guard<std::mutex> lock(mutex);
-            queue.push(std::move(task));
-          }
-          cur += cnt;
-        }
-      }
-      eventCounter += count;
-      if (eventCounter >= to) {
-        ++finished;
-        break;
+        tasks.emplace_back(instrument, bankNames, bankIdx, cur, cnt);
+        cur += cnt;
       }
     }
+    eventCounter += count;
+    if (eventCounter >= to) {
+      break;
+    }
+  }
+
+  auto loadToshmem = [&]() {
+    for (auto startPixel = pixNum.fetch_add(portion);
+         startPixel < storage.pixelCount();
+         startPixel = pixNum.fetch_add(portion)) {
+      for (auto pixel = startPixel;
+           pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
+        storage.appendEvent(0, pixel, pixels[pixel].begin(),
+                            pixels[pixel].end());
+    }
+  };
+
+  std::thread fileLoader([&]() {
+    for (auto &task : tasks) {
+      task.partitioner = task.loader.setBankIndex(task.bankIdx);
+      task.loader.readEventTimeOffset(task.eventTimeOffset.data(), task.from,
+                                      task.eventTimeOffset.size());
+      task.loader.readEventID(task.eventId.data(), task.from,
+                              task.eventId.size());
+      detail::eventIdToGlobalSpectrumIndex(
+          task.eventId.data(), task.eventId.size(), bankOffsets[task.bankIdx]);
+      ++taskCount;
+    }
+    ++finished;
 
     while (finished != 2) {
     }; // consumer have finished his work ready to transfer to shmem
 
-    for (auto startPixel = pixNum.fetch_add(portion);
-         startPixel < storage.pixelCount();
-         startPixel = pixNum.fetch_add(portion)) {
-      for (auto pixel = startPixel;
-           pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
-        storage.appendEvent(0, pixel, pixels[pixel].begin(),
-                            pixels[pixel].end());
-    }
+    loadToshmem();
+
   });
 
-  auto processQueue = [&]() {
-    std::size_t qsz{0};
-    {
-      std::lock_guard<std::mutex> lock(mutex);
-      qsz = queue.size();
-    }
+  std::thread sorter([&]() {
+    std::size_t tasksDone{0};
 
-    while (qsz > 0) {
-      std::unique_ptr<Task> task;
-      {
-        std::lock_guard<std::mutex> lock(mutex);
-        task = std::move(queue.front());
-        queue.pop();
+    auto processTask = [&]() {
+      std::size_t tasksLoaded{taskCount};
+      if (tasksDone < tasksLoaded) {
+        for (auto tn = tasksDone; tn < tasksLoaded; ++tn) {
+          auto &task = tasks[tn];
+          task.partitioner->setEventOffset(task.from);
+          for (unsigned i = 0; i < task.eventId.size(); ++i)
+            pixels.at(task.eventId[i])
+                .emplace_back(task.eventTimeOffset[i],
+                              task.partitioner->next());
+        }
+        tasksDone = tasksLoaded;
       }
-      for (unsigned i = 0; i < task->eventId.size(); ++i)
-        pixels.at(task->eventId[i])
-            .emplace_back(task->eventTimeOffset[i], task->partitioner->next());
-      --qsz;
-    }
-  };
+    };
 
-  std::thread consumer([&]() {
-    while (finished < 1) { // producer wants to produce smth
-      processQueue();
-    }
-    processQueue(); // Clean up the queue
+    while (finished < 1) // producer wants to produce smth
+      processTask();
+    // Clean up the queue
+    processTask();
 
     ++finished; // all is consumed
 
-    for (auto startPixel = pixNum.fetch_add(portion);
-         startPixel < storage.pixelCount();
-         startPixel = pixNum.fetch_add(portion)) {
-      for (auto pixel = startPixel;
-           pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
-        storage.appendEvent(0, pixel, pixels[pixel].begin(),
-                            pixels[pixel].end());
-    }
-
+    loadToshmem();
   });
 
-  producer.join();
-  consumer.join();
+  fileLoader.join();
+  sorter.join();
 }
 
 } // namespace IO
