@@ -168,6 +168,7 @@ public:
 
     expectViewReturnsDefaultValues();
     EXPECT_CALL(m_view, getStitchOptions()).WillOnce(Return(optionsString));
+    EXPECT_CALL(m_view, showStitchParametersValid());
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.experiment().stitchParameters(), optionsMap);
@@ -175,7 +176,18 @@ public:
   }
 
   void testSetStitchOptionsInvalid() {
-    // TODO
+    auto presenter = makePresenter();
+    auto const optionsString = "0.02";
+    std::map<std::string, std::string> emptyOptionsMap;
+
+    expectViewReturnsDefaultValues();
+    EXPECT_CALL(m_view, getStitchOptions()).WillOnce(Return(optionsString));
+    EXPECT_CALL(m_view, showStitchParametersInvalid());
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().stitchParameters(),
+                     emptyOptionsMap);
+    verifyAndClear();
   }
 
   void testNewPerAngleDefaultsRequested() {

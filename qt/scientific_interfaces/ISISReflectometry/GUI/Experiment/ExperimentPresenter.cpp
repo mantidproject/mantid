@@ -102,7 +102,6 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
   auto validate = PerThetaDefaultsTableValidator();
   auto perThetaValidationResult =
       validate(m_view->getPerAngleOptions(), m_thetaTolerance);
-  auto stitchParameters = stitchParametersFromView();
   if (perThetaValidationResult.isValid()) {
     auto const analysisMode = analysisModeFromString(m_view->getAnalysisMode());
     auto const reductionType =
@@ -111,6 +110,7 @@ ExperimentValidationResult ExperimentPresenter::validateExperimentFromView() {
         summationTypeFromString(m_view->getSummationType());
     auto transmissionRunRange = transmissionRunRangeFromView();
     auto polarizationCorrections = polarizationCorrectionsFromView();
+    auto stitchParameters = stitchParametersFromView();
     return ExperimentValidationResult(
         Experiment(analysisMode, reductionType, summationType,
                    polarizationCorrections, transmissionRunRange,
