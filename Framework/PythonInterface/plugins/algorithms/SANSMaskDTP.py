@@ -10,7 +10,7 @@ from mantid.simpleapi import MaskDetectors
 
 
 class SANSMaskDTP(PythonAlgorithm):
-    """ 
+    """
     Class to generate grouping file
     """
 
