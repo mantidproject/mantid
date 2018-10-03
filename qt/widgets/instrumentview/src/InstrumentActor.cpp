@@ -758,6 +758,7 @@ Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
                                                                 -1);
   alg->setPropertyValue("InputWorkspace", getWorkspace()->getName());
   alg->setPropertyValue("OutputWorkspace", maskName);
+  alg->setLogging(false);
   alg->execute();
 
   Mantid::API::MatrixWorkspace_sptr maskWorkspace =

@@ -1365,6 +1365,7 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
     alg->setProperty("InputWorkspace",
                      boost::dynamic_pointer_cast<Workspace>(outputWS));
     alg->setPropertyValue("OutputFile", fileName);
+    alg->setLogging(false);
     alg->execute();
 
   } catch (...) {
