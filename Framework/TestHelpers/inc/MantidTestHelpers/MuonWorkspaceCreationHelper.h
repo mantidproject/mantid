@@ -86,10 +86,14 @@ Mantid::API::MatrixWorkspace_sptr
 createCountsWorkspace(size_t nspec, size_t maxt, double seed,
                       size_t detectorIDseed = 1);
 
+Mantid::API::MatrixWorkspace_sptr
+createCountsWorkspace(size_t nspec, size_t maxt, double seed,
+                      size_t detectorIDseed, bool hist, double xStart, double xEnd);
+
 /**
- * Create a WorkspaceGroup and add to the ADS, populate with MatrixWorkspaces
- * simulating periods as used in muon analysis. Workspace for period i has a
- * name ending _i.
+ * Create a WorkspaceGroup and add to the ADS, populate with
+ * MatrixWorkspaces simulating periods as used in muon analysis. Workspace
+ * for period i has a name ending _i.
  */
 Mantid::API::WorkspaceGroup_sptr
 createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,

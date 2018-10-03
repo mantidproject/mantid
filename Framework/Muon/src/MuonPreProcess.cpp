@@ -75,7 +75,55 @@ void MuonPreProcess::init() {
   setPropertyGroup("DeadTimeTable", analysisGrp);
 }
 
+std::map<std::string, std::string> MuonPreProcess::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  double tmin = this->getProperty("TimeMin");
+  double tmax = this->getProperty("TimeMax");
+  if (tmin != EMPTY_DBL() && tmax != EMPTY_DBL()) {
+    if (tmin > tmax) {
+      errors["TimeMin"] = "TimeMin > TimeMax";
+    }
+    if (tmin != EMPTY_DBL() && tmin == tmax) {
+      errors["TimeMin"] = "TimeMin and TimeMax must be different";
+    }
+  }
+
+  // Checks for dead time table
+  Workspace_sptr inputWS = this->getProperty("InputWorkspace");
+  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+    TableWorkspace_sptr deadTimeTable = this->getProperty("DeadTimeTable");
+    if (deadTimeTable) {
+      if (deadTimeTable->rowCount() > ws->getNumberHistograms()) {
+        errors["DeadTimeTable"] = "DeadTimeTable must have as many rows as "
+                                  "there are spectra in InputWorkspace.";
+      }
+    }
+  }
+
+  if (auto ws = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+    if (ws->getNumberOfEntries() == 0) {
+      errors["InputWorkspace"] = "Input WorkspaceGroup is empty.";
+    } else {
+      auto nSpectra =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(0))
+              ->getNumberHistograms();
+      for (int index = 1; index < ws->getNumberOfEntries(); index++) {
+        if (boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(index))
+                ->getNumberHistograms() != nSpectra) {
+          errors["InputWorkspace"] =
+              "Numbers of spectra should be identical across all workspaces in "
+              "the workspace group.";
+        }
+      }
+    }
+  }
+
+  return errors;
+}
+
 void MuonPreProcess::exec() {
+  this->setRethrows(true);
 
   Workspace_sptr inputWS = getProperty("InputWorkspace");
 
@@ -182,7 +230,7 @@ MuonPreProcess::applyRebinning(MatrixWorkspace_sptr ws,
     IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
     rebin->setProperty("InputWorkspace", ws);
     rebin->setProperty("Params", rebinArgs);
-    rebin->setProperty("FullBinsOnly", true);
+    rebin->setProperty("FullBinsOnly", false);
     rebin->execute();
     return rebin->getProperty("OutputWorkspace");
   } else {

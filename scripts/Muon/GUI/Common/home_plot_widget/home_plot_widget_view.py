@@ -52,13 +52,11 @@ class HomePlotWidgetView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.plot_button)
         self.horizontal_layout.addSpacing(50)
 
-
-
         self.vertical_layout = QtGui.QVBoxLayout()
         self.vertical_layout.setObjectName("verticalLayout")
         self.vertical_layout.addItem(self.horizontal_layout)
 
-        self.group = QtGui.QGroupBox("Plotting")
+        self.group = QtGui.QGroupBox("Plot Data")
         self.group.setFlat(False)
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
                            "QGroupBox:title {"

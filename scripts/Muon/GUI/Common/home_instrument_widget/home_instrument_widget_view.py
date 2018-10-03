@@ -83,7 +83,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.setup_rebin_row()
         #self.setup_filter_row()
 
-        self.group = QtGui.QGroupBox("Run Pre-processing Parameters")
+        self.group = QtGui.QGroupBox("Instrument and Run Pre-processing Parameters")
         self.group.setFlat(False)
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
                            "QGroupBox:title {"

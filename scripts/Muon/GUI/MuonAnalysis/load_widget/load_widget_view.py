@@ -35,6 +35,7 @@ class LoadWidgetView(QtGui.QWidget):
         self.load_behaviour_combo.addItem("Simultaneous")
         self.load_behaviour_combo.setToolTip("The behaviour of the loaded data in multiple file mode")
         self.load_behaviour_combo.setEnabled(False)
+        self.load_behaviour_combo.setVisible(False)
 
         # Set the layout of the tools at the bottom of the widget
         self.horizontal_layout = QtGui.QHBoxLayout()
@@ -58,7 +59,7 @@ class LoadWidgetView(QtGui.QWidget):
 
         self.vertical_layout.addStretch(1)
 
-        self.group = QtGui.QGroupBox("Loading")
+        self.group = QtGui.QGroupBox("Loading From Data")
         self.group.setFlat(False)
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
                            "QGroupBox:title {"
@@ -90,8 +91,10 @@ class LoadWidgetView(QtGui.QWidget):
     def change_multiple_loading_state(self):
         if self.get_multiple_loading_state():
             self.load_behaviour_combo.setEnabled(True)
+            self.load_behaviour_combo.setVisible(True)
         else:
             self.load_behaviour_combo.setEnabled(False)
+            self.load_behaviour_combo.setVisible(False)
 
     def on_subwidget_loading_started(self, slot):
         self.load_run_widget.loadingStarted.connect(slot)
