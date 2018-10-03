@@ -800,6 +800,7 @@ set ( TEST_FILES
 	DivideTest.h
 	EditInstrumentGeometryTest.h
 	ElasticWindowTest.h
+	EQSANSUnfoldFrameTest.h
 	EstimateDivergenceTest.h
 	EstimateResolutionDiffractionTest.h
 	ExponentialCorrectionTest.h
