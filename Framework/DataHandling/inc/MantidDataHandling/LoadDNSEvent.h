@@ -10,10 +10,9 @@
 
 
 #include <array>
-#include <set>
 #include <fstream>
 #include <limits>
-#include <iterator>
+//#include <iterator>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -25,7 +24,7 @@ namespace DataHandling {
 /**
   LoadDNSEvent
 
-  Algorithm used to generate an EventWorkspace from a DNS listmode (.mdat) file.
+  Algorithm used to generate an EventWorkspace from a DNS PSD listmode (.mdat) file.
 
   @author Joachim Coenen, Jülich Centre for Neutron Science
   @date 2018-08-16
@@ -221,7 +220,7 @@ private:
       } break;
     default:
       // Panic!!!!
-      g_log.error() << "unknow event id 0x" << n2hexstr(eventId) << "\n";
+      g_log.error() << "unknow event id " << eventId << "\n";
       break;
     }
   }
