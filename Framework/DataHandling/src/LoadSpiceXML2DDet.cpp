@@ -487,6 +487,7 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
 
   // define output vector
   std::vector<unsigned int> vec_counts(num_dets);
+  infile.seekg(0, ios::beg);
 
   // read each integer... time consuming
   //  int max_count = 0;
@@ -498,6 +499,8 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
     // infile.read(buffer, sizeof(int));
     infile.read((char *)&buffer, sizeof(buffer));
     vec_counts[i] = buffer;
+    if (i < 10 || i > num_dets - 10)
+      g_log.notice() << i << "\t " << vec_counts[i] << "\n";
     total_counts += buffer;
     //    if (counts[i] > max_count)
     //      max_count = counts[i];
