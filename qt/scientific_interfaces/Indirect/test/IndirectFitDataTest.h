@@ -59,7 +59,7 @@ public:
 
   static void destroySuite(IndirectFitDataTest *suite) { delete suite; }
 
-  void test_data_is_instantiated_correctly() {
+  void test_data_is_instantiated() {
     auto const workspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     Spectra const spec =
         std::make_pair(0u, workspace->getNumberHistograms() - 1);
@@ -72,7 +72,7 @@ public:
     TS_ASSERT_EQUALS(data.workspace()->getNumberHistograms(), 1);
   }
 
-  void test_that_DiscontinuousSpectra_is_set_correctly() {
+  void test_that_DiscontinuousSpectra_is_set_up_correctly() {
     DiscontinuousSpectra<std::size_t> const spectra =
         DiscontinuousSpectra<std::size_t>("0-5,8,10");
 
@@ -84,7 +84,7 @@ public:
       TS_ASSERT_EQUALS(*it, spectraVec[it - spectra.begin()]);
   }
 
-  void test_data_is_stored_correctly_in_the_ADS() {
+  void test_data_is_stored_in_the_ADS() {
     auto const data = getIndirectFitData(1, 3);
     SetUpADSWithWorkspace ads("WorkspaceName", data);
 
@@ -95,7 +95,8 @@ public:
     TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 1);
   }
 
-  void test_displayName_returns_correct_name() {
+  void
+  test_displayName_returns_a_valid_name_when_provided_a_rangeDelimiter_and_spectrum_number() {
     auto const data = getIndirectFitData(1, 3);
 
     std::vector<std::string> const formatStrings{
@@ -111,7 +112,7 @@ public:
                      "_s1_Parameter");
   }
 
-  void test_displayName_removes_correct_part_of_workspace_name() {
+  void test_displayName_removes_red_part_of_a_workspace_name() {
     auto const data = getIndirectFitData(1, 3);
 
     SetUpADSWithWorkspace ads("Workspace_3456_red", data);
@@ -122,12 +123,13 @@ public:
                      "Workspace_3456_s0_Result");
   }
 
-  void test_that_correct_number_of_spectra_is_returned() {
+  void
+  test_that_the_number_of_spectra_returned_matches_the_instantiated_value() {
     auto const data = getIndirectFitData(10, 3);
     TS_ASSERT_EQUALS(data.numberOfSpectra(), 10);
   }
 
-  void test_that_correct_spectrum_number_is_returned() {
+  void test_that_getSpectrum_returns_the_expected_spectrum_numbers() {
     auto const data = getIndirectFitData(4, 3);
 
     for (auto i = 0u; i < data.numberOfSpectra(); ++i) {
@@ -194,7 +196,7 @@ public:
     TS_ASSERT_EQUALS(data.excludeRegionsVector(3).empty(), true);
   }
 
-  void test_that_excludeRegion_pairs_are_stored_in_correct_order() {
+  void test_that_excludeRegion_pairs_are_stored_in_an_order_of_low_to_high() {
     /// Example: unordered: 10,11 9,7     ordered: 10,11,7,9
     auto data = getIndirectFitData(3, 3);
 
@@ -213,7 +215,7 @@ public:
   }
 
   void
-  test_that_excludeRegion_is_stored_correctly_when_there_are_many_spaces_in_input_string() {
+  test_that_excludeRegion_is_stored_without_spaces_when_there_are_many_spaces_in_input_string() {
     auto data = getIndirectFitData(3, 3);
 
     data.setExcludeRegionString("  6,     2", 0);
@@ -228,7 +230,7 @@ public:
   }
 
   void
-  test_that_setExcludeRegion_correctly_rounds_the_numbers_in_the_input_string() {
+  test_that_setExcludeRegion_rounds_the_numbers_in_the_input_string_to_the_appropriate_decimal_place() {
     auto data = getIndirectFitData(2, 3);
 
     data.setExcludeRegionString("6.29,2.93", 0);
@@ -276,7 +278,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(data.setStartX(5000000, 10));
   }
 
-  void test_correct_startX_is_stored_in_rangeafter_using_setStartX() {
+  void test_the_provided_startX_is_stored_in_range_after_using_setStartX() {
     auto data = getIndirectFitData(3, 3);
 
     data.setStartX(-5.0, 0);
@@ -297,7 +299,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(data.setStartX(5000000, 10));
   }
 
-  void test_correct_endX_is_stored_in_rangeafter_using_setEndX() {
+  void test_the_provided_endX_is_stored_in_range_after_using_setEndX() {
     auto data = getIndirectFitData(3, 3);
 
     data.setEndX(-5.0, 0);
@@ -309,7 +311,8 @@ public:
     TS_ASSERT_EQUALS(data.getRange(2).second, 100000000000000.0);
   }
 
-  void test_that_the_startX_of_two_data_sets_are_combined_correctly() {
+  void
+  test_that_the_startX_of_two_data_sets_are_combined_when_relating_to_two_seperate_spectra() {
     auto data1 = getIndirectFitData(2, 3);
     auto data2 = getIndirectFitData(2, 3);
 
@@ -321,7 +324,8 @@ public:
     TS_ASSERT_EQUALS(combinedData.getRange(1).first, 5.0);
   }
 
-  void test_that_the_endX_of_two_datasets_are_combined_correctly() {
+  void
+  test_that_the_endX_of_two_datasets_are_combined_when_relating_to_two_seperate_spectra() {
     auto data1 = getIndirectFitData(2, 3);
     auto data2 = getIndirectFitData(2, 3);
 
@@ -333,7 +337,8 @@ public:
     TS_ASSERT_EQUALS(combinedData.getRange(1).second, 5.9);
   }
 
-  void test_that_the_excludeRegion_of_two_datasets_are_combined_correctly() {
+  void
+  test_that_the_excludeRegion_of_two_datasets_are_combined_when_relating_to_two_seperate_spectra() {
     auto data1 = getIndirectFitData(2, 3);
     auto data2 = getIndirectFitData(2, 3);
 
@@ -416,7 +421,7 @@ public:
   }
 
   void
-  test_that_a_SpectraPair_and_DiscontinuousSpectra_dataset_are_combined_correctly_when_spectra_do_not_overlap() {
+  test_that_a_Spectra_pair_and_DiscontinuousSpectra_dataset_are_combined_correctly_when_spectra_do_not_overlap() {
     auto data1 = getIndirectFitData(10, 3);
     auto data2 = getIndirectFitData(10, 3);
 
@@ -430,7 +435,7 @@ public:
   }
 
   void
-  test_that_a_SpectraPair_and_DiscontinuousSpectra_dataset_are_combined_correctly_when_spectra_overlap() {
+  test_that_a_Spectra_pair_and_DiscontinuousSpectra_dataset_are_combined_correctly_when_spectra_overlap() {
     auto data1 = getIndirectFitData(10, 3);
     auto data2 = getIndirectFitData(10, 3);
 

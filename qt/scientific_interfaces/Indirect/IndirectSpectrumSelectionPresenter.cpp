@@ -64,6 +64,7 @@ std::string rearrangeSpectraSubString(std::string const &string) {
                                                : string;
 }
 
+// Swaps the two numbers in a spectra range if they go from large to small
 std::string rearrangeSpectraRangeStrings(std::string const &string) {
   std::string spectraString;
   std::vector<std::string> subStrings = splitStringBy(string, ",");
