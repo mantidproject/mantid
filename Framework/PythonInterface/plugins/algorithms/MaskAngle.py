@@ -8,7 +8,7 @@ import numpy
 import math
 
 class MaskAngle(mantid.api.PythonAlgorithm):
-    """ Class to generate grouping file
+    """ Mask detectors between specified angles based on angle type required 
     """
 
     def category(self):
@@ -58,6 +58,11 @@ class MaskAngle(mantid.api.PythonAlgorithm):
             issues["Workspace"] = "Workspace must have an associated instrument."
         return issues
 
+    def _get_phi(self, det_index, detector_info):
+        pos = detector_info.position(det_index)
+        # see Detector.cpp for phi definition
+        return math.fabs(math.atan2(pos.Y(), pos.X()))
+
     def PyExec(self):
         ws = self.getProperty("Workspace").value
         ttmin = numpy.radians(self.getProperty("MinAngle").value)
@@ -65,33 +70,25 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         if ttmin > ttmax :
             raise ValueError("MinAngle > MaxAngle, please check angle range for masking")
 
-        angle = self.getProperty('Angle').value
+        angle_phi = self.getProperty('Angle').value == 'Phi'
 
         numspec = ws.getNumberHistograms()
         spectrumInfo = ws.spectrumInfo()
         detectorInfo = ws.detectorInfo()
-        componentInfo = ws.componentInfo()
         det_ids = detectorInfo.detectorIDs()
         masked_ids = list()
-
-        if angle == 'Phi':
-            for i in range(numspec):
-                if not spectrumInfo.isMonitor(i):
-                    det_index = spectrumInfo.getSpectrumDefinition(i)[0][0]
-                    pos = detectorInfo.position(det_index)
-                    phi = math.fabs(math.atan2(pos.Y(), pos.X()))
-                    if phi>= ttmin and phi<= ttmax:
-                        detectorInfo.setMasked(det_index, True)
-                        masked_ids.append(det_ids[det_index])
-        else:
-            beam = componentInfo.l1() 
-            for i in range(numspec):
-                if not spectrumInfo.isMonitor(i):
-                    det_index = spectrumInfo.getSpectrumDefinition(i)[0][0]
-                    tt=detectorInfo.twoTheta(det_index)
-                    if tt>= ttmin and tt<= ttmax:
-                        detectorInfo.setMasked(det_index, True)
-                        masked_ids.append(det_ids[det_index])
+        for i in range(numspec):
+            if not spectrumInfo.isMonitor(i):
+                # Get the first detector of spectrum. Ignore time aspects.
+                det_index = spectrumInfo.getSpectrumDefinition(i)[0][0]
+                if angle_phi:
+                    val = self._get_phi(det_index, detectorInfo)
+                else:
+                    # Two theta
+                    val =detectorInfo.twoTheta(det_index)
+                if val>= ttmin and val<= ttmax:
+                    detectorInfo.setMasked(det_index, True)
+                    masked_ids.append(det_ids[det_index])
 
         if not masked_ids:
             self.log().information("no detectors within this range")
