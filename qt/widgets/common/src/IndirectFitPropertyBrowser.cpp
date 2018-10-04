@@ -712,6 +712,24 @@ void IndirectFitPropertyBrowser::addComboBoxFunctionGroup(
 }
 
 /**
+ * Removes all current Fit Type options from the fit type combo-box in this
+ * property browser.
+ */
+void IndirectFitPropertyBrowser::removeFitTypesFromComboBox(
+    std::vector<QString> const &groupNames) {
+  for (auto groupName : groupNames) {
+    for (auto function : m_groupToFunctionList[groupName]) {
+      auto const functionName = function->name();
+      m_customFunctionCount[functionName] -= 1;
+    }
+    m_groupToFunctionList.remove(groupName);
+  }
+  m_groupToFunctionList["None"] = {};
+  m_enumManager->setEnumNames(m_functionsInComboBox, {"None"});
+
+}
+
+/**
  * Adds a custom function group to this fit property browser, with the specified
  * name and the associated specified functions.
  *

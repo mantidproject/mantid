@@ -501,6 +501,11 @@ void IndirectFitAnalysisTab::addComboBoxFunctionGroup(
   m_fitPropertyBrowser->addComboBoxFunctionGroup(groupName, functions);
 }
 
+void IndirectFitAnalysisTab::removeFitTypesFromComboBox(
+    std::vector<QString> const &groupNames) {
+  m_fitPropertyBrowser->removeFitTypesFromComboBox(groupNames);
+}
+
 /**
  * Sets the available background options in this fit analysis tab.
  *
@@ -962,6 +967,7 @@ void IndirectFitAnalysisTab::updateResultOptions() {
                                                      getSelectedSpectrum());
   setPlotResultEnabled(isFit);
   setSaveResultEnabled(isFit);
+  emit updateFitTypes();
 }
 
 } // namespace IDA

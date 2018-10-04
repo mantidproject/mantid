@@ -26,6 +26,7 @@ public:
   void setupFitTab() override;
 
 protected slots:
+  void updateParameterFitTypes();
   void updatePlotOptions() override;
   void updateModelFitTypeString();
   void plotClicked();
@@ -40,6 +41,9 @@ protected:
   void setRunIsRunning(bool running) override;
 
 private:
+  void addEISFFunctionsToFitType();
+  void addWidthFunctionsToFitType();
+
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);
 
