@@ -140,119 +140,9 @@ void LoadDNSEvent::exec() {
   g_log.notice() << std::endl;
 }
 
-template<typename _RAIter, typename _Compare>
-_RAIter partitionVector(_RAIter first, _RAIter last, _Compare comp) {
-
-  _RAIter pivot = first + (last - first) / 2;
-
-
-  while (true){
-    while (comp(*first, *pivot)) {
-      ++first;
-    }
-    --last;
-    while (comp(*pivot, *last)) {
-      --last;
-    }
-    if (!(first < last)) {
-      return first;
-    }
-    std::iter_swap(first, last);
-    ++first;
-  }
-}
-
-template<typename _RAIter, typename _Compare>
-void qsort(_RAIter first, _RAIter last, _Compare comp) {
-  auto pivot = partitionVector(first, last, comp);
-  std::array<std::pair<_RAIter, _RAIter>, 2> parts ={std::pair<_RAIter, _RAIter>{first, pivot-1}, {pivot+1, last}};
-
-  for (size_t i = 0; i < parts.size(); ++i) {
-    auto part = parts[i];
-    if (part.first < part.second) {
-      qsort(part.first, part.second, comp);
-    }
-  }
-}
-
-template<typename _RAIter, typename _Compare>
-void qsortParallel(_RAIter first, _RAIter last, _Compare comp, uint8_t depth) {
-  auto pivot = partitionVector(first, last, comp);
-  std::array<std::pair<_RAIter, _RAIter>, 2> parts ={std::pair<_RAIter, _RAIter>{first, pivot-1}, {pivot+1, last}};
-
-  PARALLEL_FOR_IF(USE_PARALLELISM)
-  for (size_t i = 0; i < parts.size(); ++i) {
-    auto part = parts[i];
-    if (part.first < part.second) {
-      if (depth > 0) {
-        qsortParallel(part.first, part.second, comp, depth-1);
-      } else {
-        qsort(part.first, part.second, comp);
-      }
-    }
-  }
-}
-
 template<typename Vector, typename _Compare>
 void sortVector(Vector &v, _Compare comp) {
-  qsortParallel(v.begin(), v.end(), comp, 2);
-}
-
-inline std::ostream &operator <<(std::ostream &lhs, const LoadDNSEvent::CompactEvent &rhs) {
-  return lhs;// << "(" << rhs.timestamp << ", " << rhs.channel << ", " << rhs.position << ", " << rhs.eventId << ")" ;//_writeToStream(lhs, rhs, "\n");
-}
-
-template<size_t n>
-inline std::ostream &operator <<(std::ostream &lhs, const typename std::array<LoadDNSEvent::CompactEvent, n>::const_iterator &rhs) {
-  return lhs << *rhs;
-}
-
-inline std::ostream &operator <<(std::ostream &lhs, const typename std::vector<LoadDNSEvent::CompactEvent>::const_iterator &rhs) {
-  return lhs << *rhs;
-}
-
-template<typename Container, typename T>
-inline std::ostream &_writeToStream(std::ostream &lhs, const Container &rhs, const T &separator) {
-  const auto end = rhs.end();
-  auto it  = rhs.begin();
-  lhs << "[";
-  lhs << (*it);
-
-  while (++it != end) {
-    lhs << separator << *it;
-  }
-  return lhs << "]";
-}
-
-template<typename T>
-inline std::ostream &operator <<(std::ostream &lhs, const std::vector<T> &rhs) {
-  return _writeToStream(lhs, rhs, ", ");
-}
-
-template<typename T, size_t n>
-inline std::ostream &operator <<(std::ostream &lhs, const std::array<T, n> &rhs) {
-  return _writeToStream(lhs, rhs, ", ");
-}
-
-template<int n, typename _RAIter, typename _Pred>
-std::array<_RAIter, n+1> partitionWhere(_RAIter begin, _RAIter end, _Pred pred) {
-  size_t length = end-begin;
-  std::array<_RAIter, n+1> result;
-  result[0] = begin;
-  result[result.size()-1] = end;
-
-  for (size_t i = 1; i < n; ++i) {
-    const auto advance = ((i * length) / (n));
-    result[i] = begin + advance;
-    //result[i] = std::find_if(begin + (i * length) / n, begin + ((i+1) * length) / n, pred);
-
-  }
-  return result;
-}
-
-template<int n, typename Vector, typename _Pred>
-auto partitionWhere(Vector &v, _Pred pred) {
-  return partitionWhere<n>(v.begin(), v.end()-1, pred);
+  std::sort(v.begin(), v.end(), comp);
 }
 
 long LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
@@ -493,7 +383,7 @@ std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file,
 
     // search for a block_separator, and append everything up to it :
     static const auto windowSize = block_sep.size();
-    uint8_t *current_window;
+    uint8_t *current_window = nullptr;
     std::array<uint8_t, windowSize> *windowAsArray = reinterpret_cast<std::array<uint8_t, windowSize>*>(current_window);
 
 //#undef LOG_NOTICE
@@ -544,7 +434,6 @@ std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file) {
   }
 
   g_log.notice() << "evtAcc.neutronEvents.size() = " << eventAccumulators[eventAccumulators.size()-1].neutronEvents.size() << std::endl;
-
 
   const auto end = filechuncks.cend();
   size_t j = 0;
