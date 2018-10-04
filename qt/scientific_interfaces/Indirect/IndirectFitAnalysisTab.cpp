@@ -117,7 +117,7 @@ void IndirectFitAnalysisTab::setup() {
 
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
-  connect(m_dataPresenter.get(), SIGNAL(dataAdded()), this,
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(emitUpdateFitTypes()));
 
   connectDataAndSpectrumPresenters();
@@ -503,9 +503,12 @@ void IndirectFitAnalysisTab::addComboBoxFunctionGroup(
   m_fitPropertyBrowser->addComboBoxFunctionGroup(groupName, functions);
 }
 
-void IndirectFitAnalysisTab::removeFitTypesFromComboBox(
-    std::vector<QString> const &groupNames) {
-  m_fitPropertyBrowser->removeFitTypesFromComboBox(groupNames);
+/**
+ * Removes all options from the Fit Type combo-box apart from the 'None' option
+ *
+ */
+void IndirectFitAnalysisTab::clearFitTypeComboBox() {
+  m_fitPropertyBrowser->clearFitTypeComboBox();
 }
 
 /**

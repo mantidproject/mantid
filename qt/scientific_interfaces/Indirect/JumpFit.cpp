@@ -49,8 +49,8 @@ void JumpFit::setupFitTab() {
   setSampleWSSuffices({"_Result"});
   setSampleFBSuffices({"_Result.nxs"});
 
-  addWidthFunctionsToFitType();
-  addEISFFunctionsToFitType();
+  addWidthFunctionsToFitTypeComboBox();
+  addEISFFunctionsToFitTypeComboBox();
 
   m_uiForm->cbParameter->setEnabled(false);
 
@@ -66,7 +66,7 @@ void JumpFit::setupFitTab() {
           SLOT(updateParameterFitTypes()));
 }
 
-void JumpFit::addEISFFunctionsToFitType() {
+void JumpFit::addEISFFunctionsToFitTypeComboBox() {
   auto &functionFactory = FunctionFactory::Instance();
   auto const eisfDiffCylinder =
       functionFactory.createFunction("EISFDiffCylinder");
@@ -78,7 +78,7 @@ void JumpFit::addEISFFunctionsToFitType() {
   addComboBoxFunctionGroup("EISFDiffSphereAlkyl", {eisfDiffSphereAklyl});
 }
 
-void JumpFit::addWidthFunctionsToFitType() {
+void JumpFit::addWidthFunctionsToFitTypeComboBox() {
   auto &functionFactory = FunctionFactory::Instance();
   auto const chudleyElliot = functionFactory.createFunction("ChudleyElliot");
   auto const hallRoss = functionFactory.createFunction("HallRoss");
@@ -93,15 +93,11 @@ void JumpFit::addWidthFunctionsToFitType() {
 void JumpFit::updateParameterFitTypes() {
   auto const parameter = m_uiForm->cbParameterType->currentText().toStdString();
   if (parameter == "EISF") {
-    std::vector<QString> const groupNames = {"ChudleyElliot", "HallRoss",
-                                             "FickDiffusion", "TeixeiraWater"};
-    removeFitTypesFromComboBox(groupNames);
-    addEISFFunctionsToFitType();
+    clearFitTypeComboBox();
+    addEISFFunctionsToFitTypeComboBox();
   } else if (parameter == "Width") {
-    std::vector<QString> const groupNames = {
-        "EISFDiffCylinder", "EISFDiffCylinder", "EISFDiffSphere"};
-    removeFitTypesFromComboBox(groupNames);
-    addWidthFunctionsToFitType();
+    clearFitTypeComboBox();
+    addWidthFunctionsToFitTypeComboBox();
   }
 }
 

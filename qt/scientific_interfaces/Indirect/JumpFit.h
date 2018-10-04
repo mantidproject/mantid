@@ -41,8 +41,8 @@ protected:
   void setRunIsRunning(bool running) override;
 
 private:
-  void addEISFFunctionsToFitType();
-  void addWidthFunctionsToFitType();
+  void addEISFFunctionsToFitTypeComboBox();
+  void addWidthFunctionsToFitTypeComboBox();
 
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);
