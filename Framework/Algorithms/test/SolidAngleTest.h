@@ -21,8 +21,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::Counts;
 
 class SolidAngleTest : public CxxTest::TestSuite {
 public:
@@ -180,11 +180,11 @@ public:
         boost::dynamic_pointer_cast<Workspace2D>(output2);
     const size_t numberOfSpectra1 = output2D_1->getNumberHistograms();
     const size_t numberOfSpectra2 = output2D_2->getNumberHistograms();
-    for(size_t i = 50, j = 0; i<numberOfSpectra1&&j<numberOfSpectra2; i++, j++){
-      //all values after the start point of the second workspace should match
-      TS_ASSERT_EQUALS(output2D_1->y(i)[0],output2D_2->y(j)[0]);
+    for (size_t i = 50, j = 0; i < numberOfSpectra1 && j < numberOfSpectra2;
+         i++, j++) {
+      // all values after the start point of the second workspace should match
+      TS_ASSERT_EQUALS(output2D_1->y(i)[0], output2D_2->y(j)[0]);
     }
-    
   }
 
 private:
