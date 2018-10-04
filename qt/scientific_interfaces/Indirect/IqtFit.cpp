@@ -149,6 +149,8 @@ void IqtFit::setSaveResultEnabled(bool enabled) {
 void IqtFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
   setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
   setFitSingleSpectrumEnabled(!running);
 }
 
