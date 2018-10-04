@@ -150,8 +150,9 @@ void MultiProcessEventLoader::load(
         // launch child processes
         vChilds.emplace_back(
             Poco::Process::launch(m_binaryToLaunch, processArgs));
-      } catch (std::exception const &ex) {
-        std::rethrow_if_nested(ex);
+      } catch (...) {
+        std::throw_with_nested(
+            std::runtime_error("MultiProcessEventLoader::load()"));
       }
     }
 
@@ -177,12 +178,14 @@ void MultiProcessEventLoader::load(
     // waiting for child processes
     for (auto &c : vChilds)
       if (c.wait())
-        throw std::runtime_error("Error while multiprocess loading\n");
+        throw std::runtime_error(
+            "Error while waiting processes in  multiprocess loading.");
 
     // Assemble multiprocess data from shared memory
     assembleFromShared(eventLists);
-  } catch (std::exception const &ex) {
-    std::rethrow_if_nested(ex);
+  } catch (...) {
+    std::throw_with_nested(std::runtime_error("Something wrong in "
+                                              "MultiprocessLoader."));
   }
 }
 

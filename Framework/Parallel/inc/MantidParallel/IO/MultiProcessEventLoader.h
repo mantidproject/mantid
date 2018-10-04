@@ -207,8 +207,10 @@ void MultiProcessEventLoader::GroupLoader<
               0, eventId[i],
               TofEvent{boost::numeric_cast<ToFType>(eventTimeOffset[i]),
                        part->next()});
-        } catch (std::exception const &ex) {
-          std::rethrow_if_nested(ex);
+        } catch (...) {
+          std::throw_with_nested(
+              std::runtime_error("Something wrong in multiprocess "
+                                 "LoadFromGroup precountEvent mode."));
         }
       }
     }
@@ -298,26 +300,34 @@ void MultiProcessEventLoader::GroupLoader<
     }
   };
 
+  std::exception_ptr shmemLoaderException;
   std::thread fileLoader([&]() {
-    for (auto &task : tasks) {
-      task.partitioner = task.loader.setBankIndex(task.bankIdx);
-      task.loader.readEventTimeOffset(task.eventTimeOffset.data(), task.from,
-                                      task.eventTimeOffset.size());
-      task.loader.readEventID(task.eventId.data(), task.from,
-                              task.eventId.size());
-      detail::eventIdToGlobalSpectrumIndex(
-          task.eventId.data(), task.eventId.size(), bankOffsets[task.bankIdx]);
-      ++taskCount;
+    try {
+      for (auto &task : tasks) {
+        task.partitioner = task.loader.setBankIndex(task.bankIdx);
+        task.loader.readEventTimeOffset(task.eventTimeOffset.data(), task.from,
+                                        task.eventTimeOffset.size());
+        task.loader.readEventID(task.eventId.data(), task.from,
+                                task.eventId.size());
+        detail::eventIdToGlobalSpectrumIndex(task.eventId.data(),
+                                             task.eventId.size(),
+                                             bankOffsets[task.bankIdx]);
+        ++taskCount;
+      }
+      ++finished;
+
+      while (finished != 2) {
+      }; // consumer have finished his work ready to transfer to shmem
+
+      loadToshmem();
+    } catch (...) {
+      finished = 1; // prevent the infinite loop;
+      shmemLoaderException = std::current_exception();
     }
-    ++finished;
-
-    while (finished != 2) {
-    }; // consumer have finished his work ready to transfer to shmem
-
-    loadToshmem();
 
   });
 
+  std::exception_ptr sorterException;
   std::thread sorter([&]() {
     std::size_t tasksDone{0};
 
@@ -336,18 +346,34 @@ void MultiProcessEventLoader::GroupLoader<
       }
     };
 
-    while (finished < 1) // producer wants to produce smth
+    try {
+      while (finished < 1) // producer wants to produce smth
+        processTask();
+      // Clean up the queue
       processTask();
-    // Clean up the queue
-    processTask();
 
-    ++finished; // all is consumed
+      ++finished; // all is consumed
 
-    loadToshmem();
+      loadToshmem();
+    } catch (...) {
+      finished = 2; // prevent the infinite loop
+      sorterException = std::current_exception();
+    }
   });
 
   fileLoader.join();
   sorter.join();
+
+  try {
+    if (shmemLoaderException)
+      std::rethrow_exception(shmemLoaderException);
+    if (sorterException)
+      std::rethrow_exception(sorterException);
+  } catch (...) {
+    std::throw_with_nested(
+        std::runtime_error("Something wrong in multiprocess "
+                           "LoadFromGroup producerConsumer mode."));
+  }
 }
 
 } // namespace IO

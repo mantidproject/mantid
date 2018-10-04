@@ -816,6 +816,21 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
             << "MPI event loader failed, falling back to default loader.\n";
       }
     } else {
+
+      struct ExceptionOutput {
+        static void out(decltype(g_log) &log, const std::exception &e,
+                        int level = 0) {
+          log.warning() << std::string(level, ' ') << "exception: " << e.what()
+                        << '\n';
+          try {
+            std::rethrow_if_nested(e);
+          } catch (const std::exception &e) {
+            ExceptionOutput::out(log, e, level + 1);
+          } catch (...) {
+          }
+        }
+      };
+
       try {
         ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name,
                                               bankNames, event_id_is_spec,
@@ -825,9 +840,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
         shortest_tof = 0.0;
         longest_tof = 1e10;
       } catch (const std::exception &e) {
-        g_log.warning() << std::string(e.what()) + "\nMultiprocess event "
-                                                   "loader failed, falling "
-                                                   "back to default loader.\n";
+        ExceptionOutput::out(g_log, e);
+        g_log.warning() << "\nMultiprocess event loader failed, falling back "
+                           "to default loader.\n";
       }
     }
 
