@@ -2,7 +2,7 @@
 #define MANTIDQT_CUSTOM_DIALOGS_GETNEGMUMUONICXRD_H_
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidQtWidgets/Common/PeriodicTableWidget.h"
+#include "MantidQtWidgets/Plugins/AlgorithmDialogs/PeriodicTableWidget.h"
 #include <QDoubleSpinBox>
 namespace MantidQt {
 

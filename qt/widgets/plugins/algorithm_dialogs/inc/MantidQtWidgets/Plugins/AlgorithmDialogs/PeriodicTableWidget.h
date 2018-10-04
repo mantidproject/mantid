@@ -32,7 +32,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class EXPORT_OPT_MANTIDQT_COMMON PeriodicTableWidget : public QWidget {
+class PeriodicTableWidget : public QWidget {
   Q_OBJECT
 
 public:
