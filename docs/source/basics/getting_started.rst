@@ -1,4 +1,4 @@
-.. _getting started:
+.. _getting started intro:
 
 ==============================
 Setting up and getting started
@@ -49,9 +49,8 @@ at any time by going to "Help > First Time Setup".
 Getting Additional/training Data
 ================================
 
-
 All of the data you need to follow the introductory training 
-in :ref:`mantid basics` can be downloaded from the `Downloads 
+in :ref:`mantid introduction` can be downloaded from the `Downloads 
 section <http://download.mantidproject.org/>`_ of the website.
 
 * Download the file "TrainingCourseData.zip"

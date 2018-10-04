@@ -27,6 +27,7 @@ capabilities of Mantid, by developing your own scripts.
    :maxdepth: 3
 
    mantid_basic_course/index
+   introduction_to_python/index
 
 **Sections:**
 
@@ -36,6 +37,6 @@ capabilities of Mantid, by developing your own scripts.
    :align: right
 
 * :ref:`mantid_basic_course`
-* `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
+* :ref:`introduction_to_python`
 * `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
 * `Extending Mantid with Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
