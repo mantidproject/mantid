@@ -100,9 +100,6 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Stitched high and low Q 1-D data')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHAB', '', direction=Direction.Output),
-                             doc='Scaled high Q 1-D data')
-
         self.declareProperty('OutScaleFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
                              doc='Applied scale factor')
         self.declareProperty('OutShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
@@ -182,20 +179,18 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
         shifted_norm_front = self._scale(nF, shift_factor)
         scaled_norm_front = self._scale(nF, 1.0 / scale_factor)
         add_counts_and_shift = self._add(cF, shifted_norm_front)
-        hab_q = self._divide(add_counts_and_shift, scaled_norm_front)
         numerator = self._add(add_counts_and_shift, cR)
         denominator = self._add(scaled_norm_front, nR)
         merged_q = self._divide(numerator, denominator)
-        return merged_q, hab_q
+        return merged_q
 
     def _calculate_merged_q_can(self, cF, nF, cR, nR, scale_factor):
         # We want: (Cf_can+Cr_can)/(Nf_can/scale + Nr_can)
         scaled_norm_front = self._scale(nF, 1.0 / scale_factor)
-        hab_q = self._divide(cF, scaled_norm_front)
         numerator = self._add(cF, cR)
         denominator = self._add(scaled_norm_front, nR)
         merged_q = self._divide(numerator, denominator)
-        return merged_q, hab_q
+        return merged_q
 
     def _crop_out_special_values(self, ws):
 
@@ -357,8 +352,8 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
             cR, cF, nR, nF = self._apply_user_mask_ranges(cF, cR, nR, nF, merge_min, merge_max)
 
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
-        merged_q, hab_q = self._calculate_merged_q(cF=cF, nF=nF, cR=cR, nR=nR, scale_factor=scale_factor,
-                                                   shift_factor=shift_factor)
+        merged_q = self._calculate_merged_q(cF=cF, nF=nF, cR=cR, nR=nR, scale_factor=scale_factor,
+                                            shift_factor=shift_factor)
 
         if self.getProperty('ProcessCan').value:
             cF_can = self._crop_to_x_range(cF_can, min_q, max_q)
@@ -371,12 +366,11 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
                                                                               merge_max)
 
             # Calculate merged q for the can
-            merged_q_can, hab_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,
-                                                                   scale_factor=scale_factor)
+            merged_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,
+                                                        scale_factor=scale_factor)
 
             # Subtract it from the sample
             merged_q = self._subract(merged_q, merged_q_can)
-            hab_q = self._subract(hab_q, hab_q_can)
 
         q_error_correction = QErrorCorrectionForMergedWorkspaces()
         q_error_correction.correct_q_resolution_for_merged(count_ws_front=cF,
@@ -385,7 +379,6 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
                                                            scale=scale_factor)
 
         self.setProperty('OutputWorkspace', merged_q)
-        self.setProperty('OutputWorkspaceHAB', hab_q)
         self.setProperty('OutScaleFactor', scale_factor)
         self.setProperty('OutShiftFactor', shift_factor)
 

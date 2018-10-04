@@ -610,7 +610,6 @@ def _merge_workspaces(retWSname_front, retWSname_rear, rAnds):
                      "ScaleFactor": scale_factor,
                      "ShiftFactor": shift_factor,
                      "OutputWorkspace": retWSname_merged,
-                     "OutputWorkspaceHAB": 'scaled_HAB',
                      "MergeMask": merge_range.q_merge_range}
     if consider_can:
         kwargs_can = {"HABCountsCan": Cf_can,
