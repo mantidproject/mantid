@@ -28,7 +28,8 @@ regex_other_style = re.compile("^.*?Copyright\s.{0,200}?(\d{4}).{0,400}?$",
                                re.IGNORECASE |  re.MULTILINE)
 
 #lines to skip when determining where to put the copyright statement (they must be from the start of the file)
-regex_lines_to_skip = [re.compile("^#!.*?$[\s]*",re.MULTILINE)]
+regex_lines_to_skip = [re.compile("^#!.*?$[\s]*",re.MULTILINE),             #shebang line
+                       re.compile("^# -\*- coding: .+?$",re.MULTILINE)]     #encoding definition
 
 #Finds empty C++ multiline comments
 regex_empty_comments = re.compile("(\/\*)[\/\s\*]{0,1000}?(\*\/)",re.MULTILINE)

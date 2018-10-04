@@ -4,9 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+#
 #  This file is part of the mantidqt package
-#
-#
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
@@ -59,11 +58,11 @@ foo()
         # approximate correct
         expected_lines = [
             "NameError:.*'_local'.*",
-            '  File ".*test_errorformatter.py", line 56, in test_standard_exception',
+            '  File ".*test_errorformatter.py", line \n+, in test_standard_exception',
             '    exec(.*)',
-            '  File "<string>", line 8, in <module>',
-            '  File "<string>", line 7, in foo',
-            '  File "<string>", line 5, in bar',
+            '  File "<string>", line \n+, in <module>',
+            '  File "<string>", line \n+, in foo',
+            '  File "<string>", line \n+, in bar',
         ]
         for produced, expected in zip(error_lines, expected_lines):
             self.assertRegexpMatches(produced, expected)

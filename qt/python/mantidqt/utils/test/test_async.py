@@ -106,7 +106,7 @@ class AsyncTaskTest(unittest.TestCase):
                         msg="Expected RuntimeError, found " + recv.task_exc.__class__.__name__)
         self.assertEqual(2, len(recv.task_exc_stack))
         # line number of self.target in async.py
-        self.assertEqual(100, recv.task_exc_stack[0][1])
+        self.assertEqual(93, recv.task_exc_stack[0][1])
         # line number of raise statement above
         self.assertEqual(101, recv.task_exc_stack[1][1])
 
@@ -141,7 +141,7 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, RuntimeError))
         self.assertEqual(2, len(recv.task_exc_stack))
-        self.assertEqual(140, recv.task_exc_stack[0][1])
+        self.assertEqual(133, recv.task_exc_stack[0][1])
         self.assertEqual(139, recv.task_exc_stack[1][1])
 
     # ---------------------------------------------------------------
