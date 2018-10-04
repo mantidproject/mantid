@@ -1,4 +1,5 @@
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/make_constructor.hpp>
@@ -45,6 +46,7 @@ void setItem(VMD &self, const size_t index, const VMD_t value) {
 }
 } // namespace
 
+GNU_DIAG_OFF("self-assign-overloaded")
 void export_VMD() {
   class_<VMD>("VMD",
               init<>(arg("self"),
@@ -113,3 +115,5 @@ void export_VMD() {
       // cppcheck-suppress duplicateExpression
       .def(self /= self);
 }
+
+GNU_DIAG_ON("self-assign-overloaded")

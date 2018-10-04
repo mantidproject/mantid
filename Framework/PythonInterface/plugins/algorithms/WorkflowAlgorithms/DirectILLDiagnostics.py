@@ -9,8 +9,8 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentVali
                         WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, Property, StringArrayProperty, StringListValidator)
-from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, Divide,
-                              ExtractMask, Integration, LoadMask, MaskDetectors, MedianDetectorTest, Plus, SolidAngle)
+from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, CreateSingleValuedWorkspace, Divide,
+                              ExtractMask, Integration, LoadMask, MaskDetectors, MedianDetectorTest, Multiply, Plus, SolidAngle)
 import numpy
 import os.path
 
@@ -83,10 +83,17 @@ def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLoggi
 
 def _createMaskWS(ws, name, algorithmLogging):
     """Return a single bin workspace with same number of histograms as ws."""
-    maskWS, detList = ExtractMask(InputWorkspace=ws,
-                                  OutputWorkspace=name,
-                                  EnableLogging=algorithmLogging)
-    maskWS *= 0.0
+    extractResult = ExtractMask(InputWorkspace=ws,
+                                OutputWorkspace=name,
+                                EnableLogging=algorithmLogging)
+    zeroWS = CreateSingleValuedWorkspace(DataValue=0.,
+                                         ErrorValue=0.,
+                                         EnableLogging=algorithmLogging,
+                                         StoreInADS=False)
+    maskWS = Multiply(LHSWorkspace=extractResult.OutputWorkspace,
+                      RHSWorkspace=zeroWS,
+                      OutputWorkspace=name,
+                      EnableLogging=algorithmLogging)
     return maskWS
 
 
@@ -457,7 +464,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              defaultValue=3.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc="Integration width of the elastic peak in multiples " +
+                             doc="Integration half width of the elastic peak in multiples " +
                                  " of 'Sigma' in the EPP table.")
         self.setPropertyGroup(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
                               PROPGROUP_PEAK_DIAGNOSTICS)
@@ -793,10 +800,10 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                       DetectorList=userMask,
                       ComponentList=maskComponents,
                       EnableLogging=algorithmLogging)
-        maskWS, detectorList = ExtractMask(InputWorkspace=maskWS,
-                                           OutputWorkspace=maskWSName,
-                                           EnableLogging=algorithmLogging)
-        return maskWS
+        extractResult = ExtractMask(InputWorkspace=maskWS,
+                                    OutputWorkspace=maskWSName,
+                                    EnableLogging=algorithmLogging)
+        return extractResult.OutputWorkspace
 
     def _value(self, ws, propertyName, instrumentParameterName, defaultValue):
         """Return a suitable value either from a property, the IPF or the supplied defaultValue."""

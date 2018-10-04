@@ -11,7 +11,8 @@ set ( SRC_FILES
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/HelpWindow.cpp
-	src/FlowLayout.cpp
+  src/FlowLayout.cpp
+  src/Hint.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
 	src/ListPropertyWidget.cpp
@@ -32,7 +33,6 @@ set ( SRC_FILES
 	src/PropertyWidget.cpp
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
-	src/PythonThreading.cpp
 	src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
 	src/RepoModel.cpp
@@ -287,7 +287,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/FlowLayout.h
 	inc/MantidQtWidgets/Common/GraphOptions.h
 	inc/MantidQtWidgets/Common/DistributionOptions.h
-	inc/MantidQtWidgets/Common/HelpWindow.h
+  inc/MantidQtWidgets/Common/HelpWindow.h
+  inc/MantidQtWidgets/Common/Hint.h
 	inc/MantidQtWidgets/Common/InterfaceFactory.h
 	inc/MantidQtWidgets/Common/InterfaceManager.h
 	inc/MantidQtWidgets/Common/IProjectSerialisable.h
@@ -300,8 +301,6 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/PlotAxis.h
 	inc/MantidQtWidgets/Common/PluginLibraries.h
 	inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
-	inc/MantidQtWidgets/Common/PythonSystemHeader.h
-	inc/MantidQtWidgets/Common/PythonThreading.h
 	inc/MantidQtWidgets/Common/QScienceSpinBox.h
 	inc/MantidQtWidgets/Common/QStringUtils.h
 	inc/MantidQtWidgets/Common/ScriptRepositoryView.h
@@ -469,7 +468,6 @@ set ( TARGET_LIBRARIES
   ${CORE_MANTIDLIBS}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${PYTHON_LIBRARIES}
 )
 
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -531,6 +529,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt5::PrintSupport
     ${_webwidgets_tgt}
     Qt5::Qscintilla
+  INSTALL_DIR
+    ${LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
     @loader_path/../Libraries

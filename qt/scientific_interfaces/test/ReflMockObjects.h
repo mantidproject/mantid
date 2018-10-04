@@ -26,6 +26,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "MantidQtWidgets/Common/Hint.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
@@ -76,6 +77,8 @@ public:
   MOCK_CONST_METHOD0(getTransferMethod, std::string());
   MOCK_CONST_METHOD0(getAlgorithmRunner,
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
+  MOCK_CONST_METHOD0(getMonitorAlgorithmRunner,
+                     boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
   MOCK_CONST_METHOD0(getSelectedGroup, int());
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
   MOCK_METHOD0(setTableCommandsProxy, void());
@@ -91,9 +94,15 @@ public:
   MOCK_METHOD1(setTransferMethodComboEnabled, void(bool));
   MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
   MOCK_METHOD1(setSearchButtonEnabled, void(bool));
+  MOCK_METHOD1(setStartMonitorButtonEnabled, void(bool));
+  MOCK_METHOD1(setStopMonitorButtonEnabled, void(bool));
   MOCK_METHOD1(startTimer, void(const int));
   MOCK_METHOD0(stopTimer, void());
   MOCK_METHOD0(startIcatSearch, void());
+  MOCK_METHOD0(startMonitor, void());
+  MOCK_METHOD0(stopMonitor, void());
+  MOCK_METHOD0(updateMonitorRunning, void());
+  MOCK_METHOD0(updateMonitorStopped, void());
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
@@ -145,8 +154,8 @@ public:
                     std::vector<MissingInstrumentParameterValue> const &));
   MOCK_CONST_METHOD0(detectorCorrectionEnabled, bool());
   // Calls we don't care about
-  void
-  createStitchHints(const std::map<std::string, std::string> &hints) override {
+  void createStitchHints(
+      const std::vector<MantidQt::MantidWidgets::Hint> &hints) override {
     UNUSED_ARG(hints);
   };
   IReflSettingsPresenter *getPresenter() const override { return nullptr; }

@@ -312,8 +312,8 @@ public:
   }
 
   void test_GetMagFFT() {
-#define N_FFT_STEPS 256
-#define HALF_FFT_STEPS 128
+    constexpr size_t N_FFT_STEPS = 256;
+    constexpr size_t HALF_FFT_STEPS = 128;
 
     double projections[N_FFT_STEPS];
     double magnitude_fft[HALF_FFT_STEPS];

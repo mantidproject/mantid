@@ -643,7 +643,7 @@ void Plot3DDialog::disableMeshOptions() {
 }
 
 void Plot3DDialog::pickDataColorMap() {
-  QString fileselection = MantidColorMap::loadMapDialog("", this);
+  QString fileselection = MantidColorMap::chooseColorMap("", this);
   if (!fileselection.isEmpty())
     d_plot->setDataColorMap(fileselection);
 }

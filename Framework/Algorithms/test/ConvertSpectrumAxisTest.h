@@ -6,7 +6,6 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 

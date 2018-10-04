@@ -23,7 +23,7 @@ GET_POINTER_SPECIALIZATION(WorkspaceHistory)
  * @param self :: A reference to the WorkspaceHistory that called this method
  * @returns A python list created from the set of algorithm histories
  */
-boost::python::object getHistoriesAsList(WorkspaceHistory &self) {
+boost::python::list getHistoriesAsList(WorkspaceHistory &self) {
   boost::python::list names;
   const auto &histories = self.getAlgorithmHistories();
   for (const auto &historie : histories) {

@@ -53,7 +53,7 @@ class ExportGeometry(PythonAlgorithm):
         return "ExportGeometry"
 
     def summary(self):
-        return "Extract geometry into a variety of file formats"
+        return "Extract components from larger in-memory instrument, save as IDF style xml"
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty("InputWorkspace", "",
@@ -67,7 +67,7 @@ class ExportGeometry(PythonAlgorithm):
                              doc="Euler angles convention used when writing angles.")
         self.declareProperty(StringArrayProperty("Components",
                                                  direction=Direction.Input),
-                             doc="Comma separated list of instrument components to export")
+                             doc="Comma separated list of instrument component names to export")
         self.declareProperty(FileProperty(name="Filename",
                                           defaultValue="",
                                           action=FileAction.Save,

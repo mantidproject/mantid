@@ -807,7 +807,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
     def set_hkl(self, i_row, hkl, is_spice_hkl, error=None):
         """
-        Set HKL to a row in the table. Show H/K/L with 4 decimal pionts
+        Set HKL to a row in the table. Show H/K/L with 4 decimal points
         :param i_row:
         :param hkl: HKL is a list of tuple
         :param is_spice_hkl: If true, then set input to cell for SPICE-imported HKL. Otherwise to calculated HKL.

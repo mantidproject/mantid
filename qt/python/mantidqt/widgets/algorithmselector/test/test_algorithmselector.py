@@ -17,16 +17,17 @@
 from __future__ import absolute_import
 
 from collections import Counter, namedtuple
+
+import qtpy
 from mock import Mock, patch, call
 import unittest
 
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
-from mantidqt.utils.qt.testing import requires_qapp,  select_item_in_combo_box, select_item_in_tree
+from mantidqt.utils.qt.test import select_item_in_combo_box, select_item_in_tree, GuiTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
-
 
 AlgorithmDescriptorMock = namedtuple('AlgorithmDescriptorMock', ['name', 'alias', 'category', 'version'])
 mock_get_algorithm_descriptors = Mock()
@@ -80,9 +81,8 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True))
 
 
-@requires_qapp
 @patch('mantid.AlgorithmFactory.getDescriptors', mock_get_algorithm_descriptors)
-class WidgetTest(unittest.TestCase):
+class WidgetTest(GuiTest):
 
     def _select_in_tree(self, widget, item_label):
         select_item_in_tree(widget.tree, item_label)
@@ -120,6 +120,14 @@ class WidgetTest(unittest.TestCase):
         selected_algorithm = widget.get_selected_algorithm()
         self.assertEqual(selected_algorithm.name, 'DoStuff')
         self.assertEqual(selected_algorithm.version, -1)
+
+    def test_search_box_selection_filter_mode_on_qt5(self):
+        if not qtpy.PYQT5:
+            self.skipTest("Versions below Qt5 do not support the following functionality, "
+                          "and the default Qt behaviour is used")
+        else:
+            widget = AlgorithmSelectorWidget()
+            self.assertEquals(widget.search_box.completer().filterMode(), Qt.MatchContains)
 
     def test_search_box_selection_ignores_tree_selection(self):
         widget = AlgorithmSelectorWidget()

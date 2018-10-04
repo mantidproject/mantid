@@ -276,7 +276,7 @@ We recommend you use ISIS Reflectometry instead, If this is not possible contact
 
     def _reset_table(self):
         """
-        Reset the plot buttons and stitch checkboxes back to thier defualt state
+        Reset the plot buttons and stitch checkboxes back to their default state
         """
         # switches from current to true, to false to make sure stateChanged fires
         self.checkTickAll.setCheckState(2)

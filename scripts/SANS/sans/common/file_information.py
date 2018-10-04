@@ -96,6 +96,8 @@ def find_sans_file(file_name):
                     "the relevant paths are added and the correct instrument is selected."
     try:
         full_path = find_full_file_path(file_name)
+        if not full_path and not file_name.endswith('.nxs'):
+            full_path = find_full_file_path(file_name + '.nxs')
         if not full_path:
             # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
             #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
@@ -118,7 +120,7 @@ def get_extension_for_file_type(file_info):
     Get the extension for a specific file type.
 
     :param file_info: a SANSFileInformation object.
-    :return: the extension a stirng. This can be either nxs or raw.
+    :return: the extension a string. This can be either nxs or raw.
     """
     if file_info.get_type() is FileType.ISISNexus or file_info.get_type() is FileType.ISISNexusAdded:
         extension = NXS_EXTENSION
@@ -273,11 +275,11 @@ def convert_to_shape(shape_flag):
     :return: a shape object
     """
     if shape_flag == 1:
-        shape = SampleShape.CylinderAxisUp
+        shape = SampleShape.Cylinder
     elif shape_flag == 2:
-        shape = SampleShape.Cuboid
+        shape = SampleShape.FlatPlate
     elif shape_flag == 3:
-        shape = SampleShape.CylinderAxisAlong
+        shape = SampleShape.Disc
     else:
         shape = None
     return shape
@@ -324,7 +326,7 @@ def get_number_of_periods_for_isis_nexus(file_name):
 
 def get_instrument_name_for_isis_nexus(file_name):
     """
-    Instrument inforamtion is
+    Instrument information is
     file|
         |--mantid_workspace_1/raw_data_1|
                                         |--instrument|
@@ -407,11 +409,11 @@ def get_geometry_information_isis_nexus(file_name):
         thickness = float(sample[THICKNESS][0])
         shape_as_string = sample[SHAPE][0].upper().decode("utf-8")
         if shape_as_string == CYLINDER:
-            shape = SampleShape.CylinderAxisUp
+            shape = SampleShape.Cylinder
         elif shape_as_string == FLAT_PLATE:
-            shape = SampleShape.Cuboid
+            shape = SampleShape.FlatPlate
         elif shape_as_string == DISC:
-            shape = SampleShape.CylinderAxisAlong
+            shape = SampleShape.Disc
         else:
             shape = None
     return height, width, thickness, shape
@@ -843,7 +845,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         self._height = height if height is not None else 1.
         self._width = width if width is not None else 1.
         self._thickness = thickness if thickness is not None else 1.
-        self._shape = shape if shape is not None else SampleShape.CylinderAxisAlong
+        self._shape = shape if shape is not None else SampleShape.Disc
 
     def get_file_name(self):
         return self._full_file_name
@@ -908,7 +910,7 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         self._height = height if height is not None else 1.
         self._width = width if width is not None else 1.
         self._thickness = thickness if thickness is not None else 1.
-        self._shape = shape if shape is not None else SampleShape.CylinderAxisAlong
+        self._shape = shape if shape is not None else SampleShape.Disc
 
     def get_file_name(self):
         return self._full_file_name
@@ -975,7 +977,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         self._height = height if height is not None else 1.
         self._width = width if width is not None else 1.
         self._thickness = thickness if thickness is not None else 1.
-        self._shape = shape if shape is not None else SampleShape.CylinderAxisAlong
+        self._shape = shape if shape is not None else SampleShape.Disc
 
     def get_file_name(self):
         return self._full_file_name

@@ -74,7 +74,7 @@ def load_scd_fullprof_intensity_file(file_name):
             # line 2 format line, skip
             continue
         elif line.endswith('0  0'):
-            # line 3 as wave lengh line
+            # line 3 as wave length line
             wave_length = float(line.split()[0])
         elif k_index < num_k_vector:
             # k-vector line: (num_k_vector) line right after k-indication line

@@ -45,6 +45,7 @@ public:
   explicit SpectrumDefinition(const size_t detectorIndex,
                               const size_t timeIndex = 0)
       : m_data{{detectorIndex, timeIndex}} {}
+
   /// Returns the size of the SpectrumDefinition, i.e., the number of detectors
   /// (or rather detector positions) that the spectrum comprises.
   size_t size() const { return m_data.size(); }

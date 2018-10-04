@@ -100,7 +100,8 @@ public:
 
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
+    TS_ASSERT_THROWS_NOTHING(
+        testAlg.setProperty("OutputFilename", tempFileName));
 
     TS_ASSERT_THROWS_ANYTHING(testAlg.execute());
   }
@@ -118,7 +119,8 @@ public:
 
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    TS_ASSERT_THROWS_NOTHING(testAlg.setProperty("Filename", tempFileName));
+    TS_ASSERT_THROWS_NOTHING(
+        testAlg.setProperty("OutputFilename", tempFileName));
 
     TS_ASSERT_THROWS_NOTHING(testAlg.execute());
     TS_ASSERT(testAlg.isExecuted());
@@ -132,10 +134,10 @@ public:
     testAlg.initialize();
     testAlg.setProperty("InputWorkspace", INPUT_GROUP_NAME);
     testAlg.setProperty("GSASParamFile", m_paramsFile.path());
-    testAlg.setProperty("GroupingScheme", std::vector<int>({2, 3}));
+    testAlg.setProperty("GroupingScheme", std::vector<int>({1, 2}));
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    testAlg.setProperty("Filename", tempFileName);
+    testAlg.setProperty("OutputFilename", tempFileName);
     testAlg.execute();
 
     std::ifstream file(tempFileName);
@@ -193,10 +195,10 @@ public:
     testAlg.initialize();
     testAlg.setProperty("InputWorkspace", INPUT_GROUP_NAME);
     testAlg.setProperty("GSASParamFile", m_paramsFile.path());
-    testAlg.setProperty("GroupingScheme", std::vector<int>({2, 3}));
+    testAlg.setProperty("GroupingScheme", std::vector<int>({1, 2}));
     Poco::TemporaryFile tempFile;
     const std::string &tempFileName = tempFile.path();
-    testAlg.setProperty("Filename", tempFileName);
+    testAlg.setProperty("OutputFilename", tempFileName);
     testAlg.execute();
 
     std::ifstream file(tempFileName);
@@ -229,15 +231,15 @@ public:
     TS_ASSERT_EQUALS(error.size(), expectedNumPoints);
 
     // Test a few reference values
-    TS_ASSERT_EQUALS(tof[103], 99772);
+    TS_ASSERT_EQUALS(tof[103], 49920);
     TS_ASSERT_EQUALS(intensity[103], 1);
     TS_ASSERT_EQUALS(error[103], 34);
 
-    TS_ASSERT_EQUALS(tof[123], 100725);
+    TS_ASSERT_EQUALS(tof[123], 50398);
     TS_ASSERT_EQUALS(intensity[123], 1);
     TS_ASSERT_EQUALS(error[123], 35);
 
-    TS_ASSERT_EQUALS(tof[3000], 239053);
+    TS_ASSERT_EQUALS(tof[3000], 119009);
     TS_ASSERT_EQUALS(intensity[3000], 800);
     TS_ASSERT_EQUALS(error[3000], 894);
   }

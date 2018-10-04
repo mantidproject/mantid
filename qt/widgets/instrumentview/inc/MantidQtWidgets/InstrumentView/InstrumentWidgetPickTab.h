@@ -3,7 +3,6 @@
 
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -25,7 +24,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentActor;
 class CollapsiblePanel;
-class OneCurvePlot;
+class MiniPlotQwt;
 class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
@@ -44,18 +43,15 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetPickTab
   Q_OBJECT
 public:
   /// Activity type the tab can be in:
-  ///   Single:  select and display info for a single detector when pointed by
-  ///   the mouse
-  ///   Tube:    select and display info for a tube of detectors. The immediate
-  ///   parent
-  ///            of a detector is considered a tube
+  ///   Single: select and display info for a single detector when pointed by
+  ///           the mouse
+  ///   Tube: select and display info for a tube of detectors. The immediate
+  ///         parent of a detector is considered a tube
   ///   AddPeak: Click on a detector and then on the miniplot to add a peak
-  ///   marker and
-  ///            a peak to the attached peaks workspace
+  ///            marker and a peak to the attached peaks workspace
   ///   SelectPeak: click on a peak marker or draw a rubber-band selector to
-  ///   select peak
-  ///               markers. Selected peaks can be deleted by pressing the
-  ///               Delete key.
+  ///               select peak markers. Selected peaks can be deleted by
+  ///               pressing the delete key.
   enum SelectionType {
     Single = 0,
     AddPeak,
@@ -122,7 +118,7 @@ private:
   QColor getShapeBorderColor() const;
 
   /* Pick tab controls */
-  OneCurvePlot *m_plot; ///< Miniplot to display data in the detectors
+  MiniPlotQwt *m_plot;  ///< Miniplot to display data in the detectors
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode
@@ -234,7 +230,7 @@ public:
   };
 
   DetectorPlotController(InstrumentWidgetPickTab *tab,
-                         InstrumentWidget *instrWidget, OneCurvePlot *plot);
+                         InstrumentWidget *instrWidget, MiniPlotQwt *plot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
   void setPlotData(const std::vector<size_t> &detIndices);
@@ -274,7 +270,7 @@ private:
 
   InstrumentWidgetPickTab *m_tab;
   InstrumentWidget *m_instrWidget;
-  OneCurvePlot *m_plot;
+  MiniPlotQwt *m_plot;
 
   PlotType m_plotType;
   bool m_enabled;

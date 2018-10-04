@@ -1,4 +1,5 @@
  set ( SRC_FILES
+  src/DraggableColorBarWidget.cpp
   src/MantidColorMap.cpp
   src/MantidQwtIMDWorkspaceData.cpp
   src/MantidQwtWorkspaceData.cpp
@@ -21,6 +22,7 @@
 )
 
 set ( MOC_FILES
+  inc/MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h
   inc/MantidQtWidgets/LegacyQwt/ColorBarWidget.h
   inc/MantidQtWidgets/LegacyQwt/MWView.h
   inc/MantidQtWidgets/LegacyQwt/RangeSelector.h
@@ -77,6 +79,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsLegacyQwt
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+  INSTALL_DIR
+    ${LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
   LINUX_INSTALL_RPATH

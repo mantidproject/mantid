@@ -633,7 +633,7 @@ TMDE(void MDBox)::integrateCylinder(
   for (const auto &evnt : events) {
     coord_t out[2]; // radius and length of cylinder
     radiusTransform.apply(evnt.getCenter(), out);
-    if (out[0] < radius && std::fabs(out[1]) < 0.5 * length) {
+    if (out[0] < radius && std::fabs(out[1]) < 0.5 * length + deltaQ) {
       // add event to appropriate y channel
       size_t xchannel =
           static_cast<size_t>(std::floor(out[1] / deltaQ)) + numSteps / 2;

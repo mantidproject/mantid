@@ -306,7 +306,7 @@ class _ElementButton(qt.QPushButton):
         self.customContextMenuRequested.connect(self.rightClickedSlot)
 
     def sizeHint(self):
-        return QtCore.QSize(40, 40)
+        return QtCore.QSize(30, 30)
 
     def setCurrent(self, b):
         """Set this element button as current.
@@ -495,6 +495,12 @@ class PeriodicTable(qt.QWidget):
         for elmt in elements:
             self.__addElement(elmt)
         self.elements = elements
+
+    def silentSetElementSelected(self, symbol, state):
+        """
+        Identical to setElementSelected, but doesn't emit sigSelectionChanged
+        """
+        self._eltButtons[symbol].setSelected(state)
 
     def enableElementButton(self, element):
         try:

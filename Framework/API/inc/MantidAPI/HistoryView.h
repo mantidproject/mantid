@@ -65,6 +65,7 @@ public:
   const std::vector<HistoryItem> &getAlgorithmsList() const {
     return m_historyItems;
   };
+
   size_t size() const { return m_historyItems.size(); }
 
 private:

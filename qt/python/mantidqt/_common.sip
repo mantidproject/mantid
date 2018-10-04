@@ -37,12 +37,31 @@ class Configurable {
 
 public:
   void readSettings(const QSettings &storage);
-  void writeSettings(QSettings *storage);
+  void writeSettings(QSettings &storage);
 
 private:
   // Not constructible or copyable
   Configurable();
   Configurable(const Configurable&);
+};
+
+class AlgorithmInputHistoryImpl : Configurable /PyName=AlgorithmInputHistory/ {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+%End
+
+public:
+static SIP_PYOBJECT Instance() const;
+%MethodCode
+  auto &cppInstance = MantidQt::API::AlgorithmInputHistory::Instance();
+  return sipConvertFromType(&cppInstance, sipType_AlgorithmInputHistoryImpl, nullptr);
+%End
+
+private:
+  // lifetime management is with C++ so don't generate any of that in Python
+  AlgorithmInputHistoryImpl();
+  ~AlgorithmInputHistoryImpl();
+  AlgorithmInputHistoryImpl(const AlgorithmInputHistoryImpl &);
 };
 
 class MessageDisplay : QWidget, Configurable {

@@ -19,8 +19,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;

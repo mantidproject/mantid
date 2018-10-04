@@ -1,11 +1,13 @@
 from __future__ import absolute_import, division, print_function
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory,
                         MatrixWorkspaceProperty, PropertyMode)
+from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (ConvertSpectrumAxis, Transpose,
                               ResampleX, CopyInstrumentParameters,
                               Divide, DeleteWorkspace, Scale,
                               MaskAngle, ExtractMask, Minus,
-                              RemoveMaskedSpectra, mtd)
+                              ExtractUnmaskedSpectra, mtd,
+                              BinaryOperateMasks)
 from mantid.kernel import StringListValidator, Direction, Property, FloatBoundedValidator
 
 
@@ -48,6 +50,11 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc="The background will be scaled by this number before being subtracted.")
 
+        self.declareProperty(MaskWorkspaceProperty("MaskWorkspace", '',
+                                                   optional=PropertyMode.Optional,
+                                                   direction=Direction.Input),
+                             doc='The mask from this workspace will be applied before reduction')
+
         self.copyProperties('ConvertSpectrumAxis', ['Target', 'EFixed'])
 
         self.copyProperties('ResampleX', ['XMin', 'XMax', 'NumberBins', 'LogBinning'])
@@ -65,6 +72,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         data = self.getProperty("InputWorkspace").value
         cal = self.getProperty("CalibrationWorkspace").value
         bkg = self.getProperty("BackgroundWorkspace").value
+        mask = self.getProperty("MaskWorkspace").value
         target = self.getProperty("Target").value
         eFixed = self.getProperty("EFixed").value
         xMin = self.getProperty("XMin").value
@@ -88,13 +96,17 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         if maskAngle != Property.EMPTY_DBL:
             MaskAngle(Workspace='__mask_tmp', MinAngle=maskAngle, Angle='Phi', EnableLogging=False)
 
-        RemoveMaskedSpectra(InputWorkspace=data, MaskedWorkspace='__mask_tmp', OutputWorkspace='__data_tmp', EnableLogging=False)
+        if mask is not None:
+            BinaryOperateMasks(InputWorkspace1='__mask_tmp', InputWorkspace2=mask,
+                               OperationType='OR', OutputWorkspace='__mask_tmp', EnableLogging=False)
+
+        ExtractUnmaskedSpectra(InputWorkspace=data, MaskWorkspace='__mask_tmp', OutputWorkspace='__data_tmp', EnableLogging=False)
         ConvertSpectrumAxis(InputWorkspace='__data_tmp', Target=target, EFixed=eFixed, OutputWorkspace=outWS, EnableLogging=False)
         Transpose(InputWorkspace=outWS, OutputWorkspace=outWS, EnableLogging=False)
         ResampleX(InputWorkspace=outWS, OutputWorkspace=outWS, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
 
         if cal is not None:
-            RemoveMaskedSpectra(InputWorkspace=cal, MaskedWorkspace='__mask_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
+            ExtractUnmaskedSpectra(InputWorkspace=cal, MaskWorkspace='__mask_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
             CopyInstrumentParameters(data, '__cal_tmp', EnableLogging=False)
             ConvertSpectrumAxis(InputWorkspace='__cal_tmp', Target=target, EFixed=eFixed, OutputWorkspace='__cal_tmp', EnableLogging=False)
             Transpose(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
@@ -109,7 +121,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         Scale(InputWorkspace=outWS, OutputWorkspace=outWS, Factor=cal_scale/data_scale, EnableLogging=False)
 
         if bkg is not None:
-            RemoveMaskedSpectra(InputWorkspace=bkg, MaskedWorkspace='__mask_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
+            ExtractUnmaskedSpectra(InputWorkspace=bkg, MaskWorkspace='__mask_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
             CopyInstrumentParameters(data, '__bkg_tmp', EnableLogging=False)
             ConvertSpectrumAxis(InputWorkspace='__bkg_tmp', Target=target, EFixed=eFixed, OutputWorkspace='__bkg_tmp', EnableLogging=False)
             Transpose(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)

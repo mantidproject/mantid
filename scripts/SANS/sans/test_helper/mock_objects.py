@@ -43,7 +43,7 @@ def get_cell_mock(row, column, convert_to=None, user_file_path = ""):
     _ = convert_to  # noqa
     if row == 0:
         # For the first row we return the
-        # all of hte sample data
+        # all of the sample data
         if column == 0:
             return "SANS2D00022024"
         elif column == 2:
