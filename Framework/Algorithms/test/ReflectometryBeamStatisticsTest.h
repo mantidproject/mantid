@@ -171,9 +171,10 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SecondSlitName", slit2))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("SecondSlitSizeSampleLog", "slit2.size"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), Kernel::Exception::NotFoundError &e, e.what(), std::string("Could not find slit search object non-existent"))
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), Kernel::Exception::NotFoundError & e, e.what(),
+        std::string("Could not find slit search object non-existent"))
     TS_ASSERT(!alg.isExecuted())
-
   }
 
   static API::MatrixWorkspace_sptr makeWS(const double braggAngle) {
