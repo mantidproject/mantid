@@ -23,6 +23,20 @@ def create_simple_workspace(data_x, data_y):
     return alg.getProperty("OutputWorkspace").value
 
 
+def create_simple_table_workspace():
+    alg = simpleapi.AlgorithmManager.create("CreateEmptyTableWorkspace")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setLogging(False)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.execute()
+    table = alg.getProperty("OutputWorkspace").value
+    table.addColumn("int", "col1", 0)
+    table.addColumn("int", "col2", 0)
+    [table.addRow([i + 1, 2 * i]) for i in range(4)]
+    return table
+
+
 class MuonWorkspaceTest(unittest.TestCase):
     """
     The MuonWorkspace object is a key class in the muon interface. It is a wrapper around a normal
@@ -65,10 +79,7 @@ class MuonWorkspaceTest(unittest.TestCase):
         MuonWorkspace(workspace=self.workspace)
 
     def test_that_can_initialize_with_TableWorkspace_object(self):
-        table_workspace = simpleapi.CreateEmptyTableWorkspace(EnableLogging=False)
-        table_workspace.addColumn("int", "col1", 0)
-        table_workspace.addColumn("int", "col2", 0)
-        [table_workspace.addRow([i + 1, 2 * i]) for i in range(4)]
+        table_workspace = create_simple_table_workspace()
         assert isinstance(table_workspace, ITableWorkspace)
 
         MuonWorkspace(workspace=table_workspace)
