@@ -10,8 +10,9 @@ namespace DataHandling {
 class DLLExport LoadBinaryStl {
 public:
   static constexpr int HEADER_SIZE = 80;
-  static constexpr uint32_t SIZE_OF_TRIANGLE = 50;
-  static constexpr uint32_t NUM_OF_TRIANGLES = 4;
+  static constexpr uint32_t TRIANGLE_DATA_SIZE = 50;
+  static constexpr uint32_t TRIANGLE_COUNT_DATA_SIZE = 4;
+  static constexpr uint32_t VECTOR_DATA_SIZE = 12;
   LoadBinaryStl(std::string filename) : m_filename(filename) {}
   std::unique_ptr<Geometry::MeshObject> readStl();
   bool isBinarySTL();
