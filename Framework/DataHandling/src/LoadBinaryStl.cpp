@@ -48,7 +48,8 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
 
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
   const auto numberTrianglesLong = getNumberTriangles(streamReader);
-  uint32_t nextToRead = HEADER_SIZE + TRIANGLE_COUNT_DATA_SIZE + VECTOR_DATA_SIZE;
+  uint32_t nextToRead =
+      HEADER_SIZE + TRIANGLE_COUNT_DATA_SIZE + VECTOR_DATA_SIZE;
 
   // now read in all the triangles
   for (uint32_t i = 0; i < numberTrianglesLong; i++) {
