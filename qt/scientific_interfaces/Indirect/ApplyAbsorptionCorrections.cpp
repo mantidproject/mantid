@@ -171,6 +171,8 @@ void ApplyAbsorptionCorrections::updateContainer() {
 }
 
 void ApplyAbsorptionCorrections::run() {
+  setRunIsRunning(true);
+
   // Create / Initialize algorithm
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
   IAlgorithm_sptr applyCorrAlg =
@@ -370,30 +372,29 @@ void ApplyAbsorptionCorrections::addInterpolationStep(
 void ApplyAbsorptionCorrections::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
-  if (error) {
+
+  if (!error) {
+    if (m_uiForm.ckUseCan->isChecked()) {
+      if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
+        IAlgorithm_sptr shiftLog =
+            AlgorithmManager::Instance().create("AddSampleLog");
+        shiftLog->initialize();
+
+        shiftLog->setProperty("Workspace", m_pythonExportWsName);
+        shiftLog->setProperty("LogName", "container_shift");
+        shiftLog->setProperty("LogType", "Number");
+        shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(
+                                             m_uiForm.spCanShift->value()));
+        m_batchAlgoRunner->addAlgorithm(shiftLog);
+      }
+    }
+    // Run algorithm queue
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+            SLOT(postProcessComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  } else
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
-    return;
-  }
-
-  if (m_uiForm.ckUseCan->isChecked()) {
-    if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
-      IAlgorithm_sptr shiftLog =
-          AlgorithmManager::Instance().create("AddSampleLog");
-      shiftLog->initialize();
-
-      shiftLog->setProperty("Workspace", m_pythonExportWsName);
-      shiftLog->setProperty("LogName", "container_shift");
-      shiftLog->setProperty("LogType", "Number");
-      shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(
-                                           m_uiForm.spCanShift->value()));
-      m_batchAlgoRunner->addAlgorithm(shiftLog);
-    }
-  }
-  // Run algorithm queue
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(postProcessComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
@@ -404,35 +405,32 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
 void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(postProcessComplete(bool)));
+  setRunIsRunning(false);
 
-  if (error) {
+  if (!error) {
+    // Handle preview plot
+    plotPreview(m_uiForm.spPreviewSpec->value());
+
+    // Clean up unwanted workspaces
+    IAlgorithm_sptr deleteAlg =
+        AlgorithmManager::Instance().create("DeleteWorkspace");
+    if (AnalysisDataService::Instance().doesExist("__algorithm_can")) {
+
+      deleteAlg->initialize();
+      deleteAlg->setProperty("Workspace", "__algorithm_can");
+      deleteAlg->execute();
+    }
+    const auto conv =
+        AnalysisDataService::Instance().doesExist("__algorithm_can_Wavelength");
+    if (conv) {
+      deleteAlg->setProperty("Workspace", "__algorithm_can_Wavelength");
+      deleteAlg->execute();
+    }
+  } else {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
     emit showMessageBox("Unable to process corrected workspace.\nSee Results "
                         "Log for more details.");
-    return;
-  }
-
-  // Enable post processing plot and save
-  m_uiForm.cbPlotOutput->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
-
-  // Handle preview plot
-  plotPreview(m_uiForm.spPreviewSpec->value());
-
-  // Clean up unwanted workspaces
-  IAlgorithm_sptr deleteAlg =
-      AlgorithmManager::Instance().create("DeleteWorkspace");
-  if (AnalysisDataService::Instance().doesExist("__algorithm_can")) {
-
-    deleteAlg->initialize();
-    deleteAlg->setProperty("Workspace", "__algorithm_can");
-    deleteAlg->execute();
-  }
-  const auto conv =
-      AnalysisDataService::Instance().doesExist("__algorithm_can_Wavelength");
-  if (conv) {
-    deleteAlg->setProperty("Workspace", "__algorithm_can_Wavelength");
-    deleteAlg->execute();
   }
 }
 
@@ -547,16 +545,15 @@ void ApplyAbsorptionCorrections::plotPreview(int wsIndex) {
 }
 
 void ApplyAbsorptionCorrections::saveClicked() {
-
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
 void ApplyAbsorptionCorrections::plotClicked() {
+  setPlotResultIsPlotting(true);
 
   QString plotType = m_uiForm.cbPlotOutput->currentText();
-
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
 
     if (plotType == "Spectra" || plotType == "Both")
@@ -565,6 +562,7 @@ void ApplyAbsorptionCorrections::plotClicked() {
     if (plotType == "Contour" || plotType == "Both")
       plot2D(QString::fromStdString(m_pythonExportWsName));
   }
+  setPlotResultIsPlotting(false);
 }
 
 void ApplyAbsorptionCorrections::runClicked() { runTab(); }
@@ -629,5 +627,32 @@ void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
     m_uiForm.spPreviewSpec->setMaximum(boost::numeric_cast<int>(m_spectra));
   }
 }
+
+void ApplyAbsorptionCorrections::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void ApplyAbsorptionCorrections::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotOutput->setEnabled(enabled);
+}
+
+void ApplyAbsorptionCorrections::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void ApplyAbsorptionCorrections::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
+}
+
+void ApplyAbsorptionCorrections::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotResultEnabled(!plotting);
+  setSaveResultEnabled(!plotting);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

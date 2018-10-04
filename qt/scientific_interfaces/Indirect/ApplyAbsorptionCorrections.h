@@ -47,6 +47,13 @@ private:
                      Mantid::API::MatrixWorkspace_sptr &ws,
                      const QColor &curveColor);
 
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+
   Ui::ApplyAbsorptionCorrections m_uiForm;
 
   std::string m_originalSampleUnits;

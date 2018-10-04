@@ -367,9 +367,12 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
   setRunIsRunning(false);
   if (!error)
     processWavelengthWorkspace();
-  else
+  else {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
     emit showMessageBox(
         "Could not run absorption corrections.\nSee Results Log for details.");
+  }
 }
 
 void AbsorptionCorrections::getParameterDefaults(QString const &dataName) {

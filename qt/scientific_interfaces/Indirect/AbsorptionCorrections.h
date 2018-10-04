@@ -41,11 +41,12 @@ private:
 
   void processWavelengthWorkspace();
 
-  void getBeamDefaults(Instrument_const_sptr instrument);
-  void getMonteCarloDefaults(Instrument_const_sptr instrument);
-  void setBeamWidthValue(Instrument_const_sptr instrument,
+  void getBeamDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
+  void
+  getMonteCarloDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
+  void setBeamWidthValue(Mantid::Geometry::Instrument_const_sptr instrument,
                          std::string const &beamWidthParamName) const;
-  void setBeamHeightValue(Instrument_const_sptr instrument,
+  void setBeamHeightValue(Mantid::Geometry::Instrument_const_sptr instrument,
                           std::string const &beamHeightParamName) const;
   void setWavelengthsValue(Mantid::Geometry::Instrument_const_sptr instrument,
                            std::string const &wavelengthsParamName) const;
