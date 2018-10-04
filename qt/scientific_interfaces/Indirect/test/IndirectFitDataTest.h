@@ -84,21 +84,37 @@ public:
       TS_ASSERT_EQUALS(*it, spectraVec[it - spectra.begin()]);
   }
 
-  void test_that_DiscontinuousSpectra_is_sorted_before_being_stored() {
+  void
+  test_that_DiscontinuousSpectra_is_sorted_before_being_stored_when_the_input_string_contains_overlapping_spectra() {
     auto data = getIndirectFitData(11, 3);
 
-    std::vector<std::string> const inputStrings{"8,5-0,6,10", "  8,10,  7",
-                                                "1,2,4-3,10"};
-    std::vector<Spectra> const anwserSpectra{
-        DiscontinuousSpectra<std::size_t>("0-6,8,10"),
-        DiscontinuousSpectra<std::size_t>("7-8,10"),
-        DiscontinuousSpectra<std::size_t>("1-4,10")};
+    std::string const inputString = "8,0-7,6,10";
+    Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-8,10");
+    data.setSpectra(inputString);
 
-    for (auto i = 0u; i < inputStrings.size(); ++i) {
-      data.setSpectra(inputStrings[i]);
-      TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), data.spectra(),
-                                     anwserSpectra[i]));
-    }
+    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), data.spectra(), spectra));
+  }
+
+  void
+  test_that_DiscontinuousSpectra_is_sorted_before_being_stored_when_the_input_string_contains_an_invalid_spectra_range() {
+    auto data = getIndirectFitData(11, 3);
+
+    std::string const inputString = "1,2,4-3,10";
+    Spectra const spectra = DiscontinuousSpectra<std::size_t>("1-4,10");
+    data.setSpectra(inputString);
+
+    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), data.spectra(), spectra));
+  }
+
+  void
+  test_that_DiscontinuousSpectra_is_sorted_before_being_stored_when_the_input_string_contains_large_spaces() {
+    auto data = getIndirectFitData(11, 3);
+
+    std::string const inputString = "  8,10,  7";
+    Spectra const spectra = DiscontinuousSpectra<std::size_t>("7-8,10");
+    data.setSpectra(inputString);
+
+    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), data.spectra(), spectra));
   }
 
   void test_data_is_stored_in_the_ADS() {
