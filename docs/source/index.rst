@@ -43,7 +43,7 @@ This is the documentation for Mantid |release|.
 * :ref:`Algorithms List`
 * :ref:`training`
     - :ref:`mantid_basic_course`
-    - `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
+    - :ref:`introduction_to_python`
     - `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
     - `Extending Mantid With Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
 * :ref:`concepts contents`
