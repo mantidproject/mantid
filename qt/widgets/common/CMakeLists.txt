@@ -297,8 +297,6 @@ set ( SRC_FILES
   src/MuonFitDataSelector.cpp
   src/MuonFitPropertyBrowser.cpp
   src/MuonFunctionBrowser.cpp
-  # todo check if it can be removed from qt4
-
   src/ProcessingAlgoWidget.cpp
   src/ProgressableView.cpp
   src/ProjectSavePresenter.cpp
@@ -407,8 +405,6 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
   inc/MantidQtWidgets/Common/MWDiag.h
-  # todo check if it can be removed from qt4
-
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
@@ -617,8 +613,6 @@ set ( UI_FILES
   inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.ui
   inc/MantidQtWidgets/Common/SlitCalculator.ui
   inc/MantidQtWidgets/Common/UserFunctionDialog.ui
-  # todo check if it can be removed from qt4
-
   inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
 
