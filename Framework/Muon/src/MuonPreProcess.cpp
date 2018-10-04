@@ -100,6 +100,7 @@ std::map<std::string, std::string> MuonPreProcess::validateInputs() {
     }
   }
 
+  // Multi period data, check that each workspace has the same number of spectra
   if (auto ws = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     if (ws->getNumberOfEntries() == 0) {
       errors["InputWorkspace"] = "Input WorkspaceGroup is empty.";

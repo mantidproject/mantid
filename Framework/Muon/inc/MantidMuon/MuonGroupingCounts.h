@@ -24,6 +24,9 @@ public:
     return {"MuonProcess"};
   }
 
+  /// Perform validation of inputs to the algorithm
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   void init() override;
   void exec() override;
