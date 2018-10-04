@@ -18,6 +18,7 @@ from __future__ import (absolute_import)
 
 # std imports
 import unittest
+import sys
 
 # 3rdparty
 from qtpy.QtCore import QCoreApplication, QObject
@@ -38,7 +39,7 @@ class WriteToSignalTest(GuiTest):
 
     def test_connected_receiver_receives_text(self):
         recv = Receiver()
-        writer = WriteToSignal()
+        writer = WriteToSignal(sys.stdout)
         writer.sig_write_received.connect(recv.capture_text)
         txt = "I expect to see this"
         writer.write(txt)
