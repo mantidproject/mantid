@@ -87,12 +87,6 @@ private:
   SpectrumInfoItem(const SpectrumInfo &spectrumInfo, const size_t index)
       : m_spectrumInfo(&spectrumInfo), m_index(index) {}
 
-  // Provide copy and move constructors
-  SpectrumInfoItem(const SpectrumInfoItem &other) = default;
-  SpectrumInfoItem &operator=(const SpectrumInfoItem &rhs) = default;
-  SpectrumInfoItem(SpectrumInfoItem &&other) = default;
-  SpectrumInfoItem &operator=(SpectrumInfoItem &&rhs) = default;
-
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.
   const SpectrumInfo *m_spectrumInfo;

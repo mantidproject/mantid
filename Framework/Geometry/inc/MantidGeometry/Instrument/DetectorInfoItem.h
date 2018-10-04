@@ -74,12 +74,6 @@ private:
   DetectorInfoItem(const DetectorInfo &detectorInfo, const size_t index)
       : m_detectorInfo(&detectorInfo), m_index(index) {}
 
-  // Provide copy and move constructors
-  DetectorInfoItem(const DetectorInfoItem &other) = default;
-  DetectorInfoItem &operator=(const DetectorInfoItem &rhs) = default;
-  DetectorInfoItem(DetectorInfoItem &&other) = default;
-  DetectorInfoItem &operator=(DetectorInfoItem &&rhs) = default;
-
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.
   const DetectorInfo *m_detectorInfo;
