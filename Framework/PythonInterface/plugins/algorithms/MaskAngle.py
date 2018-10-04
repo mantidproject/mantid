@@ -7,8 +7,9 @@ import mantid.geometry
 import numpy
 import math
 
+
 class MaskAngle(mantid.api.PythonAlgorithm):
-    """ Mask detectors between specified angles based on angle type required 
+    """ Mask detectors between specified angles based on angle type required
     """
 
     def category(self):
