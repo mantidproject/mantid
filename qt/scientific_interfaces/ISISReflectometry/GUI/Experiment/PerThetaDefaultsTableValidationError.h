@@ -8,7 +8,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class PerThetaDefaultsTableValidationError {
+class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsTableValidationError {
 public:
   PerThetaDefaultsTableValidationError(
       std::vector<InvalidDefaultsError> validationErrors,

@@ -17,6 +17,10 @@ private:
   int m_row;
 };
 
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(InvalidDefaultsError const &lhs,
+                                               InvalidDefaultsError const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(InvalidDefaultsError const &lhs,
+                                               InvalidDefaultsError const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INVALIDDEFAULTSERROR_H

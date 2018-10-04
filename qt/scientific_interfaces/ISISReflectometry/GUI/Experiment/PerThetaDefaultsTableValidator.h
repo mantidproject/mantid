@@ -7,7 +7,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class PerThetaDefaultsTableValidator {
+class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsTableValidator {
 public:
   using ResultType = ValidationResult<std::vector<PerThetaDefaults>,
                                       PerThetaDefaultsTableValidationError>;

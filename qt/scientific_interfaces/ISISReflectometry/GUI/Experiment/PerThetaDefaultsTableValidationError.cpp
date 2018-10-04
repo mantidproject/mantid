@@ -4,7 +4,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 PerThetaDefaultsTableValidationError::PerThetaDefaultsTableValidationError(
-    // cppcheck-suppress passedByValue
     std::vector<InvalidDefaultsError> validationErrors,
     boost::optional<ThetaValuesValidationError> fullTableError)
     : m_validationErrors(std::move(validationErrors)),
