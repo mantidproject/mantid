@@ -34,10 +34,10 @@ static const std::string PIXEL_SIZE{"PixelSize"};
 static const std::string POLARIZED{"Polarized"};
 static const std::string REFLECTED_BEAM_WS{"ReflectedBeamWorkspace"};
 static const std::string REFLECTED_FOREGROUND{"ReflectedForeground"};
-static const std::string SLIT1_NAME{"Slit1Name"};
-static const std::string SLIT1_SIZE_LOG{"Slit1SizeSampleLog"};
-static const std::string SLIT2_NAME{"Slit2Name"};
-static const std::string SLIT2_SIZE_LOG{"Slit2SizeSampleLog"};
+static const std::string SLIT1_NAME{"FirstSlitName"};
+static const std::string SLIT1_SIZE_LOG{"FirstSlitSizeSampleLog"};
+static const std::string SLIT2_NAME{"SecondSlitName"};
+static const std::string SLIT2_SIZE_LOG{"SecondSlitSizeSampleLog"};
 static const std::string SUM_TYPE{"SummationType"};
 static const std::string TOF_CHANNEL_WIDTH{"TOFChannelWidth"};
 } // namespace Prop

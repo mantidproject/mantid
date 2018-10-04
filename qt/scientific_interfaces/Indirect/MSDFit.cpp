@@ -98,6 +98,8 @@ void MSDFit::setSaveResultEnabled(bool enabled) {
 void MSDFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
   setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
   setFitSingleSpectrumEnabled(!running);
 }
 

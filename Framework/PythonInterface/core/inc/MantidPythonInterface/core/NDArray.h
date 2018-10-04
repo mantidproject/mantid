@@ -39,6 +39,7 @@ public:
   Py_intptr_t const *get_shape() const;
   int get_nd() const;
   void *get_data() const;
+  char get_typecode() const;
 
   NDArray astype(char dtype, bool copy = true) const;
 };

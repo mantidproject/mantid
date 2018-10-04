@@ -17,7 +17,7 @@
   Elements, with corresponding buttons as the elements
 */
 
-class EXPORT_OPT_MANTIDQT_COMMON PeriodicTableWidget : public QWidget {
+class PeriodicTableWidget : public QWidget {
   Q_OBJECT
 
 public:

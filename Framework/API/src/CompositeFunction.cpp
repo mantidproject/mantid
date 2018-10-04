@@ -620,10 +620,14 @@ std::string CompositeFunction::parameterLocalName(size_t i,
  * Apply the ties.
  */
 void CompositeFunction::applyTies() {
-  for (size_t i = 0; i < nFunctions(); i++) {
-    getFunction(i)->applyTies();
+  if (hasOrderedTies()) {
+    applyOrderedTies();
+  } else {
+    for (size_t i = 0; i < nFunctions(); i++) {
+      getFunction(i)->applyTies();
+    }
+    IFunction::applyTies();
   }
-  IFunction::applyTies();
 }
 
 /**

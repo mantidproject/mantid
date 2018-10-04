@@ -262,6 +262,82 @@ public:
     TS_ASSERT(!mf->isFixed(3));
   }
 
+  void test_circular_dependency() {
+    auto mf = makeFunction();
+    mf->tie("f0.a", "f3.f1.hi");
+    mf->tie("f0.b", "f2.sig + f0.a");
+    mf->tie("f2.sig", "f3.f1.hi");
+    mf->tie("f3.f1.hi", "f0.b");
+
+    TS_ASSERT_THROWS_EQUALS(
+        mf->sortTies(), std::runtime_error & e, std::string(e.what()),
+        "Circular dependency in "
+        "ties:\nf3.f1.hi=f0.b\nf0.a=f3.f1.hi\nf0.b=f2.sig + f0.a");
+  }
+
+  void test_circular_dependency_a_a() {
+    ParameterTieTest_Linear fun;
+    fun.tie("a", "2*a");
+    TS_ASSERT_THROWS_EQUALS(fun.sortTies(), std::runtime_error & e,
+                            std::string(e.what()),
+                            "Parameter is tied to itself: a=2*a");
+  }
+
+  void test_circular_dependency_a_b_a() {
+    ParameterTieTest_Linear fun;
+    fun.tie("a", "2*b");
+    fun.tie("b", "a/2");
+    TS_ASSERT_THROWS_EQUALS(fun.sortTies(), std::runtime_error & e,
+                            std::string(e.what()),
+                            "Circular dependency in ties:\nb=a/2\na=2*b");
+  }
+
+  void test_circular_dependency_a_b_c_a() {
+    ParameterTieTest_Gauss fun;
+    fun.tie("cen", "2*hi");
+    fun.tie("hi", "sig/2");
+    fun.tie("sig", "cen + 1");
+    TS_ASSERT_THROWS_EQUALS(
+        fun.sortTies(), std::runtime_error & e, std::string(e.what()),
+        "Circular dependency in ties:\nsig=cen + 1\nhi=sig/2\ncen=2*hi");
+  }
+
+  void test_ties_order() {
+    auto mf = makeFunction();
+    mf->tie("f0.a", "f3.f1.hi");
+    mf->tie("f0.b", "f2.sig + f0.a");
+    mf->tie("f1.hi", "f1.cen*2");
+    mf->tie("f2.sig", "f3.f1.hi");
+    mf->tie("f3.f1.hi", "f1.sig");
+
+    mf->applyTies();
+    // Unordered ties applied wrongly
+    TS_ASSERT(fabs(mf->getParameter("f0.a") - mf->getParameter("f3.f1.hi")) >
+              1);
+    TS_ASSERT(fabs(mf->getParameter("f0.b") - (mf->getParameter("f2.sig") +
+                                               mf->getParameter("f0.a"))) > 1);
+    TS_ASSERT(fabs(mf->getParameter("f1.hi") -
+                   mf->getParameter("f1.cen") * 2.0) < 1e-5);
+    TS_ASSERT(fabs(mf->getParameter("f2.sig") - mf->getParameter("f3.f1.hi")) >
+              1);
+    TS_ASSERT(fabs(mf->getParameter("f3.f1.hi") - mf->getParameter("f2.sig")) >
+              1);
+    TS_ASSERT_THROWS_NOTHING(mf->sortTies());
+    mf->applyTies();
+    // After ordering apply correctly
+    TS_ASSERT_DELTA(mf->getParameter("f0.a"), mf->getParameter("f3.f1.hi"),
+                    1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f0.b"),
+                    mf->getParameter("f2.sig") + mf->getParameter("f0.a"),
+                    1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f1.hi"), mf->getParameter("f1.cen") * 2.0,
+                    1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f2.sig"), mf->getParameter("f3.f1.hi"),
+                    1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f3.f1.hi"), mf->getParameter("f2.sig"),
+                    1e-5);
+  }
+
 private:
   void mustThrow1(CompositeFunction *fun) { ParameterTie tie(fun, "sig", "0"); }
   void mustThrow2(CompositeFunction *fun) {
@@ -272,6 +348,27 @@ private:
   }
   void mustThrow4(IFunction *fun) { ParameterTie tie(fun, "f1.a", "0"); }
   void mustThrow5(IFunction *fun) { ParameterTie tie(fun, "cen", "0"); }
+
+  IFunction_sptr makeFunction() {
+    CompositeFunction_sptr mf = CompositeFunction_sptr(new CompositeFunction);
+    IFunction_sptr bk = IFunction_sptr(new ParameterTieTest_Linear());
+    IFunction_sptr g1 = IFunction_sptr(new ParameterTieTest_Gauss());
+    IFunction_sptr g2 = IFunction_sptr(new ParameterTieTest_Gauss());
+    CompositeFunction_sptr cf = CompositeFunction_sptr(new CompositeFunction);
+    IFunction_sptr g3 = IFunction_sptr(new ParameterTieTest_Gauss());
+    IFunction_sptr g4 = IFunction_sptr(new ParameterTieTest_Gauss());
+    cf->addFunction(g3);
+    cf->addFunction(g4);
+
+    mf->addFunction(bk);
+    mf->addFunction(g1);
+    mf->addFunction(g2);
+    mf->addFunction(cf);
+    for (size_t i = 0; i < mf->nParams(); ++i) {
+      mf->setParameter(i, double(i + 1));
+    }
+    return mf;
+  }
 };
 
 #endif /*PARAMETERTIETEST_H_*/

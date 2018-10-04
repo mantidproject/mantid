@@ -145,6 +145,9 @@ QString getFilter(const std::vector<std::string> &exts) {
  */
 QString formatExtension(const std::string &extension) {
   QString formattedExtension = QString::fromStdString(extension);
+  if (extension.empty()) {
+    return formattedExtension;
+  }
   if (extension.at(0) == '*' && extension.at(1) == '.') {
     return formattedExtension;
   } else {

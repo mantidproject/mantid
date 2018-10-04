@@ -83,6 +83,14 @@ void *NDArray::get_data() const {
 }
 
 /**
+ * See https://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html
+ * @return The character code for the dtype of the array
+ */
+char NDArray::get_typecode() const {
+  return PyArray_DESCR(reinterpret_cast<PyArrayObject *>(this->ptr()))->type;
+}
+
+/**
  * Casts (and copies if necessary) the array to the given data type
  * @param dtype Character code for the numpy data types
  * (https://docs.scipy.org/doc/numpy/reference/arrays.dtypes.html)

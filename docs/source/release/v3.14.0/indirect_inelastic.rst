@@ -26,7 +26,7 @@ Data Analysis Interface
 Improvements
 ############
 
-- The Run button in the Data Analysis tabs is now above the output options, and is disabled during fitting.
+- The Run button is now above the output options, and is disabled during fitting along with the output buttons.
 - The Fit Single Spectrum buttons in the Data Analysis tabs MSDFit, ConvFit, I(Q,t)Fit and F(Q)Fit are now disabled
   during fitting.
 - When the InelasticDiffSphere, InelasticDiffRotDiscreteCircle, ElasticDiffSphere or ElasticDiffRotDiscreteCircle

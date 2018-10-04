@@ -43,13 +43,14 @@ public:
         m_firstOrDone(true) {}
 
   const DetectorInfoItem &next() {
-    if (!m_firstOrDone) {
+    if (!m_firstOrDone)
       ++m_begin;
-    } else {
+    else
       m_firstOrDone = false;
+    if (m_begin == m_end) {
+      m_firstOrDone = true;
       objects::stop_iteration_error();
     }
-
     return *m_begin;
   }
 
