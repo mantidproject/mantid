@@ -66,6 +66,8 @@ public:
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
+  /// Sign of a value
+  template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
 
 protected:
   /// Progress report & cancelling
@@ -92,15 +94,16 @@ private:
   std::string componentName(const std::string &propertyName,
                             Mantid::Geometry::Instrument_const_sptr &instr);
   /// Final angle definition between source and sample
-  double finalAngle(const double k, size_t i);
+  double finalAngle(const double k, size_t i, const double tanAngle,
+                    const double beamDiff);
   /// Retrieve the coordinate of an instrument component
   double coordinate(
       const std::string &componentName,
       Mantid::Geometry::PointingAlong direction,
       Mantid::Geometry::Instrument_const_sptr instrument = nullptr) const;
   /// Retrieve the coodinate of a detector component
-  double coordinate(const Mantid::Geometry::DetectorInfo &detectorInfo, size_t i,
-                    Mantid::Geometry::PointingAlong direction) const;
+  double coordinate(const Mantid::Geometry::DetectorInfo &detectorInfo,
+                    size_t i, Mantid::Geometry::PointingAlong direction) const;
   /// Retrieve the coordinate of an instrument component
   double coordinate(const Mantid::API::SpectrumInfo &spectrumInfo, size_t i,
                     Mantid::Geometry::PointingAlong direction) const;
@@ -116,7 +119,8 @@ private:
   void slitCheck();
   /// The corrected spectrum number for the initialSpectrumNumber
   size_t spectrumNumber(const double angle,
-                        const Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
+                        const Mantid::API::SpectrumInfo &spectrumInfo,
+                        size_t i);
   /// Parabola arc length
   double parabolaArcLength(const double arg, double constant = 1.) const;
   /// Execution code

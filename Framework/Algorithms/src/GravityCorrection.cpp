@@ -323,20 +323,21 @@ void GravityCorrection::slitCheck() {
  * @param i :: spectrum number
  * @return final angle in radians
  */
-double GravityCorrection::finalAngle(const double k, size_t i) {
+double GravityCorrection::finalAngle(const double k, size_t i,
+                                     const double tanAngle,
+                                     const double beamDiff) {
   // calculate parabola
   // calculate slit pointing up coordinate
-  const double tanAngle =
-      tan(this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.);
-  const double beamDiff = m_beam1 - m_beam2;
   // potential divide by zero avoided by input validation m_beam1 != m_beam2
   double beamShift =
       (k * (pow(m_beam1, 2.) - pow(m_beam2, 2.)) + (beamDiff * tanAngle)) /
       (2 * k * beamDiff);
-  const double up2 = m_beam2 * tanAngle;
+  const double up2 = -this->sgn(this->m_ws->spectrumInfo().signedTwoTheta(i)) *
+                     m_beam2 * tanAngle;
   double upShift = up2 + k * pow(m_beam2 - beamShift, 2.);
   // calculate final angle
-  return atan(2. * k * sqrt(abs(upShift / k)));
+  return this->sgn(this->m_ws->spectrumInfo().signedTwoTheta(i)) *
+         atan(2. * k * sqrt(abs(upShift / k)));
 }
 
 /**
@@ -572,6 +573,7 @@ void GravityCorrection::exec() {
         "Map of initial final angles and its corresponding spectrum "
         "number does not exist.");
   this->m_progress->report("Perform gravity correction ...");
+  const double beamDiff = m_beam1 - m_beam2;
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (spectrumInfo.isMonitor(i)) {
       this->g_log.debug("Found monitor spectrum, will be ignored.");
@@ -589,6 +591,8 @@ void GravityCorrection::exec() {
     const auto e = this->m_ws->e(i);
     // correct tof angles, velocity, characteristic length
     size_t i_tofit{0};
+    const double tanAngle =
+        tan(this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.);
     for (HistogramX::const_iterator tofit = tof.cbegin(); tofit < tof.cend();
          ++tofit) {
       // this velocity should take the real flight path into account
@@ -600,8 +604,9 @@ void GravityCorrection::exec() {
 
       double v{((spectrumInfo.l1() + spectrumInfo.l2(i)) / *tofit) *
                1.e6};                         // unit is m/s
-      double k = g * 100 / (2. * pow(v, 2.)); // unit is 1/m
-      double angle = this->finalAngle(k, i);  // unit is radians
+      double k = g * 800 / (2. * pow(v, 2.)); // unit is 1/m
+      double angle =
+          this->finalAngle(k, i, tanAngle, beamDiff); // unit is radians
       if (cos(angle) == 0.) {
         this->g_log.error("Cannot divide by zero for calculating new tof "
                           "values. Skip this bin.");
