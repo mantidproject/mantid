@@ -81,11 +81,12 @@ class DetectorInfoTest(unittest.TestCase):
     	workspace = CreateWorkspace(DataX=dataX, DataY=dataY)
     	info = workspace.detectorInfo()
     	self.assertEquals(info.size(), 0)
+    
+    def test_detectorIds(self):
+        info = self._ws.detectorInfo()
+        for a, b in zip(info.detectorIDs(), [1,2]):
+            self.assertEquals(a,b)
 
-    """
-    The following test cases test for returned objects to do with position
-    and rotation.
-    """
 
     def test_position(self):
         """ Test that the detector's position is returned. """

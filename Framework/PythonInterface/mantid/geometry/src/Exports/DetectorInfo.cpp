@@ -4,7 +4,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
-
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -90,5 +90,9 @@ void export_DetectorInfo() {
 
       .def("rotation", rotation, (arg("self"), arg("index")),
            "Returns the absolute rotation of the detector where the detector "
-           "is identified by 'index'.");
+           "is identified by 'index'.")
+      .def("detectorIDs", &DetectorInfo::detectorIDs,
+           return_value_policy<
+               Mantid::PythonInterface::Policies::VectorToNumpy>(),
+           "Returns all detector ids sorted by detector index");
 }
