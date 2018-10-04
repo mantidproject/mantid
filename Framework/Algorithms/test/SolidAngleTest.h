@@ -21,8 +21,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
 
 class SolidAngleTest : public CxxTest::TestSuite {
 public:
@@ -148,6 +148,43 @@ public:
       TS_ASSERT_DELTA(output2D->x(i)[1], 10000.0, 0.000001);
       TS_ASSERT_DELTA(output2D->e(i)[0], 0.0, 0.000001);
     }
+  }
+
+  void testCorrectWithIndex() {
+    if (!alg.isInitialized())
+      alg.initialize();
+    std::string outputWorkspace1 = "wholeOutput";
+    std::string outputWorkspace2 = "50OnwardsOutput";
+    alg.setPropertyValue("InputWorkspace", inputSpace);
+    alg.setPropertyValue("OutputWorkspace", outputWorkspace1);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    Workspace_sptr output1;
+    TS_ASSERT_THROWS_NOTHING(
+        output1 = AnalysisDataService::Instance().retrieve(outputWorkspace1));
+
+    if (!alg.isInitialized())
+      alg.initialize();
+    alg.setPropertyValue("InputWorkspace", inputSpace);
+    alg.setPropertyValue("OutputWorkspace", outputWorkspace2);
+    alg.setPropertyValue("StartWorkspaceIndex", "50");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    Workspace_sptr output2;
+    TS_ASSERT_THROWS_NOTHING(
+        output2 = AnalysisDataService::Instance().retrieve(outputWorkspace2));
+
+    Workspace2D_sptr output2D_1 =
+        boost::dynamic_pointer_cast<Workspace2D>(output1);
+    Workspace2D_sptr output2D_2 =
+        boost::dynamic_pointer_cast<Workspace2D>(output2);
+    const size_t numberOfSpectra1 = output2D_1->getNumberHistograms();
+    const size_t numberOfSpectra2 = output2D_2->getNumberHistograms();
+    for(size_t i = 50, j = 0; i<numberOfSpectra1&&j<numberOfSpectra2; i++, j++){
+      //all values after the start point of the second workspace should match
+      TS_ASSERT_EQUALS(output2D_1->y(i)[0],output2D_2->y(j)[0]);
+    }
+    
   }
 
 private:
