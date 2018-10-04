@@ -16,7 +16,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
-#include "MantidMuon/MuonGroupingCounts.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
