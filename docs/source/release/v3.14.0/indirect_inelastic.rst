@@ -32,8 +32,9 @@ Improvements
 - When the InelasticDiffSphere, InelasticDiffRotDiscreteCircle, ElasticDiffSphere or ElasticDiffRotDiscreteCircle
   Fit Types are selected in the ConvFit Tab, the Q values are retrieved from the workspaces, preventing a crash 
   when plotting a guess.
-- The Plot Result buttons in MSDFit and F(Q)Fit are disabled after a Run when the result workspace only has one
+- The Plot buttons in MSDFit and F(Q)Fit are disabled after a Run when the result workspace only has one
   data point to plot.
+- There is now an option to choose which output parameter to plot in MSDFit.
 - An option to skip the calculation of Monte Carlo Errors on the I(Q,t) Tab has been added.
 - During the calculation of Monte Carlo Errors, a progress bar is now shown.
 
