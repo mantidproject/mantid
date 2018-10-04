@@ -1,5 +1,6 @@
 #include "PerThetaDefaultsTableValidator.h"
 #include "../../Reduction/ValidatePerThetaDefaults.h"
+#include <boost/range/algorithm/adjacent_find.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -74,9 +75,12 @@ bool PerThetaDefaultsTableValidator::hasUniqueThetas(
         lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get()));
     return difference < tolerance;
   };
-  return std::adjacent_find(perThetaDefaults.cbegin() + wildcardCount,
-                            perThetaDefaults.cend(),
-                            thetasWithinTolerance) == perThetaDefaults.cend();
+
+  std::vector<PerThetaDefaults> perThetaDefaultsExcludingWildcards(
+      perThetaDefaults.cbegin() + wildcardCount, perThetaDefaults.cend());
+
+  return boost::adjacent_find(perThetaDefaultsExcludingWildcards,
+                              thetasWithinTolerance) == perThetaDefaults.cend();
 }
 
 int PerThetaDefaultsTableValidator::countWildcards(

@@ -1,5 +1,6 @@
 #include "Slicing.h"
 #include "../multivisitors.hpp"
+#include <boost/range/algorithm/adjacent_find.hpp>
 // equivalent to
 //         #include <boost/variant/multivisitors.hpp>
 // available in boost 1.54+ - required for RHEL7.
@@ -67,12 +68,11 @@ bool operator==(CustomSlicingByList const &lhs,
 std::ostream &operator<<(std::ostream &os, CustomSlicingByList const &slicing) {
   os << "slices at the following times\n";
   auto const &sliceTimes = slicing.sliceTimes();
-  // cppcheck-suppress ignoredReturnValue
-  std::adjacent_find(sliceTimes.cbegin(), sliceTimes.cend(),
-                     [&os](double start, double end) -> bool {
-                       os << "  " << start << " to " << end << " seconds,\n";
-                       return false;
-                     });
+  boost::range::adjacent_find(
+      sliceTimes, [&os](double start, double end) -> bool {
+        os << "  " << start << " to " << end << " seconds,\n";
+        return false;
+      });
   return os;
 }
 
@@ -100,12 +100,11 @@ std::ostream &operator<<(std::ostream &os, SlicingByEventLog const &slicing) {
   os << "slices at the times when the log value for the block '"
      << slicing.blockName() << "' is between\n";
   auto const &logValueBreakpoints = slicing.sliceAtValues();
-  // cppcheck-suppress ignoredReturnValue
-  std::adjacent_find(logValueBreakpoints.cbegin(), logValueBreakpoints.cend(),
-                     [&os](double start, double end) -> bool {
-                       os << "  " << start << " and " << end << ",\n";
-                       return false;
-                     });
+  boost::range::adjacent_find(logValueBreakpoints,
+                              [&os](double start, double end) -> bool {
+                                os << "  " << start << " and " << end << ",\n";
+                                return false;
+                              });
   return os;
 }
 
