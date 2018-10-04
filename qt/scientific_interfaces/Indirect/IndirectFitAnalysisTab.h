@@ -198,6 +198,8 @@ protected slots:
   void updateResultOptions();
   void saveResult();
 
+  void emitUpdateFitTypes();
+
 private:
   /// Overidden by child class.
   void setup() override;

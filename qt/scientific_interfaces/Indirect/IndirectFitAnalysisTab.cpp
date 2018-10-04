@@ -117,6 +117,8 @@ void IndirectFitAnalysisTab::setup() {
 
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
+  connect(m_dataPresenter.get(), SIGNAL(dataAdded()), this,
+          SLOT(emitUpdateFitTypes()));
 
   connectDataAndSpectrumPresenters();
   connectDataAndPlotPresenters();
@@ -967,8 +969,9 @@ void IndirectFitAnalysisTab::updateResultOptions() {
                                                      getSelectedSpectrum());
   setPlotResultEnabled(isFit);
   setSaveResultEnabled(isFit);
-  emit updateFitTypes();
 }
+
+void IndirectFitAnalysisTab::emitUpdateFitTypes() { emit updateFitTypes(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces
