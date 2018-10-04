@@ -17,6 +17,14 @@ set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\MantidPlot
 # Choose the proper suffix for the build.
 # if the string is not empty, capitalise the first letter
 if (NOT CPACK_PACKAGE_SUFFIX STREQUAL "" )
+  # change the icon if this is not a release build - the icons have _<suffix> appended, e.g. _nightly and _unstable
+  # this is done before the capitalisation of the first letter
+  set( WINDOWS_NSIS_MANTIDPLOT_ICON "MantidPlot_Icon_32offset_${CPACK_PACKAGE_SUFFIX}.ico" )
+  
+  set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON}.ico" )
+  set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON}.ico" )
+  set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON}.ico" )
+
   string(LENGTH ${CPACK_PACKAGE_SUFFIX} WINDOWS_NSIS_SUFFIX_LENGTH)
   # get only first letter
   string(SUBSTRING ${CPACK_PACKAGE_SUFFIX} 0 1 WINDOWS_NSIS_CAPITAL_FIRST_LETTER)
