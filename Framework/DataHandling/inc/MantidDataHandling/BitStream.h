@@ -4,21 +4,16 @@
 #include <array>
 #include <vector>
 #include <fstream>
-#include <typeinfo>
-#include <cxxabi.h>
-#include <limits>
-#include <functional>
-#include <cstring>
 #include <sys/stat.h>
 
 /**
-  VectorByteStream.h
+  BitStream.h
   Helper to read bytewise and bitwise information from a binary file.
 
   @author Joachim Coenen, Jülich Centre for Neutron Science
-  @date 2011-11-17
+  @date 2018-08-17
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -41,59 +36,14 @@
 */
 
 template <typename T>
-std::string n2hexstr(T const &w, size_t sizeofw = sizeof(T), bool useSpacers = false) {
-  static const char* digits = "0123456789ABCDEF";
-  const size_t charsPerByte = useSpacers ? 3 : 2;
-  const size_t stringLength = (sizeofw-1) * charsPerByte + 2;
-  std::string result(stringLength, '_');
-
-  uint8_t const *const wtmp_p = reinterpret_cast<uint8_t const * const>(&w);
-
-  //auto wtmp = *wtmp_p;
-  for (size_t i = 0; i < sizeofw; i++) {
-    const auto j = i * charsPerByte;
-    result[j]   = digits[(wtmp_p[i] & 0xF0) >> 4 ];
-    result[j+1] = digits[ wtmp_p[i] & 0x0F ];
-  }
-  return result;// + "  " + std::to_string(sizeof(w)) + " " + type_name(typeid(T).name());
-}
-
-template <typename T>
-std::string n2binstr(T w) {
-  static const char* digits = "01";
-  std::string result(sizeof(w)*9, '|');
-
-  uint8_t (*wtmp_p)[sizeof(w)] = reinterpret_cast<uint8_t (*)[sizeof(w)]>(&w);
-
-  auto wtmp = *wtmp_p;
-  for (size_t i = 0; i < sizeof(w); i++) {
-    const auto j = i*9;
-    result[j+0]   = digits[(wtmp[i] & 0b10000000) >> 7 ];
-    result[j+1]   = digits[(wtmp[i] & 0b01000000) >> 6 ];
-    result[j+2]   = digits[(wtmp[i] & 0b00100000) >> 5 ];
-    result[j+3]   = digits[(wtmp[i] & 0b00010000) >> 4 ];
-    result[j+4]   = digits[(wtmp[i] & 0b00001000) >> 3 ];
-    result[j+5]   = digits[(wtmp[i] & 0b00000100) >> 2 ];
-    result[j+6]   = digits[(wtmp[i] & 0b00000010) >> 1 ];
-    result[j+7]   = digits[(wtmp[i] & 0b00000001) >> 0 ];
-  }
-  return result;
-}
-
-template <typename T>
 inline T convert_endianness(T value) {
   const auto n = sizeof(value);
   uint8_t *data = reinterpret_cast<uint8_t*>(&value);
   for (size_t i = 0; i < n / 2; i++) {
     auto j = n - i - 1;
-    // g_log.notice() << "[i] = 0x" << n2hexstr(data[i])<< ", [j] = 0x" << n2hexstr(data[j]) << "\n";
     data[i] = data[i] ^ data[j];
-    // g_log.notice() << "[i] = 0x" << n2hexstr(data[i])<< ", [j] = 0x" << n2hexstr(data[j]) << "\n";
     data[j] = data[i] ^ data[j];
-    // g_log.notice() << "[i] = 0x" << n2hexstr(data[i])<< ", [j] = 0x" << n2hexstr(data[j]) << "\n";
     data[i] = data[i] ^ data[j];
-    // g_log.notice() << "[i] = 0x" << n2hexstr(data[i])<< ", [j] = 0x" << n2hexstr(data[j]) << "\n";
-    // g_log.notice() << "--------^^  --------^^\n";
   }
   return value;
 }
@@ -263,7 +213,7 @@ private:
   }
 
   inline void streamread(char* dest, const std::size_t &bytecount) {
-    std::memcpy(dest, &*pos, bytecount);
+    std::copy(pos, pos+bytecount, dest);
     pos += bytecount;
   }
 
