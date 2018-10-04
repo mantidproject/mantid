@@ -163,16 +163,14 @@ private:
   uint chopperChannel;
   uint monitorChannel;
 
-  uint chopperPeriod;
-
   void runLoadInstrument(std::string instrumentName, DataObjects::EventWorkspace_sptr &eventWS);
 
   long populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
 
-  std::pair<long, long> parse_File(FileByteStream &file, const uint64_t fileSize);
+  std::pair<long, long> parse_File(FileByteStream &file);
   std::vector<uint8_t> parse_Header(FileByteStream &file);
 
-  std::vector<std::vector<uint8_t>> split_File(FileByteStream &file, const size_t &chunckSize);
+  std::vector<std::vector<uint8_t>> split_File(FileByteStream &file, const uint maxChunckCount);
 
   void parse_BlockList(VectorByteStream &file, EventAccumulator &eventAccumulator);
   void parse_Block(VectorByteStream &file, EventAccumulator &eventAccumulator);

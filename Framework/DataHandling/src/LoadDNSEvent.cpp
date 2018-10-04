@@ -1,4 +1,4 @@
-#include <sstream>
+﻿#include <sstream>
 
 #include "MantidDataHandling/LoadDNSEvent.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -28,7 +28,8 @@
 #include <chrono>
 #include <sstream>
 #include <iostream>
-#include <sys/stat.h>
+
+#define USE_PARALLELISM true
 
 //#define LOG_INFORMATION(a) g_log.notice() << a;
 #define LOG_INFORMATION(a) //g_log.information()##<<##a;
@@ -62,6 +63,7 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadDNSEvent)
 
 const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS";
+const uint64_t MAX_BUFFER_BYTES_SIZE = 1500; // maximum buffer size in data file
 
 void LoadDNSEvent::init() {
   /// Initialise the properties
@@ -79,25 +81,10 @@ void LoadDNSEvent::init() {
                       "MonitorChannel", 1, boost::shared_ptr<BoundedValidator<uint>>(new BoundedValidator<uint>(0, 4)), Kernel::Direction::Input),
                   "The Monitor Channel");
 
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
-                      "ChopperPeriod", EMPTY_INT(), Kernel::Direction::Input),
-                  "The Chopper Period");
-
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
-                      "ChunckSize", EMPTY_INT(), boost::shared_ptr<BoundedValidator<uint>>(new BoundedValidator<uint>(1, 100*1024*1024)), Kernel::Direction::Input),
-                  "The Chunck Size");
-
   declareProperty(
       make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "The name of the output workspace.");
-}
-
-long getFileSize(std::string filename)
-{
-    struct stat stat_buf;
-    int rc = stat(filename.c_str(), &stat_buf);
-    return rc == 0 ? stat_buf.st_size : -1;
 }
 
 /// Run the algorithm
@@ -119,20 +106,15 @@ void LoadDNSEvent::exec() {
   g_log.notice() << "ChopperChannel: " << chopperChannel << std::endl;
   g_log.notice() << "MonitorChannel: " << monitorChannel << std::endl;
 
-  chopperPeriod = static_cast<uint>(getProperty("ChopperPeriod")) * 10;
-
   _eventAccumulator.neutronEvents.resize(960*128+24);
 
   try {
-
-
-    const auto filesize = getFileSize(static_cast<std::string>(getProperty("InputFile")));
     FileByteStream file(static_cast<std::string>(getProperty("InputFile")), endian::big);
     //file.exceptions(std::ifstream::eofbit);
     std::pair<long, long> elapsedTimeCombineSplitting;
     long elapsedTimeSorting    = 0;
     //long elapsedTimeTotal = measureMicroSecs::execution([&](){
-      auto elapsedTimeParsing    = MEASURE_MICRO_SECS({ elapsedTimeCombineSplitting = parse_File(file, filesize); });
+      auto elapsedTimeParsing    = MEASURE_MICRO_SECS({ elapsedTimeCombineSplitting = parse_File(file); });
       auto elapsedTimeProcessing = MEASURE_MICRO_SECS({ elapsedTimeSorting = populate_EventWorkspace(outputWS); });
     //});
 
@@ -198,7 +180,7 @@ void qsortParallel(_RAIter first, _RAIter last, _Compare comp, uint8_t depth) {
   auto pivot = partitionVector(first, last, comp);
   std::array<std::pair<_RAIter, _RAIter>, 2> parts ={std::pair<_RAIter, _RAIter>{first, pivot-1}, {pivot+1, last}};
 
-  PARALLEL_FOR_IF(true)
+  PARALLEL_FOR_IF(USE_PARALLELISM)
   for (size_t i = 0; i < parts.size(); ++i) {
     auto part = parts[i];
     if (part.first < part.second) {
@@ -286,7 +268,7 @@ long LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
   std::atomic<uint64_t> oversizedChanelIndexCounterA(0);
   std::atomic<uint64_t> oversizedPosCounterA(0);
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*eventWS))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*eventWS)&&USE_PARALLELISM)
   for (uint j = 0; j < _eventAccumulator.neutronEvents.size(); j++)
   {
     //uint64_t chopperTimestamp = 0;
@@ -412,7 +394,7 @@ buildSkipTable(const Iterable &iterable) {
 }
 
 template<typename Iterable>
-constexpr std::vector<uint8_t> buildSkipTable2(const Iterable &iterable) {
+const std::vector<uint8_t> buildSkipTable2(const Iterable &iterable) {
   std::vector<uint8_t> skipTable(256, iterable.size());
 
   size_t i = iterable.size();
@@ -482,10 +464,13 @@ inline void append(std::vector<T> &dest, const std::array<T, n> &src) {
 //#define LOG_NOTICE(a) g_log.notice() << a;
 #define LOG_NOTICE(a) //g_log.notice()##<<##a;
 
-std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file, const size_t &chunckSize) {
+std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file, const uint maxChunckCount) {
   LOG_INFORMATION("split_File...\n")
   static constexpr std::array<uint8_t, 8> block_sep = {0x00, 0x00, 0xFF, 0xFF, 0x55, 0x55, 0xAA, 0xAA}; // 0xAAAA5555FFFF0000; //
   static const auto skipTable = buildSkipTable2(block_sep);
+
+  const uint64_t minChunckSize = MAX_BUFFER_BYTES_SIZE;
+  const uint64_t chunckSize = std::max(minChunckSize, file.fileSize() / maxChunckCount);
 
   std::vector<std::vector<uint8_t>> result;
 
@@ -506,7 +491,7 @@ std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file,
     LOG_NOTICE("data.size() = " << data.size() << std::endl);
 
 
-    //std::array<uint8_t, block_sep.size()> current_windowx;
+    // search for a block_separator, and append everything up to it :
     static const auto windowSize = block_sep.size();
     uint8_t *current_window;
     std::array<uint8_t, windowSize> *windowAsArray = reinterpret_cast<std::array<uint8_t, windowSize>*>(current_window);
@@ -537,15 +522,18 @@ std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file,
     } catch (std::ifstream::failure e) {
       return result;
     }
-  }
+  } // while
+  return result;
 }
 
-std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file, const uint64_t fileSize) {
+std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
 
+  const int threadCount = USE_PARALLELISM ? omp_get_max_threads() : 1;
+
   std::vector<std::vector<uint8_t>> filechuncks;
-  auto elapsedTimeSplitting = MEASURE_MICRO_SECS({ filechuncks = split_File(file, fileSize / static_cast<uint>(getProperty("ChunckSize")));});
+  auto elapsedTimeSplitting = MEASURE_MICRO_SECS({ filechuncks = split_File(file, threadCount);});
   g_log.notice() << "filechuncks count = " << filechuncks.size() << std::endl;
 
 
@@ -560,17 +548,18 @@ std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file, const uint6
 
   const auto end = filechuncks.cend();
   size_t j = 0;
-  PARALLEL_FOR_IF(true)
+  PARALLEL_FOR_IF(USE_PARALLELISM)
   for (auto iter = filechuncks.cbegin(); iter < end; iter++) {
     g_log.notice() << "filechunck.size() = " << iter->size() << std::endl;
     auto vbs = VectorByteStream(*iter, file.endianess);
-    parse_BlockList(vbs, eventAccumulators[iter - filechuncks.cbegin()]);
+    const auto fileChunckIndex = iter - filechuncks.cbegin();
+    parse_BlockList(vbs, eventAccumulators[size_t(fileChunckIndex)]);
   }
 
   g_log.notice() << "j = " << j << std::endl;
   auto elapsedTimeCombining = MEASURE_MICRO_SECS({
 
-    PARALLEL_FOR_IF(true)
+    PARALLEL_FOR_IF(USE_PARALLELISM)
     for (int i = -1; i < _eventAccumulator.neutronEvents.size(); ++i) {
       if (i == -1) {
         auto origSize = _eventAccumulator.triggerEvents.size();

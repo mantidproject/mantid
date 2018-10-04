@@ -8,7 +8,8 @@
 #include <cxxabi.h>
 #include <limits>
 #include <functional>
-#include <cstring>;
+#include <cstring>
+#include <sys/stat.h>
 
 /**
   VectorByteStream.h
@@ -150,14 +151,22 @@ struct DataChunk<bytecount, 0> {
 class FileByteStream {
 public:
   explicit FileByteStream (const std::string &filename, const endian endianess)
-    : stream(filename, std::ios_base::binary), endianess(endianess)
+    : stream_(filename, std::ios_base::binary), endianess(endianess), fileSize_(getFileSize(filename))
   {
-    stream.exceptions(std::ifstream::eofbit);
+    stream_.exceptions(std::ifstream::eofbit);
   }
 
   const endian endianess;
 private:
-  std::ifstream stream;
+  std::ifstream stream_;
+  const uint64_t fileSize_;
+
+  long getFileSize(std::string filename)
+  {
+      struct stat stat_buf;
+      int rc = stat(filename.c_str(), &stat_buf);
+      return rc == 0 ? stat_buf.st_size : -1;
+  }
 
   template<typename T>
   inline char *getResultPointer(T *const result, const std::size_t &bytecount) const {
@@ -167,14 +176,14 @@ private:
  public:
   template<typename T>
   inline FileByteStream& readRaw (T &result, const std::size_t &bytecount) {
-    stream.read(getResultPointer(&result, bytecount), bytecount);
+    stream_.read(getResultPointer(&result, bytecount), bytecount);
     return *this;
   }
 
   template<std::size_t bytecount, typename T>
   inline FileByteStream& readRaw (T& result) {
     static_assert(sizeof(T) >= bytecount, "byte count of result needs to be greater or equal to bytecount");
-    stream.read(getResultPointer(&result, bytecount), bytecount);
+    stream_.read(getResultPointer(&result, bytecount), bytecount);
     return *this;
   }
 
@@ -212,24 +221,26 @@ private:
   }
 
   inline uint8_t peek () {
-    return static_cast<uint8_t>(stream.peek());
+    return static_cast<uint8_t>(stream_.peek());
   }
 
-  bool eof() const { return stream.eof(); }
+  bool eof() const { return stream_.eof(); }
 
   template<size_t bytecount>
   inline FileByteStream& skip () {
-    stream.ignore(bytecount);
+    stream_.ignore(bytecount);
     return *this;
   }
 
   std::streamsize gcount() const {
-    return stream.gcount();
+    return stream_.gcount();
   }
   template<typename T>
   FileByteStream& operator>>(T &val) {
     return read(val);
   }
+
+  uint64_t fileSize() const { return fileSize_; }
 
 };
 
