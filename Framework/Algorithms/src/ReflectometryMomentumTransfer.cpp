@@ -320,6 +320,7 @@ ReflectometryMomentumTransfer::createBeamStatistics(
  *
  * @param ws the reflectivity workspace
  * @return a setup object
+ * @throw NotFoundError if second slit does not exists
  */
 const ReflectometryMomentumTransfer::Setup
 ReflectometryMomentumTransfer::createSetup(const API::MatrixWorkspace &ws) {
@@ -346,6 +347,9 @@ ReflectometryMomentumTransfer::createSetup(const API::MatrixWorkspace &ws) {
   const std::string slit2Name = getProperty(Prop::SLIT2_NAME);
   auto instrument = ws.getInstrument();
   auto slit2 = instrument->getComponentByName(slit2Name);
+  if (!slit2) {
+    throw Kernel::Exception::NotFoundError("Could not find slit", slit2Name);
+  }
   const auto samplePos = spectrumInfo.samplePosition();
   s.slit2SampleDistance = (slit2->getPos() - samplePos).norm();
   const std::string slit2SizeEntry = getProperty(Prop::SLIT2_SIZE_LOG);
@@ -367,9 +371,8 @@ double ReflectometryMomentumTransfer::interslitDistance(
   const std::string slit1Name = getProperty(Prop::SLIT1_NAME);
   const std::string slit2Name = getProperty(Prop::SLIT2_NAME);
   auto instrument = ws.getInstrument();
-  auto slit1 = instrument->getComponentByName(slit1Name);
-  auto slit2 = instrument->getComponentByName(slit2Name);
-  return (slit1->getPos() - slit2->getPos()).norm();
+  return ReflectometryBeamStatistics::slitSeparation(instrument, slit1Name,
+                                                     slit2Name);
 }
 
 /** Read the slit size from samle logs.

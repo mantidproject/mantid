@@ -116,6 +116,13 @@ public:
                      secondAngularSpread)
   }
 
+  void test_failsGracefullyWhenSlitsNotFound() {
+    constexpr int firstSlit{1};
+    checkWrongSlitsThrows(firstSlit);
+    constexpr int secondSlit{2};
+    checkWrongSlitsThrows(secondSlit);
+  }
+
 private:
   static void checkDirectStatisticsContainedInSampleLogs(const API::Run &run) {
     TS_ASSERT(run.hasProperty("beam_stats.beam_rms_variation"))
@@ -133,6 +140,40 @@ private:
     TS_ASSERT(run.hasProperty("beam_stats.incident_angular_spread"))
     TS_ASSERT(run.hasProperty("beam_stats.sample_waviness"))
     TS_ASSERT(run.hasProperty("beam_stats.second_slit_angular_spread"))
+  }
+
+  void checkWrongSlitsThrows(const int slit) {
+    const std::string slit1 = slit == 1 ? "non-existent" : "slit1";
+    const std::string slit2 = slit == 2 ? "non-existent" : "slit2";
+    auto reflectedWS = makeWS(0.7);
+    const std::vector<int> reflectedForeground{FGD_FIRST, BEAM_CENTRE,
+                                               FGD_LAST};
+    auto directWS = makeWS(0.);
+    const std::vector<int> directForeground{FGD_FIRST, BEAM_CENTRE, FGD_LAST};
+    Algorithms::ReflectometryBeamStatistics alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("ReflectedBeamWorkspace", reflectedWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("ReflectedForeground", reflectedForeground))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DirectBeamWorkspace", directWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DirectForeground", directForeground))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelSize", PIXEL_SIZE))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DetectorResolution", DET_RESOLUTION))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FirstSlitName", slit1))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("FirstSlitSizeSampleLog", "slit1.size"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SecondSlitName", slit2))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("SecondSlitSizeSampleLog", "slit2.size"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), Kernel::Exception::NotFoundError &e, e.what(), std::string("Could not find slit search object non-existent"))
+    TS_ASSERT(!alg.isExecuted())
+
   }
 
   static API::MatrixWorkspace_sptr makeWS(const double braggAngle) {

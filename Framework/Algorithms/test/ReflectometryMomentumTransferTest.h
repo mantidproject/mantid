@@ -100,7 +100,7 @@ public:
     auto inputWS = make_ws(0.5 * deg2rad, nBins, logValues);
     const std::vector<int> foreground(2, 0);
     auto alg = make_alg(inputWS, "SumInLambda", foreground);
-    TS_ASSERT_THROWS_NOTHING(alg->execute();)
+    TS_ASSERT_THROWS_NOTHING(alg->execute())
     TS_ASSERT(alg->isExecuted())
 
     API::MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
@@ -181,6 +181,13 @@ public:
                                     foregroundWidthDominatedLogValues);
   }
 
+  void test_failsGracefullyWhenSlitsNotFound() {
+    constexpr int firstSlit{1};
+    wrongSlitNames(firstSlit);
+    constexpr int secondSlit{2};
+    wrongSlitNames(secondSlit);
+  }
+
 private:
   static void sameReflectedAndDirectSlitSizes(
       const std::string &sumType, const double angleBragg,
@@ -190,7 +197,7 @@ private:
     auto inputWS = make_ws(angleBragg, nBins, logValues);
     inputWS->mutableY(0) = 1. / static_cast<double>(inputWS->y(0).size());
     auto alg = make_alg(inputWS, sumType, foreground);
-    TS_ASSERT_THROWS_NOTHING(alg->execute();)
+    TS_ASSERT_THROWS_NOTHING(alg->execute())
     TS_ASSERT(alg->isExecuted())
     API::MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
@@ -229,6 +236,46 @@ private:
       TS_ASSERT_EQUALS(outPoints[qIndex], q)
       TS_ASSERT_DELTA(outDx[qIndex], q * fractionalResolution, 1e-7)
     }
+  }
+
+  void wrongSlitNames(const int nonexistentSlit) {
+    using Geometry::deg2rad;
+    const std::string slit1 = nonexistentSlit == 1 ? "non-existent" : "slit1";
+    const std::string slit2 = nonexistentSlit == 2 ? "non-existent" : "slit2";
+    const LogValues logValues(0.1, 0.1, 0.1, 0.1);
+    constexpr int nBins{10};
+    auto inputWS = make_ws(0.5 * deg2rad, nBins, logValues);
+    const std::vector<int> foreground(2, 0);
+    auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
+    alg->setChild(true);
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg->initialize())
+    TS_ASSERT(alg->isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("ReflectedForeground", foreground))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SummationType", "SumInLambda"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("PixelSize", PIXEL_SIZE))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("DetectorResolution", DET_RESOLUTION))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ChopperSpeed", CHOPPER_SPEED))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("ChopperOpening", CHOPPER_OPENING_ANGLE))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ChopperRadius", CHOPPER_RADIUS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("ChopperpairDistance", CHOPPER_GAP))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("FirstSlitName", "non-existent"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("FirstSlitSizeSampleLog", "slit1.size"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitName", slit1))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitSizeSampleLog", slit2))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH))
+    TS_ASSERT_THROWS_EQUALS(
+        alg->execute(), const Kernel::Exception::NotFoundError &e, e.what(),
+        std::string("Could not find slit search object non-existent"))
+    TS_ASSERT(!alg->isExecuted())
   }
 
   static API::Algorithm_sptr make_alg(API::MatrixWorkspace_sptr inputWS,

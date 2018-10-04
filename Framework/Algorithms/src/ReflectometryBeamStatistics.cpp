@@ -33,6 +33,9 @@ constexpr double FWHM_GAUSSIAN_EQUIVALENT{0.68};
 namespace Mantid {
 namespace Algorithms {
 
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(ReflectometryBeamStatistics)
+
 const std::string ReflectometryBeamStatistics::LogEntry::BEAM_RMS_VARIATION{
     "beam_stats.beam_rms_variation"};
 const std::string ReflectometryBeamStatistics::LogEntry::BENT_SAMPLE{
@@ -49,8 +52,27 @@ const std::string
     ReflectometryBeamStatistics::LogEntry::SECOND_SLIT_ANGULAR_SPREAD{
         "beam_stats.second_slit_angular_spread"};
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ReflectometryBeamStatistics)
+/** Give the gap between the two slits, in meters.
+ *
+ * @param instrument an instrument which containts the slit components
+ * @param slit1name name of the first slit component
+ * @param slit2name name of the second slit component
+ * @return the slit gap, in meters
+ * @throw NotFoundError if the slits do not exist
+ */
+double ReflectometryBeamStatistics::slitSeparation(
+    Geometry::Instrument_const_sptr instrument, const std::string &slit1Name,
+    const std::string &slit2Name) {
+  auto slit1 = instrument->getComponentByName(slit1Name);
+  if (!slit1) {
+    throw Kernel::Exception::NotFoundError("Could not find slit", slit1Name);
+  }
+  auto slit2 = instrument->getComponentByName(slit2Name);
+  if (!slit2) {
+    throw Kernel::Exception::NotFoundError("Could not find slit", slit2Name);
+  }
+  return (slit1->getPos() - slit2->getPos()).norm();
+}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ReflectometryBeamStatistics::name() const {
@@ -216,9 +238,8 @@ bool ReflectometryBeamStatistics::bentSample(
  *
  * @param ws the reflectivity workspace
  * @param directWS corresponding direct beam workspace
- * @param beamCentre workspace index of the reflected beam centre
- * @param directBeamCentre workspace indes of the direct beam centre
  * @return a setup object
+ * @throw NotFoundError if second slit does not exists
  */
 const ReflectometryBeamStatistics::Setup
 ReflectometryBeamStatistics::createSetup(const API::MatrixWorkspace &ws,
@@ -251,6 +272,9 @@ ReflectometryBeamStatistics::createSetup(const API::MatrixWorkspace &ws,
   const std::string slit2Name = getProperty(Prop::SECOND_SLIT_NAME);
   auto instrument = ws.getInstrument();
   auto slit2 = instrument->getComponentByName(slit2Name);
+  if (!slit2) {
+    throw Kernel::Exception::NotFoundError("Could not find slit", slit2Name);
+  }
   const auto samplePos = spectrumInfo.samplePosition();
   s.slit2SampleDistance = (slit2->getPos() - samplePos).norm();
   const std::string slit2SizeEntry = getProperty(Prop::SECOND_SLIT_SIZE_LOG);
@@ -312,9 +336,7 @@ ReflectometryBeamStatistics::interslitDistance(const API::MatrixWorkspace &ws) {
   const std::string slit1Name = getProperty(Prop::FIRST_SLIT_NAME);
   const std::string slit2Name = getProperty(Prop::SECOND_SLIT_NAME);
   auto instrument = ws.getInstrument();
-  auto slit1 = instrument->getComponentByName(slit1Name);
-  auto slit2 = instrument->getComponentByName(slit2Name);
-  return (slit1->getPos() - slit2->getPos()).norm();
+  return slitSeparation(instrument, slit1Name, slit2Name);
 }
 
 /**
