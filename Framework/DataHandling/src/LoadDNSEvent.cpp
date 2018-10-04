@@ -215,8 +215,6 @@ long LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
   return elapsedTimeSorting;
 }
 
-
-
 void LoadDNSEvent::runLoadInstrument(std::string instrumentName, EventWorkspace_sptr &eventWS) {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
@@ -233,35 +231,6 @@ void LoadDNSEvent::runLoadInstrument(std::string instrumentName, EventWorkspace_
 }
 
 namespace {
-
-template<typename Iterable>
-struct Reversed {
-  Iterable &it;
-
-  auto begin() {
-    return it.rbegin();
-  }
-
-  auto begin() const {
-    return it.rbegin();
-  }
-
-  auto end() {
-    return it.rend();
-  }
-
-  auto end() const {
-    return it.rend();
-  }
-
-};
-
-template<typename Iterable>
-inline Reversed<Iterable> reversed(Iterable &iter) {
-  return { iter };
-}
-
-
 template<typename Iterable>
 constexpr std::map<
    std::remove_reference_t<decltype(*std::declval<decltype(std::declval<Iterable>().cbegin())>())>,
@@ -298,8 +267,6 @@ const std::vector<uint8_t> buildSkipTable2(const Iterable &iterable) {
 
 }
 
-
-
 std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
   // using Boyer-Moore String Search:
   LOG_INFORMATION("parse_Header...\n")
@@ -332,23 +299,6 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
   }
   //throw std::runtime_error(std::string("STOP!!!! please. (ugh!)"));
   return header;
-}
-
-template<typename T>
-inline void append(std::vector<T> &dest, const T *src, const size_t &count) {
-  const auto origSize = dest.size();
-  dest.resize(origSize + count);
-  std::memcpy(dest.data() + origSize, src, count);
-}
-
-template<typename T>
-inline void append(std::vector<T> &dest, const std::vector<T> &src) {
-  append(dest, src.data(), src.size());
-}
-
-template<typename T, size_t n>
-inline void append(std::vector<T> &dest, const std::array<T, n> &src) {
-  append(dest, src.data(), src.size());
 }
 
 //#define LOG_NOTICE(a) g_log.notice() << a;
@@ -420,8 +370,9 @@ std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
 
-  const int threadCount = USE_PARALLELISM ? omp_get_max_threads() : 1;
+  const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 1;
 
+  // Split File:
   std::vector<std::vector<uint8_t>> filechuncks;
   auto elapsedTimeSplitting = MEASURE_MICRO_SECS({ filechuncks = split_File(file, threadCount);});
   g_log.notice() << "filechuncks count = " << filechuncks.size() << std::endl;
@@ -435,6 +386,7 @@ std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file) {
 
   g_log.notice() << "evtAcc.neutronEvents.size() = " << eventAccumulators[eventAccumulators.size()-1].neutronEvents.size() << std::endl;
 
+  //parse file chuncks:
   const auto end = filechuncks.cend();
   size_t j = 0;
   PARALLEL_FOR_IF(USE_PARALLELISM)
@@ -446,28 +398,34 @@ std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file) {
   }
 
   g_log.notice() << "j = " << j << std::endl;
-  auto elapsedTimeCombining = MEASURE_MICRO_SECS({
-
-    PARALLEL_FOR_IF(USE_PARALLELISM)
-    for (int i = -1; i < _eventAccumulator.neutronEvents.size(); ++i) {
-      if (i == -1) {
-        auto origSize = _eventAccumulator.triggerEvents.size();
-        _eventAccumulator.triggerEvents.resize(std::accumulate(eventAccumulators.cbegin(), eventAccumulators.cend(), 0, [](const auto s, const auto &v){ return s + v.triggerEvents.size(); }));
-        for (const auto & evtAcc : eventAccumulators) {
-          std::memcpy(_eventAccumulator.triggerEvents.data() + origSize, evtAcc.triggerEvents.data(), evtAcc.triggerEvents.size());
-          origSize += evtAcc.triggerEvents.size();
-          //append(_eventAccumulator.triggerEvents, evtAcc.triggerEvents);
+  // combine eventAccumulators:
+  auto elapsedTimeCombining =
+  MEASURE_MICRO_SECS(
+  {
+    PARALLEL {
+      PARALLEL_SECTIONS {
+        PARALLEL_SECTION {
+          auto origSize = _eventAccumulator.triggerEvents.size();
+          _eventAccumulator.triggerEvents.resize(std::accumulate(eventAccumulators.cbegin(), eventAccumulators.cend(), 0, [](const auto s, const auto &v){ return s + v.triggerEvents.size(); }));
+          for (const auto & evtAcc : eventAccumulators) {
+            std::memcpy(_eventAccumulator.triggerEvents.data() + origSize, evtAcc.triggerEvents.data(), evtAcc.triggerEvents.size());
+            origSize += evtAcc.triggerEvents.size();
+          }
         }
-      } else {
-        auto origSize = _eventAccumulator.neutronEvents[i].size();
-        _eventAccumulator.neutronEvents[i].resize(std::accumulate(eventAccumulators.cbegin(), eventAccumulators.cend(), 0, [&](const auto s, const auto &v){ return s + v.neutronEvents[i].size(); }));
-        for (const auto & evtAcc : eventAccumulators) {
-          std::memcpy(_eventAccumulator.neutronEvents[i].data() + origSize, evtAcc.neutronEvents[i].data(), evtAcc.neutronEvents[i].size());
-          origSize += evtAcc.neutronEvents[i].size();
-          //append(_eventAccumulator.neutronEvents[i], evtAcc.neutronEvents[i]);
+        PARALLEL_SECTION {
+          PRAGMA_OMP(for)
+          for (int i = -1; i < _eventAccumulator.neutronEvents.size(); ++i) {
+            auto origSize = _eventAccumulator.neutronEvents[i].size();
+            _eventAccumulator.neutronEvents[i].resize(std::accumulate(eventAccumulators.cbegin(), eventAccumulators.cend(), 0, [&](const auto s, const auto &v){ return s + v.neutronEvents[i].size(); }));
+            for (const auto & evtAcc : eventAccumulators) {
+              std::memcpy(_eventAccumulator.neutronEvents[i].data() + origSize, evtAcc.neutronEvents[i].data(), evtAcc.neutronEvents[i].size());
+              origSize += evtAcc.neutronEvents[i].size();
+            }
+          }
         }
       }
     }
+
   });
   //parse_BlockList(file, _eventAccumulator);
   //parse_EndSignature(file);
