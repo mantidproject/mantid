@@ -12,11 +12,11 @@ Description
 This algorithm fits a certain set of single diffraction peaks in a powder
 diffraction pattern.
 
-The assumption is that all the peaks in the diffraction patter can be described by a single peak type. 
-A specific peak parameter will have its values plotted by an analytical function among all the peaks. 
+The assumption is that all the peaks in the diffraction patter can be described by a single peak type.
+A specific peak parameter will have its values plotted by an analytical function among all the peaks.
 
 It serves as the first step to fit/refine instrumental parameters that
-will be introduced in `Le Bail Fit <http://www.mantidproject.org/Le_Bail_Fit>`__. The second step is
+will be introduced in :ref:`Le Bail fit <Le Bail Fit>`. The second step is
 realized by algorithm RefinePowderInstrumentParameters.
 
 Peak Fitting Algorithms
@@ -29,7 +29,7 @@ Fitting mode determines the approach (or algorithm) to fit diffraction
 peaks.  2 modes are supported:
 
 1. Confident: User is confident on the input peak parameters. Thus the fitting will be a one-step minimizer by Levenberg-Marquardt.
-2. Robust: The given starting values of peak parameters may be too far away from true values.  A trial-and-error approach is used. 
+2. Robust: The given starting values of peak parameters may be too far away from true values.  A trial-and-error approach is used.
 
 
 Starting Values of Peaks' Parameters
@@ -86,8 +86,8 @@ Example of Working With Other Algorithms
 ########################################
 
 *FitPowderDiffPeaks* is designed to work with other algorithms, such
-*RefinePowderInstrumentParameters*, and *LeBailFit*. See `Le Bail
-Fit <http://www.mantidproject.org/Le_Bail_Fit>`_ for full list of such algorithms.
+*RefinePowderInstrumentParameters*, and *LeBailFit*. See :ref:`Le Bail
+*fit concept page <Le Bail Fit>` for full list of such algorithms.
 
 A common scenario is that the starting values of instrumental geometry
 related parameters (Dtt1, Dtt1t, and etc) are enough far from the real
@@ -106,35 +106,35 @@ Usage
 .. testcode:: ExFitSingleDiffPeaks
 
   # Load reduced powder diffraction data
-  LoadAscii(Filename='PG3_11487-3.dat', 
+  LoadAscii(Filename='PG3_11487-3.dat',
         OutputWorkspace='PG3_11487', Unit='TOF')
 
   # Create table workspaces used by Le Bail fit algorithms
-  CreateLeBailFitInput(ReflectionsFile='LB4854b3.hkl', FullprofParameterFile='2011B_HR60b3.irf', 
-        Bank=3, LatticeConstant=4.1568899999999998, InstrumentParameterWorkspace='Bank3InstrumentParameterTable1', 
+  CreateLeBailFitInput(ReflectionsFile='LB4854b3.hkl', FullprofParameterFile='2011B_HR60b3.irf',
+        Bank=3, LatticeConstant=4.1568899999999998, InstrumentParameterWorkspace='Bank3InstrumentParameterTable1',
         BraggPeakParameterWorkspace='BraggPeakParameterTable1')
 
   # Fit background of the powder diffraction data
-  ProcessBackground(InputWorkspace='PG3_11487', OutputWorkspace='PG3_11487_Background', Options='SelectBackgroundPoints', 
-        LowerBound=10080, UpperBound=72000, SelectionMode='FitGivenDataPoints', 
-        BackgroundPoints='10082,10591,11154,12615,13690,13715,15073,16893,17764,19628,21318,24192,35350,44212,50900,60000,69900,79000', 
+  ProcessBackground(InputWorkspace='PG3_11487', OutputWorkspace='PG3_11487_Background', Options='SelectBackgroundPoints',
+        LowerBound=10080, UpperBound=72000, SelectionMode='FitGivenDataPoints',
+        BackgroundPoints='10082,10591,11154,12615,13690,13715,15073,16893,17764,19628,21318,24192,35350,44212,50900,60000,69900,79000',
         NoiseTolerance=0.10000000000000001, UserBackgroundWorkspace='dummy0', OutputBackgroundParameterWorkspace='dummy1')
 
-  Fit(Function='name=Polynomial,n=6,A0=0.473391,A1=-3.8911e-05,A2=1.7206e-09,A3=-3.21291e-14,A4=9.31264e-20,A5=3.90465e-24,A6=-3.28688e-29', 
-        InputWorkspace='PG3_11487_Background', MaxIterations=1000, OutputStatus='success', 
-        OutputChi2overDoF=2.0078239589764837, Minimizer='Levenberg-MarquardtMD', CreateOutput=True, 
-        Output='PG3_11487_Background', StartX=10080, EndX=72000, 
+  Fit(Function='name=Polynomial,n=6,A0=0.473391,A1=-3.8911e-05,A2=1.7206e-09,A3=-3.21291e-14,A4=9.31264e-20,A5=3.90465e-24,A6=-3.28688e-29',
+        InputWorkspace='PG3_11487_Background', MaxIterations=1000, OutputStatus='success',
+        OutputChi2overDoF=2.0078239589764837, Minimizer='Levenberg-MarquardtMD', CreateOutput=True,
+        Output='PG3_11487_Background', StartX=10080, EndX=72000,
         OutputNormalisedCovarianceMatrix='PG3_11487_Background_NormalisedCovarianceMatrix',
         OutputParameters='PG3_11487_Background_Parameters', OutputWorkspace='PG3_11487_Background_Workspace', Version=1)
 
   # Fit individual peaks in the diffraction pattern
-  FitPowderDiffPeaks(InputWorkspace='PG3_11487', OutputWorkspace='Bank3FittedPeaks', 
-        BraggPeakParameterWorkspace='BraggPeakParameterTable1', 
-        InstrumentParameterWorkspace='Bank3InstrumentParameterTable1', 
-        OutputBraggPeakParameterWorkspace='BraggPeakParameterTable2_0', 
-        OutputBraggPeakParameterDataWorkspace='BraggPeakParameterTable2_P', 
-        OutputZscoreWorkspace='BraggPeakParameterTable2_Zscore', 
-        MinTOF=16866, MaxTOF=70000, UseGivenPeakCentreTOF=False, MinimumPeakHeight=0.29999999999999999, 
+  FitPowderDiffPeaks(InputWorkspace='PG3_11487', OutputWorkspace='Bank3FittedPeaks',
+        BraggPeakParameterWorkspace='BraggPeakParameterTable1',
+        InstrumentParameterWorkspace='Bank3InstrumentParameterTable1',
+        OutputBraggPeakParameterWorkspace='BraggPeakParameterTable2_0',
+        OutputBraggPeakParameterDataWorkspace='BraggPeakParameterTable2_P',
+        OutputZscoreWorkspace='BraggPeakParameterTable2_Zscore',
+        MinTOF=16866, MaxTOF=70000, UseGivenPeakCentreTOF=False, MinimumPeakHeight=0.29999999999999999,
         PeaksCorrelated=True, MinimumHKL='12,12,12', RightMostPeakHKL='1,1,0', RightMostPeakLeftBound=65800, RightMostPeakRightBound=67000)
 
   # Print result
