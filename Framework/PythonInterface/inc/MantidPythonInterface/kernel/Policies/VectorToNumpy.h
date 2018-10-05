@@ -114,8 +114,8 @@ template <typename T> struct VectorToNumpy_Requires_StdVector_Return {};
 } // namespace
 
 /**
- * Implements a return value policy that clones
- * returns a numpy array from a function returning a std::vector by value
+ * Implements a return value policy that
+ * returns a numpy array from a function returning a std::vector by ref or value
  *
  * It is only possible to clone these types since a wrapper would wrap temporary
  */

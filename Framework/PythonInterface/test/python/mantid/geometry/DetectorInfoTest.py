@@ -84,7 +84,10 @@ class DetectorInfoTest(unittest.TestCase):
     
     def test_detectorIds(self):
         info = self._ws.detectorInfo()
-        for a, b in zip(info.detectorIDs(), [1,2]):
+        ids = info.detectorIDs()
+        # Should be read-only
+        self.assertFalse(ids.flags.writeable)
+        for a, b in zip(ids, [1,2]):
             self.assertEquals(a,b)
 
 

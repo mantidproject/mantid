@@ -4,6 +4,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
+#include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/python/class.hpp>
@@ -22,11 +23,17 @@ using Mantid::PythonInterface::DetectorInfoPythonIterator;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
+using namespace Mantid::PythonInterface;
 
+namespace {
 // Helper method to make the python iterator
 DetectorInfoPythonIterator make_pyiterator(const DetectorInfo &detectorInfo) {
   return DetectorInfoPythonIterator(detectorInfo);
 }
+/// return_value_policy for read-only numpy array
+using return_readonly_numpy =
+    return_value_policy<Policies::VectorRefToNumpy<Converters::WrapReadOnly>>;
+} // namespace
 
 // Export DetectorInfo
 void export_DetectorInfo() {
@@ -91,8 +98,6 @@ void export_DetectorInfo() {
       .def("rotation", rotation, (arg("self"), arg("index")),
            "Returns the absolute rotation of the detector where the detector "
            "is identified by 'index'.")
-      .def("detectorIDs", &DetectorInfo::detectorIDs,
-           return_value_policy<
-               Mantid::PythonInterface::Policies::VectorToNumpy>(),
+      .def("detectorIDs", &DetectorInfo::detectorIDs, return_readonly_numpy(),
            "Returns all detector ids sorted by detector index");
 }

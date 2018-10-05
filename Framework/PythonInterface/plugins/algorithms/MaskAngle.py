@@ -59,10 +59,9 @@ class MaskAngle(mantid.api.PythonAlgorithm):
             issues["Workspace"] = "Workspace must have an associated instrument."
         return issues
 
-    def _get_phi(self, det_index, detector_info):
-        pos = detector_info.position(det_index)
+    def _get_phi(self, spectra_pos):
         # see Detector.cpp for phi definition
-        return math.fabs(math.atan2(pos.Y(), pos.X()))
+        return math.fabs(math.atan2(spectra_pos.Y(), spectra_pos.X()))
 
     def PyExec(self):
         ws = self.getProperty("Workspace").value
@@ -72,24 +71,23 @@ class MaskAngle(mantid.api.PythonAlgorithm):
             raise ValueError("MinAngle > MaxAngle, please check angle range for masking")
 
         angle_phi = self.getProperty('Angle').value == 'Phi'
-
-        numspec = ws.getNumberHistograms()
-        spectrumInfo = ws.spectrumInfo()
-        detectorInfo = ws.detectorInfo()
-        det_ids = detectorInfo.detectorIDs()
+        spectrum_info = ws.spectrumInfo()
+        detector_info = ws.detectorInfo()
+        det_ids = detector_info.detectorIDs()
         masked_ids = list()
-        for i in range(numspec):
-            if not spectrumInfo.isMonitor(i):
+        for i, spectrum in enumerate(spectrum_info):
+            if not spectrum.isMonitor:
                 # Get the first detector of spectrum. Ignore time aspects.
-                det_index = spectrumInfo.getSpectrumDefinition(i)[0][0]
                 if angle_phi:
-                    val = self._get_phi(det_index, detectorInfo)
+                    val = self._get_phi(spectrum.position)
                 else:
                     # Two theta
-                    val =detectorInfo.twoTheta(det_index)
+                    val =spectrum.twoTheta
                 if val>= ttmin and val<= ttmax:
-                    detectorInfo.setMasked(det_index, True)
-                    masked_ids.append(det_ids[det_index])
+                    spectrum_info.setMasked(i, True)
+                    detectors = spectrum.spectrumDefinition
+                    for j in range(len(detectors)):
+                        masked_ids.append(det_ids[detectors[j][0]])
 
         if not masked_ids:
             self.log().information("no detectors within this range")
