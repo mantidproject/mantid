@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -614,10 +620,14 @@ std::string CompositeFunction::parameterLocalName(size_t i,
  * Apply the ties.
  */
 void CompositeFunction::applyTies() {
-  for (size_t i = 0; i < nFunctions(); i++) {
-    getFunction(i)->applyTies();
+  if (hasOrderedTies()) {
+    applyOrderedTies();
+  } else {
+    for (size_t i = 0; i < nFunctions(); i++) {
+      getFunction(i)->applyTies();
+    }
+    IFunction::applyTies();
   }
-  IFunction::applyTies();
 }
 
 /**
