@@ -42,7 +42,19 @@ algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
   return alg;
 }
 
-// Set up algorithm with TimeOffset applied
+// Set up algorithm without any optional properties
+// i.e. just the input workspace and group name.
+IAlgorithm_sptr
+setUpAlgorithmWithoutOptionalProperties(WorkspaceGroup_sptr ws,
+                                        const std::string &name) {
+  setUpADSWithWorkspace setup(ws);
+  IAlgorithm_sptr alg =
+      algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  alg->setProperty("GroupName", name);
+  return alg;
+}
+
+// Set up algorithm with GroupName applied
 IAlgorithm_sptr setUpAlgorithmWithGroupName(WorkspaceGroup_sptr ws,
                                             const std::string &name) {
   setUpADSWithWorkspace setup(ws);
@@ -65,40 +77,41 @@ setUpAlgorithmWithGroupNameAndDetectors(WorkspaceGroup_sptr ws,
   return alg;
 }
 
+// Retrieve the output workspace from an executed algorithm
 MatrixWorkspace_sptr getOutputWorkspace(IAlgorithm_sptr alg) {
-	Workspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-	auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-	return wsOut;
+  Workspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+  auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  return wsOut;
 }
 
 } // namespace
 
 class MuonGroupingCountsTest : public CxxTest::TestSuite {
 public:
-  // WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  MuonGroupingCountsTest() { Mantid::API::FrameworkManager::Instance(); }
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
   static MuonGroupingCountsTest *createSuite() {
     return new MuonGroupingCountsTest();
   }
   static void destroySuite(MuonGroupingCountsTest *suite) { delete suite; }
 
-  void test_algorithm_initializes() {
+  // --------------------------------------------------------------------------
+  // Initialization / Execution
+  // --------------------------------------------------------------------------
+
+  void test_that_algorithm_initializes() {
     MuonGroupingCounts alg;
+
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
 
-  // void test_that_algorithm_executes_with_no_optional_properties_set() {
-  //  auto ws = createCountsWorkspace(5, 10, 0.0);
-  //  setUpADSWithWorkspace setup(ws);
-  //  IAlgorithm_sptr alg =
-  //      algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  void test_that_algorithm_executes_with_no_optional_properties_set() {
 
-  //  TS_ASSERT_THROWS_NOTHING(alg->execute());
-  //  TS_ASSERT(alg->isExecuted())
-  //}
+    auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "group1");
+    auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group1");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted())
+  }
 
   // --------------------------------------------------------------------------
   // Validation : Group Names and Detector Grouping
@@ -174,38 +187,40 @@ public:
   // --------------------------------------------------------------------------
 
   void test_that_at_least_one_period_must_be_specified() {
-	  auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-	  std::vector<int> detectors = { 1,2 };
-	  auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
+    auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
+    std::vector<int> detectors = {1, 2};
+    auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
 
-	  std::vector<int> summedPeriods = {  };
-	  std::vector<int> subtractedPeriods = {  };
-	  alg->setProperty("SummedPeriods", summedPeriods);
-	  alg->setProperty("SubtractedPeriods", subtractedPeriods);
+    std::vector<int> summedPeriods = {};
+    std::vector<int> subtractedPeriods = {};
+    alg->setProperty("SummedPeriods", summedPeriods);
+    alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
-	  TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-  void test_that_supplying_too_many_periods_to_SummedPeriods_throws_on_execute() {
-	  auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-	  std::vector<int> detectors = { 1, 2, 3 };
-	  auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
+  void
+  test_that_supplying_too_many_periods_to_SummedPeriods_throws_on_execute() {
+    auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
+    std::vector<int> detectors = {1, 2, 3};
+    auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
 
-	  std::vector<int> summedPeriods = { 3 };
-	  alg->setProperty("SummedPeriods", summedPeriods);
+    std::vector<int> summedPeriods = {3};
+    alg->setProperty("SummedPeriods", summedPeriods);
 
-	  TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-  void test_that_supplying_too_many_periods_to_SubtractedPeriods_throws_on_execute() {
-	  auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-	  std::vector<int> detectors = { 1, 2, 3 };
-	  auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
+  void
+  test_that_supplying_too_many_periods_to_SubtractedPeriods_throws_on_execute() {
+    auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
+    std::vector<int> detectors = {1, 2, 3};
+    auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
 
-	  std::vector<int> subtractedPeriods = { 3 };
-	  alg->setProperty("SubtractedPeriods", subtractedPeriods);
+    std::vector<int> subtractedPeriods = {3};
+    alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
-	  TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   // --------------------------------------------------------------------------
@@ -213,15 +228,15 @@ public:
   // --------------------------------------------------------------------------
 
   void test_that_single_period_data_combines_detectors_correctly() {
-	// Spec 1 y-vals : 1,  2,  3,  4,  5,  6,  7,  8,  9,  10
-	// Spec 2 y-vals : 11, 12, 13, 14, 15, 16 ,17, 18, 19, 20
-	// Spec 3 y-vals : 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+    // Spec 1 y-vals : 1,  2,  3,  4,  5,  6,  7,  8,  9,  10
+    // Spec 2 y-vals : 11, 12, 13, 14, 15, 16 ,17, 18, 19, 20
+    // Spec 3 y-vals : 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
     auto ws = createMultiPeriodWorkspaceGroup(1, 3, 10, "group");
     std::vector<int> detectors = {1, 2, 3};
     auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
     alg->execute();
 
-	auto wsOut = getOutputWorkspace(alg);
+    auto wsOut = getOutputWorkspace(alg);
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
@@ -237,65 +252,64 @@ public:
   }
 
   void test_that_summing_periods_combines_detectors_correctly() {
-	  // Period 1 :
-	  // Spec 1 y-vals : 1,  2,  3,  4,  5,  6,  7,  8,  9,  10
-	  // Spec 2 y-vals : 11, 12, 13, 14, 15, 16 ,17, 18, 19, 20
-	  // Period 2 :
-	  // Spec 1 y-vals : 2,  3,  4,  5,  6,  7,  8,  9,  10, 11
-	  // Spec 2 y-vals : 12, 13, 14, 15, 16, 17 ,18, 19, 20, 21
-	  auto ws = createMultiPeriodWorkspaceGroup(2, 2, 10, "group");
-	  std::vector<int> detectors = { 1, 2 };
-	  std::vector<int> summedPeriods = { 1, 2 };
-	  auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
-	  alg->setProperty("SummedPeriods", summedPeriods);
-	  alg->execute();
+    // Period 1 :
+    // Spec 1 y-vals : 1,  2,  3,  4,  5,  6,  7,  8,  9,  10
+    // Spec 2 y-vals : 11, 12, 13, 14, 15, 16 ,17, 18, 19, 20
+    // Period 2 :
+    // Spec 1 y-vals : 2,  3,  4,  5,  6,  7,  8,  9,  10, 11
+    // Spec 2 y-vals : 12, 13, 14, 15, 16, 17 ,18, 19, 20, 21
+    auto ws = createMultiPeriodWorkspaceGroup(2, 2, 10, "group");
+    std::vector<int> detectors = {1, 2};
+    std::vector<int> summedPeriods = {1, 2};
+    auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
+    alg->setProperty("SummedPeriods", summedPeriods);
+    alg->execute();
 
-	  auto wsOut = getOutputWorkspace(alg);
+    auto wsOut = getOutputWorkspace(alg);
 
-	  TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-	  TS_ASSERT_DELTA(wsOut->readY(0)[0], 26.000, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[4], 42.000, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[9], 62.000, 0.001);
-	  // Quadrature errors : Sqrt(4 * 0.005^2 )
-	  TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0100, 0.0001);
-	  TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0100, 0.0001);
-	  TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 26.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 42.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], 62.000, 0.001);
+    // Quadrature errors : Sqrt(4 * 0.005^2 )
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0100, 0.0001);
   }
 
   void test_that_subtracting_periods_combines_detectors_correctly() {
-	  // Period 1 :
-	  // Spec 1 y-vals : 1,  2,  3,  4,  5,  6,  7,  8,  9,  10
-	  // Spec 2 y-vals : 11, 12, 13, 14, 15, 16 ,17, 18, 19, 20
-	  // Period 2 :
-	  // Spec 1 y-vals : 2,  3,  4,  5,  6,  7,  8,  9,  10, 11
-	  // Spec 2 y-vals : 12, 13, 14, 15, 16, 17 ,18, 19, 20, 21
-	  auto ws = createMultiPeriodWorkspaceGroup(2, 2, 10, "group");
-	  std::vector<int> detectors = { 1, 2 };
-	  std::vector<int> summedPeriods = { 2 };
-	  std::vector<int> subtractedPeriods = { 1 };
-	  auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
-	  alg->setProperty("SummedPeriods", summedPeriods);
-	  alg->setProperty("SubtractedPeriods", subtractedPeriods);
-	  alg->execute();
+    // Period 1 :
+    // Spec 1 y-vals : 1,  2,  3,  4,  5,  6,  7,  8,  9,  10
+    // Spec 2 y-vals : 11, 12, 13, 14, 15, 16 ,17, 18, 19, 20
+    // Period 2 :
+    // Spec 1 y-vals : 2,  3,  4,  5,  6,  7,  8,  9,  10, 11
+    // Spec 2 y-vals : 12, 13, 14, 15, 16, 17 ,18, 19, 20, 21
+    auto ws = createMultiPeriodWorkspaceGroup(2, 2, 10, "group");
+    std::vector<int> detectors = {1, 2};
+    std::vector<int> summedPeriods = {2};
+    std::vector<int> subtractedPeriods = {1};
+    auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group", detectors);
+    alg->setProperty("SummedPeriods", summedPeriods);
+    alg->setProperty("SubtractedPeriods", subtractedPeriods);
+    alg->execute();
 
-	  auto wsOut = getOutputWorkspace(alg);
+    auto wsOut = getOutputWorkspace(alg);
 
-	  TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-	  TS_ASSERT_DELTA(wsOut->readY(0)[0], 2.000, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[4], 2.000, 0.001);
-	  TS_ASSERT_DELTA(wsOut->readY(0)[9], 2.000, 0.001);
-	  // Quadrature errors : Sqrt(4 * 0.005^2 )
-	  TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0100, 0.0001);
-	  TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0100, 0.0001);
-	  TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 2.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], 2.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], 2.000, 0.001);
+    // Quadrature errors : Sqrt(4 * 0.005^2 )
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.0100, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0100, 0.0001);
   }
-
 };
 
 #endif /* MANTID_MUON_MUONGROUPINGCOUNTSTEST_H_ */
