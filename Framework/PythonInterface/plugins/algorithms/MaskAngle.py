@@ -60,7 +60,11 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         return issues
 
     def _get_phi(self, spectra_pos):
-        # see Detector.cpp for phi definition
+        '''
+        The implementation here assumes that z is the beam direction.
+        That assumption is not universally true, it depends on the geometry configuration.
+        This returns the phi spherical coordinate value
+        '''
         return math.fabs(math.atan2(spectra_pos.Y(), spectra_pos.X()))
 
     def PyExec(self):
