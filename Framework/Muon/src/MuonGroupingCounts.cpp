@@ -17,6 +17,15 @@ using namespace Mantid::HistogramData;
 
 namespace {
 
+bool checkPeriodInWorkspaceGroup(const int &period,
+                                 WorkspaceGroup_sptr workspace) {
+  return period <= workspace->getNumberOfEntries();
+}
+
+bool is_alnum_underscore(char c) {
+  return (isalpha(c) || isdigit(c) || (c == '_'));
+}
+
 MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
                                     const std::vector<int> &detectorIDs) {
 
@@ -52,6 +61,7 @@ DECLARE_ALGORITHM(MuonGroupingCounts)
 
 void MuonGroupingCounts::init() {
   std::string emptyString("");
+  std::vector<int> defaultGrouping = {1};
 
   declareProperty(
       Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
@@ -68,13 +78,16 @@ void MuonGroupingCounts::init() {
                   "The name of the group. Must contain at least one "
                   "alphanumeric character.",
                   Direction::Input);
-  declareProperty(make_unique<ArrayProperty<int>>("Grouping", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<int>>(
+                      "Grouping", defaultGrouping,
+                      IValidator_sptr(new NullValidator), Direction::Input),
                   "The grouping of detectors, comma separated list of detector "
                   "IDs or hyphenated ranges of IDs.");
 
-  declareProperty(
-      make_unique<ArrayProperty<int>>("SummedPeriods", Direction::Input),
-      "A list of periods to sum in multiperiod data.");
+  declareProperty(make_unique<ArrayProperty<int>>(
+                      "SummedPeriods", defaultGrouping,
+                      IValidator_sptr(new NullValidator), Direction::Input),
+                  "A list of periods to sum in multiperiod data.");
   declareProperty(
       make_unique<ArrayProperty<int>>("SubtractedPeriods", Direction::Input),
       "A list of periods to subtract in multiperiod data.");
@@ -88,6 +101,63 @@ void MuonGroupingCounts::init() {
   std::string periodGrp("Multi-period Data");
   setPropertyGroup("SummedPeriods", periodGrp);
   setPropertyGroup("SubtractedPeriods", periodGrp);
+}
+
+std::map<std::string, std::string> MuonGroupingCounts::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  std::string groupName = this->getProperty("GroupName");
+  if (groupName.empty()) {
+    errors["GroupName"] = "Group name must be specified.";
+  }
+
+  if (!std::all_of(std::begin(groupName), std::end(groupName),
+                   is_alnum_underscore)) {
+    errors["GroupName"] =
+        "The group name must contain alphnumeric characters and _ only.";
+  }
+
+  WorkspaceGroup_sptr inputWS = getProperty("InputWorkspace");
+  std::vector<int> summedPeriods = getProperty("SummedPeriods");
+  std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
+
+  if (summedPeriods.empty() && subtractedPeriods.empty()) {
+    errors["SummedPeriods"] = "At least one period must be specified";
+  }
+
+  if (!summedPeriods.empty()) {
+    const int highestSummedPeriod =
+        *std::max_element(summedPeriods.begin(), summedPeriods.end());
+    if (!checkPeriodInWorkspaceGroup(highestSummedPeriod, inputWS)) {
+      errors["SummedPeriods"] = "Requested period (" +
+                                std::to_string(highestSummedPeriod) +
+                                ") exceeds periods in data";
+    }
+    if (std::any_of(summedPeriods.begin(), summedPeriods.end(),
+                    [](const int &i) { return i < 0; })) {
+      errors["SummedPeriods"] = "Requested periods must be greater that 0.";
+    }
+  }
+
+  if (!subtractedPeriods.empty()) {
+    const int highestSubtractedPeriod =
+        *std::max_element(subtractedPeriods.begin(), subtractedPeriods.end());
+    if (!checkPeriodInWorkspaceGroup(highestSubtractedPeriod, inputWS)) {
+      errors["SubtractedPeriods"] = "Requested period (" +
+                                    std::to_string(highestSubtractedPeriod) +
+                                    ") exceeds periods in data";
+    }
+    if (std::any_of(subtractedPeriods.begin(), subtractedPeriods.end(),
+                    [](const int &i) { return i < 0; })) {
+      errors["SubtractedPeriods"] = "Requested periods must be greater that 0.";
+    }
+  }
+
+  if (inputWS->getNumberOfEntries() < 1) {
+    errors["InputWorkspace"] = "WorkspaceGroup contains no periods.";
+  }
+
+  return errors;
 }
 
 void MuonGroupingCounts::exec() {
