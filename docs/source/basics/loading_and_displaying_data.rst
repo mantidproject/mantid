@@ -43,7 +43,7 @@ Multiple Data Files
 ###################
 
 You can load multiple files into mantid with a single Load command, either keeping each workspace separate, 
-or summing the data into a single workspace:
+or summing the data into a single workspace, for more information see :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`.
 
 * `<name>,<name>` : load a list
 * `<name>+<name>`: sum the data in the files
