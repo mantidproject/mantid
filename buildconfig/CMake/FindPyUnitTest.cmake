@@ -25,7 +25,7 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   # Environment
   if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};$ENV{PYTHONPATH} )
-    # cmake list separator and Windows environment seprator are the same so escape the cmake one
+    # cmake list separator and Windows environment separator are the same so escape the cmake one
     string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
   else()
     set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:$ENV{PYTHONPATH} )

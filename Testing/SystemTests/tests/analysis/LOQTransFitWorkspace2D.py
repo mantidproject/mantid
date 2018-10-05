@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 
 from __future__ import (absolute_import, division, print_function)
@@ -23,7 +29,7 @@ class LOQTransFitWorkspace2D(stresstesting.MantidStressTest):
         #run the reduction
         WavRangeReduction(3, 4, False, '_suff')
 
-        #save the results, we'll use them later, remove the other tempory workspaces
+        #save the results, we'll use them later, remove the other temporary workspaces
         RenameWorkspace(InputWorkspace='54435_trans_sample_3.0_8.0',OutputWorkspace= 'samp')
         RenameWorkspace(InputWorkspace='54434_trans_can_3.0_8.0',OutputWorkspace= 'can')
         DeleteWorkspace(Workspace='54435_trans_sample_3.0_8.0_unfitted')

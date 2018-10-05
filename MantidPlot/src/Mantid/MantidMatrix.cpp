@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMatrix.h"
 #include "../ApplicationWindow.h"
 #include "../Graph3D.h"
@@ -41,7 +47,7 @@ Logger g_log("MantidMatrix");
 
 namespace {
 /**
- * Converts an interger value to the corrsponding enum
+ * Converts an integer value to the corrsponding enum
  * @param i: the integer to check
  * @returns the corresponding model type
  */
@@ -133,7 +139,7 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
 
   setWidget(m_tabs);
   // for synchronizing the views
-  // index is zero for the defualt view
+  // index is zero for the default view
   m_PrevIndex = 0;
   // install event filter on  these objects
   m_table_viewY->installEventFilter(this);
@@ -445,7 +451,7 @@ void MantidMatrix::copySelection() {
 }
 
 /**  Returns minimum and maximum values in the matrix.
-If setRange(...) has not been called it returns the true smalles ang largest
+If setRange(...) has not been called it returns the true smallest and largest
 Y-values in the matrix,
 otherwise the values set with setRange(...) are returned. These are needed in
 plotGraph2D to set
