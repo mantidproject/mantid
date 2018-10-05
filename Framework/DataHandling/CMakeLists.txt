@@ -418,6 +418,7 @@ set ( TEST_FILES
 	LoadDetectorInfoTest.h
 	LoadDetectorsGroupingFileTest.h
 	LoadDiffCalTest.h
+        LoadDNSEventTest.h
 	LoadDspacemapTest.h
 	LoadEmptyInstrumentTest.h
 	LoadEventNexusIndexSetupTest.h
