@@ -14,6 +14,7 @@ from sans.common.enums import (SANSFacility, DataType, FitModeForMerge)
 from sans.algorithm_detail.bundles import MergeBundle
 import mantid.simpleapi as mantid_api
 
+
 class Merger(with_metaclass(ABCMeta, object)):
     """ Merger interface"""
 
@@ -121,8 +122,8 @@ class ISIS1DMerger(Merger):
         scale_from_alg = stitch_alg.getProperty("OutScaleFactor").value
         merged_workspace = stitch_alg.getProperty("OutputWorkspace").value
         scaled_HAB_workspace = self.calculate_scaled_hab_output(shift_from_alg, scale_from_alg,
-                                                           sample_count_secondary, sample_norm_secondary,
-                                                           can_count_secondary, can_norm_secondary)
+                                                                sample_count_secondary, sample_norm_secondary,
+                                                                can_count_secondary, can_norm_secondary)
 
         # Return a merge bundle with the merged workspace and the fitted scale and shift factor (they are good
         # diagnostic tools which are desired by the instrument scientists.
