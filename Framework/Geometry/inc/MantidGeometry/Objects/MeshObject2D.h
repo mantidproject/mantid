@@ -47,16 +47,16 @@ class MANTID_GEOMETRY_DLL MeshObject2D : public IObject {
 public:
   /// Constructor
   MeshObject2D(const std::vector<uint16_t> &faces,
-               const std::vector<Mantid::Kernel::V3D> &vertices,
+               const std::vector<Kernel::V3D> &vertices,
                const Kernel::Material &material);
   /// Constructor
   MeshObject2D(std::vector<uint16_t> &&faces,
-               std::vector<Mantid::Kernel::V3D> &&vertices,
+               std::vector<Kernel::V3D> &&vertices,
                const Kernel::Material &&material);
 
   double volume() const override;
 
-  static bool pointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices);
+  static bool pointsCoplanar(const std::vector<Kernel::V3D> &vertices);
 
   bool hasValidShape() const override;
   double distanceToPlane(const Kernel::V3D &point) const;

@@ -65,11 +65,10 @@ class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
   /// Constructor
   MeshObject(const std::vector<uint16_t> &faces,
-             const std::vector<Mantid::Kernel::V3D> &vertices,
+             const std::vector<Kernel::V3D> &vertices,
              const Kernel::Material &material);
   /// Constructor
-  MeshObject(std::vector<uint16_t> &&faces,
-             std::vector<Mantid::Kernel::V3D> &&vertices,
+  MeshObject(std::vector<uint16_t> &&faces, std::vector<Kernel::V3D> &&vertices,
              const Kernel::Material &&material);
 
   /// Copy constructor

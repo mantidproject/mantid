@@ -13,7 +13,7 @@ namespace Mantid {
 namespace Geometry {
 
 namespace CoplanarChecks {
-bool sufficientPoints(const std::vector<Mantid::Kernel::V3D> &vertices) {
+bool sufficientPoints(const std::vector<Kernel::V3D> &vertices) {
   return vertices.size() >= 3; // Not a plane with < 3 points
 }
 
@@ -74,8 +74,7 @@ bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
  * @param vertices : all vertices to consider
  * @return : normal to surface formed by points
  */
-Kernel::V3D
-validatePointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
+Kernel::V3D validatePointsCoplanar(const std::vector<Kernel::V3D> &vertices) {
   if (!sufficientPoints(vertices))
     throw std::invalid_argument("Insufficient vertices to create a plane");
 
@@ -101,12 +100,11 @@ const std::string MeshObject2D::Id = "MeshObject2D";
  * @param vertices : All vertices to consider
  * @return : Return True only if all coplanar
  */
-bool MeshObject2D::pointsCoplanar(
-    const std::vector<Mantid::Kernel::V3D> &vertices) {
+bool MeshObject2D::pointsCoplanar(const std::vector<Kernel::V3D> &vertices) {
   if (!CoplanarChecks::sufficientPoints(vertices))
     return false;
 
-  Mantid::Kernel::V3D normal = CoplanarChecks::surfaceNormal(vertices);
+  Kernel::V3D normal = CoplanarChecks::surfaceNormal(vertices);
   // Check that a valid normal was found amongst collection of vertices
   if (normal.norm2() == 0) {
     // If all points are colinear. Not a plane.
