@@ -22,5 +22,7 @@ void export_SpectrumInfoItem() {
       .add_property("spectrumDefinition",
                     make_function(&SpectrumInfoItem::spectrumDefinition,
                                   return_internal_reference<>()))
-      .add_property("position", &SpectrumInfoItem::position);
+      .add_property("position", &SpectrumInfoItem::position)
+      .def("setMasked", &SpectrumInfoItem::setMasked,
+           (arg("self"), arg("masked")), "Set the mask flag of the spectrum");
 }

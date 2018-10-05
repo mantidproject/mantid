@@ -184,12 +184,12 @@ SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
 }
 
 // Begin method for iterator
-SpectrumInfoIterator SpectrumInfo::begin() const {
+SpectrumInfoIterator SpectrumInfo::begin() {
   return SpectrumInfoIterator(*this, 0);
 }
 
 // End method for iterator
-SpectrumInfoIterator SpectrumInfo::end() const {
+SpectrumInfoIterator SpectrumInfo::end() {
   return SpectrumInfoIterator(*this, size());
 }
 

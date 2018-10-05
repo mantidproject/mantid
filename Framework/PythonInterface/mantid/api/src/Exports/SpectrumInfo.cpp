@@ -17,7 +17,7 @@ using Mantid::SpectrumDefinition;
 using namespace boost::python;
 
 // Helper method to make the python iterator
-SpectrumInfoPythonIterator make_pyiterator(const SpectrumInfo &spectrumInfo) {
+SpectrumInfoPythonIterator make_pyiterator(SpectrumInfo &spectrumInfo) {
   return SpectrumInfoPythonIterator(spectrumInfo);
 }
 

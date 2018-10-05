@@ -99,8 +99,8 @@ public:
   Kernel::V3D samplePosition() const;
   double l1() const;
 
-  SpectrumInfoIterator begin() const;
-  SpectrumInfoIterator end() const;
+  SpectrumInfoIterator begin();
+  SpectrumInfoIterator end();
 
   friend class ExperimentInfo;
 

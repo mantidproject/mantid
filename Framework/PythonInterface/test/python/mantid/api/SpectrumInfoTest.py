@@ -135,6 +135,16 @@ class SpectrumInfoTest(unittest.TestCase):
         for item in it:
             self.assertFalse(item.isMasked)
 
+    def test_iterator_for_setting_masked(self):
+        info = self._ws.spectrumInfo()
+        # nothing should be masked 
+        it = iter(info)
+        next(it) # skip first as detectors cleared
+        for item in it:
+            # mask and check
+            item.setMasked(True)
+            self.assertTrue(item.isMasked)
+
     def test_iteration_for_position(self):
         info = self._ws.spectrumInfo()
         lastY = None

@@ -57,7 +57,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 class SpectrumInfoPythonIterator {
 public:
-  explicit SpectrumInfoPythonIterator(const SpectrumInfo &spectrumInfo)
+  explicit SpectrumInfoPythonIterator(SpectrumInfo &spectrumInfo)
       : m_begin(spectrumInfo.begin()), m_end(spectrumInfo.end()),
         m_firstOrDone(true) {}
 

@@ -48,7 +48,7 @@ class MANTID_API_DLL SpectrumInfoIterator
                                     boost::random_access_traversal_tag> {
 
 public:
-  SpectrumInfoIterator(const SpectrumInfo &spectrumInfo, const size_t index)
+  SpectrumInfoIterator(SpectrumInfo &spectrumInfo, const size_t index)
       : m_item(spectrumInfo, index) {}
 
 private:

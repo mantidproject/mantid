@@ -59,6 +59,10 @@ public:
 
   bool isMasked() const { return m_spectrumInfo->isMasked(m_index); }
 
+  void setMasked(bool masked) {
+    return m_spectrumInfo->setMasked(m_index, masked);
+  }
+
   double twoTheta() const { return m_spectrumInfo->twoTheta(m_index); }
 
   double signedTwoTheta() const {
@@ -84,12 +88,12 @@ private:
   friend class SpectrumInfoIterator;
 
   // Private constructor, can only be created by SpectrumInfoIterator
-  SpectrumInfoItem(const SpectrumInfo &spectrumInfo, const size_t index)
+  SpectrumInfoItem(SpectrumInfo &spectrumInfo, const size_t index)
       : m_spectrumInfo(&spectrumInfo), m_index(index) {}
 
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.
-  const SpectrumInfo *m_spectrumInfo;
+  SpectrumInfo *m_spectrumInfo;
   size_t m_index;
 };
 

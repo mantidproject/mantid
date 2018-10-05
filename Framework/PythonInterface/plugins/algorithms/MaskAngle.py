@@ -75,7 +75,7 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         detector_info = ws.detectorInfo()
         det_ids = detector_info.detectorIDs()
         masked_ids = list()
-        for i, spectrum in enumerate(spectrum_info):
+        for spectrum in spectrum_info:
             if not spectrum.isMonitor:
                 # Get the first detector of spectrum. Ignore time aspects.
                 if angle_phi:
@@ -84,7 +84,7 @@ class MaskAngle(mantid.api.PythonAlgorithm):
                     # Two theta
                     val =spectrum.twoTheta
                 if val>= ttmin and val<= ttmax:
-                    spectrum_info.setMasked(i, True)
+                    spectrum.setMasked(True)
                     detectors = spectrum.spectrumDefinition
                     for j in range(len(detectors)):
                         masked_ids.append(det_ids[detectors[j][0]])
