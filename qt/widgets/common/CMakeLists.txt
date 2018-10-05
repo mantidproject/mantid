@@ -171,6 +171,7 @@ set ( QT5_UI_FILES
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
   inc/MantidQtWidgets/Common/RenameParDialog.ui
   inc/MantidQtWidgets/Common/SelectFunctionDialog.ui
+  inc/MantidQtWidgets/Common/UserFunctionDialog.ui
 )
 
 set ( SRC_FILES
