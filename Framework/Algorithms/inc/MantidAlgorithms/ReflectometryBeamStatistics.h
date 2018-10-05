@@ -15,7 +15,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** Calculates statistical quantities of a reflectometry workspace.
-*/
+ */
 class MANTID_ALGORITHMS_DLL ReflectometryBeamStatistics
     : public API::Algorithm {
 public:
