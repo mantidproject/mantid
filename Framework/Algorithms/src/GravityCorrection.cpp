@@ -332,7 +332,7 @@ double GravityCorrection::finalAngle(const double k, size_t i,
   double beamShift =
       (k * (pow(m_beam1, 2.) - pow(m_beam2, 2.)) + (beamDiff * tanAngle)) /
       (2 * k * beamDiff);
-  const double up2 = -this->sgn(this->m_ws->spectrumInfo().signedTwoTheta(i)) *
+  const double up2 = this->sgn(this->m_ws->spectrumInfo().signedTwoTheta(i)) *
                      m_beam2 * tanAngle;
   double upShift = up2 + k * pow(m_beam2 - beamShift, 2.);
   // calculate final angle
@@ -499,13 +499,24 @@ size_t GravityCorrection::spectrumNumber(const double angle,
    *                          _|_
    *                           |
    */
+
   ++it;
-  double tol = .5 * ((++it)->first - it->first);
-  --it;
+  double tol = (.5 * ((*(++it)).first - (*it).first));
   // determine new final angle
   while (this->m_smallerThan((*(++it)).first + tol, angle) &&
          (it != this->m_finalAngles.end()))
     n = it->second;
+  /*
+  // alternative code
+  for (; it != this->m_finalAngles.end(); ++it){
+     if (it->first < angle){
+         n = it->second;
+         continue;
+     }
+     else
+         break;
+  }
+  */
   return n;
 }
 
@@ -539,7 +550,7 @@ void GravityCorrection::exec() {
   const auto &spectrumInfo = this->m_ws->spectrumInfo();
   this->m_progress->report("Setup OutputWorkspace ...");
   MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
-  outWS = this->m_ws->clone();
+  outWS = DataObjects::create<MatrixWorkspace>(*this->m_ws);
   outWS->setTitle(this->m_ws->getTitle() + " cancelled gravitation ");
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (spectrumInfo.isMonitor(i)) {
@@ -604,7 +615,7 @@ void GravityCorrection::exec() {
 
       double v{((spectrumInfo.l1() + spectrumInfo.l2(i)) / *tofit) *
                1.e6};                         // unit is m/s
-      double k = g * 800 / (2. * pow(v, 2.)); // unit is 1/m
+      double k = g / (2. * pow(v, 2.)); // unit is 1/m
       double angle =
           this->finalAngle(k, i, tanAngle, beamDiff); // unit is radians
       if (cos(angle) == 0.) {
