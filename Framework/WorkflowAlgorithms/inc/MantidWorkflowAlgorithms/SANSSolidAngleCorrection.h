@@ -14,7 +14,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 
 namespace Mantid {
-namespace Algorithms {
+namespace WorkflowAlgorithms {
 /**
 
     Performs a solid angle correction on a 2D SANS data set to correct
@@ -67,10 +67,11 @@ private:
   void exec() override;
   void execEvent();
 
-  double calculateSolidAngleCorrection(int, const API::SpectrumInfo &);
+  double calculateSolidAngleCorrection(int histogramIndex,
+                                       const API::SpectrumInfo &spectrumInfo);
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SANSSOLIDANGLECORRECTION_H_*/
