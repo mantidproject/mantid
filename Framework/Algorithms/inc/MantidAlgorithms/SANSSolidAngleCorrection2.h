@@ -45,7 +45,9 @@ namespace Algorithms {
 class DLLExport SANSSolidAngleCorrection2 : public API::Algorithm {
 public:
   /// Algorithm's name
-  const std::string name() const override { return "SANSSolidAngleCorrection2"; }
+  const std::string name() const override {
+    return "SANSSolidAngleCorrection2";
+  }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Performs solid angle correction on SANS 2D data.";
@@ -71,7 +73,7 @@ private:
   double calculateSolidAngleCorrection(int, const API::SpectrumInfo &);
 };
 
-} // namespace WorkflowAlgorithms
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SANSSOLIDANGLECORRECTION2_H_*/
