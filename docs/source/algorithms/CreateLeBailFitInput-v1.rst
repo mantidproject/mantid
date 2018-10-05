@@ -41,7 +41,7 @@ How to use algorithm with other algorithms
 
 This algorithm is designed to work with other algorithms to do Le Bail
 fit. The introduction can be found in the wiki page of `Le Bail
-Fit <Le Bail Fit>`__.
+Fit <http://www.mantidproject.org/Le_Bail_Fit>`__.
 
 Usage
 -----
