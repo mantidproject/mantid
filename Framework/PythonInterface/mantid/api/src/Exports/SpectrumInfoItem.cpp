@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SpectrumInfoItem.h"
 #include "MantidKernel/V3D.h"
 
@@ -12,7 +18,7 @@ using namespace boost::python;
 void export_SpectrumInfoItem() {
 
   // Export to Python
-  class_<SpectrumInfoItem, boost::noncopyable>("SpectrumInfoItem", no_init)
+  class_<SpectrumInfoItem>("SpectrumInfoItem", no_init)
       .add_property("isMonitor", &SpectrumInfoItem::isMonitor)
       .add_property("isMasked", &SpectrumInfoItem::isMasked)
       .add_property("twoTheta", &SpectrumInfoItem::twoTheta)
