@@ -91,8 +91,6 @@ using Slicing =
                    UniformSlicingByNumberOfSlices, CustomSlicingByList,
                    SlicingByEventLog>;
 
-MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &operator<<(std::ostream &os,
-                                                        Slicing const &slicing);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool isInvalid(Slicing const &slicing);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool isValid(Slicing const &slicing);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool isNoSlicing(Slicing const &slicing);

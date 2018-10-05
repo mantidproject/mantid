@@ -109,22 +109,5 @@ std::ostream &operator<<(std::ostream &os, SlicingByEventLog const &slicing) {
   }
   return os;
 }
-
-class PrintSlicingVisitor : boost::static_visitor<std::ostream &> {
-public:
-  explicit PrintSlicingVisitor(std::ostream &os) : m_os(os) {}
-
-  template <typename T> std::ostream &operator()(T const &slicing) const {
-    return (m_os << slicing);
-  }
-
-private:
-  std::ostream &m_os;
-};
-
-std::ostream &operator<<(std::ostream &os, Slicing const &slicing) {
-  os << "Slicing: ";
-  return boost::apply_visitor(PrintSlicingVisitor(os), slicing);
-}
 } // namespace CustomInterfaces
 } // namespace MantidQt
