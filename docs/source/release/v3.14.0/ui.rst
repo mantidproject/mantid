@@ -41,6 +41,7 @@ Bugfixes
 - Workspaces with a '#' in their name will no longer cause issues in the loading of a recovered project
 - Project Recovery will actually recover fully cases where multiple workspaces were passed as a list to an algorithm (Fixes a known bug with GroupWorkspaces as well)
 - Project Recovery will now run normally when you select no or the recovery fails when recovering from a ungraceful exit.
+- When autosaving or saving a recovery checkpoint with the Instrument View open the results log would be filled with excess logging and no longer does this.
 
 MantidPlot
 ----------

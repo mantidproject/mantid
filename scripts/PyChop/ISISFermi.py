@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, bad-continuation, invalid-name, unused-variable
 # pylint: disable=attribute-defined-outside-init, old-style-class, no-value-for-parameter
 # pylint: disable=too-many-locals, too-many-arguments
@@ -236,7 +242,7 @@ class ISISFermi:
 
         Inputs:
             ei - incident energy in meV [default: preset incident energy]
-            omega - chopper frequncy in Hz  [default: preset frequency]
+            omega - chopper frequency in Hz  [default: preset frequency]
             etrans - list of numpy array of energy transfers to calculate for (meV) [default: 0]
 
         Output:
@@ -343,7 +349,7 @@ class ISISFermi:
         Inputs:
             etrans - list of numpy array of energy transfers to calculate for (meV) [default: linspace(0.05Ei, 0.95Ei, 19)]
             ei - incident energy in meV [default: preset energy]
-            omega - chopper frequncy in Hz  [default: preset frequency]
+            omega - chopper frequency in Hz  [default: preset frequency]
 
         Output:
             van - the incoherent (Vanadium) energy width at etrans in meV

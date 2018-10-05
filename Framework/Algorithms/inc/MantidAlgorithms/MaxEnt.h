@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MAXENT_H_
 #define MANTID_ALGORITHMS_MAXENT_H_
 
@@ -14,27 +20,6 @@ namespace Algorithms {
   the article by J. Skilling and R. K. Bryan: "Maximum entropy image
   reconstruction: general algorithm", Mon. Not. R. astr. Soc. (1984) 211,
   111-124
-
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport MaxEnt : public API::Algorithm {
@@ -63,7 +48,8 @@ private:
   void exec() override;
   /// Returns spectrum 'spec' as a complex vector
   std::vector<double> toComplex(API::MatrixWorkspace_const_sptr &inWS,
-                                size_t spec, bool errors);
+                                size_t spec, bool errors,
+                                bool concatenatedSpectra);
   // Calculates chi-square by solving the matrix equation A*x = b
   double calculateChi(const QuadraticCoefficients &coeffs, double a,
                       std::vector<double> &beta);
@@ -87,7 +73,8 @@ private:
   /// Populates the output workspace containing the reconstructed data
   void populateDataWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec,
                       size_t nspec, const std::vector<double> &result,
-                      bool complex, API::MatrixWorkspace_sptr &outWS);
+                      bool concatenatedSpectra, bool complex,
+                      API::MatrixWorkspace_sptr &outWS);
   /// Populates the output workspace containing the reconstructed image
   void populateImageWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec,
                        size_t nspec, const std::vector<double> &result,

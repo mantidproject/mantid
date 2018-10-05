@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -193,6 +199,17 @@ bool ParameterTie::findParametersOf(const IFunction *fun) const {
  * Check if the tie is a constant.
  */
 bool ParameterTie::isConstant() const { return m_varMap.empty(); }
+
+/** Get a list of parameters on the right-hand side of the equation
+ */
+std::vector<ParameterReference> ParameterTie::getRHSParameters() const {
+  std::vector<ParameterReference> out;
+  out.reserve(m_varMap.size());
+  for (auto &&varPair : m_varMap) {
+    out.emplace_back(varPair.second);
+  }
+  return out;
+}
 
 } // namespace API
 } // namespace Mantid

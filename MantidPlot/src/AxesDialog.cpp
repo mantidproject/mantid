@@ -1494,7 +1494,7 @@ Mantid::Kernel::Logger g_log("AxisDialog");
  * scale of an axis.
  *  @param app :: the containing application window
  *  @param g :: the graph the dialog is settign the options for
- *  @param fl :: The QT flags fro thsi window
+ *  @param fl :: The QT flags for this window
  */
 AxesDialog::AxesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl)
     : QDialog(g, fl), m_app(app), m_graph(g) {
@@ -1512,8 +1512,8 @@ AxesDialog::AxesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl)
   initGridPage();
   initGeneralPage();
 
-  // Connect scale details to axis details in order to diable scale options when
-  // an axis is not shown
+  // Connect scale details to axis details in order to disable scale options
+  // when an axis is not shown
   auto scaleIter = m_Scale_list.begin();
   auto axisIter = m_Axis_list.begin();
   while ((scaleIter != m_Scale_list.end()) && (axisIter != m_Axis_list.end())) {
@@ -1562,7 +1562,7 @@ void AxesDialog::accept() {
   if (pressToGraph())
     close();
 }
-/** Applys the changes to the graph without closing the window
+/** Applies the changes to the graph without closing the window
  *
  */
 void AxesDialog::apply() {

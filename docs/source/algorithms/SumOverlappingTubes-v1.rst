@@ -22,7 +22,7 @@ If the Normalise option is set then the counts for each point in the OutputWorks
 
 .. math:: C_{scaled, i} = \frac{C_i}{N_{i}}
 
-where :math:`C_{scaled, i}` is the scaled counts, :math:`C_i` the raw counts, and :math:`N_{i}` is the number of tube pixels contributing to the point being scaled.
+where :math:`C_{scaled, i}` is the scaled counts, :math:`C_i` the raw counts, and :math:`N_{i}` is the number of tube pixels contributing to the point being scaled. Note that pixels counting zero do enter the normalisation, however the masked pixels do not.
 
 2DTubes Option
 ++++++++++++++

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ProjectRecovery.h"
 
 #include "ApplicationWindow.h"
@@ -658,9 +664,9 @@ bool ProjectRecovery::olderThanAGivenTime(const Poco::Path &path,
 }
 
 /**
- * @brief A function that brings the two seperate save methods together
+ * @brief A function that brings the two separate save methods together
  * This won't run if it is locked by the background thread but then it saving
- * Anyway so thats no issue.
+ * Anyway so that's no issue.
  */
 void ProjectRecovery::saveAll(bool autoSave) {
   // "Timeout" - Save out again

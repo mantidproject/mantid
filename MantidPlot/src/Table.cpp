@@ -758,7 +758,7 @@ void Table::setColName(int col, const QString &text, bool enumerateRight) {
     if (enumerateRight)
       newLabel += QString::number(n);
 
-    if (col_label.contains(newLabel) > nullptr) {
+    if (col_label.contains(newLabel)) {
       auto msg = "There is already a column called : <b>" + newLabel +
                  "</b> in table <b>" + caption +
                  "</b>!<p>Please choose another name!";
@@ -1078,7 +1078,7 @@ void Table::clearSelection() {
     }
     if (lstReadOnly.count() > 0) {
       QMessageBox::warning(this, tr("MantidPlot - Error"),
-                           tr("The folowing columns") + ":\n" +
+                           tr("The following columns") + ":\n" +
                                lstReadOnly.join("\n") + "\n" +
                                tr("are read only!"));
     }
@@ -1115,7 +1115,7 @@ void Table::clearSelection() {
       }
       if (lstReadOnly.count() > 0) {
         QMessageBox::warning(this, tr("MantidPlot - Error"),
-                             tr("The folowing columns") + ":\n" +
+                             tr("The following columns") + ":\n" +
                                  lstReadOnly.join("\n") + "\n" +
                                  tr("are read only!"));
       }
@@ -1234,7 +1234,7 @@ void Table::pasteSelection() {
   }
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -1289,7 +1289,7 @@ void Table::removeCol(const QStringList &list) {
 
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -1339,7 +1339,7 @@ void Table::normalizeSelection() {
 
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -1359,7 +1359,7 @@ void Table::normalize() {
 
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -1936,7 +1936,7 @@ void Table::setRandomValues() {
 
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -2091,7 +2091,7 @@ void Table::setAscValues() {
 
   if (lstReadOnly.count() > 0) {
     QMessageBox::warning(this, tr("MantidPlot - Error"),
-                         tr("The folowing columns") + ":\n" +
+                         tr("The following columns") + ":\n" +
                              lstReadOnly.join("\n") + "\n" +
                              tr("are read only!"));
   }
@@ -2398,7 +2398,7 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
         text += "C" + header[cols - 1] + eol;
       }
     }
-  } // finished writting labels
+  } // finished writing labels
 
   if (exportComments) {
     if (exportSelection) {

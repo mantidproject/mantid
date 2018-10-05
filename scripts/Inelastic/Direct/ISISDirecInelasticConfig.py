@@ -1,4 +1,10 @@
 #!/usr/bin/python
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import os
 import sys
@@ -328,7 +334,7 @@ class UserProperties(object):
             error = True
         if error:
             raise RuntimeError("Experiment start date should be defined as"
-                               " a sting in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
+                               " a string in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
         return start_date
 
     def get_all_instruments(self):

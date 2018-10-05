@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-lines
 #pylint: disable=too-many-instance-attributes,non-parent-init-called,abstract-method,too-few-public-methods
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
@@ -412,7 +418,7 @@ class ISISIndirectInelasticResolution(with_metaclass(ABCMeta, ISISIndirectInelas
     The workflow is defined in the _run() method, simply
     define an __init__ method and set the following properties
     on the object
-        - self.instrument: a string giving the intrument name
+        - self.instrument: a string giving the instrument name
         - self.analyser: a string giving the name of the analyser
         - self.reflection: a string giving the name of the reflection
         - self.detector_range: a list of two integers, giving the range of detectors

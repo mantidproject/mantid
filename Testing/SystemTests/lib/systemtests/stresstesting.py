@@ -1,24 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 '''
 Mantid stress testing framework. This module contains all of the necessary code
 to run sets of stress tests on the Mantid framework by executing scripts directly
 or by importing them into MantidPlot.
-
-Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
 '''
@@ -521,7 +510,10 @@ class ResultReporter(object):
                                                                       self._total_number_of_tests)
                 console_output += '{:.<{}} ({}: {}s)'.format(result.name+" ", self._maximum_name_length+2,
                                                              result.status, time_taken)
-            if ((self._output_on_failure and (result.status.count('fail') > 0)) or (not self._quiet)):
+            if ((self._output_on_failure
+                and (result.status != 'success')
+                and (result.status != 'skipped'))
+                or (not self._quiet)):
                 nstars = 80
                 console_output += '\n' + ('*' * nstars) + '\n'
                 print_list = ['test_name', 'filename', 'test_date', 'host_name', 'environment',
@@ -614,7 +606,7 @@ class TestRunner(object):
 
 
 #########################################################################
-# Encapsulate the script for runnning a single test
+# Encapsulate the script for running a single test
 #########################################################################
 class TestScript(object):
 
@@ -1124,7 +1116,7 @@ class MantidFrameworkConfig:
 
         # datasearch
         if self.__datasearch:
-            # turn on for 'all' facilties, 'on' is only for default facility
+            # turn on for 'all' facilities, 'on' is only for default facility
             config["datasearch.searcharchive"] = 'all'
             config['network.default.timeout'] = '5'
 
@@ -1253,7 +1245,7 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
             except KeyboardInterrupt:
                 mgr.markSkipped("KeyboardInterrupt", tests_done.value)
 
-            # Update the test results in the array shared accross cores
+            # Update the test results in the array shared across cores
             res_array[process_number] += mgr._skippedTests
             res_array[process_number + options.ncores] += mgr._failedTests
             res_array[process_number + 2*options.ncores] = min(int(reporter.reportStatus()),\
