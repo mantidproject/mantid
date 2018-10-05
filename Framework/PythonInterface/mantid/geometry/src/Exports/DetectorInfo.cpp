@@ -27,7 +27,7 @@ using namespace Mantid::PythonInterface;
 
 namespace {
 // Helper method to make the python iterator
-DetectorInfoPythonIterator make_pyiterator(const DetectorInfo &detectorInfo) {
+DetectorInfoPythonIterator make_pyiterator(DetectorInfo &detectorInfo) {
   return DetectorInfoPythonIterator(detectorInfo);
 }
 /// return_value_policy for read-only numpy array

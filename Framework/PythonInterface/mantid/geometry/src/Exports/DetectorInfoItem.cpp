@@ -17,5 +17,7 @@ void export_DetectorInfoItem() {
       .add_property("isMasked", &DetectorInfoItem::isMasked)
       .add_property("twoTheta", &DetectorInfoItem::twoTheta)
       .add_property("position", &DetectorInfoItem::position)
-      .add_property("rotation", &DetectorInfoItem::rotation);
+      .add_property("rotation", &DetectorInfoItem::rotation)
+      .def("setMasked", &DetectorInfoItem::setMasked,
+           (arg("self"), arg("masked")), "Set the mask flag for the detector");
 }

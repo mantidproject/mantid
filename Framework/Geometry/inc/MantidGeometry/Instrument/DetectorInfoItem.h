@@ -56,6 +56,10 @@ public:
 
   bool isMasked() const { return m_detectorInfo->isMasked(m_index); }
 
+  void setMasked(bool masked) {
+    return m_detectorInfo->setMasked(m_index, masked);
+  }
+
   double twoTheta() const { return m_detectorInfo->twoTheta(m_index); }
 
   Mantid::Kernel::V3D position() const {
@@ -71,12 +75,12 @@ private:
   friend class DetectorInfoIterator;
 
   // Private constructor, can only be created by DetectorInfoIterator
-  DetectorInfoItem(const DetectorInfo &detectorInfo, const size_t index)
+  DetectorInfoItem(DetectorInfo &detectorInfo, const size_t index)
       : m_detectorInfo(&detectorInfo), m_index(index) {}
 
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.
-  const DetectorInfo *m_detectorInfo;
+  DetectorInfo *m_detectorInfo;
   size_t m_index;
 };
 

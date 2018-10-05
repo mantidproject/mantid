@@ -24,5 +24,5 @@ void export_SpectrumInfoItem() {
                                   return_internal_reference<>()))
       .add_property("position", &SpectrumInfoItem::position)
       .def("setMasked", &SpectrumInfoItem::setMasked,
-           (arg("self"), arg("masked")), "Set the mask flag of the spectrum");
+           (arg("self"), arg("masked")), "Set the mask flag for the spectrum");
 }

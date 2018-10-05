@@ -53,7 +53,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 class DetectorInfoPythonIterator {
 public:
-  explicit DetectorInfoPythonIterator(const DetectorInfo &detectorInfo)
+  explicit DetectorInfoPythonIterator(DetectorInfo &detectorInfo)
       : m_begin(detectorInfo.begin()), m_end(detectorInfo.end()),
         m_firstOrDone(true) {}
 

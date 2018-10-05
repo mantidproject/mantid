@@ -133,8 +133,8 @@ public:
   friend class API::SpectrumInfo;
   friend class Instrument;
 
-  DetectorInfoIterator begin() const;
-  DetectorInfoIterator end() const;
+  DetectorInfoIterator begin();
+  DetectorInfoIterator end();
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;

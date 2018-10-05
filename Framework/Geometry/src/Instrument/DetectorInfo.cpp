@@ -390,12 +390,12 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
 }
 
 // Begin method for iterator
-DetectorInfoIterator DetectorInfo::begin() const {
+DetectorInfoIterator DetectorInfo::begin() {
   return DetectorInfoIterator(*this, 0);
 }
 
 // End method for iterator
-DetectorInfoIterator DetectorInfo::end() const {
+DetectorInfoIterator DetectorInfo::end() {
   return DetectorInfoIterator(*this, size());
 }
 

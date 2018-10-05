@@ -127,6 +127,15 @@ class DetectorInfoTest(unittest.TestCase):
         # nothing should be masked 
         for item in info:
             self.assertFalse(item.isMasked)
+    
+    def test_iterator_for_masked(self):
+        info = self._ws.detectorInfo()
+        it = iter(info)
+        item = next(it)
+        item.setMasked(True)
+        self.assertTrue(item.isMasked)
+        item.setMasked(False)
+        self.assertFalse(item.isMasked)
 
     def test_iteration_for_position(self):
         info = self._ws.detectorInfo()

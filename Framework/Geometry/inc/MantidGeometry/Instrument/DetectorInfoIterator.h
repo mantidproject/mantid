@@ -48,7 +48,7 @@ class MANTID_GEOMETRY_DLL DetectorInfoIterator
                                     boost::random_access_traversal_tag> {
 
 public:
-  DetectorInfoIterator(const DetectorInfo &detectorInfo, const size_t index)
+  DetectorInfoIterator(DetectorInfo &detectorInfo, const size_t index)
       : m_item(detectorInfo, index) {}
 
 private:
