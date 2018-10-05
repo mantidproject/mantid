@@ -12,6 +12,7 @@
 #include "MantidKernel/PropertyManagerProperty.h"
 
 #include <boost/math/special_functions/pow.hpp>
+#include <boost/optional.hpp>
 
 namespace {
 namespace Prop {
@@ -55,8 +56,8 @@ const std::string
 /** Give the gap between the two slits, in meters.
  *
  * @param instrument an instrument which containts the slit components
- * @param slit1name name of the first slit component
- * @param slit2name name of the second slit component
+ * @param slit1Name name of the first slit component
+ * @param slit2Name name of the second slit component
  * @return the slit gap, in meters
  * @throw NotFoundError if the slits do not exist
  */
