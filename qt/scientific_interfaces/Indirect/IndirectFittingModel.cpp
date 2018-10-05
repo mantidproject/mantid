@@ -418,7 +418,9 @@ std::size_t IndirectFittingModel::numberOfWorkspaces() const {
 }
 
 std::size_t IndirectFittingModel::getNumberOfSpectra(std::size_t index) const {
-  return m_fittingData[index]->numberOfSpectra();
+  if (index < m_fittingData.size())
+    return m_fittingData[index]->numberOfSpectra();
+  return 0;
 }
 
 std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
