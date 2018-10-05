@@ -157,6 +157,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ProjectRecoveryGUIs/ProjectRecoveryPresenter.cpp
                    src/ProjectRecoveryGUIs/ProjectRecoveryView.cpp
                    src/ProjectRecoveryGUIs/RecoveryFailureView.cpp
+                   src/ProjectRecoveryGUIs/RecoveryThread.cpp
 )
 
 set ( QTIPLOT_C_SRC src/zlib123/minigzip.c )
@@ -363,6 +364,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ProjectRecoveryGUIs/ProjectRecoveryPresenter.h
                    src/ProjectRecoveryGUIs/ProjectRecoveryView.h
                    src/ProjectRecoveryGUIs/RecoveryFailureView.h
+                   src/ProjectRecoveryGUIs/RecoveryThread.h
 )
 
 set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
@@ -627,6 +629,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmDockWidget.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
                        src/ProjectRecoveryGUIs/ProjectRecoveryView.h
                        src/ProjectRecoveryGUIs/RecoveryFailureView.h
+                       src/ProjectRecoveryGUIs/RecoveryThread.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui

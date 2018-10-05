@@ -38,6 +38,10 @@ bool ProjectRecoveryPresenter::startRecoveryView() {
   } catch (...) {
     return true;
   }
+  
+  if (m_model->getFailedRun()) {
+    return true;
+  }
   return false;
 }
 
@@ -46,6 +50,10 @@ bool ProjectRecoveryPresenter::startRecoveryFailure() {
     m_failureView = new RecoveryFailureView(m_mainWindow, this);
     m_failureView->exec();
   } catch (...) {
+    return true;
+  }
+
+  if (m_model->getFailedRun()) {
     return true;
   }
   return false;

@@ -94,7 +94,7 @@ public:
   std::string getRecoveryFolderCheckPR();
 
   /// Loads a recovery checkpoint in the given folder
-  void loadRecoveryCheckpoint(const Poco::Path &path);
+  bool loadRecoveryCheckpoint(const Poco::Path &path);
 
   /// Open a recovery checkpoint in the scripting window
   void openInEditor(const Poco::Path &inputFolder,

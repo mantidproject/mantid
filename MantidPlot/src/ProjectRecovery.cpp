@@ -443,7 +443,7 @@ void ProjectRecovery::stopProjectSaving() {
  *
  * @param recoveryFolder : The checkpoint folder
  */
-void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
+bool ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
   if (!scriptWindow) {
     throw std::runtime_error("Could not get handle to scripting window");
@@ -458,8 +458,8 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
     // exception
     g_log.error("Project recovery script did not finish. Your work has been "
                 "partially recovered.");
-    this->startProjectSaving();
-    return;
+    // This has failed so terminate the thread
+    return false;
   }
   g_log.notice("Re-opening GUIs");
 
@@ -467,26 +467,27 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
 
   bool loadCompleted = false;
   if (!QMetaObject::invokeMethod(
-          m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
+          m_windowPtr, "loadProjectRecovery", Qt::DirectConnection,
           Q_RETURN_ARG(bool, loadCompleted),
           Q_ARG(const std::string, projectFile.toString()))) {
-    this->startProjectSaving();
     throw std::runtime_error("Project Recovery: Failed to load project "
                              "windows - Qt binding failed");
   }
 
   if (!loadCompleted) {
     g_log.warning("Loading failed to recovery everything completely");
-    this->startProjectSaving();
-    return;
+    // This has failed so terminate the thread
+    return loadCompleted;
   }
   g_log.notice("Project Recovery finished");
 
   // Restart project recovery when the async part finishes
   Poco::Path deletePath = recoveryFolder;
   deletePath.setFileName("");
-  clearAllCheckpoints(deletePath.popDirectory());
+  clearAllCheckpoints(deletePath);
   startProjectSaving();
+
+  return loadCompleted;
 }
 
 /**

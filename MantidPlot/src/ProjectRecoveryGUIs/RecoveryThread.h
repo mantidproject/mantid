@@ -1,0 +1,28 @@
+#ifndef RECOVERYTHREAD_H_
+#define RECOVERYTHREAD_H_
+
+#include <Poco/Path.h>
+#include <QThread>
+
+namespace MantidQt {
+class ProjectRecovery;
+}
+
+class RecoveryThread : public QThread {
+  Q_OBJECT
+
+public:
+  bool getFailedRun();
+  void setCheckpoint(Poco::Path checkpoint);
+  void setProjRecPtr(MantidQt::ProjectRecovery *projectRec);
+
+protected:
+  void run() override;
+
+private:
+  bool m_failedRunInThread = true;
+  Poco::Path m_checkpoint;
+  MantidQt::ProjectRecovery *m_projRec;
+};
+
+#endif /*RECOVERYTHREAD_H_*/
