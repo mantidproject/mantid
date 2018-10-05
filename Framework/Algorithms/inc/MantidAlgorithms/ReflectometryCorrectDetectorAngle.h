@@ -16,7 +16,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** Corrects the angle of a reflectometry line detector.
-*/
+ */
 class MANTID_ALGORITHMS_DLL ReflectometryCorrectDetectorAngle
     : public API::Algorithm {
 public:
