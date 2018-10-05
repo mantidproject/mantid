@@ -12,13 +12,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-namespace { // unnamed
-std::string emptyGroupName() {
-  static int nameSuffix = 1;
-  std::string name = "Group" + std::to_string(nameSuffix++);
-  return name;
-}
-
+namespace {
 Group &findOrMakeGroupWithName(Jobs &jobs, std::string const &groupName) {
   auto maybeGroupIndex = jobs.indexOfGroupWithName(groupName);
   if (maybeGroupIndex.is_initialized())
@@ -28,9 +22,10 @@ Group &findOrMakeGroupWithName(Jobs &jobs, std::string const &groupName) {
 } // unnamed
 } // namespace
 
-Jobs::Jobs(std::vector<Group> groups) : m_groups(std::move(groups)) {}
+Jobs::Jobs(std::vector<Group> groups)
+    : m_groups(std::move(groups)), m_groupNameSuffix(1) {}
 
-Jobs::Jobs() {}
+Jobs::Jobs() : m_groupNameSuffix(1) {}
 
 Group &Jobs::appendGroup(Group group) {
   assertOrThrow(group.name().empty() || !hasGroupWithName(group.name()),
@@ -64,16 +59,24 @@ std::vector<Group> &Jobs::groups() { return m_groups; }
 
 std::vector<Group> const &Jobs::groups() const { return m_groups; }
 
+std::string Jobs::nextEmptyGroupName() {
+  std::string name = "Group" + std::to_string(m_groupNameSuffix);
+  m_groupNameSuffix++;
+  return name;
+}
+
 void removeGroup(Jobs &jobs, int groupIndex) { jobs.removeGroup(groupIndex); }
 
 void appendEmptyRow(Jobs &jobs, int groupIndex) {
   jobs.groups()[groupIndex].appendEmptyRow();
 }
 
-void appendEmptyGroup(Jobs &jobs) { jobs.appendGroup(Group(emptyGroupName())); }
+void appendEmptyGroup(Jobs &jobs) {
+  jobs.appendGroup(Group(jobs.nextEmptyGroupName()));
+}
 
 void insertEmptyGroup(Jobs &jobs, int beforeGroup) {
-  jobs.insertGroup(Group(emptyGroupName()), beforeGroup);
+  jobs.insertGroup(Group(jobs.nextEmptyGroupName()), beforeGroup);
 }
 
 void insertEmptyRow(Jobs &jobs, int groupIndex, int beforeRow) {

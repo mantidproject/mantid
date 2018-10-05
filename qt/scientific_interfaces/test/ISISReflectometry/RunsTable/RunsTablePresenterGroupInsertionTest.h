@@ -105,7 +105,7 @@ public:
     auto &groups = jobsFromPresenter(presenter).groups();
 
     TS_ASSERT_EQUALS(3, groups.size());
-    TS_ASSERT_EQUALS("", groups[2].name());
+    TS_ASSERT_EQUALS("Group1", groups[2].name());
     verifyAndClearExpectations();
   }
 
@@ -121,7 +121,7 @@ public:
 
     auto &groups = jobsFromPresenter(presenter).groups();
     TS_ASSERT_EQUALS(3, groups.size());
-    TS_ASSERT_EQUALS("Group3", groups[2].name());
+    TS_ASSERT_EQUALS("Group1", groups[2].name());
 
     verifyAndClearExpectations();
   }

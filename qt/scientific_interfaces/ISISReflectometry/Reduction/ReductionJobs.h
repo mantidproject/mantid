@@ -28,9 +28,11 @@ public:
   std::vector<Group> &groups();
   std::vector<Group> const &groups() const;
   Group const &operator[](int index) const;
+  std::string nextEmptyGroupName();
 
 private:
   std::vector<Group> m_groups;
+  size_t m_groupNameSuffix;
 };
 
 void appendEmptyRow(Jobs &jobs, int groupIndex);
