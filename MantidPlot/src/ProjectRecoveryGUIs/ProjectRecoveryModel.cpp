@@ -65,10 +65,10 @@ void ProjectRecoveryModel::recoverLast() {
   auto mostRecentCheckpoint = mostRecentCheckpoints.back();
   m_projRec->openInEditor(mostRecentCheckpoint, output);
 
-  if (m_failedRun){
+  if (m_failedRun) {
     createThreadAndManage(mostRecentCheckpoint);
   }
-  
+
   // Close View
   m_presenter->closeView();
 }
@@ -88,11 +88,11 @@ void ProjectRecoveryModel::openLastInEditor() {
   m_projRec->clearAllCheckpoints(beforeCheckpoints);
   m_projRec->startProjectSaving();
 
-  if (m_failedRun){
+  if (m_failedRun) {
     updateCheckpointTried(
-      mostRecentCheckpoint.directory(mostRecentCheckpoint.depth() - 1));
+        mostRecentCheckpoint.directory(mostRecentCheckpoint.depth() - 1));
   }
-  
+
   // Close View
   m_presenter->closeView();
 }
@@ -119,10 +119,10 @@ void ProjectRecoveryModel::recoverSelectedCheckpoint(std::string &selected) {
   createThreadAndManage(checkpoint);
 
   selected.replace(selected.find("T"), 1, " ");
-  if (m_failedRun){
+  if (m_failedRun) {
     updateCheckpointTried(selected);
   }
-  
+
   // Close View
   m_presenter->closeView();
 }
@@ -144,7 +144,7 @@ void ProjectRecoveryModel::openSelectedInEditor(std::string &selected) {
   m_projRec->startProjectSaving();
 
   selected.replace(selected.find("T"), 1, " ");
-  if (m_failedRun){
+  if (m_failedRun) {
     updateCheckpointTried(selected);
   }
 
@@ -185,7 +185,8 @@ void ProjectRecoveryModel::updateCheckpointTried(
 bool ProjectRecoveryModel::getFailedRun() const { return m_failedRun; }
 
 void ProjectRecoveryModel::createThreadAndManage(const Poco::Path &checkpoint) {
-  std::unique_ptr<RecoveryThread> recoverThread = std::make_unique<RecoveryThread>();
+  std::unique_ptr<RecoveryThread> recoverThread =
+      std::make_unique<RecoveryThread>();
   recoverThread->setProjRecPtr(m_projRec);
   recoverThread->setCheckpoint(checkpoint);
   recoverThread->start(QThread::HighestPriority);

@@ -38,7 +38,7 @@ bool ProjectRecoveryPresenter::startRecoveryView() {
   } catch (...) {
     return true;
   }
-  
+
   if (m_model->getFailedRun()) {
     return true;
   }
