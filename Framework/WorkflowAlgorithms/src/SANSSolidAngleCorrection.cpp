@@ -188,5 +188,31 @@ double SANSSolidAngleCorrection::calculateSolidAngleCorrection(
   return corr;
 }
 
-} // namespace Algorithms
+double SANSSolidAngleCorrection::calculateSolidAngleCorrection(
+    int histogramIndex, const SpectrumInfo &spectrumInfo) {
+
+  // Compute solid angle correction factor
+
+  const bool is_tube = getProperty("DetectorTubes");
+  const bool is_wing = getProperty("DetectorWing");
+
+  const double tanTheta = tan(spectrumInfo.twoTheta(histogramIndex));
+  const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
+  double corr;
+  if (is_tube || is_wing) {
+    const double tanAlpha = tan(getYTubeAngle(spectrumInfo, histogramIndex));
+    const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
+    if (is_tube)
+      corr = alpha_term * theta_term * theta_term;
+    else { // is_wing
+      corr = alpha_term * alpha_term * alpha_term;
+    }
+  } else {
+    corr = theta_term * theta_term * theta_term;
+  }
+
+  return corr;
+}
+
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
