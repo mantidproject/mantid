@@ -198,6 +198,7 @@ protected slots:
   void updateResultOptions();
   void saveResult();
 
+private slots:
   void emitUpdateFitTypes();
 
 private:

@@ -26,7 +26,6 @@ public:
   void setupFitTab() override;
 
 protected slots:
-  void updateParameterFitTypes();
   void updatePlotOptions() override;
   void updateModelFitTypeString();
   void plotClicked();
@@ -39,6 +38,9 @@ protected:
   void setSaveResultEnabled(bool enabled) override;
 
   void setRunIsRunning(bool running) override;
+
+private slots:
+  void updateParameterFitTypes();
 
 private:
   void addEISFFunctionsToFitTypeComboBox();
