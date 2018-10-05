@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/AlgorithmIDProxy.h"
@@ -56,26 +62,20 @@ boost::python::list runningInstancesOf(AlgorithmManagerImpl &self,
 
 ///@cond
 //------------------------------------------------------------------------------------------------------
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 /// Define overload generators
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads,
                                        AlgorithmManagerImpl::create, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,
                                        AlgorithmManagerImpl::createUnmanaged, 1,
                                        2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
-}
+} // namespace
 
 void export_AlgorithmManager() {
 

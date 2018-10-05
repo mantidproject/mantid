@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDPLOT_MANTIDMATRIXMODEL_H
 #define MANTIDPLOT_MANTIDMATRIXMODEL_H
 
@@ -68,10 +74,10 @@ public slots:
 
 private:
   bool checkMonitorCache(
-      int row) const; // check the monitor cache and add to it if neccessary
+      int row) const; // check the monitor cache and add to it if necessary
 
   bool checkMaskedCache(
-      int row) const; // check the masked cache and add to it if neccessary
+      int row) const; // check the masked cache and add to it if necessary
 
   bool checkMaskedBinCache(int row, int bin) const;
 

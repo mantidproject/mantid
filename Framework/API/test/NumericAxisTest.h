@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef NUMERICAXISTEST_H_
 #define NUMERICAXISTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Exception.h"
-#include <cfloat>
 #include "MantidTestHelpers/FakeObjects.h"
+#include <cfloat>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

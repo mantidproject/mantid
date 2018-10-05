@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.27
+Version:        1.28
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -55,6 +55,7 @@ Requires: python-sphinx
 Requires: python2-sphinx-bootstrap-theme
 Requires: PyYAML
 Requires: python2-mock
+Requires: python2-psutil
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
 Requires: qwt5-qt4-devel
@@ -103,6 +104,7 @@ Requires: python3-matplotlib
 %{?fedora:Requires: python3-qtconsole}
 Requires: python3-PyYAML
 Requires: python3-mock
+%{?fedora:Requires: python3-psutil}
 Requires: boost-python3-devel
 %endif
 
@@ -127,6 +129,9 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Wed Jul 18 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Added python-psutil
 
 * Wed Apr 25 2018 Steven Hahn <hahnse@ornl.gov>
 - Add qt5-qtx11extras

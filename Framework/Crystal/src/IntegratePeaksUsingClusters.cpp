@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/IntegratePeaksUsingClusters.h"
-#include "MantidCrystal/ICluster.h"
-#include "MantidCrystal/ConnectedComponentLabeling.h"
-#include "MantidCrystal/HardThresholdBackground.h"
-#include "MantidCrystal/PeakClusterProjection.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Utils.h"
+#include "MantidCrystal/ConnectedComponentLabeling.h"
+#include "MantidCrystal/HardThresholdBackground.h"
+#include "MantidCrystal/ICluster.h"
+#include "MantidCrystal/PeakClusterProjection.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Utils.h"
 
 #include <cmath>
 

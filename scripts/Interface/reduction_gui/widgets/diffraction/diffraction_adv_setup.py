@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 ################################################################################
 # Advanced Setup Widget
@@ -99,8 +105,8 @@ class AdvancedSetupWidget(BaseWidget):
 
         self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
                      self._show_help)
-        # Hanlder for events
-        # TODO - Need to add an event hanlder for the change of instrument and facility
+        # Handler for events
+        # TODO - Need to add an event handler for the change of instrument and facility
 
         # Validated widgets
 

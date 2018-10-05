@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef UNCERTAINVALUEIOTEST_H
 #define UNCERTAINVALUEIOTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include <stdexcept>
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
+#include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid::Poldi;
 

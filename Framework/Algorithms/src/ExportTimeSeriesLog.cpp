@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExportTimeSeriesLog.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -74,9 +80,10 @@ void ExportTimeSeriesLog::init() {
       "NumberEntriesExport", EMPTY_INT(),
       "Number of entries of the log to be exported.  Default is all entries.");
 
-  declareProperty("IsEventWorkspace", true, "If set to true, output workspace "
-                                            "is EventWorkspace.  Otherwise, it "
-                                            "is Workspace2D.");
+  declareProperty("IsEventWorkspace", true,
+                  "If set to true, output workspace "
+                  "is EventWorkspace.  Otherwise, it "
+                  "is Workspace2D.");
 }
 
 /** Main execution
@@ -188,7 +195,8 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
   } else if (numentries <= 0) {
     stringstream errmsg;
     errmsg << "For Export Log, NumberEntriesExport must be greater than 0.  "
-              "Input = " << numentries;
+              "Input = "
+           << numentries;
     g_log.error(errmsg.str());
     throw std::runtime_error(errmsg.str());
   } else if (static_cast<size_t>(numentries) > times.size()) {
@@ -457,5 +465,5 @@ void ExportTimeSeriesLog::setupMetaData(const std::string &log_name,
   m_outWS->mutableRun().addProperty("IsEpochTime", is_epoch, true);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

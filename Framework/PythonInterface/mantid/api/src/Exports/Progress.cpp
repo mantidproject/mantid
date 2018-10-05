@@ -1,11 +1,17 @@
-#include "MantidAPI/Algorithm.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Algorithm.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/init.hpp>
 
-using Mantid::API::Progress;
 using Mantid::API::Algorithm;
+using Mantid::API::Progress;
 using Mantid::Kernel::ProgressBase;
 using namespace boost::python;
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_
 #define MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_
 
@@ -486,11 +492,10 @@ private:
       strm << "Error in Peak " << i << ": " << peak->intensity().value()
            << " != " << referencePeak->intensity().value();
 
-      TSM_ASSERT_DELTA(
-          strm.str().c_str(),
-          fabs(1.0 -
-               peak->intensity().value() / referencePeak->intensity().value()),
-          0.0, relativePrecision);
+      TSM_ASSERT_DELTA(strm.str().c_str(),
+                       fabs(1.0 - peak->intensity().value() /
+                                      referencePeak->intensity().value()),
+                       0.0, relativePrecision);
     }
   }
 

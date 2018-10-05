@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*******************************************************************
   A cross-platform JSON parser that uses nothing more than C++ and
   STL templates.  It's probably slower than other JSON parsers, but
@@ -14,11 +20,11 @@
 #ifndef SIMPLEJSON_H
 #define SIMPLEJSON_H
 
+#include <istream>
 #include <map>
+#include <ostream>
 #include <string>
 #include <vector>
-#include <istream>
-#include <ostream>
 
 class JSONValue;
 using JSONObject = std::map<std::string, JSONValue>;

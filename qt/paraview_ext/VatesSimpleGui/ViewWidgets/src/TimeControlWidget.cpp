@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
@@ -55,6 +61,6 @@ void TimeControlWidget::updateAnimationControls(double timeStart,
 void TimeControlWidget::enableAnimationControls(bool state) {
   this->setEnabled(state);
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

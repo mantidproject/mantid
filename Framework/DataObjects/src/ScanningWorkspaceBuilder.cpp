@@ -1,6 +1,11 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
@@ -61,8 +66,9 @@ void ScanningWorkspaceBuilder::setHistogram(
  * @param timeRanges A vector of DateAndTime pairs, corresponding to the start
  *and end times
  */
-void ScanningWorkspaceBuilder::setTimeRanges(std::vector<
-    std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> timeRanges) {
+void ScanningWorkspaceBuilder::setTimeRanges(
+    std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+        timeRanges) {
   verifyTimeIndexSize(timeRanges.size(), "start time, end time pairs");
   m_timeRanges = std::move(timeRanges);
 }

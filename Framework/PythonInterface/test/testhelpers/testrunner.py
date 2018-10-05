@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """Provides a runner to execute unit tests with a given runner
 
 It is intended to be used as a launcher script for a given unit test file.
@@ -128,8 +134,9 @@ def result_class(pathname):
 
 
 if __name__ == "__main__":
-    # Import mantid so that it sets up the additional paths to scripts etc
-    # It would be good to try & remove this to soften the impact on tests
-    # that don't require importing mantid at all
-    import mantid  # noqa
+    if "TESTRUNNER_IMPORT_MANTID" in os.environ:
+        # Import mantid so that it sets up the additional paths to scripts etc
+        # It would be good to try & remove this to soften the impact on tests
+        # that don't require importing mantid at all
+        import mantid  # noqa
     main(sys.argv)

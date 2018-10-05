@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/StepScan.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -40,13 +46,15 @@ void StepScan::init() {
 
   declareProperty("XMin", EMPTY_DBL(),
                   "The minimum value of X for which an event will be counted.");
-  declareProperty("XMax", EMPTY_DBL(), "The maximum value of X for which an "
-                                       "event will be counted. Must be greater "
-                                       "than XMin.");
+  declareProperty("XMax", EMPTY_DBL(),
+                  "The maximum value of X for which an "
+                  "event will be counted. Must be greater "
+                  "than XMin.");
   // N.B. The choice of units is restricted by the upstream StepScan interface,
   // but in fact any convertible unit will work so is allowed here
-  declareProperty("RangeUnit", "TOF", boost::make_shared<StringListValidator>(
-                                          UnitFactory::Instance().getKeys()),
+  declareProperty("RangeUnit", "TOF",
+                  boost::make_shared<StringListValidator>(
+                      UnitFactory::Instance().getKeys()),
                   "The units in which XMin and XMax is being given.");
 }
 

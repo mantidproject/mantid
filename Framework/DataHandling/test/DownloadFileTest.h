@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_DOWNLOADFILETEST_H_
 #define MANTID_DATAHANDLING_DOWNLOADFILETEST_H_
 
@@ -11,8 +17,8 @@
 #include <fstream>
 #include <sstream>
 
-using Mantid::Kernel::InternetHelper;
 using Mantid::DataHandling::DownloadFile;
+using Mantid::Kernel::InternetHelper;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -37,8 +43,8 @@ protected:
 };
 
 /**
-*Mock out the internet calls of this algorithm
-*/
+ *Mock out the internet calls of this algorithm
+ */
 class MockedDownloadFile : public DownloadFile {
 public:
   MockedDownloadFile() {
@@ -46,7 +52,7 @@ public:
     m_internetHelper = new MockedInternetHelper();
   }
 };
-}
+} // namespace
 
 class DownloadFileTest : public CxxTest::TestSuite {
 public:

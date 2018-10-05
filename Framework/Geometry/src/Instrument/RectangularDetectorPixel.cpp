@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 using namespace Mantid::Kernel;
@@ -63,5 +69,5 @@ Kernel::V3D RectangularDetectorPixel::getRelativePos() const {
   return V3D(x, y, 0);
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

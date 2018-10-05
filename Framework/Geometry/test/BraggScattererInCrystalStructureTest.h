@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURETEST_H_
 #define MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURETEST_H_
 
@@ -11,8 +17,8 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-using ::testing::Return;
 using ::testing::A;
+using ::testing::Return;
 
 class BraggScattererInCrystalStructureTest : public CxxTest::TestSuite {
 public:
@@ -112,12 +118,12 @@ private:
   public:
     MockBraggScatterer() : BraggScattererInCrystalStructure() {}
     ~MockBraggScatterer() override {}
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(name, std::string());
     MOCK_CONST_METHOD0(clone, BraggScatterer_sptr());
     MOCK_CONST_METHOD1(calculateStructureFactor, StructureFactor(const V3D &));
     MOCK_METHOD1(afterScattererPropertySet, void(const std::string &));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

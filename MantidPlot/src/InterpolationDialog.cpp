@@ -28,19 +28,19 @@
  *                                                                         *
  ***************************************************************************/
 #include "InterpolationDialog.h"
-#include "Graph.h"
-#include "MyParser.h"
 #include "ColorBox.h"
+#include "Graph.h"
 #include "Interpolation.h"
+#include "MyParser.h"
 
+#include <QComboBox>
 #include <QGroupBox>
-#include <QSpinBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QLayout>
+#include <QSpinBox>
 
 InterpolationDialog::InterpolationDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), graph(nullptr) {

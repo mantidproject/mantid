@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SPLATTERPLOTVIEW_H_
 #define SPLATTERPLOTVIEW_H_
 
-#include "ui_SplatterPlotView.h"
-#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
+#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "ui_SplatterPlotView.h"
 #include <boost/shared_ptr.hpp>
 
 #include <QList>
@@ -32,27 +38,6 @@ class RebinnedSourcesManager;
 
  @author Michael Reuter
  @date 10/10/2011
-
- Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS SplatterPlotView
     : public ViewBase {
@@ -172,16 +157,16 @@ private:
   Ui::SplatterPlotView m_ui;     ///< The splatter plot view'a UI form
   QPointer<pqRenderView> m_view; ///< The main view area
   boost::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager
-  PeaksTableControllerVsi *
-      m_peaksTableController; ///< The peaks table controller
-  QAction *m_allPeaksAction;  ///<The action for showing all peaks in the table.
-  QAction *m_removePeaksAction; ///<The action for removing the peaks table.
+  PeaksTableControllerVsi
+      *m_peaksTableController; ///< The peaks table controller
+  QAction *m_allPeaksAction; ///< The action for showing all peaks in the table.
+  QAction *m_removePeaksAction; ///< The action for removing the peaks table.
   std::string
-      m_peaksWorkspaceNameDelimiter; ///<Delimiter for peaks workspace strings.
+      m_peaksWorkspaceNameDelimiter; ///< Delimiter for peaks workspace strings.
 };
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // SPLATTERPLOTVIEW_H_

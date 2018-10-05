@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_PEAKCLUSTERPROJECTIONTEST_H_
 #define MANTID_CRYSTAL_PEAKCLUSTERPROJECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCrystal/PeakClusterProjection.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidCrystal/PeakClusterProjection.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cmath>
 

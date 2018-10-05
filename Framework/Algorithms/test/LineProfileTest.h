@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_LINEPROFILETEST_H_
 #define MANTID_ALGORITHMS_LINEPROFILETEST_H_
 
@@ -5,10 +11,10 @@
 
 #include "MantidAlgorithms/LineProfile.h"
 
-#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

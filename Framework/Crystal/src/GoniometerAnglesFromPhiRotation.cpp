@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -424,5 +430,5 @@ Kernel::Matrix<double> GoniometerAnglesFromPhiRotation::getUBRaw(
   return GoniometerMatrix * UB;
 }
 
-} // Crystal
-} // Mantid
+} // namespace Crystal
+} // namespace Mantid

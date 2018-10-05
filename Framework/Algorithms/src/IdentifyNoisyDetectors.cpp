@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/IdentifyNoisyDetectors.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -132,14 +138,14 @@ void IdentifyNoisyDetectors::exec() {
 }
 
 /**
-* Main work portion of algorithm. Calculates mean of standard deviation,
-* ignoring
-* the detectors marked as "bad", then determines if any of the detectors are
-* "bad".
-* @param progress :: progress indicator
-* @param valid :: eventual output workspace, holding 0 for bad and 1 for good
-* @param values :: stddeviations of each spectra (I think)
-*/
+ * Main work portion of algorithm. Calculates mean of standard deviation,
+ * ignoring
+ * the detectors marked as "bad", then determines if any of the detectors are
+ * "bad".
+ * @param progress :: progress indicator
+ * @param valid :: eventual output workspace, holding 0 for bad and 1 for good
+ * @param values :: stddeviations of each spectra (I think)
+ */
 void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
                                        MatrixWorkspace_sptr valid,
                                        MatrixWorkspace_sptr values) {

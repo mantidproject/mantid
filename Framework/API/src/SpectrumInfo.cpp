@@ -1,14 +1,21 @@
-#include "MantidAPI/ExperimentInfo.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/SpectrumInfoIterator.h"
+#include "MantidBeamline/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidBeamline/SpectrumInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include <boost/make_shared.hpp>
 #include <algorithm>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace API {
@@ -180,6 +187,16 @@ SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
     throw Kernel::Exception::NotFoundError(
         "SpectrumInfo: No detectors for this workspace index.", "");
   return spectrumDefinition(index);
+}
+
+// Begin method for iterator
+SpectrumInfoIterator SpectrumInfo::begin() const {
+  return SpectrumInfoIterator(*this, 0);
+}
+
+// End method for iterator
+SpectrumInfoIterator SpectrumInfo::end() const {
+  return SpectrumInfoIterator(*this, size());
 }
 
 } // namespace API

@@ -414,8 +414,8 @@ Print All Loggers
       println "${it}";
     }
 
-Run a Process
--------------
+Run a Process On a Single Node
+------------------------------
 
 .. code-block:: groovy
 
@@ -425,6 +425,22 @@ Run a Process
     // kill process on windows slave
     Process p = "cmd /c Taskkill /F /IM MantidPlot.exe".execute()
     println "${p.text}"
+
+Run a Process Across All Nodes
+------------------------------
+
+.. code-block:: groovy
+
+    import hudson.util.RemotingDiagnostics;
+
+    for (slave in hudson.model.Hudson.instance.slaves) {
+       println slave.name;
+       // is it connected?
+       if(slave.getChannel()) {
+        println RemotingDiagnostics.executeGroovy("println \"ls\".execute().text", slave.getChannel());
+      }
+    }
+
 
 Update default values for job parameters
 ----------------------------------------

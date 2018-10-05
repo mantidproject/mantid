@@ -1,7 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTWIDGETTREETAB_H_
 #define INSTRUMENTWIDGETTREETAB_H_
 
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
 #include "InstrumentWidgetTab.h"
 
 #include <QModelIndex>
@@ -11,8 +16,8 @@ namespace MantidWidgets {
 class InstrumentTreeWidget;
 
 /**
-        * Implements the instrument tree tab in InstrumentWidget
-        */
+ * Implements the instrument tree tab in InstrumentWidget
+ */
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetTreeTab
     : public InstrumentWidgetTab {
   Q_OBJECT
@@ -31,7 +36,7 @@ private:
   /// Widget to display instrument tree
   InstrumentTreeWidget *m_instrumentTree;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*INSTRUMENTWIDGETTREETAB_H_*/

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/LineViewer.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -10,9 +16,9 @@
 #include "MantidKernel/UsageService.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
 #include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -53,7 +59,7 @@ std::string proposeIntegratedWSName(const std::string &wsName,
   }
   return resultName;
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -82,7 +88,7 @@ void setThicknessUsingDimensionInfo(IMDWorkspace_sptr ws, size_t dimIndex,
     thicknesses[dimIndex] = VMD_t(width);
   }
 }
-}
+} // namespace
 
 LineViewer::LineViewer(QWidget *parent)
     : QWidget(parent), m_planeWidth(0), m_numBins(100), m_allDimsFree(false),
@@ -1242,5 +1248,5 @@ void LineViewer::refreshPlot() {
  */
 void LineViewer::onToggleLogYAxis() { refreshPlot(); }
 
-} // namespace
-}
+} // namespace SliceViewer
+} // namespace MantidQt

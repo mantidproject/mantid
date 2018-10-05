@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_
 #define MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidWorkflowAlgorithms/MuonProcess.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidWorkflowAlgorithms/MuonProcess.h"
 
-using Mantid::WorkflowAlgorithms::MuonProcess;
 using Mantid::DataHandling::LoadMuonNexus2;
+using Mantid::WorkflowAlgorithms::MuonProcess;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -622,9 +628,9 @@ private:
   std::unique_ptr<LoadedData> loadEMU() { return loadData("emu00006473.nxs"); }
 
   /**
-  * Use LoadMuonNexus to load data from MUSR file
-  * @returns LoadedData struct
-  */
+   * Use LoadMuonNexus to load data from MUSR file
+   * @returns LoadedData struct
+   */
   std::unique_ptr<LoadedData> loadMUSR() {
     return loadData("MUSR00015189.nxs");
   }

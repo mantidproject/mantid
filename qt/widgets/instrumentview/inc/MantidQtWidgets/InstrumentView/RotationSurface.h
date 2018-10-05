@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ROTATIONSURFACE_H
 #define ROTATIONSURFACE_H
 
@@ -7,10 +13,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /**
-* @class RotationSurface
-* @brief Performs projection of an instrument onto a 2D surface of rotation:
-* cylinder, sphere, ...
-*/
+ * @class RotationSurface
+ * @brief Performs projection of an instrument onto a 2D surface of rotation:
+ * cylinder, sphere, ...
+ */
 class RotationSurface : public UnwrappedSurface {
 public:
   RotationSurface(const InstrumentActor *rootActor,
@@ -59,7 +65,7 @@ protected:
   bool m_manual_u_correction;  ///< Flag set to prevent automatic
   /// FindAndCorrectUGap()
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // ROTATIONSURFACE_H

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDICONVERSIONS_H
 #define MANTID_SINQ_POLDICONVERSIONS_H
 
@@ -20,8 +26,8 @@ double MANTID_SINQ_DLL qToD(double q);
 // conversions between degree and radians
 double MANTID_SINQ_DLL degToRad(double degree);
 double MANTID_SINQ_DLL radToDeg(double radians);
-}
-}
-}
+} // namespace Conversions
+} // namespace Poldi
+} // namespace Mantid
 
 #endif // MANTID_SINQ_POLDICONVERSIONS_H

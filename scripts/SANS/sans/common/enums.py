@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ The elements of this module define typed enums which are used in the SANS reduction framework."""
 
 # pylint: disable=too-few-public-methods, invalid-name
@@ -283,7 +289,7 @@ class FitType(object):
 #  SampleShape
 # --------------------------
 @string_convertible
-@serializable_enum("CylinderAxisUp", "Cuboid", "CylinderAxisAlong")
+@serializable_enum("Cylinder", "FlatPlate", "Disc")
 class SampleShape(object):
     """
     Defines the sample shape types
@@ -371,6 +377,15 @@ class FindDirectionEnum(object):
 @string_convertible
 @serializable_enum("Horizontal", "Vertical", "Time")
 class IntegralEnum(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
+    pass
+
+
+@string_convertible
+@serializable_enum("Unprocessed", "Processed", "Error")
+class RowState(object):
     """
     Defines the entries of a batch reduction file.
     """

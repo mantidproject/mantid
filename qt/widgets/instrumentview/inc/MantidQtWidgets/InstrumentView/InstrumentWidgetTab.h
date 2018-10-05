@@ -1,7 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTWIDGETTAB_H
 #define INSTRUMENTWIDGETTAB_H
 
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
 #include "InstrumentWidgetTypes.h"
 
 #include <QFrame>
@@ -47,7 +52,7 @@ protected:
   /// The parent InstrumentWidget
   InstrumentWidget *m_instrWidget;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // INSTRUMENTWIDGETTAB_H

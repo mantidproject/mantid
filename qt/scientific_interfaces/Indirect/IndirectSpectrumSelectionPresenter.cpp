@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSpectrumSelectionPresenter.h"
 
 #include "MantidKernel/ArrayProperty.h"
@@ -39,7 +45,7 @@ std::string NATURAL_NUMBER(std::size_t digits) {
 
 namespace Regexes {
 const std::string EMPTY = "^$";
-const std::string SPACE = "(\\s)*";
+const std::string SPACE = "[ ]*";
 const std::string COMMA = SPACE + "," + SPACE;
 const std::string MINUS = "\\-";
 

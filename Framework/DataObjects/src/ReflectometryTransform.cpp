@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/ReflectometryTransform.h"
 
 #include "MantidAPI/BinEdgeAxis.h"
@@ -32,15 +38,15 @@ using namespace Mantid::Kernel;
 
 namespace {
 /**
-*  Writes one row to an existing table
-*  @param vertexes : The table that the rows will be written to
-*  @param vertex : The vertex from which the data is retrieved for writing i.e
-* lower left, lower right etc.
-*  @param nHisto : The number of the histogram
-*  @param nBins : The number of the bin
-*  @param signal : The Y value of the bin
-*  @param error : The E value of the bin
-*/
+ *  Writes one row to an existing table
+ *  @param vertexes : The table that the rows will be written to
+ *  @param vertex : The vertex from which the data is retrieved for writing i.e
+ * lower left, lower right etc.
+ *  @param nHisto : The number of the histogram
+ *  @param nBins : The number of the bin
+ *  @param signal : The Y value of the bin
+ *  @param error : The E value of the bin
+ */
 void writeRow(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
               const V2D &vertex, size_t nHisto, size_t nBins, double signal,
               double error) {
@@ -49,9 +55,9 @@ void writeRow(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
       << error;
 }
 /**
-*  Adds the column headings to a table
-*  @param vertexes : Table to which the columns are written to.
-*/
+ *  Adds the column headings to a table
+ *  @param vertexes : Table to which the columns are written to.
+ */
 void addColumnHeadings(Mantid::DataObjects::TableWorkspace &vertexes,
                        const std::string &outputDimensions) {
 
@@ -80,7 +86,7 @@ void addColumnHeadings(Mantid::DataObjects::TableWorkspace &vertexes,
     vertexes.addColumn("double", "CellError");
   }
 }
-}
+} // namespace
 namespace Mantid {
 namespace DataObjects {
 
@@ -114,7 +120,7 @@ ReflectometryTransform::ReflectometryTransform(
 /**
  * Creates an MD workspace
  * @param a : pointer to the first dimension of the MDWorkspace
-  *@param b : pointer to the second dimension of the MDWorkspace
+ *@param b : pointer to the second dimension of the MDWorkspace
  * @param boxController : controls how the MDWorkspace will be split
  */
 boost::shared_ptr<MDEventWorkspace2Lean>
@@ -516,5 +522,5 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
 
   return outWS;
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

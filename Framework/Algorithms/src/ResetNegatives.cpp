@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ResetNegatives.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -124,7 +130,7 @@ inline double fixZero(const double value) {
   else
     return value;
 }
-}
+} // namespace
 
 /**
  * Add -1.*minValue on each spectra.
@@ -190,5 +196,5 @@ void ResetNegatives::changeNegatives(MatrixWorkspace_const_sptr minWS,
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/System.h"
@@ -60,7 +66,7 @@ Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin,
   }
   return dExact;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataObjects {
@@ -741,5 +747,5 @@ size_t MDHistoWorkspaceIterator::permutationCacheSize() const {
   return m_permutationsVertexTouchingMap.size();
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

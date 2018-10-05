@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ADDSAMPLELOGTEST_H_
 #define ADDSAMPLELOGTEST_H_
 
@@ -5,10 +11,10 @@
 
 #include <string>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

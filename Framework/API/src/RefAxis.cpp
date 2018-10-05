@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -62,9 +68,9 @@ double RefAxis::operator()(const std::size_t &index,
 }
 
 /** Method not available for RefAxis. Will always throw.
-  * @param index location for setting
-  * @param value the value to set
-  */
+ * @param index location for setting
+ * @param value the value to set
+ */
 void RefAxis::setValue(const std::size_t &index, const double &value) {
   UNUSED_ARG(index)
   UNUSED_ARG(value)

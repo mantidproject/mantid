@@ -17,6 +17,8 @@ list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/LARMOR)
 list(APPEND DATA_DIRS ${SYSTEM_TEST_DATA_DIR}/INTER)
 # Reference results
 list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/SystemTests/tests/analysis/reference)
+# Unit tests
+list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest)
 # Doc tests
 list(APPEND DATA_DIRS ${ExternalData_BINARY_ROOT}/Testing/Data/DocTest)
 

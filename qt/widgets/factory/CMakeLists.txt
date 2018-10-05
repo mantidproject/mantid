@@ -6,11 +6,11 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Factory/WidgetFactory.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
 	inc/MantidQtWidgets/Factory/WidgetFactory.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
 )
 
 set ( TEST_FILES
@@ -37,6 +37,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsFactory
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
     MantidQtWidgetsSliceViewer
+  INSTALL_DIR
+    ${LIB_DIR}
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${LIB_DIR}"
 )
-
-

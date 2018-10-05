@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IMPLICIT_FUNCTION_PARAMETER_PARSER_FACTORY_TEST_H_
 #define IMPLICIT_FUNCTION_PARAMETER_PARSER_FACTORY_TEST_H_
 
@@ -17,11 +23,11 @@ private:
   class MockImplicitFunctionParameter
       : public Mantid::API::ImplicitFunctionParameter {
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(isValid, bool());
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   protected:
     ImplicitFunctionParameter *clone() const override {
       return new MockImplicitFunctionParameter;

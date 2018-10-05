@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "QtReflRunsTabView.h"
+#include "IReflRunsTabPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "IReflRunsTabPresenter.h"
+#include "MantidQtWidgets/Common/HintingLineEditFactory.h"
+#include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "ReflGenericDataProcessorPresenterFactory.h"
 #include "ReflRunsTabPresenter.h"
 #include "ReflSearchModel.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtWidgets/Common/HintingLineEditFactory.h"
-#include "MantidQtWidgets/Common/SlitCalculator.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -21,8 +27,8 @@ using namespace MantidQt::MantidWidgets;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param parent :: The parent of this view
-*/
+ * @param parent :: The parent of this view
+ */
 QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
     : m_presenter(), m_calculator(new SlitCalculator(this)) {
 
@@ -32,7 +38,7 @@ QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
-*/
+ */
 QtReflRunsTabView::~QtReflRunsTabView() {}
 
 /**
@@ -75,9 +81,13 @@ void QtReflRunsTabView::initLayout() {
   // Create the presenter
   m_presenter = std::make_shared<ReflRunsTabPresenter>(
       this /* main view */,
-      this /* Currently this concrete view is also responsible for prog reporting */,
+      this /* Currently this concrete view is also responsible for prog
+              reporting */
+      ,
       processingWidgets /* The data processor presenters */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
+  m_monitorAlgoRunner =
+      boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
   // Custom context menu for table
   connect(ui.tableSearchResults,
@@ -113,10 +123,10 @@ void QtReflRunsTabView::initLayout() {
 }
 
 /**
-* Add a command (action) to a menu
-* @param menu : [input] The menu where actions will be added
-* @param command : [input] The command (action) to add
-*/
+ * Add a command (action) to a menu
+ * @param menu : [input] The menu where actions will be added
+ * @param command : [input] The command (action) to add
+ */
 void QtReflRunsTabView::addToMenu(QMenu *menu,
                                   DataProcessor::Command_uptr command) {
 
@@ -125,10 +135,10 @@ void QtReflRunsTabView::addToMenu(QMenu *menu,
 }
 
 /**
-* Adds actions to the "Reflectometry" menu
-* @param tableCommands : [input] The list of commands to add to the
-* "Reflectometry" menu
-*/
+ * Adds actions to the "Reflectometry" menu
+ * @param tableCommands : [input] The list of commands to add to the
+ * "Reflectometry" menu
+ */
 void QtReflRunsTabView::setTableCommands(
     std::vector<DataProcessor::Command_uptr> tableCommands) {
 
@@ -144,9 +154,9 @@ void QtReflRunsTabView::setTableCommands(
 }
 
 /**
-* Adds actions to the "Edit" menu
-* @param rowCommands : [input] The list of commands to add to the "Edit" menu
-*/
+ * Adds actions to the "Edit" menu
+ * @param rowCommands : [input] The list of commands to add to the "Edit" menu
+ */
 void QtReflRunsTabView::setRowCommands(
     std::vector<DataProcessor::Command_uptr> rowCommands) {
 
@@ -156,8 +166,8 @@ void QtReflRunsTabView::setRowCommands(
 }
 
 /**
-* Clears all the actions (commands)
-*/
+ * Clears all the actions (commands)
+ */
 void QtReflRunsTabView::clearCommands() {
   ui.menuRows->clear();
   ui.menuTable->clear();
@@ -165,10 +175,10 @@ void QtReflRunsTabView::clearCommands() {
 }
 
 /**
-* Updates actions in the menus to be enabled or disabled
-* according to whether processing is running or not.
-* @param isProcessing: Whether processing is running
-*/
+ * Updates actions in the menus to be enabled or disabled
+ * according to whether processing is running or not.
+ * @param isProcessing: Whether processing is running
+ */
 void QtReflRunsTabView::updateMenuEnabledState(bool isProcessing) {
 
   for (auto &command : m_commands) {
@@ -177,72 +187,90 @@ void QtReflRunsTabView::updateMenuEnabledState(bool isProcessing) {
 }
 
 /**
-* Sets the "Autoreduce" button enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the "Autoreduce" button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
 
   ui.buttonAutoreduce->setEnabled(enabled);
 }
 
 /**
-* Sets the "Autoreduce" button enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the "Autoreduce" button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setAutoreducePauseButtonEnabled(bool enabled) {
 
   ui.buttonAutoreducePause->setEnabled(enabled);
 }
 
 /**
-* Sets the "Transfer" button enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the "Transfer" button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setTransferButtonEnabled(bool enabled) {
 
   ui.buttonTransfer->setEnabled(enabled);
 }
 
 /**
-* Sets the "Instrument" combo box enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the "Instrument" combo box enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
 
   ui.comboSearchInstrument->setEnabled(enabled);
 }
 
 /**
-* Sets the transfer method combo box enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the transfer method combo box enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setTransferMethodComboEnabled(bool enabled) {
 
   ui.comboTransferMethod->setEnabled(enabled);
 }
 
 /**
-* Sets the search text box enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the search text box enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setSearchTextEntryEnabled(bool enabled) {
 
   ui.textSearch->setEnabled(enabled);
 }
 
 /**
-* Sets the search button enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the search button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setSearchButtonEnabled(bool enabled) {
 
   ui.buttonSearch->setEnabled(enabled);
 }
 
 /**
-* Set all possible tranfer methods
-* @param methods : All possible transfer methods.
-*/
+ * Sets the start-monitor button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
+void QtReflRunsTabView::setStartMonitorButtonEnabled(bool enabled) {
+
+  ui.buttonMonitor->setEnabled(enabled);
+}
+
+/**
+ * Sets the stop-monitor enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
+void QtReflRunsTabView::setStopMonitorButtonEnabled(bool enabled) {
+
+  ui.buttonStopMonitor->setEnabled(enabled);
+}
+
+/**
+ * Set all possible tranfer methods
+ * @param methods : All possible transfer methods.
+ */
 void QtReflRunsTabView::setTransferMethods(
     const std::set<std::string> &methods) {
   for (auto method = methods.begin(); method != methods.end(); ++method) {
@@ -290,8 +318,8 @@ void QtReflRunsTabView::setProgress(int progress) {
 }
 
 /**
-* Clear the progress
-*/
+ * Clear the progress
+ */
 void QtReflRunsTabView::clearProgress() { ui.progressBar->reset(); }
 
 /**
@@ -456,6 +484,11 @@ QtReflRunsTabView::getAlgorithmRunner() const {
   return m_algoRunner;
 }
 
+boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+QtReflRunsTabView::getMonitorAlgorithmRunner() const {
+  return m_monitorAlgoRunner;
+}
+
 /**
 Get the string the user wants to search for.
 @returns The search string
@@ -465,25 +498,56 @@ std::string QtReflRunsTabView::getSearchString() const {
 }
 
 /**
-* @return the transfer method selected.
-*/
+ * @return the transfer method selected.
+ */
 std::string QtReflRunsTabView::getTransferMethod() const {
   return ui.comboTransferMethod->currentText().toStdString();
 }
 
 /**
-* @return the selected group
-*/
+ * @return the selected group
+ */
 int QtReflRunsTabView::getSelectedGroup() const {
   return ui.toolbox->currentIndex();
 }
 
 /** This is slot is triggered when the selected group changes.
-*
-*/
+ *
+ */
 void QtReflRunsTabView::groupChanged() {
   m_presenter->notify(IReflRunsTabPresenter::GroupChangedFlag);
 }
 
+void MantidQt::CustomInterfaces::QtReflRunsTabView::on_buttonMonitor_clicked() {
+  startMonitor();
+}
+
+void MantidQt::CustomInterfaces::QtReflRunsTabView::
+    on_buttonStopMonitor_clicked() {
+  stopMonitor();
+}
+
+/** Start live data monitoring
+ */
+void QtReflRunsTabView::startMonitor() {
+  m_monitorAlgoRunner.get()->disconnect(); // disconnect any other connections
+  m_presenter->notify(IReflRunsTabPresenter::StartMonitorFlag);
+  connect(m_monitorAlgoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+          SLOT(startMonitorComplete()), Qt::UniqueConnection);
+}
+
+/**
+This slot notifies the presenter that the monitoring algorithm finished
+*/
+void QtReflRunsTabView::startMonitorComplete() {
+  m_presenter->notify(IReflRunsTabPresenter::StartMonitorCompleteFlag);
+}
+
+/** Stop live data monitoring
+ */
+void QtReflRunsTabView::stopMonitor() {
+  m_presenter->notify(IReflRunsTabPresenter::StopMonitorFlag);
+}
+
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

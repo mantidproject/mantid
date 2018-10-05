@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui
@@ -42,6 +48,9 @@ class DockWidget(QtGui.QWidget):
         QHbox.addWidget(self.dock_view)
 
         self.dockWidget.setLayout(QHbox)
+
+    def loadFromProject(self, project):
+        self.label.updateLabel(project)
 
     def handleButton(self, message):
         self.label.updateLabel(message)

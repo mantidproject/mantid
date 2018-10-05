@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import os
 
@@ -19,7 +25,6 @@ try:
     os.system("pyuic4 -o ui/sans/ui_eqsans_info.py ui/sans/eqsans_info.ui")
 
     os.system("pyuic4 -o ui/ui_cluster_status.py ui/cluster_status.ui")
-    os.system("pyuic4 -o ui/ui_cluster_details_dialog.py ui/cluster_details_dialog.ui")
     os.system("pyuic4 -o ui/ui_reduction_main.py ui/reduction_main.ui")
     os.system("pyuic4 -o ui/ui_hfir_output.py ui/hfir_output.ui")
     os.system("pyuic4 -o ui/ui_trans_direct_beam.py ui/trans_direct_beam.ui")

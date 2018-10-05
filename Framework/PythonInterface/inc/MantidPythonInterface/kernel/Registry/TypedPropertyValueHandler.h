@@ -1,37 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_
 #define MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_
-/**
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
 
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
 #include "MantidPythonInterface/api/ExtractWorkspace.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/IsNone.h" // includes object.hpp
+#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 
-#include <boost/python/converter/arg_from_python.hpp>
 #include <boost/python/call_method.hpp>
+#include <boost/python/converter/arg_from_python.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -158,8 +143,8 @@ struct DLLExport TypedPropertyValueHandler<
     return valueProp;
   }
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_ */

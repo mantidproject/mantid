@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
 #define MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
 
@@ -156,8 +162,8 @@ public:
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
     // make sure that nan didn' slip in
     TS_ASSERT(std::find_if(GofR.begin(), GofR.end(), [](const double d) {
-      return std::isnan(d);
-    }) == GofR.end());
+                return std::isnan(d);
+              }) == GofR.end());
   }
 
   void test_filter() {

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IMPLICIT_FUNCTION_FACTORY_TEST_H_
 #define IMPLICIT_FUNCTION_FACTORY_TEST_H_
 
@@ -16,7 +22,7 @@
 #include <memory>
 #include <vector>
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class ImplicitFunctionFactoryTest : public CxxTest::TestSuite {
 private:
@@ -107,7 +113,7 @@ private:
     MOCK_METHOD1(setSuccessorParser,
                  void(Mantid::API::ImplicitFunctionParameterParser *successor));
   };
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 
   class MockImplicitFunctionBuilderA
       : public Mantid::API::ImplicitFunctionBuilder {

@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateEPP.h"
 
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -13,8 +19,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 namespace {
 /** A private namespace holding the property names.
@@ -37,7 +43,7 @@ const static std::string HEIGHT("Height");
 const static std::string HEIGHT_ERR("HeightError");
 const static std::string CHI_SQUARED("chiSq");
 const static std::string STATUS("FitStatus");
-}
+} // namespace ColumnNames
 
 /** Add standard EPP table columns to the input workspace.
  *

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_FUNCTIONQDEPENDSTEST_H
 #define MANTID_CURVEFITTING_FUNCTIONQDEPENDSTEST_H
 
@@ -7,13 +13,13 @@
 #include "MantidCurveFitting/Functions/FunctionQDepends.h"
 // Mantid headers from other projects
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/EmptyValues.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidDataHandling/LoadNexus.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 // 3rd party library headers
 #include <cxxtest/TestSuite.h>
 // Standard library

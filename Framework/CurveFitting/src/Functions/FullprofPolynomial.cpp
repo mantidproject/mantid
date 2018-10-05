@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/FullprofPolynomial.h"
 #include "MantidAPI/FunctionFactory.h"
 #include <boost/lexical_cast.hpp>
@@ -81,7 +87,7 @@ void FullprofPolynomial::functionDeriv1D(API::Jacobian *out,
 //----------------------------------------------------------------------------------------------
 /** Get Attribute names
  * @return A list of attribute names (identical toFullprofPolynomial)
-*/
+ */
 std::vector<std::string> FullprofPolynomial::getAttributeNames() const {
   return {"n", "Bkpos"};
 }
@@ -138,7 +144,7 @@ void FullprofPolynomial::setAttribute(const std::string &attName,
 
 //----------------------------------------------------------------------------------------------
 /** Check if attribute attName exists
-  */
+ */
 bool FullprofPolynomial::hasAttribute(const std::string &attName) const {
   bool has = false;
   if (attName == "n")

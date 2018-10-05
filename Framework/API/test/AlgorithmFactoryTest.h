@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ALGORITHMFACTORYTEST_H_
 #define ALGORITHMFACTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "FakeAlgorithms.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/Instantiator.h"
-#include "FakeAlgorithms.h"
+#include <cxxtest/TestSuite.h>
 
 class AlgorithmFactoryTest : public CxxTest::TestSuite {
 public:

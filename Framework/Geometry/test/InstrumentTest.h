@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTTEST_H_
 #define INSTRUMENTTEST_H_
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/Exception.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/Exception.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -592,9 +598,10 @@ public:
     TS_ASSERT(toQuaterniond(legacyInstrument.getDetector(19)->getRotation())
                   .isApprox(toQuaterniond(detRot * bankRot), 1e-10));
     // Check the scale factor
-    TS_ASSERT(toVector3d(legacyInstrument.getComponentByName("bank3")
-                             ->getScaleFactor())
-                  .isApprox(toVector3d(newScaleFactor), 1e-10));
+    TS_ASSERT(
+        toVector3d(
+            legacyInstrument.getComponentByName("bank3")->getScaleFactor())
+            .isApprox(toVector3d(newScaleFactor), 1e-10));
   }
 
   void test_makeLegacyParameterMap_scaled_RectangularDetector() {

@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef AFFINE_MATRIX_PARAMETER_TEST_H
 #define AFFINE_MATRIX_PARAMETER_TEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/AffineMatrixParameter.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid;

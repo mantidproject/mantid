@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/DataProcessorAdapter.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 
@@ -96,7 +102,7 @@ template <class Base> void do_export(const std::string &name) {
            "for "
            "a non-MPI build");
 }
-}
+} // namespace
 
 void export_DataProcessorAlgorithm() {
   do_export<Algorithm>("DataProcessorAlgorithm");

@@ -1,7 +1,13 @@
-#include "MantidAPI/FileProperty.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveCalFile.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/System.h"
 #include <cmath>
 #include <fstream>
 
@@ -151,5 +157,5 @@ void SaveCalFile::saveCalFile(const std::string &calFileName,
   }
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

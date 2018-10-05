@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_STRETCH_H_
 #define MANTIDQTCUSTOMINTERFACES_STRETCH_H_
 
-#include "ui_Stretch.h"
 #include "IndirectBayesTab.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "ui_Stretch.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

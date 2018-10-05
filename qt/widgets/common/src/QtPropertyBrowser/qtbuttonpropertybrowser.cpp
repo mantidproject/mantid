@@ -86,12 +86,12 @@
 ****************************************************************************/
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h"
-#include <QSet>
 #include <QGridLayout>
 #include <QLabel>
+#include <QSet>
+#include <QStyle>
 #include <QTimer>
 #include <QToolButton>
-#include <QStyle>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

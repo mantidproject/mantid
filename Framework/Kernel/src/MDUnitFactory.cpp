@@ -1,6 +1,12 @@
-#include "MantidKernel/make_unique.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidKernel/make_unique.h"
 #include <boost/regex.hpp>
 
 namespace Mantid {
@@ -49,7 +55,8 @@ bool ReciprocalLatticeUnitFactory::canInterpret(
 
 MDUnitFactory_uptr makeMDUnitFactoryChain() {
   MDUnitFactory_uptr first = make_unique<ReciprocalLatticeUnitFactory>();
-  first->setSuccessor(make_unique<InverseAngstromsUnitFactory>())
+  first
+      ->setSuccessor(make_unique<InverseAngstromsUnitFactory>())
       // Add more factories here!
       // Make sure that LabelUnitFactory is the last in the chain to give a fall
       // through

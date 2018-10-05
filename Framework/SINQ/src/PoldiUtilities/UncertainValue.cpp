@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
-#include <stdexcept>
-#include <cmath>
 #include "boost/format.hpp"
+#include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Poldi {
@@ -90,5 +96,5 @@ UncertainValue operator+(double d, const UncertainValue &v) {
 UncertainValue operator-(double d, const UncertainValue &v) {
   return UncertainValue(d - v.value(), v.error());
 }
-}
-}
+} // namespace Poldi
+} // namespace Mantid

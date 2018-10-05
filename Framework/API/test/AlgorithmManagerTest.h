@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef AlgorithmManagerTest_H_
 #define AlgorithmManagerTest_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
-#include <stdexcept>
-#include <vector>
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
+#include <stdexcept>
+#include <vector>
 
 using namespace Mantid::API;
 

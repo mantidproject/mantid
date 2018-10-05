@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------------------------
@@ -107,9 +113,8 @@ void GaussianComptonProfile::massProfile(double *result, const size_t nData,
   for (size_t j = 0; j < nData; ++j) {
     const double q = modq[j];
     const double prefactor = mass() * std::pow(ei[j], 0.1) / q;
-    result[j] =
-        prefactor *
-        (voigt[j] - std::pow(gaussWidth, 4.0) * voigtDiffResult[j] / (3.0 * q));
+    result[j] = prefactor * (voigt[j] - std::pow(gaussWidth, 4.0) *
+                                            voigtDiffResult[j] / (3.0 * q));
   }
 }
 

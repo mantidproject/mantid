@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BOXPLITCONTROLLER_TEST_H
 #define BOXPLITCONTROLLER_TEST_H
 
-#include "MantidKernel/DiskBuffer.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IBoxControllerIO.h"
+#include "MantidKernel/DiskBuffer.h"
 #include "MantidTestHelpers/BoxControllerDummyIO.h"
-#include <cxxtest/TestSuite.h>
-#include <map>
-#include <vector>
-#include <memory>
-#include <stdexcept>
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
+#include <cxxtest/TestSuite.h>
+#include <map>
+#include <memory>
+#include <stdexcept>
+#include <vector>
 
 using namespace Mantid;
 using namespace Mantid::API;

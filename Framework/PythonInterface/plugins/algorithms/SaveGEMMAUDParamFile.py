@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import math
@@ -85,7 +91,12 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         def create_empty_param_list(default_value="0"):
             return "\n".join(default_value for _ in range(num_banks))
 
-        with open(self.getProperty(self.PROP_TEMPLATE_FILE).value) as template_file:
+        template_file_path = self.getProperty(self.PROP_TEMPLATE_FILE).value
+        if len(template_file_path) == 0:
+            logger.error("Could not find default diffraction directory for .maud template file: "
+                         "you'll have to find it yourself")
+
+        with open(template_file_path) as template_file:
             template = template_file.read()
 
         output_params["function_types"] = create_empty_param_list("1")
@@ -136,8 +147,6 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
             if os.path.exists(path_to_test):
                 return path_to_test
 
-        logger.warning("Could not find default diffraction directory for .maud template file: "
-                       "you'll have to find it yourself")
         return ""
 
     def _format_param_list(self, param_list):

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtCustomInterfaces/LatticePresenter.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 #include "MantidQtCustomInterfaces/LatticeView.h"
 #include "MantidQtCustomInterfaces/LoanedMemento.h"
-#include "MantidQtCustomInterfaces/AbstractMementoItem.h"
 #include "MantidQtCustomInterfaces/WorkspaceMemento.h"
 #include "MantidQtCustomInterfaces/WorkspaceMementoService.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -81,5 +87,5 @@ void LatticePresenter::update() {
     }
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

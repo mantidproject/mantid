@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IMPLICIT_FUNCTION_PARSER_FACTORY_TEST_H_
 #define IMPLICIT_FUNCTION_PARSER_FACTORY_TEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
-#include "MantidAPI/ImplicitFunctionParserFactory.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include "MantidAPI/ImplicitFunctionParser.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidAPI/ImplicitFunctionParserFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include <boost/shared_ptr.hpp>
 
 class ImplicitFunctionParserFactoryTest : public CxxTest::TestSuite {

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
@@ -9,10 +15,10 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 
-#include <fstream>
-#include <stdio.h>
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
+#include <fstream>
+#include <stdio.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -319,5 +325,5 @@ void LoadSampleShape::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // end DataHandling namespace
-} // end MantidNamespace
+} // namespace DataHandling
+} // namespace Mantid

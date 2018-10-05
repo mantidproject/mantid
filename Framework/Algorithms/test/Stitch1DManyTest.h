@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_STITCH1DMANYTEST_H_
 #define MANTID_ALGORITHMS_STITCH1DMANYTEST_H_
 
@@ -23,22 +29,22 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::Algorithms::Stitch1DMany;
 using Mantid::Algorithms::CreateWorkspace;
 using Mantid::Algorithms::GroupWorkspaces;
+using Mantid::Algorithms::Stitch1DMany;
 
 class Stitch1DManyTest : public CxxTest::TestSuite {
 private:
   /** Create a histogram workspace with two spectra and 10 bins. This can also
-  * be run using the CreateWorkspace algorithm which leaves the output workspace
-  * in the ADS as well.
-  * @param xstart :: the first X value (common to both spectra)
-  * @param deltax :: the bin width
-  * @param value1 :: the Y counts in the first spectrum (constant for all X)
-  * @param value2 :: the Y counts in the second spectrum (constant for all X)
-  * @param runAlg :: set true to run the CreateWorkspace algorithm
-  * @param outWSName :: output workspace name used if running CreateWorkspace
-  */
+   * be run using the CreateWorkspace algorithm which leaves the output
+   * workspace in the ADS as well.
+   * @param xstart :: the first X value (common to both spectra)
+   * @param deltax :: the bin width
+   * @param value1 :: the Y counts in the first spectrum (constant for all X)
+   * @param value2 :: the Y counts in the second spectrum (constant for all X)
+   * @param runAlg :: set true to run the CreateWorkspace algorithm
+   * @param outWSName :: output workspace name used if running CreateWorkspace
+   */
   void createUniformWorkspace(double xstart, double deltax, double value1,
                               double value2, std::string outWSName,
                               bool runAlg = false) {
@@ -99,10 +105,10 @@ private:
   }
 
   /** Groups workspaces using GroupWorkspaces algorithm. The output workpace is
-  * left in the ADS as well.
-  * @param inputWSNames :: input workspaces names
-  * @param outputWSName :: output workspace name
-  */
+   * left in the ADS as well.
+   * @param inputWSNames :: input workspaces names
+   * @param outputWSName :: output workspace name
+   */
   void doGroupWorkspaces(std::string inputWSNames, std::string outWSName) {
     GroupWorkspaces gw;
     gw.initialize();
@@ -115,9 +121,9 @@ private:
   }
 
   /** Obtain all algorithm histories from a workspace
-  * @param inputWS :: the input workspace
-  * @return vector of names of algorithm histories
-  */
+   * @param inputWS :: the input workspace
+   * @return vector of names of algorithm histories
+   */
   std::vector<std::string> getHistory(MatrixWorkspace_sptr inputWS) {
     std::vector<std::string> histNames;
     auto histories = inputWS->history().getAlgorithmHistories();
@@ -1092,13 +1098,15 @@ public:
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
-    TS_ASSERT_EQUALS(histNames.size(), 6)
+    TS_ASSERT_EQUALS(histNames.size(), 8)
     TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[1], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[2], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[3], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[4], "Stitch1DMany");
-    TS_ASSERT_EQUALS(histNames[5], "Stitch1DMany");
+    TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[2], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[3], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[4], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[5], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[6], "Stitch1DMany");
+    TS_ASSERT_EQUALS(histNames[7], "Stitch1DMany");
 
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
@@ -1146,14 +1154,17 @@ public:
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
-    TS_ASSERT_EQUALS(histNames.size(), 7);
+    TS_ASSERT_EQUALS(histNames.size(), 10);
     TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[1], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[2], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[3], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[2], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[3], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[4], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[5], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[6], "Stitch1DMany");
+    TS_ASSERT_EQUALS(histNames[6], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[7], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[8], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[9], "Stitch1DMany");
 
     // Clear the ADS
     AnalysisDataService::Instance().clear();

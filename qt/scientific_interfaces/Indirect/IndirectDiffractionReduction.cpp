@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDiffractionReduction.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -61,8 +67,9 @@ void IndirectDiffractionReduction::initLayout() {
   connect(m_uiForm.iicInstrumentConfiguration,
           SIGNAL(instrumentConfigurationUpdated(
               const QString &, const QString &, const QString &)),
-          this, SLOT(instrumentSelected(const QString &, const QString &,
-                                        const QString &)));
+          this,
+          SLOT(instrumentSelected(const QString &, const QString &,
+                                  const QString &)));
 
   // Update run button based on state of raw files field
   connectRunButtonValidation(m_uiForm.rfSampleFiles);
@@ -103,8 +110,8 @@ void IndirectDiffractionReduction::initLayout() {
 }
 
 /**
-* Make file finding status display on the run button and enable/disable it
-*/
+ * Make file finding status display on the run button and enable/disable it
+ */
 void IndirectDiffractionReduction::connectRunButtonValidation(
     const MantidQt::API::MWRunFiles *file_field) {
   connect(file_field, SIGNAL(fileTextChanged(const QString &)), this,
@@ -732,7 +739,8 @@ void IndirectDiffractionReduction::loadSettings() {
   QSettings settings;
   QString dataDir = QString::fromStdString(
                         Mantid::Kernel::ConfigService::Instance().getString(
-                            "datasearch.directories")).split(";")[0];
+                            "datasearch.directories"))
+                        .split(";")[0];
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);

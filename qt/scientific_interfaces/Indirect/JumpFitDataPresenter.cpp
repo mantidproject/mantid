@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFitDataPresenter.h"
 #include "JumpFitDataTablePresenter.h"
 
@@ -13,8 +19,9 @@ JumpFitDataPresenter::JumpFitDataPresenter(
     JumpFitModel *model, IndirectFitDataView *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
     : IndirectFitDataPresenter(
-          model, view, Mantid::Kernel::make_unique<JumpFitDataTablePresenter>(
-                           model, view->getDataTable())),
+          model, view,
+          Mantid::Kernel::make_unique<JumpFitDataTablePresenter>(
+              model, view->getDataTable())),
       m_activeParameterType(0), m_dataIndex(0),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
@@ -185,10 +192,12 @@ void JumpFitDataPresenter::dialogExecuted(IAddWorkspaceDialog const *dialog,
 std::unique_ptr<IAddWorkspaceDialog>
 JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = Mantid::Kernel::make_unique<JumpFitAddWorkspaceDialog>(parent);
-  connect(dialog.get(), SIGNAL(workspaceChanged(JumpFitAddWorkspaceDialog *,
-                                                const std::string &)),
-          this, SLOT(setDialogParameterNames(JumpFitAddWorkspaceDialog *,
-                                             const std::string &)));
+  connect(dialog.get(),
+          SIGNAL(workspaceChanged(JumpFitAddWorkspaceDialog *,
+                                  const std::string &)),
+          this,
+          SLOT(setDialogParameterNames(JumpFitAddWorkspaceDialog *,
+                                       const std::string &)));
   connect(dialog.get(),
           SIGNAL(parameterTypeChanged(JumpFitAddWorkspaceDialog *, int)), this,
           SLOT(setDialogParameterNames(JumpFitAddWorkspaceDialog *, int)));

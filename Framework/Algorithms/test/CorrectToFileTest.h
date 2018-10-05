@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CORRECTTOFILE_H_
 #define CORRECTTOFILE_H_
 
 //-------------------
 // Includes
 //--------------------
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace_sptr;

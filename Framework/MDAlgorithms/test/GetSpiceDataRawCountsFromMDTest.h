@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMDTEST_H_
 #define MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h"
 
-using Mantid::MDAlgorithms::GetSpiceDataRawCountsFromMD;
 using Mantid::DataHandling::LoadSpiceAscii;
 using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
+using Mantid::MDAlgorithms::GetSpiceDataRawCountsFromMD;
 
 using namespace Mantid::API;
 

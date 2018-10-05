@@ -1,22 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Strings.h"
 
-#include "MuonAnalysisHelper.h"
+#include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
-#include "ALCLatestFileFinder.h"
+#include "MuonAnalysisHelper.h"
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
 
 #include <QApplication>
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -192,7 +198,16 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
       throw std::runtime_error(result.error());
     }
 
-    m_loadedData = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr tmp = alg->getProperty("OutputWorkspace");
+
+    IAlgorithm_sptr sortAlg = AlgorithmManager::Instance().create("SortXAxis");
+    sortAlg->setChild(true); // Don't want workspaces in the ADS
+    sortAlg->setProperty("InputWorkspace", tmp);
+    sortAlg->setProperty("Ordering", "Ascending");
+    sortAlg->setProperty("OutputWorkspace", "__NotUsed__");
+
+    sortAlg->execute();
+    m_loadedData = sortAlg->getProperty("OutputWorkspace");
 
     // If errors are properly caught, shouldn't happen
     assert(m_loadedData);

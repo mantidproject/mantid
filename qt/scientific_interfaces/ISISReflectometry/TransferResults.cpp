@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "TransferResults.h"
 
 namespace MantidQt {
@@ -26,5 +32,5 @@ void TransferResults::addErrorRow(COLUMN_NAME_TYPE id,
                                   COLUMN_VALUE_TYPE error) {
   m_errorRuns.push_back({{id, error}});
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

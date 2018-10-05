@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTQUAT__
 #define MANTID_TESTQUAT__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <ostream>
-#include <float.h>
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <float.h>
+#include <ostream>
 
 using namespace Mantid::Kernel;
 

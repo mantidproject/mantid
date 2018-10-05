@@ -9,11 +9,11 @@
 Description
 -----------
 
-This algorithm converts a reflectivity workspace from wavelength to momentum transfer :math:`Q_{z}` and calculates the :math:`Q_{z}` resolution. The resolution is added as the Dx (X Errors) field in the output workspace.
+This algorithm converts a reflectivity workspace from wavelength to momentum transfer :math:`Q_{z}` and calculates the :math:`Q_{z}` resolution. The resolution is added as the Dx (X Errors) field in the output workspace. This algorithms processes workspaces in which the pixels containing the reflectected line have been integrated into a single histogram. For conversion of a 2D workspace into :math:`Q_{x}, Q_{z}` or equivalent momentum space, see :ref:`ConvertToReflectometryQ <algm-ConvertToReflectometryQ>`.
 
 The two additional input workspaces, *ReflectedBeamWorkspace* and *DirectBeamWorkspace* are the raw reflected and direct beam workspaces before foreground summation. They are needed for the resolution calculation.
 
-The instruments of all three input workspaces are expected contain two components representing the two slits in the beam before the sample. The names of these components are given to the algorithm as the *Slit1Name* and *Slit2Name* properties. The slit openings (width or height depending on reflectometer setup) should be written in the sample logs (units 'm' or 'mm'). The log enties are named by *Slit1SizeSampleLog* and *Slit2SizeSampleLog*.
+The instruments of all three input workspaces are expected contain two components representing the two slits in the beam before the sample. The names of these components are given to the algorithm as the *FirstSlitName* and *SecondSlitName* properties. The slit openings (width or height depending on reflectometer setup) should be written in the sample logs (units 'm' or 'mm'). The log enties are named by *FirstSlitSizeSampleLog* and *SecondSlitSizeSampleLog*.
 
 The *Polarized* property should be used to indicate whether *InputWorkspace* is part of a polarization analysis dataset.
 
@@ -86,10 +86,10 @@ Usage
        ChopperSpeed=chopperSpeed,
        ChopperOpening=45. - (chopper2Phase - chopper1Phase) - openoffset,
        ChopperPairDistance=chopperPairDistance,
-       Slit1Name='slit2',
-       Slit1SizeSampleLog='VirtualSlitAxis.s2w_actual_width',
-       Slit2Name='slit3',
-       Slit2SizeSampleLog='VirtualSlitAxis.s3w_actual_width',
+       FirstSlitName='slit2',
+       FirstSlitSizeSampleLog='VirtualSlitAxis.s2w_actual_width',
+       SecondSlitName='slit3',
+       SecondSlitSizeSampleLog='VirtualSlitAxis.s3w_actual_width',
        TOFChannelWidth=57.
    )
 

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FIELDDATATOMETADATATEST_H_
 #define FIELDDATATOMETADATATEST_H_
 
+#include "MantidVatesAPI/FieldDataToMetadata.h"
 #include <cxxtest/TestSuite.h>
 #include <vtkCharArray.h>
 #include <vtkFieldData.h>
-#include "MantidVatesAPI/FieldDataToMetadata.h"
 #include <vtkSmartPointer.h>
 
 using Mantid::VATES::FieldDataToMetadata;

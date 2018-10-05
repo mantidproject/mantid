@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef STRUCTURED_DETECTOR_TEST_H
 #define STRUCTURED_DETECTOR_TEST_H
 
@@ -13,8 +19,8 @@
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class StructuredDetectorTest : public CxxTest::TestSuite {
 public:
@@ -190,8 +196,8 @@ public:
   }
 
   /** Test on a structured detector that will be
-  * repeated on an un-moved parametrized version.
-  */
+   * repeated on an un-moved parametrized version.
+   */
   void do_test_on(StructuredDetector *det) {
     TS_ASSERT_EQUALS(det->xPixels(), 2);
     TS_ASSERT_EQUALS(det->yPixels(), 2);

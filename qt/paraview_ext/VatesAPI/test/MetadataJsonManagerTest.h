@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef METADATA_JSON_MANAGER_TEST
 #define METADATA_JSON_MANAGER_TEST
 
@@ -7,10 +13,10 @@
 #pragma warning(disable : 4251)
 #endif
 
-#include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/MetadataJsonManager.h"
-#include <string>
+#include <cxxtest/TestSuite.h>
 #include <json/reader.h>
+#include <string>
 
 using Mantid::VATES::MetadataJsonManager;
 

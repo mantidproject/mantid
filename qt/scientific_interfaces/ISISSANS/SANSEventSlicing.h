@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_SANSEVENTSLICING_H_
 #define MANTIDQTCUSTOMINTERFACES_SANSEVENTSLICING_H_
 
-#include "ui_SANSEventSlicing.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_SANSEventSlicing.h"
 #include <QString>
 
 namespace MantidQt {
@@ -48,7 +54,7 @@ private slots:
 private:
   Ui::SANSEventSlicing ui;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_SANSEVENTSLICING_H_

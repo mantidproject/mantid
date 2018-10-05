@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CORELLICROSSCORRELATETEST_H_
 #define MANTID_ALGORITHMS_CORELLICROSSCORRELATETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::Algorithms::CorelliCrossCorrelate;

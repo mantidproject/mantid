@@ -1,27 +1,33 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADMUONLOGTEST_H_
 #define LOADMUONLOGTEST_H_
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadMuonLog.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadMuonLog.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <vector>
 #include <Poco/Path.h>
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

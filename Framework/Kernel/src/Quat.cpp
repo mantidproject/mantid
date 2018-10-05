@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
@@ -620,7 +626,7 @@ void Quat::printSelf(std::ostream &os) const {
 /**  Read data from a stream in the format returned by printSelf ("[w,a,b,c]").
  *   @param IX :: Input Stream
  *   @throw std::runtime_error if the input is of wrong format
-*/
+ */
 void Quat::readPrinted(std::istream &IX) {
   std::string in;
   std::getline(IX, in);
@@ -809,4 +815,4 @@ Quat::getEulerAngles(const std::string &convention = "XYZ") const {
 
 } // Namespace Kernel
 
-} // Namespce Mantid
+} // namespace Mantid

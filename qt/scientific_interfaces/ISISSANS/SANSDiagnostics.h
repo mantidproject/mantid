@@ -1,42 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_SANSDIAGNOSTICS_H_
 #define MANTIDQTCUSTOMINTERFACES_SANSDIAGNOSTICS_H_
 
-#include "ui_SANSRunWindow.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_SANSRunWindow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /**
-The RectDetectorDetails class stores the rectangualr detector name
+The RectDetectorDetails class stores the rectangular detector name
 and minimum and maximum detector id
 
 @author Sofia Antony, Rutherford Appleton Laboratory
 @date 03/02/2011
-
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class RectDetectorDetails {
 public:
@@ -72,30 +57,11 @@ private:
 };
 
 /**
-    The SANSDiagnostics is responsible for the diagnostics tab of SANS
-   interface.
-    @author Sofia Antony, Rutherford Appleton Laboratory
-    @date 27/01/2011
+The SANSDiagnostics is responsible for the diagnostics tab of SANS
+interface.
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
+@author Sofia Antony, Rutherford Appleton Laboratory
+@date 27/01/2011
 */
 class SANSDiagnostics : public MantidQt::API::UserSubWindow {
   Q_OBJECT
@@ -218,17 +184,17 @@ private:
   QString m_settingsGroup; ///< settings used for permanent store.
   QString m_wsName;        ///<  workspace name created by load raw
   QString m_fileName;      ///< name of the file
-  QString m_spec_min;      ///<spectrum min
-  QString m_spec_max;      ///<spectrum max
-  QString m_outws_load;    ///<output workspace for load algorithm
+  QString m_spec_min;      ///< spectrum min
+  QString m_spec_max;      ///< spectrum max
+  QString m_outws_load;    ///< output workspace for load algorithm
   QString m_memberwsName;
   /// set to point to the object that has the Add Files controls
   Ui::SANSRunWindow *m_SANSForm;
   // set to a pointer to the parent form
   QWidget *parForm;
 
-  int m_totalPeriods;               ///<total periods
-  int m_Period;                     ///<Current period
+  int m_totalPeriods;               ///< total periods
+  int m_Period;                     ///< Current period
   std::vector<std::string> m_wsVec; ///< workspace vector
   std::vector<boost::shared_ptr<RectDetectorDetails>> m_rectDetectors;
 
@@ -255,7 +221,7 @@ private slots:
   /// enable the mask controls in the diagnostics UI
   void enableMaskFileControls();
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_

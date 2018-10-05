@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANDATORYVALIDATORTEST_H_
 #define MANDATORYVALIDATORTEST_H_
 
-#include <string>
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace Mantid::Kernel;
 
@@ -43,7 +49,7 @@ public:
     IValidator_sptr ss = s->clone();
     TS_ASSERT_DIFFERS(s, ss);
     TS_ASSERT(boost::dynamic_pointer_cast<
-        MandatoryValidator<std::vector<std::string>>>(ss));
+              MandatoryValidator<std::vector<std::string>>>(ss));
   }
 
   void testMandatoryValidator() {

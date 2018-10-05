@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_
 #define MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_
 
@@ -36,8 +42,8 @@ protected:
 private:
   /// Construct QTreeWidget with categories and functions
   void
-  constructFunctionTree(const std::map<std::string, std::vector<std::string>> &
-                            categoryFunctionsMap,
+  constructFunctionTree(const std::map<std::string, std::vector<std::string>>
+                            &categoryFunctionsMap,
                         const std::vector<std::string> &restrictions);
 };
 

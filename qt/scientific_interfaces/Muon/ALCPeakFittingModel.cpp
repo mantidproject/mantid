@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCPeakFittingModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/TextAxis.h"
 
 #include <Poco/ActiveResult.h>
 #include <QApplication>

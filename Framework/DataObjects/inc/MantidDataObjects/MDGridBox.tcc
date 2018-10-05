@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Task.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/FunctionTask.h"
@@ -1286,9 +1292,7 @@ TMDE(void MDGridBox)::centroidSphere(API::CoordTransform &radiusTransform,
   } // (for each box)
 }
 //-----------------------------------------------------------------------------------------------
-// clang-format off
-GCC_DIAG_OFF(array-bounds)
-// clang-format on
+GNU_DIAG_OFF("array-bounds")
 /** Integrate the signal within a sphere; for example, to perform single-crystal
  * peak integration.
  * The CoordTransform object could be used for more complex shapes, e.g.
@@ -1492,9 +1496,7 @@ TMDE(void MDGridBox)::integrateCylinder(
   delete[] verticesContained;
   delete[] boxMightTouch;
 }
-// clang-format off
-GCC_DIAG_ON(array-bounds)
-// clang-format on
+GNU_DIAG_ON("array-bounds")
 
 /**
 Getter for the masking status of the gridded box.

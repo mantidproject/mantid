@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "SANSEventSlicing.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "ui_SANSEventSlicing.h"
-#include <QSettings>
-#include <QMessageBox>
 #include <QKeyEvent>
+#include <QMessageBox>
+#include <QSettings>
 #include <QTextStream>
 #include <stdexcept>
 
@@ -15,7 +21,7 @@ using namespace MantidQt::CustomInterfaces;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("SANSEventSlicing");
-}
+} // namespace
 
 SANSEventSlicing::SANSEventSlicing(QWidget *parent) : UserSubWindow(parent) {
   setWindowFlags(windowFlags() | Qt::Dialog); //| Qt::Popup);

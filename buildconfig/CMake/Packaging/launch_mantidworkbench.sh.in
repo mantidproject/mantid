@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Launch Mantidplot using any necessary LD_PRELOAD or software collection behaviour
+#
+# Script is configured by CMake
+
+# Find out where we are
+THISFILE=$(readlink -f "$0")
+INSTALLDIR=$(dirname $THISFILE)   # directory of executable
+INSTALLDIR=$(dirname $INSTALLDIR) # root install directory
+
+@MTD_PATH_DEFINITION@
+
+@TCMALLOC_DEFINITIONS@
+
+@VIRTUAL_GL_WRAPPER@
+
+# Define where python libraries are
+LOCAL_PYTHONPATH=@LOCAL_PYPATH@@PARAVIEW_PYTHON_PATHS@
+if [ -n "${PYTHONPATH}" ]; then
+    LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
+fi
+
+@GDB_DEFINITIONS@
+
+LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
+    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
+    PYTHONPATH=${LOCAL_PYTHONPATH} \
+    @WRAPPER_PREFIX@$VGLRUN $GDB @PYTHON_EXECUTABLE@ $INSTALLDIR/bin/@MANTIDWORKBENCH_EXEC@ $*@WRAPPER_POSTFIX@ || @PYTHON_EXECUTABLE@ @SCRIPTSDIR@/@ERROR_CMD@

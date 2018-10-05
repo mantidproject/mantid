@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTWIDGET_H_
 #define INSTRUMENTWIDGET_H_
 
@@ -21,7 +27,7 @@ namespace Mantid {
 namespace API {
 class IPeaksWorkspace;
 }
-}
+} // namespace Mantid
 
 // Qt forward declarations
 class QPushButton;
@@ -44,7 +50,6 @@ namespace MantidWidgets {
 class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
-class OneCurvePlot;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;
@@ -178,8 +183,8 @@ public slots:
 
   void setupColorMap();
 
-  void changeColormap(const QString &filename = ""); // Deprecated
-  void changeScaleType(int);                         // Deprecated
+  void changeColormap(const QString &cmapNameOrPath = ""); // Deprecated
+  void changeScaleType(int);                               // Deprecated
   void changeNthPower(double);
   void changeColorMapMinValue(double minValue);               // Deprecated
   void changeColorMapMaxValue(double maxValue);               // Deprecated
@@ -314,7 +319,7 @@ private:
   std::string saveTabs() const;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*INSTRUMENTWIDGET_H_*/

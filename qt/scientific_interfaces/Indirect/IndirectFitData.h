@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATA_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATA_H_
 
@@ -8,6 +14,8 @@
 #include <boost/variant.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/weak_ptr.hpp>
+
+#include <cctype>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -31,7 +39,11 @@ std::vector<T> vectorFromString(const std::string &listString) {
 template <typename T> class DiscontinuousSpectra {
 public:
   explicit DiscontinuousSpectra(const std::string &str)
-      : m_str(str), m_vec(vectorFromString<T>(str)) {}
+      : m_str(str), m_vec(vectorFromString<T>(str)) {
+    m_str.erase(std::remove_if(m_str.begin(), m_str.end(),
+                               static_cast<int (*)(int)>(std::isspace)),
+                m_str.end());
+  }
   DiscontinuousSpectra(const DiscontinuousSpectra &vec)
       : m_str(vec.m_str), m_vec(vec.m_vec) {}
   DiscontinuousSpectra(DiscontinuousSpectra &&vec)
@@ -124,27 +136,6 @@ private:
    IndirectFitData - Stores the data to be fit; workspace, spectra,
    fitting range and exclude regions. Provides methods for accessing
    and applying the fitting data.
-
-   Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>.
-   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IndirectFitData {
 public:

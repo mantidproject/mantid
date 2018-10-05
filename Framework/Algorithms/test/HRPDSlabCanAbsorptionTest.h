@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef HRPDSLABCANABSORPTIONTEST_H_
 #define HRPDSLABCANABSORPTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Axis.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidIndexing/IndexInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;

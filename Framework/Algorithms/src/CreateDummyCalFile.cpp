@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CreateDummyCalFile.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
+#include "MantidKernel/ConfigService.h"
 
-#include <queue>
-#include <fstream>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <fstream>
+#include <queue>
 
 namespace Mantid {
 namespace Algorithms {
@@ -257,5 +263,5 @@ void CreateDummyCalFile::writeHeaders(std::ostream &os,
      << "\n";
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

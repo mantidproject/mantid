@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 
 #ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEPRESENTERTEST_H
 #define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEPRESENTERTEST_H
@@ -96,8 +102,9 @@ public:
     tearDownWorkspaces(workspaces);
   }
 
-  void testConstructWithOneWorkspaceAndOneWindow() {
+  void testConstructWithOneWorkspaceAndOneWindowOneInterface() {
     auto workspaces = setUpWorkspaces({"ws1"});
+    std::vector<std::string> interfaces{"Interface_1"};
 
     WindowInfo info;
     info.name = "WindowName1Workspace";
@@ -109,8 +116,10 @@ public:
     // View should be passed what workspaces exist and what windows
     // are currently included.
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    ON_CALL(m_view, getAllPythonInterfaces()).WillByDefault(Return(interfaces));
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateInterfacesList(interfaces)).Times(Exactly(1));
     EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
 
     ProjectSavePresenter presenter(&m_view);
@@ -324,10 +333,10 @@ public:
   //============================================================================
 
   /**
- * Create some workspaces and add them to the ADS
- * @param workspaces :: List of workspace names
- * @return a vector of workspace info structs
- */
+   * Create some workspaces and add them to the ADS
+   * @param workspaces :: List of workspace names
+   * @return a vector of workspace info structs
+   */
   std::vector<WorkspaceInfo>
   setUpWorkspaces(const std::vector<std::string> &workspaces) {
     std::vector<WorkspaceInfo> wsInfo;
@@ -344,9 +353,9 @@ public:
   }
 
   /**
- * Remove a list of workspaces from the ADS
- * @param workspaces :: List of workspace names
- */
+   * Remove a list of workspaces from the ADS
+   * @param workspaces :: List of workspace names
+   */
   void tearDownWorkspaces(const std::vector<WorkspaceInfo> &workspaces) {
     for (auto &info : workspaces) {
       WorkspaceCreationHelper::removeWS(info.name);

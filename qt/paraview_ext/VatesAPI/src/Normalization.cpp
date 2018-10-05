@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDNode.h"
 
 namespace Mantid {
 namespace VATES {
@@ -69,5 +75,5 @@ createIteratorWithNormalization(const VisualNormalization normalizationOption,
   // Return it
   return iterator;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

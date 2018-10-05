@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/Expression.h"
-#include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/Expression.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/LibraryManager.h"
 #include <MantidKernel/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>

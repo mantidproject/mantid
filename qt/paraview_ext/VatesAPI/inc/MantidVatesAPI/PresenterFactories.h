@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_VATES_PRESENTER_FACTORIES_H
 #define MANTID_VATES_PRESENTER_FACTORIES_H
 
@@ -26,12 +32,12 @@ protected:
 };
 
 /**
-* This templated function sets up an in memory loading presenter.
-* @param view: the loading view type
-* @param wsName: the name of the workspace which is to be displayed
-* @param worksapceProvider: a worksapce provider
-* @returns a new in memory loading presenter.
-*/
+ * This templated function sets up an in memory loading presenter.
+ * @param view: the loading view type
+ * @param wsName: the name of the workspace which is to be displayed
+ * @param worksapceProvider: a worksapce provider
+ * @returns a new in memory loading presenter.
+ */
 template <class Presenter, class WorkspaceNamePolicy>
 class DLLExport InMemoryPresenterFactory : private WorkspaceNamePolicy {
   using WorkspaceNamePolicy::getWorkspaceName;
@@ -46,6 +52,6 @@ public:
                                                   getWorkspaceName(*workspace));
   }
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

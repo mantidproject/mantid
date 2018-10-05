@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from __future__ import (absolute_import, division, print_function)
 
@@ -359,9 +365,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._output_x_units = self.getPropertyValue('UnitX')
 
         self._output_ws = self.getPropertyValue('OutputWorkspace')
-
-        if self._grouping_string is not None:
-            self._grouping_string = self._grouping_string.replace('-', ':')
 
         # Disable sum files if there is only one file
         if len(self._data_files) == 1:

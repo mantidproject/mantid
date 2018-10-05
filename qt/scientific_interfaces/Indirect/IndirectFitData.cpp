@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitData.h"
 
 #include <boost/algorithm/string.hpp>
@@ -187,7 +193,10 @@ IndirectFitData::displayName(const std::string &formatString,
   auto formatted = boost::format(formatString);
   formatted = tryPassFormatArgument(formatted, workspaceName);
   formatted = tryPassFormatArgument(formatted, spectraString);
-  return formatted.str();
+
+  auto name = formatted.str();
+  std::replace(name.begin(), name.end(), ',', '+');
+  return name;
 }
 
 std::string IndirectFitData::displayName(const std::string &formatString,

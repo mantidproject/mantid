@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
 from mantid.api import MatrixWorkspace
@@ -43,7 +49,7 @@ def get_save_strategy(file_format_bundle, file_name, save_options):
         file_name = get_file_name(file_format_bundle, file_name, "", ".xml")
         save_name = "SaveCanSAS1D"
     elif file_format is SaveType.NXcanSAS:
-        file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".nxs")
+        file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
         save_name = "SaveNXcanSAS"
     elif file_format is SaveType.NistQxy:
         file_name = get_file_name(file_format_bundle, file_name, "_nistqxy", ".dat")

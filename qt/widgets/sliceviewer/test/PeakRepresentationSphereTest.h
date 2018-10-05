@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SLICE_VIEWER_PEAK_REPRESENTATION_SPHERE_TEST_H_
 #define SLICE_VIEWER_PEAK_REPRESENTATION_SPHERE_TEST_H_
 
@@ -34,7 +40,7 @@ public:
                                   outerBackgroundRadius);
 
     // Act + Assert
-    TSM_ASSERT(radius, peak.getEffectiveRadius());
+    TS_ASSERT_EQUALS(radius, peak.getEffectiveRadius());
   }
 
   void test_getRadius_gets_outer_background_radius_if_background_is_shown() {
@@ -49,7 +55,7 @@ public:
     peak.showBackgroundRadius(true);
 
     // Act + Assert
-    TSM_ASSERT(outerBackgroundRadius, peak.getEffectiveRadius());
+    TS_ASSERT_EQUALS(outerBackgroundRadius, peak.getEffectiveRadius());
   }
 
   void test_handle_outer_background_radius_zero() {
@@ -259,7 +265,7 @@ public:
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
           m_peaks.push_back(boost::make_shared<
-              PeakRepresentationSphereExposeProtectedWrapper>(
+                            PeakRepresentationSphereExposeProtectedWrapper>(
               peakOrigin, radius, innerBackgroundRadius,
               outerBackgroundRadius));
         }

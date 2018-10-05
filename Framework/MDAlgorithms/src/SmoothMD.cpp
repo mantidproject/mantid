@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SmoothMD.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -60,7 +66,7 @@ SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
       {"Gaussian", boost::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
                                instance, _1, _2, _3)}};
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -504,15 +510,19 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
       double intpart;
       if (modf(widthEntry, &intpart) != 0.0) {
         std::stringstream message;
-        message << widthVectorPropertyName << " entries must be (odd) integers "
-                                              "when Hat function is chosen. "
-                                              "Bad entry is " << widthEntry;
+        message << widthVectorPropertyName
+                << " entries must be (odd) integers "
+                   "when Hat function is chosen. "
+                   "Bad entry is "
+                << widthEntry;
         product.emplace(widthVectorPropertyName, message.str());
       } else if (static_cast<unsigned long>(widthEntry) % 2 == 0) {
         std::stringstream message;
-        message << widthVectorPropertyName << " entries must be odd integers "
-                                              "when Hat function is chosen. "
-                                              "Bad entry is " << widthEntry;
+        message << widthVectorPropertyName
+                << " entries must be odd integers "
+                   "when Hat function is chosen. "
+                   "Bad entry is "
+                << widthEntry;
       }
     }
   }
@@ -544,8 +554,9 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
           message << normalisationWorkspacePropertyName
                   << ". Number of bins from dimension with index " << i
                   << " do not match. " << nBinsSmooth << " expected. Got "
-                  << nBinsNorm << ". Shapes of inputs must be the same. Cannot "
-                                  "continue smoothing.";
+                  << nBinsNorm
+                  << ". Shapes of inputs must be the same. Cannot "
+                     "continue smoothing.";
           product.emplace(normalisationWorkspacePropertyName, message.str());
           break;
         }

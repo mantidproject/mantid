@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef EVENTLISTTEST_H_
 #define EVENTLISTTEST_H_ 1
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_ptr.hpp>
 #include <cmath>

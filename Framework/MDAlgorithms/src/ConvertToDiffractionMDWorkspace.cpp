@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
 
 #include "MantidAPI/Axis.h"
@@ -12,19 +18,19 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -604,5 +610,5 @@ void ConvertToDiffractionMDWorkspace::exec() {
   delete[] m_extentsMax;
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

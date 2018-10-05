@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_QENSFITSEQUENTIAL_H_
 #define MANTID_ALGORITHMS_QENSFITSEQUENTIAL_H_
 
@@ -15,22 +21,6 @@ namespace Algorithms {
 
 /**
   QENSFitSequential - Performs a sequential QENS fit
-
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-  This file is part of Mantid.
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport QENSFitSequential : public API::DataProcessorAlgorithm {
 public:
@@ -47,6 +37,7 @@ protected:
   virtual std::map<std::string, std::string> getAdditionalLogNumbers() const;
   virtual API::ITableWorkspace_sptr
   processParameterTable(API::ITableWorkspace_sptr parameterTable);
+  virtual std::vector<std::string> getFitParameterNames() const;
 
 private:
   void init() override;
@@ -54,17 +45,19 @@ private:
   API::ITableWorkspace_sptr performFit(const std::string &input,
                                        const std::string &output);
   void deleteTemporaryWorkspaces(const std::string &outputBaseName);
-  void addAdditionalLogs(API::MatrixWorkspace_sptr result);
+  void addAdditionalLogs(API::Workspace_sptr result);
 
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &parameterName) const;
-  std::vector<std::string> getFitParameterNames() const;
   std::set<std::string> getUniqueParameterNames() const;
   std::string getOutputBaseName() const;
   std::string getInputString(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
-  API::MatrixWorkspace_sptr
-  processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace);
+  std::vector<std::size_t> getDatasetGrouping(
+      const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
+  API::WorkspaceGroup_sptr
+  processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace,
+                               const std::vector<std::size_t> &grouping);
 
   std::vector<API::MatrixWorkspace_sptr> convertInputToElasticQ(
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
@@ -74,7 +67,7 @@ private:
   void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
                         const std::vector<std::string> &spectra,
                         const std::vector<API::MatrixWorkspace_sptr> &names);
-  void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
+  void copyLogs(API::WorkspaceGroup_sptr resultWorkspace,
                 const std::vector<API::MatrixWorkspace_sptr> &workspaces);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
                 API::WorkspaceGroup_sptr resultGroup);

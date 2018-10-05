@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISDiagnostics.h"
 
+#include "../General/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
-#include "../General/UserInputValidator.h"
 
 #include <QFileInfo>
 
@@ -485,4 +491,4 @@ void ISISDiagnostics::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

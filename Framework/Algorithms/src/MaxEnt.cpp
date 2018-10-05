@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MaxEnt.h"
 #include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -8,13 +14,14 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
+#include "MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include <gsl/gsl_linalg.h>
 #include <algorithm>
+#include <gsl/gsl_linalg.h>
 #include <numeric>
 
 namespace Mantid {
@@ -52,12 +59,12 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
 const double THRESHOLD = 1E-6;
 
 /** removes zeros from converged results
-* @param ws :: [input] The input workspace with zeros
-* @param itCount [input] The number of iterations this alg used for each
-* spectrum
-* @param yLabel :: [input] y-label to use for returned ws
-* @return : ws cut down in lenght to maxIt
-*/
+ * @param ws :: [input] The input workspace with zeros
+ * @param itCount [input] The number of iterations this alg used for each
+ * spectrum
+ * @param yLabel :: [input] y-label to use for returned ws
+ * @return : ws cut down in lenght to maxIt
+ */
 MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
                                  const std::vector<size_t> &itCount,
                                  const std::string &yLabel) {
@@ -83,7 +90,7 @@ MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
   }
   return ws;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -204,6 +211,32 @@ void MaxEnt::init() {
                                                          500, mustBePositive,
                                                          Direction::Input),
                   "Maximum number of iterations in alpha chop.");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>(
+          "DataLinearAdj", "", Direction::Input, PropertyMode::Optional,
+          boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+      "Adjusts the calculated data by multiplying each value by the "
+      "corresponding Y value of this workspace. "
+      "The data in this workspace is complex in the same manner as complex "
+      "input data.");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>(
+          "DataConstAdj", "", Direction::Input, PropertyMode::Optional,
+          boost::make_shared<EqualBinSizesValidator>(errorLevel, warningLevel)),
+      "Adjusts the calculated data by adding to each value the corresponding Y "
+      "value of this workspace. "
+      "If DataLinearAdj is also specified, this addition is done after its "
+      "multiplication. "
+      "See equation in documentation for how DataLinearAdj and DataConstAdj "
+      "are applied. "
+      "The data in this workspace is complex in the same manner as complex "
+      "input data.");
+  declareProperty(
+      "PerSpectrumReconstruction", true,
+      "Reconstruction is done independently on each spectrum. "
+      "If false, all the spectra use one image and the reconstructions "
+      "differ only through their adjustments. "
+      "ComplexData must be set true, when this is false.");
 
   declareProperty(
       make_unique<WorkspaceProperty<>>("EvolChi", "", Direction::Output),
@@ -222,23 +255,59 @@ void MaxEnt::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Validate the input properties.
-*/
+ */
 std::map<std::string, std::string> MaxEnt::validateInputs() {
 
   std::map<std::string, std::string> result;
 
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
+  size_t nHistograms = 0;
   if (inWS) {
     // If the input signal is complex, we expect an even number of histograms
     // in the input workspace
 
-    size_t nhistograms = inWS->getNumberHistograms();
+    nHistograms = inWS->getNumberHistograms();
     bool complex = getProperty("ComplexData");
-    if (complex && (nhistograms % 2))
+    if (complex && (nHistograms % 2))
       result["InputWorkspace"] = "The number of histograms in the input "
                                  "workspace must be even for complex data";
+    if (!complex)
+      nHistograms *= 2; // Double number of real histograms to compare with
+                        // adjustments, which are always complex.
   }
+
+  // Check linear adjustments, we expect and even number of histograms
+  // and if any, they must be sufficient for all spectra in input workspace,
+  // if per spectrum reconstruction is done.
+  MatrixWorkspace_sptr linAdj = getProperty("DataLinearAdj");
+  size_t nAHistograms = 0;
+  if (linAdj)
+    nAHistograms = linAdj->getNumberHistograms();
+  if (nAHistograms % 2)
+    result["DataLinearAdj"] =
+        "The number of histograms in the linear "
+        "adjustments workspace must be even, because they are complex data";
+  else if (nAHistograms > 0 && nAHistograms < nHistograms)
+    result["DataLinearAdj"] =
+        "The number of histograms in the linear "
+        "adjustments workspace is insufficient for the input workspace";
+
+  // Check constant adjustments, we expect and even number of histograms
+  // and if any, they must be sufficient for all spectra in input workspace,
+  // if per spectrum reconstruction is done.
+  MatrixWorkspace_sptr constAdj = getProperty("DataConstAdj");
+  nAHistograms = 0;
+  if (constAdj)
+    nAHistograms = constAdj->getNumberHistograms();
+  if (nAHistograms % 2)
+    result["DataConstAdj"] =
+        "The number of histograms in the constant "
+        "adjustments workspace must be even, because they are complex data";
+  else if (nAHistograms > 0 && nAHistograms < nHistograms)
+    result["DataConstAdj"] =
+        "The number of histograms in the constant "
+        "adjustments workspace is insufficient for the input workspace";
 
   return result;
 }
@@ -277,22 +346,30 @@ void MaxEnt::exec() {
   // Read input workspace
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
   // Number of spectra
-  size_t nSpec = inWS->getNumberHistograms();
+  size_t nHist = inWS->getNumberHistograms();
   // Number of data points - assumed to be constant between spectra or
   // this will throw an exception
   size_t npoints = inWS->blocksize() * resolutionFactor;
   // Number of X bins
   const size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
+  // Linear adjustment of calculated data
+  MatrixWorkspace_const_sptr dataLinearAdj = getProperty("DataLinearAdj");
+  // Constant adjustment of calculated data
+  MatrixWorkspace_const_sptr dataConstAdj = getProperty("DataConstAdj");
+  // Add spectra in reconstruction if false
+  const bool perSpectrumReconstruction =
+      getProperty("PerSpectrumReconstruction");
 
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
-  for (size_t s = 0; s < nSpec; s++) {
+  for (size_t s = 0; s < nHist; s++) {
     auto errors = inWS->e(s).rawData();
 
     size_t npoints = errors.size();
     for (size_t i = 0; i < npoints; i++) {
       if (errors[i] <= 0.0) {
-        throw std::invalid_argument("Input data must have non-zero errors.");
+        throw std::invalid_argument(
+            "Input data must have all errors non-zero.");
       }
     }
   }
@@ -300,28 +377,36 @@ void MaxEnt::exec() {
   // Is our data space real or complex?
   MaxentSpace_sptr dataSpace;
   if (complexData) {
-    dataSpace = std::make_shared<MaxentSpaceComplex>();
+    dataSpace = boost::make_shared<MaxentSpaceComplex>();
   } else {
-    dataSpace = std::make_shared<MaxentSpaceReal>();
+    dataSpace = boost::make_shared<MaxentSpaceReal>();
   }
   // Is our image space real or complex?
   MaxentSpace_sptr imageSpace;
   if (complexImage) {
-    imageSpace = std::make_shared<MaxentSpaceComplex>();
+    imageSpace = boost::make_shared<MaxentSpaceComplex>();
   } else {
-    imageSpace = std::make_shared<MaxentSpaceReal>();
+    imageSpace = boost::make_shared<MaxentSpaceReal>();
   }
-  // The type of transform. Currently a 1D Fourier Transform
-  MaxentTransform_sptr transform =
-      std::make_shared<MaxentTransformFourier>(dataSpace, imageSpace);
+  // The type of transform. Currently a 1D Fourier Transform or Multiple ID
+  // Fourier transform
+  MaxentTransform_sptr transform;
+  if (perSpectrumReconstruction) {
+    transform =
+        boost::make_shared<MaxentTransformFourier>(dataSpace, imageSpace);
+  } else {
+    auto complexDataSpace = boost::make_shared<MaxentSpaceComplex>();
+    transform = boost::make_shared<MaxentTransformMultiFourier>(
+        complexDataSpace, imageSpace, nHist / 2);
+  }
 
   // The type of entropy we are going to use (depends on the type of image,
   // positive only, or positive and/or negative)
   MaxentEntropy_sptr entropy;
   if (positiveImage) {
-    entropy = std::make_shared<MaxentEntropyPositiveValues>();
+    entropy = boost::make_shared<MaxentEntropyPositiveValues>();
   } else {
-    entropy = std::make_shared<MaxentEntropyNegativeValues>();
+    entropy = boost::make_shared<MaxentEntropyNegativeValues>();
   }
 
   // Entropy and transform is all we need to set up a calculator
@@ -333,36 +418,65 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr outEvolChi;
   MatrixWorkspace_sptr outEvolTest;
 
-  nSpec = complexData ? nSpec / 2 : nSpec;
-  outImageWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nSpec, npoints, npoints);
+  size_t nDataSpec = complexData ? nHist / 2 : nHist;
+  size_t nImageSpec = nDataSpec;
+  size_t nSpecConcat = 1;
+  if (!perSpectrumReconstruction) {
+    nSpecConcat = nImageSpec;
+    nImageSpec = 1;
+  }
+  outImageWS = WorkspaceFactory::Instance().create(inWS, 2 * nImageSpec,
+                                                   npoints, npoints);
   for (size_t i = 0; i < outImageWS->getNumberHistograms(); ++i)
     outImageWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
-  outDataWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nSpec, npointsX, npoints);
+  outDataWS = WorkspaceFactory::Instance().create(inWS, 2 * nDataSpec, npointsX,
+                                                  npoints);
   for (size_t i = 0; i < outDataWS->getNumberHistograms(); ++i)
     outDataWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
-  outEvolChi = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
-  outEvolTest = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
+  outEvolChi =
+      WorkspaceFactory::Instance().create(inWS, nImageSpec, nIter, nIter);
+  outEvolTest =
+      WorkspaceFactory::Instance().create(inWS, nImageSpec, nIter, nIter);
 
   npoints = complexImage ? npoints * 2 : npoints;
   std::vector<size_t> iterationCounts;
-  iterationCounts.reserve(nSpec);
+  iterationCounts.reserve(nImageSpec);
   outEvolChi->setPoints(0, Points(nIter, LinearGenerator(0.0, 1.0)));
 
-  for (size_t spec = 0; spec < nSpec; spec++) {
+  size_t dataLength = complexData ? 2 * inWS->y(0).size() : inWS->y(0).size();
+  dataLength *= nSpecConcat;
+
+  for (size_t spec = 0; spec < nImageSpec; spec++) {
 
     // Start distribution (flat background)
     std::vector<double> image(npoints, background);
 
-    std::vector<double> data;
-    std::vector<double> errors;
+    std::vector<double> data(dataLength, 0.0);
+    std::vector<double> errors(dataLength, 0.0);
     if (complexData) {
-      data = toComplex(inWS, spec, false);  // false -> data
-      errors = toComplex(inWS, spec, true); // true -> errors
+      data = toComplex(inWS, spec, false,
+                       !perSpectrumReconstruction); // 3rd arg false -> data
+      errors = toComplex(inWS, spec, true,
+                         !perSpectrumReconstruction); // 3rd arg true -> errors
     } else {
-      data = inWS->y(spec).rawData();
-      errors = inWS->e(spec).rawData();
+      if (!perSpectrumReconstruction) {
+        throw std::invalid_argument(
+            "ComplexData must be true, if PerSpectrumReconstruction is false.");
+      } else {
+        data = inWS->y(spec).rawData();
+        errors = inWS->e(spec).rawData();
+      }
+    }
+
+    std::vector<double> linearAdjustments;
+    std::vector<double> constAdjustments;
+    if (dataLinearAdj) {
+      linearAdjustments =
+          toComplex(dataLinearAdj, spec, false, !perSpectrumReconstruction);
+    }
+    if (dataConstAdj) {
+      constAdjustments =
+          toComplex(dataConstAdj, spec, false, !perSpectrumReconstruction);
     }
 
     // To record the algorithm's progress
@@ -373,11 +487,13 @@ void MaxEnt::exec() {
     Progress progress(this, 0.0, 1.0, nIter);
 
     // Run maxent algorithm
+    bool converged = false;
     for (size_t it = 0; it < nIter; it++) {
 
       // Iterates one step towards the solution. This means calculating
       // quadratic coefficients, search directions, angle and chi-sq
-      maxentCalculator.iterate(data, errors, image, background);
+      maxentCalculator.iterate(data, errors, image, background,
+                               linearAdjustments, constAdjustments);
 
       // Calculate delta to construct new image (SB eq. 25)
       double currChisq = maxentCalculator.getChisq();
@@ -396,14 +512,15 @@ void MaxEnt::exec() {
       evolChi[it] = currChisq;
       evolTest[it] = currAngle;
 
-      // Stop condition, solution found
+      // Stop condition for convergence, solution found
       if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) &&
           (currAngle < angle)) {
 
         // it + 1 iterations have been done because we count from zero
-        g_log.information() << "Stopped after " << it + 1 << " iterations"
-                            << std::endl;
+        g_log.information()
+            << "Converged after " << it + 1 << " iterations" << std::endl;
         iterationCounts.push_back(it + 1);
+        converged = true;
         break;
       }
 
@@ -416,13 +533,19 @@ void MaxEnt::exec() {
 
     } // Next Iteration
 
+    // If we didn't converge, we still need to record the number of iterations
+    if (!converged) {
+      iterationCounts.push_back(nIter);
+    }
+
     // Get calculated data
     auto solData = maxentCalculator.getReconstructedData();
     auto solImage = maxentCalculator.getImage();
 
     // Populate the output workspaces
-    populateDataWS(inWS, spec, nSpec, solData, complexData, outDataWS);
-    populateImageWS(inWS, spec, nSpec, solImage, complexImage, outImageWS,
+    populateDataWS(inWS, spec, nDataSpec, solData, !perSpectrumReconstruction,
+                   complexData, outDataWS);
+    populateImageWS(inWS, spec, nImageSpec, solImage, complexImage, outImageWS,
                     autoShift);
 
     // Populate workspaces recording the evolution of Chi and Test
@@ -446,47 +569,57 @@ void MaxEnt::exec() {
 
 //----------------------------------------------------------------------------------------------
 
-/** Returns a given spectrum as a complex number
-* @param inWS :: [input] The input workspace containing all the spectra
-* @param spec :: [input] The spectrum of interest
-* @param errors :: [input] If true, returns the errors, otherwise returns the
-* counts
-* @return : Spectrum 'spec' as a complex vector
-*/
+/** Returns a given spectrum or sum of spectra as a complex number
+ * @param inWS :: [input] The input workspace containing all the spectra
+ * @param spec :: [input] The spectrum of interest
+ * @param errors :: [input] If true, returns the errors, otherwise returns the
+ * counts
+ * @param concatSpec :: [input] If true, use concatenation of all spectra
+ * (ignoring spec)
+ * @return : Spectrum 'spec' as a complex vector
+ */
 std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
-                                      size_t spec, bool errors) {
+                                      size_t spec, bool errors,
+                                      bool concatSpec) {
   const size_t numBins = inWS->y(0).size();
-  std::vector<double> result(numBins * 2);
+  size_t nSpec = inWS->getNumberHistograms() / 2;
+  std::vector<double> result;
+  result.reserve(2 * numBins);
 
   if (inWS->getNumberHistograms() % 2)
     throw std::invalid_argument(
         "Cannot convert input workspace to complex data");
 
-  size_t nspec = inWS->getNumberHistograms() / 2;
+  size_t nSpecOfInterest = (concatSpec ? nSpec : 1);
+  size_t firstSpecOfInterest = (concatSpec ? 0 : spec);
 
-  if (!errors) {
-    for (size_t i = 0; i < numBins; i++) {
-      result[2 * i] = inWS->y(spec)[i];
-      result[2 * i + 1] = inWS->y(spec + nspec)[i];
-    }
-  } else {
-    for (size_t i = 0; i < numBins; i++) {
-      result[2 * i] = inWS->e(spec)[i];
-      result[2 * i + 1] = inWS->e(spec + nspec)[i];
+  for (size_t s = firstSpecOfInterest;
+       s < firstSpecOfInterest + nSpecOfInterest; s++) {
+    if (!errors) {
+      for (size_t i = 0; i < numBins; i++) {
+        result.emplace_back(inWS->y(s)[i]);
+        result.emplace_back(inWS->y(s + nSpec)[i]);
+      }
+    } else {
+      for (size_t i = 0; i < numBins; i++) {
+        result.emplace_back(inWS->e(s)[i]);
+        result.emplace_back(inWS->e(s + nSpec)[i]);
+      }
     }
   }
+
   return result;
 }
 
 /** Bisection method to move delta one step closer towards the solution
-* @param coeffs :: [input] The current quadratic coefficients
-* @param ChiTargetOverN :: [input] The requested Chi target over N
-* (data points)
-* @param chiEps :: [input] Precision required for Chi target
-* @param alphaIter :: [input] Maximum number of iterations in the bisection
-* method (alpha chop)
-* @return : The increment length to be added to the current image
-*/
+ * @param coeffs :: [input] The current quadratic coefficients
+ * @param ChiTargetOverN :: [input] The requested Chi target over N
+ * (data points)
+ * @param chiEps :: [input] Precision required for Chi target
+ * @param alphaIter :: [input] Maximum number of iterations in the bisection
+ * method (alpha chop)
+ * @return : The increment length to be added to the current image
+ */
 std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
                                  double ChiTargetOverN, double chiEps,
                                  size_t alphaIter) {
@@ -555,12 +688,12 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
 }
 
 /** Calculates Chi given the quadratic coefficients and an alpha value by
-* solving the matrix equation A*b = B
-* @param coeffs :: [input] The quadratic coefficients
-* @param a :: [input] The alpha value
-* @param b :: [output] The solution
-* @return :: The calculated chi-square
-*/
+ * solving the matrix equation A*b = B
+ * @param coeffs :: [input] The quadratic coefficients
+ * @param a :: [input] The alpha value
+ * @param b :: [output] The solution
+ * @return :: The calculated chi-square
+ */
 double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a,
                             std::vector<double> &b) {
 
@@ -603,10 +736,10 @@ double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a,
 }
 
 /** Solves A*x = B using SVD
-* @param A :: [input] The matrix A
-* @param B :: [input] The vector B
-* @return :: The solution x
-*/
+ * @param A :: [input] The matrix A
+ * @param B :: [input] The vector B
+ * @return :: The solution x
+ */
 std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
 
   size_t dim = A.size().first;
@@ -643,13 +776,13 @@ std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
 }
 
 /** Applies a distance penalty
-* @param delta :: [input] The current increment
-* @param coeffs :: [input] The quadratic coefficients
-* @param image :: [input] The current image
-* @param background :: [input] The background
-* @param distEps :: [input] The distance constraint
-* @return :: The new increment
-*/
+ * @param delta :: [input] The current increment
+ * @param coeffs :: [input] The quadratic coefficients
+ * @param image :: [input] The current image
+ * @param background :: [input] The background
+ * @param distEps :: [input] The distance constraint
+ * @return :: The new increment
+ */
 std::vector<double> MaxEnt::applyDistancePenalty(
     const std::vector<double> &delta, const QuadraticCoefficients &coeffs,
     const std::vector<double> &image, double background, double distEps) {
@@ -680,13 +813,13 @@ std::vector<double> MaxEnt::applyDistancePenalty(
 }
 
 /**
-* Updates the image according to an increment delta
-* @param image : [input] The current image as a vector (can be real or complex)
-* @param delta : [input] The increment delta as a vector (can be real or
-* complex)
-* @param dirs : [input] The search directions
-* @return : The new image
-*/
+ * Updates the image according to an increment delta
+ * @param image : [input] The current image as a vector (can be real or complex)
+ * @param delta : [input] The increment delta as a vector (can be real or
+ * complex)
+ * @param dirs : [input] The search directions
+ * @return : The new image
+ */
 std::vector<double>
 MaxEnt::updateImage(const std::vector<double> &image,
                     const std::vector<double> &delta,
@@ -707,24 +840,25 @@ MaxEnt::updateImage(const std::vector<double> &image,
   return newImage;
 }
 
-/** Populates the output workspaces
-* @param inWS :: [input] The input workspace
-* @param spec :: [input] The current spectrum being analyzed
-* @param nspec :: [input] The total number of histograms in the input workspace
-* @param result :: [input] The image to be written in the output workspace (can
-* be real or complex vector)
-* @param complex :: [input] True if the result is a complex vector, false
-* otherwise
-* @param outWS :: [input] The output workspace to populate
-* @param autoShift :: [input] Whether or not to correct the phase shift
-*/
+/** Populates the image output workspace
+ * @param inWS :: [input] The input workspace
+ * @param spec :: [input] The current spectrum being analyzed
+ * @param nspec :: [input] The total number of histograms in the input workspace
+ * @param result :: [input] The image to be written in the output workspace (can
+ * be real or complex vector)
+ * @param complex :: [input] True if the result is a complex vector, false
+ * otherwise
+ * @param outWS :: [input] The output workspace to populate
+ * @param autoShift :: [input] Whether or not to correct the phase shift
+ */
 void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                              size_t nspec, const std::vector<double> &result,
                              bool complex, MatrixWorkspace_sptr &outWS,
                              bool autoShift) {
 
   if (complex && result.size() % 2)
-    throw std::invalid_argument("Cannot write results to output workspaces");
+    throw std::invalid_argument(
+        "Cannot write image results to output workspaces");
 
   int npoints = complex ? static_cast<int>(result.size() / 2)
                         : static_cast<int>(result.size());
@@ -797,57 +931,86 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
   outWS->setSharedE(nspec + spec, outWS->sharedE(spec));
 }
 
-/** Populates the output workspaces
-* @param inWS :: [input] The input workspace
-* @param spec :: [input] The current spectrum being analyzed
-* @param nspec :: [input] The total number of histograms in the input workspace
-* @param result :: [input] The reconstructed data to be written in the output
-* workspace (can be a real or complex vector)
-* @param complex :: [input] True if result is a complex vector, false otherwise
-* @param outWS :: [input] The output workspace to populate
-*/
+/** Populates the data output workspace
+ * @param inWS :: [input] The input workspace
+ * @param spec :: [input] The current spectrum being analyzed
+ * @param nspec :: [input] The total number of histograms in the input workspace
+ * @param result :: [input] The reconstructed data to be written in the output
+ * workspace (can be a real or complex vector)
+ * @param complex :: [input] True if result is a complex vector, false otherwise
+ * @param concatenated :: [input] True if result is concatenated spectra,
+ * then all spectra are analyzed and spec must be 0.
+ * @param outWS :: [input] The output workspace to populate
+ */
 void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                             size_t nspec, const std::vector<double> &result,
-                            bool complex, MatrixWorkspace_sptr &outWS) {
+                            bool concatenated, bool complex,
+                            MatrixWorkspace_sptr &outWS) {
 
   if (complex && result.size() % 2)
-    throw std::invalid_argument("Cannot write results to output workspaces");
+    throw std::invalid_argument(
+        "Cannot write data results to output workspaces");
+  if (concatenated && !complex)
+    throw std::invalid_argument("Concatenated data results must be complex");
+  if (concatenated && result.size() % (nspec * 2))
+    throw std::invalid_argument(
+        "Cannot write complex concatenated data results to output workspaces");
+  if (concatenated && spec != 0)
+    throw std::invalid_argument("Cannot write concatenated data results to "
+                                "output workspaces from non-first spectrum");
 
-  int npoints = complex ? static_cast<int>(result.size() / 2)
-                        : static_cast<int>(result.size());
-  int npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
-  MantidVec X(npointsX);
-  MantidVec YR(npoints);
-  MantidVec YI(npoints);
-  MantidVec E(npoints, 0.);
+  int resultLength = complex ? static_cast<int>(result.size() / 2)
+                             : static_cast<int>(result.size());
+  size_t spectrumLength = (concatenated ? resultLength / nspec : resultLength);
+  size_t spectrumLengthX =
+      inWS->isHistogramData() ? spectrumLength + 1 : spectrumLength;
+  size_t nSpecAnalyzed = (concatenated ? nspec : 1);
 
+  // Here we assume equal constant binning for all spectra analyzed
   double x0 = inWS->x(spec)[0];
   double dx = inWS->x(spec)[1] - x0;
 
-  // X values
-  for (int i = 0; i < npointsX; i++) {
-    X[i] = x0 + i * dx;
-  }
+  // Loop over each spectrum being analyzed - one spectrum unless concatenated
+  for (size_t specA = spec; specA < spec + nSpecAnalyzed; specA++) {
 
-  // Y values
-  if (complex) {
-    for (int i = 0; i < npoints; i++) {
-      YR[i] = result[2 * i];
-      YI[i] = result[2 * i + 1];
-    }
-  } else {
-    for (int i = 0; i < npoints; i++) {
-      YR[i] = result[i];
-      YI[i] = 0.;
-    }
-  }
+    MantidVec X(spectrumLengthX);
+    MantidVec YR(spectrumLength);
+    MantidVec YI(spectrumLength);
+    MantidVec E(spectrumLength, 0.);
 
-  outWS->mutableX(spec) = std::move(X);
-  outWS->mutableY(spec) = std::move(YR);
-  outWS->mutableE(spec) = std::move(E);
-  outWS->setSharedX(nspec + spec, outWS->sharedX(spec));
-  outWS->mutableY(nspec + spec) = std::move(YI);
-  outWS->setSharedE(nspec + spec, outWS->sharedE(spec));
+    // X values
+    for (size_t i = 0; i < spectrumLengthX; i++) {
+      X[i] = x0 + static_cast<double>(i) * dx;
+    }
+
+    // Y values
+    if (complex) {
+      if (concatenated) {
+        // note the spec=0, so specA starts from 0 in this case.
+        for (size_t i = 0; i < spectrumLength; i++) {
+          YR[i] = result[2 * i + 2 * specA * spectrumLength];
+          YI[i] = result[2 * i + 1 + 2 * specA * spectrumLength];
+        }
+      } else {
+        for (size_t i = 0; i < spectrumLength; i++) {
+          YR[i] = result[2 * i];
+          YI[i] = result[2 * i + 1];
+        }
+      }
+    } else {
+      for (size_t i = 0; i < spectrumLength; i++) {
+        YR[i] = result[i];
+        YI[i] = 0.;
+      }
+    }
+
+    outWS->mutableX(specA) = std::move(X);
+    outWS->mutableY(specA) = std::move(YR);
+    outWS->mutableE(specA) = std::move(E);
+    outWS->mutableY(nspec + specA) = std::move(YI);
+    outWS->setSharedX(nspec + specA, outWS->sharedX(spec));
+    outWS->setSharedE(nspec + specA, outWS->sharedE(spec));
+  } // Next spectrum if concatenated
 }
 
 } // namespace Algorithms

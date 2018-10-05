@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """A selection of utility functions related to Qt functionality
 """
 from __future__ import absolute_import
@@ -24,33 +17,44 @@ from importlib import import_module
 import os.path as osp
 
 # 3rd-party modules
-import qtawesome as qta
 from qtpy import QT_VERSION
 from qtpy.uic import loadUi, loadUiType
 from qtpy.QtWidgets import QAction, QMenu
 
+# local modules
+from ...icons import get_icon
+
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 
 
-def import_qtlib(modulename, package, attr=None):
-    """Import a module built against a specified major version of Qt.
+def import_qt(modulename, package, attr=None):
+    """Import a module built against the version of Qt we are running.
     The provided name is suffixed with the string 'qtX' where
     X is the major version of Qt that the library was built against.
     The version is determined by inspecting the loaded Python Qt
     bindings. If none can be found then Qt5 is assumed.
 
-    It is assumed that the module is a build product and therefore may not be in a fixed
-    location relative to the python source files. First a relative import from the calling
-    package is requested followed by a simple search for the binary by name on sys.path
-    :param modulename: The name of the dynamic module to find
-    :param package: The calling package trying to import the module using dotted syntax
+    If modulename looks like a relative name then the import is first tried as specified
+    and if this fails it is attempted as a top-level import without a package name and the relative prefixes removed.
+    This allows the built module to live outside of the package in a binary directory of the build. For example, a
+    developer build would put the built dynamic library in the bin directory but a package installation
+    would have the library in the proper location as indicated by the relative import path. This avoids any build
+    products being placed in the source tree.
+
+    :param modulename: The name of the dynamic module to find, possibly a relative name
+    :param package: If the name looks like a relative import then the package argument is required to specify the
+    parent package
     :param attr: Optional attribute to retrieve from the module
     :return: Either the module object if no attribute is specified of the requested attribute
     """
-    try:
-        lib = import_module('.' + modulename + LIB_SUFFIX, package)
-    except ImportError:
+    if modulename.startswith('.'):
+        try:
+            lib = import_module(modulename + LIB_SUFFIX, package)
+        except ImportError:
+            lib = import_module(modulename.lstrip('.') + LIB_SUFFIX)
+    else:
         lib = import_module(modulename + LIB_SUFFIX)
+
     if attr is not None:
         return getattr(lib, attr)
     else:
@@ -126,7 +130,7 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
         if shortcut_context is not None:
             action.setShortcutContext(shortcut_context)
     if icon_name is not None:
-        action.setIcon(qta.icon(icon_name))
+        action.setIcon(get_icon(icon_name))
 
     return action
 

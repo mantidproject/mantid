@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADTEST_H_
 #define LOADTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/Load.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidDataHandling/Load.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/algorithm/string/predicate.hpp> //for ends_with
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -29,11 +35,11 @@ WorkspaceSingleValue::WorkspaceSingleValue(const WorkspaceSingleValue &other)
 }
 
 /** Does nothing in this case
-*  @param NVectors :: This value can only be equal to one, otherwise exception
-* is thrown
-*  @param XLength :: The number of X data points/bin boundaries
-*  @param YLength :: The number of data/error points
-*/
+ *  @param NVectors :: This value can only be equal to one, otherwise exception
+ * is thrown
+ *  @param XLength :: The number of X data points/bin boundaries
+ *  @param YLength :: The number of data/error points
+ */
 void WorkspaceSingleValue::init(const std::size_t &NVectors,
                                 const std::size_t &XLength,
                                 const std::size_t &YLength) {

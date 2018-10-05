@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISHELPERTEST_H_
 #define MANTID_CUSTOMINTERFACES_MUONANALYSISHELPERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "../Muon/MuonAnalysisHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -13,7 +20,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "../Muon/MuonAnalysisHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::CustomInterfaces::MuonAnalysisHelper;
@@ -215,10 +221,11 @@ public:
     Workspace_sptr ws = createWs("MUSR", 15189);
     DateAndTime start{"2015-12-23T15:32:40Z"};
     addLog(ws, "run_start", start.toSimpleString());
-    auto range = findLogRange(ws, "run_start", [](const std::string &first,
-                                                  const std::string &second) {
-      return DateAndTime(first) < DateAndTime(second);
-    });
+    auto range =
+        findLogRange(ws, "run_start",
+                     [](const std::string &first, const std::string &second) {
+                       return DateAndTime(first) < DateAndTime(second);
+                     });
     TS_ASSERT_EQUALS(range.first, start.toSimpleString());
     TS_ASSERT_EQUALS(range.second, start.toSimpleString());
   }

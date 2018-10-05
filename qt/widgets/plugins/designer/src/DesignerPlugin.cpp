@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plugins/Designer/DesignerPlugin.h"
 #include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
 #include <QDesignerFormEditorInterface>
@@ -26,9 +32,9 @@ void DesignerPlugin::initialize(QDesignerFormEditorInterface *formEditor) {
 }
 
 /**
-* Returns whether the plugin initialized or not
-* @returns True if initialize() has been called, false otherwise
-*/
+ * Returns whether the plugin initialized or not
+ * @returns True if initialize() has been called, false otherwise
+ */
 bool DesignerPlugin::isInitialized() const { return m_initialized; }
 
 /**
@@ -105,8 +111,8 @@ QString DesignerPlugin::domXml() const {
   std::string name = this->getShortName();
   name[0] = static_cast<char>(tolower(static_cast<int>(name[0])));
 
-  return QString::fromStdString("<widget class=\"" +
-                                this->name().toStdString() + "\" name=\"" +
-                                name + "\">\n"
-                                       "</widget>\n");
+  return QString::fromStdString(
+      "<widget class=\"" + this->name().toStdString() + "\" name=\"" + name +
+      "\">\n"
+      "</widget>\n");
 }

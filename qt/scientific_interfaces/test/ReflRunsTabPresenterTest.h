@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_REFLRUNSTABPRESENTERTEST_H
 
@@ -18,7 +24,7 @@ using namespace testing;
 
 namespace {
 ACTION(ICATRuntimeException) { throw std::runtime_error(""); }
-}
+} // namespace
 
 //=====================================================================================
 // Functional tests
@@ -211,7 +217,8 @@ public:
     auto presenter = createMocksAndPresenter(1);
 
     EXPECT_CALL(*mockTablePresenter(0),
-                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(0));
+                notify(DataProcessorPresenter::PauseFlag))
+        .Times(Exactly(0));
 
     presenter.notify(IReflRunsTabPresenter::PauseAutoreductionFlag);
     verifyAndClearExpectations();
@@ -231,10 +238,12 @@ public:
     EXPECT_CALL(*m_mockRunsTabView, getSelectedGroup()).Times(Exactly(0));
     // Notify the cached autoreduction group
     EXPECT_CALL(*mockTablePresenter(GROUP_NUMBER),
-                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(1));
+                notify(DataProcessorPresenter::PauseFlag))
+        .Times(Exactly(1));
     // Check the other table is not affected
     EXPECT_CALL(*mockTablePresenter(0),
-                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(0));
+                notify(DataProcessorPresenter::PauseFlag))
+        .Times(Exactly(0));
 
     presenter.notify(IReflRunsTabPresenter::PauseAutoreductionFlag);
     verifyAndClearExpectations();
@@ -254,7 +263,8 @@ public:
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_TO_PAUSE))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockMainPresenter,
-                notifyReductionPaused(AUTOREDUCTION_GROUP)).Times(Exactly(0));
+                notifyReductionPaused(AUTOREDUCTION_GROUP))
+        .Times(Exactly(0));
     expectSetWidgetEnabledState(false, true);
 
     presenter.pause(GROUP_TO_PAUSE);
@@ -280,7 +290,8 @@ public:
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_TO_PAUSE))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockMainPresenter,
-                notifyReductionPaused(AUTOREDUCTION_GROUP)).Times(Exactly(0));
+                notifyReductionPaused(AUTOREDUCTION_GROUP))
+        .Times(Exactly(0));
 
     presenter.pause(GROUP_TO_PAUSE);
     verifyAndClearExpectations();
@@ -407,6 +418,52 @@ public:
         .Times(Exactly(1));
 
     presenter.confirmReductionResumed(GROUP_NUMBER);
+    verifyAndClearExpectations();
+  }
+
+  void test_startMonitor() {
+    auto presenter = createMocksAndPresenter(2);
+
+    // Should get settings from default group even if another is selected
+    auto DEFAULT_GROUP = 0;
+    EXPECT_CALL(*m_mockRunsTabView, getSelectedGroup()).Times(0);
+    EXPECT_CALL(*m_mockMainPresenter, getReductionOptions(DEFAULT_GROUP))
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(*m_mockRunsTabView, getMonitorAlgorithmRunner())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setStartMonitorButtonEnabled(false))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setStopMonitorButtonEnabled(false))
+        .Times(Exactly(1));
+
+    presenter.notify(IReflRunsTabPresenter::StartMonitorFlag);
+    verifyAndClearExpectations();
+  }
+
+  void test_startMonitorComplete() {
+    auto presenter = createMocksAndPresenter(2);
+
+    EXPECT_CALL(*m_mockRunsTabView, getMonitorAlgorithmRunner())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setStartMonitorButtonEnabled(false))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setStopMonitorButtonEnabled(true))
+        .Times(Exactly(1));
+
+    presenter.notify(IReflRunsTabPresenter::StartMonitorFlag);
+    verifyAndClearExpectations();
+  }
+
+  void test_stopMonitor() {
+    auto presenter = createMocksAndPresenter(2);
+
+    EXPECT_CALL(*m_mockRunsTabView, setStartMonitorButtonEnabled(true))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setStopMonitorButtonEnabled(false))
+        .Times(Exactly(1));
+
+    presenter.notify(IReflRunsTabPresenter::StartMonitorFlag);
     verifyAndClearExpectations();
   }
 
@@ -539,8 +596,9 @@ private:
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setInstrumentComboEnabled(!isProcessing))
         .Times(Exactly(1));
-    EXPECT_CALL(*m_mockRunsTabView, setTransferMethodComboEnabled(
-                                        !isAutoreducing)).Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView,
+                setTransferMethodComboEnabled(!isAutoreducing))
+        .Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setSearchTextEntryEnabled(!isAutoreducing))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockRunsTabView, setSearchButtonEnabled(!isAutoreducing))

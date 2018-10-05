@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BANKRENDERINGHELPERS_H
 #define BANKRENDERINGHELPERS_H
 #include "DllOption.h"
@@ -32,7 +38,7 @@ glEnd() are called within this function.
 EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
 renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
                      size_t index, const std::vector<GLColor> &color);
-} // namespace RenderingHelpers
+} // namespace BankRenderingHelpers
 } // namespace MantidWidgets
 } // namespace MantidQt
 

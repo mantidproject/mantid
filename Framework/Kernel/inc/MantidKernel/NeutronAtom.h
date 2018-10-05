@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_NEUTRONATOM_H_
 #define MANTID_KERNEL_NEUTRONATOM_H_
 
@@ -13,27 +19,6 @@ namespace PhysicalConstants {
 /**
   Structure to store neutronic scattering information for the various elements.
   This is taken from http://www.ncnr.nist.gov/resources/n-lengths/list.html.
-
-  Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>.
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct MANTID_KERNEL_DLL NeutronAtom {
 
@@ -106,21 +91,21 @@ MANTID_KERNEL_DLL bool operator!=(const NeutronAtom &left,
                                   const NeutronAtom &right);
 
 // addition
-MANTID_KERNEL_DLL NeutronAtom
-operator+(const NeutronAtom &left, const NeutronAtom &right);
+MANTID_KERNEL_DLL NeutronAtom operator+(const NeutronAtom &left,
+                                        const NeutronAtom &right);
 
 // multiplication
-MANTID_KERNEL_DLL NeutronAtom
-operator*(const NeutronAtom &left, const double right);
-MANTID_KERNEL_DLL NeutronAtom
-operator*(const double left, const NeutronAtom &right);
+MANTID_KERNEL_DLL NeutronAtom operator*(const NeutronAtom &left,
+                                        const double right);
+MANTID_KERNEL_DLL NeutronAtom operator*(const double left,
+                                        const NeutronAtom &right);
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &out,
                                            const NeutronAtom &atom);
-MANTID_KERNEL_DLL NeutronAtom
-getNeutronAtom(const uint16_t z_number, const uint16_t a_number = 0);
-MANTID_KERNEL_DLL NeutronAtom
-getNeutronNoExceptions(const uint16_t z_number, const uint16_t a_number);
+MANTID_KERNEL_DLL NeutronAtom getNeutronAtom(const uint16_t z_number,
+                                             const uint16_t a_number = 0);
+MANTID_KERNEL_DLL NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
+                                                     const uint16_t a_number);
 MANTID_KERNEL_DLL NeutronAtom getNeutronNoExceptions(const NeutronAtom &other);
 
 /// Utility function to calculate scattering lengths from cross-sections.

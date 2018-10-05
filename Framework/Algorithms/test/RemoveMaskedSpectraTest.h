@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REMOVEMASKEDSPECTRATEST_H_
 #define MANTID_ALGORITHMS_REMOVEMASKEDSPECTRATEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/RemoveMaskedSpectra.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/RemoveMaskedSpectra.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 

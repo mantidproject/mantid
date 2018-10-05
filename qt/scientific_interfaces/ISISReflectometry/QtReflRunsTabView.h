@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 #define MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 
-#include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
+#include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 
 #include "ui_ReflRunsTabWidget.h"
@@ -18,9 +24,9 @@ namespace DataProcessor {
 // Forward decs
 class Command;
 class QtCommandAdapter;
-}
+} // namespace DataProcessor
 class SlitCalculator;
-}
+} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }
@@ -36,27 +42,6 @@ namespace DataProcessor = MantidWidgets::DataProcessor;
 
 /** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
-
-Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflRunsTabView
     : public MantidQt::API::MantidWidget,
@@ -88,6 +73,8 @@ public:
   void setTransferMethodComboEnabled(bool enabled) override;
   void setSearchTextEntryEnabled(bool enabled) override;
   void setSearchButtonEnabled(bool enabled) override;
+  void setStartMonitorButtonEnabled(bool enabled) override;
+  void setStopMonitorButtonEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -105,6 +92,8 @@ public:
   IReflRunsTabPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
+  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  getMonitorAlgorithmRunner() const override;
 
   // Timer methods
   void startTimer(const int millisecs) override;
@@ -112,6 +101,10 @@ public:
 
   // Start an ICAT search
   void startIcatSearch() override;
+
+  // Live data monitor
+  void startMonitor() override;
+  void stopMonitor() override;
 
 private:
   /// initialise the interface
@@ -122,6 +115,7 @@ private:
   void timerEvent(QTimerEvent *event) override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
+  boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
 
   // the presenter
   std::shared_ptr<IReflRunsTabPresenter> m_presenter;
@@ -143,12 +137,15 @@ private slots:
   void on_actionTransfer_triggered();
   void slitCalculatorTriggered();
   void icatSearchComplete();
+  void startMonitorComplete();
   void instrumentChanged(int index);
   void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
+  void on_buttonMonitor_clicked();
+  void on_buttonStopMonitor_clicked();
 };
 
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_ */

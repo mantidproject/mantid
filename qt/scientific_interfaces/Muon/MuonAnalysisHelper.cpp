@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysisHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -56,7 +62,7 @@ getKeysFromTable(const Mantid::API::ITableWorkspace_sptr &tab) {
   }
   return keys;
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -510,15 +516,15 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
   };
 
   // Comparison function for doubles
-  auto numericalCompare =
-      [](const std::string &first, const std::string &second) {
-        try {
-          return boost::lexical_cast<double>(first) <
-                 boost::lexical_cast<double>(second);
-        } catch (boost::bad_lexical_cast & /*e*/) {
-          return false;
-        }
-      };
+  auto numericalCompare = [](const std::string &first,
+                             const std::string &second) {
+    try {
+      return boost::lexical_cast<double>(first) <
+             boost::lexical_cast<double>(second);
+    } catch (boost::bad_lexical_cast & /*e*/) {
+      return false;
+    }
+  };
 
   // Range of log values
   auto runNumRange = findLogRange(workspaces, "run_number", numericalCompare);
@@ -1162,4 +1168,4 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
 }
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

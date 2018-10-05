@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SLICEVIEWERWINDOW_H
 #define SLICEVIEWERWINDOW_H
 
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
-#include "MantidQtWidgets/Common/IProjectSerialisable.h"
-#include "MantidQtWidgets/SliceViewer/LineViewer.h"
-#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
-#include "MantidQtWidgets/SliceViewer/PeaksViewer.h"
-#include <QMainWindow>
-#include <QSplitter>
-#include <QDialog>
-#include <QShowEvent>
 #include "DllOption.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/VMD.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtWidgets/SliceViewer/LineViewer.h"
+#include "MantidQtWidgets/SliceViewer/PeaksViewer.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
+#include <QDialog>
+#include <QMainWindow>
+#include <QShowEvent>
+#include <QSplitter>
 
 namespace MantidQt {
 namespace SliceViewer {

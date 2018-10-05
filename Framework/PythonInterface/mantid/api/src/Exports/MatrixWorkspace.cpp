@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
@@ -6,11 +12,11 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
+#include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
@@ -28,10 +34,10 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace Mantid::PythonInterface;
 using namespace Mantid::PythonInterface::Converters;
 using namespace Mantid::PythonInterface::Policies;
 using namespace Mantid::PythonInterface::Registry;
-namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(MatrixWorkspace)
@@ -49,21 +55,15 @@ using return_readwrite_numpy =
     return_value_policy<VectorRefToNumpy<WrapReadWrite>>;
 
 //------------------------------- Overload macros ---------------------------
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 // Overloads for binIndexOf function which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads,
                                        MatrixWorkspace::binIndexOf, 1, 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 /**
  * Set the values from an python array-style object into the given spectrum in
@@ -77,7 +77,7 @@ GCC_DIAG_ON(conversion)
 void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
                              const size_t wsIndex,
                              const boost::python::object &values) {
-  if (NumPy::NdArray::check(values)) {
+  if (NDArray::check(values)) {
     NDArrayToVector<double> converter(values);
     converter.copyTo((self.*accessor)(wsIndex));
   } else {
@@ -100,10 +100,10 @@ void setMonitorWorkspace(MatrixWorkspace &self,
   self.setMonitorWorkspace(monWS);
 }
 /**
-* @param self  :: A reference to the calling object
-*
-*@return weak pointer to monitor workspace used by python
-*/
+ * @param self  :: A reference to the calling object
+ *
+ *@return weak pointer to monitor workspace used by python
+ */
 boost::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
   return boost::weak_ptr<Workspace>(self.monitorWorkspace());
 }
@@ -111,7 +111,7 @@ boost::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
  * Clear monitor workspace attached to for current workspace.
  *
  * @param self  :: A reference to the calling object
-*/
+ */
 void clearMonitorWorkspace(MatrixWorkspace &self) {
   MatrixWorkspace_sptr monWS;
   self.setMonitorWorkspace(monWS);
@@ -146,7 +146,7 @@ void setYFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                      const NumPy::NdArray &values) {
+                      const NDArray &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataE, wsIndex, values);
 }
 
@@ -184,7 +184,7 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
              "``getSampleDetails`` is deprecated, use ``getRun`` instead.");
   return self.mutableRun();
 }
-}
+} // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
 void export_MatrixWorkspace() {
@@ -210,8 +210,9 @@ void export_MatrixWorkspace() {
       .def("detectorSignedTwoTheta", &MatrixWorkspace::detectorSignedTwoTheta,
            (arg("self"), arg("det")),
            "Returns the signed two theta value for given detector")
-      .def("getSpectrum", (ISpectrum & (MatrixWorkspace::*)(const size_t)) &
-                              MatrixWorkspace::getSpectrum,
+      .def("getSpectrum",
+           (ISpectrum & (MatrixWorkspace::*)(const size_t)) &
+               MatrixWorkspace::getSpectrum,
            (arg("self"), arg("workspaceIndex")), return_internal_reference<>(),
            "Return the spectra at the given workspace index.")
       .def("getIndexFromSpectrumNumber",
@@ -235,8 +236,9 @@ void export_MatrixWorkspace() {
            "Get a pointer to a workspace axis")
       .def("isHistogramData", &MatrixWorkspace::isHistogramData, arg("self"),
            "Returns ``True`` if this is considered to be binned data.")
-      .def("isDistribution", (bool (MatrixWorkspace::*)() const) &
-                                 MatrixWorkspace::isDistribution,
+      .def("isDistribution",
+           (bool (MatrixWorkspace::*)() const) &
+               MatrixWorkspace::isDistribution,
            arg("self"), "Returns the status of the distribution flag")
       .def("YUnit", &MatrixWorkspace::YUnit, arg("self"),
            "Returns the current Y unit for the data (Y axis) in the workspace")
@@ -278,17 +280,20 @@ void export_MatrixWorkspace() {
            "around the original X data at the "
            "given index")
       .def("readY", &MatrixWorkspace::readY, return_readonly_numpy(),
-           args("self", "workspaceIndex"), "Creates a read-only numpy wrapper "
-                                           "around the original Y data at the "
-                                           "given index")
+           args("self", "workspaceIndex"),
+           "Creates a read-only numpy wrapper "
+           "around the original Y data at the "
+           "given index")
       .def("readE", &MatrixWorkspace::readE, return_readonly_numpy(),
-           args("self", "workspaceIndex"), "Creates a read-only numpy wrapper "
-                                           "around the original E data at the "
-                                           "given index")
+           args("self", "workspaceIndex"),
+           "Creates a read-only numpy wrapper "
+           "around the original E data at the "
+           "given index")
       .def("readDx", &MatrixWorkspace::readDx, return_readonly_numpy(),
-           args("self", "workspaceIndex"), "Creates a read-only numpy wrapper "
-                                           "around the original Dx data at the "
-                                           "given index")
+           args("self", "workspaceIndex"),
+           "Creates a read-only numpy wrapper "
+           "around the original Dx data at the "
+           "given index")
       .def("hasDx", &MatrixWorkspace::hasDx, args("self", "workspaceIndex"),
            "Returns True if the spectrum uses the DX (X Error) array, else "
            "False.")

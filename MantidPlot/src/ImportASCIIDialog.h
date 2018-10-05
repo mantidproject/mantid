@@ -31,10 +31,10 @@
 
 #include "ExtensibleFileDialog.h"
 
-#include <QComboBox>
 #include <QCheckBox>
-#include <QSpinBox>
+#include <QComboBox>
 #include <QLineEdit>
+#include <QSpinBox>
 #include <QTableView>
 
 class QGroupBox;
@@ -132,7 +132,7 @@ public:
   int ignoredLines() const { return d_ignored_lines->value(); }
   //! Whether to rename columns based on the first (non-skipped) line.
   bool renameColumns() const { return d_rename_columns->isChecked(); }
-  //! Whether to replace sequences of whitespace charecters with a single space.
+  //! Whether to replace sequences of whitespace characters with a single space.
   bool simplifySpaces() const { return d_simplify_spaces->isChecked(); }
   //! Whether to remove whitespace from beginning and end of lines.
   bool stripSpaces() const { return d_strip_spaces->isChecked(); }

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -16,8 +22,8 @@ using namespace boost::python;
 
 /// This is the base TypedValidator for most of the WorkspaceValidators
 void export_MatrixWorkspaceValidator() {
-  using Mantid::API::MatrixWorkspace_sptr;
   using Mantid::API::MatrixWorkspaceValidator;
+  using Mantid::API::MatrixWorkspace_sptr;
   TypedValidatorExporter<MatrixWorkspace_sptr>::define(
       "MatrixWorkspaceValidator");
   TypedValidatorExporter<IMDWorkspace_sptr>::define("IMDWorkspaceValidator");
@@ -53,9 +59,10 @@ void export_WorkspaceValidators() {
       WorkspaceUnitValidator, std::string, "unit",
       "Checks the workspace has the given unit along the X-axis");
   EXPORT_WKSP_VALIDATOR_DEFAULT_ARG(HistogramValidator, bool, "mustBeHistogram",
-                                    true, "If mustBeHistogram=True then the "
-                                          "workspace must be a histogram "
-                                          "otherwise it must be point data.");
+                                    true,
+                                    "If mustBeHistogram=True then the "
+                                    "workspace must be a histogram "
+                                    "otherwise it must be point data.");
   EXPORT_WKSP_VALIDATOR_DEFAULT_ARG(
       RawCountValidator, bool, "mustNotBeDistribution", true,
       "If mustNotBeDistribution=True then the workspace must not have been "

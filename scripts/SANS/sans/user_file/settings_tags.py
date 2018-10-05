@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
 from sans.common.enums import serializable_enum
@@ -80,7 +86,7 @@ class SampleId(object):
 
 
 # --- SET
-@serializable_enum("scales", "centre")
+@serializable_enum("scales", "centre", "centre_HAB")
 class SetId(object):
     pass
 

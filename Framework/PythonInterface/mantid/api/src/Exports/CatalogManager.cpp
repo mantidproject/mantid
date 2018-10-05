@@ -1,5 +1,11 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CatalogManager.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -13,7 +19,7 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(CatalogManagerImpl)
 
-boost::python::object getActiveSessionsAsList(CatalogManagerImpl &self) {
+boost::python::list getActiveSessionsAsList(CatalogManagerImpl &self) {
   boost::python::list sessions;
   const auto vecSessions = self.getActiveSessions();
   for (const auto &vecSession : vecSessions) {

@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
@@ -81,11 +87,10 @@ public:
  * @param data Input data
  * @param sorted A boolean indicating whether the data is sorted
  */
-Statistics getStatisticsNumpy(const NumPy::NdArray &data,
-                              const bool sorted = false) {
-  using Mantid::Kernel::getStatistics;
-  using Mantid::Kernel::StatOptions;
+Statistics getStatisticsNumpy(const NDArray &data, const bool sorted = false) {
   using Converters::NDArrayToVector;
+  using Mantid::Kernel::StatOptions;
+  using Mantid::Kernel::getStatistics;
 
   if (isFloatArray(data.ptr())) {
     unsigned int flags = StatOptions::AllStats;
@@ -97,21 +102,16 @@ Statistics getStatisticsNumpy(const NumPy::NdArray &data,
   }
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
+
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1,
                                 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 //============================ Z score
 //============================================
 
@@ -120,7 +120,7 @@ GCC_DIAG_ON(conversion)
  * @param zscoreFunc A function pointer to the required moments function
  * @param data Numpy array of data
  */
-std::vector<double> getZscoreNumpy(const NumPy::NdArray &data) {
+std::vector<double> getZscoreNumpy(const NDArray &data) {
   using Converters::NDArrayToVector;
   using Mantid::Kernel::getZscore;
 
@@ -136,7 +136,7 @@ std::vector<double> getZscoreNumpy(const NumPy::NdArray &data) {
  * @param data The input array
  * @param sorted True if the data is sorted (deprecated)
  */
-std::vector<double> getZscoreNumpyDeprecated(const NumPy::NdArray &data,
+std::vector<double> getZscoreNumpyDeprecated(const NDArray &data,
                                              const bool sorted) {
   UNUSED_ARG(sorted);
   PyErr_Warn(PyExc_DeprecationWarning,
@@ -148,10 +148,10 @@ std::vector<double> getZscoreNumpyDeprecated(const NumPy::NdArray &data,
  * Proxy for @see Mantid::Kernel::getModifiedZscore so that it can accept numpy
  * arrays,
  */
-std::vector<double> getModifiedZscoreNumpy(const NumPy::NdArray &data,
+std::vector<double> getModifiedZscoreNumpy(const NDArray &data,
                                            const bool sorted = false) {
-  using Mantid::Kernel::getModifiedZscore;
   using Converters::NDArrayToVector;
+  using Mantid::Kernel::getModifiedZscore;
 
   if (isFloatArray(data.ptr())) {
     return getModifiedZscore(NDArrayToVector<double>(data)(), sorted);
@@ -160,29 +160,24 @@ std::vector<double> getModifiedZscoreNumpy(const NumPy::NdArray &data,
   }
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
+
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getModifiedZscoreOverloads,
                                 getModifiedZscoreNumpy, 1, 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 //============================ getMoments
 //============================================
 
 // Function pointer to real implementation of getMoments
-using MomentsFunction = std::vector<double>(*)(const std::vector<double> &,
-                                               const std::vector<double> &,
-                                               const int);
+using MomentsFunction = std::vector<double> (*)(const std::vector<double> &,
+                                                const std::vector<double> &,
+                                                const int);
 
 /**
  * The implementation for getMomentsAboutOrigin & getMomentsAboutOriginMean for
@@ -196,8 +191,8 @@ using MomentsFunction = std::vector<double>(*)(const std::vector<double> &,
  * @param maxMoment Maximum number of moments to return
  */
 std::vector<double> getMomentsNumpyImpl(MomentsFunction momentsFunc,
-                                        const NumPy::NdArray &indep,
-                                        const NumPy::NdArray &depend,
+                                        const NDArray &indep,
+                                        const NDArray &depend,
                                         const int maxMoment) {
   using Converters::NDArrayToVector;
 
@@ -218,57 +213,45 @@ std::vector<double> getMomentsNumpyImpl(MomentsFunction momentsFunc,
  * Proxy for @see Mantid::Kernel::getMomentsAboutOrigin so that it can accept
  * numpy arrays
  */
-std::vector<double> getMomentsAboutOriginNumpy(const NumPy::NdArray &indep,
-                                               const NumPy::NdArray &depend,
+std::vector<double> getMomentsAboutOriginNumpy(const NDArray &indep,
+                                               const NDArray &depend,
                                                const int maxMoment = 3) {
   using Mantid::Kernel::getMomentsAboutOrigin;
   return getMomentsNumpyImpl(&getMomentsAboutOrigin, indep, depend, maxMoment);
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutOriginOverloads,
                                 getMomentsAboutOriginNumpy, 2, 3)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 /**
  * Proxy for @see Mantid::Kernel::getMomentsAboutMean so that it can accept
  * numpy arrays
  */
-std::vector<double> getMomentsAboutMeanNumpy(const NumPy::NdArray &indep,
-                                             NumPy::NdArray &depend,
+std::vector<double> getMomentsAboutMeanNumpy(const NDArray &indep,
+                                             NDArray &depend,
                                              const int maxMoment = 3) {
   using Mantid::Kernel::getMomentsAboutMean;
   return getMomentsNumpyImpl(&getMomentsAboutMean, indep, depend, maxMoment);
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads,
                                 getMomentsAboutMeanNumpy, 2, 3)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 ///@endcond
-}
+} // namespace
 
 // -------------------------------------- Exports start here
 // --------------------------------------

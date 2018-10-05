@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_SAMPLETRANSMISSION_H_
 #define MANTIDQTCUSTOMINTERFACES_SAMPLETRANSMISSION_H_
 
 //----------------------
 // Includes
 //----------------------
-#include "ui_SampleTransmission.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "ui_SampleTransmission.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -45,7 +51,7 @@ private:
   /// Algorithm runner
   API::AlgorithmRunner *m_algRunner;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_SAMPLETRANSMISSION_H_

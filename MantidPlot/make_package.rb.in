@@ -108,6 +108,10 @@ if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
 end
 
 if("@OPENMP_FOUND@" == "TRUE")
+  if not File.file?("/usr/lib/libomp.dylib")
+      # assume we're using system llvm
+      library_filenames << "libc++.dylib"
+  end
   library_filenames << "libomp.dylib"
 end
 
@@ -119,6 +123,14 @@ library_filenames.each do |filename|
     copyFile(openssl_dir+filename)
   elsif  filename.include? "libcrypto.dylib"
     copyFile(openssl_dir+filename)
+  elsif filename.include? "libomp.dylib" or filename.include? "libc++.dylib"
+      if File.file?(lib_dir+"libomp.dylib")
+        # using system llvm
+        copyFile(lib_dir+filename)
+      elsif
+        # using homebrew llvm
+        copyFile("/usr/local/opt/llvm/lib/"+filename)
+      end
   else
     copyFile(lib_dir+filename)
   end
@@ -325,7 +337,7 @@ end
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
 directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
-               "certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile","yaml"]
+               "certifi","tornado","markupsafe","jinja2","jsonschema","functools32","ptyprocess","CifFile","yaml"]
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}","Contents/MacOS/")
 end

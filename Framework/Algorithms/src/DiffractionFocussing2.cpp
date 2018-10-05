@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -22,8 +28,8 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using std::vector;
 using Mantid::HistogramData::BinEdges;
+using std::vector;
 
 namespace Mantid {
 
@@ -663,5 +669,5 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
   return totalHistProcess;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

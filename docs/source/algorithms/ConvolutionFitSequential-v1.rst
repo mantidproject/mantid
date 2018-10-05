@@ -54,6 +54,7 @@ Usage
                                              SpecMin=specMin, SpecMax=specMax,
                                              ConvolveMembers=convolve,
                                              Minimizer=minimizer, MaxIterations=maxIt)
+  result_ws = result_ws[0]
   
   print("Result has %i Spectra" %result_ws.getNumberHistograms())
   

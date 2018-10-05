@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FITPROPERTYBROWSER_H_
 #define FITPROPERTYBROWSER_H_
 
@@ -408,6 +414,8 @@ protected:
   void doFit(int maxIterations);
   /// Create CompositeFunction from string
   void createCompositeFunction(const QString &str = "");
+  /// Catches unexpected not found exceptions
+  Mantid::API::IFunction_sptr tryCreateFitFunction(const QString &str);
   /// Create CompositeFunction from pointer
   void createCompositeFunction(const Mantid::API::IFunction_sptr func);
 

@@ -1,5 +1,10 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflLegacyTransferStrategy.h"
-#include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Tolerance.h"
 #include "ReflTableSchema.h"
@@ -60,7 +65,7 @@ void validateRow(std::map<std::string, std::string> &row,
     break;
   };
 }
-}
+} // namespace
 
 /** Transfer runs from the search results table to the data processor table.
  * @param searchResults : the search results
@@ -171,5 +176,5 @@ bool MantidQt::CustomInterfaces::ReflLegacyTransferStrategy::knownFileType(
   boost::smatch match; // Unused.
   return boost::regex_search(filename, match, pattern);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

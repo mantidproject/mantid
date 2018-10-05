@@ -1,5 +1,11 @@
-#include "MantidKernel/Logger.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/LegacyQwt/DisplayCurveFit.h"
+#include "MantidKernel/Logger.h"
 // includes for workspace handling
 
 // includes for interface development
@@ -117,8 +123,8 @@ void DisplayCurveFit::addSpectrum(
     const size_t specIndex) {
   const QString &curveName{m_curveTypeToQString.at(aType)};
   const QColor curveColor(m_curveTypeToColor.at(aType));
-  m_plotPanel.at(aType)
-      ->addSpectrum(curveName, workspace, specIndex, curveColor);
+  m_plotPanel.at(aType)->addSpectrum(curveName, workspace, specIndex,
+                                     curveColor);
 }
 
 /**
@@ -217,5 +223,5 @@ DisplayCurveFit::namesToTypes(const QStringList &curveNames) const {
   return typesFound;
 }
 
-} // namespace MantidQt
 } // namespace MantidWidgets
+} // namespace MantidQt

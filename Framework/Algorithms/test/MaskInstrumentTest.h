@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MASKINSTRUMENTTEST_H_
 #define MANTID_ALGORITHMS_MASKINSTRUMENTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/MaskInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -51,7 +57,7 @@ maskInstrumentInplace(const MatrixWorkspace_sptr &ws,
   alg.execute();
   return ws;
 }
-}
+} // namespace
 
 class MaskInstrumentTest : public CxxTest::TestSuite {
 public:

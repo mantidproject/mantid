@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MATRIXPROPERTYTEST_H_
 #define MATRIXPROPERTYTEST_H_
 //-----------------------------------------------------------------------------
@@ -7,9 +13,9 @@
 #include "MantidKernel/PropertyManager.h"
 #include <cxxtest/TestSuite.h>
 
-using Mantid::Kernel::MatrixProperty;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::IntMatrix;
+using Mantid::Kernel::MatrixProperty;
 using Mantid::Kernel::PropertyManager;
 
 class MatrixPropertyTest : public CxxTest::TestSuite {

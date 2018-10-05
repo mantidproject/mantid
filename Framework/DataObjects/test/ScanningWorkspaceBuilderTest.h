@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_SCANNINGWORKSPACEBUILDERTEST_H_
 #define MANTID_DATAOBJECTS_SCANNINGWORKSPACEBUILDERTEST_H_
 
@@ -5,12 +11,12 @@
 
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -30,7 +36,7 @@ Instrument_const_sptr createSimpleInstrument(size_t nDetectors, size_t nBins) {
           int(nDetectors), int(nBins));
   return wsWithInstrument->getInstrument();
 }
-}
+} // namespace
 
 class ScanningWorkspaceBuilderTest : public CxxTest::TestSuite {
 public:
@@ -279,14 +285,16 @@ public:
       for (size_t j = 0; j < nTimeIndexes; ++j) {
         // Rounding to nearest int required to avoid problem of Euler angles
         // returning -180/0/180
-        TS_ASSERT_DELTA(0.0, std::lround(detInfo.rotation({i, j})
-                                             .getEulerAngles("XYZ")[0]) %
-                                 180,
-                        1e-12)
-        TS_ASSERT_DELTA(0.0, std::lround(detInfo.rotation({i, j})
-                                             .getEulerAngles("XYZ")[2]) %
-                                 180,
-                        1e-12)
+        TS_ASSERT_DELTA(
+            0.0,
+            std::lround(detInfo.rotation({i, j}).getEulerAngles("XYZ")[0]) %
+                180,
+            1e-12)
+        TS_ASSERT_DELTA(
+            0.0,
+            std::lround(detInfo.rotation({i, j}).getEulerAngles("XYZ")[2]) %
+                180,
+            1e-12)
       }
 
       TS_ASSERT_DELTA(

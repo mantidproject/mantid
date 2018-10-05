@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -29,7 +35,7 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual(self.beam_centre_model.r_max, 280)
         self.assertEqual(self.beam_centre_model.left_right, True)
         self.assertEqual(self.beam_centre_model.up_down, True)
-        self.assertEqual(self.beam_centre_model.tolerance, 0.000125)
+        self.assertEqual(self.beam_centre_model.tolerance, 0.0001251)
         self.assertEqual(self.beam_centre_model.lab_pos_1, '')
         self.assertEqual(self.beam_centre_model.lab_pos_2, '')
         self.assertEqual(self.beam_centre_model.hab_pos_2, '')
@@ -87,9 +93,6 @@ class BeamCentreModelTest(unittest.TestCase):
                                                                    find_direction=FindDirectionEnum.All,
                                                                    reduction_method=True,
                                                                    verbose=False, component=DetectorType.LAB)
-
-        self.assertEqual(state.convert_to_q.q_min, self.beam_centre_model.q_min)
-        self.assertEqual(state.convert_to_q.q_max, self.beam_centre_model.q_max)
 
     def test_that_find_beam_centre_calls_centre_finder_twice_when_COM_is_TRUE(self):
         state = mock.MagicMock()

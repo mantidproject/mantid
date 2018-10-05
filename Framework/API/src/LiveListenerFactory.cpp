@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
@@ -11,7 +17,7 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("LiveListenerFactory");
-}
+} // namespace
 
 /**
  * Creates an instance of the appropriate listener for the given instrument,
@@ -122,5 +128,5 @@ LiveListenerFactoryImpl::createUnwrapped(const std::string &className) const {
       "Don't use this method - use the safe one!!!");
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

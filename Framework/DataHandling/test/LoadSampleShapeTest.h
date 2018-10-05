@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOAD_SHAPETEST_H_
 #define LOAD_SHAPETEST_H_
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

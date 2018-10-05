@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MANTIDWIDGETS_PARSEKEYVALUESTRINGTEST_H
 #define MANTID_MANTIDWIDGETS_PARSEKEYVALUESTRINGTEST_H
 
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <cxxtest/TestSuite.h>
 
-using MantidQt::MantidWidgets::parseKeyValueString;
 using MantidQt::MantidWidgets::parseKeyValueQString;
+using MantidQt::MantidWidgets::parseKeyValueString;
 
 class ParseKeyValueStringTest : public CxxTest::TestSuite {
 

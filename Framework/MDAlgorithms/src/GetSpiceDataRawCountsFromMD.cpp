@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h"
 
 #include "MantidAPI/Axis.h"
@@ -463,8 +469,9 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
       std::stringstream ess;
       ess << "Workspace " << mdws->getName() << "'s " << iexp
           << "-th ExperimentInfo with "
-             "run number " << thisrunnumber
-          << " does not have specified property " << samplelogname;
+             "run number "
+          << thisrunnumber << " does not have specified property "
+          << samplelogname;
       throw std::runtime_error(ess.str());
     }
     // Get experiment value
@@ -511,8 +518,9 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     try {
       outws->getAxis(0)->setUnit(xlabel);
     } catch (...) {
-      g_log.information() << "Label " << xlabel << " for X-axis is not a unit "
-                                                   "registered."
+      g_log.information() << "Label " << xlabel
+                          << " for X-axis is not a unit "
+                             "registered."
                           << "\n";
     }
   }

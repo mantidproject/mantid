@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDCurveDialog.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDWorkspace.h"
 
-using Mantid::API::IMDWorkspace_sptr;
 using Mantid::API::AnalysisDataService;
 using Mantid::API::IMDWorkspace;
+using Mantid::API::IMDWorkspace_sptr;
 
 MantidMDCurveDialog::MantidMDCurveDialog(QWidget *parent, QString wsName)
     : QDialog(parent), m_wsName(wsName) {

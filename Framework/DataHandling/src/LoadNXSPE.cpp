@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNXSPE.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
@@ -415,5 +421,5 @@ LoadNXSPE::createCuboid(double dx, double dy, double dz) {
   return retVal;
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

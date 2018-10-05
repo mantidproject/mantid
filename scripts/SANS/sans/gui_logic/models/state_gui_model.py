@@ -1,4 +1,10 @@
-""" The state gui model contains all the reduction information which is not explictily available in the data table.
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+""" The state gui model contains all the reduction information which is not explicitly available in the data table.
 
 This is one of the two models which is used for the data reduction. It contains generally all the settings which
 are not available in the model associated with the data table.
@@ -110,7 +116,7 @@ class StateGuiModel(object):
 
     @property
     def hab_pos_1(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos1")
+        return self.get_simple_element_with_attribute(element_id=SetId.centre_HAB, default_value='', attribute="pos1")
 
     @hab_pos_1.setter
     def hab_pos_1(self, value):
@@ -118,7 +124,7 @@ class StateGuiModel(object):
 
     @property
     def hab_pos_2(self):
-        return self.get_simple_element_with_attribute(element_id=SetId.centre, default_value='', attribute="pos2")
+        return self.get_simple_element_with_attribute(element_id=SetId.centre_HAB, default_value='', attribute="pos2")
 
     @hab_pos_2.setter
     def hab_pos_2(self, value):
@@ -128,7 +134,7 @@ class StateGuiModel(object):
         if SetId.centre in self._user_file_items:
             settings = self._user_file_items[SetId.centre]
         else:
-            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overriden
+            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
             # and if not we want it to fail.
             settings = [position_entry(pos1=0.0, pos2=0.0, detector_type=DetectorType.LAB)]
 
@@ -374,7 +380,7 @@ class StateGuiModel(object):
         if LimitsId.wavelength in self._user_file_items:
             settings = self._user_file_items[LimitsId.wavelength]
         else:
-            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overriden
+            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
             # and if not we want it to fail.
             settings = [simple_range(start=-1., stop=-1., step=-1., step_type=RangeStepType.Lin)]
 
@@ -1059,7 +1065,7 @@ class StateGuiModel(object):
 
     @property
     def phi_limit_min(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="min", default_value="")
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="min", default_value="-90")
 
     @phi_limit_min.setter
     def phi_limit_min(self, value):
@@ -1067,7 +1073,7 @@ class StateGuiModel(object):
 
     @property
     def phi_limit_max(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="max", default_value="")
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="max", default_value="90")
 
     @phi_limit_max.setter
     def phi_limit_max(self, value):
@@ -1075,7 +1081,7 @@ class StateGuiModel(object):
 
     @property
     def phi_limit_use_mirror(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="use_mirror", default_value=False)  # noqa
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="use_mirror", default_value=True)  # noqa
 
     @phi_limit_use_mirror.setter
     def phi_limit_use_mirror(self, value):

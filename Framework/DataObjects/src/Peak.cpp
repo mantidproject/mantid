@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -1026,6 +1032,8 @@ Peak &Peak::operator=(const Peak &other) {
     m_orig_K = other.m_orig_K;
     m_orig_L = other.m_orig_L;
     m_detIDs = other.m_detIDs;
+    convention = other.convention;
+    m_peakNumber = other.m_peakNumber;
     m_peakShape.reset(other.m_peakShape->clone());
   }
   return *this;

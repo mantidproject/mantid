@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_WRAPPEDFUNCTIONTEST_H_
 #define MANTID_API_WRAPPEDFUNCTIONTEST_H_
 
@@ -17,8 +23,8 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-using ::testing::_;
 using ::testing::Mock;
+using ::testing::_;
 
 class FunctionParameterDecoratorTest;
 
@@ -443,9 +449,9 @@ private:
   class MockTestableFunctionParameterDecorator
       : public TestableFunctionParameterDecorator {
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD1(beforeDecoratedFunctionSet, void(const IFunction_sptr &));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

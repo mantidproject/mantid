@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_TIMESERIESPROPERTY_H_
 #define MANTID_KERNEL_TIMESERIESPROPERTY_H_
 
@@ -39,6 +45,10 @@ struct TimeSeriesPropertyStatistics {
   double median;
   /// standard_deviation of the values
   double standard_deviation;
+  /// time weighted average
+  double time_mean;
+  /// time weighted standard deviation
+  double time_standard_deviation;
   /// Duration in seconds
   double duration;
 };
@@ -92,27 +102,6 @@ public:
 
 /**
    A specialised Property class for holding a series of time-value pairs.
-
-   Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>.
-   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 template <typename TYPE>
 class DLLExport TimeSeriesProperty : public Property,
@@ -120,6 +109,7 @@ class DLLExport TimeSeriesProperty : public Property,
 public:
   /// Constructor
   explicit TimeSeriesProperty(const std::string &name);
+
   /// Virtual destructor
   ~TimeSeriesProperty() override;
   /// "Virtual" copy constructor
@@ -181,7 +171,10 @@ public:
   /// Calculate the time-weighted average of a property in a filtered range
   double averageValueInFilter(
       const std::vector<SplittingInterval> &filter) const override;
-  /// Calculate the time-weighted average of a property
+  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
+  std::pair<double, double> averageAndStdDevInFilter(
+      const std::vector<SplittingInterval> &filter) const override;
+  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
   double timeAverageValue() const override;
   /// generate constant time-step histogram from the property values
   void histogramData(const Types::Core::DateAndTime &tMin,
@@ -333,6 +326,8 @@ private:
   std::string setValueFromProperty(const Property &right) override;
   /// Find if time lies in a filtered region
   bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
+  /// Time weighted mean and standard deviation
+  std::pair<double, double> timeAverageValueAndStdDev() const;
 
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;

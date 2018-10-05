@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : CustomActionDialog.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2007 by Ion Vasilief
-    Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : Custom Action dialog
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -29,23 +18,23 @@
 #include "CustomActionDialog.h"
 #include "ApplicationWindow.h"
 
-#include <QPushButton>
-#include <QRadioButton>
-#include <QLabel>
-#include <QGroupBox>
-#include <QComboBox>
-#include <QLineEdit>
 #include <QAction>
 #include <QApplication>
+#include <QComboBox>
 #include <QDir>
-#include <QListWidget>
-#include <QLayout>
 #include <QFileDialog>
-#include <QToolBar>
-#include <QMenu>
+#include <QGroupBox>
 #include <QImageReader>
-#include <QShortcut>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMenu>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QShortcut>
+#include <QToolBar>
 
 CustomActionDialog::CustomActionDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {
@@ -298,7 +287,8 @@ bool CustomActionDialog::validUserInput() {
       QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
                             tr("You have already defined an action having "
                                "description: %1 <br>Please provide a different "
-                               "description text!").arg(textBox->text()));
+                               "description text!")
+                                .arg(textBox->text()));
       textBox->setFocus();
       return false;
     }
@@ -466,7 +456,8 @@ void CustomActionDialog::saveAction(QAction *action) {
     QMessageBox::critical(
         app, tr("MantidPlot") + " - " + tr("File Save Error"),
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!").arg(fileName));
+           "you have the right to write to this location!")
+            .arg(fileName));
     return;
   }
 

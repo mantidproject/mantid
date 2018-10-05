@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkSinglePeakMarker.h"
-#include <vtkPolyData.h>
-#include "vtkFloatArray.h"
-#include "vtkPoints.h"
-#include "vtkUnstructuredGrid.h"
-#include "vtkVertex.h"
-#include "vtkPVGlyphFilter.h"
 #include "vtkCellData.h"
+#include "vtkFloatArray.h"
+#include "vtkPVGlyphFilter.h"
+#include "vtkPoints.h"
 #include "vtkSphereSource.h"
 #include "vtkTransform.h"
 #include "vtkTransformPolyDataFilter.h"
+#include "vtkUnstructuredGrid.h"
+#include "vtkVertex.h"
+#include <vtkPolyData.h>
 
 namespace Mantid {
 namespace VATES {
@@ -71,5 +77,5 @@ vtkPolyData *vtkSinglePeakMarker::createSinglePeakMarker(double x, double y,
 
   return glyphed;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

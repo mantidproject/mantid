@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 #include <QString>
 
@@ -5,15 +11,15 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 /** Adds an element to the whitelist
-* @param colName : the name of the column to be added
-* @param algProperty : the name of the property linked to this column
-* @param description : a description of this column
-* @param isShown : true if we want to use what's in this column to
-* generate the output ws name.
-* @param isKey : true if we want to use this column as a key value i.e.
-* something that uniquely identifies the row within the group
-* @param prefix : the prefix to be added to the value of this column
-*/
+ * @param colName : the name of the column to be added
+ * @param algProperty : the name of the property linked to this column
+ * @param description : a description of this column
+ * @param isShown : true if we want to use what's in this column to
+ * generate the output ws name.
+ * @param isKey : true if we want to use this column as a key value i.e.
+ * something that uniquely identifies the row within the group
+ * @param prefix : the prefix to be added to the value of this column
+ */
 void WhiteList::addElement(const QString &colName, const QString &algProperty,
                            const QString &description, bool isShown,
                            const QString &prefix, bool isKey) {
@@ -56,13 +62,13 @@ QString WhiteList::description(int index) const {
 }
 
 /** Returns the size of this whitelist, i.e. the number of columns
-*/
+ */
 size_t WhiteList::size() const { return m_names.size(); }
 
 /** Returns true if the contents of this column should be used to generate the
  * name of the output ws
  * @param index : The column index
-*/
+ */
 bool WhiteList::isShown(int index) const { return m_isShown.at(index); }
 
 /** Check whether any of the columns are marked as a key column
@@ -78,13 +84,13 @@ bool WhiteList::hasKeyColumns() const {
 /** Returns true if the contents of this column should be used to identify the
  * row uniquely within the group
  * @param index : The column index
-*/
+ */
 bool WhiteList::isKey(int index) const { return m_isKey.at(index); }
 
 /** Returns the column prefix used to generate the name of the output ws (will
-* only be used if showValue is true for this column
-* @param index : The column index
-*/
+ * only be used if showValue is true for this column
+ * @param index : The column index
+ */
 QString WhiteList::prefix(int index) const { return m_prefixes.at(index); }
 
 /** Returns the list of entry names.
@@ -137,6 +143,6 @@ ConstColumnIterator operator-(typename ConstColumnIterator::difference_type n,
   result -= n;
   return result;
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

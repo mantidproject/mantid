@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_COORDTRANSFORMPARSERTEST_H_
 #define MANTID_DATAOBJECTS_COORDTRANSFORMPARSERTEST_H_
 
 #include "MantidAPI/CoordTransform.h"
-#include "MantidDataObjects/CoordTransformAffineParser.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAffineParser.h"
 
 #include <cxxtest/TestSuite.h>
 

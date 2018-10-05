@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_FILEEVENTDATALISTENERTEST_H_
 #define MANTID_LIVEDATA_FILEEVENTDATALISTENERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ConfigService.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAPI/CoordTransform.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Exception.h"
@@ -280,9 +286,9 @@ void CoordTransformAffine::apply(const coord_t *inputVector,
 
 //----------------------------------------------------------------------------------------------
 /** Serialize the coordinate transform
-*
-* @return The coordinate transform in its serialized form.
-*/
+ *
+ * @return The coordinate transform in its serialized form.
+ */
 std::string CoordTransformAffine::toXMLString() const {
   using namespace Poco::XML;
 
@@ -389,5 +395,5 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
   return out;
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_BASECONVERTTODIFFRACTIONMDWORKSPACE_H
 #define MANTID_MDALGORITHMS_BASECONVERTTODIFFRACTIONMDWORKSPACE_H
 
@@ -60,7 +66,7 @@ protected: // for testing
                               std::vector<double> &maxVal) = 0;
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif // MANTID_MDALGORITHMS_BASECONVERTTODIFFRACTIONMDWORKSPACE_H

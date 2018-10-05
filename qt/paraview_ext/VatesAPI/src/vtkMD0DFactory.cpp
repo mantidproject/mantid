@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
-#include "MantidVatesAPI/ProgressAction.h"
 #include "MantidKernel/Logger.h"
+#include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 
 using namespace Mantid::API;
 
@@ -42,5 +48,5 @@ void vtkMD0DFactory::initialize(
 
 /// Validate the workspace
 void vtkMD0DFactory::validate() const {}
-}
-}
+} // namespace VATES
+} // namespace Mantid

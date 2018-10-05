@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
 namespace MantidQt {
 namespace MantidWidgets {
@@ -55,6 +61,6 @@ QModelIndexForMainModel RowLocationAdapter::indexAt(RowLocation const &location,
                              "row location which does not exist.");
   }
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

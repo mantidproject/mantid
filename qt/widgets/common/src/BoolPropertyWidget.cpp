@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/BoolPropertyWidget.h"
 #include "MantidKernel/System.h"
 
@@ -50,5 +56,5 @@ void BoolPropertyWidget::setValueImpl(const QString &value) {
   else
     m_checkBox->setCheckState(Qt::Checked);
 }
-} // namespace MantidQt
 } // namespace API
+} // namespace MantidQt

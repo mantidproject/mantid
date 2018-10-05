@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_EVALUATEMDFUNCTIONTEST_H_
 #define MANTID_MDALGORITHMS_EVALUATEMDFUNCTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/EvaluateMDFunction.h"
-#include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
+#include "MantidMDAlgorithms/EvaluateMDFunction.h"
 
-using Mantid::MDAlgorithms::EvaluateMDFunction;
 using Mantid::MDAlgorithms::CreateMDHistoWorkspace;
+using Mantid::MDAlgorithms::EvaluateMDFunction;
 using namespace Mantid::API;
 
 class EvaluateMDFunctionTest : public CxxTest::TestSuite {

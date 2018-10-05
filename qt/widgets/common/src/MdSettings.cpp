@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
 #include "boost/scoped_ptr.hpp"
@@ -73,9 +79,10 @@ QColor MdSettings::getUserSettingBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QColor backgroundColor =
-      settings.value(m_lblUserSettingBackgroundColor,
-                     m_mdConstants.getDefaultBackgroundColor()).value<QColor>();
+  QColor backgroundColor = settings
+                               .value(m_lblUserSettingBackgroundColor,
+                                      m_mdConstants.getDefaultBackgroundColor())
+                               .value<QColor>();
   settings.endGroup();
 
   return backgroundColor;
@@ -93,9 +100,10 @@ QColor MdSettings::getLastSessionBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QColor backgroundColor =
-      settings.value(m_lblLastSessionBackgroundColor,
-                     m_mdConstants.getDefaultBackgroundColor()).value<QColor>();
+  QColor backgroundColor = settings
+                               .value(m_lblLastSessionBackgroundColor,
+                                      m_mdConstants.getDefaultBackgroundColor())
+                               .value<QColor>();
   settings.endGroup();
 
   return backgroundColor;
@@ -138,9 +146,10 @@ QString MdSettings::getGeneralMdColorMapName() {
   QSettings settings;
 
   settings.beginGroup(m_generalMdGroup);
-  QString colorMap =
-      settings.value(m_lblGeneralMdColorMapName,
-                     m_mdConstants.getGeneralMdColorMap()).toString();
+  QString colorMap = settings
+                         .value(m_lblGeneralMdColorMapName,
+                                m_mdConstants.getGeneralMdColorMap())
+                         .toString();
   settings.endGroup();
 
   return colorMap;
@@ -194,9 +203,10 @@ QString MdSettings::getUserSettingInitialView() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QString initialView =
-      settings.value(m_lblUserSettingInitialView,
-                     m_mdConstants.getTechniqueDependence()).toString();
+  QString initialView = settings
+                            .value(m_lblUserSettingInitialView,
+                                   m_mdConstants.getTechniqueDependence())
+                            .toString();
   settings.endGroup();
 
   return initialView;

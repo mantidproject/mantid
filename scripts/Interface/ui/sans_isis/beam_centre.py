@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
@@ -37,6 +43,13 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
 
         # Attach validators
         self._attach_validators()
+
+        # This feature is currently broken and not strictly needed so I am hiding this part of the GUI.
+        self.Q_limits.hide()
+        self.Q_from.hide()
+        self.q_min_line_edit.hide()
+        self.q_max_line_edit.hide()
+        self.Q_to.hide()
 
     def _setup_log_widget(self):
         self.log_widget = MantidQt.MantidWidgets.MessageDisplay(self.groupBox_2)

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCInterface.h"
 
-#include "ALCDataLoadingView.h"
 #include "ALCBaselineModellingView.h"
+#include "ALCDataLoadingView.h"
 #include "ALCPeakFittingView.h"
 
-#include "ALCDataLoadingPresenter.h"
 #include "ALCBaselineModellingPresenter.h"
+#include "ALCDataLoadingPresenter.h"
 #include "ALCPeakFittingPresenter.h"
 
 #include "ALCBaselineModellingModel.h"
@@ -13,9 +19,9 @@
 
 #include "QInputDialog"
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/ITableWorkspace.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -149,9 +155,9 @@ void ALCInterface::switchStep(int newStepIndex) {
 void ALCInterface::exportResults() {
 
   bool ok;
-  QString label = QInputDialog::getText(this, "Results label",
-                                        "Label to assign to the results: ",
-                                        QLineEdit::Normal, "ALCResults", &ok);
+  QString label = QInputDialog::getText(
+      this, "Results label",
+      "Label to assign to the results: ", QLineEdit::Normal, "ALCResults", &ok);
 
   if (!ok) // Cancelled
   {
@@ -206,9 +212,9 @@ void ALCInterface::exportResults() {
 void ALCInterface::importResults() {
 
   bool ok;
-  QString label = QInputDialog::getText(this, "Results label",
-                                        "Label to assign to the results: ",
-                                        QLineEdit::Normal, "ALCResults", &ok);
+  QString label = QInputDialog::getText(
+      this, "Results label",
+      "Label to assign to the results: ", QLineEdit::Normal, "ALCResults", &ok);
 
   if (!ok) // Cancelled
   {
@@ -244,9 +250,9 @@ void ALCInterface::importResults() {
 
     } else {
       // Error message
-      QMessageBox::critical(this, "Error", "Workspace " +
-                                               QString::fromStdString(wsData) +
-                                               " was not found");
+      QMessageBox::critical(this, "Error",
+                            "Workspace " + QString::fromStdString(wsData) +
+                                " was not found");
     }
 
   } else if (currentStep == 1) {
@@ -273,9 +279,9 @@ void ALCInterface::importResults() {
 
     } else {
       // Error message
-      QMessageBox::critical(this, "Error", "Workspace " +
-                                               QString::fromStdString(wsData) +
-                                               " was not found");
+      QMessageBox::critical(this, "Error",
+                            "Workspace " + QString::fromStdString(wsData) +
+                                " was not found");
     }
 
   } else if (currentStep == 2) {
@@ -301,9 +307,9 @@ void ALCInterface::importResults() {
 
     } else {
       // Error message
-      QMessageBox::critical(this, "Error", "Workspace " +
-                                               QString::fromStdString(wsData) +
-                                               " was not found");
+      QMessageBox::critical(this, "Error",
+                            "Workspace " + QString::fromStdString(wsData) +
+                                " was not found");
     }
 
   } else {

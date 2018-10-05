@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "AlgorithmMonitor.h"
-#include "MantidUI.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/MaskedProperty.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidUI.h"
 
-#include <QtGui>
 #include <QThread>
+#include <QtGui>
 
 #include <algorithm>
 
@@ -155,9 +161,10 @@ MonitorDlg::MonitorDlg(QWidget *parent, AlgorithmMonitor *algMonitor)
   update();
   connect(algMonitor, SIGNAL(countChanged()), this, SLOT(update()),
           Qt::QueuedConnection);
-  connect(algMonitor, SIGNAL(needUpdateProgress(void *, double, const QString &,
-                                                double, int)),
-          SLOT(updateProgress(void *, double, const QString &, double, int)));
+  connect(
+      algMonitor,
+      SIGNAL(needUpdateProgress(void *, double, const QString &, double, int)),
+      SLOT(updateProgress(void *, double, const QString &, double, int)));
 
   QHBoxLayout *buttonLayout = new QHBoxLayout;
   QPushButton *closeButton = new QPushButton("Close");

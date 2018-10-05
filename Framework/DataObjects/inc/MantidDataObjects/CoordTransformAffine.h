@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_COORDTRANSFORMAFFINE_H_
 #define MANTID_DATAOBJECTS_COORDTRANSFORMAFFINE_H_
 
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/SingleValueParameter.h"
+#include "MantidDataObjects/AffineMatrixParameter.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include "MantidDataObjects/AffineMatrixParameter.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -69,7 +75,7 @@ protected:
   void copyRawMatrix();
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_COORDTRANSFORMAFFINE_H_ */

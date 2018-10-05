@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_PEAKTRANSFORMQSAMPLE_H_
 #define MANTID_GEOMETRY_PEAKTRANSFORMQSAMPLE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/ConcretePeakTransformFactory.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -33,7 +39,7 @@ public:
 /// Typedef a factory for type of PeaksTransform.
 using PeakTransformQSampleFactory =
     ConcretePeakTransformFactory<PeakTransformQSample>;
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_PEAKTRANSFORMQSAMPLE_H_ */

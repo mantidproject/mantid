@@ -1,9 +1,15 @@
-#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Stitch1DMany.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -167,9 +173,9 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
               std::string compatible =
                   combHelper.checkCompatibility(ws[spec], true);
               if (!compatible.empty())
-                issues["InputWorkspaces"] = "Workspace " + ws[spec]->getName() +
-                                            " is not compatible: " +
-                                            compatible + "\n";
+                issues["InputWorkspaces"] =
+                    "Workspace " + ws[spec]->getName() +
+                    " is not compatible: " + compatible + "\n";
             }
           }
         }

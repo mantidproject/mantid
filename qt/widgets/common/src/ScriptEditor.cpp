@@ -1,28 +1,34 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------
 // Includes
 //-----------------------------------------------
 #include "MantidQtWidgets/Common/ScriptEditor.h"
-#include "MantidQtWidgets/Common/FindReplaceDialog.h"
 #include "MantidQtWidgets/Common/AlternateCSPythonLexer.h"
+#include "MantidQtWidgets/Common/FindReplaceDialog.h"
 
 // Qt
 #include <QApplication>
 #include <QFile>
 #include <QFileDialog>
 
-#include <QTextStream>
-#include <QMessageBox>
 #include <QAction>
+#include <QClipboard>
+#include <QKeyEvent>
 #include <QMenu>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QMouseEvent>
 #include <QPrintDialog>
 #include <QPrinter>
-#include <QKeyEvent>
-#include <QMouseEvent>
 #include <QScrollBar>
-#include <QClipboard>
-#include <QShortcut>
 #include <QSettings>
-#include <QMimeData>
+#include <QShortcut>
+#include <QTextStream>
 
 // Qscintilla
 #include <Qsci/qsciapis.h>
@@ -49,7 +55,7 @@ QsciLexer *createLexerFromName(const QString &lexerName) {
                                 "name. Supported names=Python, ");
   }
 }
-}
+} // namespace
 
 // The colour for a success marker
 QColor ScriptEditor::g_success_colour = QColor("lightgreen");
@@ -413,9 +419,22 @@ void ScriptEditor::dragMoveEvent(QDragMoveEvent *de) {
  * @param de :: The drag enter event
  */
 void ScriptEditor::dragEnterEvent(QDragEnterEvent *de) {
-  if (!de->mimeData()->hasUrls())
-    // pass to base class - This handles text appropriately
+  if (!de->mimeData()->hasUrls()) {
     QsciScintilla::dragEnterEvent(de);
+  }
+}
+
+/**
+ * If the QMimeData object holds workspaces names then extract text from a
+ * QMimeData object and add the necessary wrapping text to import mantid.
+ * @param source An existing QMimeData object
+ * @param rectangular On return rectangular is set if the text corresponds to a
+ * rectangular selection.
+ * @return The text
+ */
+QByteArray ScriptEditor::fromMimeData(const QMimeData *source,
+                                      bool &rectangular) const {
+  return QsciScintilla::fromMimeData(source, rectangular);
 }
 
 /**
@@ -423,11 +442,10 @@ void ScriptEditor::dragEnterEvent(QDragEnterEvent *de) {
  * @param de :: The drag drop event
  */
 void ScriptEditor::dropEvent(QDropEvent *de) {
-  QStringList filenames;
-  const QMimeData *mimeData = de->mimeData();
-  if (!mimeData->hasUrls()) {
+  if (!de->mimeData()->hasUrls()) {
+    QDropEvent localDrop(*de);
     // pass to base class - This handles text appropriately
-    QsciScintilla::dropEvent(de);
+    QsciScintilla::dropEvent(&localDrop);
   }
 }
 

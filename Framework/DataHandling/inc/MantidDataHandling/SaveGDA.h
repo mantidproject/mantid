@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVEGDA_H_
 #define MANTID_DATAHANDLING_SAVEGDA_H_
 
@@ -47,7 +53,7 @@ private:
   std::vector<CalibrationParams> parseParamsFile() const;
 };
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // MANTID_DATAHANDLING_SAVEGDA_H_

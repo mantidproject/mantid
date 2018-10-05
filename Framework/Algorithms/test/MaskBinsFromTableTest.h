@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_
 #define MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -262,7 +268,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to mask detectors by detectors IDs
-    */
+   */
   void test_maskBinWithDetectorIDsList() {
     // Create a workspace to mask: 5 spectra, 10 bins
     const std::string workspaceName("raggedMask5");

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
@@ -165,7 +171,7 @@ Property *get(IPropertyManager &self, const std::string &name,
     return Registry::PropertyWithValueFactory::create(name, value, 0).release();
   }
 }
-}
+} // namespace
 
 void export_IPropertyManager() {
   register_ptr_to_python<IPropertyManager *>();

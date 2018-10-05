@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_WORKSPACECREATION_H_
 #define MANTID_DATAOBJECTS_WORKSPACECREATION_H_
 
@@ -18,7 +24,7 @@ class Instrument;
 namespace API {
 class MatrixWorkspace;
 class HistoWorkspace;
-}
+} // namespace API
 namespace DataObjects {
 class EventWorkspace;
 class Workspace2D;
@@ -83,27 +89,6 @@ class Workspace2D;
 
   @author Simon Heybrock
   @date 2016
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 namespace detail {
@@ -152,7 +137,7 @@ template <> struct IsIndexInfo<Indexing::IndexInfo> {
 template <class UseIndexInfo>
 void initializeFromParent(const API::MatrixWorkspace &parent,
                           API::MatrixWorkspace &workspace);
-}
+} // namespace detail
 
 /** This is the create() method that all the other create() methods call.
  *  And it is also called directly.
@@ -198,9 +183,8 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
 }
 
 template <class T, class IndexArg, class HistArg,
-          typename std::enable_if<
-              !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
-              nullptr>
+          typename std::enable_if<!std::is_base_of<
+              API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
 std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = Kernel::make_unique<T>();
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
@@ -208,9 +192,8 @@ std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
 }
 
 template <class T, class IndexArg, class HistArg,
-          typename std::enable_if<
-              !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
-              nullptr>
+          typename std::enable_if<!std::is_base_of<
+              API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
 std::unique_ptr<T>
 create(const boost::shared_ptr<const Geometry::Instrument> instrument,
        const IndexArg &indexArg, const HistArg &histArg) {

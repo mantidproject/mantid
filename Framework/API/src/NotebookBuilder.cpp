@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/NotebookBuilder.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/HistoryItem.h"
-#include "MantidAPI/NotebookBuilder.h"
-#include "MantidKernel/Property.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Property.h"
 
 #include <boost/utility.hpp>
 
 namespace Mantid {
 namespace API {
 
-using Mantid::Kernel::PropertyHistory_sptr;
 using Mantid::Kernel::PropertyHistory_const_sptr;
+using Mantid::Kernel::PropertyHistory_sptr;
 
 namespace {
 Mantid::Kernel::Logger g_log("NotebookBuilder");

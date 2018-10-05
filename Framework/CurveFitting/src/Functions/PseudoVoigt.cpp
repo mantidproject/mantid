@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/PseudoVoigt.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
@@ -66,12 +72,14 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
 
     out->set(i, 0, h * (expTerm - lorentzTerm));
     out->set(i, 1, gFraction * expTerm + lFraction * lorentzTerm);
-    out->set(i, 2, h * xDiff * (gFraction * expTerm / sSquared +
-                                lFraction * lorentzTerm * 2.0 /
-                                    (xDiffSquared + gSquared)));
-    out->set(i, 3, h * (gFraction * expTerm * xDiffSquared / sSquared / f +
-                        lFraction * lorentzTerm *
-                            (1.0 / g - g / (xDiffSquared + gSquared))));
+    out->set(i, 2,
+             h * xDiff *
+                 (gFraction * expTerm / sSquared +
+                  lFraction * lorentzTerm * 2.0 / (xDiffSquared + gSquared)));
+    out->set(i, 3,
+             h * (gFraction * expTerm * xDiffSquared / sSquared / f +
+                  lFraction * lorentzTerm *
+                      (1.0 / g - g / (xDiffSquared + gSquared))));
   }
 }
 

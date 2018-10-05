@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
 #include "MantidKernel/V2D.h"
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
@@ -156,5 +162,5 @@ const Mantid::Kernel::V3D &PeakRepresentationCross::getOrigin() const {
 void PeakRepresentationCross::showBackgroundRadius(const bool) {
   // Do nothing
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

@@ -10,7 +10,8 @@ Description
 -----------
 
 This algorithm takes two or more workspaces as input and creates an
-output workspace group.
+output workspace group. A list of workspaces and a glob pattern may
+be specified together.
 
 Usage
 -----
@@ -30,6 +31,15 @@ Usage
   print('Its first  item is {}'.format(group.getItem(0)))
   print('Its second item is {}'.format(group.getItem(1)))
 
+  wrkspc1 = CreateSampleWorkspace()
+  wrkspc2 = CreateSampleWorkspace()
+  anotherGroup = GroupWorkspaces(GlobExpression='wrkspc?')
+
+  # Check the result
+  print('It has {} entries'.format(anotherGroup.getNumberOfEntries()))
+  print('Its first  item is {}'.format(anotherGroup.getItem(0)))
+  print('Its second item is {}'.format(anotherGroup.getItem(1)))
+
 Output
 ######
 
@@ -39,6 +49,9 @@ Output
   It has 2 entries
   Its first  item is ws1
   Its second item is ws2
+  It has 2 entries
+  Its first  item is wrkspc1
+  Its second item is wrkspc2
 
 .. categories::
 

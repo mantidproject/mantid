@@ -1,13 +1,19 @@
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidDataHandling/ModifyDetectorDotDatFile.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataHandling/ModifyDetectorDotDatFile.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/System.h"
 #include <fstream>
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/ExperimentInfo.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -169,5 +175,5 @@ void ModifyDetectorDotDatFile::exec() {
   in.close();
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

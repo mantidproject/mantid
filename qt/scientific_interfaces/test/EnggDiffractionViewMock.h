@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
 
-#include "MantidKernel/WarningSuppressions.h"
 #include "../EnggDiffraction/IEnggDiffractionView.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <gmock/gmock.h>
 
 class QwtData;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 // This is a simple mock for the tomo interface view when using SCARF.
 class MockEnggDiffractionView
@@ -185,6 +191,6 @@ public:
   // virtual void updateTabsInstrument(const std::string & newInstrument) = 0;
   MOCK_METHOD1(updateTabsInstrument, void(const std::string &newInstrument));
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

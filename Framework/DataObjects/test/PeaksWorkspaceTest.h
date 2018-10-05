@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAKSWORKSPACETEST_H_
 #define MANTID_DATAOBJECTS_PEAKSWORKSPACETEST_H_
 
@@ -467,9 +473,9 @@ public:
   }
 
   /**
-  * Test declaring an input PeaksWorkspace and retrieving it as const_sptr or
-  * sptr
-  */
+   * Test declaring an input PeaksWorkspace and retrieving it as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     PeaksWorkspace_sptr wsInput(new PeaksWorkspace());
@@ -499,9 +505,9 @@ public:
   }
 
   /**
-  * Test declaring an input IPeaksWorkspace and retrieving it as const_sptr or
-  * sptr
-  */
+   * Test declaring an input IPeaksWorkspace and retrieving it as const_sptr or
+   * sptr
+   */
   void testGetProperty_IPeaksWS_const_sptr() {
     const std::string wsName = "InputWorkspace";
     IPeaksWorkspace_sptr wsInput(new PeaksWorkspace());
@@ -600,8 +606,9 @@ private:
                                     // simplified relationship between qLab and
                                     // hkl.
 
-    return PeakParameters{minimalInstrument, goniometer, orientedLattice, hkl,
-                          qLab, qSample, detectorPos};
+    return PeakParameters{
+        minimalInstrument, goniometer, orientedLattice, hkl, qLab,
+        qSample,           detectorPos};
   }
 
   PeaksWorkspace_sptr makeWorkspace(const PeakParameters &params) {
