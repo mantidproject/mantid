@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Slicing.h"
 #include "../multivisitors.hpp"
-#include <boost/range/algorithm/adjacent_find.hpp>
 // equivalent to
 //         #include <boost/variant/multivisitors.hpp>
 // available in boost 1.54+ - required for RHEL7.
@@ -74,11 +73,9 @@ bool operator==(CustomSlicingByList const &lhs,
 std::ostream &operator<<(std::ostream &os, CustomSlicingByList const &slicing) {
   os << "slices at the following times\n";
   auto const &sliceTimes = slicing.sliceTimes();
-  boost::range::adjacent_find(
-      sliceTimes, [&os](double start, double end) -> bool {
-        os << "  " << start << " to " << end << " seconds,\n";
-        return false;
-      });
+  for (auto iter = sliceTimes.cbegin() + 1; iter != sliceTimes.cend(); ++iter) {
+    os << "  " << *prev(iter) << " to " << *iter << " seconds,\n";
+  }
   return os;
 }
 
@@ -106,11 +103,10 @@ std::ostream &operator<<(std::ostream &os, SlicingByEventLog const &slicing) {
   os << "slices at the times when the log value for the block '"
      << slicing.blockName() << "' is between\n";
   auto const &logValueBreakpoints = slicing.sliceAtValues();
-  boost::range::adjacent_find(logValueBreakpoints,
-                              [&os](double start, double end) -> bool {
-                                os << "  " << start << " and " << end << ",\n";
-                                return false;
-                              });
+  for (auto iter = logValueBreakpoints.cbegin() + 1;
+       iter != logValueBreakpoints.cend(); ++iter) {
+    os << "  " << *prev(iter) << " and " << *iter << ",\n";
+  }
   return os;
 }
 

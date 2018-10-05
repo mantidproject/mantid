@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PerThetaDefaultsTableValidator.h"
 #include "../../Reduction/ValidatePerThetaDefaults.h"
-#include <boost/range/algorithm/adjacent_find.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -73,6 +72,9 @@ void PerThetaDefaultsTableValidator::validateAllPerThetaDefaultRows(
 bool PerThetaDefaultsTableValidator::hasUniqueThetas(
     std::vector<PerThetaDefaults> perThetaDefaults, int wildcardCount,
     double tolerance) const {
+  if (perThetaDefaults.size() < 2)
+    return true;
+
   sortInPlaceWildcardsFirstThenByTheta(perThetaDefaults);
   auto thetasWithinTolerance =
       [tolerance](PerThetaDefaults const &lhs,
@@ -82,11 +84,13 @@ bool PerThetaDefaultsTableValidator::hasUniqueThetas(
     return difference < tolerance;
   };
 
-  std::vector<PerThetaDefaults> perThetaDefaultsExcludingWildcards(
-      perThetaDefaults.cbegin() + wildcardCount, perThetaDefaults.cend());
+  bool foundDuplicate = false;
+  for (auto iter = perThetaDefaults.cbegin() + wildcardCount + 1;
+       !foundDuplicate && iter != perThetaDefaults.cend(); ++iter) {
+    foundDuplicate = thetasWithinTolerance(*iter, *prev(iter));
+  }
 
-  return boost::adjacent_find(perThetaDefaultsExcludingWildcards,
-                              thetasWithinTolerance) == perThetaDefaults.cend();
+  return !foundDuplicate;
 }
 
 int PerThetaDefaultsTableValidator::countWildcards(
