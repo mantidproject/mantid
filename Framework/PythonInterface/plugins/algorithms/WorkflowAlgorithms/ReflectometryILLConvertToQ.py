@@ -176,10 +176,10 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             ChopperOpening=chopperOpening,
             ChopperRadius=chopperRadius,
             ChopperPairDistance=chopperPairDist,
-            Slit1Name='slit2',
-            Slit1SizeSampleLog=slit1SizeLog,
-            Slit2Name='slit3',
-            Slit2SizeSampleLog=slit2SizeLog,
+            FirstSlitName='slit2',
+            FirstSlitSizeSampleLog=slit1SizeLog,
+            SecondSlitName='slit3',
+            SecondSlitSizeSampleLog=slit2SizeLog,
             TOFChannelWidth=tofBinWidth,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)

@@ -81,6 +81,7 @@ Improved
 ########
 
 - :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
+- Common naming of slit component name and size properties across algorithms.
 
 Bug fixes
 #########
