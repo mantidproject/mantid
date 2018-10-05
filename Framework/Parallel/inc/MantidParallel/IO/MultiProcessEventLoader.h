@@ -337,10 +337,14 @@ void MultiProcessEventLoader::GroupLoader<
         for (auto tn = tasksDone; tn < tasksLoaded; ++tn) {
           auto &task = tasks[tn];
           task.partitioner->setEventOffset(task.from);
-          for (unsigned i = 0; i < task.eventId.size(); ++i)
+          for (unsigned i = 0; i < task.eventId.size(); ++i) {
             pixels.at(task.eventId[i])
                 .emplace_back(task.eventTimeOffset[i],
                               task.partitioner->next());
+          }
+          task.eventId.swap(std::vector<uint32_t >());
+          task.eventTimeOffset.swap(std::vector<T>());
+          task.partitioner.release();
         }
         tasksDone = tasksLoaded;
       }
