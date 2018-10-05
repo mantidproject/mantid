@@ -92,13 +92,11 @@ void JumpFit::addWidthFunctionsToFitTypeComboBox() {
 
 void JumpFit::updateParameterFitTypes() {
   auto const parameter = m_uiForm->cbParameterType->currentText().toStdString();
-  if (parameter == "EISF") {
-    clearFitTypeComboBox();
+  clearFitTypeComboBox();
+  if (parameter == "EISF")
     addEISFFunctionsToFitTypeComboBox();
-  } else if (parameter == "Width") {
-    clearFitTypeComboBox();
+  else if (parameter == "Width")
     addWidthFunctionsToFitTypeComboBox();
-  }
 }
 
 void JumpFit::updateModelFitTypeString() {
