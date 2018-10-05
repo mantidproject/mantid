@@ -9,10 +9,10 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidKernel/Unit.h"
+#include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -105,7 +105,7 @@ public:
   }
 
 private:
-  Mantid::Algorithms::SANSSolidAngleCorrection correction;
+  Mantid::WorkflowAlgorithms::SANSSolidAngleCorrection correction;
   std::string inputWS;
 };
 
