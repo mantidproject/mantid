@@ -227,7 +227,7 @@ public:
     auto presenter = makePresenter();
 
     auto const row = 1;
-    auto const column = 2;
+    auto const column = 0;
     OptionsTable const optionsTable = {optionsRowWithFirstAngle(),
                                        optionsRowWithSecondAngle()};
     expectViewReturnsDefaultValues();
