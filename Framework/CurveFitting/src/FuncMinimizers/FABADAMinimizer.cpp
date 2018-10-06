@@ -486,7 +486,7 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
 
 void FABADAMinimizer::applyFix(std::size_t const &parameterIndex,
                                GSLVector &newParameters) {
-  auto fixValue = m_parameters.get(parameterIndex);
+  auto const fixValue = m_parameters.get(parameterIndex);
   newParameters.set(parameterIndex, fixValue);
   m_fitFunction->setParameter(parameterIndex, fixValue);
 }
