@@ -467,6 +467,10 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
     m_fitFunction->setParameter(parameterIndex, newValue);
   }
 
+  // Apply fix to the parameter if it is fixed
+  if (m_fitFunction->isFixed(parameterIndex))
+    applyFix(parameterIndex, newParameters);
+
   // Convert type to setDirty the cost function
   //(to notify the CostFunction we have modified the IFunction)
   boost::shared_ptr<MaleableCostFunction> leastSquaresMaleable =
@@ -478,6 +482,13 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
   m_leastSquares =
       boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           leastSquaresMaleable);
+}
+
+void FABADAMinimizer::applyFix(std::size_t const &parameterIndex,
+                               GSLVector &newParameters) {
+  auto fixValue = m_parameters.get(parameterIndex);
+  newParameters.set(parameterIndex, fixValue);
+  m_fitFunction->setParameter(parameterIndex, fixValue);
 }
 
 /** Given the new chi2, next position is calculated and updated.
