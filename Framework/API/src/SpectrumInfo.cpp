@@ -190,13 +190,18 @@ SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
 }
 
 // Begin method for iterator
-SpectrumInfoIterator SpectrumInfo::begin() {
-  return SpectrumInfoIterator(*this, 0);
+SpectrumInfoIt SpectrumInfo::begin() { return SpectrumInfoIt(*this, 0); }
+
+// End method for iterator
+SpectrumInfoIt SpectrumInfo::end() { return SpectrumInfoIt(*this, size()); }
+
+const SpectrumInfoConstIt SpectrumInfo::cbegin() const {
+  return SpectrumInfoConstIt(*this, 0);
 }
 
 // End method for iterator
-SpectrumInfoIterator SpectrumInfo::end() {
-  return SpectrumInfoIterator(*this, size());
+const SpectrumInfoConstIt SpectrumInfo::cend() const {
+  return SpectrumInfoConstIt(*this, size());
 }
 
 } // namespace API

@@ -7,11 +7,10 @@
 #ifndef MANTID_API_SPECTRUMINFOITEM_H_
 #define MANTID_API_SPECTRUMINFOITEM_H_
 
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-using Mantid::API::SpectrumInfo;
 using Mantid::Kernel::V3D;
 using Mantid::SpectrumDefinition;
 
@@ -35,8 +34,7 @@ methods include:
 @author Bhuvan Bezawada, STFC
 @date 2018
 */
-
-class MANTID_API_DLL SpectrumInfoItem {
+template <typename T> class MANTID_API_DLL SpectrumInfoItem {
 
 public:
   // Methods that can be called via the iterator
@@ -68,17 +66,13 @@ public:
     return m_spectrumInfo->position(m_index);
   }
 
-private:
-  // Allow SpectrumInfoIterator access
-  friend class SpectrumInfoIterator;
-
   // Private constructor, can only be created by SpectrumInfoIterator
-  SpectrumInfoItem(SpectrumInfo &spectrumInfo, const size_t index)
+  SpectrumInfoItem(T &spectrumInfo, const size_t index)
       : m_spectrumInfo(&spectrumInfo), m_index(index) {}
 
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.
-  SpectrumInfo *m_spectrumInfo;
+  T *m_spectrumInfo;
   size_t m_index;
 };
 
