@@ -58,39 +58,39 @@ void ContainerSubtraction::setTransformedContainer(
 void ContainerSubtraction::setup() {}
 
 void ContainerSubtraction::run() {
-  if (!m_csSampleWS)
-    return;
-  if (!m_csContainerWS)
-    return;
+  setRunIsRunning(true);
 
-  m_originalSampleUnits = m_csSampleWS->getAxis(0)->unit()->unitID();
+  if (m_csSampleWS && m_csContainerWS) {
+    m_originalSampleUnits = m_csSampleWS->getAxis(0)->unit()->unitID();
 
-  // Check if using shift / scale
-  const bool shift = m_uiForm.ckShiftCan->isChecked();
-  const bool scale = m_uiForm.ckScaleCan->isChecked();
+    // Check if using shift / scale
+    const bool shift = m_uiForm.ckShiftCan->isChecked();
+    const bool scale = m_uiForm.ckScaleCan->isChecked();
 
-  auto containerWs = m_csContainerWS;
-  if (shift) {
-    containerWs = shiftWorkspace(containerWs, m_uiForm.spShift->value());
-    containerWs = rebinToWorkspace(containerWs, m_csSampleWS);
-  } else if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
-    containerWs = requestRebinToSample(containerWs);
+    auto containerWs = m_csContainerWS;
+    if (shift) {
+      containerWs = shiftWorkspace(containerWs, m_uiForm.spShift->value());
+      containerWs = rebinToWorkspace(containerWs, m_csSampleWS);
+    } else if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
+      containerWs = requestRebinToSample(containerWs);
 
-    if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
-      g_log.error("Cannot apply container corrections using a sample and "
-                  "container with different binning.");
-      return;
+      if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
+        g_log.error("Cannot apply container corrections using a sample and "
+                    "container with different binning.");
+        return;
+      }
     }
+
+    if (scale)
+      containerWs = scaleWorkspace(containerWs, m_uiForm.spCanScale->value());
+
+    m_csSubtractedWS = minusWorkspace(m_csSampleWS, containerWs);
+    m_pythonExportWsName = createOutputName();
+    AnalysisDataService::Instance().addOrReplace(m_pythonExportWsName,
+                                                 m_csSubtractedWS);
+    containerSubtractionComplete();
   }
-
-  if (scale)
-    containerWs = scaleWorkspace(containerWs, m_uiForm.spCanScale->value());
-
-  m_csSubtractedWS = minusWorkspace(m_csSampleWS, containerWs);
-  m_pythonExportWsName = createOutputName();
-  AnalysisDataService::Instance().addOrReplace(m_pythonExportWsName,
-                                               m_csSubtractedWS);
-  containerSubtractionComplete();
+  setRunIsRunning(false);
 }
 
 std::string ContainerSubtraction::createOutputName() {
@@ -314,11 +314,6 @@ void ContainerSubtraction::containerSubtractionComplete() {
                                           "Number", logText);
     m_batchAlgoRunner->addAlgorithm(shiftLog);
   }
-
-  // Enable post process plotting and saving
-  m_uiForm.cbPlotOutput->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
 }
 
 void ContainerSubtraction::saveClicked() {
@@ -330,8 +325,9 @@ void ContainerSubtraction::saveClicked() {
 }
 
 void ContainerSubtraction::plotClicked() {
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
+  setPlotResultIsPlotting(true);
 
+  QString plotType = m_uiForm.cbPlotOutput->currentText();
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
 
     if (plotType == "Spectra" || plotType == "Both")
@@ -340,6 +336,7 @@ void ContainerSubtraction::plotClicked() {
     if (plotType == "Contour" || plotType == "Both")
       plot2D(QString::fromStdString(m_pythonExportWsName));
   }
+  setPlotResultIsPlotting(false);
 }
 
 void ContainerSubtraction::runClicked() { runTab(); }
@@ -536,6 +533,33 @@ IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(
   shiftLog->setProperty("LogType", type);
   shiftLog->setProperty("LogText", value);
   return shiftLog;
+}
+
+void ContainerSubtraction::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void ContainerSubtraction::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotOutput->setEnabled(enabled);
+}
+
+void ContainerSubtraction::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void ContainerSubtraction::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
+}
+
+void ContainerSubtraction::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotResultEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveResultEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

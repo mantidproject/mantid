@@ -542,6 +542,7 @@ void AbsorptionCorrections::setRunIsRunning(bool running) {
 void AbsorptionCorrections::setPlotResultIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
   setPlotResultEnabled(!plotting);
+  setRunEnabled(!plotting);
   setSaveResultEnabled(!plotting);
 }
 

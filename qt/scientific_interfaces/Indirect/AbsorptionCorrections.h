@@ -60,7 +60,6 @@ private:
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
-
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
 

@@ -14,14 +14,6 @@ class DLLExport CalculatePaalmanPings : public CorrectionsTab {
 public:
   CalculatePaalmanPings(QWidget *parent = nullptr);
 
-private:
-  void setup() override;
-  void run() override;
-  bool validate() override;
-  void loadSettings(const QSettings &settings) override;
-
-  bool doValidation(bool silent = false);
-
 private slots:
   void absCorComplete(bool error);
   void postProcessComplete(bool error);
@@ -35,10 +27,24 @@ private slots:
   void changeCanDensityUnit(int);
 
 private:
+  void setup() override;
+  void run() override;
+  bool validate() override;
+  void loadSettings(const QSettings &settings) override;
+
+  bool doValidation(bool silent = false);
+
   void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg,
                                      QString shape);
   void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg,
                                   QString shape);
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+
   boost::optional<double>
   getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
                          const std::string &parameterName);
