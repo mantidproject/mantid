@@ -33,17 +33,15 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
-  void addSaveWorkspace(QString wsName);
+  void addSaveWorkspace(std::string const &wsName);
   void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg,
                                      QString shape);
   void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg,
-                                  QString shape);
+                                  QString const &shape);
 
   void processWavelengthWorkspace();
 
-  void getBeamDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
-  void
-  getMonteCarloDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
+  void getParameterDefaults(Mantid::Geometry::Instrument_const_sptr instrument);
   void setBeamWidthValue(Mantid::Geometry::Instrument_const_sptr instrument,
                          std::string const &beamWidthParamName) const;
   void setBeamHeightValue(Mantid::Geometry::Instrument_const_sptr instrument,
