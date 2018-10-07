@@ -495,28 +495,14 @@ void AbsorptionCorrections::plotClicked() {
 
 void AbsorptionCorrections::runClicked() { runTab(); }
 
-/**
- * Handle changing of the sample density unit
- */
 void AbsorptionCorrections::changeSampleDensityUnit(int index) {
-
-  if (index == 0) {
-    m_uiForm.spSampleDensity->setSuffix(" g/cm3");
-  } else {
-    m_uiForm.spSampleDensity->setSuffix(" 1/A3");
-  }
+  QString const suffix = index == 0 ? " g/cm3" : " 1/A3";
+  m_uiForm.spSampleDensity->setSuffix(suffix);
 }
 
-/**
- * Handle changing of the container density unit
- */
 void AbsorptionCorrections::changeCanDensityUnit(int index) {
-
-  if (index == 0) {
-    m_uiForm.spCanDensity->setSuffix(" g/cm3");
-  } else {
-    m_uiForm.spCanDensity->setSuffix(" 1/A3");
-  }
+  QString const suffix = index == 0 ? " g/cm3" : " 1/A3";
+  m_uiForm.spCanDensity->setSuffix(suffix);
 }
 
 void AbsorptionCorrections::setRunEnabled(bool enabled) {
