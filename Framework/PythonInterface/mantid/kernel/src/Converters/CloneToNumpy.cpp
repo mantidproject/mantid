@@ -86,7 +86,7 @@ template <> PyObject *clone1D(const std::vector<bool> &cvector) {
   for (Py_intptr_t i = 0; i < dims[0]; ++i) {
     void *itemPtr = PyArray_GETPTR1(nparray, i);
     auto py_bool = PyBool_FromLong(static_cast<long int>(cvector[i]));
-        PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr), py_bool);
+    PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr), py_bool);
     Py_DECREF(py_bool);
   }
   return reinterpret_cast<PyObject *>(nparray);
