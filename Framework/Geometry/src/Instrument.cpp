@@ -321,21 +321,22 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
 }
 
 /** Fill a vector with all the detectors contained (at any depth) in a named
- *component. For example,
- * you might have a bank10 with 4 tubes with 100 pixels each; this will return
- *the
- * 400 contained Detector objects.
+ * component. For example, you might have a bank10 with 4 tubes with 100
+ * pixels each; this will return the 400 contained Detector objects.
  *
  * @param[out] dets :: vector filled with detector pointers
  * @param bankName :: name of the parent component assembly that contains
- *detectors.
- *        The name must be unique, otherwise the first matching component
- *(getComponentByName)
- *        is used.
+ * detectors. The name must be unique, otherwise the first matching component
+ * (getComponentByName) is used.
+ * @throws NotFoundError if the given bank does not exist.
  */
 void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
                                     const std::string &bankName) const {
   boost::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
+  if (!comp) {
+    throw Kernel::Exception::NotFoundError("Could not find component",
+                                           bankName);
+  }
   getDetectorsInBank(dets, *comp);
 }
 

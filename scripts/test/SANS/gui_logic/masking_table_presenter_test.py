@@ -38,7 +38,8 @@ class MaskingTablePresenterTest(unittest.TestCase):
         self.assertTrue(view.set_table.call_count == 2)
         first_call = mock.call([])
         second_call = mock.call([masking_information(first='Beam stop', second='', third='infinite-cylinder, r = 10.0'),
-                                 masking_information(first='Corners', second='', third='infinite-cylinder, r = 20.0')])  # noqa
+                                 masking_information(first='Corners', second='', third='infinite-cylinder, r = 20.0'),
+                                 masking_information(first='Phi', second='', third='L/PHI -90.0 90.0')])  # noqa
         view.set_table.assert_has_calls([first_call, second_call])
 
 
