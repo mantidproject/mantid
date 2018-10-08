@@ -7,7 +7,6 @@
 #include <numeric>
 #include <sstream>
 #include <utility>
-// #include<iostream>
 
 namespace Mantid {
 namespace Beamline {
@@ -575,13 +574,6 @@ ComponentType ComponentInfo::componentType(const size_t componentIndex) const {
 size_t ComponentInfo::scanCount() const {
   return m_scanCounts;
 }
-// size_t ComponentInfo::scanCount(const size_t index) const {
-//   if (m_detectorInfo && isDetector(index))
-//     return m_detectorInfo->scanCount(index);
-//   else {
-//     return m_scanCounts;
-//   }
-// }
 
 size_t ComponentInfo::scanSize() const {
   const auto detectorScanSize = m_detectorInfo ? m_detectorInfo->scanSize() : 0;
@@ -591,12 +583,13 @@ size_t ComponentInfo::scanSize() const {
 }
 
 bool ComponentInfo::isScanning() const {
-  if (m_detectorInfo && m_detectorInfo->isScanning())
+  if (m_detectorInfo && m_detectorInfo->isScanning()) {
     return true;
-  else if (!m_positions || !m_componentRanges)
+  } else if (!m_positions || !m_componentRanges) {
     return false;
-  else
+  } else {
     return nonDetectorSize() != m_positions->size();
+  }
 }
 
 /// Throws if this has time-dependent data.
@@ -606,34 +599,6 @@ void ComponentInfo::checkNoTimeDependence() const {
         "ComponentInfo accessed without time index but the "
         "beamline has time-dependent (moving) components.");
 }
-
-// /**
-//  * Retrieve the scan interval for a component at a time index
-//  * @param index component index, time index pair
-//  * @return offset interval times since epoch
-//  */
-// const std::vector<std::pair<int64_t, int64_t>> &ComponentInfo::scanIntervals() const {
-// //   if (!m_scanIntervals) {
-// // // //     return &{0, 0};
-// //     std::vector<std::pair<int64_t, int64_t>>* dummy_vec = new std::vector<std::pair<int64_t, int64_t>> (1);
-// // //     std::pair<int64_t, int64_t> dummy_pair = {0,0};
-// // //     dummy_vec[0] = dummy_pair;
-// //     dummy_vec->push_back({0, 0});
-// //     return *dummy_vec;
-// // //     return new std::vector<std::pair<int64_t, int64_t>> {{0,0}};
-// //   } else {
-//     return m_scanIntervals;
-//   // }
-// }
-
-// std::pair<int64_t, int64_t>
-// ComponentInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
-//   if (m_detectorInfo && isDetector(index.first))
-//     return m_detectorInfo->scanInterval(index);
-//   if (!m_scanIntervals)
-//     return {0, 0};
-//   return (*m_scanIntervals)[index.second];
-// }
 
 void ComponentInfo::checkSpecialIndices(size_t componentIndex) const {
   if (!isDetector(componentIndex)) {
@@ -651,9 +616,6 @@ void ComponentInfo::setScanInterval(
   // Enforces setting scan intervals BEFORE time indexed positions and rotations
   checkNoTimeDependence();
   checkScanInterval(interval);
-  // if (!m_scanIntervals) {
-  //   initScanIntervals();
-  // }
   m_scanIntervals[0] = interval;
   if (m_detectorInfo) {
     m_detectorInfo->setScanInterval(interval);
@@ -675,16 +637,13 @@ this has no time dependence prior to this operation.
  * ignored, i.e., no time index is added.
 **/
 void ComponentInfo::merge(const ComponentInfo &other) {
-  checkNoTimeDependence();
   const auto &toMerge = buildMergeIndicesSync(other);
   for (size_t timeIndex = 0; timeIndex < other.m_scanIntervals.size();
        ++timeIndex) {
     if (!toMerge[timeIndex])
       continue;
-    // auto &scanIntervals = m_scanIntervals.access();
     auto &positions = m_positions.access();
     auto &rotations = m_rotations.access();
-    // scanIntervals.push_back((*other.m_scanIntervals)[timeIndex]);
     m_scanIntervals.push_back(other.m_scanIntervals[timeIndex]);
     const size_t indexStart = other.linearIndex({0, timeIndex});
     size_t indexEnd = indexStart + nonDetectorSize();
@@ -726,8 +685,6 @@ ComponentInfo::buildMergeIndicesSync(const ComponentInfo &other) const {
 void ComponentInfo::checkSizes(const ComponentInfo &other) const {
   if (size() != other.size())
     failMerge("size mismatch");
-  // if (!m_scanIntervals || !other.m_scanIntervals)
-    // failMerge("scan intervals not defined");
 }
 
 void ComponentInfo::checkIdenticalIntervals(
@@ -753,12 +710,6 @@ size_t ComponentInfo::nonDetectorSize() const {
   else
     return 0;
 }
-
-// void ComponentInfo::initScanIntervals() {
-//   checkNoTimeDependence();
-//   m_scanIntervals = Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
-//       1, std::pair<int64_t, int64_t>{0, 1});
-// }
 
 } // namespace Beamline
 } // namespace Mantid

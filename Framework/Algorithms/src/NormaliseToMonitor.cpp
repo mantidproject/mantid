@@ -378,7 +378,6 @@ void NormaliseToMonitor::checkProperties(
   Property *monID = getProperty("MonitorID");
   // Is the monitor spectrum within the main input workspace
   const bool inWS = !monSpec->isDefault();
-  // m_syncScanInput = inputWorkspace->detectorInfo().isSyncScan();
   // Or is it in a separate workspace
   bool sepWS{monWS};
   if (sepWS)
@@ -428,7 +427,6 @@ void NormaliseToMonitor::checkProperties(
                   "monitor - the instrument is not fully specified.\n "
                   "Continuing with normalization regardless.");
     g_log.warning() << "Error was: " << e.what() << "\n";
-    // if (m_syncScanInput)
     throw std::runtime_error("Can not continue, spectrum can not be obtained "
                              "for monitor workspace, but the input workspace "
                              "has a detector scan.");

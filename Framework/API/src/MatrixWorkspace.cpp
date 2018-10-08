@@ -1964,13 +1964,6 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
         std::vector<SpectrumDefinition>(m_indexInfo->size()));
     return;
   }
-  // size_t numberOfSpectra{0};
-  // if (detInfo.isScanning()) {
-    // for (size_t i = 0; i < numberOfDetectors; ++i)
-      // numberOfSpectra += detInfo.scanCount(i);
-  // } else {
-    // numberOfSpectra = numberOfDetectors;
-  // }
   size_t numberOfSpectra = numberOfDetectors * detInfo.scanCount();
   if (numberOfSpectra != m_indexInfo->globalSize())
     throw std::invalid_argument(

@@ -723,18 +723,12 @@ std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
   for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
     for (auto &index : addeeSpecDefs[i]) {
       SpectrumDefinition newSpecDef;
-      // const auto &addeeScanInterval = addeeDetInfo.scanIntervals()[index.second];
-      // if (addeeScanInterval == outDetInfo.scanIntervals()[index.second]) {
-      //   newSpecDef.add(index.first, index.second);
-      // } else {
-        // Find the correct time index for this entry
       for (size_t time_index = 0; time_index < newOutDetInfo.scanCount(); time_index++) {
         if (addeeDetInfo.scanIntervals()[index.second] ==
             newOutDetInfo.scanIntervals()[time_index]) {
           newSpecDef.add(index.first, time_index);
         }
       }
-      // }
       newAddeeSpecDefs[i] = newSpecDef;
     }
   }

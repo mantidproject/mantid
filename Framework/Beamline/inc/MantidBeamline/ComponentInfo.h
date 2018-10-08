@@ -67,8 +67,6 @@ private:
   DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
   size_t m_scanCounts = 1;
   std::vector<std::pair<int64_t, int64_t>> m_scanIntervals{{0, 1}};
-  // Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
-      // nullptr};
   /// For (component index, time index) -> linear index conversions
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
   /// For linear index -> (detector index, time index) conversions
@@ -144,7 +142,6 @@ public:
   bool hasParent(const size_t componentIndex) const;
   bool hasDetectorInfo() const;
   void setDetectorInfo(DetectorInfo *detectorInfo);
-  // const DetectorInfo &getDetectorInfo() const {return *m_detectorInfo;}
   bool hasSource() const;
   bool hasSample() const;
   Eigen::Vector3d sourcePosition() const;
@@ -160,12 +157,9 @@ public:
                       const Eigen::Vector3d &scaleFactor);
   ComponentType componentType(const size_t componentIndex) const;
 
-//   size_t scanCount(const size_t index) const;
   size_t scanCount() const;
   size_t scanSize() const;
   bool isScanning() const;
-//   std::pair<int64_t, int64_t>
-//   scanInterval(const std::pair<size_t, size_t> &index) const;
   const std::vector<std::pair<int64_t, int64_t>> &scanIntervals() const {return m_scanIntervals;}
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   void merge(const ComponentInfo &other);

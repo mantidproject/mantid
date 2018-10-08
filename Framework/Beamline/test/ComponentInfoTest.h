@@ -11,7 +11,6 @@
 #include <numeric>
 #include <string>
 #include <tuple>
-#include <iostream>
 
 using namespace Mantid::Beamline;
 
@@ -882,15 +881,12 @@ public:
   void test_setRotation_single_scan_updates_positions_correctly() {
     auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
-    // Resulting ComponentInfo
     ComponentInfo &info = *std::get<0>(allOutputs);
     const std::pair<size_t, size_t> rootIndex{4, 0};
     const std::pair<size_t, size_t> detectorIndex{1, 0};
     do_write_rotation_updates_positions_correctly(info, rootIndex,
                                                   detectorIndex);
-  }
 
-  void test_setScanInterval_failures() {
     auto infos = makeTreeExample();
     auto &compInfo = *std::get<0>(infos);
     TS_ASSERT_THROWS_EQUALS(
@@ -911,39 +907,10 @@ public:
     auto &b = *std::get<0>(infos2);
     a.setScanInterval({0, 1});
     b.setScanInterval({0, 1});
-    // b.setScanInterval({0, 1});
     TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: size mismatch");
   }
-
-  // void xtest_merge_fail_no_intervals() {
-  //   auto infos1 = makeFlatTree(PosVec(1, Eigen::Vector3d{0, 0, 0}), RotVec(1,
-  //     Eigen::Quaterniond::Identity()));
-  //   auto infos2 = makeFlatTree(PosVec(1, Eigen::Vector3d{0, 0, 0}), RotVec(1,
-  //     Eigen::Quaterniond::Identity()));
-  //   auto infos3 = makeFlatTree(PosVec(1, Eigen::Vector3d{1, 0, 0}), RotVec(1,
-  //     Eigen::Quaterniond::Identity()));
-  //   auto &a = *std::get<0>(infos1);
-  //   auto &b = *std::get<0>(infos2);
-  //   auto &c = *std::get<0>(infos3);
-
-  //   std::cout << "NVAYTET: a position: " << a.position(0) << std::endl;
-  //   std::cout << "NVAYTET: b position: " << b.position(0) << std::endl;
-  //   std::cout << "NVAYTET: c position: " << c.position(0) << std::endl;
-  //   // std::cout << "NVAYTET: a position: " << a.position(1) << std::endl;
-    
-
-  //   TS_ASSERT_THROWS_NOTHING(a.merge(b));
-  //   TS_ASSERT_THROWS_EQUALS(
-  //       a.merge(c), const std::runtime_error &e, std::string(e.what()),
-  //       "Cannot merge DetectorInfo: matching scan interval but positions differ");
-  //   a.setScanInterval({0, 1});
-  //   b.setScanInterval({0, 10});
-  //   TS_ASSERT_THROWS_EQUALS(
-  //       a.merge(b), const std::runtime_error &e, std::string(e.what()),
-  //       "Cannot merge ComponentInfo: scan intervals not defined");
-  // }
 
   void test_merge_identical() {
     auto infos1 = makeFlatTree(PosVec(1, Eigen::Vector3d(0, 0, 0)),

@@ -190,7 +190,7 @@ void ScanningWorkspaceBuilder::setIndexingType(
  * @return Workspace2D with the scanning information set
  */
 MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
-  validateInputs();
+  validateInputs();  
 
   auto outputWorkspace = create<Workspace2D>(
       m_instrument, m_nDetectors * m_nTimeIndexes, m_histogram);
@@ -201,7 +201,6 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
   buildOutputComponentInfo(outputComponentInfo);
 
   auto &outputDetectorInfo = outputWorkspace->mutableDetectorInfo();
-  outputDetectorInfo.setScanInterval(m_timeRanges[0]);
 
   if (!m_positions.empty())
     buildPositions(outputDetectorInfo);

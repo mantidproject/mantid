@@ -1542,9 +1542,7 @@ public:
     const auto PAIR_2 = std::pair<DateAndTime, DateAndTime>(TIME_2, TIME_3);
 
     TS_ASSERT_EQUALS(detInfo.scanIntervals()[0], PAIR_1)
-    // TS_ASSERT_EQUALS(detInfo.scanIntervals()[0], PAIR_1)
     TS_ASSERT_EQUALS(detInfo.scanIntervals()[1], PAIR_2)
-    // TS_ASSERT_EQUALS(detInfo.scanIntervals()[1], PAIR_2)
 
     if (extraTimes) {
       const auto TIME_4 = DateAndTime(20, 0);
@@ -1555,9 +1553,7 @@ public:
       const auto PAIR_4 = std::pair<DateAndTime, DateAndTime>(TIME_5, TIME_6);
 
       TS_ASSERT_EQUALS(detInfo.scanIntervals()[2], PAIR_3)
-      // TS_ASSERT_EQUALS(detInfo.scanIntervals()[2], PAIR_3)
       TS_ASSERT_EQUALS(detInfo.scanIntervals()[3], PAIR_4)
-      // TS_ASSERT_EQUALS(detInfo.scanIntervals()[3], PAIR_4)
     }
   }
 
@@ -1613,7 +1609,6 @@ public:
     const auto &detInfo = outputWS->detectorInfo();
     TS_ASSERT_EQUALS(detInfo.size(), 2)
     TS_ASSERT_EQUALS(detInfo.scanCount(), 4)
-    // TS_ASSERT_EQUALS(detInfo.scanCount(1), 4)
     assert_scan_intervals_are_correct(detInfo, true);
 
     const auto &specInfo = outputWS->spectrumInfo();

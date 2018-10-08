@@ -19,7 +19,6 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTypes/SpectrumDefinition.h"
-#include<iostream>
 
 #include <cmath>
 #include <ctime>
@@ -345,38 +344,28 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
     int numBins, double x0, double binDelta, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom, int numScanPoints) {
-  std::cout << "nvaytet got to here 1" << std::endl;
   auto builder = ScanningWorkspaceBuilder(inst, numScanPoints, numBins);
-  std::cout << "nvaytet got to here 2" << std::endl;
-  
+
   auto angles = std::vector<double>();
-  std::cout << "nvaytet got to here 3" << std::endl;
   auto timeRanges = std::vector<double>();
-  std::cout << "nvaytet got to here 4" << std::endl;
   for (int i = 0; i < numScanPoints; ++i) {
     angles.push_back(double(i));
     timeRanges.push_back(double(i + 1));
   }
-std::cout << "nvaytet got to here 5" << std::endl;
-  
+
   builder.setTimeRanges(Types::Core::DateAndTime(0), timeRanges);
-  std::cout << "nvaytet got to here 6" << std::endl;
   builder.setRelativeRotationsForScans(angles, inst->getSample()->getPos(),
                                        V3D(0, 1, 0));
 
-  std::cout << "nvaytet got to here 7" << std::endl;
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 
-  std::cout << "nvaytet got to here 8" << std::endl;
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
-  std::cout << "nvaytet got to here 9" << std::endl;
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
 
-  std::cout << "nvaytet got to here 10" << std::endl;
   builder.setHistogram(Histogram(x, y));
-std::cout << "nvaytet got to here 11" << std::endl;
-  
+
   return builder.buildWorkspace();
+
 }
 
 /** Create event workspace

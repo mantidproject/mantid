@@ -38,7 +38,7 @@
 #include <cmath>
 #include <functional>
 #include <numeric>
-#include <iostream>
+
 using std::size_t;
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -1660,8 +1660,6 @@ public:
 
     // Merge
     auto merged = WorkspaceFactory::Instance().create(ws1, 2);
-    // auto &detInfo = merged->mutableDetectorInfo();
-    // detInfo.merge(detInfo2);
     merged->mutableComponentInfo().merge(ws2->mutableComponentInfo());
 
     // Setting IndexInfo without spectrum definitions will set up a 1:1 mapping

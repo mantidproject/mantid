@@ -332,28 +332,6 @@ public:
                      EXPECTED_SECOND_FROM_END_TIME)
     TS_ASSERT_EQUALS(endRange.second.toISO8601String(), EXPECTED_END_TIME)
 
-    // for (size_t i = 0; i < detInfo.size(); ++i) {
-    //   TS_ASSERT_EQUALS(detInfo.scanCount(), SCAN_COUNT)
-
-    //   const auto &startRange = detInfo.scanInterval({i, 0});
-    //   const auto &secondRange = detInfo.scanInterval({i, 1});
-    //   const auto &secondFromEndRange =
-    //       detInfo.scanInterval({i, detInfo.scanCount(i) - 2});
-    //   const auto &endRange =
-    //       detInfo.scanInterval({i, detInfo.scanCount(i) - 1});
-
-    //   TS_ASSERT_EQUALS(startRange.first.toISO8601String(), EXPECTED_START_TIME)
-    //   TS_ASSERT_EQUALS(startRange.second.toISO8601String(),
-    //                    EXPECTED_SECOND_TIME)
-    //   TS_ASSERT_EQUALS(secondRange.first.toISO8601String(),
-    //                    EXPECTED_SECOND_TIME)
-    //   TS_ASSERT_EQUALS(secondFromEndRange.second.toISO8601String(),
-    //                    EXPECTED_SECOND_FROM_END_TIME)
-    //   TS_ASSERT_EQUALS(endRange.first.toISO8601String(),
-    //                    EXPECTED_SECOND_FROM_END_TIME)
-    //   TS_ASSERT_EQUALS(endRange.second.toISO8601String(), EXPECTED_END_TIME)
-    // }
-
     // Check monitor does not move
     for (size_t j = 0; j < detInfo.scanCount(); ++j) {
       TS_ASSERT(detInfo.isMonitor({0, j}))
