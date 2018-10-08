@@ -69,7 +69,7 @@ void MultiProcessEventLoader::load(
     auto instrument = file.openGroup(groupname);
 
     auto bkSz = EventLoader::readBankSizes(instrument, bankNames);
-    auto numEvents = std::accumulate(bkSz.begin(), bkSz.end(), 0);
+    auto numEvents = std::accumulate(bkSz.begin(), bkSz.end(), std::size_t{0});
 
     std::size_t storageSize = estimateShmemAmount(numEvents);
 
