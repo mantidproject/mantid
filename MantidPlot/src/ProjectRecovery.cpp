@@ -674,19 +674,26 @@ void ProjectRecovery::removeOlderCheckpoints() {
   std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
   // check if pid exists
   std::vector<std::string> folderPaths;
-  for (auto i = 0u; i < possiblePids.size(); ++i) {
-    if (!isPIDused(possiblePids[i])) {
-      std::string folder = recoverFolder;
-      folder.append(std::to_string(possiblePids[i]) + "/");
-      if (olderThanAGivenTime(Poco::Path(folder), timeToDeleteAfter)) {
-        folderPaths.emplace_back(folder);
+  try {
+    for (auto i = 0u; i < possiblePids.size(); ++i) {
+      if (!isPIDused(possiblePids[i])) {
+        std::string folder = recoverFolder;
+        folder.append(std::to_string(possiblePids[i]) + "/");
+        if (olderThanAGivenTime(Poco::Path(folder), timeToDeleteAfter)) {
+          folderPaths.emplace_back(folder);
+        }
       }
     }
-  }
-
-  bool recurse = true;
-  for (size_t i = 0; i < folderPaths.size(); i++) {
-    Poco::File(folderPaths[i]).remove(recurse);
+    
+    bool recurse = true;
+    for (size_t i = 0; i < folderPaths.size(); i++) {
+      Poco::File(folderPaths[i]).remove(recurse);
+    }
+  } catch (...) {
+    // Errors here are usually caused by older versions of mantid having crashed
+    // previously
+    g_log.warning("Project Recovery: An older version of mantid crashed and "
+                  "not recovered from before this was launched");
   }
 }
 
