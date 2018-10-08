@@ -3,16 +3,40 @@
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
 #include "MantidKernel/Logger.h"
+#include <QApplication>
 #include <QContextMenuEvent>
+#include <QDir>
+#include <QGridLayout>
+#include <QIcon>
 #include <QMouseEvent>
+#include <QPushButton>
+#include <QSpacerItem>
 #include <QVBoxLayout>
+#include <QtGlobal>
+
+using MantidQt::Widgets::MplCpp::ColorConverter;
+using MantidQt::Widgets::MplCpp::FigureCanvasQt;
+using MantidQt::Widgets::MplCpp::cycler;
+namespace Python = MantidQt::Widgets::MplCpp::Python;
 
 namespace {
 const char *ACTIVE_CURVE_FORMAT = "k-";
 const char *STORED_LINE_COLOR_CYCLE = "bgrcmyk";
 const char *LIN_SCALE_NAME = "linear";
 const char *LOG_SCALE_NAME = "symlog";
-Mantid::Kernel::Logger g_log("MiniPlotQwt");
+Mantid::Kernel::Logger g_log("MiniPlotMpl");
+
+QPushButton *createHomeButton() {
+  auto mpl(Python::NewRef(PyImport_ImportModule("matplotlib")));
+  QDir dataPath(
+      PyString_AsString(Python::Object(mpl.attr("get_data_path")()).ptr()));
+  dataPath.cd("images");
+  QIcon icon(dataPath.absoluteFilePath("home.png"));
+  auto iconSize(icon.availableSizes().front());
+  auto button = new QPushButton(icon, "");
+  button->setMaximumSize(iconSize + QSize(5, 5));
+  return button;
+}
 
 /**
  * Check if size(X)==size(Y) and both are not empty
@@ -38,10 +62,6 @@ bool warnDataInvalid(const std::vector<double> &x,
 } // namespace
 
 namespace MantidQt {
-using Widgets::MplCpp::ColorConverter;
-using Widgets::MplCpp::FigureCanvasQt;
-using Widgets::MplCpp::cycler;
-
 namespace MantidWidgets {
 
 /**
@@ -49,14 +69,34 @@ namespace MantidWidgets {
  * @param parent A pointer to its parent widget
  */
 MiniPlotMpl::MiniPlotMpl(QWidget *parent)
-    : QWidget(parent), m_canvas(new FigureCanvasQt(111)), m_lines(),
+    : QWidget(parent), m_canvas(new FigureCanvasQt(111)),
+      m_homeBtn(createHomeButton()), m_lines(),
       m_colorCycler(cycler("color", STORED_LINE_COLOR_CYCLE)), m_xunit(),
-      m_activeCurveLabel(), m_storedCurveLabels() {
-  setLayout(new QVBoxLayout);
-  layout()->addWidget(m_canvas);
+      m_activeCurveLabel(), m_storedCurveLabels(), m_zoomer(m_canvas) {
+  auto plotLayout = new QGridLayout(this);
+  plotLayout->setContentsMargins(0, 0, 0, 0);
+  plotLayout->setSpacing(0);
+  // We intentionally place the canvas and home button in the same location
+  // in the grid layout so that they overlap and take up less space.
+  plotLayout->addWidget(m_canvas, 0, 0);
+  plotLayout->addWidget(m_homeBtn, 0, 0, Qt::AlignLeft | Qt::AlignBottom);
+  setLayout(plotLayout);
+
+  // Capture mouse events destined for the plot canvas
   m_canvas->installEventFilterToMplCanvas(this);
+  // Mouse events cause zooming by default. See mouseReleaseEvent
+  // for exceptions
+  m_zoomer.enableZoom(true);
+  connect(m_homeBtn, SIGNAL(clicked()), this, SLOT(onHomeClicked()));
 }
 
+/**
+ * Set data and metadata for a new curve
+ * @param x The X-axis data
+ * @param y The Y-axis data
+ * @param xunit The X unit a label
+ * @param curveLabel A label for the curve data
+ */
 void MiniPlotMpl::setData(std::vector<double> x, std::vector<double> y,
                           QString xunit, QString curveLabel) {
   if (warnDataInvalid(x, y))
@@ -64,14 +104,26 @@ void MiniPlotMpl::setData(std::vector<double> x, std::vector<double> y,
 
   clearCurve();
   auto axes = m_canvas->gca();
-  axes.relim();
   // plot automatically calls "scalex=True, scaley=True"
   m_lines.emplace_back(
       axes.plot(std::move(x), std::move(y), ACTIVE_CURVE_FORMAT));
-  m_xunit = std::move(xunit);
+  setXLabel(std::move(xunit));
   m_activeCurveLabel = curveLabel;
-  axes.setXLabel(m_xunit.toLatin1().constData());
+  // If the current axis limits can fit the data then matplotlib
+  // won't change the axis scale. If the intensity of different plots
+  // is very different we need ensure the scale is tight enough to
+  // see newer plots so we force a recalculation from the data
+  axes.relim();
   replot();
+}
+
+/**
+ * Se the X unit label on the axis
+ * @param xunit A string giving the X unit
+ */
+void MiniPlotMpl::setXLabel(QString xunit) {
+  m_canvas->gca().setXLabel(xunit.toLatin1().constData());
+  m_xunit = std::move(xunit);
 }
 
 /**
@@ -163,13 +215,6 @@ void MiniPlotMpl::clearAll() {
 }
 
 /**
- * Override the contextMenuEvent handler. Ignores the events as they are handled
- * by mousePressEvent as right click also controls zoom level
- * @param evt A pointer to a QContextMenuEvent describing the event
- */
-void MiniPlotMpl::contextMenuEvent(QContextMenuEvent *evt) { evt->accept(); }
-
-/**
  * Filter events from the underlying matplotlib canvas
  * @param watched A pointer to the object being watched
  * @param evt A pointer to the generated event
@@ -177,31 +222,30 @@ void MiniPlotMpl::contextMenuEvent(QContextMenuEvent *evt) { evt->accept(); }
  */
 bool MiniPlotMpl::eventFilter(QObject *watched, QEvent *evt) {
   Q_UNUSED(watched);
-  bool filtered{false};
+  bool stopEvent{false};
   switch (evt->type()) {
-  case QEvent::MouseButtonPress:
-    mousePressEvent(static_cast<QMouseEvent *>(evt));
-    filtered = true;
+  case QEvent::ContextMenu:
+    // handled by mouse press events below
+    stopEvent = true;
     break;
+  case QEvent::MouseButtonPress:
+  case QEvent::MouseButtonRelease: {
+    auto mouseEvt = static_cast<QMouseEvent *>(evt);
+    if (mouseEvt->buttons() & Qt::RightButton) {
+      stopEvent = true;
+      emit showContextMenu();
+    }
+  } break;
   default:
-    filtered = false;
+    break;
   }
-
-  return filtered;
+  return stopEvent;
 }
 
 /**
- * Override the contextMenuEvent handler. Ignores the events as they are handled
- * by mousePressEvent as right click also controls zoom level
- * @param evt A pointer to a QMouseEvent describing the event
+ * Wire to the home button click
  */
-void MiniPlotMpl::mousePressEvent(QMouseEvent *evt) {
-  if (evt->buttons() & Qt::RightButton) {
-    evt->accept();
-    // plot owner will display and process context menu
-    emit showContextMenu();
-  }
-}
+void MiniPlotMpl::onHomeClicked() { m_zoomer.zoomOut(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

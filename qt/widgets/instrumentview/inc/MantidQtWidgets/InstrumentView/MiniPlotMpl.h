@@ -19,7 +19,10 @@
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
 #include "MantidQtWidgets/MplCpp/Cycler.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
+#include "MantidQtWidgets/MplCpp/Zoomer.h"
 #include <QWidget>
+
+class QPushButton;
 
 namespace MantidQt {
 namespace Widgets {
@@ -37,6 +40,7 @@ public:
 
   void setData(std::vector<double> x, std::vector<double> y, QString xunit,
                QString curveLabel);
+  void setXLabel(QString xunit);
   QString label() const { return m_activeCurveLabel; }
   void addPeakLabel(const PeakMarker2D *) {}
   void clearPeakLabels() {}
@@ -61,17 +65,20 @@ signals:
   void clickedAt(double, double);
 
 protected:
-  void contextMenuEvent(QContextMenuEvent *e) override;
   bool eventFilter(QObject *watched, QEvent *evt) override;
-  void mousePressEvent(QMouseEvent *) override;
+
+private slots:
+  void onHomeClicked();
 
 private: // data
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
+  QPushButton *m_homeBtn;
   std::vector<Widgets::MplCpp::Line2D> m_lines;
   Widgets::MplCpp::Cycler m_colorCycler;
   QString m_xunit;
   QString m_activeCurveLabel;
   QStringList m_storedCurveLabels;
+  Widgets::MplCpp::Zoomer m_zoomer;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

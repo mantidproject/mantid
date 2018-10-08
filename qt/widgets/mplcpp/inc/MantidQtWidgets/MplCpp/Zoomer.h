@@ -1,5 +1,5 @@
-#ifndef MPLCPP_BACKENDQT_H
-#define MPLCPP_BACKENDQT_H
+#ifndef MPLCPP_ZOOMER_H
+#define MPLCPP_ZOOMER_H
 /*
  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
@@ -18,37 +18,35 @@
 */
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Python/Object.h"
-#include <QtGlobal>
-
-/*
- * Defines constants relating to the matplotlib backend
- */
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#error "Qt >= 5 required"
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) &&                               \
-    QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-
-/// Define PyQt version that matches the matplotlib backend
-constexpr static const char *PYQT_MODULE = "PyQt5";
-
-/// Define matplotlib backend that will be used to draw the canvas
-constexpr static const char *MPL_QT_BACKEND =
-    "matplotlib.backends.backend_qt5agg";
-
-#else
-#error "Unknown Qt version. Cannot determine matplotlib backend."
-#endif
 
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
+class FigureCanvasQt;
 
-/// Import and return the backend module for this version of Qt
-MANTID_MPLCPP_DLL Python::Object backendModule();
+/**
+ * @brief The Zoomer class adds zooming capabilities to
+ * an existing FigureCanvasQt object. The implementation relies on
+ * the matplotlib NavigationToolbar2 class corresponding to the backend.
+ *
+ * This object holds a pointer to the FigureCanvasQt object but
+ * it will not keep it alive. It is assumed that the canvas lifetime
+ * is handled separately.
+ */
+class MANTID_MPLCPP_DLL Zoomer : public Python::InstanceHolder {
+public:
+  explicit Zoomer(FigureCanvasQt *canvas);
+
+  bool isZoomEnabled() const;
+  void enableZoom(bool requestOn);
+  void zoomOut();
+
+private:
+  FigureCanvasQt *m_canvas;
+};
 
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt
 
-#endif // MPLCPP_BACKENDQT_H
+#endif // MPLCPP_ZOOMER_H

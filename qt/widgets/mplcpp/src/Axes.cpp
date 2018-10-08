@@ -132,8 +132,15 @@ QString Axes::getYScale() const {
 void Axes::relim(bool visibleOnly) { pyobj().attr("relim")(visibleOnly); }
 
 /**
+ * Calls Axes.autoscale to enable/disable auto scaling
+ * @param enable If true enable autoscaling and perform the automatic rescale
+ */
+void Axes::autoscale(bool enable) { pyobj().attr("autoscale")(enable); }
+
+/**
  * Autoscale the view based on the current data limits. Calls
- * Axes.autoscale_view with the tight argument set to None
+ * Axes.autoscale_view with the tight argument set to None. Autoscaling
+ * must be turned on for this to work as expected
  * @param scaleX If true (default) scale the X axis limits
  * @param scaleY If true (default) scale the Y axis limits
  */

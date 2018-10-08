@@ -41,12 +41,14 @@ public:
   void installEventFilterToMplCanvas(QObject *filter);
 
   /// Access to the current figure instance.
-  inline Figure gcf() { return m_figure; }
+  inline Figure gcf() const { return m_figure; }
   /// Access to the current active axes instance.
-  inline Axes gca() { return m_figure.gca(); }
+  inline Axes gca() const { return m_figure.gca(); }
 
   /// Redraw the canvas
   inline void draw() { pyobj().attr("draw")(); }
+  /// Redraw the canvas if nothing else is happening
+  inline void drawIdle() { pyobj().attr("draw_idle")(); }
 
 private: // members
   Figure m_figure;

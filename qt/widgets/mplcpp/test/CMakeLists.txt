@@ -11,6 +11,7 @@ set ( TEST_FILES
   Line2DTest.h
   MantidColormapTest.h
   ScalarMappableTest.h
+  ZoomerTest.h
 )
 
 if ( NOT APPLE )
@@ -20,7 +21,7 @@ if ( NOT APPLE )
     SipTest.h
   )
 endif()
-  
+
 set (CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/MplCppTestInitialization.h)
 
 mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsMplCppTest
