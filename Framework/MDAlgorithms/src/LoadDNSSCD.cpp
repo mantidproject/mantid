@@ -521,118 +521,121 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
                   static_cast<float>(signal), static_cast<float>(error * error),
                   static_cast<uint16_t>(runindex), detid, millerindex.data());
 
-        norm_inserter.insertMDEvent(static_cast<float>(norm_signal),
-                                    static_cast<float>(norm_error * norm_error),
-                                    static_cast<uint16_t>(runindex), detid,
-                                    millerindex.data());
-      }
-    }
-  }
-  setProperty("NormalizationWorkspace", normWS);
-}
-
-void LoadDNSSCD::read_data(const std::string fname,
-                           std::map<std::string, std::string> &str_metadata,
-                           std::map<std::string, double> &num_metadata) {
-  std::ifstream file(fname);
-  std::string line;
-  std::string::size_type n;
-  std::string s;
-  boost::regex reg1("^#\\s+(\\w+):(.*)");
-  boost::regex reg2("^#\\s+((\\w+\\s)+)\\s+(-?\\d+(,\\d+)*(\\.\\d+(e\\d+)?)?)");
-  boost::smatch match;
-  getline(file, line);
-  n = line.find("DNS");
-  if (n == std::string::npos) {
-    throw std::invalid_argument("Not a DNS file");
-  }
-  // get file save time
-  Poco::File pfile(fname);
-  Poco::DateTime lastModified = pfile.getLastModified();
-  std::string wtime(
-      Poco::DateTimeFormatter::format(lastModified, "%Y-%m-%dT%H:%M:%S"));
-  str_metadata.insert(std::make_pair("file_save_time", wtime));
-
-  // get file basename
-  Poco::Path p(fname);
-  str_metadata.insert(std::make_pair("run_number", p.getBaseName()));
-
-  // parse metadata
-  while (getline(file, line)) {
-    n = line.find("Lambda");
-    if (n != std::string::npos) {
-      boost::regex re("[\\s]+");
-      s = line.substr(5);
-      boost::sregex_token_iterator it(s.begin(), s.end(), re, -1);
-      boost::sregex_token_iterator reg_end;
-      getline(file, line);
-      std::string s2 = line.substr(2);
-      boost::sregex_token_iterator it2(s2.begin(), s2.end(), re, -1);
-      for (; (it != reg_end) && (it2 != reg_end); ++it) {
-        std::string token(it->str());
-        if (token.find_first_not_of(' ') == std::string::npos) {
-          ++it2;
-          continue;
+              norm_inserter.insertMDEvent(
+                  static_cast<float>(norm_signal),
+                  static_cast<float>(norm_error * norm_error),
+                  static_cast<uint16_t>(runindex), detid, millerindex.data());
+            }
+          }
         }
-        if (token == "Mono") {
-          str_metadata.insert(std::make_pair(token, it2->str()));
-        } else {
-          num_metadata.insert(std::make_pair(token, std::stod(it2->str())));
-        }
-        ++it2;
+        setProperty("NormalizationWorkspace", normWS);
       }
-    }
-    // parse start and stop time
-    n = line.find("start");
-    if (n != std::string::npos) {
-      str_metadata.insert(std::make_pair("start_time", parseTime(line)));
-      getline(file, line);
-      str_metadata.insert(std::make_pair("stop_time", parseTime(line)));
-      getline(file, line);
-    }
-    if (boost::regex_search(line, match, reg1) && match.size() > 2) {
-      str_metadata.insert(std::make_pair(match.str(1), match.str(2)));
-    }
-    if (boost::regex_search(line, match, reg2) && match.size() > 2) {
-      s = match.str(1);
-      s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(),
-              s.end());
-      num_metadata.insert(std::make_pair(s, std::stod(match.str(3))));
-    }
-    n = line.find("DATA");
-    if (n != std::string::npos) {
-      break;
-    }
-  }
 
-  // the algorithm does not work with TOF data for the moment
-  std::map<std::string, double>::const_iterator m =
-      num_metadata.lower_bound("TOF");
-  g_log.debug() << "TOF Channels number: " << m->second << std::endl;
-  if (m->second != 1)
-    throw std::runtime_error(
-        "Algorithm does not support TOF data. TOF Channels number must be 1.");
+      void LoadDNSSCD::read_data(
+          const std::string fname,
+          std::map<std::string, std::string> &str_metadata,
+          std::map<std::string, double> &num_metadata) {
+        std::ifstream file(fname);
+        std::string line;
+        std::string::size_type n;
+        std::string s;
+        boost::regex reg1("^#\\s+(\\w+):(.*)");
+        boost::regex reg2(
+            "^#\\s+((\\w+\\s)+)\\s+(-?\\d+(,\\d+)*(\\.\\d+(e\\d+)?)?)");
+        boost::smatch match;
+        getline(file, line);
+        n = line.find("DNS");
+        if (n == std::string::npos) {
+          throw std::invalid_argument("Not a DNS file");
+        }
+        // get file save time
+        Poco::File pfile(fname);
+        Poco::DateTime lastModified = pfile.getLastModified();
+        std::string wtime(
+            Poco::DateTimeFormatter::format(lastModified, "%Y-%m-%dT%H:%M:%S"));
+        str_metadata.insert(std::make_pair("file_save_time", wtime));
 
-  ExpData ds;
-  ds.deterota = num_metadata["DeteRota"];
-  ds.huber = num_metadata["Huber"];
-  ds.wavelength = 10.0 * num_metadata["Lambda[nm]"];
-  ds.norm = num_metadata[m_normtype];
+        // get file basename
+        Poco::Path p(fname);
+        str_metadata.insert(std::make_pair("run_number", p.getBaseName()));
 
-  // read data array
-  getline(file, line);
-  int d;
-  double x;
-  while (file) {
-    file >> d >> x;
-    ds.detID.push_back(d);
-    ds.signal.push_back(x);
-  }
-  // DNS PA detector bank has only 24 detectors
-  ds.detID.resize(24);
-  ds.signal.resize(24);
-  m_data.push_back(ds);
-}
+        // parse metadata
+        while (getline(file, line)) {
+          n = line.find("Lambda");
+          if (n != std::string::npos) {
+            boost::regex re("[\\s]+");
+            s = line.substr(5);
+            boost::sregex_token_iterator it(s.begin(), s.end(), re, -1);
+            boost::sregex_token_iterator reg_end;
+            getline(file, line);
+            std::string s2 = line.substr(2);
+            boost::sregex_token_iterator it2(s2.begin(), s2.end(), re, -1);
+            for (; (it != reg_end) && (it2 != reg_end); ++it) {
+              std::string token(it->str());
+              if (token.find_first_not_of(' ') == std::string::npos) {
+                ++it2;
+                continue;
+              }
+              if (token == "Mono") {
+                str_metadata.insert(std::make_pair(token, it2->str()));
+              } else {
+                num_metadata.insert(
+                    std::make_pair(token, std::stod(it2->str())));
+              }
+              ++it2;
+            }
+          }
+          // parse start and stop time
+          n = line.find("start");
+          if (n != std::string::npos) {
+            str_metadata.insert(std::make_pair("start_time", parseTime(line)));
+            getline(file, line);
+            str_metadata.insert(std::make_pair("stop_time", parseTime(line)));
+            getline(file, line);
+          }
+          if (boost::regex_search(line, match, reg1) && match.size() > 2) {
+            str_metadata.insert(std::make_pair(match.str(1), match.str(2)));
+          }
+          if (boost::regex_search(line, match, reg2) && match.size() > 2) {
+            s = match.str(1);
+            s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(),
+                    s.end());
+            num_metadata.insert(std::make_pair(s, std::stod(match.str(3))));
+          }
+          n = line.find("DATA");
+          if (n != std::string::npos) {
+            break;
+          }
+        }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+        // the algorithm does not work with TOF data for the moment
+        std::map<std::string, double>::const_iterator m =
+            num_metadata.lower_bound("TOF");
+        g_log.debug() << "TOF Channels number: " << m->second << std::endl;
+        if (m->second != 1)
+          throw std::runtime_error("Algorithm does not support TOF data. TOF "
+                                   "Channels number must be 1.");
+
+        ExpData ds;
+        ds.deterota = num_metadata["DeteRota"];
+        ds.huber = num_metadata["Huber"];
+        ds.wavelength = 10.0 * num_metadata["Lambda[nm]"];
+        ds.norm = num_metadata[m_normtype];
+
+        // read data array
+        getline(file, line);
+        int d;
+        double x;
+        while (file) {
+          file >> d >> x;
+          ds.detID.push_back(d);
+          ds.signal.push_back(x);
+        }
+        // DNS PA detector bank has only 24 detectors
+        ds.detID.resize(24);
+        ds.signal.resize(24);
+        m_data.push_back(ds);
+      }
+
+    } // namespace MDAlgorithms
+  }   // namespace Mantid
