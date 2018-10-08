@@ -195,8 +195,8 @@ void MultiProcessEventLoader::assembleFromShared(
     std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const {
   std::vector<std::thread> workers;
 
-  std::vector<std::atomic<int>> cnts(m_segmentNames.size());
-  std::vector<std::atomic<int>> processCounter(m_segmentNames.size());
+  std::vector<std::atomic<uint32_t>> cnts(m_segmentNames.size());
+  std::vector<std::atomic<uint32_t>> processCounter(m_segmentNames.size());
   for (auto &cnt : cnts)
     cnt = 0;
   for (auto &cnt : processCounter)
@@ -242,8 +242,8 @@ void MultiProcessEventLoader::assembleFromShared(
 void MultiProcessEventLoader::fillFromFile(
     EventsListsShmemStorage &storage, const std::string &filename,
     const std::string &groupname, const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets, const uint32_t from,
-    const uint32_t to, bool precalc) {
+    const std::vector<int32_t> &bankOffsets, const std::size_t from,
+    const std::size_t to, bool precalc) {
   H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
   auto instrument = file.openGroup(groupname);
 

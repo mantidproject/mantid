@@ -76,7 +76,7 @@ public:
                            const std::string &groupname,
                            const std::vector<std::string> &bankNames,
                            const std::vector<int32_t> &bankOffsets,
-                           uint32_t from, uint32_t to, bool precalc);
+                           std::size_t from, std::size_t to, bool precalc);
 
   enum struct LoadType { preCalcEvents, producerConsumer };
 
@@ -93,14 +93,14 @@ private:
                               const H5::Group &group,
                               const std::vector<std::string> &bankNames,
                               const std::vector<int32_t> &bankOffsets,
-                              uint32_t from, uint32_t to);
+                              std::size_t from, std::size_t to);
 
     static void loadFromGroupWrapper(const H5::DataType &type,
                                      EventsListsShmemStorage &storage,
                                      const H5::Group &group,
                                      const std::vector<std::string> &bankNames,
                                      const std::vector<int32_t> &bankOffsets,
-                                     uint32_t from, uint32_t to);
+                                     std::size_t from, std::size_t to);
   };
 
   void assembleFromShared(
@@ -123,7 +123,7 @@ template <typename MultiProcessEventLoader::LoadType LT>
 void MultiProcessEventLoader::GroupLoader<LT>::loadFromGroupWrapper(
     const H5::DataType &type, EventsListsShmemStorage &storage,
     const H5::Group &instrument, const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets, uint32_t from, uint32_t to) {
+    const std::vector<int32_t> &bankOffsets, std::size_t from, std::size_t to) {
   if (type == H5::PredType::NATIVE_INT32)
     return loadFromGroup<int32_t>(storage, instrument, bankNames, bankOffsets,
                                   from, to);
@@ -159,8 +159,8 @@ void MultiProcessEventLoader::GroupLoader<
     MultiProcessEventLoader::LoadType::preCalcEvents>::
     loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
                   const std::vector<std::string> &bankNames,
-                  const std::vector<int32_t> &bankOffsets, const uint32_t from,
-                  const uint32_t to) {
+                  const std::vector<int32_t> &bankOffsets,
+                  const std::size_t from, const std::size_t to) {
   std::vector<int32_t> eventId;
   std::vector<T> eventTimeOffset;
 
@@ -203,7 +203,7 @@ void MultiProcessEventLoader::GroupLoader<
         storage.reserve(0, pair.first, pair.second);
 
       part->setEventOffset(start);
-      for (unsigned i = 0; i < eventId.size(); ++i) {
+      for (std::size_t i = 0; i < eventId.size(); ++i) {
         try {
           storage.appendEvent(
               0, eventId[i],
@@ -231,8 +231,8 @@ void MultiProcessEventLoader::GroupLoader<
     MultiProcessEventLoader::LoadType::producerConsumer>::
     loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
                   const std::vector<std::string> &bankNames,
-                  const std::vector<int32_t> &bankOffsets, const uint32_t from,
-                  const uint32_t to) {
+                  const std::vector<int32_t> &bankOffsets,
+                  const std::size_t from, const std::size_t to) {
   constexpr std::size_t chunksPerBank{10};
   const std::size_t chLen{
       std::max<std::size_t>((to - from) / chunksPerBank, 1)};
