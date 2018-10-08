@@ -19,14 +19,19 @@ bool isWorkspaceInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+}
+
+WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
 template <typename T>
 void addWorkspaceToADS(std::string const &workspaceName, T const &workspace) {
   AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
-}
-
-template <typename T = MatrixWorkspace>
-boost::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
 
 MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
@@ -114,7 +119,7 @@ AbsorptionCorrections::~AbsorptionCorrections() {
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
   auto const name = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  return isWorkspaceInADS(name) ? getADSWorkspace(name) : nullptr;
+  return isWorkspaceInADS(name) ? getADSMatrixWorkspace(name) : nullptr;
 }
 
 void AbsorptionCorrections::setup() { doValidation(); }
@@ -321,7 +326,8 @@ UserInputValidator AbsorptionCorrections::doValidation() {
 
     auto const containerWsName =
         m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-    if (isWorkspaceInADS(containerWsName) && !getADSWorkspace(containerWsName))
+    if (isWorkspaceInADS(containerWsName) &&
+        !getADSMatrixWorkspace(containerWsName))
       uiv.addErrorMessage(
           "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
 
@@ -352,7 +358,7 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {
-  auto const correctionsWs = getADSWorkspace(m_pythonExportWsName);
+  auto const correctionsWs = getADSWorkspaceGroup(m_pythonExportWsName);
   if (correctionsWs) {
     auto const wavelengthWorkspace = convertUnits(correctionsWs, "Wavelength");
     addWorkspaceToADS("__mc_corrections_wavelength", wavelengthWorkspace);
@@ -377,7 +383,7 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
 }
 
 void AbsorptionCorrections::getParameterDefaults(QString const &dataName) {
-  auto const sampleWs = getADSWorkspace(dataName.toStdString());
+  auto const sampleWs = getADSMatrixWorkspace(dataName.toStdString());
   if (sampleWs)
     getParameterDefaults(sampleWs->getInstrument());
   else
