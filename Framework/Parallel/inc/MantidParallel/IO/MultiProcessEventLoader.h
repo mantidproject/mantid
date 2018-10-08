@@ -146,6 +146,9 @@ void MultiProcessEventLoader::GroupLoader<LT>::loadFromGroupWrapper(
       "Unsupported H5::DataType for event_time_offset in NXevent_data");
 }
 
+// aliase  for ToF type used in TofEvent
+using ToFType = decltype(std::declval<TofEvent>().tof());
+
 /**Loades the portion of data from hdf5 given group and banks list to shared
  * memory, 'from' and 'to' represent the range in global number of events.
  * Implements the 'precalculation of events' strategy*/
@@ -202,7 +205,6 @@ void MultiProcessEventLoader::GroupLoader<
       part->setEventOffset(start);
       for (unsigned i = 0; i < eventId.size(); ++i) {
         try {
-          using ToFType = decltype(std::declval<TofEvent>().tof());
           storage.appendEvent(
               0, eventId[i],
               TofEvent{boost::numeric_cast<ToFType>(eventTimeOffset[i]),
@@ -339,8 +341,9 @@ void MultiProcessEventLoader::GroupLoader<
           task.partitioner->setEventOffset(task.from);
           for (unsigned i = 0; i < task.eventId.size(); ++i) {
             pixels.at(task.eventId[i])
-                .emplace_back(task.eventTimeOffset[i],
-                              task.partitioner->next());
+                .emplace_back(
+                    boost::numeric_cast<ToFType>(task.eventTimeOffset[i]),
+                    task.partitioner->next());
           }
           task.eventId.resize(0);
           task.eventId.shrink_to_fit();
