@@ -18,7 +18,7 @@ class RecoveryThread : public QThread {
   Q_OBJECT
 
 public:
-  RecoveryThread() {m_projRec = nullptr}
+  RecoveryThread() { m_projRec = nullptr }
   bool getFailedRun();
   void setCheckpoint(Poco::Path checkpoint);
   void setProjRecPtr(MantidQt::ProjectRecovery *projectRec);
