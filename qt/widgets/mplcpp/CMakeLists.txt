@@ -2,6 +2,7 @@
 set ( LIB_SRCS
   src/Artist.cpp
   src/Axes.cpp
+  src/BackendQt.cpp
   src/Colors.cpp
   src/ColorbarWidget.cpp
   src/Colormap.cpp
@@ -12,6 +13,7 @@ set ( LIB_SRCS
   src/Line2D.cpp
   src/MantidColorMap.cpp
   src/ScalarMappable.cpp
+  src/Zoomer.cpp
 )
 
 set ( MOC_HEADERS
@@ -30,6 +32,7 @@ set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/Line2D.h
   inc/MantidQtWidgets/MplCpp/MantidColorMap.h
   inc/MantidQtWidgets/MplCpp/ScalarMappable.h
+  inc/MantidQtWidgets/MplCpp/Zoomer.h
 )
 
 set ( UI_FILES
@@ -70,15 +73,6 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
   LINUX_INSTALL_RPATH
     "\$ORIGIN/../${LIB_DIR}"
 )
-
-add_executable ( MplCppTestQt5 Main.cpp )
-target_include_directories (MplCppTestQt5 PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/inc
-  ../../../Framework/PythonInterface/inc
-)
-target_link_libraries ( MplCppTestQt5
-  MantidQtWidgetsMplCppQt5 Qt5::Gui Qt5::Widgets PythonInterfaceCore ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
-
 
 # Testing
 add_subdirectory ( test )

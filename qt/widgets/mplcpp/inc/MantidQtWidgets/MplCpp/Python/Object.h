@@ -16,10 +16,17 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 */
+#include "MantidPythonInterface/core/ErrorHandling.h"
 #include <boost/python/borrowed.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/object.hpp>
-#include <stdexcept>
+
+/**
+ * @file The intetion of this module is to centralize the access
+ * to boost::python so that it is not scattered throughout this library. In
+ * theory updating to a different wrapper library would just require altering
+ * this file.
+ */
 
 namespace MantidQt {
 namespace Widgets {
@@ -35,12 +42,25 @@ using Dict = boost::python::dict;
 // Alias for handle wrapping a raw PyObject*
 template <typename T = PyObject> using Handle = boost::python::handle<T>;
 
-// Alias to borrowed function that increments the reference count
-template <typename T> using BorrowedRef = boost::python::detail::borrowed<T>;
+// Helper to forward to boost python
+inline ssize_t Len(const Python::Object &obj) {
+  return boost::python::len(obj);
+}
 
 // Helper to create an Object from a new reference to a raw PyObject*
 inline Python::Object NewRef(PyObject *obj) {
+  if (!obj) {
+    throw Mantid::PythonInterface::PythonRuntimeError();
+  }
   return Python::Object(Python::Handle<>(obj));
+}
+
+// Helper to create an Object from a borrowed reference to a raw PyObject*
+inline Python::Object BorrowedRef(PyObject *obj) {
+  if (!obj) {
+    throw Mantid::PythonInterface::PythonRuntimeError();
+  }
+  return Python::Object(Python::Handle<>(boost::python::borrowed(obj)));
 }
 
 // Alias for exception indicating Python error handler is set

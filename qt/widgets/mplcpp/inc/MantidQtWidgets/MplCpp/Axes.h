@@ -49,6 +49,7 @@ public:
   void setYScale(const char *value);
   QString getYScale() const;
   void relim(bool visibleOnly = false);
+  void autoscale(bool enable);
   void autoscaleView(bool scaleX = true, bool scaleY = true);
   void autoscaleView(bool tight, bool scaleX = true, bool scaleY = true);
   /// @}

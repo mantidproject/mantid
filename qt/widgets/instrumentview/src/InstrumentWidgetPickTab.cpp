@@ -292,7 +292,7 @@ bool InstrumentWidgetPickTab::canUpdateTouchedDetector() const {
  * Display the miniplot's context menu.
  */
 void InstrumentWidgetPickTab::plotContextMenu() {
-  QMenu context(this);
+  QMenu context(m_plot);
 
   auto plotType = m_plotController->getPlotType();
 
@@ -595,6 +595,12 @@ void InstrumentWidgetPickTab::initSurface() {
       static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache));
   m_plotController->setPlotType(
       static_cast<DetectorPlotController::PlotType>(m_plotTypeCache));
+  // miniplot X unit
+  const auto & actor = m_instrWidget->getInstrumentActor();
+  // default X axis label
+  m_plot->setXLabel(QString::fromStdString(
+      actor.getWorkspace()->getAxis(0)->unit()->unitID()));
+
 }
 
 /**

@@ -60,13 +60,21 @@ MiniPlotQwt::MiniPlotQwt(QWidget *parent)
   // Initial scales so the plot looks sensible
   setXScale(0, 1);
   setYScale(-1.2, 1.2);
-
 }
 
 /**
  * Destructor.
  */
 MiniPlotQwt::~MiniPlotQwt() { clearAll(); }
+
+/**
+ * Set the X label of the plot
+ * @param xunit
+ */
+void MiniPlotQwt::setXLabel(QString xunit) {
+  m_xUnits = xunit;
+  this->setAxisTitle(xBottom, m_xUnits);
+}
 
 /**
  * Set the scale of the horizontal axis
@@ -229,7 +237,7 @@ void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y,
         ", Y=" + std::to_string(y.size())));
     return;
   }
-  m_xUnits = xunit;
+
   m_label = curveLabel;
   if (!m_curve) {
     m_curve = new QwtPlotCurve();
@@ -248,7 +256,6 @@ void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y,
       to = yy;
   }
   setYScale(from, to);
-  this->setAxisTitle(xBottom, m_xUnits);
 }
 
 /**
