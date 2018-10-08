@@ -308,7 +308,7 @@ void ReflectometryReductionOneAuto2::init() {
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FloodWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "A flood workspace to apply. If empty and FloodCorrection is "
+      "A flood workspace to apply; if empty and FloodCorrection is "
       "'Workspace' then no correction is applied.");
 
   // Init properties for diagnostics

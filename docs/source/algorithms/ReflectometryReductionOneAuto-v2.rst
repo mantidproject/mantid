@@ -14,7 +14,9 @@ for more information on the wrapped algorithm). It optionally corrects the detec
 parameters out of the instrument parameter file where possible. These automatically applied defaults
 can be overridden by providing your own values. In addition, it outputs a rebinned workspace in Q, and it optionally
 performs polarization analysis if the input workspace is a workspace group. The input and transmission workspaces can also be optionally
-corrected for flood.
+corrected for flood using :ref:`algm-ApplyFloodWorkspace` algorithm. The flood workspace either can be provided in :literal:`FloodWorkspace`
+property or it is created on the fly with the :ref:`algm-CreateFloodWorkspace` algorithm using properties stored in the instrument
+parameter file.
 
 First, if :literal:`ThetaIn` is given the algorithm will try to correct the detector position. For this, it uses
 :literal:`ProcessingInstructions`, which corresponds to the grouping pattern of workspace indices that define the
