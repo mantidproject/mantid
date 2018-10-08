@@ -186,7 +186,6 @@ class TableModelThreadingTest(unittest.TestCase):
         file_information_factory_instance = mock.MagicMock()
         file_information_factory_instance.create_sans_file_information.side_effect = RuntimeError('File Error')
         file_information_factory_mock.return_value = file_information_factory_instance
-        update_view = mock.MagicMock()
         table_model = TableModel()
         table_index_model = TableIndexModel("00000", "", "", "", "", "", "",
                                             "", "", "", "", "", "")
@@ -201,7 +200,7 @@ class TableModelThreadingTest(unittest.TestCase):
 
     def test_that_get_thickness_for_rows_updates_table_correctly(self):
         table_model = TableModel()
-        table_index_model = TableIndexModel("74044", "", "", "", "", "", "",
+        table_index_model = TableIndexModel("LOQ74044", "", "", "", "", "", "",
                                             "", "", "", "", "", "")
         table_model.add_table_entry(0, table_index_model)
 
