@@ -9,6 +9,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include <boost/shared_ptr.hpp>
@@ -32,7 +33,7 @@ class V3D;
 
 namespace Algorithms {
 
-class DLLExport GravityCorrection : public Mantid::API::Algorithm {
+class MANTID_ALGORITHMS_DLL GravityCorrection : public Mantid::API::Algorithm {
 public:
   /// Empty constructor
   GravityCorrection() = default;
@@ -80,33 +81,13 @@ private:
   std::string componentName(const std::string &propertyName,
                             Mantid::Geometry::Instrument_const_sptr &instr);
   /// Final angle definition between source and sample
-  double finalAngle(const double k, size_t i, const double tanAngle,
-                    const double beamDiff);
-  /// Retrieve the coordinate of an instrument component
-  double coordinate(
-      const std::string &componentName,
-      Mantid::Geometry::PointingAlong direction,
-      Mantid::Geometry::Instrument_const_sptr instrument = nullptr) const;
-  /// Retrieve the coodinate of a detector component
-  double coordinate(const Mantid::Geometry::DetectorInfo &detectorInfo,
-                    size_t i, Mantid::Geometry::PointingAlong direction) const;
-  /// Retrieve the coordinate of an instrument component
-  double coordinate(const Mantid::API::SpectrumInfo &spectrumInfo, size_t i,
-                    Mantid::Geometry::PointingAlong direction) const;
-  /// Retrieve the coordinate of a vector
-  double coordinate(const Kernel::V3D &pos,
-                    Mantid::Geometry::PointingAlong direction) const;
-  /// Modify the coordinate of a Vector V3D
-  void setCoordinate(Kernel::V3D &pos,
-                     Mantid::Geometry::PointingAlong direction, double value);
+  double finalAngle(const double k, const double theta);
   /// Generalise instrument setup (origin, handedness, coordinate system)
   void virtualInstrument();
   /// Ensure slits to exist and be correctly ordered
   void slitCheck();
   /// The corrected spectrum number for the initialSpectrumNumber
-  size_t spectrumNumber(const double angle,
-                        const Mantid::API::SpectrumInfo &spectrumInfo,
-                        size_t i);
+  size_t spectrumNumber(const double angle, const double theta);
   /// Parabola arc length
   double parabolaArcLength(const double arg, double constant = 1.) const;
   /// Execution code

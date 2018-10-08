@@ -15,7 +15,7 @@ An initial computation of the final angle :math:`\theta_f` due to gravitation is
 For the path from the sample to the detector, gravitation plays a role which can be cancelled.
 Other properties of the :literal:`InputWorkspace` will be present in the :literal:`OutputWorkspace`.
 Both cases, reflection up and down, can be treated.
-Please take a look at the gravity correction for ILL reflectometers with the reduction software COSMOS: Gutfreund et. al. Towards generalized data reduction on a chopper-based time-of-flight neutron reflectometer (__https://arxiv.org/abs/1710.04139).
+Please take a look at the gravity correction for ILL reflectometers with the reduction software COSMOS, see [#Gutfreund]_.
 Counts of neutrons that do not hit the detector after correction will not be considered in the :literal:`OutputWorkspace`, an information will be logged.
 Please note that the output workspace likely has varying bins and consider a subsequent rebinning step (:ref:`algm-Rebin`).
 The instrument definition can only contain the position in beam direction and the height of the slits will always be computed internally.
@@ -198,4 +198,12 @@ Output:
 
         # Plot the workspaces
 
+References
+----------
+
+.. [#Gutfreund] P. Gutfreund, T. Saerbeck, M. A. Gonzalez, E. Pellegrini, M. Laver, C. Dewhurst, R. Cubitt,
+             `arXiv:1710.04139  <https://arxiv.org/abs/1710.04139>`_ **\[physics.ins-det\]**
+
 .. categories::
+
+.. sourcelink::

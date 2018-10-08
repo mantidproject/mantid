@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GravityCorrection.h"
 
 #include "MantidAPI/AlgorithmHistory.h"
@@ -60,8 +66,6 @@ using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using Mantid::Kernel::make_unique;
 using Mantid::PhysicalConstants::g;
-
-using boost::const_pointer_cast;
 using boost::make_shared;
 using std::abs;
 using std::find_if;
@@ -70,7 +74,112 @@ using std::pair;
 using std::pow;
 using std::runtime_error;
 using std::string;
+using std::to_string;
 using std::vector;
+
+namespace general {
+/**
+ * @brief general::coordinate
+ * @param pos :: a V3D holding a position in Cartesian coordinates in metres
+ * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
+ * PointingAlong::Y, PointingAlong::Z)
+ * @return the coordinate of the position in direction in metres
+ */
+double coordinate(const V3D &pos, PointingAlong direction) {
+  double position{0.};
+  switch (direction) {
+  case Mantid::Geometry::X:
+    position = pos.X();
+    break;
+  case Mantid::Geometry::Y:
+    position = pos.Y();
+    break;
+  case Mantid::Geometry::Z:
+    position = pos.Z();
+    break;
+  default:
+    throw runtime_error("Axis is not X/Y/Z");
+    break;
+  }
+  return position;
+}
+
+/**
+ * @brief general::coordinate
+ * @param detectorInfo :: reference detectorInfo
+ * @param i :: detector index
+ * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
+ * PointingAlong::Y, PointingAlong::Z)
+ * @return the coordinate of a detector at index i (unit metres)
+ */
+double coordinate(const DetectorInfo &detectorInfo, size_t i,
+                  PointingAlong direction) {
+  V3D position{detectorInfo.position(i)};
+  return coordinate(position, direction);
+}
+
+/**
+ * @brief general::coordinate
+ * @param spectrumInfo :: reference spectrumInfo
+ * @param i :: spectrum index
+ * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
+ * PointingAlong::Y, PointingAlong::Z)
+ * @return the coordinate of a detector or group of detectors of a spectrum at
+ * index 1 (unit metres)
+ */
+double coordinate(const SpectrumInfo &spectrumInfo, size_t i,
+                  PointingAlong direction) {
+  V3D position{spectrumInfo.position(i)};
+  return coordinate(position, direction);
+}
+
+/**
+ * @brief general::coordinate
+ * @param componentName :: name of the instrument component
+ * @param direction :: direction of the general::coordinate (i.e.
+ * PointingAlong::X, PointingAlong::Y, PointingAlong::Z)
+ * @param instrument :: instrument containing the component
+ * @return the general::coordinate of the instrument component (unit metres)
+ */
+double coordinate(const string &componentName, PointingAlong direction,
+                  Mantid::Geometry::Instrument_const_sptr instrument) {
+  double position{0.};
+  IComponent_const_sptr component =
+      instrument->getComponentByName(componentName);
+  if (component == nullptr)
+    throw runtime_error("Cannot get instrument component with name " +
+                        componentName);
+  else {
+    V3D pos = component->getPos();
+    position = general::coordinate(pos, direction);
+  }
+  return position;
+}
+
+/**
+ * @brief general::setCoordinate
+ * @param pos :: holds the position vector to be updated in metres
+ * @param direction :: direction of the coordinate of the position to be updated
+ * (i.e. PointingAlong::X, PointingAlong::Y, PointingAlong::Z)
+ * @param coor :: coordinate to be added to the position vector in metres
+ */
+void setCoordinate(V3D &pos, PointingAlong direction, double coor) {
+  switch (direction) {
+  case Mantid::Geometry::X:
+    pos.setX(pos.X() + coor);
+    break;
+  case Mantid::Geometry::Y:
+    pos.setY(pos.Y() + coor);
+    break;
+  case Mantid::Geometry::Z:
+    pos.setZ(pos.Z() + coor);
+    break;
+  default:
+    throw runtime_error("Axis is not X/Y/Z");
+    break;
+  }
+}
+} // namespace general
 
 namespace Mantid {
 namespace Algorithms {
@@ -164,7 +273,7 @@ map<string, string> GravityCorrection::validateInputs() {
         result[mapit->first] = "Instrument component with name " +
                                (mapit->second) + " does not exist. ";
       else {
-        last = this->coordinate(mapit->second, m_beamDirection, instrument);
+        last = general::coordinate(mapit->second, m_beamDirection, instrument);
         iposition += last;
         if ((mapit->first == "SecondSlitName") &&
             (iposition / 2 == last && last > 0.))
@@ -173,116 +282,6 @@ map<string, string> GravityCorrection::validateInputs() {
     }
   }
   return result;
-}
-
-/**
- * @brief GravityCorrection::coordinate
- * @param componentName :: name of the instrument component
- * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
- * PointingAlong::Y, PointingAlong::Z)
- * @param instrument :: instrument containing the component
- * @return the coordinate of the instrument component (unit metres)
- */
-double GravityCorrection::coordinate(
-    const string &componentName, PointingAlong direction,
-    Mantid::Geometry::Instrument_const_sptr instrument) const {
-  double position{0.};
-  IComponent_const_sptr component;
-  if (instrument == nullptr)
-    component = this->m_virtualInstrument->getComponentByName(componentName);
-  else
-    component = instrument->getComponentByName(componentName);
-  if (component == nullptr)
-    this->g_log.error("Cannot get instrument component with name " +
-                      componentName);
-  else {
-    V3D pos = component->getPos();
-    position = this->coordinate(pos, direction);
-  }
-  return position;
-}
-
-/**
- * @brief GravityCorrection::coordinate
- * @param detectorInfo :: reference detectorInfo
- * @param i :: detector index
- * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
- * PointingAlong::Y, PointingAlong::Z)
- * @return the coordinate of a detector at index i (unit metres)
- */
-double GravityCorrection::coordinate(const DetectorInfo &detectorInfo, size_t i,
-                                     PointingAlong direction) const {
-  V3D position{detectorInfo.position(i)};
-  return this->coordinate(position, direction);
-}
-
-/**
- * @brief GravityCorrection::coordinate
- * @param spectrumInfo :: reference spectrumInfo
- * @param i :: spectrum index
- * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
- * PointingAlong::Y, PointingAlong::Z)
- * @return the coordinate of a detector or group of detectors of a spectrum at
- * index 1 (unit metres)
- */
-double GravityCorrection::coordinate(const SpectrumInfo &spectrumInfo, size_t i,
-                                     PointingAlong direction) const {
-  V3D position{spectrumInfo.position(i)};
-  return this->coordinate(position, direction);
-}
-
-/**
- * @brief GravityCorrection::coordinate
- * @param pos :: a V3D holding a position in Cartesian coordinates in metres
- * @param direction :: direction of the coordinate (i.e. PointingAlong::X,
- * PointingAlong::Y, PointingAlong::Z)
- * @return the coordinate of the position in direction in metres
- */
-double GravityCorrection::coordinate(const V3D &pos,
-                                     PointingAlong direction) const {
-  double position{0.};
-  switch (direction) {
-  case Mantid::Geometry::X:
-    position = pos.X();
-    break;
-  case Mantid::Geometry::Y:
-    position = pos.Y();
-    break;
-  case Mantid::Geometry::Z:
-    position = pos.Z();
-    break;
-  default:
-    g_log.error("Axis is not X/Y/Z");
-    throw runtime_error("Axis is not X/Y/Z");
-    break;
-  }
-  return position;
-}
-
-/**
- * @brief GravityCorrection::setCoordinate
- * @param pos :: holds the position vector to be updated in metres
- * @param direction :: direction of the coordinate of the position to be updated
- * (i.e. PointingAlong::X, PointingAlong::Y, PointingAlong::Z)
- * @param coor :: coordinate to be added to the position vector in metres
- */
-void GravityCorrection::setCoordinate(V3D &pos, PointingAlong direction,
-                                      double coor) {
-  switch (direction) {
-  case Mantid::Geometry::X:
-    pos.setX(pos.X() + coor);
-    break;
-  case Mantid::Geometry::Y:
-    pos.setY(pos.Y() + coor);
-    break;
-  case Mantid::Geometry::Z:
-    pos.setZ(pos.Z() + coor);
-    break;
-  default:
-    g_log.error("Axis is not X/Y/Z");
-    throw runtime_error("Axis is not X/Y/Z");
-    break;
-  }
 }
 
 /**
@@ -301,10 +300,14 @@ void GravityCorrection::slitCheck() {
   this->m_slit1Name = slit1;
   this->m_slit2Name = slit2;
   // in beam directions
-  const double sourceD = this->coordinate(sourceName, this->m_beamDirection);
-  const double sampleD = this->coordinate(sampleName, this->m_beamDirection);
-  const double slit1D = this->coordinate(slit1, this->m_beamDirection);
-  const double slit2D = this->coordinate(slit2, this->m_beamDirection);
+  const double sourceD = general::coordinate(sourceName, this->m_beamDirection,
+                                             this->m_virtualInstrument);
+  const double sampleD = general::coordinate(sampleName, this->m_beamDirection,
+                                             this->m_virtualInstrument);
+  const double slit1D = general::coordinate(slit1, this->m_beamDirection,
+                                            this->m_virtualInstrument);
+  const double slit2D = general::coordinate(slit2, this->m_beamDirection,
+                                            this->m_virtualInstrument);
   // slits must be located between source and sample
   // source -> slit1 -> slit2 -> sample
   if (abs(slit2D) < abs(slit1D)) {
@@ -320,24 +323,23 @@ void GravityCorrection::slitCheck() {
 /**
  * @brief GravityCorrection::finalAngle calculates the sample hit position
  * @param k :: characteristic length of the parabola in 1/m
- * @param i :: spectrum number
- * @return final angle in radians
+ * @param theta :: the final angle of the current spectrum, unit radian
+ * @return final angle, unit radian
  */
-double GravityCorrection::finalAngle(const double k, size_t i,
-                                     const double tanAngle,
-                                     const double beamDiff) {
+double GravityCorrection::finalAngle(const double k, const double theta) {
   // calculate parabola
-  // calculate slit pointing up coordinate
+  // calculate slit pointing up general::coordinate
   // potential divide by zero avoided by input validation m_beam1 != m_beam2
+  const double tanAngle = tan(theta);
+  const int thetaSign = this->sgn(theta);
+  const double beamDiff = m_beam1 - m_beam2;
   double beamShift =
       (k * (pow(m_beam1, 2.) - pow(m_beam2, 2.)) + (beamDiff * tanAngle)) /
-      (2 * k * beamDiff);
-  const double up2 = this->sgn(this->m_ws->spectrumInfo().signedTwoTheta(i)) *
-                     m_beam2 * tanAngle;
+      (2. * k * beamDiff);
+  const double up2 = thetaSign * m_beam2 * tanAngle;
   double upShift = up2 + k * pow(m_beam2 - beamShift, 2.);
   // calculate final angle
-  return this->sgn(this->m_ws->spectrumInfo().signedTwoTheta(i)) *
-         atan(2. * k * sqrt(abs(upShift / k)));
+  return thetaSign * atan(2. * k * sqrt(abs(upShift / k)));
 }
 
 /**
@@ -377,8 +379,8 @@ void GravityCorrection::virtualInstrument() {
         detectorInfo.setPosition(i, detectorInfo.position(i) - samplePos);
     }
 
-    const double sampleY =
-        this->coordinate(sampleName, this->m_upDirection, ws->getInstrument());
+    const double sampleY = general::coordinate(sampleName, this->m_upDirection,
+                                               ws->getInstrument());
     // check if the instrument is rotated: then the up direction and horizontal
     // directions are not zero: -> rotate instrument (update positions)
     double tanAngle{0.}; // will hold tan(rotation angle)
@@ -390,35 +392,36 @@ void GravityCorrection::virtualInstrument() {
        *         | /a |
        *         |/___|____> z
        */
-      tanAngle = sampleY / this->coordinate(sourceName, m_beamDirection,
-                                            ws->getInstrument());
+      tanAngle = sampleY / general::coordinate(sourceName, m_beamDirection,
+                                               ws->getInstrument());
       auto &componentInfo = ws->mutableComponentInfo();
       for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
         const auto compID2 = (*compit)->getComponentID();
         V3D position = (*compit)->getPos();
-        double coordUp = this->coordinate(
+        double coordUp = general::coordinate(
             (*compit)->getName(), this->m_upDirection, ws->getInstrument());
-        this->setCoordinate(position, this->m_beamDirection,
-                            coordUp / tanAngle);
+        general::setCoordinate(position, this->m_beamDirection,
+                               coordUp / tanAngle);
         componentInfo.setPosition(componentInfo.indexOf(compID2), position);
       }
       auto &detectorInfo = ws->mutableDetectorInfo();
       for (size_t i = 0; i < detectorInfo.size(); ++i) {
         V3D position = detectorInfo.position(i);
-        this->setCoordinate(
+        general::setCoordinate(
             position, this->m_beamDirection,
-            this->coordinate(detectorInfo, i, this->m_upDirection) / tanAngle);
+            general::coordinate(detectorInfo, i, this->m_upDirection) /
+                tanAngle);
         detectorInfo.setPosition(i, position);
         // rotate detectors
         V3D vvector{0., 0., 0.};
         double vangle = atan(tanAngle);
-        this->setCoordinate(vvector, this->m_upDirection, sin(vangle));
-        this->setCoordinate(vvector, this->m_beamDirection, cos(vangle));
+        general::setCoordinate(vvector, this->m_upDirection, sin(vangle));
+        general::setCoordinate(vvector, this->m_beamDirection, cos(vangle));
         const Quat &rot = Quat(vangle, vvector);
         detectorInfo.setRotation(i, detectorInfo.rotation(i) * rot);
       }
     }
-    const double sampleX = this->coordinate(
+    const double sampleX = general::coordinate(
         sampleName, this->m_horizontalDirection, ws->getInstrument());
     if (sampleX != 0.) {
       // calculate horizontal rotation angle
@@ -428,32 +431,34 @@ void GravityCorrection::virtualInstrument() {
        *         |a/
        *         |/_______> x
        */
-      tanAngle = sampleX / this->coordinate(sampleName, this->m_beamDirection,
-                                            ws->getInstrument());
+      tanAngle =
+          sampleX / general::coordinate(sampleName, this->m_beamDirection,
+                                        ws->getInstrument());
       auto &componentInfo = ws->mutableComponentInfo();
       for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
         const auto compID2 = (*compit)->getComponentID();
         V3D position = (*compit)->getPos();
-        double coordHori =
-            this->coordinate((*compit)->getName(), this->m_horizontalDirection,
-                             ws->getInstrument());
-        this->setCoordinate(position, this->m_beamDirection,
-                            coordHori / tanAngle);
+        double coordHori = general::coordinate((*compit)->getName(),
+                                               this->m_horizontalDirection,
+                                               ws->getInstrument());
+        general::setCoordinate(position, this->m_beamDirection,
+                               coordHori / tanAngle);
         componentInfo.setPosition(componentInfo.indexOf(compID2), position);
       }
       auto &detectorInfo = ws->mutableDetectorInfo();
       for (size_t i = 0; i < detectorInfo.size(); ++i) {
         V3D position = detectorInfo.position(i);
-        this->setCoordinate(
+        general::setCoordinate(
             position, this->m_beamDirection,
-            this->coordinate(detectorInfo, i, this->m_horizontalDirection) /
+            general::coordinate(detectorInfo, i, this->m_horizontalDirection) /
                 tanAngle);
         detectorInfo.setPosition(i, position);
         // rotate detectors
         V3D hvector{0., 0., 0.};
         double hangle = atan(tanAngle);
-        this->setCoordinate(hvector, this->m_horizontalDirection, sin(hangle));
-        this->setCoordinate(hvector, this->m_beamDirection, cos(hangle));
+        general::setCoordinate(hvector, this->m_horizontalDirection,
+                               sin(hangle));
+        general::setCoordinate(hvector, this->m_beamDirection, cos(hangle));
         const Quat &rot = Quat(hangle, hvector);
         detectorInfo.setRotation(i, detectorInfo.rotation(i) * rot);
       }
@@ -471,52 +476,35 @@ void GravityCorrection::virtualInstrument() {
 
 /**
  * @brief GravityCorrection::spectrumNumber
- * @param angle :: a final angle for a specific detector in radians
- * @param spectrumInfo :: a reference to spectrum information
- * @param i :: spectrum number
+ * @param angle :: a final angle for a specific detector, unit radian
+ * @param theta :: the final angle of the current spectrum, unit radian
  * @return spectrum number closest to the given final angle
  */
 size_t GravityCorrection::spectrumNumber(const double angle,
-                                         const SpectrumInfo &spectrumInfo,
-                                         size_t i) {
-  // counts are dropping down -> only move counts up
-  size_t n = i;
-  const double signedCurrentAngle = spectrumInfo.signedTwoTheta(i) / 2.;
-  // a starting index for an effective search that exists
-  auto it = this->m_finalAngles.find(signedCurrentAngle);
-  // the upper bound to be added to the updated final angle:
+                                         const double theta) {
+  auto at = this->m_finalAngles.find(theta);
+  size_t n = at->second; // initial and current spectrum number
   /*                           |
-   *                          _|_
-   *                           |
+   *                          _|_ (1.5 * (*(++at)).first) - (0.5 * lval)
    *                 angle---->|
-   *                           |<---
+   *                           |
+   *                           |
    *                           |
    *                          _|_
    *                           |
    *                           |
-   *    signedCurrentAngle---->|<---it->second
-   * (lowest possible angle)   |
+   *             at->first---->|
+   *                           |
    *                          _|_
    *                           |
    */
-
-  ++it;
-  double tol = (.5 * ((*(++it)).first - (*it).first));
   // determine new final angle
-  while (this->m_smallerThan((*(++it)).first + tol, angle) &&
-         (it != this->m_finalAngles.end()))
-    n = it->second;
-  /*
-  // alternative code
-  for (; it != this->m_finalAngles.end(); ++it){
-     if (it->first < angle){
-         n = it->second;
-         continue;
-     }
-     else
-         break;
+  auto lval = at->first;
+  while (this->m_smallerThan((1.5 * (*(++at)).first) - (0.5 * lval), angle) &&
+         (at != this->m_finalAngles.cend())) {
+    lval = at->first;
+    n = at->second;
   }
-  */
   return n;
 }
 
@@ -537,16 +525,16 @@ double GravityCorrection::parabolaArcLength(const double arg,
 }
 
 void GravityCorrection::exec() {
-
   this->m_progress =
       make_unique<Progress>(this, 0.0, 1.0, 10 + this->m_ws->size());
-
   this->m_progress->report("Create virtual instrument ...");
   this->virtualInstrument();
   this->m_progress->report("Checking slits ...");
   this->slitCheck();
-  m_beam1 = this->coordinate(this->m_slit1Name, this->m_beamDirection);
-  m_beam2 = this->coordinate(this->m_slit2Name, this->m_beamDirection);
+  m_beam1 = general::coordinate(this->m_slit1Name, this->m_beamDirection,
+                                this->m_virtualInstrument);
+  m_beam2 = general::coordinate(this->m_slit2Name, this->m_beamDirection,
+                                this->m_virtualInstrument);
   const auto &spectrumInfo = this->m_ws->spectrumInfo();
   this->m_progress->report("Setup OutputWorkspace ...");
   MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
@@ -584,7 +572,6 @@ void GravityCorrection::exec() {
         "Map of initial final angles and its corresponding spectrum "
         "number does not exist.");
   this->m_progress->report("Perform gravity correction ...");
-  const double beamDiff = m_beam1 - m_beam2;
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (spectrumInfo.isMonitor(i)) {
       this->g_log.debug("Found monitor spectrum, will be ignored.");
@@ -602,30 +589,35 @@ void GravityCorrection::exec() {
     const auto e = this->m_ws->e(i);
     // correct tof angles, velocity, characteristic length
     size_t i_tofit{0};
-    const double tanAngle =
-        tan(this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.);
+    const auto theta = this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.;
     for (HistogramX::const_iterator tofit = tof.cbegin(); tofit < tof.cend();
          ++tofit) {
       // this velocity should take the real flight path into account
       if (*tofit == 0.) {
-        this->g_log.notice(
-            "Zero tof detected. Cannot divide by it, skip this bin.");
+        this->g_log.debug("Zero tof detected. Cannot divide by it, skip bin " +
+                          to_string(i));
         continue;
       }
 
       double v{((spectrumInfo.l1() + spectrumInfo.l2(i)) / *tofit) *
-               1.e6};                         // unit is m/s
-      double k = g / (2. * pow(v, 2.)); // unit is 1/m
-      double angle =
-          this->finalAngle(k, i, tanAngle, beamDiff); // unit is radians
+               1.e6};                            // unit: m/s
+      double k = g / (2. * pow(v, 2.));          // unit: 1/m
+      double angle = this->finalAngle(k, theta); // unit: radian
       if (cos(angle) == 0.) {
-        this->g_log.error("Cannot divide by zero for calculating new tof "
-                          "values. Skip this bin.");
+        this->g_log.debug("Cannot divide by zero for calculating new tof "
+                          "values, skip bin " +
+                          to_string(i));
         continue;
       }
 
       // get new spectrum number for new final angle
-      auto j = this->spectrumNumber(angle, spectrumInfo, i);
+      auto j = this->spectrumNumber(angle, theta);
+      if (j > m_finalAngles.size() - 2) {
+        this->g_log.debug("Count(s) not present in final workspace since not "
+                          "detected, skip bin " +
+                          to_string(i));
+        continue;
+      }
 
       // straight path from virtual sample (0, 0, 0) to updated detector
       // position:
@@ -637,19 +629,16 @@ void GravityCorrection::exec() {
         detPos =
             this->m_virtualInstrument->getDetector(*dets.cbegin())->getPos();
       else if (dets.size() > 1) {
-        g_log.information("Found grouped detectors ... skip for the moment");
+        g_log.debug("Found grouped detectors ... , skip bin " + to_string(i));
       } else
         continue;
 
-      double detZ = this->coordinate(detPos, m_beamDirection);
+      double detZ = general::coordinate(detPos, m_beamDirection);
       // possible trajectory from sample to detector, almost equals detZ
       double s2 = this->parabolaArcLength(2 * k * detZ) / (2 * k);
-
-      // this value should be close to one
-      // const double cOne = (detZ - offset) / (s * cos(angle));
+      // this value should be close to one and corrects the tof values
       const double cOne = detZ / (s2 * cos(angle));
       outWS->mutableX(j)[i_tofit] = cOne * *tofit; // mu sec
-
       // need to set the counts to spectrum according to finalAngle & *tofit
       outWS->mutableY(j)[i_tofit] += y[i_tofit];
       outWS->mutableE(j)[i_tofit] += e[i_tofit];

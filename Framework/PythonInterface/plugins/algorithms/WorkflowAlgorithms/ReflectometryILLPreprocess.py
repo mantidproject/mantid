@@ -122,7 +122,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         self._cleanup.cleanup(beamPosWS)
 
-        if ws.getRun().getLogData("instrument.name"):
+        if ws.getRun().getLogData("instrument.name").value == "figaro":
             ws = self._gravityCorrection(ws)
 
         ws = self._convertToWavelength(ws)
