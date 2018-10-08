@@ -11,8 +11,8 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
+#include <boost/python/list.hpp>
 #include <memory>
-#include <string>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
@@ -38,6 +38,10 @@ public:
   create(const std::string &name, const boost::python::object &defaultValue,
          const unsigned int direction);
 
+  static std::unique_ptr<Kernel::Property>
+  createTimeSeries(const std::string &name,
+                   const boost::python::list &defaultValue);
+
 private:
   /// Return a handler that maps the python type to a C++ type
   static const PropertyValueHandler &lookup(PyObject *const object);
@@ -48,4 +52,4 @@ private:
 } // namespace PythonInterface
 } // namespace Mantid
 
-#endif // MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_
+#endif // MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEFACTORY_H_

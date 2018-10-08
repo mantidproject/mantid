@@ -11,6 +11,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
 
@@ -41,14 +42,17 @@ namespace Strings {
  * For example, join a vector of strings with commas with:
  *  out = join(v.begin(), v.end(), ", ");
  *
+ * This is a simple default version that works in all cases but is potentially
+ * slow.
+ *
  * @param begin :: iterator at the start
  * @param end :: iterator at the end
  * @param separator :: string to append.
  * @return
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
-                           const std::string &separator) {
+DLLExport std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end,
+                                 const std::string &separator) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {

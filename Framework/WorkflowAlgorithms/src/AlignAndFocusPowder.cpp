@@ -16,7 +16,9 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/PropertyManager.h"
@@ -127,7 +129,11 @@ void AlignAndFocusPowder::init() {
                   "Width of events (in "
                   "microseconds) near the prompt "
                   "pulse to remove. 0 disables");
-  declareProperty("CompressTolerance", 0.01,
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+  declareProperty(make_unique<PropertyWithValue<double>>("CompressTolerance",
+                                                         1e-5, mustBePositive,
+                                                         Direction::Input),
                   "Compress events (in "
                   "microseconds) within this "
                   "tolerance. (Default 1e-5)");
@@ -399,14 +405,22 @@ void AlignAndFocusPowder::exec() {
   if (m_inputEW) {
     double tolerance = getProperty("CompressTolerance");
     if (tolerance > 0.) {
-      g_log.information() << "running CompressEvents(Tolerance=" << tolerance
-                          << ") started at "
+      double wallClockTolerance = getProperty("CompressWallClockTolerance");
+      g_log.information() << "running CompressEvents(Tolerance=" << tolerance;
+      if (!isEmpty(wallClockTolerance))
+        g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
+      g_log.information() << ") started at "
                           << Types::Core::DateAndTime::getCurrentTime() << "\n";
       API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
       compressAlg->setProperty("InputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
       compressAlg->setProperty("Tolerance", tolerance);
+      if (!isEmpty(wallClockTolerance)) {
+        compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
+        compressAlg->setPropertyValue("StartTime",
+                                      getPropertyValue("CompressStartTime"));
+      }
       compressAlg->executeAsChildAlg();
       m_outputEW = compressAlg->getProperty("OutputWorkspace");
       m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
@@ -537,7 +551,7 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   if (minwl > 0. || (!isEmpty(maxwl))) { // just crop the worksapce
-    // turn off the low res stuff
+                                         // turn off the low res stuff
     m_processLowResTOF = false;
 
     EventWorkspace_sptr ews =
@@ -697,14 +711,22 @@ void AlignAndFocusPowder::exec() {
   double tolerance = getProperty("CompressTolerance");
   m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   if ((m_outputEW) && (tolerance > 0.)) {
-    g_log.information() << "running CompressEvents(Tolerance=" << tolerance
-                        << ") started at "
+    double wallClockTolerance = getProperty("CompressWallClockTolerance");
+    g_log.information() << "running CompressEvents(Tolerance=" << tolerance;
+    if (!isEmpty(wallClockTolerance))
+      g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
+    g_log.information() << ") started at "
                         << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
     compressAlg->setProperty("InputWorkspace", m_outputEW);
     compressAlg->setProperty("OutputWorkspace", m_outputEW);
     compressAlg->setProperty("OutputWorkspace", m_outputEW);
     compressAlg->setProperty("Tolerance", tolerance);
+    if (!isEmpty(wallClockTolerance)) {
+      compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
+      compressAlg->setPropertyValue("StartTime",
+                                    getPropertyValue("CompressStartTime"));
+    }
     compressAlg->executeAsChildAlg();
     m_outputEW = compressAlg->getProperty("OutputWorkspace");
     m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);

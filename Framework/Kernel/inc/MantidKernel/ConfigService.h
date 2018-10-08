@@ -137,7 +137,7 @@ public:
   /// Sets a configuration property
   void setString(const std::string &key, const std::string &value);
   // Searches for a configuration property and returns its value
-  template <typename T> int getValue(const std::string &keyName, T &out);
+  template <typename T> boost::optional<T> getValue(const std::string &keyName);
   /// Return the local properties filename.
   std::string getLocalFilename() const;
   /// Return the user properties filename

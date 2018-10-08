@@ -12,18 +12,24 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventInserter.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
@@ -38,11 +44,6 @@
 #include <iomanip>
 #include <iterator>
 #include <map>
-
-#include "MantidDataObjects/MDBoxBase.h"
-#include "MantidDataObjects/MDEventInserter.h"
-#include "MantidMDAlgorithms/MDWSDescription.h"
-#include "MantidMDAlgorithms/MDWSTransform.h"
 
 //========================
 // helper functions
@@ -100,7 +101,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadDNSSCD)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadDNSSCD::LoadDNSSCD() : m_nDims(3) {}
+LoadDNSSCD::LoadDNSSCD() : m_columnSep("\t, ;"), m_nDims(4) {}
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -146,8 +147,8 @@ void LoadDNSSCD::init() {
   reasonableAngle->setLower(5.0);
   reasonableAngle->setUpper(175.0);
   // clang-format off
-  auto mustBe3D = boost::make_shared<ArrayLengthValidator<double> >(3);
-  auto mustBe2D = boost::make_shared<ArrayLengthValidator<double> >(2);
+      auto mustBe3D = boost::make_shared<ArrayLengthValidator<double> >(3);
+      auto mustBe2D = boost::make_shared<ArrayLengthValidator<double> >(2);
   // clang-format on
   std::vector<double> u0(3, 0), v0(3, 0);
   u0[0] = 1.;
@@ -208,6 +209,19 @@ void LoadDNSSCD::init() {
       Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
           "SaveHuberTo", "", Direction::Output, PropertyMode::Optional),
       "A workspace name to save a list of raw sample rotation angles.");
+
+  auto mustBeIntPositive = boost::make_shared<BoundedValidator<int>>();
+  mustBeIntPositive->setLower(0);
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "ElasticChannel", 0, mustBeIntPositive, Direction::Input),
+                  "Elastic channel number. Only for TOF data.");
+
+  auto mustBeNegative = boost::make_shared<BoundedValidator<double>>();
+  mustBeNegative->setUpper(0.0);
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("DeltaEmin", -10.0, mustBeNegative,
+                                             Direction::Input),
+      "Minimal energy transfer to consider. Should be <=0. Only for TOF data.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -307,6 +321,15 @@ void LoadDNSSCD::exec() {
     throw std::runtime_error(
         "No valid DNS files have been provided. Nothing to load.");
 
+  // merge data with different time channel number is not allowed
+  auto ch_n = m_data.front().nchannels;
+  bool same_channel_number =
+      std::all_of(m_data.begin(), m_data.end(),
+                  [ch_n](ExpData &d) { return (d.nchannels == ch_n); });
+  if (!same_channel_number)
+    throw std::runtime_error(
+        "Error: cannot merge data with different TOF channel numbers.");
+
   m_OutWS = MDEventFactory::CreateMDWorkspace(m_nDims, "MDEvent");
 
   m_OutWS->addExperimentInfo(expinfo);
@@ -337,6 +360,13 @@ void LoadDNSSCD::exec() {
     setProperty("SaveHuberTo", huber_table);
   }
   setProperty("OutputWorkspace", m_OutWS);
+}
+
+int LoadDNSSCD::splitIntoColumns(std::list<std::string> &columns,
+                                 std::string &str) {
+  boost::split(columns, str, boost::is_any_of(m_columnSep),
+               boost::token_compress_on);
+  return static_cast<int>(columns.size());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -379,15 +409,17 @@ void LoadDNSSCD::updateProperties(API::Run &run,
 void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
 
   // dimensions
-  std::vector<std::string> vec_ID(3);
+  std::vector<std::string> vec_ID(4);
   vec_ID[0] = "H";
   vec_ID[1] = "K";
   vec_ID[2] = "L";
+  vec_ID[3] = "DeltaE";
 
-  std::vector<std::string> dimensionNames(3);
+  std::vector<std::string> dimensionNames(4);
   dimensionNames[0] = "H";
   dimensionNames[1] = "K";
   dimensionNames[2] = "L";
+  dimensionNames[3] = "DeltaE";
 
   Mantid::Kernel::SpecialCoordinateSystem coordinateSystem =
       Mantid::Kernel::HKL;
@@ -402,10 +434,36 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   std::vector<double> u = getProperty("HKL1");
   std::vector<double> v = getProperty("HKL2");
 
+  // load empty DNS instrument to access L1 and L2
+  IAlgorithm_sptr loadAlg =
+      AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  loadAlg->setChild(true);
+  loadAlg->setLogging(false);
+  loadAlg->initialize();
+  loadAlg->setProperty("InstrumentName", "DNS");
+  loadAlg->setProperty("OutputWorkspace", "__DNS_Inst");
+  loadAlg->execute();
+  MatrixWorkspace_sptr instWS = loadAlg->getProperty("OutputWorkspace");
+  const auto &instrument = instWS->getInstrument();
+  const auto &samplePosition = instrument->getSample()->getPos();
+  const auto &sourcePosition = instrument->getSource()->getPos();
+  const auto beamVector = samplePosition - sourcePosition;
+  const auto l1 = beamVector.norm();
+  // calculate tof1
+  auto velocity = PhysicalConstants::h /
+                  (PhysicalConstants::NeutronMass * wavelength * 1e-10); // m/s
+  auto tof1 = 1e+06 * l1 / velocity; // microseconds
+  g_log.debug() << "TOF1 = " << tof1 << std::endl;
+  // calculate incident energy
+  auto Ei = 0.5 * PhysicalConstants::NeutronMass * velocity * velocity /
+            PhysicalConstants::meV;
+  g_log.debug() << "Ei = " << Ei << std::endl;
+
+  double dEmin = getProperty("DeltaEmin");
   // estimate extents
   double qmax = 4.0 * M_PI / wavelength;
-  std::vector<double> extentMins = {-qmax * a, -qmax * b, -qmax * c};
-  std::vector<double> extentMaxs = {qmax * a, qmax * b, qmax * c};
+  std::vector<double> extentMins = {-qmax * a, -qmax * b, -qmax * c, dEmin};
+  std::vector<double> extentMaxs = {qmax * a, qmax * b, qmax * c, Ei};
 
   // Get MDFrame of HKL type with RLU
   auto unitFactory = makeMDUnitFactoryChain();
@@ -452,35 +510,54 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
   ub_inv.Invert();
 
   // Creates a new instance of the MDEventInserter to output workspace
-  MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(m_OutWS);
-  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
+  MDEventWorkspace<MDEvent<4>, 4>::sptr mdws_mdevt_4 =
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(m_OutWS);
+  MDEventInserter<MDEventWorkspace<MDEvent<4>, 4>::sptr> inserter(mdws_mdevt_4);
 
   // create a normalization workspace
   IMDEventWorkspace_sptr normWS = m_OutWS->clone();
 
   // Creates a new instance of the MDEventInserter to norm workspace
-  MDEventWorkspace<MDEvent<3>, 3>::sptr normws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(normWS);
-  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> norm_inserter(
-      normws_mdevt_3);
+  MDEventWorkspace<MDEvent<4>, 4>::sptr normws_mdevt_4 =
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<4>, 4>>(normWS);
+  MDEventInserter<MDEventWorkspace<MDEvent<4>, 4>::sptr> norm_inserter(
+      normws_mdevt_4);
 
   // scattering angle limits
   std::vector<double> tth_limits = getProperty("TwoThetaLimits");
   double theta_min = tth_limits[0] * deg2rad / 2.0;
   double theta_max = tth_limits[1] * deg2rad / 2.0;
 
+  // get elastic channel from the user input
+  int echannel_user = getProperty("ElasticChannel");
+
   // Go though each element of m_data to convert to MDEvent
   for (ExpData ds : m_data) {
     uint16_t runindex = 0;
     signal_t norm_signal(ds.norm);
     signal_t norm_error = std::sqrt(m_normfactor * norm_signal);
-    double k = 2.0 / ds.wavelength;
+    double ki = 2.0 * M_PI / ds.wavelength;
     for (size_t i = 0; i < ds.detID.size(); i++) {
-      signal_t signal(ds.signal[i]);
-      signal_t error = std::sqrt(signal);
+      const auto &detector = instWS->getDetector(i);
+      const auto &detectorPosition = detector->getPos();
+      const auto detectorVector = detectorPosition - samplePosition;
+      const auto l2 = detectorVector.norm();
+      auto tof2_elastic = 1e+06 * l2 / velocity;
+      // geometric elastic channel
+      int echannel_geom =
+          static_cast<int>(std::ceil(tof2_elastic / ds.chwidth));
+      // rotate the signal array to get elastic peak at right position
+      int ch_diff = echannel_geom - echannel_user;
+      if ((echannel_user > 0) && (ch_diff < 0)) {
+        std::rotate(ds.signal[i].begin(), ds.signal[i].begin() - ch_diff,
+                    ds.signal[i].end());
+      } else if ((echannel_user > 0) && (ch_diff > 0)) {
+        std::rotate(ds.signal[i].rbegin(), ds.signal[i].rbegin() + ch_diff,
+                    ds.signal[i].rend());
+      }
       detid_t detid(ds.detID[i]);
       double theta = 0.5 * (ds.detID[i] * 5.0 - ds.deterota) * deg2rad;
+      int64_t nchannels = static_cast<int64_t>(ds.signal[i].size());
       if ((theta > theta_min) && (theta < theta_max)) {
         PARALLEL_FOR_IF(Kernel::threadSafe(*m_OutWS, *normWS))
         for (int64_t channel = 0; channel < nchannels; channel++) {
@@ -527,115 +604,125 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
                   static_cast<uint16_t>(runindex), detid, millerindex.data());
             }
           }
+          PARALLEL_END_INTERUPT_REGION
         }
-        setProperty("NormalizationWorkspace", normWS);
+        PARALLEL_CHECK_INTERUPT_REGION
       }
+    }
+  }
+  setProperty("NormalizationWorkspace", normWS);
+}
 
-      void LoadDNSSCD::read_data(
-          const std::string fname,
-          std::map<std::string, std::string> &str_metadata,
-          std::map<std::string, double> &num_metadata) {
-        std::ifstream file(fname);
-        std::string line;
-        std::string::size_type n;
-        std::string s;
-        boost::regex reg1("^#\\s+(\\w+):(.*)");
-        boost::regex reg2(
-            "^#\\s+((\\w+\\s)+)\\s+(-?\\d+(,\\d+)*(\\.\\d+(e\\d+)?)?)");
-        boost::smatch match;
-        getline(file, line);
-        n = line.find("DNS");
-        if (n == std::string::npos) {
-          throw std::invalid_argument("Not a DNS file");
+void LoadDNSSCD::read_data(const std::string fname,
+                           std::map<std::string, std::string> &str_metadata,
+                           std::map<std::string, double> &num_metadata) {
+  std::ifstream file(fname);
+  std::string line;
+  std::string::size_type n;
+  std::string s;
+  boost::regex reg1("^#\\s+(\\w+):(.*)");
+  boost::regex reg2("^#\\s+((\\w+\\s)+)\\s+(-?\\d+(,\\d+)*(\\.\\d+(e\\d+)?)?)");
+  boost::smatch match;
+  getline(file, line);
+  n = line.find("DNS");
+  if (n == std::string::npos) {
+    throw std::invalid_argument("Not a DNS file");
+  }
+  // get file save time
+  Poco::File pfile(fname);
+  Poco::DateTime lastModified = pfile.getLastModified();
+  std::string wtime(
+      Poco::DateTimeFormatter::format(lastModified, "%Y-%m-%dT%H:%M:%S"));
+  str_metadata.insert(std::make_pair("file_save_time", wtime));
+
+  // get file basename
+  Poco::Path p(fname);
+  str_metadata.insert(std::make_pair("run_number", p.getBaseName()));
+
+  // parse metadata
+  while (getline(file, line)) {
+    n = line.find("Lambda");
+    if (n != std::string::npos) {
+      boost::regex re("[\\s]+");
+      s = line.substr(5);
+      boost::sregex_token_iterator it(s.begin(), s.end(), re, -1);
+      boost::sregex_token_iterator reg_end;
+      getline(file, line);
+      std::string s2 = line.substr(2);
+      boost::sregex_token_iterator it2(s2.begin(), s2.end(), re, -1);
+      for (; (it != reg_end) && (it2 != reg_end); ++it) {
+        std::string token(it->str());
+        if (token.find_first_not_of(' ') == std::string::npos) {
+          ++it2;
+          continue;
         }
-        // get file save time
-        Poco::File pfile(fname);
-        Poco::DateTime lastModified = pfile.getLastModified();
-        std::string wtime(
-            Poco::DateTimeFormatter::format(lastModified, "%Y-%m-%dT%H:%M:%S"));
-        str_metadata.insert(std::make_pair("file_save_time", wtime));
-
-        // get file basename
-        Poco::Path p(fname);
-        str_metadata.insert(std::make_pair("run_number", p.getBaseName()));
-
-        // parse metadata
-        while (getline(file, line)) {
-          n = line.find("Lambda");
-          if (n != std::string::npos) {
-            boost::regex re("[\\s]+");
-            s = line.substr(5);
-            boost::sregex_token_iterator it(s.begin(), s.end(), re, -1);
-            boost::sregex_token_iterator reg_end;
-            getline(file, line);
-            std::string s2 = line.substr(2);
-            boost::sregex_token_iterator it2(s2.begin(), s2.end(), re, -1);
-            for (; (it != reg_end) && (it2 != reg_end); ++it) {
-              std::string token(it->str());
-              if (token.find_first_not_of(' ') == std::string::npos) {
-                ++it2;
-                continue;
-              }
-              if (token == "Mono") {
-                str_metadata.insert(std::make_pair(token, it2->str()));
-              } else {
-                num_metadata.insert(
-                    std::make_pair(token, std::stod(it2->str())));
-              }
-              ++it2;
-            }
-          }
-          // parse start and stop time
-          n = line.find("start");
-          if (n != std::string::npos) {
-            str_metadata.insert(std::make_pair("start_time", parseTime(line)));
-            getline(file, line);
-            str_metadata.insert(std::make_pair("stop_time", parseTime(line)));
-            getline(file, line);
-          }
-          if (boost::regex_search(line, match, reg1) && match.size() > 2) {
-            str_metadata.insert(std::make_pair(match.str(1), match.str(2)));
-          }
-          if (boost::regex_search(line, match, reg2) && match.size() > 2) {
-            s = match.str(1);
-            s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(),
-                    s.end());
-            num_metadata.insert(std::make_pair(s, std::stod(match.str(3))));
-          }
-          n = line.find("DATA");
-          if (n != std::string::npos) {
-            break;
-          }
+        if (token == "Mono") {
+          str_metadata.insert(std::make_pair(token, it2->str()));
+        } else {
+          num_metadata.insert(std::make_pair(token, std::stod(it2->str())));
         }
-
-        // the algorithm does not work with TOF data for the moment
-        std::map<std::string, double>::const_iterator m =
-            num_metadata.lower_bound("TOF");
-        g_log.debug() << "TOF Channels number: " << m->second << std::endl;
-        if (m->second != 1)
-          throw std::runtime_error("Algorithm does not support TOF data. TOF "
-                                   "Channels number must be 1.");
-
-        ExpData ds;
-        ds.deterota = num_metadata["DeteRota"];
-        ds.huber = num_metadata["Huber"];
-        ds.wavelength = 10.0 * num_metadata["Lambda[nm]"];
-        ds.norm = num_metadata[m_normtype];
-
-        // read data array
-        getline(file, line);
-        int d;
-        double x;
-        while (file) {
-          file >> d >> x;
-          ds.detID.push_back(d);
-          ds.signal.push_back(x);
-        }
-        // DNS PA detector bank has only 24 detectors
-        ds.detID.resize(24);
-        ds.signal.resize(24);
-        m_data.push_back(ds);
+        ++it2;
       }
+    }
+    // parse start and stop time
+    n = line.find("start");
+    if (n != std::string::npos) {
+      str_metadata.insert(std::make_pair("start_time", parseTime(line)));
+      getline(file, line);
+      str_metadata.insert(std::make_pair("stop_time", parseTime(line)));
+      getline(file, line);
+    }
+    if (boost::regex_search(line, match, reg1) && match.size() > 2) {
+      str_metadata.insert(std::make_pair(match.str(1), match.str(2)));
+    }
+    if (boost::regex_search(line, match, reg2) && match.size() > 2) {
+      s = match.str(1);
+      s.erase(std::find_if_not(s.rbegin(), s.rend(), ::isspace).base(),
+              s.end());
+      num_metadata.insert(std::make_pair(s, std::stod(match.str(3))));
+    }
+    n = line.find("DATA");
+    if (n != std::string::npos) {
+      break;
+    }
+  }
 
-    } // namespace MDAlgorithms
-  }   // namespace Mantid
+  std::map<std::string, double>::const_iterator m =
+      num_metadata.lower_bound("TOF");
+  g_log.debug() << "TOF Channels number: " << m->second << std::endl;
+  std::map<std::string, double>::const_iterator w =
+      num_metadata.lower_bound("Time");
+  g_log.debug() << "Channel width: " << w->second << std::endl;
+
+  ExpData ds;
+  ds.deterota = num_metadata["DeteRota"];
+  ds.huber = num_metadata["Huber"];
+  ds.wavelength = 10.0 * num_metadata["Lambda[nm]"];
+  ds.norm = num_metadata[m_normtype];
+  ds.chwidth = w->second;
+  ds.nchannels = static_cast<size_t>(std::ceil(m->second));
+
+  // read data array
+  getline(file, line);
+
+  std::list<std::string> columns;
+  while (getline(file, line)) {
+    boost::trim(line);
+    const int cols = splitIntoColumns(columns, line);
+    if (cols > 0) {
+      ds.detID.push_back(std::stoi(columns.front()));
+      columns.pop_front();
+      std::vector<double> signal;
+      std::transform(columns.begin(), columns.end(), std::back_inserter(signal),
+                     [](const std::string &s) { return std::stod(s); });
+      ds.signal.push_back(signal);
+    }
+  }
+  // DNS PA detector bank has only 24 detectors
+  ds.detID.resize(24);
+  ds.signal.resize(24);
+  m_data.push_back(ds);
+}
+
+} // namespace MDAlgorithms
+} // namespace Mantid
