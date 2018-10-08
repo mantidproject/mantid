@@ -79,8 +79,6 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  typedef uint64_t separator_t;
-
   enum class BufferType {
     DATA = 0,
     COMMAND = 1
@@ -166,7 +164,7 @@ private:
 
   long populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
 
-  std::pair<long, long> parse_File(FileByteStream &file);
+  std::pair<long, long> parse_File(FileByteStream &file, const std::string fileName);
   std::vector<uint8_t> parse_Header(FileByteStream &file);
 
   std::vector<std::vector<uint8_t>> split_File(FileByteStream &file, const uint maxChunckCount);

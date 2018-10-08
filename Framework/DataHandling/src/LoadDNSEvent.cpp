@@ -65,13 +65,16 @@ std::string n2hexstr(T const &w, size_t sizeofw = sizeof(T), bool useSpacers = f
 
 }
 
+typedef std::array<uint8_t, 8> separator_t;
+static constexpr separator_t header_sep    {0x00, 0x00, 0x55, 0x55, 0xAA, 0xAA, 0xFF, 0xFF};
+static constexpr separator_t block_sep =   {0x00, 0x00, 0xFF, 0xFF, 0x55, 0x55, 0xAA, 0xAA}; // 0xAAAA5555FFFF0000; //
+static constexpr separator_t closing_sig = {0xFF, 0xFF, 0xAA, 0xAA, 0x55, 0x55, 0x00, 0x00}; // 0x00005555AAAAFFFF; //
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace Mantid {
-
 namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadDNSEvent)
@@ -111,6 +114,8 @@ void LoadDNSEvent::exec() {
 
   runLoadInstrument(INSTRUMENT_NAME, outputWS);
 
+  // loadProperties:
+  const std::string fileName = getPropertyValue("InputFile");
   chopperChannel = static_cast<uint>(getProperty("ChopperChannel"));
   monitorChannel = static_cast<uint>(getProperty("MonitorChannel"));
   const auto chopperChannels = outputWS->instrumentParameters().getType<uint>("chopper", "channel");
@@ -122,13 +127,13 @@ void LoadDNSEvent::exec() {
 
   _eventAccumulator.neutronEvents.resize(960*128+24);
 
-  try {
-    FileByteStream file(static_cast<std::string>(getProperty("InputFile")), endian::big);
+  //try {
+    FileByteStream file(static_cast<std::string>(fileName), endian::big);
     //file.exceptions(std::ifstream::eofbit);
     std::pair<long, long> elapsedTimeCombineSplitting;
     long elapsedTimeSorting    = 0;
     //long elapsedTimeTotal = measureMicroSecs::execution([&](){
-      auto elapsedTimeParsing    = MEASURE_MICRO_SECS({ elapsedTimeCombineSplitting = parse_File(file); });
+      auto elapsedTimeParsing    = MEASURE_MICRO_SECS({ elapsedTimeCombineSplitting = parse_File(file, fileName); });
       auto elapsedTimeProcessing = MEASURE_MICRO_SECS({ elapsedTimeSorting = populate_EventWorkspace(outputWS); });
     //});
 
@@ -142,9 +147,9 @@ void LoadDNSEvent::exec() {
         << std::endl;
 
 
-  } catch (std::runtime_error e) {
-    g_log.error(e.what());
-  }
+  //} catch (std::runtime_error e) {
+  //  g_log.error(e.what());
+  //}
   //        g_log.notice()
   //            << std::setprecision(15) << std::fixed << "T"
   //            << ", " << double(event.timestamp) / 10000.0
@@ -283,31 +288,35 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
 
   std::array<uint8_t, header_sep.size()> current_window;
   file.readRaw(current_window);
+  try {
+    int j = 0;
+    while (!file.eof() && (j++ < 1024*8)) {
+      if (current_window == header_sep) {
+        return header;
+      } else {
+        auto iter = skipTable.find(*current_window.rbegin());
+        size_t skip_length = (iter == skipTable.end()) ? header_sep.size() : iter->second;
 
-  int j = 0;
-  while (!file.eof() && (j++ < 1024*8)) {
-    if (current_window == header_sep) {
-      return header;
-    } else {
-      auto iter = skipTable.find(*current_window.rbegin());
-      size_t skip_length = (iter == skipTable.end()) ? header_sep.size() : iter->second;
+        const auto orig_header_size = header.size();
+        header.resize(header.size() + skip_length);
+        const auto win_data = current_window.data();
+        std::copy(win_data, win_data + skip_length, header.data() + orig_header_size);
 
-      const auto orig_header_size = header.size();
-      header.resize(header.size() + skip_length);
-      const auto win_data = current_window.data();
-      std::copy(win_data, win_data + skip_length, header.data() + orig_header_size);
-
-      const std::array<uint8_t, header_sep.size()> orig_window = current_window;
-      file.readRaw(current_window, skip_length);
-      std::copy(orig_window.data() + skip_length, orig_window.data() + header_sep.size(), win_data);
+        const std::array<uint8_t, header_sep.size()> orig_window = current_window;
+        file.readRaw(current_window, skip_length);
+        std::copy(orig_window.data() + skip_length, orig_window.data() + header_sep.size(), win_data);
+      }
     }
+
+  } catch (std::ifstream::failure e) {
+    return header;
   }
+
   //throw std::runtime_error(std::string("STOP!!!! please. (ugh!)"));
   return header;
 }
 
 std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file, const uint maxChunckCount) {
-  static constexpr std::array<uint8_t, 8> block_sep = {0x00, 0x00, 0xFF, 0xFF, 0x55, 0x55, 0xAA, 0xAA}; // 0xAAAA5555FFFF0000; //
   static const auto skipTable = buildSkipTable2(block_sep);
 
   const uint64_t minChunckSize = MAX_BUFFER_BYTES_SIZE;
@@ -359,17 +368,41 @@ std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file,
   return result;
 }
 
-std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file) {
+namespace {
+
+template<typename V1, typename V2>
+bool startsWith(const V1 &sequence, const V2 &subSequence) {
+  return std::equal(std::begin(subSequence), std::end(subSequence), std::begin(sequence));
+}
+
+template<typename V1, typename V2>
+bool endsWith(const V1 &sequence, const V2 &subSequence) {
+  auto dist = std::distance(std::begin(subSequence), std::end(subSequence));
+  return std::equal(begin(subSequence), end(subSequence), end(sequence) - dist);
+}
+
+}
+
+std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file, const std::string fileName) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
 
-  const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 1;
+  for (auto v : header) {
+    g_log.debug() << v;
+  }
+  g_log.debug() << std::endl;
 
+  // check it is actually a mesytec psd listmode file:
+  if (!startsWith(header, std::string("mesytec psd listmode data"))) {
+    g_log.error() << "This seems not to be a mesytec psd listmode file: " << fileName;
+    throw Exception::FileError("This seems not to be a mesytec psd listmode file: ", fileName);
+  }
+
+  const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 1;
   // Split File:
   std::vector<std::vector<uint8_t>> filechuncks;
   auto elapsedTimeSplitting = MEASURE_MICRO_SECS({ filechuncks = split_File(file, threadCount);});
   g_log.notice() << "filechuncks count = " << filechuncks.size() << std::endl;
-
 
    std::vector<EventAccumulator> eventAccumulators;
   eventAccumulators.resize(filechuncks.size());
@@ -441,8 +474,7 @@ void LoadDNSEvent::parse_Block(VectorByteStream &file, EventAccumulator &eventAc
 }
 
 void LoadDNSEvent::parse_BlockSeparator(VectorByteStream &file) {
-  const separator_t block_sep = (0x0000FFFF5555AAAA); // 0xAAAA5555FFFF0000; //
-  auto separator = file.read(separator_t());
+  auto separator = file.readRaw(separator_t());
   if (separator != block_sep) {
     throw std::runtime_error(std::string("File Integrety LOST. (ugh!) 0x") + n2hexstr(separator)
                              + std::string("expected 0x") + n2hexstr(block_sep));
@@ -481,8 +513,7 @@ LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(VectorByteStream
 }
 
 void LoadDNSEvent::parse_EndSignature(FileByteStream &file) {
-  const separator_t closing_sig = (0xFFFFAAAA55550000); // 0x00005555AAAAFFFF; //
-  auto separator = file.read(separator_t());
+  auto separator = file.readRaw(separator_t());
   if (separator != closing_sig) {
     throw std::runtime_error(std::string("File Integrety LOST. (ugh!) 0x") + n2hexstr(separator)
                              + std::string("expected 0x") + n2hexstr(closing_sig));

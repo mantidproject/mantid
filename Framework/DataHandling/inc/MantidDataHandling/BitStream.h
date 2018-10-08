@@ -142,6 +142,12 @@ private:
     return readRaw<sizeof(T)>(result);
   }
 
+  template<typename T>
+  inline T readRaw (T&& result) {
+    readRaw<sizeof(result)>(result);
+    return result;
+  }
+
   template<std::size_t bytecount, typename T>
   inline FileByteStream& read (T& result) {
     readRaw<bytecount>(result);
@@ -247,6 +253,12 @@ private:
   template<typename T>
   inline VectorByteStream& readRaw (T& result) {
     return readRaw<sizeof(T)>(result);
+  }
+
+  template<typename T>
+  inline T readRaw (T&& result) {
+    readRaw<sizeof(result)>(result);
+    return result;
   }
 
   template<std::size_t bytecount, typename T>
