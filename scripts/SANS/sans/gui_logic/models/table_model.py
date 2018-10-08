@@ -184,6 +184,9 @@ class TableModel(object):
                 return row
         return None
 
+    def wait_for_done(self):
+        self.work_handler.wait_for_done()
+
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
