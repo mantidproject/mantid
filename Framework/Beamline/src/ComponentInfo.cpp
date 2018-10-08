@@ -460,13 +460,12 @@ bool ComponentInfo::hasDetectorInfo() const {
 void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
   if (detectorInfo &&
       detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
-    // std::cout << detectorInfo->size() << " " << m_assemblySortedDetectorIndices->size() << std::endl;
     throw std::invalid_argument("ComponentInfo must have detector indices "
                                 "input of same size as size of DetectorInfo");
   }
   if (detectorInfo && (m_scanIntervals != detectorInfo->scanIntervals())) {
-    // std::cout << "here is the info: "<< m_scanIntervals[0].first << "," << m_scanIntervals[0].second << " | " << (detectorInfo->scanIntervals())[0].first << "," << (detectorInfo->scanIntervals())[0].second << std::endl;
-    throw std::invalid_argument("ComponentInfo does not have the same scanIntervals as DetectorInfo");
+    throw std::invalid_argument(
+        "ComponentInfo does not have the same scanIntervals as DetectorInfo");
   }
   m_detectorInfo = detectorInfo;
 }
@@ -571,9 +570,7 @@ ComponentType ComponentInfo::componentType(const size_t componentIndex) const {
  * @param index : Component Index
  * @return Number of scans for component index
  */
-size_t ComponentInfo::scanCount() const {
-  return m_scanCounts;
-}
+size_t ComponentInfo::scanCount() const { return m_scanCounts; }
 
 size_t ComponentInfo::scanSize() const {
   const auto detectorScanSize = m_detectorInfo ? m_detectorInfo->scanSize() : 0;
@@ -583,13 +580,12 @@ size_t ComponentInfo::scanSize() const {
 }
 
 bool ComponentInfo::isScanning() const {
-  if (m_detectorInfo && m_detectorInfo->isScanning()) {
+  if (m_detectorInfo && m_detectorInfo->isScanning())
     return true;
-  } else if (!m_positions || !m_componentRanges) {
+  else if (!m_positions || !m_componentRanges)
     return false;
-  } else {
+  else
     return nonDetectorSize() != m_positions->size();
-  }
 }
 
 /// Throws if this has time-dependent data.

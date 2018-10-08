@@ -233,29 +233,20 @@ void CreateSampleWorkspace::exec() {
       bankDistanceFromSample, sourceSampleDistance);
 
   int numBins = static_cast<int>((xMax - xMin) / binWidth);
-  std::cout << "AND NOW: here 0" << std::endl;
-  
 
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
     ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin,
                               binWidth, inst, functionString, isRandom);
   } else if (numScanPoints > 1) {
-    std::cout << "Calling createScanningWorkspace" << std::endl;
     ws = createScanningWorkspace(numBins, xMin, binWidth, inst, functionString,
                                  isRandom, numScanPoints);
-    std::cout << "Finished createScanningWorkspace" << std::endl;
-    
-
   } else {
     ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin,
                                   binWidth, inst, functionString, isRandom);
   }
-  std::cout << "AND NOW: here 1" << std::endl;
   // add chopper
   this->addChopperParameters(ws);
-  std::cout << "AND NOW: here 2" << std::endl;
-  
 
   // Set the Unit of the X Axis
   try {
@@ -267,8 +258,6 @@ void CreateSampleWorkspace::exec() {
         boost::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel(xUnit, xUnit);
   }
-  std::cout << "AND NOW: here 3" << std::endl;
-  
 
   ws->setYUnit("Counts");
   ws->setTitle("Test Workspace");
@@ -281,8 +270,6 @@ void CreateSampleWorkspace::exec() {
       "run_start", run_start.toISO8601String()));
   theRun.addLogData(
       new PropertyWithValue<std::string>("run_end", run_end.toISO8601String()));
-  std::cout << "AND NOW: here 4" << std::endl;
-  
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", ws);
@@ -365,7 +352,6 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
   builder.setHistogram(Histogram(x, y));
 
   return builder.buildWorkspace();
-
 }
 
 /** Create event workspace

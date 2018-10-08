@@ -3,11 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "ComponentInfoTest.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/make_unique.h"
-#include "ComponentInfoTest.h"
-
 
 using namespace Mantid;
 using Beamline::DetectorInfo;
@@ -297,12 +296,12 @@ public:
   void test_setScanInterval_failures() {
     DetectorInfo info(PosVec(1), RotVec(1));
     TS_ASSERT_THROWS_EQUALS(
-        info.setScanInterval({1, 1}), const std::runtime_error &err,
-        std::string(err.what()),
+        info.setScanInterval({1, 1}), const std::runtime_error &e,
+        std::string(e.what()),
         "DetectorInfo: cannot set scan interval with start >= end");
     TS_ASSERT_THROWS_EQUALS(
-        info.setScanInterval({2, 1}), const std::runtime_error &err,
-        std::string(err.what()),
+        info.setScanInterval({2, 1}), const std::runtime_error &e,
+        std::string(e.what()),
         "DetectorInfo: cannot set scan interval with start >= end");
   }
 
@@ -310,11 +309,12 @@ public:
     DetectorInfo a(PosVec(1), RotVec(1));
     a.setScanInterval({0, 1});
     Mantid::Beamline::ComponentInfo b;
-    TS_ASSERT_THROWS_EQUALS(b.setDetectorInfo(&a);, const std::invalid_argument &err,
-                            std::string(err.what()),
-                            "ComponentInfo must have detector indices input of same size as size of DetectorInfo");
+    TS_ASSERT_THROWS_EQUALS(b.setDetectorInfo(&a);
+                            , const std::invalid_argument &e,
+                            std::string(e.what()),
+                            "ComponentInfo must have detector indices input of "
+                            "same size as size of DetectorInfo");
   }
-
 };
 
 #endif /* MANTID_BEAMLINE_DETECTORINFOTEST_H_ */

@@ -63,7 +63,8 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   // those just are internally derived from m_indices.
   if (m_scanIntervals != other.m_scanIntervals)
     return false;
-  if (m_scanCounts && other.m_scanCounts && !(m_scanCounts == other.m_scanCounts))
+  if (m_scanCounts && other.m_scanCounts &&
+      !(m_scanCounts == other.m_scanCounts))
     return false;
 
   // Positions: Absolute difference matter, so comparison is not relative.
@@ -153,7 +154,6 @@ void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
 }
 
 /// Returns the scan count of the detector with given detector index.
-// size_t DetectorInfo::scanCount(const size_t index) const {
 size_t DetectorInfo::scanCount() const {
   if (!m_scanCounts)
     return 1;
@@ -165,8 +165,9 @@ size_t DetectorInfo::scanCount() const {
  *
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
-const std::vector<std::pair<int64_t, int64_t>> &DetectorInfo::scanIntervals() const {
-    return m_scanIntervals;
+const std::vector<std::pair<int64_t, int64_t>> &
+DetectorInfo::scanIntervals() const {
+  return m_scanIntervals;
 }
 
 namespace {
@@ -176,7 +177,6 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
         "DetectorInfo: cannot set scan interval with start >= end");
 }
 } // namespace
-
 
 /** Set the scan interval for all detectors.
  *
@@ -209,7 +209,7 @@ void failMerge(const std::string &what) {
 void DetectorInfo::merge(const DetectorInfo &other) {
   const auto &merge = buildMergeSyncScanIndices(other);
   for (size_t timeIndex = 0; timeIndex < other.m_scanIntervals.size();
-        ++timeIndex) {
+       ++timeIndex) {
     if (!merge[timeIndex])
       continue;
     auto &isMasked = m_isMasked.access();
@@ -222,9 +222,9 @@ void DetectorInfo::merge(const DetectorInfo &other) {
     isMasked.insert(isMasked.end(), other.m_isMasked->begin() + indexStart,
                     other.m_isMasked->begin() + indexEnd);
     positions.insert(positions.end(), other.m_positions->begin() + indexStart,
-                      other.m_positions->begin() + indexEnd);
+                     other.m_positions->begin() + indexEnd);
     rotations.insert(rotations.end(), other.m_rotations->begin() + indexStart,
-                      other.m_rotations->begin() + indexEnd);
+                     other.m_rotations->begin() + indexEnd);
   }
   return;
 }

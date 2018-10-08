@@ -119,9 +119,7 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
   MatrixWorkspace_sptr newOutWS = DataObjects::create<MatrixWorkspace>(
       *outWS, numOutputSpectra, outWS->histogram(0).binEdges());
 
-  // newOutWS->mutableDetectorInfo().merge(addeeWS->detectorInfo());
   newOutWS->mutableComponentInfo().merge(addeeWS->componentInfo());
-
 
   if (newOutWS->detectorInfo().scanSize() == outWS->detectorInfo().scanSize()) {
     // In this case the detector info objects were identical. We just add the
@@ -143,9 +141,8 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
   auto outSpecDefs = *(outWS->indexInfo().spectrumDefinitions());
   const auto &addeeSpecDefs = *(addeeWS->indexInfo().spectrumDefinitions());
 
-  const auto newAddeeSpecDefs =
-      buildScanIntervals(addeeSpecDefs, addeeWS->detectorInfo(),
-                         newOutWS->detectorInfo());
+  const auto newAddeeSpecDefs = buildScanIntervals(
+      addeeSpecDefs, addeeWS->detectorInfo(), newOutWS->detectorInfo());
 
   outSpecDefs.insert(outSpecDefs.end(), newAddeeSpecDefs.begin(),
                      newAddeeSpecDefs.end());
@@ -723,7 +720,8 @@ std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
   for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
     for (auto &index : addeeSpecDefs[i]) {
       SpectrumDefinition newSpecDef;
-      for (size_t time_index = 0; time_index < newOutDetInfo.scanCount(); time_index++) {
+      for (size_t time_index = 0; time_index < newOutDetInfo.scanCount();
+           time_index++) {
         if (addeeDetInfo.scanIntervals()[index.second] ==
             newOutDetInfo.scanIntervals()[time_index]) {
           newSpecDef.add(index.first, time_index);

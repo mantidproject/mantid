@@ -4,7 +4,6 @@
 #include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/DateAndTime.h"
 #include <boost/shared_ptr.hpp>
 #include <unordered_map>
 #include <vector>

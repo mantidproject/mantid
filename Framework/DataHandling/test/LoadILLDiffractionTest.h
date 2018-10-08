@@ -318,14 +318,11 @@ public:
     const auto &secondRange = detInfo.scanIntervals()[1];
     const auto &secondFromEndRange =
         detInfo.scanIntervals()[detInfo.scanCount() - 2];
-    const auto &endRange =
-        detInfo.scanIntervals()[detInfo.scanCount() - 1];
+    const auto &endRange = detInfo.scanIntervals()[detInfo.scanCount() - 1];
 
     TS_ASSERT_EQUALS(startRange.first.toISO8601String(), EXPECTED_START_TIME)
-    TS_ASSERT_EQUALS(startRange.second.toISO8601String(),
-                     EXPECTED_SECOND_TIME)
-    TS_ASSERT_EQUALS(secondRange.first.toISO8601String(),
-                     EXPECTED_SECOND_TIME)
+    TS_ASSERT_EQUALS(startRange.second.toISO8601String(), EXPECTED_SECOND_TIME)
+    TS_ASSERT_EQUALS(secondRange.first.toISO8601String(), EXPECTED_SECOND_TIME)
     TS_ASSERT_EQUALS(secondFromEndRange.second.toISO8601String(),
                      EXPECTED_SECOND_FROM_END_TIME)
     TS_ASSERT_EQUALS(endRange.first.toISO8601String(),

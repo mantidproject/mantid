@@ -140,9 +140,8 @@ inline size_t DetectorInfo::size() const {
 
 /// Returns true if the beamline has scanning detectors.
 inline bool DetectorInfo::isScanning() const {
-  if (!m_positions) {
+  if (!m_positions)
     return false;
-  }
   return size() != m_positions->size();
 }
 

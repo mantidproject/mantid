@@ -317,17 +317,20 @@ const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
 }
 
 /// Returns the scan count of the detector with given detector index.
-size_t DetectorInfo::scanCount() const {
-  return m_detectorInfo->scanCount();
-}
+size_t DetectorInfo::scanCount() const { return m_detectorInfo->scanCount(); }
 
 /** Returns the scan interval of the detector with given index.
  *
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
-const std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> &DetectorInfo::scanIntervals() const {
-  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> *intervals_vector = new std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> ((m_detectorInfo->scanIntervals()).size());
-  for (auto it = m_detectorInfo->scanIntervals().begin(); it != m_detectorInfo->scanIntervals().end(); ++it) {
+const std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+    &DetectorInfo::scanIntervals() const {
+  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+      *intervals_vector = new std::vector<
+          std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>(
+          (m_detectorInfo->scanIntervals()).size());
+  for (auto it = m_detectorInfo->scanIntervals().begin();
+       it != m_detectorInfo->scanIntervals().end(); ++it) {
     intervals_vector->push_back({(*it).first, (*it).second});
   }
   return *intervals_vector;

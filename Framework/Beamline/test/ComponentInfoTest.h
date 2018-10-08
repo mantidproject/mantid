@@ -886,7 +886,9 @@ public:
     const std::pair<size_t, size_t> detectorIndex{1, 0};
     do_write_rotation_updates_positions_correctly(info, rootIndex,
                                                   detectorIndex);
+  }
 
+  void test_setScanInterval_failures() {
     auto infos = makeTreeExample();
     auto &compInfo = *std::get<0>(infos);
     TS_ASSERT_THROWS_EQUALS(
@@ -1038,8 +1040,10 @@ public:
     // Test Detector info is synched internally
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(), 2);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[index1.second], interval1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[index2.second], interval2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[index1.second],
+                     interval1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[index2.second],
+                     interval2);
     TS_ASSERT_EQUALS(mergeDetectorInfo.position(index1), pos1);
     TS_ASSERT_EQUALS(mergeDetectorInfo.position(index2), pos2);
   }
