@@ -238,7 +238,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
                             // store the OOB parameter. All of x,y,v,w,wa are
                             // short integers (16 bits maximum) and so
                             // bitfieldsizes = 0, 1 or 2 only.
-      c = (ch >> 2) & 0xF; // Bits 2-5 = c
+      c = (ch >> 2) & 0xF;  // Bits 2-5 = c
 
       if (c & 0x8)
         c |= 0xFFFFFFF0; // c is a signed parameter so sign extend - OOB events
