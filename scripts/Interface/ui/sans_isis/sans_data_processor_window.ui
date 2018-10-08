@@ -95,7 +95,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -116,64 +116,6 @@ QGroupBox::title {
                 </property>
                 <property name="buddy">
                  <cstring>masking_table</cstring>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="5">
-               <widget class="QPushButton" name="user_file_button">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;a href=&quot;https://www.mantidproject.org/SANS_User_File_Commands&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Load User File</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QLabel" name="batch_label">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;a href=&quot;https://www.mantidproject.org/SANS_batch_file_format&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Batch File:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="4">
-               <widget class="QLineEdit" name="batch_line_edit">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;a href=&quot;https://www.mantidproject.org/SANS_batch_file_format&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="4">
-               <widget class="QLineEdit" name="user_file_line_edit">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;a href=&quot;https://www.mantidproject.org/SANS_User_File_Commands&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="5">
-               <widget class="QPushButton" name="batch_button">
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;a href=&quot;https://www.mantidproject.org/SANS_batch_file_format&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="text">
-                 <string>Load Batch File</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLabel" name="instrument_label">
-                <property name="text">
-                 <string>Instrument:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="5">
-               <widget class="QPushButton" name="manage_directories_button">
-                <property name="text">
-                 <string>Manage Directories</string>
                 </property>
                </widget>
               </item>
@@ -210,6 +152,47 @@ QGroupBox::title {
                 </item>
                </layout>
               </item>
+              <item row="1" column="4">
+               <widget class="QLineEdit" name="user_file_line_edit">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;a href=&quot;https://www.mantidproject.org/SANS_User_File_Commands&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="5">
+               <widget class="QPushButton" name="batch_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;a href=&quot;https://www.mantidproject.org/SANS_batch_file_format&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Load Batch File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="4">
+               <widget class="QLineEdit" name="batch_line_edit">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;a href=&quot;https://www.mantidproject.org/SANS_batch_file_format&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLabel" name="batch_label">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;a href=&quot;https://www.mantidproject.org/SANS_batch_file_format&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Batch File:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="instrument_label">
+                <property name="text">
+                 <string>Instrument:</string>
+                </property>
+               </widget>
+              </item>
               <item row="3" column="5">
                <widget class="QPushButton" name="process_button">
                 <property name="text">
@@ -217,10 +200,154 @@ QGroupBox::title {
                 </property>
                </widget>
               </item>
+              <item row="1" column="5">
+               <widget class="QPushButton" name="user_file_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;a href=&quot;https://www.mantidproject.org/SANS_User_File_Commands&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Load User File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="5">
+               <widget class="QPushButton" name="manage_directories_button">
+                <property name="text">
+                 <string>Manage Directories</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_11">
+              <item>
+               <widget class="QToolButton" name="insert_row_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert row&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="delete_row_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;delete selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="copy_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;copy selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="cut_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cut selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="paste_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;paste rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="erase_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;erase contents of selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
              </layout>
             </item>
             <item>
              <layout class="QVBoxLayout" name="data_processor_widget_layout"/>
+            </item>
+            <item>
+             <widget class="QProgressBar" name="batch_progress_bar">
+              <property name="value">
+               <number>24</number>
+              </property>
+             </widget>
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayout_7">
@@ -455,7 +582,7 @@ QGroupBox::title {
                          <item row="0" column="0">
                           <widget class="QLabel" name="reduction_mode_label">
                            <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specifed data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specified data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                            </property>
                            <property name="text">
                             <string>Reduction Mode</string>
@@ -465,7 +592,7 @@ QGroupBox::title {
                          <item row="0" column="1">
                           <widget class="QComboBox" name="reduction_mode_combo_box">
                            <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specifed data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specified data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                            </property>
                           </widget>
                          </item>
@@ -548,7 +675,7 @@ QGroupBox::title {
                         <item row="2" column="0">
                          <widget class="QCheckBox" name="merged_scale_use_fit_check_box">
                           <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked hten the scale will be fit during the merge operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked then the scale will be fit during the merge operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                           </property>
                           <property name="text">
                            <string>Use Fit</string>
@@ -558,7 +685,7 @@ QGroupBox::title {
                         <item row="2" column="1">
                          <widget class="QCheckBox" name="merged_shift_use_fit_check_box">
                           <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked hten the shift will be fit during the merge operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked then the shift will be fit during the merge operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                           </property>
                           <property name="text">
                            <string>Use Fit</string>
@@ -629,7 +756,7 @@ QGroupBox::title {
                   <item>
                    <widget class="QGroupBox" name="slice_event_group_box">
                     <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In the case of data which was measured in event-mode, it is possible to perform time-of-flight slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies time slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a time slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications useing comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In the case of data which was measured in event-mode, it is possible to perform time-of-flight slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies time slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a time slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications using comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
                      <string>Event Slice</string>
@@ -1629,7 +1756,7 @@ QGroupBox::title {
                        <item row="1" column="0">
                         <widget class="QLabel" name="label_7">
                          <property name="toolTip">
-                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It is possible to perform wavelength slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies wavelength slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a wavelength slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications useing comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A reduction will always be done between the maximum and minimum wavelengths of a given set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It is possible to perform wavelength slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies wavelength slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a wavelength slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications using comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A reduction will always be done between the maximum and minimum wavelengths of a given set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                          </property>
                          <property name="text">
                           <string>Ranges  [Å]</string>
@@ -2079,28 +2206,6 @@ QGroupBox::title {
      </layout>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1211</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>&amp;Edit</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>Fi&amp;le</string>
-    </property>
-   </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
   </widget>
  </widget>
  <customwidgets>

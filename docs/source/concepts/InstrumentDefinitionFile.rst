@@ -1375,7 +1375,7 @@ shape is shape is shown here:
    CombineIntoOneShapeExample.png
 
 Note for this to work, a unique name for each component must be provided
-and these names must be used in the algebra sting (here "A : B", see
+and these names must be used in the algebra string (here "A : B", see
 :ref:`HowToDefineGeometricShape <HowToDefineGeometricShape>`). Further a
 bounding-box may optionally be added to the to the type.
 Note the above geometric shape can alternatively be defined with the XML

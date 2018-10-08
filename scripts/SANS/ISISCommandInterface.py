@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, redefined-builtin, protected-access, too-many-arguments
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
@@ -499,7 +505,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     # This section provides a the REAR -- FRONT fitting and a stitched workspace.
     # If merge_flag is selected we use SANSStitch and get the fitting for free
-    # If fitRequired is selected, then we explicity call the SANSFitScale algorithm
+    # If fitRequired is selected, then we explicitly call the SANSFitScale algorithm
     if merge_flag:
         if ReductionSingleton().getNumSlices() > 1:
             slices = []
@@ -517,7 +523,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
         retWSname = retWSname_merged
     elif fitRequired:
-        # Get fit paramters
+        # Get fit parameters
         scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
 
         # Since only the fit is required we use only the SANSFitScale algorithm
@@ -597,7 +603,7 @@ def _merge_workspaces(retWSname_front, retWSname_rear, rAnds):
         # The CAN was not specified
         consider_can = False
 
-    # Get fit paramters
+    # Get fit parameters
     scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
     merge_range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
 
@@ -643,7 +649,7 @@ def _merge_workspaces(retWSname_front, retWSname_rear, rAnds):
 
     # Get the merged workspace
     mergedQ = alg_stitch.getProperty("OutputWorkspace").value
-    # Add the ouput to the Analysis Data Service
+    # Add the output to the Analysis Data Service
     AnalysisDataService.addOrReplace(retWSname_merged, mergedQ)
 
     # save the properties Transmission and TransmissionCan inside the merged workspace
@@ -1349,7 +1355,7 @@ def GetTransmissionMonitorSpectrum():
     """
         Gets the transmission monitor spectrum. In the case of 4 or 17788 (for LOQ)
         the result is 4.
-        @return: tranmission monitor spectrum
+        @return: transmission monitor spectrum
     """
     transmission_monitor = ReductionSingleton().transmission_calculator.trans_mon
     if ReductionSingleton().instrument._NAME == "LOQ" and transmission_monitor == 17788:
@@ -1382,7 +1388,7 @@ def GetTransmissionMonitorSpectrumShift():
     """
         Gets the addditional shift for the transmission monitor spectrum.
         This currently only exists for SANS2D
-        @return: tranmission monitor spectrum
+        @return: transmission monitor spectrum
     """
     inst = ReductionSingleton().get_instrument()
     if inst.name() != "SANS2D" and inst.name() != "SANS2DTUBES":
@@ -1409,7 +1415,7 @@ def SetTransmissionMonitorSpectrumShift(trans_mon_shift):
 def GetTransmissionRadiusInMM():
     """
         Gets the radius for usage with beam stop as transmission monitor in mm
-        @return: tranmission radius in mm
+        @return: transmission radius in mm
     """
     radius = ReductionSingleton().transmission_calculator.radius
     if radius is not None:
@@ -1453,7 +1459,7 @@ def SetTransmissionROI(trans_roi_files):
 
 def GetTransmissionMask():
     """
-        Gets the list of transmission maks file names
+        Gets the list of transmission mask file names
         @return: list of transmission mask file names or None
     """
     trans_mask_files = ReductionSingleton().transmission_calculator.mask_files
@@ -1486,7 +1492,7 @@ def AddRuns(runs, instrument='sans2d', saveAsEvent=False, binning="Monitors", is
                     string list with the same format that is used for the Rebin algorithm. This property is ignored
                     when saving as event data.
     @param isOverlay: sets if the the overlay mechanism should be used when the saveAsEvent flag is set
-    @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specifed
+    @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specified
                         in a string list. Either time_shifts is not used or a list with times in secomds. Note that there
                         has to be one entry fewer than the number of workspaces to add.
     @param defType: the file type
@@ -1538,7 +1544,7 @@ def set_q_resolution_moderator(file_name):
                       "which exists in the search directories. See details: %s" % str(details))
 
 
-# -- Use q resoltion
+# -- Use q resolution
 def get_q_resultution_use():
     '''
     Gets if the q resolution option is being used
@@ -1559,7 +1565,7 @@ def set_q_resolution_use(use):
     elif not use:
         ReductionSingleton().to_Q.set_use_q_resolution(False)
     else:
-        sanslog.warning('Warning: Could could not set useage of QResolution')
+        sanslog.warning('Warning: Could could not set usage of QResolution')
 
 
 # -- Collimation length
@@ -1738,7 +1744,7 @@ def reset_q_resolution_settings():
 def set_q_resolution_float(func, arg, msg):
     '''
     Set a q resolution value
-    @param func: the speficied function to run
+    @param func: the specified function to run
     @param arg: the argument
     @param mgs: error message
     '''
@@ -1755,7 +1761,7 @@ def set_q_resolution_float(func, arg, msg):
 def get_q_resolution_float(func, msg):
     '''
     Gets a q resolution value and checks if it has been set.
-    @param func: the speficied function to run
+    @param func: the specified function to run
     @param mgs: error message
     @return the correct value
     '''

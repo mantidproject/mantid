@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
+#include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
 #include "MantidTypes/Core/DateAndTime.h"
 #include <boost/python/list.hpp>

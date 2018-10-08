@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef GRID_DETECTOR_H
 #define GRID_DETECTOR_H
 #include "MantidGeometry/DllConfig.h"
@@ -15,37 +21,16 @@ namespace Geometry {
 
 class ComponentVisitor;
 /**
-*  GridDetector is a type of CompAssembly, an assembly of components.
-*  It is designed to be an easy way to specify a 3D grid (XYZ) array of
-*  Detector pixels. Ragged grids are not allowed, pixels are uniform in each
-*  dimension.
-*
-* @class GridDetector
-* @brief Assembly of Detector objects in a 3D grid shape
-* @author Lamar Moore, ISIS
-* @date 2018-Jul-24
-
-Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+ *  GridDetector is a type of CompAssembly, an assembly of components.
+ *  It is designed to be an easy way to specify a 3D grid (XYZ) array of
+ *  Detector pixels. Ragged grids are not allowed, pixels are uniform in each
+ *  dimension.
+ *
+ * @class GridDetector
+ * @brief Assembly of Detector objects in a 3D grid shape
+ * @author Lamar Moore, ISIS
+ * @date 2018-Jul-24
+ */
 
 class MANTID_GEOMETRY_DLL GridDetector : public CompAssembly,
                                          public IObjComponent {

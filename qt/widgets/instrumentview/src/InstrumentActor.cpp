@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -765,6 +771,7 @@ Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
                                                                 -1);
   alg->setPropertyValue("InputWorkspace", getWorkspace()->getName());
   alg->setPropertyValue("OutputWorkspace", maskName);
+  alg->setLogging(false);
   alg->execute();
 
   Mantid::API::MatrixWorkspace_sptr maskWorkspace =
@@ -1070,14 +1077,18 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
 /// Add a range of bins for masking
 void InstrumentActor::addMaskBinsData(const std::vector<size_t> &indices) {
-  std::vector<size_t> wsIndices;
-  wsIndices.reserve(indices.size());
+  // Ensure we do not have duplicate workspace indices.
+  std::set<size_t> wi;
   for (auto det : indices) {
     auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
-    wsIndices.emplace_back(index);
+    wi.insert(index);
   }
+
+  // We will be able to do this more efficiently in C++17
+  std::vector<size_t> wsIndices(wi.cbegin(), wi.cend());
+
   if (!indices.empty()) {
     m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, wsIndices);
     auto workspace = getWorkspace();

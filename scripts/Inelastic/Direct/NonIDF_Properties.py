@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from Direct.PropertiesDescriptors import *
@@ -164,7 +170,7 @@ class NonIDF_Properties(object):
     def mapmask_ref_ws(self):
         """Property provides reference workspace for LoadMask and GroupWorkspace algorithms
 
-            on 26/07/2016 refernce workspace (a workspace which provides appropriate
+            on 26/07/2016 reference workspace (a workspace which provides appropriate
             spectra-detector mapping was implemented for LoadMask algorithm only.
         """
         return self._mapmask_ref_ws

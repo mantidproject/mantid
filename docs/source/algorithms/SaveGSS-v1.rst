@@ -77,7 +77,7 @@ Output:
     removeFiles([file_name])
     DeleteWorkspace("SaveGSSWorkspace")
 
-**Example - an example using SaveGSS with additonal options.**
+**Example - an example using SaveGSS with additional options.**
 
 .. testcode:: ExSaveGSSOptions
 

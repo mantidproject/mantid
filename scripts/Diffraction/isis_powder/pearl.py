@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from contextlib import contextmanager
@@ -72,7 +78,8 @@ class Pearl(AbstractInst):
 
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs):
-        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
+        if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
+            self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         yield
         self._inst_settings = copy.deepcopy(self._default_inst_settings)

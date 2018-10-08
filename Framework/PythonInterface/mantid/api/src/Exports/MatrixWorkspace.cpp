@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
@@ -6,11 +12,11 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
@@ -28,10 +34,10 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace Mantid::PythonInterface;
 using namespace Mantid::PythonInterface::Converters;
 using namespace Mantid::PythonInterface::Policies;
 using namespace Mantid::PythonInterface::Registry;
-namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(MatrixWorkspace)
@@ -71,7 +77,7 @@ GNU_DIAG_ON("unused-local-typedef")
 void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
                              const size_t wsIndex,
                              const boost::python::object &values) {
-  if (NumPy::NdArray::check(values)) {
+  if (NDArray::check(values)) {
     NDArrayToVector<double> converter(values);
     converter.copyTo((self.*accessor)(wsIndex));
   } else {
@@ -140,7 +146,7 @@ void setYFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                      const NumPy::NdArray &values) {
+                      const NDArray &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataE, wsIndex, values);
 }
 

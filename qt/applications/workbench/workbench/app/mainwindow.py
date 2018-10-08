@@ -1,25 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
-
+import argparse     # for command line options
 import atexit
 import imp
 import importlib
@@ -434,7 +427,7 @@ def initialize():
     return app
 
 
-def start_workbench(app):
+def start_workbench(app, command_line_options):
     """Given an application instance create the MainWindow,
     show it and start the main event loop
     """
@@ -454,11 +447,19 @@ def start_workbench(app):
     # start mantid
     main_window.set_splash('Preloading mantid')
     importlib.import_module('mantid')
-
     main_window.show()
 
     if main_window.splash:
         main_window.splash.hide()
+
+    if command_line_options.exe_script is not None:
+        main_window.editor.open_file_in_new_tab(command_line_options.exe_script)
+        main_window.editor.execute_current()  # TODO use the result as an exit code
+
+        if command_line_options.quit:
+            main_window.close()
+            return 0
+
     # lift-off!
     return app.exec_()
 
@@ -476,7 +477,41 @@ def main():
     _, pkgpath, _ = imp.find_module('mantid')
     os.environ['MANTIDPATH'] = os.path.dirname(pkgpath)
 
-    # todo: parse command arguments
+    # setup command line arguments
+    parser = argparse.ArgumentParser(description='Mantid Workbench')
+    parser.add_argument('-x', '--execute', metavar='SCRIPT', dest='exe_script',
+                        help='execute the script file given as argument')
+    parser.add_argument('-q', '--quit', dest='quit', action='store_true',
+                        help='execute the script file with \'-x\' given as argument and then exit')
+    # TODO -a or --about: show about dialog and exit
+    # TODO -d or --default-settings: start MantidPlot with the default settings
+    # DONE -h or --help: show command line options <- free with command line parser
+    # TODO -v or --version: print MantidPlot version and release date
+    # TODO -r or --revision: print MantidPlot version and release date
+    # TODO -s or --silent: start mantidplot without any setup dialogs
+    # DONE -x or --execute: execute the script file given as argument
+    # DONE -xq or --executeandquit: execute the script file given as argument and then exit MantidPlot
+    # this is not a valid short command line option
+
+    try:
+        # set up bash completion as a soft dependency
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass  # silently skip this
+
+    # parse the command line options
+    options = parser.parse_args()
+    # TODO handle options that don't require starting the workbench e.g. --help --version
+
+    # fix/validate arguments
+    if options.exe_script is not None:
+        # convert into absolute path
+        options.exe_script = os.path.abspath(os.path.expanduser(options.exe_script))
+        if not os.path.exists(options.exe_script):
+            # TODO should be logged
+            print('script "{}" does not exist'.format(options.exe_script))
+            options.exe_script = None
 
     app = initialize()
     # the default sys check interval leads to long lags
@@ -484,7 +519,7 @@ def main():
     sys.setcheckinterval(SYSCHECK_INTERVAL)
     exit_value = 0
     try:
-        exit_value = start_workbench(app)
+        exit_value = start_workbench(app, options)
     except BaseException:
         # We count this as a crash
         import traceback

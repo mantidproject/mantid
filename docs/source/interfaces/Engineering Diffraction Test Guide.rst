@@ -114,7 +114,7 @@ Negative Testing Ideas
 Pre-processing
 ^^^^^^^^^^^^^^
 Pre-processing is used to convert event data into histogram data which can be subsequently
-focused. The optimal parameters for pre-processing are dependant on how the instrument was
+focused. The optimal parameters for pre-processing are dependent on how the instrument was
 configured during the capture of the data.
 
 `Regular time binning` requires the bin width to be specified and will produce a histogram #
