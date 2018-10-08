@@ -170,9 +170,9 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
     histogram.setFrequencies(yBackground);
     histogram.setFrequencyStandardDeviations(eBackground);
   } else {
-    if (data->isHistogramData() &&
-        "On" ==
-            Kernel::ConfigService::Instance().getString(AUTODISTRIBUTIONKEY)) {
+    if (data->isHistogramData() && Kernel::ConfigService::Instance()
+                                       .getValue<bool>(AUTODISTRIBUTIONKEY)
+                                       .get_value_or(false)) {
       // Background data is actually frequencies, we put it into temporary to
       // benefit from automatic conversion in setCounts(), etc.
       histogram.setCounts(Frequencies(yBackground), xBinEdges);

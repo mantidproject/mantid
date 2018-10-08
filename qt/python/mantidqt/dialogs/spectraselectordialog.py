@@ -19,6 +19,7 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # 3rd party imports
+from mantid.api import MatrixWorkspace
 import qtawesome as qta
 from qtpy.QtWidgets import QDialogButtonBox
 
@@ -54,9 +55,17 @@ class SpectraSelection(object):
 
 class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
+    @staticmethod
+    def raise_error_if_workspaces_not_compatible(workspaces):
+        for ws in workspaces:
+            if not isinstance(ws, MatrixWorkspace):
+                raise ValueError("Expected MatrixWorkspace, found {}.".format(ws.__class__.__name__))
+
     def __init__(self, workspaces,
                  parent=None):
         super(SpectraSelectionDialog, self).__init__(parent)
+        self.raise_error_if_workspaces_not_compatible(workspaces)
+
         # attributes
         self._workspaces = workspaces
         self.spec_min, self.spec_max = None, None
@@ -78,6 +87,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self.accept()
 
     # ------------------- Private -------------------------
+
     def _init_ui(self):
         ui = SpectraSelectionDialogUI()
         ui.setupUi(self)
@@ -161,17 +171,19 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         return self.selection is not None
 
 
-def get_spectra_selection(workspaces, parent_widget):
+def get_spectra_selection(workspaces, parent_widget=None):
     """Decides whether it is necessary to request user input
     when asked to plot a list of workspaces. The input
     dialog will only be shown in the case where all workspaces
     have more than 1 spectrum
 
     :param workspaces: A list of MatrixWorkspaces that will be plotted
-    :param parent_widget: A parent_widget to use for the input selection dialog
+    :param parent_widget: An optional parent_widget to use for the input selection dialog
     :returns: Either a SpectraSelection object containing the details of workspaces to plot or None indicating
     the request was cancelled
+    :raises ValueError: if the workspaces are not of type MatrixWorkspace
     """
+    SpectraSelectionDialog.raise_error_if_workspaces_not_compatible(workspaces)
     single_spectra_ws = [wksp.getNumberHistograms() for wksp in workspaces if wksp.getNumberHistograms() == 1]
     if len(single_spectra_ws) > 0:
         # At least 1 workspace contains only a single spectrum so this is all

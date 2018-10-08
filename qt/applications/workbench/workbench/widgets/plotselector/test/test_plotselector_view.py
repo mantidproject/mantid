@@ -21,7 +21,7 @@ from qtpy.QtTest import QTest
 
 import qtawesome as qta
 
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import requires_qapp
 
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 from workbench.widgets.plotselector.view import EXPORT_TYPES, PlotSelectorView, Column

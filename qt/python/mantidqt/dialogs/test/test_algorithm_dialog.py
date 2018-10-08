@@ -20,7 +20,7 @@ from qtpy.QtWidgets import QWidget, QLineEdit
 
 from mantid.api import AlgorithmManager, AlgorithmFactory, PythonAlgorithm
 from mantid.kernel import Direction, FloatArrayProperty
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import requires_qapp
 from mantidqt.dialogs.algorithmdialog import AlgorithmDialog
 from mantidqt.dialogs.genericdialog import GenericDialog
 from mantidqt.interfacemanager import InterfaceManager

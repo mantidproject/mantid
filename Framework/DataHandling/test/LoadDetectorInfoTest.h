@@ -82,9 +82,9 @@ void writeSmallDatFile(const std::string &filename) {
 }
 
 void writeDetNXSfile(const std::string &filename, const int nDets) {
-  auto fh = new ::NeXus::File(filename, NXACC_CREATE5);
-  fh->makeGroup("detectors.dat", "NXEntry", true);
-  fh->putAttr("version", "1.0");
+  ::NeXus::File nxsfile(filename, NXACC_CREATE5);
+  nxsfile.makeGroup("detectors.dat", "NXEntry", true);
+  nxsfile.putAttr("version", "1.0");
 
   std::vector<int32_t> detID(nDets * 2);
   std::vector<float> timeOffsets(nDets * 2);
@@ -132,51 +132,50 @@ void writeDetNXSfile(const std::string &filename, const int nDets) {
   array_dims[0] = nDets;
   array_dims[1] = 2;
 
-  fh->makeData("detID", ::NeXus::INT32, array_dims, true);
-  fh->putAttr("description", "DetectorID, DetectorType");
-  fh->putData(&detID[0]);
-  fh->closeData();
+  nxsfile.makeData("detID", ::NeXus::INT32, array_dims, true);
+  nxsfile.putAttr("description", "DetectorID, DetectorType");
+  nxsfile.putData(&detID[0]);
+  nxsfile.closeData();
 
-  fh->makeData("timeOffsets", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "DelayTime, DeadTime");
-  fh->putData(&timeOffsets[0]);
-  fh->closeData();
+  nxsfile.makeData("timeOffsets", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "DelayTime, DeadTime");
+  nxsfile.putData(&timeOffsets[0]);
+  nxsfile.closeData();
 
-  fh->makeData("detPressureAndWall", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "He3_pressure_Bar, WallThicknes_m");
-  fh->putData(&detStruct[0]);
-  fh->closeData();
-
-  array_dims[1] = 3;
-  fh->makeData("detSphericalCoord", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "L2, Theta, Psi");
-  fh->putData(&detCoord[0]);
-  fh->closeData();
-
-  fh->makeData("detTrueSize", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "W_x, W_y, W_z");
-  fh->putData(&detTrueSize[0]);
-  fh->closeData();
-
-  fh->makeData("detFalseSize", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "F_x, F_y, F_z");
-  fh->putData(&detFalseSize[0]);
-  fh->closeData();
-
-  fh->makeData("detOrientation", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "a_x, a_y, a_z");
-  fh->putData(&detOrient[0]);
-  fh->closeData();
+  nxsfile.makeData("detPressureAndWall", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "He3_pressure_Bar, WallThicknes_m");
+  nxsfile.putData(&detStruct[0]);
+  nxsfile.closeData();
 
   array_dims[1] = 3;
-  fh->makeData("detTubeIndex", ::NeXus::FLOAT32, array_dims, true);
-  fh->putAttr("description", "detTubeIndex");
-  fh->putData(&detTubeIndex[0]);
-  fh->closeData();
+  nxsfile.makeData("detSphericalCoord", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "L2, Theta, Psi");
+  nxsfile.putData(&detCoord[0]);
+  nxsfile.closeData();
 
-  fh->closeGroup();
-  fh->close();
-  delete fh;
+  nxsfile.makeData("detTrueSize", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "W_x, W_y, W_z");
+  nxsfile.putData(&detTrueSize[0]);
+  nxsfile.closeData();
+
+  nxsfile.makeData("detFalseSize", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "F_x, F_y, F_z");
+  nxsfile.putData(&detFalseSize[0]);
+  nxsfile.closeData();
+
+  nxsfile.makeData("detOrientation", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "a_x, a_y, a_z");
+  nxsfile.putData(&detOrient[0]);
+  nxsfile.closeData();
+
+  array_dims[1] = 1;
+  nxsfile.makeData("detTubeIndex", ::NeXus::FLOAT32, array_dims, true);
+  nxsfile.putAttr("description", "detTubeIndex");
+  nxsfile.putData(&detTubeIndex[0]);
+  nxsfile.closeData();
+
+  nxsfile.closeGroup();
+  nxsfile.close();
 }
 void writeLargeTestDatFile(const std::string &filename, const int ndets) {
   // The array is the same value across all spectra as this is meant as a

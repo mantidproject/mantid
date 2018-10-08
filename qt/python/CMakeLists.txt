@@ -1,6 +1,7 @@
 # This file manages building/installation of the mantidqt and mantidqtpython
 # Python wrappers.
 #
+include ( PythonPackageTargetFunctions )
 
 # Legacy wrappers for MantidPlot
 add_subdirectory ( mantidqtpython )
@@ -20,7 +21,6 @@ if ( ENABLE_WORKBENCH )
       ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py
   )
 
-  # Create egg link to binary output directory for mantidqt
   add_python_package ( mantidqt )
 
   # Configure resources data in place for ease of development. The output

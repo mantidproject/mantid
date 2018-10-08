@@ -81,8 +81,8 @@ void SaveIsawUB::exec() {
   try {
     Workspace_sptr ws1 = getProperty("InputWorkspace");
     ExperimentInfo_sptr ws;
-    IMDEventWorkspace_sptr MDWS =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1);
+    MultipleExperimentInfos_sptr MDWS =
+        boost::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
     if (MDWS != nullptr) {
       ws = MDWS->getExperimentInfo(0);
     } else {
@@ -91,7 +91,7 @@ void SaveIsawUB::exec() {
 
     if (!ws)
       throw std::invalid_argument("Must specify either a MatrixWorkspace or a "
-                                  "PeaksWorkspace or a MDEventWorkspace.");
+                                  "PeaksWorkspace or a MDWorkspace.");
 
     if (!ws->sample().hasOrientedLattice())
       throw std::invalid_argument(

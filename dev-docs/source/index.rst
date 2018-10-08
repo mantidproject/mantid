@@ -125,7 +125,7 @@ Tools
 
 :doc:`GettingStartedWithPyCharm`
    Describes how to set up the PyCharm interpreter, and debug python code (Windows/Linux only).
-   
+
 :doc:`Eclipse`
    Guide to setting up Eclipse on Ubuntu
 
@@ -139,6 +139,7 @@ Testing
    RunningTheUnitTests
    DebuggingUnitTests
    UnitTestGoodPractice
+   IndividualTicketTesting
    WritingPerformanceTests
    SystemTests
    DataFilesForTesting
@@ -152,6 +153,9 @@ Testing
 
 :doc:`UnitTestGoodPractice`
    Guidance on writing good unit tests.
+
+:doc:`IndividualTicketTesting`
+   What to expect and inspect when reviewing an individual contribution to mantid.
 
 :doc:`WritingPerformanceTests`
    A walk through of how to write a performance test.
@@ -206,4 +210,3 @@ Component Overviews
    RemoteJobSubmissionAPI
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation
-

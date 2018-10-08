@@ -13,6 +13,7 @@
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -272,8 +273,15 @@ void FilterEvents::exec() {
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
   std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
+  Goniometer inputGonio = m_eventWS->run().getGoniometer();
   for (miter = m_outputWorkspacesMap.begin();
        miter != m_outputWorkspacesMap.end(); ++miter) {
+    try {
+      DataObjects::EventWorkspace_sptr ws_i = miter->second;
+      ws_i->mutableRun().setGoniometer(inputGonio, true);
+    } catch (std::runtime_error &) {
+      g_log.warning("Cannot set goniometer.");
+    }
     outputwsnames.push_back(miter->second->getName());
   }
   setProperty("OutputWorkspaceNames", outputwsnames);

@@ -381,9 +381,8 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
 LoadGroupXMLFile::LoadGroupXMLFile()
     : m_instrumentName(""), m_userGiveInstrument(false), m_date(""),
       m_userGiveDate(false), m_description(""), m_userGiveDescription(false),
-      m_pDoc(nullptr), m_pRootElem(nullptr), m_groupComponentsMap(),
-      m_groupDetectorsMap(), m_groupSpectraMap(), m_startGroupID(1),
-      m_groupNamesMap() {}
+      m_pDoc(), m_groupComponentsMap(), m_groupDetectorsMap(),
+      m_groupSpectraMap(), m_startGroupID(1), m_groupNamesMap() {}
 
 void LoadGroupXMLFile::loadXMLFile(std::string xmlfilename) {
 
@@ -407,9 +406,7 @@ void LoadGroupXMLFile::initializeXMLParser(const std::string &filename) {
   } catch (...) {
     throw Kernel::Exception::FileError("Unable to parse File:", filename);
   }
-  // Get pointer to root element
-  m_pRootElem = m_pDoc->documentElement();
-  if (!m_pRootElem->hasChildNodes()) {
+  if (!m_pDoc->documentElement()->hasChildNodes()) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "No root element in XML instrument file", filename);
   }

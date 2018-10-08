@@ -6,7 +6,7 @@ import os
 import sys
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
     FileProperty, FileAction
-from mantid.kernel import Direction, StringListValidator, DateAndTime
+from mantid.kernel import Direction, StringListValidator, DateAndTime, IntBoundedValidator
 
 from dnsdata import DNSdata
 
@@ -55,6 +55,9 @@ class LoadDNSLegacy(PythonAlgorithm):
         normalizations = ['duration', 'monitor', 'no']
         self.declareProperty("Normalization", "duration", StringListValidator(normalizations),
                              doc="Kind of data normalization.")
+
+        self.declareProperty(name="ElasticChannel",defaultValue=0,validator=IntBoundedValidator(lower=0),
+                             doc="Time channel number where elastic peak is observed. Only for TOF data.")
         return
 
     def get_polarisation_table(self):
@@ -160,18 +163,19 @@ class LoadDNSLegacy(PythonAlgorithm):
             self.log().debug("Delay time = {} microsecond".format(metadata.tof_delay_time))
             tof2_elastic = 1e+06*l2/velocity
             self.log().debug("TOF2 Elastic = {} microseconds".format(tof2_elastic))
+            epp_geom = int(tof2_elastic/dt)
+
+            epp_user = self.getProperty("ElasticChannel").value
+
+            # for comissioning period EPP in the data file is not relevant
+            in_comissioning = self.instrument.getStringParameter("tof_comissioning")[0]
+            if (epp_user < 1) and (in_comissioning == 'no') and  metadata.tof_elastic_channel:
+                epp_user = metadata.tof_elastic_channel
 
             # shift channels to keep elastic in the right position
-            if not metadata.tof_elastic_channel:
-                metadata.tof_elastic_channel = int(tof2_elastic/dt)
-
-            # required during the comissioning, since zero time channel is not yet calibrated
-            in_comissioning = self.instrument.getStringParameter("tof_comissioning")[0]
-            if in_comissioning.lower() == "yes":
-                # this will fail if inelastic peak is stronger than elastic
-                chmax = int(np.mean(arr.argmax(axis=1)))
-                self.log().debug("Elastic peak position old: {}".format(chmax))
-                arr = np.roll(arr, metadata.tof_elastic_channel - chmax, 1)
+            # required, since zero time channel is not calibrated
+            if epp_user > 0:
+                arr = np.roll(arr, epp_geom - epp_user, 1)
 
             # create dataX array
             x0 = tof1 + metadata.tof_delay_time
@@ -181,9 +185,9 @@ class LoadDNSLegacy(PythonAlgorithm):
             logs["names"].extend(["channel_width", "TOF1", "delay_time", "tof_channels"])
             logs["values"].extend([dt, tof1, metadata.tof_delay_time, metadata.tof_channel_number])
             logs["units"].extend(["microseconds", "microseconds", "microseconds", ""])
-            if metadata.tof_elastic_channel:
+            if epp_user:
                 logs["names"].append("EPP")
-                logs["values"].append(metadata.tof_elastic_channel)
+                logs["values"].append(epp_user)
                 logs["units"].append("")
             if metadata.chopper_rotation_speed:
                 logs["names"].append("chopper_speed")

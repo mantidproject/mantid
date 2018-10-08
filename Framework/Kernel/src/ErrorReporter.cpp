@@ -38,10 +38,12 @@ ErrorReporter::ErrorReporter(std::string application,
                              std::string email)
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
       m_share(share), m_name(name), m_email(email) {
-  int retval = Mantid::Kernel::ConfigService::Instance().getValue(
-      "errorreports.rooturl", m_url);
-  if (retval == 0) {
+  auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
+      "errorreports.rooturl");
+  if (!url.is_initialized()) {
     g_log.debug() << "Failed to load error report url\n";
+  } else {
+    m_url = url.get();
   }
 }
 

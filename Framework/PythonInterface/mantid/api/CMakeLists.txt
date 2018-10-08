@@ -14,7 +14,6 @@ set ( EXPORT_FILES
   src/Exports/AlgorithmHistory.cpp
   src/Exports/CatalogManager.cpp
   src/Exports/CatalogSession.cpp
-  src/Exports/DetectorInfo.cpp
   src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/Algorithm.cpp
   src/Exports/DataProcessorAlgorithm.cpp
@@ -55,6 +54,7 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceValidators.cpp
   src/Exports/ADSValidator.cpp
   src/Exports/InstrumentValidator.cpp
+  src/Exports/OrientedLatticeValidator.cpp
   src/Exports/Axis.cpp
   src/Exports/IPeak.cpp
   src/Exports/BoxController.cpp
@@ -77,6 +77,7 @@ set ( EXPORT_FILES
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
   src/Exports/MultiDomainFunction.cpp
+  src/Exports/SpectrumDefinition.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )
@@ -109,6 +110,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
   ${HEADER_DIR}/api/ExtractWorkspace.h
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
+  ${HEADER_DIR}/api/DetectorInfoPythonIterator.h
 )
 
 set ( PY_FILES

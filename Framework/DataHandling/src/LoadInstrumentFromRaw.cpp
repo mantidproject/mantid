@@ -84,15 +84,15 @@ void LoadInstrumentFromRaw::exec() {
   instrument->markAsSource(source);
 
   progress(0.5);
-  double l1;
   // If user has provided an L1, use that
-  if (!Kernel::ConfigService::Instance().getValue("instrument.L1", l1)) {
-    // Otherwise try and get it from the raw file
-    l1 = iraw.ivpb.i_l1;
-    // Default to 10 if the raw file doesn't have it set
-    if (l1 == 0)
-      l1 = 10.0;
-  }
+  auto l1ConfigValue =
+      Kernel::ConfigService::Instance().getValue<double>("instrument.L1");
+  // Otherwise try and get it from the raw file
+  double l1 = l1ConfigValue.get_value_or(iraw.ivpb.i_l1);
+  // Default to 10 if the raw file doesn't have it set
+  if (l1 == 0)
+    l1 = 10.0;
+
   source->setPos(0.0, 0.0, -1.0 * l1);
 
   // add detectors

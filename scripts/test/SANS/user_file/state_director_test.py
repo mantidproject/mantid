@@ -215,7 +215,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         director.set_scale_builder_width(1.)
         director.set_scale_builder_height(1.5)
         director.set_scale_builder_thickness(12.)
-        director.set_scale_builder_shape(SampleShape.Cuboid)
+        director.set_scale_builder_shape(SampleShape.FlatPlate)
 
         # Act
         state = director.construct()
@@ -226,7 +226,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(state.scale.width == 1.)
         self.assertTrue(state.scale.height == 1.5)
         self.assertTrue(state.scale.thickness == 12.)
-        self.assertTrue(state.scale.shape is SampleShape.Cuboid)
+        self.assertTrue(state.scale.shape is SampleShape.FlatPlate)
 
         # clean up
         if os.path.exists(user_file_path):

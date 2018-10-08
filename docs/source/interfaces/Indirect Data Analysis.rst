@@ -104,7 +104,7 @@ MSD Fit
 -------
 
 Given either a saved NeXus file or workspace generated using the Elwin tab, this
-tab fits :math:`log(intensity)` vs. :math:`Q` with a straight line for each
+tab fits :math:`intensity` vs. :math:`Q` with one of three functions for each
 run specified to give the Mean Square Displacement (MSD). It then plots the MSD
 as function of run number. This is done by means of the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
@@ -115,13 +115,16 @@ temperature is read and the MSD is plotted versus temperature; if they do not
 exist the MSD is plotted versus run number (last 3 digits).
 
 The fitted parameters for all runs are in _msd_Table and the <u2> in _msd. To
-run the Sequential fit a workspace named <inst><first-run>_to_<last-run>_lnI is
-created of :math:`ln(I)` v. :math:`Q` for all runs. A contour or 3D plot of
+run the Sequential fit a workspace named <inst><first-run>_to_<last-run>_eq is
+created of :math:`intensity` v. :math:`Q` for all runs. A contour or 3D plot of
 this may be of interest.
 
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
+
+The Peters model[1] reduces to a Gaussian at large (towards infinity) beta. The Yi[2] model
+reduces to a Gaussian at sigma equal to zero.
 
 .. interface:: Data Analysis
   :width: 450
@@ -558,7 +561,10 @@ The Temperature Correction is a :ref:`UserFunction <func-UserFunction>` with the
 formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
 :math:`T` is the temperature in Kelvin.
 
+**References**
 
+1. Peters & Kneller, Journal of Chemical Physics, 139, 165102 (2013)
+2. Yi et al, J Phys Chem B 116, 5028 (2012) 
 
 
 .. categories:: Interfaces Indirect

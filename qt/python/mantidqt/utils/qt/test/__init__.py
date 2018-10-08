@@ -63,7 +63,7 @@ def requires_qapp(cls):
         qapp = QApplication.instance()
         if qapp is None:
             setup_library_paths()
-            self._qapp = QApplication([''])
+            cls._qapp = QApplication([cls.__name__])
         else:
             self._qapp = qapp
         orig_setUp(self)

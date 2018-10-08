@@ -22,7 +22,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <Poco/Path.h>

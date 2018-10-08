@@ -2,6 +2,7 @@
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_arg.hpp>
 
 using namespace boost::python;
 using namespace Mantid::DataObjects;
@@ -22,5 +23,13 @@ void export_EventList() {
       "EventList")
       .def("addEventQuickly", &addEventToEventList,
            args("self", "tof", "pulsetime"),
-           "Create TofEvent and add to EventList.");
+           "Create TofEvent and add to EventList.")
+      .def("__iadd__",
+           (EventList & (EventList::*)(const EventList &)) &
+               EventList::operator+=,
+           return_self<>(), (arg("self"), arg("other")))
+      .def("__isub__",
+           (EventList & (EventList::*)(const EventList &)) &
+               EventList::operator-=,
+           return_self<>(), (arg("self"), arg("other")));
 }

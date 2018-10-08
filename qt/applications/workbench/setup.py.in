@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #  This file is part of the mantid workbench.
 #
 #  Copyright (C) 2017 mantidproject
@@ -14,20 +15,21 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""Defines utility functionality for interacting with the mantid framework
-"""
-from __future__ import unicode_literals
 
-from imp import find_module
-import os
+from setuptools import find_packages, setup
 
+@SETUPTOOLS_BUILD_COMMANDS_DEF@
 
-def prepare_mantid_env():
-    # Mantid needs to be able to find its .properties file. It looks
-    # in the application directory but by default but this is python.exe.
-    # MANTIDPATH can be used to override this. If it is not set
-    # we currently assume the Mantid.properties is in the same location as the
-    # mantid module itself
-    if 'MANTIDPATH' not in os.environ:
-        _, pkgpath, _ = find_module('mantid')
-        os.environ['MANTIDPATH'] = os.path.dirname(pkgpath)
+# The most basic setup possible to be able to use setup.py develop
+setup(
+    name='MantidWorkbench', # probaly the wrong name if someone wants to include it
+    version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@',
+    install_requires=['mantidqt'],
+    packages=find_packages(exclude=['*.test']),
+    entry_points={
+        'gui_scripts': [
+            'workbench = workbench.app.mainwindow:main'
+        ]
+    },
+    @SETUPTOOLS_BUILD_COMMANDS_USE@
+)

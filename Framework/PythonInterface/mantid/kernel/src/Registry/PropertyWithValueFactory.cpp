@@ -3,14 +3,26 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/python.hpp>
+#include <boost/python/class.hpp>
+#include <boost/python/extract.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/object.hpp>
 
 #include <cassert>
+
+using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
+using namespace boost::python;
+using namespace Mantid::Kernel;
+using namespace Mantid::PythonInterface;
 
 namespace Mantid {
 namespace PythonInterface {
@@ -137,6 +149,42 @@ PropertyWithValueFactory::create(const std::string &name,
                                  const unsigned int direction) {
   boost::python::object validator; // Default construction gives None object
   return create(name, defaultValue, validator, direction);
+}
+
+/**
+ * Creates a TimeSeriesProperty<Type> instance from the given information.
+ * The python type is mapped to a C type
+ * @param name :: The name of the property
+ * @param defaultValue :: A default value for this property.
+ * @returns A pointer to a new Property object
+ */
+std::unique_ptr<Mantid::Kernel::Property>
+PropertyWithValueFactory::createTimeSeries(const std::string &name,
+                                           const list &defaultValue) {
+
+  // Use a PyObject pointer to determine the type stored in the list
+  auto obj = object(defaultValue[0]).ptr();
+  auto val = defaultValue[0];
+
+  /**
+   * Decide which kind of TimeSeriesProperty to return
+   * Need to use a different method to check for boolean values
+   * since extract<> seems to get confused sometimes.
+   */
+  if (PyBool_Check(obj)) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>(name);
+  } else if (extract<int>(val).check()) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<int>>(name);
+  } else if (extract<double>(val).check()) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<double>>(name);
+  } else if (extract<std::string>(val).check()) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<std::string>>(name);
+  }
+
+  // If we reach here an error has occurred as there are no type to create
+  // a TimeSeriesProperty from
+  throw std::runtime_error(
+      "Cannot create a TimeSeriesProperty with that data type!");
 }
 
 //-------------------------------------------------------------------------

@@ -8,7 +8,7 @@
     ContainerDtype Header File
 
     A helper free function to allow identification of data type being used by
-    providing a numpy friendly string.
+    providing a numpy friendly string (using the numpy array interface).
 
     @author Lamar Moore STFC, Bhuvan Bezawada STFC
     @date 21/06/2018
@@ -43,29 +43,13 @@ namespace Converters {
 template <template <class> class Container, typename HeldType>
 std::string dtype(const Container<HeldType> &) {
   if (std::is_same<HeldType, bool>::value) {
-    return "bool_";
-  } else if (std::is_same<HeldType, short>::value) {
-    return "int16";
-  } else if (std::is_same<HeldType, std::int8_t>::value) {
-    return "int8";
-  } else if (std::is_same<HeldType, std::int16_t>::value) {
-    return "int16";
-  } else if (std::is_same<HeldType, std::int32_t>::value) {
-    return "int32";
-  } else if (std::is_same<HeldType, std::int64_t>::value) {
-    return "int64";
-  } else if (std::is_same<HeldType, long>::value) {
-    return "int_";
-  } else if (std::is_same<HeldType, long long>::value) {
-    return "int64";
-  } else if (std::is_same<HeldType, float>::value) {
-    return "float32";
-  } else if (std::is_same<HeldType, double>::value) {
-    return "float64";
-  } else if (std::is_same<HeldType, std::string>::value) {
-    return "string_";
+    return "b";
+  } else if (std::is_integral<HeldType>::value) {
+    return "i";
+  } else if (std::is_floating_point<HeldType>::value) {
+    return "f";
   } else {
-    return "object_";
+    return "O";
   }
 }
 

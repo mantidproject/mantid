@@ -933,7 +933,6 @@ class MantidFrameworkConfig:
 
         # Up the log level so that failures can give useful information
         config['logging.loggers.root.level'] = self.__loglevel
-        config['logging.channels.consoleFilterChannel.level'] = self.__loglevel
         # Set the correct search path
         config['datasearch.directories'] = self.__dataDirs
 

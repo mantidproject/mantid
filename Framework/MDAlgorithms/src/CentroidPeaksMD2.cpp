@@ -115,6 +115,7 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           centroid[d] /= static_cast<coord_t>(signal);
 
         V3D vecCentroid(centroid[0], centroid[1], centroid[2]);
+        p.setBinCount(static_cast<double>(signal));
 
         // Save it back in the peak object, in the dimension specified.
         try {

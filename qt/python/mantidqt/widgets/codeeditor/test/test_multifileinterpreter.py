@@ -22,7 +22,7 @@ import unittest
 # third-party library imports
 
 # local imports
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import requires_qapp
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 

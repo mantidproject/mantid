@@ -60,6 +60,8 @@ if ( LIBRDKAFKA_FOUND )
     ${SRC_FILES}
     src/Kafka/KafkaEventListener.cpp
     src/Kafka/KafkaEventStreamDecoder.cpp
+    src/Kafka/KafkaHistoListener.cpp
+    src/Kafka/KafkaHistoStreamDecoder.cpp
     src/Kafka/KafkaBroker.cpp
     src/Kafka/KafkaTopicSubscriber.cpp
   )
@@ -70,14 +72,21 @@ if ( LIBRDKAFKA_FOUND )
     inc/MantidLiveData/Kafka/IKafkaStreamSubscriber.h
     inc/MantidLiveData/Kafka/IKafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaBroker.h
+    inc/MantidLiveData/Kafka/KafkaHistoListener.h
+    inc/MantidLiveData/Kafka/KafkaHistoStreamDecoder.h
     inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
     src/Kafka/private/Schema/flatbuffers/flatbuffers.h
+    src/Kafka/private/Schema/flatbuffers/base.h
+    src/Kafka/private/Schema/flatbuffers/stl_emulation.h
     src/Kafka/private/Schema/df12_det_spec_map_generated.h
     src/Kafka/private/Schema/ev42_events_generated.h
     src/Kafka/private/Schema/f142_logdata_generated.h
     src/Kafka/private/Schema/fwdi_forwarder_internal_generated.h
     src/Kafka/private/Schema/is84_isis_events_generated.h
     src/Kafka/private/Schema/ba57_run_info_generated.h
+    src/Kafka/private/Schema/ai34_det_counts_generated.h
+    src/Kafka/private/Schema/ai33_det_count_imgs_generated.h
+    src/Kafka/private/Schema/hs00_event_histogram_generated.h
   )
   set ( TEST_FILES
     ${TEST_FILES}

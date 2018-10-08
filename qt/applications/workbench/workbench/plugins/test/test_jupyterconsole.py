@@ -20,7 +20,7 @@ from __future__ import (absolute_import)
 import unittest
 
 # third-party library imports
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import requires_qapp
 from qtpy.QtWidgets import QMainWindow
 
 # local package imports

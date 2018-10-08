@@ -20,6 +20,8 @@ private:
   using PySequenceToVectorDouble = PySequenceToVector<double>;
 
 public:
+  void tearDown() override { PyErr_Clear(); }
+
   void test_construction_succeeds_with_a_valid_sequence_type() {
     boost::python::list testList;
     TS_ASSERT_THROWS_NOTHING(PySequenceToVectorDouble converter(testList));

@@ -20,6 +20,8 @@ set ( TEST_FILES
   workbench/config/test/test_user.py
   workbench/test/test_import.py
 
+  workbench/plotting/test/test_functions.py
+
   workbench/widgets/plotselector/test/test_plotselector_model.py
   workbench/widgets/plotselector/test/test_plotselector_presenter.py
   workbench/widgets/plotselector/test/test_plotselector_view.py

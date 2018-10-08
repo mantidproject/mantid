@@ -27,7 +27,7 @@ try:
 except ImportError:
     NEW_STYLE_SIGNAL = True
 
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import requires_qapp
 from mantidqt.utils.qt import add_actions, create_action
 
 

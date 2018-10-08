@@ -49,7 +49,7 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
                               if prop.name not in blacklist and not self._ignore_property(prop)]
 
             for log_property in log_properties:
-                property_dtype = self._dtype_from_property_type(log_property)
+                property_dtype = log_property.dtype()
                 log_value = self._get_value_from_property(log_property)
                 if log_value is None:
                     continue
@@ -57,18 +57,6 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
                 log_dataset = sample_logs_group.create_dataset(name=log_property.name, shape=(1,), dtype=property_dtype,
                                                                data=[log_value])
                 log_dataset.attrs["Units"] = log_property.units
-
-    def _dtype_from_property_type(self, prop):
-        if isinstance(prop, (FloatPropertyWithValue, FloatTimeSeriesProperty, FloatArrayProperty)):
-            return "f"
-        if isinstance(prop, (IntPropertyWithValue, Int32TimeSeriesProperty, Int64TimeSeriesProperty)):
-            return "i"
-        if isinstance(prop, (BoolPropertyWithValue, BoolTimeSeriesProperty)):
-            return "b"
-        if isinstance(prop, StringPropertyWithValue):
-            return "S{}".format(len(prop.value))
-        raise RuntimeError("Unrecognised property type: \"{}\". Please contact the development team with this message".
-                           format(prop.type))
 
     def _get_value_from_property(self, prop):
         if isinstance(prop, FloatArrayProperty):

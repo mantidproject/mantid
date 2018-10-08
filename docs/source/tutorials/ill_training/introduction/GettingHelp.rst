@@ -22,7 +22,7 @@ Bug Reporting
 
 Please report any bugs you find, so that we can keep improving Mantid. The easiest way is to contact the development team in the CS group, especially for any issues that are causing major problems.
 
-There is also an option to report bugs in Mantid, via Help -> Report a Bug, but please only use this for minor bugs. This link allows bugs to be posted on the forums. Alternatively you can use the `contact form <https://www.mantidproject.org/Contact>`__ or email mantid-help@mantidproject.org.
+There is also an option to report bugs in Mantid, via Help -> Report a Bug, but please only use this for minor bugs. This link allows bugs to be posted on the forums. Alternatively you can use the `contact form <https://www.mantidproject.org/Contact>`__ or email `mantid-help@mantidproject.org <mailto:mantid-help@mantidproject.org>`__.
 
 .. figure:: /images/Training/Introduction/Mantid_report_a_bug.png
    :align: center
