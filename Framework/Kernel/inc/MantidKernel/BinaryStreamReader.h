@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_BINARYSTREAMREADER_H_
 #define MANTID_KERNEL_BINARYSTREAMREADER_H_
 //------------------------------------------------------------------------------
@@ -22,26 +28,7 @@ template <typename T> class Matrix;
  * only allows for reading fixed-width integer types to avoid cross-platform
  * differences on the sizes of various types.
  *
- * Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- * National Laboratory & European Spallation Source
  *
- * This file is part of Mantid.
- *
- * Mantid is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * Mantid is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * File change history is stored at: <https://github.com/mantidproject/mantid>
- * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_KERNEL_DLL BinaryStreamReader {
 public:
@@ -52,6 +39,7 @@ public:
 
   ///@name Single-value stream operators
   /// @{
+  BinaryStreamReader &operator>>(int16_t &value);
   BinaryStreamReader &operator>>(int32_t &value);
   BinaryStreamReader &operator>>(int64_t &value);
   BinaryStreamReader &operator>>(float &value);
@@ -61,6 +49,7 @@ public:
 
   ///@name 1D methods
   /// @{
+  BinaryStreamReader &read(std::vector<int16_t> &value, const size_t nvals);
   BinaryStreamReader &read(std::vector<int32_t> &value, const size_t nvals);
   BinaryStreamReader &read(std::vector<int64_t> &value, const size_t nvals);
   BinaryStreamReader &read(std::vector<float> &value, const size_t nvals);
@@ -80,6 +69,9 @@ public:
                            const std::vector<int32_t> &shape,
                            MatrixOrdering order);
   /// @}
+
+  /// Move the stream to nbytes past the beginning of the file
+  void moveStreamToPosition(size_t nbytes);
 
 private:
   /// Reference to the stream being read

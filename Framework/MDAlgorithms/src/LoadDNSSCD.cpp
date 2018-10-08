@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/LoadDNSSCD.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
@@ -476,17 +482,44 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
       detid_t detid(ds.detID[i]);
       double theta = 0.5 * (ds.detID[i] * 5.0 - ds.deterota) * deg2rad;
       if ((theta > theta_min) && (theta < theta_max)) {
-        double omega = (ds.huber - ds.deterota) * deg2rad - theta;
-        V3D uphi(-cos(omega), 0, -sin(omega));
-        V3D hphi = uphi * k * sin(theta);
-        V3D hkl = ub_inv * hphi;
-        std::vector<Mantid::coord_t> millerindex(3);
-        millerindex[0] = static_cast<float>(hkl.X());
-        millerindex[1] = static_cast<float>(hkl.Y());
-        millerindex[2] = static_cast<float>(hkl.Z());
-        inserter.insertMDEvent(
-            static_cast<float>(signal), static_cast<float>(error * error),
-            static_cast<uint16_t>(runindex), detid, millerindex.data());
+        PARALLEL_FOR_IF(Kernel::threadSafe(*m_OutWS, *normWS))
+        for (int64_t channel = 0; channel < nchannels; channel++) {
+          PARALLEL_START_INTERUPT_REGION
+          double signal = ds.signal[i][channel];
+          signal_t error = std::sqrt(signal);
+          double tof2 = static_cast<double>(channel) * ds.chwidth +
+                        0.5 * ds.chwidth; // bin centers
+          double dE = 0.0;
+          if (nchannels > 1) {
+            double v2 = 1e+06 * l2 / tof2;
+            dE = Ei - 0.5 * PhysicalConstants::NeutronMass * v2 * v2 /
+                          PhysicalConstants::meV;
+          }
+          if (dE > dEmin) {
+            double kf =
+                std::sqrt(ki * ki - 2.0e-20 * PhysicalConstants::NeutronMass *
+                                        dE * PhysicalConstants::meV /
+                                        (PhysicalConstants::h_bar *
+                                         PhysicalConstants::h_bar));
+            double tlab =
+                std::atan2(ki - kf * cos(2.0 * theta), kf * sin(2.0 * theta));
+            double omega = (ds.huber - ds.deterota) * deg2rad - tlab;
+            V3D uphi(-cos(omega), 0, -sin(omega));
+            double qabs = 0.5 *
+                          std::sqrt(ki * ki + kf * kf -
+                                    2.0 * ki * kf * cos(2.0 * theta)) /
+                          M_PI;
+            V3D hphi = uphi * qabs; // qabs = ki * sin(theta), for elastic case;
+            V3D hkl = ub_inv * hphi;
+            std::vector<Mantid::coord_t> millerindex(4);
+            millerindex[0] = static_cast<float>(hkl.X());
+            millerindex[1] = static_cast<float>(hkl.Y());
+            millerindex[2] = static_cast<float>(hkl.Z());
+            millerindex[3] = static_cast<float>(dE);
+            PARALLEL_CRITICAL(addValues) {
+              inserter.insertMDEvent(
+                  static_cast<float>(signal), static_cast<float>(error * error),
+                  static_cast<uint16_t>(runindex), detid, millerindex.data());
 
         norm_inserter.insertMDEvent(static_cast<float>(norm_signal),
                                     static_cast<float>(norm_error * norm_error),

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef RemoveBinsTest_H_
 #define RemoveBinsTest_H_
 
@@ -9,7 +15,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/RemoveBins.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/Workspace2D.h"

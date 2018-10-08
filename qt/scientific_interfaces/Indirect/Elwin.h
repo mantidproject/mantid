@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 
@@ -15,13 +21,20 @@ public:
   Elwin(QWidget *parent = nullptr);
 
 private:
-  void setup() override;
   void run() override;
+  void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
                             const QPair<double, double> &range);
   void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
 
 private slots:
   void newInputFiles();
@@ -32,6 +45,7 @@ private slots:
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);
   void unGroupInput(bool error);
+  void runClicked();
   void saveClicked();
   void plotClicked();
 

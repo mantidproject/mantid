@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import HFIR_4Circle_Reduction.ui_RefineUbFftDialog as ui_RefineUbFftDialog
 
@@ -30,7 +36,7 @@ class RefineUBFFTSetupDialog(QtGui.QDialog):
         self.ui.lineEdit_maxD.setText('40.0')
         self.ui.lineEdit_tolerance.setText('0.15')
 
-        # connected to event hanlder
+        # connected to event handler
         self.connect(self.ui.buttonBox, QtCore.SIGNAL('accepted()'),
                      self.do_ok)
 

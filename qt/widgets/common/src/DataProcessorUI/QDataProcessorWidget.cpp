@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
@@ -215,10 +221,13 @@ void QDataProcessorWidget::showTable(
   ui.viewTable->setModel(m_model.get());
   ui.viewTable->setStyleSheet("QTreeView {font-size:11pt;}");
   ui.viewTable->setAlternatingRowColors(false);
-  ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable));
 
   // Hide the Hidden Options column
   ui.viewTable->hideColumn(m_model->columnCount() - 1);
+}
+
+void QDataProcessorWidget::setItemDelegate() {
+  ui.viewTable->setItemDelegate(new GridDelegate(ui.viewTable));
 }
 
 /** This slot is used to update the instrument*/
@@ -467,8 +476,11 @@ column.
 */
 void QDataProcessorWidget::setOptionsHintStrategy(
     MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column) {
+  auto delegate_pointer = ui.viewTable->itemDelegate();
   ui.viewTable->setItemDelegateForColumn(
-      column, new HintingLineEditFactory(hintStrategy));
+      column, new HintingLineEditFactory(
+                  delegate_pointer, std::unique_ptr<HintStrategy>(hintStrategy),
+                  ui.viewTable));
 }
 
 /**

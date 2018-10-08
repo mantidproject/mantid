@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import matplotlib.pyplot as plt
@@ -109,10 +115,10 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
         tmp = strongPeakParams[:, :2] - phthPeak
         distSq = tmp[:, 0]**2 + tmp[:, 1]**2
         nnIDX = np.argmin(distSq)
-        logger.information('Using [ph, th] = [{:2.2f},{:2.2f}] for [{:2.2f},{:2.2f}]'.format(strongPeakParams[nnIDX,0],
-                                                                                             strongPeakParams[nnIDX,1],
-                                                                                             phthPeak[0],
-                                                                                             phthPeak[1]))
+        #logger.information('Using [ph, th] = [{:2.2f},{:2.2f}] for [{:2.2f},{:2.2f}]'.format(strongPeakParams[nnIDX,0],
+        #                                                                                     strongPeakParams[nnIDX,1],
+        #                                                                                     phthPeak[0],
+        #                                                                                     phthPeak[1]))
         params, h, t, p = doBVGFit(box, nTheta=nTheta, nPhi=nPhi, fracBoxToHistogram=fracBoxToHistogram,
                                    goodIDX=goodIDX, forceParams=strongPeakParams[nnIDX],
                                    doPeakConvolution=doPeakConvolution, sigX0Scale=sigX0Scale, sigY0Scale=sigY0Scale)
@@ -489,8 +495,8 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
                              thBins[thBins.size // 2 + dth]]
         boundsDict['MuY'] = [phBins[phBins.size // 2 - dph],
                              phBins[phBins.size // 2 + dph]]
-        # boundsDict['sigX'] = [0.7*sigX0, 1.3*sigX0]
-        boundsDict['SigX'] = [0., 0.02]
+        boundsDict['SigX'] = [0.5*sigX0, 1.5*sigX0]
+        #boundsDict['SigX'] = [0., 0.02]
         boundsDict['SigY'] = [0., 0.02]
         boundsDict['SigP'] = [-1., 1.]
         boundsDict['Bg'] = [0, np.inf]
@@ -520,7 +526,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m.setAttributeValue('nX', h.shape[0])
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
-
         # Do the fit
         #bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(
         #), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
@@ -589,7 +594,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m.setAttributeValue('nX', h.shape[0])
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
-
         # Do the fit
         #plt.figure(18); plt.clf(); plt.imshow(m.function2D(pos)); plt.title('BVG Initial guess')
         bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))

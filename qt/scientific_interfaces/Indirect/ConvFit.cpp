@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFit.h"
 #include "ConvFitDataPresenter.h"
 
@@ -106,6 +112,7 @@ void ConvFit::setupFitTab() {
       m_dblManager->addProperty("InstrumentResolution");
 
   // Post Plot and Save
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
@@ -138,7 +145,9 @@ void ConvFit::saveClicked() { IndirectFitAnalysisTab::saveResult(); }
  * Handles plotting the workspace when plot is clicked
  */
 void ConvFit::plotClicked() {
+  setPlotResultIsPlotting(true);
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
+  setPlotResultIsPlotting(false);
 }
 
 void ConvFit::updatePlotOptions() {
@@ -169,14 +178,37 @@ std::string ConvFit::fitTypeString() const {
   return fitType;
 }
 
+void ConvFit::setRunEnabled(bool enabled) {
+  m_uiForm->pbRun->setEnabled(enabled);
+}
+
 void ConvFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
   m_uiForm->cbPlotType->setEnabled(enabled);
 }
 
+void ConvFit::setFitSingleSpectrumEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
+}
+
 void ConvFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
+
+void ConvFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
+  setFitSingleSpectrumEnabled(!running);
+}
+
+void ConvFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotResultEnabled(!plotting);
+}
+
+void ConvFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

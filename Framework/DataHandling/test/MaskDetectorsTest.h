@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MARKDEADDETECTORSTEST_H_
 #define MARKDEADDETECTORSTEST_H_
 
@@ -6,6 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -48,8 +55,8 @@ public:
    * Generate a Workspace which can be (1) EventWorkspace, (2) Workspace2D, and
    * (3) SpecialWorkspace2D
    */
-  void setUpWS(bool event, const std::string &name = "testSpace",
-               bool asMaskWorkspace = false, int numspec = 9) {
+  static void setUpWS(bool event, const std::string &name = "testSpace",
+                      bool asMaskWorkspace = false, int numspec = 9) {
     // 1. Instrument
     int num_banks = numspec / 9;
     if (num_banks < 1)
@@ -776,6 +783,38 @@ public:
                 boost::lexical_cast<std::string>(det.getID()) +
                 "; Spectra N: " + boost::lexical_cast<std::string>(i),
             spectrumInfo.isMasked(i), false);
+      }
+    }
+  }
+
+  void test_MaskingMaskWorkspace() {
+    const auto &ads = AnalysisDataService::Instance();
+    const std::string inputWSName("inputWS");
+    constexpr int numInputSpec(5);
+    constexpr int maskedIndex{numInputSpec / 2};
+    setUpWS(false, inputWSName, true, numInputSpec);
+    auto inputWS = ads.retrieveWS<MatrixWorkspace>(inputWSName);
+    MaskDetectors masker;
+    masker.initialize();
+    masker.setChild(true);
+    masker.setProperty("Workspace", inputWS);
+    masker.setPropertyValue("WorkspaceIndexList", std::to_string(maskedIndex));
+    masker.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(masker.execute());
+    // Check that the workspace has not suddenly changed.
+    // Guards against a bug where the Workspace property was set to another
+    // workspace breaking some Python scripts.
+    Workspace_sptr outputWS = masker.getProperty("Workspace");
+    TS_ASSERT_EQUALS(inputWS, outputWS)
+    // MaskWorkspaces don't have masks, but communicate the mask state by
+    // nonzero numbers.
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
+      TS_ASSERT(!spectrumInfo.isMasked(i))
+      if (i == maskedIndex) {
+        TS_ASSERT_EQUALS(inputWS->y(i)[0], 1.)
+      } else {
+        TS_ASSERT_EQUALS(inputWS->y(i)[0], 0.)
       }
     }
   }

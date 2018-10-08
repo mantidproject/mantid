@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTTEST_H_
 #define INSTRUMENTTEST_H_
 
@@ -393,6 +399,14 @@ public:
     std::vector<IDetector_const_sptr> dets;
     inst->getDetectorsInBank(dets, "bank2");
     TS_ASSERT_EQUALS(dets.size(), 9);
+  }
+
+  void test_getDetectorsInBank_throwsIfBankNotFound() {
+    Instrument_const_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    std::vector<IDetector_const_sptr> dets;
+    TS_ASSERT_THROWS(inst->getDetectorsInBank(dets, "bank_in_the_dark_side"),
+                     Exception::NotFoundError)
   }
 
   void test_getDetectors() {

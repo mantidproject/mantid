@@ -1,8 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotView.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <boost/numeric/conversion/cast.hpp>
+
+#include <QMessageBox>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,10 +42,16 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
 
 IndirectFitPlotView::~IndirectFitPlotView() {}
 
+std::string IndirectFitPlotView::getSpectrumText() const {
+  return m_plotForm->cbPlotSpectrum->currentText().toStdString();
+}
+
 std::size_t IndirectFitPlotView::getSelectedSpectrum() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
     return m_plotForm->spPlotSpectrum->value();
-  return m_plotForm->cbPlotSpectrum->currentIndex();
+  else if (m_plotForm->cbPlotSpectrum->count() != 0)
+    return std::stoull(getSpectrumText());
+  return 0;
 }
 
 int IndirectFitPlotView::getSelectedSpectrumIndex() const {
@@ -151,30 +165,24 @@ void IndirectFitPlotView::removeFromBottomPreview(const QString &name) {
   m_plotForm->ppPlotBottom->removeSpectrum(name);
 }
 
-void IndirectFitPlotView::disablePlotGuess() {
-  m_plotForm->ckPlotGuess->setDisabled(true);
-  m_plotForm->ckPlotGuess->setChecked(false);
+void IndirectFitPlotView::enablePlotGuess(bool enable) {
+  if (!enable)
+    m_plotForm->ckPlotGuess->setChecked(enable);
+  m_plotForm->ckPlotGuess->setEnabled(enable);
 }
 
-void IndirectFitPlotView::enablePlotGuess() {
-  m_plotForm->ckPlotGuess->setEnabled(true);
+void IndirectFitPlotView::enableFitSingleSpectrum(bool enable) {
+  m_plotForm->pbFitSingle->setEnabled(enable);
 }
 
-void IndirectFitPlotView::disableSpectrumSelection() {
-  m_plotForm->spPlotSpectrum->setValue(0);
-  m_plotForm->spPlotSpectrum->setDisabled(true);
+void IndirectFitPlotView::enableSpectrumSelection(bool enable) {
+  if (!enable)
+    m_plotForm->spPlotSpectrum->setValue(0);
+  m_plotForm->spPlotSpectrum->setEnabled(enable);
 }
 
-void IndirectFitPlotView::enableSpectrumSelection() {
-  m_plotForm->spPlotSpectrum->setEnabled(true);
-}
-
-void IndirectFitPlotView::disableFitRangeSelection() {
-  m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(false);
-}
-
-void IndirectFitPlotView::enableFitRangeSelection() {
-  m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(true);
+void IndirectFitPlotView::enableFitRangeSelection(bool enable) {
+  m_plotForm->ppPlotTop->getRangeSelector("FitRange")->setVisible(enable);
 }
 
 void IndirectFitPlotView::clearTopPreview() { m_plotForm->ppPlotTop->clear(); }
@@ -246,6 +254,11 @@ void IndirectFitPlotView::setBackgroundRangeVisible(bool visible) {
 
 void IndirectFitPlotView::setHWHMRangeVisible(bool visible) {
   m_plotForm->ppPlotTop->getRangeSelector("HWHM")->setVisible(visible);
+}
+
+void IndirectFitPlotView::displayMessage(const std::string &message) const {
+  QMessageBox::information(parentWidget(), "MantidPlot - Warning",
+                           QString::fromStdString(message));
 }
 
 void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {

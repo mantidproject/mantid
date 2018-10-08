@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """A selection of utility functions related to Qt functionality
 """
 from __future__ import absolute_import
@@ -24,10 +17,12 @@ from importlib import import_module
 import os.path as osp
 
 # 3rd-party modules
-import qtawesome as qta
 from qtpy import QT_VERSION
 from qtpy.uic import loadUi, loadUiType
 from qtpy.QtWidgets import QAction, QMenu
+
+# local modules
+from ...icons import get_icon
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 
@@ -135,7 +130,7 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
         if shortcut_context is not None:
             action.setShortcutContext(shortcut_context)
     if icon_name is not None:
-        action.setIcon(qta.icon(icon_name))
+        action.setIcon(get_icon(icon_name))
 
     return action
 

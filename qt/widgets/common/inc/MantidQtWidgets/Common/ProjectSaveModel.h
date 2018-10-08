@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODEL_H
 #define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODEL_H
 
@@ -40,7 +46,9 @@ struct WindowInfo {
 class EXPORT_OPT_MANTIDQT_COMMON ProjectSaveModel {
 public:
   /// Construct a new model instance with vector of window handles
-  ProjectSaveModel(std::vector<MantidQt::API::IProjectSerialisable *> windows);
+  ProjectSaveModel(std::vector<MantidQt::API::IProjectSerialisable *> windows,
+                   std::vector<std::string> activePythonInterfaces =
+                       std::vector<std::string>());
 
   /// Check if a workspace has any windows attached to it
   bool hasWindows(const std::string &ws) const;
@@ -49,6 +57,8 @@ public:
   getWindowNames(const std::vector<std::string> &wsNames) const;
   /// Get all workspace names
   std::vector<std::string> getWorkspaceNames() const;
+  /// Return the list of python interfaces that can be saved
+  std::vector<std::string> getAllPythonInterfaces() const;
   /// Get all window information for a collection of workspaces
   std::vector<WindowInfo>
   getWindowInformation(const std::vector<std::string> &wsNames,
@@ -80,6 +90,7 @@ private:
       m_workspaceWindows;
 
   std::vector<MantidQt::API::IProjectSerialisable *> m_unattachedWindows;
+  std::vector<std::string> m_activePythonInterfaces;
 };
 
 } // namespace MantidWidgets

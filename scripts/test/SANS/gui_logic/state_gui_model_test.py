@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
 from sans.gui_logic.models.state_gui_model import StateGuiModel
@@ -512,11 +518,11 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     # Phi mask
     # ------------------------------------------------------------------------------------------------------------------
-    def test_that_phi_mask_defaults_to_empty_and_false_for_use_mirror(self):
+    def test_that_phi_mask_defaults_to_90_and_true_for_use_mirror(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertTrue(state_gui_model.phi_limit_min == "")
-        self.assertTrue(state_gui_model.phi_limit_max == "")
-        self.assertFalse(state_gui_model.phi_limit_use_mirror)
+        self.assertTrue(state_gui_model.phi_limit_min == "-90")
+        self.assertTrue(state_gui_model.phi_limit_max == "90")
+        self.assertTrue(state_gui_model.phi_limit_use_mirror)
 
     def test_that_phi_mask_can_be_set(self):
         state_gui_model = StateGuiModel({"test": [1]})

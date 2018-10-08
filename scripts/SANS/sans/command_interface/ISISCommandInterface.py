@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import re
 import inspect
@@ -591,7 +597,7 @@ def LimitsWav(lmin, lmax, step, bin_type):
     @param lmin: the lower wavelength bound.
     @param lmax: the upper wavelength bound.
     @param step: the wavelength step.
-    @param bin_type: teh bin type, ie linear or logarithmic. Accepted strings are "LINEAR" and "LOGARITHMIC"
+    @param bin_type: the bin type, ie linear or logarithmic. Accepted strings are "LINEAR" and "LOGARITHMIC"
     """
     lmin = float(lmin)
     lmax = float(lmax)
@@ -826,7 +832,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
     if centreit:
         raise RuntimeError("The beam centre finder is currently not supported.")
     if plotresults:
-        raise RuntimeError("Plotting the results is currenlty not supported.")
+        raise RuntimeError("Plotting the results is currently not supported.")
 
     # Set up the save algorithms
     save_algs = []
@@ -897,7 +903,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
         # Name of the output. We need to modify the name according to the setup of the old reduction mechanism
         output_name = parsed_batch_entry[BatchReductionEntry.Output]
 
-        # In addition to the output name the user can specify with combineDet an additional suffix (in addtion to the
+        # In addition to the output name the user can specify with combineDet an additional suffix (in addition to the
         # suffix that the user can set already -- was there previously, so we have to provide that)
         use_reduction_mode_as_suffix = combineDet is not None
 
@@ -1017,7 +1023,7 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     Finds the beam centre position.
     @param rlow: Inner radius of quadrant
     @param rupp: Outer radius of quadrant
-    @param MaxIter: Maximun number of iterations
+    @param MaxIter: Maximum number of iterations
     @param xstart: starting x centre position, if not set is taken from user file
     @param ystart: starting y centre position, if not set is taken from user file
     @param tolerance: Sets the step size at which the search will stop
@@ -1028,7 +1034,7 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     if not xstart:
         xstart = state.move.detectors['LAB'].sample_centre_pos1
     elif config['default.instrument'] == 'LARMOR':
-        # This is to mantain compatibility with how this function worked in the old Interface so that legacy scripts still
+        # This is to maintain compatibility with how this function worked in the old Interface so that legacy scripts still
         # function
         xstart = xstart * 1000
     if not ystart:
@@ -1088,7 +1094,7 @@ def AddRuns(runs, instrument='sans2d', saveAsEvent=False, binning="Monitors", is
                     string list with the same format that is used for the Rebin algorithm. This property is ignored
                     when saving as event data.
     @param isOverlay: sets if the the overlay mechanism should be used when the saveAsEvent flag is set
-    @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specifed
+    @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specified
                         in a string list. Either time_shifts is not used or a list with times in secomds. Note that there
                         has to be one entry fewer than the number of workspaces to add.
     @param defType: the file type

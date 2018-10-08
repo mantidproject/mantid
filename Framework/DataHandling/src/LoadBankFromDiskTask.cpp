@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadBankFromDiskTask.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -187,7 +194,7 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
   int64_t dim0 = recalculateDataSize(id_info.dims[0]);
 
   // Now we allocate the required arrays
-  m_event_id = new uint32_t[m_loadSize[0]];
+  auto event_id = Mantid::Kernel::make_unique<uint32_t[]>(m_loadSize[0]);
 
   // Check that the required space is there in the file.
   if (dim0 < m_loadSize[0] + m_loadStart[0]) {
@@ -247,9 +254,8 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
  */
 void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Allocate the array
-  auto temp = new float[m_loadSize[0]];
-  delete[] m_event_time_of_flight;
-  m_event_time_of_flight = temp;
+  auto event_time_of_flight =
+      Mantid::Kernel::make_unique<float[]>(m_loadSize[0]);
 
   // Get the list of event_time_of_flight's
   if (!m_oldNexusFileNames)
@@ -307,9 +313,7 @@ void LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   m_have_weight = true;
 
   // Allocate the array
-  auto temp = new float[m_loadSize[0]];
-  delete[] m_event_weight;
-  m_event_weight = temp;
+  auto event_weight = Mantid::Kernel::make_unique<float[]>(m_loadSize[0]);
 
   ::NeXus::Info weight_info = file.getInfo();
   int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);

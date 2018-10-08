@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
@@ -319,7 +325,6 @@ void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId,
  * @return Component index of this component
  */
 size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
-
   auto detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
 
   /* Already allocated we just need to index into the inital front-detector

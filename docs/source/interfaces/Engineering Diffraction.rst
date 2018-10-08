@@ -513,7 +513,7 @@ To do a refinement, take the following steps:
    corresponding **Browse** button, then clicking **Load**. The run
    number and bank ID (for example ``123456_1``) should appear in the
    **Run Number** list in the **Preview** section. Click the label,
-   and the run willl be plotted
+   and the run will be plotted
 2. Select your input files, and input any additional parameters in the
    **GSASIIRefineFitPeaks Controls** section
 3. Click **Run Refinement**. Once complete, fitted peaks for the run

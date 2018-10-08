@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_STRINGS_H
 #define MANTID_KERNEL_STRINGS_H
 
@@ -22,27 +28,6 @@ namespace Mantid {
 namespace Kernel {
 
 /** Holds support functions for strings.
-
-Copyright & copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge
-National Laboratory
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
 namespace Strings {
@@ -73,6 +58,123 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
       output << separator;
   }
   return output.str();
+}
+
+//------------------------------------------------------------------------------------------------
+/** Join a set or vector of (something that turns into a string) together
+ * into one string, separated by a string.
+ * Returns an empty string if the range is null.
+ * Does not add the separator after the LAST item.
+ *
+ * For example, join a vector of strings with commas with:
+ *  out = join(v.begin(), v.end(), ", ");
+ *
+ * This version is used for random access iterators (e.g. map, set), and
+ * it calls simpleJoin().
+ *
+ * @param begin :: iterator at the start
+ * @param end :: iterator at the end
+ * @param separator :: string to append.
+ * @return
+ */
+template <typename ITERATOR_TYPE>
+DLLExport std::string
+join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
+     typename std::enable_if<
+         !(std::is_same<
+             typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+             std::random_access_iterator_tag>::value)>::type * = nullptr) {
+  return simpleJoin(begin, end, separator);
+}
+
+//------------------------------------------------------------------------------------------------
+/** Join a set or vector of (something that turns into a string) together
+ * into one string, separated by a string.
+ * Returns an empty string if the range is null.
+ * Does not add the separator after the LAST item.
+ *
+ * For example, join a vector of strings with commas with:
+ *  out = join(v.begin(), v.end(), ", ");
+ *
+ * This is a faster threaded version of the join() function above.
+ * It is used only if the iterators are not random access (e.g. vector), as it
+ * needs to be able to determine the distance between begin and end.
+ * It reverts to calling simpleJoin() if the input array is small.
+ *
+ * @param begin :: iterator at the start
+ * @param end :: iterator at the end
+ * @param separator :: string to append.
+ * @return
+ */
+template <typename ITERATOR_TYPE>
+DLLExport std::string
+join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
+     typename std::enable_if<
+         (std::is_same<
+             typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+             std::random_access_iterator_tag>::value)>::type * = nullptr) {
+
+  // Get max number of threads
+  int nmaxThreads = static_cast<int>(PARALLEL_GET_MAX_THREADS);
+
+  // Define minimum size for using threading
+  int min_size = 500 * nmaxThreads;
+
+  // Get the distance between begining and end
+  int dist = static_cast<int>(std::distance(begin, end));
+
+  if (dist < min_size) {
+
+    // If the input array is small, use the simpler function to avoid
+    // unnecessary overhead from generating the parallel section
+    return simpleJoin(begin, end, separator);
+
+  } else {
+
+    // Allocate vector space
+    std::vector<std::string> output(nmaxThreads);
+    size_t stream_size = 0;
+
+    // Actual number of threads in the current region
+    int nThreads = 1;
+#pragma omp parallel reduction(+ : stream_size)
+    {
+      nThreads = static_cast<int>(PARALLEL_NUMBER_OF_THREADS);
+      int idThread = static_cast<int>(PARALLEL_THREAD_NUMBER);
+
+      // Initialise ostringstream
+      std::ostringstream thread_stream;
+
+/* To make sure the loop is done in the right order, we use schedule(static).
+
+   From the OpenMP documentation:
+   "When schedule(static, chunk_size) is specified, iterations are divided into
+   chunks of size chunk_size, and the chunks are assigned to the threads in the
+   team in a round-robin fashion **in the order of the thread number**."
+
+   "When no chunk_size is specified, the iteration space is divided into chunks
+   that are approximately equal in size, and at most one chunk is distributed
+   to each thread."
+*/
+#pragma omp for schedule(static)
+      for (int i = 0; i < dist; i++) {
+        thread_stream << separator << *(begin + i);
+      }
+      output[idThread] = thread_stream.str();
+      stream_size += output[idThread].length();
+    }
+
+    // Reserve space in memory for output string
+    std::string master_string = output[0].erase(0, separator.length());
+    master_string.reserve(stream_size - separator.length());
+
+    // Concatenate the contributions from the remaning threads
+    for (int i = 1; i < nThreads; i++) {
+      master_string += output[i];
+    }
+
+    return master_string;
+  }
 }
 
 //------------------------------------------------------------------------------------------------

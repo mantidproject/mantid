@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDCOLORMAP_H_
 #define MANTIDCOLORMAP_H_
 
@@ -5,37 +11,19 @@
 // Includes
 //---------------------------------------------
 #include "DllOption.h"
-#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include "qwt_color_map.h"
-#include <boost/shared_ptr.hpp>
 
 /**
    The class inherits from QwtColorMap and implements reading a color color map
    from a file.
    There is also a mode which indicates the scale type.
-
-   Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class EXPORT_OPT_MANTIDQT_LEGACYQWT MantidColorMap : public QwtColorMap {
+
+public:
+  static QString chooseColorMap(const QString &previousFile, QWidget *parent);
+  static QString exists(const QString &filename);
 
 public:
   MantidColorMap();
@@ -51,8 +39,6 @@ public:
   double getNthPower() const { return m_nth_power; };
 
   bool loadMap(const QString &filename);
-
-  static QString loadMapDialog(QString previousFile, QWidget *parent);
 
   void setNanColor(int r, int g, int b);
 

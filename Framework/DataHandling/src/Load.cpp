@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/Load.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -284,6 +290,7 @@ void Load::init() {
   exts.emplace_back(".hd5");
   exts.emplace_back(".sqw");
   exts.emplace_back(".fits");
+  exts.emplace_back(".bin");
 
   declareProperty(
       Kernel::make_unique<MultipleFileProperty>("Filename", exts),

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from six import with_metaclass
 from abc import (ABCMeta, abstractmethod)
@@ -305,7 +311,7 @@ def mask_beam_stop(mask_info, workspace, instrument, detector_names):
 
     :param mask_info: a SANSStateMask object.
     :param workspace: the workspace which is to be masked.
-    :param instrument: the instrument assoicated with the current workspace.
+    :param instrument: the instrument associated with the current workspace.
     :return: a masked workspace
     """
     beam_stop_arm_width = mask_info.beam_stop_arm_width

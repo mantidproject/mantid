@@ -110,7 +110,7 @@ TextDialog::TextDialog(TextType type, QWidget *parent, Qt::WFlags fl)
   buttonDefault = nullptr;
   boxBackgroundTransparency = nullptr;
   if (textType == TextMarker) { // TODO: Sometime background features for axes
-                                // lables should be implemented
+                                // labels should be implemented
     topLayout->addWidget(new QLabel(tr("Opacity")), 3, 0);
     boxBackgroundTransparency = new QSpinBox();
     boxBackgroundTransparency->setRange(0, 255);

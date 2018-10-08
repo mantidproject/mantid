@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H
 #define MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H
 
@@ -67,6 +73,7 @@ public:
   MOCK_METHOD2(setInstrumentList, void(const QString &, const QString &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
+  MOCK_METHOD0(setItemDelegate, void());
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<QString, QVariant> &));

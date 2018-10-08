@@ -1,5 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/reference_existing_object.hpp>
@@ -19,6 +26,23 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getFullPathOverloader, getFullPath, 1, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 } // namespace
+
+/**
+ * Runs FileFinder.findRuns after releasing the python GIL.
+ * @param self :: A reference to the calling object
+ * @param hinstr :: A string containing the run number and possibly instrument
+ * to search for
+ */
+std::vector<std::string> runFinderProxy(FileFinderImpl &self,
+                                        std::string hinstr) {
+  //   Before calling the function we need to release the GIL,
+  //   drop the Python threadstate and reset anything installed
+  //   via PyEval_SetTrace while we execute the C++ code -
+  //   ReleaseGlobalInterpreter does this for us
+  Mantid::PythonInterface::ReleaseGlobalInterpreterLock
+      releaseGlobalInterpreterLock;
+  return self.findRuns(hinstr);
+}
 
 void export_FileFinder() {
   class_<FileFinderImpl, boost::noncopyable>("FileFinderImpl", no_init)

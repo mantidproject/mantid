@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import (PythonAlgorithm, AlgorithmFactory,
                         PropertyMode, WorkspaceProperty, Progress,
@@ -35,6 +41,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                                                direction=Direction.Input),
                              "Workspace containing the UB matrix to use")
         self.declareProperty("Wavelength", 1.488, validator=FloatBoundedValidator(0.0), doc="Wavelength to set the workspace")
+        self.declareProperty("S1Offset", 0., doc="Offset to apply (in degrees) to the s1 of the input workspace")
         self.declareProperty('NormaliseBy', 'Monitor', StringListValidator(['None', 'Time', 'Monitor']),
                              "Normalise to monitor, time or None.")
         self.declareProperty('Frame', 'Q_sample', StringListValidator(['Q_sample', 'HKL']),
@@ -153,7 +160,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         progress = Progress(self, 0.0, 1.0, number_of_runs+4)
 
         # Get rotation array
-        s1 = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('s1').value)
+        s1 = np.deg2rad(inWS.getExperimentInfo(0).run().getProperty('s1').value) + np.deg2rad(self.getProperty("S1Offset").value)
 
         normaliseBy = self.getProperty("NormaliseBy").value
         if normaliseBy == "Monitor":

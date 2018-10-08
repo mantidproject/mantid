@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ErrorReporter.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
@@ -28,16 +34,16 @@ Logger g_log("ErrorReporter");
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share)
-    : ErrorReporter(application, upTime, exitCode, share, "", "") {}
+    : ErrorReporter(application, upTime, exitCode, share, "", "", "") {}
 
 /** Constructor
  */
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share, std::string name,
-                             std::string email)
+                             std::string email, std::string textBox)
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
-      m_share(share), m_name(name), m_email(email) {
+      m_share(share), m_name(name), m_email(email), m_textbox(textBox) {
   auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
       "errorreports.rooturl");
   if (!url.is_initialized()) {
@@ -49,15 +55,17 @@ ErrorReporter::ErrorReporter(std::string application,
 
 /** Generates an error message and then calls an internet helper to send it
  */
-void ErrorReporter::sendErrorReport() {
+int ErrorReporter::sendErrorReport() {
   try {
     std::string message = this->generateErrorMessage();
 
     // send the report
     // Poco::ActiveResult<int> result = m_errorActiveMethod(message);
-    this->sendReport(message, m_url + "/api/error");
+    auto status = this->sendReport(message, m_url + "/api/error");
+    return status;
   } catch (std::exception &ex) {
     g_log.debug() << "Send error report failure. " << ex.what() << '\n';
+    return -1;
   }
 }
 
@@ -102,11 +110,13 @@ std::string ErrorReporter::generateErrorMessage() {
   message["exitCode"] = m_exitCode;
 
   if (m_share) {
+    message["textBox"] = m_textbox;
     message["email"] = m_email;
     message["name"] = m_name;
   } else {
     message["email"] = "";
     message["name"] = "";
+    message["textBox"] = "";
   }
 
   ::Json::FastWriter writer;

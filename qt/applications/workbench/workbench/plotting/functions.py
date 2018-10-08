@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Defines a collection of functions to support plotting workspaces with
 our custom window.
 """
@@ -284,7 +277,7 @@ def _raise_if_not_sequence(value, seq_name, element_type=None):
     is an instance of this type
     :raises ValueError: if the conditions are not met
     """
-    accepted_types = (list, tuple)
+    accepted_types = (list, tuple, range)
     if type(value) not in accepted_types:
         raise ValueError("{} should be a list or tuple".format(seq_name))
     if element_type is not None:

@@ -1,11 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTRENDERER_H_
 #define INSTRUMENTRENDERER_H_
 
+#include "ColorMap.h"
 #include "DllOption.h"
 #include "GLColor.h"
+
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+
 #include <QString>
+#include <map>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,7 +33,7 @@ private:
   mutable std::vector<std::vector<char>> colorTextures;
   mutable std::vector<std::vector<char>> pickTextures;
   std::vector<double> m_specIntegrs;
-  MantidColorMap m_colorMap;
+  ColorMap m_colorMap;
 
 public:
   InstrumentRenderer(const InstrumentActor &actor);
@@ -39,7 +48,7 @@ public:
 
   void loadColorMap(const QString &fname);
 
-  const MantidColorMap &getColorMap() const { return m_colorMap; }
+  const ColorMap &getColorMap() const { return m_colorMap; }
 
   GLColor getColor(size_t index) const;
 

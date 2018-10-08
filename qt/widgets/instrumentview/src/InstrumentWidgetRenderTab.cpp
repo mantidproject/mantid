@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
@@ -19,13 +25,11 @@
 #include <QToolTip>
 #include <QVBoxLayout>
 
-#include <qwt_scale_engine.h>
-#include <qwt_scale_widget.h>
-
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/InstrumentView/BinDialog.h"
-#include "MantidQtWidgets/InstrumentView/ColorMapWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+
+#include "MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h"
 
 #include <limits>
 
@@ -185,7 +189,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   QFrame *axisViewFrame = setupAxisFrame();
 
   // Colormap widget
-  m_colorMapWidget = new ColorMapWidget(0, this);
+  m_colorMapWidget = new DraggableColorBarWidget(0, this);
   connect(m_colorMapWidget, SIGNAL(scaleTypeChanged(int)), m_instrWidget,
           SLOT(changeScaleType(int)));
   connect(m_colorMapWidget, SIGNAL(nthPowerChanged(double)), m_instrWidget,
@@ -321,15 +325,6 @@ void InstrumentWidgetRenderTab::initSurface() {
   } else {
     m_UCorrection->setEnabled(false);
   }
-}
-
-/**
- *
- */
-void InstrumentWidgetRenderTab::setupColorBarScaling(const MantidColorMap &cmap,
-                                                     double minPositive) {
-  m_colorMapWidget->setMinPositiveValue(minPositive);
-  m_colorMapWidget->setupColorBarScaling(cmap);
 }
 
 /**
@@ -510,7 +505,7 @@ void InstrumentWidgetRenderTab::saveImage(QString filename) {
  * @param minPositive :: A new minimum positive value for the log scale.
  * @param autoscaling :: Flag to set autoscaling of the color
  */
-void InstrumentWidgetRenderTab::setupColorBar(const MantidColorMap &cmap,
+void InstrumentWidgetRenderTab::setupColorBar(const ColorMap &cmap,
                                               double minValue, double maxValue,
                                               double minPositive,
                                               bool autoscaling) {

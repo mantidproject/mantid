@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/LegacyQwt/MWView.h"
 // includes for workspace handling
 #include "MantidAPI/AlgorithmManager.h"
@@ -60,7 +66,7 @@ MWView::~MWView() {
 void MWView::loadColorMap(QString filename) {
   QString fileselection;
   if (filename.isEmpty()) {
-    fileselection = MantidColorMap::loadMapDialog(m_currentColorMapFile, this);
+    fileselection = MantidColorMap::chooseColorMap(m_currentColorMapFile, this);
     if (fileselection.isEmpty())
       return;
   } else

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 #pylint: disable=invalid-name
 #pylint: disable=too-many-arguments
@@ -412,7 +418,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Execute the dark_run_subtractor - let exceptions flow to help track down errors
         start_spec = 9
-        end_spec = 20 # Full specturm length
+        end_spec = 20 # Full spectrum length
         scatter_workspace, monitor_workspace = dark_run_subtractor.execute(scatter_workspace, monitor_workspace,
                                                                            start_spec, end_spec, is_input_event)
 

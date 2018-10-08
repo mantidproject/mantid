@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "QtReflSettingsView.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
@@ -486,8 +492,7 @@ QLineEdit &QtReflSettingsView::stitchOptionsLineEdit() const {
 /** Creates hints for 'Stitch1DMany'
  * @param hints :: Hints as a map
  */
-void QtReflSettingsView::createStitchHints(
-    const std::map<std::string, std::string> &hints) {
+void QtReflSettingsView::createStitchHints(const std::vector<Hint> &hints) {
 
   // We want to add the stitch params box next to the stitch
   // label, so first find the label's position

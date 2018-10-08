@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
@@ -41,9 +47,8 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
                          "energy in mili-eV");
   this->declareParameter("Shift", 0.0, "Shift in the centre of the peak");
 
-  this->declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
-  this->declareAttribute("WorkspaceIndex", API::IFunction::Attribute(0));
   this->declareAttribute("N", API::IFunction::Attribute(3));
+  declareAttributes();
 }
 
 /**

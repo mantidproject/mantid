@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # std imports
 import unittest
@@ -24,21 +17,28 @@ except ImportError:
 
 # 3rdparty imports
 from mantid.api import WorkspaceFactory
+from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialog, QDialogButtonBox
 
 # local imports
-from mantidqt.utils.qt.test import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 from mantidqt.dialogs.spectraselectordialog import (get_spectra_selection, parse_selection_str,
                                                     SpectraSelectionDialog)
 
 
-@requires_qapp
-class SpectraSelectionDialogTest(unittest.TestCase):
+class SpectraSelectionDialogTest(GuiTest):
 
+    _mock_get_icon = None
     _single_spec_ws = None
     _multi_spec_ws = None
 
     def setUp(self):
+        # patch away getting a real icon as it can hit a race condition when running tests
+        # in parallel
+        patcher = mock.patch('mantidqt.dialogs.spectraselectordialog.get_icon')
+        self._mock_get_icon = patcher.start()
+        self._mock_get_icon.return_value = QIcon()
+        self.addCleanup(patcher.stop)
         if self._single_spec_ws is None:
             self.__class__._single_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=1,
                                                                                 XLength=1, YLength=1)
@@ -104,6 +104,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         dlg._ui.wkspIndices.setText("50-60")
         dlg._ui.buttonBox.button(QDialogButtonBox.Ok).click()
 
+        self._mock_get_icon.assert_called_once_with('fa.asterisk', color='red', scale_factor=0.6)
         self.assertTrue(dlg.selection is not None)
         self.assertTrue(dlg.selection.spectra is None)
         self.assertEqual(list(range(50, 61)), dlg.selection.wksp_indices)

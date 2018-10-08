@@ -1,27 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2018 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
 
+from mantidqt.utils.qt.test import GuiTest
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QIcon
 from qtpy.QtTest import QTest
-
-import qtawesome as qta
-
-from mantidqt.utils.qt.test import requires_qapp
 
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 from workbench.widgets.plotselector.view import EXPORT_TYPES, PlotSelectorView, Column
@@ -33,14 +24,18 @@ except ImportError:
     import mock
 
 
-@requires_qapp
-class PlotSelectorWidgetTest(unittest.TestCase):
+class PlotSelectorWidgetTest(GuiTest):
 
     def setUp(self):
         self.presenter = mock.Mock(spec=PlotSelectorPresenter)
         self.presenter.get_plot_name_from_number = mock.Mock(side_effect=self.se_plot_name)
         self.presenter.get_initial_last_active_value = mock.Mock(side_effect=self.se_get_initial_last_active_value)
         self.presenter.is_shown_by_filter = mock.Mock(side_effect=self.se_is_shown_by_filter)
+
+        patcher = mock.patch('workbench.widgets.plotselector.view.get_icon')
+        self.mock_get_icon = patcher.start()
+        self.mock_get_icon.return_value = QIcon()
+        self.addCleanup(patcher.stop)
 
         self.view = PlotSelectorView(self.presenter)
         self.view.table_widget.setSortingEnabled(False)
@@ -285,24 +280,18 @@ class PlotSelectorWidgetTest(unittest.TestCase):
     def test_set_visibility_icon_to_visible(self):
         plot_numbers = [0, 1, 2]
         self.view.set_plot_list(plot_numbers)
-
+        self.mock_get_icon.reset_mock()
         self.view.set_visibility_icon(0, True)
 
-        name_widget = self.view.table_widget.cellWidget(0, Column.Name)
-        icon = name_widget.hide_button.icon()
-        self.assertEqual(icon.pixmap(50, 50).toImage(),
-                         qta.icon('fa.eye').pixmap(50, 50).toImage())
+        self.mock_get_icon.assert_called_once_with('fa.eye')
 
     def test_set_visibility_icon_to_hidden(self):
         plot_numbers = [0, 1, 2]
         self.view.set_plot_list(plot_numbers)
-
+        self.mock_get_icon.reset_mock()
         self.view.set_visibility_icon(0, False)
 
-        name_widget = self.view.table_widget.cellWidget(0, Column.Name)
-        icon = name_widget.hide_button.icon()
-        self.assertEqual(icon.pixmap(50, 50).toImage(),
-                         qta.icon('fa.eye', color='lightgrey').pixmap(50, 50).toImage())
+        self.mock_get_icon.assert_called_once_with('fa.eye', color='lightgrey')
 
     # ------------------------ Plot Renaming ------------------------
 

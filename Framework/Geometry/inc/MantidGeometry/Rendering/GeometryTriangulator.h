@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_SURFACETRIANGULATOR_H_
 #define MANTID_GEOMETRY_SURFACETRIANGULATOR_H_
 
@@ -10,47 +16,27 @@ class TopoDS_Shape;
 namespace Mantid {
 namespace Geometry {
 class CSGObject;
-class MeshObject;
+class RenderingMesh;
 
 namespace detail {
+
 /** GeometryTriangulator : Triangulates object surfaces. May or may not use
   opencascade.
-
-  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL GeometryTriangulator {
 private:
   bool m_isTriangulated;
-  size_t m_nFaces;
-  size_t m_nPoints;
+  size_t m_nFaces = 0;
+  size_t m_nPoints = 0;
   std::vector<double> m_points;        ///< double array or points
   std::vector<uint32_t> m_faces;       ///< Integer array of faces
   const CSGObject *m_csgObj = nullptr; ///< Input Object
-  const MeshObject *m_meshObj = nullptr;
+  std::unique_ptr<RenderingMesh> m_meshObj;
   void checkTriangulated();
 
 public:
   GeometryTriangulator(const CSGObject *obj = nullptr);
-  GeometryTriangulator(const MeshObject *obj);
+  GeometryTriangulator(std::unique_ptr<RenderingMesh> obj);
   GeometryTriangulator(const GeometryTriangulator &) = delete;
   GeometryTriangulator &operator=(const GeometryTriangulator &) = delete;
   ~GeometryTriangulator();

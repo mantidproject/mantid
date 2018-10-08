@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H
 #define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H
 
@@ -99,6 +105,18 @@ public:
     TS_ASSERT_EQUALS(names.size(), 2);
     TS_ASSERT_EQUALS(names[0], "ws1");
     TS_ASSERT_EQUALS(names[1], "ws2");
+  }
+
+  void testGetInterfaceNames() {
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
+    std::vector<std::string> interfaces{"Test_Interface",
+                                        "Test_Python_Interface_2"};
+
+    ProjectSaveModel model(windows, interfaces);
+    auto names = model.getAllPythonInterfaces();
+    TS_ASSERT_EQUALS(2, names.size());
+    TS_ASSERT_EQUALS("Test_Interface", names[0]);
+    TS_ASSERT_EQUALS("Test_Python_Interface_2", names[1]);
   }
 
   void testGetWindowNames() {

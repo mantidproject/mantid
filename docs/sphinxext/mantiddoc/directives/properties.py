@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,deprecated-module
 from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
@@ -113,12 +119,12 @@ class PropertiesDirective(AlgorithmBaseDirective):
         # col_sizes.
         table_content_formatted = [
             formatter.format(*item) for item in table_content]
-        # Create a seperator for each column
-        seperator = formatter.format(*['=' * col for col in col_sizes])
+        # Create a separator for each column
+        separator = formatter.format(*['=' * col for col in col_sizes])
         # Build the table.
-        header = '\n' + seperator + '\n' + formatter.format(*header_content) + '\n'
-        content = seperator + '\n' + \
-            '\n'.join(table_content_formatted) + '\n' + seperator
+        header = '\n' + separator + '\n' + formatter.format(*header_content) + '\n'
+        content = separator + '\n' + \
+            '\n'.join(table_content_formatted) + '\n' + separator
         # Join the header and footer.
         return header + content
 
@@ -253,7 +259,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
     def _escape_subsitution_refs(self, desc):
         """
         Find occurrences of text surrounded by vertical bars and assume they
-        are not docutils subsitution referencess by esacping them
+        are not docutils substitution referencess by esacping them
         """
         def repl(match):
             return r'\|' + match.group(1) + r'\|'
