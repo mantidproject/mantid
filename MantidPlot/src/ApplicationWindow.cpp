@@ -16808,7 +16808,7 @@ void ApplicationWindow::checkForProjectRecovery() {
   m_projectRecoveryRunOnStart = true;
 
   m_projectRecovery.removeOlderCheckpoints();
-  
+
   // Mantid crashed during writing to this checkpoint so remove it
   m_projectRecovery.removeLockedCheckpoints();
 
