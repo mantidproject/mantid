@@ -24,7 +24,9 @@ public:
   static LoadBinaryStlTest *createSuite() { return new LoadBinaryStlTest(); }
   static void destroySuite(LoadBinaryStlTest *suite) { delete suite; }
 
-  void assert_shape_matches(std::unique_ptr<Geometry::MeshObject> &shape, int vertices, int triangles, int volume, double delta){
+  void assert_shape_matches(std::unique_ptr<Geometry::MeshObject> &shape,
+                            int vertices, int triangles, int volume,
+                            double delta) {
     TS_ASSERT(shape->hasValidShape());
     TS_ASSERT_EQUALS(shape->numberOfVertices(), vertices);
     TS_ASSERT_EQUALS(shape->numberOfTriangles(), triangles);
@@ -38,7 +40,7 @@ public:
         std::make_unique<LoadBinaryStl>(path);
     auto cube = loader->readStl();
 
-    assert_shape_matches(cube,8,12,3000,0.001);
+    assert_shape_matches(cube, 8, 12, 3000, 0.001);
   }
 
   void test_loading_cylinder_stl() {
@@ -48,7 +50,7 @@ public:
         std::make_unique<LoadBinaryStl>(path);
     auto cylinder = loader->readStl();
 
-    assert_shape_matches(cylinder,722,1440,589,1);
+    assert_shape_matches(cylinder, 722, 1440, 589, 1);
   }
 
   void test_loading_tube_stl() {
@@ -58,7 +60,7 @@ public:
         std::make_unique<LoadBinaryStl>(path);
     auto tube = loader->readStl();
 
-    assert_shape_matches(tube,1080,2160,7068,1);
+    assert_shape_matches(tube, 1080, 2160, 7068, 1);
   }
   // check that isBinaryStl returns false if the file contains an incomplete
   // vertex
