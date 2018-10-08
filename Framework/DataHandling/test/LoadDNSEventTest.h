@@ -9,8 +9,6 @@
 //#include "MantidDataObjects/MDGridBox.h"
 //#include "MantidDataObjects/EventFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/BoxController.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -18,6 +16,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidDataHandling/LoadDNSEvent.h"
+#include <boost/range/irange.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -35,22 +34,23 @@ public:
 
   LoadDNSEventTest() {}
 
-  std::shared_ptr<LoadDNSEvent> makeAlgorithm() {
+  std::shared_ptr<LoadDNSEvent> makeAlgorithm(bool doesThrow = true) {
     std::shared_ptr<LoadDNSEvent> alg(new LoadDNSEvent());
+    alg->setRethrows(doesThrow);
     alg->initialize();
     TS_ASSERT(alg->isInitialized());
     return alg;
   }
 
-  std::shared_ptr<LoadDNSEvent> makeAlgorithm(const std::string &inputFile, const std::string &outputWorkspace) {
-    auto alg = makeAlgorithm();
+  std::shared_ptr<LoadDNSEvent> makeAlgorithm(const std::string &inputFile, const std::string &outputWorkspace, bool doesThrow = true) {
+    auto alg = makeAlgorithm(doesThrow);
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputFile", inputFile));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outputWorkspace));
     return alg;
   }
 
-  std::shared_ptr<LoadDNSEvent> makeAlgorithm(const std::string &inputFile, uint chopperChannel, uint monitorChannel, const std::string &outputWorkspace) {
-    auto alg = makeAlgorithm(inputFile, outputWorkspace);
+  std::shared_ptr<LoadDNSEvent> makeAlgorithm(const std::string &inputFile, uint chopperChannel, uint monitorChannel, const std::string &outputWorkspace, bool doesThrow = true) {
+    auto alg = makeAlgorithm(inputFile, outputWorkspace, doesThrow);
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("chopperChannel", chopperChannel));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("monitorChannel", monitorChannel));
     return alg;
@@ -119,35 +119,37 @@ public:
     TS_ASSERT(iws);
 
     TS_ASSERT_EQUALS(iws->getEventType(), EventType::TOF);
-    TS_ASSERT_EQUALS(iws->size(), 122904);
+    TS_ASSERT_EQUALS(iws->size(), 960*128+24); // number of detector cells
 
 
     TS_ASSERT_EQUALS(iws->getNumDims(), 2);
-    TS_ASSERT_EQUALS(iws->getNPoints(), 122904);
     TS_ASSERT_EQUALS(iws->id(), "EventWorkspace");
-/*
-    // test box controller
-    BoxController_sptr bc = iws->getBoxController();
-    TS_ASSERT(bc);
-    TS_ASSERT_EQUALS(bc->getNumMDBoxes().size(), 6);
 
     // test dimensions
-    std::vector<std::string> v = {"H", "K", "L"};
-    for (auto i = 0; i < 3; i++) {
-      auto dim = iws->getDimension(i);
-      TS_ASSERT(dim);
-      TS_ASSERT_EQUALS(dim->getName(), v[i]);
-      TS_ASSERT_EQUALS(dim->getNBins(), 5);
-      double d(1.0e-05);
-      TS_ASSERT_DELTA(dim->getMinimum(), -2.991993, d);
-      TS_ASSERT_DELTA(dim->getMaximum(), 2.991993, d);
-    }
-    */
+    const auto tofDim = iws->getDimension(0);
+    TS_ASSERT(tofDim);
+    TS_ASSERT_EQUALS(tofDim->getName(), "Time-of-flight");
+    TS_ASSERT_EQUALS(tofDim->getNBins(), 1);
+
+    const auto specDim = iws->getDimension(1);
+    TS_ASSERT(specDim);
+    TS_ASSERT_EQUALS(specDim->getName(), "Spectrum");
+    TS_ASSERT_EQUALS(specDim->getNBins(), 960*128+24); // number of detector cells
+    TS_ASSERT_RELATION(std::greater<double>, specDim->getMinimum(), 0);
+    TS_ASSERT_RELATION(std::greater<double>, specDim->getMaximum(), 0);
+
+    const auto rng = boost::irange(0ul, iws->size());
+    const size_t eventCount = std::accumulate(rng.begin(), rng.end(), 0ul, [&](auto a, auto b) {
+      return a + iws->getSpectrum(b).getEvents().size();
+    });
+    TS_ASSERT_EQUALS(eventCount, 6721)
+
     AnalysisDataService::Instance().remove(outWSName);
   }
 
 private:
-  const std::string m_fileName = "/home/jochimcoenen/Programming/testdata/DNS/data/00550232.mdat  ";
+  const std::string m_fileName = "/home/jochimcoenen/Programming/testdata/DNS/data/00550232.mdat";
+
   const std::string m_badFileName = "dn134011vana.d_dat";
-};
+};//"/home/jochimcoenen/MantidExternalData/MD5/28151e3198f9f57b18b97d87627eadf6",#
 #endif /* MANTID_MDALGORITHMS_LOADDNSSCDEWEST_H_ */
