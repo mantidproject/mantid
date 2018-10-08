@@ -15,6 +15,20 @@ using namespace Mantid::Geometry;
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
 
+bool isWorkspaceInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+template <typename T>
+void addWorkspaceToADS(std::string const &workspaceName, T const &workspace) {
+  AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
+}
+
+template <typename T = MatrixWorkspace>
+boost::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
+}
+
 MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
                                   std::string const &target) {
   auto convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
@@ -51,7 +65,7 @@ WorkspaceGroup_sptr convertUnits(WorkspaceGroup_sptr workspaceGroup,
     auto const name = "__" + workspace->getName() + "_" + target;
     auto const wavelengthWorkspace = convertUnits(
         boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), target);
-    AnalysisDataService::Instance().addOrReplace(name, wavelengthWorkspace);
+    addWorkspaceToADS(name, wavelengthWorkspace);
     convertedNames.emplace_back(name);
   }
   return groupWorkspaces(convertedNames);
@@ -94,18 +108,13 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
 }
 
 AbsorptionCorrections::~AbsorptionCorrections() {
-  if (AnalysisDataService::Instance().doesExist("__mc_corrections_wavelength"))
+  if (isWorkspaceInADS("__mc_corrections_wavelength"))
     AnalysisDataService::Instance().remove("__mc_corrections_wavelength");
 }
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
-  auto const sampleWSName =
-      m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-
-  if (AnalysisDataService::Instance().doesExist(sampleWSName))
-    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        sampleWSName);
-  return nullptr;
+  auto const name = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
+  return isWorkspaceInADS(name) ? getADSWorkspace(name) : nullptr;
 }
 
 void AbsorptionCorrections::setup() { doValidation(); }
@@ -312,14 +321,9 @@ UserInputValidator AbsorptionCorrections::doValidation() {
 
     auto const containerWsName =
         m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-    bool containerExists =
-        AnalysisDataService::Instance().doesExist(containerWsName);
-    if (containerExists &&
-        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            containerWsName)) {
+    if (isWorkspaceInADS(containerWsName) && !getADSWorkspace(containerWsName))
       uiv.addErrorMessage(
           "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
-    }
 
     if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
                                  m_uiForm.leCanChemicalFormula,
@@ -348,13 +352,10 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {
-  auto const correctionsWs =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          m_pythonExportWsName);
+  auto const correctionsWs = getADSWorkspace(m_pythonExportWsName);
   if (correctionsWs) {
     auto const wavelengthWorkspace = convertUnits(correctionsWs, "Wavelength");
-    AnalysisDataService::Instance().addOrReplace("__mc_corrections_wavelength",
-                                                 wavelengthWorkspace);
+    addWorkspaceToADS("__mc_corrections_wavelength", wavelengthWorkspace);
   }
 }
 
@@ -376,9 +377,7 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
 }
 
 void AbsorptionCorrections::getParameterDefaults(QString const &dataName) {
-  auto const sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          dataName.toStdString());
+  auto const sampleWs = getADSWorkspace(dataName.toStdString());
   if (sampleWs)
     getParameterDefaults(sampleWs->getInstrument());
   else
