@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidBeamline/ComponentType.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 using Mantid::Beamline::ComponentType;
 
@@ -15,7 +15,8 @@ bool isDetectorFixedInBank(const ComponentInfo &compInfo,
 
   if (compInfo.isDetector(detIndex) &&
       (grandParentType == ComponentType::Rectangular ||
-       grandParentType == ComponentType::Structured)) {
+       grandParentType == ComponentType::Structured ||
+       grandParentType == ComponentType::Grid)) {
     return true;
   }
 
