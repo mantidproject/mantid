@@ -3,7 +3,12 @@
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidQtWidgets/MplCpp/Python/Sip.h"
 
+#include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/NDArray.h"
+
 #include <QVBoxLayout>
+
+using Mantid::PythonInterface::NDArray;
 
 namespace MantidQt {
 namespace Widgets {
@@ -88,6 +93,43 @@ FigureCanvasQt::FigureCanvasQt(Figure fig, QWidget *parent)
 void FigureCanvasQt::installEventFilterToMplCanvas(QObject *filter) {
   assert(m_mplCanvas);
   m_mplCanvas->installEventFilter(filter);
+}
+
+/**
+ * @param pos A point in Qt screen coordinates from, for example, a mouse click
+ * @return A QPointF defining the position in data coordinates
+ */
+QPointF FigureCanvasQt::toDataCoords(QPoint pos) const {
+  // There is no isolated method for doing the transform on matplotlib's
+  // classes. The functionality is bound up inside other methods
+  // so we are forced to duplicate the behaviour here.
+  // The following code is derived form what happens in
+  // matplotlib.backends.backend_qt5.FigureCanvasQT &
+  // matplotlib.backend_bases.LocationEvent where we transform first to
+  // matplotlib's coordinate system, (0,0) is bottom left,
+  // and then to the data coordinates
+  const int dpiRatio(devicePixelRatio());
+  const double xPosPhysical = pos.x() * dpiRatio;
+  // Y=0 is at the bottom
+  double height = PyFloat_AsDouble(
+      Python::Object(m_figure.pyobj().attr("bbox").attr("height")).ptr());
+  const double yPosPhysical =
+      ((height / devicePixelRatio()) - pos.y()) * dpiRatio;
+  // Transform to data coordinates
+  QPointF dataCoords;
+  try {
+    auto invTransform = gca().pyobj().attr("transData").attr("inverted")();
+    NDArray transformed = invTransform.attr("transform_point")(
+        Python::NewRef(Py_BuildValue("(ff)", xPosPhysical, yPosPhysical)));
+    auto rawData = reinterpret_cast<double *>(transformed.get_data());
+    dataCoords =
+        QPointF(static_cast<qreal>(rawData[0]), static_cast<qreal>(rawData[1]));
+  } catch (Python::ErrorAlreadySet &) {
+    PyErr_Clear();
+    // an exception indicates no transform possible. Matplotlib sets this as
+    // an empty data coordinate so we will do the same
+  }
+  return dataCoords;
 }
 
 } // namespace MplCpp

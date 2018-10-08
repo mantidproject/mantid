@@ -24,7 +24,6 @@ public:
   }
 
   void testConstructionCapturesGivenAxesObject() {
-    using namespace MantidQt::Widgets::MplCpp;
     Figure fig;
     fig.addSubPlot(221);
     FigureCanvasQt canvas{std::move(fig)};
@@ -32,6 +31,16 @@ public:
     TS_ASSERT_EQUALS(2, geometry[0]);
     TS_ASSERT_EQUALS(2, geometry[1]);
     TS_ASSERT_EQUALS(1, geometry[2]);
+  }
+
+  void testToDataCoordinatesReturnsExpectedPoint() {
+    FigureCanvasQt canvas{111};
+    canvas.gca().plot({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5});
+
+    auto dataCoords = canvas.toDataCoords(
+        QPoint(canvas.width() * 0.5, canvas.height() * 0.25));
+    TS_ASSERT_DELTA(2.9, dataCoords.x(), 0.1);
+    TS_ASSERT_DELTA(4.5, dataCoords.y(), 0.1);
   }
 };
 
