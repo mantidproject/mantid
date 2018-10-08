@@ -28,7 +28,7 @@ except ImportError:
 
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
-                               RangeStepType, SampleShape, ReductionMode, FitType)
+                               RangeStepType, ReductionMode, FitType)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file,

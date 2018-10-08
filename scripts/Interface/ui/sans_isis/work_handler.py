@@ -11,6 +11,7 @@ from worker import Worker
 import functools
 import uuid
 
+
 class WorkHandler(object):
     class WorkListener(with_metaclass(ABCMeta, object)):
         def __init__(self):
