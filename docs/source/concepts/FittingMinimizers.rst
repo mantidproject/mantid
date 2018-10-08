@@ -21,6 +21,8 @@ and modifications to existing minimizers.
 
 For the task of Bayesian probability sampling: this is supported with the FABADA minimizer.
 
+.. _FittingMinimizers Minimizer Comparison:
+
 Comparing Minimizers
 ====================
 
@@ -46,16 +48,16 @@ Several minimizers are included with Mantid and can be selected in the
 or when using the algorithm :ref:`Fit <algm-Fit>` The following
 options are available:
 
-- `Simplex <../fitminimizers/Simplex.html>`__
-- `SteepestDescent <../fitminimizers/GradientDescent.html>`__
-- `Conjugate gradient (Fletcher-Reeves imp.) <../fitminimizers/FletcherReeves.html>`__
-- `Conjugate gradient (Polak-Ribiere imp.) <../fitminimizers/PolakRibiere.html>`__
-- `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <../fitminimizers/BFGS.html>`__
-- `Levenberg-Marquardt <../fitminimizers/LevenbergMarquardt.html>`__ (default)
-- `Levenberg-MarquardtMD <../fitminimizers/LevenbergMarquardtMD.html>`__
-- `Damped Gauss-Newton <../fitminimizers/DampedGaussNewton.html>`__
+- :ref:`Simplex <Simplex>`
+- :ref:`SteepestDescent <GradientDescent>`
+- :ref:`Conjugate gradient (Fletcher-Reeves imp.) <FletcherReeves>`
+- :ref:`Conjugate gradient (Polak-Ribiere imp.) <PolakRiberiere>`
+- :ref:`BFGS (Broyden-Fletcher-Goldfarb-Shanno) <BFGS>`
+- :ref:`Levenberg-Marquardt <LevenbergMarquardt>` (default)
+- :ref:`Levenberg-MarquardtMD <LevenbergMarquardtMD>`
+- :ref:`Damped Gauss-Newton <DampedGaussNewton>`
 - :ref:`FABADA <FABADA>`
-- `Trust region <../fitminimizers/TrustRegion.html>`__
+- :ref:`Trust region <TrustRegion>`
 
 All these algorithms are `iterative
 <https://en.wikipedia.org/wiki/Iterative_method>`__.  The *Simplex*
