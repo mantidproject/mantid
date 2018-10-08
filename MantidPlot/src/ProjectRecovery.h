@@ -8,6 +8,7 @@
 #define PROJECT_RECOVERY_H_
 
 #include "MantidKernel/ConfigService.h"
+#include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
 
 #include <Poco/NObserver.h>
 
@@ -21,7 +22,6 @@
 // Forward declarations
 class ApplicationWindow;
 class Folder;
-
 namespace Poco {
 class Path;
 }
@@ -45,9 +45,6 @@ public:
   /// Checks if recovery is required
   bool checkForRecovery() const noexcept;
 
-  /// Clears all checkpoints in the existing folder
-  bool clearAllCheckpoints() const noexcept;
-
   /// Clears all checkpoints in the existing folder at the given path
   bool clearAllCheckpoints(Poco::Path path) const noexcept;
 
@@ -67,6 +64,27 @@ public:
 
   /// get Recovery Folder location
   std::string getRecoveryFolderOutputPR();
+
+  /// Get a list of poco paths based on recoveryFolderPaths' directory
+  std::vector<Poco::Path>
+  getListOfFoldersInDirectoryPR(const std::string &recoveryFolderPath);
+
+  /// get Recovery Folder to loads location
+  std::string getRecoveryFolderLoadPR();
+
+  /// Exposing the getRecoveryFolderCheckpoints function
+  std::vector<Poco::Path>
+  getRecoveryFolderCheckpointsPR(const std::string &recoveryFolderPath);
+
+  /// Expose the getRecoveryFolderCheck function
+  std::string getRecoveryFolderCheckPR();
+
+  /// Loads a recovery checkpoint in the given folder
+  bool loadRecoveryCheckpoint(const Poco::Path &path);
+
+  /// Open a recovery checkpoint in the scripting window
+  void openInEditor(const Poco::Path &inputFolder,
+                    const Poco::Path &historyDest);
 
 private:
   /// Captures the current object in the background thread
@@ -88,13 +106,6 @@ private:
 
   /// Deletes oldest "unused" checkpoints beyond the maximum number to keep
   void deleteExistingUnusedCheckpoints(size_t checkpointsToKeep) const;
-
-  /// Loads a recovery checkpoint in the given folder
-  void loadRecoveryCheckpoint(const Poco::Path &path);
-
-  /// Open a recovery checkpoint in the scripting window
-  void openInEditor(const Poco::Path &inputFolder,
-                    const Poco::Path &historyDest);
 
   /// Wraps the thread in a try catch to log any failures
   void projectSavingThreadWrapper();
@@ -128,6 +139,9 @@ private:
 
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
+
+  // The presenter of the recovery guis
+  ProjectRecoveryPresenter *m_recoveryGui;
 
   std::vector<std::string> m_algsToIgnore = {
       "EnggSaveGSASIIFitResultsToHDF5",
