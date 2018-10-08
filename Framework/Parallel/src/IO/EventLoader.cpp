@@ -61,7 +61,7 @@ void load(const std::string &filename, const std::string &groupname,
       "/MantidNexusParallelLoader";
 
   MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()),
-                                 concurencyNumber / 2, concurencyNumber / 2,
+                                 concurencyNumber / 2, 12/*concurencyNumber / 2*/,
                                  executableName, precalcEvents);
   loader.load(filename, groupname, bankNames, bankOffsets, eventLists);
 }

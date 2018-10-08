@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <numeric>
 #include <thread>
+#include <fstream>
 
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
@@ -189,38 +190,40 @@ void MultiProcessEventLoader::load(
   }
 }
 
+
 /**Collects data from the chunks in shared memory to the final structure*/
 void MultiProcessEventLoader::assembleFromShared(
     std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const {
   std::vector<std::thread> workers;
-  std::atomic<int> cnt{0};
+
+  std::vector<std::atomic<int> > cnts(m_segmentNames.size());
+  std::vector<std::atomic<int > > processCounter(m_segmentNames.size());
+  for(auto& cnt: cnts) cnt = 0;
+  for(auto& cnt: processCounter) cnt = 0;
+
+  const unsigned portion{std::max<unsigned>(m_numPixels / m_numThreads / 3, 1)};
 
   for (unsigned i = 0; i < m_numThreads; ++i) {
-    workers.emplace_back([&cnt, this, &result]() {
-      std::vector<ip::managed_shared_memory> segments;
-      std::vector<Mantid::Parallel::IO::Chunks *> chunksPtrs;
-      for (unsigned pid = 0; pid < m_numProcesses; ++pid) {
-        segments.emplace_back(ip::open_read_only, m_segmentNames[pid].c_str());
-        chunksPtrs.emplace_back(
-            segments[pid]
-                .find<Mantid::Parallel::IO::Chunks>(m_storageName.c_str())
-                .first);
-      }
-
-      const unsigned portion{
-          std::max<unsigned>(m_numPixels / m_numThreads / 3, 1)};
-      for (unsigned startPixel = cnt.fetch_add(portion);
-           startPixel < m_numPixels; startPixel = cnt.fetch_add(portion)) {
-
-        for (auto pixel = startPixel;
-             pixel < std::min(startPixel + portion, m_numPixels); ++pixel) {
-          auto &res = result[pixel];
-          for (unsigned i = 0; i < m_numProcesses; ++i) {
-            for (auto &chunk : *chunksPtrs[i]) {
-              res->insert(res->end(), chunk[pixel].begin(), chunk[pixel].end());
+    workers.emplace_back([&]() {
+      for(std::size_t segId = 0; segId < m_segmentNames.size(); ++segId) {
+        ip::managed_shared_memory segment{ip::open_read_only, m_segmentNames[segId].c_str()};
+        auto chunks = segment.find<Mantid::Parallel::IO::Chunks>(m_storageName.c_str()).first;
+        auto& cnt = cnts[segId];
+        for (uint32_t startPixel = cnt.fetch_add(portion); startPixel < m_numPixels; startPixel = cnt.fetch_add(portion)) {
+          auto toPixel = std::min(startPixel + portion, m_numPixels);
+          for (uint32_t pixel = startPixel; pixel < toPixel; ++pixel) {
+            auto &res = result[pixel];
+            for (auto &ch : *chunks) {
+              res->insert(res->end(), ch[pixel].begin(), ch[pixel].end());
             }
           }
         }
+        ++processCounter[segId];
+        if(processCounter[segId] == m_numThreads)
+          ip::shared_memory_object::remove(m_segmentNames[segId].c_str());
+
+        while (processCounter[segId] != m_numThreads);
+
       }
     });
   }

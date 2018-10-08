@@ -342,8 +342,10 @@ void MultiProcessEventLoader::GroupLoader<
                 .emplace_back(task.eventTimeOffset[i],
                               task.partitioner->next());
           }
-          task.eventId.swap(std::vector<uint32_t >());
-          task.eventTimeOffset.swap(std::vector<T>());
+          task.eventId.resize(0);
+          task.eventId.shrink_to_fit();
+          task.eventTimeOffset.resize(0);
+          task.eventTimeOffset.shrink_to_fit();
           task.partitioner.release();
         }
         tasksDone = tasksLoaded;
