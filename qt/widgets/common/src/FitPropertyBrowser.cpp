@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
@@ -2211,7 +2217,7 @@ void FitPropertyBrowser::addConstraint(int f, bool lo, bool up) {
   if (!h)
     return;
 
-  double x = m_doubleManager->value(parProp);
+  double x = parProp->valueText().toDouble();
   double loBound = x * (1 - 0.01 * f);
   double upBound = x * (1 + 0.01 * f);
 
