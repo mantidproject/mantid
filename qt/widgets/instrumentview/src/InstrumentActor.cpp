@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -758,6 +764,7 @@ Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
                                                                 -1);
   alg->setPropertyValue("InputWorkspace", getWorkspace()->getName());
   alg->setPropertyValue("OutputWorkspace", maskName);
+  alg->setLogging(false);
   alg->execute();
 
   Mantid::API::MatrixWorkspace_sptr maskWorkspace =

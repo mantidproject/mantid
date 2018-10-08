@@ -1,3 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#
+# Mantid Repository : https://github.com/mantidproject/mantid
+
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from Direct.NonIDF_Properties import *
@@ -66,9 +75,6 @@ class PropertyManager(NonIDF_Properties):
            If this changes, careful refactoring will be necessary
 
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-
-    This file is part of Mantid and is distributed under GPL
     """
 
     #-----------------------------------------------------------------------------------
@@ -627,7 +633,7 @@ class PropertyManager(NonIDF_Properties):
             missing=[]
 #pylint: disable=unused-variable
             ok,missing,found=self.find_files_to_sum()
-            #Presence of Cashe sum ws assumes that you sum files to workspace as they appear
+            #Presence of cashe_sum_ws assumes that you sum files to workspace as they appear
             # This mean, that we should not expect all files to be there at the beginning
             if not ok and not self.cashe_sum_ws:
                 file_errors['missing_runs_toSum']=str(missing)

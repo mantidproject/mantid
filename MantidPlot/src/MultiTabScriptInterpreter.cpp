@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------
 // Includes
 //-----------------------------------------------------
@@ -660,7 +666,7 @@ void MultiTabScriptInterpreter::contextMenuEvent(QContextMenuEvent *event) {
 /**
  * A custom event handler, which in this case monitors for ScriptChangeEvent
  * signals
- * @param event :: The custome event
+ * @param event :: The custom event
  */
 void MultiTabScriptInterpreter::customEvent(QEvent *event) {
   if (!isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT) {

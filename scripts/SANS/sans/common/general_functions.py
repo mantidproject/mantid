@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ The elements of this module contain various general-purpose functions for the SANS reduction framework."""
 
 # pylint: disable=invalid-name
@@ -223,7 +229,7 @@ def add_to_sample_log(workspace, log_name, log_value, log_type):
     """
     Adds a sample log to the workspace
 
-    :param workspace: the workspace to whcih the sample log is added
+    :param workspace: the workspace to which the sample log is added
     :param log_name: the name of the log
     :param log_value: the value of the log in string format
     :param log_type: the log value type which can be String, Number, Number Series

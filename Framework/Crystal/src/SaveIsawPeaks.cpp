@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -267,7 +273,10 @@ void SaveIsawPeaks::exec() {
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
     // Start of a new run
-    appendPeakNumb += maxPeakNumb;
+    if (maxPeakNumb > 0) {
+      appendPeakNumb += maxPeakNumb + 1;
+      maxPeakNumb = 0;
+    }
     int run = runMap_it->first;
     bankMap_t &bankMap = runMap_it->second;
 

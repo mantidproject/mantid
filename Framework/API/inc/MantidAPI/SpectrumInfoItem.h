@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_SPECTRUMINFOITEM_H_
 #define MANTID_API_SPECTRUMINFOITEM_H_
 
@@ -28,27 +34,6 @@ methods include:
 
 @author Bhuvan Bezawada, STFC
 @date 2018
-
-Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class MANTID_API_DLL SpectrumInfoItem {
@@ -86,12 +71,6 @@ private:
   // Private constructor, can only be created by SpectrumInfoIterator
   SpectrumInfoItem(const SpectrumInfo &spectrumInfo, const size_t index)
       : m_spectrumInfo(&spectrumInfo), m_index(index) {}
-
-  // Provide copy and move constructors
-  SpectrumInfoItem(const SpectrumInfoItem &other) = default;
-  SpectrumInfoItem &operator=(const SpectrumInfoItem &rhs) = default;
-  SpectrumInfoItem(SpectrumInfoItem &&other) = default;
-  SpectrumInfoItem &operator=(SpectrumInfoItem &&rhs) = default;
 
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.

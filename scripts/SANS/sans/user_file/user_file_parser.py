@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, too-many-instance-attributes, too-many-branches, too-few-public-methods
 
 from __future__ import (absolute_import, division, print_function)
@@ -143,7 +149,7 @@ class UserFileComponentParser(object):
 class BackParser(UserFileComponentParser):
     """
     The BackParser handles the following structure
-        Command | Qualifer    | Parameter
+        Command | Qualifier    | Parameter
         BACK    / MON/TIMES     t1 t2
         BACK    / M m/TIMES      t1 t2
         BACK    / M m            t1 t2
@@ -784,7 +790,7 @@ class MaskParser(UserFileComponentParser):
 
         MASK Ssp1[>Ssp2]
 
-        MASK[/REAR/FRONT/HAB]/TIME t1 t2 or  MASK[/REAR/FRONT/HAB]/T t1 t2 - if no detector is specfied, then mask
+        MASK[/REAR/FRONT/HAB]/TIME t1 t2 or  MASK[/REAR/FRONT/HAB]/T t1 t2 - if no detector is specified, then mask
                                                                              is applied to both detectors.
 
         MASK/LINE width angle [x y]
@@ -1125,7 +1131,7 @@ class SetParser(UserFileComponentParser):
 
         An undocumented feature is:
         SET CENTRE[/MAIN|/HAB] x y [d1 d2]
-        where d1 and d2 are pixel sizes. This is not used in the old parser, but user files have it nontheless.
+        where d1 and d2 are pixel sizes. This is not used in the old parser, but user files have it nonetheless.
 
         SET SCALES s a b c d
     """
@@ -1691,7 +1697,7 @@ class FitParser(UserFileComponentParser):
         fit_string = re.sub(self._lin_or_log_or_poly_to_remove, "", fit_string)
 
         # We should now have something like [poly_order] [w1 w2]
-        # There are four posibilties
+        # There are four possibilities
         # 1. There is no number
         # 2. There is one number -> it has to be the poly_order
         # 3. There are two numbers -> it has to be the w1 and w2

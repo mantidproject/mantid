@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "AlgorithmHistoryWindow.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
@@ -449,7 +455,7 @@ void AlgorithmHistoryWindow::updateAlgHistoryProperties(
 
 void AlgorithmHistoryWindow::updateExecSummaryGrpBox(
     AlgorithmHistory_const_sptr algHistory) {
-  // getting the selcted algorithm at pos from History vector
+  // getting the selected algorithm at pos from History vector
   double duration = algHistory->executionDuration();
   Mantid::Types::Core::DateAndTime date = algHistory->executionDate();
   if (m_execSumGrpBox)

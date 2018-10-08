@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------
 // Includes
 //---------------------------------------
@@ -43,7 +49,7 @@ void UserFitFunctionDialog::addFunction(const QString &op, bool brackets) {
   QTreeWidgetItem *parentItem = item->parent();
 
   if (parentItem == nullptr)
-    return; // this sould never happen, just in case
+    return; // this should never happen, just in case
 
   if (parentItem->parent() != nullptr)
     item = parentItem;

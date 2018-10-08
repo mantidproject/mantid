@@ -62,7 +62,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   if ( ${PACKAGE_WORKBENCH} )
     # setuptools by default wants to build into a directory called 'build' relative the to the working directory. We have overridden
     # commands in setup.py.in to force the build directory to take place out of source. The install directory is specified here and then
-    # --install-scripts=bin --install-lib=lib removes any of the plaform/distribution specific install directories so we can have a flat
+    # --install-scripts=bin --install-lib=lib removes any of the platform/distribution specific install directories so we can have a flat
     # structure
     install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})")
     # register the "installed" components with cmake so it will carry them over

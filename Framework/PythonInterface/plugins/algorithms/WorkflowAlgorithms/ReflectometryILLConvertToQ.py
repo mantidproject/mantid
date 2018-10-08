@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -176,10 +182,10 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             ChopperOpening=chopperOpening,
             ChopperRadius=chopperRadius,
             ChopperPairDistance=chopperPairDist,
-            Slit1Name='slit2',
-            Slit1SizeSampleLog=slit1SizeLog,
-            Slit2Name='slit3',
-            Slit2SizeSampleLog=slit2SizeLog,
+            FirstSlitName='slit2',
+            FirstSlitSizeSampleLog=slit1SizeLog,
+            SecondSlitName='slit3',
+            SecondSlitSizeSampleLog=slit2SizeLog,
             TOFChannelWidth=tofBinWidth,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
