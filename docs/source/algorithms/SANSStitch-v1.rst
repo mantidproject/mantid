@@ -67,7 +67,7 @@ Usage
    lab_counts = Rebin(lab_counts, Params=uniform_binning)
    lab_norm = Rebin(lab_norm, Params=uniform_binning)
 
-   stitched, scale, shift, shifted_hab = SANSStitch(HABCountsSample=hab_counts, 
+   stitched, scale, shift = SANSStitch(HABCountsSample=hab_counts, 
        HABNormSample=hab_norm, 
        LABCountsSample=lab_counts, 
        LABNormSample=lab_norm, 
