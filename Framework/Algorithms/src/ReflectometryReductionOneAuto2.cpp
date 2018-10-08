@@ -1000,6 +1000,11 @@ void ReflectometryReductionOneAuto2::applyPolarizationCorrection(
   }
 }
 
+/**
+ * Get the flood workspace for flood correction. If it is provided via the
+ * FloodWorkspace property return it. Otherwise create it using parameters
+ * in the instrument parameter file.
+ */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
   std::string const method = getProperty("FloodCorrection");
   if (method == "Workspace" && !isDefault("FloodWorkspace")) {
@@ -1049,18 +1054,29 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
   return MatrixWorkspace_sptr();
 }
 
+/**
+ * Apply flood correction to a single data workspace.
+ * @param flood :: The flood workspace.
+ * @param propertyName :: Name of an input property containing a workspace
+ *   that should be corrected. The corrected workspace replaces the old
+ *   value of this property.
+ */
 void ReflectometryReductionOneAuto2::applyFloodCorrection(
-    MatrixWorkspace_sptr const &flood, std::string const &prop) {
-  MatrixWorkspace_sptr ws = getProperty(prop);
+    MatrixWorkspace_sptr const &flood, const std::string &propertyName) {
+  MatrixWorkspace_sptr ws = getProperty(propertyName);
   auto alg = createChildAlgorithm("ApplyFloodWorkspace");
   alg->initialize();
   alg->setProperty("InputWorkspace", ws);
   alg->setProperty("FloodWorkspace", flood);
   alg->execute();
   MatrixWorkspace_sptr out = alg->getProperty("OutputWOrkspace");
-  setProperty(prop, out);
+  setProperty(propertyName, out);
 }
 
+/**
+ * Apply flood correction to all workspaces that need to be corrected:
+ * the input data and the transmission runs.
+ */
 void ReflectometryReductionOneAuto2::applyFloodCorrections() {
   MatrixWorkspace_sptr flood = getFloodWorkspace();
   if (flood) {
