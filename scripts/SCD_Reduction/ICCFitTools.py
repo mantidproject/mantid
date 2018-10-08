@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import matplotlib.pyplot as plt
 import numpy as np
@@ -456,7 +462,7 @@ def getHKLMask(UB, frac=0.5, dQPixel=0.005, dQ=None):
 
 def padeWrapper(x, a, b, c, d, f, g, h, i, j, k):
     """
-    padeWrapper is a wrapper for the pade(c,x) function for compatability with curve_fit.
+    padeWrapper is a wrapper for the pade(c,x) function for compatibility with curve_fit.
     Inputs are x (numpy array) and the 8 coefficients for the approximant.
     Output are the values of the pade approximant at each value of x.
     """
@@ -575,7 +581,7 @@ def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.
         workspaceNumber - None of not doing multiple fits.  Otherwise it will append an integer in the mtd[] object so
             not to overwrite.  Probably not needed in most cases.
         neigh_length_m - integer; how large of a convolution box to use.
-        pp_lambda - the most likely backgorund level; set to None if want to calculate
+        pp_lambda - the most likely background level; set to None if want to calculate
         calc_pp_lambda - boolean; True if you want to calculate pp_lambda using TOF profile fitting.  If you do not
             want to, you can feed the value in as pp_lambda (calculated elsewhere).
         minppl_frac, maxppl_frac; range around predicted pp_lambda to check.
@@ -696,7 +702,7 @@ def oneOverXSquared(x, A, bg):
 
 def getInitialGuess(tofWS, paramNames, energy, flightPath, padeCoefficients):
     """
-    Returns intial parameters for fitting based on a few quickly derived TOF
+    Returns initial parameters for fitting based on a few quickly derived TOF
      profile parameters.  tofWS is a worskapce containng the TOF profile,
      paramNames is the list of parameter names
      energy is the energy of the peak (units: eV)
@@ -733,7 +739,7 @@ def getSample(run, DetCalFile,  workDir, fileName, qLow=-25, qHigh=25, q_frame='
         workDir - not used.  TODO - remove this.
         fileName - str; the events file to load.  Should probably be an absolute path.
         qLow, qHigh - the returned MDWorkspace will range from qLow to qHigh in all 3 directions.
-        q_frame - either 'sample' or 'lab'.  Wether to return in the lab or sample coordinate system.
+        q_frame - either 'sample' or 'lab'.  Whether to return in the lab or sample coordinate system.
     Returns:
         MDdata - a handle for the mtd['MDdata'] object, which contains the loaded run in reciprocal space.
     """
@@ -855,7 +861,7 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
         fitResults - the output from Mantid's Fit() routine
         fICC - an IkedaCarpenterConvoluted function with parameters set to the fit values.
     """
-    # Set up our inital guess
+    # Set up our initial guess
     fICC = ICC.IkedaCarpenterConvoluted()
     fICC.init()
     paramNames = [fICC.getParamName(x) for x in range(fICC.numParams())]

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
@@ -43,7 +49,7 @@ def get_cell_mock(row, column, convert_to=None, user_file_path = ""):
     _ = convert_to  # noqa
     if row == 0:
         # For the first row we return the
-        # all of hte sample data
+        # all of the sample data
         if column == 0:
             return "SANS2D00022024"
         elif column == 2:

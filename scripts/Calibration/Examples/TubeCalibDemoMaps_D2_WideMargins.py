@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MAPS - Execute this
@@ -15,7 +21,7 @@ filename = 'MAP14919.raw'  # Name of calibration run
 rangeLower = 2000  # Integrate counts in each spectra from rangeLower to rangeUpper
 rangeUpper = 10000  #
 
-# Set what we want to calibrate (e.g whole intrument or one door )
+# Set what we want to calibrate (e.g whole instrument or one door )
 CalibratedComponent = 'D2_window'  # Calibrate D2 window
 
 # Get calibration raw file and integrate it

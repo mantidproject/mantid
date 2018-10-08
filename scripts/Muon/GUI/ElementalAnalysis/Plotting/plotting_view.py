@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from six import iteritems
 
 from mantid import plots
@@ -248,7 +254,7 @@ class PlotView(QtWidgets.QWidget):
             self.workspace_plots[name] = lines
 
     def plot_workspace_errors(self, name, workspace):
-        """ Plots a workspace with errrors, and appends caps/bars to the subplot list. """
+        """ Plots a workspace with errors, and appends caps/bars to the subplot list. """
         subplot = self.get_subplot(name)
         line, cap_lines, bar_lines = plots.plotfunctions.errorbar(
             subplot, workspace, specNum=1)

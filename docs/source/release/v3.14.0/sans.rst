@@ -26,6 +26,7 @@ Bug fixes
 * Changed the geometry names from CylinderAxisUP, Cuboid and CylinderAxisAlong to Cylinder, FlatPlate and Disc
 * The GUI now correctly resets to default values when a new user file is loaded.
 * The GUI no longer hangs whilst searching the archive for files.
+* Fixed a bug which crashed the beam centre finder if a phi mask was set.
 
 Improvements
 ############

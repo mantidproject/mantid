@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "Elwin.h"
 #include "../General/UserInputValidator.h"
 
@@ -117,7 +123,7 @@ void Elwin::setup() {
 }
 
 void Elwin::run() {
-  setRunEnabled(false);
+  setRunIsRunning(true);
 
   QStringList inputFilenames = m_uiForm.dsInputFiles->getFilenames();
   inputFilenames.sort();
@@ -240,20 +246,19 @@ void Elwin::run() {
 void Elwin::unGroupInput(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(unGroupInput(bool)));
-  if (error)
-    return;
-  if (!m_uiForm.ckGroupInput->isChecked()) {
-    IAlgorithm_sptr ungroupAlg =
-        AlgorithmManager::Instance().create("UnGroupWorkspace");
-    ungroupAlg->initialize();
-    ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
-    ungroupAlg->execute();
-  }
+  setRunIsRunning(false);
 
-  // Enable run, plot and save
-  setRunEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
+  if (!error) {
+    if (!m_uiForm.ckGroupInput->isChecked()) {
+      IAlgorithm_sptr ungroupAlg =
+          AlgorithmManager::Instance().create("UnGroupWorkspace");
+      ungroupAlg->initialize();
+      ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
+      ungroupAlg->execute();
+    }
+    setPlotResultEnabled(true);
+    setSaveResultEnabled(true);
+  }
 }
 
 bool Elwin::validate() {
@@ -464,6 +469,7 @@ void Elwin::updateRS(QtProperty *prop, double val) {
  * Handles mantid plotting
  */
 void Elwin::plotClicked() {
+  setPlotResultIsPlotting(true);
 
   auto workspaceBaseName =
       getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
@@ -483,13 +489,14 @@ void Elwin::plotClicked() {
   if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
                                    true, false))
     plotSpectrum(workspaceBaseName + "_elt");
+
+  setPlotResultIsPlotting(false);
 }
 
 /**
  * Handles saving of workspaces
  */
 void Elwin::saveClicked() {
-
   auto workspaceBaseName =
       getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 
@@ -512,9 +519,26 @@ void Elwin::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void Elwin::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-  m_uiForm.pbRun->setText(!enabled ? "Running..." : "Run");
+void Elwin::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+
+void Elwin::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+}
+
+void Elwin::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void Elwin::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
+}
+
+void Elwin::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setPlotResultEnabled(!plotting);
 }
 
 void Elwin::runClicked() { runTab(); }

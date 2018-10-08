@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import numpy
 
 # This class is the ideal tube, which specifies where the peaks formed by slits or edges should occur
@@ -68,7 +74,7 @@ class IdealTube(object):
        :param activeTubeLen: Active tube length in metres
 
        """
-       #Contruct Ideal tube for 3 point calibration of MERLIN standard tube (code could be put into a function)
+       #Construct Ideal tube for 3 point calibration of MERLIN standard tube (code could be put into a function)
         pixelLen = activeTubeLen/1024  # Pixel length
 
        # we then convert idealAP, idealCP and idealBP to Y coordinates and put into ideal tube array
@@ -78,12 +84,12 @@ class IdealTube(object):
 
     def getArray( self ):
         """
-       Reurn the array of of points where the peaks should be in Metres
+       Return the array of of points where the peaks should be in Metres
        """
         return self.positions
 
     def getFunctionalForms( self ):
         """
-       Reurn the array of of points where the peaks should be in Metres
+       Return the array of of points where the peaks should be in Metres
        """
         return self.functionalForms
