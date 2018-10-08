@@ -19,6 +19,7 @@
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
 
+#include <QPointF>
 #include <QWidget>
 
 namespace MantidQt {
@@ -38,12 +39,15 @@ public:
   FigureCanvasQt(int subplotspec, QWidget *parent = nullptr);
   FigureCanvasQt(Figure fig, QWidget *parent = nullptr);
 
+  /// Attach an event filter to the underlying matplotlib canvas
   void installEventFilterToMplCanvas(QObject *filter);
-
   /// Access to the current figure instance.
   inline Figure gcf() const { return m_figure; }
   /// Access to the current active axes instance.
   inline Axes gca() const { return m_figure.gca(); }
+
+  /// Convert a point in screen coordinates to data coordinates
+  QPointF toDataCoords(QPoint pos) const;
 
   /// Redraw the canvas
   inline void draw() { pyobj().attr("draw")(); }
