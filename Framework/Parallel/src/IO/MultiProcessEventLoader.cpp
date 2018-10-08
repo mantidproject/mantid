@@ -2,10 +2,10 @@
 //#include <boost/process/child.hpp>
 #include <Poco/Process.h>
 #include <chrono>
+#include <fstream>
 #include <iomanip>
 #include <numeric>
 #include <thread>
-#include <fstream>
 
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
@@ -190,26 +190,31 @@ void MultiProcessEventLoader::load(
   }
 }
 
-
 /**Collects data from the chunks in shared memory to the final structure*/
 void MultiProcessEventLoader::assembleFromShared(
     std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const {
   std::vector<std::thread> workers;
 
-  std::vector<std::atomic<int> > cnts(m_segmentNames.size());
-  std::vector<std::atomic<int > > processCounter(m_segmentNames.size());
-  for(auto& cnt: cnts) cnt = 0;
-  for(auto& cnt: processCounter) cnt = 0;
+  std::vector<std::atomic<int>> cnts(m_segmentNames.size());
+  std::vector<std::atomic<int>> processCounter(m_segmentNames.size());
+  for (auto &cnt : cnts)
+    cnt = 0;
+  for (auto &cnt : processCounter)
+    cnt = 0;
 
   const unsigned portion{std::max<unsigned>(m_numPixels / m_numThreads / 3, 1)};
 
   for (unsigned i = 0; i < m_numThreads; ++i) {
     workers.emplace_back([&]() {
-      for(std::size_t segId = 0; segId < m_segmentNames.size(); ++segId) {
-        ip::managed_shared_memory segment{ip::open_read_only, m_segmentNames[segId].c_str()};
-        auto chunks = segment.find<Mantid::Parallel::IO::Chunks>(m_storageName.c_str()).first;
-        auto& cnt = cnts[segId];
-        for (uint32_t startPixel = cnt.fetch_add(portion); startPixel < m_numPixels; startPixel = cnt.fetch_add(portion)) {
+      for (std::size_t segId = 0; segId < m_segmentNames.size(); ++segId) {
+        ip::managed_shared_memory segment{ip::open_read_only,
+                                          m_segmentNames[segId].c_str()};
+        auto chunks =
+            segment.find<Mantid::Parallel::IO::Chunks>(m_storageName.c_str())
+                .first;
+        auto &cnt = cnts[segId];
+        for (uint32_t startPixel = cnt.fetch_add(portion);
+             startPixel < m_numPixels; startPixel = cnt.fetch_add(portion)) {
           auto toPixel = std::min(startPixel + portion, m_numPixels);
           for (uint32_t pixel = startPixel; pixel < toPixel; ++pixel) {
             auto &res = result[pixel];
@@ -219,11 +224,11 @@ void MultiProcessEventLoader::assembleFromShared(
           }
         }
         ++processCounter[segId];
-        if(processCounter[segId] == m_numThreads)
+        if (processCounter[segId] == m_numThreads)
           ip::shared_memory_object::remove(m_segmentNames[segId].c_str());
 
-        while (processCounter[segId] != m_numThreads);
-
+        while (processCounter[segId] != m_numThreads)
+          ;
       }
     });
   }
