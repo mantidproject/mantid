@@ -222,6 +222,19 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
   return folderPaths;
 }
 
+void removeEmptyFolders(std::vector<Poco::Path> checkpointPaths) {
+  for (auto i = 0u; i < checkpointPaths.size(); ++i) {
+    const auto listOfFolders =
+        getListOfFoldersInDirectory(checkpointPaths[i].toString());
+    if (listOfFolders.size() == 0) {
+      // Remove actual folder to stop this happening again in further checks
+      Poco::File(checkpointPaths[i]).remove(true);
+      // Erase from checkpointPaths vector
+      checkpointPaths.erase(checkpointPaths.begin() + i);
+    }
+  }
+}
+
 const std::string LOCK_FILE_NAME = "projectrecovery.lock";
 
 Poco::File addLockFile(const Poco::Path &lockFilePath) {
@@ -313,8 +326,12 @@ void ProjectRecovery::attemptRecovery() {
 
 bool ProjectRecovery::checkForRecovery() const noexcept {
   try {
-    const auto checkpointPaths =
+    auto checkpointPaths =
         getRecoveryFolderCheckpoints(getRecoveryFolderCheck());
+    // Since adding removal of checkpoints before this check it is possible that
+    // a PID is there with no checkpoint this loop fixes that issue removing
+    // them.
+    removeEmptyFolders(checkpointPaths);
     return checkpointPaths.size() != 0 &&
            (checkpointPaths.size() > Process::numberOfMantids());
   } catch (...) {
@@ -708,20 +725,23 @@ void ProjectRecovery::removeLockedCheckpoints() {
   // Order pids based on date last modified descending
   std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
   // check if pid exists
-  std::vector<std::string> folderPaths;
+  std::vector<Poco::Path> files;
   for (auto i = 0u; i < possiblePids.size(); ++i) {
     if (!isPIDused(possiblePids[i])) {
       std::string folder = recoverFolder;
       folder.append(std::to_string(possiblePids[i]) + "/");
-      if (Poco::File(Poco::Path(folder).append(LOCK_FILE_NAME)).exists()) {
-        folderPaths.emplace_back(folder);
+      auto checkpointsInsidePIDs = getListOfFoldersInDirectory(folder);
+      for (auto c : checkpointsInsidePIDs) {
+        if (Poco::File(c.setFileName(LOCK_FILE_NAME)).exists()) {
+          files.emplace_back(c.setFileName(""));
+        }
       }
     }
   }
 
   bool recurse = true;
-  for (size_t i = 0; i < folderPaths.size(); i++) {
-    Poco::File(folderPaths[i]).remove(recurse);
+  for (auto c : files) {
+    Poco::File(c).remove(recurse);
   }
 }
 
@@ -759,7 +779,7 @@ void ProjectRecovery::saveAll(bool autoSave) {
   g_log.debug("Project Recovery: Saving finished");
 
   // Remove lock file
-  //lockFile.remove(true);
+  lockFile.remove(true);
 }
 
 std::string ProjectRecovery::getRecoveryFolderOutputPR() {
