@@ -45,7 +45,8 @@ class ISIS1DMerger(Merger):
                                                      Operation='Multiply', StoreInADS=False)
             hab_can = mantid_api.Divide(LHSWorkspace=can_count_secondary, RHSWorkspace=scaled_norm_front_can,
                                         StoreInADS=False)
-            return mantid_api.Minus(LHSWorkspace=hab_sample, RHSWorkspace=hab_can, StoreInADS=False)
+            hab_sample = mantid_api.Minus(LHSWorkspace=hab_sample, RHSWorkspace=hab_can, StoreInADS=False)
+            return hab_sample
         else:
             return hab_sample
 
