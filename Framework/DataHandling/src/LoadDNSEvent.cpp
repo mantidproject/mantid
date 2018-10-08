@@ -127,33 +127,20 @@ void LoadDNSEvent::exec() {
 
   _eventAccumulator.neutronEvents.resize(960*128+24);
 
-  //try {
-    FileByteStream file(static_cast<std::string>(fileName), endian::big);
-    //file.exceptions(std::ifstream::eofbit);
-    std::pair<long, long> elapsedTimeCombineSplitting;
-    long elapsedTimeSorting    = 0;
-    //long elapsedTimeTotal = measureMicroSecs::execution([&](){
-      auto elapsedTimeParsing    = MEASURE_MICRO_SECS({ elapsedTimeCombineSplitting = parse_File(file, fileName); });
-      auto elapsedTimeProcessing = MEASURE_MICRO_SECS({ elapsedTimeSorting = populate_EventWorkspace(outputWS); });
-    //});
+  FileByteStream file(static_cast<std::string>(fileName), endian::big);
+  std::pair<long, long> elapsedTimeCombineSplitting;
+  long elapsedTimeSorting    = 0;
+  auto elapsedTimeParsing    = MEASURE_MICRO_SECS({ elapsedTimeCombineSplitting = parse_File(file, fileName); });
+  auto elapsedTimeProcessing = MEASURE_MICRO_SECS({ elapsedTimeSorting = populate_EventWorkspace(outputWS); });
 
-    g_log.notice()
-        << " ## elapsedTime Parsing\t= " << elapsedTimeParsing
-        << "\n  # elapsedTime Splitting\t= " << elapsedTimeCombineSplitting.first
-        << "\n  # elapsedTime Combining\t= " << elapsedTimeCombineSplitting.second
-        << "\n ## elapsedTime Processing\t= " << elapsedTimeProcessing
-        << "\n  # elapsedTime Sorting\t= " << elapsedTimeSorting
-        << "\n### elapsedTime Total  \t= " << elapsedTimeParsing + elapsedTimeProcessing
-        << std::endl;
-
-
-  //} catch (std::runtime_error e) {
-  //  g_log.error(e.what());
-  //}
-  //        g_log.notice()
-  //            << std::setprecision(15) << std::fixed << "T"
-  //            << ", " << double(event.timestamp) / 10000.0
-  //            << std::endl;
+  g_log.notice()
+      << " ## elapsedTime Parsing\t= " << elapsedTimeParsing
+      << "\n  # elapsedTime Splitting\t= " << elapsedTimeCombineSplitting.first
+      << "\n  # elapsedTime Combining\t= " << elapsedTimeCombineSplitting.second
+      << "\n ## elapsedTime Processing\t= " << elapsedTimeProcessing
+      << "\n  # elapsedTime Sorting\t= " << elapsedTimeSorting
+      << "\n### elapsedTime Total  \t= " << elapsedTimeParsing + elapsedTimeProcessing
+      << std::endl;
 
   setProperty("OutputWorkspace", outputWS);
   g_log.notice() << std::endl;
@@ -490,7 +477,6 @@ void LoadDNSEvent::parse_DataBuffer(VectorByteStream &file, EventAccumulator &ev
   for (uint16_t i = 0; i < event_count; i++) {
     parse_andAddEvent(file, bufferHeader, eventAccumulator);
   }
-
 }
 
 LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(VectorByteStream &file) {
