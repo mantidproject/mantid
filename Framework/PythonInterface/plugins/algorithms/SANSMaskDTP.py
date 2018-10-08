@@ -68,11 +68,11 @@ class SANSMaskDTP(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(
             MatrixWorkspaceProperty(
-                "InputWorkspace", "", direction = Direction.Input),
+                "InputWorkspace", "", direction=Direction.InOut,),
             doc="Input Workspace")
 
         self.declareProperty(
-            "Detector", "1", # Default 1
+            "Detector", "1",  # Default 1
             doc="Detector number to be masked.")
 
         self.declareProperty(
@@ -84,7 +84,7 @@ class SANSMaskDTP(PythonAlgorithm):
             doc="Pixel(s) to be masked. If empty, will apply to all pixels")
 
         self.declareProperty(IntArrayProperty(
-                name="MaskedDetectors", direction=Direction.Output),
+            name="MaskedDetectors", direction=Direction.Output),
             doc="List of masked detectors")
 
     def validateInputs(self):
@@ -103,7 +103,7 @@ class SANSMaskDTP(PythonAlgorithm):
         if self.instrument_name not in valid_instruments:
             message = "Instrument {} not valid. Valid instruments are {}.  Make" \
                       "sure the instrument name is defined in the workspace.".format(
-                         self.instrument_name, valid_instruments)
+                          self.instrument_name, valid_instruments)
             issues['InputWorkspace'] = message
             return issues
 
@@ -136,13 +136,13 @@ class SANSMaskDTP(PythonAlgorithm):
         """
         for x in s.split(','):
             elem = x.split('-')
-            if len(elem) == 1: # a number
+            if len(elem) == 1:  # a number
                 yield int(elem[0])
-            elif len(elem) == 2: # a range inclusive
+            elif len(elem) == 2:  # a range inclusive
                 start, end = map(int, elem)
                 for i in range(start, end+1):
                     yield i
-            else: # more than one hyphen
+            else:  # more than one hyphen
                 raise ValueError('format error in %s' % x)
 
     def _double_colon_range(self, s, max_value):
@@ -159,15 +159,16 @@ class SANSMaskDTP(PythonAlgorithm):
         return range(frm, to+1, step)
 
     def _string_to_int(self, sequence, min_value, max_value):
-        sequence = sequence.replace(" ", "") # remove spaces
-        if not sequence: # empty
+        sequence = sequence.replace(" ", "")  # remove spaces
+        if not sequence:  # empty
             return range(min_value, max_value+1)
         elif re.match(self.PATTERN_COLON_RANGE, sequence):
             return self._double_colon_range(sequence, max_value)
         elif re.match(self.PATTERN_HYPHEN_RANGE, sequence):
             return list(self._hyphen_range(sequence))
         else:
-            raise ValueError('See the format of the fields in the documentation')
+            raise ValueError(
+                'See the format of the fields in the documentation')
 
     def PyExec(self):
 
@@ -194,7 +195,7 @@ class SANSMaskDTP(PythonAlgorithm):
         # get detector name
         detector = self.instrument.getComponentByName(
             self.INSTRUMENTS[self.instrument_name][detectors-1]["name"])
-            # iterate tubes
+        # iterate tubes
         for t in tubes:
             tube_component = detector[t-1]
             for p in pixels:
@@ -209,7 +210,8 @@ class SANSMaskDTP(PythonAlgorithm):
         if len(detectors_to_mask) > 0:
             MaskDetectors(Workspace=self.ws, DetectorList=detectors_to_mask,
                           EnableLogging=False)
-            logger.information("{} detectors masked.".format(len(detectors_to_mask)))
+            logger.information(
+                "{} detectors masked.".format(len(detectors_to_mask)))
         else:
             logger.information("No detectors within this range!")
 
