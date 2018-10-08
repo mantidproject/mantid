@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 
 #include "../General/UserInputValidator.h"
@@ -411,19 +417,34 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   m_uiForm.ckSaveSPE->setEnabled(true);
 }
 
-void ISISEnergyTransfer::removeGroupingOption(const QString &option) {
+int ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
   for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
-    if (m_uiForm.cbGroupingOptions->itemText(i) == option) {
-      m_uiForm.cbGroupingOptions->removeItem(i);
-      return;
-    }
+    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
+      return i;
+  return 0;
+}
+
+bool ISISEnergyTransfer::isOptionHidden(QString const &option) {
+  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
+    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
+      return false;
+  return true;
+}
+
+void ISISEnergyTransfer::setCurrentGroupingOption(QString const &option) {
+  m_uiForm.cbGroupingOptions->setCurrentIndex(getGroupingOptionIndex(option));
+}
+
+void ISISEnergyTransfer::removeGroupingOption(QString const &option) {
+  m_uiForm.cbGroupingOptions->removeItem(getGroupingOptionIndex(option));
 }
 
 void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
-                                                    const QString &option) {
-  if (includeOption)
+                                                    QString const &option) {
+  if (includeOption && isOptionHidden(option)) {
     m_uiForm.cbGroupingOptions->addItem(option);
-  else
+    setCurrentGroupingOption(option);
+  } else if (!includeOption && !isOptionHidden(option))
     removeGroupingOption(option);
 }
 

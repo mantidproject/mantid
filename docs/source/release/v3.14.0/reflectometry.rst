@@ -28,6 +28,7 @@ New
 - Added algorithm :ref:`algm-CreateFloodWorkspace` which makes a workspace for subsequent flood corrections.
 - Added algorithm :ref:`algm-ApplyFloodWorkspace` which applies flood corrections to a workspace.
 - :ref:`FindReflectometryLines <algm-FindReflectometryLines-v2>` has been rewritten and updated to version 2. The new version finds a single line by a Gaussian fit. Version 1 has been deprecated and will be removed in a future release.
+- Added algorithm :ref:`algm-ReflectometrySliceEventWorkspace` which slices an input event workspace into multiple slices, producing a histogram workspace suitable for use with :ref:`algm-ReflectometryReductionOneAuto`.
 
 Improved
 ########
@@ -81,6 +82,7 @@ Improved
 ########
 
 - :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
+- Common naming of slit component name and size properties across algorithms.
 
 Bug fixes
 #########

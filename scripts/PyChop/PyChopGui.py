@@ -1,4 +1,10 @@
 #!/usr/bin/python
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, invalid-name, unused-argument, unused-import, multiple-statements
 # pylint: disable=attribute-defined-outside-init, protected-access, super-on-old-class, redefined-outer-name
 # pylint: disable=too-many-statements, too-many-instance-attributes, too-many-locals, too-many-branches

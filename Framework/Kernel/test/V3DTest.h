@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTV3D__
 #define MANTID_TESTV3D__
 
@@ -577,11 +583,13 @@ public:
     m_rotx[1][2] = -sin(theta);
     m_rotx[2][2] = cos(theta);
     m_rotx[2][1] = sin(theta);
+
+    m_sampleSize = 100000000;
   }
 
   void testRotate() {
     V3D direction(1.0, 1.0, 1.0);
-    for (size_t i = 0; i < 100000; ++i) {
+    for (size_t i = 0; i < m_sampleSize; ++i) {
       direction = V3D(1.0, 1.0, 1.0);
       direction.rotate(m_rotx);
     }
@@ -589,8 +597,181 @@ public:
     TS_ASSERT_DELTA(direction.Y(), 0.0, 1e-08);
   }
 
+  void testElementAccessOperator() {
+    V3D direction(1.0, 1.0, 1.0);
+    double sum = 0;
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum += direction[0] + direction[1] + direction[2];
+    }
+    TS_ASSERT_EQUALS(sum, 3 * m_sampleSize);
+  }
+
+  void testAddAssignOperatorV3D() {
+    V3D direction(1.0, 1.0, 1.0);
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum += direction;
+    }
+    TS_ASSERT_DELTA(sum.Y(), m_sampleSize, 1e-08);
+  }
+
+  void testSubAssignOperatorV3D() {
+    V3D direction(1.0, 1.0, 1.0);
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum -= direction;
+    }
+    TS_ASSERT_DELTA(sum.Y(), -static_cast<int>(m_sampleSize), 1e-08);
+  }
+
+  void testMultiplyAssignOperatorV3D() {
+    V3D direction(1.0, 1.0, 1.0);
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum *= direction;
+    }
+    TS_ASSERT_DELTA(sum.Y(), 0.0, 1e-08);
+  }
+
+  void testDivideAssignOperatorV3D() {
+    V3D direction(1.0, 1.0, 1.0);
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum /= direction;
+    }
+    TS_ASSERT_DELTA(sum.Y(), 0.0, 1e-08);
+  }
+
+  void testAddOperatorV3D() {
+    V3D direction1(1.0, 1.0, 1.0);
+    V3D direction2(2.0, 2.0, 2.0);
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum = direction1 + direction2;
+    }
+    TS_ASSERT_DELTA(sum.Y(), 3.0, 1e-08);
+  }
+
+  void testSubOperatorV3D() {
+    V3D direction1(1.0, 1.0, 1.0);
+    V3D direction2(2.0, 2.0, 2.0);
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum = direction1 - direction2;
+    }
+    TS_ASSERT_DELTA(sum.Y(), -1.0, 1e-08);
+  }
+
+  void testMultiplyOperatorV3D() {
+    V3D direction1(1.0, 1.0, 1.0);
+    V3D direction2(2.0, 2.0, 2.0);
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum = direction1 * direction2;
+    }
+    TS_ASSERT_DELTA(sum.Y(), 2.0, 1e-08);
+  }
+
+  void testDivideOperatorV3D() {
+    V3D direction1(1.0, 1.0, 1.0);
+    V3D direction2(2.0, 2.0, 2.0);
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum = direction1 / direction2;
+    }
+    TS_ASSERT_DELTA(sum.Y(), 0.5, 1e-08);
+  }
+
+  void testMultiplyAssignOperatorScalar() {
+    V3D direction(1.0, 1.0, 1.0);
+    double scalar = 1.0;
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      direction *= scalar;
+    }
+    TS_ASSERT_DELTA(direction.Y(), 1.0, 1e-08);
+  }
+
+  void testDivideAssignOperatorScalar() {
+    V3D direction(1.0, 1.0, 1.0);
+    double scalar = 1.0;
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      direction /= scalar;
+    }
+    TS_ASSERT_DELTA(direction.Y(), 1.0, 1e-08);
+  }
+
+  void testMultiplyOperatorScalar() {
+    V3D direction1(1.0, 1.0, 1.0);
+    double scalar = 0.1;
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum = direction1 * scalar;
+    }
+    TS_ASSERT_DELTA(sum.Y(), 0.1, 1e-08);
+  }
+
+  void testDivideOperatorScalar() {
+    V3D direction1(1.0, 1.0, 1.0);
+    double scalar = 0.1;
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum = direction1 / scalar;
+    }
+    TS_ASSERT_DELTA(sum.Y(), 10, 1e-08);
+  }
+
+  void testNegationOperator() {
+    V3D direction1(1.0, 1.0, 1.0);
+    V3D sum(0, 0, 0);
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      sum = -direction1;
+    }
+    TS_ASSERT_DELTA(sum.Y(), -1.0, 1e-08);
+  }
+
+  void testEqualityOperator() {
+    V3D direction1(1.0, 1.0, 1.0);
+    V3D direction2(1.0, 1.0, 1.0);
+    bool out = false;
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      out = direction1 == direction2;
+    }
+    TS_ASSERT(out)
+  }
+
+  void testInequalityOperator() {
+    V3D direction1(1.0, 1.0, 1.0);
+    V3D direction2(1.0, 1.0, 1.0);
+    bool out = false;
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      out = direction1 != direction2;
+    }
+    TS_ASSERT(!out)
+  }
+
+  void testLessThanOperator() {
+    V3D direction1(1.0, 1.0, 1.0);
+    V3D direction2(1.0, 1.0, 1.0);
+    bool out = false;
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      out = direction1 < direction2;
+    }
+    TS_ASSERT(!out)
+  }
+
+  void testGreaterThanOperator() {
+    V3D direction1(1.0, 1.0, 1.0);
+    V3D direction2(1.0, 1.0, 1.0);
+    bool out = false;
+    for (size_t i = 0; i < m_sampleSize; i++) {
+      out = direction1 > direction2;
+    }
+    TS_ASSERT(!out)
+  }
+
 private:
   Mantid::Kernel::Matrix<double> m_rotx;
+  size_t m_sampleSize;
 };
 
 #endif
