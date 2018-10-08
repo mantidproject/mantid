@@ -244,7 +244,7 @@ public:
         dynamic_cast<TimeSeriesProperty<double> *>(
             ws->run().getLogData("proton_charge"));
     TS_ASSERT(dlog);
-    TS_ASSERT_EQUALS(dlog->size(), 172);
+    TS_ASSERT_EQUALS(dlog->size(), 173);
 
     TimeSeriesProperty<bool> *blog = dynamic_cast<TimeSeriesProperty<bool> *>(
         ws->run().getLogData("period 1"));
@@ -648,7 +648,7 @@ public:
         dynamic_cast<TimeSeriesProperty<double> *>(
             ws->run().getLogData("proton_charge"));
     TS_ASSERT(dlog);
-    TS_ASSERT_EQUALS(dlog->size(), 172);
+    TS_ASSERT_EQUALS(dlog->size(), 173);
 
     TimeSeriesProperty<bool> *blog = dynamic_cast<TimeSeriesProperty<bool> *>(
         ws->run().getLogData("period 1"));

@@ -120,7 +120,7 @@ public:
         dynamic_cast<TimeSeriesProperty<double> *>(
             run.getLogData("proton_charge"));
     TS_ASSERT(dlog);
-    TS_ASSERT_EQUALS(dlog->size(), 172);
+    TS_ASSERT_EQUALS(dlog->size(), 173);
   }
 
   void test_File_With_Bad_Property() {
@@ -269,6 +269,29 @@ public:
     loader.setProperty("Workspace", testWS);
     loader.setPropertyValue("Filename", "larmor_array_time_series_mock.nxs");
     TS_ASSERT_THROWS_NOTHING(loader.execute())
+  }
+
+  void test_last_time_series_log_entry_equals_end_time() {
+    LoadNexusLogs ld;
+    std::string outws_name = "REF_L_instrument";
+    ld.initialize();
+    ld.setPropertyValue("Filename", "REF_L_32035.nxs");
+    MatrixWorkspace_sptr ws = createTestWorkspace();
+    // Put it in the object.
+    ld.setProperty("Workspace", ws);
+    ld.execute();
+    TS_ASSERT(ld.isExecuted());
+
+    auto run = ws->run();
+    auto pclog = dynamic_cast<TimeSeriesProperty<double> *>(
+        run.getLogData("PhaseRequest1"));
+
+    TS_ASSERT(pclog);
+
+    const auto lastTime = pclog->lastTime();
+    const auto endTime = run.endTime();
+
+    TS_ASSERT_EQUALS(endTime.totalNanoseconds(), lastTime.totalNanoseconds());
   }
 
 private:
