@@ -29,6 +29,7 @@ class GuiCommonTest(unittest.TestCase):
         table_index_model_1 = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
         self.table_model.add_table_entry(0, table_index_model_0)
         self.table_model.add_table_entry(1, table_index_model_1)
+        self.table_model.wait_for_file_finding_done()
 
         self.fake_state = mock.MagicMock(spec=State)
         self.gui_state_director_instance = mock.MagicMock()
