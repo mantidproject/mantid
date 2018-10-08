@@ -138,6 +138,7 @@ public:
     TS_ASSERT_RELATION(std::greater<double>, specDim->getMinimum(), 0);
     TS_ASSERT_RELATION(std::greater<double>, specDim->getMaximum(), 0);
 
+    // test event count:
     const auto rng = boost::irange(0ul, iws->size());
     const size_t eventCount = std::accumulate(rng.begin(), rng.end(), 0ul, [&](auto a, auto b) {
       return a + iws->getSpectrum(b).getEvents().size();
@@ -148,8 +149,8 @@ public:
   }
 
 private:
-  const std::string m_fileName = "/home/jochimcoenen/Programming/testdata/DNS/data/00550232.mdat";
+  const std::string m_fileName = "00550232.mdat";
 
-  const std::string m_badFileName = "dn134011vana.d_dat";
-};//"/home/jochimcoenen/MantidExternalData/MD5/28151e3198f9f57b18b97d87627eadf6",#
+  const std::string m_badFileName = "dn134011vana.d_dat"; // some random file
+};
 #endif /* MANTID_MDALGORITHMS_LOADDNSSCDEWEST_H_ */
