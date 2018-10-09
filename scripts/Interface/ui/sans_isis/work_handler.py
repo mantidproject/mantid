@@ -66,7 +66,7 @@ class WorkHandler(object):
         QThreadPool.globalInstance().start(self._worker[process_id]['worker'])
 
     def remove_already_processing(self, id):
-        for key, process in self._listener.items():
+        for key, process in list(self._listener.items()):
             if process['id'] == id:
                 self._listener.pop(key)
                 self._worker.pop(key)
