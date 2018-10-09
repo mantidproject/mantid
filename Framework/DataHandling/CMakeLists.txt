@@ -40,7 +40,7 @@
 	src/LoadAsciiStl.cpp
 	src/LoadBBY.cpp
 	src/LoadBankFromDiskTask.cpp
-	src/LoadBinStl.cpp
+	src/LoadBinaryStl.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -233,7 +233,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadAsciiStl.h
 	inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadBankFromDiskTask.h
-	inc/MantidDataHandling/LoadBinStl.h
+	inc/MantidDataHandling/LoadBinaryStl.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -420,7 +420,7 @@ set ( TEST_FILES
 	LoadAsciiTest.h
 	LoadAsciiStlTest.h
 	LoadBBYTest.h
-	LoadBinStlTest.h
+	LoadBinaryStlTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h

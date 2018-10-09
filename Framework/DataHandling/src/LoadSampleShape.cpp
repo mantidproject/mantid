@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
-#include "MantidDataHandling/LoadBinStl.h"
+#include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -203,8 +203,8 @@ void LoadSampleShape::exec() {
   } else /* stl */ {
     std::unique_ptr<LoadAsciiStl> asciiStlReader =
         Kernel::make_unique<LoadAsciiStl>(filename);
-    std::unique_ptr<LoadBinStl> binaryStlReader =
-        Kernel::make_unique<LoadBinStl>(filename);
+    std::unique_ptr<LoadBinaryStl> binaryStlReader =
+        Kernel::make_unique<LoadBinaryStl>(filename);
     if (asciiStlReader->isAsciiSTL()) {
       shape = asciiStlReader->readStl();
     } else if (binaryStlReader->isBinarySTL()) {
