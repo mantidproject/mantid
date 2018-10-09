@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
@@ -43,28 +49,6 @@ namespace FileDialogHandler {
 /**
     Contains modifications to Qt functions where problems have been found
     on certain operating systems
-
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-    @date 17/09/2010
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 QString getSaveFileName(QWidget *parent,
                         const Mantid::Kernel::Property *baseProp,
@@ -108,14 +92,14 @@ QString getFilter(const Mantid::Kernel::Property *baseProp) {
   const auto *multiProp =
       dynamic_cast<const Mantid::API::MultipleFileProperty *>(baseProp);
   if (bool(multiProp))
-    return getFilter(multiProp->getExts(), multiProp->getDefaultExt());
+    return getFilter(multiProp->getExts());
 
   // regular file version
   const auto *singleProp =
       dynamic_cast<const Mantid::API::FileProperty *>(baseProp);
   // The allowed values in this context are file extensions
   if (bool(singleProp))
-    return getFilter(singleProp->allowedValues(), singleProp->getDefaultExt());
+    return getFilter(singleProp->allowedValues());
 
   // otherwise only the all files exists
   return ALL_FILES;
@@ -125,30 +109,57 @@ QString getFilter(const Mantid::Kernel::Property *baseProp) {
  * the first.
  *
  * @param exts :: vector of extensions
- * @param defaultExt :: default extension to use
  * @return a string that filters files by extenstions
  */
-QString getFilter(const std::vector<std::string> &exts,
-                  const std::string &defaultExt) {
+QString getFilter(const std::vector<std::string> &exts) {
   QString filter("");
 
-  if (!defaultExt.empty()) {
-    filter.append(QString::fromStdString(defaultExt) + " (*" +
-                  QString::fromStdString(defaultExt) + ");;");
-  }
-
   if (!exts.empty()) {
-    // Push a wild-card onto the front of each file suffix
-    for (auto &itr : exts) {
-      if (itr != defaultExt) {
-        filter.append(QString::fromStdString(itr) + " (*" +
-                      QString::fromStdString(itr) + ");;");
+    // Generate the display all filter
+    if (exts.size() > 1) {
+      QString displayAllFilter = "Data Files (";
+      for (auto &itr : exts) {
+        // Add a space to between each extension
+        displayAllFilter.append(" ");
+        displayAllFilter.append(formatExtension(itr));
       }
+      displayAllFilter.append(" );;");
+      filter.append(displayAllFilter);
+    }
+
+    // Append individual file filters
+    for (auto &itr : exts) {
+      filter.append(QString::fromStdString(itr) + " (*" +
+                    QString::fromStdString(itr) + ");;");
     }
     filter = filter.trimmed();
   }
   filter.append(ALL_FILES);
   return filter;
+}
+
+/** Format extension into expected form (*.ext)
+ *
+ * @param extension :: extension to be formatted
+ * @return a QString of the expected form
+ */
+QString formatExtension(const std::string &extension) {
+  QString formattedExtension = QString::fromStdString(extension);
+  if (extension.empty()) {
+    return formattedExtension;
+  }
+  if (extension.at(0) == '*' && extension.at(1) == '.') {
+    return formattedExtension;
+  } else {
+    if (extension.at(0) == '*') {
+      formattedExtension.insert(1, ".");
+    } else if (extension.at(0) == '.') {
+      formattedExtension.prepend("*");
+    } else {
+      formattedExtension.prepend("*.");
+    }
+  }
+  return formattedExtension;
 }
 
 QString getCaption(const std::string &dialogName,

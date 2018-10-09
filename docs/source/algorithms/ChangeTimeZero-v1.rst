@@ -15,7 +15,7 @@ alters the logs and in case of an :ref:`EventWorkspace <EventWorkspace>` the neu
 The time offset can be specified in one of the two following ways:
 
 *  A time offset in seconds: In this case all time stamps in the workspace are shifted by the specified amount. A positive entry creates a shift into the future and a negative one creates a shift into the past relative to the original time.
-*  An ISO8601 time stamp (YYYY-MM-DDTHH:MM:SS, eg 2003-11-30T03:23:54). The logs need to contain a proton_charge time series property for this shift to work. The first time entry of the proton_charge time series is used as a reference time stamp and all times will be shifted according to the differnce between this time stamp and the newly specified value.
+*  An ISO8601 time stamp (YYYY-MM-DDTHH:MM:SS, eg 2003-11-30T03:23:54). The logs need to contain a proton_charge time series property for this shift to work. The first time entry of the proton_charge time series is used as a reference time stamp and all times will be shifted according to the difference between this time stamp and the newly specified value.
  
 Only one of the two ways of shifting the time can be specified.
  

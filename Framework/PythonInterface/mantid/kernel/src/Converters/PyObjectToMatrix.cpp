@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
+#include "MantidPythonInterface/core/NDArray.h"
 
 #include <boost/python/extract.hpp>
 
@@ -16,7 +22,6 @@ using boost::python::extract;
 
 namespace Mantid {
 namespace PythonInterface {
-using namespace NumPy;
 
 namespace Converters {
 /**
@@ -35,7 +40,7 @@ PyObjectToMatrix::PyObjectToMatrix(const boost::python::object &p)
     return;
   }
   // Is it a 2D numpy array
-  if (!NumPy::NdArray::check(p)) {
+  if (!NDArray::check(p)) {
     std::ostringstream msg;
     msg << "Cannot convert object to Matrix. Expected numpy array, found "
         << p.ptr()->ob_type->tp_name;

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFit.h"
 #include "JumpFitDataPresenter.h"
 
@@ -78,23 +84,47 @@ void JumpFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
+void JumpFit::plotClicked() {
+  setPlotResultIsPlotting(true);
+  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
+  setPlotResultIsPlotting(false);
+}
+
+bool JumpFit::shouldEnablePlotResult() {
+  for (auto i = 0u; i < m_jumpFittingModel->numberOfWorkspaces(); ++i)
+    if (m_jumpFittingModel->getNumberOfSpectra(i) > 1)
+      return true;
+  return false;
+}
+
+void JumpFit::setRunEnabled(bool enabled) {
+  m_uiForm->pbRun->setEnabled(enabled);
+}
+
 void JumpFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
   m_uiForm->cbPlotType->setEnabled(enabled);
+}
+
+void JumpFit::setFitSingleSpectrumEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
 }
 
 void JumpFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
 
-void JumpFit::plotClicked() {
-  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
+void JumpFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
+  setFitSingleSpectrumEnabled(!running);
 }
 
-void JumpFit::setRunEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
-  m_uiForm->pbRun->setEnabled(enabled);
-  m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
+void JumpFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotResultEnabled(!plotting);
 }
 
 void JumpFit::runClicked() { runTab(); }

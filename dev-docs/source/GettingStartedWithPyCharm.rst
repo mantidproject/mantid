@@ -5,7 +5,7 @@ Getting Started with PyCharm
 
 PyCharm can be installed from `here <https://jetbrains.com/pycharm/download/>`_.
 
-This tutorial assumes you are familiar with the process of building Mantid (with separate source and build directories inside a root directory), and that you have built a working version. If you are unclear about this see `here <GettingStarted.html>`__
+This tutorial assumes you are familiar with the process of building Mantid (with separate source and build directories inside a root directory), and that you have built a working version. If you are unclear about this see :ref:`here <GettingStarted>`.
 
 .. contents::
   :local:

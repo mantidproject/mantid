@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef __cxxtest__MantidFormatter_h__
 #define __cxxtest__MantidFormatter_h__
 
@@ -57,7 +63,7 @@ namespace CxxTest
             std::ostringstream o;
             o << ticksElapsed;
             std::string s = o.str();
-            //ouput it
+            //output it
             (*_o) << "Elapsed: " << s.c_str() << " seconds"<< endl;
             return tracker().failedTests();
         }

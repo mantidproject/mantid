@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMatrixExtensionRequest.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
@@ -116,7 +122,7 @@ QChar MantidMatrixExtensionRequest::getFormat(
  * Get the preicson for the requested type
  * @param type: the type
  * @param extensions: the extensions
- * @param defaultValue: a defaut value
+ * @param defaultValue: a default value
  * @returns the precision
  */
 int MantidMatrixExtensionRequest::getPrecision(

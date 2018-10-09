@@ -85,7 +85,7 @@ private:
  *
  * \section future Future Plans
  * Port to the Model/View approach used in Qt4 and get rid of the Qt3Support
- * dependancy.
+ * dependency.
  * [ assigned to thzs ]
  */
 class Table : public MdiSubWindow, public Scripted {

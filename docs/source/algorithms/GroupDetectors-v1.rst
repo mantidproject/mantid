@@ -105,7 +105,7 @@ Example 1: specifying spectrum numbers
   group_index = GroupDetectors(ws,SpectraList=[1,3,5],Version=1)
 
   # The specified spectra are grouped and saved into the same workspace.
-  # The returned value is an index in ws wich contains the created group.
+  # The returned value is an index in ws which contains the created group.
 
   # Check the result
   print('The workspace still has {} spectra'.format(ws.getNumberHistograms()))
@@ -162,7 +162,7 @@ Example 2: specifying detctor IDs
   group_index = GroupDetectors(ws,DetectorList=[100,102,104],Version=1)
 
   # The specified spectra are grouped and saved into the same workspace.
-  # The returned value is an index in ws wich contains the created group.
+  # The returned value is an index in ws which contains the created group.
 
   # Check the result
   print('The workspace still has {} spectra'.format(ws.getNumberHistograms()))
@@ -219,7 +219,7 @@ Example 3: specifying workspace indices
   group_index = GroupDetectors(ws,WorkspaceIndexList=[0,2,4],Version=1)
 
   # The specified spectra are grouped and saved into the same workspace.
-  # The returned value is an index in ws wich contains the created group.
+  # The returned value is an index in ws which contains the created group.
 
   # Check the result
   print('The workspace still has {} spectra'.format(ws.getNumberHistograms()))
