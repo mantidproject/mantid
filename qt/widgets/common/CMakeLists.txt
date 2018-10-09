@@ -18,6 +18,9 @@ set ( QT5_SRC_FILES
   src/FunctionBrowser.cpp
   src/GenericDialog.cpp
   src/HelpWindow.cpp
+  # todo: move this to the instrument view library when the slice
+  # viewer library is removed
+  src/InputController.cpp
   src/InterfaceFactory.cpp
   src/InterfaceManager.cpp
   src/LineEditWithClear.cpp
@@ -90,6 +93,7 @@ set ( QT5_MOC_FILES
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/GenericDialog.h
+  inc/MantidQtWidgets/Common/InputController.h
   inc/MantidQtWidgets/Common/InterfaceManager.h
   inc/MantidQtWidgets/Common/LineEditWithClear.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
