@@ -47,3 +47,4 @@ private:
   void operator delete[](void *);
 };
 } // namespace ScopedFileHelper
+#endif
