@@ -1012,7 +1012,6 @@ public:
     auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
     auto infos2 = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
-
     ComponentInfo &b = *std::get<0>(infos2);
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
@@ -1025,7 +1024,6 @@ public:
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
-    TS_ASSERT_EQUALS(a.scanSize(), a.size() + b.size());
     TS_ASSERT_EQUALS(a.scanCount(), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
@@ -1052,7 +1050,6 @@ public:
     auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
     auto infos2 = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
-
     ComponentInfo &b = *std::get<0>(infos2);
     const auto detPosA = a.position(0);
     const auto detPosB = b.position(0);
@@ -1069,7 +1066,6 @@ public:
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
-    TS_ASSERT_EQUALS(a.scanSize(), 2 * 2);
     TS_ASSERT_EQUALS(a.scanCount(), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
@@ -1100,7 +1096,6 @@ public:
     auto infos1 = makeFlatTree(PosVec(1, detPos), RotVec(1));
     auto infos2 = makeFlatTree(PosVec(1, detPos), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
-
     ComponentInfo &b = *std::get<0>(infos2);
     Eigen::Quaterniond rot1(
         Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitY()));
@@ -1115,7 +1110,6 @@ public:
     a.merge(b); // Execute the merge
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
-    TS_ASSERT_EQUALS(a.scanSize(), 2 * 2);
     TS_ASSERT_EQUALS(a.scanCount(), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
@@ -1166,7 +1160,6 @@ public:
     a.merge(b); // Merge again
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
-    TS_ASSERT_EQUALS(a.scanSize(), 2 * 3);
     TS_ASSERT_EQUALS(a.scanCount(), 3);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.

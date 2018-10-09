@@ -61,10 +61,7 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 
   // Scanning related fields. Not testing m_scanCounts and m_indexMap since
   // those just are internally derived from m_indices.
-  if (m_scanIntervals != other.m_scanIntervals)
-    return false;
-  if (m_scanCounts && other.m_scanCounts &&
-      !(m_scanCounts == other.m_scanCounts))
+  if (scanIntervals() != other.scanIntervals())
     return false;
 
   // Positions: Absolute difference matter, so comparison is not relative.
@@ -95,17 +92,6 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
                   }))
     return false;
   return true;
-}
-
-/** Returns the number of sum of the scan intervals for every detector in the
- *instrument.
- *
- * If a detector is moving, i.e., has more than one associated position, every
- *position is counted. */
-size_t DetectorInfo::scanSize() const {
-  if (!m_positions)
-    return 0;
-  return m_positions->size();
 }
 
 /// Returns true if the detector with given detector index is a monitor.
@@ -153,40 +139,17 @@ void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
   m_isMasked.access()[linearIndex(index)] = masked;
 }
 
-/// Returns the scan count of the detector with given detector index.
+/// Returns the scan count of the detector, reading it from m_componentInfo
 size_t DetectorInfo::scanCount() const {
-  if (!m_scanCounts)
-    return 1;
-  else
-    return m_scanCounts;
+  return m_componentInfo->scanCount();
 }
 
 /** Returns the scan interval of the detector with given index.
  *
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
-const std::vector<std::pair<int64_t, int64_t>> &
-DetectorInfo::scanIntervals() const {
-  return m_scanIntervals;
-}
-
-namespace {
-void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
-  if (interval.first >= interval.second)
-    throw std::runtime_error(
-        "DetectorInfo: cannot set scan interval with start >= end");
-}
-} // namespace
-
-/** Set the scan interval for all detectors.
- *
- * Prefer this over setting intervals for individual detectors since it enables
- * internal performance optimization. See also overload for other details. */
-void DetectorInfo::setScanInterval(
-    const std::pair<int64_t, int64_t> &interval) {
-  checkNoTimeDependence();
-  checkScanInterval(interval);
-  m_scanIntervals[0] = interval;
+const std::vector<std::pair<int64_t, int64_t>> DetectorInfo::scanIntervals() const {
+  return m_componentInfo->scanIntervals();
 }
 
 namespace {
@@ -208,15 +171,13 @@ void failMerge(const std::string &what) {
  * ignored, i.e., no time index is added. */
 void DetectorInfo::merge(const DetectorInfo &other) {
   const auto &merge = buildMergeSyncScanIndices(other);
-  for (size_t timeIndex = 0; timeIndex < other.m_scanIntervals.size();
+  for (size_t timeIndex = 0; timeIndex < other.scanCount();
        ++timeIndex) {
     if (!merge[timeIndex])
       continue;
     auto &isMasked = m_isMasked.access();
     auto &positions = m_positions.access();
     auto &rotations = m_rotations.access();
-    m_scanCounts++;
-    m_scanIntervals.push_back(other.m_scanIntervals[timeIndex]);
     const size_t indexStart = other.linearIndex({0, timeIndex});
     size_t indexEnd = indexStart + size();
     isMasked.insert(isMasked.end(), other.m_isMasked->begin() + indexStart,
@@ -268,12 +229,12 @@ Eigen::Vector3d DetectorInfo::samplePosition() const {
 std::vector<bool>
 DetectorInfo::buildMergeSyncScanIndices(const DetectorInfo &other) const {
   checkSizes(other);
-  std::vector<bool> merge(other.m_scanIntervals.size(), true);
+  std::vector<bool> merge(other.scanCount(), true);
 
-  for (size_t t1 = 0; t1 < other.m_scanIntervals.size(); ++t1) {
-    for (size_t t2 = 0; t2 < m_scanIntervals.size(); ++t2) {
-      const auto &interval1 = other.m_scanIntervals[t1];
-      const auto &interval2 = m_scanIntervals[t2];
+  for (size_t t1 = 0; t1 < other.scanCount(); ++t1) {
+    for (size_t t2 = 0; t2 < scanCount(); ++t2) {
+      const auto &interval1 = other.scanIntervals()[t1];
+      const auto &interval2 = scanIntervals()[t2];
       if (interval1 == interval2) {
         for (size_t detIndex = 0; detIndex < size(); ++detIndex) {
           const size_t linearIndex1 = other.linearIndex({detIndex, t1});

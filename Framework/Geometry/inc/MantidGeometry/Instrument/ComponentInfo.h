@@ -150,8 +150,8 @@ public:
                           const BoundingBox *reference = nullptr) const;
   Beamline::ComponentType componentType(const size_t componentIndex) const;
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
+  size_t scanCount() const;
   void merge(const ComponentInfo &other);
-  size_t scanSize() const;
   friend class Instrument;
 };
 

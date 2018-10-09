@@ -74,7 +74,6 @@ public:
   bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
-  size_t scanSize() const;
   bool isScanning() const;
 
   bool isMonitor(const size_t index) const;
@@ -95,8 +94,7 @@ public:
                    const Eigen::Quaterniond &rotation);
 
   size_t scanCount() const;
-  const std::vector<std::pair<int64_t, int64_t>> &scanIntervals() const;
-  void setScanInterval(const std::pair<int64_t, int64_t> &interval);
+  const std::vector<std::pair<int64_t, int64_t>> scanIntervals() const;
 
   void setComponentInfo(ComponentInfo *componentInfo);
   bool hasComponentInfo() const;
@@ -123,8 +121,6 @@ private:
                               Eigen::aligned_allocator<Eigen::Quaterniond>>>
       m_rotations{nullptr};
 
-  size_t m_scanCounts = 1;
-  std::vector<std::pair<int64_t, int64_t>> m_scanIntervals{{0, 1}};
   ComponentInfo *m_componentInfo = nullptr; // Geometry::ComponentInfo owner
 };
 

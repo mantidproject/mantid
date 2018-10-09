@@ -424,11 +424,13 @@ void ComponentInfo::setScanInterval(
   m_componentInfo->setScanInterval(interval);
 }
 
+size_t ComponentInfo::scanCount() const {
+  return m_componentInfo->scanCount();
+}
+
 void ComponentInfo::merge(const ComponentInfo &other) {
   m_componentInfo->merge(*other.m_componentInfo);
 }
-
-size_t ComponentInfo::scanSize() const { return m_componentInfo->scanSize(); }
 
 } // namespace Geometry
 } // namespace Mantid

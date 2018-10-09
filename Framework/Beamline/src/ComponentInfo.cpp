@@ -463,10 +463,6 @@ void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
     throw std::invalid_argument("ComponentInfo must have detector indices "
                                 "input of same size as size of DetectorInfo");
   }
-  if (detectorInfo && (m_scanIntervals != detectorInfo->scanIntervals())) {
-    throw std::invalid_argument(
-        "ComponentInfo does not have the same scanIntervals as DetectorInfo");
-  }
   m_detectorInfo = detectorInfo;
 }
 
@@ -565,19 +561,8 @@ ComponentType ComponentInfo::componentType(const size_t componentIndex) const {
   }
 }
 
-/**
- * Get the number of scans for component index
- * @param index : Component Index
- * @return Number of scans for component index
- */
-size_t ComponentInfo::scanCount() const { return m_scanCounts; }
-
-size_t ComponentInfo::scanSize() const {
-  const auto detectorScanSize = m_detectorInfo ? m_detectorInfo->scanSize() : 0;
-  if (!m_positions)
-    return 0 + detectorScanSize;
-  return m_positions->size() + detectorScanSize;
-}
+/// Get the number of scans
+size_t ComponentInfo::scanCount() const { return m_scanIntervals.size(); }
 
 bool ComponentInfo::isScanning() const {
   if (m_detectorInfo && m_detectorInfo->isScanning())
@@ -594,6 +579,11 @@ void ComponentInfo::checkNoTimeDependence() const {
     throw std::runtime_error(
         "ComponentInfo accessed without time index but the "
         "beamline has time-dependent (moving) components.");
+}
+
+/// Get the scan intervals
+const std::vector<std::pair<int64_t, int64_t>> ComponentInfo::scanIntervals() const {
+  return m_scanIntervals;
 }
 
 void ComponentInfo::checkSpecialIndices(size_t componentIndex) const {
@@ -613,9 +603,6 @@ void ComponentInfo::setScanInterval(
   checkNoTimeDependence();
   checkScanInterval(interval);
   m_scanIntervals[0] = interval;
-  if (m_detectorInfo) {
-    m_detectorInfo->setScanInterval(interval);
-  }
 }
 
 /**

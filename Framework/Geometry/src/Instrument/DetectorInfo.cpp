@@ -83,10 +83,6 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 /// instrument.
 size_t DetectorInfo::size() const { return m_detectorIDs->size(); }
 
-/// Returns the size of DetectorInfo taking into account scanning, i.e., the sum
-/// of the number of scan points for every detector in the instrument.
-size_t DetectorInfo::scanSize() const { return m_detectorInfo->scanSize(); }
-
 /// Returns true if the beamline has scanning detectors.
 bool DetectorInfo::isScanning() const { return m_detectorInfo->isScanning(); }
 
@@ -324,27 +320,9 @@ size_t DetectorInfo::scanCount() const { return m_detectorInfo->scanCount(); }
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
 const std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
-    &DetectorInfo::scanIntervals() const {
-  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
-      *intervals_vector = new std::vector<
-          std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>(
-          (m_detectorInfo->scanIntervals()).size());
-  for (auto it = m_detectorInfo->scanIntervals().begin();
-       it != m_detectorInfo->scanIntervals().end(); ++it) {
-    intervals_vector->push_back({(*it).first, (*it).second});
-  }
-  return *intervals_vector;
-}
-
-/** Set the scan interval for all detectors.
- *
- * Prefer this over setting intervals for individual detectors since it enables
- * internal performance optimization. See also overload for other details. */
-void DetectorInfo::setScanInterval(
-    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
-        &interval) {
-  m_detectorInfo->setScanInterval(
-      {interval.first.totalNanoseconds(), interval.second.totalNanoseconds()});
+    DetectorInfo::scanIntervals() const {
+  const auto &intervals = m_detectorInfo->scanIntervals();
+  return {intervals.begin(), intervals.end()};
 }
 
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
