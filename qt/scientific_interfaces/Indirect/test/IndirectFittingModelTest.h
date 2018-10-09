@@ -28,18 +28,37 @@ MatrixWorkspace_sptr createWorkspace(int const &numberOfSpectra) {
   return WorkspaceCreationHelper::create2DWorkspace(numberOfSpectra, 10);
 }
 
+MatrixWorkspace_sptr setWorkspaceEFixed(MatrixWorkspace_sptr workspace,
+                                        int const &xLength) {
+  for (int i = 0; i < xLength; i++)
+    workspace->setEFixed((i + 1), 0.50);
+  return workspace;
+}
+
+MatrixWorkspace_sptr
+setWorkspaceBinEdges(MatrixWorkspace_sptr workspace, int const &yLength,
+                     Mantid::HistogramData::BinEdges const &binEdges) {
+  for (int i = 0; i < yLength; i++)
+    workspace->setBinEdges(i, binEdges);
+  return workspace;
+}
+
+MatrixWorkspace_sptr setWorkspaceBinEdges(MatrixWorkspace_sptr workspace,
+                                          int const &xLength,
+                                          int const &yLength) {
+  Mantid::HistogramData::BinEdges binEdges(xLength - 1, 0.0);
+  int j = 0;
+  std::generate(begin(binEdges), end(binEdges),
+                [&j] { return 0.5 + 0.75 * j++; });
+  setWorkspaceBinEdges(workspace, yLength, binEdges);
+  return workspace;
+}
+
 MatrixWorkspace_sptr setWorkspaceProperties(MatrixWorkspace_sptr workspace,
                                             int const &xLength,
                                             int const &yLength) {
-  Mantid::HistogramData::BinEdges x1(xLength - 1, 0.0);
-  int j = 0;
-  std::generate(begin(x1), end(x1), [&j] { return 0.5 + 0.75 * j++; });
-  /// Set Bin Edges
-  for (int i = 0; i < yLength; i++)
-    workspace->setBinEdges(i, x1);
-  /// Set EFixed
-  for (int i = 0; i < xLength; i++)
-    workspace->setEFixed((i + 1), 0.50);
+  setWorkspaceBinEdges(workspace, xLength, yLength);
+  setWorkspaceEFixed(workspace, xLength);
   return workspace;
 }
 
@@ -49,6 +68,10 @@ MatrixWorkspace_sptr createWorkspaceWithInstrument(int const &xLength,
       xLength, yLength - 1, false, false, true, "testInst");
   workspace->initialize(yLength, xLength, xLength - 1);
   return setWorkspaceProperties(workspace, xLength, yLength);
+}
+
+IFunction_sptr getFunction(std::string const &functionString) {
+  return FunctionFactory::Instance().createInitialized(functionString);
 }
 
 /// Simple class to set up the ADS with the configuration required
@@ -394,8 +417,7 @@ public:
   test_that_setFitFunction_will_alter_the_activeFunction_to_the_function_specified() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
 
-    auto const function = FunctionFactory::Instance().createInitialized(
-        "name=Convolution;name=Resolution");
+    auto const function = getFunction("name=Convolution;name=Resolution");
     model->setFitFunction(function);
 
     TS_ASSERT_EQUALS(model->getFittingFunction(), function);
@@ -437,7 +459,7 @@ public:
 
   void
   test_that_isPreviouslyFit_returns_true_if_the_spectrum_has_been_fitted_previously() {
-    auto const model = getModelWithOutputFitData();
+    auto const model = getModelWithFitOutputData();
     TS_ASSERT(model->isPreviouslyFit(0, 0));
   }
 
@@ -473,8 +495,7 @@ public:
   test_that_isInvalidFunction_returns_a_message_when_the_activeFunction_contains_zero_parameters_or_functions() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
 
-    auto const function = FunctionFactory::Instance().createInitialized(
-        "name=Convolution;name=Resolution");
+    auto const function = getFunction("name=Convolution;name=Resolution");
     model->setFitFunction(function);
 
     TS_ASSERT(model->isInvalidFunction());
@@ -636,7 +657,7 @@ public:
 
   void
   test_that_getParameterValues_returns_an_empty_map_if_the_dataIndex_is_out_of_range() {
-    auto const model = getModelWithOutputFitData();
+    auto const model = getModelWithFitOutputData();
     TS_ASSERT(model->getParameterValues(1, 0).empty());
   }
 
@@ -655,7 +676,7 @@ public:
 
   void
   test_that_getParameterValues_returns_the_fit_parameters_after_a_fit_has_been_executed() {
-    auto const model = getModelWithOutputFitData();
+    auto const model = getModelWithFitOutputData();
 
     auto const parameters = model->getParameterValues(0, 0);
     TS_ASSERT_DELTA(parameters.at("f1.f1.f0.Amplitude").value, 1.0, 0.0001);
@@ -674,7 +695,7 @@ public:
   }
 
   void test_getFitParameters_returns_the_fitParameters_after_a_fit() {
-    auto const model = getModelWithOutputFitData();
+    auto const model = getModelWithFitOutputData();
 
     auto const parameters = model->getFitParameters(0, 0);
     TS_ASSERT_DELTA(parameters.at("f1.f1.f0.Amplitude").value, 1.0, 0.0001);
@@ -684,13 +705,13 @@ public:
 
   void
   test_getDefaultParameters_returns_an_empty_map_when_the_dataIndex_is_out_of_range() {
-    auto const model = getModelWithOutputFitData();
+    auto const model = getModelWithFitOutputData();
     TS_ASSERT(model->getDefaultParameters(1).empty());
   }
 
   void
   test_getDefaultParameters_returns_the_default_parameters_which_have_been_set() {
-    auto const model = getModelWithOutputFitData();
+    auto const model = getModelWithFitOutputData();
 
     model->setDefaultParameterValue("Amplitude", 1.5, 0);
 
@@ -700,12 +721,12 @@ public:
   }
 
   void test_that_getResultLocation_returns_a_location_for_the_output_data() {
-    auto const model = getModelWithOutputFitData();
+    auto const model = getModelWithFitOutputData();
     TS_ASSERT(model->getResultLocation(0, 0));
   }
 
   void test_that_saveResult_does_not_throw_when_saving_data_from_a_fit() {
-    auto const model = getModelWithOutputFitData();
+    auto const model = getModelWithFitOutputData();
     TS_ASSERT_THROWS_NOTHING(model->saveResult());
   }
 
@@ -746,9 +767,7 @@ public:
 private:
   void setFittingFunction(std::unique_ptr<DummyModel> &model,
                           std::string const &functionString) const {
-    auto const function =
-        FunctionFactory::Instance().createInitialized(functionString);
-    model->setFitFunction(function);
+    model->setFitFunction(getFunction(functionString));
   }
 
   IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
@@ -766,7 +785,6 @@ private:
     alg->setProperty("MaxIterations", 500);
     alg->setProperty("OutputWorkspace", "output");
     alg->setLogging(false);
-    alg->setAlwaysStoreInADS(true);
     return alg;
   }
 
@@ -795,7 +813,7 @@ private:
     return alg;
   }
 
-  std::unique_ptr<DummyModel> getModelWithOutputFitData() {
+  std::unique_ptr<DummyModel> getModelWithFitOutputData() {
     auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
     SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
