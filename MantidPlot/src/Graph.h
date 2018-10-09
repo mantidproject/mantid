@@ -668,7 +668,7 @@ public slots:
   void setCurveTitle(int index, const QString &title);
   //@}
 
-  //! \name Modifing insertCurve Data
+  //! \name Modifying insertCurve Data
   //@{
   int selectedCurveID();
   int selectedCurveIndex() { return curveIndex(selectedCurveID()); }
