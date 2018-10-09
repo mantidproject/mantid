@@ -25,7 +25,7 @@ public:
     std::unique_ptr<DetectorInfo> detInfo;
     TS_ASSERT_THROWS_NOTHING(detInfo = Kernel::make_unique<DetectorInfo>());
     TS_ASSERT_EQUALS(detInfo->size(), 0);
-    TS_ASSERT_EQUALS(detInfo->scanSize(), 0);
+    TS_ASSERT_EQUALS(detInfo->scanCount(), 1);
     TS_ASSERT(!detInfo->isScanning());
     TS_ASSERT(!detInfo->hasComponentInfo());
 
@@ -42,7 +42,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         info = Kernel::make_unique<DetectorInfo>(PosVec(3), RotVec(3), mons));
     TS_ASSERT_EQUALS(info->size(), 3);
-    TS_ASSERT_EQUALS(info->scanSize(), 3);
+    TS_ASSERT_EQUALS(info->scanCount(), 1);
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0, 1, 2}));
@@ -281,39 +281,6 @@ public:
     DetectorInfo info(PosVec(1), RotVec(1));
     TS_ASSERT_EQUALS(info.scanIntervals()[0],
                      (std::pair<int64_t, int64_t>(0, 1)));
-  }
-
-  void test_setScanInterval() {
-    DetectorInfo info(PosVec(2), RotVec(2));
-    std::pair<int64_t, int64_t> interval(1, 2);
-    info.setScanInterval(interval);
-    TS_ASSERT_EQUALS(info.scanIntervals()[0], interval);
-    interval = {1, 3};
-    info.setScanInterval(interval);
-    TS_ASSERT_EQUALS(info.scanIntervals()[0], interval);
-  }
-
-  void test_setScanInterval_failures() {
-    DetectorInfo info(PosVec(1), RotVec(1));
-    TS_ASSERT_THROWS_EQUALS(
-        info.setScanInterval({1, 1}), const std::runtime_error &e,
-        std::string(e.what()),
-        "DetectorInfo: cannot set scan interval with start >= end");
-    TS_ASSERT_THROWS_EQUALS(
-        info.setScanInterval({2, 1}), const std::runtime_error &e,
-        std::string(e.what()),
-        "DetectorInfo: cannot set scan interval with start >= end");
-  }
-
-  void test_setDetectorInfo_fail_size() {
-    DetectorInfo a(PosVec(1), RotVec(1));
-    a.setScanInterval({0, 1});
-    Mantid::Beamline::ComponentInfo b;
-    TS_ASSERT_THROWS_EQUALS(b.setDetectorInfo(&a);
-                            , const std::invalid_argument &e,
-                            std::string(e.what()),
-                            "ComponentInfo must have detector indices input of "
-                            "same size as size of DetectorInfo");
   }
 };
 

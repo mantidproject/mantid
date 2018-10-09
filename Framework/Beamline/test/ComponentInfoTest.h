@@ -888,6 +888,17 @@ public:
                                                   detectorIndex);
   }
 
+  void test_setScanInterval() {
+    auto infos = makeTreeExample();
+    auto &compInfo = *std::get<0>(infos);
+    std::pair<int64_t, int64_t> interval(1, 2);
+    compInfo.setScanInterval(interval);
+    TS_ASSERT_EQUALS(compInfo.scanIntervals()[0], interval);
+    interval = {1, 3};
+    compInfo.setScanInterval(interval);
+    TS_ASSERT_EQUALS(compInfo.scanIntervals()[0], interval);
+  }
+
   void test_setScanInterval_failures() {
     auto infos = makeTreeExample();
     auto &compInfo = *std::get<0>(infos);

@@ -517,7 +517,7 @@ public:
     // Merge
     auto merged = WorkspaceFactory::Instance().create(ws1, 2 * N_DET);
     auto &cmpInfo = merged->mutableComponentInfo();
-    cmpInfo.merge(ws2->ComponentInfo());
+    cmpInfo.merge(ws2->componentInfo());
     merged->setIndexInfo(Indexing::IndexInfo(merged->getNumberHistograms()));
 
     NormaliseToMonitor alg;

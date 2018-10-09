@@ -650,7 +650,7 @@ public:
 
     infoScan1->merge(*infoScan2);
 
-    TS_ASSERT_EQUALS(infoScan1->scanSize(),
+    TS_ASSERT_EQUALS(infoScan1->size() * infoScan1->scanCount(),
                      infoScan1->size() + infoScan2->size());
     TS_ASSERT_EQUALS(infoScan1->position({0 /*detector index*/, 0}),
                      V3D(0, 0, 0));
