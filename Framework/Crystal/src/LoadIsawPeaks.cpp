@@ -349,6 +349,9 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
   boost::shared_ptr<const IComponent> parent =
       getCachedBankByName(bankName, inst);
 
+  if (!parent)
+    return -1; // peak not in any detector.
+
   if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
