@@ -26,7 +26,7 @@ using namespace API;
 BoundaryConstraint::BoundaryConstraint()
     : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()),
       m_hasLowerBound(false), m_hasUpperBound(false), m_lowerBound(DBL_MAX),
-      m_upperBound(-DBL_MAX){} 
+      m_upperBound(-DBL_MAX) {}
 
 /// Constructor with no boundary arguments
 /// @param paramName :: The parameter name
