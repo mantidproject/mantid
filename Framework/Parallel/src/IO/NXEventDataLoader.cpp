@@ -1,5 +1,5 @@
-#include "MantidParallel/IO/NXEventDataLoader.h"
 #include "MantidKernel/System.h"
+#include "MantidParallel/IO/NXEventDataLoader.h"
 
 namespace Mantid {
 namespace Parallel {
