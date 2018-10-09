@@ -78,13 +78,12 @@ public:
   virtual std::string asString() const = 0;
 
   /// Return the value for default fitting penalties
-  virtual double getDefaultPenaltyFactor() const = 0;
+  static double getDefaultPenaltyFactor() { return m_defaultPenaltyFactor; }
 
 protected:
   /// default penalty factor for constraints
-  const double m_defaultPenaltyFactor = 1000.0;
+  static constexpr double m_defaultPenaltyFactor = 1000;
 };
-
 } // namespace API
 } // namespace Mantid
 

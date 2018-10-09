@@ -65,9 +65,9 @@ public:
   /// implement IConstraint virtual functions
   void setPenaltyFactor(const double &c) override;
   double getPenaltyFactor() const override { return m_penaltyFactor; }
-  double getDefaultPenaltyFactor() const override {
-    return m_defaultPenaltyFactor;
-  }
+  //static double getDefaultPenaltyFactor(){
+  //  return m_defaultPenaltyFactor;
+  //}
 
   /// Return if it has a lower bound
   bool hasLower() const { return m_hasLowerBound; }

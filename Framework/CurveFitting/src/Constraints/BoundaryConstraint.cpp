@@ -22,12 +22,11 @@ DECLARE_CONSTRAINT(BoundaryConstraint)
 
 // using namespace Kernel;
 using namespace API;
-
 /// Default constructor
 BoundaryConstraint::BoundaryConstraint()
     : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()),
       m_hasLowerBound(false), m_hasUpperBound(false), m_lowerBound(DBL_MAX),
-      m_upperBound(-DBL_MAX) {}
+      m_upperBound(-DBL_MAX){} 
 
 /// Constructor with no boundary arguments
 /// @param paramName :: The parameter name
