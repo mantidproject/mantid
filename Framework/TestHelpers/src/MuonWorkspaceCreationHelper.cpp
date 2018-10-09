@@ -59,6 +59,9 @@ double eData::operator()(const double, size_t) { return 0.005; }
  * Number of bins = maxt - 1 .
  * @param seed :: Number added to all y-values.
  * @param detectorIDseed :: detector IDs starting from this number.
+ * @param hist :: Whether to output histogram data or not
+ * @param xStart :: The start value of the x-axis.
+ * @param xEnd :: The end value of the x-axis.
  * @return Pointer to the workspace.
  */
 MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,

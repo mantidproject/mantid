@@ -116,7 +116,7 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX) {
   auto upper =
       std::lower_bound(xData.rawData().begin(), xData.rawData().end(), startX);
-  return std::distance(xData.rawData().begin(), upper + 1);
+  return std::distance(xData.rawData().begin(), upper);
 }
 /**
  * find the first index in bin edges that is after
