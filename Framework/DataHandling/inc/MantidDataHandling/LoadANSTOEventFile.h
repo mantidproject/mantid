@@ -47,7 +47,7 @@ struct EventFileHeader_Packed { // total content should be 16*int (64 bytes)
   int evt_stg_xy_signed; // 0 if x and y are unsigned, 1 if x and y are signed
                          // ints
   // cppcheck-suppress unusedStructMember
-  int spares[16 - 6];    // spares (padding)
+  int spares[16 - 6]; // spares (padding)
 };
 
 #pragma pack(pop)
