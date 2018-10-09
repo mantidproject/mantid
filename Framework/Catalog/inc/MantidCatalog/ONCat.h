@@ -79,8 +79,8 @@ using QueryParameters = std::vector<QueryParameter>;
  *     // Print out the IPTS numbers of each one.
  *     for (const auto & experiment : nomadExperiments) {
  *       std::cout
- *         << *experiment.asString("name") << " has "
- *         << *experiment.asInt("size") << " ingested datafiles.";
+ *         << *experiment.get<std::string>("name") << " has "
+ *         << *experiment.get<int>("size") << " ingested datafiles.";
  *     }
  *
  * For logged-in users, no further credential prompting should be required

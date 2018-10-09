@@ -291,7 +291,7 @@ public:
                                        {QueryParameter("facility", "HFIR")});
 
     TS_ASSERT_EQUALS(entity.id(), std::string("HB2C"));
-    TS_ASSERT_EQUALS(entity.asString("name"), std::string("HB2C"));
+    TS_ASSERT_EQUALS(entity.get<std::string>("name"), std::string("HB2C"));
 
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
@@ -315,7 +315,7 @@ public:
                                        {QueryParameter("facility", "HFIR")});
 
     TS_ASSERT_EQUALS(entity.id(), std::string("HB2C"));
-    TS_ASSERT_EQUALS(entity.asString("name"), std::string("HB2C"));
+    TS_ASSERT_EQUALS(entity.get<std::string>("name"), std::string("HB2C"));
 
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
@@ -350,9 +350,9 @@ public:
 
     TS_ASSERT_EQUALS(entities.size(), 2);
     TS_ASSERT_EQUALS(entities[0].id(), std::string("HB2C"));
-    TS_ASSERT_EQUALS(entities[0].asString("name"), std::string("HB2C"));
+    TS_ASSERT_EQUALS(entities[0].get<std::string>("name"), std::string("HB2C"));
     TS_ASSERT_EQUALS(entities[1].id(), std::string("CG1D"));
-    TS_ASSERT_EQUALS(entities[1].asString("name"), std::string("CG1D"));
+    TS_ASSERT_EQUALS(entities[1].get<std::string>("name"), std::string("CG1D"));
 
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }

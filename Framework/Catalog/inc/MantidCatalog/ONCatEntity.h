@@ -60,26 +60,19 @@ public:
   ONCatEntity(const ONCatEntity &);
   ~ONCatEntity();
 
-  // These are the only two fields the ONCat API guarantees will be
-  // there across *all* entity types.
+  // These are the only two fields the ONCat API guarantees will be there
+  // across *all* entity types.
   std::string id() const;
   std::string type() const;
 
-  // So, you can either supply a default value for when the field you
-  // want is not there ...
-  std::string asString(const std::string &path,
-                       const std::string defaultValue) const;
-  int asInt(const std::string &path, int defaultValue) const;
-  float asFloat(const std::string &path, float defaultValue) const;
-  double asDouble(const std::string &path, double defaultValue) const;
-  bool asBool(const std::string &path, bool defaultValue) const;
+  // For all other fields, you can either supply a default value for when a
+  // value does not exist ...
+  template <typename T>
+  T get(const std::string &path, T defaultValue) const;
 
   // ... or, write conditional logic around boost's optional results.
-  boost::optional<std::string> asString(const std::string &path) const;
-  boost::optional<int> asInt(const std::string &path) const;
-  boost::optional<float> asFloat(const std::string &path) const;
-  boost::optional<double> asDouble(const std::string &path) const;
-  boost::optional<bool> asBool(const std::string &path) const;
+  template <typename T>
+  boost::optional<T> get(const std::string &path) const;
 
   std::string toString() const;
 

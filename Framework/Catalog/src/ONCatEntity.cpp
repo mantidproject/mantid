@@ -116,46 +116,45 @@ std::string ONCatEntity::id() const { return m_id; }
 
 std::string ONCatEntity::type() const { return m_type; }
 
-std::string ONCatEntity::asString(const std::string &path,
-                                  const std::string defaultValue) const {
+template <>
+std::string ONCatEntity::get(const std::string &path, std::string defaultValue) const {
+  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
+}
+template <>
+int ONCatEntity::get(const std::string &path, int defaultValue) const {
+  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
+}
+template <>
+float ONCatEntity::get(const std::string &path, float defaultValue) const {
+  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
+}
+template <>
+double ONCatEntity::get(const std::string &path, double defaultValue) const {
+  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
+}
+template <>
+bool ONCatEntity::get(const std::string &path, bool defaultValue) const {
   return getNestedContentValueElseDefault(*m_content, path, defaultValue);
 }
 
-int ONCatEntity::asInt(const std::string &path, int defaultValue) const {
-  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
-}
-
-float ONCatEntity::asFloat(const std::string &path, float defaultValue) const {
-  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
-}
-
-double ONCatEntity::asDouble(const std::string &path,
-                             double defaultValue) const {
-  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
-}
-
-bool ONCatEntity::asBool(const std::string &path, bool defaultValue) const {
-  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
-}
-
-boost::optional<std::string>
-ONCatEntity::asString(const std::string &path) const {
+template <>
+boost::optional<std::string> ONCatEntity::get(const std::string &path) const {
   return getNestedContentValueIfPresent<std::string>(*m_content, path);
 }
-
-boost::optional<int> ONCatEntity::asInt(const std::string &path) const {
+template <>
+boost::optional<int> ONCatEntity::get(const std::string &path) const {
   return getNestedContentValueIfPresent<int>(*m_content, path);
 }
-
-boost::optional<float> ONCatEntity::asFloat(const std::string &path) const {
+template <>
+boost::optional<float> ONCatEntity::get(const std::string &path) const {
   return getNestedContentValueIfPresent<float>(*m_content, path);
 }
-
-boost::optional<double> ONCatEntity::asDouble(const std::string &path) const {
+template <>
+boost::optional<double> ONCatEntity::get(const std::string &path) const {
   return getNestedContentValueIfPresent<double>(*m_content, path);
 }
-
-boost::optional<bool> ONCatEntity::asBool(const std::string &path) const {
+template <>
+boost::optional<bool> ONCatEntity::get(const std::string &path) const {
   return getNestedContentValueIfPresent<bool>(*m_content, path);
 }
 

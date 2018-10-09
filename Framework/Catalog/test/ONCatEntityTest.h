@@ -114,18 +114,18 @@ public:
 
     auto dummy = ONCatEntity::fromJSONStream(ss);
 
-    // Note implicit calls to get, i.e. "dummy.asType("val.a.type").get()".
-    TS_ASSERT_EQUALS(dummy.asString("val.a.string"), std::string("value"));
-    TS_ASSERT_EQUALS(dummy.asInt("val.a.int"), 1234);
-    TS_ASSERT_EQUALS(dummy.asFloat("val.a.float"), 1234.5f);
-    TS_ASSERT_EQUALS(dummy.asDouble("val.a.double"), 1234.5);
-    TS_ASSERT_EQUALS(dummy.asBool("val.a.bool"), true);
+    TS_ASSERT_EQUALS(dummy.get<std::string>("val.a.string"),
+                     std::string("value"));
+    TS_ASSERT_EQUALS(dummy.get<int>("val.a.int"), 1234);
+    TS_ASSERT_EQUALS(dummy.get<float>("val.a.float"), 1234.5f);
+    TS_ASSERT_EQUALS(dummy.get<double>("val.a.double"), 1234.5);
+    TS_ASSERT_EQUALS(dummy.get<bool>("val.a.bool"), true);
 
-    TS_ASSERT(!dummy.asString("a.string"));
-    TS_ASSERT(!dummy.asInt("a.int"));
-    TS_ASSERT(!dummy.asFloat("a.float"));
-    TS_ASSERT(!dummy.asDouble("a.double"));
-    TS_ASSERT(!dummy.asBool("a.bool"));
+    TS_ASSERT(!dummy.get<std::string>("a.string"));
+    TS_ASSERT(!dummy.get<int>("a.int"));
+    TS_ASSERT(!dummy.get<float>("a.float"));
+    TS_ASSERT(!dummy.get<double>("a.double"));
+    TS_ASSERT(!dummy.get<bool>("a.bool"));
   }
 
   void test_default_values_with_various_types() {
@@ -141,11 +141,12 @@ public:
 
     auto dummy = ONCatEntity::fromJSONStream(ss);
 
-    TS_ASSERT_EQUALS(dummy.asString("a.string", "val"), std::string("val"));
-    TS_ASSERT_EQUALS(dummy.asInt("a.int", 1234), 1234);
-    TS_ASSERT_EQUALS(dummy.asFloat("a.float", 1234.5f), 1234.5f);
-    TS_ASSERT_EQUALS(dummy.asDouble("a.double", 1234.5), 1234.5);
-    TS_ASSERT_EQUALS(dummy.asBool("a.bool", true), true);
+    TS_ASSERT_EQUALS(dummy.get<std::string>("a.string", "val"),
+                     std::string("val"));
+    TS_ASSERT_EQUALS(dummy.get<int>("a.int", 1234), 1234);
+    TS_ASSERT_EQUALS(dummy.get<float>("a.float", 1234.5f), 1234.5f);
+    TS_ASSERT_EQUALS(dummy.get<double>("a.double", 1234.5), 1234.5);
+    TS_ASSERT_EQUALS(dummy.get<bool>("a.bool", true), true);
   }
 };
 
