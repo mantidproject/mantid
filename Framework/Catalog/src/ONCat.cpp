@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCatalog/ONCat.h"
 #include "MantidCatalog/OAuth.h"
 #include "MantidCatalog/Exception.h"
@@ -48,34 +54,35 @@ static const std::string DEFAULT_CLIENT_ID =
  * Constructs an ONCat object based on various settings gathered from
  * the ConfigService.
  *
- * The resulting object will work with resources that require authorization
- * in one of two possible modes:
+ * The resulting object will work with resources that require no
+ * authentication at all, or assuming authentication is to be done in one of
+ * two possible modes:
  *
- * User Login Mode (Default)
- * -------------------------
+ * 1 - User Login Mode (Default)
+ * -----------------------------
  *
  * Users must log in with their UCAMS / XCAMS credentials before calls
  * to the ONCat API can be made.  This mode should work "out of the box"
  * (requires no changes to config files), and is the default mode of
- * operation.  User access to API information is governed by the same
- * LDAP instance that controls file system access, so users should only
- * see the experiment data they are allowed to see.
+ * operation when authenticating.  User access to API information is governed
+ * by the same LDAP instance that controls file system access, so users should
+ * only see the experiment data they are allowed to see.
  *
  * This mode uses the "Resource Owner Credentials" OAuth flow.
  *
- * Machine-to-Machine Mode
- * -----------------------
+ * 2 - Machine-to-Machine Mode
+ * ---------------------------
  *
- * No user login is necessary, but for it to be enabled a client ID and
- * secret must exist in the ConfigService.  Recommended practice would
- * be to add the following two entries to the Mantid.local.properties
- * file on the machine to be given access, using the credentials issued
- * by the ONCat administrator for the values:
+ * No user login is necessary in this case, but for this mode to be enabled a
+ * client ID and secret must exist in the ConfigService.  Recommended practice
+ * would be to add the following two entries to the Mantid.local.properties
+ * file on the machine to be given access, using the credentials issued by the
+ * ONCat administrator:
  *
  *     catalog.oncat.client_id = "[CLIENT ID]"
  *     catalog.oncat.client_secret = "[CLIENT SECRET]"
  *
- * API read access is completely unrestricted in this mode, which is
+ * API read access is completely unrestricted in this mode, and so it is
  * intended for autoreduction use cases or similar.
  *
  * This mode uses the "Client Credentials" OAuth flow.
