@@ -78,7 +78,6 @@ public:
     MatrixWorkspace_const_sptr outputWS =
         asymCalc.getProperty("OutputWorkspace");
     TS_ASSERT_DELTA(outputWS->y(0)[100], 0.2965, 0.005);
-    TS_ASSERT(!outputWS->isHistogramData());
   }
 
   void test_single_spectra() {
@@ -101,7 +100,6 @@ public:
     TS_ASSERT_EQUALS(outputWS->y(0)[0], -0.5); // == (1 - 3)/(1 + 3)
     TS_ASSERT_EQUALS(outputWS->y(0)[6], -0.5); // == (1 - 3)/(1 + 3)
     TS_ASSERT_EQUALS(outputWS->y(0)[9], -0.5); // == (1 - 3)/(1 + 3)
-    TS_ASSERT(!outputWS->isHistogramData());
   }
 
   void test_yUnitLabel() {

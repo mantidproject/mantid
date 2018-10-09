@@ -190,10 +190,9 @@ public:
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
-    // Asymmetry converts bin width to point data
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.3928, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.44885, 0.0001);
@@ -358,9 +357,9 @@ public:
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
     // Asymmetry converted to point data
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.150, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.0, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.10, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.0001);
 
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
@@ -401,9 +400,9 @@ public:
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.550, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.650, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.950, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.50, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.60, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.90, 0.0001);
 
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
