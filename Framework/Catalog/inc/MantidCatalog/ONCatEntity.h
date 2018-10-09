@@ -78,7 +78,7 @@ public:
   template <typename T> boost::optional<T> get(const std::string &path) const {
     try {
       return boost::make_optional(
-        getNestedContentValueAsType<T>(*m_content, path));
+          getNestedContentValueAsType<T>(*m_content, path));
     } catch (ContentError &) {
       return boost::none;
     }

@@ -92,28 +92,29 @@ ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
 }
 
 template <>
-std::string ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                        const std::string &path) const {
+std::string
+ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                         const std::string &path) const {
   return getNestedContent(content, path).asString();
 }
 template <>
 int ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                const std::string &path) const {
+                                             const std::string &path) const {
   return getNestedContent(content, path).asInt();
 }
 template <>
 float ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                  const std::string &path) const {
+                                               const std::string &path) const {
   return getNestedContent(content, path).asFloat();
 }
 template <>
 double ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                   const std::string &path) const {
+                                                const std::string &path) const {
   return getNestedContent(content, path).asDouble();
 }
 template <>
 bool ONCatEntity::getNestedContentValueAsType(const Content &content,
-                                 const std::string &path) const {
+                                              const std::string &path) const {
   return getNestedContent(content, path).asBool();
 }
 

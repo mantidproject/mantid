@@ -51,8 +51,7 @@ public:
 
 class ContentError : public CatalogError {
 public:
-  explicit ContentError(const std::string &message)
-      : CatalogError(message) {}
+  explicit ContentError(const std::string &message) : CatalogError(message) {}
 };
 
 } // namespace Exception
