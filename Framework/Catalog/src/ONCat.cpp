@@ -394,8 +394,8 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
 }
 
 void ONCat::setInternetHelper(
-    std::shared_ptr<Mantid::Kernel::InternetHelper> internetHelper) {
-  m_internetHelper = std::move(internetHelper);
+    const std::shared_ptr<Mantid::Kernel::InternetHelper> & internetHelper) {
+  m_internetHelper = internetHelper;
 }
 
 void ONCat::sendAPIRequest(const std::string &uri,

@@ -124,7 +124,7 @@ public:
   void refreshTokenIfNeeded();
   void refreshTokenIfNeeded(const DateAndTime &currentTime);
   void setInternetHelper(
-      std::shared_ptr<Mantid::Kernel::InternetHelper> internetHelper);
+      const std::shared_ptr<Mantid::Kernel::InternetHelper> & internetHelper);
   //////////////////////////////////////////////////////////////////////
 
 private:
