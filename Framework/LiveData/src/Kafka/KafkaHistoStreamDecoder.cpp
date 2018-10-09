@@ -104,7 +104,7 @@ bool KafkaHistoStreamDecoder::hasData() const {
  */
 API::Workspace_sptr KafkaHistoStreamDecoder::extractData() {
   if (m_exception) {
-    throw * m_exception;
+    throw *m_exception;
   }
 
   auto workspace_ptr = extractDataImpl();
