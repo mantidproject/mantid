@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/StatisticsOfPeaksWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Crystal/ReflectionCondition.h"
-#include "MantidKernel/Utils.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/ReflectionCondition.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Utils.h"
 
 #include <fstream>
 
@@ -219,5 +225,5 @@ void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
   setProperty("EquivalentsWorkspace", equivws);
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

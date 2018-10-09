@@ -1,15 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SPECIALFUNCTIONSUPPORTTEST_H_
 #define SPECIALFUNCTIONSUPPORTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <complex>
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
+#include <complex>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
@@ -88,7 +94,8 @@ std::string PropertyManagerProperty::setValue(const std::string &strValue) {
     msg << "Error setting value from string.\n"
            "String is expected to contain either the name of a global "
            "PropertyManager or a json-formatted object.\n"
-           "Parser error: " << exc.what();
+           "Parser error: "
+        << exc.what();
   } catch (std::exception &exc) {
     msg << "Error setting value from string.\n" << exc.what();
   }

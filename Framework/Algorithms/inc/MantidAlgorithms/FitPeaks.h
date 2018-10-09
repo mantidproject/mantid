@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_FITPEAKS_H_
 #define MANTID_ALGORITHMS_FITPEAKS_H_
 
@@ -18,7 +24,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 
@@ -51,7 +57,7 @@ private:
   // fitted peak and background parameters
   std::vector<std::vector<double>> m_function_parameters_vector;
 };
-}
+} // namespace FitPeaksAlgorithm
 
 class DLLExport FitPeaks : public API::Algorithm {
 public:
@@ -109,7 +115,7 @@ private:
   enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 
   /// suites of method to fit peaks
-  void fitPeaks();
+  std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fitPeaks();
 
   /// fit peaks in a same spectrum
   void fitSpectrumPeaks(
@@ -207,19 +213,27 @@ private:
       boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
 
   /// calculate peak+background for fitted
-  void calculateFittedPeaks();
+  void calculateFittedPeaks(
+      std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+          fit_results);
 
   /// Get the parameter name for peak height (I or height or etc)
   std::string
   getPeakHeightParameterName(API::IPeakFunction_const_sptr peak_function);
 
   /// Set the workspaces and etc to output properties
-  void processOutputs();
+  void processOutputs(
+      std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+          fit_result_vec);
 
   /// Write result of peak fit per spectrum to output analysis workspaces
   void writeFitResult(
       size_t wi, const std::vector<double> &expected_positions,
       boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result);
+
+  /// check whether FitPeaks supports observation on a certain peak profile's
+  /// parameters (width!)
+  bool isObservablePeakProfile(const std::string &peakprofile);
 
   //------- Workspaces-------------------------------------
   /// mandatory input and output workspaces
@@ -233,6 +247,9 @@ private:
   /// optional output analysis workspaces
   /// table workspace for fitted parameters
   API::ITableWorkspace_sptr m_fittedParamTable;
+  /// flag to show that the pamarameters in table are raw parameters or
+  /// effective parameters
+  bool m_rawPeaksTable;
   /// matrix workspace contained calcalated peaks+background from fitted result
   /// it has same number of spectra of input workspace even if only part of
   /// spectra to have peaks to fit

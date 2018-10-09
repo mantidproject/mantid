@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDGEOMETRYXMLBUILDER_H_
 #define MDGEOMETRYXMLBUILDER_H_
 
-#include <vector>
-#include <string>
-#include <algorithm>
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include <algorithm>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -20,26 +26,6 @@ namespace Geometry {
  Handles the generation of well formed description of a geometry based on input
  IMDDimensions.
  Outputs xml.
-
- Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
 
  */
 template <typename CheckDimensionPolicy>
@@ -151,7 +137,7 @@ struct MANTID_GEOMETRY_DLL NoDimensionPolicy {
     // Do nothing.
   }
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif /* GEOMETRYXMLBUILDER_H_ */

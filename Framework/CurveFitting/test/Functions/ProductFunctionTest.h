@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PRODUCTFUNCTIONTEST_H_
 #define PRODUCTFUNCTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 using WS_type = Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::CurveFitting::Functions::ProductFunction;
 using Mantid::CurveFitting::Functions::Gaussian;
+using Mantid::CurveFitting::Functions::ProductFunction;
 
 class ProductFunctionMWTest_Gauss : public Mantid::API::IPeakFunction {
 public:

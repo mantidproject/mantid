@@ -5,7 +5,7 @@
 # running environment
 
 # clang-format executable
-CLANG_FORMAT_EXE=clang-format-3.6
+CLANG_FORMAT_EXE=clang-format-5.0
 CLANG_FORMAT=$(which $CLANG_FORMAT_EXE)
 if [ -z "$CLANG_FORMAT" ]; then
   echo "Cannot find ${CLANG_FORMAT_EXE} executable"

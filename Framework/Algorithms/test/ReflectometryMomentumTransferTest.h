@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_
 
@@ -291,12 +297,12 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("ChopperRadius", CHOPPER_RADIUS))
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("ChopperpairDistance", CHOPPER_GAP))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Slit1Name", "slit1"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("FirstSlitName", "slit1"))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("Slit1SizeSampleLog", "slit1.size"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Slit2Name", "slit2"))
+        alg->setProperty("FirstSlitSizeSampleLog", "slit1.size"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitName", "slit2"))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("Slit2SizeSampleLog", "slit2.size"))
+        alg->setProperty("SecondSlitSizeSampleLog", "slit2.size"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH))
     return alg;
   }
@@ -307,18 +313,19 @@ private:
     const Kernel::V3D sourcePos{0., 0., -L1};
     const Kernel::V3D &monitorPos = sourcePos;
     const Kernel::V3D samplePos{
-        0., 0., 0.,
+        0.,
+        0.,
+        0.,
     };
     const auto detZ = DET_DIST * std::cos(2 * braggAngle);
     const auto detY = DET_DIST * std::sin(2 * braggAngle);
     const Kernel::V3D detectorPos{0., detY, detZ};
     const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
     const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
-    constexpr int nHisto{2};
     constexpr int nBins{100};
     auto ws = create2DWorkspaceWithReflectometryInstrument(
         startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
-        monitorPos, samplePos, detectorPos, nHisto, nBins, TOF_BIN_WIDTH);
+        monitorPos, samplePos, detectorPos, nBins, TOF_BIN_WIDTH);
     // Add slit sizes to sample logs, too.
     auto &run = ws->mutableRun();
     constexpr bool overwrite{true};
@@ -523,10 +530,10 @@ private:
     alg->setProperty("ChopperOpening", CHOPPER_OPENING_ANGLE);
     alg->setProperty("ChopperRadius", CHOPPER_RADIUS);
     alg->setProperty("ChopperpairDistance", CHOPPER_GAP);
-    alg->setProperty("Slit1Name", "slit1");
-    alg->setProperty("Slit1SizeSampleLog", "slit1.size");
-    alg->setProperty("Slit2Name", "slit2");
-    alg->setProperty("Slit2SizeSampleLog", "slit2.size");
+    alg->setProperty("FirstSlitName", "slit1");
+    alg->setProperty("FirstSlitSizeSampleLog", "slit1.size");
+    alg->setProperty("SecondSlitName", "slit2");
+    alg->setProperty("SecondSlitSizeSampleLog", "slit2.size");
     alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH);
     return alg;
   }
@@ -537,7 +544,9 @@ private:
     const Kernel::V3D sourcePos{0., 0., -L1};
     const Kernel::V3D &monitorPos = sourcePos;
     const Kernel::V3D samplePos{
-        0., 0., 0.,
+        0.,
+        0.,
+        0.,
     };
     const double braggAngle{0.7};
     const auto detZ = DET_DIST * std::cos(2 * braggAngle);
@@ -545,11 +554,10 @@ private:
     const Kernel::V3D detectorPos{0., detY, detZ};
     const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
     const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
-    constexpr int nHisto{2};
     constexpr int nBins{10000};
     auto ws = create2DWorkspaceWithReflectometryInstrument(
         startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
-        monitorPos, samplePos, detectorPos, nHisto, nBins, TOF_BIN_WIDTH);
+        monitorPos, samplePos, detectorPos, nBins, TOF_BIN_WIDTH);
     // Add slit sizes to sample logs, too.
     auto &run = ws->mutableRun();
     constexpr bool overwrite{true};

@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CombinePeaksWorkspaces.h"
+#include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {

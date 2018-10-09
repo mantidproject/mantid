@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveFITS.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -48,8 +54,8 @@ const std::array<int, 3> SaveFITS::g_bitDepths = {
     {8, 16, static_cast<int>(g_maxBitDepth)}};
 const size_t SaveFITS::g_maxBytesPP = g_maxBitDepth / 8;
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveFITS)
@@ -75,7 +81,7 @@ namespace {
 const std::string PROP_INPUT_WS = "InputWorkspace";
 const std::string PROP_FILENAME = "Filename";
 const std::string PROP_BIT_DEPTH = "BitDepth";
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

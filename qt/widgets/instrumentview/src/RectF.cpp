@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/RectF.h"
 
 namespace MantidQt {
@@ -60,10 +66,10 @@ bool RectF::contains(const RectF &rect) {
 }
 
 /**
-* Create a transformation from this rectangle to a QRectF.
-* @param trans :: The result transform.
-* @param rect  :: The transform's destination QRectF.
-*/
+ * Create a transformation from this rectangle to a QRectF.
+ * @param trans :: The result transform.
+ * @param rect  :: The transform's destination QRectF.
+ */
 void RectF::findTransform(QTransform &trans, const QRectF &rect) const {
   double m11 = rect.width() / xSpan();
   double m22 = -rect.height() / ySpan();
@@ -90,5 +96,5 @@ void RectF::unite(const RectF &rect) {
   include(rect.p1());
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_INTEGRATEFLUXTEST_H_
 #define MANTID_MDALGORITHMS_INTEGRATEFLUXTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/IntegrateFlux.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidMDAlgorithms/IntegrateFlux.h"
 
 #include <numeric>
 
@@ -66,7 +72,7 @@ struct TestingFunction {
     throw std::logic_error("Cannot test this workspace type.");
   }
 };
-}
+} // namespace
 
 class IntegrateFluxTest : public CxxTest::TestSuite {
 public:
@@ -374,7 +380,7 @@ private:
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
       double tmp = *(i - 1);
-      *i = tmp *(1.0 + 0.0001 * tmp) + 0.3;
+      *i = tmp * (1.0 + 0.0001 * tmp) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
       ws->setBinEdges(spec, x);
@@ -434,7 +440,7 @@ private:
     x[0] = 0.0;
     for (auto i = x.begin() + 1; i != x.end(); ++i) {
       double tmp = *(i - 1);
-      *i = tmp *(1.0 + 0.0001 * tmp) + 0.3;
+      *i = tmp * (1.0 + 0.0001 * tmp) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
       ws->setPoints(spec, x);

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*=========================================================================
 
   Program:   Visualization Toolkit
@@ -25,7 +31,7 @@
  * - 1: Output of the first internal vtkCutter filter
  * - 2: Output of the second internal vtkCutter filter
  * - 3: Output of the third internal vtkCutter filter
-*/
+ */
 
 #ifndef AlignedThreeSliceFilter_h
 #define AlignedThreeSliceFilter_h

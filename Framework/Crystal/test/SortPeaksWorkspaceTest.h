@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_SORTPEAKSWORKSPACETEST_H_
 #define MANTID_CRYSTAL_SORTPEAKSWORKSPACETEST_H_
 
+#include "MantidCrystal/SortPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <algorithm>
-#include "MantidCrystal/SortPeaksWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -194,9 +200,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    IPeaksWorkspace_sptr temp = alg.getProperty("OutputWorkspace");
-    PeaksWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<PeaksWorkspace>(temp);
+    PeaksWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
     TSM_ASSERT_EQUALS("Sorting should have happened in place. Output and input "
                       "workspaces should be the same.",

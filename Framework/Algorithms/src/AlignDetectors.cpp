@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -7,7 +13,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -311,8 +316,8 @@ void AlignDetectors::align(const ConversionFactors &converter,
   if (outputWS.getTofMin() < 0.) {
     std::stringstream msg;
     msg << "Something wrong with the calibration. Negative minimum d-spacing "
-           "created. d_min = " << outputWS.getTofMin() << " d_max "
-        << outputWS.getTofMax();
+           "created. d_min = "
+        << outputWS.getTofMin() << " d_max " << outputWS.getTofMax();
     g_log.warning(msg.str());
   }
   outputWS.clearMRU();

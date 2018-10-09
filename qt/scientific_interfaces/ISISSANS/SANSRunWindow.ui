@@ -859,13 +859,6 @@ The NXcanSAS format can be used to save 1D and 2D data. </string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
-              <widget class="QCheckBox" name="saveNIST_Qxy_check">
-               <property name="text">
-                <string>NIST Qxy(2D)</string>
-               </property>
-              </widget>
-             </item>
              <item row="3" column="4">
               <spacer name="horizontalSpacer_26">
                <property name="orientation">

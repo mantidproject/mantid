@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Property.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AlgorithmProxy.h"
+#include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 
 #include <QCoreApplication>
 #include <QGridLayout>
@@ -20,11 +26,11 @@
 #include <vector>
 
 using namespace Mantid::Kernel;
-using Mantid::API::IWorkspaceProperty;
 using Mantid::API::AlgorithmManager;
-using Mantid::API::FrameworkManager;
-using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmProxy;
+using Mantid::API::Algorithm_sptr;
+using Mantid::API::FrameworkManager;
+using Mantid::API::IWorkspaceProperty;
 
 namespace MantidQt {
 namespace API {
@@ -155,8 +161,8 @@ bool haveInputWS(const std::vector<Property *> &prop_list) {
 
 //---------------------------------------------------------------------------------------------------------------
 /**
-* Create the layout for this dialog.
-*/
+ * Create the layout for this dialog.
+ */
 void AlgorithmPropertiesWidget::initLayout() {
   if (!getAlgorithm())
     return;
@@ -357,9 +363,9 @@ bool AlgorithmPropertiesWidget::isWidgetEnabled(Property *property,
     return true;
 
   /** The control is disabled if
-  *   (1) It is contained in the disabled list or
-  *   (2) A user passed a value into the dialog
-  */
+   *   (1) It is contained in the disabled list or
+   *   (2) A user passed a value into the dialog
+   */
   if (m_disabled.contains(propName)) {
     return false;
   } else {
@@ -456,5 +462,5 @@ void AlgorithmPropertiesWidget::saveInput() {
   }
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace MantidQt

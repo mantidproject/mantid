@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_
 
@@ -7,6 +13,8 @@
 #include "IEnggDiffGSASFittingModel.h"
 #include "IEnggDiffGSASFittingObserver.h"
 #include "RunMap.h"
+
+#include "MantidAPI/IAlgorithm_fwd.h"
 
 #include <QObject>
 #include <QThread>
@@ -23,6 +31,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingModel
   friend void EnggDiffGSASFittingWorker::doRefinements();
 
 public:
+  EnggDiffGSASFittingModel();
+
   ~EnggDiffGSASFittingModel();
 
   void setObserver(
@@ -45,6 +55,12 @@ public:
   Mantid::API::MatrixWorkspace_sptr
   loadFocusedRun(const std::string &filename) const override;
 
+  void saveRefinementResultsToHDF5(
+      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets,
+      const std::string &filename) const override;
+
 protected:
   /// The following methods are marked as protected so that they can be exposed
   /// by a helper class in the tests
@@ -63,11 +79,15 @@ protected:
   void addSigma(const RunLabel &runLabel, const double sigma);
 
 protected slots:
-  void processRefinementsComplete();
+  void processRefinementsComplete(
+      Mantid::API::IAlgorithm_sptr alg,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets);
 
   void processRefinementFailed(const std::string &failureMessage);
 
   void processRefinementSuccessful(
+      Mantid::API::IAlgorithm_sptr successfulAlgorithm,
       const GSASIIRefineFitPeaksOutputProperties &refinementResults);
 
   void processRefinementCancelled();
@@ -75,7 +95,7 @@ protected slots:
 private:
   static constexpr double DEFAULT_PAWLEY_DMIN = 1;
   static constexpr double DEFAULT_PAWLEY_NEGATIVE_WEIGHT = 0;
-  static const size_t MAX_BANKS = 2;
+  static const size_t MAX_BANKS = 3;
 
   RunMap<MAX_BANKS, double> m_gammaMap;
   RunMap<MAX_BANKS, Mantid::API::ITableWorkspace_sptr> m_latticeParamsMap;
@@ -96,7 +116,7 @@ private:
   void deleteWorkerThread();
 
   /// Run GSASIIRefineFitPeaks
-  GSASIIRefineFitPeaksOutputProperties
+  std::pair<Mantid::API::IAlgorithm_sptr, GSASIIRefineFitPeaksOutputProperties>
   doGSASRefinementAlgorithm(const GSASIIRefineFitPeaksParameters &params);
 
   template <typename T>
@@ -109,7 +129,7 @@ private:
   }
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_

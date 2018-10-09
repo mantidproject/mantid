@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 
@@ -7,9 +13,9 @@
 
 #include "MantidKernel/Unit.h"
 
+#include <boost/optional.hpp>
 #include <string>
 #include <vector>
-#include <boost/optional.hpp>
 
 class QwtData;
 
@@ -22,27 +28,6 @@ Engineering diffraction custom interface / GUI. This is the base class
 sense of the Model-View-Presenter, MVP pattern). This class is
 Qt-free. Qt specific functionality/dependencies are added in a class
 derived from this.
-
-Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD
-Oak Ridge National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IEnggDiffFittingView : public IEnggDiffractionUserMsg,
                              public IEnggDiffractionSettings,
@@ -82,11 +67,11 @@ public:
   virtual void enableFitAllButton(bool enable) const = 0;
 
   /**
-  * adds the run number to the list view widget on the interface
-  *
-  * @param runNo run number which needs to be added to
-  * the list widget
-  */
+   * adds the run number to the list view widget on the interface
+   *
+   * @param runNo run number which needs to be added to
+   * the list widget
+   */
   virtual void addRunNoItem(std::string runNo) = 0;
 
   /**
@@ -102,51 +87,51 @@ public:
   virtual void enableFittingListWidget(bool enable) const = 0;
 
   /**
-  * Gets the peak picker's center (d-spacing value)
-  *
-  * @return the peak picker's center value
-  */
+   * Gets the peak picker's center (d-spacing value)
+   *
+   * @return the peak picker's center value
+   */
   virtual double getPeakCentre() const = 0;
 
   /**
-  * Checks whether peak picker widget is enabled or no
-  *
-  * @return true or false according to the state of the
-  *  peak picker widget
-  */
+   * Checks whether peak picker widget is enabled or no
+   *
+   * @return true or false according to the state of the
+   *  peak picker widget
+   */
   virtual bool peakPickerEnabled() const = 0;
 
   /**
-  * gets the previously used directory path by the user
-  *
-  * @return directory of previously used directory by user,
-  * may return empty if no previous history
-  */
+   * gets the previously used directory path by the user
+   *
+   * @return directory of previously used directory by user,
+   * may return empty if no previous history
+   */
   virtual std::string getPreviousDir() const = 0;
 
   /**
-  * sets the previously used directory path
-  *
-  * @param path is set according to the file selected by user
-  */
+   * sets the previously used directory path
+   *
+   * @param path is set according to the file selected by user
+   */
   virtual void setPreviousDir(const std::string &path) = 0;
 
   /**
-  * gets the path as string which required when browsing the file
-  *
-  * @param prevPath path set according to the previously file selected
-  *
-  * @return string of the browsed file path
-  */
+   * gets the path as string which required when browsing the file
+   *
+   * @param prevPath path set according to the previously file selected
+   *
+   * @return string of the browsed file path
+   */
   virtual std::string getOpenFile(const std::string &prevPath) = 0;
 
   /**
-  * gets the path as string which is required when saving the file
-  *
-  * @param prevPath path set according to the previously selected file
-  *
-  * @return string of the saved file
-  */
+   * gets the path as string which is required when saving the file
+   *
+   * @param prevPath path set according to the previously selected file
+   *
+   * @return string of the saved file
+   */
   virtual std::string getSaveFile(const std::string &prevPath) = 0;
 
   /**
@@ -155,20 +140,21 @@ public:
   virtual int getFittingListWidgetCurrentRow() const = 0;
 
   /**
-  * Update the fitting list widget with a list of workspace run and bank numbers
-  */
+   * Update the fitting list widget with a list of workspace run and bank
+   * numbers
+   */
   virtual void
   updateFittingListWidget(const std::vector<std::string> &rows) = 0;
 
   /**
-  * @return The text on the current selected row of the list widget
-  */
+   * @return The text on the current selected row of the list widget
+   */
   virtual boost::optional<std::string>
   getFittingListWidgetCurrentValue() const = 0;
 
   /**
-  * @return Whether the list widget currently has an item selected
-  */
+   * @return Whether the list widget currently has an item selected
+   */
   virtual bool listWidgetHasSelectedRow() const = 0;
 
   /**
@@ -201,38 +187,6 @@ public:
   virtual void setFittingRunNumVec(std::vector<std::string> assignVec) = 0;
 
   /**
-   * to determine whether the current loop is multi-run or single to avoid
-   * regenerating the list-view widget when not required
-   *
-   * @return bool whether given multi-run or singular file
-   */
-  virtual bool getFittingMultiRunMode() = 0;
-
-  /**
-   * sets the fitting mode to multi-run or single to avoid
-   * regenerating the list-view widget when not required
-   *
-   * @param mode true if its multi-run
-   */
-  virtual void setFittingMultiRunMode(bool mode) = 0;
-
-  /**
-  * to determine whether the current loop is multi-run or single to avoid
-  * regenerating the list-view widget when not required
-  *
-  * @return bool whether given multi-run or singular file
-  */
-  virtual bool getFittingSingleRunMode() = 0;
-
-  /**
-  * sets the fitting mode to multi-run or single to avoid
-  * regenerating the list-view widget when not required
-  *
-  * @param mode true if its multi-run
-  */
-  virtual void setFittingSingleRunMode(bool mode) = 0;
-
-  /**
    * generates and sets the curves on the fitting tab
    *
    * @param data of the workspace to be passed as QwtData
@@ -262,8 +216,8 @@ public:
   virtual void saveSettings() const = 0;
 
   /**
-  * Gets the current selected instrument
-  */
+   * Gets the current selected instrument
+   */
   virtual std::string getCurrentInstrument() const = 0;
 
   /**
@@ -273,8 +227,8 @@ public:
   virtual void setCurrentInstrument(const std::string &newInstrument) = 0;
 
   /**
-  * Get whether the user has selected to plot reconstructed peaks over the run
-  */
+   * Get whether the user has selected to plot reconstructed peaks over the run
+   */
   virtual bool plotFittedPeaksEnabled() const = 0;
 };
 

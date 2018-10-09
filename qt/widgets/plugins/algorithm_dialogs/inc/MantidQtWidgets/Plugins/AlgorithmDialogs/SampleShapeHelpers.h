@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_CUSTOMDIALOGS_SAMPLESHAPEHELPERS_H_
 #define MANTIDQT_CUSTOMDIALOGS_SAMPLESHAPEHELPERS_H_
 
 //--------------------------------------
 // Includes
 //--------------------------------------
-#include <QWidget>
 #include <QGroupBox>
+#include <QWidget>
 
 //--------------------------------------
 // Qt forward declarations
@@ -428,7 +434,7 @@ private:
 //   /// Corner points
 //   PointGroupBox *m_centre, *m_axis;
 // };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMDIALOGS_SAMPLESHAPEHELPERS_H_

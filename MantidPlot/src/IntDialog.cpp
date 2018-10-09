@@ -33,13 +33,13 @@
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
 #include <QGroupBox>
-#include <QSpinBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
+#include <QSpinBox>
 #include <QTextEdit>
-#include <QLayout>
 
 IntDialog::IntDialog(QWidget *parent, Graph *g, Qt::WFlags fl)
     : QDialog(parent, fl), d_graph(g) {

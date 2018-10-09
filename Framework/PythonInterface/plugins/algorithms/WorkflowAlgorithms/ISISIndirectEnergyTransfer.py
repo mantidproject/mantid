@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from __future__ import (absolute_import, division, print_function)
 
@@ -39,6 +45,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
     _fold_multiple_frames = None
     _grouping_method = None
     _grouping_ws = None
+    _grouping_string = None
     _grouping_map_file = None
     _output_x_units = None
     _output_ws = None
@@ -99,12 +106,15 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         # Spectra grouping options
         self.declareProperty(name='GroupingMethod', defaultValue='IPF',
-                             validator=StringListValidator(['Individual', 'All', 'File', 'Workspace', 'IPF']),
+                             validator=StringListValidator(['Individual', 'All', 'File', 'Workspace', 'IPF', 'Custom']),
                              doc='Method used to group spectra.')
         self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
                                                direction=Direction.Input,
                                                optional=PropertyMode.Optional),
                              doc='Workspace containing spectra grouping.')
+        self.declareProperty(name='GroupingString', defaultValue='',
+                             direction=Direction.Input,
+                             doc='Spectra to group as string')
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.map']),
@@ -249,7 +259,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                               masked_detectors=masked_detectors,
                               method=self._grouping_method,
                               group_file=self._grouping_map_file,
-                              group_ws=self._grouping_ws)
+                              group_ws=self._grouping_ws,
+                              group_string=self._grouping_string)
 
             if self._fold_multiple_frames and is_multi_frame:
                 fold_chopped(c_ws_name)
@@ -348,6 +359,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         self._grouping_method = self.getPropertyValue('GroupingMethod')
         self._grouping_ws = _ws_or_none(self.getPropertyValue('GroupingWorkspace'))
+        self._grouping_string = _str_or_none(self.getPropertyValue('GroupingString'))
         self._grouping_map_file = _str_or_none(self.getPropertyValue('MapFile'))
 
         self._output_x_units = self.getPropertyValue('UnitX')

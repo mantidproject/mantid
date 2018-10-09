@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveNXcanSAS.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -716,7 +722,7 @@ void addTransmission(H5::Group &group,
   writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumLambda,
                                 lambda.rawData(), lambdaAttributes);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -736,11 +742,17 @@ void SaveNXcanSAS::init() {
                       "Filename", "", API::FileProperty::Save, ".h5"),
                   "The name of the .h5 file to save");
 
-  std::vector<std::string> radiation_source{
-      "Spallation Neutron Source", "Pulsed Reactor Neutron Source",
-      "Reactor Neutron Source", "Synchrotron X-ray Source",
-      "Pulsed Muon Source", "Rotating Anode X-ray", "Fixed Tube X-ray",
-      "neutron", "x-ray", "muon", "electron"};
+  std::vector<std::string> radiation_source{"Spallation Neutron Source",
+                                            "Pulsed Reactor Neutron Source",
+                                            "Reactor Neutron Source",
+                                            "Synchrotron X-ray Source",
+                                            "Pulsed Muon Source",
+                                            "Rotating Anode X-ray",
+                                            "Fixed Tube X-ray",
+                                            "neutron",
+                                            "x-ray",
+                                            "muon",
+                                            "electron"};
   declareProperty(
       "RadiationSource", "Spallation Neutron Source",
       boost::make_shared<Kernel::StringListValidator>(radiation_source),

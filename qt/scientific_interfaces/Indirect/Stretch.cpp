@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "Stretch.h"
 #include "../General/UserInputValidator.h"
 
@@ -168,8 +174,8 @@ void Stretch::run() {
 }
 
 /**
-* Handles the saving and plotting of workspaces after execution
-*/
+ * Handles the saving and plotting of workspaces after execution
+ */
 void Stretch::algorithmComplete(const bool &error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
@@ -281,10 +287,10 @@ void Stretch::handleSampleInputReady(const QString &filename) {
 }
 
 /**
-* Sets a new preview spectrum for the mini plot.
-*
-* @param value workspace index
-*/
+ * Sets a new preview spectrum for the mini plot.
+ *
+ * @param value workspace index
+ */
 void Stretch::previewSpecChanged(int value) {
   m_previewSpec = value;
 
@@ -298,8 +304,8 @@ void Stretch::previewSpecChanged(int value) {
 }
 
 /**
-* plots the current miniplot preview
-*/
+ * plots the current miniplot preview
+ */
 void Stretch::plotCurrentPreview() {
   if (m_uiForm.ppPlot->hasCurve("Sample")) {
     plotSpectrum(m_uiForm.dsSample->getCurrentDataName(), m_previewSpec);

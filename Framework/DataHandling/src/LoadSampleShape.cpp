@@ -1,4 +1,11 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSampleShape.h"
+#include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -9,10 +16,10 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 
-#include <fstream>
-#include <stdio.h>
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
+#include <fstream>
+#include <stdio.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -122,20 +129,148 @@ std::unique_ptr<MeshObject> readSTLMeshObject(std::ifstream &file) {
   return retVal;
 }
 
-std::unique_ptr<Geometry::MeshObject> readSTLSolid(std::ifstream &file,
-                                                   std::string &name) {
+std::unique_ptr<Geometry::MeshObject>
+readSTLSolid(std::ifstream &file, std::string &name, std::string filename) {
   // Read Solid name
   // We expect line after trimming to be "solid "+name.
   std::string line;
   if (getline(file, line)) {
     boost::trim(line);
     if (line.size() < 5 || line.substr(0, 5) != "solid") {
-      throw std::runtime_error("Expected start of solid");
+      // attempt to load stl binary instead
+      std::unique_ptr<LoadBinaryStl> binaryStlReader =
+          Kernel::make_unique<LoadBinaryStl>(filename);
+      if (binaryStlReader->isBinarySTL()) {
+        return binaryStlReader->LoadBinaryStl::readStl();
+      } else {
+        throw std::runtime_error("Expected start of solid");
+      }
+
     } else {
       name = line.substr(6, std::string::npos);
     }
     // Read Solid shape
     return readSTLMeshObject(file);
+  }
+  return nullptr;
+}
+
+bool getOFFline(std::ifstream &file, std::string &line) {
+  // Get line from OFF file ignoring blank lines and comments
+  // The line output is ready trimmed
+  if (!getline(file, line)) {
+    return false;
+  }
+  boost::trim(line);
+  while (line.empty() || line.substr(0, 1) == "#") {
+    if (!getline(file, line)) {
+      return false;
+    }
+    boost::trim(line);
+  }
+  return true;
+}
+
+void readOFFVertices(std::ifstream &file, uint16_t nVertices,
+                     std::vector<V3D> &vertices) {
+  std::string line;
+  for (uint16_t i = 0; i < nVertices; i++) {
+    if (getOFFline(file, line)) {
+      std::vector<std::string> tokens;
+      boost::split(tokens, line, boost::is_any_of(" "),
+                   boost::token_compress_on);
+      if (tokens.size() == 3) {
+        vertices.emplace_back(boost::lexical_cast<double>(tokens[0]),  // x
+                              boost::lexical_cast<double>(tokens[1]),  // y
+                              boost::lexical_cast<double>(tokens[2])); // z
+      } else {
+        throw std::runtime_error("Error on reading OFF vertex");
+      }
+    } else {
+      throw std::runtime_error(
+          "Unexpected end of file, while reading OFF vertices");
+    }
+  }
+}
+
+void readOFFTriangles(std::ifstream &file, uint16_t nTriangles,
+                      std::vector<uint16_t> &triangleIndices) {
+  std::string line;
+  uint16_t t1, t2, t3;
+  size_t nFaceVertices;
+  for (uint16_t i = 0; i < nTriangles; i++) {
+    if (getOFFline(file, line)) {
+      std::vector<std::string> tokens;
+      boost::split(tokens, line, boost::is_any_of(" "),
+                   boost::token_compress_on);
+      if (tokens.size() >= 4) {
+        nFaceVertices = boost::lexical_cast<size_t>(tokens[0]);
+        if (nFaceVertices == 3) {
+          t1 = boost::lexical_cast<uint16_t>(tokens[1]);
+          t2 = boost::lexical_cast<uint16_t>(tokens[2]);
+          t3 = boost::lexical_cast<uint16_t>(tokens[3]);
+        } else {
+          throw std::runtime_error("OFF face is not a triangle.");
+        }
+        triangleIndices.emplace_back(t1);
+        triangleIndices.emplace_back(t2);
+        triangleIndices.emplace_back(t3);
+      } else {
+        throw std::runtime_error("Error on reading OFF triangle");
+      }
+    } else {
+      throw std::runtime_error(
+          "Unexpected end of file, while reading OFF triangles");
+    }
+  }
+}
+
+std::unique_ptr<MeshObject> readOFFMeshObject(std::ifstream &file) {
+  std::vector<uint16_t> triangleIndices;
+  std::vector<V3D> vertices;
+  uint16_t nVertices;
+  uint16_t nTriangles;
+
+  std::string line;
+  // Get number of vetrtices and faces
+  if (getOFFline(file, line)) {
+    std::vector<std::string> tokens;
+    boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
+    if (tokens.size() == 3) {
+      try {
+        nVertices = boost::lexical_cast<uint16_t>(tokens[0]);
+        nTriangles = boost::lexical_cast<uint16_t>(tokens[1]);
+      } catch (...) {
+        throw std::runtime_error("Error in reading numbers of OFF vertices and "
+                                 "triangles, which may be too large");
+      }
+      vertices.reserve(nVertices);
+      triangleIndices.reserve(3 * nTriangles);
+    } else {
+      throw std::runtime_error(
+          "Error on reading OFF number of vertices, faces & edges");
+    }
+  } else {
+    throw std::runtime_error("Unexpected end of OFF file");
+  }
+  readOFFVertices(file, nVertices, vertices);
+  readOFFTriangles(file, nTriangles, triangleIndices);
+
+  // Use efficient constructor of MeshObject
+  std::unique_ptr<MeshObject> retVal = std::unique_ptr<MeshObject>(
+      new MeshObject(std::move(triangleIndices), std::move(vertices),
+                     Mantid::Kernel::Material()));
+  return retVal;
+}
+
+std::unique_ptr<Geometry::MeshObject> readOFFshape(std::ifstream &file) {
+  std::string line;
+  if (getOFFline(file, line)) {
+    if (line != "OFF") {
+      throw std::runtime_error("Expected first line to be 'OFF' keyword");
+    }
+    // Read OFF shape
+    return readOFFMeshObject(file);
   }
   return nullptr;
 }
@@ -153,7 +288,7 @@ void LoadSampleShape::init() {
       "The name of the workspace containing the instrument to add the shape");
 
   // shape file
-  const std::vector<std::string> extensions{".stl"};
+  const std::vector<std::string> extensions{".stl", ".off"};
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
       "The path name of the file containing the shape");
@@ -181,9 +316,15 @@ void LoadSampleShape::exec() {
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
-  std::string solidName = "";
+  std::string filetype = filename.substr(filename.size() - 3);
+
   boost::shared_ptr<MeshObject> shape = nullptr;
-  shape = readSTLSolid(file, solidName);
+  if (filetype == "off") {
+    shape = readOFFshape(file);
+  } else /* stl */ {
+    std::string solidName = "";
+    shape = readSTLSolid(file, solidName, filename);
+  }
 
   // Put shape into sample.
   Sample &sample = outputWS->mutableSample();
@@ -193,5 +334,5 @@ void LoadSampleShape::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // end DataHandling namespace
-} // end MantidNamespace
+} // namespace DataHandling
+} // namespace Mantid

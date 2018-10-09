@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
 #define MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
@@ -101,7 +107,6 @@ public:
     auto &Azimuthal = tws->getColVector<double>("Azimuthal");
     auto &detDir = tws->getColVector<Kernel::V3D>("DetDirections");
 
-    TS_ASSERT(&detDir[0]);
     TS_ASSERT_EQUALS(nVal, detDir.size());
 
     for (size_t i = 0; i < nVal; i++) {

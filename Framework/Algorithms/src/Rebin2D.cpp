@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -30,11 +36,11 @@ using namespace Mantid::HistogramData;
  * Initialize the algorithm's properties.
  */
 void Rebin2D::init() {
+  using API::WorkspaceProperty;
   using Kernel::ArrayProperty;
   using Kernel::Direction;
   using Kernel::PropertyWithValue;
   using Kernel::RebinParamsValidator;
-  using API::WorkspaceProperty;
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                            Direction::Input),
                   "An input workspace.");

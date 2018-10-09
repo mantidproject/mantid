@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GeneratePythonScript.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ScriptBuilder.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
 
 #include <fstream>
 
@@ -24,7 +30,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GeneratePythonScript)
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void GeneratePythonScript::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -36,6 +42,7 @@ void GeneratePythonScript::init() {
                       "Filename", "", API::FileProperty::OptionalSave, exts),
                   "The name of the file into which the workspace history will "
                   "be generated.");
+
   declareProperty("ScriptText", std::string(""),
                   "Saves the history of the workspace to a variable.",
                   Direction::Output);
@@ -47,9 +54,15 @@ void GeneratePythonScript::init() {
   declareProperty("StartTimestamp", std::string(""),
                   "The filter start time in the format YYYY-MM-DD HH:mm:ss",
                   Direction::Input);
+
   declareProperty("EndTimestamp", std::string(""),
                   "The filter end time in the format YYYY-MM-DD HH:mm:ss",
                   Direction::Input);
+
+  declareProperty(
+      "AppendTimestamp", false,
+      "Appends the time the command was run as a comment afterwards",
+      Direction::Input);
 
   std::vector<std::string> saveVersions{"Specify Old", "Specify All",
                                         "Specify None"};
@@ -57,16 +70,23 @@ void GeneratePythonScript::init() {
       "SpecifyAlgorithmVersions", "Specify Old",
       boost::make_shared<StringListValidator>(saveVersions),
       "When to specify which algorithm version was used by Mantid.");
+
+  declareProperty("IgnoreTheseAlgs", std::vector<std::string>(),
+                  "A list of algorithms to filter out of the built script",
+                  Direction::Input);
 }
 
 /** Execute the algorithm.
-*/
+ */
 void GeneratePythonScript::exec() {
   const Workspace_const_sptr ws = getProperty("InputWorkspace");
   const bool unrollAll = getProperty("UnrollAll");
   const std::string startTime = getProperty("StartTimestamp");
   const std::string endTime = getProperty("EndTimestamp");
   const std::string saveVersions = getProperty("SpecifyAlgorithmVersions");
+  const bool appendTimestamp = getProperty("AppendTimestamp");
+  const std::vector<std::string> ignoreTheseAlgs =
+      getProperty("IgnoreTheseAlgs");
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
@@ -97,7 +117,8 @@ void GeneratePythonScript::exec() {
   else
     versionSpecificity = "all";
 
-  ScriptBuilder builder(view, versionSpecificity);
+  ScriptBuilder builder(view, versionSpecificity, appendTimestamp,
+                        ignoreTheseAlgs);
   std::string generatedScript;
   generatedScript += "#########################################################"
                      "#############\n";

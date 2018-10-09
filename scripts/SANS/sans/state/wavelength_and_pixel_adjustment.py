@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """State describing the creation of pixel and wavelength adjustment workspaces for SANS reduction."""
@@ -6,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, StringParameter,
-                                   ClassTypeParameter, PositiveFloatParameter, DictParameter)
+                                   ClassTypeParameter, PositiveFloatParameter, DictParameter, PositiveFloatListParameter)
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
 from sans.common.enums import (RangeStepType, DetectorType, SANSFacility)
 from sans.state.automatic_setters import (automatic_setters)
@@ -35,8 +41,8 @@ class StateAdjustmentFiles(StateBase):
 
 @rename_descriptor_names
 class StateWavelengthAndPixelAdjustment(StateBase):
-    wavelength_low = PositiveFloatParameter()
-    wavelength_high = PositiveFloatParameter()
+    wavelength_low = PositiveFloatListParameter()
+    wavelength_high = PositiveFloatListParameter()
     wavelength_step = PositiveFloatParameter()
     wavelength_step_type = ClassTypeParameter(RangeStepType)
 

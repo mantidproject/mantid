@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
@@ -419,8 +425,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
     def _get_filename(self, run_or_filename):
         """Given a string containing either a filename/partial filename or run number find the correct
         file prefix"""
-        isis = config.getFacility("ISIS")
-        vesuvio = isis.instrument("VESUVIO")
+        vesuvio = config.getInstrument("VESUVIO")
         if isinstance(run_or_filename, six.integer_types):
             run_no = run_or_filename
             return vesuvio.filePrefix(int(run_no)) + str(run_or_filename)

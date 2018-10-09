@@ -1,17 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertDiffCal.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
@@ -22,6 +27,7 @@ using Mantid::DataObjects::OffsetsWorkspace_const_sptr;
 using Mantid::DataObjects::TableWorkspace;
 using Mantid::DataObjects::TableWorkspace_sptr;
 using Mantid::Geometry::Instrument_const_sptr;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertDiffCal)

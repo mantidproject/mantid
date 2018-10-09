@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CONJOINXRUNSTEST_H_
 #define MANTID_ALGORITHMS_CONJOINXRUNSTEST_H_
 
@@ -20,9 +26,9 @@
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::ConjoinXRuns;
 using Mantid::Algorithms::AddSampleLog;
 using Mantid::Algorithms::AddTimeSeriesLog;
+using Mantid::Algorithms::ConjoinXRuns;
 using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::HistogramDx;

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
@@ -168,8 +174,8 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
                             DetectorType.to_string(DetectorType.HAB)].wavelength_adjustment_file == "test")
         self.assertTrue(state.mask.radius_min == 23.5 / 1000.)
         self.assertTrue(state.mask.radius_max == 234.7 / 1000.)
-        self.assertTrue(state.wavelength.wavelength_low == 1.23)
-        self.assertTrue(state.adjustment.normalize_to_monitor.wavelength_high == 23.)
+        self.assertTrue(state.wavelength.wavelength_low == [1.23])
+        self.assertTrue(state.adjustment.normalize_to_monitor.wavelength_high == [23.])
         self.assertTrue(state.adjustment.wavelength_and_pixel_adjustment.wavelength_step == 1.1)
         self.assertTrue(state.adjustment.calculate_transmission.wavelength_step_type is RangeStepType.Lin)
         self.assertTrue(state.convert_to_q.q_xy_max == 23.)

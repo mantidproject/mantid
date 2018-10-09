@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """ SANSConvertToWavelength converts to wavelength units """
@@ -42,8 +48,8 @@ class SANSConvertToWavelength(DistributedDataProcessorAlgorithm):
 
         wavelength_name = "SANSConvertToWavelengthAndRebin"
         wavelength_options = {"InputWorkspace": workspace,
-                              "WavelengthLow": wavelength_state.wavelength_low,
-                              "WavelengthHigh": wavelength_state.wavelength_high,
+                              "WavelengthLow": wavelength_state.wavelength_low[0],
+                              "WavelengthHigh": wavelength_state.wavelength_high[0],
                               "WavelengthStep": wavelength_state.wavelength_step,
                               "WavelengthStepType": RangeStepType.to_string(
                                   wavelength_state.wavelength_step_type),

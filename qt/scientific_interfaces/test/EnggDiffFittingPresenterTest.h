@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
 
@@ -8,13 +14,14 @@
 
 #include "EnggDiffFittingModelMock.h"
 #include "EnggDiffFittingViewMock.h"
+#include "EnggDiffractionParamMock.h"
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
 using namespace MantidQt::CustomInterfaces;
-using testing::TypedEq;
 using testing::Return;
 using testing::ReturnRef;
+using testing::TypedEq;
 
 // Use this mocked presenter for tests that will start the focusing
 // workers/threads. Otherwise you'll run into trouble with issues like
@@ -32,12 +39,17 @@ public:
                                    std::unique_ptr<IEnggDiffFittingModel> model)
       : EnggDiffFittingPresenter(view, std::move(model), nullptr, nullptr) {}
 
+  EnggDiffFittingPresenterNoThread(
+      IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
+      boost::shared_ptr<IEnggDiffractionParam> mainParam)
+      : EnggDiffFittingPresenter(view, std::move(model), nullptr, mainParam) {}
+
 private:
   // not async at all
   void startAsyncFittingWorker(const std::vector<RunLabel> &runLabels,
                                const std::string &ExpectedPeaks) override {
     assert(runLabels.size() == 1);
-    doFitting(runLabels[0], ExpectedPeaks);
+    doFitting(runLabels, ExpectedPeaks);
     fittingFinished();
   }
 };
@@ -297,13 +309,20 @@ public:
 
   void test_browse_peaks_list() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    const auto paramMock =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+    EnggDiffFittingPresenterNoThread pres(
+        &mockView,
+        Mantid::Kernel::make_unique<
+            testing::NiceMock<MockEnggDiffFittingModel>>(),
+        paramMock);
 
-    EXPECT_CALL(mockView, focusingDir()).Times(1);
+    const auto &userDir(Poco::Path::home());
+    EXPECT_CALL(*paramMock, outFilesUserDir(""))
+        .Times(1)
+        .WillOnce(Return(userDir));
 
-    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
-
-    EXPECT_CALL(mockView, getOpenFile(testing::_)).Times(1);
+    EXPECT_CALL(mockView, getOpenFile(userDir)).Times(1);
 
     EXPECT_CALL(mockView, getSaveFile(testing::_)).Times(0);
 
@@ -320,15 +339,22 @@ public:
 
   void test_browse_peaks_list_with_warning() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    const auto paramMock =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+    EnggDiffFittingPresenterNoThread pres(
+        &mockView,
+        Mantid::Kernel::make_unique<
+            testing::NiceMock<MockEnggDiffFittingModel>>(),
+        paramMock);
+
+    const auto &userDir(Poco::Path::home());
+    EXPECT_CALL(*paramMock, outFilesUserDir(""))
+        .Times(1)
+        .WillOnce(Return(userDir));
 
     std::string dummyDir = "I/am/a/dummy/directory";
 
-    EXPECT_CALL(mockView, focusingDir()).Times(1);
-
-    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
-
-    EXPECT_CALL(mockView, getOpenFile(testing::_))
+    EXPECT_CALL(mockView, getOpenFile(userDir))
         .Times(1)
         .WillOnce(Return(dummyDir));
 
@@ -349,13 +375,20 @@ public:
 
   void test_save_peaks_list() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    const auto paramMock =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+    EnggDiffFittingPresenterNoThread pres(
+        &mockView,
+        Mantid::Kernel::make_unique<
+            testing::NiceMock<MockEnggDiffFittingModel>>(),
+        paramMock);
 
-    EXPECT_CALL(mockView, focusingDir()).Times(1);
+    const auto &userDir(Poco::Path::home());
+    EXPECT_CALL(*paramMock, outFilesUserDir(""))
+        .Times(1)
+        .WillOnce(Return(userDir));
 
-    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
-
-    EXPECT_CALL(mockView, getSaveFile(testing::_)).Times(1);
+    EXPECT_CALL(mockView, getSaveFile(userDir)).Times(1);
 
     // No errors/No warnings.
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -370,15 +403,21 @@ public:
 
   void test_save_peaks_list_with_warning() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
+    const auto paramMock =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+    EnggDiffFittingPresenterNoThread pres(
+        &mockView,
+        Mantid::Kernel::make_unique<
+            testing::NiceMock<MockEnggDiffFittingModel>>(),
+        paramMock);
+
+    const auto &userDir(Poco::Path::home());
+    EXPECT_CALL(*paramMock, outFilesUserDir(""))
+        .Times(1)
+        .WillOnce(Return(userDir));
 
     std::string dummyDir = "/dummy/directory/";
-
-    EXPECT_CALL(mockView, focusingDir()).Times(1);
-
-    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
-
-    EXPECT_CALL(mockView, getSaveFile(testing::_))
+    EXPECT_CALL(mockView, getSaveFile(userDir))
         .Times(1)
         .WillOnce(Return(dummyDir));
 
@@ -539,14 +578,14 @@ public:
   void test_shutDown() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
-        &mockView, Mantid::Kernel::make_unique<
-                       testing::NiceMock<MockEnggDiffFittingModel>>(),
+        &mockView,
+        Mantid::Kernel::make_unique<
+            testing::NiceMock<MockEnggDiffFittingModel>>(),
         nullptr, nullptr);
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
     EXPECT_CALL(mockView, getFocusedFileNames()).Times(0);
     EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
-    EXPECT_CALL(mockView, focusingDir()).Times(0);
 
     EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);
 
@@ -615,8 +654,9 @@ public:
     EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel))
         .Times(1)
         .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
-    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
-                                        testing::_)).Times(2);
+    EXPECT_CALL(mockView,
+                setDataVector(testing::_, testing::_, testing::_, testing::_))
+        .Times(2);
 
     pres.notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
     TSM_ASSERT(
@@ -647,8 +687,9 @@ public:
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel)).Times(0);
-    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
-                                        testing::_)).Times(1);
+    EXPECT_CALL(mockView,
+                setDataVector(testing::_, testing::_, testing::_, testing::_))
+        .Times(1);
     EXPECT_CALL(mockView, userWarning("Cannot plot fitted peaks", testing::_))
         .Times(1);
 
@@ -681,8 +722,9 @@ public:
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel)).Times(0);
-    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
-                                        testing::_)).Times(1);
+    EXPECT_CALL(mockView,
+                setDataVector(testing::_, testing::_, testing::_, testing::_))
+        .Times(1);
 
     pres.notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
     TSM_ASSERT(

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/BinEdgeAxis.h"
@@ -19,8 +25,8 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -30,8 +36,8 @@
 #include <functional>
 #include <numeric>
 
-using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace API {
@@ -518,8 +524,8 @@ std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
       int index = det + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
-                         "): detector ID found (" << det
-                      << " at workspace index " << workspaceIndex
+                         "): detector ID found ("
+                      << det << " at workspace index " << workspaceIndex
                       << ") is invalid.\n";
       } else
         // Save it at that point.
@@ -803,9 +809,8 @@ MatrixWorkspace::detectorSignedTwoTheta(const Geometry::IDetector &det) const {
         "Source and sample are at same position!");
   }
   // Get the instrument up axis.
-  const V3D &instrumentUpAxis =
-      instrument->getReferenceFrame()->vecPointingUp();
-  return det.getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+  const V3D &thetaSignAxis = instrument->getReferenceFrame()->vecThetaSign();
+  return det.getSignedTwoTheta(samplePos, beamLine, thetaSignAxis);
 }
 
 /** Returns the 2Theta scattering angle for a detector
@@ -2034,8 +2039,7 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
         "MatrixWorkspace: SpectrumDefinition contains an out-of-range "
         "time index for a detector, i.e., the spectrum definition does "
         "not match the instrument in the workspace.");
-  case ErrorCode::None:
-    ; // nothing to do
+  case ErrorCode::None:; // nothing to do
   }
 }
 

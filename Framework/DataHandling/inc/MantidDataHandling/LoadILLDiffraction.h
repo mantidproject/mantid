@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADILLDIFFRACTION_H_
 #define MANTID_DATAHANDLING_LOADILLDIFFRACTION_H_
 
@@ -14,27 +20,6 @@ namespace DataHandling {
 /** LoadILLDiffraction : Loads ILL diffraction nexus files.
 
   @date 15/05/17
-
-  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_DATAHANDLING_DLL LoadILLDiffraction
     : public API::IFileLoader<Kernel::NexusDescriptor> {
@@ -71,7 +56,7 @@ private:
   void exec() override;
 
   void calculateRelativeRotations(std::vector<double> &instrumentAngles,
-                                  const Kernel::V3D &tube1Position);
+                                  const Kernel::V3D &firstTubePosition);
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
   void fillMovingInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &);
@@ -93,10 +78,11 @@ private:
                                   const std::string &propertyName) const;
 
   void initStaticWorkspace();
-  void initMovingWorkspace(const NeXus::NXDouble &scan);
+  void initMovingWorkspace(const NeXus::NXDouble &scan,
+                           const std::string &start_time);
 
   void loadDataScan();
-  API::MatrixWorkspace_sptr loadEmptyInstrument();
+  API::MatrixWorkspace_sptr loadEmptyInstrument(const std::string &start_time);
   void loadMetaData();
   void loadScanVars();
   void loadStaticInstrument();
@@ -121,10 +107,14 @@ private:
   std::string m_filename;               ///< file name to load
   Types::Core::DateAndTime m_startTime; ///< start time of acquisition
   ScanType m_scanType;                  ///< NoScan, DetectorScan or OtherScan
+  double m_pixelHeight{0.};             ///< height of the pixel in D2B
+  double m_maxHeight{0.}; ///< maximum absolute height of the D2B tubes
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
   LoadHelper m_loadHelper;                  ///< a helper for metadata
   API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
+  bool m_useCalibratedData{false}; ///< whether to use the calibrated data in
+                                   ///< the nexus (D2B only)
 };
 
 } // namespace DataHandling

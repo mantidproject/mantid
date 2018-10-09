@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -5,27 +11,26 @@ import sys
 
 import PyQt4.QtGui as QtGui
 
-from Muon import model_constructor
-from Muon import transform_presenter
-from Muon import transform_view
-from Muon import view_constructor
+from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_widget import TransformWidget
+from Muon.GUI.Common import load_utils
+from Muon.GUI.Common import message_box
 
 
 class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
     def __init__(self,parent=None):
         super(FrequencyDomainAnalysisGui,self).__init__(parent)
 
-        groupedViews = view_constructor.ViewConstructor(True,self)
-        groupedModels = model_constructor.ModelConstructor(True)
-        view =transform_view.TransformView(groupedViews,self)
-        self.presenter =transform_presenter.TransformPresenter(view,groupedModels)
+        load = load_utils.LoadUtils()
+        if not load.MuonAnalysisExists:
+            return
+        self.transform = TransformWidget(load = load, parent = self)
 
-        self.setCentralWidget(view)
+        self.setCentralWidget(self.transform.widget)
         self.setWindowTitle("Frequency Domain Analysis")
 
     # cancel algs if window is closed
     def closeEvent(self,event):
-        self.presenter.close()
+        self.transform.closeEvent(event)
 
 
 def qapp():
@@ -43,5 +48,4 @@ try:
     ex.show()
     app.exec_()
 except RuntimeError as error:
-    ex = QtGui.QWidget()
-    QtGui.QMessageBox.warning(ex,"Frequency Domain Analysis",str(error))
+    message_box.warning(str(error))

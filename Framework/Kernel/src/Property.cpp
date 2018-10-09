@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Property.h"
 
 #include "MantidKernel/DateAndTime.h"
@@ -102,9 +108,9 @@ IPropertySettings *Property::getSettings() { return m_settings.get(); }
 void Property::clearSettings() { m_settings.reset(nullptr); }
 
 /**
-* Whether to remember this property input
-* @return whether to remember this property's input
-*/
+ * Whether to remember this property input
+ * @return whether to remember this property's input
+ */
 bool Property::remember() const { return m_remember; }
 
 /**
@@ -114,11 +120,11 @@ bool Property::remember() const { return m_remember; }
 void Property::setRemember(bool remember) { m_remember = remember; }
 
 /**
-* Returns the value as a pretty printed string
-* The default implementation just returns the value with the size limit applied
-* @param maxLength :: The Max length of the returned string
-* @param collapseLists :: Whether to collapse 1,2,3 into 1-3
-*/
+ * Returns the value as a pretty printed string
+ * The default implementation just returns the value with the size limit applied
+ * @param maxLength :: The Max length of the returned string
+ * @param collapseLists :: Whether to collapse 1,2,3 into 1-3
+ */
 std::string Property::valueAsPrettyStr(const size_t maxLength,
                                        const bool collapseLists) const {
   UNUSED_ARG(collapseLists);
@@ -232,7 +238,7 @@ void Property::splitByTime(std::vector<SplittingInterval> &splitter,
   UNUSED_ARG(isProtonCharge);
 }
 
-} // End Kernel namespace
+} // namespace Kernel
 
 //-------------------------- Utility function for class name lookup
 //-----------------------------
@@ -253,7 +259,7 @@ class IPeaksWorkspace;
 class IMDHistoWorkspace;
 class IFunction;
 class IAlgorithm;
-}
+} // namespace API
 namespace DataObjects {
 class EventWorkspace;
 class PeaksWorkspace;
@@ -265,7 +271,7 @@ class Workspace2D;
 class TableWorkspace;
 class SpecialWorkspace2D;
 class SplittersWorkspace;
-}
+} // namespace DataObjects
 
 namespace Kernel {
 class PropertyManager;
@@ -320,8 +326,8 @@ bool operator!=(const Property &lhs, const Property &rhs) {
  * @returns An unmangled version of the name
  */
 std::string getUnmangledTypeName(const std::type_info &type) {
-  using std::string;
   using std::make_pair;
+  using std::string;
   using namespace Mantid::API;
   using namespace Mantid::DataObjects;
   // Compile a lookup table. This is a static local variable that
@@ -403,17 +409,17 @@ std::string getUnmangledTypeName(const std::type_info &type) {
 }
 
 /**
-* Returns if the property is set to  automatically trim string unput values of
-* whitespace
-* @returns True/False
-*/
+ * Returns if the property is set to  automatically trim string unput values of
+ * whitespace
+ * @returns True/False
+ */
 bool Property::autoTrim() const { return m_autotrim; }
 
 /**
-* Sets if the property is set to  automatically trim string unput values of
-* whitespace
-* @param setting The new setting value
-*/
+ * Sets if the property is set to  automatically trim string unput values of
+ * whitespace
+ * @param setting The new setting value
+ */
 void Property::setAutoTrim(const bool &setting) { m_autotrim = setting; }
 } // namespace Kernel
 

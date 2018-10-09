@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WORKSPACEHISTORYTEST_H_
 #define WORKSPACEHISTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Property.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "Poco/File.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, division, print_function)
 
 import numpy
@@ -241,7 +234,6 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
     Note: the return is the pcolor, pcolormesh, or pcolorfast of the last spectrum
     '''
     (x, y, z) = get_uneven_data(workspace, distribution)
-    pcolortype = kwargs.pop('pcolortype', '')
     mini = numpy.min([numpy.min(i) for i in z])
     maxi = numpy.max([numpy.max(i) for i in z])
     if 'vmin' in kwargs:
@@ -255,14 +247,20 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
             kwargs['norm'].vmin = mini
         if kwargs['norm'].vmax is None:
             kwargs['norm'].vmax = maxi
+
+    # setup the particular pcolor to use
+    pcolortype = kwargs.pop('pcolortype', '').lower()
+    if 'mesh' in pcolortype:
+        pcolor = axes.pcolormesh
+    elif 'fast' in pcolortype:
+        pcolor = axes.pcolorfast
+    else:
+        pcolor = axes.pcolor
+
     for xi, yi, zi in zip(x, y, z):
         XX, YY = numpy.meshgrid(xi, yi, indexing='ij')
-        if 'mesh' in pcolortype.lower():
-            cm = axes.pcolormesh(XX, YY, zi.reshape(-1, 1), **kwargs)
-        elif 'fast' in pcolortype.lower():
-            cm = axes.pcolorfast(XX, YY, zi.reshape(-1, 1), **kwargs)
-        else:
-            cm = axes.pcolor(XX, YY, zi.reshape(-1, 1), **kwargs)
+        cm = pcolor(XX, YY, zi.reshape(-1, 1), **kwargs)
+
     return cm
 
 
@@ -466,4 +464,3 @@ def tricontourf(axes, workspace, *args, **kwargs):
     y = y[condition]
     z = z[condition]
     return axes.tricontourf(x, y, z, *args, **kwargs)
-

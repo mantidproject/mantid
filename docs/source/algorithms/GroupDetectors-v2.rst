@@ -50,7 +50,7 @@ incorrect, but other software may not. Mantid will warn you if the value
 given is incorrect.
 
 Each group's spectrum number is determined by the group's number. This
-behaviour can be overriden by enabling the IgnoreGroupNumber property, in
+behaviour can be overridden by enabling the IgnoreGroupNumber property, in
 which case the first group will be numbered 1, and the second 2, and so on.
 
 Blank lines and whitespace in the map file are ignored. Comments may be
@@ -108,7 +108,7 @@ workspace indices. This can be achieved with the following operators:
   keep indices 1, 2 and 4 only.
 - :literal:`:` indicates a continuous range of indices. For example,
   :literal:`1:5` is the same as :literal:`1,2,3,4,5`.
-- :literal:`+` sums two spectra together. :literal:'7+9' will produce a single
+- :literal:`+` sums two spectra together. :literal:`7+9` will produce a single
   spectra listing the sum of 7 and 9, ignoring any others.
 - :literal:`-` sums a range of spectra together. For example, :literal:`3-8` is
   the same as :literal:`3+4+5+6+7+8`.

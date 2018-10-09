@@ -1,9 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-name-in-module,too-many-public-methods
 from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
 from DGSPlanner.ValidateOL import ValidateUB
+from DGSPlanner.LoadNexusUB import LoadNexusUB
 try:
     from PyQt4.QtCore import QString
 except ImportError:
@@ -82,9 +89,14 @@ class MatrixUBInputWidget(QtGui.QWidget):
         self._tableView.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self._tableView.verticalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.LoadIsawUBButton=QtGui.QPushButton("LoadIsawUB")
+        self.LoadNexusUBButton=QtGui.QPushButton("LoadNexusUB")
         self.layout().addWidget(QtGui.QLabel('UB matrix'))
         self.layout().addWidget(self._tableView)
-        self.layout().addWidget(self.LoadIsawUBButton)
+        self.hbox = QtGui.QHBoxLayout()
+        self.hbox.addStretch(1)
+        self.hbox.addWidget(self.LoadIsawUBButton)
+        self.hbox.addWidget(self.LoadNexusUBButton)
+        self.layout().addLayout(self.hbox)
         self.ol=ol
         self.UBmodel = UBTableModel(self.ol,self)
         self._tableView.setModel(self.UBmodel)
@@ -92,8 +104,7 @@ class MatrixUBInputWidget(QtGui.QWidget):
         self._tableView.setMinimumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*4)
         self._tableView.setMaximumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*4)
         self.LoadIsawUBButton.clicked.connect(self.loadIsawUBDialog)
-        self.LoadIsawUBButton.setMinimumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*2)
-        self.LoadIsawUBButton.setMaximumSize(self._tableView.sizeHintForColumn(0)*6, self._tableView.sizeHintForRow(0)*2)
+        self.LoadNexusUBButton.clicked.connect(self.loadNexusUBDialog)
         self.layout().addStretch(1)
 
     def loadIsawUBDialog(self):
@@ -110,6 +121,19 @@ class MatrixUBInputWidget(QtGui.QWidget):
         except:
             mantid.logger.error("Could not open the file, or not a valid UB matrix")
 
+    def loadNexusUBDialog(self):
+        # pylint: disable=bare-except
+        try:
+            fname = QtGui.QFileDialog.getOpenFileName(
+                    self, 'Open Nexus file to extract UB matrix',
+                    filter=QString('Nexus file (*.nxs.h5);;All Files (*)'))
+            __tempUB = LoadNexusUB(str(fname))
+            ol=mantid.geometry.OrientedLattice()
+            ol.setUB(__tempUB)
+            self.UBmodel.updateOL(ol)
+            self.UBmodel.sendSignal()
+        except:
+            mantid.logger.error("Could not open the Nexus file, or could not find UB matrix")
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

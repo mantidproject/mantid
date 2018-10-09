@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 
 from __future__ import (absolute_import, division, print_function)
@@ -73,6 +79,9 @@ class SANSReductionCoreTest(unittest.TestCase):
         reduction_core_alg.setProperty("DataType", DataType.to_string(component))
 
         reduction_core_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+
+        reduction_core_alg.setProperty("CalculatedTransmissionWorkspace", EMPTY_NAME)
+        reduction_core_alg.setProperty("UnfittedTransmissionWorkspace", EMPTY_NAME)
 
         # Act
         reduction_core_alg.execute()
@@ -157,6 +166,7 @@ class SANSReductionCoreTest(unittest.TestCase):
 
         # Construct the final state
         state = user_file_director.construct()
+        state.adjustment.show_transmission = True
 
         # Load the sample workspaces
         workspace, workspace_monitor, transmission_workspace, direct_workspace = self._load_workspace(state)
@@ -165,10 +175,17 @@ class SANSReductionCoreTest(unittest.TestCase):
         reduction_core_alg = self._run_reduction_core(state, workspace, workspace_monitor,
                                                       transmission_workspace, direct_workspace)
         output_workspace = reduction_core_alg.getProperty("OutputWorkspace").value
+        calculated_transmission = reduction_core_alg.getProperty("CalculatedTransmissionWorkspace").value
+        unfitted_transmission = reduction_core_alg.getProperty("UnfittedTransmissionWorkspace").value
 
         # Evaluate it up to a defined point
         reference_file_name = "SANS2D_ws_D20_reference.nxs"
         self._compare_workspace(output_workspace, reference_file_name)
+
+        calculated_transmission_reference_file = "SANS2D_ws_D20_calculated_transmission_reference.nxs"
+        unfitted_transmission_reference_file = "SANS2D_ws_D20_unfitted_transmission_reference.nxs"
+        self._compare_workspace(calculated_transmission, calculated_transmission_reference_file)
+        self._compare_workspace(unfitted_transmission, unfitted_transmission_reference_file)
 
 
 class SANSReductionCoreRunnerTest(stresstesting.MantidStressTest):

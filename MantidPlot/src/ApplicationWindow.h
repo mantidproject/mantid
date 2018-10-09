@@ -12,23 +12,23 @@ Description          : QtiPlot's main window
 ***************************************************************************/
 
 /***************************************************************************
-*                                                                         *
-*  This program is free software; you can redistribute it and/or modify   *
-*  it under the terms of the GNU General Public License as published by   *
-*  the Free Software Foundation; either version 2 of the License, or      *
-*  (at your option) any later version.                                    *
-*                                                                         *
-*  This program is distributed in the hope that it will be useful,        *
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
-*  GNU General Public License for more details.                           *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the Free Software           *
-*   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
-*   Boston, MA  02110-1301  USA                                           *
-*                                                                         *
-***************************************************************************/
+ *                                                                         *
+ *  This program is free software; you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation; either version 2 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the Free Software           *
+ *   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
+ *   Boston, MA  02110-1301  USA                                           *
+ *                                                                         *
+ ***************************************************************************/
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
@@ -44,6 +44,9 @@ Description          : QtiPlot's main window
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
+
+#include "MenuWithToolTips.h"
+#include "ProjectRecovery.h"
 #include "ProjectSaveView.h"
 #include "Script.h"
 #include "Scripted.h"
@@ -102,30 +105,31 @@ class TiledWindow;
 #endif
 
 namespace MantidQt {
+
 namespace MantidWidgets {
 class FitPropertyBrowser;
 class Message;
 class MessageDisplay;
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 // Mantid
 class MantidUI;
 class ScriptingWindow;
 
 /**
-* \brief MantidPlot's main window.
-*
-* This class contains the main part of the user interface as well as the central
-*project management facilities.
-*
-* It manages all MdiSubWindow MDI Windows in a project, knows about their
-*organization in Folder objects
-* and contains the parts of the project explorer not implemented in Folder,
-*FolderListItem or FolderListView.
-*
-* Furthermore, it is responsible for displaying most MDI Windows' context menus
-*and opening all sorts of dialogs.
-*/
+ * \brief MantidPlot's main window.
+ *
+ * This class contains the main part of the user interface as well as the
+ *central project management facilities.
+ *
+ * It manages all MdiSubWindow MDI Windows in a project, knows about their
+ *organization in Folder objects
+ * and contains the parts of the project explorer not implemented in Folder,
+ *FolderListItem or FolderListView.
+ *
+ * Furthermore, it is responsible for displaying most MDI Windows' context menus
+ *and opening all sorts of dialogs.
+ */
 class ApplicationWindow : public QMainWindow, public Scripted {
   Q_OBJECT
 public:
@@ -235,13 +239,13 @@ public slots:
   void openRecentFile(QAction *action);
 
   /**
-  * \brief Create a new project from a data file.
-  *
-  * @param fn :: is read as a data file with the default column separator (as
-  *set by the user)
-  * and inserted as a table into a new, empty project.
-  * This table is then plotted with the GraphOptions::LineSymbols style.
-  */
+   * \brief Create a new project from a data file.
+   *
+   * @param fn :: is read as a data file with the default column separator (as
+   *set by the user)
+   * and inserted as a table into a new, empty project.
+   * This table is then plotted with the GraphOptions::LineSymbols style.
+   */
   ApplicationWindow *plotFile(const QString &fn);
 
   /// Runs a script from a file. Mainly useful for automatically running scripts
@@ -254,7 +258,7 @@ public slots:
                             int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on
   /// success/failure.
-  bool runPythonScript(const QString &code, bool async = false,
+  bool runPythonScript(const QString &code, bool asynchronous = false,
                        bool quiet = false, bool redirect = true);
 
   QList<MdiSubWindow *> windowsList() const;
@@ -275,7 +279,7 @@ public slots:
   /// Update application window post save
   void postSaveProject();
 
-  //! Set the project status to modifed
+  //! Set the project status to modified
   void modifiedProject();
   //! Set the project status to saved (not modified)
   void savedProject();
@@ -451,15 +455,15 @@ public slots:
                   const QString &legend = QString());
   Table *newTable(const QString &caption, int r, int c, const QString &text);
   /**
-  * \brief Create a Table which is initially hidden; used to return the result
-  *of an analysis operation.
-  *
-  * @param name :: window name (compare MdiSubWindow::MdiSubWindow)
-  * @param label :: window label (compare MdiSubWindow::MdiSubWindow)
-  * @param r :: number of rows
-  * @param c :: number of columns
-  * @param text :: tab/newline - seperated initial content; may be empty
-  */
+   * \brief Create a Table which is initially hidden; used to return the result
+   *of an analysis operation.
+   *
+   * @param name :: window name (compare MdiSubWindow::MdiSubWindow)
+   * @param label :: window label (compare MdiSubWindow::MdiSubWindow)
+   * @param r :: number of rows
+   * @param c :: number of columns
+   * @param text :: tab/newline - separated initial content; may be empty
+   */
   Table *newHiddenTable(const QString &name, const QString &label, int r, int c,
                         const QString &text = QString());
   Table *table(const QString &name);
@@ -970,11 +974,11 @@ public slots:
   //! Show the currently selected windows from the list view #lv.
   void showSelectedWindows();
 
-  //! Sets all items in the folders list view to be desactivated (QPixmap =
+  //! Sets all items in the folders list view to be deactivated (QPixmap =
   // folder_closed_xpm)
   void desactivateFolders();
 
-  //! Changes the current folder. Returns true if successfull
+  //! Changes the current folder. Returns true if successful
   bool changeFolder(Folder *newFolder, bool force = false);
 
   //! Changes the current folder when the user changes the current item in the
@@ -986,15 +990,15 @@ public slots:
 
   //!  creates and opens the context menu of a folder list view item
   /**
-  * @param it :: list view item
-  * @param p :: mouse global position
-  * @param fromFolders: true means that the user clicked right mouse buttom on
-  *an item from QListView "folders"
-  *					   false means that the user clicked
-  *right
-  *mouse
-  *buttom on an item from QListView "lv"
-  */
+   * @param it :: list view item
+   * @param p :: mouse global position
+   * @param fromFolders: true means that the user clicked right mouse buttom on
+   *an item from QListView "folders"
+   *					   false means that the user clicked
+   *right
+   *mouse
+   *buttom on an item from QListView "lv"
+   */
   void showFolderPopupMenu(QTreeWidgetItem *it, const QPoint &p,
                            bool fromFolders);
 
@@ -1005,7 +1009,7 @@ public slots:
   // depending on the user's viewing policy
   void showAllFolderWindows();
 
-  //!  forces hidding all windows in the current folder and subfolders,
+  //!  forces hiding all windows in the current folder and subfolders,
   // depending on the user's viewing policy
   void hideAllFolderWindows();
 
@@ -1119,6 +1123,19 @@ public slots:
   //@}
 
   bool isOfType(const QObject *obj, const char *toCompare) const;
+
+  bool loadProjectRecovery(std::string sourceFile);
+
+  // The string must be copied from the other thread in saveProjectRecovery
+  /// Saves the current project as part of recovery auto saving
+  bool saveProjectRecovery(std::string destination);
+
+  /// Checks for and attempts project recovery if required
+  void checkForProjectRecovery();
+
+  /// Make a Recovery checkpoint so you don't have to wait for it to happen
+  /// normally
+  void saveRecoveryCheckpoint();
 
 signals:
   void modified();
@@ -1411,7 +1428,7 @@ public:
   ImageMarker *d_image_copy;
   //@}
 
-  //! Equals true if an automatical search for updates was performed on start-up
+  //! Equals true if an automatic search for updates was performed on start-up
   // otherwise is set to false;
   bool autoSearchUpdatesRequest;
 
@@ -1472,7 +1489,8 @@ private:
   QScopedPointer<QWidget> catalogSearch;
 
   QMenu *windowsMenu, *view, *graph, *fileMenu, *format, *edit;
-  QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
+  QMenu *recentProjectsMenu, *interfaceMenu;
+  MenuWithToolTips *recentFilesMenu;
 
   QMenu *help, *plot2DMenu, *analysisMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
@@ -1624,6 +1642,14 @@ private:
   bool blockWindowActivation;
   ///
   bool m_enableQtiPlotFitting;
+
+  /// Set to true when the main window is shutting down
+  bool m_shuttingDown{false};
+
+  /// Owns a thread which automatically triggers project recovery for the GUI
+  MantidQt::ProjectRecovery m_projectRecovery;
+  /// True if project recovery was started when MantidPlot started
+  bool m_projectRecoveryRunOnStart{false};
 
 #ifdef SHARED_MENUBAR
   QMenuBar *m_sharedMenuBar; ///< Pointer to the shared menubar

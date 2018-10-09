@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef OPENGLERROR_H_
 #define OPENGLERROR_H_
 
@@ -7,8 +13,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 /**
-* Exception for wrapping an OpenGL error
-*/
+ * Exception for wrapping an OpenGL error
+ */
 class OpenGLError : public std::exception {
 public:
   explicit OpenGLError(const std::string &msg) : m_msg(msg) {}
@@ -21,7 +27,7 @@ public:
 private:
   std::string m_msg;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*OPENGLERROR_H_*/

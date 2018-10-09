@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDMDCURVEDIALOG_H
 #define MANTIDMDCURVEDIALOG_H
 
-#include <QtGui/QWidget>
-#include "ui_MantidMDCurveDialog.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
+#include "ui_MantidMDCurveDialog.h"
+#include <QtGui/QWidget>
 
 /** Dialog asking the user for some options on how to plot a MDWorkspace
  * before plotting

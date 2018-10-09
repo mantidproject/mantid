@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable-all
 from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
@@ -314,7 +320,7 @@ class Ui_SaveWindow(object):
                     except:
                         print("Journal does not exist or is unreachable, please check your network connection.")
 
-#--------- If "Save" button pressed, selcted workspaces are saved -------------
+#--------- If "Save" button pressed, selected workspaces are saved -------------
     def buttonClickHandler1(self):
         prefix = str(self.lineEdit2.text())
         if not (self.lineEdit.text() and os.path.exists(self.lineEdit.text())):

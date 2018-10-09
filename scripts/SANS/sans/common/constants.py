@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ These constants  are used in the SANS reducer framework. We want a central place for them."""
 
 # pylint: disable=too-few-public-methods
@@ -5,7 +11,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 # ----------------------------------------
-# Proeprty names for Algorithms
+# Property names for Algorithms
 # ---------------------------------------
 MONITOR_SUFFIX = "_monitors"
 INPUT_WORKSPACE = "InputWorkspace"
@@ -57,5 +63,5 @@ HAB_CAN_SUFFIX = "_hab_can"
 HAB_CAN_COUNT_SUFFIX = "_hab_can_count"
 HAB_CAN_NORM_SUFFIX = "_hab_can_norm"
 
-REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION = "can_sample_workspaces_from_merged_reduction"
+REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION = "LAB_and_HAB_workspaces_from_merged_reduction"
 REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION = "reduced_can_and_partial_can_workspaces"

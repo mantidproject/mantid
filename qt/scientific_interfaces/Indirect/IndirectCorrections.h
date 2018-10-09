@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 
 //----------------------
 // Includes
 //----------------------
-#include "ui_IndirectCorrections.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IndirectTab.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_IndirectCorrections.h"
 
-#include <Poco/NObserver.h>
 #include "MantidKernel/ConfigService.h"
+#include <Poco/NObserver.h>
 
 class DoubleEditorFactory;
 class QtCheckBoxFactory;
@@ -83,7 +89,8 @@ private:
 
   /// Change Observer for ConfigService (monitors user directories)
   Poco::NObserver<IndirectCorrections,
-                  Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+                  Mantid::Kernel::ConfigValChangeNotification>
+      m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, CorrectionsTab *> m_tabs;

@@ -1,10 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryMomentumTransfer.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -29,10 +34,10 @@ static const std::string PIXEL_SIZE{"PixelSize"};
 static const std::string POLARIZED{"Polarized"};
 static const std::string REFLECTED_BEAM_WS{"ReflectedBeamWorkspace"};
 static const std::string REFLECTED_FOREGROUND{"ReflectedForeground"};
-static const std::string SLIT1_NAME{"Slit1Name"};
-static const std::string SLIT1_SIZE_LOG{"Slit1SizeSampleLog"};
-static const std::string SLIT2_NAME{"Slit2Name"};
-static const std::string SLIT2_SIZE_LOG{"Slit2SizeSampleLog"};
+static const std::string SLIT1_NAME{"FirstSlitName"};
+static const std::string SLIT1_SIZE_LOG{"FirstSlitSizeSampleLog"};
+static const std::string SLIT2_NAME{"SecondSlitName"};
+static const std::string SLIT2_SIZE_LOG{"SecondSlitSizeSampleLog"};
 static const std::string SUM_TYPE{"SummationType"};
 static const std::string TOF_CHANNEL_WIDTH{"TOFChannelWidth"};
 } // namespace Prop
@@ -53,7 +58,6 @@ constexpr double inRad(const double a) noexcept { return a / 180. * M_PI; }
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
@@ -72,6 +76,11 @@ int ReflectometryMomentumTransfer::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ReflectometryMomentumTransfer::category() const {
   return "ILL\\Reflectometry;Reflectometry";
+}
+
+/// Return a vector of related algorithms.
+const std::vector<std::string> ReflectometryMomentumTransfer::seeAlso() const {
+  return {"ConvertToReflectometryQ", "ConvertUnits"};
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
@@ -99,11 +108,12 @@ void ReflectometryMomentumTransfer::init() {
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Direction::Input, inWavelength),
-      "A reflectivity workspace in wavelenght.");
+      "A reflectivity workspace with X units in wavelength.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Direction::Output, inWavelength),
-      "The input workspace with DX values set to the Qz resolution.");
+      "The input workspace with X units converted to Q and DX values set to "
+      "the Q resolution.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::REFLECTED_BEAM_WS, "", Direction::Input, inWavelength),
@@ -531,15 +541,16 @@ double ReflectometryMomentumTransfer::wavelengthResolutionSquared(
   const auto l1 = spectrumInfo.l1();
   const auto l2 = spectrumInfo.l2(wsIndex);
   const auto flightDistance = l1 + l2;
-  const auto chopperResolution = setup.chopperPairDistance +
-                                 h * setup.chopperOpening *
-                                     setup.chopperPeriod /
-                                     (2. * M_PI * NeutronMass * wavelength);
+  const auto chopperResolution =
+      setup.chopperPairDistance + h * setup.chopperOpening *
+                                      setup.chopperPeriod /
+                                      (2. * M_PI * NeutronMass * wavelength);
   const auto detectorResolution =
       h * setup.tofChannelWidth / (NeutronMass * wavelength);
   const auto partialResolution =
-      0.49 * (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) +
-              3. * chopperResolution * detectorResolution) /
+      0.49 *
+      (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) +
+       3. * chopperResolution * detectorResolution) /
       (2. * chopperResolution + detectorResolution) / flightDistance;
   const auto flightDistRatio =
       (l1 - setup.slit2SampleDistance) / setup.slit1Slit2Distance;

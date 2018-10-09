@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /* Test functions for algorithms for single crystal diffraction
  */
 
+#include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/normal_distribution.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
+#include "MantidKernel/normal_distribution.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <cmath>
@@ -256,5 +262,5 @@ void WorkspaceBuilder::rebinWorkspace() {
   rebinAlg->execute();
   m_workspace = rebinAlg->getProperty("OutputWorkspace");
 }
-}
-}
+} // namespace SingleCrystalDiffractionTestHelper
+} // namespace Mantid

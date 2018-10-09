@@ -1,3 +1,4 @@
+
 .. algorithm::
 
 .. summary::
@@ -26,12 +27,17 @@ Usage
     
     #Load in iqt data
     input_ws = Load(Filename='iris26176_graphite002_iqt.nxs')
-    function = r'name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.972332,Tau=0.0247558,Beta=1;ties=(f1.Intensity=1-f0.A0)'
+    function = r'name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);
+                 name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.972332,Tau=0.0247558,Beta=1;
+                 ties=(f1.Intensity=1-f0.A0)'
 
     #run IqtFitSequential
-    result, params, fit_group = IqtFitSequential(InputWorkspace=input_ws, Function=function, StartX=0, EndX=0.2, SpecMin=0, SpecMax=16)
+    result, params, fit_group = IqtFitSequential(InputWorkspace=input_ws, Function=function,
+                                                 StartX=0, EndX=0.2, SpecMin=0, SpecMax=16)
 
 
 .. categories::
 
 .. sourcelink::
+ :h: Framework/CurveFitting/inc/MantidCurveFitting/Algorithms/IqtFit.h
+ :cpp: Framework/CurveFitting/src/Algorithms/IqtFit.cpp

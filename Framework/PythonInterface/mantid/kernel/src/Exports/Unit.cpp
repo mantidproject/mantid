@@ -1,9 +1,15 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Unit.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/tuple.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/tuple.hpp>
 
 using Mantid::Kernel::Unit;
 using Mantid::Kernel::Unit_sptr;
@@ -45,7 +51,7 @@ tuple quickConversionWrapper(Unit &self, const T &destUnitName) {
   }
   return boost::python::make_tuple<double>(wavelengthFactor, wavelengthPower);
 }
-}
+} // namespace
 
 void export_Unit() {
 

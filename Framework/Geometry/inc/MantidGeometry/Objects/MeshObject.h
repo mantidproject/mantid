@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_MESHOBJECT_H_
 #define MANTID_GEOMETRY_MESHOBJECT_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "BoundingBox.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidKernel/Material.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
-#include "BoundingBox.h"
+#include "MantidKernel/Material.h"
 #include <map>
 #include <memory>
 
@@ -19,7 +25,7 @@ namespace Mantid {
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 class CompGrp;
@@ -37,28 +43,8 @@ class vtkGeometryCacheWriter;
 
 Mesh Object of Triangles assumed to form one or more
 non-intersecting closed surfaces enclosing separate volumes.
-The number of vertices is limited to 65535.
-
-Copyright &copy; 2017-2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
+The number of vertices is limited to 2^16 based on index type. For 2D Meshes see
+Mesh2DObject
 */
 class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
@@ -97,8 +83,7 @@ public:
   bool
   isValid(const Kernel::V3D &) const override; ///< Check if a point is inside
   bool isOnSide(const Kernel::V3D &) const override;
-  int calcValidType(const Kernel::V3D &Pt,
-                    const Kernel::V3D &uVec) const override;
+  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
 
   // INTERSECTION
   int interceptSurface(Geometry::Track &) const override;

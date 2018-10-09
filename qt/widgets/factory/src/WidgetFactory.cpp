@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Factory/WidgetFactory.h"
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 
 using namespace MantidQt::SliceViewer;
 
@@ -131,5 +137,5 @@ WidgetFactory::createSliceViewer(const QString &wsName) {
   return slicer;
 }
 
-} // namespace Mantid
 } // namespace Factory
+} // namespace MantidQt

@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SOFQWCUTTEST_H_
 #define SOFQWCUTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SofQW.h"
-#include "MantidAlgorithms/SofQWPolygon.h"
-#include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/Unit.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/SofQW.h"
+#include "MantidAlgorithms/SofQWNormalisedPolygon.h"
+#include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidKernel/Unit.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/make_shared.hpp>
 

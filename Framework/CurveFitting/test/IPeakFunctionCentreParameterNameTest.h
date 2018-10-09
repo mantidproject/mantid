@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IPEAKFUNCTIONCENTREPARAMETERNAMETEST_H
 #define IPEAKFUNCTIONCENTREPARAMETERNAMETEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include <cxxtest/TestSuite.h>
 #include <map>
 
 using namespace Mantid::API;
@@ -41,10 +47,12 @@ public:
           FunctionFactory::Instance().createFunction(peakFunctionName));
 
       TS_ASSERT(fn);
-      TSM_ASSERT_EQUALS("IPeakFunction " + peakFunctionName + " gave centre"
-                                                              "parameter '" +
-                            fn->getCentreParameterName() + "', "
-                                                           "should give '" +
+      TSM_ASSERT_EQUALS("IPeakFunction " + peakFunctionName +
+                            " gave centre"
+                            "parameter '" +
+                            fn->getCentreParameterName() +
+                            "', "
+                            "should give '" +
                             centreParameterName + "'.",
                         fn->getCentreParameterName(), centreParameterName);
     }

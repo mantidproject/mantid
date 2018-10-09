@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LINEPLOTOPTIONS_H
 #define LINEPLOTOPTIONS_H
 
-#include <QWidget>
-#include "ui_LinePlotOptions.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "DllOption.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
+#include "ui_LinePlotOptions.h"
+#include <QWidget>
 
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER LinePlotOptions : public QWidget {
   Q_OBJECT

@@ -1,10 +1,11 @@
 include(ExternalProject)
 
-# Use version 3.2.10 of Eigen
-# A newer version existed at the time of choosing this version (3.3.2), but this had warnings when building
-set(eigen_version "3.2.10")
-
 option(USE_SYSTEM_EIGEN "Use the system installed Eigen - v${eigen_version}?" OFF)
+
+if ( WIN32 )
+  # Installed by 3rd party dependencies bundle
+  set ( USE_SYSTEM_EIGEN ON )
+endif ()
 
 if(USE_SYSTEM_EIGEN)
   message(STATUS "Using system Eigen")

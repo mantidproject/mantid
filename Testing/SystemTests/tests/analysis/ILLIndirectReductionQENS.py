@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import stresstesting
 from mantid.simpleapi import IndirectILLReductionQENS, Plus, CompareWorkspaces, GroupWorkspaces, Scale
 from mantid import config, mtd
@@ -152,7 +158,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         self.assertEquals(mtd['out_calib_bg_red'].getItem(0).getNumberHistograms(), 18)
 
-        self.assertDelta(mtd['out_calib_bg_red'].getItem(0).readY(0)[580], 0.0035, 0.0001)
+        self.assertDelta(mtd['out_calib_bg_red'].getItem(0).readY(0)[1024 - 580], 0.0035, 0.0001)
 
     def runTestDifferentZeroMonitorChannels(self):
 

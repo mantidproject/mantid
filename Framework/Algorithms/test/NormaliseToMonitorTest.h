@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef NORMALISETOMONITORTEST_H_
 #define NORMALISETOMONITORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/NormaliseToMonitor.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/NormaliseToMonitor.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
@@ -141,7 +147,7 @@ void dotestExec(bool events, bool sameOutputWS, bool performance = false) {
     AnalysisDataService::Instance().remove("NormFactor");
   }
 }
-}
+} // namespace
 
 class NormaliseToMonitorTest : public CxxTest::TestSuite {
 public:

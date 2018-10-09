@@ -4,9 +4,10 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="OFFSPEC" valid-from   ="2012-01-02 00:00:00"
-                           valid-to     ="2115-01-02 23:59:59"
-		           last-modified="2015-10-10 15:00:00">
+            name="OFFSPEC"
+            valid-from   ="1900-02-01 00:00:00"
+            valid-to     ="2115-01-02 23:59:59"
+            last-modified="2018-08-07 11:00:00">
 
   <defaults>
     <length unit="meter" />

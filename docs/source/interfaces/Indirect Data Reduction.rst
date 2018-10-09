@@ -77,7 +77,7 @@ Sum Files
   treated as a single run.
 
 Load Log Files
-  If selected the sample logs will be laoded from each of the run files.
+  If selected the sample logs will be loaded from each of the run files.
 
 Efixed
   This option allows you to override the default fixed final energy for the
@@ -105,7 +105,7 @@ Scale
   Gives the option to scale the output by a given factor.
 
 Spectra Min & Spectra Max
-  Selecte the range of detectors you are interested in, default values are
+  Select the range of detectors you are interested in, default values are
   chosen based on the instrument and analyser bank selected.
 
 Rebin Steps
@@ -119,7 +119,7 @@ Plot Output
 
 Fold Multiple Frames
   This option is only relevant for TOSCA. If checked, then multiple-framed data
-  will be folded back into a single spectra, if unchecked the frames wil lbe
+  will be folded back into a single spectra, if unchecked the frames will be
   left as is with the frame number given at the end of the workspace name.
 
 Output in :math:`cm^{-1}`
@@ -128,23 +128,26 @@ Output in :math:`cm^{-1}`
 
 Select Save Formats
   Allows you to select multiple output save formats to save the reduced data as,
-  in all cases the file will be saved in the defaut save directory.
+  in all cases the file will be saved in the default save directory.
 
 Grouping
 ~~~~~~~~
 
 The following options are available for grouping output data:
 
-Default
-  The data will be grouped according to the Workflow.GroupingMethod parameter in
-  the instrument's parameter file. If this value is not set then Individual is
-  used.
+Custom
+  Follows the same grouping patterns used in the :ref:`GroupDetectors <algm-GroupDetectors>` algorithm.
+  An example of the syntax is 1,2+3,4-6,7-10
+
+  This would produce spectra for: spectra 1, the sum of spectra 2 and 3, the sum of spectra 4-6 (4+5+6)
+  and individual spectra from 7 to 10 (7,8,9,10)
 
 Individual
   All detectors will remain on individual spectra.
 
 Groups
-  The detectors will automatically be divided into a given number of gorups.
+  The detectors will automatically be divided into a given number of equal size groups. Any
+  left over will be added as an additional group.
 
 All
   All detectors will be grouped into a single spectra.
@@ -165,7 +168,7 @@ Single
 .. interface:: Data Reduction
   :widget: pgSingleRebin
 
-In this mode only a single binning range is defined as  a range and width.
+In this mode only a single binning range is defined as a range and width.
 
 Multiple
 ########
@@ -173,7 +176,7 @@ Multiple
 .. interface:: Data Reduction
   :widget: pgMultipleRebin
 
-In this mode multiple binning ranges can be defined using he rebin string syntax
+In this mode multiple binning ranges can be defined using the rebin string syntax
 used by the :ref:`Rebin <algm-Rebin>` algorithm.
 
 ILL Energy Transfer
@@ -251,7 +254,7 @@ FWS-only Options
 ~~~~~~~~~~~~~~~~
 
 Observable
-  This is the scanning ovservable, that will become the x-axis of the final result.
+  This is the scanning observable, that will become the x-axis of the final result.
   It can be any numeric sample parameter defined in Sample Logs (e.g. sample.*) or a time-stamp string (e.g. start_time).
   It can also be the run number. It can not be an instrument parameter.
 
@@ -271,7 +274,7 @@ ISIS Calibration & Resolution
 
 This tab gives you the ability to create Calibration and Resolution files.
 
-The calibrtion file is normalised to an average of 1.
+The calibration file is normalised to an average of 1.
 
 Options
 ~~~~~~~
@@ -366,7 +369,7 @@ Input
   Transfer tab.
 
 Use Calibration
-  Allows you to select either a calibrtion file or workspace to apply to the raw
+  Allows you to select either a calibration file or workspace to apply to the raw
   files.
 
 Preview Spectrum
@@ -387,7 +390,7 @@ Use Two Ranges
   If selected, enables subtraction of the background range.
 
 Background
-  An optional range denoting background noice that is to be removed from the raw
+  An optional range denoting background noise that is to be removed from the raw
   data before the integration is performed. A default starting value is generally
   provided from the instrument's parameter file.
 

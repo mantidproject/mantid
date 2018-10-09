@@ -1,13 +1,24 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.api import IFunction1D, IFunction, FunctionFactory
 import numpy as np
 
+
 class NoCatgeoryFunction(IFunction1D):
 
     def init(self):
         pass
+
+    def function1D(self, xvals):
+        return xvals
+
 
 class Times2(IFunction1D):
 
@@ -27,6 +38,7 @@ class Times2(IFunction1D):
 
     def function1D(self, xvals):
         return 2*xvals
+
 
 class IFunction1DTest(unittest.TestCase):
 

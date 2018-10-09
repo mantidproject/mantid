@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -12,13 +18,13 @@ namespace Algorithms {
 DECLARE_ALGORITHM(PoissonErrors)
 
 /** Performs a simple check to see if the sizes of two workspaces are
-* identically sized
-* @param lhs :: the first workspace to compare
-* @param rhs :: the second workspace to compare
-* @retval "" The two workspaces are size compatible
-* @retval "<reason why not compatible>" The two workspaces are NOT size
-* compatible
-*/
+ * identically sized
+ * @param lhs :: the first workspace to compare
+ * @param rhs :: the second workspace to compare
+ * @retval "" The two workspaces are size compatible
+ * @retval "<reason why not compatible>" The two workspaces are NOT size
+ * compatible
+ */
 std::string PoissonErrors::checkSizeCompatibility(
     const API::MatrixWorkspace_const_sptr lhs,
     const API::MatrixWorkspace_const_sptr rhs) const {
@@ -67,5 +73,5 @@ void PoissonErrors::performBinaryOperation(const MantidVec &lhsX,
   else
     EOut[0] = 0.0;
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

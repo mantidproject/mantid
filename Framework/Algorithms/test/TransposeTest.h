@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TRANSPOSETEST_H_
 #define TRANSPOSETEST_H_
 
@@ -5,8 +11,8 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidAlgorithms/Transpose.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/Transpose.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 

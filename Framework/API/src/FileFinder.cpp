@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -12,15 +18,15 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/Path.h>
-#include <Poco/File.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/Exception.h>
-#include <boost/regex.hpp>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 
-#include <cctype>
 #include <algorithm>
+#include <cctype>
 
 #include <boost/algorithm/string.hpp>
 
@@ -39,7 +45,7 @@ Mantid::Kernel::Logger g_log("FileFinder");
 bool containsWildCard(const std::string &ext) {
   return std::string::npos != ext.find('*');
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace API {
@@ -62,13 +68,9 @@ FileFinderImpl::FileFinderImpl() {
 #ifdef _WIN32
   m_globOption = Poco::Glob::GLOB_DEFAULT;
 #else
-  std::string casesensitive =
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "filefinder.casesensitive");
-  if (boost::iequals("Off", casesensitive))
-    m_globOption = Poco::Glob::GLOB_CASELESS;
-  else
-    m_globOption = Poco::Glob::GLOB_DEFAULT;
+  setCaseSensitive(Kernel::ConfigService::Instance()
+                       .getValue<bool>("filefinder.casesensitive")
+                       .get_value_or(false));
 #endif
 }
 
@@ -627,8 +629,9 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
   Mantid::Kernel::StringTokenizer hints(
-      hint, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      hint, ",",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   auto h = hints.begin();
 
   for (; h != hints.end(); ++h) {
@@ -646,8 +649,9 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
     }
 
     Mantid::Kernel::StringTokenizer range(
-        *h, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        *h, "-",
+        Mantid::Kernel::StringTokenizer::TOK_TRIM |
+            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if ((range.count() > 2) && (!fileSuspected)) {
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {
@@ -824,5 +828,5 @@ std::string FileFinderImpl::toUpper(const std::string &src) const {
   return result;
 }
 
-} // API
-} // Mantid
+} // namespace API
+} // namespace Mantid

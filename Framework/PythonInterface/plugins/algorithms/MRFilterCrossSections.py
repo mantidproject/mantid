@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 import os
@@ -8,6 +14,9 @@ import mantid.simpleapi as api
 
 
 def extract_times(times, is_start, is_sf1=False, is_sf2=False, is_veto1=False, is_veto2=False):
+    """
+        Extract a list of times
+    """
     return [(times[i], is_start, [is_sf1, is_sf2, is_veto1, is_veto2]) for i in range(len(times))]
 
 
@@ -35,6 +44,8 @@ class MRFilterCrossSections(PythonAlgorithm):
                              doc="Name of the log entry determining the polarizer veto [optional]")
         self.declareProperty("AnaVeto", "",
                              doc="Name of the log entry determining the analyzer veto [optional]")
+        self.declareProperty("CheckDevices", True,
+                             doc="If true, the analyzer/polarizer devices will be checked before filtering")
         self.declareProperty(WorkspaceGroupProperty("CrossSectionWorkspaces", "",
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
@@ -96,10 +107,14 @@ class MRFilterCrossSections(PythonAlgorithm):
             ws_raw_name = os.path.basename(file_path)
             ws_raw = api.LoadEventNexus(Filename=file_path, OutputWorkspace=ws_raw_name)
 
-        # Check whether we have a polarizer
-        polarizer = ws_raw.getRun().getProperty("Polarizer").value[0]
-        # Check whether we have an analyzer
-        analyzer = ws_raw.getRun().getProperty("Analyzer").value[0]
+        if self.getProperty("CheckDevices").value:
+            # Check whether we have a polarizer
+            polarizer = ws_raw.getRun().getProperty("Polarizer").value[0]
+            # Check whether we have an analyzer
+            analyzer = ws_raw.getRun().getProperty("Analyzer").value[0]
+        else:
+            polarizer = 1
+            analyzer = 1
 
         change_list = []
         if polarizer > 0:

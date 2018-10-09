@@ -1,8 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.kernel import FacilityInfo, InstrumentInfo, ConfigService
-
+import pytz
 
 class FacilityInfoTest(unittest.TestCase):
 
@@ -24,8 +30,16 @@ class FacilityInfoTest(unittest.TestCase):
         self.assertTrue(len(test_facility.instruments()) > 30)
         self.assertTrue(len(test_facility.instruments("Neutron Diffraction"))> 10)
         self.assertTrue(isinstance(test_facility.instrument("WISH"), InstrumentInfo))
+        self.assertEquals(test_facility.timezone(), "Europe/London")
 
+    def test_timezones(self):
+        # verify that all of the timezones can get converted by pytz
+        for facility in ConfigService.getFacilities():
+            if len(facility.timezone()) == 0:
+                continue # don't test empty strings
+            tz = pytz.timezone(facility.timezone())
+            print(facility.name(), tz)
+            self.assertEquals(str(tz), facility.timezone())
 
 if __name__ == '__main__':
     unittest.main()
-

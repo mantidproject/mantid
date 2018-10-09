@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
 #define MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
 
 #include "IReflEventView.h"
-#include "ui_ReflEventWidget.h"
 #include "QWidgetGroup.h"
+#include "ui_ReflEventWidget.h"
 #include <memory>
 
 namespace MantidQt {
@@ -14,33 +20,12 @@ class IReflEventPresenter;
 
 /** QtReflEventView : Provides an interface for the "Event Handling" widget in
 the ISIS Reflectometry interface.
-
-Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class QtReflEventView : public QWidget, public IReflEventView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit QtReflEventView(QWidget *parent = nullptr);
+  explicit QtReflEventView(int group, QWidget *parent = nullptr);
   /// Destructor
   ~QtReflEventView() override;
   /// Returns the presenter managing this view
@@ -68,11 +53,16 @@ public slots:
   void toggleUniformEven(bool isChecked);
   void toggleCustom(bool isChecked);
   void toggleLogValue(bool isChecked);
+  void notifySettingsChanged();
 
 private:
   /// Initialise the interface
   void initLayout();
   std::string textFrom(QLineEdit const *const widget) const;
+  void registerEventWidgets();
+  void connectSettingsChange(QLineEdit &edit);
+  void connectSettingsChange(QGroupBox &edit);
+
   QWidgetGroup<2> m_uniformGroup;
   QWidgetGroup<2> m_uniformEvenGroup;
   QWidgetGroup<4> m_logValueGroup;
@@ -85,7 +75,7 @@ private:
   std::unique_ptr<IReflEventPresenter> m_presenter;
 };
 
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_ */

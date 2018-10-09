@@ -1,14 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "DllConfig.h"
 #include "IEnggDiffractionCalibration.h"
 #include "IEnggDiffractionParam.h"
 #include "IEnggDiffractionPresenter.h"
 #include "IEnggDiffractionView.h"
+#include "IEnggVanadiumCorrectionsModel.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -28,27 +35,6 @@ Presenter for the Enggineering Diffraction GUI (presenter as in the
 MVP Model-View-Presenter pattern). In principle, in a strict MVP
 setup, signals from the model should always be handled through this
 presenter and never go directly to the view, and viceversa.
-
-Copyright &copy; 2015-2016 ISIS Rutherford Appleton Laboratory, NScD
-Oak Ridge National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 // needs to be dll-exported for the tests
 class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffractionPresenter
@@ -71,9 +57,8 @@ public:
                         const std::string &specNos);
 
   /// the focusing hard work that a worker / thread will run
-  void doFocusRun(const std::string &dir, const std::string &runNo,
-                  const std::vector<bool> &banks, const std::string &specNos,
-                  const std::string &dgFile);
+  void doFocusRun(const std::string &runNo, const std::vector<bool> &banks,
+                  const std::string &specNos, const std::string &dgFile);
 
   /// checks if its a valid run number returns string
   std::string isValidRunNumber(const std::vector<std::string> &dir);
@@ -173,8 +158,7 @@ private:
                      const std::string &dgFile = "");
 
   virtual void
-  startAsyncFocusWorker(const std::string &dir,
-                        const std::vector<std::string> &multi_RunNo,
+  startAsyncFocusWorker(const std::vector<std::string> &multi_RunNo,
                         const std::vector<bool> &banks,
                         const std::string &specNos, const std::string &dgFile);
 
@@ -205,33 +189,8 @@ private:
                                std::vector<size_t> &bankIDs,
                                std::vector<std::string> &specs);
 
-  void doFocusing(const EnggDiffCalibSettings &cs,
-                  const std::string &fullFilename, const std::string &runNo,
-                  size_t bank, const std::string &specNos,
-                  const std::string &dgFile);
-
-  void
-  loadOrCalcVanadiumWorkspaces(const std::string &vanNo,
-                               const std::string &inputDirCalib,
-                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS,
-                               bool forceRecalc, const std::string &specNos);
-
-  void findPrecalcVanadiumCorrFilenames(const std::string &vanNo,
-                                        const std::string &inputDirCalib,
-                                        std::string &preIntegFilename,
-                                        std::string &preCurvesFilename,
-                                        bool &found);
-
-  void loadVanadiumPrecalcWorkspaces(
-      const std::string &preIntegFilename, const std::string &preCurvesFilename,
-      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, const std::string &vanNo,
-      const std::string &specNos);
-
-  void calcVanadiumWorkspaces(const std::string &vanNo,
-                              Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-                              Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
+  void doFocusing(const EnggDiffCalibSettings &cs, const RunLabel &runLabel,
+                  const std::string &specNos, const std::string &dgFile);
 
   /// @name Methods related to pre-processing / re-binning
   //@{
@@ -260,21 +219,28 @@ private:
                           std::string specNos);
 
   // algorithms to save the generated workspace
-  void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
-  void saveFocusedXYE(std::string inputWorkspace, std::string bank,
-                      std::string runNo);
-  void saveOpenGenie(std::string inputWorkspace, std::string bank,
-                     std::string runNo);
+  void saveGSS(const RunLabel &runLabel, const std::string &inputWorkspace);
+  void saveFocusedXYE(const RunLabel &runLabel,
+                      const std::string &inputWorkspace);
+  void saveNexus(const RunLabel &runLabel, const std::string &inputWorkspace);
+  void saveOpenGenie(const RunLabel &runLabel,
+                     const std::string &inputWorkspace);
+  void exportSampleLogsToHDF5(const std::string &inputWorkspace,
+                              const std::string &filename) const;
 
   // generates the required file name of the output files
-  std::string outFileNameFactory(std::string inputWorkspace, std::string runNo,
-                                 std::string bank, std::string format);
+  std::string outFileNameFactory(const std::string &inputWorkspace,
+                                 const RunLabel &runLabel,
+                                 const std::string &format);
 
   // returns a directory as a path, creating it if not found, and checking
   // errors
-  Poco::Path outFilesUserDir(const std::string &addToDir) override;
+  Poco::Path outFilesUserDir(const std::string &addToDir) const override;
+  std::string userHDFRunFilename(const int runNumber) const override;
+  std::string userHDFMultiRunFilename(
+      const std::vector<RunLabel> &runLabels) const override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
-  Poco::Path outFilesRootDir();
+  Poco::Path outFilesRootDir() const;
 
   std::string appendToPath(const std::string &path,
                            const std::string &toAppend) const;
@@ -314,12 +280,6 @@ private:
 
   /// string to use for invalid run number error message
   const static std::string g_runNumberErrorStr;
-
-  // name of the workspace with the vanadium integration (of spectra)
-  static const std::string g_vanIntegrationWSName;
-
-  // name of the workspace with the vanadium (smoothed) curves
-  static const std::string g_vanCurvesWSName;
 
   // for the GSAS parameters (difc, difa, tzero) of the banks
   static const std::string g_calibBanksParms;
@@ -372,6 +332,10 @@ private:
 
   /// the current selected instrument
   std::string m_currentInst = "";
+
+  /// Model for calculating the vanadium corrections workspaces for focus and
+  /// calib
+  boost::shared_ptr<IEnggVanadiumCorrectionsModel> m_vanadiumCorrectionsModel;
 };
 
 } // namespace CustomInterfaces

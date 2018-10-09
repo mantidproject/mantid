@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAMITEM_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAMITEM_H_
 
@@ -26,27 +32,6 @@ namespace HistogramData {
 
   @author Samuel Jackson
   @date 2017
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_HISTOGRAMDATA_DLL HistogramItem {
 
@@ -84,7 +69,7 @@ public:
     if (yModeIsCounts()) {
       return y[m_index];
     } else {
-      return y[m_index] / binWidth();
+      return y[m_index] * binWidth();
     }
   }
 
@@ -111,7 +96,7 @@ public:
   double frequency() const {
     const auto &y = m_histogram.y();
     if (yModeIsCounts()) {
-      return y[m_index] * binWidth();
+      return y[m_index] / binWidth();
     } else {
       return y[m_index];
     }
@@ -136,29 +121,6 @@ public:
       return e[m_index] / width;
     }
   }
-
-  void advance(int64_t delta) {
-    m_index = delta < 0 ? std::max(static_cast<uint64_t>(0),
-                                   static_cast<uint64_t>(m_index) + delta)
-                        : std::min(m_histogram.size(),
-                                   m_index + static_cast<size_t>(delta));
-  }
-
-  void incrementIndex() {
-    if (m_index < m_histogram.size()) {
-      ++m_index;
-    }
-  }
-
-  void decrementIndex() {
-    if (m_index > 0) {
-      --m_index;
-    }
-  }
-
-  size_t getIndex() const { return m_index; }
-
-  void setIndex(const size_t index) { m_index = index; }
 
 private:
   friend class HistogramIterator;

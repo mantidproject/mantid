@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -23,7 +29,7 @@ namespace { // anonymous namespace
 const std::string CHAR_PROP_NAME("Characterizations");
 const std::string FREQ_PROP_NAME("FrequencyLogNames");
 const std::string WL_PROP_NAME("WaveLengthLogNames");
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PDDetermineCharacterizations)
@@ -64,9 +70,19 @@ const std::string PDDetermineCharacterizations::summary() const {
  * @return The list of expected column names
  */
 std::vector<std::string> getColumnNames() {
-  return {"frequency", "wavelength", "bank", "container", "vanadium",
-          "vanadium_background", "empty_environment", "empty_instrument",
-          "d_min", "d_max", "tof_min", "tof_max", "wavelength_min",
+  return {"frequency",
+          "wavelength",
+          "bank",
+          "container",
+          "vanadium",
+          "vanadium_background",
+          "empty_environment",
+          "empty_instrument",
+          "d_min",
+          "d_max",
+          "tof_min",
+          "tof_max",
+          "wavelength_min",
           "wavelength_max"};
 }
 
@@ -233,8 +249,8 @@ void PDDetermineCharacterizations::getInformationFromTable(
         } else {
           const auto canRuns =
               m_characterizations->getRef<std::string>(canName, i);
-          g_log.information() << "Updating container identifier to \""
-                              << canRuns << "\"\n";
+          g_log.information()
+              << "Updating container identifier to \"" << canRuns << "\"\n";
           m_propertyManager->setProperty("container", canRuns);
         }
       }

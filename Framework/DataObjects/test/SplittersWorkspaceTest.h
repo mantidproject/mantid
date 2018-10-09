@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_SPLITTERSWORKSPACETEST_H_
 #define MANTID_DATAOBJECTS_SPLITTERSWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "PropertyManagerHelper.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "PropertyManagerHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -95,9 +101,9 @@ public:
   }
 
   /**
-  * Test declaring an input SplittersWorkspace and retrieving it as const_sptr
-  * or sptr
-  */
+   * Test declaring an input SplittersWorkspace and retrieving it as const_sptr
+   * or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     SplittersWorkspace_sptr wsInput(new SplittersWorkspace());

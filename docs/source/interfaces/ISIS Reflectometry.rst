@@ -1,5 +1,6 @@
 .. _interface-isis-refl:
 
+
 ============================
 ISIS Reflectometry Interface
 ============================
@@ -405,20 +406,102 @@ Hovering over the highlighted run with your cursor will allow you to see why the
 .. figure:: /images/ISISReflectometryPolref_tooltip_failed_run.jpg
    :alt: Showing tooltip from failed transfer.
 
-Autoreduce
-==========
+Autoprocess
+===========
 
-With an investigation id supplied, the **Autoreduce** button when clicked will do the following:
+The **Autoprocess** button allows fully automatic processing of runs for a
+particular investigation. Enter the instrument and investigation ID and then
+click `Autoprocess` to start. This then:
 
 - Searches for runs that are part of the investigation the id was supplied for.
-- Transfers all found runs from the Search table to the Processing table.
-- Selects all of the runs in the Processing table and processes them.
+- Transfers any initial runs found for that investigation from the Search table
+  into the Processing table and processes them.
+- Polls for new runs and transfers and processes any as they are found.
 
-Like the `Process` button in the Processing table, the `Autoreduce` button will be disabled while
-runs are being processed. If processing has been paused, the button will be enabled again. Clicking
-this button again will resume processing runs just like the `Process` button. Changing the
-instrument, investigation id or transfer method while paused and clicking `Autoreduce` however will
-start a new autoreduction instead.
+If the investigation has not started yet, polling will begin straight away and
+the Processing table will remain empty until runs are created.
+  
+Like the `Process` button in the Processing table, the `Autoprocess` button
+will be disabled while autoprocessing is in progress. If autoprocessing has
+been paused, the button will be enabled again. Clicking `Autoprocess` again
+will resume processing from where it left off.
+
+Rows that do not contain a valid theta value will not be included in
+autoprocessing - they will be highlighted as failed rows in the Search
+table. The error message will be displayed as a tooltip if you hover over the
+row. These rows can be transferred manually by first pausing autoprocessing and
+then selecting the rows and clicking `Transfer`.
+
+Successfully reduced rows are highlighted in green. If a group has been
+post-processed successfully then it is also highlighted in green. If the group
+only contains a single row then post-processing is not applicable, and the
+group will be highlighted in a paler shade of green to indicate that all of its
+rows have been reduced successfully but that post-processing was not performed.
+
+If row or group processing fails, the row will be highlighted in blue. The
+error message will be displayed as a tooltip if you hover over the row. Failed
+rows will not be reprocessed automatically, but you can manually re-process
+them by pausing autoprocessing, selecting the required rows, and clicking
+`Process`.
+
+The Processing table is not editable while autoprocessing is running but can be
+edited while paused. Any changes to a row that will affect the result of the
+reduction will cause the row's state to be reset to unprocessed, and the row
+will be re-processed when autoprocessing is resumed. You can also manually
+process selected rows while autoprocessing is paused using the `Process` button.
+
+Rows can be deleted and new rows can be added to the table while autoprocessing
+is paused. Use the buttons at the top of the Processing table, or manually
+transfer them from the Search table. They will then be included when you resume
+autoprocessing.
+
+If workspaces are deleted while autoprocessing is running, or before resuming
+autoprocessing, then affected rows/groups will be reprocessed if their
+mandatory output workspaces no longer exist. If you do not want a row/group to
+be reprocessed, then you must first remove it from the table. Deleting interim
+workspaces such as IvsLam will not cause rows to be reprocessed.
+
+Changing the instrument, investigation id or transfer method while paused and
+then clicking `Autoprocess` will start a new autoprocessing operation, and the
+current contents of the Processing table will be cleared. You will be warned if
+this will cause unsaved changes to be lost.
+
+Live Data Monitoring
+^^^^^^^^^^^^^^^^^^^^
+
+The *Live data* section on the *Runs* tab allows you to start a monitoring
+algorithm that will periodically load live data from the instrument and reduce
+it with :ref:`ReflectometryReductionOneAuto
+<algm-ReflectometryReductionOneAuto>`. It outputs two workspaces, `TOF_live`
+for the original data and `IvsQ_binned_live` for the reduced data.
+
+Live values for `ThetaIn` and the slit gaps are checked and used each time the
+reduction runs. Other algorithm properties are taken from `Group 1` on the
+*Settings* tab. Make any changes you want to the settings and press `Start
+monitor` to begin monitoring. Note that **any changes to the settings will not
+be updated** in the live data reduction unless you stop and re-start
+monitoring.
+
+You can stop monitoring at any time using the `Stop monitor` button or by
+cancelling the algorithm from the *Algorithm progress* dialog. If you close the
+interface, monitoring will continue running in the background. You can cancel
+the `MonitorLiveData` algorithm from the *Algorithm progress* dialog.
+
+If `MonitorLiveData` stops due to an error, the `Start monitor` button will be
+re-enabled so that it can be re-started from the Interface.
+
+Note that if you close and re-open the Interface, the link to any running
+monitor algorithm will be lost. You will not be able to start a new version of
+the monitor due to a clash in the output names. Stop the algorithm from the
+*Algorithm process* dialog and re-start it from the new instance of the
+Interface to re-link it.
+
+Live data monitoring has the following requirements:
+
+- EPICS support must be installed in Mantid. This is included by default on Windows but see the instructions `here <https://www.mantidproject.org/PyEpics_In_Mantid>`_ for other platforms.
+- The instrument must be on IBEX or have additional processes installed to supply the EPICS values. If it does not, you will get an error that live values could not be found for `Theta` and the slits.
+
+
 
 Event Handling tab
 ~~~~~~~~~~~~~~~~~~

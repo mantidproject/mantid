@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENTSPECPARSERTEST_H_
 #define MANTID_GEOMETRY_SAMPLEENVIRONMENTSPECPARSERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
 #include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
 #include "MantidKernel/Material.h"
 
 #include "Poco/AutoPtr.h"
-#include "Poco/SAX/InputSource.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NodeList.h"
+#include "Poco/SAX/InputSource.h"
 
 #include <sstream>
 

@@ -26,22 +26,22 @@
  *                                                                         *
  ***************************************************************************/
 #include "ContourLinesEditor.h"
-#include "MantidQtWidgets/Common/DoubleSpinBox.h"
-#include "Spectrogram.h"
-#include "PenStyleBox.h"
 #include "ColorButton.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "PenStyleBox.h"
+#include "Spectrogram.h"
 
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QHeaderView>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QLayout>
+#include <QMessageBox>
+#include <QMouseEvent>
+#include <QPainter>
 #include <QPushButton>
 #include <QTableWidget>
-#include <QHeaderView>
-#include <QCheckBox>
-#include <QLayout>
-#include <QLabel>
-#include <QKeyEvent>
-#include <QMouseEvent>
-#include <QMessageBox>
-#include <QPainter>
-#include <QGroupBox>
 
 #include <stdexcept>
 

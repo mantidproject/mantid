@@ -1,14 +1,20 @@
-#include "MantidAPI/FileProperty.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/LoadIsawUB.h"
-#include <fstream>
-#include <MantidGeometry/Crystal/OrientedLattice.h>
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/Strings.h"
+#include <MantidGeometry/Crystal/OrientedLattice.h>
+#include <fstream>
 
 using namespace Mantid::Kernel::Strings;
-using Mantid::Kernel::DblMatrix;
 using Mantid::Geometry::OrientedLattice;
+using Mantid::Kernel::DblMatrix;
 
 namespace Mantid {
 namespace Crystal {
@@ -32,9 +38,10 @@ void LoadIsawUB::init() {
                                                     FileProperty::Load, exts),
                   "Path to an ISAW-style UB matrix text file.");
 
-  declareProperty("CheckUMatrix", true, "If True (default) then a check is "
-                                        "performed to ensure the U matrix is a "
-                                        "proper rotation matrix");
+  declareProperty("CheckUMatrix", true,
+                  "If True (default) then a check is "
+                  "performed to ensure the U matrix is a "
+                  "proper rotation matrix");
 }
 
 /** Execute the algorithm.
@@ -44,8 +51,8 @@ void LoadIsawUB::exec() {
   Workspace_sptr ws1 = getProperty("InputWorkspace");
 
   ExperimentInfo_sptr ws;
-  IMDEventWorkspace_sptr MDWS =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(ws1);
+  MultipleExperimentInfos_sptr MDWS =
+      boost::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
   if (MDWS != nullptr) {
     ws = MDWS->getExperimentInfo(0);
   } else {
@@ -53,7 +60,7 @@ void LoadIsawUB::exec() {
   }
   if (!ws)
     throw std::invalid_argument("Must specify either a MatrixWorkspace or a "
-                                "PeaksWorkspace or a MDEventWorkspace.");
+                                "PeaksWorkspace or a MDWorkspace.");
 
   std::string Filename = getProperty("Filename");
 
@@ -126,5 +133,5 @@ void LoadIsawUB::exec() {
   this->setProperty("InputWorkspace", ws1);
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

@@ -29,12 +29,12 @@
  ***************************************************************************/
 #include "SortDialog.h"
 
-#include <QPushButton>
-#include <QLabel>
+#include <QApplication>
 #include <QComboBox>
 #include <QGroupBox>
+#include <QLabel>
 #include <QLayout>
-#include <QApplication>
+#include <QPushButton>
 
 SortDialog::SortDialog(QWidget *parent, Qt::WFlags fl) : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Sorting Options"));

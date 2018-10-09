@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ALGORITHMMPITEST_H_
 #define ALGORITHMMPITEST_H_
 
@@ -7,10 +13,10 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 
-#include "MantidKernel/Property.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/Property.h"
 #include "MantidParallel/Communicator.h"
+#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
 #include "MantidTestHelpers/ParallelRunner.h"
 
@@ -422,7 +428,7 @@ void runChained(const Parallel::Communicator &comm) {
   Workspace_const_sptr ws2 = alg2->getProperty("OutputWorkspace");
   TS_ASSERT_EQUALS(ws2->storageMode(), StorageMode::Distributed);
 }
-}
+} // namespace
 
 class AlgorithmMPITest : public CxxTest::TestSuite {
 public:

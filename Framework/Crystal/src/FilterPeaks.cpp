@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FilterPeaks.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace {
 
@@ -28,7 +34,7 @@ double QMOD(const Mantid::Geometry::IPeak &p) {
 double SN(const Mantid::Geometry::IPeak &p) {
   return p.getIntensity() / p.getSigmaIntensity();
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {
@@ -54,7 +60,7 @@ void FilterPeaks::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The filtered workspace");
 
@@ -78,8 +84,9 @@ void FilterPeaks::init() {
  */
 void FilterPeaks::exec() {
   PeaksWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  PeaksWorkspace_sptr filteredWS = boost::dynamic_pointer_cast<PeaksWorkspace>(
+      WorkspaceFactory::Instance().createPeaks());
 
-  IPeaksWorkspace_sptr filteredWS = WorkspaceFactory::Instance().createPeaks();
   // Copy over ExperimentInfo from input workspace
   filteredWS->copyExperimentInfoFrom(inputWS.get());
 

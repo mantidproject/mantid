@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReadGroupsFromFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -29,10 +35,10 @@ namespace Algorithms {
 DECLARE_ALGORITHM(ReadGroupsFromFile)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace;
 using API::FileProperty;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 
 ReadGroupsFromFile::ReadGroupsFromFile() : API::Algorithm(), calibration() {}
 
@@ -243,5 +249,5 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
   progress(0.7);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

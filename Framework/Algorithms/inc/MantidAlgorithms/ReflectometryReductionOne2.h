@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE2_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE2_H_
 
@@ -15,32 +21,11 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 
 /** ReflectometryReductionOne2 : Reflectometry reduction of a single input TOF
  workspace to an IvsQ workspace. Version 2 of the algorithm.
-
- Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport ReflectometryReductionOne2 : public ReflectometryWorkflowBase2 {
 public:
@@ -71,6 +56,8 @@ private:
   void exec() override;
   // Validate inputs
   std::map<std::string, std::string> validateInputs() override;
+  // Set default names for output workspaces
+  void setDefaultOutputWorkspaceNames();
   // Create a direct beam workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeDirectBeamWS(Mantid::API::MatrixWorkspace_sptr inputWS);
@@ -139,7 +126,8 @@ private:
   void getProjectedLambdaRange(const double lambda, const double twoTheta,
                                const double bLambda, const double bTwoTheta,
                                const std::vector<size_t> &detectors,
-                               double &lambdaTop, double &lambdaBot);
+                               double &lambdaTop, double &lambdaBot,
+                               const bool outerCorners = true);
   // Check whether two spectrum maps match
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2,
@@ -157,6 +145,14 @@ private:
   size_t twoThetaRDetectorIdx(const std::vector<size_t> &detectors);
   double wavelengthMin() { return m_wavelengthMin; };
   double wavelengthMax() { return m_wavelengthMax; };
+  size_t findIvsLamRangeMinDetector(const std::vector<size_t> &detectors);
+  size_t findIvsLamRangeMaxDetector(const std::vector<size_t> &detectors);
+  double findIvsLamRangeMin(Mantid::API::MatrixWorkspace_sptr detectorWS,
+                            const std::vector<size_t> &detectors,
+                            const double lambda);
+  double findIvsLamRangeMax(Mantid::API::MatrixWorkspace_sptr detectorWS,
+                            const std::vector<size_t> &detectors,
+                            const double lambda);
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
@@ -173,6 +169,8 @@ private:
   // versions of these if summing in Q
   double m_wavelengthMin;
   double m_wavelengthMax;
+  // True if partial bins should be included in the summation in Q
+  bool m_partialBins;
 };
 
 } // namespace Algorithms

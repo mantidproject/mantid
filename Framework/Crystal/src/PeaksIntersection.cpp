@@ -1,15 +1,23 @@
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidAPI/TableRow.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeaksIntersection.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <boost/function.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::DataObjects::PeaksWorkspace;
+using Mantid::DataObjects::PeaksWorkspace_sptr;
 
 namespace Mantid {
 namespace Crystal {
@@ -25,7 +33,7 @@ std::string PeaksIntersection::hklFrame() { return "HKL"; }
 /** Initialize the algorithm's properties.
  */
 void PeaksIntersection::initBaseProperties() {
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input peaks workspace.");
 
@@ -66,7 +74,7 @@ the surfaces.
 */
 void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   const std::string coordinateFrame = this->getPropertyValue("CoordinateFrame");
-  IPeaksWorkspace_sptr ws = this->getProperty("InputWorkspace");
+  PeaksWorkspace_sptr ws = this->getProperty("InputWorkspace");
 
   m_peakRadius = this->getProperty("PeakRadius");
 

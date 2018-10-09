@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
@@ -185,11 +191,12 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         factor = size / (size - 1)
 
+        # minus sign is needed
         if self._doppler_energy != 0:
-            formula = '(x/{0} - 1)*{1}'.format(mid, self._doppler_energy * scale * factor)
+            formula = '-(x/{0} - 1)*{1}'.format(mid, self._doppler_energy * scale * factor)
         else:
             # Center the data for elastic fixed window scan, for integration over the elastic peak
-            formula = '(x-{0})*{1}'.format(mid-0.5, 1. / scale)
+            formula = '-(x-{0})*{1}'.format(mid-0.5, 1. / scale)
             self.log().notice('The only energy value is 0 meV. Ignore the x-axis.')
 
         self.log().information('Energy conversion formula is: {0}'.format(formula))

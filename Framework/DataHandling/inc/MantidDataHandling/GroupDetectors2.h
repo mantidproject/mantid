@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_GROUPDETECTORS2_H_
 #define MANTID_DATAHANDLING_GROUPDETECTORS2_H_
 
@@ -83,27 +89,6 @@ namespace DataHandling {
 
     @author Steve Williams and Russell Taylor (Tessella Support Services plc)
     @date 27/07/2009
-
-    Copyright &copy; 2008-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport GroupDetectors2 : public API::Algorithm {
 public:
@@ -257,15 +242,15 @@ private:
 };
 
 /**
-*  Only to be used if the KeepUnGrouped property is true, moves the spectra that
-* were not selected
-*  to be in a group to the end of the output spectrum
-*  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
-* group
-*  @param inputWS :: user selected input workspace for the algorithm
-*  @param outputWS :: user selected output workspace for the algorithm
-*  @param outIndex :: the next spectra index available after the grouped spectra
-*/
+ *  Only to be used if the KeepUnGrouped property is true, moves the spectra
+ * that were not selected to be in a group to the end of the output spectrum
+ *  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
+ * group
+ *  @param inputWS :: user selected input workspace for the algorithm
+ *  @param outputWS :: user selected output workspace for the algorithm
+ *  @param outIndex :: the next spectra index available after the grouped
+ * spectra
+ */
 template <class TIn, class TOut>
 void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
                                  const TIn &inputWS, TOut &outputWS,

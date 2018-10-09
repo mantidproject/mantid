@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEMTEST_H_
 #define MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEMTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/MDFramesToSpecialCoordinateSystem.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/MDUnit.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 #include "boost/make_shared.hpp"
 

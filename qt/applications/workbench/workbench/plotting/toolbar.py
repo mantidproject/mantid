@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 #
-#    Copyright (C) 2017 mantidproject
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
@@ -22,7 +15,7 @@ from __future__ import (absolute_import, division, print_function,
 
 # third-party library imports
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
-import qtawesome as qta
+from mantidqt.icons import get_icon
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 # local package imports
@@ -40,10 +33,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         ('Zoom', 'Zoom to rectangle', 'fa.search-plus', 'zoom', False),
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', None, 'toggle_grid', False),
-        (None, None, None, None, None),
-        ('Active', 'When enabled future plots will overwrite this figure', None, 'active', True),
-        ('Hold', 'When enabled this holds this figure open ', None, 'hold', False),
-        (None, None, None, None, None),
         ('Save', 'Save the figure', 'fa.save', 'save_figure', None),
         ('Print','Print the figure', 'fa.print', 'print_figure', None),
         (None, None, None, None, None),
@@ -56,7 +45,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 self.addSeparator()
             else:
                 if fa_icon:
-                    a = self.addAction(qta.icon(fa_icon),
+                    a = self.addAction(get_icon(fa_icon),
                                        text, getattr(self, callback))
                 else:
                     a = self.addAction(text, getattr(self, callback))
@@ -89,16 +78,6 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     def toggle_grid(self):
         self.sig_grid_toggle_triggered.emit()
-
-    def hold(self, *args):
-        self._actions['hold'].setChecked(True)
-        self._actions['active'].setChecked(False)
-        self.sig_hold_triggered.emit()
-
-    def active(self, *args):
-        self._actions['active'].setChecked(True)
-        self._actions['hold'].setChecked(False)
-        self.sig_active_triggered.emit()
 
     def print_figure(self):
         printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)

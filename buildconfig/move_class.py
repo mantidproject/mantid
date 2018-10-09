@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ Utility for moving a class file to a different project."""
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
@@ -40,7 +46,7 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
 
         # Replace the namespace declaration
         text = text.replace("namespace " + subproject, "namespace " + newproject)
-        # Replace the conents
+        # Replace the contents
         f = open(newfilename, 'w')
         f.write(text)
     except RuntimeError as err:

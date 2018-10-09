@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_STITCH1D_H_
 #define MANTID_ALGORITHMS_STITCH1D_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <boost/tuple/tuple.hpp>
 
@@ -9,27 +16,6 @@ namespace Mantid {
 namespace Algorithms {
 
 /** Stitch1D : Stitches two Matrix Workspaces together into a single output.
-
- Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport Stitch1D : public API::Algorithm {
 public:
@@ -44,10 +30,12 @@ public:
     return "Stitches single histogram matrix workspaces together";
   }
   const std::vector<std::string> seeAlso() const override {
-    return {"Stitch1DMany"};
+    return {"Rebin", "Stitch1DMany"};
   }
   /// Does the x-axis have non-zero errors
-  bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr ws);
+  bool hasNonzeroErrors(Mantid::API::MatrixWorkspace_sptr &ws);
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Helper typedef. For storing indexes of special values per spectra per
@@ -58,28 +46,33 @@ private:
   /// Overwrites Algorithm method.
   void exec() override;
   /// Get the start overlap
-  double getStartOverlap(const double &intesectionMin,
-                         const double &intesectionMax) const;
+  double getStartOverlap(const double intesectionMin,
+                         const double intesectionMax) const;
   /// Get the end overlap
-  double getEndOverlap(const double &intesectionMin,
-                       const double &intesectionMax) const;
+  double getEndOverlap(const double intesectionMin,
+                       const double intesectionMax) const;
 
   /// Get the rebin parameters
-  std::vector<double> getRebinParams(Mantid::API::MatrixWorkspace_sptr &lhsWS,
-                                     Mantid::API::MatrixWorkspace_sptr &rhsWS,
-                                     const bool scaleRHS) const;
+  std::vector<double>
+  getRebinParams(Mantid::API::MatrixWorkspace_const_sptr &lhsWS,
+                 Mantid::API::MatrixWorkspace_const_sptr &rhsWS,
+                 const bool scaleRHS) const;
   /// Perform rebin
   Mantid::API::MatrixWorkspace_sptr
   rebin(Mantid::API::MatrixWorkspace_sptr &input,
         const std::vector<double> &params);
   /// Perform integration
   Mantid::API::MatrixWorkspace_sptr
-  integration(Mantid::API::MatrixWorkspace_sptr &input, const double &start,
-              const double &stop);
-  Mantid::API::MatrixWorkspace_sptr singleValueWS(double val);
-  /// Calclate the weighted mean
+  integration(Mantid::API::MatrixWorkspace_sptr &input, const double start,
+              const double stop);
+  Mantid::API::MatrixWorkspace_sptr singleValueWS(const double val);
+  /// Calculate the weighted mean
   Mantid::API::MatrixWorkspace_sptr
   weightedMean(Mantid::API::MatrixWorkspace_sptr &inOne,
+               Mantid::API::MatrixWorkspace_sptr &inTwo);
+  /// Conjoin x axis
+  Mantid::API::MatrixWorkspace_sptr
+  conjoinXAxis(Mantid::API::MatrixWorkspace_sptr &inOne,
                Mantid::API::MatrixWorkspace_sptr &inTwo);
   /// Find the start and end indexes
   boost::tuple<int, int>
@@ -89,19 +82,26 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   maskAllBut(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Mask out everything but the data in the ranges, but do it inplace.
-  void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr source);
+  void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Add back in any special values
   void reinsertSpecialValues(Mantid::API::MatrixWorkspace_sptr ws);
   /// Range tolerance
   static const double range_tolerance;
-  /// Index per workspace spectra of Nans
-  SpecialTypeIndexes m_nanYIndexes;
-  /// Index per workspace spectra of Infs
-  SpecialTypeIndexes m_infYIndexes;
+  /// Scaling factors
+  double m_scaleFactor;
+  double m_errorScaleFactor;
+  /// Scale workspace (left hand side or right hand side)
+  void scaleWorkspace(API::MatrixWorkspace_sptr &ws,
+                      API::MatrixWorkspace_sptr &scaleFactorWS,
+                      API::MatrixWorkspace_const_sptr &dxWS);
   /// Index per workspace spectra of Nans
   SpecialTypeIndexes m_nanEIndexes;
+  SpecialTypeIndexes m_nanYIndexes;
+  SpecialTypeIndexes m_nanDxIndexes;
   /// Index per workspace spectra of Infs
   SpecialTypeIndexes m_infEIndexes;
+  SpecialTypeIndexes m_infYIndexes;
+  SpecialTypeIndexes m_infDxIndexes;
 };
 
 } // namespace Algorithms

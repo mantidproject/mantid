@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef NULLVALIDATORTEST_H_
 #define NULLVALIDATORTEST_H_
 
-#include <string>
+#include "MantidKernel/NullValidator.h"
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/NullValidator.h"
+#include <string>
 
 using namespace Mantid::Kernel;
 

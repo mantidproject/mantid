@@ -1,5 +1,11 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UsageService.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/reference_existing_object.hpp>
 
@@ -18,6 +24,9 @@ void export_UsageService() {
       .def("shutdown", &UsageServiceImpl::shutdown, arg("self"),
            "Sends any pending usage information, and disables the usage "
            "service.")
+
+      .def("getUpTime", &UsageServiceImpl::getUpTime, arg("self"),
+           "Returns the time that the instance of mantid has been running")
 
       .def("isEnabled", &UsageServiceImpl::isEnabled, arg("self"),
            "Returns if the usage service is enabled.")

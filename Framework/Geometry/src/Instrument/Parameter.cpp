@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Parameter.h"
-#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/V3D.h"
@@ -19,6 +25,32 @@
 
 namespace Mantid {
 namespace Geometry {
+
+/** Return the value of the parameter as a string
+ * @tparam T The type of the parameter
+ * @returns A string representation of the parameter
+ */
+template <class Type> std::string ParameterType<Type>::asString() const {
+  std::ostringstream str;
+  str << m_value;
+  return str.str();
+}
+
+/// Specialization for doubles
+template <> std::string ParameterType<double>::asString() const {
+  std::ostringstream str;
+  str << std::setprecision(std::numeric_limits<double>::digits10);
+  str << m_value;
+  return str.str();
+}
+
+/// Specialization for V3D
+template <> std::string ParameterType<Kernel::V3D>::asString() const {
+  std::ostringstream str;
+  str << std::setprecision(std::numeric_limits<double>::digits10);
+  str << m_value;
+  return str.str();
+}
 
 // Initialize the static map
 ParameterFactory::FactoryMap ParameterFactory::s_map;

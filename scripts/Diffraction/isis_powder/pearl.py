@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from contextlib import contextmanager
@@ -67,9 +73,13 @@ class Pearl(AbstractInst):
                                                              cross_correlate_params=cross_correlate_params,
                                                              get_det_offset_params=get_detector_offsets_params)
 
+    def should_subtract_empty_inst(self):
+        return self._inst_settings.subtract_empty_inst
+
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs):
-        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
+        if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
+            self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         yield
         self._inst_settings = copy.deepcopy(self._default_inst_settings)
@@ -137,8 +147,10 @@ class Pearl(AbstractInst):
             pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
                                                         run_details=run_details, focus_mode=output_mode,
                                                         attenuation_filepath=attenuation_path)
-        group_name = "PEARL" + str(run_details.output_run_string)
-        group_name += '_' + self._inst_settings.tt_mode + "-Results-D-Grp"
+
+        group_name = "PEARL{0!s}_{1}{2}-Results-D-Grp"
+        mode = "_long" if self._inst_settings.long_mode else ""
+        group_name = group_name.format(run_details.output_run_string, self._inst_settings.tt_mode, mode)
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing, None
 
@@ -170,5 +182,4 @@ class Pearl(AbstractInst):
                                                             absorb_ws=absorb_corrections)
 
     def _switch_long_mode_inst_settings(self, long_mode_on):
-        self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on),
-                                              suppress_warnings=True)
+        self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on))

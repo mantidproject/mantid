@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 import numpy
@@ -78,7 +84,7 @@ class MainWindow(QtGui.QMainWindow):
     _errMsgWindow = None
 
     def __init__(self, parent=None):
-        """ Intialization and set up
+        """ Initialization and set up
         """
         # Base class
         QtGui.QMainWindow.__init__(self,parent)
@@ -710,14 +716,14 @@ class MainWindow(QtGui.QMainWindow):
 
         # append 1 more log if original log only has 1 value
         tf = self._dataWS.getRun().getProperty("proton_charge").times[-1]
-        vectimes.append(tf)
+        vectimes = numpy.append(vectimes,tf)
         vecvalue = numpy.append(vecvalue, vecvalue[-1])
 
-        vecreltimes = [float(t - t0) / numpy.timedelta64(1, 's') for t in vectimes]
+        vecreltimes = (vectimes - t0) / numpy.timedelta64(1, 's')
 
         # Set to plot
-        xlim = [min(vecreltimes), max(vecreltimes)]
-        ylim = [min(vecvalue), max(vecvalue)]
+        xlim = [vecreltimes.min(), vecreltimes.max()]
+        ylim = [vecvalue.min(), vecvalue.max()]
         self.ui.mainplot.set_xlim(xlim[0], xlim[1])
         self.ui.mainplot.set_ylim(ylim[0], ylim[1])
 
@@ -806,11 +812,13 @@ class MainWindow(QtGui.QMainWindow):
         run = dataws.getRun()
         plist = run.getProperties()
         for p in plist:
-            pv = p.value
-            if isinstance(pv, numpy.ndarray):
+            try:
                 times = p.times
-                if len(times) > 1:
+                if len(times) > 1 and numpy.isreal(p.value[0]):
                     self._sampleLogNames.append(p.name)
+            # This is here for FloatArrayProperty. If a log value is of this type it does not have times
+            except AttributeError:
+                pass
         # ENDFOR(p)
 
         # Set up sample log
@@ -880,7 +888,7 @@ class MainWindow(QtGui.QMainWindow):
             iname = filename.split("_")[0]
             str_runnumber = filename.split("_")[1]
             if str_runnumber.isdigit() is True and int(str_runnumber) > 0:
-                # Acccepted format
+                # Accepted format
                 ishort = config.getInstrument(iname).shortName()
                 wsname = "%s_%s_event" % (ishort, str_runnumber)
             else:
@@ -925,7 +933,7 @@ class MainWindow(QtGui.QMainWindow):
             t0 = datetime.datetime.strptime(runstart, "%Y-%m-%dT%H:%M:%S")
             tf = datetime.datetime.strptime(runstop, "%Y-%m-%dT%H:%M:%S")
 
-            # Calcualte
+            # Calculate
             dt = tf-t0
             timeduration = dt.days*3600*24 + dt.seconds
 

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>MantidPlot</string>
+	<string>Mantid_osx_launcher</string>
 	<key>CFBundleGetInfoString</key>
 	<string>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@</string>
 	<key>CFBundleIconFile</key>
@@ -31,6 +31,6 @@
 	<key>LSRequiresCarbon</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 2011 ISIS Rutherford Appleton Laboratory and NScD Oak Ridge National Laboratory</string>
+	<string>Copyright (c) 2007 ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge National Laboratory, European Spallation Source & Institut Laue - Langevin</string>
 </dict>
 </plist>

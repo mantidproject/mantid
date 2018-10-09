@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveCanSAS1D2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -38,7 +44,7 @@ void encode(std::string &data) {
 
   data.swap(buffer);
 }
-}
+} // namespace
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -314,5 +320,5 @@ void SaveCanSAS1D2::writeHeader(const std::string &fileName) {
                                fileName);
   }
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

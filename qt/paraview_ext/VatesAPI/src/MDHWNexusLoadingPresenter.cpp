@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -7,8 +13,10 @@
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 #include "MantidAPI/AlgorithmManager.h"
 #include <vtkUnstructuredGrid.h>
 
@@ -172,5 +180,5 @@ void MDHWNexusLoadingPresenter::loadWorkspace(
   m_histoWs = AnalysisDataService::Instance()
                   .retrieveWS<Mantid::API::IMDHistoWorkspace>("MD_HISTO_WS_ID");
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_WORKSPACEJOINERS_H_
 #define MANTID_ALGORITHMS_WORKSPACEJOINERS_H_
 
@@ -15,27 +21,6 @@ namespace Algorithms {
    OutputWorkspace
     property into which the result is stored, whereas the former puts the result
     into a workspace with the same name as the first input workspace.
-
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 class DLLExport WorkspaceJoiners : public API::Algorithm {
 public:
@@ -52,8 +37,9 @@ public:
 protected:
   API::MatrixWorkspace_sptr execWS2D(const API::MatrixWorkspace &ws1,
                                      const API::MatrixWorkspace &ws2);
-  API::MatrixWorkspace_sptr execEvent();
-
+  DataObjects::EventWorkspace_sptr
+  execEvent(const DataObjects::EventWorkspace &eventWs1,
+            const DataObjects::EventWorkspace &eventWs2);
   using Mantid::API::Algorithm::validateInputs;
   void validateInputs(const API::MatrixWorkspace &ws1,
                       const API::MatrixWorkspace &ws2, const bool checkBinning);
@@ -66,10 +52,6 @@ protected:
                                   API::MatrixWorkspace &output) = 0;
 
   API::Progress *m_progress; ///< Progress reporting object
-  DataObjects::EventWorkspace_const_sptr
-      event_ws1; ///< First event workspace input.
-  DataObjects::EventWorkspace_const_sptr
-      event_ws2; ///< Second event workspace input.
 };
 
 } // namespace Algorithms

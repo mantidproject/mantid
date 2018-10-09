@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -28,7 +34,7 @@ bool cannotReachSpecifiedToleranceInF(int errorCode) {
 bool cannotReachSpecifiedToleranceInX(int errorCode) {
   return errorCode == GSL_ETOLX;
 }
-}
+} // namespace
 
 // clang-format off
 DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer, Levenberg-Marquardt)
@@ -37,12 +43,14 @@ DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer, Levenberg-Marquardt)
 LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
     : m_data(nullptr), gslContainer(), m_gslSolver(nullptr), m_function(),
       m_absError(1e-4), m_relError(1e-4) {
-  declareProperty("AbsError", m_absError, "Absolute error allowed for "
-                                          "parameters - a stopping parameter "
-                                          "in success.");
-  declareProperty("RelError", m_relError, "Relative error allowed for "
-                                          "parameters - a stopping parameter "
-                                          "in success.");
+  declareProperty("AbsError", m_absError,
+                  "Absolute error allowed for "
+                  "parameters - a stopping parameter "
+                  "in success.");
+  declareProperty("RelError", m_relError,
+                  "Relative error allowed for "
+                  "parameters - a stopping parameter "
+                  "in success.");
 }
 
 void LevenbergMarquardtMinimizer::initialize(

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLSETTINGSVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSVIEW_H
 
@@ -8,6 +14,7 @@
 #include "InstrumentParameters.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/Hint.h"
 #include <map>
 #include <vector>
 
@@ -20,27 +27,6 @@ class IReflSettingsPresenter;
 
 IReflSettingsView is the base view class for the Reflectometry settings. It
 contains no QT specific functionality as that should be handled by a subclass.
-
-Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport IReflSettingsView {
@@ -55,7 +41,7 @@ public:
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
   virtual void
-  createStitchHints(const std::map<std::string, std::string> &hints) = 0;
+  createStitchHints(const std::vector<MantidWidgets::Hint> &hints) = 0;
 
   /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
@@ -81,6 +67,8 @@ public:
   virtual std::string getDetectorCorrectionType() const = 0;
   virtual std::string getSummationType() const = 0;
   virtual std::string getReductionType() const = 0;
+  virtual bool getDebugOption() const = 0;
+  virtual bool getIncludePartialBins() const = 0;
 
   /// Check if settings are enabled
   virtual bool experimentSettingsEnabled() const = 0;
@@ -97,12 +85,13 @@ public:
   /// Sets status of whether polarisation corrections should be enabled/disabled
   virtual void setIsPolCorrEnabled(bool enable) const = 0;
   virtual void setReductionTypeEnabled(bool enable) = 0;
+  virtual void setIncludePartialBinsEnabled(bool enable) = 0;
   /// Set polarisation corrections and parameters enabled/disabled
   virtual void setPolarisationOptionsEnabled(bool enable) = 0;
   virtual void setDetectorCorrectionEnabled(bool enable) = 0;
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLSETTINGSVIEW_H */

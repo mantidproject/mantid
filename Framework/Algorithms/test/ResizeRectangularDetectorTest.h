@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_RESIZERECTANGULARDETECTORTEST_H_
 #define MANTID_ALGORITHMS_RESIZERECTANGULARDETECTORTEST_H_
 
-#include "MantidAlgorithms/ResizeRectangularDetector.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/ResizeRectangularDetector.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -58,12 +64,12 @@ public:
     TS_ASSERT_DELTA(det->xstep(), 0.008 * 2, 1e-6);
 
     // Check that accessing through spectrumInfo.detector() also works
-    const RectangularDetectorPixel *recDetPix;
+    const GridDetectorPixel *recDetPix;
     const auto &spectrumInfo = ws->spectrumInfo();
     const auto &pixel = spectrumInfo.detector(11);
-    recDetPix = dynamic_cast<const RectangularDetectorPixel *>(
-        det->getAtXY(1, 1).get());
-    TSM_ASSERT("getDetector() returns a RectangularDetectorPixel", recDetPix);
+    recDetPix =
+        dynamic_cast<const GridDetectorPixel *>(det->getAtXY(1, 1).get());
+    TSM_ASSERT("getDetector() returns a GridDetectorPixel", recDetPix);
     pos = pixel.getPos();
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
 

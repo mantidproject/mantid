@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_CUSTOMINTERFACES_ENGGDIFFRUNLABEL_H_
 #define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFRUNLABEL_H_
 
@@ -25,6 +31,9 @@ MANTIDQT_ENGGDIFFRACTION_DLL bool operator==(const RunLabel &lhs,
 
 MANTIDQT_ENGGDIFFRACTION_DLL bool operator!=(const RunLabel &lhs,
                                              const RunLabel &rhs);
+
+MANTIDQT_ENGGDIFFRACTION_DLL bool operator<(const RunLabel &lhs,
+                                            const RunLabel &rhs);
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

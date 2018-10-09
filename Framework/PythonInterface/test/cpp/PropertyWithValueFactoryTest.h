@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROPERTYWITHVALUEFACTORYTEST_H_
 #define PROPERTYWITHVALUEFACTORYTEST_H_
 
@@ -7,8 +13,8 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4005)
 #endif
-#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #ifdef _MSC_VER
 #pragma warning(push)
 #endif
@@ -18,13 +24,20 @@
 
 //-------------------------------------------------------------------------
 
-using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
-using Mantid::PythonInterface::Converters::PySequenceToVector;
-using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::PropertyWithValue;
+using Mantid::PythonInterface::Converters::PySequenceToVector;
+using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
 
 class PropertyWithValueFactoryTest : public CxxTest::TestSuite {
 public:
+  static PropertyWithValueFactoryTest *createSuite() {
+    return new PropertyWithValueFactoryTest();
+  }
+  static void destroySuite(PropertyWithValueFactoryTest *suite) {
+    delete suite;
+  }
+
 #if PY_MAJOR_VERSION >= 3
 #define FROM_INT PyLong_FromLong
 #define FROM_CSTRING PyUnicode_FromString

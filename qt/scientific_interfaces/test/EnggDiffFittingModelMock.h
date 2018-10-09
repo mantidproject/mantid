@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOM_INTERFACES_ENGGDIFFFITTINGMODELMOCK_H
 #define MANTID_CUSTOM_INTERFACES_ENGGDIFFFITTINGMODELMOCK_H
 
@@ -13,7 +19,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockEnggDiffFittingModel : public IEnggDiffFittingModel {
 
@@ -44,8 +50,9 @@ public:
   MOCK_METHOD2(enggFitPeaks, void(const RunLabel &runLabel,
                                   const std::string &expectedPeaks));
 
-  MOCK_CONST_METHOD2(saveDiffFittingAscii, void(const RunLabel &runLabel,
-                                                const std::string &filename));
+  MOCK_CONST_METHOD2(saveFitResultsToHDF5,
+                     void(const std::vector<RunLabel> &runLabels,
+                          const std::string &filename));
 
   MOCK_METHOD1(createFittedPeaksWS, void(const RunLabel &runLabel));
 
@@ -60,6 +67,6 @@ public:
   MOCK_METHOD1(removeRun, void(const RunLabel &runLabel));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOM_INTERFACES_ENGGDIFFFITTINGMODELMOCK_H

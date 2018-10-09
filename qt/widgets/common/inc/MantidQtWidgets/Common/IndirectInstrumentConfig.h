@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_INDIRECTINSTRUMENTCONFIG_H_
 #define MANTIDQTMANTIDWIDGETS_INDIRECTINSTRUMENTCONFIG_H_
 
@@ -5,8 +11,8 @@
 #include "ui_IndirectInstrumentConfig.h"
 
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QWidget>
 
@@ -22,27 +28,6 @@ reflections
 are populated by loading an empty instrument.
 
 @author Dan Nixon
-
-Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class EXPORT_OPT_MANTIDQT_COMMON IndirectInstrumentConfig
@@ -53,10 +38,10 @@ class EXPORT_OPT_MANTIDQT_COMMON IndirectInstrumentConfig
   Q_PROPERTY(QStringList disabledInstruments READ getDisabledInstruments WRITE
                  setDisabledInstruments)
   Q_PROPERTY(QString facility READ getFacility WRITE setFacility)
-  Q_PROPERTY(bool enableDiffraction READ isDiffractionEnabled WRITE
-                 enableDiffraction)
-  Q_PROPERTY(bool forceDiffraction READ isDiffractionForced WRITE
-                 forceDiffraction)
+  Q_PROPERTY(
+      bool enableDiffraction READ isDiffractionEnabled WRITE enableDiffraction)
+  Q_PROPERTY(
+      bool forceDiffraction READ isDiffractionForced WRITE forceDiffraction)
   Q_PROPERTY(bool showInstrumentLabel READ isInstrumentLabelShown WRITE
                  setShowInstrumentLabel)
 

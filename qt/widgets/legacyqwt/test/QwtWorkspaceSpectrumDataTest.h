@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_API_MANTIDQWTWORKSPACESPECTRUMDATA_H_
 #define MANTIDQT_API_MANTIDQWTWORKSPACESPECTRUMDATA_H_
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <QRgb>
 #include <cxxtest/TestSuite.h>
 #include <limits>
-#include <QRgb>
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 
 class QwtWorkspaceSpectrumDataTest : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr ws;

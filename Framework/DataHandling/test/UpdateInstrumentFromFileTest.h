@@ -1,19 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef UPDATEINSTRUMENTTESTFROMFILE_H_
 #define UPDATEINSTRUMENTTESTFROMFILE_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/GroupDetectors2.h"
-#include "MantidDataHandling/UpdateInstrumentFromFile.h"
-#include "MantidDataHandling/LoadInstrumentFromNexus.h"
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/GroupDetectors2.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadInstrumentFromNexus.h"
+#include "MantidDataHandling/UpdateInstrumentFromFile.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidIndexing/IndexInfo.h"

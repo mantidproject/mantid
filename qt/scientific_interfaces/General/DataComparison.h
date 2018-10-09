@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_DATACOMPARISON_H_
 #define MANTIDQTCUSTOMINTERFACES_DATACOMPARISON_H_
 
 //----------------------
 // Includes
 //----------------------
-#include "ui_DataComparison.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "ui_DataComparison.h"
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -103,7 +109,7 @@ private:
   // The two workspaces that are currently being diffed
   QPair<QString, QString> m_diffWorkspaceNames;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_DATACOMPARISON_H_

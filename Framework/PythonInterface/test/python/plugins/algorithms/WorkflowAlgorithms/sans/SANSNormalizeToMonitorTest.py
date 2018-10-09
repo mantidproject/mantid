@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
@@ -62,8 +68,8 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         data_state = state.data
         normalize_to_monitor_builder = get_normalize_to_monitor_builder(data_state)
         normalize_to_monitor_builder.set_rebin_type(RebinType.Rebin)
-        normalize_to_monitor_builder.set_wavelength_low(2.)
-        normalize_to_monitor_builder.set_wavelength_high(8.)
+        normalize_to_monitor_builder.set_wavelength_low([2.])
+        normalize_to_monitor_builder.set_wavelength_high([8.])
         normalize_to_monitor_builder.set_wavelength_step(2.)
         normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.Lin)
         if background_TOF_general_start:

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ The settings diagnostic tab view.
 
 The settings diagnostic tab allows to display the state information in a tree view. The user can select the data
@@ -182,3 +188,21 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
 
     def set_save_location(self, full_file_path):
         self.save_state_line_edit.setText(full_file_path)
+
+    def set_processing(self, processing=True):
+        if processing:
+            self.select_row_combo_box.setEnabled(False)
+            self.expand_button.setEnabled(False)
+            self.collapse_button.setEnabled(False)
+            self.save_state_line_edit.setEnabled(False)
+            self.save_state_browse_push_button.setEnabled(False)
+            self.save_state_save_push_button.setEnabled(False)
+            self.select_row_push_button.setEnabled(False)
+        else:
+            self.select_row_combo_box.setEnabled(True)
+            self.expand_button.setEnabled(True)
+            self.collapse_button.setEnabled(True)
+            self.save_state_line_edit.setEnabled(True)
+            self.save_state_browse_push_button.setEnabled(True)
+            self.save_state_save_push_button.setEnabled(True)
+            self.select_row_push_button.setEnabled(True)

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGMODEL_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGMODEL_H_
 
@@ -44,7 +50,7 @@ public:
   void enggFitPeaks(const RunLabel &runLabel,
                     const std::string &expectedPeaks) override;
 
-  void saveDiffFittingAscii(const RunLabel &runLabel,
+  void saveFitResultsToHDF5(const std::vector<RunLabel> &runLabels,
                             const std::string &filename) const override;
 
   void createFittedPeaksWS(const RunLabel &runLabel) override;
@@ -69,7 +75,7 @@ protected:
                    Mantid::API::ITableWorkspace_sptr targetTable) const;
 
 private:
-  static const size_t MAX_BANKS = 2;
+  static const size_t MAX_BANKS = 3;
   static const double DEFAULT_DIFC;
   static const double DEFAULT_DIFA;
   static const double DEFAULT_TZERO;
@@ -107,6 +113,9 @@ private:
   void cloneWorkspace(const Mantid::API::MatrixWorkspace_sptr inputWorkspace,
                       const std::string &outputWSName) const;
 
+  void cloneWorkspace(const Mantid::API::ITableWorkspace_sptr inputWorkspace,
+                      const std::string &outputWSName) const;
+
   void setDataToClonedWS(const std::string &wsToCopyName,
                          const std::string &targetWSName);
 
@@ -139,6 +148,6 @@ private:
 };
 
 } // namespace CustomInterfaces
-} // namespace MantidQT
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGMODEL_H_

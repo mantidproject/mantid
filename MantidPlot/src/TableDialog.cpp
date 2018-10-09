@@ -31,19 +31,19 @@
 #include "Table.h"
 
 #include <QApplication>
-#include <QCloseEvent>
-#include <QMessageBox>
-#include <QLayout>
-#include <QSpinBox>
 #include <QCheckBox>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
+#include <QCloseEvent>
 #include <QComboBox>
-#include <QTextEdit>
-#include <QRegExp>
 #include <QDate>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRegExp>
+#include <QSpinBox>
+#include <QTextEdit>
 
 TableDialog::TableDialog(Table *t, Qt::WFlags fl) : QDialog(t, fl), d_table(t) {
   setObjectName("TableDialog");

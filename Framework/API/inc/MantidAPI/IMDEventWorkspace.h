@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IMDEVENTWORKSPACE_H_
 #define IMDEVENTWORKSPACE_H_
 
@@ -5,11 +11,11 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/IMDNode.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -123,7 +129,7 @@ private:
   IMDEventWorkspace *doCloneEmpty() const override = 0;
 };
 
-} // namespace MDEvents
+} // namespace API
 
 } // namespace Mantid
 

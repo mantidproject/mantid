@@ -5,11 +5,10 @@ add_subdirectory(reflectometer)
 add_subdirectory(sans)
 add_subdirectory(sans_isis)
 add_subdirectory(dataprocessorinterface)
+add_subdirectory(batchwidget)
 add_subdirectory(poldi)
 
 SET(UI_FILES
-cluster_details_dialog.ui
-cluster_status.ui
 data_catalog.ui
 hfir_output.ui
 instrument_dialog.ui
@@ -29,6 +28,7 @@ add_custom_target(CompileUIUI DEPENDS
   CompileUISANS
   CompileUISANSDataProcessorInterface
   CompileUIDataProcessorInterface
+  CompileUIBatchWidgetInterface
   CompileUIPoldi
 )
 

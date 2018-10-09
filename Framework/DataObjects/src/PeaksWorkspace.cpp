@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Column.h"
@@ -26,8 +32,10 @@
 #include <cstdlib>
 #include <exception>
 #include <fstream>
-#include <nexus/NeXusException.hpp>
+// clang-format off
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+// clang-format on
 #include <ostream>
 #include <string>
 
@@ -154,8 +162,8 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 }
 
 /** Removes multiple peaks
-* @param badPeaks peaks to be removed
-*/
+ * @param badPeaks peaks to be removed
+ */
 void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
   if (badPeaks.empty())
     return;
@@ -285,18 +293,20 @@ Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
   Geometry::Goniometer goniometer;
 
   LogManager_const_sptr props = getLogs();
-  if (props->hasProperty("wavelength") || props->hasProperty("energy")) {
-    // Assume constant wavelenth
-    // Calculate Q lab from Q sample and wavelength
-    double wavelength;
-    if (props->hasProperty("energy")) {
-      wavelength = Kernel::UnitConversion::run(
-          "Energy", "Wavelength",
-          props->getPropertyValueAsType<double>("energy"), 0, 0, 0,
-          Kernel::DeltaEMode::Elastic, 0);
-    } else {
-      wavelength = props->getPropertyValueAsType<double>("wavelength");
-    }
+  // See if we can get a wavelength/energy
+  // Then assume constant wavelenth
+  double wavelength(0);
+  if (props->hasProperty("wavelength")) {
+    wavelength = props->getPropertyValueAsType<double>("wavelength");
+  } else if (props->hasProperty("energy")) {
+    wavelength = Kernel::UnitConversion::run(
+        "Energy", "Wavelength", props->getPropertyValueAsType<double>("energy"),
+        0, 0, 0, Kernel::DeltaEMode::Elastic, 0);
+  } else if (getInstrument()->hasParameter("wavelength")) {
+    wavelength = getInstrument()->getNumberParameter("wavelength").at(0);
+  }
+
+  if (wavelength > 0) {
     goniometer.calcFromQSampleAndWavelength(position, wavelength);
     g_log.information() << "Found goniometer rotation to be "
                         << goniometer.getEulerAngles()[0]
@@ -977,8 +987,8 @@ PeaksWorkspace::doCloneColumns(const std::vector<std::string> &) const {
   throw Kernel::Exception::NotImplementedError(
       "PeaksWorkspace cannot clone columns.");
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 
 ///\cond TEMPLATE
 

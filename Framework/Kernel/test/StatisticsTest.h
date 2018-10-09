@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef STATISTICSTEST_H_
 #define STATISTICSTEST_H_
 
 #include "MantidKernel/Statistics.h"
-#include <cxxtest/TestSuite.h>
 #include <algorithm>
 #include <cmath>
-#include <vector>
+#include <cxxtest/TestSuite.h>
 #include <string>
+#include <vector>
 
 using namespace Mantid::Kernel;
 using std::string;
@@ -180,7 +186,7 @@ public:
   }
 
   /** Test function to calculate Rwp
-    */
+   */
   void testRwp() {
     vector<double> obsY(4);
     vector<double> calY(4);
@@ -208,7 +214,7 @@ public:
   }
 
   /** Test throw exception
-    */
+   */
   void testRwpException1() {
     vector<double> obsY{1.0, 2.0, 3.0, 1.0};
     vector<double> calY{1.1, 2.1, 3.5, 1.3};
@@ -218,7 +224,7 @@ public:
   }
 
   /** Test throw exception on empty array
-    */
+   */
   void testRwpException2() {
     vector<double> obsY;
     vector<double> calY;

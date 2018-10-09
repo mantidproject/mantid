@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,bare-except
 from __future__ import (absolute_import, division, print_function)
 
@@ -65,6 +71,10 @@ class SANSMask(PythonAlgorithm):
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc="Output message")
 
+        self.declareProperty(MatrixWorkspaceProperty("MaskedWorkspace", "",
+                             direction=Direction.Input, optional=PropertyMode.Optional),
+                             doc="Workspace to copy the mask from; is passed straight to MaskDetectors")
+
     def PyExec(self):
         workspace = self.getProperty("Workspace").value
         facility = self.getProperty("Facility").value
@@ -100,6 +110,10 @@ class SANSMask(PythonAlgorithm):
                 "Masking FULL component named %s." %
                 component_name)
             self._mask_component(workspace, component_name)
+
+        masked_ws = self.getPropertyValue("MaskedWorkspace")
+        if masked_ws:
+            api.MaskDetectors(Workspace=workspace, MaskedWorkspace=masked_ws)
 
         self.setProperty("OutputMessage", "Mask applied")
 

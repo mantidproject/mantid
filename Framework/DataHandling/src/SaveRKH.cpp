@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveRKH.h"
 
 #include "MantidAPI/Axis.h"
@@ -93,8 +99,9 @@ void SaveRKH::writeHeader() {
   std::string month =
       Poco::DateTimeFormatter::format(timestamp, std::string("%b"));
   std::transform(month.begin(), month.end(), month.begin(), toupper);
-  m_outRKH << month << "-" << Poco::DateTimeFormatter::format(
-                                  timestamp, std::string("%Y %H:%M"))
+  m_outRKH << month << "-"
+           << Poco::DateTimeFormatter::format(timestamp,
+                                              std::string("%Y %H:%M"))
            << " Workspace: " << getPropertyValue("InputWorkspace") << "\n";
 
   if (m_2d) {

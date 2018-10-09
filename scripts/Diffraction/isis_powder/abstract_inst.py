@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
@@ -61,6 +67,13 @@ class AbstractInst(object):
         return focus.focus(run_number_string=run_number_string, perform_vanadium_norm=do_van_normalisation,
                            instrument=self, absorb=do_absorb_corrections, sample_details=sample_details)
 
+    def mask_prompt_pulses_if_necessary(self, ws_list):
+        """
+        Mask prompt pulses in a list of input workspaces,
+        disabled for all instrument except HRPD
+        """
+        pass
+
     def set_beam_parameters(self, height, width):
         """
         Set the height and width of the beam. Currently only supports rectangular (or square) beam shapes.
@@ -79,6 +92,12 @@ class AbstractInst(object):
         else:
             self._beam_parameters = {'height': height,
                                      'width': width}
+
+    def should_subtract_empty_inst(self):
+        """
+        :return: Whether the empty run should be subtracted from a run being focused
+        """
+        return True
 
     # Mandatory overrides
 
@@ -169,6 +188,13 @@ class AbstractInst(object):
         :return: List of bin widths or None if no rebinning should take place
         """
         return None
+
+    def get_instrument_prefix(self):
+        """
+        Returns the instrument prefix which tells this abstract instrument what instrument it is
+        :return: The instrument prefix
+        """
+        return self._inst_prefix
 
     def _get_input_batching_mode(self):
         """

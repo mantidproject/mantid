@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 
 from __future__ import (absolute_import, division, print_function)
@@ -80,7 +86,7 @@ class SANSSaveTest(unittest.TestCase):
 
         # Assert
         expected_files = ["sample_sans_save_file.xml", "sample_sans_save_file.txt", "sample_sans_save_file_nistqxy.dat",
-                          "sample_sans_save_file_nxcansas.nxs", "sample_sans_save_file.nxs",
+                          "sample_sans_save_file.h5", "sample_sans_save_file.nxs",
                           "sample_sans_save_file.csv"]
         expected_full_file_names = [os.path.join(mantid.config.getString('defaultsave.directory'), elem)
                                     for elem in expected_files]

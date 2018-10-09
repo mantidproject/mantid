@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
@@ -5,8 +11,8 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 
-#include <QVBoxLayout>
 #include <QMessageBox>
+#include <QVBoxLayout>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -28,12 +34,12 @@ void InstrumentWidgetTreeTab::initSurface() {
 }
 
 /**
-        * Find an instrument component by its name. This is used from the
-        * scripting API and errors (component not found) are shown as a
-        * message box in the GUI.
-        *
-        * @param name :: Name of an instrument component.
-        */
+ * Find an instrument component by its name. This is used from the
+ * scripting API and errors (component not found) are shown as a
+ * message box in the GUI.
+ *
+ * @param name :: Name of an instrument component.
+ */
 void InstrumentWidgetTreeTab::selectComponentByName(const QString &name) {
   QModelIndex component = m_instrumentTree->findComponentByName(name);
   if (!component.isValid()) {
@@ -52,8 +58,8 @@ void InstrumentWidgetTreeTab::selectComponentByName(const QString &name) {
 }
 
 /**
-        * Update surface when tab becomes visible.
-        */
+ * Update surface when tab becomes visible.
+ */
 void InstrumentWidgetTreeTab::showEvent(QShowEvent *) {
   getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
 }
@@ -112,5 +118,5 @@ std::string InstrumentWidgetTreeTab::saveToProject() const {
   return tsv.outputLines();
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

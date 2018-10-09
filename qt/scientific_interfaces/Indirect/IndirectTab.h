@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTTAB_H_
 
@@ -50,27 +56,6 @@ namespace CustomInterfaces {
 
   @author Dan Nixon
   @date 08/10/2014
-
-  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport IndirectTab : public QObject {
   Q_OBJECT
@@ -137,39 +122,9 @@ protected:
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
                        QPair<double, double> range);
 
-  /// Extracts a map of column name to value in the specified spectra from the
-  /// specified table workspace
-  QHash<QString, double>
-  extractRowFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
-                      const QSet<QString> &columnsToExtract, size_t wsIndex);
-
-  /// Extracts the specified columns from the table workspace with the specified
-  /// name, storing them in a map of row index to a map of column name to cell
-  /// value.
-  QHash<size_t, QHash<QString, double>>
-  extractParametersFromTable(const std::string &tableWsName,
-                             const QSet<QString> &columnsToExtract,
-                             size_t minSpectrum, size_t maxSpectrum);
-
-  /// Extracts the specified columns from the table workspace with the specified
-  /// name, storing them in a map of row index to a map of column name to cell
-  /// value.
-  QHash<size_t, QHash<QString, double>>
-  extractParametersFromTable(const std::string &tableWsName,
-                             const QSet<QString> &columnsToExtract,
-                             const std::vector<size_t> &spectraIndices);
-
-  /// Extracts the specified columns from the specified table workspace,
-  /// storing them in a map of row index to a map of column name to cell
-  /// value.
-  QHash<size_t, QHash<QString, double>>
-  extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
-                             const QSet<QString> &columnsToExtract,
-                             const std::vector<size_t> &spectraIndices);
-
   /// Extracts the labels from the axis at the specified index in the
   /// specified workspace.
-  QHash<QString, size_t>
+  std::unordered_map<std::string, size_t>
   extractAxisLabels(Mantid::API::MatrixWorkspace_const_sptr workspace,
                     const size_t &axisIndex) const;
 

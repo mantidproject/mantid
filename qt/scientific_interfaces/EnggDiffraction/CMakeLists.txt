@@ -12,6 +12,7 @@ set ( SRC_FILES
 	EnggDiffMultiRunFittingWidgetPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
+	EnggVanadiumCorrectionsModel.cpp
 	GSASIIRefineFitPeaksOutputProperties.cpp
 	GSASIIRefineFitPeaksParameters.cpp
 	RunLabel.cpp
@@ -37,6 +38,7 @@ set ( INC_FILES
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
+	EnggVanadiumCorrectionsModel.h
 	GSASIIRefineFitPeaksOutputProperties.cpp
 	GSASIIRefineFitPeaksParameters.h
 	IEnggDiffFittingModel.h
@@ -51,6 +53,7 @@ set ( INC_FILES
 	IEnggDiffMultiRunFittingWidgetView.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
+	IEnggVanadiumCorrectionsModel.h
 	RunLabel.h
 	RunMap.h
 )

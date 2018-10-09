@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef EXTRACTFFTSPECTRUM_H_
 #define EXTRACTFFTSPECTRUM_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ExtractFFTSpectrum.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Axis.h"
-#include "MantidDataHandling/LoadNexus.h"
+#include "MantidAlgorithms/ExtractFFTSpectrum.h"
 #include "MantidAlgorithms/Rebin.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

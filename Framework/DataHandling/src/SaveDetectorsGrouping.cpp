@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -6,8 +12,8 @@
 #include "MantidKernel/System.h"
 
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 #include <Poco/XML/XMLWriter.h>
@@ -235,5 +241,5 @@ void SaveDetectorsGrouping::printToXML(
   ofs.close();
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

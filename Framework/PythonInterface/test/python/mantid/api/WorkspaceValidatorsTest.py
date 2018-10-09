@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
    Test construction of the WorkspaceValidators
 """
@@ -9,7 +15,8 @@ from mantid.kernel import IValidator
 from mantid.api import (WorkspaceUnitValidator, HistogramValidator,
                         RawCountValidator, CommonBinsValidator,
                         SpectraAxisValidator, NumericAxisValidator,
-                        InstrumentValidator)
+                        InstrumentValidator, MDFrameValidator,
+                        OrientedLatticeValidator)
 
 class WorkspaceValidatorsTest(unittest.TestCase):
 
@@ -66,6 +73,21 @@ class WorkspaceValidatorsTest(unittest.TestCase):
             with no args
         """
         testhelpers.assertRaisesNothing(self, InstrumentValidator)
+
+    def test_MDFrameValidator_construction(self):
+        """
+            Test that the MDFrameValidator can be constructed
+            with a single string
+        """
+        testhelpers.assertRaisesNothing(self, MDFrameValidator, "HKL")
+        self.assertRaises(Exception, MDFrameValidator)
+
+    def test_OrientedLatticeValidator_construction(self):
+        """
+            Test that the OrientedLatticeValidator can be constructed
+            with no args
+        """
+        testhelpers.assertRaisesNothing(self, OrientedLatticeValidator)
 
 if __name__ == '__main__':
     unittest.main()

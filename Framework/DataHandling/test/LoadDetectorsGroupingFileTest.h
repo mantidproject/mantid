@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILETEST_H_
 #define MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILETEST_H_
 
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
@@ -21,8 +27,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-using ScopedFileHelper::ScopedFile;
 using Mantid::DataObjects::GroupingWorkspace;
+using ScopedFileHelper::ScopedFile;
 
 class LoadDetectorsGroupingFileTest : public CxxTest::TestSuite {
 public:

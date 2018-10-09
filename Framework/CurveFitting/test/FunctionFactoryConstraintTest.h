@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FunctionFactoryConstraintTest_H_
 #define FunctionFactoryConstraintTest_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/Expression.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/Expression.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/System.h"
 
 #include <sstream>

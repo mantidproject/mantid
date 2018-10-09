@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
 #include "IndirectFitAnalysisTab.h"
+#include "JumpFitModel.h"
 #include "ui_JumpFit.h"
 
 #include "MantidAPI/IFunction.h"
@@ -16,71 +23,30 @@ class DLLExport JumpFit : public IndirectFitAnalysisTab {
 public:
   JumpFit(QWidget *parent = nullptr);
 
-  // Inherited methods from IndirectDataAnalysisTab
-  void setup() override;
-
-  bool validate() override;
-  /// Load default settings into the interface
-  void loadSettings(const QSettings &settings) override;
-
-  bool doPlotGuess() const override;
+  void setupFitTab() override;
 
 protected slots:
-  /// Handle when the sample input is ready
-  void handleSampleInputReady(const QString &filename);
-  /// Slot to handle plotting a different spectrum of the workspace
-  void handleWidthChange(const QString &text);
-  /// Find all spectra with width data in the workspace
-  void findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws);
-  /// Handles plotting results of algorithm on miniplot
-  void algorithmComplete(bool error) override;
-  /// Handles plotting and saving
-  void updatePreviewPlots() override;
-  void startXChanged(double startX) override;
-  void endXChanged(double endX) override;
-  void updatePlotRange() override;
-  void saveClicked();
-  void plotClicked();
   void updatePlotOptions() override;
+  void updateModelFitTypeString();
+  void plotClicked();
+  void runClicked();
 
 protected:
-  size_t getWidth() const;
-  int minimumSpectrum() const override;
-  int maximumSpectrum() const override;
+  bool shouldEnablePlotResult() override;
 
-  std::string createSingleFitOutputName() const override;
-  Mantid::API::IAlgorithm_sptr singleFitAlgorithm() const override;
+  void setPlotResultEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
 
-  Mantid::API::IAlgorithm_sptr
-  deleteWorkspaceAlgorithm(const std::string &workspaceName);
-
-  Mantid::API::IAlgorithm_sptr
-  scaleAlgorithm(const std::string &workspaceToScale,
-                 const std::string &outputName, double scaleFactor);
-
-  void enablePlotResult() override;
-  void disablePlotResult() override;
-  void enableSaveResult() override;
-  void disableSaveResult() override;
-  void enablePlotPreview() override;
-  void disablePlotPreview() override;
-  void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
-  void removeGuessPlot() override;
+  void setRunIsRunning(bool running) override;
 
 private:
-  std::map<std::string, size_t>
-  findAxisLabelsWithSubstrings(Mantid::API::TextAxis *axis,
-                               const std::vector<std::string> &substrings,
-                               const size_t &maximumNumber) const;
+  void setRunEnabled(bool enabled);
+  void setFitSingleSpectrumEnabled(bool enabled);
 
-  void disablePlotGuess() override;
-  void enablePlotGuess() override;
+  void setPlotResultIsPlotting(bool plotting);
 
-  // The UI form
+  JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
-
-  /// Map of axis labels to spectrum number
-  std::map<std::string, size_t> m_spectraList;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

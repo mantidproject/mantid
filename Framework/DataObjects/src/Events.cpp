@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/Events.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventList.h"
@@ -220,20 +226,6 @@ WeightedEventNoTime::WeightedEventNoTime()
 bool WeightedEventNoTime::operator==(const WeightedEventNoTime &rhs) const {
   return (this->m_tof == rhs.m_tof) && (this->m_weight == rhs.m_weight) &&
          (this->m_errorSquared == rhs.m_errorSquared);
-}
-
-/** < comparison operator, using the TOF to do the comparison.
- * @param rhs: the other WeightedEventNoTime to compare.
- * @return true if this->m_tof < rhs.m_tof*/
-bool WeightedEventNoTime::operator<(const WeightedEventNoTime &rhs) const {
-  return (this->m_tof < rhs.m_tof);
-}
-
-/** < comparison operator, using the TOF to do the comparison.
- * @param rhs_tof: the other time of flight to compare.
- * @return true if this->m_tof < rhs.m_tof*/
-bool WeightedEventNoTime::operator<(const double rhs_tof) const {
-  return (this->m_tof < rhs_tof);
 }
 
 /**

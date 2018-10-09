@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_FINDSXPEAKSHELPERTEST_H_
 #define MANTID_CRYSTAL_FINDSXPEAKSHELPERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindSXPeaksHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <gmock/gmock.h>
 
 #include <string>
@@ -16,15 +22,15 @@ using namespace testing;
 
 namespace {
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
   MOCK_METHOD1(doReport, void(const std::string &));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
-}
+GNU_DIAG_ON_SUGGEST_OVERRIDE
+} // namespace
 
 class FindSXPeaksHelperTest : public CxxTest::TestSuite {
 public:

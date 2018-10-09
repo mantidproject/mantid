@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MinusMD.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDBoxIterator.h"
@@ -138,5 +144,5 @@ void MinusMD::execHistoScalar(
   out->subtract(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

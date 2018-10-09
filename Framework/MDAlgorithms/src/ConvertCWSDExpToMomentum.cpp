@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertCWSDExpToMomentum.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
@@ -78,9 +84,10 @@ void ConvertCWSDExpToMomentum::init() {
   declareProperty(make_unique<ArrayProperty<double>>("PixelDimension"),
                   "A vector of 8 doubles to determine a cubic pixel's size.");
 
-  declareProperty("IsBaseName", true, "It is specified as true if the data "
-                                      "file names listed in InputWorkspace are "
-                                      "base name without directory.");
+  declareProperty("IsBaseName", true,
+                  "It is specified as true if the data "
+                  "file names listed in InputWorkspace are "
+                  "base name without directory.");
 
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -291,8 +298,8 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     int scanid = m_expDataTableWS->cell<int>(ir, m_iColScan);
     g_log.notice() << "[DB] Scan = " << scanid << "\n";
     int runid = m_expDataTableWS->cell<int>(ir, m_iColPt);
-    g_log.notice() << "Pt = " << runid << "\n" << m_iTime
-                   << "-th for time/duration"
+    g_log.notice() << "Pt = " << runid << "\n"
+                   << m_iTime << "-th for time/duration"
                    << "\n";
     double time(0.);
     try {

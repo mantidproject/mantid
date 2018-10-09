@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DIFFROTDISCRETECIRCLETEST_H_
 #define DIFFROTDISCRETECIRCLETEST_H_
 
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/DiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -236,7 +242,8 @@ public:
     std::string funtion_string =
         "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,"
         "Height=1,PeakCentre=0,Sigma=20,ties=(Height=1,PeakCentre=0,Sigma=20);("
-        "name=DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.5,Intensity=47.014,"
+        "name=DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.20092,Intensity=47."
+        "014,"
         "Radius=1.567,Decay=0.07567))";
 
     // Initialize the fit function in the Fit algorithm
@@ -252,11 +259,12 @@ public:
     // purposes only
 
     // override the function with new parameters, then do the Fit
-    funtion_string = "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-                     "name=Gaussian,Height=1,PeakCentre=0,Sigma=20,ties=("
-                     "Height=1,PeakCentre=0,Sigma=20);(name="
-                     "DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.5,Intensity="
-                     "20.0,Radius=1.567,Decay=0.1))";
+    funtion_string =
+        "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+        "name=Gaussian,Height=1,PeakCentre=0,Sigma=20,ties=("
+        "Height=1,PeakCentre=0,Sigma=20);(name="
+        "DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.20092,Intensity="
+        "20.0,Radius=1.567,Decay=0.1))";
     fitalg.setProperty("Function", funtion_string);
     fitalg.setProperty("InputWorkspace", data_workspace);
     fitalg.setPropertyValue("WorkspaceIndex", "0");
@@ -433,9 +441,8 @@ private:
       temp_ws->dataX(0)[i] = xView[i];
       temp_ws->dataY(0)[i] = dataYvalues.getCalculated(i);
       temp_ws->dataE(0)[i] =
-          0.1 *
-          dataYvalues.getCalculated(
-              i); // assume the error is 10% of the actual value
+          0.1 * dataYvalues.getCalculated(
+                    i); // assume the error is 10% of the actual value
     }
     const double dw = xView[1] - xView[0]; // bin width
     temp_ws->dataX(0)[M] = temp_ws->dataX(0)[M - 1] + dw;
@@ -487,9 +494,10 @@ private:
       double bin_boundary =
           dataX[i] -
           dw / 2.0; // bin boundaries are shifted by half the bind width
-      double y = I * (2.0 / M_PI) * A1 *
-                 (3.0 * rate / (9.0 * rate * rate +
-                                dataX[i] * dataX[i])); // verbose for clarity
+      double y =
+          I * (2.0 / M_PI) * A1 *
+          (3.0 * rate /
+           (9.0 * rate * rate + dataX[i] * dataX[i])); // verbose for clarity
       ws->dataX(0)[i] = bin_boundary;
       ws->dataY(0)[i] = y;
       ws->dataE(0)[i] =

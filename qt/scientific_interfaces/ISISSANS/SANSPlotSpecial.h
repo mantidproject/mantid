@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_SANS_DISPLAY_TAB
 #define MANTIDQTCUSTOMINTERFACES_SANS_DISPLAY_TAB
 
-#include <QFrame>
 #include "ui_SANSPlotSpecial.h"
+#include <QFrame>
 
 // Forward Declarations
 namespace MantidQt {
 namespace MantidWidgets {
 class RangeSelector;
 }
-}
+} // namespace MantidQt
 namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 }
-}
+} // namespace Mantid
 class QwtPlotCurve;
 // End of forward declarations
 
@@ -26,8 +32,8 @@ class SANSPlotSpecial : public QFrame {
 
 public:
   /**
-  * Small utility class to hold information about the different functions.
-  */
+   * Small utility class to hold information about the different functions.
+   */
   class Transform {
   public:
     enum TransformType {
@@ -122,7 +128,7 @@ private:
   bool m_rearrangingTable;
   QTableWidgetItem *m_emptyCell;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif

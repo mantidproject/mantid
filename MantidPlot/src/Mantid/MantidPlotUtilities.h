@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDPLOTUTILITIES_H_
 #define MANTIDPLOTUTILITIES_H_
 
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 
 /**
-* These utilities assist with plotting in Mantid
-*/
+ * These utilities assist with plotting in Mantid
+ */
 /// Structure to aid ordering of plots
 struct CurveSpec {
   double logVal;

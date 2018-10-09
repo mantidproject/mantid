@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FFTSmooth2.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
@@ -186,8 +192,8 @@ void FFTSmooth2::exec() {
 
     if (getProperty("AllSpectra")) {
       outWS->setSharedX(spec, inWS->sharedX(spec));
-      outWS->mutableY(spec)
-          .assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
+      outWS->mutableY(spec).assign(tmpWS->y(0).cbegin() + dn,
+                                   tmpWS->y(0).cend());
     } else {
       outWS->setSharedX(0, inWS->sharedX(spec));
       outWS->mutableY(0).assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
@@ -269,5 +275,5 @@ void FFTSmooth2::Butterworth(int n, int order,
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

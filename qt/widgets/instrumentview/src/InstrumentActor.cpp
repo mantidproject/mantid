@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -10,8 +16,8 @@
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -84,11 +90,18 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
         "InstrumentActor passed a workspace that isn't a MatrixWorkspace");
   setupPhysicalInstrumentIfExists();
 
+  m_hasGrid = false;
+  m_numGridLayers = 0;
   for (size_t i = 0; i < componentInfo().size(); ++i) {
     if (!componentInfo().isDetector(i))
       m_components.push_back(i);
     else if (detectorInfo().isMonitor(i))
       m_monitors.push_back(i);
+    if (componentInfo().componentType(i) ==
+        Mantid::Beamline::ComponentType::Grid) {
+      m_hasGrid = true;
+      m_numGridLayers = componentInfo().children(i).size();
+    }
   }
 
   m_isCompVisible.assign(componentInfo().size(), true);
@@ -97,8 +110,8 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   m_renderer->changeScaleType(m_scaleType);
 
   // set up the color map
-  if (!m_currentColorMapFilename.isEmpty()) {
-    loadColorMap(m_currentColorMapFilename, false);
+  if (!m_currentCMap.isEmpty()) {
+    loadColorMap(m_currentCMap, false);
   }
 
   // set up data ranges and colours
@@ -188,7 +201,7 @@ void InstrumentActor::setupPhysicalInstrumentIfExists() {
 }
 
 void InstrumentActor::setComponentVisible(size_t componentIndex) {
-  setChildVisibility(false);
+  setAllComponentsVisibility(false);
   const auto &compInfo = componentInfo();
   auto children = compInfo.componentsInSubtree(componentIndex);
   m_isCompVisible[componentIndex] = true;
@@ -198,7 +211,7 @@ void InstrumentActor::setComponentVisible(size_t componentIndex) {
   resetColors();
 }
 
-void InstrumentActor::setChildVisibility(bool on) {
+void InstrumentActor::setAllComponentsVisibility(bool on) {
   std::fill(m_isCompVisible.begin(), m_isCompVisible.end(), on);
 }
 
@@ -355,7 +368,7 @@ Instrument_const_sptr InstrumentActor::getInstrument() const {
   return sharedWorkspace->getInstrument();
 }
 
-const MantidColorMap &InstrumentActor::getColorMap() const {
+const ColorMap &InstrumentActor::getColorMap() const {
   return m_renderer->getColorMap();
 }
 
@@ -638,7 +651,7 @@ void InstrumentActor::draw(bool picking) const {
  */
 void InstrumentActor::loadColorMap(const QString &fname, bool reset_colors) {
   m_renderer->loadColorMap(fname);
-  m_currentColorMapFilename = fname;
+  m_currentCMap = fname;
   if (reset_colors)
     resetColors();
 }
@@ -681,7 +694,7 @@ void InstrumentActor::loadSettings() {
   m_scaleType = static_cast<GraphOptions::ScaleType>(
       settings.value("ScaleType", 0).toInt());
   // Load Colormap. If the file is invalid the default stored colour map is used
-  m_currentColorMapFilename = settings.value("ColormapFile", "").toString();
+  m_currentCMap = settings.value("ColormapFile", "").toString();
   // Set values from settings
   m_showGuides = settings.value("ShowGuides", false).toBool();
   settings.endGroup();
@@ -690,7 +703,7 @@ void InstrumentActor::loadSettings() {
 void InstrumentActor::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
-  settings.setValue("ColormapFile", m_currentColorMapFilename);
+  settings.setValue("ColormapFile", m_currentCMap);
   settings.setValue("ScaleType", (int)m_renderer->getColorMap().getScaleType());
   settings.setValue("ShowGuides", m_showGuides);
   settings.endGroup();
@@ -758,6 +771,7 @@ Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
                                                                 -1);
   alg->setPropertyValue("InputWorkspace", getWorkspace()->getName());
   alg->setPropertyValue("OutputWorkspace", maskName);
+  alg->setLogging(false);
   alg->execute();
 
   Mantid::API::MatrixWorkspace_sptr maskWorkspace =
@@ -1063,14 +1077,18 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
 /// Add a range of bins for masking
 void InstrumentActor::addMaskBinsData(const std::vector<size_t> &indices) {
-  std::vector<size_t> wsIndices;
-  wsIndices.reserve(indices.size());
+  // Ensure we do not have duplicate workspace indices.
+  std::set<size_t> wi;
   for (auto det : indices) {
     auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
-    wsIndices.emplace_back(index);
+    wi.insert(index);
   }
+
+  // We will be able to do this more efficiently in C++17
+  std::vector<size_t> wsIndices(wi.cbegin(), wi.cend());
+
   if (!indices.empty()) {
     m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, wsIndices);
     auto workspace = getWorkspace();
@@ -1114,8 +1132,8 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
     auto id = paramComp->getComponentID();
     auto &compParamNames = mapCmptToNameVector[id];
     if (compParamNames.size() > 0) {
-      text += QString::fromStdString("\nParameters from: " +
-                                     paramComp->getName() + "\n");
+      text += QString::fromStdString(
+          "\nParameters from: " + paramComp->getName() + "\n");
       std::sort(compParamNames.begin(), compParamNames.end(),
                 Mantid::Kernel::CaseInsensitiveStringComparator());
       for (auto itParamName = compParamNames.begin();
@@ -1189,6 +1207,22 @@ void InstrumentActor::loadFromProject(const std::string &lines) {
   }
 }
 
+bool InstrumentActor::hasGridBank() const { return m_hasGrid; }
+
+size_t InstrumentActor::getNumberOfGridLayers() const {
+  return m_numGridLayers;
+}
+
+void InstrumentActor::setGridLayer(bool isUsingLayer, int layer) const {
+  m_renderer->enableGridBankLayers(isUsingLayer, layer);
+  m_renderer->reset();
+  emit colorMapChanged();
+}
+
+const InstrumentRenderer &InstrumentActor::getInstrumentRenderer() const {
+  return *m_renderer;
+}
+
 /** If instrument.geometry.view is set to Default or Physical, then the physical
  * instrument componentInfo is returned. Othewise this returns the neutronic
  * version.
@@ -1201,9 +1235,9 @@ const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
 }
 
 /** If instrument.geometry.view is set to Default or Physical, then the physical
-* instrument detectorInfo is returned. Othewise this returns the neutronic
-* version.
-*/
+ * instrument detectorInfo is returned. Othewise this returns the neutronic
+ * version.
+ */
 const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
   if (m_isPhysicalInstrument)
     return *m_physicalDetectorInfo;

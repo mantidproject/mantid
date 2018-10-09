@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNexusMonitors.h"
 
 #include "MantidAPI/Algorithm.h"
@@ -5,8 +11,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceGroup;
+using Mantid::API::Workspace_sptr;
 
 namespace Mantid {
 namespace DataHandling {
@@ -25,13 +31,6 @@ void LoadNexusMonitors::init() {
       Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
-
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
-                      "MonitorsAsEvents", true, Kernel::Direction::Input),
-                  "If enabled (by default), load the monitors as events (into "
-                  "an EventWorkspace), as long as there is event data. If "
-                  "disabled, load monitors as spectra (into a Workspace2D, "
-                  "regardless of whether event data is found.");
 }
 
 /**
@@ -46,8 +45,6 @@ void LoadNexusMonitors::exec() {
   // Forward algorithm properties
   alg->setPropertyValue("Filename", getPropertyValue("Filename"));
   alg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-  alg->setPropertyValue("MonitorsAsEvents",
-                        getPropertyValue("MonitorsAsEvents"));
 
   // Run new algorithm
   alg->execute();
@@ -82,5 +79,5 @@ void LoadNexusMonitors::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
-} // end DataHandling
-} // end Mantid
+} // namespace DataHandling
+} // namespace Mantid

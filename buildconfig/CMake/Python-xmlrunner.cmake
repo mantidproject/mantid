@@ -4,8 +4,13 @@ set(xmlrunner_version "2.1.0")
 
 option(USE_SYSTEM_XMLRUNNER "Use the system installed unittest-xmlrunner?" OFF)
 
+if ( WIN32 )
+  # Installed by 3rd party dependencies bundle
+  set ( USE_SYSTEM_XMLRUNNER ON )
+endif ()
+
 if(USE_SYSTEM_XMLRUNNER)
-  # Currrently assumes item is importable
+  # Currently assumes item is importable
   message(STATUS "Using system unittest-xml-runner")
 else()
   message(STATUS "Using unittest-xml-runner from ExternalProject")

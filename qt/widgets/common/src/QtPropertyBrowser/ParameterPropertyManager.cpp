@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 
@@ -78,8 +84,10 @@ void ParameterPropertyManager::setDescription(QtProperty *property,
  */
 void ParameterPropertyManager::clearError(QtProperty *property) {
   m_errors.remove(property);
-  emit propertyChanged(property);
-  updateTooltip(property);
+  if (hasProperty(property)) {
+    emit propertyChanged(property);
+    updateTooltip(property);
+  }
 }
 
 /**

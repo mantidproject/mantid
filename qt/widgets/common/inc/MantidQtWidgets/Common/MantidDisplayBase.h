@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MANTIDWIDGETS_MANTIDDISPLAYBASE_H_
 #define MANTID_MANTIDWIDGETS_MANTIDDISPLAYBASE_H_
 
@@ -6,12 +12,12 @@
 #include <MantidAPI/IAlgorithm_fwd.h>
 #include <MantidQtWidgets/Common/DistributionOptions.h>
 #include <MantidQtWidgets/Common/GraphOptions.h>
+#include <QStringList>
 #include <map>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <QStringList>
 
 template <class Key, class T> class QHash;
 template <class Key, class T> class QMultiMap;
@@ -34,27 +40,6 @@ QWorkspaceDockView.
 \author Lamar Moore
 \date   24-08-2016
 \version 1.0
-
-
-Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport MantidDisplayBase {
 public:
@@ -143,6 +128,6 @@ public:
   virtual bool doesVatesSupportOpenGL() = 0;
 #endif
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTID_MANTIDWIDGETS_MANTIDDISPLAYBASE_H_

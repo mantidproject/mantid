@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 
@@ -49,4 +55,4 @@ def _is_unbound_key_sane(keys):
 
 def _is_run_range_key_unbounded(key):
     split_key = str(key).split('-')
-    return True if split_key[-1] == '' else False
+    return split_key[-1] == ''

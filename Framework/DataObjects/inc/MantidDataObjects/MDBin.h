@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MDBIN_H_
 #define MANTID_DATAOBJECTS_MDBIN_H_
 
-#include "MantidKernel/System.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -35,8 +41,8 @@ public:
   signal_t m_signal;
 
   /** The accumulated error (squared) in this bin.
-  * This is public so as to avoid the need (and slowdown) of getters/setters
-  */
+   * This is public so as to avoid the need (and slowdown) of getters/setters
+   */
   signal_t m_errorSquared;
 
   /// The minimum edge of the bin for each dimension in the workspace
@@ -49,7 +55,7 @@ public:
   size_t m_index;
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_MDBIN_H_ */

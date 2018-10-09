@@ -1,44 +1,30 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import unittest
 
 from qtpy.QtCore import QObject, Qt, Slot
-from qtpy.QtWidgets import QAction, QApplication, QMenu, QToolBar
+from qtpy.QtWidgets import QAction, QMenu, QToolBar
 try:
     from qtpy.QtCore import SIGNAL
     NEW_STYLE_SIGNAL = False
 except ImportError:
     NEW_STYLE_SIGNAL = True
 
+from mantidqt.utils.qt.test import GuiTest
 from mantidqt.utils.qt import add_actions, create_action
 
-QAPP = None
 
-
-class CreateActionTest(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        global QAPP
-        if QApplication.instance() is None:
-            QAPP = QApplication([''])
+class CreateActionTest(GuiTest):
 
     def test_parent_and_name_only_required(self):
         class Parent(QObject):
@@ -79,13 +65,7 @@ class CreateActionTest(unittest.TestCase):
         self.assertEqual(Qt.WindowShortcut, action.shortcutContext())
 
 
-class AddActionsTest(unittest.TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        global QAPP
-        if QApplication.instance() is None:
-            QAPP = QApplication([''])
+class AddActionsTest(GuiTest):
 
     def test_add_actions_with_qmenu_target(self):
         test_act_1 = create_action(None, "Test Action 1")

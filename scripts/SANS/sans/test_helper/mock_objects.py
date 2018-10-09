@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
@@ -6,7 +12,7 @@ from ui.sans_isis.diagnostics_page import DiagnosticsPage
 from ui.sans_isis.masking_table import MaskingTable
 from ui.sans_isis.beam_centre import BeamCentre
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (RangeStepType, OutputMode, SANSFacility)
+from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
 from sans.test_helper.test_director import TestDirector
 from functools import (partial)
 
@@ -43,7 +49,7 @@ def get_cell_mock(row, column, convert_to=None, user_file_path = ""):
     _ = convert_to  # noqa
     if row == 0:
         # For the first row we return the
-        # all of hte sample data
+        # all of the sample data
         if column == 0:
             return "SANS2D00022024"
         elif column == 2:
@@ -195,6 +201,12 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path = 
     _output_mode = mock.PropertyMock(return_value=OutputMode.PublishToADS)
     type(view).output_mode = _output_mode
 
+    _wavelength_range = mock.PropertyMock(return_value='')
+    type(view).wavelength_range = _wavelength_range
+
+    _instrument = mock.PropertyMock(return_value=SANSInstrument.SANS2D)
+    type(view).instrument = _instrument
+
     return view, settings_diagnostic_tab, masking_table
 
 
@@ -224,11 +236,11 @@ class FakeState(object):
         return self.dummy_state
 
 
-def get_state_for_row_mock(row_index):
+def get_state_for_row_mock(row_index, file_lookup=True):
     return FakeState() if row_index == 3 else ""
 
 
-def get_state_for_row_mock_with_real_state(row_index):
+def get_state_for_row_mock_with_real_state(row_index, file_lookup=True):
     _ = row_index  # noqa
     test_director = TestDirector()
     return test_director.construct()

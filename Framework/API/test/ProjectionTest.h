@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_PROJECTIONTEST_H_
 #define MANTID_API_PROJECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Projection.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Projection.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
@@ -122,7 +128,7 @@ public:
       throw std::runtime_error("unknown column: " + name);
   }
 };
-}
+} // namespace
 
 class ProjectionTest : public CxxTest::TestSuite {
 public:

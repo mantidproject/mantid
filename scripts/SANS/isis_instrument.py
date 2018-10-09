@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 import math
@@ -408,7 +414,7 @@ class DetectorBank(object):
         """
             Sets to relationship between the detectors and the spectra numbers. The relationship
             is given by an orientation string and this function throws if the string is not recognised
-            @param orien: the orienation string must be a string contained in the dictionary _ORIENTED
+            @param orien: the orientation string must be a string contained in the dictionary _ORIENTED
         """
         self._ORIENTED[orien]
         self._orientation = orien
@@ -564,7 +570,7 @@ class ISISInstrument(BaseInstrument):
 
     def suggest_incident_mntr(self, spectrum_number):
         """
-            remove this function and the data memember it uses
+            remove this function and the data member it uses
         """
         if not self._del_incidient_set:
             self.set_incident_mon(spectrum_number)
@@ -788,7 +794,7 @@ class ISISInstrument(BaseInstrument):
 
         It configures the instrument for the specific run of the workspace for handle historical changes in the instrument.
 
-        It centralizes the detector bank to teh beamcentre (tuple of two values)
+        It centralizes the detector bank to the beamcentre (tuple of two values)
         """
         ws_ref = mtd[str(ws_name)]
         try:
@@ -895,8 +901,8 @@ class ISISInstrument(BaseInstrument):
 
     def get_m4_monitor_det_ID(self):
         """
-        Gets the detecor ID assoicated with Monitor 4
-        @returns: teh det ID of Monitor 4
+        Gets the detecor ID associated with Monitor 4
+        @returns: the det ID of Monitor 4
         """
         raise RuntimeError("Monitor 4 does not seem to be implemented.")
 
@@ -938,7 +944,40 @@ class LOQ(ISISInstrument):
         elif self._m4_det_id in list(self.monitor_names.keys()):
             del self.monitor_names[self._m4_det_id]
 
-    def move_components(self, ws, xbeam, ybeam):
+    def on_load_sample(self, ws_name, beamcentre, isSample, other_centre=None):
+        """It will be called just after loading the workspace for sample and can
+
+        It configures the instrument for the specific run of the workspace for handle historical changes in the instrument.
+
+        It centralizes the detector bank to the beamcentre (tuple of two values)
+        """
+        ws_ref = mtd[str(ws_name)]
+        try:
+            run_num = LARMOR.get_run_number_from_workspace_reference(ws_ref)
+        except:
+            run_num = int(re.findall(r'\d+', str(ws_name))[0])
+
+        if isSample:
+            self.set_up_for_run(run_num)
+
+        if self._newCalibrationWS:
+            # We are about to transfer the Instrument Parameter File from the
+            # calibration to the original workspace. We want to add new parameters
+            # which the calibration file has not yet picked up.
+            # IMPORTANT NOTE: This takes the parameter settings from the original workspace
+            # if they are old too, then we don't pick up newly added parameters
+            self._add_parmeters_absent_in_calibration(ws_name, self._newCalibrationWS)
+            self.changeCalibration(ws_name)
+
+        # centralize the bank to the centre
+        if other_centre:
+            dummy_centre, centre_shift = self.move_components(ws_name, beamcentre[0], beamcentre[1],
+                                                              xbeam_other=other_centre[0], ybeam_other=other_centre[1])
+        else:
+            dummy_centre, centre_shift = self.move_components(ws_name, beamcentre[0], beamcentre[1])
+        return centre_shift
+
+    def move_components(self, ws, xbeam, ybeam, xbeam_other=None, ybeam_other=None):
         """
             Move the locations of the sample and detector bank based on the passed beam center
             and information from the sample workspace logs
@@ -954,13 +993,22 @@ class LOQ(ISISInstrument):
         MoveInstrumentComponent(Workspace=ws,
                                 ComponentName=self.cur_detector().name(),
                                 X=xshift, Y=yshift, RelativePosition="1")
-
+        if ybeam_other and xbeam_other:
+            xshift_other = (317.5 / 1000.) - xbeam_other
+            yshift_other = (317.5 / 1000.) - ybeam_other
+            MoveInstrumentComponent(Workspace=ws,
+                                    ComponentName=self.other_detector().name(),
+                                    X=xshift_other, Y=yshift_other, RelativePosition="1")
         # Have a separate move for x_corr, y_coor and z_coor just to make it more obvious in the
         # history, and to expert users what is going on
         det = self.cur_detector()
+        det_other = self.other_detector()
         if det.x_corr != 0.0 or det.y_corr != 0.0 or det.z_corr != 0.0:
             MoveInstrumentComponent(Workspace=ws, ComponentName=det.name(), X=det.x_corr / 1000.0,
                                     Y=det.y_corr / 1000.0, Z=det.z_corr / 1000.0, RelativePosition="1")
+            if ybeam_other and xbeam_other:
+                MoveInstrumentComponent(Workspace=ws, ComponentName=det_other.name(), X=det_other.x_corr / 1000.0,
+                                        Y=det_other.y_corr / 1000.0, Z=det_other.z_corr / 1000.0, RelativePosition="1")
             xshift = xshift + det.x_corr / 1000.0
             yshift = yshift + det.y_corr / 1000.0
 
@@ -1097,7 +1145,7 @@ class SANS2D(ISISInstrument):
 
     def getDetValues(self, ws_name):
         """
-        Retrive the values of Front_Det_Z, Front_Det_X, Front_Det_Rot, Rear_Det_Z and Rear_Det_X from
+        Retrieve the values of Front_Det_Z, Front_Det_X, Front_Det_Rot, Rear_Det_Z and Rear_Det_X from
         the workspace. If it does not find the value at the run info, it takes as default value the
         self.FRONT_DET_Z, self... which are extracted from the sample workspace at apply_detector_log.
 
@@ -1478,7 +1526,7 @@ class LARMOR(ISISInstrument):
 
     def getDetValues(self, ws_name):
         """
-        Retrive the values of Bench_Rot from the workspace. If it does not find the value at the run info,
+        Retrieve the values of Bench_Rot from the workspace. If it does not find the value at the run info,
         it takes as default value the self.BENCH_ROT, which are extracted from the sample workspace
         at apply_detector_log.
         This is done to allow the function move_components to use the correct values and not to use
@@ -1559,8 +1607,9 @@ class LARMOR(ISISInstrument):
 
             start = log_data.getLogData('run_start')
             dt_0 = format_date(start.value, "%Y-%m-%dT%H:%M:%S", 19)
+            property_times = property.times
             for i in range(0, size):
-                dt = format_date(str(property.times[i]), "%Y-%m-%dT%H:%M:%S", 19)
+                dt = format_date(str(property_times[i]), "%Y-%m-%dT%H:%M:%S", 19)
                 if dt > dt_0:
                     if i == 0:
                         return float(log_data.getLogData(log_name).value[0])
@@ -1687,13 +1736,13 @@ class LARMOR(ISISInstrument):
         @param x_beam: either a shift in mm or a angle in degree
         @param x_scale_factor:
         '''
-        # in order to avoid rewriting old mask files from initial commisioning during 2014.
+        # in order to avoid rewriting old mask files from initial commissioning during 2014.
         ws_ref = mtd[workspace]
 
         # The angle value
         # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
         if not LARMOR.is_run_new_style_run(ws_ref):
-            # Initial commisioning before run 2217 did not pay much attention to making sure the bench_rot value was meaningful
+            # Initial commissioning before run 2217 did not pay much attention to making sure the bench_rot value was meaningful
             xshift = -x_beam
             sanslog.notice("Setup move " + str(xshift * x_scale_factor) + " " + str(0.0) + " " + str(0.0))
             MoveInstrumentComponent(workspace, ComponentName=component_name, X=xshift, Y=0.0, Z=0.0)
@@ -1724,7 +1773,7 @@ class LARMOR(ISISInstrument):
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
-        # Unforunately getting the angle of the bench does not work so we have to get bench and detector
+        # Unfortunately getting the angle of the bench does not work so we have to get bench and detector
 
         # logger.warning("Entering cur_detector_position")
         ws = mtd[ws_name]
@@ -1759,7 +1808,7 @@ class LARMOR(ISISInstrument):
         """
         # logger.warning("Entering on_load_sample")
         ws_ref = mtd[str(ws_name)]
-        # in order to avoid problems with files from initial commisioning during 2014.
+        # in order to avoid problems with files from initial commissioning during 2014.
         # these didn't have the required log entries for the detector position
 
         if LARMOR.is_run_new_style_run(ws_ref):
@@ -1773,7 +1822,7 @@ class LARMOR(ISISInstrument):
                     run = ws_ref.run()
                     if not run.hasProperty("Bench_Rot"):
                         additional_message = ("The Bench_Rot entry seems to be missing. There might be "
-                                              "an issue with your data aquisition. Make sure that the sample_log entry "
+                                              "an issue with your data acquisition. Make sure that the sample_log entry "
                                               "Bench_Rot is available.")
                     else:
                         additional_message = ""
@@ -1796,7 +1845,7 @@ class LARMOR(ISISInstrument):
         '''
         Checks if the run assiated with the workspace is pre or post 2217
         Original comment:
-        In order to avoid problems with files from initial commisioning during 2014.
+        In order to avoid problems with files from initial commissioning during 2014.
         these didn't have the required log entries for the detector position
         @param workspace_ref:: A handle to the workspace
         '''

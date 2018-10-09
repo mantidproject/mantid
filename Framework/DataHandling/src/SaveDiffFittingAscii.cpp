@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveDiffFittingAscii.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -21,7 +27,9 @@ DECLARE_ALGORITHM(SaveDiffFittingAscii)
 
 /// Empty constructor
 SaveDiffFittingAscii::SaveDiffFittingAscii()
-    : Mantid::API::Algorithm(), m_sep(','), m_counter(0) {}
+    : Mantid::API::Algorithm(), m_sep(','), m_counter(0) {
+  useAlgorithm("EnggSaveSinglePeakFitResultsToHDF5", 1);
+}
 
 /// Initialisation method.
 void SaveDiffFittingAscii::init() {

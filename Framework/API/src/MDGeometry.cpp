@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MDGeometry.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CoordTransform.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/make_unique.h"
 #include <Poco/NObserver.h>
 #include <boost/make_shared.hpp>
@@ -565,5 +571,5 @@ size_t MDGeometry::getNumberTransformsFromOriginal() const {
   return m_transforms_FromOriginal.size();
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

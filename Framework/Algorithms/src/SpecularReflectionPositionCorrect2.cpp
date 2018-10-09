@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect2.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -40,7 +46,7 @@ const std::string SpecularReflectionPositionCorrect2::category() const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void SpecularReflectionPositionCorrect2::init() {
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -92,7 +98,7 @@ void SpecularReflectionPositionCorrect2::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void SpecularReflectionPositionCorrect2::exec() {
 
   MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");

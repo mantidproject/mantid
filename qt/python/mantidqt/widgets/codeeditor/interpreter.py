@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
@@ -91,7 +84,6 @@ class EditorIO(object):
 
 
 class PythonFileInterpreter(QWidget):
-
     sig_editor_modified = Signal(bool)
     sig_filename_modified = Signal(str)
 
@@ -165,7 +157,7 @@ class PythonFileInterpreter(QWidget):
         # set a margin large enough for sensible file sizes < 1000 lines
         # and the progress marker
         font_metrics = QFontMetrics(self.font())
-        editor.setMarginWidth(1, font_metrics.averageCharWidth()*3 + 12)
+        editor.setMarginWidth(1, font_metrics.averageCharWidth() * 3 + 20)
 
         # fill with content if supplied and set source filename
         if default_content is not None:
@@ -243,9 +235,9 @@ class PythonFileInterpreterPresenter(QObject):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
                                          task_error.stack
         if hasattr(exc_value, 'lineno'):
-            lineno = exc_value.lineno
+            lineno = exc_value.lineno + self._code_start_offset
         elif exc_stack is not None:
-            lineno = exc_stack[-1][1]
+            lineno = exc_stack[-1][1] + self._code_start_offset
         else:
             lineno = -1
         sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + '\n')

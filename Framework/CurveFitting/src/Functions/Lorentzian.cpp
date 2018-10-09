@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -158,8 +164,9 @@ void Lorentzian::histogramDerivative1D(Jacobian *jacobian, double left,
     double cRight = cumulFun(xr);
     jacobian->set(i, 0, cRight - cLeft);
     jacobian->set(i, 1, -2.0 * (g / denomRight - g / denomLeft) * amplitude);
-    jacobian->set(i, 2, -2.0 * ((xr - c) / denomRight - (xl - c) / denomLeft) *
-                            amplitude);
+    jacobian->set(i, 2,
+                  -2.0 * ((xr - c) / denomRight - (xl - c) / denomLeft) *
+                      amplitude);
     denomLeft = denomRight;
     cLeft = cRight;
     xl = xr;

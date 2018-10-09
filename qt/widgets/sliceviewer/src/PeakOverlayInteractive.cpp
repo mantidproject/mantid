@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/PeakOverlayInteractive.h"
-#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 #include "MantidQtWidgets/Common/InputController.h"
-#include <qwt_plot.h>
-#include <qwt_plot_canvas.h>
-#include <qwt_scale_div.h>
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 #include <QApplication>
 #include <QPaintEvent>
 #include <QPainter>
+#include <qwt_plot.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_scale_div.h>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -175,5 +181,5 @@ int PeakOverlayInteractive::height() const {
 }
 
 int PeakOverlayInteractive::width() const { return m_plot->canvas()->width(); }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MDBOXBASETEST_H_
 #define MANTID_DATAOBJECTS_MDBOXBASETEST_H_
 
+#include "MantidAPI/CoordTransform.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidDataObjects/MDBoxBase.h"
-#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
-#include "MantidAPI/CoordTransform.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -26,8 +32,9 @@ public:
   MDBoxBaseTester(const MDBoxBaseTester &source)
       : MDBoxBase<MDE, nd>(source, source.getBoxController()) {}
 
-  MDBoxBaseTester(const std::vector<
-      Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector)
+  MDBoxBaseTester(
+      const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+          &extentsVector)
       : MDBoxBase<MDE, nd>(nullptr, 0, 0, extentsVector) {}
   //-----------------------------------------------------------------------------------------------
   Kernel::ISaveable *getISaveable() override { return nullptr; }

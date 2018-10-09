@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_VECTORHELPERTEST_H_
 #define MANTID_KERNEL_VECTORHELPERTEST_H_
 
@@ -165,6 +171,20 @@ public:
     std::vector<double> axis;
     TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(rbParams, axis),
                      const std::runtime_error)
+  }
+
+  void test_createAxisFromRebinParams_throwsOnInfiniteVal() {
+    const std::vector<double> params = {1.0, INFINITY};
+    std::vector<double> axis;
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis),
+                     const std::runtime_error);
+  }
+
+  void test_createAxisFromRebinParams_throwsOnNaNVal() {
+    const std::vector<double> params = {1.0, NAN};
+    std::vector<double> axis;
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis),
+                     const std::runtime_error);
   }
 
   void test_CreateAxisFromRebinParams_xMinXMaxHints() {

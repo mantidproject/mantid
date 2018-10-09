@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/EvaluateMDFunction.h"
-#include "MantidAPI/FunctionProperty.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FunctionDomainMD.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EvaluateMDFunction)
@@ -44,7 +50,7 @@ void EvaluateMDFunction::init() {
           "InputWorkspace", "", Direction::Input),
       "An input workspace that provides dimensions for the output.");
   declareProperty(
-      Kernel::make_unique<API::FunctionProperty>("Function"),
+      Kernel::make_unique<API::FunctionProperty>("Function", Direction::InOut),
       "Parameters defining the fitting function and its initial values");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(

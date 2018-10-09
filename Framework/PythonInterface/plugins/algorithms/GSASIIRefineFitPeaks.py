@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from contextlib import contextmanager
 import numpy
@@ -171,6 +177,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         if not x_max:
             x_max = max(input_ws.readX(0))
         x_min = max(pawley_tmin, min(input_ws.readX(0)), self.getProperty(self.PROP_XMIN).value)
+        self.setProperty(self.PROP_XMIN, x_min)
+        self.setProperty(self.PROP_XMAX, x_max)
         basic_refinement["set"].update({"Limits": [x_min, x_max]})
 
         scale_refinement = {"set": {"Scale": True},

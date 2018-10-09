@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADASCIITEST_H_
 #define LOADASCIITEST_H_
 
-#include "cxxtest/TestSuite.h"
 #include "MantidDataHandling/LoadAscii2.h"
+#include "cxxtest/TestSuite.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveAscii2.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Unit.h"
 

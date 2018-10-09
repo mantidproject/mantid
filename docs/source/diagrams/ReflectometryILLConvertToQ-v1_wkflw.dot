@@ -1,0 +1,51 @@
+digraph ReflectometryILLConvertToQ {
+  label = "ReflectometryILLConvertToQ workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    input             [label="InputWorkspace"]
+    output            [label="OutputWorkspace"]
+    direct            [label="DirectBeamWorkspace"]
+    direct_foreground [label="DirectForegroundWorkspace"]
+    reflected         [label="ReflectedBeamWorkspace"]
+    polarized         [label="Polarized"]
+    q_grouping        [label="GroupingQFraction"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    direct_to_q          [label="Copy Q and dQ from\nreflected"]
+    direct_to_point_data [label="ConvertToPointData"]
+    direct_group_points  [label="Optionally group points\nto Q resolution"]
+    refl_to_q            [label="ReflectometryMomentumTransfer"]
+    refl_to_point_data   [label="ConvertToPointData"]
+    refl_group_points    [label="Optionally group points\nto Q resolution"]
+    divide               [label="Divide"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    if_direct_foreground [label="Is DirectForegroundWorkspace\navailable?"]
+  }
+
+  input -> refl_to_q
+  reflected -> refl_to_q
+  direct -> refl_to_q
+  polarized -> refl_to_q
+  refl_to_q -> refl_to_point_data
+  refl_to_point_data -> refl_group_points
+  refl_group_points -> if_direct_foreground
+  if_direct_foreground -> output              [label="no"]
+  if_direct_foreground -> divide              [label="yes, LHS"]
+  divide -> output
+
+  direct_foreground -> direct_to_q
+  refl_to_q -> direct_to_q                    [label="Q and dQ data"]
+  direct_to_q -> direct_to_point_data
+  direct_to_point_data -> direct_group_points
+  direct_group_points -> divide               [label="RHS"]
+
+  q_grouping -> refl_group_points
+  q_grouping -> direct_group_points
+}

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //
 // Includes
 //
@@ -61,7 +67,7 @@ const char *SIMULATION_ATTR = "Simulation";
 
 /// static logger
 Kernel::Logger g_log("ResolutionConvolvedCrossSection");
-}
+} // namespace
 
 /**
  * Constructor
@@ -326,5 +332,5 @@ void ResolutionConvolvedCrossSection::storeCalculatedWithMutex(
   std::lock_guard<std::mutex> lock(m_valuesMutex);
   functionValues.setCalculated(index, signal);
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

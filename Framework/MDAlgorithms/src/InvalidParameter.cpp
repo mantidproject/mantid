@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/InvalidParameter.h"
 
 namespace Mantid {
@@ -19,5 +25,5 @@ InvalidParameter *InvalidParameter::clone() const {
 std::string InvalidParameter::toXMLString() const {
   throw std::runtime_error("Invalid parameters cannot be represented in xml.");
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

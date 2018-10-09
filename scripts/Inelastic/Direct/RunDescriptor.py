@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #pylint: disable=attribute-defined-outside-init
@@ -934,7 +940,7 @@ class RunDescriptor(PropDescriptor):
                 mon_list = [monitors_ID]
         else:
             mon_list = self._holder.get_used_monitors_list()
-        # Check if all requested spectra are indeed availible
+        # Check if all requested spectra are indeed available
         for monID in mon_list:
             if monID in combined_spec_list:
                 continue
@@ -1085,7 +1091,7 @@ class RunDescriptor(PropDescriptor):
             # call appropritate load command
             Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = mon_load_option)
         except ValueError: # if loader thrown, its probably event file rejected "separate" options
-            Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = '1',MonitorsAsEvents='0')
+            Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = True, MonitorsLoadOnly='Histogram')
         RunDescriptor._logger("Loaded {0}".format(data_file),'information')
 
         loaded_ws = mtd[ws_name]

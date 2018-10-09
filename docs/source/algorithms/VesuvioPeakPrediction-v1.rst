@@ -58,3 +58,7 @@ Usage
 
     DeleteWorkspace('vesuvio_einstein_params')
     DeleteWorkspace('vesuvio_debye_params')
+
+.. categories::
+
+.. sourcelink::

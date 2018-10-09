@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/DateValidator.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
@@ -83,7 +89,7 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
 
   return timeinfo;
 }
-}
+} // namespace
 
 /// create a copy of the the validator
 IValidator_sptr DateValidator::clone() const {
@@ -123,5 +129,5 @@ std::string DateValidator::checkValidity(const std::string &value) const {
   }
   return "";
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

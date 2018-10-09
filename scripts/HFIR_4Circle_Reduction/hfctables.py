@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0403,C0103,R0901,R0904,R0913,C0302
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
@@ -807,7 +813,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
     def set_hkl(self, i_row, hkl, is_spice_hkl, error=None):
         """
-        Set HKL to a row in the table. Show H/K/L with 4 decimal pionts
+        Set HKL to a row in the table. Show H/K/L with 4 decimal points
         :param i_row:
         :param hkl: HKL is a list of tuple
         :param is_spice_hkl: If true, then set input to cell for SPICE-imported HKL. Otherwise to calculated HKL.

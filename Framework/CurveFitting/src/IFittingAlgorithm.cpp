@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/IFittingAlgorithm.h"
 
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
@@ -55,7 +61,7 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
   }
   return creator;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -67,7 +73,7 @@ const std::string IFittingAlgorithm::category() const { return "Optimization"; }
  */
 void IFittingAlgorithm::init() {
   declareProperty(
-      make_unique<API::FunctionProperty>("Function"),
+      make_unique<API::FunctionProperty>("Function", Direction::InOut),
       "Parameters defining the fitting function and its initial values");
 
   declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
@@ -249,7 +255,6 @@ void IFittingAlgorithm::addWorkspaces() {
       const size_t index =
           suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
       creator->declareDatasetProperties(suffix, false);
-      m_workspacePropertyNames.push_back(workspacePropertyName);
       if (!m_domainCreator) {
         m_domainCreator.reset(creator);
       }
@@ -304,6 +309,7 @@ void IFittingAlgorithm::declareCostFunctionProperty() {
 boost::shared_ptr<CostFunctions::CostFuncFitting>
 IFittingAlgorithm::getCostFunctionInitialized() const {
   // Function may need some preparation.
+  m_function->sortTies();
   m_function->setUpForFit();
 
   API::FunctionDomain_sptr domain;

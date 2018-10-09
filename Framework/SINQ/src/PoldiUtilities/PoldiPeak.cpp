@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 
+#include "boost/bind.hpp"
 #include <cmath>
 #include <stdexcept>
-#include "boost/bind.hpp"
 
 namespace Mantid {
 namespace Poldi {
@@ -143,5 +149,5 @@ PoldiPeak::PoldiPeak(UncertainValue d, UncertainValue intensity,
   setD(d);
   setFwhm(fwhm, Relative);
 }
-}
-}
+} // namespace Poldi
+} // namespace Mantid

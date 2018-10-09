@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
@@ -26,27 +33,6 @@ WhiteList containing the header of the model, i.e. the name of the columns that
 will be displayed in the tree. As the group is not shown as a column but as a
 parent item, the table workspace must have one extra column with respect to the
 number of items in the WhiteList.
-
-Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON QTwoLevelTreeModel : public AbstractTreeModel {
   Q_OBJECT
@@ -60,11 +46,12 @@ public:
   // Get data for a cell
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
+  std::string cellValue(int groupIndex, int rowIndex, int columnIndex) const;
   // Get header data for the table
   QVariant headerData(int section, Qt::Orientation orientation,
                       int role) const override;
   // Get row metadata
-  RowData_sptr rowData(const QModelIndex &index) override;
+  RowData_sptr rowData(const QModelIndex &index) const override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent
@@ -73,6 +60,10 @@ public:
   // Get the 'processed' status of a row
   bool isProcessed(int position,
                    const QModelIndex &parent = QModelIndex()) const override;
+  // Check whether reduction failed for a row/group
+  bool
+  reductionFailed(int position,
+                  const QModelIndex &parent = QModelIndex()) const override;
   // Get the underlying data structure
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
@@ -92,9 +83,14 @@ public:
   // Remove rows from the model
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
+  // Remove all rows from the model
+  bool removeAll();
   // Set the 'processed' status of a row / group
   bool setProcessed(bool processed, int position,
                     const QModelIndex &parent = QModelIndex()) override;
+  // Set the error message for a row / group
+  bool setError(const std::string &error, int position,
+                const QModelIndex &parent = QModelIndex()) override;
   // Insert rows
   bool insertRows(int position, int count, int parent);
   // Transfer rows into the table
@@ -103,14 +99,36 @@ private slots:
   void tableDataUpdated(const QModelIndex &, const QModelIndex &);
 
 private:
+  void updateGroupData(const int groupIdx, const int start, const int end);
   void updateAllGroupData();
+  bool runListsMatch(const std::string &newValue, const std::string &oldValue,
+                     const bool exactMatch) const;
+  bool rowMatches(int groupIndex, int rowIndex,
+                  const std::map<QString, QString> &rowValues,
+                  const bool exactMatch) const;
+  boost::optional<int>
+  findRowIndex(int group, const std::map<QString, QString> &rowValues) const;
   void insertRowWithValues(int groupIndex, int rowIndex,
                            const std::map<QString, QString> &rowValues);
+  void insertRowAndGroupWithValues(const std::map<QString, QString> &rowValues);
   bool rowIsEmpty(int row, int parent) const;
   void setupModelData(Mantid::API::ITableWorkspace_sptr table);
   bool insertGroups(int position, int count);
   bool removeGroups(int position, int count);
   bool removeRows(int position, int count, int parent);
+  // Check whether an index corresponds to a group or a row
+  bool indexIsGroup(const QModelIndex &index) const;
+  // Get data for a cell for particular roles
+  QVariant getEditRole(const QModelIndex &index) const;
+  QVariant getDisplayRole(const QModelIndex &index) const;
+  QVariant getBackgroundRole(const QModelIndex &index) const;
+  QVariant getToolTipRole(const QModelIndex &index) const;
+
+  RowData_sptr rowData(int groupIndex, int rowIndex) const;
+  int getPositionToInsertRowInGroup(
+      const int groupIndex, const std::map<QString, QString> &rowValues);
+  bool checkColumnInComparisons(const Column &column,
+                                const bool exactMatch) const;
 
   /// List of all groups ordered by the group's position in the tree
   std::vector<GroupInfo> m_groups;
@@ -134,6 +152,6 @@ void forEachRow(QTwoLevelTreeModel &model, Action act) {
 using QTwoLevelTreeModel_sptr = boost::shared_ptr<QTwoLevelTreeModel>;
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_ */

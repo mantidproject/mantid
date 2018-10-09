@@ -1,8 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGWORKER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGWORKER_H_
 
 #include "GSASIIRefineFitPeaksOutputProperties.h"
 #include "GSASIIRefineFitPeaksParameters.h"
+
+#include "MantidAPI/IAlgorithm_fwd.h"
 
 #include <QObject>
 
@@ -27,9 +35,11 @@ public slots:
   void doRefinements();
 
 signals:
-  void refinementsComplete();
+  void refinementsComplete(Mantid::API::IAlgorithm_sptr,
+                           std::vector<GSASIIRefineFitPeaksOutputProperties>);
 
-  void refinementSuccessful(GSASIIRefineFitPeaksOutputProperties);
+  void refinementSuccessful(Mantid::API::IAlgorithm_sptr,
+                            GSASIIRefineFitPeaksOutputProperties);
 
   void refinementFailed(std::string);
 

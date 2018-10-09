@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ This module contains bundle definitions for passing reduction settings between functions."""
 from __future__ import (absolute_import, division, print_function)
 from collections import namedtuple
@@ -40,3 +46,6 @@ OutputBundle = namedtuple('OutputBundle', 'state, data_type, reduction_mode, out
 # 5. Handle to the partial output workspace which contains the normalization.
 OutputPartsBundle = namedtuple('OutputPartsBundle', 'state, data_type, reduction_mode, '
                                                     'output_workspace_count, output_workspace_norm')
+
+OutputTransmissionBundle = namedtuple('OutputTransmissionBundle', 'state, data_type, calculated_transmission_workspace,'
+                                                                  ' unfitted_transmission_workspace')

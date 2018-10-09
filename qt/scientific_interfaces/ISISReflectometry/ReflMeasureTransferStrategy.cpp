@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflMeasureTransferStrategy.h"
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
@@ -41,7 +47,9 @@ ReflMeasureTransferStrategy::~ReflMeasureTransferStrategy() {}
 
 TransferResults
 MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
-    SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
+    SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress,
+    const TransferMatch matchType) {
+  UNUSED_ARG(matchType);
 
   using VecSameMeasurement = std::vector<MeasurementItem>;
   using MapGroupedMeasurement =
@@ -158,4 +166,4 @@ bool ReflMeasureTransferStrategy::knownFileType(
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
 """ SANSNormalizeToMonitor algorithm calculates the normalization to the monitor."""
@@ -180,8 +186,8 @@ class SANSNormalizeToMonitor(ParallelDataProcessorAlgorithm):
         :param normalize_to_monitor_state: a SANSStateNormalizeToMonitor object.
         :return: a wavelength workspace.
         """
-        wavelength_low = normalize_to_monitor_state.wavelength_low
-        wavelength_high = normalize_to_monitor_state.wavelength_high
+        wavelength_low = normalize_to_monitor_state.wavelength_low[0]
+        wavelength_high = normalize_to_monitor_state.wavelength_high[0]
         wavelength_step = normalize_to_monitor_state.wavelength_step
         wavelength_step_type = normalize_to_monitor_state.wavelength_step_type
         wavelength_rebin_mode = normalize_to_monitor_state.rebin_type

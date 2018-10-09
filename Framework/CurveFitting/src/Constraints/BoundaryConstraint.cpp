@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/Expression.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/Logger.h"
 #include <boost/lexical_cast.hpp>
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -16,7 +22,7 @@ namespace Constraints {
 namespace {
 /// static logger
 Kernel::Logger g_log("BoundaryConstraint");
-}
+} // namespace
 
 DECLARE_CONSTRAINT(BoundaryConstraint)
 

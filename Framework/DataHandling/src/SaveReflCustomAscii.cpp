@@ -1,10 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveReflCustomAscii.h"
-#include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidKernel/ArrayProperty.h"
-
-#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -33,12 +37,8 @@ void SaveReflCustomAscii::extraHeaders(std::ofstream &file) {
   bool subtitle = getProperty("Subtitle");
   std::string subtitleEntry;
   std::string title = getProperty("Title");
-
   if (!title.empty()) // if is toggled
-  {
     file << "#" << title << '\n';
-  }
-
   if (subtitle) {
     try {
       subtitleEntry = samp.getLogData("run_title")->value();
@@ -46,9 +46,7 @@ void SaveReflCustomAscii::extraHeaders(std::ofstream &file) {
       subtitleEntry = "";
     }
   }
-
   file << "#" << subtitleEntry << '\n';
-
   const std::vector<std::string> logList = getProperty("LogList");
   /// logs
   for (const auto &log : logList) {
@@ -58,11 +56,9 @@ void SaveReflCustomAscii::extraHeaders(std::ofstream &file) {
   }
 }
 
-void SaveReflCustomAscii::data(std::ofstream &file,
-                               const std::vector<double> &XData,
-                               bool exportDeltaQ) {
+void SaveReflCustomAscii::data(std::ofstream &file, bool exportDeltaQ) {
   exportDeltaQ = getProperty("WriteDeltaQ");
-  AsciiPointBase::data(file, XData, exportDeltaQ);
+  AsciiPointBase::data(file, exportDeltaQ);
 }
 
 } // namespace DataHandling

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #########################################################
@@ -290,9 +296,10 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
 
     if binning != "":
         aux_hist = Rebin(ws_event, binning, False)
-        Rebin(ws_monitor, binning, False, OutputWorkspace=name)
+        Rebin(InputWorkspace=ws_monitor, Params=binning, PreserveEvents=False, OutputWorkspace=name)
     else:
-        aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
+        aux_hist = RebinToWorkspace(WorkspaceToRebin=ws_event, WorkspaceToMatch=ws_monitor,
+                                    PreserveEvents=False)
         ws_monitor.clone(OutputWorkspace=name)
 
     ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)
@@ -573,7 +580,7 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
 
     masked_det_ids = list(_yield_masked_det_ids(masking_ws))
 
-    MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
+    MaskDetectors(Workspace=ws, DetectorList=masked_det_ids, ForceInstrumentMasking=True)
 
 
 def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup, number_of_entries=None):
@@ -967,7 +974,7 @@ class AddOperation(object):
     def __init__(self,isOverlay, time_shifts):
         """
         The AddOperation requires to know if the workspaces are to
-        be plainly added or to be overlayed. Additional time shifts can be
+        be plainly added or to be overlaid. Additional time shifts can be
         specified
         @param isOverlay :: true if the operation is an overlay operation
         @param time_shifts :: a string with comma-separted time shift values
@@ -1031,7 +1038,7 @@ class PlusWorkspaces(object):
         rhs_ws = self._get_workspace(RHS_workspace)
 
         # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
-        # cummulative time series correctly at this point
+        # cumulative time series correctly at this point
         cummulative_correction = CummulativeTimeSeriesPropertyAdder()
         cummulative_correction. extract_sample_logs_from_workspace(lhs_ws, rhs_ws)
         Plus(LHSWorkspace = LHS_workspace, RHSWorkspace = RHS_workspace, OutputWorkspace = output_workspace)
@@ -1048,7 +1055,7 @@ class PlusWorkspaces(object):
 class OverlayWorkspaces(object):
     """
     Overlays (in time) a workspace  on top of another workspace. The two
-    workspaces overlayed such that the first time entry of their proton_charge entry matches.
+    workspaces overlaid such that the first time entry of their proton_charge entry matches.
     This overlap can be shifted by the specified time_shift in seconds
     """
 
@@ -1069,11 +1076,11 @@ class OverlayWorkspaces(object):
         total_time_shift = time_difference + time_shift
 
         # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
-        # cummulative time series correctly at this point
+        # cumulative time series correctly at this point
         cummulative_correction = CummulativeTimeSeriesPropertyAdder()
         cummulative_correction. extract_sample_logs_from_workspace(lhs_ws, rhs_ws)
 
-        # Create a temporary workspace with shifted time values from RHS, if the shift is necesary
+        # Create a temporary workspace with shifted time values from RHS, if the shift is necessary
         temp = rhs_ws
         temp_ws_name = 'shifted'
         if total_time_shift != 0.0:
@@ -1184,7 +1191,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
 class CummulativeTimeSeriesPropertyAdder(object):
     '''
     Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
-    cummulative time series correctly at this point.
+    cumulative time series correctly at this point.
     '''
 
     def __init__(self, total_time_shift_seconds = 0):
@@ -1214,7 +1221,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         '''
         run_lhs = lhs.getRun()
         run_rhs = rhs.getRun()
-        # Get the cummulative time s
+        # Get the cumulative time s
         for element in self._time_series:
             if (run_lhs.hasProperty(element) and
                     run_rhs.hasProperty(element)):
@@ -1267,7 +1274,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
     def _update_single_valued_entries(self, workspace):
         '''
         We need to update single-valued entries which are based on the
-        cummulative time series
+        cumulative time series
         @param workspace: the workspace which requires the changes
         '''
         run = workspace.getRun()
@@ -1348,7 +1355,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
 
     def _get_raw_values(self, values):
         '''
-        We extract the original data from the cummulative
+        We extract the original data from the cumulative
         series.
         '''
         raw_values = []
@@ -1541,7 +1548,7 @@ def can_load_as_event_workspace(filename):
             # and check for event_eventworkspace in the next level
             with h5.File(filename) as h5f:
                 try:
-                    rootKeys = h5f.keys()
+                    rootKeys = list(h5f.keys()) # python3 fix
                     entry0 = h5f[rootKeys[0]]
                     ew = entry0['event_workspace']
                     is_event_workspace = ew is not None
@@ -1880,7 +1887,7 @@ def is_valid_user_file_extension(user_file):
 def createUnmanagedAlgorithm(name, **kwargs):
     '''
     This creates an unmanged child algorithm with the
-    provided proeprties set. The returned algorithm has
+    provided properties set. The returned algorithm has
     not been executed yet.
     '''
     alg = AlgorithmManager.createUnmanaged(name)
@@ -1923,7 +1930,7 @@ def check_has_bench_rot(workspace, log_dict=None):
         run = workspace.run()
         if not run.hasProperty("Bench_Rot"):
             raise RuntimeError("LARMOR Instrument: Bench_Rot does not seem to be available on {0}. There might be "
-                               "an issue with your data aquisition. Make sure that the sample_log entry "
+                               "an issue with your data acquisition. Make sure that the sample_log entry "
                                "Bench_Rot is available.".format(workspace.name()))
 
 
@@ -1979,7 +1986,7 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
     """
     We want to get the correct combinDet variable for batch reductions from a new detector selection.
 
-    @param instrument_name: the name of the intrument
+    @param instrument_name: the name of the instrument
     @param detector_selection: a detector selection comes directly from the reducer
     @return: a combinedet option
     """
@@ -2059,10 +2066,26 @@ def rename_workspace_correctly(instrument_name, reduced_type, final_name, worksp
             return suffix
         else:
             return ""
-    final_suffix = get_suffix(instrument_name, reduced_type)
-    complete_name = final_name + final_suffix
-    RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=complete_name)
-    return complete_name
+
+    reduced_workspace = mtd[workspace]
+    workspaces_to_rename = [workspace]
+
+    if isinstance(reduced_workspace, WorkspaceGroup):
+        workspaces_to_rename += reduced_workspace.getNames()
+
+    run_number = re.findall(r'\d+', workspace)[0] if re.findall(r'\d+', workspace) else None
+
+    if run_number and workspace.startswith(run_number):
+        for workspace_name in workspaces_to_rename:
+            complete_name = workspace_name.replace(run_number, final_name + '_')
+            RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=complete_name)
+        return workspace.replace(run_number, final_name + '_')
+    else:
+        final_suffix = get_suffix(instrument_name, reduced_type)
+        for workspace_name in workspaces_to_rename:
+            complete_name = workspace_name.replace(workspace, final_name) + final_suffix
+            RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=complete_name)
+        return final_name + final_suffix
 
 
 ###############################################################################
@@ -2180,7 +2203,7 @@ def MaskBySpecNumber(workspace, speclist):
     speclist = speclist.rstrip(',')
     if speclist == '':
         return ''
-    MaskDetectors(Workspace=workspace, SpectraList = speclist)
+    MaskDetectors(Workspace=workspace, SpectraList = speclist, ForceInstrumentMasking=True)
 
 
 @deprecated

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TESTDETECTORGROUP_H_
 #define TESTDETECTORGROUP_H_
 
@@ -10,8 +16,8 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class DetectorGroupTest : public CxxTest::TestSuite {
 public:

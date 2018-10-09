@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
 from PyQt4 import QtGui, QtCore
 import os
@@ -22,8 +28,9 @@ def generate_table_index(multi_period):
     table_index.update({'CAN_DIRECT_PERIOD_INDEX': 11 if multi_period else None})
     table_index.update({'OUTPUT_NAME_INDEX': 12 if multi_period else 6})
     table_index.update({'USER_FILE_INDEX': 13 if multi_period else 7})
-    table_index.update({'OPTIONS_INDEX': 14 if multi_period else 8})
-    table_index.update({'HIDDEN_OPTIONS_INDEX': 15 if multi_period else 9})
+    table_index.update({'SAMPLE_THICKNESS_INDEX': 14 if multi_period else 8})
+    table_index.update({'OPTIONS_INDEX': 15 if multi_period else 9})
+    table_index.update({'HIDDEN_OPTIONS_INDEX': 16 if multi_period else 10})
     return table_index
 
 

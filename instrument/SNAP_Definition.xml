@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- For help on the notation used to specify an Instrument Definition File 
+<!-- For help on the notation used to specify an Instrument Definition File
      see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="SNAP" valid-from   ="1900-01-31 23:59:59"
+            name="SNAP" valid-from   ="2018-05-01 00:00:01"
                         valid-to     ="2100-01-31 23:59:59"
-		        last-modified="2011-09-07 14:22:00">
+		        last-modified="2018-05-14 14:00:00">
   <!--Data taken from /SNS/SNAP/2010_2_3_CAL/calibrations/SNAP_geom_2010_03_22.xml-->
   <!--Created by Vickie Lynch, modified by Janik Zikovsky -->
   <!-- Modified by Vickie Lynch, Feb 17,2011 Bank names changed from local_name to name -->
@@ -46,13 +46,13 @@
     <properties />
     <location  />
   </component>
-  
+
   <type is="monitor" name="Downstream_monitor">
    <component type="monitor">
     <location x="0.0" y="0.0" z="0.3" name="monitor2" />
    </component>
   </type>
-  
+
   <idlist idname="Downstream_monitor">
     <id start="1179648" end="1179648" />
     <!--id start="1342177280" end="1342177280" / -->
@@ -60,7 +60,7 @@
 
 <!--  detector components -->
 
-  <component type="East" idstart="983040" idfillbyfirst="y" idstepbyrow="256">
+  <component type="East">
     <location >
       <parameter name="roty">
         <logfile id="det_arc2" eq="180.0+value"/>
@@ -73,7 +73,7 @@
       </parameter>
     </location>
   </component>
-  <component type="West" idstart="0" idfillbyfirst="y" idstepbyrow="256">
+  <component type="West">
     <location >
       <parameter name="roty">
         <logfile id="det_arc1" eq="180.0+value"/>
@@ -111,110 +111,110 @@
   </type>
 
   <type name="Column1">
-    <component type="panel"   idstart="720896" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank1">
+    <component type="panel"   idstart="131072" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank13">  <!-- was bank1 - 720896 -->
         <trans x="-0.167548" y="0.167548" />
       </location>
     </component>
-    <component type="panel"   idstart="655360" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank4">
+    <component type="panel"   idstart="65536" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank12">  <!-- was bank4 - 655360 -->
         <trans x="-0.167548" y="0.0" />
       </location>
     </component>
-    <component type="panel"   idstart="589824" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank7">
+    <component type="panel"   idstart="0" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank11">  <!-- was bank7 - 589824 -->
         <trans x="-0.167548" y="-0.167548" />
       </location>
     </component>
   </type>
   <type name="Column2">
-    <component type="panel"   idstart="917504" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank2">
+    <component type="panel"   idstart="327680" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank23">  <!-- was bank2 - 917504 -->
         <trans x="0.0" y="0.167548" />
       </location>
     </component>
-    <component type="panel"  idstart="851968" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank5">
+    <component type="panel"  idstart="262144" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank22">  <!-- was bank5 - 851968 -->
         <trans x="0.0" y="0.0" />
       </location>
     </component>
-    <component type="panel"   idstart="786432" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank8">
+    <component type="panel"   idstart="196608" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank21">  <!-- was bank8 - 786432 -->
         <trans x="0.0" y="-0.167548" />
       </location>
     </component>
   </type>
   <type name="Column3">
-    <component type="panel"   idstart="1114112" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank3">
+    <component type="panel"   idstart="524288" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank33">  <!-- was bank3 - 1114112 -->
         <trans x="0.167548" y="0.167548" />
       </location>
     </component>
-    <component type="panel"   idstart="1048576" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank6">
+    <component type="panel"   idstart="458752" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank32">  <!-- was bank6 - 1048576 -->
         <trans x="0.167548" y="0.0" />
       </location>
     </component>
-    <component type="panel"   idstart="983040" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank9">
+    <component type="panel"   idstart="393216" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank31">  <!-- was bank9 - 983040 -->
         <trans x="0.167548" y="-0.167548" />
       </location>
     </component>
   </type>
   <type name="Column4">
-    <component type="panel"   idstart="524288" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank10">
+    <component type="panel"   idstart="1114112" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank63">  <!-- was bank10 - 524288 -->
         <trans x="0.167548" y="0.167548" />
       </location>
     </component>
-    <component type="panel"   idstart="458752" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank13">
+    <component type="panel"   idstart="1048576" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank62">  <!-- was bank13 - 458752 -->
         <trans x="0.167548" y="0.0" />
       </location>
     </component>
-    <component type="panel"   idstart="393216" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank16">
+    <component type="panel"   idstart="983040" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank61">  <!-- was bank16 - 393216 -->
         <trans x="0.167548" y="-0.167548" />
       </location>
     </component>
   </type>
   <type name="Column5">
-    <component type="panel"   idstart="327680" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank11">
+    <component type="panel"   idstart="917504" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank53">  <!-- was bank11 - 327680 -->
         <trans x="0.0" y="0.167548" />
       </location>
     </component>
-    <component type="panel"   idstart="262144" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank14">
+    <component type="panel"   idstart="851968" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank52">  <!-- was bank14 - 262144 -->
         <trans x="0.0" y="0.0" />
       </location>
     </component>
-    <component type="panel"   idstart="196608" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank17">
+    <component type="panel"   idstart="786432" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank51">  <!-- was bank17 - 196608 -->
         <trans x="0.0" y="-0.167548" />
       </location>
     </component>
   </type>
   <type name="Column6">
-    <component type="panel"   idstart="131072" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank12">
+    <component type="panel"   idstart="720896" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank43">  <!-- was bank12 - 131072 -->
         <trans x="-0.167548" y="0.167548" />
       </location>
     </component>
-    <component type="panel"   idstart="65536" idfillbyfirst="y" idstepbyrow="256" >
-      <location name="bank15">
+    <component type="panel"   idstart="655360" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank42">  <!-- was bank15 - 65536 -->
         <trans x="-0.167548" y="0.0" />
       </location>
     </component>
-    <component type="panel"  idstart="0" idfillbyfirst="y" idstepbyrow="256" > 
-      <location name="bank18">
+    <component type="panel"  idstart="589824" idfillbyfirst="y" idstepbyrow="256" >
+      <location name="bank41">  <!-- was bank18 - 0 -->
         <trans x="-0.167548" y="-0.167548" />
       </location>
     </component>
   </type>
 
 <!-- Rectangular Detector Panel -->
-<type name="panel" is="rectangular_detector" type="pixel" 
+<type name="panel" is="rectangular_detector" type="pixel"
     xpixels="256" xstart="-0.078795" xstep="+0.000618"
     ypixels="256" ystart="-0.078795" ystep="+0.000618" >
   <properties/>
@@ -245,36 +245,8 @@
     <algebra val="some-shape"/>
   </type>
 
-<!-- 
-  <idlist idname="East">
-    <id start="720896" end="786431"/>
-    <id start="917504" end="983039"/>
-    <id start="1114112" end="1179647"/>
-    <id start="655360" end="720895"/>
-    <id start="851968" end="917503"/>
-    <id start="1048576" end="1114111"/>
-    <id start="589824" end="655359"/>
-    <id start="786432" end="851967"/>
-    <id start="983040" end="1048575"/>
-  </idlist>
-  <idlist idname="West">
-    <id start="524288" end="589823"/>
-    <id start="327680" end="393215"/>
-    <id start="131072" end="196607"/>
-    <id start="458752" end="524287"/>
-    <id start="262144" end="327679"/>
-    <id start="65536" end="131071"/>
-    <id start="393216" end="458751"/>
-    <id start="196608" end="262143"/>
-    <id start="0" end="65535"/>
-  </idlist>
-
--->
-
   <!--MONITOR IDs-->
   <idlist idname="monitors">
     <id val="-1"/>
   </idlist>
 </instrument>
-
-

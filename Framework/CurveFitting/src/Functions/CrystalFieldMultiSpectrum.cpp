@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
-#include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
-#include "MantidCurveFitting/Functions/CrystalFieldPeakUtils.h"
 #include "MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h"
-#include "MantidCurveFitting/Functions/CrystalFieldSusceptibility.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMagnetisation.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMoment.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeakUtils.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
+#include "MantidCurveFitting/Functions/CrystalFieldSusceptibility.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
@@ -98,7 +104,7 @@ public:
     m_PPChi0IdxSelf[iSpec] = parameterIndex("Chi0" + si);
   }
 };
-}
+} // namespace
 
 /// Constructor
 CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()

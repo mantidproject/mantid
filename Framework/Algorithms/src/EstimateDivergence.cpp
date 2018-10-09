@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EstimateDivergence.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -14,8 +20,8 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace std;
-using Mantid::Kernel::Direction;      // NOLINT
 using Mantid::API::WorkspaceProperty; // NOLINT
+using Mantid::Kernel::Direction;      // NOLINT
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EstimateDivergence)

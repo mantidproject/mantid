@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_
 
@@ -6,9 +12,9 @@
 //----------------------
 #include "ui_IndirectDataReduction.h"
 
+#include "IndirectDataReductionTab.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "IndirectDataReductionTab.h"
 
 #include "MantidGeometry/IComponent.h"
 
@@ -31,27 +37,6 @@ mode is defined in the instrument definition file using the "deltaE-mode".
 
 @author Martyn Gigg, Tessella Support Services plc
 @author Michael Whitty
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class IndirectDataReduction : public MantidQt::API::UserSubWindow {
@@ -181,14 +166,15 @@ private:
 
   /// Poco observer for changes in user directory settings
   Poco::NObserver<IndirectDataReduction,
-                  Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+                  Mantid::Kernel::ConfigValChangeNotification>
+      m_changeObserver;
   QString m_dataDir; ///< default data search directory
   QString m_saveDir; ///< default data save directory
 
   // Pointer to the current empty instrument workspace
   Mantid::API::MatrixWorkspace_sptr m_instWorkspace;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_

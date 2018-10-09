@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """ Sample LET reduction script """
 
@@ -98,22 +104,21 @@ class ReduceLET_OneRep(ReductionWrapper):
         prop = self.reducer.prop_man
         # Ignore input properties for the time being
         white_ws = 'wb_wksp'
-        LoadRaw(Filename='LET00005545.raw',OutputWorkspace=white_ws)
+        LoadRaw(Filename='LET00005545.raw', OutputWorkspace=white_ws)
         #prop.wb_run = white_ws
 
         sample_ws = 'w1'
         monitors_ws = sample_ws + '_monitors'
-        LoadEventNexus(Filename='LET00006278.nxs',OutputWorkspace=sample_ws,
-                       SingleBankPixelsOnly='0',LoadMonitors='1',
-                       MonitorsAsEvents='1')
+        LoadEventNexus(Filename='LET00006278.nxs', OutputWorkspace=sample_ws,
+                       SingleBankPixelsOnly=False, LoadMonitors=True, MonitorsLoadOnly='Events')
         #prop.sample_run = sample_ws
 
         ebin = prop.energy_bins
         ei   = prop.incident_energy
 
         (energybin,tbin,t_elastic) = find_binning_range(ei,ebin)
-        Rebin(InputWorkspace=sample_ws,OutputWorkspace=sample_ws, Params=tbin, PreserveEvents='1')
-        Rebin(InputWorkspace=monitors_ws,OutputWorkspace=monitors_ws, Params=tbin, PreserveEvents='1')
+        Rebin(InputWorkspace=sample_ws,OutputWorkspace=sample_ws, Params=tbin, PreserveEvents=True)
+        Rebin(InputWorkspace=monitors_ws,OutputWorkspace=monitors_ws, Params=tbin, PreserveEvents=True)
 
         ConjoinWorkspaces(InputWorkspace1=sample_ws, InputWorkspace2=monitors_ws)
         prop.bkgd_range=[int(t_elastic),int(tbin[2])]

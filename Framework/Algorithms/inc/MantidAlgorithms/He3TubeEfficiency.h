@@ -1,19 +1,28 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHM_HE3TUBEEFFICIENCY_H_
 #define MANTID_ALGORITHM_HE3TUBEEFFICIENCY_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 
 // forward declarations
+namespace HistogramData {
+class Points;
+}
 namespace Geometry {
 class IDetector;
 class IObject;
 class ParameterMap;
-}
+} // namespace Geometry
 
 namespace Algorithms {
 /**
@@ -36,27 +45,6 @@ namespace Algorithms {
 
     @author Michael Reuter
     @date 30/09/2010
-
-    Copyright &copy; 2008-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport He3TubeEfficiency : public API::Algorithm {
 public:
@@ -87,6 +75,11 @@ private:
   void exec() override;
   void execEvent();
 
+  /// Calculates the efficiency correction from the points
+  void computeEfficiencyCorrection(std::vector<double> &effCorrection,
+                                   const HistogramData::Points &wavelength,
+                                   const double expConstant,
+                                   const double scale) const;
   /// Correct the given spectra index for efficiency
   void correctForEfficiency(std::size_t spectraIndex,
                             const API::SpectrumInfo &spectrumInfo);
@@ -111,21 +104,21 @@ private:
                               const Geometry::IDetector &idet);
 
   /// The user selected (input) workspace
-  API::MatrixWorkspace_const_sptr inputWS;
+  API::MatrixWorkspace_const_sptr m_inputWS;
   /// The output workspace, maybe the same as the input one
-  API::MatrixWorkspace_sptr outputWS;
+  API::MatrixWorkspace_sptr m_outputWS;
   /// Map that stores additional properties for detectors
-  const Geometry::ParameterMap *paraMap;
+  const Geometry::ParameterMap *m_paraMap;
   /// A lookup of previously seen shape objects used to save calculation time as
   /// most detectors have the same shape
   std::map<const Geometry::IObject *, std::pair<double, Kernel::V3D>>
-      shapeCache;
+      m_shapeCache;
   /// Sample position
-  Kernel::V3D samplePos;
+  Kernel::V3D m_samplePos;
   /// The spectra numbers that were skipped
-  std::vector<specnum_t> spectraSkipped;
+  std::vector<specnum_t> m_spectraSkipped;
   /// Algorithm progress keeper
-  API::Progress *progress;
+  API::Progress *m_progress;
 };
 
 } // namespace Algorithms

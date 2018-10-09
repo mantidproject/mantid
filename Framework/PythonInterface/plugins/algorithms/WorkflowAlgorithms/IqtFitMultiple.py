@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid import logger, AlgorithmFactory
@@ -32,7 +38,7 @@ class IqtFitMultiple(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='The _iqt.nxs InputWorkspace used by the algorithm')
 
-        self.declareProperty(FunctionProperty(name='Function'),
+        self.declareProperty(FunctionProperty(name='Function',direction=Direction.InOut),
                              doc='The function to use in fitting')
 
         self.declareProperty(name='FitType', defaultValue='',

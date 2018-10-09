@@ -1,32 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PYTHONINTERFACE_IPEAKFUNCTIONADAPTER_H_
 #define MANTID_PYTHONINTERFACE_IPEAKFUNCTIONADAPTER_H_
-/**
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
 
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
+#include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 
 #include <boost/python/object.hpp>
 
@@ -41,8 +26,11 @@ namespace PythonInterface {
  *into Python.
  */
 class IPeakFunctionAdapter : public API::IPeakFunction,
-                             public IFunction1DAdapter {
+                             public IFunctionAdapter {
 public:
+  // Convenience typedef
+  using Base = API::IPeakFunction;
+
   /// A constructor that looks like a Python __init__ method
   IPeakFunctionAdapter(PyObject *self);
 
@@ -86,7 +74,7 @@ public:
   /// Python-type signature for above method
   boost::python::object functionLocal(const boost::python::object &xvals) const;
   /// Implemented base-class method
-  void functionDerivLocal(API::Jacobian *out, const double *xValues,
+  void functionDerivLocal(API::Jacobian *jacobian, const double *xValues,
                           const size_t nData) override;
   /// Python signature
   void functionDerivLocal(const boost::python::object &xvals,
@@ -94,7 +82,7 @@ public:
 
 private:
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_IPEAKFUNCTIONADAPTER_H_ */

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MAXENTTRANSFORMFOURIERTEST_H_
 #define MANTID_ALGORITHMS_MAXENTTRANSFORMFOURIERTEST_H_
 
@@ -6,18 +12,13 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
+#include <boost/make_shared.hpp>
 #include <cmath>
-#include <memory>
 
 using Mantid::Algorithms::MaxentSpaceComplex;
 using Mantid::Algorithms::MaxentSpaceReal;
+using Mantid::Algorithms::MaxentSpace_sptr;
 using Mantid::Algorithms::MaxentTransformFourier;
-
-using MaxentSpace_sptr = std::shared_ptr<Mantid::Algorithms::MaxentSpace>;
-using MaxentSpaceComplex_sptr =
-    std::shared_ptr<Mantid::Algorithms::MaxentSpaceComplex>;
-using MaxentSpaceReal_sptr =
-    std::shared_ptr<Mantid::Algorithms::MaxentSpaceReal>;
 
 class MaxentTransformFourierTest : public CxxTest::TestSuite {
 public:
@@ -30,15 +31,16 @@ public:
 
   void test_real_image_to_real_data() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceReal>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceReal>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x)
     std::vector<double> realImage = {
-        1, 0.951057, 0.809017, 0.587785, 0.309017, 6.12323e-17, -0.309017,
-        -0.587785, -0.809017, -0.951057, -1, -0.951057, -0.809017, -0.587785,
-        -0.309017, -1.83697e-16, 0.309017, 0.587785, 0.809017, 0.951057};
+        1,         0.951057,  0.809017,  0.587785,     0.309017, 6.12323e-17,
+        -0.309017, -0.587785, -0.809017, -0.951057,    -1,       -0.951057,
+        -0.809017, -0.587785, -0.309017, -1.83697e-16, 0.309017, 0.587785,
+        0.809017,  0.951057};
 
     TS_ASSERT_THROWS_NOTHING(transform.imageToData(realImage));
 
@@ -59,15 +61,16 @@ public:
 
   void test_real_image_to_complex_data() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceReal>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x)
     std::vector<double> realImage = {
-        1, 0.951057, 0.809017, 0.587785, 0.309017, 6.12323e-17, -0.309017,
-        -0.587785, -0.809017, -0.951057, -1, -0.951057, -0.809017, -0.587785,
-        -0.309017, -1.83697e-16, 0.309017, 0.587785, 0.809017, 0.951057};
+        1,         0.951057,  0.809017,  0.587785,     0.309017, 6.12323e-17,
+        -0.309017, -0.587785, -0.809017, -0.951057,    -1,       -0.951057,
+        -0.809017, -0.587785, -0.309017, -1.83697e-16, 0.309017, 0.587785,
+        0.809017,  0.951057};
 
     TS_ASSERT_THROWS_NOTHING(transform.imageToData(realImage));
 
@@ -88,22 +91,51 @@ public:
 
   void test_complex_image_to_real_data() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceReal>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x) + i sin(x)
-    std::vector<double> complexImage = {
-        1.0, 0.0, 0.951056516295, 0.309016994375, 0.809016994375,
-        0.587785252292, 0.587785252292, 0.809016994375, 0.309016994375,
-        0.951056516295, 6.12323399574e-17, 1.0, -0.309016994375, 0.951056516295,
-        -0.587785252292, 0.809016994375, -0.809016994375, 0.587785252292,
-        -0.951056516295, 0.309016994375, -1.0, 1.22464679915e-16,
-        -0.951056516295, -0.309016994375, -0.809016994375, -0.587785252292,
-        -0.587785252292, -0.809016994375, -0.309016994375, -0.951056516295,
-        -1.83697019872e-16, -1.0, 0.309016994375, -0.951056516295,
-        0.587785252292, -0.809016994375, 0.809016994375, -0.587785252292,
-        0.951056516295, -0.309016994375};
+    std::vector<double> complexImage = {1.0,
+                                        0.0,
+                                        0.951056516295,
+                                        0.309016994375,
+                                        0.809016994375,
+                                        0.587785252292,
+                                        0.587785252292,
+                                        0.809016994375,
+                                        0.309016994375,
+                                        0.951056516295,
+                                        6.12323399574e-17,
+                                        1.0,
+                                        -0.309016994375,
+                                        0.951056516295,
+                                        -0.587785252292,
+                                        0.809016994375,
+                                        -0.809016994375,
+                                        0.587785252292,
+                                        -0.951056516295,
+                                        0.309016994375,
+                                        -1.0,
+                                        1.22464679915e-16,
+                                        -0.951056516295,
+                                        -0.309016994375,
+                                        -0.809016994375,
+                                        -0.587785252292,
+                                        -0.587785252292,
+                                        -0.809016994375,
+                                        -0.309016994375,
+                                        -0.951056516295,
+                                        -1.83697019872e-16,
+                                        -1.0,
+                                        0.309016994375,
+                                        -0.951056516295,
+                                        0.587785252292,
+                                        -0.809016994375,
+                                        0.809016994375,
+                                        -0.587785252292,
+                                        0.951056516295,
+                                        -0.309016994375};
 
     TS_ASSERT_THROWS_NOTHING(transform.imageToData(complexImage));
 
@@ -124,22 +156,51 @@ public:
 
   void test_complex_image_to_complex_data() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // sin (x) + i cos(x)
-    std::vector<double> complexImage = {
-        0.0, 1.0, 0.309016994375, 0.951056516295, 0.587785252292,
-        0.809016994375, 0.809016994375, 0.587785252292, 0.951056516295,
-        0.309016994375, 1.0, 6.12323399574e-17, 0.951056516295, -0.309016994375,
-        0.809016994375, -0.587785252292, 0.587785252292, -0.809016994375,
-        0.309016994375, -0.951056516295, 1.22464679915e-16, -1.0,
-        -0.309016994375, -0.951056516295, -0.587785252292, -0.809016994375,
-        -0.809016994375, -0.587785252292, -0.951056516295, -0.309016994375,
-        -1.0, -1.83697019872e-16, -0.951056516295, 0.309016994375,
-        -0.809016994375, 0.587785252292, -0.587785252292, 0.809016994375,
-        -0.309016994375, 0.951056516295};
+    std::vector<double> complexImage = {0.0,
+                                        1.0,
+                                        0.309016994375,
+                                        0.951056516295,
+                                        0.587785252292,
+                                        0.809016994375,
+                                        0.809016994375,
+                                        0.587785252292,
+                                        0.951056516295,
+                                        0.309016994375,
+                                        1.0,
+                                        6.12323399574e-17,
+                                        0.951056516295,
+                                        -0.309016994375,
+                                        0.809016994375,
+                                        -0.587785252292,
+                                        0.587785252292,
+                                        -0.809016994375,
+                                        0.309016994375,
+                                        -0.951056516295,
+                                        1.22464679915e-16,
+                                        -1.0,
+                                        -0.309016994375,
+                                        -0.951056516295,
+                                        -0.587785252292,
+                                        -0.809016994375,
+                                        -0.809016994375,
+                                        -0.587785252292,
+                                        -0.951056516295,
+                                        -0.309016994375,
+                                        -1.0,
+                                        -1.83697019872e-16,
+                                        -0.951056516295,
+                                        0.309016994375,
+                                        -0.809016994375,
+                                        0.587785252292,
+                                        -0.587785252292,
+                                        0.809016994375,
+                                        -0.309016994375,
+                                        0.951056516295};
 
     TS_ASSERT_THROWS_NOTHING(transform.imageToData(complexImage));
 
@@ -160,15 +221,16 @@ public:
 
   void test_real_data_to_real_image() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceReal>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceReal>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos(x)
     std::vector<double> realData = {
-        1, 0.951057, 0.809017, 0.587785, 0.309017, 6.12323e-17, -0.309017,
-        -0.587785, -0.809017, -0.951057, -1, -0.951057, -0.809017, -0.587785,
-        -0.309017, -1.83697e-16, 0.309017, 0.587785, 0.809017, 0.951057};
+        1,         0.951057,  0.809017,  0.587785,     0.309017, 6.12323e-17,
+        -0.309017, -0.587785, -0.809017, -0.951057,    -1,       -0.951057,
+        -0.809017, -0.587785, -0.309017, -1.83697e-16, 0.309017, 0.587785,
+        0.809017,  0.951057};
 
     TS_ASSERT_THROWS_NOTHING(transform.dataToImage(realData));
 
@@ -189,15 +251,16 @@ public:
 
   void test_real_data_to_complex_image() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceReal>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x)
     std::vector<double> realData = {
-        1, 0.951057, 0.809017, 0.587785, 0.309017, 6.12323e-17, -0.309017,
-        -0.587785, -0.809017, -0.951057, -1, -0.951057, -0.809017, -0.587785,
-        -0.309017, -1.83697e-16, 0.309017, 0.587785, 0.809017, 0.951057};
+        1,         0.951057,  0.809017,  0.587785,     0.309017, 6.12323e-17,
+        -0.309017, -0.587785, -0.809017, -0.951057,    -1,       -0.951057,
+        -0.809017, -0.587785, -0.309017, -1.83697e-16, 0.309017, 0.587785,
+        0.809017,  0.951057};
 
     TS_ASSERT_THROWS_NOTHING(transform.dataToImage(realData));
 
@@ -218,22 +281,51 @@ public:
 
   void test_complex_data_to_real_image() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceReal>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceReal>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // cos (x) + i sin(x)
-    std::vector<double> complexData = {
-        1.0, 0.0, 0.951056516295, 0.309016994375, 0.809016994375,
-        0.587785252292, 0.587785252292, 0.809016994375, 0.309016994375,
-        0.951056516295, 6.12323399574e-17, 1.0, -0.309016994375, 0.951056516295,
-        -0.587785252292, 0.809016994375, -0.809016994375, 0.587785252292,
-        -0.951056516295, 0.309016994375, -1.0, 1.22464679915e-16,
-        -0.951056516295, -0.309016994375, -0.809016994375, -0.587785252292,
-        -0.587785252292, -0.809016994375, -0.309016994375, -0.951056516295,
-        -1.83697019872e-16, -1.0, 0.309016994375, -0.951056516295,
-        0.587785252292, -0.809016994375, 0.809016994375, -0.587785252292,
-        0.951056516295, -0.309016994375};
+    std::vector<double> complexData = {1.0,
+                                       0.0,
+                                       0.951056516295,
+                                       0.309016994375,
+                                       0.809016994375,
+                                       0.587785252292,
+                                       0.587785252292,
+                                       0.809016994375,
+                                       0.309016994375,
+                                       0.951056516295,
+                                       6.12323399574e-17,
+                                       1.0,
+                                       -0.309016994375,
+                                       0.951056516295,
+                                       -0.587785252292,
+                                       0.809016994375,
+                                       -0.809016994375,
+                                       0.587785252292,
+                                       -0.951056516295,
+                                       0.309016994375,
+                                       -1.0,
+                                       1.22464679915e-16,
+                                       -0.951056516295,
+                                       -0.309016994375,
+                                       -0.809016994375,
+                                       -0.587785252292,
+                                       -0.587785252292,
+                                       -0.809016994375,
+                                       -0.309016994375,
+                                       -0.951056516295,
+                                       -1.83697019872e-16,
+                                       -1.0,
+                                       0.309016994375,
+                                       -0.951056516295,
+                                       0.587785252292,
+                                       -0.809016994375,
+                                       0.809016994375,
+                                       -0.587785252292,
+                                       0.951056516295,
+                                       -0.309016994375};
 
     TS_ASSERT_THROWS_NOTHING(transform.dataToImage(complexData));
 
@@ -253,22 +345,51 @@ public:
   }
 
   void test_complex_data_to_complex_image() {
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // sin (x) + i cos(x)
-    std::vector<double> complexData = {
-        0.0, 1.0, 0.309016994375, 0.951056516295, 0.587785252292,
-        0.809016994375, 0.809016994375, 0.587785252292, 0.951056516295,
-        0.309016994375, 1.0, 6.12323399574e-17, 0.951056516295, -0.309016994375,
-        0.809016994375, -0.587785252292, 0.587785252292, -0.809016994375,
-        0.309016994375, -0.951056516295, 1.22464679915e-16, -1.0,
-        -0.309016994375, -0.951056516295, -0.587785252292, -0.809016994375,
-        -0.809016994375, -0.587785252292, -0.951056516295, -0.309016994375,
-        -1.0, -1.83697019872e-16, -0.951056516295, 0.309016994375,
-        -0.809016994375, 0.587785252292, -0.587785252292, 0.809016994375,
-        -0.309016994375, 0.951056516295};
+    std::vector<double> complexData = {0.0,
+                                       1.0,
+                                       0.309016994375,
+                                       0.951056516295,
+                                       0.587785252292,
+                                       0.809016994375,
+                                       0.809016994375,
+                                       0.587785252292,
+                                       0.951056516295,
+                                       0.309016994375,
+                                       1.0,
+                                       6.12323399574e-17,
+                                       0.951056516295,
+                                       -0.309016994375,
+                                       0.809016994375,
+                                       -0.587785252292,
+                                       0.587785252292,
+                                       -0.809016994375,
+                                       0.309016994375,
+                                       -0.951056516295,
+                                       1.22464679915e-16,
+                                       -1.0,
+                                       -0.309016994375,
+                                       -0.951056516295,
+                                       -0.587785252292,
+                                       -0.809016994375,
+                                       -0.809016994375,
+                                       -0.587785252292,
+                                       -0.951056516295,
+                                       -0.309016994375,
+                                       -1.0,
+                                       -1.83697019872e-16,
+                                       -0.951056516295,
+                                       0.309016994375,
+                                       -0.809016994375,
+                                       0.587785252292,
+                                       -0.587785252292,
+                                       0.809016994375,
+                                       -0.309016994375,
+                                       0.951056516295};
 
     TS_ASSERT_THROWS_NOTHING(transform.dataToImage(complexData));
 
@@ -289,22 +410,51 @@ public:
 
   void test_forward_backward() {
 
-    MaxentSpace_sptr dataSpace = std::make_shared<MaxentSpaceComplex>();
-    MaxentSpace_sptr imageSpace = std::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr dataSpace = boost::make_shared<MaxentSpaceComplex>();
+    MaxentSpace_sptr imageSpace = boost::make_shared<MaxentSpaceComplex>();
     MaxentTransformFourier transform(dataSpace, imageSpace);
 
     // sin (x) + i cos(x)
-    std::vector<double> complexImage = {
-        0.0, 1.0, 0.309016994375, 0.951056516295, 0.587785252292,
-        0.809016994375, 0.809016994375, 0.587785252292, 0.951056516295,
-        0.309016994375, 1.0, 6.12323399574e-17, 0.951056516295, -0.309016994375,
-        0.809016994375, -0.587785252292, 0.587785252292, -0.809016994375,
-        0.309016994375, -0.951056516295, 1.22464679915e-16, -1.0,
-        -0.309016994375, -0.951056516295, -0.587785252292, -0.809016994375,
-        -0.809016994375, -0.587785252292, -0.951056516295, -0.309016994375,
-        -1.0, -1.83697019872e-16, -0.951056516295, 0.309016994375,
-        -0.809016994375, 0.587785252292, -0.587785252292, 0.809016994375,
-        -0.309016994375, 0.951056516295};
+    std::vector<double> complexImage = {0.0,
+                                        1.0,
+                                        0.309016994375,
+                                        0.951056516295,
+                                        0.587785252292,
+                                        0.809016994375,
+                                        0.809016994375,
+                                        0.587785252292,
+                                        0.951056516295,
+                                        0.309016994375,
+                                        1.0,
+                                        6.12323399574e-17,
+                                        0.951056516295,
+                                        -0.309016994375,
+                                        0.809016994375,
+                                        -0.587785252292,
+                                        0.587785252292,
+                                        -0.809016994375,
+                                        0.309016994375,
+                                        -0.951056516295,
+                                        1.22464679915e-16,
+                                        -1.0,
+                                        -0.309016994375,
+                                        -0.951056516295,
+                                        -0.587785252292,
+                                        -0.809016994375,
+                                        -0.809016994375,
+                                        -0.587785252292,
+                                        -0.951056516295,
+                                        -0.309016994375,
+                                        -1.0,
+                                        -1.83697019872e-16,
+                                        -0.951056516295,
+                                        0.309016994375,
+                                        -0.809016994375,
+                                        0.587785252292,
+                                        -0.587785252292,
+                                        0.809016994375,
+                                        -0.309016994375,
+                                        0.951056516295};
 
     auto complexData = transform.imageToData(complexImage);
     auto newImage = transform.dataToImage(complexData);

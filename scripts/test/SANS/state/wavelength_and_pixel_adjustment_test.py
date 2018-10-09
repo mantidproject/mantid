@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
@@ -18,9 +24,9 @@ class StateWavelengthAndPixelAdjustmentTest(unittest.TestCase):
         # Arrange
         state = StateWavelengthAndPixelAdjustment()
         assert_validate_error(self, ValueError, state)
-        state.wavelength_low = 1.
+        state.wavelength_low = [1.]
         assert_validate_error(self, ValueError, state)
-        state.wavelength_high = 2.
+        state.wavelength_high = [2.]
         assert_validate_error(self, ValueError, state)
         state.wavelength_step = 2.
         assert_validate_error(self, ValueError, state)
@@ -29,8 +35,8 @@ class StateWavelengthAndPixelAdjustmentTest(unittest.TestCase):
 
     def test_that_raises_when_lower_wavelength_is_smaller_than_high_wavelength(self):
         state = StateWavelengthAndPixelAdjustment()
-        state.wavelength_low = 2.
-        state.wavelength_high = 1.
+        state.wavelength_low = [2.]
+        state.wavelength_high = [1.]
         state.wavelength_step = 2.
         state.wavelength_step_type = RangeStepType.Lin
         assert_validate_error(self, ValueError, state)
@@ -54,8 +60,8 @@ class StateWavelengthAndPixelAdjustmentBuilderTest(unittest.TestCase):
 
         builder.set_HAB_pixel_adjustment_file("test")
         builder.set_HAB_wavelength_adjustment_file("test2")
-        builder.set_wavelength_low(1.5)
-        builder.set_wavelength_high(2.7)
+        builder.set_wavelength_low([1.5])
+        builder.set_wavelength_high([2.7])
         builder.set_wavelength_step(0.5)
         builder.set_wavelength_step_type(RangeStepType.Lin)
 
@@ -66,8 +72,8 @@ class StateWavelengthAndPixelAdjustmentBuilderTest(unittest.TestCase):
                                                                      DetectorType.HAB)].pixel_adjustment_file == "test")
         self.assertTrue(state.adjustment_files[DetectorType.to_string(
                                                               DetectorType.HAB)].wavelength_adjustment_file == "test2")
-        self.assertTrue(state.wavelength_low == 1.5)
-        self.assertTrue(state.wavelength_high == 2.7)
+        self.assertTrue(state.wavelength_low == [1.5])
+        self.assertTrue(state.wavelength_high == [2.7])
         self.assertTrue(state.wavelength_step == 0.5)
         self.assertTrue(state.wavelength_step_type is RangeStepType.Lin)
 

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, invalid-name, old-style-class, multiple-statements, too-many-branches
 
 """
@@ -8,6 +14,7 @@ direct geometry time-of-flight inelastic neutron spectrometers.
 from __future__ import (absolute_import, division, print_function)
 from .ISISFermi import ISISFermi
 from .ISISDisk import ISISDisk
+import warnings
 
 
 class PyChop2:
@@ -30,9 +37,13 @@ class PyChop2:
         'LETHIFLUX': ISISDisk,   # LET, high flux configuration
         'LETINTERMED': ISISDisk, # LET, medium flux configuration
         'LETHIRES': ISISDisk,    # LET, low flux configuration
-        'MERLIN': ISISDisk}
+        'MERLIN': ISISDisk,
+        'MAPS': ISISDisk,
+        'MARI': ISISDisk}
 
     def __init__(self, instname, *args):
+        warnings.warn("The PyChop2 class is deprecated and will be removed in the next Mantid version. "
+                      "Please use the Instrument class or the official PyChop CLI interface.", DeprecationWarning)
         instname = instname.upper()
         if instname not in self.__Classes.keys():
             raise ValueError('Instrument %s not recognised' % (instname))

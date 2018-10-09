@@ -1,8 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Divide.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -15,10 +20,11 @@ DECLARE_ALGORITHM(Divide)
 
 void Divide::init() {
   BinaryOperation::init();
-  declareProperty("WarnOnZeroDivide", true, "Algorithm usually warns if "
-                                            "division by 0 occurs. Set this "
-                                            "value to false if one does not "
-                                            "want this message appearing ");
+  declareProperty("WarnOnZeroDivide", true,
+                  "Algorithm usually warns if "
+                  "division by 0 occurs. Set this "
+                  "value to false if one does not "
+                  "want this message appearing ");
 }
 
 void Divide::exec() {

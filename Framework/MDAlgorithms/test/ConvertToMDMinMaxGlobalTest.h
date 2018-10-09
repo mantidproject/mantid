@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_CONVERTTOMDHELPERTEST_H_
 #define MANTID_MDALGORITHMS_CONVERTTOMDHELPERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MDAlgorithms::ConvertToMDMinMaxGlobal;
 
@@ -90,7 +96,7 @@ Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin, double dx,
 
   return ws;
 }
-}
+} // namespace
 
 class ConvertToMDMinMaxGlobalTest : public CxxTest::TestSuite {
 public:

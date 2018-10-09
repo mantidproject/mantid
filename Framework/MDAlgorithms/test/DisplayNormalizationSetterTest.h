@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_DISPLAYNORMALIZATIONSETTERTEST_H_
 #define MANTID_MDALGORITHMS_DISPLAYNORMALIZATIONSETTERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "boost/pointer_cast.hpp"
+#include <cxxtest/TestSuite.h>
 using namespace Mantid::MDAlgorithms;
 
 class DisplayNormalizationSetterTest : public CxxTest::TestSuite {

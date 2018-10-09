@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_GSLJACOBIAN_H_
 #define MANTID_CURVEFITTING_GSLJACOBIAN_H_
 
-#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -15,27 +21,6 @@ An implementation of Jacobian using gsl_matrix.
 
 @author Anders Markvardsen, ISIS, RAL
 @date 14/05/2010
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class GSLJacobian : public API::Jacobian {
   /// The pointer to the GSL's internal jacobian matrix
@@ -127,6 +112,21 @@ public:
   }
   /// overwrite base method
   void set(size_t iY, size_t iP, double value) override {
+    if (iP >= m_index.size()) {
+      // Functions are allowed to change their number of active
+      // fitting parameters during the fit (example: the crystal field
+      // functions). When it happens after an iteration is finished there is a
+      // special exception that signals the minimizer to re-initialize itself.
+      // But it can happen during a numeric derivative calculation: a field
+      // parameter is incremented, a new peak may appear and it may have a free
+      // fitting parameter, so the number of parameters change. You cannot throw
+      // and re-initialize the minimizer at this point because the same will
+      // happen again. If you ignore these "virtual" extra parameters by the
+      // time the derivative calculations finish the number of parameters will
+      // return to the original value. Note that the get(...) method doesn't
+      // skip any extra indices because if there are any it is an error.
+      return;
+    }
     int j = m_index[iP];
     if (j >= 0)
       gsl_matrix_set(m_J, iY, j, value);

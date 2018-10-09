@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_INTERPOLATINGREBIN_H_
 #define MANTID_ALGORITHMS_INTERPOLATINGREBIN_H_
 
@@ -9,8 +15,11 @@
 
 namespace Mantid {
 namespace HistogramData {
+class HistogramE;
+class Histogram;
 class BinEdges;
-}
+class Points;
+} // namespace HistogramData
 namespace Algorithms {
 /**Uses cubic splines to interpolate the mean rate of change of the integral
   over the inputed data bins to that for the user supplied bins.
@@ -45,27 +54,6 @@ namespace Algorithms {
 
     @author Steve Williams, STFC
     @date 05/05/2010
-
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport InterpolatingRebin : public Rebin {
 public:
@@ -94,15 +82,16 @@ protected:
   void outputYandEValues(API::MatrixWorkspace_const_sptr inputW,
                          const HistogramData::BinEdges &XValues_new,
                          API::MatrixWorkspace_sptr outputW);
-  void cubicInterpolation(const HistogramData::BinEdges &xOld,
-                          const MantidVec &yOld, const MantidVec &eOld,
-                          const HistogramData::BinEdges &xNew, MantidVec &yNew,
-                          MantidVec &eNew) const;
-  void noInterpolation(const HistogramData::BinEdges &xOld, const double yOld,
-                       const MantidVec &eOld,
-                       const HistogramData::BinEdges &xNew, MantidVec &yNew,
-                       MantidVec &eNew) const;
-  double estimateError(const MantidVec &xsOld, const MantidVec &esOld,
+  HistogramData::Histogram
+  cubicInterpolation(const HistogramData::Histogram &oldHistogram,
+                     const HistogramData::BinEdges &xNew) const;
+
+  HistogramData::Histogram
+  noInterpolation(const HistogramData::Histogram &oldHistogram,
+                  const HistogramData::BinEdges &xNew) const;
+
+  double estimateError(const HistogramData::Points &xsOld,
+                       const HistogramData::HistogramE &esOld,
                        const double xNew) const;
 };
 

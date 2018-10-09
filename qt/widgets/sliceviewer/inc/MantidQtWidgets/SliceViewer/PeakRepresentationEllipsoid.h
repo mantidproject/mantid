@@ -1,36 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
 #define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
 
-#include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
-#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidKernel/V2D.h"
+#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
 namespace MantidQt {
 namespace SliceViewer {
 
 /** PeakRepresentationEllipsoid : Draws an ellipse for elliptical peaks.
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at:
-  <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+ */
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationEllipsoid
     : public PeakRepresentation {
 public:
@@ -47,6 +31,12 @@ public:
   /// Transform the coordinates.
   void
   movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
+  void
+  movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
+                            NonOrthogonalAxis &info) override {
+    (void)info;
+    movePosition(peakTransform);
+  }
   /// Get the bounding box.
   PeakBoundingBox getBoundingBox() const override;
   /// Set the size of the cross peak in the viewing plane
@@ -123,6 +113,6 @@ private:
   std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
       m_calculator;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif

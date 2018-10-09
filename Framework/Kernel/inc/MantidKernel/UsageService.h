@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_USAGESERVICE_H_
 #define MANTID_KERNEL_USAGESERVICE_H_
 
@@ -10,8 +16,8 @@
 #include <Poco/ActiveMethod.h>
 #include <Poco/Timer.h>
 
-#include <queue>
 #include <mutex>
+#include <queue>
 
 namespace Mantid {
 namespace Kernel {
@@ -25,27 +31,6 @@ namespace Kernel {
     - Registering feature usage, and storing in a feature usage buffer
     - Sending Feature usage reports on application exit, and when the feature
   usage buffer is above a size threshold.
-
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class FeatureUsage {
@@ -87,6 +72,8 @@ public:
   void shutdown();
   /// gets the uptime of this mantid instance
   Types::Core::time_duration getUpTime();
+  /// Gets the start time of this mantid instance
+  Types::Core::DateAndTime getStartTime() { return m_startTime; }
 
 protected:
   /// Constructor

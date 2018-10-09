@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSymmetrise.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 
 namespace {
@@ -533,4 +539,4 @@ void IndirectSymmetrise::saveClicked() {
     plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

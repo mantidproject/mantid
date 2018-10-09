@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import re
 
 
@@ -29,7 +35,7 @@ class ReflTestHarness:
         clickButton(waitForObject(":tableMain.Yes_QPushButton"))
         
     def __teardown(self):
-        sendEvent("QCloseEvent", waitForObject(":ISIS Reflectometry (Old)_ReflGui"))
+        sendEvent("QCloseEvent", waitForObject(":ISIS Reflectometry (Old) - DEPRECATED_ReflGui"))
         dont_save_name = ":Don't Save_QPushButton"
         if(object.exists(dont_save_name)):
             clickButton(waitForObject(dont_save_name))
@@ -215,7 +221,7 @@ def do_test_three_runs(test_harness):
     # Set the second run number
     tbl.item(row_index, 5).setText(str(run_number2))
     
-    # Set the thrid run number
+    # Set the third run number
     tbl.item(row_index, 10).setText(str(run_number3))
     # Give the third run a theta value
     tbl.item(row_index, 11).setText(str(1.0))

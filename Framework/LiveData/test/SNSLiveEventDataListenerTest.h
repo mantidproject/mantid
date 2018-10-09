@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENERTEST_H_
 #define MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENERTEST_H_
 
 /* This code is largely based on Russell Taylor's test for the
  * FakeEventDataLister class. */
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <Poco/Thread.h>
 #include "MantidKernel/CPUTimer.h"
+#include <Poco/Thread.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using Mantid::Kernel::CPUTimer;

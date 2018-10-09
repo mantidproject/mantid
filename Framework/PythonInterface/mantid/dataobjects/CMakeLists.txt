@@ -21,6 +21,7 @@ set ( EXPORT_FILES
   src/Exports/MDEventWorkspace.cpp
   src/Exports/MDHistoWorkspace.cpp
   src/Exports/PeaksWorkspace.cpp
+  src/Exports/PeaksWorkspaceProperty.cpp
   src/Exports/TableWorkspace.cpp
   src/Exports/SplittersWorkspace.cpp
   src/Exports/WorkspaceSingleValue.cpp
@@ -66,6 +67,7 @@ set_target_output_directory ( PythonDataObjectsModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
 target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            PythonInterfaceCore
             PythonAPIModule
             PythonGeometryModule
             PythonKernelModule
