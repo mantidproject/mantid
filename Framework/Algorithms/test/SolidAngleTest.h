@@ -7,8 +7,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAlgorithms/SolidAngle.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/SolidAngle.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
@@ -66,7 +66,7 @@ public:
   }
 
   void testInit() {
-      SolidAngle alg;
+    SolidAngle alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -78,9 +78,9 @@ public:
 
   void testExec() {
     SolidAngle alg;
-    if (!alg.isInitialized()){
+    if (!alg.isInitialized()) {
       alg.initialize();
-       // Set the properties
+      // Set the properties
       alg.setPropertyValue("InputWorkspace", inputSpace);
       outputSpace = "outWorkspace";
       alg.setPropertyValue("OutputWorkspace", outputSpace);
@@ -165,13 +165,13 @@ public:
     SolidAngle alg2;
     CreateSampleWorkspace createWS;
     createWS.initialize();
-    
+
     if (!alg1.isInitialized())
       alg1.initialize();
     std::string outputWorkspace1 = "wholeOutput";
     std::string outputWorkspace2 = "50OnwardsOutput";
     std::string inputSpace2 = "IndexTestWS";
-    createWS.setPropertyValue("OutputWorkspace",inputSpace2);
+    createWS.setPropertyValue("OutputWorkspace", inputSpace2);
     createWS.execute();
     alg1.setPropertyValue("InputWorkspace", inputSpace2);
     alg1.setPropertyValue("OutputWorkspace", outputWorkspace1);
