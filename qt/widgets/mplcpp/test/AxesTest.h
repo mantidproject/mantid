@@ -72,11 +72,29 @@ public:
     axes.setYScale("symlog");
   }
 
+  void testGetXLimReturnsXLimits() {
+    Axes axes(pyAxes());
+    axes.plot({5, 6, 7, 8}, {10, 11, 12, 13});
+    auto xlimits = axes.getXLim();
+    TS_ASSERT_DELTA(5, std::get<0>(xlimits), 1e-5);
+    TS_ASSERT_DELTA(8, std::get<1>(xlimits), 1e-5);
+  }
+
+  void testGetYLimReturnsYLimits() {
+    Axes axes(pyAxes());
+    axes.plot({5, 6, 7, 8}, {10, 11, 12, 13});
+    auto ylimits = axes.getYLim();
+    TS_ASSERT_DELTA(10, std::get<0>(ylimits), 1e-5);
+    TS_ASSERT_DELTA(13, std::get<1>(ylimits), 1e-5);
+  }
+
   void testTextAddsTextAddGivenCoordinate() {
     Axes axes(pyAxes());
-    auto artist = axes.text(0.5, 0.5, "test", "left");
+    auto artist = axes.text(0.5, 0.4, "test", "left");
 
     TS_ASSERT_EQUALS("test", artist.pyobj().attr("get_text")());
+    TS_ASSERT_EQUALS(0.5, artist.pyobj().attr("get_position")()[0]);
+    TS_ASSERT_EQUALS(0.4, artist.pyobj().attr("get_position")()[1]);
   }
 
   // ----------------- failure tests ---------------------

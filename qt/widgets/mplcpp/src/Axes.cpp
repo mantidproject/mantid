@@ -21,6 +21,23 @@ namespace {
 QString toQString(const Python::Object &pystr) {
   return QString::fromLatin1(TO_CSTRING(pystr.ptr()));
 }
+
+/**
+ * Retrieve axes limits from an axes object as C++ tuple
+ * @param axes A reference to the axes object
+ * @param method The accessor name
+ * @return A 2-tuple of the limits values
+ */
+std::tuple<double, double> limitsToTuple(const Python::Object &axes,
+                                         const char *method) {
+  auto toDouble = [](const Python::Object &value) {
+    return PyFloat_AsDouble(value.ptr());
+  };
+  auto limits = axes.attr(method)();
+  return std::make_tuple<double, double>(toDouble(limits[0]),
+                                         toDouble(limits[1]));
+}
+
 } // namespace
 
 /**
@@ -139,6 +156,22 @@ void Axes::setYScale(const char *value) {
 /// @return The scale type of the Y axis as a string
 QString Axes::getYScale() const {
   return toQString(pyobj().attr("get_yscale")());
+}
+
+/**
+ * Retrieve the X limits of the axes
+ * @return A 2-tuple of (min,max) values for the X axis
+ */
+std::tuple<double, double> Axes::getXLim() const {
+  return limitsToTuple(pyobj(), "get_xlim");
+}
+
+/**
+ * Retrieve the Y limits of the axes
+ * @return A 2-tuple of (min,max) values for the Y axis
+ */
+std::tuple<double, double> Axes::getYLim() const {
+  return limitsToTuple(pyobj(), "get_ylim");
 }
 
 /**
