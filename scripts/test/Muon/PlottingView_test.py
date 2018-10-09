@@ -18,20 +18,22 @@ try:
 except ImportError:
     import mock
 
+
 def get_subPlot(name):
-    ws1 = CreateWorkspace(DataX=[1,2,3,4],DataY=[4,5,6,7],NSpec=2)
+    ws1 = CreateWorkspace(DataX=[1, 2, 3, 4], DataY=[4, 5, 6, 7], NSpec=2)
     label1 = "test"
     # create real lines
     fig = Figure()
-    sub = fig.add_subplot(1,1,1)
-    line1 =plots.plotfunctions.plot(sub,ws1,specNum=1) 
+    sub = fig.add_subplot(1, 1, 1)
+    line1 = plots.plotfunctions.plot(sub, ws1, specNum=1)
     # add them both
     subplot = subPlot(name)
-    subplot.addLine(label1,line1,ws1,2)
-    return subplot,ws1
+    subplot.addLine(label1, line1, ws1, 2)
+    return subplot, ws1
 
 
 class PlottingViewHelperFunctionTests(unittest.TestCase):
+
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
 
@@ -231,12 +233,15 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view.plot = mock.Mock()
         # create subplot object
         subplot, ws = get_subPlot(self.plot_name)
-        self.view.plot_storage = {self.plot_name:subplot}
+        self.view.plot_storage = {self.plot_name: subplot}
         self.view.plot_storage[self.plot_name].delete = mock.Mock()
 
         self.view._change_plot_errors(*args)
         self.view._modify_errors_list.assert_called_once_with(*args[::2])
-        self.assertEquals(self.view.plot_storage[self.plot_name].delete.call_count,1)
+        self.assertEquals(
+            self.view.plot_storage[
+                self.plot_name].delete.call_count,
+            1)
         self.view.plot.assert_called_once_with(
             self.plot_name, ws)
 
@@ -284,6 +289,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
 
 class PlottingViewPlotFunctionsTests(unittest.TestCase):
+
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
 
@@ -332,18 +338,20 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
 
     @mock.patch("mantid.plots.plotfunctions.errorbar")
     #@mock.patch("mantid.plots.plotfunctions.plot")
-    def test_plot_workspace_errors(self, error_bar):#, normal_plot):
+    def test_plot_workspace_errors(self, error_bar):  # , normal_plot):
         self.view._add_plotted_line = mock.Mock()
         error_bar.return_value = tuple([[] for i in range(3)])
         mock_line = mock.Mock()
-        mock_line.get_label = mock.Mock(return_value = "test")
+        mock_line.get_label = mock.Mock(return_value="test")
         mock_line.remove = mock.Mock()
         with mock.patch("mantid.plots.plotfunctions.plot") as normal_plot:
-           normal_plot.return_value = tuple([mock_line])
-           self.view.plot_workspace_errors(self.plot_name, self.mock_workspace)
-           self.assertEquals(error_bar.call_count, 1)
-           self.assertEquals(self.view._add_plotted_line.call_count,1)
-           self.assertEquals(normal_plot.call_count, 1)
+            normal_plot.return_value = tuple([mock_line])
+            self.view.plot_workspace_errors(
+                self.plot_name,
+                self.mock_workspace)
+            self.assertEquals(error_bar.call_count, 1)
+            self.assertEquals(self.view._add_plotted_line.call_count, 1)
+            self.assertEquals(normal_plot.call_count, 1)
 
     @mock.patch("mantid.plots.plotfunctions.plot")
     def test_plot_workspace(self, plot):
@@ -374,7 +382,7 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
         self.assertEquals(return_value, True)
 
     def test_remove_subplot(self):
-        self.view.plot_storage = {self.plot_name:get_subPlot(self.plot_name)}
+        self.view.plot_storage = {self.plot_name: get_subPlot(self.plot_name)}
         self.view.subplotRemovedSignal = mock.Mock()
         self.view.remove_subplot(self.plot_name)
         self.view.subplotRemovedSignal.callled_once_with(self.plot_name)
