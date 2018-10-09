@@ -12,7 +12,8 @@
 #include "GLColor.h"
 
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
-
+#include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include <QString>
 #include <map>
 
@@ -27,19 +28,21 @@ private:
   std::vector<GLColor> m_pickColors;
   mutable GLuint m_displayListId[2];
   mutable bool m_useDisplayList[2];
-  mutable std::vector<GLuint> m_textureIDs;
-  mutable std::vector<size_t> m_textureIndices;
+  mutable std::vector<detail::BankTextureBuilder> m_textures;
   mutable std::map<size_t, size_t> m_reverseTextureIndexMap;
-  mutable std::vector<std::vector<char>> colorTextures;
-  mutable std::vector<std::vector<char>> pickTextures;
   std::vector<double> m_specIntegrs;
   ColorMap m_colorMap;
+  bool m_isUsingLayers;
+  size_t m_layer;
 
 public:
   InstrumentRenderer(const InstrumentActor &actor);
+
   ~InstrumentRenderer();
+
   void renderInstrument(const std::vector<bool> &visibleComps, bool showGuides,
                         bool picking = false);
+
   void reset();
 
   void changeScaleType(int type);
@@ -52,31 +55,26 @@ public:
 
   GLColor getColor(size_t index) const;
 
+  void enableGridBankLayers(bool on, size_t layer);
+
   static GLColor makePickColor(size_t pickID);
 
   static size_t decodePickColor(const QRgb &c);
+
+  bool isUsingLayers() const { return m_isUsingLayers; }
+
+  size_t selectedLayer() const { return m_layer; }
 
 private:
   void resetColors();
   void resetPickColors();
   void draw(const std::vector<bool> &visibleComps, bool showGuides,
             bool picking);
+  void drawGridBank(size_t bankIndex, bool picking);
   void drawRectangularBank(size_t bankIndex, bool picking);
   void drawStructuredBank(size_t bankIndex, bool picking);
   void drawTube(size_t bankIndex, bool picking);
   void drawSingleDetector(size_t detIndex, bool picking);
-  void generateRectangularTexture(std::vector<char> &texture,
-                                  const std::vector<GLColor> &colors,
-                                  size_t bankIndex);
-
-  void uploadRectangularTexture(const std::vector<char> &texture,
-                                size_t textureIndex) const;
-
-  void generateTubeTexture(std::vector<char> &texture,
-                           const std::vector<GLColor> &colors,
-                           size_t bankIndex);
-  void uploadTubeTexture(const std::vector<char> &texture,
-                         size_t textureIndex) const;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
