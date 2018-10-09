@@ -236,19 +236,19 @@ public:
 
     Spectra const inputSpectra = DiscontinuousSpectra<std::size_t>("0-1");
     model->setSpectra(inputSpectra, 0);
+    Spectra const spectra = model->getSpectra(0);
 
-    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), model->getSpectra(0),
-                                   inputSpectra));
+    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, inputSpectra));
   }
 
   void
   test_that_getSpectra_returns_an_empty_DiscontinuousSpectra_when_provided_an_out_of_range_index() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
 
-    Spectra const spec(DiscontinuousSpectra<std::size_t>(""));
+    Spectra const emptySpectra(DiscontinuousSpectra<std::size_t>(""));
+    Spectra const spectra = model->getSpectra(3);
 
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), model->getSpectra(3), spec));
+    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, emptySpectra));
   }
 
   void
@@ -545,9 +545,9 @@ public:
 
     Spectra const inputSpectra = DiscontinuousSpectra<std::size_t>("2,4,6-8");
     model->setSpectra(inputSpectra, 0);
+    Spectra const spectra = model->getSpectra(0);
 
-    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), model->getSpectra(0),
-                                   inputSpectra));
+    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, inputSpectra));
   }
 
   void
@@ -556,9 +556,9 @@ public:
 
     Spectra const inputSpectra = std::make_pair(0u, 5u);
     model->setSpectra(inputSpectra, 0);
+    Spectra const spectra = model->getSpectra(0);
 
-    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), model->getSpectra(0),
-                                   inputSpectra));
+    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, inputSpectra));
   }
 
   void
@@ -658,8 +658,8 @@ public:
     auto const model = getModelWithOutputFitData();
 
     auto const parameters = model->getParameterValues(0, 0);
-    TS_ASSERT_EQUALS(parameters.at("f1.f1.f0.Amplitude").value, 1.0, 0.0001);
-    TS_ASSERT_EQUALS(parameters.at("f1.f1.f0.FWHM").value, 0.0175, 0.0001);
+    TS_ASSERT_DELTA(parameters.at("f1.f1.f0.Amplitude").value, 1.0, 0.0001);
+    TS_ASSERT_DELTA(parameters.at("f1.f1.f0.FWHM").value, 0.0175, 0.0001);
     TS_ASSERT(!parameters.empty());
   }
 
@@ -677,8 +677,8 @@ public:
     auto const model = getModelWithOutputFitData();
 
     auto const parameters = model->getFitParameters(0, 0);
-    TS_ASSERT_EQUALS(parameters.at("f1.f1.f0.Amplitude").value, 1.0, 0.0001);
-    TS_ASSERT_EQUALS(parameters.at("f1.f1.f0.FWHM").value, 0.0175, 0.0001);
+    TS_ASSERT_DELTA(parameters.at("f1.f1.f0.Amplitude").value, 1.0, 0.0001);
+    TS_ASSERT_DELTA(parameters.at("f1.f1.f0.FWHM").value, 0.0175, 0.0001);
     TS_ASSERT(!parameters.empty());
   }
 
@@ -696,7 +696,7 @@ public:
 
     auto const parameters = model->getDefaultParameters(0);
     TS_ASSERT(!parameters.empty());
-    TS_ASSERT_EQUALS(parameters.at("f1.f1.f0.Amplitude").value, 1.5, 0.0001);
+    TS_ASSERT_DELTA(parameters.at("f1.f1.f0.Amplitude").value, 1.5, 0.0001);
   }
 
   void test_that_getResultLocation_returns_a_location_for_the_output_data() {
