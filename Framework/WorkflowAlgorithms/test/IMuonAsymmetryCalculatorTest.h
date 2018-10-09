@@ -446,8 +446,8 @@ public:
       TS_ASSERT_DELTA(ws->readY(0)[1], 0.778, 0.001);
       TS_ASSERT_DELTA(ws->readY(0)[2], 0.714, 0.001);
 
-      TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
-      TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
+      TS_ASSERT_EQUALS(ws->readX(0)[0], 1.5);
+      TS_ASSERT_EQUALS(ws->readX(0)[1], 2.5);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
       TS_ASSERT_DELTA(ws->readE(0)[0], 0.475, 0.01);
@@ -481,8 +481,8 @@ public:
       TS_ASSERT_DELTA(ws->readY(0)[1], -0.2250, 0.0001);
       TS_ASSERT_DELTA(ws->readY(0)[2], -0.1666, 0.0001);
 
-      TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
-      TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
+      TS_ASSERT_EQUALS(ws->readX(0)[0], 1.5);
+      TS_ASSERT_EQUALS(ws->readX(0)[1], 2.5);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
       TS_ASSERT_DELTA(ws->readE(0)[0], 0.5290, 0.001);
@@ -512,8 +512,8 @@ public:
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 3);
 
-      TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
-      TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
+      TS_ASSERT_EQUALS(ws->readX(0)[0], 1.5);
+      TS_ASSERT_EQUALS(ws->readX(0)[1], 2.5);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
       TS_ASSERT_DELTA(ws->readY(0)[0], -0.5454, 0.0001);
@@ -553,8 +553,8 @@ public:
       TS_ASSERT_DELTA(ws->readY(0)[1], 0.0330, 0.0001);
       TS_ASSERT_DELTA(ws->readY(0)[2], 0.0250, 0.0001);
 
-      TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
-      TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
+      TS_ASSERT_EQUALS(ws->readX(0)[0], 1.5);
+      TS_ASSERT_EQUALS(ws->readX(0)[1], 2.5);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
       TS_ASSERT_DELTA(ws->readE(0)[0], 0.4039, 0.001);
@@ -590,8 +590,8 @@ public:
       TS_ASSERT_DELTA(ws->readY(0)[1], 0.4500, 0.0001);
       TS_ASSERT_DELTA(ws->readY(0)[2], 0.3913, 0.0001);
 
-      TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
-      TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
+      TS_ASSERT_EQUALS(ws->readX(0)[0], 1.5);
+      TS_ASSERT_EQUALS(ws->readX(0)[1], 2.5);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
       TS_ASSERT_DELTA(ws->readE(0)[0], 0.1940, 0.001);
