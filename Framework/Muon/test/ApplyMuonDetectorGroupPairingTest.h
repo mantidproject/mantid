@@ -247,11 +247,9 @@ public:
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-    // Current behaviour is to convert bin edge x-values to bin centre x-values
-    // (point data) so there is on fewer x-value now.
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.4692, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 1.0000, 0.0001);
@@ -311,9 +309,9 @@ public:
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.5755, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.5368, 0.0001);
@@ -342,9 +340,9 @@ public:
 
     // Summation of periods occurs before asymmetry calculation
     // Subtraction of periods occurs AFTER asymmetry calculation
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.0153, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.0130, 0.0001);
@@ -380,9 +378,9 @@ public:
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
 
     // Dead time applied before asymmetry
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.5181, 0.0001);
@@ -421,9 +419,9 @@ public:
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.1388, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.2900, 0.001);
