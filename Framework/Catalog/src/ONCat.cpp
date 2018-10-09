@@ -89,7 +89,15 @@ static const std::string DEFAULT_CLIENT_ID =
  *
  * @return The constructed ONCat object.
  */
-ONCat ONCat::fromMantidSettings() {
+ONCat ONCat::fromMantidSettings(bool authenticate) {
+  if (!authenticate) {
+    return ONCat(DEFAULT_ONCAT_URL,
+                 nullptr,
+                 OAuthFlow::NONE,
+                 boost::none,
+                 boost::none);
+  }
+
   auto &config = Mantid::Kernel::ConfigService::Instance();
   const auto client_id = config.getString(CONFIG_PATH_BASE + "client_id");
   const auto client_secret =
@@ -114,17 +122,15 @@ ONCat ONCat::fromMantidSettings() {
 }
 
 ONCat::ONCat(const std::string &url, IOAuthTokenStore_uptr tokenStore,
-             OAuthFlow flow, const std::string &clientId,
+             OAuthFlow flow, const boost::optional<std::string> &clientId,
              const boost::optional<std::string> &clientSecret)
     : m_url(url), m_tokenStore(std::move(tokenStore)), m_clientId(clientId),
       m_clientSecret(clientSecret),
-
       m_flow(flow), m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
 
 ONCat::ONCat(const ONCat &other)
     : m_url(other.m_url), m_tokenStore(other.m_tokenStore),
       m_clientId(other.m_clientId), m_clientSecret(other.m_clientSecret),
-
       m_flow(other.m_flow), m_internetHelper(other.m_internetHelper) {}
 
 ONCat::~ONCat() {}
@@ -172,8 +178,7 @@ ONCat::~ONCat() {}
  * @param true if a user is "logged in", else false.
  */
 bool ONCat::isUserLoggedIn() const {
-  if (m_flow == OAuthFlow::CLIENT_CREDENTIALS) {
-    // No users are ever authenticated as part of this flow.
+  if (m_flow == OAuthFlow::NONE || m_flow == OAuthFlow::CLIENT_CREDENTIALS) {
     return false;
   }
 
@@ -185,9 +190,10 @@ void ONCat::logout() {
   // that are no longer needed (though this is defined in the OAtuh
   // spec).  A "logout", then, is simply throwing away whatever token we
   // previously stored client-side.
-  m_tokenStore->setToken(boost::none);
-  g_log.debug() << "Logging out." << std::endl;
-  ;
+  if (m_tokenStore) {
+    m_tokenStore->setToken(boost::none);
+    g_log.debug() << "Logging out." << std::endl;
+  }
 }
 
 /**
@@ -205,16 +211,15 @@ void ONCat::login(const std::string &username, const std::string &password) {
     g_log.warning()
         << "Unexpected usage detected!  "
         << "Logging in with user credentials in not required (and is not "
-        << "supported) when machine-to-machine credentials are being used."
+        << "supported) unless resource owner credentials are being used."
         << std::endl;
-    ;
     return;
   }
 
   Poco::Net::HTMLForm form(Poco::Net::HTMLForm::ENCODING_MULTIPART);
   form.set("username", username);
   form.set("password", password);
-  form.set("client_id", m_clientId);
+  form.set("client_id", m_clientId.get());
   if (m_clientSecret) {
     form.set("client_secret", m_clientSecret.get());
   }
@@ -317,6 +322,10 @@ void ONCat::refreshTokenIfNeeded() {
  *   Thrown when the provider decides the current token cannot be refreshed.
  */
 void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
+  if (m_flow == OAuthFlow::NONE) {
+    return;
+  }
+
   const auto currentToken = m_tokenStore->getToken();
 
   if (m_flow == OAuthFlow::CLIENT_CREDENTIALS) {
@@ -325,7 +334,7 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
     }
 
     Poco::Net::HTMLForm form(Poco::Net::HTMLForm::ENCODING_MULTIPART);
-    form.set("client_id", m_clientId);
+    form.set("client_id", m_clientId.get());
     if (m_clientSecret) {
       form.set("client_secret", m_clientSecret.get());
     }
@@ -360,7 +369,7 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
     }
 
     Poco::Net::HTMLForm form(Poco::Net::HTMLForm::ENCODING_MULTIPART);
-    form.set("client_id", m_clientId);
+    form.set("client_id", m_clientId.get());
     if (m_clientSecret) {
       form.set("client_secret", m_clientSecret.get());
     }
@@ -403,12 +412,16 @@ void ONCat::sendAPIRequest(const std::string &uri,
                            std::ostream &response) {
   refreshTokenIfNeeded();
 
-  const auto tokenType = m_tokenStore->getToken()->tokenType();
-  const auto accessToken = m_tokenStore->getToken()->accessToken();
-
   m_internetHelper->clearHeaders();
   m_internetHelper->setMethod("GET");
-  m_internetHelper->addHeader("Authorization", tokenType + " " + accessToken);
+
+  if (m_flow != OAuthFlow::NONE) {
+    const auto tokenType = m_tokenStore->getToken()->tokenType();
+    const auto accessToken = m_tokenStore->getToken()->accessToken();
+
+    m_internetHelper->addHeader("Authorization",
+                                tokenType + " " + accessToken);
+  }
 
   std::vector<std::string> queryStringParts(queryParameters.size());
   std::transform(queryParameters.begin(), queryParameters.end(),
@@ -437,6 +450,9 @@ void ONCat::sendAPIRequest(const std::string &uri,
             "principle this should rarely happen.  "
             "Please try again and if the problem persists contact the "
             "ONCat administrator at oncat-support@ornl.gov.";
+        break;
+      case OAuthFlow::NONE:
+        assert(false);
         break;
       }
       // The ONCat API does *not* leak information in the case where a

@@ -96,7 +96,7 @@ using QueryParameters = std::vector<QueryParameter>;
 */
 class MANTID_CATALOG_DLL ONCat {
 public:
-  static ONCat fromMantidSettings();
+  static ONCat fromMantidSettings(bool authenticate = true);
 
   ONCat() = delete;
   ONCat(const ONCat &other);
@@ -118,8 +118,9 @@ public:
   //////////////////////////////////////////////////////////////////////
   // Exposed publicly for testing purposes only.
   //////////////////////////////////////////////////////////////////////
+  ONCat(const std::string &url);
   ONCat(const std::string &url, IOAuthTokenStore_uptr tokenStore,
-        OAuthFlow flow, const std::string &clientId,
+        OAuthFlow flow, const boost::optional<std::string> &clientId,
         const boost::optional<std::string> &clientSecret = boost::none);
   void refreshTokenIfNeeded();
   void refreshTokenIfNeeded(const DateAndTime &currentTime);
@@ -134,7 +135,7 @@ private:
 
   std::string m_url;
   IOAuthTokenStore_sptr m_tokenStore;
-  std::string m_clientId;
+  boost::optional<std::string> m_clientId;
   boost::optional<std::string> m_clientSecret;
 
   OAuthFlow m_flow;

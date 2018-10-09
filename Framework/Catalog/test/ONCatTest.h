@@ -273,6 +273,29 @@ public:
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
   }
 
+  void test_retrieve_entity_unauthenticated() {
+    ONCat oncat(DUMMY_URL, nullptr, OAuthFlow::NONE, boost::none, boost::none);
+
+    TS_ASSERT(!oncat.isUserLoggedIn());
+
+    auto mock_oncat_api = make_mock_oncat_api(
+        {{DUMMY_URL + "/api/instruments/HB2C?facility=HFIR",
+          std::make_pair(HTTPResponse::HTTP_OK, "{\"facility\": \"HFIR\","
+                                                "\"name\": \"HB2C\","
+                                                "\"id\": \"HB2C\","
+                                                "\"type\": \"instrument\"}")}});
+
+    oncat.setInternetHelper(mock_oncat_api);
+
+    const auto entity = oncat.retrieve("api", "instruments", "HB2C",
+                                       {QueryParameter("facility", "HFIR")});
+
+    TS_ASSERT_EQUALS(entity.id(), std::string("HB2C"));
+    TS_ASSERT_EQUALS(entity.asString("name"), std::string("HB2C"));
+
+    TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
+  }
+
   void test_retrieve_entity() {
     ONCat oncat(DUMMY_URL, make_mock_token_store_already_logged_in(),
                 OAuthFlow::RESOURCE_OWNER_CREDENTIALS, DUMMY_CLIENT_ID);
