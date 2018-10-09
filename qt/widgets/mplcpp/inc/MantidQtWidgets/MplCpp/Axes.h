@@ -36,10 +36,12 @@ public:
   void setTitle(const char *label);
   /// @}
 
-  /// @name Plotting
+  /// @name Drawing
   /// @{
   Line2D plot(std::vector<double> xdata, std::vector<double> ydata,
               const char *format = "b-");
+  Artist text(double x, double y, QString text,
+              const char *horizontalAlignment);
   /// @}
 
   ///@name Scales
