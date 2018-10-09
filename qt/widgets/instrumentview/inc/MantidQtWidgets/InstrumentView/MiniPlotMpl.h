@@ -74,6 +74,7 @@ private: // data
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
   QPushButton *m_homeBtn;
   std::vector<Widgets::MplCpp::Line2D> m_lines;
+  std::vector<Widgets::MplCpp::Artist> m_peakLabels;
   Widgets::MplCpp::Cycler m_colorCycler;
   QString m_xunit;
   QString m_activeCurveLabel;

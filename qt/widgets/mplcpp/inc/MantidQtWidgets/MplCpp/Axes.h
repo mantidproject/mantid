@@ -21,6 +21,8 @@
 
 #include <QString>
 
+#include <tuple>
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -50,6 +52,8 @@ public:
   QString getXScale() const;
   void setYScale(const char *value);
   QString getYScale() const;
+  std::tuple<double, double> getXLim() const;
+  std::tuple<double, double> getYLim() const;
   void relim(bool visibleOnly = false);
   void autoscale(bool enable);
   void autoscaleView(bool scaleX = true, bool scaleY = true);

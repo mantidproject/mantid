@@ -71,7 +71,7 @@ namespace MantidWidgets {
  */
 MiniPlotMpl::MiniPlotMpl(QWidget *parent)
     : QWidget(parent), m_canvas(new FigureCanvasQt(111)),
-      m_homeBtn(createHomeButton()), m_lines(),
+      m_homeBtn(createHomeButton()), m_lines(), m_peakLabels(),
       m_colorCycler(cycler("color", STORED_LINE_COLOR_CYCLE)), m_xunit(),
       m_activeCurveLabel(), m_storedCurveLabels(), m_zoomer(m_canvas) {
   auto plotLayout = new QGridLayout(this);
@@ -144,18 +144,24 @@ void MiniPlotMpl::addPeakLabel(const PeakMarker2D *peakMarker) {
   } else {
     peakX = peak.getTOF();
   }
-  double ymax(1.0);
-  //  std::tie(_, ymax) = m_miniplot->getYLimits();
-  //  // arbitrarily place the label at 85% of the y-axis height
+  double ymax(1.0), _;
+  std::tie(_, ymax) = m_canvas->gca().getYLim();
+  // arbitrarily place the label at 85% of the y-axis height
   const double peakY = 0.85 * ymax;
   const QString label(peakMarker->getLabel());
-  m_canvas->gca().text(peakX, peakY, label, "center");
+  m_peakLabels.emplace_back(
+      m_canvas->gca().text(peakX, peakY, label, "center"));
 }
 
 /**
  * Clear all peak labels from the canvas
  */
-void MiniPlotMpl::clearPeakLabels() {}
+void MiniPlotMpl::clearPeakLabels() {
+  for (auto &label : m_peakLabels) {
+    label.remove();
+  }
+  m_peakLabels.clear();
+}
 
 /**
  * @return True if an active curve exists
@@ -223,6 +229,7 @@ void MiniPlotMpl::clearCurve() {
     m_lines.pop_back();
   }
   m_activeCurveLabel.clear();
+  clearPeakLabels();
 }
 
 /**
