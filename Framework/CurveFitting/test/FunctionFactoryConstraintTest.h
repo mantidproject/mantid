@@ -173,6 +173,12 @@ public:
 
     funa->setParameter("a0", -1);
     TS_ASSERT_EQUALS(c->check(), 1000);
+
+    TS_ASSERT_EQUALS(funa->asString(), "name=FunctionFactoryConstraintTest_FunctA,a0=-1,"
+                                       "a1=1.1,constraints=(0<a0<0.2)");
+    funa->setConstraintPenaltyFactor("a0", 10.2);
+    TS_ASSERT_EQUALS(funa->asString(), "name=FunctionFactoryConstraintTest_FunctA,a0=-1,"
+                                       "a1=1.1,constraints=(0<a0<0.2,penalty=10.2)");
   }
 
   void testCreateWithConstraint2() {
@@ -204,6 +210,10 @@ public:
 
     funa->setParameter("a1", 11);
     TS_ASSERT_EQUALS(c1->check(), 0);
+
+    funa->setConstraintPenaltyFactor("a1", 18.4);
+    TS_ASSERT_EQUALS(funa->asString(), "name=FunctionFactoryConstraintTest_FunctA,a0=-1,"
+                                       "a1=11,constraints=(0<a0<0.2,10<a1,penalty=18.4)");
   }
 
   void testCreateCompositeWithConstraints() {
