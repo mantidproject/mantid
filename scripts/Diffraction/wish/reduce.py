@@ -332,7 +332,6 @@ def WISH_focus_onepanel(work, focus, panel):
     DiffractionFocussing(InputWorkspace=work, OutputWorkspace=focus, GroupingFileName=WISH_group())
     if (panel == 5 or panel == 6):
         CropWorkspace(InputWorkspace=focus, OutputWorkspace=focus, XMin=0.3)
-    DeleteWorkspace(work)
     return focus
 
 
@@ -461,13 +460,13 @@ def WISH_createvan(van, empty, panel, smoothing, vh, vr, cycle_van="09_3", cycle
     wempty = WISH_read(empty, panel, "nxs_event")
     Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
     print "read van and empty"
-    DleteWorkspace(wempty)
+    DeleteWorkspace(wempty)
     ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="Wavelength", EMode="Elastic")
     CylinderAbsorption(InputWorkspace=wvan, OutputWorkspace="T",
                        CylinderSampleHeight=str(vh), CylinderSampleRadius=str(vr), AttenuationXSection="4.8756",
                        ScatteringXSection="5.16", SampleNumberDensity="0.07118",
                        NumberOfSlices="10", NumberOfAnnuli="10", NumberOfWavelengthPoints="25", ExpMethod="Normal")
-    Divide(LHSWorkspace=wvan, RHSWorkspace="T", OutputWorkspave=wvan)
+    Divide(LHSWorkspace=wvan, RHSWorkspace="T", OutputWorkspace=wvan)
     DeleteWorkspace("T")
     ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="TOF", EMode="Elastic")
     vanfoc = WISH_focus(wvan, panel)
@@ -639,7 +638,7 @@ def WISH_process_incidentmon(number, ext, spline_terms=20, debug=False):
 
 
 # removes the peaks in a vanadium  run, then performs a spline and a smooth
-def Removepeaks_spline_smooth_empty(works, panel, debug=False):
+def Removepeaks_spline_smooth_vana(works, panel, debug=False):
     if (panel == 1):
         splineterms = 0
         smoothterms = 30
@@ -856,14 +855,14 @@ def main(input_file, output_dir):
     #		wfoc=WISH_focus(wout,j)
     # ####################################################################
     # use the lines below to manually set the paths if needed
-    # WISH_setdatadir("/archive/ndxwish/Instrument/data/cycle_10_1/")
-    # WISH_setuserdir("/home/mp43/ProcessedData/")WISHcryo
+WISH_setdatadir("/archive/ndxwish/Instrument/data/cycle_10_1/")
+WISH_setuserdir("/home/sjenkins/Documents/WISH")
     # ######### use the lines below to process a LoadRawvanadium run                               ##################
-    # for j in range(1,2):
-    #	WISH_createvan(19612,19618,j,100,4.0,0.15,cycle_van="11_4",cycle_empty="11_4")
-    #	CropWorkspace(InputWorkspace="w19612-"+str(j)+"foc",OutputWorkspace="w19612-"+str(j)+"foc",XMin='0.35',XMax='5.0')
-    #	Removepeaks_spline_smooth_vana("w18904-"+str(j)+"foc",j,debug=False)
-    #	SaveNexusProcessed("w16847-"+str(i)+"foc",WISH_userdir()+"vana16847-"+str(i)+"foc.nx5")
+for j in range(1,2):
+  WISH_createvan(38428,19618,j,100,4.0,0.15,cycle_van="17_1",cycle_empty="11_4")
+  CropWorkspace(InputWorkspace="w38428-"+str(j)+"foc",OutputWorkspace="w38428-"+str(j)+"foc",XMin='0.35',XMax='5.0')
+  Removepeaks_spline_smooth_vana("w38428-"+str(j)+"foc",j,debug=False)
+  SaveNexusProcessed("w38428-"+str(j)+"foc",WISH_userdir()+"vana38428-"+str(j)+"foc.nx5")
     # ########  use the lines below to create a processed empty (instrument, cryostat, can..) run     ########
     # for i in range(4,5):
     #	WISH_createempty(20620,i)
@@ -873,5 +872,5 @@ def main(input_file, output_dir):
 if __name__ == "__main__":
     WISH_startup("ffv81422", "18_2")
 
-    WISH_setdatafile(WISH_getfilename(41869, "raw"))
+    WISH_setdatafile(WISH_getfilename(38428, "nxs"))
     main(WISH_getdatafile(), WISH_userdir())
