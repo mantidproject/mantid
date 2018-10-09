@@ -222,7 +222,7 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
   return folderPaths;
 }
 
-void removeEmptyFolders(std::vector<Poco::Path> checkpointPaths) {
+void removeEmptyFolders(std::vector<Poco::Path> &checkpointPaths) {
   for (auto i = 0u; i < checkpointPaths.size(); ++i) {
     const auto listOfFolders =
         getListOfFoldersInDirectory(checkpointPaths[i].toString());
