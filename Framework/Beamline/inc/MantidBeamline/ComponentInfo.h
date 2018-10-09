@@ -66,6 +66,7 @@ private:
   const int64_t m_sampleIndex = -1;
   DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
   size_t m_scanCounts = 1;
+  /// The default initialisation is a single interval, i.e. no scan
   std::vector<std::pair<int64_t, int64_t>> m_scanIntervals{{0, 1}};
   /// For (component index, time index) -> linear index conversions
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
@@ -75,7 +76,7 @@ private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
   void initScanIntervals();
   void checkNoTimeDependence() const;
-  std::vector<bool> buildMergeIndicesSync(const ComponentInfo &other) const;
+  std::vector<bool> buildMergeIndices(const ComponentInfo &other) const;
   void checkSizes(const ComponentInfo &other) const;
   void initIndices();
   void checkIdenticalIntervals(const ComponentInfo &other,

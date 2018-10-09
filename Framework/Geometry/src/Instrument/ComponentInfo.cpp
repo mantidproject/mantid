@@ -420,8 +420,8 @@ ComponentInfo::componentType(const size_t componentIndex) const {
 }
 
 void ComponentInfo::setScanInterval(
-    const std::pair<int64_t, int64_t> &interval) {
-  m_componentInfo->setScanInterval(interval);
+    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {
+  m_componentInfo->setScanInterval({interval.first.totalNanoseconds(),interval.second.totalNanoseconds()});
 }
 
 size_t ComponentInfo::scanCount() const {

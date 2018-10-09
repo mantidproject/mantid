@@ -1,4 +1,4 @@
-#ifndef MANTID_DATAOBJECTS_SCANNINGWORKSPACEBUILDERTEST_H_
+// #ifndef MANTID_DATAOBJECTS_SCANNINGWORKSPACEBUILDERTEST_H_
 #define MANTID_DATAOBJECTS_SCANNINGWORKSPACEBUILDERTEST_H_
 
 #include <cxxtest/TestSuite.h>
@@ -591,10 +591,8 @@ private:
   }
 
   void checkTimeRanges(const DetectorInfo &detectorInfo) {
-    for (size_t i = 0; i < nDetectors; ++i) {
-      for (size_t j = 0; j < nTimeIndexes; ++j) {
-        TS_ASSERT_EQUALS(detectorInfo.scanIntervals()[j], timeRanges[j]);
-      }
+    for (size_t i = 0; i < nTimeIndexes; ++i) {
+      TS_ASSERT_EQUALS(detectorInfo.scanIntervals()[i], timeRanges[i]);
     }
   }
 };

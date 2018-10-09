@@ -510,14 +510,14 @@ public:
         N_DET, N_BINS, true);
     auto ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         N_DET, N_BINS, true);
-    auto &detInfo1 = ws1->mutableDetectorInfo();
-    auto &detInfo2 = ws2->mutableDetectorInfo();
-    detInfo1.setScanInterval({10, 20});
-    detInfo2.setScanInterval({20, 30});
+    auto &cmpInfo1 = ws1->mutableComponentInfo();
+    auto &cmpInfo2 = ws2->mutableComponentInfo();
+    cmpInfo1.setScanInterval({10, 20});
+    cmpInfo2.setScanInterval({20, 30});
     // Merge
     auto merged = WorkspaceFactory::Instance().create(ws1, 2 * N_DET);
     auto &cmpInfo = merged->mutableComponentInfo();
-    cmpInfo.merge(ws2->mutableComponentInfo());
+    cmpInfo.merge(ws2->ComponentInfo());
     merged->setIndexInfo(Indexing::IndexInfo(merged->getNumberHistograms()));
 
     NormaliseToMonitor alg;

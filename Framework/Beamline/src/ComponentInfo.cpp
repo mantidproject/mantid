@@ -620,7 +620,7 @@ this has no time dependence prior to this operation.
  * ignored, i.e., no time index is added.
 **/
 void ComponentInfo::merge(const ComponentInfo &other) {
-  const auto &toMerge = buildMergeIndicesSync(other);
+  const auto &toMerge = buildMergeIndices(other);
   for (size_t timeIndex = 0; timeIndex < other.m_scanIntervals.size();
        ++timeIndex) {
     if (!toMerge[timeIndex])
@@ -641,7 +641,7 @@ void ComponentInfo::merge(const ComponentInfo &other) {
 }
 
 std::vector<bool>
-ComponentInfo::buildMergeIndicesSync(const ComponentInfo &other) const {
+ComponentInfo::buildMergeIndices(const ComponentInfo &other) const {
   checkSizes(other);
   std::vector<bool> merge(other.m_scanIntervals.size(), true);
 
@@ -658,7 +658,7 @@ ComponentInfo::buildMergeIndicesSync(const ComponentInfo &other) const {
         merge[t1] = false;
       } else if ((interval1.first < interval2.second) &&
                  (interval1.second > interval2.first)) {
-        failMerge("sync scan intervals overlap but not identical");
+        failMerge("scan intervals overlap but not identical");
       }
     }
   }

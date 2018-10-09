@@ -170,7 +170,7 @@ void failMerge(const std::string &what) {
  * index in `other` is identical to a corresponding interval in `this`, it is
  * ignored, i.e., no time index is added. */
 void DetectorInfo::merge(const DetectorInfo &other) {
-  const auto &merge = buildMergeSyncScanIndices(other);
+  const auto &merge = buildMergeScanIndices(other);
   for (size_t timeIndex = 0; timeIndex < other.scanCount();
        ++timeIndex) {
     if (!merge[timeIndex])
@@ -227,7 +227,7 @@ Eigen::Vector3d DetectorInfo::samplePosition() const {
 
 // Indices returned here are the list of time indexes not to merge
 std::vector<bool>
-DetectorInfo::buildMergeSyncScanIndices(const DetectorInfo &other) const {
+DetectorInfo::buildMergeScanIndices(const DetectorInfo &other) const {
   checkSizes(other);
   std::vector<bool> merge(other.scanCount(), true);
 
@@ -244,7 +244,7 @@ DetectorInfo::buildMergeSyncScanIndices(const DetectorInfo &other) const {
         merge[t1] = false;
       } else if ((interval1.first < interval2.second) &&
                  (interval1.second > interval2.first)) {
-        failMerge("sync scan intervals overlap but not identical");
+        failMerge("scan intervals overlap but not identical");
       }
     }
   }

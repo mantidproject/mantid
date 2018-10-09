@@ -102,13 +102,20 @@ public:
   Eigen::Vector3d sourcePosition() const;
   Eigen::Vector3d samplePosition() const;
 
+  /** The merge() operation was made private in DetectorInfo, and only
+   * accessible through ComponentInfo (via this friend declaration)
+   * because we need to avoid merging DetectorInfo without merging
+   * ComponentInfo, since that would effectively let us create a non-sync
+   * scan. Otherwise we cannot provide scanning-related methods in
+   * ComponentInfo without component index.
+  */
   friend class ComponentInfo;
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
   void checkNoTimeDependence() const;
   std::vector<bool> buildMergeIndices(const DetectorInfo &other) const;
-  std::vector<bool> buildMergeSyncScanIndices(const DetectorInfo &other) const;
+  std::vector<bool> buildMergeScanIndices(const DetectorInfo &other) const;
   void checkSizes(const DetectorInfo &other) const;
   void checkIdenticalIntervals(const DetectorInfo &other, const size_t index1,
                                const size_t index2) const;
