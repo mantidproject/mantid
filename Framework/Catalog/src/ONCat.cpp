@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCatalog/ONCat.h"
-#include "MantidCatalog/OAuth.h"
 #include "MantidCatalog/Exception.h"
+#include "MantidCatalog/OAuth.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
@@ -28,13 +28,13 @@ namespace ONCat {
 
 using Poco::Net::HTTPResponse;
 
-using Mantid::Catalog::OAuth::ConfigServiceTokenStore;
-using Mantid::Catalog::OAuth::OAuthToken;
-using Mantid::Catalog::ONCat::ONCatEntity;
 using Mantid::Catalog::Exception::CatalogError;
 using Mantid::Catalog::Exception::InvalidCredentialsError;
 using Mantid::Catalog::Exception::InvalidRefreshTokenError;
 using Mantid::Catalog::Exception::TokenRejectedError;
+using Mantid::Catalog::OAuth::ConfigServiceTokenStore;
+using Mantid::Catalog::OAuth::OAuthToken;
+using Mantid::Catalog::ONCat::ONCatEntity;
 using Mantid::Kernel::Exception::InternetError;
 
 namespace {
@@ -48,7 +48,7 @@ static const std::string CONFIG_PATH_BASE = "catalog.oncat.";
 static const std::string DEFAULT_ONCAT_URL = "https://oncat.ornl.gov";
 static const std::string DEFAULT_CLIENT_ID =
     "d16ea847-41ce-4b30-9167-40298588e755";
-}
+} // namespace
 
 /**
  * Constructs an ONCat object based on various settings gathered from
@@ -91,10 +91,7 @@ static const std::string DEFAULT_CLIENT_ID =
  */
 ONCat ONCat::fromMantidSettings(bool authenticate) {
   if (!authenticate) {
-    return ONCat(DEFAULT_ONCAT_URL,
-                 nullptr,
-                 OAuthFlow::NONE,
-                 boost::none,
+    return ONCat(DEFAULT_ONCAT_URL, nullptr, OAuthFlow::NONE, boost::none,
                  boost::none);
   }
 
@@ -125,8 +122,8 @@ ONCat::ONCat(const std::string &url, IOAuthTokenStore_uptr tokenStore,
              OAuthFlow flow, const boost::optional<std::string> &clientId,
              const boost::optional<std::string> &clientSecret)
     : m_url(url), m_tokenStore(std::move(tokenStore)), m_clientId(clientId),
-      m_clientSecret(clientSecret),
-      m_flow(flow), m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
+      m_clientSecret(clientSecret), m_flow(flow),
+      m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
 
 ONCat::ONCat(const ONCat &other)
     : m_url(other.m_url), m_tokenStore(other.m_tokenStore),
@@ -403,7 +400,7 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
 }
 
 void ONCat::setInternetHelper(
-    const std::shared_ptr<Mantid::Kernel::InternetHelper> & internetHelper) {
+    const std::shared_ptr<Mantid::Kernel::InternetHelper> &internetHelper) {
   m_internetHelper = internetHelper;
 }
 
@@ -419,8 +416,7 @@ void ONCat::sendAPIRequest(const std::string &uri,
     const auto tokenType = m_tokenStore->getToken()->tokenType();
     const auto accessToken = m_tokenStore->getToken()->accessToken();
 
-    m_internetHelper->addHeader("Authorization",
-                                tokenType + " " + accessToken);
+    m_internetHelper->addHeader("Authorization", tokenType + " " + accessToken);
   }
 
   std::vector<std::string> queryStringParts(queryParameters.size());

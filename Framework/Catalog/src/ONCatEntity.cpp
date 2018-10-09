@@ -4,21 +4,21 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidCatalog/Exception.h"
 #include "MantidCatalog/ONCatEntity.h"
+#include "MantidCatalog/Exception.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <iostream>
-#include <sstream>
 #include <json/json.h>
+#include <sstream>
 
 namespace Mantid {
 namespace Catalog {
 namespace ONCat {
 
+using Mantid::Catalog::Exception::MalformedRepresentationError;
 using Mantid::Kernel::StringTokenizer;
 using Mantid::Kernel::make_unique;
-using Mantid::Catalog::Exception::MalformedRepresentationError;
 
 //----------------------------------------------------------------------
 // Anonymous Helpers
@@ -96,7 +96,7 @@ boost::optional<T> getNestedContentValueIfPresent(const Content &content,
     return boost::none;
   }
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------
 // ONCatEntity
@@ -117,7 +117,8 @@ std::string ONCatEntity::id() const { return m_id; }
 std::string ONCatEntity::type() const { return m_type; }
 
 template <>
-std::string ONCatEntity::get(const std::string &path, std::string defaultValue) const {
+std::string ONCatEntity::get(const std::string &path,
+                             std::string defaultValue) const {
   return getNestedContentValueElseDefault(*m_content, path, defaultValue);
 }
 template <>

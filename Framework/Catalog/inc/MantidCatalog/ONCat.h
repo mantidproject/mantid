@@ -26,9 +26,9 @@ class InternetHelper;
 namespace Catalog {
 namespace ONCat {
 
-using Mantid::Catalog::OAuth::OAuthFlow;
-using Mantid::Catalog::OAuth::IOAuthTokenStore_uptr;
 using Mantid::Catalog::OAuth::IOAuthTokenStore_sptr;
+using Mantid::Catalog::OAuth::IOAuthTokenStore_uptr;
+using Mantid::Catalog::OAuth::OAuthFlow;
 using Types::Core::DateAndTime;
 
 // Here we use a vector of pairs rather than a map because we would like
@@ -125,7 +125,7 @@ public:
   void refreshTokenIfNeeded();
   void refreshTokenIfNeeded(const DateAndTime &currentTime);
   void setInternetHelper(
-      const std::shared_ptr<Mantid::Kernel::InternetHelper> & internetHelper);
+      const std::shared_ptr<Mantid::Kernel::InternetHelper> &internetHelper);
   //////////////////////////////////////////////////////////////////////
 
 private:

@@ -67,12 +67,10 @@ public:
 
   // For all other fields, you can either supply a default value for when a
   // value does not exist ...
-  template <typename T>
-  T get(const std::string &path, T defaultValue) const;
+  template <typename T> T get(const std::string &path, T defaultValue) const;
 
   // ... or, write conditional logic around boost's optional results.
-  template <typename T>
-  boost::optional<T> get(const std::string &path) const;
+  template <typename T> boost::optional<T> get(const std::string &path) const;
 
   std::string toString() const;
 

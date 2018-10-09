@@ -13,9 +13,9 @@
 #include "MantidCatalog/OAuth.h"
 #include "MantidKernel/DateAndTime.h"
 
-using Mantid::Catalog::OAuth::OAuthToken;
 using Mantid::Catalog::OAuth::IOAuthTokenStore;
 using Mantid::Catalog::OAuth::IOAuthTokenStore_uptr;
+using Mantid::Catalog::OAuth::OAuthToken;
 using Mantid::Types::Core::DateAndTime;
 
 class OAuthTest : public CxxTest::TestSuite {

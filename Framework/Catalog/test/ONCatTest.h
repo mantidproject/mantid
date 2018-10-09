@@ -26,15 +26,15 @@ using Poco::Net::HTTPResponse;
 using Mantid::Catalog::Exception::InvalidCredentialsError;
 using Mantid::Catalog::Exception::InvalidRefreshTokenError;
 using Mantid::Catalog::Exception::TokenRejectedError;
-using Mantid::Catalog::OAuth::OAuthFlow;
-using Mantid::Catalog::OAuth::OAuthToken;
 using Mantid::Catalog::OAuth::ConfigServiceTokenStore;
 using Mantid::Catalog::OAuth::IOAuthTokenStore;
 using Mantid::Catalog::OAuth::IOAuthTokenStore_uptr;
+using Mantid::Catalog::OAuth::OAuthFlow;
+using Mantid::Catalog::OAuth::OAuthToken;
 using Mantid::Catalog::ONCat::ONCat;
 using Mantid::Catalog::ONCat::QueryParameter;
-using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::Exception::InternetError;
+using Mantid::Types::Core::DateAndTime;
 
 //----------------------------------------------------------------------
 // Helpers, Mocks and Variables
@@ -132,7 +132,7 @@ IOAuthTokenStore_uptr make_mock_token_store_already_logged_in() {
 const static std::string DUMMY_URL = "https://not.a.real.url";
 const static std::string DUMMY_CLIENT_ID =
     "0e527a36-297d-4cb4-8a35-84f6b11248d7";
-}
+} // namespace
 
 //----------------------------------------------------------------------
 // Tests
@@ -408,7 +408,8 @@ public:
         std::make_pair(HTTPResponse::HTTP_OK,
                        "{\"token_type\": \"Bearer\", \"expires_in\": 3600, "
                        "\"access_token\": \"987JHGFiusdvs72fAkjhsKJH32tkjk\", "
-                       "\"scope\": \"api:read data:read settings:read\"}"), }});
+                       "\"scope\": \"api:read data:read settings:read\"}"),
+    }});
 
     oncat.setInternetHelper(mock_oncat_api);
 
