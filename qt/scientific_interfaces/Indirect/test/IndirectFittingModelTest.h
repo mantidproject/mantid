@@ -712,16 +712,13 @@ public:
   void
   test_that_cleanFailedRun_removes_the_temporary_workspace_from_the_ADS_when_a_fit_fails() {
     /// Fails the fit algorithm on purpose by providing an invalid function
-    auto model =
-        createModelWithSingleInstrumentWorkspace("__ConvFitResolution", 6, 5);
+    auto model = createModelWithSingleInstrumentWorkspace("Name", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFitResolution", modelWorkspace);
+    SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
     std::string const functionString =
-        "name=Convolution;name=Resolution,Workspace=__ConvFit"
-        "Resolution,WorkspaceIndex=0;";
-    auto alg = setupConvolutionSequentialFitAlgorithm(
-        modelWorkspace, "__ConvFit", functionString);
+        "name=Convolution;name=Resolution,Workspace=Name,WorkspaceIndex=0;";
+    auto alg = setupFitAlgorithm(modelWorkspace, functionString);
     alg->execute();
 
     TS_ASSERT(ads.doesExist("__ConvolutionFitSequential_ws1"));
@@ -732,16 +729,13 @@ public:
   void
   test_that_cleanFailedSingleRun_removes_the_temporary_workspace_from_the_ADS_when_a_fit_fails_for_a_specific_workspaceIndex() {
     /// Fails the fit algorithm on purpose by providing an invalid function
-    auto model =
-        createModelWithSingleInstrumentWorkspace("__ConvFitResolution", 6, 5);
+    auto model = createModelWithSingleInstrumentWorkspace("Name", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFitResolution", modelWorkspace);
+    SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
     std::string const functionString =
-        "name=Convolution;name=Resolution,Workspace=__ConvFit"
-        "Resolution,WorkspaceIndex=0;";
-    auto alg = setupConvolutionSequentialFitAlgorithm(
-        modelWorkspace, "__ConvFit", functionString);
+        "name=Convolution;name=Resolution,Workspace=Name,WorkspaceIndex=0;";
+    auto alg = setupFitAlgorithm(modelWorkspace, functionString);
     alg->execute();
 
     TS_ASSERT(ads.doesExist("__ConvolutionFitSequential_ws1"));
@@ -757,9 +751,8 @@ private:
     model->setFitFunction(function);
   }
 
-  IAlgorithm_sptr setupConvolutionSequentialFitAlgorithm(
-      MatrixWorkspace_sptr workspace, std::string const &workspaceName,
-      std::string const &functionString) const {
+  IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
+                                    std::string const &functionString) const {
     auto alg = boost::make_shared<ConvolutionFitSequential>();
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     alg->setProperty("InputWorkspace", workspace);
@@ -789,8 +782,7 @@ private:
         "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
         "0175)))";
     setFittingFunction(model, function);
-    auto alg = setupConvolutionSequentialFitAlgorithm(workspace, workspaceName,
-                                                      function);
+    auto alg = setupFitAlgorithm(workspace, function);
     return alg;
   }
 
