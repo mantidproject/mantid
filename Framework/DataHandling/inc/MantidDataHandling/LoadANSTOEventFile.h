@@ -26,12 +26,14 @@ struct EventFileHeader_Base { // total content should be 16*int (64 bytes)
   int magic_number;  // must equal EVENTFILEHEADER_BASE_MAGIC_NUMBER (DAE data)
   int format_number; // must equal EVENTFILEHEADER_BASE_FORMAT_NUMBER,
                      // identifies this header format
+  // cppcheck-suppress unusedStructMember
   int anstohm_version; // ANSTOHM_VERSION server/filler version number that
                        // generated the file
   int pack_format;     // typically 0 if packed binary, 1 if unpacked binary.
   int oob_enabled; // if set, OOB events can be present in the data, otherwise
                    // only neutron and t0 events are stored
   int clock_scale; // the CLOCK_SCALE setting, ns per timestamp unit
+  // cppcheck-suppress unusedStructMember
   int spares[16 - 6]; // spares (padding)
 };
 
@@ -44,6 +46,7 @@ struct EventFileHeader_Packed { // total content should be 16*int (64 bytes)
                          // format 0x00010002
   int evt_stg_xy_signed; // 0 if x and y are unsigned, 1 if x and y are signed
                          // ints
+  // cppcheck-suppress unusedStructMember
   int spares[16 - 6];    // spares (padding)
 };
 
@@ -173,7 +176,6 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
   int nbits_val = 0;
   int nbits_val_filled = 0;
   int nbits_dt_filled = 0;
-  int nbits_ch_used;
 
   int oob_en = hdr_base.oob_enabled; // will be 1 if we are reading a new OOB
                                      // event file (format 0x00010002 only).
@@ -183,21 +185,15 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
 
   event_decode_state state = DECODE_START; // event decoding state machine
   bool event_ended = false;
-  bool _cancel = false;
 
   while (true) {
-
-    // handle interrupts
-    if (_cancel) {
-      return;
-    }
 
     // read next byte
     unsigned char ch;
     if (!loader.read(reinterpret_cast<char *>(&ch), 1))
       break;
 
-    nbits_ch_used = 0; // no bits used initially, 8 to go
+    int nbits_ch_used = 0; // no bits used initially, 8 to go
 
     // start of event processing
     if (state == DECODE_START) {
