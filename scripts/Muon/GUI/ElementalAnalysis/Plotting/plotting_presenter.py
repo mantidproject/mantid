@@ -7,7 +7,7 @@ class PlotPresenter(object):
 
     def __init__(self, view):
         self.view = view
-        self.view.setAddConnection(self.add)
+        #self.view.setAddConnection(self.add)
         self.view.setRmConnection(self.rm)
         self.view.plotCloseConnection(self.close)
         self.rmWindow = None

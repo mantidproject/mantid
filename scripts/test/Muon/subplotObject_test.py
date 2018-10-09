@@ -7,11 +7,6 @@ from mantid import plots
 
 from matplotlib.figure import Figure
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
 
 class subplotTest(unittest.TestCase):
     def setUp(self):

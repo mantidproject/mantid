@@ -67,11 +67,11 @@ class PlottingPresenterTest(unittest.TestCase):
 
 
     def test_setup(self):
-        assert(self.view.setRmConnection.call_count ==1)
-        assert(self.view.setAddConnection.call_count ==1)
-        assert(self.view.plotCloseConnection.call_count ==1)
+        self.assertEquals(self.view.setRmConnection.call_count, 1)
+        #self.assertEquals(self.view.setAddConnection.call_count ,1)
+        self.assertEquals(self.view.plotCloseConnection.call_count ,1)
         self.view.setRmConnection.assert_called_with(self.presenter.rm)
-        self.view.setAddConnection.assert_called_with(self.presenter.add)
+        #self.view.setAddConnection.assert_called_with(self.presenter.add)
         self.view.plotCloseConnection.assert_called_with(self.presenter.close)
 
     def test_get_subplot(self):
@@ -113,7 +113,7 @@ class PlottingPresenterTest(unittest.TestCase):
 
     def test_removeSubplotConnection(self):
         self.presenter.removeSubplotConnection(self.mock_func)
-        assert(self.view.subplotRemovedSignal.connect.call_count ==1)
+        self.assertEquals(self.view.subplotRemovedSignal.connect.call_count,1 )
         self.view.subplotRemovedSignal.connect.assert_called_with(self.mock_func)
    
 
@@ -126,8 +126,8 @@ class PlottingPresenterTest(unittest.TestCase):
         self.presenter.rmWindow = None
         # do test
         self.presenter.close()
-        assert(self.presenter.closeSelectorWindow.call_count == 1)
-        assert(self.presenter.closeRmWindow.call_count == 0)
+        self.assertEquals(self.presenter.closeSelectorWindow.call_count, 1)
+        self.assertEquals(self.presenter.closeRmWindow.call_count, 0)
 
 
     def test_closeRm(self):
@@ -139,8 +139,8 @@ class PlottingPresenterTest(unittest.TestCase):
         self.presenter.rmWindow = mock.Mock()
         # do test
         self.presenter.close()
-        assert(self.presenter.closeSelectorWindow.call_count == 0)
-        assert(self.presenter.closeRmWindow.call_count == 1)
+        self.assertEquals(self.presenter.closeSelectorWindow.call_count, 0)
+        self.assertEquals(self.presenter.closeRmWindow.call_count, 1)
 
     def test_closeNone(self):
         # mock called function to test they are called
@@ -151,8 +151,8 @@ class PlottingPresenterTest(unittest.TestCase):
         self.presenter.rmWindow = None
         # do test
         self.presenter.close()
-        assert(self.presenter.closeSelectorWindow.call_count == 0)
-        assert(self.presenter.closeRmWindow.call_count == 0)
+        self.assertEquals(self.presenter.closeSelectorWindow.call_count, 0)
+        self.assertEquals(self.presenter.closeRmWindow.call_count, 0)
 
     def test_closeAll(self):
         # mock called function to test they are called
@@ -163,8 +163,8 @@ class PlottingPresenterTest(unittest.TestCase):
         self.presenter.rmWindow = mock.Mock()
         # do test
         self.presenter.close()
-        assert(self.presenter.closeSelectorWindow.call_count == 1)
-        assert(self.presenter.closeRmWindow.call_count == 1)
+        self.assertEquals(self.presenter.closeSelectorWindow.call_count, 1)
+        self.assertEquals(self.presenter.closeRmWindow.call_count, 1)
 
     def test_add(self):
         # to do
@@ -179,17 +179,17 @@ class PlottingPresenterTest(unittest.TestCase):
         self.presenter.rm()
 
         # skip to rm window if subplot == 1
-        assert(self.presenter.getRmWindow.call_count == 1)
+        self.assertEquals(self.presenter.getRmWindow.call_count, 1)
 
         # never create selector window
-        assert(self.presenter.createSelectWindow.call_count == 0)
-        assert(self.mock_selector.subplotSelectorSignal.connect.call_count == 0)
-        assert(self.mock_selector.closeEventSignal.connect.call_count == 0)
-        assert(self.mock_selector.setMinimumSize.call_count == 0)
-        assert(self.mock_selector.show.call_count == 0)
+        self.assertEquals(self.presenter.createSelectWindow.call_count, 0)
+        self.assertEquals(self.mock_selector.subplotSelectorSignal.connect.call_count, 0)
+        self.assertEquals(self.mock_selector.closeEventSignal.connect.call_count, 0)
+        self.assertEquals(self.mock_selector.setMinimumSize.call_count, 0)
+        self.assertEquals(self.mock_selector.show.call_count, 0)
         # never make the remove window or raise any windows
-        assert(self.mock_rmWindow.raise_.call_count == 0)
-        assert(self.mock_selector.raise_.call_count == 0)
+        self.assertEquals(self.mock_rmWindow.raise_.call_count, 0)
+        self.assertEquals(self.mock_selector.raise_.call_count, 0)
  
 
 
@@ -203,18 +203,18 @@ class PlottingPresenterTest(unittest.TestCase):
         # do test
         self.presenter.rm()
         # create selector window if > 2
-        assert(self.presenter.createSelectWindow.call_count == 1)
+        self.assertEquals(self.presenter.createSelectWindow.call_count, 1)
         self.presenter.createSelectWindow.assert_called_with(self.view.subplot_names)
-        assert(self.mock_selector.subplotSelectorSignal.connect.call_count == 1)
+        self.assertEquals(self.mock_selector.subplotSelectorSignal.connect.call_count, 1)
         self.mock_selector.subplotSelectorSignal.connect.assert_called_with(self.presenter.getRmWindow)
-        assert(self.mock_selector.closeEventSignal.connect.call_count == 1)
+        self.assertEquals(self.mock_selector.closeEventSignal.connect.call_count, 1)
         self.mock_selector.closeEventSignal.connect.assert_called_with(self.presenter.closeSelectorWindow)
-        assert(self.mock_selector.setMinimumSize.call_count == 1)
-        assert(self.mock_selector.show.call_count == 1)
+        self.assertEquals(self.mock_selector.setMinimumSize.call_count, 1)
+        self.assertEquals(self.mock_selector.show.call_count, 1)
         # never make the remove window or raise any windows
-        assert(self.presenter.getRmWindow.call_count == 0)
-        assert(self.mock_rmWindow.raise_.call_count == 0)
-        assert(self.mock_selector.raise_.call_count == 0)
+        self.assertEquals(self.presenter.getRmWindow.call_count,0)
+        self.assertEquals(self.mock_rmWindow.raise_.call_count, 0)
+        self.assertEquals(self.mock_selector.raise_.call_count, 0)
        
     def test_RaiseRmWindow(self):
         self.view.subplot_names =  ["one plot","two plots"]
@@ -225,16 +225,16 @@ class PlottingPresenterTest(unittest.TestCase):
         # do test
         self.presenter.rm()
         # raise rm window
-        assert(self.mock_rmWindow.raise_.call_count == 1)
+        self.assertEquals(self.mock_rmWindow.raise_.call_count, 1)
         # never create selector
-        assert(self.presenter.createSelectWindow.call_count == 0)
-        assert(self.mock_selector.subplotSelectorSignal.connect.call_count == 0)
-        assert(self.mock_selector.closeEventSignal.connect.call_count == 0)
-        assert(self.mock_selector.setMinimumSize.call_count == 0)
-        assert(self.mock_selector.show.call_count == 0)
+        self.assertEquals(self.presenter.createSelectWindow.call_count, 0)
+        self.assertEquals(self.mock_selector.subplotSelectorSignal.connect.call_count, 0)
+        self.assertEquals(self.mock_selector.closeEventSignal.connect.call_count, 0)
+        self.assertEquals(self.mock_selector.setMinimumSize.call_count, 0)
+        self.assertEquals(self.mock_selector.show.call_count, 0)
         # never make the remove window or raise selector windows
-        assert(self.presenter.getRmWindow.call_count == 0)
-        assert(self.mock_selector.raise_.call_count == 0)
+        self.assertEquals(self.presenter.getRmWindow.call_count, 0)
+        self.assertEquals(self.mock_selector.raise_.call_count, 0)
 
     def test_RaiseSelector(self):
         self.view.subplot_names =  ["one plot","two plots"]
@@ -245,16 +245,16 @@ class PlottingPresenterTest(unittest.TestCase):
         # do test
         self.presenter.rm()
         # raise selector window
-        assert(self.mock_selector.raise_.call_count == 1)
+        self.assertEquals(self.mock_selector.raise_.call_count, 1)
         # never create selector
-        assert(self.presenter.createSelectWindow.call_count == 0)
-        assert(self.mock_selector.subplotSelectorSignal.connect.call_count == 0)
-        assert(self.mock_selector.closeEventSignal.connect.call_count == 0)
-        assert(self.mock_selector.setMinimumSize.call_count == 0)
-        assert(self.mock_selector.show.call_count == 0)
+        self.assertEquals(self.presenter.createSelectWindow.call_count, 0)
+        self.assertEquals(self.mock_selector.subplotSelectorSignal.connect.call_count, 0)
+        self.assertEquals(self.mock_selector.closeEventSignal.connect.call_count, 0)
+        self.assertEquals(self.mock_selector.setMinimumSize.call_count, 0)
+        self.assertEquals(self.mock_selector.show.call_count, 0)
         # never make the remove window or raise selector windows
-        assert(self.mock_rmWindow.raise_.call_count == 0)
-        assert(self.presenter.getRmWindow.call_count == 0)
+        self.assertEquals(self.mock_rmWindow.raise_.call_count, 0)
+        self.assertEquals(self.presenter.getRmWindow.call_count, 0)
     
 
     def test_getRmWindow(self):
@@ -265,14 +265,14 @@ class PlottingPresenterTest(unittest.TestCase):
         # run test
         self.presenter.getRmWindow(result)
 
-        assert(self.presenter.createRmWindow.call_count == 1)
+        self.assertEquals(self.presenter.createRmWindow.call_count, 1)
         self.presenter.createRmWindow.assert_called_with(subplot=result)
-        assert(self.mock_rmWindow.applyRemoveSignal.connect.call_count == 1)
+        self.assertEquals(self.mock_rmWindow.applyRemoveSignal.connect.call_count, 1)
         self.mock_rmWindow.applyRemoveSignal.connect.assert_called_with(self.presenter.applyRm)
-        assert(self.mock_rmWindow.closeEventSignal.connect.call_count == 1)
+        self.assertEquals(self.mock_rmWindow.closeEventSignal.connect.call_count, 1)
         self.mock_rmWindow.closeEventSignal.connect.assert_called_with(self.presenter.closeRmWindow)
-        assert(self.mock_rmWindow.show.call_count == 1)
-        assert(self.mock_rmWindow.setMinimumSize.call_count == 1)
+        self.assertEquals(self.mock_rmWindow.show.call_count, 1)
+        self.assertEquals(self.mock_rmWindow.setMinimumSize.call_count, 1)
  
 
     def test_applyRm0(self):
@@ -287,15 +287,15 @@ class PlottingPresenterTest(unittest.TestCase):
         # do test
         self.presenter.applyRm(names)
         # check both lines
-        assert(self.mock_rmWindow.getState.call_count == 2)
+        self.assertEquals(self.mock_rmWindow.getState.call_count, 2)
         # only remove 1
-        assert(self.mock_rmWindow.getLine.call_count == 0)
-        assert(self.view.removeLine.call_count == 0)
+        self.assertEquals (self.mock_rmWindow.getLine.call_count, 0)
+        self.assertEquals(self.view.removeLine.call_count, 0)
         # delete subplot
-        assert(self.presenter.remove_subplot.call_count == 0)
+        self.assertEquals(self.presenter.remove_subplot.call_count, 0)
         # close window but keep plot
-        assert(self.presenter.closeRmWindow.call_count ==1)
-        assert(self.view.close.call_count == 0)
+        self.assertEquals(self.presenter.closeRmWindow.call_count,1)
+        self.assertEquals(self.view.close.call_count, 0)
 
 
     def test_applyRm1(self):
@@ -309,15 +309,15 @@ class PlottingPresenterTest(unittest.TestCase):
         # do test
         self.presenter.applyRm(names)
         # check both lines
-        assert(self.mock_rmWindow.getState.call_count == 2)
+        self.assertEquals(self.mock_rmWindow.getState.call_count, 2)
         # only remove 1
-        assert(self.mock_rmWindow.getLine.call_count == 1)
-        assert(self.view.removeLine.call_count == 1)
+        self.assertEquals(self.mock_rmWindow.getLine.call_count, 1)
+        self.assertEquals(self.view.removeLine.call_count, 1)
         # keep subplot
-        assert(self.presenter.remove_subplot.call_count == 0)
+        self.assertEquals(self.presenter.remove_subplot.call_count, 0)
         # close window
-        assert(self.presenter.closeRmWindow.call_count ==1)
-        assert(self.view.close.call_count == 0)
+        self.assertEquals(self.presenter.closeRmWindow.call_count, 1)
+        self.assertEquals(self.view.close.call_count, 0)
 
 
     def test_applyRm2(self):
@@ -331,15 +331,15 @@ class PlottingPresenterTest(unittest.TestCase):
         # do test
         self.presenter.applyRm(names)
         # check both lines
-        assert(self.mock_rmWindow.getState.call_count == 2)
+        self.assertEquals(self.mock_rmWindow.getState.call_count, 2)
         # only remove 1
-        assert(self.mock_rmWindow.getLine.call_count == 2)
-        assert(self.view.removeLine.call_count == 2)
+        self.assertEquals(self.mock_rmWindow.getLine.call_count, 2)
+        self.assertEquals(self.view.removeLine.call_count, 2)
         # delete subplot
-        assert(self.presenter.remove_subplot.call_count == 1)
+        self.assertEquals(self.presenter.remove_subplot.call_count, 1)
         # close window but keep plot
-        assert(self.presenter.closeRmWindow.call_count ==1)
-        assert(self.view.close.call_count == 0)
+        self.assertEquals(self.presenter.closeRmWindow.call_count,1)
+        self.assertEquals(self.view.close.call_count, 0)
 
 
     def test_applyRmAndClose(self):
@@ -351,15 +351,15 @@ class PlottingPresenterTest(unittest.TestCase):
         # do test
         self.presenter.applyRm(names)
         # check both lines
-        assert(self.mock_rmWindow.getState.call_count == 2)
+        self.assertEquals(self.mock_rmWindow.getState.call_count, 2)
         # only remove 1
-        assert(self.mock_rmWindow.getLine.call_count == 2)
-        assert(self.view.removeLine.call_count == 2)
+        self.assertEquals(self.mock_rmWindow.getLine.call_count, 2)
+        self.assertEquals(self.view.removeLine.call_count, 2)
         # delete subplot
-        assert(self.presenter.remove_subplot.call_count == 1)
+        self.assertEquals(self.presenter.remove_subplot.call_count, 1)
         # close window but keep plot
-        assert(self.presenter.closeRmWindow.call_count ==1)
-        assert(self.view.close.call_count == 1)
+        self.assertEquals(self.presenter.closeRmWindow.call_count,1)
+        self.assertEquals(self.view.close.call_count, 1)
 
 if __name__ == "__main__":
     unittest.main()
