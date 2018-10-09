@@ -21,6 +21,7 @@ from sans.common.enums import RowState, SampleShape
 import functools
 from sans.gui_logic.presenter.create_file_information import create_file_information
 from ui.sans_isis.work_handler import WorkHandler
+from sans.common.file_information import SANSFileInformationFactory
 
 
 class TableModel(object):
@@ -203,11 +204,29 @@ class TableModel(object):
         if self._table_entries[row].file_finding:
             self.wait_for_file_finding_done()
 
+    def add_table_entry_no_thread_or_signal(self, row, table_index_model):
+        table_index_model.id = self._id_count
+        self._id_count += 1
+        self._table_entries.insert(row, table_index_model)
+        if row >= self.get_number_of_rows():
+            row = self.get_number_of_rows() - 1
+
+        entry = self._table_entries[row]
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(entry.sample_scatter)
+        self.update_thickness_from_file_information(entry.id, file_information)
+
     def __eq__(self, other):
-        return self.__dict__ == other.__dict__
+        return self.equal_dicts(self.__dict__, other.__dict__, ['work_handler'])
 
     def __ne__(self, other):
-        return self.__dict__ != other.__dict__
+        return not self.equal_dicts(self.__dict__, other.__dict__, ['work_handler'])
+
+    @staticmethod
+    def equal_dicts(d1, d2, ignore_keys):
+        d1_filtered = dict((k, v) for k, v in d1.items() if k not in ignore_keys)
+        d2_filtered = dict((k, v) for k, v in d2.items() if k not in ignore_keys)
+        return d1_filtered == d2_filtered
 
 
 class TableIndexModel(object):
