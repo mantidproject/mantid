@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/LoadSpice2D.h"
+#include "MantidDataHandling/LoadSpice2D2.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -60,11 +60,11 @@ using namespace Geometry;
 using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_FILELOADER_ALGORITHM(LoadSpice2D)
+DECLARE_FILELOADER_ALGORITHM(LoadSpice2D2)
 
 // Parse string and convert to numeric type
 template <class T>
-bool from_string(T &t, const std::string &s,
+bool LoadSpice2D2::from_string(T &t, const std::string &s,
                  std::ios_base &(*f)(std::ios_base &)) {
   std::istringstream iss(s);
   return !(iss >> f >> t).fail();
@@ -81,7 +81,7 @@ bool from_string(T &t, const std::string &s,
  * @param wavelength: wavelength value [Angstrom]
  * @param dwavelength: error on the wavelength [Angstrom]
  */
-void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
+void LoadSpice2D2::store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
                  double error, double wavelength, double dwavelength) {
   auto &X = ws->mutableX(specID);
   auto &Y = ws->mutableY(specID);
@@ -101,7 +101,7 @@ void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
+int LoadSpice2D2::confidence(Kernel::FileDescriptor &descriptor) const {
   if (descriptor.extension() != ".xml")
     return 0;
 
@@ -136,7 +136,7 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 /// Overwrites Algorithm Init method.
-void LoadSpice2D::init() {
+void LoadSpice2D2::init() {
   declareProperty(Kernel::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the input xml file to load");
@@ -165,7 +165,7 @@ void LoadSpice2D::init() {
  * Creates and loads the workspace with the data
  *
  */
-void LoadSpice2D::exec() {
+void LoadSpice2D2::exec() {
 
   setInputPropertiesAsMemberProperties();
   setTimes();
@@ -218,7 +218,7 @@ void LoadSpice2D::exec() {
  * @param dims_str : INT32[192,256]
  */
 std::pair<int, int>
-LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
+LoadSpice2D2::parseDetectorDimensions(const std::string &dims_str) {
 
   // Read in the detector dimensions from the Detector tag
 
@@ -241,7 +241,7 @@ LoadSpice2D::parseDetectorDimensions(const std::string &dims_str) {
  * Adds map of the form key:value
  * as Workspace run properties
  */
-void LoadSpice2D::addMetadataAsRunProperties(
+void LoadSpice2D2::addMetadataAsRunProperties(
     const std::map<std::string, std::string> &metadata) {
 
   for (const auto &keyValuePair : metadata) {
@@ -254,7 +254,7 @@ void LoadSpice2D::addMetadataAsRunProperties(
 /**
  * Get the input algorithm properties and sets them as class attributes
  */
-void LoadSpice2D::setInputPropertiesAsMemberProperties() {
+void LoadSpice2D2::setInputPropertiesAsMemberProperties() {
 
   m_wavelength_input = getProperty("Wavelength");
   m_wavelength_spread_input = getProperty("WavelengthSpread");
@@ -275,7 +275,7 @@ void LoadSpice2D::setInputPropertiesAsMemberProperties() {
  * Gets the wavelenght and wavelength spread from the  metadata
  * and sets them as class attributes
  */
-void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
+void LoadSpice2D2::setWavelength(std::map<std::string, std::string> &metadata) {
   // Read in wavelength and wavelength spread
 
   g_log.debug() << "setWavelength: " << m_wavelength_input << " , "
@@ -307,7 +307,7 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
  * Parses the data dimensions and stores them as member variables
  * Reads the data and returns a vector
  */
-std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
+std::vector<int> LoadSpice2D2::getData(const std::string &dataXpath = "//Data") {
 
   // data container
   std::vector<int> data;
@@ -368,12 +368,12 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
 /**
  * Creates workspace and loads the data along with 2 monitors!
  */
-void LoadSpice2D::createWorkspace(const std::vector<int> &data,
+void LoadSpice2D2::createWorkspace(const std::vector<int> &data,
                                   const std::string &title,
                                   double monitor1_counts,
                                   double monitor2_counts) {
   int nBins = 1;
-  int numSpectra = static_cast<int>(data.size()) + LoadSpice2D::nMonitors;
+  int numSpectra = static_cast<int>(data.size()) + LoadSpice2D2::nMonitors;
 
   m_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
@@ -409,7 +409,7 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
  * Inserts a property in the run with a new name!
  */
 template <class T>
-T LoadSpice2D::addRunProperty(std::map<std::string, std::string> &metadata,
+T LoadSpice2D2::addRunProperty(std::map<std::string, std::string> &metadata,
                               const std::string &oldName,
                               const std::string &newName,
                               const std::string &units) {
@@ -422,7 +422,7 @@ T LoadSpice2D::addRunProperty(std::map<std::string, std::string> &metadata,
 }
 
 template <class T>
-void LoadSpice2D::addRunProperty(const std::string &name, const T &value,
+void LoadSpice2D2::addRunProperty(const std::string &name, const T &value,
                                  const std::string &units) {
   m_workspace->mutableRun().addProperty(name, value, units, true);
 }
@@ -442,7 +442,7 @@ void LoadSpice2D::addRunProperty(const std::string &name, const T &value,
  * GPSANS: 548.999969
  * BIOSANS: 544.999977
  */
-void LoadSpice2D::setBeamTrapRunProperty(
+void LoadSpice2D2::setBeamTrapRunProperty(
     std::map<std::string, std::string> &metadata) {
 
   std::vector<double> trapDiameters = {76.2, 50.8, 76.2, 101.6};
@@ -491,7 +491,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
   addRunProperty<double>("beam-trap-diameter", trapDiameterInUse, "mm");
 }
 
-void LoadSpice2D::setTimes() {
+void LoadSpice2D2::setTimes() {
   // start_time
   std::map<std::string, std::string> attributes =
       m_xmlHandler.get_attributes_from_tag("/");
@@ -500,7 +500,7 @@ void LoadSpice2D::setTimes() {
   m_endTime = DateAndTime(attributes["end_time"]);
 }
 
-void LoadSpice2D::setMetadataAsRunProperties(
+void LoadSpice2D2::setMetadataAsRunProperties(
     std::map<std::string, std::string> &metadata) {
 
   setBeamTrapRunProperty(metadata);
@@ -575,7 +575,7 @@ void LoadSpice2D::setMetadataAsRunProperties(
  * @return : sample_detector_distance
  */
 double
-LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
+LoadSpice2D2::detectorDistance(std::map<std::string, std::string> &metadata) {
 
   double sample_detector_distance = 0, sample_detector_distance_offset = 0,
          sample_si_window_distance = 0;
@@ -645,7 +645,7 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
 }
 
 double
-LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metadata) {
+LoadSpice2D2::detectorTranslation(std::map<std::string, std::string> &metadata) {
 
   // detectorTranslations
   double detectorTranslation = 0;
@@ -661,7 +661,7 @@ LoadSpice2D::detectorTranslation(std::map<std::string, std::string> &metadata) {
 /**
  * Places the detector at the right sample_detector_distance
  */
-void LoadSpice2D::moveDetector(double sample_detector_distance,
+void LoadSpice2D2::moveDetector(double sample_detector_distance,
                                double translation_distance) {
   // Some tests fail if the detector is moved here.
   // TODO: Move the detector here and not the SANSLoad
@@ -695,7 +695,7 @@ void LoadSpice2D::moveDetector(double sample_detector_distance,
  * @param inst_name :: The name written in the Nexus file
  * @param localWorkspace :: The workspace to insert the instrument into
  */
-void LoadSpice2D::runLoadInstrument(
+void LoadSpice2D2::runLoadInstrument(
     const std::string &inst_name,
     DataObjects::Workspace2D_sptr localWorkspace) {
 
@@ -723,7 +723,7 @@ void LoadSpice2D::runLoadInstrument(
  * @param name ::  element name
  * @param fileName :: xml file name
  */
-void LoadSpice2D::throwException(Poco::XML::Element *elem,
+void LoadSpice2D2::throwException(Poco::XML::Element *elem,
                                  const std::string &name,
                                  const std::string &fileName) {
   if (!elem) {
@@ -738,7 +738,7 @@ void LoadSpice2D::throwException(Poco::XML::Element *elem,
  *
  * @param angle in degrees
  */
-void LoadSpice2D::rotateDetector(const double &angle) {
+void LoadSpice2D2::rotateDetector(const double &angle) {
 
   g_log.notice() << "Rotating Wing Detector " << angle << " degrees." << '\n';
 
@@ -757,7 +757,7 @@ void LoadSpice2D::rotateDetector(const double &angle) {
  * Useful to test tags rather than using the date.
  * @param metadata
  */
-void LoadSpice2D::setSansSpiceXmlFormatVersion(
+void LoadSpice2D2::setSansSpiceXmlFormatVersion(
     std::map<std::string, std::string> &metadata) {
 
   if (metadata.find("Header/sans_spice_xml_format_version") != metadata.end()) {
