@@ -127,8 +127,16 @@ void AsymmetryCalc::exec() {
   assert(tmpWS->blocksize() == blocksize);
 
   // Create a point data workspace with only one spectra for forward
-  auto outputWS = DataObjects::create<API::HistoWorkspace>(
-      *inputWS, 1, tmpWS->points(forward));
+  std::unique_ptr<Mantid::API::HistoWorkspace> outputWS;
+  if (inputWS->isHistogramData()) {
+	  outputWS = DataObjects::create<API::HistoWorkspace>(
+		  *inputWS, 1, tmpWS->binEdges(forward));
+  }
+  else {
+	  outputWS = DataObjects::create<API::HistoWorkspace>(
+		  *inputWS, 1, tmpWS->points(forward));
+  }
+  
   outputWS->getSpectrum(0).setDetectorID(static_cast<detid_t>(1));
 
   // Calculate asymmetry for each time bin
@@ -159,7 +167,8 @@ void AsymmetryCalc::exec() {
     prog.report();
   }
 
-  assert(outputWS->x(0).size() == blocksize);
+  // Removed this assert which checks point vs bin edges
+  //assert(outputWS->x(0).size() == blocksize);
 
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");

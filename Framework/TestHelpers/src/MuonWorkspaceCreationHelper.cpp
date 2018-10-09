@@ -62,12 +62,13 @@ double eData::operator()(const double, size_t) { return 0.005; }
  * @return Pointer to the workspace.
  */
 MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-                                           double seed, size_t detectorIDseed) {
+                                           double seed, size_t detectorIDseed,
+                                           bool hist, double xStart, double xEnd) {
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          yDataCounts(), static_cast<int>(nspec), 0.0, 1.0,
-          (1.0 / static_cast<double>(maxt)), true, eData());
+          yDataCounts(), static_cast<int>(nspec), xStart, xEnd,
+          (1.0 / static_cast<double>(maxt)), hist, eData());
 
   ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
       static_cast<int>(nspec)));
@@ -89,6 +90,11 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
   ws->mutableRun().addProperty("run_number", 12345);
 
   return ws;
+}
+
+MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
+                                           double seed, size_t detectorIDseed) {
+  return createCountsWorkspace(nspec, maxt, seed, detectorIDseed, true, 0.0, 1.0);
 }
 
 /**
@@ -128,6 +134,33 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
   }
 
   return wsGroup;
+}
+
+Mantid::API::WorkspaceGroup_sptr
+createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
+	const std::string &wsGroupName) {
+	Mantid::API::WorkspaceGroup_sptr wsGroup =
+		boost::make_shared<Mantid::API::WorkspaceGroup>();
+	Mantid::API::AnalysisDataService::Instance().addOrReplace(wsGroupName,
+		wsGroup);
+
+	std::string wsNameStem = "MuonDataPeriod_";
+	std::string wsName;
+
+	boost::shared_ptr<Mantid::Geometry::Instrument> inst1 =
+		boost::make_shared<Mantid::Geometry::Instrument>();
+	inst1->setName("EMU");
+
+	for (int period = 1; period < nPeriods + 1; period++) {
+		Mantid::API::MatrixWorkspace_sptr ws =
+			createAsymmetryWorkspace(nspec, maxt, yDataAsymmetry(10.0 * period, 0.1 * period));
+
+		wsGroup->addWorkspace(ws);
+		wsName = wsNameStem + std::to_string(period);
+		Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
+	}
+
+	return wsGroup;
 }
 
 /**
