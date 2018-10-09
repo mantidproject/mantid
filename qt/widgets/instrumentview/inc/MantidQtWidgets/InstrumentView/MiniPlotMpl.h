@@ -42,8 +42,8 @@ public:
                QString curveLabel);
   void setXLabel(QString xunit);
   QString label() const { return m_activeCurveLabel; }
-  void addPeakLabel(const PeakMarker2D *) {}
-  void clearPeakLabels() {}
+  void addPeakLabel(const PeakMarker2D *peakMarker);
+  void clearPeakLabels();
   bool hasCurve() const;
   void store();
   bool hasStored() const;

@@ -37,8 +37,9 @@ public:
     FigureCanvasQt canvas{111};
     canvas.gca().plot({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5});
 
-    auto dataCoords = canvas.toDataCoords(
-        QPoint(canvas.width() * 0.5, canvas.height() * 0.25));
+    auto dataCoords =
+        canvas.toDataCoords(QPoint(static_cast<int>(canvas.width() * 0.5),
+                                   static_cast<int>(canvas.height() * 0.25)));
     TS_ASSERT_DELTA(2.9, dataCoords.x(), 0.1);
     TS_ASSERT_DELTA(4.5, dataCoords.y(), 0.1);
   }

@@ -72,6 +72,13 @@ public:
     axes.setYScale("symlog");
   }
 
+  void testTextAddsTextAddGivenCoordinate() {
+    Axes axes(pyAxes());
+    auto artist = axes.text(0.5, 0.5, "test", "left");
+
+    TS_ASSERT_EQUALS("test", artist.pyobj().attr("get_text")());
+  }
+
   // ----------------- failure tests ---------------------
   void testPlotThrowsWithEmptyData() {
     Axes axes(pyAxes());

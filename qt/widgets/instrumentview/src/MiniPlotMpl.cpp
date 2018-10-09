@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/InstrumentView/MiniPlotMpl.h"
+#include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
@@ -125,6 +126,36 @@ void MiniPlotMpl::setXLabel(QString xunit) {
   m_canvas->gca().setXLabel(xunit.toLatin1().constData());
   m_xunit = std::move(xunit);
 }
+
+/**
+ * Add a label to mark a peak to the plot
+ * @param peakMarker A pointer to a PeakMarker2D object defining
+ * the marker added to the instrument widget
+ */
+void MiniPlotMpl::addPeakLabel(const PeakMarker2D *peakMarker) {
+  if (m_xunit.isEmpty())
+    return;
+  const auto &peak = peakMarker->getPeak();
+  double peakX(0.0);
+  if (m_xunit == "dSpacing") {
+    peakX = peak.getDSpacing();
+  } else if (m_xunit == "Wavelength") {
+    peakX = peak.getWavelength();
+  } else {
+    peakX = peak.getTOF();
+  }
+  double ymax(1.0);
+  //  std::tie(_, ymax) = m_miniplot->getYLimits();
+  //  // arbitrarily place the label at 85% of the y-axis height
+  const double peakY = 0.85 * ymax;
+  const QString label(peakMarker->getLabel());
+  m_canvas->gca().text(peakX, peakY, label, "center");
+}
+
+/**
+ * Clear all peak labels from the canvas
+ */
+void MiniPlotMpl::clearPeakLabels() {}
 
 /**
  * @return True if an active curve exists

@@ -85,6 +85,23 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
 }
 
 /**
+ * Add an arbitrary text label to the canvas
+ * @param x X position in data coordinates
+ * @param y Y position in data coordinates
+ * @param text The string to attach to the canvas
+ * @param horizontalAlignment A string indicating the horizontal
+ * alignment of the string
+ */
+Artist Axes::text(double x, double y, QString text,
+                  const char *horizontalAlignment) {
+  auto args =
+      Python::NewRef(Py_BuildValue("(ffs)", x, y, text.toLatin1().constData()));
+  auto kwargs = Python::NewRef(
+      Py_BuildValue("(ss)", "horizontalalignment", horizontalAlignment));
+  return Artist(pyobj().attr("text")(*args, **kwargs));
+}
+
+/**
  * @brief Set the X-axis scale to the given value.
  * @param value New scale type. See
  * https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xscale.html
