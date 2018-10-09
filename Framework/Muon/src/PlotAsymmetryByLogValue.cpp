@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <cmath>
 #include <vector>
 
@@ -700,12 +706,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
     asym->setLogging(false);
     asym->setProperty("InputWorkspace", ws);
     asym->execute();
-    MatrixWorkspace_sptr asymWS2 = asym->getProperty("OutputWorkspace");
-    auto alg2 = createChildAlgorithm("ConvertToPointData");
-    alg2->setProperty("InputWorkspace", asymWS2);
-    alg2->setProperty("OutputWorkspace", "__NotUsed");
-    alg2->execute();
-    MatrixWorkspace_sptr asymWS = alg2->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr asymWS = asym->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr integr = createChildAlgorithm("Integration");
     integr->setLogging(false);
@@ -729,12 +730,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
     asym->setLogging(false);
     asym->setProperty("InputWorkspace", intWS);
     asym->execute();
-    MatrixWorkspace_sptr tmp = asym->getProperty("OutputWorkspace");
-    auto alg2 = createChildAlgorithm("ConvertToPointData");
-    alg2->setProperty("InputWorkspace", tmp);
-    alg2->setProperty("OutputWorkspace", "__NotUsed");
-    alg2->execute();
-    out = alg2->getProperty("OutputWorkspace");
+    out = asym->getProperty("OutputWorkspace");
   }
 
   Y = out->y(0)[0];
