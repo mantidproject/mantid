@@ -49,6 +49,12 @@ public:
       : CatalogError(message) {}
 };
 
+class ContentError : public CatalogError {
+public:
+  explicit ContentError(const std::string &message)
+      : CatalogError(message) {}
+};
+
 } // namespace Exception
 } // namespace Catalog
 } // namespace Mantid

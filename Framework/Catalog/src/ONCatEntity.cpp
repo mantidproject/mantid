@@ -9,7 +9,6 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include <iostream>
-#include <json/json.h>
 #include <sstream>
 
 namespace Mantid {
@@ -19,88 +18,6 @@ namespace ONCat {
 using Mantid::Catalog::Exception::MalformedRepresentationError;
 using Mantid::Kernel::StringTokenizer;
 using Mantid::Kernel::make_unique;
-
-//----------------------------------------------------------------------
-// Anonymous Helpers
-//----------------------------------------------------------------------
-namespace {
-
-class ContentError : public std::runtime_error {
-public:
-  explicit ContentError(const std::string &message)
-      : std::runtime_error(message) {}
-};
-
-Content getNestedContent(const Content &content, const std::string &path) {
-  const auto pathTokens =
-      StringTokenizer(path, ".", Mantid::Kernel::StringTokenizer::TOK_TRIM);
-
-  auto currentNode = content;
-
-  // Use the path tokens to drill down through the JSON nodes.
-  for (auto pathToken = pathTokens.cbegin(); pathToken != pathTokens.cend();
-       ++pathToken) {
-    if (!currentNode.isMember(*pathToken)) {
-      throw ContentError("");
-    }
-    currentNode = currentNode[*pathToken];
-  }
-
-  return currentNode;
-}
-
-template <typename T>
-T getNestedContentValueAsType(const Content &content, const std::string &path);
-template <>
-std::string getNestedContentValueAsType(const Content &content,
-                                        const std::string &path) {
-  return getNestedContent(content, path).asString();
-}
-template <>
-int getNestedContentValueAsType(const Content &content,
-                                const std::string &path) {
-  return getNestedContent(content, path).asInt();
-}
-template <>
-float getNestedContentValueAsType(const Content &content,
-                                  const std::string &path) {
-  return getNestedContent(content, path).asFloat();
-}
-template <>
-double getNestedContentValueAsType(const Content &content,
-                                   const std::string &path) {
-  return getNestedContent(content, path).asDouble();
-}
-template <>
-bool getNestedContentValueAsType(const Content &content,
-                                 const std::string &path) {
-  return getNestedContent(content, path).asBool();
-}
-
-template <typename T>
-T getNestedContentValueElseDefault(const Content &content,
-                                   const std::string &path, T defaultValue) {
-  try {
-    return getNestedContentValueAsType<T>(content, path);
-  } catch (ContentError &) {
-    return defaultValue;
-  }
-}
-
-template <typename T>
-boost::optional<T> getNestedContentValueIfPresent(const Content &content,
-                                                  const std::string &path) {
-  try {
-    return boost::make_optional(getNestedContentValueAsType<T>(content, path));
-  } catch (ContentError &) {
-    return boost::none;
-  }
-}
-} // namespace
-
-//----------------------------------------------------------------------
-// ONCatEntity
-//----------------------------------------------------------------------
 
 ONCatEntity::ONCatEntity(const std::string &id, const std::string &type,
                          Content_uptr content)
@@ -115,49 +32,6 @@ ONCatEntity::~ONCatEntity() {}
 std::string ONCatEntity::id() const { return m_id; }
 
 std::string ONCatEntity::type() const { return m_type; }
-
-template <>
-std::string ONCatEntity::get(const std::string &path,
-                             std::string defaultValue) const {
-  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
-}
-template <>
-int ONCatEntity::get(const std::string &path, int defaultValue) const {
-  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
-}
-template <>
-float ONCatEntity::get(const std::string &path, float defaultValue) const {
-  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
-}
-template <>
-double ONCatEntity::get(const std::string &path, double defaultValue) const {
-  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
-}
-template <>
-bool ONCatEntity::get(const std::string &path, bool defaultValue) const {
-  return getNestedContentValueElseDefault(*m_content, path, defaultValue);
-}
-
-template <>
-boost::optional<std::string> ONCatEntity::get(const std::string &path) const {
-  return getNestedContentValueIfPresent<std::string>(*m_content, path);
-}
-template <>
-boost::optional<int> ONCatEntity::get(const std::string &path) const {
-  return getNestedContentValueIfPresent<int>(*m_content, path);
-}
-template <>
-boost::optional<float> ONCatEntity::get(const std::string &path) const {
-  return getNestedContentValueIfPresent<float>(*m_content, path);
-}
-template <>
-boost::optional<double> ONCatEntity::get(const std::string &path) const {
-  return getNestedContentValueIfPresent<double>(*m_content, path);
-}
-template <>
-boost::optional<bool> ONCatEntity::get(const std::string &path) const {
-  return getNestedContentValueIfPresent<bool>(*m_content, path);
-}
 
 std::string ONCatEntity::toString() const {
   return m_content->toStyledString();
@@ -215,6 +89,51 @@ ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
   }
 
   return entities;
+}
+
+template <>
+std::string ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                        const std::string &path) const {
+  return getNestedContent(content, path).asString();
+}
+template <>
+int ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                const std::string &path) const {
+  return getNestedContent(content, path).asInt();
+}
+template <>
+float ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                  const std::string &path) const {
+  return getNestedContent(content, path).asFloat();
+}
+template <>
+double ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                   const std::string &path) const {
+  return getNestedContent(content, path).asDouble();
+}
+template <>
+bool ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                 const std::string &path) const {
+  return getNestedContent(content, path).asBool();
+}
+
+Content ONCatEntity::getNestedContent(const Content &content,
+                                      const std::string &path) const {
+  const auto pathTokens =
+      StringTokenizer(path, ".", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+
+  auto currentNode = content;
+
+  // Use the path tokens to drill down through the JSON nodes.
+  for (auto pathToken = pathTokens.cbegin(); pathToken != pathTokens.cend();
+       ++pathToken) {
+    if (!currentNode.isMember(*pathToken)) {
+      throw ContentError("");
+    }
+    currentNode = currentNode[*pathToken];
+  }
+
+  return currentNode;
 }
 
 } // namespace ONCat

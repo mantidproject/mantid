@@ -8,16 +8,14 @@
 #define MANTID_CATALOG_ONCATENTITY_H_
 
 #include "MantidCatalog/DllConfig.h"
+#include "MantidCatalog/Exception.h"
 #include "MantidKernel/make_unique.h"
 
 #include <string>
 #include <vector>
 
 #include <boost/optional.hpp>
-
-namespace Json {
-class Value;
-}
+#include <json/json.h>
 
 namespace Mantid {
 namespace Catalog {
@@ -25,6 +23,7 @@ namespace ONCat {
 
 using Content = Json::Value;
 using Content_uptr = std::unique_ptr<Content>;
+using Mantid::Catalog::Exception::ContentError;
 
 /**
  * A class to encapsulate the "entity" responses received from the ONCat API.
@@ -67,10 +66,23 @@ public:
 
   // For all other fields, you can either supply a default value for when a
   // value does not exist ...
-  template <typename T> T get(const std::string &path, T defaultValue) const;
+  template <typename T> T get(const std::string &path, T defaultValue) const {
+    try {
+      return getNestedContentValueAsType<T>(*m_content, path);
+    } catch (ContentError &) {
+      return defaultValue;
+    }
+  }
 
   // ... or, write conditional logic around boost's optional results.
-  template <typename T> boost::optional<T> get(const std::string &path) const;
+  template <typename T> boost::optional<T> get(const std::string &path) const {
+    try {
+      return boost::make_optional(
+        getNestedContentValueAsType<T>(*m_content, path));
+    } catch (ContentError &) {
+      return boost::none;
+    }
+  }
 
   std::string toString() const;
 
@@ -81,6 +93,13 @@ public:
 private:
   ONCatEntity(const std::string &id, const std::string &type,
               Content_uptr content);
+
+  template <typename T>
+  T getNestedContentValueAsType(const Content &content,
+                                const std::string &path) const;
+
+  Content getNestedContent(const Content &content,
+                           const std::string &path) const;
 
   std::string m_id;
   std::string m_type;
