@@ -86,7 +86,7 @@ public:
                     const Poco::Path &historyDest);
 
   /// Looks at the recovery checkpoints and repairs some faults
-  void repairCheckpointDirectory();           
+  void repairCheckpointDirectory();
 
 private:
   /// Captures the current object in the background thread
