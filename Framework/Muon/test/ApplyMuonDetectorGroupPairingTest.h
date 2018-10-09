@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MUON_APPLYMUONDETECTORGROUPPAIRINGTEST_H_
 #define MANTID_MUON_APPLYMUONDETECTORGROUPPAIRINGTEST_H_
 
@@ -247,9 +253,11 @@ public:
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
+    // Current behaviour is to convert bin edge x-values to bin centre x-values
+    // (point data) so there is on fewer x-value now.
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.4692, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 1.0000, 0.0001);
@@ -274,7 +282,7 @@ public:
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Account for the bin edges to point data conversion
-    double shift = 0.2;
+    double shift = 0.2 + 0.05;
     TS_ASSERT_DELTA(wsOut->readX(0)[0], ws->readX(0)[0] + shift, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[4], ws->readX(0)[4] + shift, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], ws->readX(0)[9] + shift, 0.001);
@@ -309,9 +317,9 @@ public:
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.5755, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.5368, 0.0001);
@@ -340,9 +348,9 @@ public:
 
     // Summation of periods occurs before asymmetry calculation
     // Subtraction of periods occurs AFTER asymmetry calculation
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.0153, 0.0001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.0130, 0.0001);
@@ -378,9 +386,9 @@ public:
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
     // Dead time applied before asymmetry
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.5181, 0.0001);
@@ -419,9 +427,9 @@ public:
     auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.40, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.90, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.1388, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.2900, 0.001);

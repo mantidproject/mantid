@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/CalMuonDetectorPhases.h"
 
 #include "MantidAPI/Axis.h"
@@ -511,12 +517,7 @@ API::MatrixWorkspace_sptr CalMuonDetectorPhases::getAsymmetry(
   alg->setProperty("Alpha", alpha);
   alg->executeAsChildAlg();
   API::MatrixWorkspace_sptr wsAsym = alg->getProperty("OutputWorkspace");
-  auto alg2 = createChildAlgorithm("ConvertToPointData");
-  alg2->setProperty("InputWorkspace", wsAsym);
-  alg2->setProperty("OutputWorkspace", "__NotUsed");
-  alg2->execute();
-  API::MatrixWorkspace_sptr wsAsym2 = alg2->getProperty("OutputWorkspace");
-  return wsAsym2;
+  return wsAsym;
 }
 
 /**
