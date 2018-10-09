@@ -364,9 +364,9 @@ public:
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
     // Rebinning happens before conversion to point data
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.100, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.300, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.900, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.00, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.200, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.800, 0.0001);
   }
 
   void test_TimeOffset_applied_correctly() {
@@ -407,9 +407,9 @@ public:
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.550, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.650, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.950, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.50, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.60, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.90, 0.0001);
   }
 
   void test_multiple_period_data_summing_periods_gives_correct_result() {
@@ -553,9 +553,9 @@ public:
     wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
         wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.25, delta);
-    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.35, delta);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.65, delta);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.2, delta);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.3, delta);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.6, delta);
   }
 
   void test_group_asymmetry_range_applied_correctly() {}

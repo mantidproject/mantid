@@ -511,7 +511,12 @@ API::MatrixWorkspace_sptr CalMuonDetectorPhases::getAsymmetry(
   alg->setProperty("Alpha", alpha);
   alg->executeAsChildAlg();
   API::MatrixWorkspace_sptr wsAsym = alg->getProperty("OutputWorkspace");
-  return wsAsym;
+  auto alg2 = createChildAlgorithm("ConvertToPointData");
+  alg2->setProperty("InputWorkspace", wsAsym);
+  alg2->setProperty("OutputWorkspace", "__NotUsed");
+  alg2->execute();
+  API::MatrixWorkspace_sptr wsAsym2 = alg2->getProperty("OutputWorkspace");
+  return wsAsym2;
 }
 
 /**
