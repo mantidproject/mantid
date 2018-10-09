@@ -27,28 +27,28 @@ bool is_alnum_underscore(char c) {
 }
 
 MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
-                                    const std::vector<int> &detectorIDs) {
+	const std::vector<int> &detectorIDs) {
 
-  auto outputWS = WorkspaceFactory::Instance().create(workspace, 1);
+	auto outputWS = WorkspaceFactory::Instance().create(workspace, 1);
 
-  std::vector<size_t> wsIndices =
-      workspace->getIndicesFromDetectorIDs(detectorIDs);
+	std::vector<size_t> wsIndices =
+		workspace->getIndicesFromDetectorIDs(detectorIDs);
 
-  if (wsIndices.size() != detectorIDs.size())
-    throw std::invalid_argument("Some of the detector IDs were not found");
+	if (wsIndices.size() != detectorIDs.size())
+		throw std::invalid_argument("Some of the detector IDs were not found");
 
-  outputWS->getSpectrum(0).clearDetectorIDs();
-  outputWS->setSharedX(0, workspace->sharedX(wsIndices.front()));
+	outputWS->getSpectrum(0).clearDetectorIDs();
+	outputWS->setSharedX(0, workspace->sharedX(wsIndices.front()));
 
-  auto hist = outputWS->histogram(0);
-  for (auto &wsIndex : wsIndices) {
-    hist += workspace->histogram(wsIndex);
-    outputWS->getSpectrum(0).addDetectorIDs(
-        workspace->getSpectrum(wsIndex).getDetectorIDs());
-  }
-  outputWS->setHistogram(0, hist);
-  outputWS->getSpectrum(0).setSpectrumNo(static_cast<int32_t>(1));
-  return outputWS;
+	auto hist = outputWS->histogram(0);
+	for (auto &wsIndex : wsIndices) {
+		hist += workspace->histogram(wsIndex);
+		outputWS->getSpectrum(0).addDetectorIDs(
+			workspace->getSpectrum(wsIndex).getDetectorIDs());
+	}
+	outputWS->setHistogram(0, hist);
+	outputWS->getSpectrum(0).setSpectrumNo(static_cast<int32_t>(1));
+	return outputWS;
 }
 
 } // namespace

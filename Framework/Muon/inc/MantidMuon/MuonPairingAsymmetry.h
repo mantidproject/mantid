@@ -18,7 +18,10 @@ public:
   const std::string name() const override { return "MuonPairingAsymmetry"; }
   int version() const override { return (1); }
   const std::string category() const override { return "Muon\\DataHandling"; }
-  const std::string summary() const override { return "."; }
+  const std::string summary() const override {
+    return "Apply a pairing asymmetry calculation between two detector groups "
+           "from Muon data.";
+  }
   const std::vector<std::string> seeAlso() const override {
     return {"MuonProcess"};
   }
@@ -26,20 +29,33 @@ public:
 private:
   void init() override;
   void exec() override;
+  // Validation split across several functions due to size
+  std::map<std::string, std::string> validateInputs();
+  void validateManualGroups(std::map<std::string, std::string> &errors);
+  void validateGroupsWorkspaces(std::map<std::string, std::string> &errors);
+  void validatePeriods(WorkspaceGroup_sptr inputWS,
+                       std::map<std::string, std::string> &errors);
 
-  MatrixWorkspace_sptr
-  createPairWorkspaceFromGroupWorkspaces(MatrixWorkspace_sptr inputWS1,
-                                         MatrixWorkspace_sptr inputWS2,
-                                         const double &alpha);
+  WorkspaceGroup_sptr createGroupWorkspace(WorkspaceGroup_sptr inputWS);
+  MatrixWorkspace_sptr appendSpectra(MatrixWorkspace_sptr inputWS1,
+                                     MatrixWorkspace_sptr inputWS2);
 
   /// Perform an asymmetry calculation
   MatrixWorkspace_sptr asymmetryCalc(MatrixWorkspace_sptr inputWS,
                                      const double &alpha);
+  MatrixWorkspace_sptr calcAsymmetryWithSummedAndSubtractedPeriods(
+      const std::vector<int> &summedPeriods,
+      const std::vector<int> &subtractedPeriods,
+      WorkspaceGroup_sptr groupedPeriods, const double &alpha);
 
   /// Execute the algorithm if "SpecifyGroupsManually" is checked
-  MatrixWorkspace_sptr execSpecifyGroupsManually(WorkspaceGroup_sptr inputWS);
+  MatrixWorkspace_sptr execSpecifyGroupsManually();
+
+  MatrixWorkspace_sptr MuonPairingAsymmetry::execGroupWorkspaceInput();
 
   void setPairAsymmetrySampleLogs(MatrixWorkspace_sptr workspace);
+  /// Allow WorkspaceGroup property to function correctly.
+  bool checkGroups() override;
 };
 
 } // namespace Muon

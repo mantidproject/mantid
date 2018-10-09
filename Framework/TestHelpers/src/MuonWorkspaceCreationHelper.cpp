@@ -136,6 +136,33 @@ createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
   return wsGroup;
 }
 
+Mantid::API::WorkspaceGroup_sptr
+createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
+	const std::string &wsGroupName) {
+	Mantid::API::WorkspaceGroup_sptr wsGroup =
+		boost::make_shared<Mantid::API::WorkspaceGroup>();
+	Mantid::API::AnalysisDataService::Instance().addOrReplace(wsGroupName,
+		wsGroup);
+
+	std::string wsNameStem = "MuonDataPeriod_";
+	std::string wsName;
+
+	boost::shared_ptr<Mantid::Geometry::Instrument> inst1 =
+		boost::make_shared<Mantid::Geometry::Instrument>();
+	inst1->setName("EMU");
+
+	for (int period = 1; period < nPeriods + 1; period++) {
+		Mantid::API::MatrixWorkspace_sptr ws =
+			createAsymmetryWorkspace(nspec, maxt, yDataAsymmetry(10.0 * period, 0.1 * period));
+
+		wsGroup->addWorkspace(ws);
+		wsName = wsNameStem + std::to_string(period);
+		Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
+	}
+
+	return wsGroup;
+}
+
 /**
  * Create a simple dead time TableWorkspace with two columns (spectrum number
  * and dead time).

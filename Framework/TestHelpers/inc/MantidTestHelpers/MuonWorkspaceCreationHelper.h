@@ -88,7 +88,8 @@ createCountsWorkspace(size_t nspec, size_t maxt, double seed,
 
 Mantid::API::MatrixWorkspace_sptr
 createCountsWorkspace(size_t nspec, size_t maxt, double seed,
-                      size_t detectorIDseed, bool hist, double xStart, double xEnd);
+                      size_t detectorIDseed, bool hist, double xStart,
+                      double xEnd);
 
 /**
  * Create a WorkspaceGroup and add to the ADS, populate with
@@ -99,9 +100,13 @@ Mantid::API::WorkspaceGroup_sptr
 createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
                                 const std::string &wsGroupName);
 
+Mantid::API::WorkspaceGroup_sptr
+createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
+                               const std::string &wsGroupName);
+
 /**
- * Create a simple dead time TableWorkspace with two columns (spectrum number
- * and dead time).
+ * Create a simple dead time TableWorkspace with two columns (spectrum
+ * number and dead time).
  */
 Mantid::API::ITableWorkspace_sptr
 createDeadTimeTable(const size_t &nspec, std::vector<double> &deadTimes);
