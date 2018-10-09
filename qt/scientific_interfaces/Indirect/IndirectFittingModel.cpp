@@ -516,7 +516,8 @@ void IndirectFittingModel::addNewWorkspace(MatrixWorkspace_sptr workspace,
 }
 
 void IndirectFittingModel::removeWorkspace(std::size_t index) {
-  removeFittingData(index);
+  if (m_fittingData.size() > index)
+    removeFittingData(index);
 
   if (index > 0 && m_fittingData.size() > index) {
     const auto previousWS = m_fittingData[index - 1]->workspace();

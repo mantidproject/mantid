@@ -10,6 +10,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest
   QT_VERSION 4
   SRC ${TEST_FILES}
   INCLUDE_DIRS
+    ../../../../Framework/CurveFitting/inc
     ../../../../Framework/DataObjects/inc
     ../../../../Framework/TestHelpers/inc
     ../
@@ -21,6 +22,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
+    CurveFitting
     DataObjects
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
