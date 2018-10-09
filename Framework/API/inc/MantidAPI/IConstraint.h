@@ -84,6 +84,7 @@ protected:
   /// default penalty factor for constraints
   static constexpr double m_defaultPenaltyFactor = 1000;
 };
+
 } // namespace API
 } // namespace Mantid
 
