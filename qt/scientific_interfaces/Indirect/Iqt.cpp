@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "Iqt.h"
 #include "../General/UserInputValidator.h"
 
@@ -475,6 +481,9 @@ void Iqt::setSaveResultEnabled(bool enabled) {
 void Iqt::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
+  setTiledPlotEnabled(!running);
 }
 
 void Iqt::setPlotResultIsPlotting(bool plotting) {

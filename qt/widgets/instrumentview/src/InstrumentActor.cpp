@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -84,11 +90,18 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
         "InstrumentActor passed a workspace that isn't a MatrixWorkspace");
   setupPhysicalInstrumentIfExists();
 
+  m_hasGrid = false;
+  m_numGridLayers = 0;
   for (size_t i = 0; i < componentInfo().size(); ++i) {
     if (!componentInfo().isDetector(i))
       m_components.push_back(i);
     else if (detectorInfo().isMonitor(i))
       m_monitors.push_back(i);
+    if (componentInfo().componentType(i) ==
+        Mantid::Beamline::ComponentType::Grid) {
+      m_hasGrid = true;
+      m_numGridLayers = componentInfo().children(i).size();
+    }
   }
 
   m_isCompVisible.assign(componentInfo().size(), true);
@@ -188,7 +201,7 @@ void InstrumentActor::setupPhysicalInstrumentIfExists() {
 }
 
 void InstrumentActor::setComponentVisible(size_t componentIndex) {
-  setChildVisibility(false);
+  setAllComponentsVisibility(false);
   const auto &compInfo = componentInfo();
   auto children = compInfo.componentsInSubtree(componentIndex);
   m_isCompVisible[componentIndex] = true;
@@ -198,7 +211,7 @@ void InstrumentActor::setComponentVisible(size_t componentIndex) {
   resetColors();
 }
 
-void InstrumentActor::setChildVisibility(bool on) {
+void InstrumentActor::setAllComponentsVisibility(bool on) {
   std::fill(m_isCompVisible.begin(), m_isCompVisible.end(), on);
 }
 
@@ -1192,6 +1205,22 @@ void InstrumentActor::loadFromProject(const std::string &lines) {
     tsv >> binMaskLines;
     m_maskBinsData.loadFromProject(binMaskLines);
   }
+}
+
+bool InstrumentActor::hasGridBank() const { return m_hasGrid; }
+
+size_t InstrumentActor::getNumberOfGridLayers() const {
+  return m_numGridLayers;
+}
+
+void InstrumentActor::setGridLayer(bool isUsingLayer, int layer) const {
+  m_renderer->enableGridBankLayers(isUsingLayer, layer);
+  m_renderer->reset();
+  emit colorMapChanged();
+}
+
+const InstrumentRenderer &InstrumentActor::getInstrumentRenderer() const {
+  return *m_renderer;
 }
 
 /** If instrument.geometry.view is set to Default or Physical, then the physical
