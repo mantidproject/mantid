@@ -140,15 +140,14 @@ void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
 }
 
 /// Returns the scan count of the detector, reading it from m_componentInfo
-size_t DetectorInfo::scanCount() const {
-  return m_componentInfo->scanCount();
-}
+size_t DetectorInfo::scanCount() const { return m_componentInfo->scanCount(); }
 
 /** Returns the scan interval of the detector with given index.
  *
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
-const std::vector<std::pair<int64_t, int64_t>> DetectorInfo::scanIntervals() const {
+const std::vector<std::pair<int64_t, int64_t>>
+DetectorInfo::scanIntervals() const {
   return m_componentInfo->scanIntervals();
 }
 
@@ -171,8 +170,7 @@ void failMerge(const std::string &what) {
  * ignored, i.e., no time index is added. */
 void DetectorInfo::merge(const DetectorInfo &other) {
   const auto &merge = buildMergeScanIndices(other);
-  for (size_t timeIndex = 0; timeIndex < other.scanCount();
-       ++timeIndex) {
+  for (size_t timeIndex = 0; timeIndex < other.scanCount(); ++timeIndex) {
     if (!merge[timeIndex])
       continue;
     auto &isMasked = m_isMasked.access();

@@ -420,13 +420,13 @@ ComponentInfo::componentType(const size_t componentIndex) const {
 }
 
 void ComponentInfo::setScanInterval(
-    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {
-  m_componentInfo->setScanInterval({interval.first.totalNanoseconds(),interval.second.totalNanoseconds()});
+    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
+        &interval) {
+  m_componentInfo->setScanInterval(
+      {interval.first.totalNanoseconds(), interval.second.totalNanoseconds()});
 }
 
-size_t ComponentInfo::scanCount() const {
-  return m_componentInfo->scanCount();
-}
+size_t ComponentInfo::scanCount() const { return m_componentInfo->scanCount(); }
 
 void ComponentInfo::merge(const ComponentInfo &other) {
   m_componentInfo->merge(*other.m_componentInfo);

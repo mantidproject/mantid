@@ -320,7 +320,7 @@ size_t DetectorInfo::scanCount() const { return m_detectorInfo->scanCount(); }
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
 const std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
-    DetectorInfo::scanIntervals() const {
+DetectorInfo::scanIntervals() const {
   const auto &intervals = m_detectorInfo->scanIntervals();
   return {intervals.begin(), intervals.end()};
 }

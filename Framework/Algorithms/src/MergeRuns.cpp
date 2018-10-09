@@ -121,14 +121,17 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
 
   newOutWS->mutableComponentInfo().merge(addeeWS->componentInfo());
 
-  if (newOutWS->detectorInfo().size() * newOutWS->detectorInfo().scanCount() == outWS->detectorInfo().size() * outWS->detectorInfo().scanCount()) {
+  if (newOutWS->detectorInfo().size() * newOutWS->detectorInfo().scanCount() ==
+      outWS->detectorInfo().size() * outWS->detectorInfo().scanCount()) {
     // In this case the detector info objects were identical. We just add the
     // workspaces as we normally would for MergeRuns.
     g_log.information()
         << "Workspaces had identical detector scan information and were "
            "merged.";
     return outWS + addeeWS;
-  } else if (newOutWS->detectorInfo().size() * newOutWS->detectorInfo().scanCount() != numOutputSpectra) {
+  } else if (newOutWS->detectorInfo().size() *
+                 newOutWS->detectorInfo().scanCount() !=
+             numOutputSpectra) {
     throw std::runtime_error("Unexpected DetectorInfo size. Merging workspaces "
                              "with some, but not all overlapping scan "
                              "intervals is not currently supported.");

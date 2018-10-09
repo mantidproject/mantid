@@ -119,7 +119,9 @@ public:
   size_t indexOf(const detid_t id) const { return m_detIDToIndex->at(id); }
 
   size_t scanCount() const;
-  const std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> scanIntervals() const;
+  const std::vector<
+      std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+  scanIntervals() const;
 
   friend class API::SpectrumInfo;
   friend class Instrument;

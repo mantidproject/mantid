@@ -582,7 +582,8 @@ void ComponentInfo::checkNoTimeDependence() const {
 }
 
 /// Get the scan intervals
-const std::vector<std::pair<int64_t, int64_t>> ComponentInfo::scanIntervals() const {
+const std::vector<std::pair<int64_t, int64_t>>
+ComponentInfo::scanIntervals() const {
   return m_scanIntervals;
 }
 

@@ -108,7 +108,7 @@ public:
    * ComponentInfo, since that would effectively let us create a non-sync
    * scan. Otherwise we cannot provide scanning-related methods in
    * ComponentInfo without component index.
-  */
+   */
   friend class ComponentInfo;
 
 private:
