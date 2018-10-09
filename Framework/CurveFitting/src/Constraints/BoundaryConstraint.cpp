@@ -258,7 +258,6 @@ std::string BoundaryConstraint::asString() const {
     ostr << '<' << m_upperBound;
   }
   if (m_penaltyFactor != getDefaultPenaltyFactor()) {
-    // if(true){
     ostr << ", penalty=" << m_penaltyFactor;
   }
   return ostr.str();
