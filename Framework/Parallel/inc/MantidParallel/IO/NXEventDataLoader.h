@@ -4,6 +4,7 @@
 #include <H5Cpp.h>
 #include <vector>
 
+#include "MantidKernel/System.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/NXEventDataSource.h"
