@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <cxxtest/TestSuite.h>
 #include <math.h>
 
@@ -105,7 +111,7 @@ public:
 
     void testThrowsNothingMessage()
     {
-        TSM_ASSERT_THROWS_NOTHING( "Empty functions dosn't throw", throwNothing() );
+        TSM_ASSERT_THROWS_NOTHING( "Empty functions doesn't throw", throwNothing() );
     }
 
     void throwNothing()

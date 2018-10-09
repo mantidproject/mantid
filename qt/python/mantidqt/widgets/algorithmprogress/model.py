@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
 from mantid.api import AlgorithmObserver
@@ -12,7 +18,7 @@ class ProgressObserver(AlgorithmObserver):
         super(ProgressObserver, self).__init__()
         self.model = model
         self.algorithm = alg
-        self.message = None
+        self.message = ''
         self.progress = 0.0
 
     def name(self):
@@ -30,10 +36,7 @@ class ProgressObserver(AlgorithmObserver):
 
     def progressHandle(self, p, message):
         self.progress = p
-        if len(message) > 0:
-            self.message = message
-        else:
-            self.message = None
+        self.message = message
         self.model.update_progress(self)
 
     def errorHandle(self, message):

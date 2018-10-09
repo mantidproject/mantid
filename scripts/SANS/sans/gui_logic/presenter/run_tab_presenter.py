@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ The run tab presenter.
 
 This presenter is essentially the brain of the reduction gui. It controls other presenters and is mainly responsible
@@ -167,8 +173,9 @@ class RunTabPresenter(object):
         self._view.sample_shape = sample_shape
 
         # Set the q range
-        self._view.q_1d_step_type = range_step_types
-        self._view.q_xy_step_type = range_step_types
+        self._view.q_1d_step_type = [RangeStepType.to_string(RangeStepType.Lin),
+                                     RangeStepType.to_string(RangeStepType.Log)]
+        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin)]
 
         # Set the fit options
         fit_types = [FitType.to_string(FitType.Linear),

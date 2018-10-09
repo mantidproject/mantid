@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
@@ -385,6 +391,9 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
                                int col, int row) {
   boost::shared_ptr<const IComponent> parent =
       getCachedBankByName(bankName, inst);
+
+  if (!parent)
+    return -1; // peak not in any detector.
 
   if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =

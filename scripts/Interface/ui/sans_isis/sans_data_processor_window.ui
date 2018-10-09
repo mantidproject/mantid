@@ -582,7 +582,7 @@ QGroupBox::title {
                          <item row="0" column="0">
                           <widget class="QLabel" name="reduction_mode_label">
                            <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specifed data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specified data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                            </property>
                            <property name="text">
                             <string>Reduction Mode</string>
@@ -592,7 +592,7 @@ QGroupBox::title {
                          <item row="0" column="1">
                           <widget class="QComboBox" name="reduction_mode_combo_box">
                            <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specifed data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specified data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                            </property>
                           </widget>
                          </item>
@@ -675,7 +675,7 @@ QGroupBox::title {
                         <item row="2" column="0">
                          <widget class="QCheckBox" name="merged_scale_use_fit_check_box">
                           <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked hten the scale will be fit during the merge operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked then the scale will be fit during the merge operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                           </property>
                           <property name="text">
                            <string>Use Fit</string>
@@ -685,7 +685,7 @@ QGroupBox::title {
                         <item row="2" column="1">
                          <widget class="QCheckBox" name="merged_shift_use_fit_check_box">
                           <property name="toolTip">
-                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked hten the shift will be fit during the merge operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked then the shift will be fit during the merge operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                           </property>
                           <property name="text">
                            <string>Use Fit</string>
@@ -756,7 +756,7 @@ QGroupBox::title {
                   <item>
                    <widget class="QGroupBox" name="slice_event_group_box">
                     <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In the case of data which was measured in event-mode, it is possible to perform time-of-flight slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies time slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a time slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications useing comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In the case of data which was measured in event-mode, it is possible to perform time-of-flight slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies time slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a time slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications using comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
                      <string>Event Slice</string>
@@ -1756,7 +1756,7 @@ QGroupBox::title {
                        <item row="1" column="0">
                         <widget class="QLabel" name="label_7">
                          <property name="toolTip">
-                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It is possible to perform wavelength slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies wavelength slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a wavelength slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications useing comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A reduction will always be done between the maximum and minimum wavelengths of a given set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It is possible to perform wavelength slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies wavelength slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a wavelength slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications using comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A reduction will always be done between the maximum and minimum wavelengths of a given set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                          </property>
                          <property name="text">
                           <string>Ranges  [Å]</string>
@@ -1859,7 +1859,28 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="0">
+                   <item row="0" column="4">
+                    <widget class="QLabel" name="q_step_type_label">
+                     <property name="text">
+                      <string>Step type</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="3">
+                    <widget class="QLabel" name="q_step_label">
+                     <property name="text">
+                      <string>Step [Å^-1]</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="2">
+                    <widget class="QLineEdit" name="q_xy_max_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="0">
                     <widget class="QLabel" name="q_xy_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Momentum transfer settings for 2D reductions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1879,28 +1900,14 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="2">
-                    <widget class="QLineEdit" name="q_1d_max_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <item row="0" column="1">
+                    <widget class="QLabel" name="q_min_label">
+                     <property name="text">
+                      <string>Min [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="3">
-                    <widget class="QLineEdit" name="q_1d_step_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="2">
-                    <widget class="QLineEdit" name="q_xy_max_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="3">
+                   <item row="3" column="3">
                     <widget class="QLineEdit" name="q_xy_step_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1914,10 +1921,24 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="4">
+                   <item row="3" column="4">
                     <widget class="QComboBox" name="q_xy_step_type_combo_box">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step type of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="3">
+                    <widget class="QLineEdit" name="q_1d_step_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="2">
+                    <widget class="QLineEdit" name="q_1d_max_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
@@ -1928,24 +1949,17 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="1">
-                    <widget class="QLabel" name="q_min_label">
+                   <item row="2" column="2">
+                    <widget class="QLabel" name="label_8">
                      <property name="text">
-                      <string>Min [Å^-1]</string>
+                      <string>Max [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="3">
-                    <widget class="QLabel" name="q_step_label">
+                   <item row="2" column="3">
+                    <widget class="QLabel" name="label_9">
                      <property name="text">
                       <string>Step [Å^-1]</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="4">
-                    <widget class="QLabel" name="q_step_type_label">
-                     <property name="text">
-                      <string>Step type</string>
                      </property>
                     </widget>
                    </item>

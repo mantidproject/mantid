@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 
 from __future__ import (absolute_import, division, print_function)
@@ -52,11 +58,11 @@ class SANS2DNewSettingsCarriedAcrossInBatchMode(stresstesting.MantidStressTest):
         SANS2D()
         Set1D()
         Detector("rear-detector")
-        # This contains two MASKFILE commands, each resulting in a seperate call to MaskDetectors.
+        # This contains two MASKFILE commands, each resulting in a separate call to MaskDetectors.
         MaskFile('MaskSANS2DReductionGUI_MaskFiles.txt')
         Gravity(True)
 
-        # This does 2 seperate reductions of the same data, but saving the result of each to a different workspace.
+        # This does 2 separate reductions of the same data, but saving the result of each to a different workspace.
         csv_file = FileFinder.getFullPath("SANS2D_mask_batch.csv")
         BatchReduce(csv_file, 'nxs', plotresults=False)
 
@@ -78,7 +84,7 @@ class SANS2DTUBESBatchWithZeroErrorCorrection(stresstesting.MantidStressTest):
         SANS2DTUBES()
         Set1D()
         Detector("rear-detector")
-        # This contains two MASKFILE commands, each resulting in a seperate call to MaskDetectors.
+        # This contains two MASKFILE commands, each resulting in a separate call to MaskDetectors.
         MaskFile('SANS2DTube_ZerroErrorFreeTest.txt')
 
         # Saves a file which produces an output file which does not contain any zero errors

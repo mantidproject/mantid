@@ -93,7 +93,7 @@ signals:
 private:
   bool pointSelected;
   /**\brief The marker that is currently being edited, or NULL.
-   * Editing does explicitly _not_ inlude moving and resizing, which are being
+   * Editing does explicitly _not_ include moving and resizing, which are being
    * handled by SelectionMoveResizer (see Graph::d_markers_selector).
    * Currently, only ArrowMarker provides any other form of editing, but this
    * really

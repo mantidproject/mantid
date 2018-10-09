@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from copy import deepcopy
 from mantid.api import AnalysisDataService, WorkspaceGroup
@@ -433,7 +439,7 @@ def reduction_packages_require_splitting_for_event_slices(reduction_packages):
     The SANSSingleReduction algorithm can handle only a single time slice. For each time slice, we require an individual
     reduction. Hence we split the states up at this point.
     :param reduction_packages: a list of reduction packages.
-    :return: a list of reduction packages which has at leaset the same length as the input
+    :return: a list of reduction packages which has at least the same length as the input
     """
     # Determine if the event slice sub-state object contains multiple event slice requests. This is given
     # by the number of elements in start_tof

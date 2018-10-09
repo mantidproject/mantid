@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
@@ -198,7 +204,7 @@ void IFunctionAdapter::setAttribute(const std::string &attName,
  *    For a single domain function it should have a single element (self).
  * @return A python list of IFunction_sprs.
  */
-boost::python::object
+boost::python::list
 IFunctionAdapter::createPythonEquivalentFunctions(IFunction &self) {
   auto functions = self.createEquivalentFunctions();
   boost::python::list list;

@@ -21,7 +21,7 @@ Improvements
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
-
+- :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
 
 Bugfixes
 ########
@@ -52,6 +52,7 @@ Improvements
 
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
   data streaming from TOPAZ new Adara data server.
+- :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
 
 - :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace.
 
@@ -63,6 +64,7 @@ Bugfixes
 - :ref:`CentroidPeaksMD <algm-CentroidPeaksMD>` now updates peak bin counts.
 
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` now finds peaks correctly with the crystallography convention setting and reduction with crystallography convention is tested with a system test.
+- :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` does not have duplicate peak numbers when saving PeaksWorkspaces with more than one RunNumber.
 
 Powder Diffraction
 ------------------
@@ -80,6 +82,7 @@ Bugfixes
 ########
 
 - multiple_scattering flag is now optional for Polaris focus when absorb_correction is true.
+- Normalisation is fixed in :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`, which was causing very low peak to background ratio for reduced D2B data.
 
 New
 ###

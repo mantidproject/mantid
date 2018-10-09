@@ -579,7 +579,7 @@
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Directory to save outcome of the data reduction&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="text">
-                  <string>Working Direcotry</string>
+                  <string>Working Directory</string>
                  </property>
                 </widget>
                </item>
@@ -3470,7 +3470,7 @@ p, li { white-space: pre-wrap; }
                  </sizepolicy>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;List of scans and possibly Pt numbers.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 1:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304&lt;/p&gt;&lt;p&gt;It will integrate all Pts. in each scan&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 2:&lt;/p&gt;&lt;p&gt;123 (1, 2, 3, 4-10), 125-130, &lt;/p&gt;&lt;p&gt;It will integrate all Pts. in all scans excpet 123, which will have a selected few to be integrated&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 3:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304 | 1, 2, 3-9&lt;/p&gt;&lt;p&gt;It will integrate selected Pts. in the previous one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;List of scans and possibly Pt numbers.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 1:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304&lt;/p&gt;&lt;p&gt;It will integrate all Pts. in each scan&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 2:&lt;/p&gt;&lt;p&gt;123 (1, 2, 3, 4-10), 125-130, &lt;/p&gt;&lt;p&gt;It will integrate all Pts. in all scans except 123, which will have a selected few to be integrated&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 3:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304 | 1, 2, 3-9&lt;/p&gt;&lt;p&gt;It will integrate selected Pts. in the previous one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
