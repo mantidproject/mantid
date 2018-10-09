@@ -223,15 +223,13 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
   return folderPaths;
 }
 
-void removeEmptyFolders(std::vector<Poco::Path> checkpointPaths) {
+void removeEmptyFolders(std::vector<Poco::Path> &checkpointPaths) {
   for (auto i = 0u; i < checkpointPaths.size(); ++i) {
     const auto listOfFolders =
         getListOfFoldersInDirectory(checkpointPaths[i].toString());
     if (listOfFolders.size() == 0) {
       // Remove actual folder to stop this happening again in further checks
       Poco::File(checkpointPaths[i]).remove(true);
-      // Erase from checkpointPaths vector
-      checkpointPaths.erase(checkpointPaths.begin() + i);
     }
   }
 }
@@ -302,12 +300,8 @@ void ProjectRecovery::attemptRecovery() {
 
 bool ProjectRecovery::checkForRecovery() const noexcept {
   try {
-    auto checkpointPaths =
+    const auto checkpointPaths =
         getRecoveryFolderCheckpoints(getRecoveryFolderCheck());
-    // Since adding removal of checkpoints before this check it is possible that
-    // a PID is there with no checkpoint this loop fixes that issue removing
-    // them.
-    removeEmptyFolders(checkpointPaths);
     return checkpointPaths.size() != 0 &&
            (checkpointPaths.size() > Process::numberOfMantids());
   } catch (...) {
@@ -658,68 +652,6 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   }
 }
 
-void ProjectRecovery::removeOlderCheckpoints() {
-  // Currently set to a month in microseconds
-  const int64_t timeToDeleteAfter = 2592000000000;
-  std::string recoverFolder = getRecoveryFolderCheck();
-  // Get the PIDS
-  std::vector<Poco::Path> possiblePidsPaths =
-      getListOfFoldersInDirectory(recoverFolder);
-  // Order pids based on date last modified descending
-  std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
-  // check if pid exists
-  std::vector<std::string> folderPaths;
-  try {
-    for (auto i = 0u; i < possiblePids.size(); ++i) {
-      if (!isPIDused(possiblePids[i])) {
-        std::string folder = recoverFolder;
-        folder.append(std::to_string(possiblePids[i]) + "/");
-        if (olderThanAGivenTime(Poco::Path(folder), timeToDeleteAfter)) {
-          folderPaths.emplace_back(folder);
-        }
-      }
-    }
-    
-    bool recurse = true;
-    for (size_t i = 0; i < folderPaths.size(); i++) {
-      Poco::File(folderPaths[i]).remove(recurse);
-    }
-  } catch (...) {
-    // Errors here are usually caused by older versions of mantid having crashed
-    // previously
-    g_log.warning("Project Recovery: An older version of mantid crashed and "
-                  "not recovered from before this was launched");
-  }
-}
-
-void ProjectRecovery::removeLockedCheckpoints() {
-  std::string recoverFolder = getRecoveryFolderCheck();
-  // Get the PIDS
-  std::vector<Poco::Path> possiblePidsPaths =
-      getListOfFoldersInDirectory(recoverFolder);
-  // Order pids based on date last modified descending
-  std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
-  // check if pid exists
-  std::vector<Poco::Path> files;
-  for (auto i = 0u; i < possiblePids.size(); ++i) {
-    if (!isPIDused(possiblePids[i])) {
-      std::string folder = recoverFolder;
-      folder.append(std::to_string(possiblePids[i]) + "/");
-      auto checkpointsInsidePIDs = getListOfFoldersInDirectory(folder);
-      for (auto c : checkpointsInsidePIDs) {
-        if (Poco::File(c.setFileName(LOCK_FILE_NAME)).exists()) {
-          files.emplace_back(c.setFileName(""));
-        }
-      }
-    }
-  }
-
-  bool recurse = true;
-  for (auto c : files) {
-    Poco::File(c).remove(recurse);
-  }
-}
-
 bool ProjectRecovery::olderThanAGivenTime(const Poco::Path &path,
                                           int64_t elapsedTime) {
   return Poco::File(path).getLastModified().isElapsed(elapsedTime);
@@ -776,6 +708,98 @@ std::string ProjectRecovery::getRecoveryFolderLoadPR() {
 std::vector<Poco::Path> ProjectRecovery::getRecoveryFolderCheckpointsPR(
     const std::string &recoveryFolderPath) {
   return getRecoveryFolderCheckpoints(recoveryFolderPath);
+}
+
+std::vector<std::string>
+ProjectRecovery::findOlderCheckpoints(const std::string &recoverFolder,
+                                      const std::vector<int> &possiblePids) {
+  // Currently set to a month in microseconds
+  const int64_t timeToDeleteAfter = 2592000000000;
+  std::vector<std::string> folderPaths;
+  for (auto i = 0u; i < possiblePids.size(); ++i) {
+    std::string folder = recoverFolder;
+    folder.append(std::to_string(possiblePids[i]) + "/");
+    // check if the checkpoint is too old
+    if (olderThanAGivenTime(Poco::Path(folder), timeToDeleteAfter)) {
+      folderPaths.emplace_back(folder);
+    }
+  }
+  return folderPaths;
+}
+
+std::vector<std::string>
+ProjectRecovery::findLockedCheckpoints(const std::string &recoverFolder,
+                                       const std::vector<int> &possiblePids) {
+  std::vector<std::string> files;
+  for (auto i = 0u; i < possiblePids.size(); ++i) {
+    std::string folder = recoverFolder;
+    folder.append(std::to_string(possiblePids[i]) + "/");
+    auto checkpointsInsidePIDs = getListOfFoldersInDirectory(folder);
+    for (auto c : checkpointsInsidePIDs) {
+      if (Poco::File(c.setFileName(LOCK_FILE_NAME)).exists()) {
+        files.emplace_back(c.setFileName("").toString());
+      }
+    }
+  }
+  return files;
+}
+
+std::vector<std::string> ProjectRecovery::findLegacyCheckpoints(
+    const std::vector<Poco::Path> &checkpoints) {
+  std::vector<std::string> vectorToDelete;
+  for (auto c : checkpoints) {
+    const std::string PID = c.directory(c.depth() - 1);
+    // If char 11 is a T then it is a date saved as a PID which is a legacy
+    // checkpoint
+    if (PID.size() >= 11 && PID[10] == 'T') {
+      vectorToDelete.emplace_back(c.toString());
+    }
+  }
+  return vectorToDelete;
+}
+
+void ProjectRecovery::checkPIDsAreNotInUse(std::vector<int> &possiblePids) {
+  for (auto i = 0u; i < possiblePids.size(); ++i) {
+    if (isPIDused(possiblePids[i])) {
+      possiblePids.erase(possiblePids.begin() + i);
+    }
+  }
+}
+
+void ProjectRecovery::repairCheckpointDirectory() {
+  const std::string recoverFolder = getRecoveryFolderCheck();
+  std::vector<std::string> vectorToDelete;
+  std::vector<Poco::Path> checkpoints =
+      getListOfFoldersInDirectory(recoverFolder);
+  try {
+    // Grab Unused PIDs from retrieved directories
+    std::vector<int> possiblePids = orderProcessIDs(checkpoints);
+    checkPIDsAreNotInUse(possiblePids);
+
+    std::vector<std::string> tempVec = findLegacyCheckpoints(checkpoints);
+    vectorToDelete.insert(vectorToDelete.end(), tempVec.begin(), tempVec.end());
+
+    tempVec = findLockedCheckpoints(recoverFolder, possiblePids);
+    vectorToDelete.insert(vectorToDelete.end(), tempVec.begin(), tempVec.end());
+
+    tempVec = findOlderCheckpoints(recoverFolder, possiblePids);
+    vectorToDelete.insert(vectorToDelete.end(), tempVec.begin(), tempVec.end());
+
+  } catch (...) {
+    // Errors here are likely caused by older versions of mantid having crashed
+    // previously (Even though removeLegacyCheckpoints() should handle this)
+    g_log.debug("Project Recovery: During repair of checkpoint directory, "
+                "mantid has been unable to successfully handle repair so "
+                "checkpoints may be invalid");
+  }
+  bool recurse = true;
+  for (auto c : vectorToDelete) {
+    Poco::File(c).remove(recurse);
+  }
+
+  // Handle removing empty checkpoint folders
+  checkpoints = getListOfFoldersInDirectory(recoverFolder);
+  removeEmptyFolders(checkpoints);
 }
 
 } // namespace MantidQt

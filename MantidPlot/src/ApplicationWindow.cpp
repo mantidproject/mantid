@@ -16807,10 +16807,7 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
 void ApplicationWindow::checkForProjectRecovery() {
   m_projectRecoveryRunOnStart = true;
 
-  m_projectRecovery.removeOlderCheckpoints();
-
-  // Mantid crashed during writing to this checkpoint so remove it
-  m_projectRecovery.removeLockedCheckpoints();
+  m_projectRecovery.repairCheckpointDirectory();
 
   if (!m_projectRecovery.checkForRecovery()) {
     m_projectRecovery.startProjectSaving();

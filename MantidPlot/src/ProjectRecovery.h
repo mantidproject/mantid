@@ -58,9 +58,6 @@ public:
   /// Stops the background thread
   void stopProjectSaving();
 
-  /// Removes checkpoints should they be older than a month old.
-  void removeOlderCheckpoints();
-
   /// Saves a project recovery checkpoint
   void saveAll(bool autoSave = true);
 
@@ -88,8 +85,8 @@ public:
   void openInEditor(const Poco::Path &inputFolder,
                     const Poco::Path &historyDest);
 
-  /// Remove checkpoints if it has lock file
-  void removeLockedCheckpoints();
+  /// Looks at the recovery checkpoints and repairs some faults
+  void repairCheckpointDirectory();           
 
 private:
   /// Captures the current object in the background thread
@@ -125,8 +122,28 @@ private:
   /// Saves the current workspace's histories from Mantid
   void saveWsHistories(const Poco::Path &projectDestFile);
 
-  // Return true if the folder at the end of the path is older than a month.
+  /// Return true if the folder at the end of the path is older than a month.
   bool olderThanAGivenTime(const Poco::Path &path, int64_t elapsedTime);
+
+  /// Finds any checkpoints older than a time defined inside the function and
+  /// returns paths to them
+  std::vector<std::string>
+  findOlderCheckpoints(const std::string &recoverFolder,
+                       const std::vector<int> &possiblePids);
+
+  /// Finds any checkpoints containing a Locked file and returns paths to them
+  std::vector<std::string>
+  findLockedCheckpoints(const std::string &recoverFolder,
+                        const std::vector<int> &possiblePids);
+
+  /// Finds any checkpoints believed to be from previous versions of project
+  /// recovery and returns them
+  std::vector<std::string>
+  findLegacyCheckpoints(const std::vector<Poco::Path> &checkpoints);
+
+  /// Takes a list of potentially used PIDs and removes any used PIDs from that
+  /// list
+  void checkPIDsAreNotInUse(std::vector<int> &possiblePids);
 
   /// Background thread which runs the saving body
   std::thread m_backgroundSavingThread;
