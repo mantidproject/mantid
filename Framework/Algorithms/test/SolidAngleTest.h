@@ -8,6 +8,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/SolidAngle.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
@@ -30,6 +31,7 @@ public:
   static void destroySuite(SolidAngleTest *suite) { delete suite; }
 
   SolidAngleTest() : inputSpace(""), outputSpace("") {
+    SolidAngle alg;
     // Set up a small workspace for testing
     // Nhist = 144;
     auto space2D = createWorkspace<Workspace2D>(Nhist, 11, 10);
@@ -64,6 +66,7 @@ public:
   }
 
   void testInit() {
+      SolidAngle alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -74,8 +77,14 @@ public:
   }
 
   void testExec() {
-    if (!alg.isInitialized())
+    SolidAngle alg;
+    if (!alg.isInitialized()){
       alg.initialize();
+       // Set the properties
+      alg.setPropertyValue("InputWorkspace", inputSpace);
+      outputSpace = "outWorkspace";
+      alg.setPropertyValue("OutputWorkspace", outputSpace);
+    }
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -115,6 +124,7 @@ public:
   }
 
   void testExecSubset() {
+    SolidAngle alg;
     if (!alg.isInitialized())
       alg.initialize();
     alg.setPropertyValue("InputWorkspace", inputSpace);
@@ -151,25 +161,33 @@ public:
   }
 
   void testCorrectWithIndex() {
-    if (!alg.isInitialized())
-      alg.initialize();
+    SolidAngle alg1;
+    SolidAngle alg2;
+    CreateSampleWorkspace createWS;
+    createWS.initialize();
+    
+    if (!alg1.isInitialized())
+      alg1.initialize();
     std::string outputWorkspace1 = "wholeOutput";
     std::string outputWorkspace2 = "50OnwardsOutput";
-    alg.setPropertyValue("InputWorkspace", inputSpace);
-    alg.setPropertyValue("OutputWorkspace", outputWorkspace1);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
+    std::string inputSpace2 = "IndexTestWS";
+    createWS.setPropertyValue("OutputWorkspace",inputSpace2);
+    createWS.execute();
+    alg1.setPropertyValue("InputWorkspace", inputSpace2);
+    alg1.setPropertyValue("OutputWorkspace", outputWorkspace1);
+    TS_ASSERT_THROWS_NOTHING(alg1.execute());
+    TS_ASSERT(alg1.isExecuted());
     Workspace_sptr output1;
     TS_ASSERT_THROWS_NOTHING(
         output1 = AnalysisDataService::Instance().retrieve(outputWorkspace1));
 
-    if (!alg.isInitialized())
-      alg.initialize();
-    alg.setPropertyValue("InputWorkspace", inputSpace);
-    alg.setPropertyValue("OutputWorkspace", outputWorkspace2);
-    alg.setPropertyValue("StartWorkspaceIndex", "50");
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
+    if (!alg2.isInitialized())
+      alg2.initialize();
+    alg2.setPropertyValue("InputWorkspace", inputSpace2);
+    alg2.setPropertyValue("OutputWorkspace", outputWorkspace2);
+    alg2.setPropertyValue("StartWorkspaceIndex", "50");
+    TS_ASSERT_THROWS_NOTHING(alg2.execute());
+    TS_ASSERT(alg2.isExecuted());
     Workspace_sptr output2;
     TS_ASSERT_THROWS_NOTHING(
         output2 = AnalysisDataService::Instance().retrieve(outputWorkspace2));
@@ -188,7 +206,6 @@ public:
   }
 
 private:
-  SolidAngle alg;
   std::string inputSpace;
   std::string outputSpace;
   enum { Nhist = 144 };
