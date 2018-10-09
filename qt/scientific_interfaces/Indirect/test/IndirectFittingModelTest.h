@@ -57,7 +57,7 @@ struct SetUpADSWithWorkspace {
   template <typename T>
   SetUpADSWithWorkspace(std::string const &inputWSName, T const &workspace) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, workspace);
-  };
+  }
 
   template <typename T>
   void addOrReplace(std::string const &workspaceName, T const &workspace) {
@@ -73,7 +73,7 @@ struct SetUpADSWithWorkspace {
         AnalysisDataService::Instance().retrieve(workspaceName));
   }
 
-  ~SetUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
+  ~SetUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); }
 };
 
 /// This is used to compare Spectra which is implemented as a boost::variant
@@ -98,6 +98,8 @@ private:
   std::string simultaneousFitOutputName() const override { return ""; };
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override {
+    (void)index;
+    (void)spectrum;
     return "";
   };
 };
@@ -116,7 +118,10 @@ createModelWithSingleWorkspace(std::string const &workspaceName,
 }
 
 void addWorkspacesToModel(std::unique_ptr<DummyModel> &model,
-                          int const &numberOfSpectra) {}
+                          int const &numberOfSpectra) {
+  (void)model;
+  (void)numberOfSpectra;
+}
 
 template <typename Name, typename... Names>
 void addWorkspacesToModel(std::unique_ptr<DummyModel> &model,
