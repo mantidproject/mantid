@@ -701,11 +701,11 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
     asym->setProperty("InputWorkspace", ws);
     asym->execute();
     MatrixWorkspace_sptr asymWS2 = asym->getProperty("OutputWorkspace");
-	auto alg2 = createChildAlgorithm("ConvertToPointData");
-	alg2->setProperty("InputWorkspace", asymWS2);
-	alg2->setProperty("OutputWorkspace", "__NotUsed");
-	alg2->execute();
-	MatrixWorkspace_sptr asymWS = alg2->getProperty("OutputWorkspace");
+    auto alg2 = createChildAlgorithm("ConvertToPointData");
+    alg2->setProperty("InputWorkspace", asymWS2);
+    alg2->setProperty("OutputWorkspace", "__NotUsed");
+    alg2->execute();
+    MatrixWorkspace_sptr asymWS = alg2->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr integr = createChildAlgorithm("Integration");
     integr->setLogging(false);
@@ -730,11 +730,11 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
     asym->setProperty("InputWorkspace", intWS);
     asym->execute();
     MatrixWorkspace_sptr tmp = asym->getProperty("OutputWorkspace");
-	auto alg2 = createChildAlgorithm("ConvertToPointData");
-	alg2->setProperty("InputWorkspace", tmp);
-	alg2->setProperty("OutputWorkspace", "__NotUsed");
-	alg2->execute();
-	out = alg2->getProperty("OutputWorkspace");
+    auto alg2 = createChildAlgorithm("ConvertToPointData");
+    alg2->setProperty("InputWorkspace", tmp);
+    alg2->setProperty("OutputWorkspace", "__NotUsed");
+    alg2->execute();
+    out = alg2->getProperty("OutputWorkspace");
   }
 
   Y = out->y(0)[0];
