@@ -18,12 +18,12 @@ set ( SRC_FILES
 	src/Bin2DPowderDiffraction.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
+	src/CalculateCarpenterSampleCorrection.cpp
 	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
 	src/CalculateIqt.cpp
-	src/CalculateCarpenterSampleCorrection.cpp
 	src/CalculatePolynomialBackground.cpp
 	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
@@ -177,6 +177,7 @@ set ( SRC_FILES
 	src/MagFormFactorCorrection.cpp
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
+	src/MaskBinsIf.cpp
 	src/MaskDetectorsIf.cpp
 	src/MaskInstrument.cpp
 	src/MatrixWorkspaceAccess.cpp
@@ -348,12 +349,12 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
+	inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
 	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateIqt.h
-	inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
 	inc/MantidAlgorithms/CalculatePolynomialBackground.h
 	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
@@ -508,6 +509,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MagFormFactorCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
+	inc/MantidAlgorithms/MaskBinsIf.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/MaskInstrument.h
 	inc/MantidAlgorithms/MatrixWorkspaceAccess.h
@@ -847,6 +849,7 @@ set ( TEST_FILES
 	MCInteractionVolumeTest.h
 	MagFormFactorCorrectionTest.h
 	MaskBinsFromTableTest.h
+	MaskBinsIfTest.h
 	MaskBinsTest.h
 	MaskDetectorsIfTest.h
 	MaskInstrumentTest.h

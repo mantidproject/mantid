@@ -40,6 +40,7 @@ New Algorithms
 ##############
 
 - :ref:`MatchSpectra <algm-MatchSpectra>` is an algorithm that calculates factors to match all spectra to a reference spectrum.
+- :ref:`MaskBinsIf <algm-MaskBinsIf>` is an algorithm to mask bins according to criteria specified as a muparser expression.
 
 Improvements
 ############
