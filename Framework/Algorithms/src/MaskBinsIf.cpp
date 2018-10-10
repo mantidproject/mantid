@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MaskBinsIf.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -7,14 +13,36 @@
 
 #include <muParser.h>
 
+namespace {
+
+/**
+ * @brief Makes a new instance of the muparser
+ * @param y : count
+ * @param e : error
+ * @param x : bin center
+ * @param dx : bin center error
+ * @param s : spectrum axis value
+ * @param i : workspace index
+ * @param criterion : expression
+ * @return muparser
+ */
+mu::Parser makeParser(double &y, double &e, double &x, double &dx, double &s,
+                      double &i, const std::string &criterion) {
+  mu::Parser muParser;
+  muParser.DefineVar("y", &y);
+  muParser.DefineVar("e", &e);
+  muParser.DefineVar("x", &x);
+  muParser.DefineVar("dx", &dx);
+  muParser.DefineVar("s", &s);
+  muParser.DefineVar("i", &i);
+  muParser.SetExpr(criterion);
+  return muParser;
+}
+}
+
 namespace Mantid {
 namespace Algorithms {
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
+
 using namespace API;
 using namespace Kernel;
 
@@ -35,6 +63,22 @@ void MaskBinsIf::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
+}
+
+//----------------------------------------------------------------------------------------------
+/** Validate the inputs.
+ */
+std::map<std::string, std::string> MaskBinsIf::validateInputs() {
+  std::map<std::string, std::string> issues;
+  double y = 0., e = 0., x = 0., dx = 0., s = 0., i = 0.;
+  mu::Parser parser =
+      makeParser(y, e, x, dx, s, i, getPropertyValue("Criterion"));
+  try {
+    parser.Eval();
+  } catch (mu::Parser::exception_type &e) {
+    issues["Criterion"] = "Invalid expression given: " + e.GetMsg();
+  }
+  return issues;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -59,14 +103,7 @@ void MaskBinsIf::exec() {
     dx = 0.;
     s = 0.;
     i = index;
-    mu::Parser muParser;
-    muParser.DefineVar("y", &y);
-    muParser.DefineVar("e", &e);
-    muParser.DefineVar("x", &x);
-    muParser.DefineVar("dx", &dx);
-    muParser.DefineVar("s", &s);
-    muParser.DefineVar("i", &i);
-    muParser.SetExpr(criterion);
+    mu::Parser parser = makeParser(y, e, x, dx, s, i, criterion);
     if (spectrumOrNumeric) {
       s = spectrumAxis->getValue(index);
     }
@@ -80,7 +117,7 @@ void MaskBinsIf::exec() {
       if (hasDx) {
         dx = it->centerError();
       }
-      if (muParser.Eval() != 0.) {
+      if (parser.Eval() != 0.) {
         outputWorkspace->maskBin(index, bin);
       }
     }

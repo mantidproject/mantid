@@ -13,7 +13,6 @@
 #include "MantidHistogramData/HistogramItem.h"
 #include "MantidHistogramData/HistogramIterator.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/make_cow.h"
 
 using namespace Mantid::HistogramData;
 
