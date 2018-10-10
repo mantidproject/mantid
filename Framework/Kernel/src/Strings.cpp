@@ -746,18 +746,7 @@ template <> MANTID_KERNEL_DLL std::string toString(const UnitLabel &value) {
 /// @return :: A string with comma separated items of the value vector.
 template <>
 MANTID_KERNEL_DLL std::string toString(const std::vector<std::string> &value) {
-  if (value.empty()) {
-    return "";
-  }
-  std::ostringstream mess;
-  auto it = value.cbegin();
-  const auto last = value.cend();
-  mess << *it;
-  ++it;
-  for (; it != last; ++it) {
-    mess << ',' << *it;
-  }
-  return mess.str();
+  return join(value.begin(), value.end(), ",");
 }
 
 //------------------------------------------------------------------------------------------------
