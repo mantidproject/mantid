@@ -1,6 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from . import ui_save_other_dialog as ui_save_other_dialog
 from PyQt4 import QtGui
 from sans.common.enums import SaveType
+
 
 class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog):
     def __init__(self):
@@ -49,7 +56,6 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
     def populate_workspace_list(self, workspace_list):
         for workspace in workspace_list:
             self.workspace_listWidget.addItem(workspace)
-
 
     def update_workspace_list(self):
         pass

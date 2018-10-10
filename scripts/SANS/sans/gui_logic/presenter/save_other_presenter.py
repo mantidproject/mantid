@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from mantid import ConfigService
 from mantid import AnalysisDataService
 from sans.algorithm_detail.batch_execution import save_workspace_to_file
@@ -28,11 +34,10 @@ class SaveOtherPresenter():
 
     def on_save_clicked(self):
         file_formats = self._view.get_save_options()
-        filename = self._view.filename
         if not file_formats:
             return
         selected_workspaces = self._view.get_selected_workspaces()
-        selected_filenames = self.get_filenames(selected_workspaces, filename)
+        selected_filenames = self.get_filenames(selected_workspaces, self.filename)
         for name_to_save, filename in zip(selected_workspaces, selected_filenames):
             save_workspace_to_file(name_to_save, file_formats, filename)
 
