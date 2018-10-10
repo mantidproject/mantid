@@ -106,6 +106,23 @@ private:
   Content_uptr m_content;
 };
 
+template <> MANTID_CATALOG_DLL
+std::string
+ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                         const std::string &path) const;
+template <> MANTID_CATALOG_DLL
+int ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                             const std::string &path) const;
+template <> MANTID_CATALOG_DLL
+float ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                               const std::string &path) const;
+template <> MANTID_CATALOG_DLL
+double ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                                const std::string &path) const;
+template <> MANTID_CATALOG_DLL
+bool ONCatEntity::getNestedContentValueAsType(const Content &content,
+                                              const std::string &path) const;
+
 } // namespace ONCat
 } // namespace Catalog
 } // namespace Mantid
