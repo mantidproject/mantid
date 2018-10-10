@@ -12,6 +12,10 @@
 #include "MantidQtWidgets/InstrumentView/UCorrectionDialog.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
+
 #include <QAction>
 #include <QActionGroup>
 #include <QCheckBox>
@@ -832,6 +836,8 @@ QPointF InstrumentWidgetRenderTab::getUCorrection() const {
  */
 std::string
 MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+
   API::TSVSerialiser tab;
 
   tab.writeLine("AxesView") << mAxisCombo->currentIndex();
@@ -858,6 +864,9 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
   API::TSVSerialiser tsv;
   tsv.writeSection("rendertab", tab.outputLines());
   return tsv.outputLines();
+#else
+  return "";
+#endif
 }
 
 /**
@@ -865,6 +874,7 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
  * @param lines :: lines defining the state of the render tab
  */
 void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("rendertab"))
@@ -931,6 +941,11 @@ void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
     tab >> colorMapLines;
     m_colorBarWidget->loadFromProject(colorMapLines);
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "InstrumentActor::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 } // namespace MantidWidgets

@@ -5,7 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 #include "MantidQtWidgets/InstrumentView/CollapsiblePanel.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -596,11 +598,10 @@ void InstrumentWidgetPickTab::initSurface() {
   m_plotController->setPlotType(
       static_cast<DetectorPlotController::PlotType>(m_plotTypeCache));
   // miniplot X unit
-  const auto & actor = m_instrWidget->getInstrumentActor();
+  const auto &actor = m_instrWidget->getInstrumentActor();
   // default X axis label
   m_plot->setXLabel(QString::fromStdString(
       actor.getWorkspace()->getAxis(0)->unit()->unitID()));
-
 }
 
 /**
@@ -768,6 +769,7 @@ void InstrumentWidgetPickTab::savePlotToWorkspace() {
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("picktab"))
@@ -789,12 +791,18 @@ void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
     tab >> value;
     button->setChecked(value);
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "MaskBinsData::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the pick tab to a Mantid project file
  * @return a string representing the state of the pick tab
  */
 std::string InstrumentWidgetPickTab::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv, tab;
 
   // save active push button
@@ -810,6 +818,10 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
 
   tsv.writeSection("picktab", tab.outputLines());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "MaskBinsData::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 //=====================================================================================//
