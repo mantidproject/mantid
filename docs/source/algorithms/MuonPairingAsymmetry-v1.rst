@@ -35,7 +35,7 @@ Additionally, a value for **Alpha** must be supplied, and which must be non-nega
 
 There are two options for supplying the group data :
 
-#. If **SpecifyGroupsManually** is checked, then the detector ID's that define the two groups must be given (they must be unique); and an **InputWorkspace** supplied. This workspace must be a *WorkspaceGroup* to match the output of :ref:`algm-MuonPreProcess`, where the group contains one *MatrixWorkspace* for each period.
+#. If **SpecifyGroupsManually** is checked, then the detector ID's that define the two groups must be given (they must be unique); and an **InputWorkspace** supplied. This workspace must be a :ref:`WorkspaceGroup <WorkspaceGroup>` to match the output of :ref:`algm-MuonPreProcess`, where the group contains one *MatrixWorkspace* for each period.
 
 #. If **SpecifyGroupsManually** is not checked, then two workspaces must be supplied which represent the two groups via **InputWorkspace1** and **InputWorkspace2**. These may be *MatrixWorkspace*s (in the case of single period data); or *WorkspaceGroup*s (in the case of multi period data, the two groups must contain the same number of workspaces). Any *MatrixWorkspace* must only contain one spectra (the group counts).
 
@@ -50,7 +50,7 @@ The **SummedPeriods** and **SubtractedPeriods** inputs are used to control the w
 #. SummedPeriods = 1,2
 #. SubtractedPeriods = 3,4 
 
-would combine periods in the combination $(1+2)-(3+4)$.
+would combine periods in the combination :math:`(1+2)-(3+4)`.
 
 Usage
 -----

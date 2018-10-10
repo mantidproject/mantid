@@ -18,7 +18,7 @@ Analysis
 
 A workspace has one or more *spectra* contained within it; each spectra has a unique detector ID. Assuming the y-values represent counts; a *detector grouping* operation causes the counts to be summed across the given set of detector IDs which are supplied to the **Grouping** argument (for example `1,2,3,4,5` and `1-5`).
 
-The **InputWorkspace** must be a *WorkspaceGroup*, where each workspace within the group represents a single period. Thus, single period data is just a *workspaceGroup* with a single workspace within it.
+The **InputWorkspace** must be a :ref:`WorkspaceGroup <WorkspaceGroup>`, where each workspace within the group represents a single period. Thus, single period data is just a *WorkspaceGroup* with a single workspace within it.
 
 The group must be given a name via **GroupName** which can consist of letters, numbers and underscores. 
 
@@ -37,7 +37,7 @@ The **SummedPeriods** and **SubtractedPeriods** inputs are used to control the w
 #. SummedPeriods = 1,2
 #. SubtractedPeriods = 3,4 
 
-would combine periods in the combination $(1+2)-(3+4)$.
+would combine periods in the combination :math:`(1+2)-(3+4)`.
 
 Usage
 -----
@@ -73,7 +73,7 @@ Output:
 
 .. testoutput:: ConvertToGroup
 
-	X values are : [ 0.  1.  2.  3.  4.  5.]
+    X values are : [ 0.  1.  2.  3.  4.  5.]
     Y values are : [  40.   80.  120.   80.   40.]
 
 **Example - Using Only MuonGroupingCounts on Single Period Data**
