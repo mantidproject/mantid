@@ -2,7 +2,7 @@
  IFunction1D
 =============
 
-This a python binding to the C++ class Mantid::API::IFunction1D.
+This is a Python binding to the C++ class Mantid::API::IFunction1D.
 
 *bases:* :py:obj:`mantid.api.IFunction`
 

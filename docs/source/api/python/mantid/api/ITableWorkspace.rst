@@ -2,7 +2,7 @@
  ITableWorkspace
 =================
 
-This a python binding to the C++ class Mantid::API::ITableWorkspace.
+This is a Python binding to the C++ class Mantid::API::ITableWorkspace.
 
 *bases:* :py:obj:`mantid.api.Workspace`
 
