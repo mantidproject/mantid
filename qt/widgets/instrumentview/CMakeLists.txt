@@ -137,6 +137,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
     ${INC_FILES}
     ${QT4_INC_FILES}
   UI ${UI_FILES}
+  RES
+    ../../../images/instrumentview.qrc
   DEFS
     IN_MANTIDQT_INSTRUMENTVIEW
   INCLUDE_DIRS
@@ -176,6 +178,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
     ${INC_FILES}
     ${QT5_INC_FILES}
   UI ${UI_FILES}
+  RES
+    ../../../images/instrumentview.qrc
   DEFS
     IN_MANTIDQT_INSTRUMENTVIEW
   INCLUDE_DIRS
