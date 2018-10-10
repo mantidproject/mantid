@@ -483,10 +483,29 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
   Expression list;
   list.parse(str);
   list.toList();
-  for (const auto &expr : list) {
-    auto c = std::unique_ptr<IConstraint>(
+  for (auto it = list.begin(); it != list.end(); ++it) {
+    auto expr = (*it);
+    if(expr.terms()[0].str().compare("penalty") == 0){
+      continue;
+    }
+    if((it+1) != list.end()){
+      auto next_expr = *(it+1);
+      if(next_expr.terms()[0].str().compare("penalty") == 0) {
+          auto c = std::unique_ptr<IConstraint>(
+          ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
+          double penalty_factor = std::stof(next_expr.terms()[1].str(), NULL);
+          c->setPenaltyFactor(penalty_factor);
+          this->addConstraint(std::move(c));
+      } else {
+          auto c = std::unique_ptr<IConstraint>(
+          ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
+          this->addConstraint(std::move(c));
+      }
+    } else {
+        auto c = std::unique_ptr<IConstraint>(
         ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
-    this->addConstraint(std::move(c));
+        this->addConstraint(std::move(c));
+    }
   }
 }
 
