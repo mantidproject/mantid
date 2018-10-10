@@ -130,6 +130,20 @@ QRgb MantidColorMap::rgb(double vmin, double vmax, double value) const {
   return m_mappable.toRGBA(value);
 }
 
+/**
+ * @brief Compute RGB color values on the current scale type for the given
+ * data values
+ * @param vmin The minimum value of the data range
+ * @param vmax The maximum value of the data range
+ * @param values The values to be transformed
+ * @return An array of QRgb describing the colors
+ */
+std::vector<QRgb> MantidColorMap::rgb(double vmin, double vmax,
+                                      const std::vector<double> &values) const {
+  m_mappable.setClim(vmin, vmax);
+  return m_mappable.toRGBA(values);
+}
+
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt

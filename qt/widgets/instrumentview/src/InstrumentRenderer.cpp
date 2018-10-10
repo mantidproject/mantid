@@ -331,36 +331,54 @@ void InstrumentRenderer::reset() {
 
 void InstrumentRenderer::resetColors() {
   auto sharedWorkspace = m_actor.getWorkspace();
-  const auto &compInfo = m_actor.componentInfo();
-  const auto &detInfo = m_actor.detectorInfo();
   const double vmin(m_actor.minValue()), vmax(m_actor.maxValue());
-  auto color = m_colorMap.rgb(vmin, vmax, 0);
+  // Reset all colors to 0 and resize m_colors to the appropriate size
+  const auto zero = m_colorMap.rgb(vmin, vmax, 0);
+  const auto &compInfo = m_actor.componentInfo();
   m_colors.assign(compInfo.size(),
-                  GLColor(qRed(color), qGreen(color), qBlue(color), 1));
-  auto invalidColor = GLColor(80, 80, 80, 1);
-  auto maskedColor = GLColor(100, 100, 100, 1);
+                  GLColor(qRed(zero), qGreen(zero), qBlue(zero), 1));
+  // No data/masked colors
+  static const auto invalidColor = GLColor(80, 80, 80, 1);
+  static const auto maskedColor = GLColor(100, 100, 100, 1);
 
-  Mantid::API::IMaskWorkspace_sptr mask = m_actor.getMaskWorkspaceIfExists();
-  const auto &detectorIDs = detInfo.detectorIDs();
+  // Compute required colors for the detectors in a single shot to avoid
+  // repeated calls to python and back in the matplotlib-based implementation
+  const auto &detInfo = m_actor.detectorInfo();
+  std::vector<double> counts(detInfo.size());
   for (size_t det = 0; det < detInfo.size(); ++det) {
-    auto masked = false;
+    counts[det] = m_actor.getIntegratedCounts(det);
+  }
+  auto rgba = m_colorMap.rgb(vmin, vmax, counts);
 
-    if (mask)
-      masked = mask->isMasked(detectorIDs[det]);
-    if (detInfo.isMasked(det) || masked)
-      m_colors[det] = maskedColor;
-    else {
-      auto integratedValue = m_actor.getIntegratedCounts(det);
+  // Now apply colors taking into account detectors with bad counts and detector
+  // masking
+  Mantid::API::IMaskWorkspace_sptr maskWS = m_actor.getMaskWorkspaceIfExists();
+  const auto &detectorIDs = detInfo.detectorIDs();
+  // Defines a mask checker lambda dependent on if we have a mask workspace or
+  // not. Done once outside the loop to avoid repeated if branches in the loop
+  std::function<bool(size_t)> isMasked;
+  if (maskWS) {
+    isMasked = [&detInfo, &detectorIDs, &maskWS](size_t index) {
+      return maskWS->isMasked(detectorIDs[index]) && detInfo.isMasked(index);
+    };
+  } else {
+    isMasked = [&detInfo](size_t index) { return detInfo.isMasked(index); };
+  }
+  for (size_t det = 0; det < counts.size(); ++det) {
+    if (!isMasked(det)) {
+      const double integratedValue(counts[det]);
       if (integratedValue > -1) {
-        auto color = m_colorMap.rgb(vmin, vmax, integratedValue);
+        const auto &color = rgba[det];
         m_colors[det] =
             GLColor(qRed(color), qGreen(color), qBlue(color),
                     static_cast<int>(255 * (integratedValue / vmax)));
       } else
         m_colors[det] = invalidColor;
+    } else {
+      m_colors[det] = maskedColor;
     }
   }
-
+  // finish off rest of the components with the mask color
   for (const auto comp : m_actor.components())
     m_colors[comp] = maskedColor;
 }

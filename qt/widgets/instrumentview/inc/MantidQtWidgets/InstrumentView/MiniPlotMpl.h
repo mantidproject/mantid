@@ -11,8 +11,8 @@
 #include "MantidQtWidgets/MplCpp/Cycler.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
 #include "MantidQtWidgets/MplCpp/Zoomer.h"
-#include <list>
 #include <QWidget>
+#include <list>
 
 class QPushButton;
 

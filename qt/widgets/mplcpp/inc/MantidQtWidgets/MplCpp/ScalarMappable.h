@@ -15,6 +15,7 @@
 
 #include <QRgb>
 #include <QString>
+#include <vector>
 
 namespace MantidQt {
 namespace Widgets {
@@ -23,7 +24,7 @@ namespace MplCpp {
 /**
  * @brief A C++ wrapper around the matplotlib.cm.ScalarMappable
  * type to provide the capability to map an arbitrary data
- * value to an RGBA value within a given colormap
+ * value or array of values to an RGBA value(s) within a given colormap
  */
 class MANTID_MPLCPP_DLL ScalarMappable : public Python::InstanceHolder {
 public:
@@ -36,6 +37,8 @@ public:
   void setClim(boost::optional<double> vmin = boost::none,
                boost::optional<double> vmax = boost::none);
   QRgb toRGBA(double x, double alpha = 1.0) const;
+  std::vector<QRgb> toRGBA(const std::vector<double> &x,
+                           double alpha = 1.0) const;
 };
 
 } // namespace MplCpp
