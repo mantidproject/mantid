@@ -24,8 +24,7 @@ class ViewSpiceDialog(QtGui.QDialog):
         self.ui.setupUi(self)
 
         # define event handlers
-        self.connect(self.ui.pushButton_close, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
+        self.ui.pushButton_close.clicked.connect(self.do_quit)
 
         return
 

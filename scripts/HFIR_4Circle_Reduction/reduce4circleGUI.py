@@ -118,218 +118,127 @@ class MainWindow(QtGui.QMainWindow):
 
         # Tab 'Data Access'
         self.ui.pushButton_applySetup.clicked.connect(self.do_apply_setup)
-        self.connect(self.ui.pushButton_browseLocalDataDir, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_local_spice_data)
-        self.connect(self.ui.pushButton_applyCalibratedSampleDistance, QtCore.SIGNAL('clicked()'),
-                     self.do_set_user_detector_distance)
-        self.connect(self.ui.pushButton_applyUserDetCenter, QtCore.SIGNAL('clicked()'),
-                     self.do_set_user_detector_center)
-        self.connect(self.ui.pushButton_applyUserWavelength, QtCore.SIGNAL('clicked()'),
-                     self.do_set_user_wave_length)
-        self.connect(self.ui.pushButton_applyDetectorSize, QtCore.SIGNAL('clicked()'),
-                     self.do_set_detector_size)
-        self.ui.pushButton_applyAllCalibrationSetup.clicked.connect(self.do_set_all_calibration)
+        self.ui.pushButton_browseLocalDataDir.clicked.connect(self.do_browse_local_spice_data)
+        self.ui.pushButton_applyCalibratedSampleDistance.clicked.connect(self.do_set_user_detector_distance)
+        self.ui.pushButton_applyUserDetCenter.clicked.connect(self.do_set_user_detector_center)
+        self.ui.pushButton_applyUserWavelength.clicked.connect(self.do_set_user_wave_length)
+        self.ui.pushButton_applyDetectorSize.clicked.connect(self.do_set_detector_size)
 
         # Tab survey
-        self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
-                     self.do_survey)
-        self.connect(self.ui.pushButton_saveSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_save_survey)
-        self.connect(self.ui.pushButton_loadSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_load_survey)
-        self.connect(self.ui.pushButton_viewSurveyPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_view_survey_peak)
-        self.connect(self.ui.pushButton_addPeaksToRefine, QtCore.SIGNAL('clicked()'),
-                     self.do_add_peaks_for_ub)
-        self.connect(self.ui.pushButton_mergeScansSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_merge_scans_survey)
-        self.connect(self.ui.pushButton_selectAllSurveyPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_select_all_survey)
-        self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
-                     self.do_filter_sort_survey_table)
-        self.connect(self.ui.pushButton_clearSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_survey)
-        self.connect(self.ui.pushButton_viewRawSpice, QtCore.SIGNAL('clicked()'),
-                     self.do_show_spice_file)
-
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('editingFinished()'),
-                     self.evt_show_survey)
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('returnPressed()'),
-                     self.evt_show_survey)
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
-                     self.evt_show_survey)
+        self.ui.pushButton_survey.clicked.connect(self.do_survey)
+        self.ui.pushButton_saveSurvey.clicked.connect(self.do_save_survey)
+        self.ui.pushButton_loadSurvey.clicked.connect(self.do_load_survey)
+        self.ui.pushButton_viewSurveyPeak.clicked.connect(self.do_view_survey_peak)
+        self.ui.pushButton_addPeaksToRefine.clicked.connect(self.do_add_peaks_for_ub)
+        self.ui.pushButton_mergeScansSurvey.clicked.connect(self.do_merge_scans_survey)
+        self.ui.pushButton_selectAllSurveyPeaks.clicked.connect(self.do_select_all_survey)
+        self.ui.pushButton_sortInfoTable.clicked.connect(self.do_filter_sort_survey_table)
+        self.ui.pushButton_clearSurvey.clicked.connect(self.do_clear_survey)
+        self.ui.pushButton_viewRawSpice.clicked.connect(self.do_show_spice_file)
 
         # Tab 'View Raw Data'
-        self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
-                     self.do_load_scan_info)
-        self.connect(self.ui.pushButton_plotRawPt, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_pt_raw)
-        self.connect(self.ui.pushButton_prevPtNumber, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_prev_pt_raw)
-        self.connect(self.ui.pushButton_nextPtNumber, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_next_pt_raw)
-        self.connect(self.ui.pushButton_showPtList, QtCore.SIGNAL('clicked()'),
-                     self.show_scan_pt_list)
-        self.connect(self.ui.pushButton_showSPICEinRaw, QtCore.SIGNAL('clicked()'),
-                     self.do_show_spice_file_raw)
-        self.connect(self.ui.pushButton_switchROIMode, QtCore.SIGNAL('clicked()'),
-                     self.do_switch_roi_mode)
-        self.connect(self.ui.pushButton_removeROICanvas, QtCore.SIGNAL('clicked()'),
-                     self.do_del_roi)
-        self.connect(self.ui.pushButton_nextScanNumber, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_next_scan)
-        self.connect(self.ui.pushButton_prevScanNumber, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_prev_scan)
-        self.connect(self.ui.pushButton_maskScanPt, QtCore.SIGNAL('clicked()'),
-                     self.do_mask_pt_2d)
-        self.connect(self.ui.pushButton_integrateROI, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_roi)
-        self.connect(self.ui.pushButton_exportMaskToFile, QtCore.SIGNAL('clicked()'),
-                     self.do_export_mask)
+        self.ui.pushButton_setScanInfo.clicked.connect(self.do_load_scan_info)
+        self.ui.pushButton_plotRawPt.clicked.connect(self.do_plot_pt_raw)
+        self.ui.pushButton_prevPtNumber.clicked.connect(self.do_plot_prev_pt_raw)
+        self.ui.pushButton_nextPtNumber.clicked.connect(self.do_plot_next_pt_raw)
+        self.ui.pushButton_showPtList.clicked.connect(self.show_scan_pt_list)
+        self.ui.pushButton_showSPICEinRaw.clicked.connect(self.do_show_spice_file_raw)
+        self.ui.pushButton_switchROIMode.clicked.connect(self.do_switch_roi_mode)
+        self.ui.pushButton_removeROICanvas.clicked.connect(self.do_del_roi)
+        self.ui.pushButton_nextScanNumber.clicked.connect(self.do_plot_next_scan)
+        self.ui.pushButton_prevScanNumber.clicked.connect(self.do_plot_prev_scan)
+        self.ui.pushButton_maskScanPt.clicked.connect(self.do_mask_pt_2d)
+        self.ui.pushButton_integrateROI.clicked.connect(self.do_integrate_roi)
+        self.ui.pushButton_exportMaskToFile.clicked.connect(self.do_export_mask)
 
         # Tab 'calculate ub matrix'
-        self.connect(self.ui.pushButton_addUBScans, QtCore.SIGNAL('clicked()'),
-                     self.do_add_ub_peaks)
-        # self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
-        #              self.do_add_ub_peak)
-        self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
-                     self.do_cal_ub_matrix)
-        self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
-                     self.do_accept_ub)
-        self.connect(self.ui.pushButton_indexUBPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_index_ub_peaks)
-        self.connect(self.ui.pushButton_deleteUBPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_del_ub_peaks)
-        self.connect(self.ui.pushButton_clearUBPeakTable, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_ub_peaks)
-        self.connect(self.ui.pushButton_resetPeakHKLs, QtCore.SIGNAL('clicked()'),
-                     self.do_reset_ub_peaks_hkl)
-        # self.connect(self.ui.pushButton_selectAllPeaks, QtCore.SIGNAL('clicked()'),
-        #              self.do_select_all_peaks)
-        self.connect(self.ui.pushButton_viewScan3D, QtCore.SIGNAL('clicked()'),
-                     self.do_view_data_3d)
-        self.connect(self.ui.pushButton_plotSelectedData, QtCore.SIGNAL('clicked()'),
-                     self.do_view_data_set_3d)
-        self.connect(self.ui.pushButton_setHKL2Int, QtCore.SIGNAL('clicked()'),
-                     self.do_set_ub_tab_hkl_to_integers)
-        self.connect(self.ui.pushButton_undoSetToInteger, QtCore.SIGNAL('clicked()'),
-                     self.do_undo_ub_tab_hkl_to_integers)
-        self.connect(self.ui.pushButton_clearIndexing, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_all_peaks_index_ub)
+        self.ui.pushButton_addUBScans.clicked.connect(self.do_add_ub_peaks)
+        self.ui.pushButton_calUB.clicked.connect(self.do_cal_ub_matrix)
+        self.ui.pushButton_acceptUB.clicked.connect(self.do_accept_ub)
+        self.ui.pushButton_indexUBPeaks.clicked.connect(self.do_index_ub_peaks)
+        self.ui.pushButton_deleteUBPeak.clicked.connect(self.do_del_ub_peaks)
+        self.ui.pushButton_clearUBPeakTable.clicked.connect(self.do_clear_ub_peaks)
+        self.ui.pushButton_resetPeakHKLs.clicked.connect(self.do_reset_ub_peaks_hkl)
+        self.ui.pushButton_viewScan3D.clicked.connect(self.do_view_data_3d)
+        self.ui.pushButton_plotSelectedData.clicked.connect(self.do_view_data_set_3d)
+        self.ui.pushButton_setHKL2Int.clicked.connect(self.do_set_ub_tab_hkl_to_integers)
+        self.ui.pushButton_undoSetToInteger.clicked.connect(self.do_undo_ub_tab_hkl_to_integers)
+        self.ui.pushButton_clearIndexing.clicked.connect(self.do_clear_all_peaks_index_ub)
 
-        self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub_indexed_peaks)
-        self.connect(self.ui.pushButton_refineUBCalIndex, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub_cal_indexed_peaks)
+        self.ui.pushButton_refineUB.clicked.connect(self.do_refine_ub_indexed_peaks)
+        self.ui.pushButton_refineUBCalIndex.clicked.connect(self.do_refine_ub_cal_indexed_peaks)
 
-        self.connect(self.ui.pushButton_refineUBFFT, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub_fft)
-        self.connect(self.ui.pushButton_findUBLattice, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub_lattice)
+        self.ui.pushButton_refineUBFFT.clicked.connect(self.do_refine_ub_fft)
+        self.ui.pushButton_findUBLattice.clicked.connect(self.do_refine_ub_lattice)
 
-        self.connect(self.ui.radioButton_ubAdvancedSelection, QtCore.SIGNAL('toggled(bool)'),
-                     self.do_select_all_peaks)
-        self.connect(self.ui.radioButton_ubSelectAllScans, QtCore.SIGNAL('toggled(bool)'),
-                     self.do_select_all_peaks)
-        self.connect(self.ui.radioButton_ubSelectNoScan, QtCore.SIGNAL('toggled(bool)'),
-                     self.do_select_all_peaks)
+        self.ui.radioButton_ubAdvancedSelection.toggled.connect(self.do_select_all_peaks)
+        self.ui.radioButton_ubSelectAllScans.toggled.connect(self.do_select_all_peaks)
+        self.ui.radioButton_ubSelectNoScan.toggled.connect(self.do_select_all_peaks)
 
         # Tab 'Setup'
-        self.connect(self.ui.pushButton_browseWorkDir, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_working_dir)
-        self.connect(self.ui.comboBox_instrument, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.do_change_instrument_name)
-        self.connect(self.ui.pushButton_browsePreprocessed, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_preprocessed_dir)
+        self.ui.pushButton_browseWorkDir.clicked.connect(self.do_browse_working_dir)
+        self.ui.comboBox_instrument.currentIndexChanged.connect(self.do_change_instrument_name)
+        self.ui.pushButton_browsePreprocessed.clicked.connect(self.do_browse_preprocessed_dir)
 
         # Tab 'UB Matrix'
-        self.connect(self.ui.pushButton_showUB2Edit, QtCore.SIGNAL('clicked()'),
-                     self.do_show_ub_in_box)
-        self.connect(self.ui.pushButton_syncUB, QtCore.SIGNAL('clicked()'),
-                     self.do_sync_ub)
-        self.connect(self.ui.pushButton_saveUB, QtCore.SIGNAL('clicked()'),
-                     self.do_save_ub)
+        self.ui.pushButton_showUB2Edit.clicked.connect(self.do_show_ub_in_box)
+        self.ui.pushButton_syncUB.clicked.connect(self.do_sync_ub)
+        self.ui.pushButton_saveUB.clicked.connect(self.do_save_ub)
 
         # Tab 'Scans Processing'
-        self.connect(self.ui.pushButton_addScanSliceView, QtCore.SIGNAL('clicked()'),
-                     self.do_add_scans_merge)
-        self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
-                     self.do_merge_scans)
-        self.connect(self.ui.pushButton_integratePeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_peaks)
-        self.connect(self.ui.pushButton_setupPeakIntegration, QtCore.SIGNAL('clicked()'),
-                     self.do_switch_tab_peak_int)
-        self.connect(self.ui.pushButton_refreshMerged, QtCore.SIGNAL('clicked()'),
-                     self.do_refresh_merged_scans_table)
-        self.connect(self.ui.pushButton_plotMergedScans, QtCore.SIGNAL('clicked()'),
-                     self.do_view_merged_scans_3d)
-        self.connect(self.ui.pushButton_showUB, QtCore.SIGNAL('clicked()'),
-                     self.do_view_ub)
-        self.connect(self.ui.pushButton_exportPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_export_to_fp)
-        self.connect(self.ui.pushButton_selectAllScans2Merge, QtCore.SIGNAL('clicked()'),
-                     self.do_select_merged_scans)
-        self.connect(self.ui.pushButton_indexMergedScans, QtCore.SIGNAL('clicked()'),
-                     self.do_index_merged_scans_peaks)
-        self.connect(self.ui.pushButton_applyKShift, QtCore.SIGNAL('clicked()'),
-                     self.do_apply_k_shift)
-        self.connect(self.ui.pushButton_clearMergeScanTable, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_merge_table)
-        self.connect(self.ui.pushButton_multipleScans, QtCore.SIGNAL('clicked()'),
-                     self.do_merge_multi_scans)
-        self.connect(self.ui.pushButton_convertMerged2HKL, QtCore.SIGNAL('clicked()'),
-                     self.do_convert_merged_to_hkl)
-        self.connect(self.ui.pushButton_showScanWSInfo, QtCore.SIGNAL('clicked()'),
-                     self.do_show_workspaces)
-        self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
-                     self.do_show_integration_details)
-        self.connect(self.ui.pushButton_toggleIntegrateType, QtCore.SIGNAL('clicked()'),
-                     self.do_toggle_table_integration)
-        self.connect(self.ui.pushButton_exportSelectedPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_export_selected_peaks_to_integrate)
+        self.ui.pushButton_addScanSliceView.clicked.connect(self.do_add_scans_merge)
+        self.ui.pushButton_mergeScans.clicked.connect(self.do_merge_scans)
+        self.ui.pushButton_integratePeaks.clicked.connect(self.do_integrate_peaks)
+        self.ui.pushButton_setupPeakIntegration.clicked.connect(self.do_switch_tab_peak_int)
+        self.ui.pushButton_refreshMerged.clicked.connect(self.do_refresh_merged_scans_table)
+        self.ui.pushButton_plotMergedScans.clicked.connect(self.do_view_merged_scans_3d)
+        self.ui.pushButton_showUB.clicked.connect(self.do_view_ub)
+        self.ui.pushButton_exportPeaks.clicked.connect(self.do_export_to_fp)
+        self.ui.pushButton_selectAllScans2Merge.clicked.connect(self.do_select_merged_scans)
+        self.ui.pushButton_indexMergedScans.clicked.connect(self.do_index_merged_scans_peaks)
+        self.ui.pushButton_applyKShift.clicked.connect(self.do_apply_k_shift)
+        self.ui.pushButton_clearMergeScanTable.clicked.connect(self.do_clear_merge_table)
+        self.ui.pushButton_multipleScans.clicked.connect(self.do_merge_multi_scans)
+        self.ui.pushButton_convertMerged2HKL.clicked.connect(self.do_convert_merged_to_hkl)
+        self.ui.pushButton_showScanWSInfo.clicked.connect(self.do_show_workspaces)
+        self.ui.pushButton_showIntegrateDetails.clicked.connect(self.do_show_integration_details)
+        self.ui.pushButton_toggleIntegrateType.clicked.connect(self.do_toggle_table_integration)
+        self.ui.pushButton_exportSelectedPeaks.clicked.connect(self.do_export_selected_peaks_to_integrate)
 
         # Tab 'Integrate (single) Peaks'
-        self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_single_scan)
-        self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.evt_change_normalization)  # calculate the normalized data again
-        self.connect(self.ui.pushButton_showIntPeakDetails, QtCore.SIGNAL('clicked()'),
-                     self.do_show_single_peak_integration)
-        self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_peak_integration_canvas)
+        self.ui.pushButton_integratePt.clicked.connect(self.do_integrate_single_scan)
+        self.ui.comboBox_ptCountType.currentIndexChanged.connect(self.evt_change_normalization)
+
+        # calculate the normalized data again
+        self.ui.pushButton_showIntPeakDetails.clicked.connect(self.do_show_single_peak_integration)
+        self.ui.pushButton_clearPeakIntFigure.clicked.connect(self.do_clear_peak_integration_canvas)
+
+        self.ui.lineEdit_numSurveyOutput.editingFinished.connect(self.evt_show_survey)
+        self.ui.lineEdit_numSurveyOutput.returnPressed.connect(self.evt_show_survey)
+        self.ui.lineEdit_numSurveyOutput.textEdited.connect(self.evt_show_survey)
         self.ui.pushButton_exportToMovie.clicked.connect(self.do_export_detector_views_to_movie)
 
         self.ui.comboBox_viewRawDataMasks.currentIndexChanged.connect(self.evt_change_roi)
         self.ui.comboBox_mergePeakNormType.currentIndexChanged.connect(self.evt_change_norm_type)
 
         # Tab k-shift vector
-        self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
-                     self.do_add_k_shift_vector)
+        self.ui.pushButton_addKShift.clicked.connect(self.do_add_k_shift_vector)
 
         # Menu and advanced tab
-        self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
-                     self.menu_quit)
-        self.connect(self.ui.actionSave_Session, QtCore.SIGNAL('triggered()'),
-                     self.save_current_session)
-        self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
-                     self.load_session)
-        self.connect(self.ui.actionLoad_Mask, QtCore.SIGNAL('triggered()'),
-                     self.menu_load_mask)
+        self.ui.actionExit.triggered.connect(self.menu_quit)
+        self.ui.actionSave_Session.triggered.connect(self.save_current_session)
+        self.ui.actionLoad_Session.triggered.connect(self.load_session)
+        self.ui.actionLoad_Mask.triggered.connect(self.menu_load_mask)
 
-        self.connect(self.ui.actionSave_Project, QtCore.SIGNAL('triggered()'),
-                     self.action_save_project)
-        self.connect(self.ui.actionOpen_Project, QtCore.SIGNAL('triggered()'),
-                     self.action_load_project)
-        self.connect(self.ui.actionOpen_Last_Project, QtCore.SIGNAL('triggered()'),
-                     self.action_load_last_project)
+        self.ui.actionSave_Project.triggered.connect(self.action_save_project)
+        self.ui.actionOpen_Project.triggered.connect(self.action_load_project)
+        self.ui.actionOpen_Last_Project.triggered.connect(self.action_load_last_project)
 
-        self.connect(self.ui.pushButton_loadLastNthProject, QtCore.SIGNAL('clicked()'),
-                     self.do_load_nth_project)
+        self.ui.pushButton_loadLastNthProject.clicked.connect(self.do_load_nth_project)
 
-        self.connect(self.ui.actionPre_Processing, QtCore.SIGNAL('triggered()'),
-                     self.menu_pre_process)
-        self.connect(self.ui.actionData_Downloading, QtCore.SIGNAL('triggered()'),
-                     self.menu_download_data)
+        self.ui.actionPre_Processing.triggered.connect(self.menu_pre_process)
+        self.ui.actionData_Downloading.triggered.connect(self.menu_download_data)
+
         self.ui.actionSingle_Pt_Integration.triggered.connect(self.menu_integrate_peak_single_pt)
         self.ui.actionSort_By_2Theta.triggered.connect(self.menu_sort_survey_2theta)
         self.ui.actionSort_By_Pt.triggered.connect(self.menu_sort_by_pt_number)

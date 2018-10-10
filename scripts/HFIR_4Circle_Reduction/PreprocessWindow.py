@@ -62,16 +62,11 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self.ui.tableView_scanProcessState.resizeColumnsToContents()
 
         # define event handling
-        self.connect(self.ui.pushButton_browseOutputDir, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_output_dir)
-        self.connect(self.ui.pushButton_preProcessScan, QtCore.SIGNAL('clicked()'),
-                     self.do_start_pre_process)
-        self.connect(self.ui.pushButton_changeSettings, QtCore.SIGNAL('clicked()'),
-                     self.do_change_calibration_settings)
-        self.connect(self.ui.pushButton_fixSettings, QtCore.SIGNAL('clicked()'),
-                     self.do_fix_calibration_settings)
-        self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
-                     self.do_quit)
+        self.ui.pushButton_browseOutputDir.clicked.connect(self.do_browse_output_dir)
+        self.ui.pushButton_preProcessScan.clicked.connect(self.do_start_pre_process)
+        self.ui.pushButton_changeSettings.clicked.connect(self.do_change_calibration_settings)
+        self.ui.pushButton_fixSettings.clicked.connect(self.do_fix_calibration_settings)
+        self.ui.actionExit.triggered.connect(self.do_quit)
 
         return
 

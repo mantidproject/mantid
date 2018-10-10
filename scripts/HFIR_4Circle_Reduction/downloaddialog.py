@@ -40,22 +40,15 @@ class DataDownloadDialog(QtGui.QDialog):
         self._init_widgets()
 
         # define event handing
-        self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
-                     self.do_test_url)
+        self.ui.pushButton_testURLs.clicked.connect(self.do_test_url)
 
-        self.connect(self.ui.pushButton_downloadExpData, QtCore.SIGNAL('clicked()'),
-                     self.do_download_spice_data)
+        self.ui.pushButton_downloadExpData.clicked.connect(self.do_download_spice_data)
 
-        self.connect(self.ui.pushButton_ListScans, QtCore.SIGNAL('clicked()'),
-                     self.do_list_scans)
+        self.ui.pushButton_ListScans.clicked.connect(self.do_list_scans)
 
-        self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.do_change_data_access_mode)
+        self.ui.comboBox_mode.currentIndexChanged.connect(self.do_change_data_access_mode)
 
-        # self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
-        #              self.do_setup_dir_default)
-        self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_local_cache_dir)
+        self.ui.pushButton_browseLocalCache.clicked.connect(self.do_browse_local_cache_dir)
 
         # Set the URL red as it is better not check at this stage. Leave it to user
         self.ui.lineEdit_url.setStyleSheet("color: black;")

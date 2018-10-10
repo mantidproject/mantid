@@ -45,11 +45,8 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
         self.ui.lineEdit_tolerance.setText('0.12')
 
         # define event handling
-        self.connect(self.ui.pushButton_Ok, QtCore.SIGNAL('clicked()'),
-                     self.do_ok)
-
-        self.connect(self.ui.pushButton_cancel, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
+        self.ui.pushButton_Ok.clicked.connect(self.do_ok)
+        self.ui.pushButton_cancel.clicked.connect(self.do_quit)
 
         if parent is not None:
             # connect to the method to refine UB matrix by constraining lattice parameters

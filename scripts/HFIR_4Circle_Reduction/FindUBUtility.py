@@ -36,19 +36,13 @@ class AddScansForUBDialog(QtGui.QDialog):
         # initialize widgets
         self.ui.checkBox_loadHKLfromFile.setChecked(True)
 
-        # define event handling
-        self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_find_peak)
-        self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
-                     self.do_add_single_scan)
+        self.ui.pushButton_findPeak.clicked.connect(self.do_find_peak)
+        self.ui.pushButton_addPeakToCalUB.clicked.connect(self.do_add_single_scan)
 
-        self.connect(self.ui.pushButton_loadScans, QtCore.SIGNAL('clicked()'),
-                     self.do_load_scans)
-        self.connect(self.ui.pushButton_addScans, QtCore.SIGNAL('clicked()'),
-                     self.do_add_scans)
+        self.ui.pushButton_loadScans.clicked.connect(self.do_load_scans)
+        self.ui.pushButton_addScans.clicked.connect(self.do_add_scans)
 
-        self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
+        self.ui.pushButton_quit.clicked.connect(self.do_quit)
 
         return
 
@@ -153,15 +147,10 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
         self.ui.setupUi(self)
 
         # define event handling methods
-        self.connect(self.ui.pushButton_selectScans, QtCore.SIGNAL('clicked()'),
-                     self.do_select_scans)
-        self.connect(self.ui.pushButton_revertCurrentSelection, QtCore.SIGNAL('clicked()'),
-                     self.do_revert_selection)
-        self.connect(self.ui.pushButton_exportSelectedScans, QtCore.SIGNAL('clicked()'),
-                     self.do_export_selected_scans)
-
-        self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
+        self.ui.pushButton_selectScans.clicked.connect(self.do_select_scans)
+        self.ui.pushButton_revertCurrentSelection.clicked.connect(self.do_revert_selection)
+        self.ui.pushButton_exportSelectedScans.clicked.connect(self.do_export_selected_scans)
+        self.ui.pushButton_quit.clicked.connect(self.do_quit)
 
         return
 
