@@ -178,8 +178,8 @@ private:
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("SecondSlitSizeSampleLog", "slit2.size"))
     TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), Kernel::Exception::NotFoundError & e, e.what(),
-        std::string("Could not find slit search object non-existent"))
+        alg.execute(), std::runtime_error & e, e.what(),
+        std::string("Some invalid Properties found"))
     TS_ASSERT(!alg.isExecuted())
   }
 
@@ -337,27 +337,16 @@ private:
     const double ratio = SLIT2_SIZE / SLIT1_SIZE;
     const double vs = sdr + (ratio * INTERSLIT) / (1 + ratio);
     const double da_det = std::sqrt(pow<2>(da() * vs) + pow<2>(DET_RESOLUTION));
-    double om_fwhm{0};
-    if (std::abs(SLIT1_SIZE - dirs2w) >= 0.00004 ||
-        std::abs(SLIT2_SIZE - dirs3w) >= 0.00004) {
-      if ((det_fwhm - da_det) >= 0.) {
-        if (std::sqrt(pow<2>(det_fwhm) - pow<2>(da_det)) >= PIXEL_SIZE) {
-          om_fwhm = 0.5 * std::sqrt(pow<2>(det_fwhm) - pow<2>(da_det)) / dirl2;
-        } else {
-          om_fwhm = 0;
-        }
-      }
-    } else {
-      if (pow<2>(det_fwhm) - pow<2>(detdb_fwhm) >= 0.) {
-        if (std::sqrt(pow<2>(det_fwhm) - pow<2>(detdb_fwhm)) >= PIXEL_SIZE) {
-          om_fwhm =
-              0.5 * std::sqrt(pow<2>(det_fwhm) - pow<2>(detdb_fwhm)) / dirl2;
-        } else {
-          om_fwhm = 0.;
-        }
-      } else {
-        om_fwhm = 0.;
-      }
+    double om_fwhm{0.};
+    if ((std::abs(SLIT1_SIZE - dirs2w) >= 0.00004 ||
+         std::abs(SLIT2_SIZE - dirs3w) >= 0.00004) &&
+        (det_fwhm - da_det >= 0.) &&
+        (std::sqrt(pow<2>(det_fwhm) - pow<2>(da_det)) >= PIXEL_SIZE)) {
+      om_fwhm = 0.5 * std::sqrt(pow<2>(det_fwhm) - pow<2>(da_det)) / dirl2;
+    } else if ((pow<2>(det_fwhm) - pow<2>(detdb_fwhm) >= 0.) &&
+               (std::sqrt(pow<2>(det_fwhm) - pow<2>(detdb_fwhm)) >=
+                PIXEL_SIZE)) {
+      om_fwhm = 0.5 * std::sqrt(pow<2>(det_fwhm) - pow<2>(detdb_fwhm)) / dirl2;
     }
     return om_fwhm;
   }

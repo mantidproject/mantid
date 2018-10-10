@@ -15,7 +15,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/PropertyManagerProperty.h"
 
 #include <boost/math/special_functions/pow.hpp>
 #include <boost/optional.hpp>
@@ -65,19 +64,12 @@ const std::string
  * @param slit1Name name of the first slit component
  * @param slit2Name name of the second slit component
  * @return the slit gap, in meters
- * @throw NotFoundError if the slits do not exist
  */
 double ReflectometryBeamStatistics::slitSeparation(
     Geometry::Instrument_const_sptr instrument, const std::string &slit1Name,
     const std::string &slit2Name) {
   auto slit1 = instrument->getComponentByName(slit1Name);
-  if (!slit1) {
-    throw Kernel::Exception::NotFoundError("Could not find slit", slit1Name);
-  }
   auto slit2 = instrument->getComponentByName(slit2Name);
-  if (!slit2) {
-    throw Kernel::Exception::NotFoundError("Could not find slit", slit2Name);
-  }
   return (slit1->getPos() - slit2->getPos()).norm();
 }
 
@@ -148,6 +140,25 @@ void ReflectometryBeamStatistics::init() {
   declareProperty(Prop::SECOND_SLIT_SIZE_LOG, "", mandatoryString,
                   "The sample log entry for the second slit opening.");
 }
+
+/// Return issues found in input properties.
+std::map<std::string, std::string> ReflectometryBeamStatistics::validateInputs() {
+  std::map<std::string, std::string> issues;
+  API::MatrixWorkspace_const_sptr reflectedWS = getProperty(Prop::REFLECTED_WS);
+  const std::string slit1Name = getProperty(Prop::FIRST_SLIT_NAME);
+  auto instrument = reflectedWS->getInstrument();
+  auto slit = instrument->getComponentByName(slit1Name);
+  if (!slit) {
+    issues[Prop::FIRST_SLIT_NAME] = "No component called '" + slit1Name + "' found in " + Prop::REFLECTED_WS;
+  }
+  const std::string slit2Name = getProperty(Prop::SECOND_SLIT_NAME);
+  slit = instrument->getComponentByName(slit2Name);
+  if (!slit) {
+    issues[Prop::SECOND_SLIT_NAME] = "No component called '" + slit2Name + "' found in " + Prop::REFLECTED_WS;
+  }
+  return issues;
+}
+
 
 /** Execute the algorithm.
  */
@@ -246,7 +257,6 @@ bool ReflectometryBeamStatistics::bentSample(
  * @param ws the reflectivity workspace
  * @param directWS corresponding direct beam workspace
  * @return a setup object
- * @throw NotFoundError if second slit does not exists
  */
 const ReflectometryBeamStatistics::Setup
 ReflectometryBeamStatistics::createSetup(const API::MatrixWorkspace &ws,
@@ -279,9 +289,6 @@ ReflectometryBeamStatistics::createSetup(const API::MatrixWorkspace &ws,
   const std::string slit2Name = getProperty(Prop::SECOND_SLIT_NAME);
   auto instrument = ws.getInstrument();
   auto slit2 = instrument->getComponentByName(slit2Name);
-  if (!slit2) {
-    throw Kernel::Exception::NotFoundError("Could not find slit", slit2Name);
-  }
   const auto samplePos = spectrumInfo.samplePosition();
   s.slit2SampleDistance = (slit2->getPos() - samplePos).norm();
   const std::string slit2SizeEntry = getProperty(Prop::SECOND_SLIT_SIZE_LOG);

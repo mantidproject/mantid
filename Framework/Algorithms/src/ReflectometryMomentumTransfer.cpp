@@ -184,6 +184,17 @@ ReflectometryMomentumTransfer::validateInputs() {
       issues[Prop::INPUT_WS] = "The only histogram is masked.";
     }
   }
+  const std::string slit1Name = getProperty(Prop::SLIT1_NAME);
+  auto instrument = inWS->getInstrument();
+  auto slit = instrument->getComponentByName(slit1Name);
+  if (!slit) {
+    issues[Prop::SLIT1_NAME] = "No component called '" + slit1Name + "' found in " + Prop::INPUT_WS;
+  }
+  const std::string slit2Name = getProperty(Prop::SLIT1_NAME);
+  slit = instrument->getComponentByName(slit2Name);
+  if (!slit) {
+    issues[Prop::SLIT2_NAME] = "No component called '" + slit2Name + "' found in " + Prop::INPUT_WS;
+  }
   return issues;
 }
 
@@ -326,7 +337,6 @@ ReflectometryMomentumTransfer::createBeamStatistics(
  *
  * @param ws the reflectivity workspace
  * @return a setup object
- * @throw NotFoundError if second slit does not exists
  */
 const ReflectometryMomentumTransfer::Setup
 ReflectometryMomentumTransfer::createSetup(const API::MatrixWorkspace &ws) {
@@ -353,9 +363,6 @@ ReflectometryMomentumTransfer::createSetup(const API::MatrixWorkspace &ws) {
   const std::string slit2Name = getProperty(Prop::SLIT2_NAME);
   auto instrument = ws.getInstrument();
   auto slit2 = instrument->getComponentByName(slit2Name);
-  if (!slit2) {
-    throw Kernel::Exception::NotFoundError("Could not find slit", slit2Name);
-  }
   const auto samplePos = spectrumInfo.samplePosition();
   s.slit2SampleDistance = (slit2->getPos() - samplePos).norm();
   const std::string slit2SizeEntry = getProperty(Prop::SLIT2_SIZE_LOG);

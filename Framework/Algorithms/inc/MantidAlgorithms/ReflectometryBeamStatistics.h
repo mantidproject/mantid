@@ -63,6 +63,7 @@ private:
   };
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
   double beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start,
                           const size_t end);
   static bool bentSample(const Setup &setup, const double sampleWaviness,
