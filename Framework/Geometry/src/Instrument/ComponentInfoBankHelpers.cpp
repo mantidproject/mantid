@@ -42,7 +42,7 @@ bool isRectangularBankPixel(const ComponentInfo &compInfo,
     return true;
   return false;
 }
-}
+} // namespace
 /** Tests whether or not the detector is within a fixed bank. If detIndex does
 not point to a detector, this will return false. This method only returns true
 if the bank which houses the detector is rectangular, a grid or structured.
