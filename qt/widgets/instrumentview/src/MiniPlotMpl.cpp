@@ -72,7 +72,8 @@ MiniPlotMpl::MiniPlotMpl(QWidget *parent)
     : QWidget(parent), m_canvas(new FigureCanvasQt(111)),
       m_homeBtn(createHomeButton()), m_lines(), m_peakLabels(),
       m_colorCycler(cycler("color", STORED_LINE_COLOR_CYCLE)), m_xunit(),
-      m_activeCurveLabel(), m_storedCurveLabels(), m_zoomer(m_canvas) {
+      m_activeCurveLabel(), m_storedCurveLabels(), m_zoomer(m_canvas),
+      m_mousePressPt() {
   auto plotLayout = new QGridLayout(this);
   plotLayout->setContentsMargins(0, 0, 0, 0);
   plotLayout->setSpacing(0);
@@ -268,19 +269,59 @@ bool MiniPlotMpl::eventFilter(QObject *watched, QEvent *evt) {
   bool stopEvent{false};
   switch (evt->type()) {
   case QEvent::ContextMenu:
-    // handled by mouse press events below
+    // handled by mouse press events below as we need to
+    // stop the canvas getting mouse events in some circumstances
+    // to disable zooming
     stopEvent = true;
     break;
   case QEvent::MouseButtonPress:
-  case QEvent::MouseButtonRelease: {
-    auto mouseEvt = static_cast<QMouseEvent *>(evt);
-    if (mouseEvt->buttons() & Qt::RightButton) {
-      stopEvent = true;
-      emit showContextMenu();
-    }
-  } break;
+    stopEvent = handleMousePressEvent(static_cast<QMouseEvent *>(evt));
+    break;
+  case QEvent::MouseButtonRelease:
+    stopEvent = handleMouseReleaseEvent(static_cast<QMouseEvent *>(evt));
+    break;
   default:
     break;
+  }
+  return stopEvent;
+}
+
+/**
+ * Handler called when the event filter recieves a mouse press event
+ * @param evt A pointer to the event
+ * @return True if the event propagation should be stopped, false otherwise
+ */
+bool MiniPlotMpl::handleMousePressEvent(QMouseEvent *evt) {
+  bool stopEvent(false);
+  // right-click events are reserved for the context menu
+  // show when the mouse click is released
+  if (evt->buttons() & Qt::LeftButton) {
+    m_mousePressPt = evt->pos();
+  } else if (evt->buttons() & Qt::RightButton) {
+    m_mousePressPt = QPoint();
+    stopEvent = true;
+  }
+  return stopEvent;
+}
+
+/**
+ * Handler called when the event filter recieves a mouse release event
+ * @param evt A pointer to the event
+ * @return True if the event propagation should be stopped, false otherwise
+ */
+bool MiniPlotMpl::handleMouseReleaseEvent(QMouseEvent *evt) {
+  bool stopEvent(false);
+  if (evt->button() == Qt::LeftButton) {
+    auto mouseReleasePt = evt->pos();
+    // A click and release at the same point implies picking on the canvas
+    // and not a zoom so stop matplotlib getting hold it it
+    if (mouseReleasePt == m_mousePressPt) {
+      const auto dataCoords = m_canvas->toDataCoords(mouseReleasePt);
+      emit clickedAt(dataCoords.x(), dataCoords.y());
+    }
+  } else if (evt->button() == Qt::RightButton) {
+    stopEvent = true;
+    emit showContextMenu();
   }
   return stopEvent;
 }
