@@ -392,9 +392,13 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
             SLOT(postProcessComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
-  } else
+  } else {
+    setRunIsRunning(false);
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
+  }
 }
 
 /**
