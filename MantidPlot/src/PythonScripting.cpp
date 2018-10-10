@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
   File                 : PythonScripting.cpp
   Project              : QtiPlot
 --------------------------------------------------------------------
-  Copyright            : (C) 2006 by Knut Franke
-  Email (use @ for *)  : knut.franke*gmx.de
-  Description          : Execute Python code from within QtiPlot
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -38,6 +27,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 
 #include <QApplication>
 #include <Qsci/qscilexerpython.h>
@@ -57,6 +48,8 @@ PyMODINIT_FUNC PyInit__qti();
 #else
 PyMODINIT_FUNC init_qti();
 #endif
+
+using Mantid::PythonInterface::GlobalInterpreterLock;
 
 namespace {
 Mantid::Kernel::Logger g_log("PythonScripting");
@@ -86,7 +79,7 @@ PythonScripting::~PythonScripting() {}
  * @param args A list of strings that denoting command line arguments
  */
 void PythonScripting::setSysArgs(const QStringList &args) {
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
   PyObject *argv = toPyList(args);
   if (argv && m_sys) {
     PyDict_SetItemString(m_sys, "argv", argv);
@@ -146,9 +139,13 @@ bool PythonScripting::start() {
 #else
   PyImport_AppendInittab("_qti", &init_qti);
 #endif
-  PythonInterpreter::initialize();
-  ScopedPythonGIL lock;
+  Py_Initialize();
+  // Acquires the GIL
+  PyEval_InitThreads();
+  // Release GIL so that we can use our scoped lock types for management
+  PyEval_SaveThread();
 
+  GlobalInterpreterLock lock;
   // Keep a hold of the globals, math and sys dictionary objects
   PyObject *mainmod = PyImport_AddModule("__main__");
   if (!mainmod) {
@@ -218,10 +215,9 @@ bool PythonScripting::start() {
 void PythonScripting::shutdown() {
   // The scoped lock cannot be used here as after the
   // finalize call no Python code can execute.
-  PythonGIL gil;
-  gil.acquire();
+  GlobalInterpreterLock::acquire();
   Py_XDECREF(m_math);
-  PythonInterpreter::finalize();
+  Py_Finalize();
 }
 
 void PythonScripting::setupPythonPath() {

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 This file is concerned with calibrating a specified set of tubes
 
@@ -411,7 +417,7 @@ def getCalibratedPixelPositions(ws, tube_positions, ideal_tube_positions, which_
     for i in range(n_dets):
         deti = ws.getDetector(which_tube[i])
         p_new = pixels[i]
-        # again, the opeartion float * v3d is not defined, but v3d * float is,
+        # again, the operation float * v3d is not defined, but v3d * float is,
         # so, I wrote the new pos as center + unit_vector * (float)
         new_pos = center + unit_vector * p_new
 
@@ -475,7 +481,7 @@ def getCalibration(ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
     :param fitPar: A :class:`~tube_calib_fit_params.TubeCalibFitParams` object for fitting the peaks
     :param iTube: The :class:`~ideal_tube.IdealTube` which contains the positions in metres of the shadows of the slits,
         bars or edges used for calibration.
-    :param peaksTable: Peaks table into wich the peaks positions will be put
+    :param peaksTable: Peaks table into which the peaks positions will be put
     :param overridePeaks: dictionary with tube indexes keys and an array of peaks in pixels to override those that would be
         fitted for one tube
     :param excludeShortTubes: Exlude tubes shorter than specified length from calibration

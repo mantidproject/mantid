@@ -40,7 +40,7 @@ spectrum.
 
 The pixel efficiency and incident spectrum correction are NOT CURRENTLY
 USED. The absorption correction, trans, depends on both lamda and the
-pixel, Which is a fairly expensive calulation when done for each event.
+pixel, Which is a fairly expensive calculation when done for each event.
 
 Also see :ref:`algm-LorentzCorrection`
 

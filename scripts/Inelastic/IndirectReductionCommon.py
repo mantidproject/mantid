@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import Load
 from mantid.api import WorkspaceGroup, AlgorithmManager
@@ -966,7 +972,7 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
     @param multi_frame_rebin_string Rebin string for multiple frame rebinning
     @param num_bins Max number of bins in input frames
     """
-    from mantid.simpleapi import (Rebin, RebinToWorkspace, SortXAxis)
+    from mantid.simpleapi import (Rebin, SortXAxis)
 
     if rebin_string is not None:
         if multi_frame_rebin_string is not None and num_bins is not None:
@@ -989,9 +995,18 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
     else:
         try:
             # If user does not want to rebin then just ensure uniform binning across spectra
-            RebinToWorkspace(WorkspaceToRebin=workspace_name,
-                             WorkspaceToMatch=workspace_name,
-                             OutputWorkspace=workspace_name)
+            # extract the binning parameters from the first spectrum.
+            # there is probably a better way to calculate the binning parameters, but this
+            # gets the right answer.
+            xaxis = mtd[workspace_name].readX(0)
+            params = []
+            for i, x in enumerate(xaxis):
+                params.append(x)
+                if i < len(xaxis) -1:
+                    params.append(xaxis[i+1] - x) # delta
+            Rebin(InputWorkspace=workspace_name,
+                  OutputWorkspace=workspace_name,
+                  Params=params)
         except RuntimeError:
             logger.warning('Rebinning failed, will try to continue anyway.')
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifdef _MSC_VER
 #pragma warning(disable : 4250) // Disable warning regarding inheritance via
                                 // dominance, we have no way around it with the
@@ -9,8 +15,8 @@
 #pragma warning(default : 4250)
 #endif
 #include "MantidKernel/Strings.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/Converters/MapToPyDictionary.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
@@ -34,9 +40,9 @@ using Mantid::Kernel::Direction;
 using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::Property;
 using Mantid::PythonInterface::AlgorithmIDProxy;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
 using Mantid::PythonInterface::isNone;
-namespace Environment = Mantid::PythonInterface::Environment;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IAlgorithm)
@@ -124,10 +130,10 @@ PropertyVector apiOrderedProperties(const IAlgorithm &propMgr) {
  * @return A Python list of strings
  */
 
-object getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
+list getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   list names;
   ToPyString toPyStr;
   for (const auto &prop : properties) {
@@ -145,10 +151,10 @@ object getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-object getAlgorithmPropertiesOrdered(IAlgorithm &self) {
+list getAlgorithmPropertiesOrdered(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   list names;
   ToPyString toPyStr;
   for (const auto &prop : properties) {
@@ -162,10 +168,10 @@ object getAlgorithmPropertiesOrdered(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-object getOutputProperties(IAlgorithm &self) {
+list getOutputProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
 
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   list names;
   ToPyString toPyStr;
   for (const auto &p : properties) {
@@ -181,10 +187,10 @@ object getOutputProperties(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-object getInOutProperties(IAlgorithm &self) {
+list getInOutProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
 
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   list names;
   ToPyString toPyStr;
   for (const auto &p : properties) {
@@ -346,7 +352,7 @@ std::string getWikiSummary(IAlgorithm &self) {
  * @param self Reference to the calling object
  * @return validation error dictionary
  */
-boost::python::object validateInputs(IAlgorithm &self) {
+boost::python::dict validateInputs(IAlgorithm &self) {
   auto map = self.validateInputs();
   using MapToPyDictionary =
       Mantid::PythonInterface::Converters::MapToPyDictionary<std::string,

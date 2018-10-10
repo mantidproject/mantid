@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621,R0912,R0921,R0914,W0403
 ################################################################################
 #
@@ -2860,7 +2866,7 @@ class CWSCDReductionControl(object):
             'Center row number {0} of type {1} must either None or non-negative integer.' \
             ''.format(center_row, type(center_row))
         assert center_col is None or (isinstance(center_col, int) and center_col >= 0), \
-            'Center column number {0} of type {1} must be either Noe or non-negative integer.' \
+            'Center column number {0} of type {1} must be either None or non-negative integer.' \
             ''.format(center_col, type(center_col))
 
         if default:

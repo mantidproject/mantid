@@ -63,7 +63,7 @@ Output:
     Workspace has 200 spectra
     Workspace has 1 spectra
 
-**Example - running SumSpectra with a list of indicies.**
+**Example - running SumSpectra with a list of indices.**
 
 .. testcode:: ExSumSpectraListOfIndicies
 

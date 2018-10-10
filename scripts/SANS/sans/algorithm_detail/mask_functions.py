@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from collections import (namedtuple, Sequence)
 from sans.common.enums import (SANSInstrument, DetectorOrientation, DetectorType)
@@ -136,7 +142,7 @@ class SpectraBlock(object):
         """
         Create a list of spectra for a rectangular block of size x_dim by y_dim
 
-        :param y_lower: the x coordiante of the starting point of the lower left corner
+        :param y_lower: the x coordinate of the starting point of the lower left corner
         :param x_lower: the y coordinate of the starting point of the lower left corner
         :param y_dim: the y dimension
         :param x_dim: the x dimension

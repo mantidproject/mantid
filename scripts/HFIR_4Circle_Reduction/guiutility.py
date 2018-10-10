@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #
 # GUI Utility Methods
 #
@@ -128,7 +134,7 @@ def map_to_color(data_array, base_color, change_color_flag):
                 color_value = min(1.0 - 1.E-10, color_value)
                 step_list_index += 1
             else:
-                # use bae color
+                # use base color
                 color_value = base_color[i_color]
             # ENDIF
 

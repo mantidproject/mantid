@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, division, print_function
 from mantid.simpleapi import HB2AReduce
 import unittest
@@ -31,7 +37,7 @@ class HB2AReduceTest(unittest.TestCase):
         self.assertEquals(HB2AReduce_ws.getNumberHistograms(), 1)
         self.assertEquals(HB2AReduce_ws.blocksize(), 2439)
         self.assertEquals(np.argmax(HB2AReduce_ws.extractY()), 2203)
-        self.assertAlmostEquals(np.max(HB2AReduce_ws.extractY()), 2.7863608266)
+        self.assertAlmostEquals(np.max(HB2AReduce_ws.extractY()), 2.788603131)
         HB2AReduce_ws.delete()
 
     def test_TwoFiles(self):
@@ -40,7 +46,7 @@ class HB2AReduceTest(unittest.TestCase):
         self.assertEquals(HB2AReduce_ws.getNumberHistograms(), 1)
         self.assertEquals(HB2AReduce_ws.blocksize(), 2439)
         self.assertEquals(np.argmax(HB2AReduce_ws.extractY()), 2203)
-        self.assertAlmostEquals(np.max(HB2AReduce_ws.extractY()), 2.8059953301)
+        self.assertAlmostEquals(np.max(HB2AReduce_ws.extractY()), 2.780263137)
         HB2AReduce_ws.delete()
 
     def test_Vanadium(self):
@@ -50,7 +56,7 @@ class HB2AReduceTest(unittest.TestCase):
         self.assertEquals(HB2AReduce_ws.getNumberHistograms(), 1)
         self.assertEquals(HB2AReduce_ws.blocksize(), 2439)
         self.assertEquals(np.argmax(HB2AReduce_ws.extractY()), 2203)
-        self.assertAlmostEquals(np.max(HB2AReduce_ws.extractY()), 78.4374673238)
+        self.assertAlmostEquals(np.max(HB2AReduce_ws.extractY()), 78.50058933)
         HB2AReduce_ws.delete()
 
     def test_ExcludeDetectors(self):
@@ -60,7 +66,7 @@ class HB2AReduceTest(unittest.TestCase):
         self.assertEquals(HB2AReduce_ws.getNumberHistograms(), 1)
         self.assertEquals(HB2AReduce_ws.blocksize(), 1360)
         self.assertEquals(np.argmax(HB2AReduce_ws.extractY()), 283)
-        self.assertAlmostEquals(np.max(HB2AReduce_ws.extractY()), 0.8336013246)
+        self.assertAlmostEquals(np.max(HB2AReduce_ws.extractY()), 0.826432392)
         HB2AReduce_ws.delete()
 
     def test_anode_vs_temp(self):

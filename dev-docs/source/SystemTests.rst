@@ -228,19 +228,42 @@ would run the tests on 8 cores.
 
 Some tests write or delete in the same directories, using the same file
 names, which causes issues when running in parallel. To resolve this,
-the tests are grouped in lists where all modules starting with the
-same 4 letters are given to one core. This worsens the load balance
-between cores (with 8 cores, core 1 performs 93 tests while core 8 only
-has 44). This is not ideal but allows the suite to complete without
-failures. The runtime using 8 cores still goes down from 2h to 30 min.
+a global list of test modules (= different python files in the
+``Testing/SystemTests/tests/analysis`` directory) is first created.
+Now we scan each test module line by line and list all the data files
+that are used by that module. The possible ways files are being
+specified are:
+1. if the extensions ``.nxs``, ``.raw`` or ``.RAW`` are present
+2. if there is a sequence of at least 4 digits inside a string
+In case number 2, we have to search for strings starting with 4 digits,
+i.e. "0123, or strings ending with 4 digits 0123".
+This might over-count, meaning some sequences of 4 digits might not be
+used for a file name specification, but it does not matter if it gets
+identified as a filename as the probability of the same sequence being
+present in another python file is small, and it would therefore not lock
+any other tests. A dict is created with an entry for each module name
+that contains the list of files that this module requires.
+An accompanying dict with an entry for each data file stores a lock
+status for that particular datafile.
 
-This also means that in the case of running a subset of tests with the
-``-R`` option, if the number of groups created from this is smaller
-than the number of cores being used, some cores will have no tests to
-run. Using the ``-j`` option is only really advantageous when running
-a large list of tests. It does not bring much speedup up for a small
-subset of tests, as these are likely to be put inside the same group
-and run on the same core.
+Finally, a scheduler spawns ``N`` threads who each start a loop and
+gather a first test module from the master test list which is stored in
+a shared dictionary, starting with the number in the module list equal
+to the process id.
+
+Each process then checks if all the data files required by the current
+test module are available (i.e. have not been locked by another
+thread). If all files are unlocked, the thread locks all these files
+and proceeds with that test module. If not, it goes further down the
+list until it finds a module whose files are all available.
+
+Once it has completed the work in the current module, it unlocks the
+data files and checks if the number of modules that remains to be
+executed is greater than 0. If there is some work left to do, the
+thread finds the next module that still has not been executed
+(searches through the tests_lock array and finds the next element
+that has a 0 value). This aims to have all threads end calculation
+approximately at the same time.
 
 Reducing the size of console output
 -----------------------------------

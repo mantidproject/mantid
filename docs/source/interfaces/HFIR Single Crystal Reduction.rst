@@ -105,7 +105,7 @@ Here is a typical use case to calculate UB matrix after initial setup.
 7.  GUI finds the peak center and load HKL
 8.  User pushes button *Add peak* to add the peak to table
 9.  User repeats step 2 to 9 to add other peaks
-10.  User select the peaks that are linearly independent and pushes *Calcualte UB*
+10.  User select the peaks that are linearly independent and pushes *Calculate UB*
 11.  GUI calculates UB matrix and show the result
 12.  User may push *Index peak* to use the calculated UB matrix to index peaks in the table to check UB matrix;
 13.  User may refine the UB matrix and thus lattice parameters
@@ -198,7 +198,7 @@ and scaled up by same factor (e.g, 1500).
 
 
 
-UB Matrix Calcualtion and Refinement
+UB Matrix Calculation and Refinement
 ------------------------------------
 
 
@@ -271,11 +271,11 @@ The error can be calculated as
 Estimating background
 ^^^^^^^^^^^^^^^^^^^^^
 
-For each measurment, the background :math:`B_i` is calculated as
+For each measurement, the background :math:`B_i` is calculated as
 
 .. math:: B^{(e)} = \frac{\sum_i^{<pt>}C_i}{|<pt>|}
 
-where :math:`<pt>` is a set of measurment points that are specified by users.
+where :math:`<pt>` is a set of measurement points that are specified by users.
 Usually they are the first and last several measurements in a scan.
 
 Then this estimated **normalized** background value can be applied to each measuremnt, whose counts are normalized.
@@ -376,7 +376,7 @@ normalization type of :math:`F_i`.
 Estimating background
 ^^^^^^^^^^^^^^^^^^^^^
 
-For each measurment, the background :math:`B_i` is calculated as
+For each measurement, the background :math:`B_i` is calculated as
 
 .. math:: B_i = \frac{\sum^{(pt)}_{\{d_i\}}n_{d_i}}{F^{(a)}_{d_i}}
 

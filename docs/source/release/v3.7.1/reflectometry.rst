@@ -48,9 +48,9 @@ ISIS Reflectometry (Polref)
   As a consequence there are some changes visible to users: a new progress bar that has been added to the *Search Runs* section, which shows the progress when
   transferring runs. The progress bar that existed before will only indicate the progress of processing that is
   in progress. A new section below the processing table has been added. It
-  summarises the algorithms used in the reduction and allows users to specify global options for them. Options to be applied to invidual rows can still
+  summarises the algorithms used in the reduction and allows users to specify global options for them. Options to be applied to individual rows can still
   be specified via the 'Options' column. User documentation has been updated accordingly.
-  The aim of this code refactoring is to have a General Data Processor Framework shared accross different technique areas that need to execute complex
+  The aim of this code refactoring is to have a General Data Processor Framework shared across different technique areas that need to execute complex
   batch-processing via DataProcessorAlgorithms. Standardisation across similar user interfaces will help avoid the maintenance effort involved in looking
   after specific user interfaces, making the wider project more robust to changes thanks to the introduction of fast, automated testing.
   Some of the target user interfaces that can benefit from this new design are SANS (both at ANSTO and ISIS), Powder at SNS and SCD at SNS.

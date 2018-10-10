@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches,C0302
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
@@ -1368,7 +1374,7 @@ class Qt4MplCanvas(FigureCanvas):
                 try:
                     self.axes.lines.remove(plot)
                 except ValueError as e:
-                    print("[Error] Plot %s is not in axes.lines which has %d lines. Error mesage: %s" % (
+                    print("[Error] Plot %s is not in axes.lines which has %d lines. Error message: %s" % (
                         str(plot), len(self.axes.lines), str(e)))
                 del self._lineDict[ikey]
             else:
@@ -1451,7 +1457,7 @@ class Qt4MplCanvas(FigureCanvas):
         return self._lineIndex-1
 
     def getPlot(self):
-        """ reture figure's axes to expose the matplotlib figure to PyQt client
+        """ return figure's axes to expose the matplotlib figure to PyQt client
         """
         return self.axes
 
@@ -1765,7 +1771,7 @@ class Qt4MplCanvas(FigureCanvas):
     def _setup_legend(self, location='best', font_size=10):
         """
         Set up legend
-        self.axes.legend(): Handler is a Line2D object. Lable maps to the line object
+        self.axes.legend(): Handler is a Line2D object. Label maps to the line object
         Args:
             location:
             font_size:
