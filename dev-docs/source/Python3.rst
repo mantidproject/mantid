@@ -32,8 +32,54 @@ or on fedora, with slightly different package names
 then set ``-DPYTHON_EXECUTABLE=/usr/bin/python3`` when running cmake before building.
 
 .. warning::
-   If any of these packages are installed via pip, this could cause conflicts.
-   Install as described here only.
+
+    If any of these packages are installed via pip, this could cause conflicts.
+    Install as described here only.
+
+Setting up the anaconda environment for developer (tested on ubuntu 18.04).
+
+1. Creating environment and activating:
+
+.. code-block:: sh
+
+    conda create -n env3.5 python=3.5
+    source activate env3.5
+
+2. Installing needed packages:
+
+.. code-block:: sh
+
+    conda install numpy
+    conda install pyqt=4.11
+    conda install -c conda-forge qscintilla2
+    conda install matplotlib
+    pip install -U numpy
+
+3. Build mantid with correct python:
+
+.. code-block:: sh
+
+    mkdir <your_path>/build
+    cd <your_path>/build
+    cmake -DPYTHON_EXECUTABLE=<anaconda_home>/bin/python3.5 -DCMAKE_BUILD_TYPE=Release
+    make
+
+4. Install and launch jupyter lab:
+
+.. code-block:: sh
+
+    conda install jupyterlab
+    jupyter lab
+
+Inside the jupyter you have to import API:
+
+.. code-block:: python
+
+    import sys
+    sys.path.append('<your_path/build/bin>')
+    from mantid.simpleapi import *
+    import mantid
+
 
 Supporting Python 2 and 3
 #########################
