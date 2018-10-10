@@ -1296,7 +1296,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
     const int64_t parentIndex = componentInfo.parent(i);
     const bool makeTransform = parentIndex != oldParentIndex;
-    bool isGridDetectorPixel = false;
+    bool isDetFixedInBank = false;
 
     if (makeTransform) {
       oldParentIndex = parentIndex;
@@ -1314,15 +1314,15 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
           std::get<1>(baseInstr.m_detectorCache[i]);
 
       auto type = componentInfo.componentType(i);
-      isGridDetectorPixel =
-          ComponentInfoBankHelpers::isGridDetectorPixel(componentInfo, i);
+      isDetFixedInBank =
+          ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, i);
       if (detectorInfo.isMasked(i)) {
         pmap->forceUnsafeSetMasked(baseDet.get(), true);
       }
 
       if (makeTransform) {
         // Special case: scaling for GridDetectorPixel.
-        if (isGridDetectorPixel) {
+        if (isDetFixedInBank) {
 
           size_t panelIndex = componentInfo.parent(parentIndex);
           const auto panelID = componentInfo.componentID(panelIndex);
@@ -1356,7 +1356,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
-      if (isGridDetectorPixel) {
+      if (isDetFixedInBank) {
         throw std::runtime_error("Cannot create legacy ParameterMap: Position "
                                  "parameters for GridDetectorPixel are "
                                  "not supported");
