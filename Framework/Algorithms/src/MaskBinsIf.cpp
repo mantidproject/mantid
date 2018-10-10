@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/MaskBinsIf.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidHistogramData/HistogramIterator.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -38,7 +39,7 @@ mu::Parser makeParser(double &y, double &e, double &x, double &dx, double &s,
   muParser.SetExpr(criterion);
   return muParser;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -95,9 +96,11 @@ void MaskBinsIf::exec() {
   const auto numeric = dynamic_cast<NumericAxis *>(spectrumAxis);
   const auto spectrum = dynamic_cast<SpectraAxis *>(spectrumAxis);
   const bool spectrumOrNumeric = numeric || spectrum;
+  const int64_t numberHistograms =
+      static_cast<int64_t>(outputWorkspace->getNumberHistograms());
+  auto progress = make_unique<Progress>(this, 0., 1., numberHistograms);
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
-  for (size_t index = 0; index < outputWorkspace->getNumberHistograms();
-       ++index) {
+  for (int64_t index = 0; index < numberHistograms; ++index) {
     PARALLEL_START_INTERUPT_REGION
     double y, e, x, dx, s, i;
     dx = 0.;
@@ -121,6 +124,7 @@ void MaskBinsIf::exec() {
         outputWorkspace->maskBin(index, bin);
       }
     }
+    progress->report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
