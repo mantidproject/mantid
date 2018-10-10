@@ -220,7 +220,7 @@ public:
   }
 
   void testSetConstraintPenaltyFactor1() {
-    std::string fnString = 
+    std::string fnString =
         "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=15.1,"
         "constraints=(0<a0<0.2,a1>10,penalty=12.)";
 
@@ -237,7 +237,7 @@ public:
     TS_ASSERT(c1);
     TS_ASSERT_EQUALS(c1->check(), 0);
     TS_ASSERT_EQUALS(c1->getPenaltyFactor(), 12.);
-    
+
     TS_ASSERT_EQUALS(funa->asString(),
                      "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,"
                      "a1=15.1,constraints=(0<a0<0.2,10<a1,penalty=12)");
