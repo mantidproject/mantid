@@ -142,23 +142,25 @@ void ReflectometryBeamStatistics::init() {
 }
 
 /// Return issues found in input properties.
-std::map<std::string, std::string> ReflectometryBeamStatistics::validateInputs() {
+std::map<std::string, std::string>
+ReflectometryBeamStatistics::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr reflectedWS = getProperty(Prop::REFLECTED_WS);
   const std::string slit1Name = getProperty(Prop::FIRST_SLIT_NAME);
   auto instrument = reflectedWS->getInstrument();
   auto slit = instrument->getComponentByName(slit1Name);
   if (!slit) {
-    issues[Prop::FIRST_SLIT_NAME] = "No component called '" + slit1Name + "' found in " + Prop::REFLECTED_WS;
+    issues[Prop::FIRST_SLIT_NAME] = "No component called '" + slit1Name +
+                                    "' found in " + Prop::REFLECTED_WS;
   }
   const std::string slit2Name = getProperty(Prop::SECOND_SLIT_NAME);
   slit = instrument->getComponentByName(slit2Name);
   if (!slit) {
-    issues[Prop::SECOND_SLIT_NAME] = "No component called '" + slit2Name + "' found in " + Prop::REFLECTED_WS;
+    issues[Prop::SECOND_SLIT_NAME] = "No component called '" + slit2Name +
+                                     "' found in " + Prop::REFLECTED_WS;
   }
   return issues;
 }
-
 
 /** Execute the algorithm.
  */

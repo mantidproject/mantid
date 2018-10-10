@@ -278,9 +278,9 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitName", slit1))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitSizeSampleLog", slit2))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH))
-    TS_ASSERT_THROWS_EQUALS(
-        alg->execute(), const std::runtime_error &e, e.what(),
-        std::string("Some invalid Properties found"))
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Some invalid Properties found"))
     TS_ASSERT(!alg->isExecuted())
   }
 

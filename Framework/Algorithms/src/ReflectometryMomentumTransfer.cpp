@@ -188,12 +188,14 @@ ReflectometryMomentumTransfer::validateInputs() {
   auto instrument = inWS->getInstrument();
   auto slit = instrument->getComponentByName(slit1Name);
   if (!slit) {
-    issues[Prop::SLIT1_NAME] = "No component called '" + slit1Name + "' found in " + Prop::INPUT_WS;
+    issues[Prop::SLIT1_NAME] =
+        "No component called '" + slit1Name + "' found in " + Prop::INPUT_WS;
   }
   const std::string slit2Name = getProperty(Prop::SLIT1_NAME);
   slit = instrument->getComponentByName(slit2Name);
   if (!slit) {
-    issues[Prop::SLIT2_NAME] = "No component called '" + slit2Name + "' found in " + Prop::INPUT_WS;
+    issues[Prop::SLIT2_NAME] =
+        "No component called '" + slit2Name + "' found in " + Prop::INPUT_WS;
   }
   return issues;
 }
