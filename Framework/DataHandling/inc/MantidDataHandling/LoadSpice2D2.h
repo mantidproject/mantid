@@ -55,8 +55,11 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+
 class DLLExport LoadSpice2D2 : public API::IFileLoader<Kernel::FileDescriptor> {
+
 public:
+
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadSpice2D2"; }
   /// Summary of algorithms purpose
@@ -75,68 +78,52 @@ public:
   const std::string category() const override {
     return "DataHandling\\Text;SANS\\DataHandling";
   }
-  /// Number of monitors
-  static const int nMonitors = 2;
+
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
+
+
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
 
-  /// This method throws not found error if a element is not found in the xml
-  /// file
-  void throwException(Poco::XML::Element *elem, const std::string &name,
-                      const std::string &fileName);
-  /// Run LoadInstrument Child Algorithm
-  void runLoadInstrument(const std::string &inst_name,
-                         DataObjects::Workspace2D_sptr localWorkspace);
+  void setInputFileAsHandler();
+  void setTimes();
+  void setWavelength();
 
-  void setInputPropertiesAsMemberProperties();
+  std::pair<int, int> parseDetectorDimensions(const std::string &dims_str);
+  std::vector<int> getData(const std::string &dataXpath = "//Data");
 
-  void addMetadataAsRunProperties(const std::map<std::string, std::string> &);
-  std::pair<int, int> parseDetectorDimensions(const std::string &);
+  void storeValue(int specID, double value,
+                 double error, double wavelength, double dwavelength);
   void createWorkspace();
-  std::vector<int> getData(const std::string &);
-  void createWorkspace(const std::vector<int> &data, const std::string &title,
-                       double monitor1_counts, double monitor2_counts);
-  void setWavelength(std::map<std::string, std::string> &metadata);
-  template <class T>
-  T addRunProperty(std::map<std::string, std::string> &metadata,
-                   const std::string &oldName, const std::string &newName,
-                   const std::string &units = "");
   template <class T>
   void addRunProperty(const std::string &name, const T &value,
-                      const std::string &units = "");
-  void setBeamTrapRunProperty(std::map<std::string, std::string> &metadata);
-  void moveDetector(double, double);
-  double detectorDistance(std::map<std::string, std::string> &metadata);
-  double detectorTranslation(std::map<std::string, std::string> &metadata);
-  void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
-  void rotateDetector(const double &);
-  void setTimes();
-  void
-  setSansSpiceXmlFormatVersion(std::map<std::string, std::string> &metadata);
+                                 const std::string &units="");
+  void storeMetaDataIntoWS();
+  
 
-  template <class T>
-  bool from_string(T &t, const std::string &s,
-                   std::ios_base &(*f)(std::ios_base &));
-  void store_value(DataObjects::Workspace2D_sptr, int, double, double, double,
-                   double);
 
-  // Member variables:
-  DataObjects::Workspace2D_sptr m_workspace;
-  double m_wavelength_input{0.0};
-  double m_wavelength_spread_input{0.0};
+  /* constants */
+  /// Number of monitors
+  static const int nMonitors = 2;
+  // when parsing the metadata ignore those tags
+  const std::vector<std::string> m_tags_to_ignore{"Detector", "DetectorWing"};
+
   Mantid::DataHandling::XmlHandler m_xmlHandler;
-  double m_wavelength{0.0};
-  double m_dwavelength{0.0};
-  double m_sansSpiceXmlFormatVersion{0.0};
+  DataObjects::Workspace2D_sptr m_workspace;
+  std::map<std::string, std::string> m_metadata;
+
+
+  double m_wavelength;
+  double m_dwavelength;
   Mantid::Types::Core::DateAndTime m_startTime;
   Mantid::Types::Core::DateAndTime m_endTime;
+  
 };
 } // namespace DataHandling
 } // namespace Mantid
