@@ -13,7 +13,6 @@
 #include <QPushButton>
 #include <QSpacerItem>
 #include <QVBoxLayout>
-#include <QtGlobal>
 
 using MantidQt::Widgets::MplCpp::ColorConverter;
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
@@ -108,8 +107,8 @@ void MiniPlotMpl::setData(std::vector<double> x, std::vector<double> y,
   // plot automatically calls "scalex=True, scaley=True"
   m_lines.emplace_back(
       axes.plot(std::move(x), std::move(y), ACTIVE_CURVE_FORMAT));
-  setXLabel(std::move(xunit));
   m_activeCurveLabel = curveLabel;
+  setXLabel(std::move(xunit));
   // If the current axis limits can fit the data then matplotlib
   // won't change the axis scale. If the intensity of different plots
   // is very different we need ensure the scale is tight enough to
@@ -192,8 +191,10 @@ void MiniPlotMpl::removeCurve(const QString &label) {
   auto labelIndex = m_storedCurveLabels.indexOf(label);
   if (labelIndex < 0)
     return;
-  // The line is at the same position in the vector
+  m_storedCurveLabels.removeAt(labelIndex);
   m_lines.erase(std::next(std::begin(m_lines), labelIndex));
+  m_canvas->gca().relim();
+  m_canvas->gca().autoscaleView();
 }
 
 /**
@@ -205,7 +206,8 @@ QColor MiniPlotMpl::getCurveColor(const QString &label) const {
   auto labelIndex = m_storedCurveLabels.indexOf(label);
   if (labelIndex < 0)
     return QColor();
-  return ColorConverter::toRGB(m_lines[labelIndex].pyobj().attr("get_color")());
+  auto lineIter = std::next(std::begin(m_lines), labelIndex);
+  return ColorConverter::toRGB(lineIter->pyobj().attr("get_color")());
 }
 
 /**
