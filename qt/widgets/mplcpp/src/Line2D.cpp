@@ -15,8 +15,11 @@ namespace MplCpp {
  */
 Line2D::Line2D(Python::Object obj, std::vector<double> xdataOwner,
                std::vector<double> ydataOwner)
-    : Artist(obj), m_xOwner(std::move(xdataOwner)),
-      m_yOwner(std::move(ydataOwner)) {}
+    : Artist(std::move(obj)), m_xOwner(std::move(xdataOwner)),
+      m_yOwner(std::move(ydataOwner)) {
+  assert(!m_xOwner.empty());
+  assert(!m_yOwner.empty());
+}
 
 /**
  * The data is being deleted so the the line is removed from the axes
