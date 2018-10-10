@@ -1313,7 +1313,6 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       const boost::shared_ptr<const IDetector> &baseDet =
           std::get<1>(baseInstr.m_detectorCache[i]);
 
-      auto type = componentInfo.componentType(i);
       isDetFixedInBank =
           ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, i);
       if (detectorInfo.isMasked(i)) {
