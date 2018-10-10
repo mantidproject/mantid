@@ -11,7 +11,10 @@ namespace ComponentInfoBankHelpers {
 
 MANTID_GEOMETRY_DLL bool isDetectorFixedInBank(const ComponentInfo &compInfo,
                                                const size_t detIndex);
-}
+
+MANTID_GEOMETRY_DLL bool isGridDetectorPixel(const ComponentInfo &compInfo,
+                                             const size_t detIndex);
+} // namespace ComponentInfoBankHelpers
 
 } // namespace Geometry
 } // namespace Mantid

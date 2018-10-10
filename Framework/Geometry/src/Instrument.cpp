@@ -8,6 +8,7 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
@@ -1312,8 +1313,9 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       const boost::shared_ptr<const IDetector> &baseDet =
           std::get<1>(baseInstr.m_detectorCache[i]);
 
+      auto type = componentInfo.componentType(i);
       isGridDetectorPixel =
-          bool(boost::dynamic_pointer_cast<const GridDetectorPixel>(baseDet));
+          ComponentInfoBankHelpers::isGridDetectorPixel(componentInfo, i);
       if (detectorInfo.isMasked(i)) {
         pmap->forceUnsafeSetMasked(baseDet.get(), true);
       }
