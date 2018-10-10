@@ -64,6 +64,6 @@ class ThreadModel(QThread):
         self.exceptionSignal.connect(message_box.warning)
 
     def threadWrapperTearDown(self,startSlot,endSlot):
-        self.started.disconnect(start_slot)
+        self.started.disconnect(startSlot)
         self.finished.disconnect(endSlot)
         self.exceptionSignal.disconnect(message_box.warning)
