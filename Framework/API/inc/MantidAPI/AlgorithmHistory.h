@@ -114,11 +114,14 @@ public:
                  const size_t maxPropertyLength = 0) const;
   /// Less than operator
   inline bool operator<(const AlgorithmHistory &other) const {
-    return (execCount() < other.execCount());
+    if (executionDate() == other.executionDate()) {
+      return name() < other.name();
+    } else
+      return executionDate() < other.executionDate();
   }
   /// Equality operator
   inline bool operator==(const AlgorithmHistory &other) const {
-    return (execCount() == other.execCount() && name() == other.name());
+    return (executionDate() == other.executionDate() && name() == other.name());
   }
   /// Create a concrete algorithm based on a history record
   boost::shared_ptr<IAlgorithm> createAlgorithm() const;
@@ -132,6 +135,8 @@ public:
   void fillAlgorithmHistory(const Algorithm *const alg,
                             const Types::Core::DateAndTime &start,
                             const double &duration, std::size_t uexeccount);
+  /// Increment the execution date by 1 nano second
+  void increaseExecutionDate();                          
   // Allow Algorithm::execute to change the exec count & duration after the
   // algorithm was executed
   friend class Algorithm;

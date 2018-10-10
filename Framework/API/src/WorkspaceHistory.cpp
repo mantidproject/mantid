@@ -11,6 +11,7 @@
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -18,8 +19,8 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using Mantid::Kernel::EnvironmentHistory;
 using boost::algorithm::split;
+using Mantid::Kernel::EnvironmentHistory;
 
 namespace Mantid {
 namespace API {
@@ -55,7 +56,8 @@ WorkspaceHistory::getEnvironmentHistory() const {
 }
 
 /// Append the algorithm history from another WorkspaceHistory into this one
-void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
+void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory,
+                                  bool alwaysInsert) {
   // Don't copy one's own history onto oneself
   if (this == &otherHistory) {
     return;
@@ -64,11 +66,34 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
   // Merge the histories
   const AlgorithmHistories &otherAlgorithms =
       otherHistory.getAlgorithmHistories();
-  m_algorithms.insert(otherAlgorithms.begin(), otherAlgorithms.end());
+
+  // Add default boolean to false for file operations from ProcessFileNexus to
+  // check for presence in the set already
+  for (auto algHistory : otherAlgorithms) {
+    if (alwaysInsert) {
+      int counter = 0;
+      while (m_algorithms.find(algHistory) != m_algorithms.end() && counter < 1000) {
+        algHistory->increaseExecutionDate();
+        ++counter;
+      }
+    }
+    m_algorithms.insert(std::move(algHistory));
+  }
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
-void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory) {
+void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory,
+                                  bool alwaysInsert) {
+  // Add default boolean to false for file operations from ProcessFileNexus to
+  // check for presence in the set already
+  if (alwaysInsert) {
+    int counter = 0;
+    while (m_algorithms.find(algHistory) != m_algorithms.end() && counter < 1000) {
+      algHistory->increaseExecutionDate();
+      ++counter;
+    }
+  }
+
   m_algorithms.insert(std::move(algHistory));
 }
 
@@ -288,7 +313,7 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File *file,
       } else {
         // if not parent point is supplied, assume we're at the top
         // and attach the history to the workspace
-        this->addHistory(history);
+        this->addHistory(history, true);
       }
     } catch (std::runtime_error &e) {
       // just log the exception as a warning and continue parsing history

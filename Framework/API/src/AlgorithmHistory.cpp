@@ -291,5 +291,13 @@ void AlgorithmHistory::saveNexus(::NeXus::File *file, int &algCount) const {
   file->closeGroup();
 }
 
+/**
+ * Increases the execution date by 1 nanosecond
+ */
+void AlgorithmHistory::increaseExecutionDate() {
+  const int64_t nanosecondIncrement = 1;
+  m_executionDate += nanosecondIncrement;
+}
+
 } // namespace API
 } // namespace Mantid
