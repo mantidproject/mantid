@@ -1111,13 +1111,12 @@ DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
  * @param pickID :: A pick ID of an instrument component.
  */
 void DetectorPlotController::setPlotData(size_t pickID) {
-  m_currentPickID = std::numeric_limits<size_t>::max();
-
   if (m_plotType == DetectorSum) {
     m_plotType = Single;
   }
 
   if (!m_enabled) {
+    m_currentPickID = std::numeric_limits<size_t>::max();
     m_plot->clearCurve();
     return;
   }
@@ -1126,14 +1125,18 @@ void DetectorPlotController::setPlotData(size_t pickID) {
   const auto &componentInfo = actor.componentInfo();
   if (componentInfo.isDetector(pickID)) {
     if (m_plotType == Single) {
-      m_currentPickID = pickID;
-      plotSingle(pickID);
+      if (m_currentPickID != pickID) {
+        m_currentPickID = pickID;
+        plotSingle(pickID);
+      }
     } else if (m_plotType == TubeSum || m_plotType == TubeIntegral) {
+      m_currentPickID = std::numeric_limits<size_t>::max();
       plotTube(pickID);
     } else {
       throw std::logic_error("setPlotData: Unexpected plot type.");
     }
   } else {
+    m_currentPickID = std::numeric_limits<size_t>::max();
     m_plot->clearCurve();
   }
 }
