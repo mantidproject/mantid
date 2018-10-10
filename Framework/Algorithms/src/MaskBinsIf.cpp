@@ -102,14 +102,10 @@ void MaskBinsIf::exec() {
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
   for (int64_t index = 0; index < numberHistograms; ++index) {
     PARALLEL_START_INTERUPT_REGION
-    double y, e, x, dx, s, i;
-    dx = 0.;
-    s = 0.;
-    i = index;
+    double y, e, x, dx;
+    double i = double(index);
+    double s = spectrumOrNumeric ? spectrumAxis->getValue(index) : 0.;
     mu::Parser parser = makeParser(y, e, x, dx, s, i, criterion);
-    if (spectrumOrNumeric) {
-      s = spectrumAxis->getValue(index);
-    }
     const auto &spectrum = outputWorkspace->histogram(index);
     const bool hasDx = outputWorkspace->hasDx(index);
     for (auto it = spectrum.begin(); it != spectrum.end(); ++it) {
@@ -117,9 +113,7 @@ void MaskBinsIf::exec() {
       y = it->counts();
       x = it->center();
       e = it->countStandardDeviation();
-      if (hasDx) {
-        dx = it->centerError();
-      }
+      dx = hasDx ? it->centerError() : 0.;
       if (parser.Eval() != 0.) {
         outputWorkspace->maskBin(index, bin);
       }
