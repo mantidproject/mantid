@@ -250,6 +250,9 @@ void MiniPlotMpl::setYLinearScale() {
  * Clear all artists from the canvas
  */
 void MiniPlotMpl::clearAll() {
+  // active curve, labels etc
+  clearCurve();
+  // any stored curves
   m_lines.clear();
   replot();
 }
