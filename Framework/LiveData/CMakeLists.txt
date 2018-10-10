@@ -9,8 +9,6 @@ set ( SRC_FILES
 	src/ISIS/FakeISISHistoDAE.cpp
 	src/ISIS/ISISHistoDataListener.cpp
 	src/ISIS/ISISLiveEventDataListener.cpp
-	src/KafkaHistoListener.cpp
-	src/KafkaHistoStreamDecoder.cpp
 	src/LiveDataAlgorithm.cpp
 	src/LoadLiveData.cpp
 	src/MonitorLiveData.cpp
@@ -33,8 +31,6 @@ set ( INC_FILES
 	inc/MantidLiveData/ISIS/ISISHistoDataListener.h
 	inc/MantidLiveData/ISIS/ISISLiveEventDataListener.h
 	inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
-	inc/MantidLiveData/KafkaHistoListener.h
-	inc/MantidLiveData/KafkaHistoStreamDecoder.h
 	inc/MantidLiveData/LiveDataAlgorithm.h
 	inc/MantidLiveData/LoadLiveData.h
 	inc/MantidLiveData/MonitorLiveData.h
@@ -50,8 +46,6 @@ set ( TEST_FILES
 	FakeEventDataListenerTest.h
 	FileEventDataListenerTest.h
 	ISISHistoDataListenerTest.h
-	KafkaHistoListenerTest.h
-	KafkaHistoStreamDecoderTest.h
 	LiveDataAlgorithmTest.h
 	LoadLiveDataTest.h
 	MonitorLiveDataTest.h
