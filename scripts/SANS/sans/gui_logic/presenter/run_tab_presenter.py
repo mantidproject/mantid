@@ -37,6 +37,8 @@ from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
 from ui.sans_isis.work_handler import WorkHandler
 from sans.common.file_information import SANSFileInformationFactory
+from ui.sans_isis import SANSSaveOtherWindow
+from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
 
 try:
     import mantidplot
@@ -98,6 +100,9 @@ class RunTabPresenter(object):
 
         def on_cut_rows(self):
             self._presenter.on_cut_rows_requested()
+
+        def on_save_other(self):
+            self._presenter.on_save_other()
 
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
@@ -524,6 +529,11 @@ class RunTabPresenter(object):
         :return: True if the row is empty.
         """
         return self._table_model.is_empty_row(row)
+
+    def on_save_other(self):
+        self.save_other_presenter = SaveOtherPresenter(parent_presenter=self)
+        self.save_other_presenter.set_view(SANSSaveOtherWindow.SANSSaveOtherDialog())
+        self.save_other_presenter.show()
 
     # def _validate_rows(self):
     #     """

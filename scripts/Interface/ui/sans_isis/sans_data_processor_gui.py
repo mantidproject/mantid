@@ -147,6 +147,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_cut_rows(self):
             pass
 
+        @abstractmethod
+        def on_save_other(self):
+            pass
+
     def __init__(self):
         """
         Initialise the interface
@@ -195,6 +199,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.delete_row_button.clicked.connect(self._remove_rows_requested_from_button)
         self.insert_row_button.clicked.connect(self._on_insert_button_pressed)
+        self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
 
         # Attach validators
         self._attach_validators()
@@ -452,6 +457,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _on_insert_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_insert_row())
+
+    def _on_save_other_button_pressed(self):
+        self._call_settings_listeners(lambda listener: listener.on_save_other())
 
     def _on_help_button_clicked(self):
         pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')

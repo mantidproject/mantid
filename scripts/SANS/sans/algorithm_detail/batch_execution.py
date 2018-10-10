@@ -921,7 +921,7 @@ def save_to_file(reduction_packages):
     save_info = state.save
     file_formats = save_info.file_format
     for name_to_save in workspaces_names_to_save:
-        save_workspace_to_file(name_to_save, file_formats)
+        save_workspace_to_file(name_to_save, file_formats, name_to_save)
 
 
 def delete_reduced_workspaces(reduction_packages):
@@ -1018,16 +1018,16 @@ def get_all_names_to_save(reduction_packages):
     return set(names_to_save)
 
 
-def save_workspace_to_file(output_name, file_formats):
+def save_workspace_to_file(workspace_name, file_formats, file_name):
     """
     Saves the workspace to the different file formats specified in the state object.
 
-    :param output_name: the name of the output workspace and also the name of the file
+    :param workspace_name: the name of the output workspace and also the name of the file
     :param file_formats: a list of file formats to save
     """
     save_name = "SANSSave"
-    save_options = {"InputWorkspace": output_name}
-    save_options.update({"Filename": output_name})
+    save_options = {"InputWorkspace": workspace_name}
+    save_options.update({"Filename": file_name})
 
     if SaveType.Nexus in file_formats:
         save_options.update({"Nexus": True})
