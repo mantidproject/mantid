@@ -13,7 +13,7 @@
 
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/InstrumentView/ColorMap.h"
 #include <QString>
 #include <map>
 #include <vector>

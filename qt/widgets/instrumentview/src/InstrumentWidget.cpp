@@ -8,7 +8,9 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
@@ -1390,6 +1392,7 @@ int InstrumentWidget::getCurrentTab() const {
  * @return string representing the current state of the instrumet widget.
  */
 std::string InstrumentWidget::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   TSVSerialiser tsv;
 
   // serialise widget properties
@@ -1405,6 +1408,10 @@ std::string InstrumentWidget::saveToProject() const {
   tsv.writeSection("tabs", saveTabs());
 
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "InstrumentWidget::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 /**
@@ -1435,6 +1442,7 @@ void InstrumentWidget::loadTabs(const std::string &lines) const {
  * file.
  */
 void InstrumentWidget::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("SurfaceType")) {
@@ -1474,6 +1482,11 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
   }
 
   updateInstrumentView();
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "InstrumentWidget::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 } // namespace MantidWidgets

@@ -12,7 +12,6 @@
 #include "InstrumentWidgetTab.h"
 
 #include "MantidQtWidgets/Common/GraphOptions.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 class QPushButton;
 class QLineEdit;
