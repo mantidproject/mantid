@@ -68,6 +68,10 @@ signals:
 protected:
   bool eventFilter(QObject *watched, QEvent *evt) override;
 
+private:
+  bool handleMousePressEvent(QMouseEvent *evt);
+  bool handleMouseReleaseEvent(QMouseEvent *evt);
+
 private slots:
   void onHomeClicked();
 
@@ -81,6 +85,7 @@ private: // data
   QString m_activeCurveLabel;
   QStringList m_storedCurveLabels;
   Widgets::MplCpp::Zoomer m_zoomer;
+  QPoint m_mousePressPt;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
