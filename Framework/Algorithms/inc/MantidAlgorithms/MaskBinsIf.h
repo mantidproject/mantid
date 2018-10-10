@@ -7,14 +7,14 @@
 #ifndef MANTID_ALGORITHMS_MASKBINSIF_H_
 #define MANTID_ALGORITHMS_MASKBINSIF_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /** MaskBinsIf : Masks bins based on muparser expression
-*/
+ */
 class MANTID_ALGORITHMS_DLL MaskBinsIf : public API::Algorithm {
 public:
   const std::string name() const override { return "MaskBinsIf"; }
