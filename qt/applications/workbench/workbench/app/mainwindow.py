@@ -258,7 +258,6 @@ class MainWindow(QMainWindow):
             logger.error(str('Failed to load {} interface'.format(name)))  # TODO logger should accept unicode
             raise
 
-
     def populateAfterMantidImport(self):
         from mantid.kernel import ConfigService, logger
         # TODO ConfigService should accept unicode strings
