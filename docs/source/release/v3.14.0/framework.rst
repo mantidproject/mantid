@@ -59,6 +59,7 @@ Bugfixes
 ########
 
 - :ref:`SaveGDA <algm-SaveGDA>` Now takes a parameter of OutputFilename instead of Filename to better match with similar algorithms.
+- :ref:`SolidAngle <algm-SolidAngle-v1>` Now properly accounts for a given StartWorkspaceIndex.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` output workspaces now contain the goniometer.
 - Fixed an issue where if a workspace's history wouldn't update for some algorithms
 - Fixed a ``std::bad_cast`` error in :ref:`algm-LoadLiveData` when the data size changes.
