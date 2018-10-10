@@ -114,12 +114,10 @@ public:
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
   void checkNoTimeDependence() const;
-  std::vector<bool> buildMergeIndices(const DetectorInfo &other) const;
-  std::vector<bool> buildMergeScanIndices(const DetectorInfo &other) const;
   void checkSizes(const DetectorInfo &other) const;
   void checkIdenticalIntervals(const DetectorInfo &other, const size_t index1,
                                const size_t index2) const;
-  void merge(const DetectorInfo &other);
+  void merge(const DetectorInfo &other, const std::vector<bool> &merge);
 
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};

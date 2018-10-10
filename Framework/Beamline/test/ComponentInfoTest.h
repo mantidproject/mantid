@@ -241,7 +241,6 @@ cloneInfos(const std::tuple<boost::shared_ptr<ComponentInfo>,
       std::get<0>(in)->cloneWithoutDetectorInfo());
   auto detInfo = boost::make_shared<DetectorInfo>(*std::get<1>(in));
   compInfo->setDetectorInfo(detInfo.get());
-  detInfo->setComponentInfo(compInfo.get());
   return std::make_tuple(compInfo, detInfo);
 }
 
@@ -1005,17 +1004,17 @@ public:
     b.setScanInterval({-1, 5});
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
-                            "Cannot merge ComponentInfo: sync scan intervals "
+                            "Cannot merge ComponentInfo: scan intervals "
                             "overlap but not identical");
     b.setScanInterval({1, 5});
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
-                            "Cannot merge ComponentInfo: sync scan intervals "
+                            "Cannot merge ComponentInfo: scan intervals "
                             "overlap but not identical");
     b.setScanInterval({1, 11});
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
-                            "Cannot merge ComponentInfo: sync scan intervals "
+                            "Cannot merge ComponentInfo: scan intervals "
                             "overlap but not identical");
   }
 

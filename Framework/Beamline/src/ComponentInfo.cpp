@@ -464,6 +464,8 @@ void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
                                 "input of same size as size of DetectorInfo");
   }
   m_detectorInfo = detectorInfo;
+  if (m_detectorInfo)
+    m_detectorInfo->setComponentInfo(this);
 }
 
 bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
@@ -622,6 +624,8 @@ this has no time dependence prior to this operation.
 **/
 void ComponentInfo::merge(const ComponentInfo &other) {
   const auto &toMerge = buildMergeIndices(other);
+  // Merging the detectorInfo has to be done before we update scanIntervals
+  m_detectorInfo->merge(*other.m_detectorInfo, toMerge);
   for (size_t timeIndex = 0; timeIndex < other.m_scanIntervals.size();
        ++timeIndex) {
     if (!toMerge[timeIndex])
@@ -635,10 +639,7 @@ void ComponentInfo::merge(const ComponentInfo &other) {
                      other.m_positions->begin() + indexEnd);
     rotations.insert(rotations.end(), other.m_rotations->begin() + indexStart,
                      other.m_rotations->begin() + indexEnd);
-    ++m_scanCounts;
   }
-
-  m_detectorInfo->merge(*other.m_detectorInfo);
 }
 
 std::vector<bool>

@@ -59,9 +59,9 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   if (!(m_isMasked == other.m_isMasked) && (*m_isMasked != *other.m_isMasked))
     return false;
 
-  // Scanning related fields. Not testing m_scanCounts and m_indexMap since
+  // Scanning related fields. Not testing m_indexMap since
   // those just are internally derived from m_indices.
-  if (scanIntervals() != other.scanIntervals())
+  if (this->scanIntervals() != other.scanIntervals())
     return false;
 
   // Positions: Absolute difference matter, so comparison is not relative.
@@ -168,8 +168,8 @@ void failMerge(const std::string &what) {
  * of time indices added from `other` is preserved. If the interval for a time
  * index in `other` is identical to a corresponding interval in `this`, it is
  * ignored, i.e., no time index is added. */
-void DetectorInfo::merge(const DetectorInfo &other) {
-  const auto &merge = buildMergeScanIndices(other);
+void DetectorInfo::merge(const DetectorInfo &other,
+                         const std::vector<bool> &merge) {
   for (size_t timeIndex = 0; timeIndex < other.scanCount(); ++timeIndex) {
     if (!merge[timeIndex])
       continue;
@@ -185,7 +185,6 @@ void DetectorInfo::merge(const DetectorInfo &other) {
     rotations.insert(rotations.end(), other.m_rotations->begin() + indexStart,
                      other.m_rotations->begin() + indexEnd);
   }
-  return;
 }
 
 void DetectorInfo::setComponentInfo(ComponentInfo *componentInfo) {
@@ -221,32 +220,6 @@ Eigen::Vector3d DetectorInfo::samplePosition() const {
                              "cannot determine samplePosition");
   }
   return m_componentInfo->samplePosition();
-}
-
-// Indices returned here are the list of time indexes not to merge
-std::vector<bool>
-DetectorInfo::buildMergeScanIndices(const DetectorInfo &other) const {
-  checkSizes(other);
-  std::vector<bool> merge(other.scanCount(), true);
-
-  for (size_t t1 = 0; t1 < other.scanCount(); ++t1) {
-    for (size_t t2 = 0; t2 < scanCount(); ++t2) {
-      const auto &interval1 = other.scanIntervals()[t1];
-      const auto &interval2 = scanIntervals()[t2];
-      if (interval1 == interval2) {
-        for (size_t detIndex = 0; detIndex < size(); ++detIndex) {
-          const size_t linearIndex1 = other.linearIndex({detIndex, t1});
-          const size_t linearIndex2 = linearIndex({detIndex, t2});
-          checkIdenticalIntervals(other, linearIndex1, linearIndex2);
-        }
-        merge[t1] = false;
-      } else if ((interval1.first < interval2.second) &&
-                 (interval1.second > interval2.first)) {
-        failMerge("scan intervals overlap but not identical");
-      }
-    }
-  }
-  return merge;
 }
 
 void DetectorInfo::checkSizes(const DetectorInfo &other) const {
