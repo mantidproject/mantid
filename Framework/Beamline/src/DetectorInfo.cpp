@@ -61,7 +61,8 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 
   // Scanning related fields. Not testing m_indexMap since
   // those just are internally derived from m_indices.
-  if (this->hasComponentInfo() && (this->scanIntervals() != other.scanIntervals()))
+  if (this->hasComponentInfo() &&
+      (this->scanIntervals() != other.scanIntervals()))
     return false;
 
   // Positions: Absolute difference matter, so comparison is not relative.
