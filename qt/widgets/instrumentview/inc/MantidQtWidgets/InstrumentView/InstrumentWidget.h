@@ -222,7 +222,7 @@ private slots:
 
 protected:
   void init(bool resetGeometry, bool autoscaling, double scaleMin,
-            double scaleMax, bool setDefaultView);
+            double scaleMax, bool setDefaultView, bool resetActor = true);
   /// Set newly created projection surface
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);

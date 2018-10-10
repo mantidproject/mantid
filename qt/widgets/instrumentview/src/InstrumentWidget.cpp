@@ -156,6 +156,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 
   m_instrumentActor.reset(
       new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+
   // Create the b=tabs
   createTabs(settings);
 
@@ -199,7 +200,9 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
 
-  init(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView);
+  const bool resetActor(false);
+  init(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView,
+       resetActor);
 }
 
 /**
@@ -257,13 +260,15 @@ InstrumentWidget::getSurfaceAxis(const int surfaceType) const {
  * @param scaleMax :: Maximum value of the colormap scale. Ignored if
  * autoscaling == true.
  * @param setDefaultView :: Set the default surface type
+ * @param resetActor :: If true reset the instrumentActor object
  */
 void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
                             double scaleMin, double scaleMax,
-                            bool setDefaultView) {
-  // Previously in (now removed) setWorkspaceName method
-  m_instrumentActor.reset(
-      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+                            bool setDefaultView, bool resetActor) {
+  if (resetActor) {
+    m_instrumentActor.reset(
+        new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+  }
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
                                 m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(
