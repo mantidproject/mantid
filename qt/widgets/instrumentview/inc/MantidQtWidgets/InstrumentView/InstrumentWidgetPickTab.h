@@ -124,7 +124,7 @@ private:
   QColor getShapeBorderColor() const;
 
   /* Pick tab controls */
-  MiniPlot *m_plot;  ///< Miniplot to display data in the detectors
+  MiniPlot *m_plot;     ///< Miniplot to display data in the detectors
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode

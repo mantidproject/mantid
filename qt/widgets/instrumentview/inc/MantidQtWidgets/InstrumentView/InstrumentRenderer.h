@@ -31,7 +31,6 @@ private:
   mutable bool m_useDisplayList[2];
   mutable std::vector<detail::BankTextureBuilder> m_textures;
   mutable std::map<size_t, size_t> m_reverseTextureIndexMap;
-  std::vector<double> m_specIntegrs;
   ColorMap m_colorMap;
   bool m_isUsingLayers;
   size_t m_layer;

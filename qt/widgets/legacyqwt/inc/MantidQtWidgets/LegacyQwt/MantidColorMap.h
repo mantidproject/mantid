@@ -49,6 +49,8 @@ public:
   void setupDefaultMap();
 
   QRgb rgb(double vmin, double vmax, double value) const;
+  std::vector<QRgb> rgb(double vmin, double vmax,
+                        const std::vector<double> &values) const;
   QRgb rgb(const QwtDoubleInterval &interval, double value) const override;
 
   double normalize(const QwtDoubleInterval &interval, double value) const;

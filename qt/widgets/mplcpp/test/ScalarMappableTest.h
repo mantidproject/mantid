@@ -112,6 +112,39 @@ public:
     TS_ASSERT_EQUALS(121, qBlue(rgba));
     TS_ASSERT_EQUALS(127, qAlpha(rgba));
   }
+
+  void testtoRGBAArrayWithNoAlphaGivesDefault() {
+    ScalarMappable mappable(Normalize(-1, 1), getCMap("jet"));
+    auto rgba = mappable.toRGBA({0.0, 0.75});
+    TS_ASSERT_EQUALS(2, rgba.size());
+
+    TS_ASSERT_EQUALS(124, qRed(rgba[0]));
+    TS_ASSERT_EQUALS(255, qGreen(rgba[0]));
+    TS_ASSERT_EQUALS(121, qBlue(rgba[0]));
+    TS_ASSERT_EQUALS(255, qAlpha(rgba[0]));
+
+    TS_ASSERT_EQUALS(255, qRed(rgba[1]));
+    TS_ASSERT_EQUALS(29, qGreen(rgba[1]));
+    TS_ASSERT_EQUALS(0, qBlue(rgba[1]));
+    TS_ASSERT_EQUALS(255, qAlpha(rgba[1]));
+  }
+
+  void testtoRGBAArrayWithAlpha() {
+    ScalarMappable mappable(Normalize(-1, 1), getCMap("jet"));
+    const double alpha = 0.5;
+    auto rgba = mappable.toRGBA({0.0, 0.75}, alpha);
+    TS_ASSERT_EQUALS(2, rgba.size());
+
+    TS_ASSERT_EQUALS(124, qRed(rgba[0]));
+    TS_ASSERT_EQUALS(255, qGreen(rgba[0]));
+    TS_ASSERT_EQUALS(121, qBlue(rgba[0]));
+    TS_ASSERT_EQUALS(static_cast<int>(alpha * 255), qAlpha(rgba[0]));
+
+    TS_ASSERT_EQUALS(255, qRed(rgba[1]));
+    TS_ASSERT_EQUALS(29, qGreen(rgba[1]));
+    TS_ASSERT_EQUALS(0, qBlue(rgba[1]));
+    TS_ASSERT_EQUALS(static_cast<int>(alpha * 255), qAlpha(rgba[1]));
+  }
 };
 
 #endif // MPLCPP_SCALARMAPPABLETEST_H
