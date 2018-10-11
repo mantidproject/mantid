@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import print_function
 
-from mantid.simpleapi import CreateWorkspace, Transpose, Multiply
+from mantid.simpleapi import CreateWorkspace, Transpose, Multiply, MaskDetectors, mtd
 from mantid.api import AlgorithmFactory, PropertyMode, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction
 import numpy as np
@@ -44,16 +44,25 @@ class ApplyDetectorScanEffCorr(PythonAlgorithm):
         input_ws = self.getProperty("InputWorkspace").value
         eff_ws = self.getProperty("DetectorEfficiencyWorkspace").value
         transposed = Transpose(InputWorkspace=eff_ws, StoreInADS=False)
-        efficiencies = transposed.extractY().flatten()
+        y = transposed.extractY()
+        efficiencies = y.flatten()
         errors = transposed.extractE().flatten()
         n_hist = input_ws.getNumberHistograms()
         if n_hist % efficiencies.size != 0:
             raise ValueError('Number of histograms in input workspace is not a multiple of number of entries in detector efficiency '
                              'workspace.')
         n_time_indexes = n_hist / efficiencies.size
-        to_multiply = CreateWorkspace(DataY=np.repeat(efficiencies, n_time_indexes),DataE=np.repeat(errors, n_time_indexes),
+        to_multiply = CreateWorkspace(DataY=np.repeat(efficiencies, n_time_indexes), DataE=np.repeat(errors, n_time_indexes),
                                       DataX=np.zeros(n_hist), NSpec=n_hist, StoreInADS=False)
         output = Multiply(LHSWorkspace=input_ws, RHSWorkspace=to_multiply, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
+        # In the output we should mask the detectors where calibration constant is 0
+        n_pixels_per_tube = transposed.blocksize()        
+        mask = np.argwhere(y == 0.)
+        if len(mask) > 0:
+            det_IDs = ''
+            for pixel in mask:
+                det_IDs += str(pixel[0] * n_pixels_per_tube + pixel[1] + 1) + ','
+            MaskDetectors(Workspace=output, DetectorList=det_IDs[:-1])
         self.setProperty("OutputWorkspace", output)
 
 AlgorithmFactory.subscribe(ApplyDetectorScanEffCorr)
