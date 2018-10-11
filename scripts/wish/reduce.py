@@ -8,12 +8,13 @@ from mantid.simpleapi import *
 # import matplotlib.pyplot as p # Had to remove matplotlib as autoreduce running on server without display
 import numpy as n
 import mantid.simpleapi as mantid
-def Wish_Run(input):
+def Wish_Run(input,  cal_directory, user_directory, outputfolder):
     __name__=input
     print("Running")
     wish_dir = ""
-
-
+    cal_dir = cal_directory
+    use_folder = user_directory
+    out_fold = outputfolder
     def validate(input_file, output_dir):
         """
         Autoreduction validate Function
@@ -79,9 +80,11 @@ def Wish_Run(input):
         return wish_userdir
 
 
-    def WISH_calibration(cycle="11_4"):
-        return "/home/sjenkins/Documents/WISH/Cal/"
+    def WISH_getcalibration(cycle="11_4"):
+        return cal_dir
 
+    def WISH_setcalibration(directory):
+        wish_userdir = cal_dir
 
     #   This is no longer needed unless run manually
     def WISH_startup(usern, cycle='14_3'):
@@ -92,10 +95,12 @@ def Wish_Run(input):
         sys.path.append('/home/' + usern + '/Scripts/')
         # import Mantid_plotting as mtdplt
         # userdatadir="/home/rawdata/"
-        userdatadir = "/archive/ndxwish/Instrument/data/cycle_" + cycle + '/'
+        # userdatadir = "/archive/ndxwish/Instrument/data/cycle_" + cycle + '/'
+        userdatadir = use_folder
         WISH_setdatadir(userdatadir)
         print "Raw Data in :   ", userdatadir
-        userdataprocessed =  r"/home/sjenkins/Documents/WISH"
+        # userdataprocessed =  r"/home/sjenkins/Documents/WISH"
+        userdataprocessed = out_fold
         WISH_setuserdir(directory=userdataprocessed)
         print "Processed Data in :   ", userdataprocessed
         return
