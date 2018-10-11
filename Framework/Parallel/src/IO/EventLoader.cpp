@@ -10,9 +10,10 @@
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <H5Cpp.h>
-#include <omp.h>
+
 
 namespace Mantid {
 namespace Parallel {
@@ -61,7 +62,7 @@ void load(const std::string &filename, const std::string &groupname,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists,
           bool precalcEvents) {
-  auto concurencyNumber = omp_get_num_procs();
+  auto concurencyNumber = PARALLEL_NUMBER_OF_THREADS;
   std::string executableName =
       Kernel::ConfigService::Instance().getPropertiesDir() +
       "/MantidNexusParallelLoader";
