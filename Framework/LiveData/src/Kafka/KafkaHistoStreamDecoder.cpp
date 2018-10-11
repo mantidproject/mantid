@@ -35,18 +35,26 @@ namespace LiveData {
 
 /**
  * Constructor
- * @param broker A reference to a Broker object for creating topic streams
+ * @param brokerAddress The physical ipAddress of the broker
  * @param histoTopic The name of the topic streaming the histo data
  * @param spDetTopic The name of the topic streaming the spectrum-detector
  * run mapping
  */
 KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
-    std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
+    const std::string &brokerAddress, const std::string &histoTopic,
     const std::string &instrumentName)
-    : m_broker(broker), m_histoTopic(histoTopic),
+    : m_broker(brokerAddress), m_histoTopic(histoTopic),
       m_instrumentName(instrumentName), m_histoStream(), m_workspace(),
       m_buffer(), m_thread(), m_interrupt(false), m_capturing(false),
-      m_exception() {
+      m_exception(nullptr) {
+  if (histoTopic.empty())
+    throw std::invalid_argument(
+        "KafkaHistoStreamDecoder::KafkaHistoStreamDecorder "
+        ": histogramTopic cannot be an empty string.");
+  if (instrumentName.empty())
+    throw std::invalid_argument(
+        "KafkaHistoStreamDecoder::KafkaHistoStreamDecorder "
+        ": instrumentName cannot be an empty string.");
   // Initialize buffer workspace
   m_workspace = createBufferWorkspace();
 }
@@ -63,8 +71,7 @@ KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() { stopCapture(); }
  */
 void KafkaHistoStreamDecoder::startCapture(bool) {
   g_log.debug() << "Starting capture on topic: " << m_histoTopic << "\n";
-  m_histoStream =
-      m_broker->subscribe({m_histoTopic}, SubscribeAtOption::LATEST);
+  m_histoStream = m_broker.subscribe({m_histoTopic}, SubscribeAtOption::LATEST);
 
   m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
@@ -74,7 +81,7 @@ void KafkaHistoStreamDecoder::startCapture(bool) {
  * Stop capturing from the stream. This is a blocking call until the capturing
  * function has completed
  */
-void KafkaHistoStreamDecoder::stopCapture() {
+void KafkaHistoStreamDecoder::stopCapture() noexcept {
   g_log.debug() << "Stopping capture\n";
 
   // This will interrupt the "event" loop
@@ -126,9 +133,10 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
     throw Exception::NotYet("No message to process yet.");
   }
 
-  auto histoMsg = GetEventHistogram(m_buffer.c_str());
+  // Retrieve flatbuffer struct describing histogram
+  const auto *histoMsg = GetEventHistogram(m_buffer.c_str());
 
-  auto shape = histoMsg->current_shape();
+  const auto *shape = histoMsg->current_shape();
   auto nbins = shape->Get(0) - 1;
   auto nspectra = static_cast<size_t>(shape->Get(1));
 
@@ -171,10 +179,10 @@ void KafkaHistoStreamDecoder::captureImpl() {
   try {
     captureImplExcept();
   } catch (std::exception &exc) {
-    m_exception = boost::make_shared<std::runtime_error>(exc.what());
+    m_exception.reset(new std::runtime_error(exc.what()));
   } catch (...) {
-    m_exception = boost::make_shared<std::runtime_error>(
-        "KafkaEventStreamDecoder: Unknown exception type caught.");
+    m_exception.reset(new std::runtime_error(
+        "KafkaEventStreamDecoder: Unknown exception type caught."));
   }
   m_capturing = false;
 }
@@ -222,6 +230,7 @@ DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
     alg->setChild(true);
     alg->initialize();
     alg->setPropertyValue("InstrumentName", m_instrumentName);
+    // Dummy workspace value "ws" as not placed in ADS
     alg->setPropertyValue("OutputWorkspace", "ws");
     alg->execute();
     workspace = alg->getProperty("OutputWorkspace");
@@ -231,6 +240,7 @@ DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
     throw;
   }
 
+  // OutputWorkspace type is Worspace2D in algorithm see LoadEmptyInstrument.cpp
   return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(workspace);
 }
 

@@ -8,8 +8,8 @@
 #define MANTID_LIVEDATA_ISISKAFKAHISTOSTREAMDECODER_H_
 
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidLiveData/Kafka/IKafkaBroker.h"
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
+#include "MantidLiveData/Kafka/KafkaBroker.h"
 
 #include <atomic>
 #include <mutex>
@@ -26,7 +26,7 @@ namespace LiveData {
 */
 class DLLExport KafkaHistoStreamDecoder {
 public:
-  KafkaHistoStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
+  KafkaHistoStreamDecoder(const std::string &brokerAddress,
                           const std::string &histoTopic,
                           const std::string &instrumentName);
   ~KafkaHistoStreamDecoder();
@@ -37,7 +37,7 @@ public:
   ///@name Start/stop
   ///@{
   void startCapture(bool startNow = true);
-  void stopCapture();
+  void stopCapture() noexcept;
   ///@}
 
   ///@name Querying
@@ -61,7 +61,7 @@ private:
   DataObjects::Workspace2D_sptr createBufferWorkspace();
 
   /// Broker to use to subscribe to topics
-  std::shared_ptr<IKafkaBroker> m_broker;
+  KafkaBroker m_broker;
   /// Topic name
   const std::string m_histoTopic;
   /// Instrument name
@@ -82,7 +82,7 @@ private:
   /// Flag indicating that the decoder is capturing
   std::atomic<bool> m_capturing;
   /// Exception object indicating there was an error
-  boost::shared_ptr<std::runtime_error> m_exception;
+  std::unique_ptr<std::runtime_error> m_exception;
 };
 
 } // namespace LiveData

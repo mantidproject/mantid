@@ -20,9 +20,9 @@ namespace LiveData {
 class KafkaHistoStreamDecoder;
 
 /**
-  Implementation of a live listener to consume messages from the Kafka system
-  at ISIS. It currently parses the events directly using flatbuffers so will
-  need updating if the schema changes.
+  Implementation of a live listener to consume messages which are in a histogram
+  format from the Kafka system at ISIS. It currently parses the histogram data
+  directly using flatbuffers so will need updating if the schema changes.
  */
 class DLLExport KafkaHistoListener : public API::LiveListener {
 public:
