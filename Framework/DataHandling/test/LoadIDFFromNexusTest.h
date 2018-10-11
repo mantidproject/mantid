@@ -104,7 +104,7 @@ public:
     const auto &ptrDetMain = detectorInfo.detector(detectorInfo.indexOf(5));
     TS_ASSERT_EQUALS(ptrDetMain.getID(), 5);
     TS_ASSERT_EQUALS(ptrDetMain.getName(), "main-detector-bank(2,0)");
-    TS_ASSERT_EQUALS(ptrDetMain.type(), "RectangularDetectorPixel");
+    TS_ASSERT_EQUALS(ptrDetMain.type(), "GridDetectorPixel");
     TS_ASSERT_DELTA(ptrDetMain.getPos().X(), -0.3035, 0.0001);
     TS_ASSERT_DELTA(ptrDetMain.getPos().Y(), -0.3124, 0.0001);
     TS_ASSERT_DELTA(detectorInfo.l2(detectorInfo.indexOf(5)), 4.1727, 0.0001);

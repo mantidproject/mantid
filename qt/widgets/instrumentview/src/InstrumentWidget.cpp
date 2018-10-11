@@ -151,6 +151,8 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   setBackgroundColor(
       settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
 
+  m_instrumentActor.reset(
+      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   // Create the b=tabs
   createTabs(settings);
 
@@ -297,6 +299,12 @@ void InstrumentWidget::resetInstrument(bool resetGeometry) {
   updateInstrumentDetectors();
 }
 
+void InstrumentWidget::resetSurface() {
+  auto surface = getSurface();
+  surface->updateDetectors();
+  update();
+}
+
 /**
  * Select the tab to be displayed
  */
@@ -416,19 +424,29 @@ void InstrumentWidget::setSurfaceType(int type) {
       auto sample_pos = componentInfo.samplePosition();
       auto axis = getSurfaceAxis(surfaceType);
 
+      m_maskTab->setDisabled(false);
+
       // create the surface
       if (surfaceType == FULL3D) {
+        m_renderTab->forceLayers(false);
+
+        if (m_instrumentActor->hasGridBank())
+          m_maskTab->setDisabled(true);
+
         surface = new Projection3D(m_instrumentActor.get(),
                                    getInstrumentDisplayWidth(),
                                    getInstrumentDisplayHeight());
       } else if (surfaceType <= CYLINDRICAL_Z) {
+        m_renderTab->forceLayers(true);
         surface =
             new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis);
       } else if (surfaceType <= SPHERICAL_Z) {
+        m_renderTab->forceLayers(true);
         surface =
             new UnwrappedSphere(m_instrumentActor.get(), sample_pos, axis);
       } else // SIDE_BY_SIDE
       {
+        m_renderTab->forceLayers(true);
         surface = new PanelsSurface(m_instrumentActor.get(), sample_pos, axis);
       }
     } catch (InstrumentHasNoSampleError &) {
@@ -1180,13 +1198,13 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   pickTab->loadSettings(settings);
 
   // Mask controls
-  InstrumentWidgetMaskTab *maskTab = new InstrumentWidgetMaskTab(this);
-  mControlsTab->addTab(maskTab, QString("Draw"));
-  connect(maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
+  m_maskTab = new InstrumentWidgetMaskTab(this);
+  mControlsTab->addTab(m_maskTab, QString("Draw"));
+  connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
-  connect(m_xIntegration, SIGNAL(changed(double, double)), maskTab,
+  connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
           SLOT(changedIntegrationRange(double, double)));
-  maskTab->loadSettings(settings);
+  m_maskTab->loadSettings(settings);
 
   // Instrument tree controls
   InstrumentWidgetTreeTab *treeTab = new InstrumentWidgetTreeTab(this);
@@ -1196,7 +1214,7 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
 
-  m_tabs << m_renderTab << pickTab << maskTab << treeTab;
+  m_tabs << m_renderTab << pickTab << m_maskTab << treeTab;
 }
 
 /**

@@ -13,6 +13,7 @@ namespace Beamline {
 enum class ComponentType {
   Generic,
   Infinite,
+  Grid,
   Rectangular,
   Structured,
   Unstructured,
