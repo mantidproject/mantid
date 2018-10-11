@@ -472,7 +472,7 @@ MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
     m_workspaceIndexes = indexList;
   } else { // monitor spectrum is specified.
     if (m_scanInput)
-      throw std::runtime_error("For a sync-scan input workspace the monitor ID "
+      throw std::runtime_error("For a scanning input workspace the monitor ID "
                                "must be provided. Normalisation can not be "
                                "performed to a spectrum.");
     const SpectraAxis *axis =
