@@ -92,6 +92,7 @@ Improvements
 ############
 
 - :ref:`ChudleyElliot <func-ChudleyElliot>` includes hbar in the definition
+- :ref:`Functions <FitFunctionsInPython>` may now have their constraint penalties for fitting set in python using ``function.setConstraintPenaltyFactor("parameterName", double)``.
 
 Bugfixes
 ########
