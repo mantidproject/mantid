@@ -223,7 +223,7 @@ class WorkspaceTreeWidget : QWidget {
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 %End
 public:
-  WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/,
+  WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/, bool showButtonToolbar
                       QWidget *parent /TransferThis/ = nullptr);
 };
 
@@ -233,7 +233,7 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
 %End
 public:
-  WorkspaceTreeWidgetSimple(QWidget *parent /TransferThis/ = nullptr);
+  WorkspaceTreeWidgetSimple(bool showButtonToolbar, QWidget *parent /TransferThis/ = nullptr);
 
 signals:
   void plotSpectrumClicked(const QStringList & workspaceNames);

@@ -8,6 +8,7 @@ from mantid import ConfigService
 from mantid import AnalysisDataService
 from sans.algorithm_detail.batch_execution import save_workspace_to_file
 import os
+from mantid.api import WorkspaceGroup
 
 class SaveOtherPresenter():
     def __init__(self, parent_presenter=None):
@@ -36,7 +37,7 @@ class SaveOtherPresenter():
         file_formats = self._view.get_save_options()
         if not file_formats:
             return
-        selected_workspaces = self._view.get_selected_workspaces()
+        selected_workspaces = self.get_workspaces()
         selected_filenames = self.get_filenames(selected_workspaces, self.filename)
         for name_to_save, filename in zip(selected_workspaces, selected_filenames):
             save_workspace_to_file(name_to_save, file_formats, filename)
@@ -62,3 +63,12 @@ class SaveOtherPresenter():
             return [os.path.join(self.current_directory, filename)]
         else:
             return [os.path.join(self.current_directory, x) for x in selected_workspaces]
+
+    def get_workspaces(self):
+        simple_list = self._view.get_selected_workspaces()
+        for workspace_name in simple_list:
+            workspace = AnalysisDataService.retrieve(workspace_name)
+            if issubclass(type(workspace),WorkspaceGroup):
+                simple_list.remove(workspace_name)
+                simple_list += list(workspace.getNames())
+        return list(set(simple_list))

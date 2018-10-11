@@ -5,8 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from . import ui_save_other_dialog as ui_save_other_dialog
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from sans.common.enums import SaveType
+from mantidqtpython import MantidQt
 
 
 class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog):
@@ -23,7 +24,17 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
         self.cancel_button.pressed.connect(self.on_cancel_clicked)
         self.directory_lineEdit.textChanged.connect(self.on_directory_changed)
         self.NxCanSAS_checkBox.setChecked(True)
-        self.workspace_listWidget.itemSelectionChanged.connect(self.on_item_selection_changed)
+        self.ads_widget = MantidQt.MantidWidgets.WorkspaceTreeWidgetSimple(False, self)
+        self.ads_widget.refreshWorkspaces()
+        self.ads_widget.installEventFilter(self)
+        self.workspace_list_layout.addWidget(self.ads_widget, 0, 1, 4, 1)
+
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.ContextMenu: #and event.button() == QtCore.Qt.RightButton:
+            return True
+        if event.type() == QtCore.QEvent.KeyPress:
+            return True
+        return QtGui.QWidget.eventFilter(self, source, event)
 
     def subscribe(self, subscriber):
         self.subscribers.append(subscriber)
@@ -54,14 +65,15 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
             subscriber.on_item_selection_changed()
 
     def populate_workspace_list(self, workspace_list):
-        for workspace in workspace_list:
-            self.workspace_listWidget.addItem(workspace)
+        pass
+        # for workspace in workspace_list:
+        #     self.workspace_listWidget.addItem(workspace)
 
     def update_workspace_list(self):
         pass
 
     def get_selected_workspaces(self):
-        return [str(x.text()) for x in self.workspace_listWidget.selectedItems()]
+        return [str(x) for x in self.ads_widget.getSelectedWorkspaceNames()]
 
     def get_save_options(self):
         save_types = []
