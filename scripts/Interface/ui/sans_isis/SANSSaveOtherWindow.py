@@ -24,14 +24,12 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
         self.cancel_button.pressed.connect(self.on_cancel_clicked)
         self.directory_lineEdit.textChanged.connect(self.on_directory_changed)
         self.NxCanSAS_checkBox.setChecked(True)
-        self.ads_widget = MantidQt.MantidWidgets.WorkspaceTreeWidgetSimple(False, self)
+        self.ads_widget = MantidQt.MantidWidgets.WorkspaceTreeWidgetSimple(True, self)
         self.ads_widget.refreshWorkspaces()
         self.ads_widget.installEventFilter(self)
         self.workspace_list_layout.addWidget(self.ads_widget, 0, 1, 4, 1)
 
     def eventFilter(self, source, event):
-        if event.type() == QtCore.QEvent.ContextMenu: #and event.button() == QtCore.Qt.RightButton:
-            return True
         if event.type() == QtCore.QEvent.KeyPress:
             return True
         return QtGui.QWidget.eventFilter(self, source, event)
