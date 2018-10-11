@@ -136,7 +136,7 @@ public:
                             const Types::Core::DateAndTime &start,
                             const double &duration, std::size_t uexeccount);
   /// Increment the execution date by 1 nano second
-  void increaseExecutionDate();                          
+  void increaseExecutionDate();
   // Allow Algorithm::execute to change the exec count & duration after the
   // algorithm was executed
   friend class Algorithm;

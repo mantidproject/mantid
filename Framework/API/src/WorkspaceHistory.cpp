@@ -19,8 +19,8 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using boost::algorithm::split;
 using Mantid::Kernel::EnvironmentHistory;
+using boost::algorithm::split;
 
 namespace Mantid {
 namespace API {
@@ -72,7 +72,8 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory,
   for (auto algHistory : otherAlgorithms) {
     if (alwaysInsert) {
       int counter = 0;
-      while (m_algorithms.find(algHistory) != m_algorithms.end() && counter < 1000) {
+      while (m_algorithms.find(algHistory) != m_algorithms.end() &&
+             counter < 1000) {
         algHistory->increaseExecutionDate();
         ++counter;
       }
@@ -88,7 +89,8 @@ void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory,
   // check for presence in the set already
   if (alwaysInsert) {
     int counter = 0;
-    while (m_algorithms.find(algHistory) != m_algorithms.end() && counter < 1000) {
+    while (m_algorithms.find(algHistory) != m_algorithms.end() &&
+           counter < 1000) {
       algHistory->increaseExecutionDate();
       ++counter;
     }
