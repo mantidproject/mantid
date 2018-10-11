@@ -6,21 +6,33 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from FilterEvents import eventFilterGUI
-from PyQt4 import QtGui
+from qtpy.QtWidgets import (QApplication)  # noqa
 import sys
-
+# set the backend for matplotlib to use
+import matplotlib
+if not matplotlib.get_backend().startswith('module://'):
+    from qtpy import PYQT4, PYQT5
+    if PYQT4:
+        matplotlib.use('Qt4Agg')
+        print('Qt4Agg')
+    elif PYQT5:
+        matplotlib.use('Qt5Agg')
+        print('Qt5Agg')
+    else:
+        raise RuntimeError('Do not know which matplotlib backend to set')
+from FilterEvents import eventFilterGUI  # noqa
 
 def qapp():
-    if QtGui.QApplication.instance():
-        _app = QtGui.QApplication.instance()
+    app = QApplication.instance()
+    if app:
+        return app, app.applicationName().lower().startswith('mantid')
     else:
-        _app = QtGui.QApplication(sys.argv)
-    return _app
+        return QApplication(sys.argv), False
 
 
-app = qapp()
+app, within_mantid = qapp()
 
 reducer = eventFilterGUI.MainWindow() #the main ui class in this file is called MainWindow
 reducer.show()
-app.exec_()
+if not within_mantid:
+    sys.exit(app.exec_())

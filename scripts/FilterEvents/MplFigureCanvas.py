@@ -6,9 +6,29 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui
+from qtpy import PYQT4, PYQT5
+from qtpy.QtWidgets import QSizePolicy
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+import matplotlib
+backend = matplotlib.get_backend()
+if backend.startswith('module://'):
+    if backend.endswith('qt4agg'):
+        backend = 'Qt4Agg'
+    elif backend.endswith('workbench') or backend.endswith('qt5agg'):
+            backend = 'Qt5Agg'
+else:  # is this part necessary?
+    if PYQT4:
+        backend = 'Qt4Agg'
+    elif PYQT5:
+        backend = 'Qt5Agg'
+
+if backend == 'Qt4Agg':
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+elif backend == 'Qt5Agg':
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+else:
+    raise RuntimeError('Unrecognized backend {}'.format(backend))
+
 from matplotlib.figure import Figure
 
 
@@ -29,8 +49,8 @@ class MplFigureCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,
-                                   QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding,
+                                   QSizePolicy.Expanding)
 
         FigureCanvas.updateGeometry(self)
 

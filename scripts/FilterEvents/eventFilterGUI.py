@@ -8,10 +8,8 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy
 
-from FilterEvents.ui_MainWindow import Ui_MainWindow #import line for the UI python class
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from qtpy.QtWidgets import (QFileDialog, QMainWindow, QMessageBox, QSlider, QWidget)  # noqa
+from qtpy.QtGui import (QDoubleValidator)  # noqa
 
 from matplotlib.pyplot import setp
 
@@ -25,59 +23,19 @@ from mantid.kernel import ConfigService
 
 import os
 
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("Filter_Events").information('Using legacy ui importer')
+    from mantidplot import load_ui
+
 HUGE_FAST = 10000
 HUGE_PARALLEL = 100000
 MAXTIMEBINSIZE = 3000
 
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
 
 
-class MyPopErrorMsg(QWidget):
-    """ Pop up dialog window
-    """
-
-    def __init__(self):
-        """ Init
-        """
-        import FilterEvents.ui_ErrorMessage as errui
-        QWidget.__init__(self)
-
-        self.ui = errui.Ui_Dialog()
-        self.ui.setupUi(self)
-
-        QtCore.QObject.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'), self.quit)
-
-    def setMessage(self, errmsg):
-        """ Set message
-        """
-        self.ui.label_errmsg.setWordWrap(True)
-        self.ui.label_errmsg.setText(errmsg)
-
-        return
-
-    def quit(self):
-        """ Quit
-        """
-        self.close()
-
-        return
-
-    def XpaintEvent(self, _):
-        """ ???
-        """
-        import FilterEvents.ui_ErrorMessage as errui
-
-        self.ui = errui.Ui_Dialog()
-        self.ui.setupUi(self)
-
-        return
-
-
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QMainWindow):
     """ Class of Main Window (top)
     """
 
@@ -87,18 +45,17 @@ class MainWindow(QtGui.QMainWindow):
         """ Initialization and set up
         """
         # Base class
-        QtGui.QMainWindow.__init__(self,parent)
+        QMainWindow.__init__(self,parent)
 
         # Mantid configuration
         config = ConfigService.Instance()
         self._instrument = config["default.instrument"]
 
         # Central widget
-        self.centralwidget = QtGui.QWidget(self)
+        self.centralwidget = QWidget(self)
 
         # UI Window (from Qt Designer)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
+        self.ui = load_ui(__file__, 'MainWindow.ui', baseinstance=self)
         self.ui.mainplot = self.ui.graphicsView.getPlot()
 
         # Do initialize plotting
@@ -129,48 +86,46 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
         self.ui.horizontalSlider.setTracking(True)
         self.ui.horizontalSlider.setTickPosition(QSlider.NoTicks)
-        self.connect(self.ui.horizontalSlider, SIGNAL('valueChanged(int)'), self.move_leftSlider)
+        self.ui.horizontalSlider.valueChanged.connect(self.move_leftSlider)
 
         self.ui.horizontalSlider_2.setRange(0, 100)
         self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
         self.ui.horizontalSlider_2.setTracking(True)
         self.ui.horizontalSlider_2.setTickPosition(QSlider.NoTicks)
-        self.connect(self.ui.horizontalSlider_2, SIGNAL('valueChanged(int)'), self.move_rightSlider)
+        self.ui.horizontalSlider_2.valueChanged.connect(self.move_rightSlider)
 
         # self.connect(self.ui.lineEdit_3, QtCore.SIGNAL("textChanged(QString)"),
         #         self.set_startTime)
-        self.ui.lineEdit_3.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_3))
-        self.connect(self.ui.pushButton_setT0, QtCore.SIGNAL("clicked()"), self.set_startTime)
+        self.ui.lineEdit_3.setValidator(QDoubleValidator(self.ui.lineEdit_3))
+        self.ui.pushButton_setT0.clicked.connect(self.set_startTime)
         # self.connect(self.ui.lineEdit_4, QtCore.SIGNAL("textChanged(QString)"),
         #         self.set_stopTime)
-        self.ui.lineEdit_4.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_4))
-        self.connect(self.ui.pushButton_setTf, QtCore.SIGNAL("clicked()"), self.set_stopTime)
+        self.ui.lineEdit_4.setValidator(QDoubleValidator(self.ui.lineEdit_4))
+        self.ui.pushButton_setTf.clicked.connect(self.set_stopTime)
 
         # File loader
         self.scanEventWorkspaces()
-        self.connect(self.ui.pushButton_refreshWS, SIGNAL('clicked()'), self.scanEventWorkspaces)
-        self.connect(self.ui.pushButton_browse, SIGNAL('clicked()'), self.browse_File)
-        self.connect(self.ui.pushButton_load, SIGNAL('clicked()'), self.load_File)
-        self.connect(self.ui.pushButton_3, SIGNAL('clicked()'), self.use_existWS)
+        self.ui.pushButton_refreshWS.clicked.connect(self.scanEventWorkspaces)
+        self.ui.pushButton_browse.clicked.connect(self.browse_File)
+        self.ui.pushButton_load.clicked.connect(self.load_File)
+        self.ui.pushButton_3.clicked.connect(self.use_existWS)
 
         # Set up time
-        self.ui.lineEdit_3.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_3))
-        self.ui.lineEdit_4.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_4))
+        self.ui.lineEdit_3.setValidator(QDoubleValidator(self.ui.lineEdit_3))
+        self.ui.lineEdit_4.setValidator(QDoubleValidator(self.ui.lineEdit_4))
 
         # Filter by time
-        self.connect(self.ui.pushButton_filterTime, SIGNAL('clicked()'), self.filterByTime)
+        self.ui.pushButton_filterTime.clicked.connect(self.filterByTime)
 
         # Filter by log value
-        self.ui.lineEdit_5.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_5))
-        self.ui.lineEdit_6.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_6))
-        self.ui.lineEdit_7.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_7))
-        self.ui.lineEdit_8.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_8))
-        self.ui.lineEdit_9.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_9))
+        self.ui.lineEdit_5.setValidator(QDoubleValidator(self.ui.lineEdit_5))
+        self.ui.lineEdit_6.setValidator(QDoubleValidator(self.ui.lineEdit_6))
+        self.ui.lineEdit_7.setValidator(QDoubleValidator(self.ui.lineEdit_7))
+        self.ui.lineEdit_8.setValidator(QDoubleValidator(self.ui.lineEdit_8))
+        self.ui.lineEdit_9.setValidator(QDoubleValidator(self.ui.lineEdit_9))
 
-        self.connect(self.ui.lineEdit_5, QtCore.SIGNAL("textChanged(QString)"),
-                     self.set_minLogValue)
-        self.connect(self.ui.lineEdit_6, QtCore.SIGNAL("textChanged(QString)"),
-                     self.set_maxLogValue)
+        self.ui.lineEdit_5.textChanged.connect(self.set_minLogValue)
+        self.ui.lineEdit_6.textChanged.connect(self.set_maxLogValue)
 
         dirchangeops = ["Both", "Increase", "Decrease"]
         self.ui.comboBox_4.addItems(dirchangeops)
@@ -178,12 +133,12 @@ class MainWindow(QtGui.QMainWindow):
         logboundops = ["Centre", "Left"]
         self.ui.comboBox_5.addItems(logboundops)
 
-        self.connect(self.ui.pushButton_4, SIGNAL('clicked()'), self.plotLogValue)
+        self.ui.pushButton_4.clicked.connect(self.plotLogValue)
 
-        self.connect(self.ui.pushButton_filterLog, SIGNAL('clicked()'), self.filterByLogValue)
+        self.ui.pushButton_filterLog.clicked.connect(self.filterByLogValue)
 
         #Set up help button
-        self.connect(self.ui.helpBtn, QtCore.SIGNAL('clicked()'), self.helpClicked)
+        self.ui.helpBtn.clicked.connect(self.helpClicked)
 
         # Set up vertical slide
         self._upperSlideValue = 99
@@ -192,12 +147,12 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.verticalSlider.setRange(0, 100)
         self.ui.verticalSlider.setValue(self._upperSlideValue)
         self.ui.verticalSlider.setTracking(True)
-        self.connect(self.ui.verticalSlider, SIGNAL('valueChanged(int)'), self.move_upperSlider)
+        self.ui.verticalSlider.valueChanged.connect(self.move_upperSlider)
 
         self.ui.verticalSlider_2.setRange(0, 100)
         self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
         self.ui.verticalSlider_2.setTracking(True)
-        self.connect(self.ui.verticalSlider_2, SIGNAL('valueChanged(int)'), self.move_lowerSlider)
+        self.ui.verticalSlider_2.valueChanged.connect(self.move_lowerSlider)
 
         # Set up for filtering (advanced setup)
         self._tofcorrection = False
@@ -206,10 +161,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.checkBox_from1.setChecked(False)
         self.ui.checkBox_groupWS.setChecked(True)
 
-        self.connect(self.ui.comboBox_tofCorr, SIGNAL('currentIndexChanged(int)'), self.showHideEi)
-        self.connect(self.ui.pushButton_refreshCorrWSList, SIGNAL('clicked()'),  self._searchTableWorkspaces)
+        self.ui.comboBox_tofCorr.currentIndexChanged.connect(self.showHideEi)
+        self.ui.pushButton_refreshCorrWSList.clicked.connect(self._searchTableWorkspaces)
 
-        self.ui.lineEdit_Ei.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_Ei))
+        self.ui.lineEdit_Ei.setValidator(QDoubleValidator(self.ui.lineEdit_Ei))
 
         self.ui.label_Ei.hide()
         self.ui.lineEdit_Ei.hide()
@@ -242,7 +197,7 @@ class MainWindow(QtGui.QMainWindow):
         # Default
         self._defaultdir = os.getcwd()
 
-        # self.ui.InputVal.setValidator(QtGui.QDoubleValidator(self.ui.InputVal))
+        # self.ui.InputVal.setValidator(QDoubleValidator(self.ui.InputVal))
 
         # QtCore.QObject.connect(self.ui.convert, QtCore.SIGNAL("clicked()"), self.convert )
         # QtCore.QObject.connect(self.ui.inputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
@@ -641,7 +596,7 @@ class MainWindow(QtGui.QMainWindow):
     def browse_File(self):
         """ Open a file dialog to get file
         """
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog',
+        filename = QFileDialog.getOpenFileName(self, 'Input File Dialog',
                                                      self._defaultdir, "Data (*.nxs *.dat);;All files (*)")
 
         self.ui.lineEdit.setText(str(filename))
@@ -662,7 +617,6 @@ class MainWindow(QtGui.QMainWindow):
         #    isabspath = True
         #else:
         #    isabspath = False
-
         dataws = self._loadFile(str(filename))
         if dataws is None:
             error_msg = "Unable to locate run %s in default directory %s." % (filename, self._defaultdir)
@@ -1179,15 +1133,15 @@ class MainWindow(QtGui.QMainWindow):
     def _setErrorMsg(self, errmsg):
         """ Clear error message
         """
-        #self.ui.plainTextEdit_ErrorMsg.setPlainText(errmsg)
-        #self.ui.label_error.show()
+        self._errMsgWindow = QMessageBox()
+        self._errMsgWindow.setIcon(QMessageBox.Critical)
+        self._errMsgWindow.setWindowTitle('Error')
+        self._errMsgWindow.setStandardButtons(QMessageBox.Ok)
+        self._errMsgWindow.setText(errmsg)
+        #self._errMsgWindow.show()
+        result = self._errMsgWindow.exec_()
 
-        #print "Testing Pop-up Error Message Window: %s" % (errmsg)
-        self._errMsgWindow = MyPopErrorMsg()
-        self._errMsgWindow.setMessage(errmsg)
-        self._errMsgWindow.show()
-
-        return
+        return result
 
     def helpClicked(self):
         from pymantidplot.proxies import showCustomInterfaceHelp
