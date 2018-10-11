@@ -238,6 +238,7 @@ void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y,
     return;
   }
 
+  m_xUnits = xunit;
   m_label = curveLabel;
   if (!m_curve) {
     m_curve = new QwtPlotCurve();
