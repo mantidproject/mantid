@@ -7,13 +7,12 @@
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
-#include "MantidKernel/MultiThreaded.h"
 
 #include <H5Cpp.h>
-
 
 namespace Mantid {
 namespace Parallel {
