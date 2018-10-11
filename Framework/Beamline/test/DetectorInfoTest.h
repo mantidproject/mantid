@@ -273,7 +273,7 @@ public:
     DetectorInfo detInfo;
     Mantid::Beamline::ComponentInfo compInfo;
     detInfo.setComponentInfo(&compInfo);
-    TS_ASSERT_EQUALS(detInfo.scanCount(),1);
+    TS_ASSERT_EQUALS(detInfo.scanCount(), 1);
   }
 
   void test_scanIntervals() {
@@ -283,7 +283,6 @@ public:
     TS_ASSERT_EQUALS(detInfo.scanIntervals(),
                      (std::vector<std::pair<int64_t, int64_t>>{{0, 1}}));
   }
-
 };
 
 #endif /* MANTID_BEAMLINE_DETECTORINFOTEST_H_ */

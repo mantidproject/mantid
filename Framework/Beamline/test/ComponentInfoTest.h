@@ -86,6 +86,18 @@ makeFlatTree(PosVec detPositions, RotVec detRotations) {
   return std::make_tuple(componentInfo, detectorInfo);
 }
 
+std::tuple<boost::shared_ptr<ComponentInfo>, boost::shared_ptr<DetectorInfo>>
+makeFlatTreeWithMonitor(PosVec detPositions, RotVec detRotations,
+                        const std::vector<size_t> &monitorIndices) {
+  auto flatTree = makeFlatTree(detPositions, detRotations);
+  auto detectorInfo = boost::make_shared<DetectorInfo>(
+      detPositions, detRotations, monitorIndices);
+  auto compInfo = std::get<0>(flatTree);
+  // auto detInfo = std::get<1>(flatTree);
+  compInfo->setDetectorInfo(detectorInfo.get());
+  return std::make_tuple(compInfo, detectorInfo);
+}
+
 std::tuple<boost::shared_ptr<ComponentInfo>, PosVec, RotVec, PosVec, RotVec,
            boost::shared_ptr<DetectorInfo>>
 makeTreeExampleAndReturnGeometricArguments() {
@@ -992,6 +1004,18 @@ public:
                             "Cannot merge ComponentInfo: "
                             "matching scan interval but "
                             "rotations differ");
+  }
+
+  void test_merge_fail_monitor_mismatch() {
+    auto infos1 = makeFlatTree(PosVec(2), RotVec(2));
+    auto infos2 = makeFlatTreeWithMonitor(PosVec(2), RotVec(2), {1});
+    ComponentInfo &a = *std::get<0>(infos1);
+    ComponentInfo &b = *std::get<0>(infos2);
+    a.setScanInterval({0, 1});
+    b.setScanInterval({0, 1});
+    TS_ASSERT_THROWS_EQUALS(
+        a.merge(b), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: monitor flags mismatch");
   }
 
   void test_merge_fail_partial_overlap() {

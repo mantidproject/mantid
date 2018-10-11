@@ -312,22 +312,25 @@ public:
         "2015-04-16T16:40:34.289000000";
     const std::string EXPECTED_END_TIME = "2015-04-16T16:41:11.956000000";
 
+    auto firstIntervalLeft = detInfo.scanIntervals()[0].first;
+    auto firstIntervalRight = detInfo.scanIntervals()[0].second;
+    auto secondIntervalLeft = detInfo.scanIntervals()[1].first;
+    auto penultimateIntervalRight =
+        detInfo.scanIntervals()[detInfo.scanCount() - 2].second;
+    auto lastIntervalLeft =
+        detInfo.scanIntervals()[detInfo.scanCount() - 1].first;
+    auto lastIntervalRight =
+        detInfo.scanIntervals()[detInfo.scanCount() - 1].second;
+
     TS_ASSERT_EQUALS(detInfo.scanCount(), SCAN_COUNT)
-
-    const auto &startRange = detInfo.scanIntervals()[0];
-    const auto &secondRange = detInfo.scanIntervals()[1];
-    const auto &secondFromEndRange =
-        detInfo.scanIntervals()[detInfo.scanCount() - 2];
-    const auto &endRange = detInfo.scanIntervals()[detInfo.scanCount() - 1];
-
-    TS_ASSERT_EQUALS(startRange.first.toISO8601String(), EXPECTED_START_TIME)
-    TS_ASSERT_EQUALS(startRange.second.toISO8601String(), EXPECTED_SECOND_TIME)
-    TS_ASSERT_EQUALS(secondRange.first.toISO8601String(), EXPECTED_SECOND_TIME)
-    TS_ASSERT_EQUALS(secondFromEndRange.second.toISO8601String(),
+    TS_ASSERT_EQUALS(firstIntervalLeft.toISO8601String(), EXPECTED_START_TIME)
+    TS_ASSERT_EQUALS(firstIntervalRight.toISO8601String(), EXPECTED_SECOND_TIME)
+    TS_ASSERT_EQUALS(secondIntervalLeft.toISO8601String(), EXPECTED_SECOND_TIME)
+    TS_ASSERT_EQUALS(penultimateIntervalRight.toISO8601String(),
                      EXPECTED_SECOND_FROM_END_TIME)
-    TS_ASSERT_EQUALS(endRange.first.toISO8601String(),
+    TS_ASSERT_EQUALS(lastIntervalLeft.toISO8601String(),
                      EXPECTED_SECOND_FROM_END_TIME)
-    TS_ASSERT_EQUALS(endRange.second.toISO8601String(), EXPECTED_END_TIME)
+    TS_ASSERT_EQUALS(lastIntervalRight.toISO8601String(), EXPECTED_END_TIME)
 
     // Check monitor does not move
     for (size_t j = 0; j < detInfo.scanCount(); ++j) {

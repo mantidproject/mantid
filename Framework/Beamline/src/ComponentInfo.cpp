@@ -464,6 +464,9 @@ void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
                                 "input of same size as size of DetectorInfo");
   }
   m_detectorInfo = detectorInfo;
+  /* We need to check here whether m_detectorInfo actually exists, since in the
+   * case of cloneWithoutDetectorInfo(), the detectorInfo is a null pointer.
+   */
   if (m_detectorInfo)
     m_detectorInfo->setComponentInfo(this);
 }
