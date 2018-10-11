@@ -225,7 +225,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
 
     // state machine for event decoding
     switch (state) {
-	case DECODE_START: // Should never get here
+    case DECODE_START: // Should never get here
       throw std::runtime_error("Failure in event decoding");
     case DECODE_OOB_BYTE_1: // first OOB header byte
                             // OOB event Byte 1:  Bit 0 = 1 = OOB event, Bit 1 =
@@ -318,8 +318,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
       // is this event a frame_start? // FRAME_START is an OOB event when oob
       // mode enabled
       bool frame_start_event =
-          (oob_en ? (oob_event && c == -2)
-                  : (x == 0 && y == 0 && dt == -1));
+          (oob_en ? (oob_event && c == -2) : (x == 0 && y == 0 && dt == -1));
 
       if (oob_en || !frame_start_event) {
         if (oob_event) {

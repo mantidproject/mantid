@@ -198,10 +198,9 @@ public:
                  const TimeLimits &timeBoundary, const TimeLimits &directLimits,
                  const TimeLimits &analysedLimits)
       : m_roi(roi), m_mapIndex(mapIndex), m_stride(stride),
-        m_framePeriod(framePeriod), m_gatePeriod(gatePeriod), 
-        m_frames(0), m_framesValid(0),
-        m_timeBoundary(timeBoundary), m_directTaux(directLimits),
-        m_analysedTaux(analysedLimits) {}
+        m_framePeriod(framePeriod), m_gatePeriod(gatePeriod), m_frames(0),
+        m_framesValid(0), m_timeBoundary(timeBoundary),
+        m_directTaux(directLimits), m_analysedTaux(analysedLimits) {}
 
   void newFrame() {
     m_frames++;
@@ -261,8 +260,7 @@ protected:
   // fields
   std::vector<size_t> &m_eventCounts;
 
-  void addEventImpl(size_t id, size_t, size_t,
-                                  double) override {
+  void addEventImpl(size_t id, size_t, size_t, double) override {
     m_eventCounts[id]++;
   }
 
@@ -315,11 +313,9 @@ public:
                 std::vector<EventVector_pt> &eventVectors, bool saveAsTOF)
       : EventProcessor(roi, mapIndex, stride, framePeriod, gatePeriod,
                        timeBoundary, directLimits, analysedLimits),
-        m_eventVectors(eventVectors),
-        m_convertTOF(convert),
+        m_eventVectors(eventVectors), m_convertTOF(convert),
         m_tofMin(std::numeric_limits<double>::max()),
-        m_tofMax(std::numeric_limits<double>::min()),
-        m_saveAsTOF(saveAsTOF) {}
+        m_tofMax(std::numeric_limits<double>::min()), m_saveAsTOF(saveAsTOF) {}
 
   double tofMin() const { return m_tofMin <= m_tofMax ? m_tofMin : 0.0; }
   double tofMax() const { return m_tofMin <= m_tofMax ? m_tofMax : 0.0; }
