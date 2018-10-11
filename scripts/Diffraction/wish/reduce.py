@@ -127,6 +127,8 @@ def Wish_Run(input):
                 return WISH_calibration(cycle) + "vana3123-" + str(panel) + "foc-SS.nx5"
             if (cycle == "11_4"):
                 return WISH_calibration(cycle) + "vana38428-" + str(panel) + "foc-SF-SS.nxs"
+            if (cycle == "18_2"):
+                return WISH_calibration(cycle) +"WISHvana41865-" +str(panel) +"foc.nxs"
         if (SE == "WISHcryo"):
             if (cycle == "09_2"):
                 return WISH_calibration() + "vana318-" + str(panel) + "foc-rmbins-smooth50.nx5"
@@ -140,6 +142,8 @@ def Wish_Run(input):
                 return WISH_calibration(cycle) + "vana16812-" + str(panel) + "foc-SS.nx5"
             if (cycle == "11_3"):
                 return WISH_calibration(cycle) + "vana18590-" + str(panel) + "foc-SS-new.nxs"
+            if (cycle == "18_2"):
+                return WISH_calibration(cycle) +"WISHvana41865-" +str(panel) +"foc.nxs"
 
 
     def split_string(t):
@@ -181,6 +185,8 @@ def Wish_Run(input):
                 return WISH_calibration(cycle) + "emptyinst1726-" + str(panel) + "foc-monitor.nxs"
             if (cycle == "11_4"):
                 return WISH_calibration(cycle) + "emptyinst19618-" + str(panel) + "foc-SF-S.nxs"
+            if (cycle == "17_1"):
+                return WISH_calibration(cycle) + "emptyinst38581-" +str(panel) + "foc.nxs"
 
 
     def WISH_getfilename(run_number, ext):
@@ -231,6 +237,7 @@ def Wish_Run(input):
         elif (panel == 0):
             min = 6
             max = 194565
+        print panel
         return min, max
 
 
@@ -414,6 +421,9 @@ def Wish_Run(input):
                 mantid.CropWorkspace(InputWorkspace=wfocname, OutputWorkspace=wfocname, XMin=0.50, XMax=13.1)
                 mantid.CropWorkspace(InputWorkspace=wfocname, OutputWorkspace=wfocname, XMin=0.80, XMax=53.3)
         # print "will try to load an empty with the name:"
+        print panel
+        print SEsample
+        print emptySEcycle
         print WISH_getempty(panel, SEsample, emptySEcycle)
         if (panel == 0):
             for i in range(1, 11):
@@ -771,7 +781,10 @@ def Wish_Run(input):
 
         i = get_run_number(input_file)
         for j in range(1, 11):
-            wout = WISH_process(i, j, "raw", "candlestick", "11_4", "candlestick", "11_4", absorb=False, nd=0.0, Xs=0.0,
+            WISH_process(i, j, "raw", "candlestick", "17_1", "candlestick", "18_2", absorb=False, nd=0.0, Xs=0.0,
+                                Xa=0.0, h=4.0, r=0.4)
+        for j in range(1, 11):
+            wout = WISH_process(i, j, "raw", "candlestick", "17_1", "candlestick", "18_2", absorb=False, nd=0.0, Xs=0.0,
                                 Xa=0.0, h=4.0, r=0.4)
             mantid.ConvertUnits(InputWorkspace=wout, OutputWorkspace=wout + "-d", Target="dSpacing", EMode="Elastic")
         #	SaveGSS("w"+str(i)+"-1foc",WISH_userdir()+str(i)+"-1foc"+".gss",Append=False,Bank=1)
@@ -887,9 +900,18 @@ def Wish_Run(input):
 
 
     if __name__ == "__main__":
-        create_vanadium()
+        #WISH_startup("ffv81422", "17_1")
+        #WISH_setdatafile(WISH_getfilename(38581, "nxs"))
+        #for i in range(1, 11):
+        #    print "loop"
+        #    wout = WISH_read(38581, i, "raw")
+        #    wfoc=WISH_focus(wout,i)
+        WISH_startup("ffv81422", "18_2")
+        WISH_setdatafile(WISH_getfilename(41870, "nxs"))
 
 
-        #main(WISH_getdatafile(), WISH_userdir())
+
+
+        main(WISH_getdatafile(), WISH_userdir())
 
 
