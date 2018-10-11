@@ -10,6 +10,7 @@ from sans.algorithm_detail.batch_execution import save_workspace_to_file
 import os
 from mantid.api import WorkspaceGroup
 
+
 class SaveOtherPresenter():
     def __init__(self, parent_presenter=None):
         self._parent_presenter = parent_presenter
@@ -17,7 +18,6 @@ class SaveOtherPresenter():
         self.current_directory = ConfigService['defaultsave.directory']
         self.filename = ''
         self.workspace_list = AnalysisDataService.getObjectNames()
-
 
     def set_view(self, view=None):
         if view:
