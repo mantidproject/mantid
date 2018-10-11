@@ -77,7 +77,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             sigma_theta = np.abs(strongPeakParams_ws.column('SigTheta'))
 
             CreateWorkspace(DataX=theta, DataY=sigma_theta, OutputWorkspace='__ws_bvg0_scat')
-            Fit(Function='name=UserFunction,Formula=A*(exp(((x-x0)/b))+exp( -((x-x0)/b)))+BG,A=0.0025,x0=1.54,b=1,BG=-1.26408e-15',
+            Fit(Function='name=UserFunction,Formula=A/2.0*(exp(((x-x0)/b))+exp( -((x-x0)/b)))+BG,A=0.0025,x0=1.54,b=1,BG=-1.26408e-15',
                 InputWorkspace='__ws_bvg0_scat', Output='fitSigX0', StartX=np.min(theta), EndX=np.max(theta))
             sigX0Params = mtd['fitSigX0_Parameters'].column(1)[:-1]
             # Second, along the azimuthal.  This is just a constant.
@@ -242,8 +242,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     strongPeakParamsToSend = strongPeakParams
 
                 # Will allow forced weak and edge peaks to be fit using a neighboring peak profile
-                print(sigX0Params, sigY0)
-
                 Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients,qMask,
                                                                   nTheta=nTheta, nPhi=nPhi, plotResults=False,
                                                                   zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
@@ -255,7 +253,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                   peakMaskSize=peakMaskSize,
                                                                   iccFitDict=iccFitDict, sigX0Params=sigX0Params,
                                                                   sigY0=sigY0, sigP0Params=sigP0Params)
-
+                print(pp_lambda, '=pp_lambda')
                 # First we get the peak intensity
                 peakIDX = Y3D/Y3D.max() > fracStop
                 intensity = np.sum(Y3D[peakIDX])
@@ -321,7 +319,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 raise
 
             except:
-                raise
+                #raise
                 logger.warning('Error fitting peak number ' + str(peakNumber))
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)

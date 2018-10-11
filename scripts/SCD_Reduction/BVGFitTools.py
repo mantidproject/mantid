@@ -174,7 +174,7 @@ def coshPeakWidthModel(x,A,x0,b,BG):
     direction.
     """
     y = (x-x0)/b
-    return A*(np.exp(y)+np.exp(-y)) + BG
+    return A/2.0*(np.exp(y)+np.exp(-y)) + BG
 
 
 def getBVGGuesses(peaks_ws, sigX0Params, sigY0, sigP0Params):
@@ -188,8 +188,7 @@ def getBVGGuesses(peaks_ws, sigX0Params, sigY0, sigP0Params):
         if peaks_ws.getInstrument().hasParameter("sigSC0Params"):
             sigX0Params = np.array(peaks_ws.getInstrument().getStringParameter("sigSC0Params")[0].split(),dtype=float)
         else:
-            sigX0Params=[0.00413132, 1.54103839, 1.0, -0.00266634]
-
+            sigX0Params=[5.68860816e-06, 7.63702849e-01, 8.31642225e-02, 3.06656383e-03]
     if sigY0 is None:
         if peaks_ws.getInstrument().hasParameter("sigAZ0"):
             sigY0 = peaks_ws.getInstrument().getNumberParameter("sigAZ0")[0]
@@ -458,7 +457,7 @@ def compareBVGFitData(box, params, nTheta=200, nPhi=200, figNumber=2, fracBoxToH
 
 def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodIDX=None,
              forceParams=None, forceTolerance=0.1, dth=10, dph=10,
-             doPeakConvolution=False, sigX0Params=[0.00413132, 1.54103839, 1.0, -0.00266634],
+             doPeakConvolution=False, sigX0Params=[5.68860816e-06, 7.63702849e-01, 8.31642225e-02, 3.06656383e-03],
              sigY0=0.0025, sigP0Params=[0.1460775, 1.85816592, 0.26850086, -0.00725352]):
     """
     doBVGFit takes a binned MDbox and returns the fit of the peak shape along the non-TOF direction.  This is done in one of two ways:
@@ -509,7 +508,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         meanPH = PH.mean()
         sigX0 = coshPeakWidthModel(meanPH,  sigX0Params[0], sigX0Params[1], sigX0Params[2], sigX0Params[3])
         sigP0 = fSigP(meanTH, sigP0Params[0], sigP0Params[1], sigP0Params[2], sigP0Params[3])
-
         # Set some constraints
         boundsDict = {}
         boundsDict['A'] = [0.0, np.inf]
@@ -517,8 +515,7 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
                              thBins[thBins.size // 2 + dth]]
         boundsDict['MuY'] = [phBins[phBins.size // 2 - dph],
                              phBins[phBins.size // 2 + dph]]
-        boundsDict['SigX'] = [0.5*sigX0, 1.5*sigX0]
-        #boundsDict['SigX'] = [0., 0.02]
+        boundsDict['SigX'] = [0., 0.02]
         boundsDict['SigY'] = [0., 0.02]
         boundsDict['SigP'] = [-1., 1.]
         boundsDict['Bg'] = [0, np.inf]
@@ -550,7 +547,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
 
         CreateWorkspace(OutputWorkspace='__bvgWS', DataX=pos.ravel(
         ), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
-        print(m)
         fitResults = Fit(Function=m, InputWorkspace='__bvgWS', Output='__bvgfit',
                          Minimizer='Levenberg-MarquardtMD')
     elif forceParams is not None:
@@ -634,7 +630,6 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
     chiSq = fitResults[1]
     params = [[m['A'], m['MuX'], m['MuY'], m['SigX'],
                m['SigY'], m['SigP'], m['Bg']], chiSq]
-    print('after'+str(m))
     return params, h, thBins, phBins
 
 
