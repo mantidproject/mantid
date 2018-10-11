@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import print_function
 
-from mantid.simpleapi import CreateWorkspace, Transpose, Multiply, MaskDetectors, mtd
+from mantid.simpleapi import CreateWorkspace, Transpose, Multiply, MaskDetectors
 from mantid.api import AlgorithmFactory, PropertyMode, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction
 import numpy as np
@@ -56,7 +56,7 @@ class ApplyDetectorScanEffCorr(PythonAlgorithm):
                                       DataX=np.zeros(n_hist), NSpec=n_hist, StoreInADS=False)
         output = Multiply(LHSWorkspace=input_ws, RHSWorkspace=to_multiply, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         # In the output we should mask the detectors where calibration constant is 0
-        n_pixels_per_tube = transposed.blocksize()        
+        n_pixels_per_tube = transposed.blocksize()
         mask = np.argwhere(y == 0.)
         if len(mask) > 0:
             det_IDs = ''
