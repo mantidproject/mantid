@@ -238,6 +238,8 @@ def Wish_Run(input):
     # Reads a wish data file return a workspace with a short name
     def WISH_read(number, panel, ext):
         if type(number) is int:
+            WISH_startup("ffv81422", "17_1")
+            WISH_setdatafile(WISH_getfilename(38581, "nxs"))
             filename = WISH_getdatafile()  # Changed as full path is set in main now
             ext = filename.split('.')[-1]  # Get the extension from the inputted filename
             print "Extension is: " + ext
@@ -286,13 +288,15 @@ def Wish_Run(input):
                 min, max = WISH_returnpanel(panel)
                 mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, StartWorkspaceIndex=min - 6,
                               EndWorkspaceIndex=max - 6)
-                MaskBins(output, output, XMin=99900, XMax=106000)
+                mantid.MaskBins(output, output, XMin=99900, XMax=106000)
                 print "nexus event file chopped"
             if (ext == "nxs"):
                 mantid.LoadNexus(Filename=filename, OutputWorkspace=output, SpectrumMin=str(min), SpectrumMax=str(max))
                 mantid.MaskBins(InputWorkspace=output, OutputWorkspace=output, XMin=99900, XMax=106000)
+                mantid.ConvertUnits(InputWorkspace=output, OutputWorkspace=output, Target="Wavelength", Emode="Elastic")
                 print "standard histo nxs file loaded"
         else:
+
             n1, n2 = split_string(number)
             output = "w" + str(n1) + "_" + str(n2) + "-" + str(panel)
             filename = WISH_getfilename(n1, ext)
@@ -455,7 +459,7 @@ def Wish_Run(input):
     # Create a corrected vanadium (normalise,corrected for attenuation and empty, strip peaks) and
     # save a a nexus processed file.
     # It looks like smoothing of 100 works quite well
-    def WISH_createvan(van, empty, panel, smoothing, vh, vr, cycle_van="09_3", cycle_empty="09_3"):
+    def WISH_createvan(van, empty, panel, smoothing, vh, vr, cycle_van="18_2", cycle_empty="17_1"):
         WISH_setdatadir("/archive/ndxwish/Instrument/data/cycle_" + cycle_van + "/")
         wvan = WISH_read(van, panel, "nxs_event")
         WISH_setdatadir("/archive/ndxwish/Instrument/data/cycle_" + cycle_empty + "/")
@@ -595,6 +599,7 @@ def Wish_Run(input):
             if (ext == "nxs"):
                 works = "monitor" + str(number)
                 mantid.LoadNexus(Filename=fname, OutputWorkspace=works, SpectrumMin=4, SpectrumMax=4)
+                mantid.ConvertUnits(InputWorkspace=works, OutputWorkspace=works, Target="Wavelength", Emode="Elastic")
             if (ext[0:9] == "nxs_event"):
                 temp = "w" + str(number) + "_monitors"
                 works = "w" + str(number) + "_monitor4"
@@ -635,7 +640,7 @@ def Wish_Run(input):
             p.plot(x, y)
             p.show()
             mantid.SmoothData(InputWorkspace=works, OutputWorkspace=works, NPoints=40)
-            mantid.ConvertFromDistribution(works)
+        mantid.ConvertFromDistribution(works)
         return works
 
 
@@ -867,23 +872,23 @@ def Wish_Run(input):
         #	WISH_createempty(20620,i)
         # SaveNexusProcessed("w16748-"+str(i)+"foc",WISH_userdir()+"emptyinst16748-"+str(i)+"foc.nx5")
 
-    #  def create_vanadium():
+    def create_vanadium():
 
         # ######### use the lines below to process a LoadRawvanadium run                               #################
-        # for j in range(1, 11):
-        # WISH_createvan(38428, 19618, j, 100, 4.0, 0.15, cycle_van="17_1", cycle_empty="11_4")
-        # mantid.CropWorkspace(InputWorkspace="w38428-" + str(j) + "foc", OutputWorkspace="w38428-" + str(j) + "foc",
-        #              XMin='0.35',
-        #              XMax='5.0')
-        # mantid.Removepeaks_spline_smooth_vana("w38428-" + str(j) + "foc", j, debug=False)
-        # mantid.SaveNexusProcessed("w38428-" + str(j) + "foc", WISH_userdir() + "vana38428-" + str(j) + "foc.nx5")
+        for j in range(1, 11):
+            WISH_createvan(41865, 38581, j, 100, 4.0, 0.15, cycle_van="18_2", cycle_empty="17_1")
+            mantid.CropWorkspace(InputWorkspace="w41865-" + str(j) + "foc", OutputWorkspace="w41865-" + str(j) + "foc",
+                      XMin='0.35',
+                      XMax='5.0')
+            Removepeaks_spline_smooth_vana("w41865-" + str(j) + "foc", j, debug=False)
+            mantid.SaveNexusProcessed("w41865-" + str(j) + "foc", WISH_userdir() + "vana41865-" + str(j) + "foc.nxs")
 
     WISH_startup("ffv81422", "18_2")
-    WISH_setdatafile(WISH_getfilename(38428, "nxs"))
+    WISH_setdatafile(WISH_getfilename(41870, "nxs"))
     if __name__ == "__main__":
+        create_vanadium()
 
 
-
-        main(WISH_getdatafile(), WISH_userdir())
+        #main(WISH_getdatafile(), WISH_userdir())
 
 
