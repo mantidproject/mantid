@@ -23,6 +23,7 @@ class PythonInterpreter : CxxTest::GlobalFixture {
 public:
   bool setUpWorld() override {
     Py_Initialize();
+    PyEval_InitThreads();
     Mantid::PythonInterface::importNumpy();
     return Py_IsInitialized();
   }

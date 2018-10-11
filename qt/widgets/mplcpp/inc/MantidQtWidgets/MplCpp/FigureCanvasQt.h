@@ -40,9 +40,15 @@ public:
   QPointF toDataCoords(QPoint pos) const;
 
   /// Redraw the canvas
-  inline void draw() { pyobj().attr("draw")(); }
+  inline void draw() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    pyobj().attr("draw")();
+  }
   /// Redraw the canvas if nothing else is happening
-  inline void drawIdle() { pyobj().attr("draw_idle")(); }
+  inline void drawIdle() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    pyobj().attr("draw_idle")();
+  }
 
 private: // members
   Figure m_figure;

@@ -8,6 +8,7 @@
 #define MPLCPP_PYTHON_OBJECT_H
 
 #include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include <boost/python/borrowed.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/object.hpp>
@@ -80,6 +81,13 @@ public:
       throw std::invalid_argument(std::string("object has no attribute ") +
                                   attr);
     }
+  }
+
+  /// The destructor must hold the GIL to be able reduce the refcount of
+  /// the object
+  ~InstanceHolder() {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    m_instance = Python::Object(); // none
   }
 
   /// Return the held instance object

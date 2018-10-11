@@ -7,15 +7,16 @@
 #include "MantidQtWidgets/MplCpp/ScalarMappable.h"
 #include "MantidQtWidgets/MplCpp/Colormap.h"
 
+#include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/NDArray.h"
 
-#include <iostream>
-
 using Mantid::PythonInterface::Converters::VectorToNDArray;
 using Mantid::PythonInterface::Converters::WrapReadOnly;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::NDArray;
+using Mantid::PythonInterface::callMethodNoCheck;
 
 namespace MantidQt {
 namespace Widgets {
@@ -57,7 +58,7 @@ ScalarMappable::ScalarMappable(const NormalizeBase &norm, const QString &cmap)
  * @param cmap An instance of a Colormap
  */
 void ScalarMappable::setCmap(const Colormap &cmap) {
-  pyobj().attr("set_cmap")(cmap.pyobj());
+  callMethodNoCheck<void, Python::Object>(pyobj(), "set_cmap", cmap.pyobj());
 }
 
 /**
@@ -65,7 +66,8 @@ void ScalarMappable::setCmap(const Colormap &cmap) {
  * @param cmap The name of a colormap
  */
 void ScalarMappable::setCmap(const QString &cmap) {
-  pyobj().attr("set_cmap")(cmap.toLatin1().constData());
+  callMethodNoCheck<void, const char *>(pyobj(), "set_cmap",
+                                        cmap.toLatin1().constData());
 }
 
 /**
@@ -73,7 +75,7 @@ void ScalarMappable::setCmap(const QString &cmap) {
  * @param norm A normalization type
  */
 void ScalarMappable::setNorm(const NormalizeBase &norm) {
-  pyobj().attr("set_norm")(norm.pyobj());
+  callMethodNoCheck<void, Python::Object>(pyobj(), "set_norm", norm.pyobj());
 }
 
 /**
@@ -83,6 +85,7 @@ void ScalarMappable::setNorm(const NormalizeBase &norm) {
  */
 void ScalarMappable::setClim(boost::optional<double> vmin,
                              boost::optional<double> vmax) {
+  GlobalInterpreterLock lock;
   Python::Object none;
   auto setClimAttr = pyobj().attr("set_clim");
   if (vmin.is_initialized() && vmax.is_initialized()) {
@@ -101,6 +104,7 @@ void ScalarMappable::setClim(boost::optional<double> vmin,
  * @return A QRgb value corresponding to this data point
  */
 QRgb ScalarMappable::toRGBA(double x, double alpha) const {
+  GlobalInterpreterLock lock;
   return toRGBA(std::vector<double>(1, x), alpha)[0];
 }
 
@@ -113,6 +117,7 @@ QRgb ScalarMappable::toRGBA(double x, double alpha) const {
 std::vector<QRgb> ScalarMappable::toRGBA(const std::vector<double> &x,
                                          double alpha) const {
   std::vector<QRgb> rgbaVector(x.size());
+  GlobalInterpreterLock lock;
   auto ndarrayView = Python::NewRef(VectorToNDArray<double, WrapReadOnly>()(x));
   // The final argument (bytes=true) forces the return value to be 0->255
   NDArray bytes{pyobj().attr("to_rgba")(ndarrayView, alpha, true)};

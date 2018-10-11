@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Colors.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonRuntimeError;
 
 namespace MantidQt {
@@ -21,10 +23,33 @@ Python::Object colorsModule() {
   return Python::NewRef(PyImport_ImportModule("matplotlib.colors"));
 }
 
+// Factory function for creating a Normalize instance
+// Holds the GIL
+Python::Object createNormalize(double vmin, double vmax) {
+  GlobalInterpreterLock lock;
+  return colorsModule().attr("Normalize")(vmin, vmax);
+}
+
+// Factory function for creating a SymLogNorm instance
+// Holds the GIL
+Python::Object createSymLog(double linthresh, double linscale, double vmin,
+                            double vmax) {
+  GlobalInterpreterLock lock;
+  return colorsModule().attr("SymLogNorm")(linthresh, linscale, vmin, vmax);
+}
+
+// Factory function for creating a SymLogNorm instance
+// Holds the GIL
+Python::Object createPowerNorm(double gamma, double vmin, double vmax) {
+  GlobalInterpreterLock lock;
+  return colorsModule().attr("PowerNorm")(gamma, vmin, vmax);
+}
+
 /**
  * @return A reference to the matplotlib.ticker module
  */
 Python::Object tickerModule() {
+  GlobalInterpreterLock lock;
   return Python::NewRef(PyImport_ImportModule("matplotlib.ticker"));
 }
 
@@ -32,6 +57,7 @@ Python::Object tickerModule() {
  * @return A reference to the matplotlib.ticker module
  */
 Python::Object scaleModule() {
+  GlobalInterpreterLock lock;
   return Python::NewRef(PyImport_ImportModule("matplotlib.scale"));
 }
 
@@ -54,7 +80,7 @@ NormalizeBase::NormalizeBase(Python::Object obj)
  * @param vmax Maximum value of the data interval
  */
 Normalize::Normalize(double vmin, double vmax)
-    : NormalizeBase(colorsModule().attr("Normalize")(vmin, vmax)) {}
+    : NormalizeBase(createNormalize(vmin, vmax)) {}
 
 // ------------------------ SymLogNorm -----------------------------------------
 /// The threshold below which the scale becomes linear
@@ -75,14 +101,14 @@ double SymLogNorm::DefaultLinearScale = 1.0;
  */
 SymLogNorm::SymLogNorm(double linthresh, double linscale, double vmin,
                        double vmax)
-    : NormalizeBase(
-          colorsModule().attr("SymLogNorm")(linthresh, linscale, vmin, vmax)),
+    : NormalizeBase(createSymLog(linthresh, linscale, vmin, vmax)),
       m_linscale(linscale) {}
 
 /**
  * @return An instance of the SymmetricalLogLocator
  */
 Python::Object SymLogNorm::tickLocator() const {
+  GlobalInterpreterLock lock;
   // Create log transform with base=10
   auto transform = scaleModule().attr("SymmetricalLogTransform")(
       10, Python::Object(pyobj().attr("linthresh")), m_linscale);
@@ -95,6 +121,7 @@ Python::Object SymLogNorm::tickLocator() const {
  * @return
  */
 Python::Object SymLogNorm::labelFormatter() const {
+  GlobalInterpreterLock lock;
   return Python::Object(tickerModule().attr("LogFormatterMathtext")());
 }
 
@@ -108,7 +135,7 @@ Python::Object SymLogNorm::labelFormatter() const {
  * @param vmax Maximum value of the data interval
  */
 PowerNorm::PowerNorm(double gamma, double vmin, double vmax)
-    : NormalizeBase(colorsModule().attr("PowerNorm")(gamma, vmin, vmax)) {}
+    : NormalizeBase(createPowerNorm(gamma, vmin, vmax)) {}
 
 } // namespace MplCpp
 } // namespace Widgets

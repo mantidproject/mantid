@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/ColorbarWidget.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/MplCpp/Colors.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
@@ -14,7 +15,8 @@
 #include <QDoubleValidator>
 #include <QLineEdit>
 #include <QVBoxLayout>
-#include <QVector>
+
+using Mantid::PythonInterface::GlobalInterpreterLock;
 
 namespace MantidQt {
 namespace Widgets {
@@ -256,6 +258,7 @@ void ColorbarWidget::initLayout() {
 void ColorbarWidget::createColorbar(const Python::Object &ticks,
                                     const Python::Object &format) {
   assert(m_canvas);
+  GlobalInterpreterLock lock;
   auto cb = Python::Object(m_mappable.pyobj().attr("colorbar"));
   if (!cb.is_none()) {
     cb.attr("remove")();

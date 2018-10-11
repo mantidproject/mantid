@@ -10,10 +10,12 @@
 #include "MantidQtWidgets/MplCpp/Python/Sip.h"
 
 #include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/NDArray.h"
 
 #include <QVBoxLayout>
 
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::NDArray;
 
 namespace MantidQt {
@@ -28,6 +30,7 @@ const char *DEFAULT_FACECOLOR = "w";
  * @return A new FigureCanvasQT object
  */
 Python::Object createPyCanvasFromFigure(Figure fig) {
+  GlobalInterpreterLock lock;
   return backendModule().attr("FigureCanvasQTAgg")(fig.pyobj());
 }
 
@@ -86,6 +89,7 @@ QPointF FigureCanvasQt::toDataCoords(QPoint pos) const {
   // and then to the data coordinates
   const int dpiRatio(devicePixelRatio());
   const double xPosPhysical = pos.x() * dpiRatio;
+  GlobalInterpreterLock lock;
   // Y=0 is at the bottom
   double height = PyFloat_AsDouble(
       Python::Object(m_figure.pyobj().attr("bbox").attr("height")).ptr());

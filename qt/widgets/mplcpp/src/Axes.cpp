@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Axes.h"
+#include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
@@ -16,7 +17,9 @@ namespace MplCpp {
 
 using Mantid::PythonInterface::Converters::VectorToNDArray;
 using Mantid::PythonInterface::Converters::WrapReadOnly;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonRuntimeError;
+using Mantid::PythonInterface::callMethodNoCheck;
 
 namespace {
 /**
@@ -56,19 +59,25 @@ Axes::Axes(Python::Object obj) : InstanceHolder(std::move(obj), "plot") {}
  * @brief Set the X-axis label
  * @param label String for the axis label
  */
-void Axes::setXLabel(const char *label) { pyobj().attr("set_xlabel")(label); }
+void Axes::setXLabel(const char *label) {
+  callMethodNoCheck<void, const char *>(pyobj(), "set_xlabel", label);
+}
 
 /**
  * @brief Set the Y-axis label
  * @param label String for the axis label
  */
-void Axes::setYLabel(const char *label) { pyobj().attr("set_ylabel")(label); }
+void Axes::setYLabel(const char *label) {
+  callMethodNoCheck<void, const char *>(pyobj(), "set_ylabel", label);
+}
 
 /**
  * @brief Set the title
  * @param label String for the title label
  */
-void Axes::setTitle(const char *label) { pyobj().attr("set_title")(label); }
+void Axes::setTitle(const char *label) {
+  callMethodNoCheck<void, const char *>(pyobj(), "set_title", label);
+}
 
 /**
  * @brief Take the data and draw a single Line2D on the axes
@@ -91,6 +100,7 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
   throwIfEmpty(xdata, 'X');
   throwIfEmpty(ydata, 'Y');
 
+  GlobalInterpreterLock lock;
   // Wrap the vector data in a numpy facade to avoid a copy.
   // The vector still owns the data so it needs to be kept alive too
   // It is transferred to the Line2D for this purpose.
@@ -117,6 +127,7 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
  */
 Artist Axes::text(double x, double y, QString text,
                   const char *horizontalAlignment) {
+  GlobalInterpreterLock lock;
   auto args =
       Python::NewRef(Py_BuildValue("(ffs)", x, y, text.toLatin1().constData()));
   auto kwargs = Python::NewRef(
@@ -131,16 +142,12 @@ Artist Axes::text(double x, double y, QString text,
  * @raises std::invalid_argument if the value is unknown
  */
 void Axes::setXScale(const char *value) {
-  try {
-    pyobj().attr("set_xscale")(value);
-  } catch (Python::ErrorAlreadySet &) {
-    throw std::invalid_argument(std::string("setXScale: Unknown scale type ") +
-                                value);
-  }
+  callMethodNoCheck<void, const char *>(pyobj(), "set_xscale", value);
 }
 
 /// @return The scale type of the X axis as a string
 QString Axes::getXScale() const {
+  GlobalInterpreterLock lock;
   return toQString(pyobj().attr("get_xscale")());
 }
 
@@ -151,16 +158,12 @@ QString Axes::getXScale() const {
  * @raises std::invalid_argument if the value is unknown
  */
 void Axes::setYScale(const char *value) {
-  try {
-    pyobj().attr("set_yscale")(value);
-  } catch (Python::ErrorAlreadySet &) {
-    throw std::invalid_argument(std::string("setYScale: Unknown scale type ") +
-                                value);
-  }
+  callMethodNoCheck<void, const char *>(pyobj(), "set_yscale", value);
 }
 
 /// @return The scale type of the Y axis as a string
 QString Axes::getYScale() const {
+  GlobalInterpreterLock lock;
   return toQString(pyobj().attr("get_yscale")());
 }
 
@@ -169,6 +172,7 @@ QString Axes::getYScale() const {
  * @return A 2-tuple of (min,max) values for the X axis
  */
 std::tuple<double, double> Axes::getXLim() const {
+  GlobalInterpreterLock lock;
   return limitsToTuple(pyobj(), "get_xlim");
 }
 
@@ -178,7 +182,7 @@ std::tuple<double, double> Axes::getXLim() const {
  * @param max Maximum value
  */
 void Axes::setXLim(double min, double max) const {
-  pyobj().attr("set_xlim")(min, max);
+  callMethodNoCheck<void, double, double>(pyobj(), "set_xlim", min, max);
 }
 
 /**
@@ -186,6 +190,7 @@ void Axes::setXLim(double min, double max) const {
  * @return A 2-tuple of (min,max) values for the Y axis
  */
 std::tuple<double, double> Axes::getYLim() const {
+  GlobalInterpreterLock lock;
   return limitsToTuple(pyobj(), "get_ylim");
 }
 
@@ -195,7 +200,7 @@ std::tuple<double, double> Axes::getYLim() const {
  * @param max Maximum value
  */
 void Axes::setYLim(double min, double max) const {
-  pyobj().attr("set_ylim")(min, max);
+  callMethodNoCheck<void, double, double>(pyobj(), "set_ylim", min, max);
 }
 
 /**
@@ -203,13 +208,17 @@ void Axes::setYLim(double min, double max) const {
  * @param visibleOnly If true then only include visble artists in the
  * calculation
  */
-void Axes::relim(bool visibleOnly) { pyobj().attr("relim")(visibleOnly); }
+void Axes::relim(bool visibleOnly) {
+  callMethodNoCheck<void, bool>(pyobj(), "relim", visibleOnly);
+}
 
 /**
  * Calls Axes.autoscale to enable/disable auto scaling
  * @param enable If true enable autoscaling and perform the automatic rescale
  */
-void Axes::autoscale(bool enable) { pyobj().attr("autoscale")(enable); }
+void Axes::autoscale(bool enable) {
+  callMethodNoCheck<void, bool>(pyobj(), "autoscale", enable);
+}
 
 /**
  * Autoscale the view based on the current data limits. Calls
@@ -219,7 +228,8 @@ void Axes::autoscale(bool enable) { pyobj().attr("autoscale")(enable); }
  * @param scaleY If true (default) scale the Y axis limits
  */
 void Axes::autoscaleView(bool scaleX, bool scaleY) {
-  pyobj().attr("autoscale_view")(Python::Object(), scaleX, scaleY);
+  callMethodNoCheck<void, Python::Object, bool, bool>(
+      pyobj(), "autoscale_view", Python::Object(), scaleX, scaleY);
 }
 
 /**
@@ -231,7 +241,8 @@ void Axes::autoscaleView(bool scaleX, bool scaleY) {
  * @param scaleY If true (default) scale the Y axis limits
  */
 void Axes::autoscaleView(bool tight, bool scaleX, bool scaleY) {
-  pyobj().attr("autoscale_view")(tight, scaleX, scaleY);
+  callMethodNoCheck<void, bool, bool, bool>(pyobj(), "autoscale_view", tight,
+                                            scaleX, scaleY);
 }
 
 } // namespace MplCpp

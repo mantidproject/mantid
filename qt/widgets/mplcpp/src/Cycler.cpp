@@ -5,6 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Cycler.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+
+using Mantid::PythonInterface::GlobalInterpreterLock;
 
 namespace MantidQt {
 namespace Widgets {
@@ -21,10 +24,10 @@ Python::Object cyclerModule() {
  * @return An iterable returned from itertools.cycle
  */
 Python::Object cycleIterator(const Python::Object &rawCycler) {
+  GlobalInterpreterLock lock;
   auto itertools = Python::NewRef(PyImport_ImportModule("itertools"));
   try {
     return Python::Object(itertools.attr("cycle")(rawCycler));
-
   } catch (Python::ErrorAlreadySet &) {
     throw std::invalid_argument("itertools.cycle() - Object not iterable");
   }
@@ -44,6 +47,7 @@ Cycler::Cycler(Python::Object obj)
  * @return The next item in the cycle
  */
 Python::Dict Cycler::operator()() const {
+  GlobalInterpreterLock lock;
   return Python::Dict(pyobj().attr("next")());
 }
 
@@ -54,6 +58,7 @@ Python::Dict Cycler::operator()() const {
  * @return A new cycler object wrapping the given iterable sequence
  */
 Cycler cycler(const char *label, const char *iterable) {
+  GlobalInterpreterLock lock;
   return cyclerModule().attr("cycler")(label, iterable);
 }
 

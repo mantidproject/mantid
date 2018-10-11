@@ -7,6 +7,7 @@
 #ifndef MPLCPP_FIGURE_H
 #define MPLCPP_FIGURE_H
 
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/MplCpp/Axes.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Python/Object.h"
@@ -28,12 +29,16 @@ public:
    * @brief Access (and create if necessar) the active Axes
    * @return An instance of Axes attached to the figure
    */
-  inline Axes gca() const { return Axes{pyobj().attr("gca")()}; }
+  inline Axes gca() const {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    return Axes{pyobj().attr("gca")()};
+  }
   /**
    * @param index The index of the axes to return
    * @return The axes instance
    */
   inline Axes axes(size_t index) const {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
     return Axes{pyobj().attr("axes")[index]};
   }
 

@@ -70,6 +70,23 @@ ReturnType callMethodNoCheck(PyObject *obj, const char *methodName,
 
 /**
  * Wrapper around boost::python::call_method to acquire GIL for duration
+ * of call. If the call raises a Python error then this is translated to
+ * a C++ exception object inheriting from std::exception or std::runtime_error
+ * depending on the type of Python error. Overload for boost::python::object
+ * @param obj Reference to boost.python.object wrapper
+ * @param methodName Name of the method call
+ * @param args A list of arguments to forward to call_method
+ */
+template <typename ReturnType, typename... Args>
+ReturnType callMethodNoCheck(const boost::python::object &obj,
+                             const char *methodName, const Args &... args) {
+  GlobalInterpreterLock gil;
+  return detail::callMethodImpl<ReturnType, Args...>(obj.ptr(), methodName,
+                                                     args...);
+}
+
+/**
+ * Wrapper around boost::python::call_method to acquire GIL for duration
  * of call. If the attribute does not exist then an UndefinedAttributeError
  * is thrown, if the call raises a Python error then this is translated to
  * a C++ exception object inheriting from std::exception or std::runtime_error

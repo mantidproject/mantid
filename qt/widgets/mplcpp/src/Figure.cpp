@@ -5,6 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Figure.h"
+#include "MantidPythonInterface/core/CallMethod.h"
+
+using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::callMethodNoCheck;
 
 namespace MantidQt {
 namespace Widgets {
@@ -12,6 +16,7 @@ namespace MplCpp {
 
 namespace {
 Python::Object newFigure(bool tightLayout = true) {
+  GlobalInterpreterLock lock;
   Python::Object figureModule{
       Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
   auto fig = figureModule.attr("Figure")();
@@ -27,7 +32,8 @@ Python::Object newFigure(bool tightLayout = true) {
  * Construct a C++ wrapper around an existing figure instance
  * @param obj An existing Figure instance
  */
-Figure::Figure(Python::Object obj) : Python::InstanceHolder(obj, "add_axes") {}
+Figure::Figure(Python::Object obj)
+    : Python::InstanceHolder(std::move(obj), "add_axes") {}
 
 /**
  * Construct a new default figure.
@@ -42,7 +48,7 @@ Figure::Figure(bool tightLayout)
  * See https://matplotlib.org/api/colors_api.html
  */
 void Figure::setFaceColor(const char *color) {
-  pyobj().attr("set_facecolor")(color);
+  callMethodNoCheck<void, const char *>(pyobj(), "set_facecolor", color);
 }
 
 /**
@@ -55,6 +61,7 @@ void Figure::setFaceColor(const char *color) {
  * @return A new Axes instance
  */
 Axes Figure::addAxes(double left, double bottom, double width, double height) {
+  GlobalInterpreterLock lock;
   return Axes{pyobj().attr("add_axes")(
       Python::NewRef(Py_BuildValue("(ffff)", left, bottom, width, height)))};
 }
@@ -65,6 +72,7 @@ Axes Figure::addAxes(double left, double bottom, double width, double height) {
  * @return
  */
 Axes Figure::addSubPlot(int subplotspec) {
+  GlobalInterpreterLock lock;
   return Axes{pyobj().attr("add_subplot")(subplotspec)};
 }
 
@@ -80,6 +88,7 @@ Axes Figure::addSubPlot(int subplotspec) {
 Python::Object Figure::colorbar(const ScalarMappable &mappable, const Axes &cax,
                                 const Python::Object &ticks,
                                 const Python::Object &format) {
+  GlobalInterpreterLock lock;
   auto args = Python::NewRef(
       Py_BuildValue("(OO)", mappable.pyobj().ptr(), cax.pyobj().ptr()));
   auto kwargs = Python::NewRef(
