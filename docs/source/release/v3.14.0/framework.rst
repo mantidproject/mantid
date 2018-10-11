@@ -55,6 +55,7 @@ Improvements
 - :ref:`GroupWorkspaces <algm-GroupWorkspaces>` supports glob patterns for matching workspaces in the ADS.
 - :ref:`LoadSampleShape <algm-LoadSampleShape-v1>` now supports loading from binary .stl files.
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` now supports masking a workspace in addition to writing the masking information to a calfile.
+- :ref:`ApplyDetectorScanEffCorr <algm-ApplyDetectorScanEffCorr>` will properly propagate the masked bins in the calibration map to the output workspace.
 
 Bugfixes
 ########
