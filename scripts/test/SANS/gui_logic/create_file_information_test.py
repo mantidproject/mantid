@@ -68,7 +68,7 @@ class CreateFileInformationTest(unittest.TestCase):
 
         self.success_callback.assert_called_once_with(None)
         self.assertEqual(self.error_callback.call_count, 1)
-        self.assertEqual(self.error_callback.call_args[0][0][1].message, 'File Error')
+        self.assertEqual(str(self.error_callback.call_args[0][0][1]), 'File Error')
 
 
 if __name__ == '__main__':
