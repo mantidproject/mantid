@@ -238,8 +238,6 @@ def Wish_Run(input):
     # Reads a wish data file return a workspace with a short name
     def WISH_read(number, panel, ext):
         if type(number) is int:
-            WISH_startup("ffv81422", "17_1")
-            WISH_setdatafile(WISH_getfilename(38581, "nxs"))
             filename = WISH_getdatafile()  # Changed as full path is set in main now
             ext = filename.split('.')[-1]  # Get the extension from the inputted filename
             print "Extension is: " + ext
@@ -460,8 +458,12 @@ def Wish_Run(input):
     # save a a nexus processed file.
     # It looks like smoothing of 100 works quite well
     def WISH_createvan(van, empty, panel, smoothing, vh, vr, cycle_van="18_2", cycle_empty="17_1"):
+        WISH_startup("ffv81422", cycle_van)
+        WISH_setdatafile(WISH_getfilename(41870, "nxs"))
         WISH_setdatadir("/archive/ndxwish/Instrument/data/cycle_" + cycle_van + "/")
         wvan = WISH_read(van, panel, "nxs_event")
+        WISH_startup("ffv81422", cycle_empty)
+        WISH_setdatafile(WISH_getfilename(38581, "nxs"))
         WISH_setdatadir("/archive/ndxwish/Instrument/data/cycle_" + cycle_empty + "/")
         wempty = WISH_read(empty, panel, "nxs_event")
         mantid.Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
@@ -883,8 +885,7 @@ def Wish_Run(input):
             Removepeaks_spline_smooth_vana("w41865-" + str(j) + "foc", j, debug=False)
             mantid.SaveNexusProcessed("w41865-" + str(j) + "foc", WISH_userdir() + "vana41865-" + str(j) + "foc.nxs")
 
-    WISH_startup("ffv81422", "18_2")
-    WISH_setdatafile(WISH_getfilename(41870, "nxs"))
+
     if __name__ == "__main__":
         create_vanadium()
 
