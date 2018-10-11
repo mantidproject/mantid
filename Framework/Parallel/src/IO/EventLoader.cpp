@@ -12,7 +12,7 @@
 #include "MantidParallel/IO/NXEventDataLoader.h"
 
 #include <H5Cpp.h>
-#include <thread>
+#include <omp.h>
 
 namespace Mantid {
 namespace Parallel {
@@ -61,7 +61,7 @@ void load(const std::string &filename, const std::string &groupname,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists,
           bool precalcEvents) {
-  auto concurencyNumber = std::thread::hardware_concurrency();
+  auto concurencyNumber = omp_get_num_procs();
   std::string executableName =
       Kernel::ConfigService::Instance().getPropertiesDir() +
       "/MantidNexusParallelLoader";
