@@ -12,10 +12,8 @@ set( CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}" )
 set( CPACK_NSIS_INSTALL_ROOT "C:")
 
 set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "MantidPlot_Icon_32offset" )
+set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "workbench_32px" )
 set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "mantid_notebook")
-set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.png" )
-set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico" )
-set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico" )
 
 # Choose the proper suffix for the build.
 # if the string is not empty, capitalise the first letter
@@ -24,11 +22,7 @@ if (NOT CPACK_PACKAGE_SUFFIX STREQUAL "" )
   # this is done before the capitalisation of the first letter
   set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}" )
   set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}")
-
-  # note: the PACKAGE icon uses PNG, the other two use ICO
-  set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.png" )
-  set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico" )
-  set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico" )
+  set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}_${CPACK_PACKAGE_SUFFIX}" )
 
   string(LENGTH ${CPACK_PACKAGE_SUFFIX} WINDOWS_NSIS_SUFFIX_LENGTH)
   # get only first letter
@@ -39,10 +33,16 @@ if (NOT CPACK_PACKAGE_SUFFIX STREQUAL "" )
   string(SUBSTRING ${CPACK_PACKAGE_SUFFIX} 1 ${WINDOWS_NSIS_SUFFIX_LENGTH} WINDOWS_NSIS_REST_OF_SUFFIX)
   # concatenate the capitalized letter and the rest of the suffix
   set(WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "${WINDOWS_NSIS_CAPITAL_FIRST_LETTER}${WINDOWS_NSIS_REST_OF_SUFFIX}")
-else() # if the string is empty, it is the release suffix, which should be empty
+else()
+   # if the string is empty, it is the release suffix, which should be empty
   set ( WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "" )
 endif()
 
+
+# note: the PACKAGE icon uses PNG, the other two use ICO
+set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.png" )
+set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico" )
+set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico" )
 # have the properly capitalsed name for the start menu and install folder
 set( CPACK_NSIS_DISPLAY_NAME "Mantid${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}")
 set( CPACK_PACKAGE_INSTALL_DIRECTORY "Mantid${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}Install")
@@ -121,7 +121,7 @@ set ( MISC_CORE_DIST_DLLS
     tbb_preview.dll
     zlib.dll
 )
-set ( QT_DIST_DLLS
+set ( QT4_DIST_DLLS
     phonon4.dll
     Qt3Support4.dll
     QtCLucene4.dll
@@ -141,22 +141,40 @@ set ( QT_DIST_DLLS
     QtTest4.dll
     QtWebKit4.dll
     QtXml4.dll
-    QtXmlPatterns4.dll 
+    QtXmlPatterns4.dll
     qscintilla2.dll )
 
 set ( MISC_GUI_DIST_DLLS
     qwt5.dll
-    qwtplot3d.dll
-)
+    qwtplot3d.dll)
+
 set ( BIN_DLLS ${BOOST_DIST_DLLS} ${POCO_DIST_DLLS} ${OCC_DIST_DLLS} ${MISC_CORE_DIST_DLLS}
                  ${MISC_GUI_DIST_DLLS} )
 foreach( DLL ${BIN_DLLS} )
   install ( FILES ${THIRD_PARTY_DIR}/bin/${DLL} DESTINATION bin )
 endforeach()
-set ( QT_INSTALL_PREFIX ${THIRD_PARTY_DIR}/lib/qt4 )
-foreach( DLL ${QT_DIST_DLLS} )
-  install ( FILES ${QT_INSTALL_PREFIX}/lib/${DLL} DESTINATION bin )
+
+set ( QT4_INSTALL_PREFIX ${THIRD_PARTY_DIR}/lib/qt4 )
+foreach( DLL ${QT4_DIST_DLLS} )
+  install ( FILES ${QT4_INSTALL_PREFIX}/lib/${DLL} DESTINATION bin )
 endforeach()
+
+set ( QT5_DIST_DLLS
+    Qt5Core.dll
+    Qt5Gui.dll
+    Qt5Widgets.dll
+    Qt5PrintSupport.dll
+    Qt5Svg.dll
+    Qt5OpenGL.dll
+)
+
+set ( QT5_INSTALL_PREFIX ${THIRD_PARTY_DIR}/lib/qt5 )
+foreach( DLL ${QT5_DIST_DLLS} )
+  # Note: QT5 has its DLLs only in /bin, unlike QT4 where they are in both /lib and /bin
+  install ( FILES ${QT5_INSTALL_PREFIX}/bin/${DLL} DESTINATION bin )
+endforeach()
+
+install ( FILES ${QT5_INSTALL_PREFIX}/lib/qscintilla2_qt5.dll  DESTINATION bin )
 
 ###########################################################################
 # Qt Plugins + qt.conf file
@@ -164,7 +182,7 @@ endforeach()
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/WinInstaller/qt.conf DESTINATION bin )
 # imageformats
 set ( QT_PLUGINS_IMAGEFORMAT qgif4.dll qico4.dll qjpeg4.dll qmng4.dll qsvg4.dll qtga4.dll qtiff4.dll )
-set ( QT_PLUGIN_DIR ${QT_INSTALL_PREFIX}/plugins )
+set ( QT_PLUGIN_DIR ${QT4_INSTALL_PREFIX}/plugins )
 foreach( DLL ${QT_PLUGINS_IMAGEFORMAT} )
   install ( FILES ${QT_PLUGIN_DIR}/imageformats/${DLL} DESTINATION plugins/qt4/imageformats )
 endforeach()
@@ -176,14 +194,51 @@ install ( FILES ${QT_PLUGIN_DIR}/sqldrivers/qsqlite4.dll DESTINATION plugins/qt4
 ###########################################################################
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
-install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin 
-    RENAME mantidpython.bat )
+install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin RENAME mantidpython.bat )
 
-###########################################################################	
-# Icons for shortcuts	
-###########################################################################	
+# On Windows we don't use the setuptools install executable at the moment, because it is
+# generated with a hard coded path to the build Python, that fails to run on
+# other machines, or if the build Python is moved. Instead we have a Python script to
+# run the workbench ourselves and a Batch and PowerShell wrappers to run it with the
+# correct Python from Mantid's installation directory
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_workbench.bat DESTINATION bin )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_workbench.pyw DESTINATION bin )
+
+if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
+  find_program(POWERSHELL_AVAILABLE NAMES "powershell")
+  # Name of the workbench executable without any extensions
+  set(_workbench_base_name launch_workbench)
+  # Installs the PowerShell run script in the bin directory
+  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/${_workbench_base_name}.ps1 DESTINATION bin )
+
+  if ( POWERSHELL_AVAILABLE )
+    message(STATUS "Found PowerShell: ${POWERSHELL_AVAILABLE}")
+    # Add the extensions for the executable after it is generated in the build directory
+    set(_workbench_executable_install_name ${_workbench_base_name}.exe.install)
+    # Generate an executable from the PowerShell script
+    execute_process(COMMAND powershell.exe -version 2.0 -noprofile -windowstyle hidden ${THIRD_PARTY_DIR}/build-scripts/ps2exe.ps1 -inputFile ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/${_workbench_base_name}.ps1 -outputFile ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} -x64 -runtime2 -noconsole RESULT_VARIABLE _workbench_powershell_return_code OUTPUT_VARIABLE _workbench_powershell_output)
+
+    # If the EXE generation failed then display an error and stop the CMAKE generation
+    if ( _workbench_powershell_return_code GREATER 0 )
+      message(${_workbench_powershell_output})
+      message(FATAL_ERROR "Generating the Workbench executable encountered an error.")
+    endif ()
+
+    # If the EXE generation succeeded then install the executable and rename it to remove the .install suffix
+    set (_workbench_executable_full_name ${_workbench_base_name}.exe)
+    message(STATUS "Generated the Workbench executable: ${_workbench_executable_full_name}")
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} DESTINATION bin RENAME ${_workbench_executable_full_name})
+  else ()
+    message(STATUS "PowerShell was not found. Not generating the Workbench executable.")
+  endif ()
+endif ()
+
+###########################################################################
+# Icons for shortcuts
+###########################################################################
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}.ico DESTINATION bin )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico DESTINATION bin )
 
 ###########################################################################
 # Extra NSIS commands for shortcuts, start menu items etc
@@ -194,21 +249,27 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDNOTEBOOK
 
 set ( MANTIDPLOT_LINK_NAME "MantidPlot${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
 set ( MANTIDNOTEBOOK_LINK_NAME "MantidNotebook${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
+set ( MANTIDWORKBENCH_LINK_NAME "MantidWorkbench${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
 
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
   CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico'
 
   CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDNOTEBOOK_LINK_NAME}' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}.ico'
+
+  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\launch_workbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'
 ")
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDPLOT_LINK_NAME}\\\"
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDNOTEBOOK_LINK_NAME}\\\"
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDWORKBENCH_LINK_NAME}\\\"
 ")
 # The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
   CreateShortCut '$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico'
 
   CreateShortCut '$DESKTOP\\\\${MANTIDNOTEBOOK_LINK_NAME}' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME}.ico'
+
+  CreateShortCut '$DESKTOP\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\launch_workbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'
 
   CreateDirectory \\\"$INSTDIR\\\\logs\\\"
 
@@ -218,6 +279,7 @@ set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
 set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
   Delete \\\"$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}\\\"
   Delete \\\"$DESKTOP\\\\${MANTIDNOTEBOOK_LINK_NAME}\\\"
+  Delete \\\"$DESKTOP\\\\${MANTIDWORKBENCH_LINK_NAME}\\\"
   RMDir \\\"$INSTDIR\\\\logs\\\"
   RMDir \\\"$INSTDIR\\\\docs\\\"
 ")
