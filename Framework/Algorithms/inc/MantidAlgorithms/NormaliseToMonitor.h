@@ -135,7 +135,7 @@ private:
   double m_integrationMin = EMPTY_DBL();
   /// The upper bound of the integration range
   double m_integrationMax = EMPTY_DBL();
-  bool m_syncScanInput;
+  bool m_scanInput;
   std::vector<size_t> m_workspaceIndexes;
 };
 
