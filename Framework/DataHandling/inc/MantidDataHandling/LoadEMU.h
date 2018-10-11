@@ -86,7 +86,7 @@ private:
   void createWorkspace(ANSTO::Tar::File &tarFile);
 
   void loadDetectorL2Values();
-  void updateNeutronicPostions(int detID, double sampleAnalyser);
+  void updateNeutronicPostions(detid_t detID, double sampleAnalyser);
 
   // binary file access
   template <class EventProcessor>

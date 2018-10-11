@@ -225,7 +225,7 @@ public:
       return;
 
     // group pixels
-    size_t y = static_cast<size_t>(p / HISTO_BINS_Y_DENUMERATOR);
+    auto y = static_cast<size_t>(p / HISTO_BINS_Y_DENUMERATOR);
 
     // determine detector id and check limits
     if (x >= DETECTORS || y >= m_stride)
@@ -288,7 +288,7 @@ protected:
   double m_tofMax;
   bool m_saveAsTOF;
 
-  void addEventImpl(size_t id, size_t x, size_t y, double tobs) override {
+  void addEventImpl(size_t id, size_t x, size_t, double tobs) override {
 
     // convert observation time to tof
     double tof = tobs;
@@ -599,13 +599,13 @@ void LoadEMU::exec() {
   double sampleAnalyser = iparam("SampleAnalyser");
 
   // Indirect hz tubes idstart = 0
-  detid_t endID = HORIZONTAL_TUBES * PIXELS_PER_TUBE;
+  detid_t endID = static_cast<detid_t>(HORIZONTAL_TUBES * PIXELS_PER_TUBE);
   for (detid_t detID = 0; detID < endID; detID++)
     updateNeutronicPostions(detID, sampleAnalyser);
 
   // Indirect vertical tubes idstart = 16 * 64
-  detid_t startID = 16 * PIXELS_PER_TUBE;
-  endID = startID + VERTICAL_TUBES * PIXELS_PER_TUBE;
+  detid_t startID = 16 * static_cast<detid_t>(PIXELS_PER_TUBE);
+  endID = startID + static_cast<detid_t>(VERTICAL_TUBES * PIXELS_PER_TUBE);
   for (detid_t detID = startID; detID < endID; detID++)
     updateNeutronicPostions(detID, sampleAnalyser);
 
@@ -618,9 +618,9 @@ void LoadEMU::exec() {
   // converter
   //
   loadDetectorL2Values();
-  double dopplerFreq =
+  auto dopplerFreq =
       logManager.getPropertyValueAsType<double>("DopplerFrequency");
-  double dopplerAmpl =
+  auto dopplerAmpl =
       logManager.getPropertyValueAsType<double>("DopplerAmplitude");
   double dopplerPhase = getProperty(OverrideDopplerPhaseStr);
   if (isEmpty(dopplerPhase)) {
@@ -726,7 +726,7 @@ void LoadEMU::exec() {
   }
 
   // set log values
-  int frame_count = static_cast<int>(eventCounter.numFrames());
+  auto frame_count = static_cast<int>(eventCounter.numFrames());
 
   logManager.addProperty("filename", filename);
   logManager.addProperty("frame_count", frame_count);
@@ -756,7 +756,7 @@ void LoadEMU::loadDetectorL2Values() {
 }
 
 // update the neutronic positins
-void LoadEMU::updateNeutronicPostions(int detID, double sampleAnalyser) {
+void LoadEMU::updateNeutronicPostions(detid_t detID, double sampleAnalyser) {
 
   // get the instrument
 
