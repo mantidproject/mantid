@@ -19,7 +19,7 @@ public:
 
   // ---------------------- success tests --------------------
   void testConstructionRequiresMplLine2DObject() {
-    TS_ASSERT_THROWS_NOTHING(Line2D line(pyLine2D(), {}, {}));
+    TS_ASSERT_THROWS_NOTHING(Line2D line(pyLine2D(), {1, 2}, {1, 2}));
   }
 
   // ---------------------- failure tests --------------------

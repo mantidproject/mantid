@@ -173,11 +173,29 @@ std::tuple<double, double> Axes::getXLim() const {
 }
 
 /**
+ * Set the limits for the X axis
+ * @param min Minimum value
+ * @param max Maximum value
+ */
+void Axes::setXLim(double min, double max) const {
+  pyobj().attr("set_xlim")(min, max);
+}
+
+/**
  * Retrieve the Y limits of the axes
  * @return A 2-tuple of (min,max) values for the Y axis
  */
 std::tuple<double, double> Axes::getYLim() const {
   return limitsToTuple(pyobj(), "get_ylim");
+}
+
+/**
+ * Set the limits for the Y axis
+ * @param min Minimum value
+ * @param max Maximum value
+ */
+void Axes::setYLim(double min, double max) const {
+  pyobj().attr("set_ylim")(min, max);
 }
 
 /**

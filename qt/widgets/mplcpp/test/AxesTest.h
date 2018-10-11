@@ -81,17 +81,19 @@ public:
   void testGetXLimReturnsXLimits() {
     Axes axes(pyAxes());
     axes.plot({5, 6, 7, 8}, {10, 11, 12, 13});
+    axes.setXLim(4, 9);
     auto xlimits = axes.getXLim();
-    TS_ASSERT_DELTA(5, std::get<0>(xlimits), 1e-5);
-    TS_ASSERT_DELTA(8, std::get<1>(xlimits), 1e-5);
+    TS_ASSERT_DELTA(4, std::get<0>(xlimits), 1e-5);
+    TS_ASSERT_DELTA(9, std::get<1>(xlimits), 1e-5);
   }
 
   void testGetYLimReturnsYLimits() {
     Axes axes(pyAxes());
     axes.plot({5, 6, 7, 8}, {10, 11, 12, 13});
+    axes.setYLim(9, 14);
     auto ylimits = axes.getYLim();
-    TS_ASSERT_DELTA(10, std::get<0>(ylimits), 1e-5);
-    TS_ASSERT_DELTA(13, std::get<1>(ylimits), 1e-5);
+    TS_ASSERT_DELTA(9, std::get<0>(ylimits), 1e-5);
+    TS_ASSERT_DELTA(14, std::get<1>(ylimits), 1e-5);
   }
 
   void testTextAddsTextAddGivenCoordinate() {

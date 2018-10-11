@@ -44,7 +44,9 @@ public:
   void setYScale(const char *value);
   QString getYScale() const;
   std::tuple<double, double> getXLim() const;
+  void setXLim(double min, double max) const;
   std::tuple<double, double> getYLim() const;
+  void setYLim(double min, double max) const;
   void relim(bool visibleOnly = false);
   void autoscale(bool enable);
   void autoscaleView(bool scaleX = true, bool scaleY = true);
