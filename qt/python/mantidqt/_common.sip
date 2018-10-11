@@ -223,7 +223,7 @@ class WorkspaceTreeWidget : QWidget {
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 %End
 public:
-  WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/, bool viewOnly
+  WorkspaceTreeWidget(MantidDisplayBase *mdb /Transfer/, bool viewOnly,
                       QWidget *parent /TransferThis/ = nullptr);
 };
 
