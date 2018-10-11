@@ -717,8 +717,8 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     const auto detId = i + 2;
     const auto shape = ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03);
     auto pointDetector = new Detector("point-detector", detId, shape, nullptr);
-    detectorPanel->add(pointDetector);
     pointDetector->setPos(pos);
+    detectorPanel->add(pointDetector);
     instrument->markAsDetector(pointDetector);
   }
   auto slit1 = addComponent(instrument, slit1Pos, "slit1");
