@@ -221,7 +221,7 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
 }
 
 DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
-  API::MatrixWorkspace_sptr workspace;
+  DataObjects::Workspace2D_sptr workspace;
 
   try {
     auto alg = API::AlgorithmManager::Instance().createUnmanaged(
@@ -240,8 +240,7 @@ DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
     throw;
   }
 
-  // OutputWorkspace type is Worspace2D in algorithm see LoadEmptyInstrument.cpp
-  return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(workspace);
+  return workspace;
 }
 
 } // namespace LiveData

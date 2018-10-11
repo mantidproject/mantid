@@ -95,8 +95,8 @@ void LoadEmptyInstrument::init() {
                   "Name of instrument. Can be used instead of Filename to "
                   "specify an IDF");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      make_unique<WorkspaceProperty<Workspace2D>>("OutputWorkspace", "",
+                                                  Direction::Output),
       "The name of the workspace in which to store the imported instrument");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
