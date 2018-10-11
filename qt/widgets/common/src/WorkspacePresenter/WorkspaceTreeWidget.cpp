@@ -63,7 +63,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly,
   m_saveMenu = new QMenu(this);
 
   setupWidgetLayout();
-  
+
   setupLoadButtonMenu();
 
   // Dialog box used for user to specify folder to save multiple workspaces into
@@ -90,7 +90,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly,
   m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
   presenter->init();
 
-  if(m_viewOnly)
+  if (m_viewOnly)
     hideButtonToolbar();
 }
 
@@ -1239,7 +1239,7 @@ void WorkspaceTreeWidget::handleClearView() {
 
 /// Handles display of the workspace context menu.
 void WorkspaceTreeWidget::popupMenu(const QPoint &pos) {
-  if(!m_viewOnly){
+  if (!m_viewOnly) {
     m_menuPosition = pos;
     m_presenter->notifyFromView(
         ViewNotifiable::Flag::PopulateAndShowWorkspaceContextMenu);
@@ -1751,12 +1751,12 @@ bool WorkspaceTreeWidget::executeAlgorithmAsync(
   return m_mantidDisplayModel->executeAlgorithmAsync(alg, wait);
 }
 
-void WorkspaceTreeWidget::hideButtonToolbar(){
-  m_loadButton -> hide();
-  m_saveButton -> hide();
-  m_deleteButton -> hide();
-  m_groupButton -> hide();
-  m_sortButton -> hide();
+void WorkspaceTreeWidget::hideButtonToolbar() {
+  m_loadButton->hide();
+  m_saveButton->hide();
+  m_deleteButton->hide();
+  m_groupButton->hide();
+  m_sortButton->hide();
 }
 
 } // namespace MantidWidgets

@@ -63,8 +63,8 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget
       public IWorkspaceDockView {
   Q_OBJECT
 public:
-  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb, bool viewOnly=false, 
-                               QWidget *parent = nullptr);
+  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb,
+                      bool viewOnly = false, QWidget *parent = nullptr);
   ~WorkspaceTreeWidget();
   void dropEvent(QDropEvent *de) override;
 
