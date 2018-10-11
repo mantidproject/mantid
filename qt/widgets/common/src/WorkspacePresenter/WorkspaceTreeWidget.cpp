@@ -53,11 +53,10 @@ namespace MantidWidgets {
 
 WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly,
                                          QWidget *parent)
-    : QWidget(parent), m_mantidDisplayModel(mdb), m_updateCount(0),
+    : QWidget(parent), m_mantidDisplayModel(mdb), m_viewOnly(viewOnly), m_updateCount(0),
       m_treeUpdating(false), m_promptDelete(false),
       m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
-      m_sortDirection(SortDirection::Ascending), m_mutex(QMutex::Recursive),
-      m_viewOnly(viewOnly) {
+      m_sortDirection(SortDirection::Ascending), m_mutex(QMutex::Recursive){
   setObjectName(
       "exploreMantid"); // this is needed for QMainWindow::restoreState()
   m_saveMenu = new QMenu(this);
