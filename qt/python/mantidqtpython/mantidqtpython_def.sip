@@ -1554,7 +1554,7 @@ class WorkspaceTreeWidget : QWidget {
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 %End
 public:
-  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb /Transfer/, bool showButtonLayout,
+  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb /Transfer/, bool viewOnly,
                       QWidget *parent /TransferThis/ = nullptr);
   void refreshWorkspaces();
   std::vector<std::string> getSelectedWorkspaceNames() const;
@@ -1566,7 +1566,7 @@ class WorkspaceTreeWidgetSimple : MantidQt::MantidWidgets::WorkspaceTreeWidget {
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
 %End
 public:
-  WorkspaceTreeWidgetSimple(bool showButtonLayout, QWidget *parent /TransferThis/ = nullptr);
+  WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *parent /TransferThis/ = nullptr);
 };
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt

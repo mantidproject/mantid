@@ -51,13 +51,13 @@ WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool showButtonToolbar,
+WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly,
                                          QWidget *parent)
     : QWidget(parent), m_mantidDisplayModel(mdb), m_updateCount(0),
       m_treeUpdating(false), m_promptDelete(false),
       m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
       m_sortDirection(SortDirection::Ascending), m_mutex(QMutex::Recursive),
-      m_showButtonToolbar(showButtonToolbar) {
+      m_viewOnly(viewOnly) {
   setObjectName(
       "exploreMantid"); // this is needed for QMainWindow::restoreState()
   m_saveMenu = new QMenu(this);
@@ -90,7 +90,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool showButton
   m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
   presenter->init();
 
-  if(!showButtonToolbar)
+  if(m_viewOnly)
     hideButtonToolbar();
 }
 
@@ -1239,7 +1239,7 @@ void WorkspaceTreeWidget::handleClearView() {
 
 /// Handles display of the workspace context menu.
 void WorkspaceTreeWidget::popupMenu(const QPoint &pos) {
-  if(m_showButtonToolbar){
+  if(!m_viewOnly){
     m_menuPosition = pos;
     m_presenter->notifyFromView(
         ViewNotifiable::Flag::PopulateAndShowWorkspaceContextMenu);
@@ -1603,14 +1603,12 @@ void WorkspaceTreeWidget::showColourFillPlot() {
 }
 
 void WorkspaceTreeWidget::keyPressEvent(QKeyEvent *e) {
-  // if(m_showButtonToolbar){
   switch (e->key()) {
   case Qt::Key_Delete:
   case Qt::Key_Backspace:
     m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
     break;
   }
-  // }
 }
 
 void WorkspaceTreeWidget::onClickShowDetectorTable() {

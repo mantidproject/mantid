@@ -24,8 +24,8 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool showButtonToolbar, QWidget *parent)
-    : WorkspaceTreeWidget(new MantidTreeModel(), showButtonToolbar, parent),
+WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly, QWidget *parent)
+    : WorkspaceTreeWidget(new MantidTreeModel(), viewOnly, parent),
       m_plotSpectrum(new QAction("spectrum...", this)),
       m_overplotSpectrum(new QAction("overplot spectrum...", this)),
       m_plotSpectrumWithErrs(new QAction("spectrum with errors...", this)),

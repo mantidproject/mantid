@@ -63,7 +63,7 @@ class EXPORT_OPT_MANTIDQT_COMMON WorkspaceTreeWidget
       public IWorkspaceDockView {
   Q_OBJECT
 public:
-  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb, bool showButtonToolbar=true, 
+  WorkspaceTreeWidget(MantidQt::MantidWidgets::MantidDisplayBase *mdb, bool viewOnly=false, 
                                QWidget *parent = nullptr);
   ~WorkspaceTreeWidget();
   void dropEvent(QDropEvent *de) override;
@@ -243,7 +243,7 @@ private:
   QLineEdit *m_workspaceFilter;
   QActionGroup *m_sortChoiceGroup;
   QFileDialog *m_saveFolderDialog;
-  bool m_showButtonToolbar;
+  bool m_viewOnly;
 
   QMenu *m_sortMenu, *m_saveMenu;
   // Context-menu actions
