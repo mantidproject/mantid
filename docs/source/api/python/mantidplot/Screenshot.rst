@@ -2,7 +2,7 @@
  Screenshot
 ============
 
-This a python binding to the C++ class Mantidplot::Screenshot.
+This is a Python binding to the C++ class Mantidplot::Screenshot.
 
 
 .. module:`mantidplot`

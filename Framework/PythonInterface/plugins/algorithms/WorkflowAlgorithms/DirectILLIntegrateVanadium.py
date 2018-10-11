@@ -13,7 +13,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentVali
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, FloatBoundedValidator, Property,
                            PropertyCriterion, StringListValidator)
-from mantid.simpleapi import (ComputeCalibrationCoefVan, Integration)
+from mantid.simpleapi import (ComputeCalibrationCoefVan, Integration, MaskDetectorsIf)
 import numpy
 
 
@@ -45,7 +45,7 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
-        progress = Progress(self, 0.0, 1.0, 3)
+        progress = Progress(self, 0.0, 1.0, 4)
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
         wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
@@ -55,6 +55,9 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
 
         progress.report('Integrating')
         mainWS = self._integrate(mainWS, wsCleanup, subalgLogging)
+
+        progress.report('Masking zeros')
+        mainWS = self._maskZeros(mainWS, subalgLogging)
 
         self._finalize(mainWS, wsCleanup)
         progress.report('Done')
@@ -167,6 +170,16 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
                                     EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return calibrationWS
+
+    def _maskZeros(self, mainWS, subalgLogging):
+        """Mask zero integrals in mainWS."""
+        mainWS = MaskDetectorsIf(InputWorkspace=mainWS,
+                                 OutputWorkspace=mainWS,
+                                 Mode='SelectIf',
+                                 Operator='Equal',
+                                 Value=0.,
+                                 EnableLogging=subalgLogging)
+        return mainWS
 
 
 AlgorithmFactory.subscribe(DirectILLIntegrateVanadium)

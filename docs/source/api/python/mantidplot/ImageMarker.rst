@@ -2,7 +2,7 @@
  ImageMarker
 =============
 
-This a python binding to the C++ class Mantidplot::ImageMarker.
+This is a Python binding to the C++ class Mantidplot::ImageMarker.
 
 
 .. module:`mantidplot`

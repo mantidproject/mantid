@@ -40,8 +40,8 @@ How to use algorithm with other algorithms
 ------------------------------------------
 
 This algorithm is designed to work with other algorithms to do Le Bail
-fit. The introduction can be found in the wiki page of `Le Bail
-Fit <http://www.mantidproject.org/Le_Bail_Fit>`__.
+fit. The introduction can be found in the :ref:`Le Bail fit concept
+page <Le Bail Fit>`.
 
 Usage
 -----
@@ -50,14 +50,14 @@ Usage
 
 .. testcode:: ExCreateLBInputs
 
-  CreateLeBailFitInput(ReflectionsFile=r'LB4854b3.hkl',		
-	FullprofParameterFile=r'2013A_HR60b3.irf',	
+  CreateLeBailFitInput(ReflectionsFile=r'LB4854b3.hkl',
+	FullprofParameterFile=r'2013A_HR60b3.irf',
 	Bank='3',
-	LatticeConstant='4.1568899999999998',		
-	InstrumentParameterWorkspace='PG3_Bank3_ParTable',	
-	BraggPeakParameterWorkspace='LaB6_HKL_Table')	
+	LatticeConstant='4.1568899999999998',
+	InstrumentParameterWorkspace='PG3_Bank3_ParTable',
+	BraggPeakParameterWorkspace='LaB6_HKL_Table')
 
-  # Examine 
+  # Examine
   partablews = mtd["PG3_Bank3_ParTable"]
   braggtablews = mtd["LaB6_HKL_Table"]
   print("Number Bragg peaks from .hkl file is {}.  Number of peak profile parameters is {}.".format(braggtablews.rowCount(), partablews.rowCount()))

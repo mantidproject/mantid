@@ -34,6 +34,7 @@ Improved
 ########
 
 - The ILL reduction workflow algorithms were reorganized to allow correct reflectivity calculation in the :literal:`SumInLambda` case.
+- Added flood corrections to :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto-v2>`. The correction data can be provided either via a flood workspace passed as a property or taken from the parameter file.
 
 Bug fixes
 #########
