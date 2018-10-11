@@ -1,21 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MPLCPP_COLORS_H
 #define MPLCPP_COLORS_H
-/*
-  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
 
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-*/
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Python/Object.h"
 
@@ -37,6 +28,13 @@ namespace MplCpp {
 class MANTID_MPLCPP_DLL NormalizeBase : public Python::InstanceHolder {
 public:
   NormalizeBase(Python::Object obj);
+
+  /// Return an appropriate object to determine the tick locations
+  /// The default returns None indicating that matplotlib should autoselect it
+  virtual Python::Object tickLocator() const { return Python::Object(); }
+  /// Return an appropriate object to determine the text format type
+  /// The default returns None indicating that matplotlib should autoselect it
+  virtual Python::Object labelFormatter() const { return Python::Object(); }
 };
 
 /**
@@ -57,7 +55,18 @@ public:
  */
 class MANTID_MPLCPP_DLL SymLogNorm : public NormalizeBase {
 public:
+  static double DefaultLinearThreshold;
+  static double DefaultLinearScale;
+
+public:
   SymLogNorm(double linthresh, double linscale, double vmin, double vmax);
+
+  Python::Object tickLocator() const override;
+  Python::Object labelFormatter() const override;
+
+private:
+  // cache the linscale as it's not available publicly on the class
+  double m_linscale;
 };
 
 /**

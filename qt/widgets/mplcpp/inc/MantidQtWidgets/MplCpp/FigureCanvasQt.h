@@ -1,24 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MPLCPP_FIGURECANVASQT_H
 #define MPLCPP_FIGURECANVASQT_H
-/*
-  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
 
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-*/
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
 
+#include <QPointF>
 #include <QWidget>
 
 namespace MantidQt {
@@ -38,11 +30,25 @@ public:
   FigureCanvasQt(int subplotspec, QWidget *parent = nullptr);
   FigureCanvasQt(Figure fig, QWidget *parent = nullptr);
 
-  /// Non-const access to the current active axes instance.
-  inline Axes &gca() { return m_axes; }
+  /// Attach an event filter to the underlying matplotlib canvas
+  void installEventFilterToMplCanvas(QObject *filter);
+  /// Access to the current figure instance.
+  inline Figure gcf() const { return m_figure; }
+  /// Access to the current active axes instance.
+  inline Axes gca() const { return m_figure.gca(); }
+
+  /// Convert a point in screen coordinates to data coordinates
+  QPointF toDataCoords(QPoint pos) const;
+
+  /// Redraw the canvas
+  inline void draw() { pyobj().attr("draw")(); }
+  /// Redraw the canvas if nothing else is happening
+  inline void drawIdle() { pyobj().attr("draw_idle")(); }
 
 private: // members
-  Axes m_axes;
+  Figure m_figure;
+  // A pointer to the C++ widget extract from the Python FigureCanvasQT object
+  QWidget *m_mplCanvas;
 };
 
 } // namespace MplCpp

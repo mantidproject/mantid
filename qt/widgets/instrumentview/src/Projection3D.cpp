@@ -17,7 +17,10 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -458,6 +461,7 @@ void Projection3D::setLightingModel(bool picking) const {
  * @param lines :: lines from the project file to load state from
  */
 void Projection3D::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   ProjectionSurface::loadFromProject(lines);
   API::TSVSerialiser tsv(lines);
 
@@ -466,16 +470,26 @@ void Projection3D::loadFromProject(const std::string &lines) {
     tsv >> viewportLines;
     m_viewport.loadFromProject(viewportLines);
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "Projection3D::loadFromProject not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the 3D projection to a Mantid project file
  * @return a string representing the state of the 3D projection
  */
 std::string Projection3D::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   tsv.writeRaw(ProjectionSurface::saveToProject());
   tsv.writeSection("Viewport", m_viewport.saveToProject());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "Projection3D::saveToProject not implemented for Qt >= 5");
+#endif
 }
 
 } // namespace MantidWidgets

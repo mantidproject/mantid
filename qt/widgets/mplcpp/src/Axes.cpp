@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Axes.h"
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 
 namespace MantidQt {
 namespace Widgets {
@@ -10,6 +17,34 @@ namespace MplCpp {
 using Mantid::PythonInterface::Converters::VectorToNDArray;
 using Mantid::PythonInterface::Converters::WrapReadOnly;
 using Mantid::PythonInterface::PythonRuntimeError;
+
+namespace {
+/**
+ * Create a QString from a Python string object
+ * @param pystr A Python string object. This is not checked
+ * @return A new QString
+ */
+QString toQString(const Python::Object &pystr) {
+  return QString::fromLatin1(TO_CSTRING(pystr.ptr()));
+}
+
+/**
+ * Retrieve axes limits from an axes object as C++ tuple
+ * @param axes A reference to the axes object
+ * @param method The accessor name
+ * @return A 2-tuple of the limits values
+ */
+std::tuple<double, double> limitsToTuple(const Python::Object &axes,
+                                         const char *method) {
+  auto toDouble = [](const Python::Object &value) {
+    return PyFloat_AsDouble(value.ptr());
+  };
+  auto limits = axes.attr(method)();
+  return std::make_tuple<double, double>(toDouble(limits[0]),
+                                         toDouble(limits[1]));
+}
+
+} // namespace
 
 /**
  * Construct an Axes wrapper around an existing Axes instance
@@ -70,6 +105,115 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
   } catch (Python::ErrorAlreadySet &) {
     throw PythonRuntimeError();
   }
+}
+
+/**
+ * Add an arbitrary text label to the canvas
+ * @param x X position in data coordinates
+ * @param y Y position in data coordinates
+ * @param text The string to attach to the canvas
+ * @param horizontalAlignment A string indicating the horizontal
+ * alignment of the string
+ */
+Artist Axes::text(double x, double y, QString text,
+                  const char *horizontalAlignment) {
+  auto args =
+      Python::NewRef(Py_BuildValue("(ffs)", x, y, text.toLatin1().constData()));
+  auto kwargs = Python::NewRef(
+      Py_BuildValue("(ss)", "horizontalalignment", horizontalAlignment));
+  return Artist(pyobj().attr("text")(*args, **kwargs));
+}
+
+/**
+ * @brief Set the X-axis scale to the given value.
+ * @param value New scale type. See
+ * https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xscale.html
+ * @raises std::invalid_argument if the value is unknown
+ */
+void Axes::setXScale(const char *value) {
+  try {
+    pyobj().attr("set_xscale")(value);
+  } catch (Python::ErrorAlreadySet &) {
+    throw std::invalid_argument(std::string("setXScale: Unknown scale type ") +
+                                value);
+  }
+}
+
+/// @return The scale type of the X axis as a string
+QString Axes::getXScale() const {
+  return toQString(pyobj().attr("get_xscale")());
+}
+
+/**
+ * @brief Set the Y-axis scale to the given value.
+ * @param value New scale type. See
+ * https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xscale.html
+ * @raises std::invalid_argument if the value is unknown
+ */
+void Axes::setYScale(const char *value) {
+  try {
+    pyobj().attr("set_yscale")(value);
+  } catch (Python::ErrorAlreadySet &) {
+    throw std::invalid_argument(std::string("setYScale: Unknown scale type ") +
+                                value);
+  }
+}
+
+/// @return The scale type of the Y axis as a string
+QString Axes::getYScale() const {
+  return toQString(pyobj().attr("get_yscale")());
+}
+
+/**
+ * Retrieve the X limits of the axes
+ * @return A 2-tuple of (min,max) values for the X axis
+ */
+std::tuple<double, double> Axes::getXLim() const {
+  return limitsToTuple(pyobj(), "get_xlim");
+}
+
+/**
+ * Retrieve the Y limits of the axes
+ * @return A 2-tuple of (min,max) values for the Y axis
+ */
+std::tuple<double, double> Axes::getYLim() const {
+  return limitsToTuple(pyobj(), "get_ylim");
+}
+
+/**
+ * @brief Recompute the data limits from the current artists.
+ * @param visibleOnly If true then only include visble artists in the
+ * calculation
+ */
+void Axes::relim(bool visibleOnly) { pyobj().attr("relim")(visibleOnly); }
+
+/**
+ * Calls Axes.autoscale to enable/disable auto scaling
+ * @param enable If true enable autoscaling and perform the automatic rescale
+ */
+void Axes::autoscale(bool enable) { pyobj().attr("autoscale")(enable); }
+
+/**
+ * Autoscale the view based on the current data limits. Calls
+ * Axes.autoscale_view with the tight argument set to None. Autoscaling
+ * must be turned on for this to work as expected
+ * @param scaleX If true (default) scale the X axis limits
+ * @param scaleY If true (default) scale the Y axis limits
+ */
+void Axes::autoscaleView(bool scaleX, bool scaleY) {
+  pyobj().attr("autoscale_view")(Python::Object(), scaleX, scaleY);
+}
+
+/**
+ * Autoscale the view based on the current data limits. Calls
+ * Axes.autoscale_view
+ * @param tight If true tight is False, the axis major locator will be used to
+ * expand the view limits
+ * @param scaleX If true (default) scale the X axis limits
+ * @param scaleY If true (default) scale the Y axis limits
+ */
+void Axes::autoscaleView(bool tight, bool scaleX, bool scaleY) {
+  pyobj().attr("autoscale_view")(tight, scaleX, scaleY);
 }
 
 } // namespace MplCpp

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Colors.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
 
@@ -12,10 +18,23 @@ namespace {
  * @return A reference to the matplotlib.colors module
  */
 Python::Object colorsModule() {
-  Python::Object colorsModule{
-      Python::NewRef(PyImport_ImportModule("matplotlib.colors"))};
-  return colorsModule;
+  return Python::NewRef(PyImport_ImportModule("matplotlib.colors"));
 }
+
+/**
+ * @return A reference to the matplotlib.ticker module
+ */
+Python::Object tickerModule() {
+  return Python::NewRef(PyImport_ImportModule("matplotlib.ticker"));
+}
+
+/**
+ * @return A reference to the matplotlib.ticker module
+ */
+Python::Object scaleModule() {
+  return Python::NewRef(PyImport_ImportModule("matplotlib.scale"));
+}
+
 } // namespace
 
 // ------------------------ NormalizeBase---------------------------------------
@@ -38,6 +57,10 @@ Normalize::Normalize(double vmin, double vmax)
     : NormalizeBase(colorsModule().attr("Normalize")(vmin, vmax)) {}
 
 // ------------------------ SymLogNorm -----------------------------------------
+/// The threshold below which the scale becomes linear
+double SymLogNorm::DefaultLinearThreshold = 1e-3;
+/// The value to scale the linear range by. Defaults to 1 decade
+double SymLogNorm::DefaultLinearScale = 1.0;
 
 /**
  * @brief Construct a SymLogNorm object mapping data from [vmin, vmax]
@@ -53,7 +76,27 @@ Normalize::Normalize(double vmin, double vmax)
 SymLogNorm::SymLogNorm(double linthresh, double linscale, double vmin,
                        double vmax)
     : NormalizeBase(
-          colorsModule().attr("SymLogNorm")(linthresh, linscale, vmin, vmax)) {}
+          colorsModule().attr("SymLogNorm")(linthresh, linscale, vmin, vmax)),
+      m_linscale(linscale) {}
+
+/**
+ * @return An instance of the SymmetricalLogLocator
+ */
+Python::Object SymLogNorm::tickLocator() const {
+  // Create log transform with base=10
+  auto transform = scaleModule().attr("SymmetricalLogTransform")(
+      10, Python::Object(pyobj().attr("linthresh")), m_linscale);
+  return Python::Object(
+      tickerModule().attr("SymmetricalLogLocator")(transform));
+}
+
+/**
+ * @brief SymLogNorm::labelFormatter
+ * @return
+ */
+Python::Object SymLogNorm::labelFormatter() const {
+  return Python::Object(tickerModule().attr("LogFormatterMathtext")());
+}
 
 // ------------------------ PowerNorm ------------------------------------------
 

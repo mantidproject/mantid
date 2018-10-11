@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Figure.h"
 
 namespace MantidQt {
@@ -10,12 +16,18 @@ Python::Object newFigure(bool tightLayout = true) {
       Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
   auto fig = figureModule.attr("Figure")();
   if (tightLayout) {
-    auto kwargs = Python::NewRef(Py_BuildValue("{s:f}", "pad", 0.5));
-    fig.attr("set_tight_layout")(kwargs);
+    auto tight = Python::NewRef(Py_BuildValue("{sf}", "pad", 0.5));
+    fig.attr("set_tight_layout")(tight);
   }
   return fig;
 }
 } // namespace
+
+/**
+ * Construct a C++ wrapper around an existing figure instance
+ * @param obj An existing Figure instance
+ */
+Figure::Figure(Python::Object obj) : Python::InstanceHolder(obj, "add_axes") {}
 
 /**
  * Construct a new default figure.
@@ -23,6 +35,15 @@ Python::Object newFigure(bool tightLayout = true) {
  */
 Figure::Figure(bool tightLayout)
     : Python::InstanceHolder(newFigure(tightLayout)) {}
+
+/**
+ * Reset the background color of the figure.
+ * @param color A character string indicating the color.
+ * See https://matplotlib.org/api/colors_api.html
+ */
+void Figure::setFaceColor(const char *color) {
+  pyobj().attr("set_facecolor")(color);
+}
 
 /**
  * Add an Axes of the given dimensions to the current figure
@@ -45,6 +66,26 @@ Axes Figure::addAxes(double left, double bottom, double width, double height) {
  */
 Axes Figure::addSubPlot(int subplotspec) {
   return Axes{pyobj().attr("add_subplot")(subplotspec)};
+}
+
+/**
+ * @brief Add a colorbar to this figure
+ * @param mappable An objet providing the mapping of data to rgb colors
+ * @param cax An axes instance to hold the color bar
+ * @param ticks An optional array or ticker.Locator object to control tick
+ * placement
+ * @param format An optional object describing how to format the tick labels
+ * @return A reference to the matplotlib.colorbar.Colorbar object
+ */
+Python::Object Figure::colorbar(const ScalarMappable &mappable, const Axes &cax,
+                                const Python::Object &ticks,
+                                const Python::Object &format) {
+  auto args = Python::NewRef(
+      Py_BuildValue("(OO)", mappable.pyobj().ptr(), cax.pyobj().ptr()));
+  auto kwargs = Python::NewRef(
+      Py_BuildValue("{sOsO}", "ticks", ticks.ptr(), "format", format.ptr()));
+  Python::Object attr{pyobj().attr("colorbar")};
+  return Python::NewRef(PyObject_Call(attr.ptr(), args.ptr(), kwargs.ptr()));
 }
 
 } // namespace MplCpp

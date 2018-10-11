@@ -1,0 +1,286 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidQtWidgets/MplCpp/ColorbarWidget.h"
+#include "MantidQtWidgets/MplCpp/Colors.h"
+#include "MantidQtWidgets/MplCpp/Figure.h"
+#include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
+#include "MantidQtWidgets/MplCpp/MantidColorMap.h"
+
+#include <QComboBox>
+#include <QDoubleValidator>
+#include <QLineEdit>
+#include <QVBoxLayout>
+#include <QVector>
+
+namespace MantidQt {
+namespace Widgets {
+namespace MplCpp {
+
+namespace {
+// These values control the dimensions of the axes used
+// to hold the colorbar. The aspect ratio is set to give
+// the usual long thin colobar
+constexpr double AXES_LEFT = 0.4;
+constexpr double AXES_BOTTOM = 0.05;
+constexpr double AXES_WIDTH = 0.2;
+constexpr double AXES_HEIGHT = 0.9;
+
+// Background color for figure
+constexpr const char *FIGURE_FACECOLOR = "w";
+
+// Define the available normalization option labels and tooltips
+// The order defines the order in the combo box. The index
+// values is used as an integer representation. See the setScaleType
+// method if this is changed.
+QStringList NORM_OPTS = {"Linear", "SymmetricLog10", "Power"};
+
+} // namespace
+
+/**
+ * @brief Construct a default color bar with a linear scale. The default limits
+ * are set to [0, 1] so setRange would need to be called at a minimum
+ * @param parent A pointer to the parent widget
+ */
+ColorbarWidget::ColorbarWidget(QWidget *parent)
+    : QWidget(parent), m_ui(),
+      m_mappable(Normalize(0, 1), getCMap(defaultCMapName())) {
+  initLayout();
+  connectSignals();
+}
+
+/**
+ * Set the normalization instance
+ * @param norm An instance of NormalizeBase. See Colors.h
+ */
+void ColorbarWidget::setNorm(const NormalizeBase &norm) {
+  m_mappable.setNorm(norm);
+  // matplotlib requires creating a brand new colorbar if the
+  // normalization type changes
+  createColorbar(norm.tickLocator(), norm.labelFormatter());
+  m_canvas->draw();
+}
+
+/**
+ * Update the range of the scale
+ * @param vmin An optional new minimum of the scale
+ * @param vmax An optional new maximum of the scale
+ */
+void ColorbarWidget::setClim(boost::optional<double> vmin,
+                             boost::optional<double> vmax) {
+  m_mappable.setClim(vmin, vmax);
+  m_canvas->draw();
+
+  if (vmin.is_initialized()) {
+    m_ui.scaleMinEdit->setText(QString::number(vmin.get()));
+    emit minValueChanged(vmin.get());
+  }
+  if (vmax.is_initialized()) {
+    m_ui.scaleMaxEdit->setText(QString::number(vmax.get()));
+    emit maxValueChanged(vmax.get());
+  }
+}
+
+/**
+ * @return A tuple giving the current colorbar scale limits
+ */
+std::tuple<double, double> ColorbarWidget::clim() const {
+  return std::make_tuple<double, double>(m_ui.scaleMinEdit->text().toDouble(),
+                                         m_ui.scaleMaxEdit->text().toDouble());
+}
+
+/**
+ * @brief Called to setup the widget based on the MantidColorMap instance
+ * @param mtdCMap A reference to the MantidColorMap wrapper
+ */
+void ColorbarWidget::setupColorBarScaling(const MantidColorMap &mtdCMap) {
+  // block signals to avoid infinite loop while setting scale type
+  this->blockSignals(true);
+  setScaleType(static_cast<int>(mtdCMap.getScaleType()));
+  this->blockSignals(false);
+}
+
+// ------------------------------ Legacy API -----------------------------------
+
+/**
+ * Update the minimum value of the normalization scale
+ * @param vmin New minimum of the scale
+ */
+void ColorbarWidget::setMinValue(double vmin) { setClim(vmin, boost::none); }
+
+/**
+ * Update the maximum value of the normalization scale
+ * @param vmin New maximum of the scale
+ */
+void ColorbarWidget::setMaxValue(double vmax) { setClim(boost::none, vmax); }
+
+/**
+ * @return The minimum color scale value as a string
+ */
+QString ColorbarWidget::getMinValue() const {
+  return QString::number(std::get<0>(clim()));
+}
+
+/**
+ * @return The maximum color scale value as a string
+ */
+QString ColorbarWidget::getMaxValue() const {
+  return QString::number(std::get<1>(clim()));
+}
+
+/**
+ * @return The power value as a string
+ */
+QString ColorbarWidget::getNthPower() const { return m_ui.powerEdit->text(); }
+
+/**
+ * @return The scale type choice as an integer.
+ */
+int ColorbarWidget::getScaleType() const {
+  return m_ui.normTypeOpt->currentIndex();
+}
+
+/**
+ * @brief Set the scale type from an integer representation
+ * Linear=0, Log=1, Power=2, which is backwards compatible
+ * with the original Qwt version
+ * @param index The scale type as an integer
+ */
+void ColorbarWidget::setScaleType(int index) {
+  // Protection against a bad index.
+  if (index < 0 || index > 2)
+    return;
+  m_ui.normTypeOpt->setCurrentIndex(index);
+  auto range = clim();
+  const double vmin(std::get<0>(range)), vmax(std::get<1>(range));
+  switch (index) {
+  case 0:
+    setNorm(Normalize(vmin, vmax));
+    break;
+  case 1:
+    setNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold,
+                       SymLogNorm::DefaultLinearScale, vmin, vmax));
+    break;
+  case 2:
+    setNorm(PowerNorm(getNthPower().toDouble(), vmin, vmax));
+    break;
+  }
+
+  emit scaleTypeChanged(index);
+}
+
+/**
+ * @brief Set the power for the power scale
+ * @param gamma The value of the exponent
+ */
+void ColorbarWidget::setNthPower(double gamma) {
+  m_ui.powerEdit->setText(QString::number(gamma));
+  auto range = clim();
+  setNorm(PowerNorm(gamma, std::get<0>(range), std::get<1>(range)));
+  emit nthPowerChanged(gamma);
+}
+
+// --------------------------- Private slots -----------------------------------
+/**
+ * Called when a user has edited the minimum scale value
+ */
+void ColorbarWidget::scaleMinimumEdited() {
+  // The validator ensures the text is a double
+  setClim(m_ui.scaleMinEdit->text().toDouble(), boost::none);
+}
+
+/**
+ * Called when a user has edited the maximum scale value
+ */
+void ColorbarWidget::scaleMaximumEdited() {
+  // The validator ensures the text is a double
+  setClim(boost::none, m_ui.scaleMaxEdit->text().toDouble());
+}
+
+/**
+ * Called when a new selection in the scale type box is made
+ */
+void ColorbarWidget::scaleTypeSelectionChanged(int index) {
+  if (index == 2) { // Power
+    m_ui.powerEdit->show();
+  } else {
+    m_ui.powerEdit->hide();
+  }
+  m_ui.normTypeOpt->blockSignals(true);
+  setScaleType(index);
+  m_ui.normTypeOpt->blockSignals(false);
+}
+
+/**
+ * Called when the power exponent input has been edited
+ */
+void ColorbarWidget::powerExponentEdited() { setScaleType(2); }
+
+// --------------------------- Private methods --------------------------------
+
+/**
+ * Setup the layout of the child widgets
+ */
+void ColorbarWidget::initLayout() {
+  // Create colorbar (and figure if necessary)
+  Figure fig{false};
+  fig.setFaceColor(FIGURE_FACECOLOR);
+  m_ui.setupUi(this);
+  // remove placeholder widget and add figure canvas
+  delete m_ui.mplColorbar;
+  m_canvas = new FigureCanvasQt(std::move(fig), this);
+  m_ui.mplColorbar = m_canvas;
+  m_ui.verticalLayout->insertWidget(1, m_canvas);
+  createColorbar();
+
+  // Set validators on the scale inputs
+  m_ui.scaleMinEdit->setValidator(new QDoubleValidator());
+  m_ui.scaleMaxEdit->setValidator(new QDoubleValidator());
+  m_ui.powerEdit->setValidator(new QDoubleValidator());
+  // Setup normalization options
+  m_ui.normTypeOpt->addItems(NORM_OPTS);
+  scaleTypeSelectionChanged(0);
+}
+
+/**
+ * (Re)-create a colorbar around the current mappable. It assumes the figure
+ * and canvas have been created
+ * @param ticks An optional matplotlib.ticker.*Locator object. Default=None to
+ * autoselect the most appropriate
+ * @param format An optional matplotlib.ticker.*Format object. Default=None to
+ * autoselect the most appropriate
+ */
+void ColorbarWidget::createColorbar(const Python::Object &ticks,
+                                    const Python::Object &format) {
+  assert(m_canvas);
+  auto cb = Python::Object(m_mappable.pyobj().attr("colorbar"));
+  if (!cb.is_none()) {
+    cb.attr("remove")();
+  }
+  // create the new one
+  auto fig = m_canvas->gcf();
+  Axes cbAxes{fig.addAxes(AXES_LEFT, AXES_BOTTOM, AXES_WIDTH, AXES_HEIGHT)};
+  fig.colorbar(m_mappable, cbAxes, ticks, format);
+}
+
+/**
+ * Wire up the signals for the child widgets
+ */
+void ColorbarWidget::connectSignals() {
+  connect(m_ui.scaleMinEdit, SIGNAL(editingFinished()), this,
+          SLOT(scaleMinimumEdited()));
+  connect(m_ui.scaleMaxEdit, SIGNAL(editingFinished()), this,
+          SLOT(scaleMaximumEdited()));
+
+  connect(m_ui.normTypeOpt, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(scaleTypeSelectionChanged(int)));
+  connect(m_ui.powerEdit, SIGNAL(editingFinished()), this,
+          SLOT(powerExponentEdited()));
+}
+
+} // namespace MplCpp
+} // namespace Widgets
+} // namespace MantidQt

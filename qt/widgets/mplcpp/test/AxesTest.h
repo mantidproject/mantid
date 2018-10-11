@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MPLCPP_AXESTEST_H
 #define MPLCPP_AXESTEST_H
 
@@ -62,12 +68,57 @@ public:
     TS_ASSERT_EQUALS(format[1], line.pyobj().attr("get_marker")());
   }
 
+  void testSetXScaleWithKnownScaleType() {
+    Axes axes(pyAxes());
+    axes.setXScale("symlog");
+  }
+
+  void testSetYScaleWithKnownScaleType() {
+    Axes axes(pyAxes());
+    axes.setYScale("symlog");
+  }
+
+  void testGetXLimReturnsXLimits() {
+    Axes axes(pyAxes());
+    axes.plot({5, 6, 7, 8}, {10, 11, 12, 13});
+    auto xlimits = axes.getXLim();
+    TS_ASSERT_DELTA(5, std::get<0>(xlimits), 1e-5);
+    TS_ASSERT_DELTA(8, std::get<1>(xlimits), 1e-5);
+  }
+
+  void testGetYLimReturnsYLimits() {
+    Axes axes(pyAxes());
+    axes.plot({5, 6, 7, 8}, {10, 11, 12, 13});
+    auto ylimits = axes.getYLim();
+    TS_ASSERT_DELTA(10, std::get<0>(ylimits), 1e-5);
+    TS_ASSERT_DELTA(13, std::get<1>(ylimits), 1e-5);
+  }
+
+  void testTextAddsTextAddGivenCoordinate() {
+    Axes axes(pyAxes());
+    auto artist = axes.text(0.5, 0.4, "test", "left");
+
+    TS_ASSERT_EQUALS("test", artist.pyobj().attr("get_text")());
+    TS_ASSERT_EQUALS(0.5, artist.pyobj().attr("get_position")()[0]);
+    TS_ASSERT_EQUALS(0.4, artist.pyobj().attr("get_position")()[1]);
+  }
+
   // ----------------- failure tests ---------------------
   void testPlotThrowsWithEmptyData() {
     Axes axes(pyAxes());
     TS_ASSERT_THROWS(axes.plot({}, {}), std::invalid_argument);
     TS_ASSERT_THROWS(axes.plot({1}, {}), std::invalid_argument);
     TS_ASSERT_THROWS(axes.plot({}, {1}), std::invalid_argument);
+  }
+
+  void testSetXScaleWithUnknownScaleTypeThrows() {
+    Axes axes(pyAxes());
+    TS_ASSERT_THROWS(axes.setXScale("notascaletype"), std::invalid_argument);
+  }
+
+  void testSetYScaleWithUnknownScaleTypeThrows() {
+    Axes axes(pyAxes());
+    TS_ASSERT_THROWS(axes.setYScale("notascaletype"), std::invalid_argument);
   }
 
 private:
