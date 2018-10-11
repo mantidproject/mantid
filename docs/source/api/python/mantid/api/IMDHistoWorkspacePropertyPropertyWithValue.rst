@@ -2,7 +2,7 @@
  IMDHistoWorkspacePropertyPropertyWithValue
 ============================================
 
-This a python binding to the C++ class Mantid::API::IMDHistoWorkspacePropertyPropertyWithValue.
+This is a Python binding to the C++ class Mantid::API::IMDHistoWorkspacePropertyPropertyWithValue.
 
 *bases:* :py:obj:`mantid.kernel.Property`
 
