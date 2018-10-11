@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtCore
+from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal as Signal
 from Muon.GUI.Common import message_box
 
@@ -46,7 +46,7 @@ class ThreadModelWorker(QtCore.QObject):
         self.signals.finished.emit()
 
 
-class ThreadModel(QtCore.QObject):
+class ThreadModel(QtGui.QWidget):
     """
     A wrapper to allow threading with
     the MaxEnt models.
