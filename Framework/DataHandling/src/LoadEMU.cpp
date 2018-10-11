@@ -95,7 +95,7 @@ double invert(double y, const F &f, double x0 = 0.0, const double eps = 1e-16) {
   double x1 = x0 + eps;
   double e1 = f(x1) - y;
   int loop = 16;
-  while (abs(e0) > eps && loop-- > 0) {
+  while (fabs(e0) > eps && loop-- > 0) {
     double x = (x1 * e0 - x0 * e1) / (e0 - e1);
 
     x1 = x0;
@@ -197,8 +197,9 @@ public:
                  const double framePeriod, const double gatePeriod,
                  const TimeLimits &timeBoundary, const TimeLimits &directLimits,
                  const TimeLimits &analysedLimits)
-      : m_roi(roi), m_mapIndex(mapIndex), m_stride(stride), m_frames(0),
-        m_framesValid(0), m_framePeriod(framePeriod), m_gatePeriod(gatePeriod),
+      : m_roi(roi), m_mapIndex(mapIndex), m_stride(stride),
+        m_framePeriod(framePeriod), m_gatePeriod(gatePeriod), 
+        m_frames(0), m_framesValid(0),
         m_timeBoundary(timeBoundary), m_directTaux(directLimits),
         m_analysedTaux(analysedLimits) {}
 
@@ -209,14 +210,14 @@ public:
   }
 
   inline bool validFrame() const {
-    double frameTime = m_framePeriod * m_frames * 1.0e-6;
+    double frameTime = m_framePeriod * static_cast<double>(m_frames) * 1.0e-6;
     return (frameTime >= m_timeBoundary.first &&
             frameTime <= m_timeBoundary.second);
   }
 
   double duration() const {
     // length test in seconds
-    return m_framePeriod * m_frames * 1.0e-6;
+    return m_framePeriod * static_cast<double>(m_frames) * 1.0e-6;
   }
   void addEvent(size_t x, size_t p, double tdop, double taux) {
 
@@ -243,7 +244,7 @@ public:
       return;
 
     size_t id = m_stride * xid + y;
-    if (id >= m_roi.size() || (id < 0))
+    if (id >= m_roi.size())
       return;
 
     // check if neutron is in region of interest
@@ -260,8 +261,8 @@ protected:
   // fields
   std::vector<size_t> &m_eventCounts;
 
-  void EventCounter::addEventImpl(size_t id, size_t x, size_t y,
-                                  double tof) override {
+  void addEventImpl(size_t id, size_t, size_t,
+                                  double) override {
     m_eventCounts[id]++;
   }
 
@@ -314,10 +315,11 @@ public:
                 std::vector<EventVector_pt> &eventVectors, bool saveAsTOF)
       : EventProcessor(roi, mapIndex, stride, framePeriod, gatePeriod,
                        timeBoundary, directLimits, analysedLimits),
-        m_convertTOF(convert), m_saveAsTOF(saveAsTOF),
         m_eventVectors(eventVectors),
+        m_convertTOF(convert),
         m_tofMin(std::numeric_limits<double>::max()),
-        m_tofMax(std::numeric_limits<double>::min()) {}
+        m_tofMax(std::numeric_limits<double>::min()),
+        m_saveAsTOF(saveAsTOF) {}
 
   double tofMin() const { return m_tofMin <= m_tofMax ? m_tofMin : 0.0; }
   double tofMax() const { return m_tofMin <= m_tofMax ? m_tofMax : 0.0; }
@@ -601,13 +603,15 @@ void LoadEMU::exec() {
   double sampleAnalyser = iparam("SampleAnalyser");
 
   // Indirect hz tubes idstart = 0
-  for (int detID = 0; detID < HORIZONTAL_TUBES * PIXELS_PER_TUBE; detID++)
+  detid_t endID = HORIZONTAL_TUBES * PIXELS_PER_TUBE;
+  for (detid_t detID = 0; detID < endID; detID++)
     updateNeutronicPostions(detID, sampleAnalyser);
 
   // Indirect vertical tubes idstart = 16 * 64
-  int startID = 16 * PIXELS_PER_TUBE;
-  for (int detID = 0; detID < VERTICAL_TUBES * PIXELS_PER_TUBE; detID++)
-    updateNeutronicPostions(detID + startID, sampleAnalyser);
+  detid_t startID = 16 * PIXELS_PER_TUBE;
+  endID = startID + VERTICAL_TUBES * PIXELS_PER_TUBE;
+  for (detid_t detID = startID; detID < endID; detID++)
+    updateNeutronicPostions(detID, sampleAnalyser);
 
   // get the detector map from raw to physical detector
   std::string dmapStr = instr->getParameterAsString("DetectorMap");
@@ -771,7 +775,6 @@ void LoadEMU::updateNeutronicPostions(int detID, double sampleAnalyser) {
 
   try {
     auto component = instrument->getDetector(detID);
-    const auto componentId = component->getComponentID();
     double rho, theta, phi;
     V3D position = component->getPos();
     position.getSpherical(rho, theta, phi);
@@ -782,7 +785,7 @@ void LoadEMU::updateNeutronicPostions(int detID, double sampleAnalyser) {
     const auto componentIndex = compInfo.indexOf(component->getComponentID());
     compInfo.setPosition(componentIndex, position);
   } catch (const std::runtime_error &) {
-    // throw std::runtime_error("Runtime error moving detID " + detID);
+    // just continue with the remainder
   }
 }
 
@@ -796,10 +799,10 @@ std::vector<bool> LoadEMU::createRoiVector(const std::string &selected,
   // turn off pixels linked to missing tubes
   if (!selected.empty()) {
     std::vector<bool> tubes(HISTO_BINS_X, false);
-    EMU::mapRangeToIndex(selected, tubes, [](size_t n) { return true; });
-    for (int i = 0; i < HISTO_BINS_X; i++) {
+    EMU::mapRangeToIndex(selected, tubes, [](size_t) { return true; });
+    for (size_t i = 0; i < HISTO_BINS_X; i++) {
       if (tubes[i] == false) {
-        for (int j = 0; j < PIXELS_PER_TUBE; j++) {
+        for (size_t j = 0; j < PIXELS_PER_TUBE; j++) {
           result[i * PIXELS_PER_TUBE + j] = false;
         }
       }
@@ -820,7 +823,7 @@ std::vector<bool> LoadEMU::createRoiVector(const std::string &selected,
 
     if ((i0 != std::string::npos) && (iN != std::string::npos) && (i0 < iN)) {
       line = line.substr(i0 + 8, iN - i0 - 8); // 8 = len("<detids>")
-      EMU::mapRangeToIndex(line, result, [](size_t n) { return false; });
+      EMU::mapRangeToIndex(line, result, [](size_t) { return false; });
     }
   }
 

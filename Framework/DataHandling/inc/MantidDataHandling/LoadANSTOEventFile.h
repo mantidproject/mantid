@@ -98,28 +98,28 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
   // read file headers (base header then packed-format header)
   EventFileHeader_Base hdr_base;
   if (!loader.read(reinterpret_cast<char *>(&hdr_base), sizeof(hdr_base)))
-    throw std::exception("unable to load EventFileHeader-Base");
+    throw std::runtime_error("unable to load EventFileHeader-Base");
 
   EventFileHeader_Packed hdr_packed;
   if (!loader.read(reinterpret_cast<char *>(&hdr_packed), sizeof(hdr_packed)))
-    throw std::exception("unable to load EventFileHeader-Packed");
+    throw std::runtime_error("unable to load EventFileHeader-Packed");
 
   if (hdr_base.magic_number != EVENTFILEHEADER_BASE_MAGIC_NUMBER)
-    throw std::exception("bad magic number");
+    throw std::runtime_error("bad magic number");
 
   if (hdr_base.format_number > EVENTFILEHEADER_BASE_FORMAT_NUMBER) {
     char txtBuffer[255] = {};
     snprintf(txtBuffer, sizeof(txtBuffer),
              "invalid file (only format_number=%08Xh or lower)",
              EVENTFILEHEADER_BASE_FORMAT_NUMBER);
-    throw std::exception(txtBuffer);
+    throw std::runtime_error(txtBuffer);
   }
 
   if (hdr_base.pack_format != 0)
-    throw std::exception("only packed binary format is supported");
+    throw std::runtime_error("only packed binary format is supported");
 
   if (hdr_base.clock_scale == 0)
-    throw std::exception("clock scale cannot be zero");
+    throw std::runtime_error("clock scale cannot be zero");
 
   // note: in the old format 0x00010001, the evt_stg_nbits_wa did not exist and
   // it contained evt_stg_xy_signed
@@ -225,6 +225,8 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
 
     // state machine for event decoding
     switch (state) {
+	case DECODE_START: // Should never get here
+      throw std::runtime_error("Failure in event decoding");
     case DECODE_OOB_BYTE_1: // first OOB header byte
                             // OOB event Byte 1:  Bit 0 = 1 = OOB event, Bit 1 =
                             // mode (only mode=0 suported currently), Bits 2-5 =
@@ -317,7 +319,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
       // mode enabled
       bool frame_start_event =
           (oob_en ? (oob_event && c == -2)
-                  : (x == 0 && y == 0 && dt == 0xFFFFFFFF));
+                  : (x == 0 && y == 0 && dt == -1));
 
       if (oob_en || !frame_start_event) {
         if (oob_event) {
@@ -337,8 +339,8 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
           // nsec
           if (primary_ok && auxillary_ok)
             handler.addEvent(
-                x, y, static_cast<double>(primary_time * scale_microsec),
-                static_cast<double>(auxillary_time * scale_microsec));
+                x, y, static_cast<double>(primary_time) * scale_microsec,
+                static_cast<double>(auxillary_time) * scale_microsec);
         }
       }
 
