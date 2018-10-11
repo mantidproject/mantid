@@ -6,29 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from qtpy import PYQT4, PYQT5
 from qtpy.QtWidgets import QSizePolicy
-
-import matplotlib
-backend = matplotlib.get_backend()
-if backend.startswith('module://'):
-    if backend.endswith('qt4agg'):
-        backend = 'Qt4Agg'
-    elif backend.endswith('workbench') or backend.endswith('qt5agg'):
-            backend = 'Qt5Agg'
-else:  # is this part necessary?
-    if PYQT4:
-        backend = 'Qt4Agg'
-    elif PYQT5:
-        backend = 'Qt5Agg'
-
-if backend == 'Qt4Agg':
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-elif backend == 'Qt5Agg':
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-else:
-    raise RuntimeError('Unrecognized backend {}'.format(backend))
-
+from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 
