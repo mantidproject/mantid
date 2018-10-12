@@ -59,7 +59,7 @@ public:
   }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Load data from the new PSD detector to a Mantid EventWorkspace.";
+    return "Loads data from the new PSD detector to a Mantid EventWorkspace.";
   }
 
   /// Algorithm's version for identification
