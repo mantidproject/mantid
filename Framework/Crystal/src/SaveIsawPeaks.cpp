@@ -332,7 +332,9 @@ void SaveIsawPeaks::exec() {
             out << "3" << std::setw(7) << sequenceNumber;
           } else {
             maxPeakNumb = std::max(maxPeakNumb, p.getPeakNumber());
-            out << "3" << std::setw(7) << p.getPeakNumber() + appendPeakNumb;
+            int peakNumber = p.getPeakNumber();
+            if (append) peakNumber =+ appendPeakNumb;
+            out << "3" << std::setw(7) << peakNumber;
           }
 
           // HKL's are flipped by -1 because of the internal Q convention
