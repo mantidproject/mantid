@@ -88,9 +88,7 @@ private:
     DAQ_STOPPED_SYNC_ERROR = 0,
     DAQ_RUNNING_SYNC_ERROR = 1,
     DAQ_STOPPED_SYNC_OK = 2,
-    DAQ_RUNNING_SYNC_OK = 3,
-    DAQ_RUNNING = 1,
-    SYNC_OK = 2
+    DAQ_RUNNING_SYNC_OK = 3
   };
 
   struct BufferHeader {
@@ -144,14 +142,12 @@ public:
 
   struct CompactEvent {
     uint64_t timestamp;
-    //uint16_t channel;
-    //uint16_t position;
-    //event_id_e eventId;
   };
 
 private:
 
   struct EventAccumulator {
+    //! Neutron Events for each pixel
     std::vector<std::vector<CompactEvent>> neutronEvents;
     std::vector<CompactEvent> triggerEvents;
   };
@@ -162,9 +158,9 @@ private:
 
   void runLoadInstrument(std::string instrumentName, DataObjects::EventWorkspace_sptr &eventWS);
 
-  long populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
+  void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
 
-  std::pair<long, long> parse_File(FileByteStream &file, const std::string fileName);
+  void parse_File(FileByteStream &file, const std::string fileName);
   std::vector<uint8_t> parse_Header(FileByteStream &file);
 
   std::vector<std::vector<uint8_t>> split_File(FileByteStream &file, const uint maxChunckCount);
@@ -178,14 +174,15 @@ private:
   inline size_t getWsIndex(const uint16_t &channel, const uint16_t &position) {
     const uint16_t channelIndex = ((channel & 0b1111111111100000) >> 1) | (channel & 0b0000000000001111);
     const uint16_t positionClamped = std::min(uint16_t(959u), position);
-    return channelIndex * 960 + positionClamped + 24;
+    return channelIndex * 960 + position;
   }
+
 
   inline void parse_andAddEvent(VectorByteStream &file, const BufferHeader &bufferHeader, EventAccumulator &eventAccumulator) {
     CompactEvent event = {};
     event_id_e eventId;
     const auto dataChunk = file.extractDataChunk<6>().readBits<1>(eventId);
-
+    // // datachunck has now 6 bytes - 1 bit (= 47 bits) left
     switch (eventId) {
       case event_id_e::TRIGGER: {
         uint8_t trigId;
@@ -197,8 +194,6 @@ private:
           return;
         }
         event.timestamp += bufferHeader.timestamp;
-        //event.channel |= bufferHeader.mcpdId << 8;
-        //PARALLEL_CRITICAL(push_back_Tevent)
         eventAccumulator.triggerEvents.push_back(event);
       } break;
       case event_id_e::NEUTRON: {
@@ -213,7 +208,6 @@ private:
         channel |= bufferHeader.mcpdId << 8;
 
         const size_t wsIndex = getWsIndex(channel, position);
-        //PARALLEL_CRITICAL(push_back_Nevent)
         eventAccumulator.neutronEvents[wsIndex].push_back(event);
       } break;
     default:

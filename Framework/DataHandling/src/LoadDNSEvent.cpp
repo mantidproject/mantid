@@ -24,24 +24,6 @@
 
 #define USE_PARALLELISM true
 
-template<typename TimeT = std::chrono::milliseconds>
-struct measure
-{
-    template<typename F, typename ...Args>
-    static typename TimeT::rep execution(F&& func, Args&&... args)
-    {
-        auto start = std::chrono::steady_clock::now();
-        std::forward<decltype(func)>(func)(std::forward<Args>(args)...);
-        auto duration = std::chrono::duration_cast< TimeT>
-                            (std::chrono::steady_clock::now() - start);
-        return duration.count();
-    }
-};
-
-using measureMicroSecs = measure<std::chrono::microseconds>;
-
-#define MEASURE_MICRO_SECS(op) measureMicroSecs::execution([&]() op )
-
 namespace  {
 
 /// coverts data into a hex string
@@ -80,7 +62,9 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadDNSEvent)
 
 const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS-PSD";
-const uint64_t MAX_BUFFER_BYTES_SIZE = 1500; // maximum buffer size in data file
+const uint MAX_BUFFER_BYTES_SIZE = 1500; // maximum buffer size in data file
+const uint DETECTOR_PIXEL_COUNT = 960*128; // number of >pixels< in detector
+
 
 void LoadDNSEvent::init() {
   /// Initialise the properties
@@ -108,7 +92,7 @@ void LoadDNSEvent::init() {
 void LoadDNSEvent::exec() {
   const size_t DUMMY_SIZE = 42;
   EventWorkspace_sptr outputWS =  boost::dynamic_pointer_cast<EventWorkspace>(
-      WorkspaceFactory::Instance().create("EventWorkspace", 960*128+24, DUMMY_SIZE, DUMMY_SIZE));
+      WorkspaceFactory::Instance().create("EventWorkspace", DETECTOR_PIXEL_COUNT, DUMMY_SIZE, DUMMY_SIZE));
   outputWS->switchEventType(Mantid::API::EventType::TOF);
   outputWS->getAxis(0)->setUnit("TOF");
 
@@ -125,22 +109,21 @@ void LoadDNSEvent::exec() {
   g_log.notice() << "ChopperChannel: " << chopperChannel << std::endl;
   g_log.notice() << "MonitorChannel: " << monitorChannel << std::endl;
 
-  _eventAccumulator.neutronEvents.resize(960*128+24);
+  _eventAccumulator.neutronEvents.resize(DETECTOR_PIXEL_COUNT);
 
   FileByteStream file(static_cast<std::string>(fileName), endian::big);
-  std::pair<long, long> elapsedTimeCombineSplitting;
-  long elapsedTimeSorting    = 0;
-  auto elapsedTimeParsing    = MEASURE_MICRO_SECS({ elapsedTimeCombineSplitting = parse_File(file, fileName); });
-  auto elapsedTimeProcessing = MEASURE_MICRO_SECS({ elapsedTimeSorting = populate_EventWorkspace(outputWS); });
 
-  g_log.notice()
-      << " ## elapsedTime Parsing\t= " << elapsedTimeParsing
-      << "\n  # elapsedTime Splitting\t= " << elapsedTimeCombineSplitting.first
-      << "\n  # elapsedTime Combining\t= " << elapsedTimeCombineSplitting.second
-      << "\n ## elapsedTime Processing\t= " << elapsedTimeProcessing
-      << "\n  # elapsedTime Sorting\t= " << elapsedTimeSorting
-      << "\n### elapsedTime Total  \t= " << elapsedTimeParsing + elapsedTimeProcessing
-      << std::endl;
+  parse_File(file, fileName);
+  populate_EventWorkspace(outputWS);
+
+  //g_log.notice()
+  //    << " ## elapsedTime Parsing\t= " << elapsedTimeParsing
+  //    << "\n  # elapsedTime Splitting\t= " << elapsedTimeCombineSplitting.first
+  //    << "\n  # elapsedTime Combining\t= " << elapsedTimeCombineSplitting.second
+  //    << "\n ## elapsedTime Processing\t= " << elapsedTimeProcessing
+  //    << "\n  # elapsedTime Sorting\t= " << elapsedTimeSorting
+  //    << "\n### elapsedTime Total  \t= " << elapsedTimeParsing + elapsedTimeProcessing
+  //    << std::endl;
 
   setProperty("OutputWorkspace", outputWS);
   g_log.notice() << std::endl;
@@ -151,13 +134,13 @@ void sortVector(Vector &v, _Compare comp) {
   std::sort(v.begin(), v.end(), comp);
 }
 
-long LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
+void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
   static const uint EVENTS_PER_PROGRESS = 100;
   // The number of steps depends on the type of input file
   Progress progress(this, 0.0, 1.0, _eventAccumulator.neutronEvents.size()/EVENTS_PER_PROGRESS);
 
   // Sort reversed (latest event first, most early event last):
-  auto elapsedTimeSorting = measureMicroSecs::execution([&](){ sortVector(_eventAccumulator.triggerEvents, [](auto l, auto r){ return l.timestamp > r.timestamp; }); });
+  sortVector(_eventAccumulator.triggerEvents, [](auto l, auto r){ return l.timestamp > r.timestamp; });
 
   g_log.notice() << _eventAccumulator.neutronEvents.size() << std::endl;
 
@@ -210,7 +193,6 @@ long LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
   g_log.notice() << "Bad chanel indices: " << oversizedChanelIndexCounterA << std::endl;
   g_log.notice() << "Bad position values: " << oversizedPosCounterA << std::endl;
   g_log.notice() << "Trigger Counter: " << _eventAccumulator.triggerEvents.size() << std::endl;
-  return elapsedTimeSorting;
 }
 
 void LoadDNSEvent::runLoadInstrument(std::string instrumentName, EventWorkspace_sptr &eventWS) {
@@ -276,8 +258,7 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
   std::array<uint8_t, header_sep.size()> current_window;
   file.readRaw(current_window);
   try {
-    int j = 0;
-    while (!file.eof() && (j++ < 1024*8)) {
+    while (!file.eof()) {
       if (current_window == header_sep) {
         return header;
       } else {
@@ -299,7 +280,6 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
     return header;
   }
 
-  //throw std::runtime_error(std::string("STOP!!!! please. (ugh!)"));
   return header;
 }
 
@@ -370,7 +350,7 @@ bool endsWith(const V1 &sequence, const V2 &subSequence) {
 
 }
 
-std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file, const std::string fileName) {
+void LoadDNSEvent::parse_File(FileByteStream &file, const std::string fileName) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
 
@@ -387,14 +367,13 @@ std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file, const std::
 
   const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 1;
   // Split File:
-  std::vector<std::vector<uint8_t>> filechuncks;
-  auto elapsedTimeSplitting = MEASURE_MICRO_SECS({ filechuncks = split_File(file, threadCount);});
+  std::vector<std::vector<uint8_t>> filechuncks = split_File(file, threadCount);
   g_log.notice() << "filechuncks count = " << filechuncks.size() << std::endl;
 
    std::vector<EventAccumulator> eventAccumulators;
   eventAccumulators.resize(filechuncks.size());
   for (auto & evtAcc : eventAccumulators) {
-    evtAcc.neutronEvents.resize(960*128+24);
+    evtAcc.neutronEvents.resize(DETECTOR_PIXEL_COUNT);
   }
 
   g_log.notice() << "evtAcc.neutronEvents.size() = " << eventAccumulators[eventAccumulators.size()-1].neutronEvents.size() << std::endl;
@@ -412,39 +391,34 @@ std::pair<long, long> LoadDNSEvent::parse_File(FileByteStream &file, const std::
 
   g_log.notice() << "j = " << j << std::endl;
   // combine eventAccumulators:
-  auto elapsedTimeCombining =
-  MEASURE_MICRO_SECS(
-  {
-    PRAGMA_OMP(parallel num_threads(2)){
-      PARALLEL_SECTIONS {
-        // combine triggerEvents:
-        PARALLEL_SECTION {
-          auto origSize = _eventAccumulator.triggerEvents.size();
-          _eventAccumulator.triggerEvents.resize(std::accumulate(eventAccumulators.cbegin(), eventAccumulators.cend(), 0, [](const auto s, const auto &v){ return s + v.triggerEvents.size(); }));
-          for (const auto & evtAcc : eventAccumulators) {
-            std::memcpy(_eventAccumulator.triggerEvents.data() + origSize, evtAcc.triggerEvents.data(), evtAcc.triggerEvents.size());
-            origSize += evtAcc.triggerEvents.size();
-          }
+  PRAGMA_OMP(parallel num_threads(2)){
+    PARALLEL_SECTIONS {
+      // combine triggerEvents:
+      PARALLEL_SECTION {
+        auto origSize = _eventAccumulator.triggerEvents.size();
+        _eventAccumulator.triggerEvents.resize(std::accumulate(eventAccumulators.cbegin(), eventAccumulators.cend(), 0, [](const auto s, const auto &v){ return s + v.triggerEvents.size(); }));
+        for (const auto & evtAcc : eventAccumulators) {
+          std::memcpy(_eventAccumulator.triggerEvents.data() + origSize, evtAcc.triggerEvents.data(), evtAcc.triggerEvents.size());
+          origSize += evtAcc.triggerEvents.size();
         }
-        // combine neutronEvents:
-        PARALLEL_SECTION {
-          PARALLEL_FOR_NO_WSP_CHECK()
-          for (int i = 0; i < _eventAccumulator.neutronEvents.size(); ++i) {
-            auto origSize = _eventAccumulator.neutronEvents[i].size();
-            _eventAccumulator.neutronEvents[i].resize(std::accumulate(eventAccumulators.cbegin(), eventAccumulators.cend(), 0, [&](const auto s, const auto &v){ return s + v.neutronEvents[i].size(); }));
-            for (const auto & evtAcc : eventAccumulators) {
-              std::memcpy(_eventAccumulator.neutronEvents[i].data() + origSize, evtAcc.neutronEvents[i].data(), evtAcc.neutronEvents[i].size());
-              origSize += evtAcc.neutronEvents[i].size();
-            }
+      }
+      // combine neutronEvents:
+      PARALLEL_SECTION {
+        PARALLEL_FOR_NO_WSP_CHECK()
+        for (int i = 0; i < _eventAccumulator.neutronEvents.size(); ++i) {
+          auto origSize = _eventAccumulator.neutronEvents[i].size();
+          _eventAccumulator.neutronEvents[i].resize(std::accumulate(eventAccumulators.cbegin(), eventAccumulators.cend(), 0, [&](const auto s, const auto &v){ return s + v.neutronEvents[i].size(); }));
+          for (const auto & evtAcc : eventAccumulators) {
+            std::memcpy(_eventAccumulator.neutronEvents[i].data() + origSize, evtAcc.neutronEvents[i].data(), evtAcc.neutronEvents[i].size());
+            origSize += evtAcc.neutronEvents[i].size();
           }
         }
       }
     }
+  }
 
-  });
   //parse_BlockList(file, _eventAccumulator);
   //parse_EndSignature(file);
-  return {elapsedTimeSplitting, elapsedTimeCombining};
 }
 
 void LoadDNSEvent::parse_BlockList(VectorByteStream &file, EventAccumulator &eventAccumulator) {
