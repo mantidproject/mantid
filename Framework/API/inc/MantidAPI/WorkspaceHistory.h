@@ -82,6 +82,8 @@ private:
   void loadNestedHistory(
       ::NeXus::File *file,
       AlgorithmHistory_sptr parent = boost::shared_ptr<AlgorithmHistory>());
+  /// Perform a binary search for the passed value return the value
+  bool binarySearchAlgorithms(AlgorithmHistory_sptr algHistory);
   /// Parse an algorithm history string loaded from file
   AlgorithmHistory_sptr parseAlgorithmHistory(const std::string &rawData);
   /// Find the history entries at this level in the file.

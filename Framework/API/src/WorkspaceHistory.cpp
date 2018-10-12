@@ -19,14 +19,20 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using Mantid::Kernel::EnvironmentHistory;
 using boost::algorithm::split;
+using Mantid::Kernel::EnvironmentHistory;
 
 namespace Mantid {
 namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("WorkspaceHistory");
+struct AlgorithmHistorySearch {
+  bool operator()(const AlgorithmHistory_sptr &lhs,
+                  const AlgorithmHistory_sptr &rhs) {
+    return (*lhs) < (*rhs);
+  }
+};
 } // namespace
 
 /// Default Constructor
@@ -67,19 +73,19 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory,
   const AlgorithmHistories &otherAlgorithms =
       otherHistory.getAlgorithmHistories();
 
+  // Reserve maximum needed space
+  //m_algorithms.reserve(otherAlgorithms.size() + m_algorithms.size());
+
   // Add default boolean to false for file operations from ProcessFileNexus to
   // check for presence in the set already
   for (auto algHistory : otherAlgorithms) {
-    if (alwaysInsert) {
-      int counter = 0;
-      while (m_algorithms.find(algHistory) != m_algorithms.end() &&
-             counter < 1000) {
-        algHistory->increaseExecutionDate();
-        ++counter;
-      }
-    }
-    m_algorithms.insert(std::move(algHistory));
+    this->addHistory(algHistory, alwaysInsert);
   }
+  // Make sure that the vector is sorted
+  std::sort(m_algorithms.begin(), m_algorithms.end(),
+            [](AlgorithmHistory_sptr a, AlgorithmHistory_sptr b) -> bool {
+              return a->execCount() < b->execCount();
+            });         
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
@@ -89,14 +95,17 @@ void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory,
   // check for presence in the set already
   if (alwaysInsert) {
     int counter = 0;
-    while (m_algorithms.find(algHistory) != m_algorithms.end() &&
-           counter < 1000) {
+    while (binarySearchAlgorithms(algHistory) && counter < 1000) {
       algHistory->increaseExecutionDate();
       ++counter;
     }
   }
 
-  m_algorithms.insert(std::move(algHistory));
+  // Assume it is always sorted as algorithm history should only be inserted in
+  // the correct order
+  if (!binarySearchAlgorithms(algHistory)) {
+    m_algorithms.emplace_back(algHistory);
+  }
 }
 
 /*
@@ -457,6 +466,12 @@ boost::shared_ptr<HistoryView> WorkspaceHistory::createView() const {
 std::ostream &operator<<(std::ostream &os, const WorkspaceHistory &WH) {
   WH.printSelf(os);
   return os;
+}
+
+bool WorkspaceHistory::binarySearchAlgorithms(
+    AlgorithmHistory_sptr algHistory) {
+  return std::binary_search(m_algorithms.begin(), m_algorithms.end(),
+                            algHistory, AlgorithmHistorySearch());
 }
 
 } // namespace API

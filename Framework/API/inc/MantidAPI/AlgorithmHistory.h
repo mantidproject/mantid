@@ -27,23 +27,10 @@ class IAlgorithm;
 class Algorithm;
 class AlgorithmHistory;
 
-namespace Detail {
-// Written as a template in order to get around circular issue of CompareHistory
-// needing to know the implementation of AlgorithmHistory and AlgorithmHistory
-// needing to know the implementation of CompareHistory.
-template <class T> struct CompareHistory {
-  bool operator()(const boost::shared_ptr<T> &lhs,
-                  const boost::shared_ptr<T> &rhs) const {
-    return (*lhs) < (*rhs);
-  }
-};
-} // namespace Detail
-
 // typedefs for algorithm history pointers
 using AlgorithmHistory_sptr = boost::shared_ptr<AlgorithmHistory>;
 using AlgorithmHistory_const_sptr = boost::shared_ptr<const AlgorithmHistory>;
-using AlgorithmHistories =
-    std::set<AlgorithmHistory_sptr, Detail::CompareHistory<AlgorithmHistory>>;
+using AlgorithmHistories = std::vector<AlgorithmHistory_sptr>;
 
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
 
@@ -114,10 +101,11 @@ public:
                  const size_t maxPropertyLength = 0) const;
   /// Less than operator
   inline bool operator<(const AlgorithmHistory &other) const {
-    if (executionDate() == other.executionDate()) {
-      return name() < other.name();
-    } else
+    if (executionDate() == other.executionDate()){
+      return name() == other.name();
+    } else {
       return executionDate() < other.executionDate();
+    }
   }
   /// Equality operator
   inline bool operator==(const AlgorithmHistory &other) const {
@@ -135,8 +123,8 @@ public:
   void fillAlgorithmHistory(const Algorithm *const alg,
                             const Types::Core::DateAndTime &start,
                             const double &duration, std::size_t uexeccount);
-  /// Increment the execution date by 1 nano second
-  void increaseExecutionDate();
+  /// Increment the execution date by 1 or the defined amount of nano seconds
+  void increaseExecutionDate(const int64_t nanosecondIncrement = 1);
   // Allow Algorithm::execute to change the exec count & duration after the
   // algorithm was executed
   friend class Algorithm;

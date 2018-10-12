@@ -54,12 +54,6 @@ public:
     TS_ASSERT_EQUALS(AH, AH);
   }
 
-  void test_Less_Than_Returns_True_For_If_Execution_Order_Is_Lower() {
-    AlgorithmHistory first = createTestHistory();
-    AlgorithmHistory second = createTestHistory();
-    TS_ASSERT_LESS_THAN(first, second);
-  }
-
   void test_getPropertyValue() {
     AlgorithmHistory alg = createTestHistory();
     TS_ASSERT_EQUALS(alg.getPropertyValue("arg1_param"), "y");
@@ -232,12 +226,17 @@ private:
     testInput->setPropertyValue("arg1_param", paramValue);
     AlgorithmHistory history(testInput, 1, -1.0, m_execCount++);
 
+    // Incrementing the execution date actually means they are unique, a
+    // requirement of the std::set used for algorithm history
+    history.increaseExecutionDate(++m_executionDate);
     delete testInput;
     return history;
   }
 
   std::string m_correctOutput;
   size_t m_execCount;
+  static int64_t m_executionDate;
 };
+int64_t AlgorithmHistoryTest::m_executionDate = 0;
 
 #endif /* ALGORITHMHISTORYTEST_H_*/

@@ -65,13 +65,13 @@ private:
   };
 
 public:
-  void test_New_History_Is_Empty() {
+  void xtest_New_History_Is_Empty() {
     WorkspaceHistory history;
     TS_ASSERT_EQUALS(history.size(), 0);
     TS_ASSERT_EQUALS(history.empty(), true);
   }
 
-  void test_Adding_History_Entry() {
+  void xtest_Adding_History_Entry() {
     WorkspaceHistory history;
     TS_ASSERT_EQUALS(history.size(), 0);
     TS_ASSERT_EQUALS(history.empty(), true);
@@ -130,7 +130,7 @@ public:
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum2", 1);
   }
 
-  void test_Empty_History_Throws_When_Retrieving_Attempting_To_Algorithms() {
+  void xtest_Empty_History_Throws_When_Retrieving_Attempting_To_Algorithms() {
     WorkspaceHistory emptyHistory;
     TS_ASSERT_THROWS(emptyHistory.lastAlgorithm(), std::out_of_range);
     TS_ASSERT_THROWS(emptyHistory.getAlgorithm(1), std::out_of_range);
@@ -139,6 +139,14 @@ public:
 
 class WorkspaceHistoryTestPerformance : public CxxTest::TestSuite {
 public:
+  WorkspaceHistoryTestPerformance(){
+    constructAlgHistories(); 
+  }
+
+  void setUp() override { 
+    m_wsHist.clearHistory();
+  }
+
   void test_Wide_History() {
     int depth = 3;
     int width = 50;
@@ -156,6 +164,19 @@ public:
     m_wsHist.addHistory(std::move(algHist));
   }
 
+  void test_standard_insertion_500000_times() {
+    for (auto i = 0u; i < 500000; ++i) {
+      m_wsHist.addHistory(m_1000000Histories[i]);
+    }
+  }
+
+  void test_standard_insertion_1000000_times(){
+    for (auto i = 0u; i < 1000000; ++i) {
+      m_wsHist.addHistory(m_1000000Histories[i]);
+    }
+  }
+
+private:
   void build_Algorithm_History(AlgorithmHistory &parent, int width,
                                int depth = 0) {
     if (depth > 0) {
@@ -167,8 +188,15 @@ public:
     }
   }
 
-private:
+  void constructAlgHistories(){
+    for (auto i =1u; i < 1000001; ++i){
+      auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", i);
+      m_1000000Histories.emplace_back(std::move(algHist));
+    }
+  }
+
   Mantid::API::WorkspaceHistory m_wsHist;
+  std::vector<AlgorithmHistory_sptr> m_1000000Histories;
 };
 
 #endif

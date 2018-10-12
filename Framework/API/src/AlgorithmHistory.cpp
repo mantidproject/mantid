@@ -21,6 +21,15 @@ using Kernel::PropertyHistory_const_sptr;
 using Kernel::PropertyHistory_sptr;
 using Types::Core::DateAndTime;
 
+namespace Detail {
+struct AlgorithmHistorySearch {
+  bool operator()(const AlgorithmHistory_sptr &lhs,
+                  const AlgorithmHistory_sptr &rhs) const {
+    return (*lhs) < (*rhs);
+  }
+};
+} // namespace Detail
+
 /** Constructor
  *  @param alg ::      A pointer to the algorithm for which the history should
  * be constructed
@@ -143,7 +152,16 @@ void AlgorithmHistory::addChildHistory(AlgorithmHistory_sptr childHist) {
     return;
   }
 
-  m_childHistories.insert(childHist);
+  if (!std::binary_search(m_childHistories.begin(), m_childHistories.end(),
+                          childHist, Detail::AlgorithmHistorySearch())) {
+    m_childHistories.emplace_back(childHist);
+
+    // Make sure that the vector is sorted
+    std::sort(m_childHistories.begin(), m_childHistories.end(),
+              [](AlgorithmHistory_sptr a, AlgorithmHistory_sptr b) -> bool {
+                return a->execCount() < b->execCount();
+              });
+  }
 }
 
 /*
@@ -294,8 +312,8 @@ void AlgorithmHistory::saveNexus(::NeXus::File *file, int &algCount) const {
 /**
  * Increases the execution date by 1 nanosecond
  */
-void AlgorithmHistory::increaseExecutionDate() {
-  const int64_t nanosecondIncrement = 1;
+void AlgorithmHistory::increaseExecutionDate(
+    const int64_t nanosecondIncrement) {
   m_executionDate += nanosecondIncrement;
 }
 
