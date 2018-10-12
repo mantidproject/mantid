@@ -145,6 +145,7 @@ void SpecularReflectionPositionCorrect2::init() {
       "A direct beam workspace for reference.");
 }
 
+/// Validate the algorithm's inputs.
 std::map<std::string, std::string>
 SpecularReflectionPositionCorrect2::validateInputs() {
   std::map<std::string, std::string> issues;
@@ -182,30 +183,16 @@ void SpecularReflectionPositionCorrect2::exec() {
     outWS = inWS->clone();
   }
   // Sample
-  V3D samplePosition;
-  const std::string sampleName = getProperty("SampleComponentName");
-  auto inst = outWS->getInstrument();
-  IComponent_const_sptr sample = inst->getComponentByName(sampleName);
-  if (sample)
-    samplePosition = sample->getPos();
-  else
-    samplePosition = inWS->spectrumInfo().samplePosition();
+  const V3D samplePosition = declareSamplePosition(*inWS);
 
   // Type of movement (vertical shift or rotation around the sample)
   const std::string correctionType = getProperty("DetectorCorrectionType");
   // Detector
+  auto inst = inWS->getInstrument();
   const int detectorID = getProperty("DetectorID");
   const std::string detectorName = getProperty("DetectorComponentName");
-  IComponent_const_sptr detector;
-  if (detectorName.empty()) {
-    detector = inst->getDetector(detectorID);
-  } else {
-    detector = inst->getComponentByName(detectorName);
-    if (!detector)
-      throw Exception::NotFoundError("Detector component not found",
-                                     detectorName);
-  }
-  const V3D detectorPosition = detector->getPos();
+  const V3D detectorPosition =
+      declareDetectorPosition(*inst, detectorName, detectorID);
 
   // Sample-to-detector
   const V3D sampleToDetector = detectorPosition - samplePosition;
@@ -214,47 +201,41 @@ void SpecularReflectionPositionCorrect2::exec() {
   const auto alongDir = referenceFrame->vecPointingAlongBeam();
   const double beamOffsetOld = sampleToDetector.scalar_prod(alongDir);
 
-  double twoThetaInRad;
-  if (!isDefault("TwoTheta")) {
-    twoThetaInRad = static_cast<double>(getProperty("TwoTheta")) * M_PI / 180.0;
-    if (!isDefault("LinePosition")) {
-      const double linePosition = getProperty("LinePosition");
-      const double pixelSize = getProperty("PixelSize");
-      const double offset =
-          offsetAngleFromCentre(*inWS, l2, linePosition, pixelSize);
-      twoThetaInRad -= offset;
-    }
-  } else {
-    MatrixWorkspace_sptr directWS = getProperty("DirectLineWorkspace");
-    const double directLinePosition = getProperty("DirectLinePosition");
-    const double pixelSize = getProperty("PixelSize");
-    const double directOffset =
-        offsetAngleFromCentre(*directWS, l2, directLinePosition, pixelSize);
-    const auto reflectedDetectorAngle = std::acos(beamOffsetOld / l2);
-    auto directInst = directWS->getInstrument();
-    IComponent_const_sptr directDet;
-    if (detectorName.empty()) {
-      directDet = directInst->getDetector(detectorID);
-    } else {
-      directDet = inst->getComponentByName(detectorName);
-      if (!detector)
-        throw Exception::NotFoundError(
-            "DirectLineWorkspace: Detector component not found", detectorName);
-    }
-    const auto directDetPos = directDet->getPos();
-    const auto directSampleToDet = directDetPos - samplePosition;
-    const double directBeamOffset = directSampleToDet.scalar_prod(alongDir);
-    const double directL2 = directSampleToDet.norm();
-    const auto directDetectorAngle = std::acos(directBeamOffset / directL2);
-    twoThetaInRad = reflectedDetectorAngle - directDetectorAngle - directOffset;
-  }
+  const double twoThetaInRad =
+      isDefault("TwoTheta")
+          ? twoThetaFromDirectLine(detectorName, detectorID, samplePosition, l2,
+                                   alongDir, beamOffsetOld)
+          : twoThetaFromProperties(*inWS, l2);
 
-  // Reference frame
-  const auto beamAxis = referenceFrame->pointingAlongBeamAxis();
-  const auto horizontalAxis = referenceFrame->pointingHorizontalAxis();
-  const auto upAxis = referenceFrame->pointingUpAxis();
-  const auto thetaSignDir = referenceFrame->vecThetaSign();
-  const auto upDir = referenceFrame->vecPointingUp();
+  correctDetectorPosition(outWS, detectorName, detectorID, twoThetaInRad,
+                          correctionType, *referenceFrame, samplePosition,
+                          sampleToDetector, beamOffsetOld);
+  setProperty("OutputWorkspace", outWS);
+}
+
+/**
+ * Move and rotate the detector to its correct position
+ * @param outWS the workspace to modify
+ * @param detectorName name of the detector component
+ * @param detectorID detector component's id
+ * @param twoThetaInRad beam-detector angle in radians
+ * @param correctionType type of correction
+ * @param referenceFrame instrument's reference frame
+ * @param samplePosition sample position
+ * @param sampleToDetector a vector from sample to detector
+ * @param beamOffsetOld sample detector distance on the beam axis
+ */
+void SpecularReflectionPositionCorrect2::correctDetectorPosition(
+    MatrixWorkspace_sptr &outWS, const std::string &detectorName,
+    const int detectorID, const double twoThetaInRad,
+    const std::string &correctionType, const ReferenceFrame &referenceFrame,
+    const V3D &samplePosition, const V3D &sampleToDetector,
+    const double beamOffsetOld) {
+  const auto beamAxis = referenceFrame.pointingAlongBeamAxis();
+  const auto horizontalAxis = referenceFrame.pointingHorizontalAxis();
+  const auto upAxis = referenceFrame.pointingUpAxis();
+  const auto thetaSignDir = referenceFrame.vecThetaSign();
+  const auto upDir = referenceFrame.vecPointingUp();
   const auto plane = thetaSignDir.scalar_prod(upDir) == 1. ? Plane::vertical
                                                            : Plane::horizontal;
 
@@ -283,7 +264,7 @@ void SpecularReflectionPositionCorrect2::exec() {
   const double perpendicularOffset = beamOffset * std::tan(twoThetaInRad);
   const double beamOffsetFromOrigin =
       beamOffset +
-      samplePosition.scalar_prod(referenceFrame->vecPointingAlongBeam());
+      samplePosition.scalar_prod(referenceFrame.vecPointingAlongBeam());
 
   auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
   moveAlg->setProperty("Workspace", outWS);
@@ -316,7 +297,7 @@ void SpecularReflectionPositionCorrect2::exec() {
       rotate->setProperty("Y", upDir.Y());
       rotate->setProperty("Z", upDir.Z());
     } else {
-      const V3D horizontalDir = -referenceFrame->vecPointingHorizontal();
+      const V3D horizontalDir = -referenceFrame.vecPointingHorizontal();
       rotate->setProperty("X", horizontalDir.X());
       rotate->setProperty("Y", horizontalDir.Y());
       rotate->setProperty("Z", horizontalDir.Z());
@@ -325,8 +306,99 @@ void SpecularReflectionPositionCorrect2::exec() {
     rotate->setProperty("Angle", twoThetaInRad * 180. / M_PI);
     rotate->execute();
   }
+}
 
-  setProperty("OutputWorkspace", outWS);
+/**
+ * Return the detector's position
+ * @param inst an instrument
+ * @param detectorName detector component's name
+ * @param detectorID detector's id
+ * @return a position
+ */
+Kernel::V3D SpecularReflectionPositionCorrect2::declareDetectorPosition(
+    const Geometry::Instrument &inst, const std::string &detectorName,
+    const int detectorID) {
+  // Detector
+  IComponent_const_sptr detector;
+  if (detectorName.empty()) {
+    detector = inst.getDetector(detectorID);
+  } else {
+    detector = inst.getComponentByName(detectorName);
+    if (!detector)
+      throw Exception::NotFoundError("Detector component not found",
+                                     detectorName);
+  }
+  return detector->getPos();
+}
+
+/**
+ * Return the sample position
+ * @param ws a workspace
+ * @return a position
+ */
+V3D SpecularReflectionPositionCorrect2::declareSamplePosition(
+    const MatrixWorkspace &ws) {
+  V3D position;
+  const std::string sampleName = getProperty("SampleComponentName");
+  auto inst = ws.getInstrument();
+  IComponent_const_sptr sample = inst->getComponentByName(sampleName);
+  if (sample)
+    position = sample->getPos();
+  else
+    position = ws.spectrumInfo().samplePosition();
+  return position;
+}
+
+/**
+ * Return the user-given TwoTheta, augmented by LinePosition if needed
+ * @param inWS the input workspace
+ * @param l2 sample-to-detector distance
+ * @return TwoTheta, in radians
+ */
+double SpecularReflectionPositionCorrect2::twoThetaFromProperties(
+    const MatrixWorkspace &inWS, const double l2) {
+  double twoThetaInRad =
+      static_cast<double>(getProperty("TwoTheta")) * M_PI / 180.0;
+  if (!isDefault("LinePosition")) {
+    const double linePosition = getProperty("LinePosition");
+    const double pixelSize = getProperty("PixelSize");
+    const double offset =
+        offsetAngleFromCentre(inWS, l2, linePosition, pixelSize);
+    twoThetaInRad -= offset;
+  }
+  return twoThetaInRad;
+}
+
+/**
+ * Return a direct beam calibrated TwoTheta
+ * @param detectorName name of the detector component
+ * @param detectorID detector's id
+ * @param samplePosition sample position
+ * @param l2 sample-to-detector distance
+ * @param alongDir a unit vector pointing along the beam
+ * @param beamOffset sample-to-detector distance on the beam axis
+ * @return TwoTheta, in radians
+ */
+double SpecularReflectionPositionCorrect2::twoThetaFromDirectLine(
+    const std::string &detectorName, const int detectorID,
+    const V3D &samplePosition, const double l2, const V3D &alongDir,
+    const double beamOffset) {
+  double twoThetaInRad;
+  MatrixWorkspace_sptr directWS = getProperty("DirectLineWorkspace");
+  const double directLinePosition = getProperty("DirectLinePosition");
+  const double pixelSize = getProperty("PixelSize");
+  const double directOffset =
+      offsetAngleFromCentre(*directWS, l2, directLinePosition, pixelSize);
+  const auto reflectedDetectorAngle = std::acos(beamOffset / l2);
+  auto directInst = directWS->getInstrument();
+  const auto directDetPos =
+      declareDetectorPosition(*directInst, detectorName, detectorID);
+  const auto directSampleToDet = directDetPos - samplePosition;
+  const double directBeamOffset = directSampleToDet.scalar_prod(alongDir);
+  const double directL2 = directSampleToDet.norm();
+  const auto directDetectorAngle = std::acos(directBeamOffset / directL2);
+  twoThetaInRad = reflectedDetectorAngle - directDetectorAngle - directOffset;
+  return twoThetaInRad;
 }
 
 } // namespace Algorithms

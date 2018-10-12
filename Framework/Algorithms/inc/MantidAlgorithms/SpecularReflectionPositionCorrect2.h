@@ -10,12 +10,20 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
+namespace Geometry {
+class Instrument;
+class ReferenceFrame;
+} // namespace Geometry
+namespace Kernel {
+class V3D;
+}
 namespace Algorithms {
 
 /** SpecularReflectionPositionCorrect : Algorithm to perform position
 corrections based on the specular reflection condition. Version 2.
 */
-class DLLExport SpecularReflectionPositionCorrect2 final : public API::Algorithm {
+class DLLExport SpecularReflectionPositionCorrect2 final
+    : public API::Algorithm {
 public:
   /// Name of this algorithm
   const std::string name() const override;
@@ -33,6 +41,25 @@ private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
+  void correctDetectorPosition(API::MatrixWorkspace_sptr &outWS,
+                               const std::string &detectorName,
+                               const int detectorID, const double twoThetaInRad,
+                               const std::string &correctionType,
+                               const Geometry::ReferenceFrame &referenceFrame,
+                               const Kernel::V3D &samplePosition,
+                               const Kernel::V3D &sampleToDetector,
+                               const double beamOffsetOld);
+  static Kernel::V3D declareDetectorPosition(const Geometry::Instrument &inst,
+                                             const std::string &detectorName,
+                                             const int detectorID);
+  Kernel::V3D declareSamplePosition(const API::MatrixWorkspace &ws);
+  double twoThetaFromProperties(const API::MatrixWorkspace &inWS,
+                                const double l2);
+  double twoThetaFromDirectLine(const std::string &detectorName,
+                                const int detectorID,
+                                const Kernel::V3D &samplePosition,
+                                const double l2, const Kernel::V3D &alongDir,
+                                const double beamOffset);
 };
 
 } // namespace Algorithms
