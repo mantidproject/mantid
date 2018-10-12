@@ -28,12 +28,9 @@ class MplFigureCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
-
-        FigureCanvas.updateGeometry(self)
-
-        return
+        self.setSizePolicy(QSizePolicy.Expanding,
+                           QSizePolicy.Expanding)
+        self.updateGeometry()
 
     def plot(self, x, y):
         """ Plot a set of data
@@ -44,8 +41,6 @@ class MplFigureCanvas(FigureCanvas):
         self.x = x
         self.y = y
         self.axes.plot(self.x, self.y)
-
-        return
 
     def getPlot(self):
         """ return figure's axes to expose the matplotlib figure to PyQt client
