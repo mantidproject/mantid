@@ -596,11 +596,11 @@ void SCDCalibratePanels::saveXmlFile(
 
     Quat relRot = bank->getRelativeRot();
 
-    std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");
+    std::vector<double> relRotAngles = relRot.getEulerAngles("YZY");
 
-    writeXmlParameter(oss3, "rotx", relRotAngles[0]);
-    writeXmlParameter(oss3, "roty", relRotAngles[1]);
-    writeXmlParameter(oss3, "rotz", relRotAngles[2]);
+    writeXmlParameter(oss3, "roty", relRotAngles[0]);
+    writeXmlParameter(oss3, "rotz", relRotAngles[1]);
+    writeXmlParameter(oss3, "roty", relRotAngles[2]);
 
     V3D pos1 = bank->getRelativePos();
     writeXmlParameter(oss3, "x", pos1.X());

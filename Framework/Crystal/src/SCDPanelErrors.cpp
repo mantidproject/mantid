@@ -108,8 +108,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
     algx->setLogging(false);
     algx->setProperty<Workspace_sptr>("Workspace", inputW);
     algx->setPropertyValue("ComponentName", detname);
-    algx->setProperty("X", 1.0);
-    algx->setProperty("Y", 0.0);
+    algx->setProperty("X", 0.0);
+    algx->setProperty("Y", 1.0);
     algx->setProperty("Z", 0.0);
     algx->setProperty("Angle", rotx);
     algx->setPropertyValue("RelativeRotation", "1");
@@ -125,8 +125,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
     algy->setProperty<Workspace_sptr>("Workspace", inputW);
     algy->setPropertyValue("ComponentName", detname);
     algy->setProperty("X", 0.0);
-    algy->setProperty("Y", 1.0);
-    algy->setProperty("Z", 0.0);
+    algy->setProperty("Y", 0.0);
+    algy->setProperty("Z", 1.0);
     algy->setProperty("Angle", roty);
     algy->setPropertyValue("RelativeRotation", "1");
     algy->execute();
@@ -141,8 +141,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
     algz->setProperty<Workspace_sptr>("Workspace", inputW);
     algz->setPropertyValue("ComponentName", detname);
     algz->setProperty("X", 0.0);
-    algz->setProperty("Y", 0.0);
-    algz->setProperty("Z", 1.0);
+    algz->setProperty("Y", 1.0);
+    algz->setProperty("Z", 0.0);
     algz->setProperty("Angle", rotz);
     algz->setPropertyValue("RelativeRotation", "1");
     algz->execute();
@@ -182,11 +182,12 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
 
   setupData();
 
+  boost::shared_ptr<API::Workspace> cloned = m_workspace->clone();
   moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex,
-               scaley, m_bank, m_workspace);
+               scaley, m_bank, cloned);
 
   auto inputP =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(cloned);
   auto inst = inputP->getInstrument();
   Geometry::OrientedLattice lattice =
       inputP->mutableSample().getOrientedLattice();
@@ -214,8 +215,6 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
       out[i * 3 + 2] = std::numeric_limits<double>::infinity();
     }
   }
-  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate,
-               1.0 / scalex, 1.0 / scaley, m_bank, m_workspace);
 }
 
 /**

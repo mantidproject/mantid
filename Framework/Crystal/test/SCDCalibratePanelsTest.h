@@ -61,9 +61,9 @@ public:
     TS_ASSERT_DELTA(-0.0050, results->cell<double>(0, 1), 1e-3);
     TS_ASSERT_DELTA(0.0013, results->cell<double>(1, 1), 4e-4);
     TS_ASSERT_DELTA(0.0008, results->cell<double>(2, 1), 3e-4);
-    TS_ASSERT_DELTA(0.0, results->cell<double>(3, 1), 1.2);
+    TS_ASSERT_DELTA(26.03, results->cell<double>(3, 1), 1.2);
     TS_ASSERT_DELTA(0.0, results->cell<double>(4, 1), 1.1);
-    TS_ASSERT_DELTA(0.1133, results->cell<double>(5, 1), 0.36);
+    TS_ASSERT_DELTA(-27.11, results->cell<double>(5, 1), 0.36);
     TS_ASSERT_DELTA(1.0024, results->cell<double>(6, 1), 5e-3);
     TS_ASSERT_DELTA(0.9986, results->cell<double>(7, 1), 1e-2);
     TS_ASSERT_DELTA(0.2710, results->cell<double>(9, 1), 0.2);

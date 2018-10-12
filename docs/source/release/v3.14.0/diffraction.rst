@@ -34,6 +34,7 @@ Improvements
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
   data streaming from TOPAZ new Adara data server.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` now rotates the panels with YZY rotations and clones the workspace instead of removing rotations.
 
 Bugfixes
 ########
