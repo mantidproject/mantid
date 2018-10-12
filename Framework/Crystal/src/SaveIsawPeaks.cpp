@@ -333,7 +333,8 @@ void SaveIsawPeaks::exec() {
           } else {
             maxPeakNumb = std::max(maxPeakNumb, p.getPeakNumber());
             int peakNumber = p.getPeakNumber();
-            if (append) peakNumber =+ appendPeakNumb;
+            if (append)
+              peakNumber = +appendPeakNumb;
             out << "3" << std::setw(7) << peakNumber;
           }
 
