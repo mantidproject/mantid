@@ -60,9 +60,6 @@ void debug(Logger *self, const boost::python::object &message) {
 void export_Logger() {
   register_ptr_to_python<boost::shared_ptr<Logger>>();
 
-  // To distinguish between the overloaded functions
-  using LogLevelFunction = void (Logger::*)(const std::string &);
-
   class_<Logger, boost::noncopyable>(
       "Logger", init<std::string>((arg("self"), arg("name"))))
       .def("__init__",
