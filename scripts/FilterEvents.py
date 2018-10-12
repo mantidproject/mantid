@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 import sys
 from gui_helper import set_matplotlib_backend, get_qapplication

@@ -9,11 +9,13 @@ from qtpy.QtWidgets import (QApplication)  # noqa
 import matplotlib
 import sys
 
+
 def set_matplotlib_backend():
     '''MUST be called before anything tries to use matplotlib
 
-    This will set the backend if it hasn't been already. It also returns the name of the backend to be the name to
-    be used for importing the correct matplotlib widgets.'''
+    This will set the backend if it hasn't been already. It also returns
+    the name of the backend to be the name to be used for importing the
+    correct matplotlib widgets.'''
     backend = matplotlib.get_backend()
     if backend.startswith('module://'):
         if backend.endswith('qt4agg'):
@@ -31,10 +33,11 @@ def set_matplotlib_backend():
         matplotlib.use(backend)
     return backend
 
+
 def get_qapplication():
     '''
     app, within_mantid = get_qapplication()
-    reducer = eventFilterGUI.MainWindow() #the main ui class in this file is called MainWindow
+    reducer = eventFilterGUI.MainWindow()  # the main ui class in this file
     reducer.show()
     if not within_mantid:
         sys.exit(app.exec_())'''
@@ -43,5 +46,3 @@ def get_qapplication():
         return app, app.applicationName().lower().startswith('mantid')
     else:
         return QApplication(sys.argv), False
-
-
