@@ -127,7 +127,7 @@ void SaveIsawPeaks::exec() {
     throw std::runtime_error(
         "No instrument in PeaksWorkspace. Cannot save peaks file.");
 
-  if (bankPart != "bank" && bankPart != "WISH" && bankPart != "?") {
+  if (bankPart != "bank" && bankPart != "WISHpanel" && bankPart != "?") {
     std::ostringstream mess;
     mess << "Detector module of type " << bankPart
          << " not supported in ISAWPeaks. Cannot save peaks file";

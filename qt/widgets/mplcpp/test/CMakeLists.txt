@@ -4,15 +4,20 @@
 set ( TEST_FILES
   ArtistTest.h
   AxesTest.h
-  ColorsTest.h
   ColormapTest.h
   FigureTest.h
-  FigureCanvasQtTest.h
   Line2DTest.h
   ScalarMappableTest.h
-  SipTest.h
 )
 
+if ( NOT APPLE )
+  list ( APPEND TEST_FILES
+    ColorsTest.h
+    FigureCanvasQtTest.h
+    SipTest.h
+  )
+endif()
+  
 set (CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/MplCppTestInitialization.h)
 
 mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsMplCppTest

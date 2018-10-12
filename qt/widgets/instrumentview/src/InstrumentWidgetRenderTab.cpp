@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
@@ -45,6 +46,45 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
     : InstrumentWidgetTab(instrWindow) {
   QVBoxLayout *renderControlsLayout = new QVBoxLayout(this);
 
+  connectInstrumentWidgetSignals();
+
+  setupSurfaceTypeOptions();
+
+  // Save image control
+  mSaveImage = new QPushButton(tr("Save image"));
+  mSaveImage->setToolTip("Save the instrument image to a file");
+  connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
+
+  auto *displaySettings = setupDisplaySettings();
+
+  QFrame *axisViewFrame = setupAxisFrame();
+
+  setupColorMapWidget();
+
+  QHBoxLayout *unwrappedControlsLayout = new QHBoxLayout;
+  setupUnwrappedControls(unwrappedControlsLayout);
+
+  m_autoscaling = new QCheckBox("Autoscaling", this);
+  m_autoscaling->setChecked(true);
+  connect(m_autoscaling, SIGNAL(toggled(bool)), this,
+          SLOT(setColorMapAutoscaling(bool)));
+
+  // layout
+  renderControlsLayout->addWidget(m_surfaceTypeButton);
+  renderControlsLayout->addLayout(unwrappedControlsLayout);
+  renderControlsLayout->addWidget(axisViewFrame);
+  renderControlsLayout->addWidget(displaySettings);
+  renderControlsLayout->addWidget(mSaveImage);
+  renderControlsLayout->addWidget(m_colorMapWidget);
+  renderControlsLayout->addWidget(m_autoscaling);
+
+  // Add GridBank Controls if Grid bank present
+  setupGridBankMenu(renderControlsLayout);
+}
+
+InstrumentWidgetRenderTab::~InstrumentWidgetRenderTab() {}
+
+void InstrumentWidgetRenderTab::connectInstrumentWidgetSignals() const {
   // Connect to InstrumentWindow signals
   connect(m_instrWidget, SIGNAL(surfaceTypeChanged(int)), this,
           SLOT(surfaceTypeChanged(int)));
@@ -62,7 +102,9 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
           SLOT(nthPowerChanged(double)));
   connect(m_instrWidget, SIGNAL(glOptionChanged(bool)), this,
           SLOT(glOptionChanged(bool)));
+}
 
+void InstrumentWidgetRenderTab::setupSurfaceTypeOptions() {
   // Surface type controls
   m_surfaceTypeButton = new QPushButton("Render mode", this);
   m_surfaceTypeButton->setToolTip("Set render mode");
@@ -120,12 +162,9 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
           SLOT(showMenuToolTip(QAction *)));
 
   m_surfaceTypeButton->setMenu(renderModeMenu);
+}
 
-  // Save image control
-  mSaveImage = new QPushButton(tr("Save image"));
-  mSaveImage->setToolTip("Save the instrument image to a file");
-  connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
-
+QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
   // Setup Display Setting menu
   QPushButton *displaySettings = new QPushButton("Display Settings", this);
   QMenu *displaySettingsMenu = new QMenu(this);
@@ -186,8 +225,10 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   connect(displaySettingsMenu, SIGNAL(hovered(QAction *)), this,
           SLOT(showMenuToolTip(QAction *)));
 
-  QFrame *axisViewFrame = setupAxisFrame();
+  return displaySettings;
+}
 
+void InstrumentWidgetRenderTab::setupColorMapWidget() {
   // Colormap widget
   m_colorMapWidget = new DraggableColorBarWidget(0, this);
   connect(m_colorMapWidget, SIGNAL(scaleTypeChanged(int)), m_instrWidget,
@@ -198,7 +239,10 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
           SLOT(changeColorMapMinValue(double)));
   connect(m_colorMapWidget, SIGNAL(maxValueChanged(double)), m_instrWidget,
           SLOT(changeColorMapMaxValue(double)));
+}
 
+void InstrumentWidgetRenderTab::setupUnwrappedControls(
+    QHBoxLayout *parentLayout) {
   m_flipCheckBox = new QCheckBox("Flip view", this);
   m_flipCheckBox->setToolTip("Flip the instrument view horizontally");
   m_flipCheckBox->setChecked(false);
@@ -211,26 +255,42 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   m_peakOverlaysButton->hide();
   m_peakOverlaysButton->setMenu(createPeaksMenu());
 
-  QHBoxLayout *unwrappedControlsLayout = new QHBoxLayout;
-  unwrappedControlsLayout->addWidget(m_flipCheckBox);
-  unwrappedControlsLayout->addWidget(m_peakOverlaysButton);
-
-  m_autoscaling = new QCheckBox("Autoscaling", this);
-  m_autoscaling->setChecked(true);
-  connect(m_autoscaling, SIGNAL(toggled(bool)), this,
-          SLOT(setColorMapAutoscaling(bool)));
-
-  // layout
-  renderControlsLayout->addWidget(m_surfaceTypeButton);
-  renderControlsLayout->addLayout(unwrappedControlsLayout);
-  renderControlsLayout->addWidget(axisViewFrame);
-  renderControlsLayout->addWidget(displaySettings);
-  renderControlsLayout->addWidget(mSaveImage);
-  renderControlsLayout->addWidget(m_colorMapWidget);
-  renderControlsLayout->addWidget(m_autoscaling);
+  parentLayout->addWidget(m_flipCheckBox);
+  parentLayout->addWidget(m_peakOverlaysButton);
 }
 
-InstrumentWidgetRenderTab::~InstrumentWidgetRenderTab() {}
+void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
+  const auto &actor = m_instrWidget->getInstrumentActor();
+
+  if (!actor.hasGridBank())
+    return;
+
+  m_layerSlide = new QSlider(Qt::Orientation::Horizontal, this);
+  m_layerCheck = new QCheckBox("Show Single Layer", this);
+  m_layerDisplay = new QLabel("0", this);
+
+  m_layerSlide->setRange(0,
+                         static_cast<int>(actor.getNumberOfGridLayers() - 1));
+  m_layerSlide->setSingleStep(1);
+  m_layerSlide->setPageStep(1);
+  m_layerSlide->setSliderPosition(0);
+  m_layerSlide->setEnabled(false);
+  m_layerCheck->setChecked(false);
+
+  connect(m_layerCheck, SIGNAL(toggled(bool)), this,
+          SLOT(toggleLayerDisplay(bool)));
+  connect(m_layerSlide, SIGNAL(valueChanged(int)), this,
+          SLOT(setVisibleLayer(int)));
+  connect(m_layerSlide, SIGNAL(valueChanged(int)), m_layerDisplay,
+          SLOT(setNum(int)));
+  QHBoxLayout *voxelControlsLayout = new QHBoxLayout();
+  voxelControlsLayout->addWidget(m_layerCheck);
+  voxelControlsLayout->addWidget(m_layerSlide);
+  voxelControlsLayout->addWidget(m_layerDisplay);
+
+  parentLayout->addLayout(voxelControlsLayout);
+  m_usingLayerStore = false;
+}
 
 /** Sets up the controls and surrounding layout that allows uses to view the
  * instrument
@@ -284,6 +344,56 @@ void InstrumentWidgetRenderTab::enable3DSurface(bool on) {
     m_full3D->setToolTip(
         "Disabled: check \"Use OpenGL\" option in Display Settings to enable");
   }
+}
+
+/// Force the rendering of layers for banks containing vocel/grid detectors,
+/// only does this if not already in a forced state.
+void InstrumentWidgetRenderTab::forceLayers(bool on) {
+  auto &actor = m_instrWidget->getInstrumentActor();
+
+  if (!actor.hasGridBank())
+    return;
+
+  const auto &renderer = actor.getInstrumentRenderer();
+  if (on) {
+    // only force this state if not already enforced.
+    if (!m_layerCheck->isChecked() || m_layerCheck->isEnabled()) {
+      m_usingLayerStore = renderer.isUsingLayers();
+      m_layerCheck->setChecked(on);
+      toggleLayerDisplay(on);
+    }
+  } else {
+    toggleLayerDisplay(m_usingLayerStore);
+    m_layerCheck->setChecked(m_usingLayerStore);
+  }
+
+  // Checkbox disabled when forced so that all detectors are never drawn
+  m_layerCheck->setDisabled(on);
+}
+
+/// Toggles the display of Grid bank layers or all detectors in the instrument
+/// view.
+void InstrumentWidgetRenderTab::toggleLayerDisplay(bool on) {
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  m_layerSlide->setEnabled(on);
+  auto value = m_layerSlide->value();
+  actor.setGridLayer(on, value);
+  m_layerDisplay->setNum(value);
+  emit rescaleColorMap();
+}
+
+/// Select the Grid bank layer which will be displayed in the instrument view.
+void InstrumentWidgetRenderTab::setVisibleLayer(int layer) {
+  const auto &actor = m_instrWidget->getInstrumentActor();
+  actor.setGridLayer(true, layer);
+  const auto &renderer = actor.getInstrumentRenderer();
+  auto surfaceType = m_instrWidget->getSurfaceType();
+  // If in an unwrapped view the surface needs to be redrawn
+  if (renderer.isUsingLayers() &&
+      surfaceType != InstrumentWidget::SurfaceType::FULL3D)
+    m_instrWidget->resetSurface();
+
+  emit rescaleColorMap();
 }
 
 /**

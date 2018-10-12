@@ -117,6 +117,8 @@ void IndirectFitAnalysisTab::setup() {
 
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
+          SLOT(emitUpdateFitTypes()));
 
   connectDataAndSpectrumPresenters();
   connectDataAndPlotPresenters();
@@ -499,6 +501,14 @@ void IndirectFitAnalysisTab::addSpinnerFunctionGroup(
 void IndirectFitAnalysisTab::addComboBoxFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions) {
   m_fitPropertyBrowser->addComboBoxFunctionGroup(groupName, functions);
+}
+
+/**
+ * Removes all options from the Fit Type combo-box apart from the 'None' option
+ *
+ */
+void IndirectFitAnalysisTab::clearFitTypeComboBox() {
+  m_fitPropertyBrowser->clearFitTypeComboBox();
 }
 
 /**
@@ -963,6 +973,8 @@ void IndirectFitAnalysisTab::updateResultOptions() {
   setPlotResultEnabled(isFit);
   setSaveResultEnabled(isFit);
 }
+
+void IndirectFitAnalysisTab::emitUpdateFitTypes() { emit updateFitTypes(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces
