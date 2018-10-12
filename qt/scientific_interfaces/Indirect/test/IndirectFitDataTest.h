@@ -6,6 +6,7 @@
 #include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <iostream>
@@ -13,41 +14,16 @@
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace MantidQt::CustomInterfaces::IDA;
+using namespace Mantid::IndirectFitDataCreationHelper;
 
 namespace {
 
-IndirectFitData getIndirectFitData(std::size_t const &numberOfSpectra,
-                                   std::size_t const &numberOfBins) {
-  auto const workspace = WorkspaceCreationHelper::create2DWorkspace123(
-      numberOfSpectra, numberOfBins);
+IndirectFitData getIndirectFitData(int const &numberOfSpectra) {
+  auto const workspace = createWorkspace(numberOfSpectra);
   Spectra const spec = std::make_pair(0u, workspace->getNumberHistograms() - 1);
   IndirectFitData data(workspace, spec);
   return data;
 }
-
-/// Simple class to set up the ADS with the configuration required
-struct SetUpADSWithWorkspace {
-
-  SetUpADSWithWorkspace(std::string const &inputWSName,
-                        IndirectFitData const &data) {
-    AnalysisDataService::Instance().addOrReplace(inputWSName, data.workspace());
-  };
-
-  ~SetUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
-};
-
-/// This is used to compare Spectra which is implemented as a boost::variant
-struct AreSpectraEqual : public boost::static_visitor<bool> {
-
-  template <typename T, typename U>
-  bool operator()(const T &, const U &) const {
-    return false; // cannot compare different types
-  }
-
-  template <typename T> bool operator()(const T &lhs, const T &rhs) const {
-    return lhs == rhs;
-  }
-};
 
 } // namespace
 
@@ -60,7 +36,7 @@ public:
   static void destroySuite(IndirectFitDataTest *suite) { delete suite; }
 
   void test_data_is_instantiated() {
-    auto const workspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+    auto const workspace = createWorkspace(1);
     Spectra const spec =
         std::make_pair(0u, workspace->getNumberHistograms() - 1);
 
@@ -86,7 +62,7 @@ public:
 
   void
   test_that_DiscontinuousSpectra_is_sorted_before_being_stored_when_the_input_string_contains_overlapping_spectra() {
-    auto data = getIndirectFitData(11, 3);
+    auto data = getIndirectFitData(11);
 
     std::string const inputString = "8,0-7,6,10";
     Spectra const spectra = DiscontinuousSpectra<std::size_t>("0-8,10");
@@ -97,7 +73,7 @@ public:
 
   void
   test_that_DiscontinuousSpectra_is_sorted_before_being_stored_when_the_input_string_contains_an_invalid_spectra_range() {
-    auto data = getIndirectFitData(11, 3);
+    auto data = getIndirectFitData(11);
 
     std::string const inputString = "1,2,4-3,10";
     Spectra const spectra = DiscontinuousSpectra<std::size_t>("1-4,10");
@@ -108,7 +84,7 @@ public:
 
   void
   test_that_DiscontinuousSpectra_is_sorted_before_being_stored_when_the_input_string_contains_large_spaces() {
-    auto data = getIndirectFitData(11, 3);
+    auto data = getIndirectFitData(11);
 
     std::string const inputString = "  8,10,  7";
     Spectra const spectra = DiscontinuousSpectra<std::size_t>("7-8,10");
@@ -118,19 +94,17 @@ public:
   }
 
   void test_data_is_stored_in_the_ADS() {
-    auto const data = getIndirectFitData(1, 3);
-    SetUpADSWithWorkspace ads("WorkspaceName", data);
+    auto const data = getIndirectFitData(1);
+    SetUpADSWithWorkspace ads("WorkspaceName", data.workspace());
 
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("WorkspaceName"));
-    MatrixWorkspace_sptr workspace =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("WorkspaceName"));
+    TS_ASSERT(ads.doesExist("WorkspaceName"));
+    auto workspace = ads.retrieveWorkspace("WorkspaceName");
     TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 1);
   }
 
   void
   test_displayName_returns_a_valid_name_when_provided_a_rangeDelimiter_and_spectrum_number() {
-    auto const data = getIndirectFitData(1, 3);
+    auto const data = getIndirectFitData(1);
 
     std::vector<std::string> const formatStrings{
         "%1%_s%2%_Result", "%1%_f%2%,s%2%_Parameter", "%1%_s%2%_Parameter"};
@@ -146,9 +120,9 @@ public:
   }
 
   void test_displayName_removes_red_part_of_a_workspace_name() {
-    auto const data = getIndirectFitData(1, 3);
+    auto const data = getIndirectFitData(1);
 
-    SetUpADSWithWorkspace ads("Workspace_3456_red", data);
+    SetUpADSWithWorkspace ads("Workspace_3456_red", data.workspace());
     std::string const formatString = "%1%_s%2%_Result";
     std::string const rangeDelimiter = "_to_";
 
@@ -158,12 +132,12 @@ public:
 
   void
   test_that_the_number_of_spectra_returned_matches_the_instantiated_value() {
-    auto const data = getIndirectFitData(10, 3);
+    auto const data = getIndirectFitData(10);
     TS_ASSERT_EQUALS(data.numberOfSpectra(), 10);
   }
 
   void test_that_getSpectrum_returns_the_expected_spectrum_numbers() {
-    auto const data = getIndirectFitData(4, 3);
+    auto const data = getIndirectFitData(4);
 
     for (auto i = 0u; i < data.numberOfSpectra(); ++i) {
       std::size_t const spectrumNum = data.getSpectrum(i);
@@ -182,7 +156,7 @@ public:
 
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_spectra() {
-    auto const workspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+    auto const workspace = createWorkspace(1);
     DiscontinuousSpectra<std::size_t> const spec("");
     IndirectFitData const data(workspace, spec);
 
@@ -192,7 +166,7 @@ public:
   void
   test_that_false_is_returned_from_zeroSpectra_if_data_contains_one_or_more_spectra() {
     for (auto i = 1u; i < 10; ++i) {
-      auto const data = getIndirectFitData(i, 3);
+      auto const data = getIndirectFitData(i);
       TS_ASSERT_EQUALS(data.zeroSpectra(), false);
     }
   }
@@ -201,7 +175,7 @@ public:
   test_that_correct_excludeRegion_is_returned_when_regions_are_in_correct_order() {
     /// When each pair of numbers in the string are in order, then the whole
     /// string is in the correct order(unordered: 10,11 9,7 ordered:10,11,7,9)
-    auto data = getIndirectFitData(4, 3);
+    auto data = getIndirectFitData(4);
 
     data.setExcludeRegionString("1,8", 0);
     data.setExcludeRegionString("2,5", 1);
@@ -217,7 +191,7 @@ public:
   test_that_correct_excludeRegionVector_is_returned_when_regions_are_in_correct_order() {
     /// When each pair of numbers in the string are in order, then the whole
     /// string is in the correct order(unordered: 10,11 9,7 ordered:10,11,7,9)
-    auto data = getIndirectFitData(4, 3);
+    auto data = getIndirectFitData(4);
 
     data.setExcludeRegionString("1,8", 0);
     data.setExcludeRegionString("2,5", 1);
@@ -231,7 +205,7 @@ public:
 
   void test_that_excludeRegion_pairs_are_stored_in_an_order_of_low_to_high() {
     /// Example: unordered: 10,11 9,7     ordered: 10,11,7,9
-    auto data = getIndirectFitData(3, 3);
+    auto data = getIndirectFitData(3);
 
     data.setExcludeRegionString("6,2", 0);
     data.setExcludeRegionString("6,2,1,2,3,4,7,6", 1);
@@ -249,7 +223,7 @@ public:
 
   void
   test_that_excludeRegion_is_stored_without_spaces_when_there_are_many_spaces_in_input_string() {
-    auto data = getIndirectFitData(3, 3);
+    auto data = getIndirectFitData(3);
 
     data.setExcludeRegionString("  6,     2", 0);
     data.setExcludeRegionString("6,  2,1  ,2,  3,4  ,7,6", 1);
@@ -264,7 +238,7 @@ public:
 
   void
   test_that_setExcludeRegion_rounds_the_numbers_in_the_input_string_to_the_appropriate_decimal_place() {
-    auto data = getIndirectFitData(2, 3);
+    auto data = getIndirectFitData(2);
 
     data.setExcludeRegionString("6.29,2.93", 0);
     data.setExcludeRegionString("2.6,2.3,1.99,3.01", 1);
@@ -274,7 +248,7 @@ public:
   }
 
   void test_throws_when_setSpectra_is_provided_an_out_of_range_spectra() {
-    auto data = getIndirectFitData(10, 3);
+    auto data = getIndirectFitData(10);
 
     std::vector<Spectra> const spectraPairs{
         std::make_pair(0u, 11u), std::make_pair(0u, 1000000000000000000u),
@@ -289,7 +263,7 @@ public:
   }
 
   void test_no_throw_when_setSpectra_is_provided_a_valid_spectra() {
-    auto data = getIndirectFitData(10, 3);
+    auto data = getIndirectFitData(10);
 
     std::vector<Spectra> const spectraPairs{
         std::make_pair(0u, 9u), std::make_pair(4u, 4u), std::make_pair(7u, 4u)};
@@ -304,7 +278,7 @@ public:
 
   void
   test_no_throw_when_setStartX_is_provided_a_valid_xValue_and_spectrum_number() {
-    auto data = getIndirectFitData(10, 3);
+    auto data = getIndirectFitData(10);
 
     TS_ASSERT_THROWS_NOTHING(data.setStartX(0.0, 0));
     TS_ASSERT_THROWS_NOTHING(data.setStartX(-5.0, 0));
@@ -312,7 +286,7 @@ public:
   }
 
   void test_the_provided_startX_is_stored_in_range_after_using_setStartX() {
-    auto data = getIndirectFitData(3, 3);
+    auto data = getIndirectFitData(3);
 
     data.setStartX(-5.0, 0);
     data.setStartX(6.53, 1);
@@ -325,7 +299,7 @@ public:
 
   void
   test_no_throw_when_setEndX_is_provided_a_valid_xValue_and_spectrum_number() {
-    auto data = getIndirectFitData(10, 3);
+    auto data = getIndirectFitData(10);
 
     TS_ASSERT_THROWS_NOTHING(data.setStartX(0.0, 0));
     TS_ASSERT_THROWS_NOTHING(data.setStartX(-5.0, 0));
@@ -333,7 +307,7 @@ public:
   }
 
   void test_the_provided_endX_is_stored_in_range_after_using_setEndX() {
-    auto data = getIndirectFitData(3, 3);
+    auto data = getIndirectFitData(3);
 
     data.setEndX(-5.0, 0);
     data.setEndX(6.53, 1);
@@ -346,8 +320,8 @@ public:
 
   void
   test_that_the_startX_of_two_data_sets_are_combined_when_relating_to_two_seperate_spectra() {
-    auto data1 = getIndirectFitData(2, 3);
-    auto data2 = getIndirectFitData(2, 3);
+    auto data1 = getIndirectFitData(2);
+    auto data2 = getIndirectFitData(2);
 
     data1.setStartX(6.53, 0);
     data2.setStartX(5.0, 1);
@@ -359,8 +333,8 @@ public:
 
   void
   test_that_the_endX_of_two_datasets_are_combined_when_relating_to_two_seperate_spectra() {
-    auto data1 = getIndirectFitData(2, 3);
-    auto data2 = getIndirectFitData(2, 3);
+    auto data1 = getIndirectFitData(2);
+    auto data2 = getIndirectFitData(2);
 
     data1.setEndX(2.34, 0);
     data2.setEndX(5.9, 1);
@@ -372,8 +346,8 @@ public:
 
   void
   test_that_the_excludeRegion_of_two_datasets_are_combined_when_relating_to_two_seperate_spectra() {
-    auto data1 = getIndirectFitData(2, 3);
-    auto data2 = getIndirectFitData(2, 3);
+    auto data1 = getIndirectFitData(2);
+    auto data2 = getIndirectFitData(2);
 
     data1.setExcludeRegionString("1,2,6,5", 0);
     data1.setExcludeRegionString("6,2", 1);
@@ -385,8 +359,8 @@ public:
 
   void
   test_that_the_spectra_pair_of_two_datasets_are_combined_correctly_when_spectra_do_not_overlap() {
-    auto data1 = getIndirectFitData(10, 3);
-    auto data2 = getIndirectFitData(10, 3);
+    auto data1 = getIndirectFitData(10);
+    auto data2 = getIndirectFitData(10);
 
     data1.setSpectra(std::make_pair(0u, 4u));
     data2.setSpectra(std::make_pair(5u, 9u));
@@ -399,8 +373,8 @@ public:
 
   void
   test_that_the_spectra_pair_of_two_datasets_are_combined_correctly_when_spectra_are_discontinuous() {
-    auto data1 = getIndirectFitData(10, 3);
-    auto data2 = getIndirectFitData(10, 3);
+    auto data1 = getIndirectFitData(10);
+    auto data2 = getIndirectFitData(10);
 
     data1.setSpectra(std::make_pair(0u, 4u));
     data2.setSpectra(std::make_pair(8u, 9u));
@@ -413,8 +387,8 @@ public:
 
   void
   test_that_the_spectra_pair_of_two_datasets_are_combined_correctly_when_spectra_overlap() {
-    auto data1 = getIndirectFitData(10, 3);
-    auto data2 = getIndirectFitData(10, 3);
+    auto data1 = getIndirectFitData(10);
+    auto data2 = getIndirectFitData(10);
 
     data1.setSpectra(std::make_pair(0u, 8u));
     data2.setSpectra(std::make_pair(4u, 9u));
@@ -427,8 +401,8 @@ public:
 
   void
   test_that_the_DiscontinuousSpectra_of_two_datasets_are_combined_correctly_when_spectra_do_not_overlap() {
-    auto data1 = getIndirectFitData(10, 3);
-    auto data2 = getIndirectFitData(10, 3);
+    auto data1 = getIndirectFitData(10);
+    auto data2 = getIndirectFitData(10);
 
     data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-4"));
     data2.setSpectra(DiscontinuousSpectra<std::size_t>("5-9"));
@@ -441,8 +415,8 @@ public:
 
   void
   test_that_the_DiscontinuousSpectra_of_two_datasets_are_combined_correctly_when_spectra_overlap() {
-    auto data1 = getIndirectFitData(10, 3);
-    auto data2 = getIndirectFitData(10, 3);
+    auto data1 = getIndirectFitData(10);
+    auto data2 = getIndirectFitData(10);
 
     data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-7"));
     data2.setSpectra(DiscontinuousSpectra<std::size_t>("2-9"));
@@ -455,8 +429,8 @@ public:
 
   void
   test_that_a_Spectra_pair_and_DiscontinuousSpectra_dataset_are_combined_correctly_when_spectra_do_not_overlap() {
-    auto data1 = getIndirectFitData(10, 3);
-    auto data2 = getIndirectFitData(10, 3);
+    auto data1 = getIndirectFitData(10);
+    auto data2 = getIndirectFitData(10);
 
     data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-4"));
     data2.setSpectra(std::make_pair(5u, 9u));
@@ -469,8 +443,8 @@ public:
 
   void
   test_that_a_Spectra_pair_and_DiscontinuousSpectra_dataset_are_combined_correctly_when_spectra_overlap() {
-    auto data1 = getIndirectFitData(10, 3);
-    auto data2 = getIndirectFitData(10, 3);
+    auto data1 = getIndirectFitData(10);
+    auto data2 = getIndirectFitData(10);
 
     data1.setSpectra(DiscontinuousSpectra<std::size_t>("0-7"));
     data2.setSpectra(std::make_pair(4u, 9u));
