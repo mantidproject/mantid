@@ -62,7 +62,7 @@ void load(const std::string &filename, const std::string &groupname,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists,
           bool precalcEvents) {
-  auto concurencyNumber = std::thread::hardware_concurrency();
+  auto concurencyNumber = PARALLEL_GET_MAX_THREADS;
   auto numThreads = std::max<int>(concurencyNumber / 2, 1);
   auto numProceses = std::max<int>(concurencyNumber / 2, 1);
   std::string executableName =
