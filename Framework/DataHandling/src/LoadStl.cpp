@@ -11,7 +11,7 @@ uint16_t LoadStl::addSTLVertex(Kernel::V3D &vertex) {
       return i;
     }
   }
-  m_verticies.push_back(vertex);
+  m_verticies.emplace_back(vertex);
   uint16_t index = static_cast<uint16_t>(m_verticies.size() - 1);
   if (index != m_verticies.size() - 1) {
     throw std::runtime_error("Too many vertices in solid");

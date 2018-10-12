@@ -2,7 +2,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <fstream>
-
+#include "MantidKernel"
 namespace Mantid {
 namespace DataHandling {
 
@@ -25,16 +25,15 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
     // Add triangle if all 3 vertices are distinct
     if (!areEqualVertices(t1, t2) && !areEqualVertices(t1, t3) &&
         !areEqualVertices(t2, t3)) {
-      m_triangle.push_back(addSTLVertex(t1));
-      m_triangle.push_back(addSTLVertex(t2));
-      m_triangle.push_back(addSTLVertex(t3));
+      m_triangle.emplace_back(addSTLVertex(t1));
+      m_triangle.emplace_back(addSTLVertex(t2));
+      m_triangle.emplace_back(addSTLVertex(t3));
     }
   }
   // Use efficient constructor of MeshObject
-  std::unique_ptr<Geometry::MeshObject> retVal =
-      std::unique_ptr<Geometry::MeshObject>(new Geometry::MeshObject(
-          std::move(m_triangle), std::move(m_verticies),
-          Mantid::Kernel::Material()));
+  std::unique_ptr<Geometry::MeshObject> retVal = 
+  Kernel::make_unique<Geometry::MeshObject>(std::move(m_triangle), std::move(m_verticies),
+          Mantid::Kernel::Material());
   return retVal;
 }
 
@@ -44,7 +43,7 @@ bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1,
     bool ok = (readSTLVertex(file, v1) && readSTLVertex(file, v2) &&
                readSTLVertex(file, v3));
     if (!ok) {
-      throw std::runtime_error("Error on reading STL triangle");
+      throw Kernel::Exception::ParseError("Error on reading STL triangle");
     }
   } else {
     return false; // End of file
@@ -64,7 +63,7 @@ bool LoadAsciiStl::readSTLVertex(std::ifstream &file, Kernel::V3D &vertex) {
       vertex.setZ(boost::lexical_cast<double>(tokens[3]));
       return true;
     } else {
-      throw std::runtime_error("Error on reading STL vertex");
+      throw Kernel::Exception::ParseError("Error on reading STL vertex");
     }
   }
   return false;
@@ -79,7 +78,7 @@ bool LoadAsciiStl::readSTLLine(std::ifstream &file, std::string const &type) {
       // Before throwing, check for endsolid statment
       std::string type2 = "endsolid";
       if (line.size() < type2.size() || line.substr(0, type2.size()) != type2) {
-        throw std::runtime_error("Expected STL line begining with " + type +
+        throw Kernel::Exception::ParseError("Expected STL line begining with " + type +
                                  " or " + type2);
       } else {
         return false; // ends reading at endsolid

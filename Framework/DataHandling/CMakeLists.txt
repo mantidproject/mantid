@@ -63,7 +63,7 @@
 	src/LoadILLIndirect2.cpp
 	src/LoadILLPolarizationFactors.cpp
 	src/LoadILLReflectometry.cpp
-        src/LoadILLSANS.cpp
+    src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadISISPolarizationEfficiencies.cpp
@@ -160,7 +160,7 @@
 	src/SaveILLCosmosAscii.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
-        src/SaveMask.cpp
+    src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
