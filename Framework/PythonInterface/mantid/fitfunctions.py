@@ -36,9 +36,9 @@ class FunctionWrapper(object):
             self.fun = name
         else:
             self.fun = FunctionFactory.createFunction(name)
-        self.init_parameters_and_attributes(**kwargs)
+        self.init_paramgeters_and_attributes(**kwargs)
 
-    def init_parameters_and_attributes(self, **kwargs):
+    def init_paramgeters_and_attributes(self, **kwargs):
         # Deal with attributes first
         for key in kwargs:
             if key == "attributes":
