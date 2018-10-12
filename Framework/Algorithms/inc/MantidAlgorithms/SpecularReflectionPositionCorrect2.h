@@ -12,10 +12,10 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** SpecularReflectionPositionCorrect : Algorithm to perform vertical position
+/** SpecularReflectionPositionCorrect : Algorithm to perform position
 corrections based on the specular reflection condition. Version 2.
 */
-class DLLExport SpecularReflectionPositionCorrect2 : public API::Algorithm {
+class DLLExport SpecularReflectionPositionCorrect2 final : public API::Algorithm {
 public:
   /// Name of this algorithm
   const std::string name() const override;
@@ -24,13 +24,14 @@ public:
   /// Version
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"SpecularReflectionCalculateTheta"};
+    return {"SpecularReflectionCalculateTheta, FindReflectometryLines"};
   }
   /// Category
   const std::string category() const override;
 
 private:
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 };
 

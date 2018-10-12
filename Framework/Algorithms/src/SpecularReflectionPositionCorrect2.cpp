@@ -6,16 +6,53 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect2.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+
+namespace {
+/// Enumerations to define the rotation plane of the detector.
+enum class Plane { horizontal, vertical };
+
+/** Return true if twoTheta increases with workspace index.
+ *  @param spectrumInfo a spectrum info
+ *  @return true if twoTheta increases with workspace index
+ */
+bool isAngleIncreasingWithIndex(const Mantid::API::SpectrumInfo &spectrumInfo) {
+  const auto first = spectrumInfo.signedTwoTheta(0);
+  const auto last = spectrumInfo.signedTwoTheta(spectrumInfo.size() - 1);
+  return first < last;
+}
+
+/** Calculate a pixel's offset angle from detector centre.
+ * @param ws a workspace
+ * @param l2 sample to detector distance
+ * @param linePosition pixel's workspace index
+ * @return the offset angle, in radians
+ */
+double offsetAngleFromCentre(const MatrixWorkspace &ws, const double l2,
+                             const double linePosition,
+                             const double pixelSize) {
+  const auto &spectrumInfo = ws.spectrumInfo();
+  const size_t nSpec = spectrumInfo.size();
+  if (linePosition + 1. > static_cast<double>(nSpec)) {
+    std::ostringstream msg;
+    msg << "LinePosition is greater than the maximum workspace index "
+        << spectrumInfo.size() - 1;
+    throw std::runtime_error(msg.str());
+  }
+  auto const centreIndex = static_cast<double>(nSpec - 1) / 2.;
+  auto const sign = isAngleIncreasingWithIndex(spectrumInfo) ? -1. : 1.;
+  double const offsetWidth = (centreIndex - linePosition) * pixelSize;
+  return sign * std::atan2(offsetWidth, l2);
+}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -31,7 +68,7 @@ const std::string SpecularReflectionPositionCorrect2::name() const {
 
 /// Algorithm's summary. @see Algorithm::summary
 const std::string SpecularReflectionPositionCorrect2::summary() const {
-  return "Corrects a detector component's position based on TwoTheta.";
+  return "Corrects a reflectometer's detector component's position.";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
@@ -53,22 +90,14 @@ void SpecularReflectionPositionCorrect2::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace to correct.");
 
-  auto thetaValidator = boost::make_shared<CompositeValidator>();
-  thetaValidator->add(boost::make_shared<MandatoryValidator<double>>());
-  thetaValidator->add(
-      boost::make_shared<BoundedValidator<double>>(0, 90, true));
-  declareProperty(
-      make_unique<PropertyWithValue<double>>("TwoTheta", Mantid::EMPTY_DBL(),
-                                             thetaValidator, Direction::Input),
-      "Angle used to correct the detector component.");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "TwoTheta", Mantid::EMPTY_DBL(), Direction::Input),
+                  "Angle used to correct the detector component [degrees].");
 
   const std::vector<std::string> correctionType{"VerticalShift",
                                                 "RotateAroundSample"};
-  auto correctionTypeValidator = boost::make_shared<CompositeValidator>();
-  correctionTypeValidator->add(
-      boost::make_shared<MandatoryValidator<std::string>>());
-  correctionTypeValidator->add(
-      boost::make_shared<StringListValidator>(correctionType));
+  auto correctionTypeValidator =
+      boost::make_shared<StringListValidator>(correctionType);
   declareProperty(
       "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
       "Whether detectors should be shifted vertically or rotated around the "
@@ -78,80 +107,159 @@ void SpecularReflectionPositionCorrect2::init() {
   declareProperty(
       Mantid::Kernel::make_unique<PropertyWithValue<std::string>>(
           "DetectorComponentName", "", Direction::Input),
-      "Name of the detector component to correct, i.e. point-detector");
-
-  declareProperty("DetectorID", -1,
-                  "The ID of the detector to correct. If both "
+      "Name of the detector component to correct, for example point-detector");
+  auto nonNegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  nonNegativeInt->setLower(0);
+  declareProperty("DetectorID", EMPTY_INT(), nonNegativeInt,
+                  "The ID of the detector to correct; if both "
                   "the component name and the detector ID "
                   "are set the latter will be used.");
 
   declareProperty(
       Mantid::Kernel::make_unique<PropertyWithValue<std::string>>(
           "SampleComponentName", "some-surface-holder", Direction::Input),
-      "Name of the sample component, i.e. some-surface-holder");
+      "Name of the sample component; if the given name is not found in the "
+      "instrument, the default sample is used.");
 
   declareProperty(
       Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+      "A workspace with corrected detector position.");
+  declareProperty("DetectorFacesSample", false,
+                  "If true, a normal vector at the centre of the detector "
+                  "always points towards the sample.");
+  auto nonNegativeDouble =
+      boost::make_shared<Kernel::BoundedValidator<double>>();
+  nonNegativeDouble->setLower(0.);
+  declareProperty("LinePosition", EMPTY_DBL(), nonNegativeDouble,
+                  "A fractional workspace index for the specular line centre.");
+  declareProperty("DirectLinePosition", EMPTY_DBL(), nonNegativeDouble,
+                  "A fractional workspace index for the direct line centre.");
+  auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  nonNegativeDouble->setLowerExclusive(0.);
+  declareProperty("PixelSize", EMPTY_DBL(), positiveDouble,
+                  "Size of a detector pixel, in metres.");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "DirectLineWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "A direct beam workspace for reference.");
 }
 
-//----------------------------------------------------------------------------------------------
+std::map<std::string, std::string>
+SpecularReflectionPositionCorrect2::validateInputs() {
+  std::map<std::string, std::string> issues;
+  if (isDefault("DetectorID") && isDefault("DetectorComponentName")) {
+    issues["DetectorID"] =
+        "DetectorID or DetectorComponentName has to be specified.";
+  }
+  if (!isDefault("TwoTheta")) {
+    if (!isDefault("LinePosition") && isDefault("PixelSize")) {
+      issues["PixelSize"] = "Pixel size required.";
+    }
+  } else {
+    if (isDefault("DirectLinePosition")) {
+      issues["DirectLinePosition"] =
+          "Direct line position required when no TwoTheta supplied.";
+    }
+    if (isDefault("DirectLineWorkspace")) {
+      issues["DirectLineWorkspace"] =
+          "Direct beam workspcae required when no TwoTheta supplied.";
+    }
+    if (isDefault("PixelSize")) {
+      issues["PixelSize"] = "Pixel size required for direct beam calibarion.";
+    }
+  }
+  return issues;
+}
+
 /** Execute the algorithm.
  */
 void SpecularReflectionPositionCorrect2::exec() {
 
   MatrixWorkspace_sptr inWS = this->getProperty("InputWorkspace");
-
-  auto cloneWS = createChildAlgorithm("CloneWorkspace");
-  cloneWS->initialize();
-  cloneWS->setProperty("InputWorkspace", inWS);
-  cloneWS->execute();
-  Workspace_sptr tmp = cloneWS->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr outWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
-
-  const double twoThetaIn = getProperty("TwoTheta");
-  const double twoThetaInRad = twoThetaIn * (M_PI / 180.0);
-
-  auto inst = outWS->getInstrument();
-
-  // Detector
-  const int detectorID = getProperty("DetectorID");
-  const std::string detectorName = getProperty("DetectorComponentName");
-
-  IComponent_const_sptr detector;
-  if (detectorID > 0) {
-    detector = inst->getDetector(detectorID);
-  } else {
-    if (!inst->getComponentByName(detectorName))
-      throw std::runtime_error("Detector component not found.");
-    detector = inst->getComponentByName(detectorName);
+  MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
+  if (outWS != inWS) {
+    outWS = inWS->clone();
   }
-  const V3D detectorPosition = detector->getPos();
-
   // Sample
+  V3D samplePosition;
   const std::string sampleName = getProperty("SampleComponentName");
-  if (!inst->getComponentByName(sampleName))
-    throw std::runtime_error("Sample component not found.");
+  auto inst = outWS->getInstrument();
   IComponent_const_sptr sample = inst->getComponentByName(sampleName);
-  const V3D samplePosition = sample->getPos();
+  if (sample)
+    samplePosition = sample->getPos();
+  else
+    samplePosition = inWS->spectrumInfo().samplePosition();
 
   // Type of movement (vertical shift or rotation around the sample)
   const std::string correctionType = getProperty("DetectorCorrectionType");
+  // Detector
+  const int detectorID = getProperty("DetectorID");
+  const std::string detectorName = getProperty("DetectorComponentName");
+  IComponent_const_sptr detector;
+  if (detectorName.empty()) {
+    detector = inst->getDetector(detectorID);
+  } else {
+    detector = inst->getComponentByName(detectorName);
+    if (!detector)
+      throw Exception::NotFoundError("Detector component not found",
+                                     detectorName);
+  }
+  const V3D detectorPosition = detector->getPos();
 
   // Sample-to-detector
   const V3D sampleToDetector = detectorPosition - samplePosition;
-  // Reference frame
+  const double l2 = sampleToDetector.norm();
   auto referenceFrame = inst->getReferenceFrame();
-  auto beamAxis = referenceFrame->pointingAlongBeamAxis();
-  auto horizontalAxis = referenceFrame->pointingHorizontalAxis();
-  auto upAxis = referenceFrame->pointingUpAxis();
+  const auto alongDir = referenceFrame->vecPointingAlongBeam();
+  const double beamOffsetOld = sampleToDetector.scalar_prod(alongDir);
+
+  double twoThetaInRad;
+  if (!isDefault("TwoTheta")) {
+    twoThetaInRad = static_cast<double>(getProperty("TwoTheta")) * M_PI / 180.0;
+    if (!isDefault("LinePosition")) {
+      const double linePosition = getProperty("LinePosition");
+      const double pixelSize = getProperty("PixelSize");
+      const double offset =
+          offsetAngleFromCentre(*inWS, l2, linePosition, pixelSize);
+      twoThetaInRad -= offset;
+    }
+  } else {
+    MatrixWorkspace_sptr directWS = getProperty("DirectLineWorkspace");
+    const double directLinePosition = getProperty("DirectLinePosition");
+    const double pixelSize = getProperty("PixelSize");
+    const double directOffset =
+        offsetAngleFromCentre(*directWS, l2, directLinePosition, pixelSize);
+    const auto reflectedDetectorAngle = std::acos(beamOffsetOld / l2);
+    auto directInst = directWS->getInstrument();
+    IComponent_const_sptr directDet;
+    if (detectorName.empty()) {
+      directDet = directInst->getDetector(detectorID);
+    } else {
+      directDet = inst->getComponentByName(detectorName);
+      if (!detector)
+        throw Exception::NotFoundError(
+            "DirectLineWorkspace: Detector component not found", detectorName);
+    }
+    const auto directDetPos = directDet->getPos();
+    const auto directSampleToDet = directDetPos - samplePosition;
+    const double directBeamOffset = directSampleToDet.scalar_prod(alongDir);
+    const double directL2 = directSampleToDet.norm();
+    const auto directDetectorAngle = std::acos(directBeamOffset / directL2);
+    twoThetaInRad = reflectedDetectorAngle - directDetectorAngle - directOffset;
+  }
+
+  // Reference frame
+  const auto beamAxis = referenceFrame->pointingAlongBeamAxis();
+  const auto horizontalAxis = referenceFrame->pointingHorizontalAxis();
+  const auto upAxis = referenceFrame->pointingUpAxis();
+  const auto thetaSignDir = referenceFrame->vecThetaSign();
+  const auto upDir = referenceFrame->vecPointingUp();
+  const auto plane = thetaSignDir.scalar_prod(upDir) == 1. ? Plane::vertical
+                                                           : Plane::horizontal;
 
   // Get the offset from the sample in the beam direction
   double beamOffset = 0.0;
-  const double beamOffsetOld =
-      sampleToDetector.scalar_prod(referenceFrame->vecPointingAlongBeam());
 
   if (correctionType == "VerticalShift") {
     // Only shifting vertically, so the beam offset remains the same
@@ -159,27 +267,25 @@ void SpecularReflectionPositionCorrect2::exec() {
   } else if (correctionType == "RotateAroundSample") {
     // The radius for the rotation is the distance from the sample to
     // the detector in the Beam-Vertical plane
-    const double upOffsetOld =
-        sampleToDetector.scalar_prod(referenceFrame->vecPointingUp());
-    const double radius =
-        std::sqrt(beamOffsetOld * beamOffsetOld + upOffsetOld * upOffsetOld);
+    const double perpendicularOffsetOld =
+        sampleToDetector.scalar_prod(thetaSignDir);
+    const double radius = std::hypot(beamOffsetOld, perpendicularOffsetOld);
     beamOffset = radius * std::cos(twoThetaInRad);
   } else {
     // Shouldn't get here unless there's been a coding error
     std::ostringstream message;
-    message << "Invalid correction type '" << correctionType;
+    message << "Invalid correction type '" << correctionType << "'";
     throw std::runtime_error(message.str());
   }
 
   // Calculate the offset in the vertical direction, and the total
   // offset in the beam direction
-  const double upOffset = (beamOffset * std::tan(twoThetaInRad));
+  const double perpendicularOffset = beamOffset * std::tan(twoThetaInRad);
   const double beamOffsetFromOrigin =
       beamOffset +
       samplePosition.scalar_prod(referenceFrame->vecPointingAlongBeam());
 
   auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
-  moveAlg->initialize();
   moveAlg->setProperty("Workspace", outWS);
   if (!detectorName.empty()) {
     moveAlg->setProperty("ComponentName", detectorName);
@@ -188,9 +294,37 @@ void SpecularReflectionPositionCorrect2::exec() {
   }
   moveAlg->setProperty("RelativePosition", false);
   moveAlg->setProperty(beamAxis, beamOffsetFromOrigin);
-  moveAlg->setProperty(horizontalAxis, 0.0);
-  moveAlg->setProperty(upAxis, upOffset);
+  if (plane == Plane::vertical) {
+    moveAlg->setProperty(horizontalAxis, 0.0);
+    moveAlg->setProperty(upAxis, perpendicularOffset);
+  } else {
+    moveAlg->setProperty(horizontalAxis, perpendicularOffset);
+    moveAlg->setProperty(upAxis, 0.0);
+  }
   moveAlg->execute();
+
+  const bool rotateFace = getProperty("DetectorFacesSample");
+  if (rotateFace) {
+    auto rotate = createChildAlgorithm("RotateInstrumentComponent");
+    rotate->setProperty("Workspace", outWS);
+    if (!detectorName.empty())
+      rotate->setProperty("ComponentName", detectorName);
+    else
+      rotate->setProperty("DetectorID", detectorID);
+    if (plane == Plane::horizontal) {
+      rotate->setProperty("X", upDir.X());
+      rotate->setProperty("Y", upDir.Y());
+      rotate->setProperty("Z", upDir.Z());
+    } else {
+      const V3D horizontalDir = -referenceFrame->vecPointingHorizontal();
+      rotate->setProperty("X", horizontalDir.X());
+      rotate->setProperty("Y", horizontalDir.Y());
+      rotate->setProperty("Z", horizontalDir.Z());
+    }
+    rotate->setProperty("RelativeRotation", false);
+    rotate->setProperty("Angle", twoThetaInRad * 180. / M_PI);
+    rotate->execute();
+  }
 
   setProperty("OutputWorkspace", outWS);
 }
