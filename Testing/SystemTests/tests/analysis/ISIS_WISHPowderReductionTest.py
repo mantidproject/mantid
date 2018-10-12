@@ -2,6 +2,7 @@ from stresstesting import MantidStressTest
 from wish.reduce import Wish_Run
 
 from mantid import config
+import mantid.simpleapi as mantid
 import os
 import shutil
 
@@ -11,7 +12,7 @@ DIRS = config['datasearch.directories'].split(';')
 working_folder_name = "WISH"
 
 # Relative to working folder
-input_folder_name = "input/"
+input_folder_name = "input"
 output_folder_name = "output"
 
 # Relative to input folder
@@ -41,20 +42,25 @@ class WISHPowderReductionTest(MantidStressTest):
 
         input_files = [os.path.join(calibration_dir, files) for files in input_files]
         return input_files
-    #def requiredMemoryMB(self):
-        # Need lots of memory for full WISH dataset
-     #   return 20000
 
     def cleanup(self):
-        pass
+        shutil.rmtree(output_dir)
+        os.makedirs(output_dir)
+       
 
     def runTest(self):
-
-        Wish_Run("__main__", calibration_dir+"/", input_dir, output_dir)
+        Wish_Run("__main__", calibration_dir+"/", input_dir, output_dir, True)
+        self.clearWorkspaces()
 
     def validate(self):
         return "w41870-2_9foc-d", "WISH41870-2_9raw.nxs", \
                "w41870-3_8foc-d", "WISH41870-3_8raw.nxs", \
                "w41870-4_7foc-d", "WISH41870-4_7raw.nxs", \
                "w41870-5_6foc-d", "WISH41870-5_6raw.nxs"
+
+    def clearWorkspaces(self):
+        deletews = ["w41870-" + str(i) + "foc" for i in range(1, 11)]
+        for ws in deletews:
+            mantid.DeleteWorkspace(ws)
+            mantid.DeleteWorkspace(ws + "-d")
 

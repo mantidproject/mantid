@@ -8,7 +8,7 @@ from mantid.simpleapi import *
 # import matplotlib.pyplot as p # Had to remove matplotlib as autoreduce running on server without display
 import numpy as n
 import mantid.simpleapi as mantid
-def Wish_Run(input,  cal_directory, user_directory, outputfolder):
+def Wish_Run(input,  cal_directory, user_directory, outputfolder, deleteWorkspace):
     __name__=input
     print("Running")
     cal_dir = cal_directory
@@ -200,7 +200,7 @@ def Wish_Run(input,  cal_directory, user_directory, outputfolder):
             # data_dir="/datad/ndxwish/"
             data_dir = WISH_datadir()
         digit = len(str(run_number))
-        filename = data_dir + "WISH"
+        filename = os.path.join(data_dir, "WISH")
         for i in range(0, 8 - digit):
             filename = filename + "0"
         filename += str(run_number) + "." + ext
@@ -390,6 +390,8 @@ def Wish_Run(input,  cal_directory, user_directory, outputfolder):
         else:
             n1, n2 = split_string(number)
             wfocname = "w" + str(n1) + "_" + str(n2) + "-" + str(panel) + "foc"
+        if deleteWorkspace:
+            mantid.DeleteWorkspace(w)
         if (panel == 1):
             mantid.CropWorkspace(InputWorkspace=wfocname, OutputWorkspace=wfocname, XMin=0.80, XMax=53.3)
         elif (panel == 2):
@@ -444,10 +446,10 @@ def Wish_Run(input,  cal_directory, user_directory, outputfolder):
                 mantid.ConvertUnits(InputWorkspace=wfocname, OutputWorkspace=wfocname, Target="TOF", EMode="Elastic")
                 mantid.ReplaceSpecialValues(InputWorkspace=wfocname, OutputWorkspace=wfocname, NaNValue=0.0, NaNError=0.0,
                                      InfinityValue=0.0, InfinityError=0.0)
-                mantid.SaveGSS(InputWorkspace=wfocname, Filename=WISH_userdir() + str(number) + "-" + str(i) + ext + ".gss",
+                mantid.SaveGSS(InputWorkspace=wfocname, Filename=os.path.join(WISH_userdir(), (str(number) + "-" + str(i) + ext + ".gss")),
                         Append=False, Bank=1)
-                mantid.SaveFocusedXYE(wfocname, WISH_userdir() + str(number) + "-" + str(i) + ext + ".dat")
-                mantid.SaveNexusProcessed(wfocname, WISH_userdir() + str(number) + "-" + str(i) + ext + ".nxs")
+                mantid.SaveFocusedXYE(wfocname, os.path.join(WISH_userdir(), (str(number) + "-" + str(i) + ext + ".dat")))
+                mantid.SaveNexusProcessed(wfocname, os.path.join(WISH_userdir(), (str(number) + "-" + str(i) + ext + ".nxs")))
         else:
             mantid.LoadNexusProcessed(Filename=WISH_getempty(panel, SEsample, emptySEcycle), OutputWorkspace="empty")
             mantid.RebinToWorkspace(WorkspaceToRebin="empty", WorkspaceToMatch=wfocname, OutputWorkspace="empty")
@@ -461,10 +463,10 @@ def Wish_Run(input,  cal_directory, user_directory, outputfolder):
             mantid.ConvertUnits(InputWorkspace=wfocname, OutputWorkspace=wfocname, Target="TOF", EMode="Elastic")
             mantid.ReplaceSpecialValues(InputWorkspace=wfocname, OutputWorkspace=wfocname, NaNValue=0.0, NaNError=0.0,
                                  InfinityValue=0.0, InfinityError=0.0)
-            mantid.SaveGSS(InputWorkspace=wfocname, Filename=WISH_userdir() + str(number) + "-" + str(panel) + ext + ".gss",
+            mantid.SaveGSS(InputWorkspace=wfocname, Filename=os.path.join(WISH_userdir(), (str(number) + "-" + str(panel) + ext + ".gss")),
                     Append=False, Bank=1)
-            mantid.SaveFocusedXYE(wfocname, WISH_userdir() + str(number) + "-" + str(panel) + ext + ".dat")
-            mantid.SaveNexusProcessed(wfocname, WISH_userdir() + str(number) + "-" + str(panel) + ext + ".nxs")
+            mantid.SaveFocusedXYE(wfocname, os.path.join(WISH_userdir(), (str(number) + "-" + str(panel) + ext + ".dat")))
+            mantid.SaveNexusProcessed(wfocname, os.path.join(WISH_userdir(),(str(number) + "-" + str(panel) + ext + ".nxs")))
         return wfocname
 
 
@@ -716,7 +718,7 @@ def Wish_Run(input,  cal_directory, user_directory, outputfolder):
                   OutputWorkspace='w' + str(runno) + 'minus' + str(empty) + p)
             mantid.ConvertUnits(InputWorkspace='w' + str(runno) + 'minus' + str(empty) + p,
                          OutputWorkspace='w' + str(runno) + 'minus' + str(empty) + p + '-d', Target='dSpacing')
-            mantid.SaveGSS("w" + str(runno) + 'minus' + str(empty) + p, WISH_userdir() + str(i) + p + ".gss", Append=False, Bank=1)
+            mantid.SaveGSS("w" + str(runno) + 'minus' + str(empty) + p, os.path.join(WISH_userdir(), (str(i) + p + ".gss")), Append=False, Bank=1)
 
 
     def main(input_file, output_dir):
@@ -801,45 +803,45 @@ def Wish_Run(input,  cal_directory, user_directory, outputfolder):
              OutputWorkspace="w" + str(i) + "-5_6foc")
             mantid.ConvertUnits(InputWorkspace="w" + str(i) + "-5_6foc", OutputWorkspace="w" + str(i) + "-5_6foc" + "-d",
                      Target="dSpacing", EMode="Elastic")
-            mantid.SaveGSS("w" + str(i) + "-5_6foc", WISH_userdir() + str(i) + "-5_6raw" + ".gss", Append=False, Bank=1)
-            mantid.SaveFocusedXYE("w" + str(i) + "-5_6foc", WISH_userdir() + str(i) + "-5_6raw" + ".dat")
-            mantid.SaveNexusProcessed("w" + str(i) + "-5_6foc", WISH_userdir() + str(i) + "-5_6raw" + ".nxs")
+            mantid.SaveGSS("w" + str(i) + "-5_6foc", os.path.join(WISH_userdir(), (str(i) + "-5_6raw" + ".gss")), Append=False, Bank=1)
+            mantid.SaveFocusedXYE("w" + str(i) + "-5_6foc", os.path.join(WISH_userdir(), (str(i) + "-5_6raw" + ".dat")))
+            mantid.SaveNexusProcessed("w" + str(i) + "-5_6foc", os.path.join(WISH_userdir(), (str(i) + "-5_6raw" + ".nxs")))
             mantid.RebinToWorkspace(WorkspaceToRebin="w" + str(i) + "-7foc", WorkspaceToMatch="w" + str(i) + "-4foc",
                          OutputWorkspace="w" + str(i) + "-7foc", PreserveEvents='0')
             mantid.Plus(LHSWorkspace="w" + str(i) + "-4foc", RHSWorkspace="w" + str(i) + "-7foc",
              OutputWorkspace="w" + str(i) + "-4_7foc")
             mantid.ConvertUnits(InputWorkspace="w" + str(i) + "-4_7foc", OutputWorkspace="w" + str(i) + "-4_7foc" + "-d",
                      Target="dSpacing", EMode="Elastic")
-            mantid.SaveGSS("w" + str(i) + "-4_7foc", WISH_userdir() + str(i) + "-4_7raw" + ".gss", Append=False, Bank=1)
-            mantid.SaveFocusedXYE("w" + str(i) + "-4_7foc", WISH_userdir() + str(i) + "-4_7raw" + ".dat")
-            mantid.SaveNexusProcessed("w" + str(i) + "-4_7foc", WISH_userdir() + str(i) + "-4_7raw" + ".nxs")
+            mantid.SaveGSS("w" + str(i) + "-4_7foc", os.path.join(WISH_userdir(), (str(i) + "-4_7raw" + ".gss")), Append=False, Bank=1)
+            mantid.SaveFocusedXYE("w" + str(i) + "-4_7foc", os.path.join(WISH_userdir(), (str(i) + "-4_7raw" + ".dat")))
+            mantid.SaveNexusProcessed("w" + str(i) + "-4_7foc", os.path.join(WISH_userdir(), (str(i) + "-4_7raw" + ".nxs")))
         mantid.RebinToWorkspace(WorkspaceToRebin="w" + str(i) + "-8foc", WorkspaceToMatch="w" + str(i) + "-3foc",
                          OutputWorkspace="w" + str(i) + "-8foc", PreserveEvents='0')
         mantid.Plus(LHSWorkspace="w" + str(i) + "-3foc", RHSWorkspace="w" + str(i) + "-8foc",
              OutputWorkspace="w" + str(i) + "-3_8foc")
         mantid.ConvertUnits(InputWorkspace="w" + str(i) + "-3_8foc", OutputWorkspace="w" + str(i) + "-3_8foc" + "-d",
                      Target="dSpacing", EMode="Elastic")
-        mantid.SaveGSS("w" + str(i) + "-3_8foc", WISH_userdir() + str(i) + "-3_8raw" + ".gss", Append=False, Bank=1)
-        mantid.SaveFocusedXYE("w" + str(i) + "-3_8foc", WISH_userdir() + str(i) + "-3_8raw" + ".dat")
-        mantid.SaveNexusProcessed("w" + str(i) + "-3_8foc", WISH_userdir() + str(i) + "-3_8raw" + ".nxs")
+        mantid.SaveGSS("w" + str(i) + "-3_8foc", os.path.join(WISH_userdir(), (str(i) + "-3_8raw" + ".gss")), Append=False, Bank=1)
+        mantid.SaveFocusedXYE("w" + str(i) + "-3_8foc", os.path.join(WISH_userdir(), (str(i) + "-3_8raw" + ".dat")))
+        mantid.SaveNexusProcessed("w" + str(i) + "-3_8foc", os.path.join(WISH_userdir(), (str(i) + "-3_8raw" + ".nxs")))
         mantid.RebinToWorkspace(WorkspaceToRebin="w" + str(i) + "-9foc", WorkspaceToMatch="w" + str(i) + "-2foc",
                          OutputWorkspace="w" + str(i) + "-9foc", PreserveEvents='0')
         mantid.Plus(LHSWorkspace="w" + str(i) + "-2foc", RHSWorkspace="w" + str(i) + "-9foc",
              OutputWorkspace="w" + str(i) + "-2_9foc")
         mantid.ConvertUnits(InputWorkspace="w" + str(i) + "-2_9foc", OutputWorkspace="w" + str(i) + "-2_9foc" + "-d",
                      Target="dSpacing", EMode="Elastic")
-        mantid.SaveGSS("w" + str(i) + "-2_9foc", WISH_userdir() + str(i) + "-2_9raw" + ".gss", Append=False, Bank=1)
-        mantid.SaveFocusedXYE("w" + str(i) + "-2_9foc", WISH_userdir() + str(i) + "-2_9raw" + ".dat")
-        mantid.SaveNexusProcessed("w" + str(i) + "-2_9foc", WISH_userdir() + str(i) + "-2_9raw" + ".nxs")
+        mantid.SaveGSS("w" + str(i) + "-2_9foc", os.path.join(WISH_userdir(), (str(i) + "-2_9raw" + ".gss")), Append=False, Bank=1)
+        mantid.SaveFocusedXYE("w" + str(i) + "-2_9foc", os.path.join(WISH_userdir(), (str(i) + "-2_9raw" + ".dat")))
+        mantid.SaveNexusProcessed("w" + str(i) + "-2_9foc", os.path.join(WISH_userdir(), (str(i) + "-2_9raw" + ".nxs")))
         mantid.RebinToWorkspace(WorkspaceToRebin="w" + str(i) + "-10foc", WorkspaceToMatch="w" + str(i) + "-1foc",
                          OutputWorkspace="w" + str(i) + "-10foc", PreserveEvents='0')
         mantid.Plus(LHSWorkspace="w" + str(i) + "-1foc", RHSWorkspace="w" + str(i) + "-10foc",
              OutputWorkspace="w" + str(i) + "-1_10foc")
         mantid.ConvertUnits(InputWorkspace="w" + str(i) + "-1_10foc", OutputWorkspace="w" + str(i) + "-1_10foc" + "-d",
                      Target="dSpacing", EMode="Elastic")
-        mantid.SaveGSS("w" + str(i) + "-1_10foc", WISH_userdir() + str(i) + "-1_10raw" + ".gss", Append=False, Bank=1)
-        mantid.SaveFocusedXYE("w" + str(i) + "-1_10foc", WISH_userdir() + str(i) + "-1_10raw" + ".dat")
-        mantid.SaveNexusProcessed("w" + str(i) + "-1_10foc", WISH_userdir() + str(i) + "-1_10raw" + ".nxs")
+        mantid.SaveGSS("w" + str(i) + "-1_10foc", os.path.join(WISH_userdir(), (str(i) + "-1_10raw" + ".gss")), Append=False, Bank=1)
+        mantid.SaveFocusedXYE("w" + str(i) + "-1_10foc", os.path.join(WISH_userdir(), (str(i) + "-1_10raw" + ".dat")))
+        mantid.SaveNexusProcessed("w" + str(i) + "-1_10foc", os.path.join(WISH_userdir(), (str(i) + "-1_10raw" + ".nxs")))
 
         # minus_emptycans(26977,26969)
         # #############################################################################################
@@ -900,7 +902,7 @@ def Wish_Run(input,  cal_directory, user_directory, outputfolder):
                       XMin='0.35',
                       XMax='5.0')
             Removepeaks_spline_smooth_vana("w41865-" + str(j) + "foc", j, debug=False)
-            mantid.SaveNexusProcessed("w41865-" + str(j) + "foc", WISH_userdir() + "vana41865-" + str(j) + "foc.nxs")
+            mantid.SaveNexusProcessed("w41865-" + str(j) + "foc", os.path.join(WISH_userdir(), ("vana41865-" + str(j) + "foc.nxs")))
 
 
     if __name__ == "__main__":
