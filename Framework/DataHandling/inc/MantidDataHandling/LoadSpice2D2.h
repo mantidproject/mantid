@@ -92,6 +92,7 @@ private:
   void exec() override;
 
   void setInputFileAsHandler();
+  void setSansSpiceXmlFormatVersion() ;
   void setTimes();
   void setWavelength();
 
@@ -104,12 +105,15 @@ private:
   template <class T>
   void addRunProperty(const std::string &name, const T &value,
                                  const std::string &units="");
+  void setBeamTrapRunProperty();
   void storeMetaDataIntoWS();
   void runLoadInstrument();
   void rotateDetector();
   double detectorDistance();
   void moveDetector();
-  
+  double getSourceToSampleDistance();
+  void setBeamDiameter();
+
 
 
   /* constants */
@@ -123,8 +127,10 @@ private:
   std::map<std::string, std::string> m_metadata;
 
 
+  double m_sansSpiceXmlFormatVersion{0.0};
   double m_wavelength;
   double m_dwavelength;
+  double m_sampleDetectorDistance;
   Mantid::Types::Core::DateAndTime m_startTime;
   Mantid::Types::Core::DateAndTime m_endTime;
   
