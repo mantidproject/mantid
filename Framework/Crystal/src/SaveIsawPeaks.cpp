@@ -152,7 +152,24 @@ void SaveIsawPeaks::exec() {
   if (!Poco::File(filename.c_str()).exists())
     append = false;
 
+  int appendPeakNumb = 0;
   if (append) {
+    std::ifstream infile(filename.c_str());
+    std::string line;
+  while (!infile.eof())      // To get you all the lines.
+  {
+    getline(infile, line); // Saves the line in STRING.
+    if (infile.eof())
+      break;
+    std::stringstream ss(line);
+      double three;
+      ss >> three;
+      if (three == 3) ss >> appendPeakNumb;
+
+    }
+
+    std::cout << appendPeakNumb <<"\n";
+    infile.close();
     out.open(filename.c_str(), std::ios::app);
   } else {
     out.open(filename.c_str());
@@ -273,16 +290,10 @@ void SaveIsawPeaks::exec() {
   // =========================================
 
   // Go in order of run numbers
-  int maxPeakNumb = 0;
-  int appendPeakNumb = 0;
-  int sequenceNumber = 0;
+  int sequenceNumber = appendPeakNumb;
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
     // Start of a new run
-    if (maxPeakNumb > 0) {
-      appendPeakNumb += maxPeakNumb + 1;
-      maxPeakNumb = 0;
-    }
     int run = runMap_it->first;
     bankMap_t &bankMap = runMap_it->second;
 
@@ -331,7 +342,6 @@ void SaveIsawPeaks::exec() {
             sequenceNumber++;
             out << "3" << std::setw(7) << sequenceNumber;
           } else {
-            maxPeakNumb = std::max(maxPeakNumb, p.getPeakNumber());
             out << "3" << std::setw(7) << p.getPeakNumber() + appendPeakNumb;
           }
 
