@@ -188,8 +188,6 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
     //PARALLEL_CHECK_INTERUPT_REGION
   }
 
-
-
   g_log.notice() << "Bad chanel indices: " << oversizedChanelIndexCounterA << std::endl;
   g_log.notice() << "Bad position values: " << oversizedPosCounterA << std::endl;
   g_log.notice() << "Trigger Counter: " << _eventAccumulator.triggerEvents.size() << std::endl;
@@ -456,8 +454,8 @@ void LoadDNSEvent::parse_DataBuffer(VectorByteStream &file, EventAccumulator &ev
 LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(VectorByteStream &file) {
   BufferHeader header = {};
   file.read<2>(header.bufferLength);
-  file.extractDataChunk<2>()
-        .readBits<1>(header.bufferType)
+  file.extractDataChunk<2>() // datachunck with a size of 2 bytes
+        .readBits<1>(header.bufferType) // reads first bit of the extracted data chnk
         .readBits<15>(header.bufferVersion);
   file.read<2>(header.headerLength);
   file.read<2>(header.bufferNumber);
