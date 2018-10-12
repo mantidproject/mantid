@@ -33,6 +33,8 @@ class SampleLogs(object):
         log = self.model.get_log(log_text)
         print('# {}'.format(log.name))
         print(log.valueAsPrettyStr())
+        if self.model.is_log_plottable(log_text):
+            self.view.new_plot_log(self.model.get_ws(), self.model.get_exp(), log_text)
 
     def changeExpInfo(self):
         selected_rows = self.view.get_selected_row_indexes()
