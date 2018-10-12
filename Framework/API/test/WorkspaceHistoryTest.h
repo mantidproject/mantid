@@ -140,7 +140,8 @@ public:
 class WorkspaceHistoryTestPerformance : public CxxTest::TestSuite {
 public:
   WorkspaceHistoryTestPerformance(){
-    constructAlgHistories(); 
+    constructAlgHistories1();
+    constructAlgHistories2(); 
   }
 
   void setUp() override { 
@@ -166,14 +167,32 @@ public:
 
   void test_standard_insertion_500000_times() {
     for (auto i = 0u; i < 500000; ++i) {
-      m_wsHist.addHistory(m_1000000Histories[i]);
+      m_wsHist.addHistory(m_1000000Histories1[i]);
     }
   }
 
   void test_standard_insertion_1000000_times(){
     for (auto i = 0u; i < 1000000; ++i) {
-      m_wsHist.addHistory(m_1000000Histories[i]);
+      m_wsHist.addHistory(m_1000000Histories1[i]);
     }
+  }
+
+  void test_adding_1000000_to_500000_workspace_histories(){
+    // It's hard to test this without doing this bit
+    for (auto i = 0u; i < 500000; ++i) {
+      m_wsHist.addHistory(m_1000000Histories1[i]);
+    }
+    // The actual test
+    m_wsHist.addHistory(m_1000000Histories2);
+  }
+
+  void test_adding_1000000_to_1000000_workspace_histories(){
+    // It's hard to test this without doing this bit
+    for (auto i = 0u; i < 1000000; ++i) {
+      m_wsHist.addHistory(m_1000000Histories1[i]);
+    }
+    // The actual test
+    m_wsHist.addHistory(m_1000000Histories2);
   }
 
 private:
@@ -188,15 +207,22 @@ private:
     }
   }
 
-  void constructAlgHistories(){
+  void constructAlgHistories1(){
     for (auto i =1u; i < 1000001; ++i){
       auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", i);
-      m_1000000Histories.emplace_back(std::move(algHist));
+      m_1000000Histories1.emplace_back(std::move(algHist));
+    }
+  }
+  void constructAlgHistories2(){
+    for (auto i =1000001u; i < 1000001; ++i){
+      auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", i);
+      m_1000000Histories2.addHistory(std::move(algHist));
     }
   }
 
   Mantid::API::WorkspaceHistory m_wsHist;
-  std::vector<AlgorithmHistory_sptr> m_1000000Histories;
+  std::vector<AlgorithmHistory_sptr> m_1000000Histories1;
+  WorkspaceHistory m_1000000Histories2;
 };
 
 #endif

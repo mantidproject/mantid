@@ -74,10 +74,8 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory,
       otherHistory.getAlgorithmHistories();
 
   // Reserve maximum needed space
-  //m_algorithms.reserve(otherAlgorithms.size() + m_algorithms.size());
+  m_algorithms.reserve(otherAlgorithms.size() + m_algorithms.size());
 
-  // Add default boolean to false for file operations from ProcessFileNexus to
-  // check for presence in the set already
   for (auto algHistory : otherAlgorithms) {
     this->addHistory(algHistory, alwaysInsert);
   }
@@ -85,7 +83,7 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory,
   std::sort(m_algorithms.begin(), m_algorithms.end(),
             [](AlgorithmHistory_sptr a, AlgorithmHistory_sptr b) -> bool {
               return a->execCount() < b->execCount();
-            });         
+            });
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
