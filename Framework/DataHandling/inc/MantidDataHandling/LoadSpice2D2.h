@@ -107,6 +107,7 @@ private:
   void storeMetaDataIntoWS();
   void runLoadInstrument();
   void rotateDetector();
+  double detectorDistance();
   void moveDetector();
   
 
