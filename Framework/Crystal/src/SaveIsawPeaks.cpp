@@ -156,19 +156,19 @@ void SaveIsawPeaks::exec() {
   if (append) {
     std::ifstream infile(filename.c_str());
     std::string line;
-  while (!infile.eof())      // To get you all the lines.
-  {
-    getline(infile, line); // Saves the line in STRING.
-    if (infile.eof())
-      break;
-    std::stringstream ss(line);
+    while (!infile.eof()) // To get you all the lines.
+    {
+      getline(infile, line); // Saves the line in STRING.
+      if (infile.eof())
+        break;
+      std::stringstream ss(line);
       double three;
       ss >> three;
-      if (three == 3) ss >> appendPeakNumb;
-
+      if (three == 3)
+        ss >> appendPeakNumb;
     }
 
-    std::cout << appendPeakNumb <<"\n";
+    std::cout << appendPeakNumb << "\n";
     infile.close();
     out.open(filename.c_str(), std::ios::app);
   } else {
