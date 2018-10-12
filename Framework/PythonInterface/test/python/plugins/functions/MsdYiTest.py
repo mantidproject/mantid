@@ -23,15 +23,15 @@ class MsdYiTest(unittest.TestCase):
         input = np.array([[1, 2], [3, 4]])
         expected = np.array([[0.03616947, 0.53117559], [1.46726692, 3.69882113]])
         tolerance = 0.000001
-        status, output = check_output("MsdYi", input, expected, tolerance, Height=1.0, MSD=0.05, Sigma=1.0)
+        status, output = check_output("MsdYi", input, expected, tolerance, Height=1.0, Msd=0.05, Sigma=1.0)
 
         if not status:
             self.fail("Computed output " + str(output) + " from input " + str(input) +
                       " is not equal to the expected output: " + str(expected))
 
     def test_use_in_fit(self):
-        workspace = create_test_workspace(create_model("MsdYi", Height=1.0, MSD=0.05, Sigma=1.0), 1000)
-        function_string = create_function_string("MsdYi", Height=1.0, MSD=0.05, Sigma=1.0)
+        workspace = create_test_workspace(create_model("MsdYi", Height=1.0, Msd=0.05, Sigma=1.0), 1000)
+        function_string = create_function_string("MsdYi", Height=1.0, Msd=0.05, Sigma=1.0)
         Fit(Function=function_string, InputWorkspace=workspace, StartX=1.2, EndX=1200)
 
 
