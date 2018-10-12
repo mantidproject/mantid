@@ -13,6 +13,7 @@
 #include "MantidParallel/IO/NXEventDataLoader.h"
 
 #include <H5Cpp.h>
+#include <thread>
 
 namespace Mantid {
 namespace Parallel {
@@ -61,14 +62,16 @@ void load(const std::string &filename, const std::string &groupname,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists,
           bool precalcEvents) {
-  auto concurencyNumber = PARALLEL_NUMBER_OF_THREADS;
+  auto concurencyNumber = std::thread::hardware_concurrency();
+  auto numThreads = std::max<int>(concurencyNumber / 2, 1);
+  auto numProceses = std::max<int>(concurencyNumber / 2, 1);
   std::string executableName =
       Kernel::ConfigService::Instance().getPropertiesDir() +
       "/MantidNexusParallelLoader";
 
-  MultiProcessEventLoader loader(
-      static_cast<unsigned>(eventLists.size()), concurencyNumber / 2,
-      12 /*concurencyNumber / 2*/, executableName, precalcEvents);
+  MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()),
+                                 numProceses, numThreads, executableName,
+                                 precalcEvents);
   loader.load(filename, groupname, bankNames, bankOffsets, eventLists);
 }
 
