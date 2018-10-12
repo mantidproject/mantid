@@ -79,7 +79,7 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadDNSEvent)
 
-const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS";
+const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS-PSD";
 const uint64_t MAX_BUFFER_BYTES_SIZE = 1500; // maximum buffer size in data file
 
 void LoadDNSEvent::init() {
