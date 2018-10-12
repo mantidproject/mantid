@@ -366,7 +366,8 @@ public:
     MatrixWorkspace_const_sptr outWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outWS);
     const auto &spectrumInfoIn = m_d17WS->spectrumInfo();
-    const auto twoThetaIn = spectrumInfoIn.twoTheta(static_cast<size_t>(directLinePos));
+    const auto twoThetaIn =
+        spectrumInfoIn.twoTheta(static_cast<size_t>(directLinePos));
     auto instrOut = outWS->getInstrument();
     auto detOut = instrOut->getComponentByName("detector");
     const auto posOut = detOut->getPos();
