@@ -9,8 +9,8 @@ from gui_helper import set_matplotlib_backend
 
 backend = set_matplotlib_backend() # must be at the top of this file
 if backend == 'Qt4Agg':
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+    from matplotlib.backends.backend_qt4agg import *
 elif backend == 'Qt5Agg':
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+    from matplotlib.backends.backend_qt5agg import *
 else:
     raise RuntimeError('Unrecognized backend {}'.format(backend))
