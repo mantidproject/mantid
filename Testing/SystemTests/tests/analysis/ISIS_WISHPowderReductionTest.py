@@ -1,9 +1,9 @@
 from stresstesting import MantidStressTest
-import wish.reduce
+from wish.reduce import Wish_Run
 
 from mantid import config
 import os
-
+import shutil
 
 DIRS = config['datasearch.directories'].split(';')
 
@@ -11,11 +11,11 @@ DIRS = config['datasearch.directories'].split(';')
 working_folder_name = "WISH"
 
 # Relative to working folder
-input_folder_name = "input"
+input_folder_name = "input/"
 output_folder_name = "output"
 
 # Relative to input folder
-calibration_folder_name = "calibration"
+calibration_folder_name = "Cal"
 
 
 
@@ -29,14 +29,18 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 
 class WISHPowderReductionTest(MantidStressTest):
-
+#still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
-        return ["WISHvana41865-1foc.nxs","WISHvana41865-2foc.nxs","WISHvana41865-3foc.nxs","WISHvana41865-4foc.nxs",
-                "WISHvana41865-5foc.nxs","WISHvana41865-6foc.nxs","WISHvana41865-7foc.nxs","WISHvana41865-8foc.nxs",
-                "WISHvana41865-9foc.nxs","WISHvana41865-10foc.nxs","emptyinst38581-1foc.nxs","emptyinst38581-2foc.nxs",
-                "emptyinst38581-3foc.nxs","emptyinst38581-4foc.nxs","emptyinst38581-5foc.nxs","emptyinst38581-6foc.nxs",
-                "emptyinst38581-7foc.nxs","emptyinst38581-8foc.nxs","emptyinst38581-9foc.nxs",
-                "emptyinst38581-10foc.nxs"]
+        input_files = ["WISHvana41865-1foc.nxs", "WISHvana41865-2foc.nxs", "WISHvana41865-3foc.nxs",
+                       "WISHvana41865-4foc.nxs", "WISHvana41865-5foc.nxs", "WISHvana41865-6foc.nxs",
+                       "WISHvana41865-7foc.nxs", "WISHvana41865-8foc.nxs", "WISHvana41865-9foc.nxs",
+                       "WISHvana41865-10foc.nxs", "emptyinst38581-1foc.nxs", "emptyinst38581-2foc.nxs",
+                       "emptyinst38581-3foc.nxs", "emptyinst38581-4foc.nxs", "emptyinst38581-5foc.nxs",
+                       "emptyinst38581-6foc.nxs", "emptyinst38581-7foc.nxs", "emptyinst38581-8foc.nxs",
+                       "emptyinst38581-9foc.nxs", "emptyinst38581-10foc.nxs"]
+
+        input_files = [os.path.join(calibration_dir, files) for files in input_files]
+        return input_files
     #def requiredMemoryMB(self):
         # Need lots of memory for full WISH dataset
      #   return 20000
@@ -46,7 +50,7 @@ class WISHPowderReductionTest(MantidStressTest):
 
     def runTest(self):
 
-        wish.reduce.Wish_Run("__main__", calibration_dir, input, output_dir)
+        Wish_Run("__main__", calibration_dir+"/", input_dir, output_dir)
 
     def validate(self):
         return "w41870-2_9foc-d", "WISH41870-2_9raw.nxs", \

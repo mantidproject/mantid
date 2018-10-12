@@ -11,7 +11,6 @@ import mantid.simpleapi as mantid
 def Wish_Run(input,  cal_directory, user_directory, outputfolder):
     __name__=input
     print("Running")
-    wish_dir = ""
     cal_dir = cal_directory
     use_folder = user_directory
     out_fold = outputfolder
@@ -108,14 +107,14 @@ def Wish_Run(input,  cal_directory, user_directory, outputfolder):
 
     # Returns the calibration filename
     def WISH_cal(panel):
-        return WISH_calibration() + "WISH_cycle_10_3_noends_10to10.cal"
+        return WISH_getcalibration() + "WISH_cycle_10_3_noends_10to10.cal"
         # return "/home/mp43/Desktop/Si_Mar15/test_detOffsets_SiMar15_noends.cal"
         # return "/home/ryb18365/Desktop/WISH_cycle_10_3_noends_10to10_dodgytubesremoved.cal"
 
 
     # Returns the grouping filename
     def WISH_group():
-        return WISH_calibration() + "WISH_cycle_10_3_noends_10to10.cal"
+        return WISH_getcalibration() + "WISH_cycle_10_3_noends_10to10.cal"
         # return "/home/mp43/Desktop/Si_Mar15/test_detOffsets_SiMar15_noends.cal"
         # return "/home/ryb18365/Desktop/WISH_cycle_10_3_noends_10to10_dodgytubesremoved.cal"
 
@@ -123,32 +122,32 @@ def Wish_Run(input,  cal_directory, user_directory, outputfolder):
     def WISH_getvana(panel, SE="candlestick", cycle="09_4"):
         if (SE == "candlestick"):
             if (cycle == "09_2"):
-                return WISH_calibration() + "vana318-" + str(panel) + "foc-rmbins-smooth50.nx5"
+                return WISH_getcalibration() + "vana318-" + str(panel) + "foc-rmbins-smooth50.nx5"
             if (cycle == "09_3"):
-                return WISH_calibration(cycle) + "vana935-" + str(panel) + "foc-SS.nx5"
+                return WISH_getcalibration(cycle) + "vana935-" + str(panel) + "foc-SS.nx5"
             if (cycle == "09_4"):
-                return WISH_calibration(cycle) + "vana3123-" + str(panel) + "foc-SS.nx5"
+                return WISH_getcalibration(cycle) + "vana3123-" + str(panel) + "foc-SS.nx5"
             if (cycle == "09_5"):
-                return WISH_calibration(cycle) + "vana3123-" + str(panel) + "foc-SS.nx5"
+                return WISH_getcalibration(cycle) + "vana3123-" + str(panel) + "foc-SS.nx5"
             if (cycle == "11_4"):
-                return WISH_calibration(cycle) + "vana38428-" + str(panel) + "foc-SF-SS.nxs"
+                return WISH_getcalibration(cycle) + "vana38428-" + str(panel) + "foc-SF-SS.nxs"
             if (cycle == "18_2"):
-                return WISH_calibration(cycle) +"WISHvana41865-" +str(panel) +"foc.nxs"
+                return WISH_getcalibration(cycle) +"WISHvana41865-" +str(panel) +"foc.nxs"
         if (SE == "WISHcryo"):
             if (cycle == "09_2"):
-                return WISH_calibration() + "vana318-" + str(panel) + "foc-rmbins-smooth50.nx5"
+                return WISH_getcalibration() + "vana318-" + str(panel) + "foc-rmbins-smooth50.nx5"
             if (cycle == "09_3"):
-                return WISH_calibration(cycle) + "vana935-" + str(panel) + "foc-SS.nx5"
+                return WISH_getcalibration(cycle) + "vana935-" + str(panel) + "foc-SS.nx5"
             if (cycle == "09_4"):
-                return WISH_calibration(cycle) + "vana3123-" + str(panel) + "foc-SS.nx5"
+                return WISH_getcalibration(cycle) + "vana3123-" + str(panel) + "foc-SS.nx5"
             if (cycle == "11_1"):
-                return WISH_calibration(cycle) + "vana17718-" + str(panel) + "foc-SS.nxs"
+                return WISH_getcalibration(cycle) + "vana17718-" + str(panel) + "foc-SS.nxs"
             if (cycle == "11_2"):
-                return WISH_calibration(cycle) + "vana16812-" + str(panel) + "foc-SS.nx5"
+                return WISH_getcalibration(cycle) + "vana16812-" + str(panel) + "foc-SS.nx5"
             if (cycle == "11_3"):
-                return WISH_calibration(cycle) + "vana18590-" + str(panel) + "foc-SS-new.nxs"
+                return WISH_getcalibration(cycle) + "vana18590-" + str(panel) + "foc-SS-new.nxs"
             if (cycle == "18_2"):
-                return WISH_calibration(cycle) +"WISHvana41865-" +str(panel) +"foc.nxs"
+                return WISH_getcalibration(cycle) +"WISHvana41865-" +str(panel) +"foc.nxs"
 
 
     def split_string(t):
@@ -162,36 +161,36 @@ def Wish_Run(input,  cal_directory, user_directory, outputfolder):
 
     def WISH_getemptyinstrument(panel, cycle="09_4"):
         if (cycle == "09_4"):
-            return WISH_calibration(cycle) + "emptyinst3120-" + str(panel) + "foc.nx5"
+            return WISH_getcalibration(cycle) + "emptyinst3120-" + str(panel) + "foc.nx5"
 
 
     def WISH_getempty(panel, SE="WISHcryo", cycle="09_4"):
         if (SE == "WISHcryo"):
             if (cycle == "09_2"):
-                return WISH_calibration(cycle) + "emptycryo322-" + str(panel) + "-smooth50.nx5"
+                return WISH_getcalibration(cycle) + "emptycryo322-" + str(panel) + "-smooth50.nx5"
             if (cycle == "09_3"):
-                return WISH_calibration(cycle) + "emptycryo1725-" + str(panel) + "foc.nx5"
+                return WISH_getcalibration(cycle) + "emptycryo1725-" + str(panel) + "foc.nx5"
             if (cycle == "09_4"):
-                return WISH_calibration(cycle) + "emptycryo3307-" + str(panel) + "foc.nx5"
+                return WISH_getcalibration(cycle) + "emptycryo3307-" + str(panel) + "foc.nx5"
             if (cycle == "09_5"):
-                return WISH_calibration(cycle) + "emptycryo16759-" + str(panel) + "foc.nx5"
+                return WISH_getcalibration(cycle) + "emptycryo16759-" + str(panel) + "foc.nx5"
             if (cycle == "11_1"):
-                return WISH_calibration(cycle) + "emptycryo17712-" + str(panel) + "foc-SS.nxs"
+                return WISH_getcalibration(cycle) + "emptycryo17712-" + str(panel) + "foc-SS.nxs"
             if (cycle == "11_2"):
-                return WISH_calibration(cycle) + "emptycryo16759-" + str(panel) + "foc-SS.nx5"
+                return WISH_getcalibration(cycle) + "emptycryo16759-" + str(panel) + "foc-SS.nx5"
             if (cycle == "11_3"):
-                return WISH_calibration(cycle) + "emptycryo17712-" + str(panel) + "foc-SS-new.nxs"
+                return WISH_getcalibration(cycle) + "emptycryo17712-" + str(panel) + "foc-SS-new.nxs"
             if (cycle == "11_4"):
-                return WISH_calibration(cycle) + "empty_mag20620-" + str(panel) + "foc-HR-SF.nxs"
+                return WISH_getcalibration(cycle) + "empty_mag20620-" + str(panel) + "foc-HR-SF.nxs"
         if (SE == "candlestick"):
             if (cycle == "09_4"):
-                return WISH_calibration(cycle) + "emptyinst3120-" + str(panel) + "foc.nxs"
+                return WISH_getcalibration(cycle) + "emptyinst3120-" + str(panel) + "foc.nxs"
             if (cycle == "09_3"):
-                return WISH_calibration(cycle) + "emptyinst1726-" + str(panel) + "foc-monitor.nxs"
+                return WISH_getcalibration(cycle) + "emptyinst1726-" + str(panel) + "foc-monitor.nxs"
             if (cycle == "11_4"):
-                return WISH_calibration(cycle) + "emptyinst19618-" + str(panel) + "foc-SF-S.nxs"
+                return WISH_getcalibration(cycle) + "emptyinst19618-" + str(panel) + "foc-SF-S.nxs"
             if (cycle == "17_1"):
-                return WISH_calibration(cycle) + "emptyinst38581-" +str(panel) + "foc.nxs"
+                return WISH_getcalibration(cycle) + "emptyinst38581-" +str(panel) + "foc.nxs"
 
 
     def WISH_getfilename(run_number, ext):
