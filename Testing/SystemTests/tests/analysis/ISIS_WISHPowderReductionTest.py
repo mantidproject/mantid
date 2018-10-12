@@ -45,18 +45,19 @@ class WISHPowderReductionTest(MantidStressTest):
 
     def cleanup(self):
         shutil.rmtree(output_dir)
-        os.makedirs(output_dir)
+
        
 
     def runTest(self):
+        os.makedirs(output_dir)
         Wish_Run("__main__", calibration_dir+"/", input_dir, output_dir, True)
         self.clearWorkspaces()
 
     def validate(self):
-        return "w41870-2_9foc-d", "WISH41870-2_9raw.nxs", \
-               "w41870-3_8foc-d", "WISH41870-3_8raw.nxs", \
-               "w41870-4_7foc-d", "WISH41870-4_7raw.nxs", \
-               "w41870-5_6foc-d", "WISH41870-5_6raw.nxs"
+        return "w41870-2_9foc", "WISH41870-2_9raw.nxs", \
+               "w41870-3_8foc", "WISH41870-3_8raw.nxs", \
+               "w41870-4_7foc", "WISH41870-4_7raw.nxs", \
+               "w41870-5_6foc", "WISH41870-5_6raw.nxs"
 
     def clearWorkspaces(self):
         deletews = ["w41870-" + str(i) + "foc" for i in range(1, 11)]
