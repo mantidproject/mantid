@@ -24,13 +24,15 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 from __future__ import (absolute_import, division, print_function)
-import math, numpy as np
+import math
+import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
 # The model of Yi et al(J Phys Chem B 1316 5029 2012) takes into account motional heterogeneity.
 # The elastic intensity is propotional to exp(-(1/6)*Q^2*msd)*(1+Q^4*sigma/72)
 # where the mean square displacement msd = <r^2> and sigma^2 is the variance of the msd.
 # In the limit sigma = 0 the model becomes Gaussian.
+
 
 class MsdYi(IFunction1D):
 
