@@ -4,6 +4,7 @@
 set ( TEST_FILES
   IndirectFittingModelTest.h
   IndirectFitDataTest.h
+  IndirectFitOutputTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest
@@ -16,6 +17,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest
     ../
   TEST_HELPER_SRCS
     ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
