@@ -418,13 +418,17 @@ class RunTabPresenter(object):
             # Check if results should be plotted
             plot_results = self._view.plot_results
 
+            save_can = self._view.save_can
+
             # Get the name of the graph to output to
             output_graph = self.output_graph
 
             self.progress = 0
             setattr(self._view, 'progress_bar_value', self.progress)
             setattr(self._view, 'progress_bar_maximum', len(states))
-            self.batch_process_runner.process_states(states, use_optimizations, output_mode, plot_results, output_graph)
+
+            self.batch_process_runner.process_states(states,use_optimizations, output_mode, plot_results,
+                                                     output_graph, save_can)
 
         except Exception as e:
             self._view.enable_buttons()

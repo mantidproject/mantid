@@ -28,7 +28,7 @@ except (Exception, Warning):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for the execution of a single batch iteration
 # ----------------------------------------------------------------------------------------------------------------------
-def single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph):
+def single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph, save_can=False):
     """
     Runs a single reduction.
 
@@ -39,6 +39,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     :param state: a SANSState object
     :param use_optimizations: if true then the optimizations of child algorithms are enabled.
     :param output_mode: the output mode
+    :param save_can: whether to save out can workspaces
     """
     # ------------------------------------------------------------------------------------------------------------------
     # Load the data
@@ -129,12 +130,11 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # 3. Both:
     #    * This means that we need to save out the reduced data
     #    * The data is already on the ADS, so do nothing
-
     if output_mode is OutputMode.SaveToFile:
-        save_to_file(reduction_packages)
+        save_to_file(reduction_packages, save_can)
         delete_reduced_workspaces(reduction_packages)
     elif output_mode is OutputMode.Both:
-        save_to_file(reduction_packages)
+        save_to_file(reduction_packages, save_can)
 
     # -----------------------------------------------------------------------
     # Clean up other workspaces if the optimizations have not been turned on.
@@ -918,13 +918,13 @@ def add_to_group(workspace, name_of_group_workspace):
         group_alg.execute()
 
 
-def save_to_file(reduction_packages):
+def save_to_file(reduction_packages, save_can=False):
     """
     Extracts all workspace names which need to be saved and saves them into a file.
 
     @param reduction_packages: a list of reduction packages which contain all the relevant information for saving
     """
-    workspaces_names_to_save = get_all_names_to_save(reduction_packages)
+    workspaces_names_to_save = get_all_names_to_save(reduction_packages, save_can=save_can)
 
     state = reduction_packages[0].state
     save_info = state.save
@@ -1001,7 +1001,7 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors):
         _delete_workspaces(delete_alg, optimizations_to_delete)
 
 
-def get_all_names_to_save(reduction_packages):
+def get_all_names_to_save(reduction_packages, save_can=False):
     """
     Extracts all the output names from a list of reduction packages. The main
 
@@ -1013,9 +1013,23 @@ def get_all_names_to_save(reduction_packages):
         reduced_lab = reduction_package.reduced_lab
         reduced_hab = reduction_package.reduced_hab
         reduced_merged = reduction_package.reduced_merged
+        reduced_lab_can = reduction_package.reduced_lab_can
+        reduced_hab_can = reduction_package.reduced_hab_can
+
+        if save_can:
+            if reduced_merged:
+                names_to_save.append(reduced_merged.name())
+            if reduced_lab:
+                names_to_save.append(reduced_lab.name())
+            if reduced_hab:
+                names_to_save.append(reduced_hab.name())
+            if reduced_lab_can:
+                names_to_save.append(reduced_lab_can.name())
+            if reduced_hab_can:
+                names_to_save.append(reduced_hab_can.name())
 
         # If we have merged reduction then store the
-        if reduced_merged:
+        elif reduced_merged:
             names_to_save.append(reduced_merged.name())
         else:
             if reduced_lab:
