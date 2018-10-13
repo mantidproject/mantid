@@ -63,16 +63,18 @@ private:
       const std::vector<API::MatrixWorkspace_sptr> &workspaces) const;
 
   void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
-                        const std::vector<std::string> &spectra);
+                        std::vector<std::string> const &spectra,
+                        std::string const &outputBaseName,
+                        std::string const &endOfSuffix);
   void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
-                        const std::vector<std::string> &spectra,
-                        const std::vector<API::MatrixWorkspace_sptr> &names);
-  void renameWorkspaces(API::WorkspaceGroup_sptr group,
+                        std::vector<std::string> const &spectra,
                         std::string const &outputBaseName,
-                        std::string const &suffix);
-  void renameWorkspaces(std::string const &name,
-                        std::string const &outputBaseName,
-                        std::string const &suffix);
+                        std::string const &endOfSuffix,
+                        std::vector<API::MatrixWorkspace_sptr> const &names);
+  void renameGroupWorkspace(std::string const &currentName,
+                            std::vector<std::string> const &spectra,
+                            std::string const &outputBaseName,
+                            std::string const &endOfSuffix);
   void copyLogs(API::WorkspaceGroup_sptr resultWorkspace,
                 const std::vector<API::MatrixWorkspace_sptr> &workspaces);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,

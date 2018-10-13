@@ -239,15 +239,14 @@ template <typename F>
 void renameWorkspacesInQENSFit(Algorithm *qensFit,
                                IAlgorithm_sptr renameAlgorithm,
                                WorkspaceGroup_sptr outputGroup,
+                               std::string const &outputBaseName,
+                               std::string const &groupSuffix,
                                const F &getNameSuffix) {
-  const auto groupName = qensFit->getPropertyValue("OutputWorkspaceGroup");
-  auto outputBase = groupName.substr(0, groupName.rfind("_Workspaces"));
-
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
   renamerProg.report("Renaming group workspaces...");
 
   auto getName = [&](std::size_t i) {
-    return outputBase + "_" + getNameSuffix(i);
+    return outputBaseName + "_" + getNameSuffix(i);
   };
 
   auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
@@ -256,6 +255,7 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
   };
   renameWorkspacesWith(outputGroup, getName, renamer);
 
+  auto const groupName = outputBaseName + groupSuffix;
   if (outputGroup->getName() != groupName)
     renameWorkspace(renameAlgorithm, outputGroup, groupName);
 }
@@ -518,17 +518,17 @@ void QENSFitSequential::exec() {
       getPropertyValue("OutputWorkspace"), resultWs);
 
   if (containsMultipleData(workspaces))
-    renameWorkspaces(groupWs, spectra, inputWorkspaces);
+    renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
+                     inputWorkspaces);
   else
-    renameWorkspaces(groupWs, spectra);
+    renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
   if (doExtractMembers)
     extractMembers(groupWs, workspaces, outputBaseName + "_Members");
 
-  if (AnalysisDataService::Instance().doesExist("__PDF_Workspace"))
-    renameWorkspaces("__PDF_Workspace", outputBaseName, "_PDF");
+  renameGroupWorkspace("__PDF_Workspace", spectra, outputBaseName, "_PDF");
 
   deleteTemporaryWorkspaces(outputBaseName);
 
@@ -661,36 +661,34 @@ QENSFitSequential::processParameterTable(ITableWorkspace_sptr parameterTable) {
 }
 
 void QENSFitSequential::renameWorkspaces(
-    WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra,
-    const std::vector<MatrixWorkspace_sptr> &inputWorkspaces) {
+    WorkspaceGroup_sptr outputGroup, std::vector<std::string> const &spectra,
+    std::string const &outputBaseName, std::string const &endOfSuffix,
+    std::vector<MatrixWorkspace_sptr> const &inputWorkspaces) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   const auto getNameSuffix = [&](std::size_t i) {
-    return inputWorkspaces[i]->getName() + "_" + spectra[i] + "_Workspace";
+    return inputWorkspaces[i]->getName() + "_" + spectra[i] + endOfSuffix;
   };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
 }
 
 void QENSFitSequential::renameWorkspaces(
-    WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra) {
+    WorkspaceGroup_sptr outputGroup, std::vector<std::string> const &spectra,
+    std::string const &outputBaseName, std::string const &endOfSuffix) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
-  auto getNameSuffix = [&](std::size_t i) { return spectra[i] + "_Workspace"; };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
+  auto getNameSuffix = [&](std::size_t i) { return spectra[i] + endOfSuffix; };
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
 }
 
-void QENSFitSequential::renameWorkspaces(WorkspaceGroup_sptr group,
-                                         std::string const &outputBaseName,
-                                         std::string const &suffix) {
-  auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
-  rename->setProperty("InputWorkspace", group);
-  rename->setProperty("OutputWorkspace", outputBaseName + suffix);
-  rename->executeAsChildAlg();
-}
-
-void QENSFitSequential::renameWorkspaces(std::string const &name,
-                                         std::string const &outputBaseName,
-                                         std::string const &suffix) {
-  auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
-  renameWorkspaces(group, outputBaseName, suffix);
+void QENSFitSequential::renameGroupWorkspace(
+    std::string const &currentName, std::vector<std::string> const &spectra,
+    std::string const &outputBaseName, std::string const &endOfSuffix) {
+  if (AnalysisDataService::Instance().doesExist(currentName)) {
+    auto const pdfGroup =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(currentName);
+    renameWorkspaces(pdfGroup, spectra, outputBaseName, endOfSuffix);
+  }
 }
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
