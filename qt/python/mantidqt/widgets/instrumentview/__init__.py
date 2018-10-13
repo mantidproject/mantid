@@ -9,9 +9,14 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
+# 3rdparty imports
+from qtpy import PYQT4
 # local imports
 from mantidqt.utils.qt import import_qt
 
+
+if PYQT4:
+    raise ImportError("Instrument view requires Qt >= v5")
 # import widget class from C++ wrappers
 InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
                              'InstrumentWidget')
