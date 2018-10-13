@@ -527,6 +527,9 @@ void QENSFitSequential::exec() {
   if (doExtractMembers)
     extractMembers(groupWs, workspaces, outputBaseName + "_Members");
 
+  if (AnalysisDataService::Instance().doesExist("__PDF_Workspace"))
+    renameWorkspaces("__PDF_Workspace", outputBaseName, "_PDF");
+
   deleteTemporaryWorkspaces(outputBaseName);
 
   addAdditionalLogs(resultWs);
@@ -672,6 +675,22 @@ void QENSFitSequential::renameWorkspaces(
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   auto getNameSuffix = [&](std::size_t i) { return spectra[i] + "_Workspace"; };
   return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
+}
+
+void QENSFitSequential::renameWorkspaces(WorkspaceGroup_sptr group,
+                                         std::string const &outputBaseName,
+                                         std::string const &suffix) {
+  auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
+  rename->setProperty("InputWorkspace", group);
+  rename->setProperty("OutputWorkspace", outputBaseName + suffix);
+  rename->executeAsChildAlg();
+}
+
+void QENSFitSequential::renameWorkspaces(std::string const &name,
+                                         std::string const &outputBaseName,
+                                         std::string const &suffix) {
+  auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
+  renameWorkspaces(group, outputBaseName, suffix);
 }
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,

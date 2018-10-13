@@ -82,6 +82,11 @@ private:
   /// Output PDF
   double outputPDF(size_t convLength,
                    std::vector<std::vector<double>> &reducedChain);
+  void outputPDF(Mantid::API::MatrixWorkspace_sptr workspace,
+                 std::vector<std::vector<double>> &reducedChain,
+                 std::size_t const &convLength, int const &pdfLength);
+  void addOutputPDFWorkspaceToGroup(Mantid::API::MatrixWorkspace_sptr workspace,
+                                    std::string const &groupName);
   /// Output parameter table
   void outputParameterTable(const std::vector<double> &bestParameters,
                             const std::vector<double> &errorsLeft,

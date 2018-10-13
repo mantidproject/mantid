@@ -4,6 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -13,6 +14,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
@@ -35,6 +37,7 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
+using namespace Mantid::API;
 
 namespace {
 // static logger object
@@ -88,10 +91,7 @@ FABADAMinimizer::FABADAMinimizer()
                   " constant during the convergence period)."
                   " Useful to find the exact minimum.");
   // Output Properties
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
-                      "PDF", "PDF", Kernel::Direction::Output),
-                  "The name to give the output workspace for the"
-                  " Probability Density Functions");
+  declareProperty("PDF", true, "If the PDF's should be calculated or not.");
   declareProperty("NumberBinsPDF", 20,
                   "Number of bins used for the output PDFs");
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
@@ -836,36 +836,57 @@ FABADAMinimizer::outputPDF(size_t convLength,
 
     mostPchi2 = X[indexMostProbableChi2 - PDFYAxis.begin()] + (bin / 2.0);
 
-    // Do one iteration for each parameter.
-    for (size_t j = 0; j < m_nParams; ++j) {
-      // Calculate the Probability Density Function
-      std::vector<double> PDFYAxis(pdfLength, 0);
-      double start = reducedChain[j][0];
-      double bin =
-          (reducedChain[j][convLength - 1] - start) / double(pdfLength);
-      size_t step = 0;
-      MantidVec &X = ws->dataX(j);
-      MantidVec &Y = ws->dataY(j);
-      X[0] = start;
-      for (size_t i = 1; i < static_cast<size_t>(pdfLength) + 1; i++) {
-        double binEnd = start + double(i) * bin;
-        X[i] = binEnd;
-        while (step < convLength && reducedChain[j][step] <= binEnd) {
-          PDFYAxis[i - 1] += 1;
-          ++step;
-        }
-        Y[i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
-      }
-    }
+    if (getProperty("PDF"))
+      outputPDF(ws, reducedChain, convLength, pdfLength);
+
   } // if convLength > 0
   else {
-    g_log.warning() << "No points to create PDF. Empty Wokspace returned.\n";
+    g_log.warning() << "No points to create PDF. Empty Workspace returned.\n";
     mostPchi2 = -1;
   }
 
-  // Set and name the PDF workspace.
-  setProperty("PDF", ws);
   return mostPchi2;
+}
+
+void FABADAMinimizer::outputPDF(API::MatrixWorkspace_sptr workspace,
+                                std::vector<std::vector<double>> &reducedChain,
+                                std::size_t const &convLength,
+                                int const &pdfLength) {
+  for (size_t j = 0; j < m_nParams; ++j) {
+    // Calculate the Probability Density Function
+    std::vector<double> PDFYAxis(pdfLength, 0);
+    double start = reducedChain[j][0];
+    double bin = (reducedChain[j][convLength - 1] - start) / double(pdfLength);
+    size_t step = 0;
+    MantidVec &X = workspace->dataX(j);
+    MantidVec &Y = workspace->dataY(j);
+    X[0] = start;
+    for (size_t i = 1; i < static_cast<size_t>(pdfLength) + 1; i++) {
+      double binEnd = start + double(i) * bin;
+      X[i] = binEnd;
+      while (step < convLength && reducedChain[j][step] <= binEnd) {
+        PDFYAxis[i - 1] += 1;
+        ++step;
+      }
+      Y[i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
+    }
+  }
+
+  addOutputPDFWorkspaceToGroup(workspace, "__PDF_Workspace");
+}
+
+void FABADAMinimizer::addOutputPDFWorkspaceToGroup(
+    API::MatrixWorkspace_sptr workspace, std::string const &groupName) {
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(groupName)) {
+    auto groupPDF =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+    groupPDF->addWorkspace(workspace);
+    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
+  } else {
+    auto groupPDF = boost::make_shared<WorkspaceGroup>();
+    groupPDF->addWorkspace(workspace);
+    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
+  }
 }
 
 /** Create the table workspace containing parameter values
@@ -887,7 +908,7 @@ void FABADAMinimizer::outputParameterTable(
   wsPdfE->addColumn("str", "Name");
   wsPdfE->addColumn("double", "Value");
   wsPdfE->addColumn("double", "Left's error");
-  wsPdfE->addColumn("double", "Rigth's error");
+  wsPdfE->addColumn("double", "Right's error");
 
   for (size_t j = 0; j < m_nParams; ++j) {
     API::TableRow row = wsPdfE->appendRow();
