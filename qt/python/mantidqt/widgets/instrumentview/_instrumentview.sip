@@ -18,9 +18,10 @@ class InstrumentWidget : QWidget {
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 %End
 public:
-  InstrumentWidget(const QString &wsName, QWidget *parent /TransferThis/ = nullptr,
-                   bool resetGeometry = true, bool autoscaling = true,
-                   double scaleMin = 0.0, double scaleMax = 0.0,
-                   bool setDefaultView = true);
+  InstrumentWidget(const QString &ws_name, QWidget *parent /TransferThis/ = nullptr,
+                   bool reset_geometry = true, bool autoscaling = true,
+                   double scale_min = 0.0, double scale_max = 0.0,
+                   bool set_default_view = true);
+  bool overlay(const QString & ws_name);
 };
 
