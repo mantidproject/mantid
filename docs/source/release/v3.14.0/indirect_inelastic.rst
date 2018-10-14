@@ -64,6 +64,8 @@ Improvements
   tries to be made to generate a scattering point.
 - In the Calculate Monte Carlo Absorption Tab, all of the options in the Monte Carlo section are now read from
   an instrument parameter files once a file has been loaded.
+- The option to choose which spectrum to Plot Spectrum for is now available in the ContainerSubtraction Tab and 
+  ApplyAbsorptionCorrections Tab.
 
 
 Data Reduction Interface
