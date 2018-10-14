@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/MiniPlotMpl.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
@@ -35,8 +36,7 @@ Mantid::Kernel::Logger g_log("MiniPlotMpl");
 
 QPushButton *createHomeButton() {
   auto mpl(Python::NewRef(PyImport_ImportModule("matplotlib")));
-  QDir dataPath(
-      PyString_AsString(Python::Object(mpl.attr("get_data_path")()).ptr()));
+  QDir dataPath(TO_CSTRING(Python::Object(mpl.attr("get_data_path")()).ptr()));
   dataPath.cd("images");
   QIcon icon(dataPath.absoluteFilePath("home.png"));
   auto iconSize(icon.availableSizes().front());

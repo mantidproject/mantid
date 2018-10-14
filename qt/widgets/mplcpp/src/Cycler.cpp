@@ -17,6 +17,9 @@ namespace {
 Python::Object cyclerModule() {
   return Python::NewRef(PyImport_ImportModule("cycler"));
 }
+Python::Object sixNext() {
+  return Python::NewRef(PyImport_ImportModule("six")).attr("next");
+}
 
 /**
  * Creates an iterable from a plain Cycler object
@@ -48,7 +51,7 @@ Cycler::Cycler(Python::Object obj)
  */
 Python::Dict Cycler::operator()() const {
   GlobalInterpreterLock lock;
-  return Python::Dict(pyobj().attr("next")());
+  return Python::Dict(sixNext()(pyobj()));
 }
 
 /**

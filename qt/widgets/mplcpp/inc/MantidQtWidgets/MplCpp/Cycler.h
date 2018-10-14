@@ -8,7 +8,10 @@
 #define MPLCPP_CYCLER_H
 
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
+#pragma push_macro("slots")
+#undef slots
 #include "MantidQtWidgets/MplCpp/Python/Object.h"
+#pragma pop_macro("slots")
 
 namespace MantidQt {
 namespace Widgets {
