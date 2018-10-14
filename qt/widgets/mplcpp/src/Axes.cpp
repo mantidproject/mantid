@@ -18,6 +18,7 @@ namespace MplCpp {
 using Mantid::PythonInterface::Converters::VectorToNDArray;
 using Mantid::PythonInterface::Converters::WrapReadOnly;
 using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::PythonException;
 using Mantid::PythonInterface::PythonRuntimeError;
 using Mantid::PythonInterface::callMethodNoCheck;
 
@@ -139,10 +140,15 @@ Artist Axes::text(double x, double y, QString text,
  * @brief Set the X-axis scale to the given value.
  * @param value New scale type. See
  * https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xscale.html
- * @raises std::invalid_argument if the value is unknown
+ * @raises PythonException if the value is unknown
  */
 void Axes::setXScale(const char *value) {
-  callMethodNoCheck<void, const char *>(pyobj(), "set_xscale", value);
+  try {
+    callMethodNoCheck<void, const char *>(pyobj(), "set_xscale", value);
+  } catch (PythonException &) {
+    throw std::invalid_argument(
+        std::string("Axes::setXScale - Invalid scale type ") + value);
+  }
 }
 
 /// @return The scale type of the X axis as a string
@@ -158,7 +164,12 @@ QString Axes::getXScale() const {
  * @raises std::invalid_argument if the value is unknown
  */
 void Axes::setYScale(const char *value) {
-  callMethodNoCheck<void, const char *>(pyobj(), "set_yscale", value);
+  try {
+    callMethodNoCheck<void, const char *>(pyobj(), "set_yscale", value);
+  } catch (PythonException &) {
+    throw std::invalid_argument(
+        std::string("Axes::setYScale - Invalid scale type ") + value);
+  }
 }
 
 /// @return The scale type of the Y axis as a string

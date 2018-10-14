@@ -40,7 +40,7 @@ public:
   void testArtistCallsRemoveOnPyObject() {
     auto textModule(Python::NewRef(PyImport_ImportModule("matplotlib.text")));
     Artist label(textModule.attr("Text")());
-    TS_ASSERT_THROWS(label.remove(), Python::ErrorAlreadySet);
+    TS_ASSERT_THROWS(label.remove(), std::exception);
   }
   // ----------------- failure tests ---------------------
 

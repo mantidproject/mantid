@@ -37,7 +37,7 @@ Line2D::~Line2D() {
   if (!m_xOwner.empty()) {
     try {
       this->remove();
-    } catch (Python::ErrorAlreadySet &) {
+    } catch (...) {
       // line is not attached to an axes
     }
   }
