@@ -45,6 +45,8 @@ Bugfixes
   option in ConvFit.
 - An unexpected crash is prevented when Plot Current Preview is clicked when no data is loaded. A meaningful error
   message is now displayed.
+- The Probability Density Functions (PDF) workspaces for the FABADA minimiser in ConvFit no longer overwrite each other. 
+  Various other improvements in the display of the FABADA PDF's have also been finished.
 
 
 Data Corrections Interface
