@@ -67,6 +67,9 @@ class RunTabPresenter(object):
         def on_processed_clicked(self):
             self._presenter.on_processed_clicked()
 
+        def on_load_clicked(self):
+            self._presenter.on_load_clicked()
+
         def on_multi_period_selection(self, show_periods):
             self._presenter.on_multiperiod_changed(show_periods)
 
@@ -434,6 +437,17 @@ class RunTabPresenter(object):
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e))
+
+    def on_load_clicked(self):
+        states, errors = self.get_states(row_index=selected_rows)
+
+        for row, error in errors.items():
+            self.on_processing_error(row, error)
+
+        if not states:
+            self.on_processing_finished(None)
+            return
+
 
     def on_multiperiod_changed(self, show_periods):
         if show_periods:

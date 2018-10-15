@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from PyQt4.QtCore import pyqtSlot, QThreadPool, pyqtSignal, QObject
 from sans.sans_batch import SANSBatchReduction
+from sans.algorithm_detail.batch_execution import load_workspaces_from_states
 from ui.sans_isis.worker import Worker
 from sans.common.enums import ISISReductionMode
 
@@ -40,6 +41,13 @@ class BatchProcessRunner(QObject):
 
         QThreadPool.globalInstance().start(self._worker)
 
+    def load_workspaces(self, states):
+        self._worker = Worker(self._process_states_on_thread, states)
+        self._worker.signals.finished.connect(self.on_finished)
+        self._worker.signals.error.connect(self.on_error)
+
+        QThreadPool.globalInstance().start(self._worker)
+
     def _process_states_on_thread(self, states, use_optimizations, output_mode, plot_results, output_graph,
                                   save_can=False):
         for key, state in states.items():
@@ -56,3 +64,6 @@ class BatchProcessRunner(QObject):
 
             except Exception as e:
                 self.row_failed_signal.emit(key, str(e))
+
+    def _load_workspaces_on_thread(self, states):
+        load_workspaces_from_states(states)
