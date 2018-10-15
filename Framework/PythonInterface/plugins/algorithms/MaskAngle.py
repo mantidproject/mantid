@@ -11,7 +11,6 @@ import mantid.kernel
 import mantid.api
 import mantid.geometry
 import numpy
-import math
 
 
 class MaskAngle(mantid.api.PythonAlgorithm):
@@ -71,7 +70,7 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         That assumption is not universally true, it depends on the geometry configuration.
         This returns the phi spherical coordinate value
         '''
-        return math.fabs(math.atan2(spectra_pos.Y(), spectra_pos.X()))
+        return numpy.fabs(numpy.arctan2(spectra_pos.Y(), spectra_pos.X()))
 
     def PyExec(self):
         ws = self.getProperty("Workspace").value
