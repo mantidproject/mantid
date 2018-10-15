@@ -1,13 +1,10 @@
-import os, sys
+import sys
+from mantid.simpleapi import *
+import numpy as n
+import mantid.simpleapi as mantid
 
 sys.path.insert(0, "/opt/Mantid/bin")
 sys.path.append("/isis/NDXWISH/user/scripts/autoreduction")
-
-# Set of routines to normalise WISH data- new look Mantid with mantidsimple removed
-from mantid.simpleapi import *
-# import matplotlib.pyplot as p # Had to remove matplotlib as autoreduce running on server without display
-import numpy as n
-import mantid.simpleapi as mantid
 
 
 def Wish_Run(input, cal_directory, user_directory, outputfolder, deleteWorkspace):
@@ -75,8 +72,8 @@ def Wish_Run(input, cal_directory, user_directory, outputfolder, deleteWorkspace
     def WISH_getcalibration(cycle="11_4"):
         return cal_dir
 
-    def WISH_setcalibration(directory):
-        wish_userdir = cal_dir
+    # def WISH_setcalibration(directory):
+        # wish_userdir = cal_dir
 
     #   This is no longer needed unless run manually
     def WISH_startup(usern, cycle='14_3'):
@@ -366,7 +363,7 @@ def Wish_Run(input, cal_directory, user_directory, outputfolder, deleteWorkspace
             mantid.Divide(LHSWorkspace=w, RHSWorkspace="T", OutputWorkspace=w)
             mantid.DeleteWorkspace("T")
             mantid.ConvertUnits(InputWorkspace=w, OutputWorkspace=w, Target="TOF", EMode="Elastic")
-        wfoc = WISH_focus(w, panel)
+        # wfoc = WISH_focus(w, panel)
         print "focussing done!"
         if type(number) is int:
             wfocname = "w" + str(number) + "-" + str(panel) + "foc"
@@ -487,7 +484,7 @@ def Wish_Run(input, cal_directory, user_directory, outputfolder, deleteWorkspace
         mantid.Divide(LHSWorkspace=wvan, RHSWorkspace="T", OutputWorkspace=wvan)
         mantid.DeleteWorkspace("T")
         mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="TOF", EMode="Elastic")
-        vanfoc = WISH_focus(wvan, panel)
+        # vanfoc = WISH_focus(wvan, panel)
         mantid.DeleteWorkspace(wvan)
         # StripPeaks(vanfoc,vanfoc)
         # SmoothData(vanfoc,vanfoc,str(smoothing))
@@ -500,7 +497,7 @@ def Wish_Run(input, cal_directory, user_directory, outputfolder, deleteWorkspace
 
     # Have made no changes here as not called (may not work in future though)
     def WISH_monitors(rb, ext):
-        data_dir = WISH_dir()
+        # data_dir = WISH_dir()
         file = WISH_getfilename(rb, ext)
         wout = "w" + str(rb)
         print "reading File..." + file
@@ -527,7 +524,7 @@ def Wish_Run(input, cal_directory, user_directory, outputfolder, deleteWorkspace
             mantid.Divide(w, "T", w)
             mantid.DeleteWorkspace("T")
             mantid.ConvertUnits(InputWorkspace=w, OutputWorkspace=w, Target="TOF", EMode="Elastic")
-        wfoc = WISH_focus(w, panel)
+        # wfoc = WISH_focus(w, panel)
         print "focussing done!"
         if type(number) is int:
             wfocname = "w" + str(number) + "-" + str(panel) + "foc"
@@ -584,15 +581,17 @@ def Wish_Run(input, cal_directory, user_directory, outputfolder, deleteWorkspace
             mantid.Divide(LHSWorkspace=wfocname, RHSWorkspace="vana", OutputWorkspace=wfocname)
             mantid.DeleteWorkspace("vana")
             mantid.ConvertUnits(InputWorkspace=wfocname, OutputWorkspace=wfocname, Target="TOF", EMode="Elastic")
-        #		SaveGSS(InputWorkspace=wfocname,Filename=WISH_userdir()+str(number)+"-"+str(panel)+ext+".gss",Append=False,Bank=1)
-        #		SaveFocusedXYE(wfocname,WISH_userdir()+str(number)+"-"+str(panel)+ext+".dat")
+        # SaveGSS(InputWorkspace=wfocname,Filename=WISH_userdir()+str(number)+"-"+str(panel)+ext+".gss",
+        # Append=False,Bank=1)
+        # SaveFocusedXYE(wfocname,WISH_userdir()+str(number)+"-"+str(panel)+ext+".dat")
         return wfocname
         mantid.LoadRaw(Filename=file, OutputWorkspace=output, spectrummin=str(min), spectrummax=str(max),
                        LoadLogFiles="0")
         mantid.Integration(InputWorkspace=output, OutputWorkspace=output + "int")
-        g = plotTimeBin(output + "int", 0)
+        # g = plotTimeBin(output + "int", 0)
 
-    # Smoothing the incident beam monitor using a spline function.  Regions around Bragg edges are masked, before fitting with a  spline function.
+    # Smoothing the incident beam monitor using a spline function.
+    # Regions around Bragg edges are masked, before fitting with a  spline function.
     # Returns a smooth monitor spectrum
 
     def WISH_process_incidentmon(number, ext, spline_terms=20, debug=False):
