@@ -14,6 +14,7 @@ public:
   bool isAsciiSTL();
 
 private:
+  int m_lineNumber = 0;
   bool readSTLTriangle(std::ifstream &file, Kernel::V3D &v1, Kernel::V3D &v2,
                        Kernel::V3D &v3);
   bool readSTLVertex(std::ifstream &file, Kernel::V3D &vertex);

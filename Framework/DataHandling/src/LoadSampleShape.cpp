@@ -201,17 +201,15 @@ void LoadSampleShape::exec() {
   if (filetype == "off") {
     shape = readOFFshape(file);
   } else /* stl */ {
-    auto asciiStlReader =
-        Kernel::make_unique<LoadAsciiStl>(filename);
-    auto binaryStlReader =
-        Kernel::make_unique<LoadBinaryStl>(filename);
-    if (asciiStlReader->isAsciiSTL()) {
-      shape = asciiStlReader->readStl();
-    } else if (binaryStlReader->isBinarySTL()) {
-      shape = binaryStlReader->readStl();
+    auto asciiStlReader = LoadAsciiStl(filename);
+    auto binaryStlReader = LoadBinaryStl(filename);
+    if (asciiStlReader.isAsciiSTL()) {
+      shape = asciiStlReader.readStl();
+    } else if (binaryStlReader.isBinarySTL()) {
+      shape = binaryStlReader.readStl();
     } else {
       throw Kernel::Exception::ParseError(
-          "Could not read file, did not match either STL Format");
+          "Could not read file, did not match either STL Format",filename,0);
     }
   }
 

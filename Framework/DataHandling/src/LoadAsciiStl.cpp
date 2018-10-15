@@ -2,7 +2,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <fstream>
-#include "MantidKernel"
+#include <string>
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/make_unique.h"
 namespace Mantid {
 namespace DataHandling {
 
@@ -11,15 +13,14 @@ bool LoadAsciiStl::isAsciiSTL() {
   std::string line;
   getline(file, line);
   boost::trim(line);
-  if (line.size() < 5 || line.substr(0, 5) != "solid") {
-    return false;
-  }
-  return true;
+  return (line.size() >= 5 && line.substr(0, 5) == "solid");
 }
+
 std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
   std::ifstream file(m_filename.c_str());
   std::string line;
   getline(file, line);
+  m_lineNumber++;
   Kernel::V3D t1, t2, t3;
   while (readSTLTriangle(file, t1, t2, t3)) {
     // Add triangle if all 3 vertices are distinct
@@ -40,10 +41,10 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
 bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1,
                                    Kernel::V3D &v2, Kernel::V3D &v3) {
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
-    bool ok = (readSTLVertex(file, v1) && readSTLVertex(file, v2) &&
+    const bool ok = (readSTLVertex(file, v1) && readSTLVertex(file, v2) &&
                readSTLVertex(file, v3));
     if (!ok) {
-      throw Kernel::Exception::ParseError("Error on reading STL triangle");
+      throw Kernel::Exception::ParseError("Error on reading STL triangle",m_filename,m_lineNumber);
     }
   } else {
     return false; // End of file
@@ -53,17 +54,18 @@ bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1,
 
 bool LoadAsciiStl::readSTLVertex(std::ifstream &file, Kernel::V3D &vertex) {
   std::string line;
+  m_lineNumber++;
   if (getline(file, line)) {
     boost::trim(line);
     std::vector<std::string> tokens;
     boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
     if (tokens.size() == 4 && tokens[0] == "vertex") {
-      vertex.setX(boost::lexical_cast<double>(tokens[1]));
-      vertex.setY(boost::lexical_cast<double>(tokens[2]));
-      vertex.setZ(boost::lexical_cast<double>(tokens[3]));
+      vertex.setX(std::stod(tokens[1]));
+      vertex.setY(std::stod(tokens[2]));
+      vertex.setZ(std::stod(tokens[3]));
       return true;
     } else {
-      throw Kernel::Exception::ParseError("Error on reading STL vertex");
+      throw Kernel::Exception::ParseError("Error on reading STL vertex",m_filename,m_lineNumber);
     }
   }
   return false;
@@ -72,14 +74,15 @@ bool LoadAsciiStl::readSTLVertex(std::ifstream &file, Kernel::V3D &vertex) {
 // Read, check and ignore line in STL file. Return true if line is read
 bool LoadAsciiStl::readSTLLine(std::ifstream &file, std::string const &type) {
   std::string line;
+  m_lineNumber++;
   if (getline(file, line)) {
     boost::trim(line);
     if (line.size() < type.size() || line.substr(0, type.size()) != type) {
       // Before throwing, check for endsolid statment
-      std::string type2 = "endsolid";
+      const std::string type2 = "endsolid";
       if (line.size() < type2.size() || line.substr(0, type2.size()) != type2) {
         throw Kernel::Exception::ParseError("Expected STL line begining with " + type +
-                                 " or " + type2);
+                                 " or " + type2,m_filename,m_lineNumber);
       } else {
         return false; // ends reading at endsolid
       }
