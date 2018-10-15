@@ -61,3 +61,7 @@ class WISHPowderReductionTest(MantidStressTest):
         for ws in deletews:
             mantid.DeleteWorkspace(ws)
             mantid.DeleteWorkspace(ws + "-d")
+
+    # Skip test when on builds as extremely slow, run only as reversion test for wish script
+    def skipTests(self):
+        return True
