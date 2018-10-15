@@ -20,8 +20,7 @@ def split_into_tof_d_spacing_groups(run_details, processed_spectra):
     :param processed_spectra: A list containing workspaces, one entry per focused bank.
     :return: A workspace group for dSpacing and TOF in that order
     """
-    d_spacing_output = []
-    tof_output = []
+   
     run_number = str(run_details.output_run_string)
     ext = run_details.file_extension if run_details.file_extension else ""
     input_group = mantid.GroupWorkspaces(processed_spectra)
