@@ -93,7 +93,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         else:
             return None, None, None
 
-    def getUBMatrix(peaks_ws, UBFile):
+    def getUBMatrix(self, peaks_ws, UBFile):
         # Load the UB Matrix if one is not already loaded
         if UBFile == '' and peaks_ws.sample().hasOrientedLattice():
             logger.information("Using UB file already available in PeaksWorkspace")
@@ -152,7 +152,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             logger.error("Cannot find all parameters in instrument parameters file.")
             raise
 
-        UBMatrix = getUBMatrix(peaks_ws, UBFile)
+        UBMatrix = self.getUBMatrix(peaks_ws, UBFile)
         dQ = np.abs(ICCFT.getDQFracHKL(UBMatrix, frac=0.5))
         dQ[dQ>dQMax] = dQMax
         qMask = ICCFT.getHKLMask(UBMatrix, frac=fracHKL, dQPixel=dQPixel,dQ=dQ)
