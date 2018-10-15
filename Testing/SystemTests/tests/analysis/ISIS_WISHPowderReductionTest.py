@@ -19,7 +19,6 @@ output_folder_name = "output"
 calibration_folder_name = "Cal"
 
 
-
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
 working_dir = os.path.join(DIRS[0], working_folder_name)
@@ -30,7 +29,7 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 
 class WISHPowderReductionTest(MantidStressTest):
-#still missing required files check with ./systemtest -R PowderReduction --showskipped
+    # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
         input_files = ["WISHvana41865-1foc.nxs", "WISHvana41865-2foc.nxs", "WISHvana41865-3foc.nxs",
                        "WISHvana41865-4foc.nxs", "WISHvana41865-5foc.nxs", "WISHvana41865-6foc.nxs",
@@ -45,8 +44,6 @@ class WISHPowderReductionTest(MantidStressTest):
 
     def cleanup(self):
         shutil.rmtree(output_dir)
-
-       
 
     def runTest(self):
         os.makedirs(output_dir)
@@ -64,4 +61,3 @@ class WISHPowderReductionTest(MantidStressTest):
         for ws in deletews:
             mantid.DeleteWorkspace(ws)
             mantid.DeleteWorkspace(ws + "-d")
-
