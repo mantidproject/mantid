@@ -78,8 +78,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
             CreateWorkspace(DataX=theta, DataY=sigma_theta, OutputWorkspace='__ws_bvg0_scat')
             Fit(Function='name=UserFunction,Formula=A/2.0*(exp(((x-x0)/b))+exp( -((x-x0)/b)))+BG,A=0.0025,x0=1.54,b=1,BG=-1.26408e-15',
-                InputWorkspace='__ws_bvg0_scat', Output='fitSigX0', StartX=np.min(theta), EndX=np.max(theta))
-            sigX0Params = mtd['fitSigX0_Parameters'].column(1)[:-1]
+                InputWorkspace='__ws_bvg0_scat', Output='__fitSigX0', StartX=np.min(theta), EndX=np.max(theta))
+            sigX0Params = mtd['__fitSigX0_Parameters'].column(1)[:-1]
             # Second, along the azimuthal.  This is just a constant.
             sigY0 = np.median(strongPeakParams_ws.column('SigPhi'))
             # Finally, the interaction term.  This we just get from the instrument file.
@@ -253,7 +253,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                   peakMaskSize=peakMaskSize,
                                                                   iccFitDict=iccFitDict, sigX0Params=sigX0Params,
                                                                   sigY0=sigY0, sigP0Params=sigP0Params)
-                print(pp_lambda, '=pp_lambda')
                 # First we get the peak intensity
                 peakIDX = Y3D/Y3D.max() > fracStop
                 intensity = np.sum(Y3D[peakIDX])
