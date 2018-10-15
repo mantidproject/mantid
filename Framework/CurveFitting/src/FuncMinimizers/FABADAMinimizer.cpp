@@ -51,7 +51,7 @@ const double LOW_JUMP_LIMIT = 1e-25;
 // random number generator
 std::mt19937 rng;
 
-MatrixWorkspace_sptr
+API::MatrixWorkspace_sptr
 createWorkspace(std::vector<double> const &xValues,
                 std::vector<double> const &yValues, int const numberOfSpectra,
                 std::vector<std::string> const &verticalAxisNames) {
@@ -923,7 +923,7 @@ void FABADAMinimizer::setParameterXAndYValuesForPDF(
 }
 
 void FABADAMinimizer::addOutputPDFWorkspaceToGroup(
-    std::string const &groupName, MatrixWorkspace_sptr workspace) {
+    std::string const &groupName, API::MatrixWorkspace_sptr workspace) {
   if (AnalysisDataService::Instance().doesExist(groupName)) {
     auto groupPDF =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
