@@ -39,7 +39,6 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
-using namespace Mantid::API;
 
 namespace {
 // static logger object
@@ -53,12 +52,13 @@ const double LOW_JUMP_LIMIT = 1e-25;
 // random number generator
 std::mt19937 rng;
 
-MatrixWorkspace_sptr
+Mantid::API::MatrixWorkspace_sptr
 createWorkspace(std::vector<double> const &xValues,
                 std::vector<double> const &yValues, int const numberOfSpectra,
                 std::vector<std::string> const &verticalAxisNames) {
   auto createWorkspaceAlgorithm =
-      AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+          "CreateWorkspace");
   createWorkspaceAlgorithm->initialize();
   createWorkspaceAlgorithm->setChild(true);
   createWorkspaceAlgorithm->setLogging(false);
@@ -832,8 +832,8 @@ FABADAMinimizer::outputPDF(std::size_t const &convLength,
   // Calculate the cost function Probability Density Function
   if (convLength > 0) {
     std::sort(reducedChain[m_nParams].begin(), reducedChain[m_nParams].end());
-    auto &xValues = std::vector<double>((m_nParams + 1) * (pdfLength + 1));
-    auto &yValues = std::vector<double>((m_nParams + 1) * pdfLength);
+    std::vector<double> xValues((m_nParams + 1) * (pdfLength + 1));
+    std::vector<double> yValues((m_nParams + 1) * pdfLength);
     std::vector<double> PDFYAxis(pdfLength, 0);
     double const start = reducedChain[m_nParams][0];
     double const bin =
@@ -925,16 +925,18 @@ void FABADAMinimizer::setParameterXAndYValuesForPDF(
 }
 
 void FABADAMinimizer::addOutputPDFWorkspaceToGroup(
-    std::string const &groupName, API::MatrixWorkspace_sptr workspace) {
+    std::string const &groupName, Mantid::API::MatrixWorkspace_sptr workspace) {
   if (Mantid::API::AnalysisDataService::Instance().doesExist(groupName)) {
-    auto groupPDF =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+    auto groupPDF = Mantid::API::AnalysisDataService::Instance()
+                        .retrieveWS<Mantid::API::WorkspaceGroup>(groupName);
     groupPDF->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(groupName,
+                                                              groupPDF);
   } else {
-    auto groupPDF = boost::make_shared<WorkspaceGroup>();
+    auto groupPDF = boost::make_shared<Mantid::API::WorkspaceGroup>();
     groupPDF->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(groupName,
+                                                              groupPDF);
   }
 }
 

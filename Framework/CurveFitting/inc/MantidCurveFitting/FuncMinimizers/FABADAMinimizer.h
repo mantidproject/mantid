@@ -85,8 +85,9 @@ private:
   void outputPDF(std::vector<double> &xValues, std::vector<double> &yValues,
                  std::vector<std::vector<double>> &reducedChain,
                  std::size_t const &convLength, int const &pdfLength);
-  void addOutputPDFWorkspaceToGroup(std::string const &groupName,
-                                    API::MatrixWorkspace_sptr workspace);
+  void
+  addOutputPDFWorkspaceToGroup(std::string const &groupName,
+                               Mantid::API::MatrixWorkspace_sptr workspace);
   /// Finds the most probable Chi Squared value
   double getMostProbableChiSquared(
       std::size_t const &convLength,
