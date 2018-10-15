@@ -1013,7 +1013,7 @@ public:
     PosVec posVec({pos, pos});
     auto rot = Eigen::Quaterniond{
         Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized())};
-    RotVec rotVec({rot,rot});
+    RotVec rotVec({rot, rot});
     auto infos1 = makeFlatTree(posVec, rotVec);
     auto infos2 = makeFlatTreeWithMonitor(posVec, rotVec, {1});
     ComponentInfo &a = *std::get<0>(infos1);
@@ -1228,9 +1228,10 @@ public:
   void test_merge_idempotent() {
     // Test that A + B + B = A + B
     PosVec pos = {Eigen::Vector3d{0, 0, 0}, Eigen::Vector3d{1, 1, 1}};
-    RotVec rot = {Eigen::Quaterniond{
-        Eigen::AngleAxisd(20.0, Eigen::Vector3d{1, 2, 3}.normalized())}, Eigen::Quaterniond{
-            Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized())}};
+    RotVec rot = {Eigen::Quaterniond{Eigen::AngleAxisd(
+                      20.0, Eigen::Vector3d{1, 2, 3}.normalized())},
+                  Eigen::Quaterniond{Eigen::AngleAxisd(
+                      30.0, Eigen::Vector3d{1, 2, 3}.normalized())}};
     auto infos1 = makeFlatTree(pos, rot);
     auto infos2 = makeFlatTree(pos, rot);
     auto infos3 = makeFlatTree(pos, rot);
@@ -1251,10 +1252,14 @@ public:
   void test_merge_multiple_associative() {
     // Test that (A + B) + C == A + (B + C)
     // This is implied by the ordering guaranteed by merge().
-    auto infos1 = makeFlatTree(PosVec({Eigen::Vector3d{1, 0, 0}}), RotVec({Eigen::Quaterniond::Identity()}));
-    auto infos2 = makeFlatTree(PosVec({Eigen::Vector3d{2, 0, 0}}), RotVec({Eigen::Quaterniond::Identity()}));
-    auto infos3 = makeFlatTree(PosVec({Eigen::Vector3d{3, 0, 0}}), RotVec({Eigen::Quaterniond::Identity()}));
-    auto infos4 = makeFlatTree(PosVec({Eigen::Vector3d{1, 0, 0}}), RotVec({Eigen::Quaterniond::Identity()}));
+    auto infos1 = makeFlatTree(PosVec({Eigen::Vector3d{1, 0, 0}}),
+                               RotVec({Eigen::Quaterniond::Identity()}));
+    auto infos2 = makeFlatTree(PosVec({Eigen::Vector3d{2, 0, 0}}),
+                               RotVec({Eigen::Quaterniond::Identity()}));
+    auto infos3 = makeFlatTree(PosVec({Eigen::Vector3d{3, 0, 0}}),
+                               RotVec({Eigen::Quaterniond::Identity()}));
+    auto infos4 = makeFlatTree(PosVec({Eigen::Vector3d{1, 0, 0}}),
+                               RotVec({Eigen::Quaterniond::Identity()}));
     ComponentInfo &a1 = *std::get<0>(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     ComponentInfo &c = *std::get<0>(infos3);
@@ -1271,6 +1276,5 @@ public:
     TS_ASSERT_THROWS_NOTHING(a2.merge(b));
     TS_ASSERT(d.isEquivalent(e));
   }
-
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
