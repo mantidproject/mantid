@@ -1,21 +1,21 @@
 #ifndef MANTID_MDALGORITHMS_LOADDNSSCDEWTEST_H_
 #define MANTID_MDALGORITHMS_LOADDNSSCDEWTEST_H_
 
-#include "MantidKernel/Strings.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/Strings.h"
 //#include "MantidAPI/IMDIterator.h"
 //#include "MantidAPI/IMDEventWorkspace.h"
 //#include "MantidDataObjects/MDBox.h"
 //#include "MantidDataObjects/MDGridBox.h"
 //#include "MantidDataObjects/EventFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/Run.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDNSEvent.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/range/irange.hpp>
 #include <cxxtest/TestSuite.h>
 
@@ -42,17 +42,25 @@ public:
     return alg;
   }
 
-  std::shared_ptr<LoadDNSEvent> makeAlgorithm(const std::string &inputFile, const std::string &outputWorkspace, bool doesThrow = true) {
+  std::shared_ptr<LoadDNSEvent>
+  makeAlgorithm(const std::string &inputFile,
+                const std::string &outputWorkspace, bool doesThrow = true) {
     auto alg = makeAlgorithm(doesThrow);
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputFile", inputFile));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setPropertyValue("OutputWorkspace", outputWorkspace));
     return alg;
   }
 
-  std::shared_ptr<LoadDNSEvent> makeAlgorithm(const std::string &inputFile, uint chopperChannel, uint monitorChannel, const std::string &outputWorkspace, bool doesThrow = true) {
+  std::shared_ptr<LoadDNSEvent>
+  makeAlgorithm(const std::string &inputFile, uint chopperChannel,
+                uint monitorChannel, const std::string &outputWorkspace,
+                bool doesThrow = true) {
     auto alg = makeAlgorithm(inputFile, outputWorkspace, doesThrow);
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("chopperChannel", chopperChannel));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("monitorChannel", monitorChannel));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("chopperChannel", chopperChannel));
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("monitorChannel", monitorChannel));
     return alg;
   }
 
@@ -68,16 +76,17 @@ public:
     TS_ASSERT_EQUALS(alg.name(), "LoadDNSEvent");
   }
 
-
   void test_Properties() {
     auto alg = makeAlgorithm();
     TS_ASSERT_EQUALS(alg->getPropertyValue("chopperChannel"), "1");
     TS_ASSERT_EQUALS(alg->getPropertyValue("monitorChannel"), "1");
 
-    TS_ASSERT_THROWS(alg->setProperty("chopperChannel", 5), std::invalid_argument);
-    TS_ASSERT_THROWS(alg->setProperty("monitorChannel", 5), std::invalid_argument);
-    // TODO: test case when chopper/monitor-Channel set to 0; should get value from definition file
-
+    TS_ASSERT_THROWS(alg->setProperty("chopperChannel", 5),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setProperty("monitorChannel", 5),
+                     std::invalid_argument);
+    // TODO: test case when chopper/monitor-Channel set to 0; should get value
+    // from definition file
   }
 
   void test_Executes_1() {
@@ -119,8 +128,7 @@ public:
     TS_ASSERT(iws);
 
     TS_ASSERT_EQUALS(iws->getEventType(), EventType::TOF);
-    TS_ASSERT_EQUALS(iws->size(), 960*128+24); // number of detector cells
-
+    TS_ASSERT_EQUALS(iws->size(), 960 * 128 + 24); // number of detector cells
 
     TS_ASSERT_EQUALS(iws->getNumDims(), 2);
     TS_ASSERT_EQUALS(iws->id(), "EventWorkspace");
@@ -134,15 +142,17 @@ public:
     const auto specDim = iws->getDimension(1);
     TS_ASSERT(specDim);
     TS_ASSERT_EQUALS(specDim->getName(), "Spectrum");
-    TS_ASSERT_EQUALS(specDim->getNBins(), 960*128+24); // number of detector cells
+    TS_ASSERT_EQUALS(specDim->getNBins(),
+                     960 * 128 + 24); // number of detector cells
     TS_ASSERT_RELATION(std::greater<double>, specDim->getMinimum(), 0);
     TS_ASSERT_RELATION(std::greater<double>, specDim->getMaximum(), 0);
 
     // test event count:
     const auto rng = boost::irange(0ul, iws->size());
-    const size_t eventCount = std::accumulate(rng.begin(), rng.end(), 0ul, [&](auto a, auto b) {
-      return a + iws->getSpectrum(b).getEvents().size();
-    });
+    const size_t eventCount =
+        std::accumulate(rng.begin(), rng.end(), 0ul, [&](auto a, auto b) {
+          return a + iws->getSpectrum(b).getEvents().size();
+        });
     TS_ASSERT_EQUALS(eventCount, 6721)
 
     AnalysisDataService::Instance().remove(outWSName);

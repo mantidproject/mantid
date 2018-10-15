@@ -2,12 +2,11 @@
 #define MANTID_DATAHANDLING_LoadDNSEvent_H_
 
 #include "BitStream.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidKernel/System.h"
 #include "MantidTypes/Core/DateAndTime.h"
-
 
 #include <array>
 #include <fstream>
@@ -17,14 +16,14 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-
 namespace Mantid {
 namespace DataHandling {
 
 /**
   LoadDNSEvent
 
-  Algorithm used to generate an EventWorkspace from a DNS PSD listmode (.mdat) file.
+  Algorithm used to generate an EventWorkspace from a DNS PSD listmode (.mdat)
+  file.
 
   @author Joachim Coenen, Jülich Centre for Neutron Science
   @date 2018-08-16
@@ -54,9 +53,7 @@ namespace DataHandling {
 class DLLExport LoadDNSEvent : public API::Algorithm {
 public:
   ///
-  const std::string name() const override {
-    return "LoadDNSEvent";
-  }
+  const std::string name() const override { return "LoadDNSEvent"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Loads data from the new PSD detector to a Mantid EventWorkspace.";
@@ -64,13 +61,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return { };
-  }
+  const std::vector<std::string> seeAlso() const override { return {}; }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling";
-  }
+  const std::string category() const override { return "DataHandling"; }
 
 private:
   static const std::string INSTRUMENT_NAME;
@@ -79,10 +72,7 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  enum class BufferType {
-    DATA = 0,
-    COMMAND = 1
-  };
+  enum class BufferType { DATA = 0, COMMAND = 1 };
 
   enum class DeviceStatus {
     DAQ_STOPPED_SYNC_ERROR = 0,
@@ -95,10 +85,10 @@ private:
     uint16_t bufferLength;
     uint16_t bufferVersion;
     BufferType bufferType;
-    uint16_t headerLength; //static const uint16_t headerLength = 21;
+    uint16_t headerLength; // static const uint16_t headerLength = 21;
     uint16_t bufferNumber;
     uint16_t runId;
-    uint8_t  mcpdId;
+    uint8_t mcpdId;
     DeviceStatus deviceStatus;
     uint64_t timestamp;
     // std::array<uint16_t, 3> parameter0;
@@ -108,7 +98,7 @@ private:
   };
 
   struct NeutronEventData {
-    uint8_t	modId;
+    uint8_t modId;
     //! number of the slot inside the MPSD
     uint8_t slotId;
     //! amplitude value of the neutron event
@@ -122,11 +112,9 @@ private:
     uint8_t dataId;
     uint32_t data;
   };
+
 public:
-  enum event_id_e {
-    NEUTRON = 0,
-    TRIGGER = 1
-  };
+  enum event_id_e { NEUTRON = 0, TRIGGER = 1 };
 
   struct Event {
     event_id_e eventId;
@@ -145,7 +133,6 @@ public:
   };
 
 private:
-
   struct EventAccumulator {
     //! Neutron Events for each pixel
     std::vector<std::vector<CompactEvent>> neutronEvents;
@@ -156,60 +143,64 @@ private:
   uint chopperChannel;
   uint monitorChannel;
 
-  void runLoadInstrument(std::string instrumentName, DataObjects::EventWorkspace_sptr &eventWS);
+  void runLoadInstrument(std::string instrumentName,
+                         DataObjects::EventWorkspace_sptr &eventWS);
 
-  void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
+  void
+  populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
 
   void parse_File(FileByteStream &file, const std::string fileName);
   std::vector<uint8_t> parse_Header(FileByteStream &file);
 
-  std::vector<std::vector<uint8_t>> split_File(FileByteStream &file, const uint maxChunckCount);
+  std::vector<std::vector<uint8_t>> split_File(FileByteStream &file,
+                                               const uint maxChunckCount);
 
-  void parse_BlockList(VectorByteStream &file, EventAccumulator &eventAccumulator);
+  void parse_BlockList(VectorByteStream &file,
+                       EventAccumulator &eventAccumulator);
   void parse_Block(VectorByteStream &file, EventAccumulator &eventAccumulator);
   void parse_BlockSeparator(VectorByteStream &file);
-  void parse_DataBuffer(VectorByteStream &file, EventAccumulator &eventAccumulator);
+  void parse_DataBuffer(VectorByteStream &file,
+                        EventAccumulator &eventAccumulator);
   BufferHeader parse_DataBufferHeader(VectorByteStream &file);
 
   inline size_t getWsIndex(const uint16_t &channel, const uint16_t &position) {
-    const uint16_t channelIndex = ((channel & 0b1111111111100000) >> 1) | (channel & 0b0000000000001111);
+    const uint16_t channelIndex =
+        ((channel & 0b1111111111100000) >> 1) | (channel & 0b0000000000001111);
     const uint16_t positionClamped = std::min(uint16_t(959u), position);
     return channelIndex * 960 + position;
   }
 
-
-  inline void parse_andAddEvent(VectorByteStream &file, const BufferHeader &bufferHeader, EventAccumulator &eventAccumulator) {
+  inline void parse_andAddEvent(VectorByteStream &file,
+                                const BufferHeader &bufferHeader,
+                                EventAccumulator &eventAccumulator) {
     CompactEvent event = {};
     event_id_e eventId;
     const auto dataChunk = file.extractDataChunk<6>().readBits<1>(eventId);
     // // datachunck has now 6 bytes - 1 bit (= 47 bits) left
     switch (eventId) {
-      case event_id_e::TRIGGER: {
-        uint8_t trigId;
-        dataChunk
-            .readBits<3>(trigId)
-            .skipBits<25>()
-            .readBits<19>(event.timestamp);
-        if (!(trigId == chopperChannel)) {
-          return;
-        }
-        event.timestamp += bufferHeader.timestamp;
-        eventAccumulator.triggerEvents.push_back(event);
-      } break;
-      case event_id_e::NEUTRON: {
-        uint16_t channel;
-        uint16_t position;
-        dataChunk
-            .readBits<8>(channel)
-            .skipBits<10>()
-            .readBits<10>(position)
-            .readBits<19>(event.timestamp);
-        event.timestamp += bufferHeader.timestamp;
-        channel |= bufferHeader.mcpdId << 8;
+    case event_id_e::TRIGGER: {
+      uint8_t trigId;
+      dataChunk.readBits<3>(trigId).skipBits<25>().readBits<19>(
+          event.timestamp);
+      if (!(trigId == chopperChannel)) {
+        return;
+      }
+      event.timestamp += bufferHeader.timestamp;
+      eventAccumulator.triggerEvents.push_back(event);
+    } break;
+    case event_id_e::NEUTRON: {
+      uint16_t channel;
+      uint16_t position;
+      dataChunk.readBits<8>(channel)
+          .skipBits<10>()
+          .readBits<10>(position)
+          .readBits<19>(event.timestamp);
+      event.timestamp += bufferHeader.timestamp;
+      channel |= bufferHeader.mcpdId << 8;
 
-        const size_t wsIndex = getWsIndex(channel, position);
-        eventAccumulator.neutronEvents[wsIndex].push_back(event);
-      } break;
+      const size_t wsIndex = getWsIndex(channel, position);
+      eventAccumulator.neutronEvents[wsIndex].push_back(event);
+    } break;
     default:
       // Panic!!!!
       g_log.error() << "unknow event id " << eventId << "\n";
@@ -217,13 +208,10 @@ private:
     }
   }
 
-
   void parse_EndSignature(FileByteStream &file);
-
-
 };
 
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_LoadDNSEvent_H_ */
