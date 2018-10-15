@@ -11,7 +11,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/scoped_ptr.hpp>
 #include <gmock/gmock.h>
 
 class NDRandomNumberGeneratorTest : public CxxTest::TestSuite {

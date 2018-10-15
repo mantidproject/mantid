@@ -14,6 +14,7 @@ from qtpy.QtWidgets import (QTableView, QHBoxLayout, QVBoxLayout,
                             QSizePolicy, QSpinBox, QSplitter, QFrame)
 from qtpy.QtCore import QItemSelectionModel, Qt
 from matplotlib.backends.backend_qt5agg import FigureCanvas
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 
@@ -53,9 +54,10 @@ class SampleLogsView(QSplitter):
         layout_right.addLayout(layout_options)
 
         # Sample log plot
-        self.fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.fig = Figure()
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        self.ax = self.fig.add_subplot(111, projection='mantid')
         layout_right.addWidget(self.canvas)
 
         # Sample stats
@@ -101,6 +103,14 @@ class SampleLogsView(QSplitter):
         if self.ax.get_legend_handles_labels()[0]:
             self.ax.legend()
         self.fig.canvas.draw()
+
+    def new_plot_log(self, ws, exp, log_text):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot(ws,
+                LogName=log_text,
+                FullTime=not self.full_time.isChecked(),
+                ExperimentInfo=exp)
+        fig.show()
 
     def get_row_log_name(self, i):
         return str(self.model.item(i, 0).text())

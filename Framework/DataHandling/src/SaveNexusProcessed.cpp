@@ -21,7 +21,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <Poco/File.h>
-#include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;

@@ -35,7 +35,8 @@ def set_matplotlib_backend():
 
 
 def get_qapplication():
-    '''
+    ''' Example usage:
+
     app, within_mantid = get_qapplication()
     reducer = eventFilterGUI.MainWindow()  # the main ui class in this file
     reducer.show()
