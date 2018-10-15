@@ -34,6 +34,7 @@ Improvements
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
   data streaming from TOPAZ new Adara data server.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
+- :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
 
 Bugfixes
 ########
