@@ -225,12 +225,11 @@ if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
     endif ()
 
     # If the EXE generation succeeded then install the executable and rename it to remove the .install suffix
+    # the shortcuts for the workbench are ONLY installed if this variable has been declared
     set (_workbench_executable_full_name ${_workbench_base_name}.exe)
     message(STATUS "Generated the Workbench executable for installation: ${_workbench_executable_install_name}")
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} DESTINATION bin RENAME ${_workbench_executable_full_name})
   else ()
-    # set the executable full name to signify that the generation failed
-    set (_workbench_executable_full_name "")
     message(STATUS "PowerShell was not found. Not generating the Workbench executable.")
   endif ()
 endif ()
@@ -280,7 +279,7 @@ set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
 ")
 
 # if the workbench executable was generated then add the shortcut installation and deletion everywhere
-if (NOT _workbench_executable_full_name STREQUAL "")
+if (_workbench_executable_full_name)
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico DESTINATION bin )
   set ( MANTIDWORKBENCH_LINK_NAME "MantidWorkbench${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
   message(STATUS "Adding icons for Workbench as EXE was generated.")
