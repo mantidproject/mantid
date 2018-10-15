@@ -171,6 +171,7 @@ void failMerge(const std::string &what) {
  * ignored, i.e., no time index is added. */
 void DetectorInfo::merge(const DetectorInfo &other,
                          const std::vector<bool> &merge) {
+  checkSizes(other);
   for (size_t timeIndex = 0; timeIndex < other.scanCount(); ++timeIndex) {
     if (!merge[timeIndex])
       continue;
