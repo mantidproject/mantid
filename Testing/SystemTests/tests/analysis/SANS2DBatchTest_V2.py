@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 
 from __future__ import (absolute_import, division, print_function)
@@ -83,7 +89,7 @@ class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(stresstesting.MantidStressT
         SANS2DTUBES()
         Set1D()
         Detector("rear-detector")
-        # This contains two MASKFILE commands, each resulting in a seperate call to MaskDetectors.
+        # This contains two MASKFILE commands, each resulting in a separate call to MaskDetectors.
         MaskFile('SANS2DTube_ZerroErrorFreeTest.txt')
 
         # Saves a file which produces an output file which does not contain any zero errors

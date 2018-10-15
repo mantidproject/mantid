@@ -65,7 +65,7 @@ if( POCO_INCLUDE_DIR )
   set ( POCO_VERSION "${POCO_VERSION_MAJOR}.${POCO_VERSION_MINOR}.${POCO_VERSION_PATCH}" )
 endif()
 
-# Also set a shared libarary version number. This is different to the main version number
+# Also set a shared library version number. This is different to the main version number
 # and can form part of the package name on some Linux systems
 if( POCO_LIB_FOUNDATION )
   set ( POCO_SOLIB_VERSION "" )

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 
@@ -110,8 +116,6 @@ protected:
                        MantidQt::MantidWidgets::PreviewPlot *previewPlot,
                        const QString &startRangePropName = "",
                        const QString &endRangePropName = "");
-
-  virtual void setRunEnabled(bool enabled) = 0;
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
