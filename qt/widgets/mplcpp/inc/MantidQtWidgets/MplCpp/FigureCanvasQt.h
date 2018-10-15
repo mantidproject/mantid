@@ -27,7 +27,8 @@ class MANTID_MPLCPP_DLL FigureCanvasQt : public QWidget,
                                          public Python::InstanceHolder {
   Q_OBJECT
 public:
-  explicit FigureCanvasQt(Figure fig, QWidget *parent = nullptr);
+  FigureCanvasQt(int subplotspec, QWidget *parent = nullptr);
+  FigureCanvasQt(Figure fig, QWidget *parent = nullptr);
 
   /// Attach an event filter to the underlying matplotlib canvas
   void installEventFilterToMplCanvas(QObject *filter);
@@ -55,10 +56,6 @@ private: // members
   // A pointer to the C++ widget extract from the Python FigureCanvasQT object
   QWidget *m_mplCanvas;
 };
-
-/// Create a figure canvas with the given subplotspec and parent
-MANTID_MPLCPP_DLL FigureCanvasQt *subplots(int subplotspec,
-                                           QWidget *parent = nullptr);
 
 } // namespace MplCpp
 } // namespace Widgets

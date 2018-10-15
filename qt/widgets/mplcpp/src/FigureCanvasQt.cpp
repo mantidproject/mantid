@@ -34,6 +34,19 @@ Python::Object createPyCanvasFromFigure(Figure fig) {
   return backendModule().attr("FigureCanvasQTAgg")(fig.pyobj());
 }
 
+/**
+ * @param subplotspec A matplotlib subplot spec defined as a 3-digit
+ * integer.
+ * @return A new FigureCanvasQT object
+ */
+Python::Object createPyCanvas(int subplotspec) {
+  Figure fig{true};
+  fig.setFaceColor(DEFAULT_FACECOLOR);
+
+  if (subplotspec > 0)
+    fig.addSubPlot(subplotspec);
+  return createPyCanvasFromFigure(std::move(fig));
+}
 } // namespace
 
 /**
@@ -50,7 +63,24 @@ QWidget *initLayout(FigureCanvasQt *cppCanvas) {
 }
 
 /**
- * @brief Constructor specifying an existing figure object and optional
+ * @brief Constructor specifying an axes subplot spec and optional parent.
+ * An Axes with the given subplot specification is created on construction
+ * See
+ * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.figure.Figure.html?highlight=add_subplot#matplotlib.figure.Figure.add_subplot
+ * @param subplotspec A matplotlib subplot spec defined as a 3-digit integer
+ * @param facecolor String denoting the figure's facecolor
+ * @param parent The owning parent widget
+ */
+FigureCanvasQt::FigureCanvasQt(int subplotspec, QWidget *parent)
+    : QWidget(parent), InstanceHolder(createPyCanvas(subplotspec), "draw"),
+      m_figure(Figure(Python::Object(pyobj().attr("figure")))) {
+  // Cannot use delegating constructor here as InstanceHolder needs to be
+  // initialized before the axes can be created
+  m_mplCanvas = initLayout(this);
+}
+
+/**
+ * @brief Constructor specifying an existing axes object and optional
  * parent.
  * @param fig An existing figure instance containing an axes
  * @param parent The owning parent widget
@@ -110,25 +140,6 @@ QPointF FigureCanvasQt::toDataCoords(QPoint pos) const {
     // an empty data coordinate so we will do the same
   }
   return dataCoords;
-}
-
-/**
- * @brief Factory function specifying an axes subplot spec and optional parent.
- * A canvas containin Axes with the given subplot specification is created.
- * See
- * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.figure.Figure.html?highlight=add_subplot#matplotlib.figure.Figure.add_subplot
- * @param subplotspec A matplotlib subplot spec defined as a 3-digit integer
- * @param parent The owning parent widget
- * @return A pointer to a newly allocated FigureCanvasQt object. The user is
- * responsible for deleting it.
- */
-FigureCanvasQt *subplots(int subplotspec, QWidget *parent) {
-  Figure fig(true);
-  fig.setFaceColor(DEFAULT_FACECOLOR);
-  if (subplotspec > 0)
-    fig.addSubPlot(subplotspec);
-
-  return new FigureCanvasQt(std::move(fig), parent);
 }
 
 } // namespace MplCpp
