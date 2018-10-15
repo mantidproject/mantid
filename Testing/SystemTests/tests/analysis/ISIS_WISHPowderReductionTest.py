@@ -28,6 +28,7 @@ output_dir = os.path.join(working_dir, output_folder_name)
 
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 
+
 class WISHPowderReductionTest(MantidStressTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):

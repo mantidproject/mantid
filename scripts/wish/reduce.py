@@ -1,3 +1,4 @@
+# flake8: noqa
 import sys
 from mantid.simpleapi import *
 import numpy as n
