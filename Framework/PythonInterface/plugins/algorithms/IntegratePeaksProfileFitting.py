@@ -292,7 +292,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                         qPeak = peak.getQLabFrame()
                         theta = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #2theta
                         try:
-                            p = mtd['fitSigX0_Parameters'].column(1)[:-1]
+                            p = mtd['__fitSigX0_Parameters'].column(1)[:-1]
                             tol = 0.2 #We should have a good idea now - only allow 20% variation
                         except:
                             p = peaks_ws.getInstrument().getStringParameter("sigSC0Params")
