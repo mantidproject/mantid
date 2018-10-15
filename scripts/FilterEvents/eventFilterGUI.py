@@ -8,10 +8,9 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy
 
-from qtpy.QtWidgets import (QFileDialog, QMainWindow, QMessageBox, QSlider, QWidget)  # noqa
+from qtpy.QtWidgets import (QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget)  # noqa
 from qtpy.QtGui import (QDoubleValidator)  # noqa
 
-from matplotlib.pyplot import setp
 
 import mantid
 import mantid.simpleapi as api
@@ -20,7 +19,8 @@ from mantid.kernel import Logger
 from mantid.simpleapi import AnalysisDataService
 
 from mantid.kernel import ConfigService
-
+from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.pyplot import (Figure, setp)
 import os
 
 try:
@@ -55,7 +55,12 @@ class MainWindow(QMainWindow):
 
         # UI Window (from Qt Designer)
         self.ui = load_ui(__file__, 'MainWindow.ui', baseinstance=self)
-        self.ui.mainplot = self.ui.graphicsView.getPlot()
+        mpl_layout = QVBoxLayout()
+        self.ui.graphicsView.setLayout(mpl_layout)
+        self.fig = Figure()
+        self.canvas = FigureCanvas(self.fig)
+        self.ui.mainplot = self.fig.add_subplot(111, projection='mantid')
+        mpl_layout.addWidget(self.canvas)
 
         # Do initialize plotting
         vecx, vecy, xlim, ylim = self.computeMock()
@@ -75,7 +80,7 @@ class MainWindow(QMainWindow):
         lowery = [ylim[0], ylim[0]]
         self.lowerslideline = self.ui.mainplot.plot(lowerx, lowery, 'g--')
 
-        self.ui.graphicsView.mpl_connect('button_press_event', self.on_mouseDownEvent)
+        self.canvas.mpl_connect('button_press_event', self.on_mouseDownEvent)
 
         # Set up horizontal slide (integer) and string value
         self._leftSlideValue = 0
@@ -246,7 +251,7 @@ class MainWindow(QMainWindow):
             lefty = self.ui.mainplot.get_ylim()
             setp(self.leftslideline, xdata=leftx, ydata=lefty)
 
-            self.ui.graphicsView.draw()
+            self.canvas.draw()
 
             # Change value
             self.ui.lineEdit_3.setText(str(newx))
@@ -305,7 +310,7 @@ class MainWindow(QMainWindow):
         lefty = self.ui.mainplot.get_ylim()
         setp(self.leftslideline, xdata=leftx, ydata=lefty)
 
-        self.ui.graphicsView.draw()
+        self.canvas.draw()
 
         # Set the value to left slider
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
@@ -330,7 +335,7 @@ class MainWindow(QMainWindow):
             lefty = self.ui.mainplot.get_ylim()
             setp(self.rightslideline, xdata=leftx, ydata=lefty)
 
-            self.ui.graphicsView.draw()
+            self.canvas.draw()
 
             # Change value
             self.ui.lineEdit_4.setText(str(newx))
@@ -383,7 +388,7 @@ class MainWindow(QMainWindow):
         righty = self.ui.mainplot.get_ylim()
         setp(self.rightslideline, xdata=rightx, ydata=righty)
 
-        self.ui.graphicsView.draw()
+        self.canvas.draw()
 
         # Set the value to left slider
         self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
@@ -424,7 +429,7 @@ class MainWindow(QMainWindow):
         lowery = [newy, newy]
         setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
 
-        self.ui.graphicsView.draw()
+        self.canvas.draw()
 
         # Set line edit input
         if setLineEdit is True:
@@ -473,7 +478,7 @@ class MainWindow(QMainWindow):
         lowery = [newminY, newminY]
         setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
 
-        self.ui.graphicsView.draw()
+        self.canvas.draw()
 
         # Move the slide bar (lower)
         self._lowerSlideValue = iminlogval
@@ -515,7 +520,7 @@ class MainWindow(QMainWindow):
         uppery = [newy, newy]
         setp(self.upperslideline, xdata=upperx, ydata=uppery)
 
-        self.ui.graphicsView.draw()
+        self.canvas.draw()
 
         # Change value
         if setLineEdit is True:
@@ -566,7 +571,7 @@ class MainWindow(QMainWindow):
         uppery = [newmaxY, newmaxY]
         setp(self.upperslideline, xdata=upperx, ydata=uppery)
 
-        self.ui.graphicsView.draw()
+        self.canvas.draw()
 
         # Set the value to upper slider
         self._upperSlideValue = imaxlogval
@@ -685,7 +690,7 @@ class MainWindow(QMainWindow):
         self.ui.verticalSlider.setValue(self._upperSlideValue)
         self.ui.lineEdit_6.setText("")
 
-        self.ui.graphicsView.draw()
+        self.canvas.draw()
 
         # Load property's statistic and give suggestion on parallel and fast log
         timeavg = samplelog.timeAverageValue()
@@ -913,7 +918,7 @@ class MainWindow(QMainWindow):
         newrightx = xmin + (xmax-xmin)*self._rightSlideValue*0.01
         setp(self.rightslideline, xdata=[newrightx, newrightx], ydata=newslidery)
 
-        self.ui.graphicsView.draw()
+        self.canvas.draw()
 
         return
 
@@ -1145,7 +1150,7 @@ class MainWindow(QMainWindow):
         xlim = self.ui.mainplot.get_xlim()
         setp(self.lowerslideline, xdata=xlim, ydata=[miny, miny])
         setp(self.upperslideline, xdata=xlim, ydata=[maxy, maxy])
-        self.ui.graphicsView.draw()
+        self.canvas.draw()
 
         self.ui.lineEdit_7.clear()
         self.ui.lineEdit_8.clear()
