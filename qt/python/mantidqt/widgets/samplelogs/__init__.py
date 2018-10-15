@@ -1,7 +1,7 @@
 """
 You can run this widget independently by for example:
 
-    from workbench.widgets.samplelogs.presenter import SampleLogs
+    from mantidqt.widgets.samplelogs.presenter import SampleLogs
     from mantid.simpleapi import Load
     from qtpy.QtWidgets import QApplication
 
