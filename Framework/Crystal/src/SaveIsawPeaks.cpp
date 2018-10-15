@@ -164,11 +164,13 @@ void SaveIsawPeaks::exec() {
       std::stringstream ss(line);
       double three;
       ss >> three;
-      if (three == 3)
-        ss >> appendPeakNumb;
+      if (three == 3) {
+        int peakNumber
+        ss >> peakNumber;
+        appendPeakNumb = std::max(peakNumber, appendPeakNumb);
+      }
     }
 
-    std::cout << appendPeakNumb << "\n";
     infile.close();
     out.open(filename.c_str(), std::ios::app);
   } else {
