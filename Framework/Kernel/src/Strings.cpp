@@ -747,6 +747,14 @@ template <> MANTID_KERNEL_DLL std::string toString(const UnitLabel &value) {
   return value;
 }
 
+/// Template overload for a vector of strings.
+/// @param value :: A value to convert to a string.
+/// @return :: A string with comma separated items of the value vector.
+template <>
+MANTID_KERNEL_DLL std::string toString(const std::vector<std::string> &value) {
+  return join(value.begin(), value.end(), ",");
+}
+
 //------------------------------------------------------------------------------------------------
 /**
  *  Write out the three vectors into a file of type dc 9

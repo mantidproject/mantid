@@ -92,6 +92,7 @@ private slots:
 private:
   void setSpectraRangeMinimum(int minimum);
   void setSpectraRangeMaximum(int maximum);
+  void displaySpectraList();
   QValidator *createValidator(const QString &regex);
 
   std::unique_ptr<Ui::IndirectSpectrumSelector> m_selector;

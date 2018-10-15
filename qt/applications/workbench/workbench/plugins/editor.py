@@ -19,6 +19,7 @@ from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
+# from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 
 # Initial content
@@ -75,7 +76,10 @@ class MultiFileEditor(PluginWidget):
     def get_plugin_title(self):
         return "Editor"
 
-    def read_user_settings(self, _):
+    def readSettings(self, _):
+        pass
+
+    def writeSettings(self, _):
         pass
 
     def register_plugin(self):

@@ -37,7 +37,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QSettings, QPoint, QSize)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -64,7 +64,7 @@ def qapplication():
     if app is None:
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
         argv = sys.argv[:]
-        argv[0] = APPNAME # replace application name
+        argv[0] = APPNAME  # replace application name
         app = QApplication(argv)
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
@@ -113,9 +113,6 @@ class MainWindow(QMainWindow):
         # -- instance attributes --
         self.setWindowTitle("Mantid Workbench")
 
-        # uses default configuration as necessary
-        self.readSettings(CONF)
-
         # widgets
         self.messagedisplay = None
         self.ipythonconsole = None
@@ -134,6 +131,7 @@ class MainWindow(QMainWindow):
         self.editor_menu = None
         self.view_menu = None
         self.view_menu_actions = None
+        self.interfaces_menu = None
 
         # Allow splash screen text to be overridden in set_splash
         self.splash = SPLASH
@@ -184,6 +182,9 @@ class MainWindow(QMainWindow):
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
 
+        # uses default configuration as necessary
+        self.readSettings(CONF)
+
         self.setup_layout()
         self.create_actions()
         self.populate_menus()
@@ -200,6 +201,7 @@ class MainWindow(QMainWindow):
         self.file_menu = self.menuBar().addMenu("&File")
         self.editor_menu = self.menuBar().addMenu("&Editor")
         self.view_menu = self.menuBar().addMenu("&View")
+        self.interfaces_menu = self.menuBar().addMenu('&Interfaces')
 
     def create_actions(self):
         # --- general application menu options --
@@ -247,6 +249,49 @@ class MainWindow(QMainWindow):
         # Link to menus
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
+
+    def launchCustomGUI(self, name):
+        try:
+            importlib.import_module(name)
+        except ImportError:
+            from mantid.kernel import  logger
+            logger.error(str('Failed to load {} interface'.format(name)))  # TODO logger should accept unicode
+            raise
+
+    def populateAfterMantidImport(self):
+        from mantid.kernel import ConfigService, logger
+        # TODO ConfigService should accept unicode strings
+        interface_dir = ConfigService[str('mantidqt.python_interfaces_directory')]
+        items = ConfigService[str('mantidqt.python_interfaces')].split()
+
+        # list of custom interfaces that have been made qt4/qt5 compatible
+        # TODO need to make *anything* compatible
+        GUI_WHITELIST = []
+
+        # detect the python interfaces
+        interfaces = {}
+        for item in items:
+            key,scriptname = item.split('/')
+            if not os.path.exists(os.path.join(interface_dir, scriptname)):
+                logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
+                continue
+            if scriptname not in GUI_WHITELIST:
+                continue
+            temp = interfaces.get(key, [])
+            temp.append(scriptname)
+            interfaces[key] = temp
+
+        # add the interfaces to the menu
+        keys = list(interfaces.keys())
+        keys.sort()
+        for key in keys:
+            submenu = self.interfaces_menu.addMenu(key)
+            names = interfaces[key]
+            names.sort()
+            for name in names:
+                action = submenu.addAction(name.replace('.py', '').replace('_', ' '))
+                script = name.replace('.py', '')
+                action.triggered.connect(lambda checked, script=script:self.launchCustomGUI(script))
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
@@ -328,11 +373,11 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         # Close editors
         if self.editor.app_closing():
-            self.writeSettings(CONF) # write current window information to global settings object
+            self.writeSettings(CONF)  # write current window information to global settings object
 
             # Close all open plots
             # We don't want this at module scope here
-            import matplotlib.pyplot as plt  #noqa
+            import matplotlib.pyplot as plt  # noqa
             plt.close('all')
 
             event.accept()
@@ -360,13 +405,13 @@ class MainWindow(QMainWindow):
         qapp = QApplication.instance()
         qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
         if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('main/high_dpi_scaling'))
+            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('high_dpi_scaling'))
 
         # get the saved window geometry
-        window_size = settings.get('main/window/size')
+        window_size = settings.get('MainWindow/size')
         if not isinstance(window_size, QSize):
             window_size = QSize(*window_size)
-        window_pos = settings.get('main/window/position')
+        window_pos = settings.get('MainWindow/position')
         if not isinstance(window_pos, QPoint):
             window_pos = QPoint(*window_pos)
 
@@ -392,21 +437,27 @@ class MainWindow(QMainWindow):
         self.move(window_pos)
 
         # restore window state
-        if settings.has('main/window/state'):
-            self.restoreState(settings.get('main/window/state'))
+        if settings.has('MainWindow/state'):
+            self.restoreState(settings.get('MainWindow/state'))
         else:
             self.setWindowState(Qt.WindowMaximized)
 
-        # have algorithm dialogs do their thing
+        # read in settings for children
         AlgorithmInputHistory().readSettings(settings)
+        for widget in self.widgets:
+            if hasattr(widget, 'readSettings'):
+                widget.readSettings(settings)
 
     def writeSettings(self, settings):
-        settings.set('main/window/size', self.size()) # QSize
-        settings.set('main/window/position', self.pos()) # QPoint
-        settings.set('main/window/state', self.saveState()) # QByteArray
+        settings.set('MainWindow/size', self.size())        # QSize
+        settings.set('MainWindow/position', self.pos())     # QPoint
+        settings.set('MainWindow/state', self.saveState())  # QByteArray
 
-        # have algorithm dialogs do their thing
+        # write out settings for children
         AlgorithmInputHistory().writeSettings(settings)
+        for widget in self.widgets:
+            if hasattr(widget, 'writeSettings'):
+                widget.writeSettings(settings)
 
 
 def initialize():
@@ -447,6 +498,7 @@ def start_workbench(app, command_line_options):
     # start mantid
     main_window.set_splash('Preloading mantid')
     importlib.import_module('mantid')
+    main_window.populateAfterMantidImport()
     main_window.show()
 
     if main_window.splash:

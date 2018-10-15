@@ -152,3 +152,12 @@ def add_actions(target, actions):
         else:
             raise ValueError("Unexpected action type. "
                              "Expected one of (QAction,QMenu) but found '{}'".format(type(action)))
+
+
+def toQSettings(settings):
+    '''Utility function to convert supplied settings object to a qtpy.QtCore.QSettings
+    '''
+    if hasattr(settings, 'qsettings'):  # workbench.config.user
+        return settings.qsettings
+    else:  # must be a QSettings already
+        return settings

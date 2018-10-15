@@ -2,7 +2,7 @@
  ArrowMarker
 =============
 
-This a python binding to the C++ class Mantidplot::ArrowMarker.
+This is a Python binding to the C++ class Mantidplot::ArrowMarker.
 
 
 .. module:`mantidplot`
