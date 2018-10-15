@@ -102,15 +102,16 @@ private:
   void storeValue(int specID, double value,
                  double error, double wavelength, double dwavelength);
   void createWorkspace();
-  template <class T>
-  void addRunProperty(const std::string &name, const T &value,
+  template <class T> void addRunProperty(const std::string &name, const T &value,
                                  const std::string &units="");
   void setBeamTrapRunProperty();
   void storeMetaDataIntoWS();
   void runLoadInstrument();
   void rotateDetector();
-  double detectorDistance();
+  void setDetectorDistance();
   void moveDetector();
+  std::string getInstrumentStringParameter(const std::string &parameter);
+  double getInstrumentDoubleParameter(const std::string &parameter);
   double getSourceToSampleDistance();
   void setBeamDiameter();
 
