@@ -310,7 +310,7 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
       }
     }
 
-  } catch (std::ifstream::failure e) {
+  } catch (std::ifstream::failure &e) {
     return header;
   }
 
@@ -334,7 +334,7 @@ LoadDNSEvent::split_File(FileByteStream &file, const uint maxChunckCount) {
     data.resize(chunckSize);
     try {
       file.readRaw(*data.begin(), chunckSize);
-    } catch (std::ifstream::failure e) {
+    } catch (std::ifstream::failure &e) {
       data.resize(file.gcount());
       return result;
     }
@@ -366,7 +366,7 @@ LoadDNSEvent::split_File(FileByteStream &file, const uint maxChunckCount) {
             reinterpret_cast<std::array<uint8_t, windowSize> *>(current_window);
         file.readRaw(current_window[windowSize - skip_length], skip_length);
       }
-    } catch (std::ifstream::failure e) {
+    } catch (std::ifstream::failure &e) {
       return result;
     }
   } // while
