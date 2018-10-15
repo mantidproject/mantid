@@ -649,16 +649,15 @@ std::vector<bool>
 ComponentInfo::buildMergeIndices(const ComponentInfo &other) const {
   checkSizes(other);
   std::vector<bool> merge(other.m_scanIntervals.size(), true);
-
   for (size_t t1 = 0; t1 < other.m_scanIntervals.size(); ++t1) {
     for (size_t t2 = 0; t2 < m_scanIntervals.size(); ++t2) {
-      const auto &interval1 = other.m_scanIntervals[t1];
-      const auto &interval2 = m_scanIntervals[t2];
+      const auto interval1 = other.m_scanIntervals[t1];
+      const auto interval2 = m_scanIntervals[t2];
       if (interval1 == interval2) {
         for (size_t compIndex = 0; compIndex < nonDetectorSize(); ++compIndex) {
-          const size_t linearIndex1 = other.linearIndex({compIndex, t1});
-          const size_t linearIndex2 = linearIndex({compIndex, t2});
-          checkIdenticalIntervals(other, linearIndex1, linearIndex2);
+          checkIdenticalIntervals(other,
+                                  std::pair<size_t, size_t>(compIndex, t1),
+                                  std::pair<size_t, size_t>(compIndex, t2));
         }
         merge[t1] = false;
       } else if ((interval1.first < interval2.second) &&
@@ -676,12 +675,11 @@ void ComponentInfo::checkSizes(const ComponentInfo &other) const {
 }
 
 void ComponentInfo::checkIdenticalIntervals(
-    const ComponentInfo &other, const size_t linearIndexOther,
-    const size_t linearIndexThis) const {
-  if ((*m_positions)[linearIndexThis] != (*other.m_positions)[linearIndexOther])
+    const ComponentInfo &other, const std::pair<size_t, size_t> indexOther,
+    const std::pair<size_t, size_t> indexThis) const {
+  if (this->position(indexThis) != other.position(indexOther))
     failMerge("matching scan interval but positions differ");
-  if ((*m_rotations)[linearIndexThis].coeffs() !=
-      (*other.m_rotations)[linearIndexOther].coeffs())
+  if (this->rotation(indexThis).coeffs() != other.rotation(indexOther).coeffs())
     failMerge("matching scan interval but rotations differ");
 }
 

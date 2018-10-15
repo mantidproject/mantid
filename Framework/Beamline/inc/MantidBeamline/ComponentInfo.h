@@ -79,8 +79,8 @@ private:
   void checkSizes(const ComponentInfo &other) const;
   void initIndices();
   void checkIdenticalIntervals(const ComponentInfo &other,
-                               const size_t linearIndexOther,
-                               const size_t linearIndexThis) const;
+                               const std::pair<size_t, size_t> indexOther,
+                               const std::pair<size_t, size_t> indexThis) const;
   void checkSpecialIndices(size_t componentIndex) const;
   size_t nonDetectorSize() const;
   /// Copy constructor is private because of the way DetectorInfo stored

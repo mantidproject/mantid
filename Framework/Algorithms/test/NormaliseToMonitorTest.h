@@ -501,38 +501,6 @@ public:
     }
   }
 
-  void test_with_async_scan_workspace_throws() {
-    const size_t N_DET = 10;
-    const size_t N_BINS = 5;
-
-    // Set up 2 workspaces to be merged
-    auto ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        N_DET, N_BINS, true);
-    auto ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        N_DET, N_BINS, true);
-    auto &cmpInfo1 = ws1->mutableComponentInfo();
-    auto &cmpInfo2 = ws2->mutableComponentInfo();
-    cmpInfo1.setScanInterval({10, 20});
-    cmpInfo2.setScanInterval({20, 30});
-    // Merge
-    auto merged = WorkspaceFactory::Instance().create(ws1, 2 * N_DET);
-    auto &cmpInfo = merged->mutableComponentInfo();
-    cmpInfo.merge(ws2->componentInfo());
-    merged->setIndexInfo(Indexing::IndexInfo(merged->getNumberHistograms()));
-
-    NormaliseToMonitor alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", merged))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), std::runtime_error & e, std::string(e.what()),
-        "More then one spectrum corresponds to the requested monitor ID. This "
-        "is unexpected in a non-scanning workspace.")
-  }
-
   void test_with_single_count_point_data_workspace() {
     const size_t N_DET = 10;
     const size_t N_BINS = 1;

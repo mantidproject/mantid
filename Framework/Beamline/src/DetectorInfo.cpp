@@ -232,17 +232,5 @@ void DetectorInfo::checkSizes(const DetectorInfo &other) const {
   // TODO If we make masking time-independent we need to check masking here.
 }
 
-void DetectorInfo::checkIdenticalIntervals(const DetectorInfo &other,
-                                           const size_t linearIndexOther,
-                                           const size_t linearIndexThis) const {
-  if ((*m_isMasked)[linearIndexThis] != (*other.m_isMasked)[linearIndexOther])
-    failMerge("matching scan interval but mask flags differ");
-  if ((*m_positions)[linearIndexThis] != (*other.m_positions)[linearIndexOther])
-    failMerge("matching scan interval but positions differ");
-  if ((*m_rotations)[linearIndexThis].coeffs() !=
-      (*other.m_rotations)[linearIndexOther].coeffs())
-    failMerge("matching scan interval but rotations differ");
-}
-
 } // namespace Beamline
 } // namespace Mantid
