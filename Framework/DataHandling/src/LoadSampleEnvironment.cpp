@@ -7,9 +7,9 @@
 #include "MantidDataHandling/LoadSampleEnvironment.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
-#include "MantidGeometry/Objects/MeshObject.h"
-#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -39,10 +39,10 @@ void LoadSampleEnvironment::init() {
   ;
 
   // input workspace
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       wsValidator),
-      "The name of the workspace containing the instrument to add the Environment");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
+                  "The name of the workspace containing the instrument to add "
+                  "the Environment");
 
   // Environment file
   const std::vector<std::string> extensions{".stl"};
@@ -57,8 +57,8 @@ void LoadSampleEnvironment::init() {
                   "Environment of the sample");
 
   // Environment Name
- declareProperty("EnvironmentName", "Environment", "The Name of the Environment", Direction::Input);
-
+  declareProperty("EnvironmentName", "Environment",
+                  "The Name of the Environment", Direction::Input);
 }
 
 void LoadSampleEnvironment::exec() {
@@ -80,7 +80,7 @@ void LoadSampleEnvironment::exec() {
   std::string filetype = filename.substr(filename.size() - 3);
 
   boost::shared_ptr<MeshObject> environmentMesh = nullptr;
-  
+
   auto asciiStlReader = LoadAsciiStl(filename);
   auto binaryStlReader = LoadBinaryStl(filename);
   if (asciiStlReader.isAsciiSTL()) {
@@ -89,7 +89,7 @@ void LoadSampleEnvironment::exec() {
     environmentMesh = binaryStlReader.readStl();
   } else {
     throw Kernel::Exception::ParseError(
-          "Could not read file, did not match either STL Format", filename, 0);
+        "Could not read file, did not match either STL Format", filename, 0);
   }
   std::string name = getProperty("EnvironmentName");
   auto can = boost::make_shared<Container>(environmentMesh);

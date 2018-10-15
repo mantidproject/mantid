@@ -27,7 +27,8 @@ public:
   const std::string name() const override { return "LoadSampleEnvironment"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "The algorithm loads a Environment into the instrument of a workspace "
+    return "The algorithm loads a Environment into the instrument of a "
+           "workspace "
            "at the sample.";
   }
 
@@ -35,7 +36,8 @@ public:
   int version() const override { return 1; };
   /// Related algorithms
   const std::vector<std::string> seeAlso() const override {
-    return {"CreateSampleEnvironment", "CopySample", "SetSampleMaterial", "LoadSampleShape"};
+    return {"CreateSampleEnvironment", "CopySample", "SetSampleMaterial",
+            "LoadSampleShape"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
