@@ -26,6 +26,7 @@
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
@@ -43,6 +44,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <limits>
+#include <cmath>
 
 using Poco::XML::Document;
 using Poco::XML::DOMParser;
@@ -533,8 +536,8 @@ void LoadSpice2D2::runLoadInstrument() {
  */ 
 void LoadSpice2D2::rotateDetector(){
 
-  double angle = boost::lexical_cast<double>(
-        m_metadata["Motor_Positions/det_west_wing_rot"]);
+  // The angle is negative!
+  double angle = - boost::lexical_cast<double>(m_metadata["Motor_Positions/det_west_wing_rot"]);
 
   g_log.notice() << "Rotating Wing Detector " << angle << " degrees." << '\n';
 
@@ -567,9 +570,9 @@ void LoadSpice2D2::rotateDetector(){
  * If SDD tag is available in the metadata set that as sample detector distance
  * @return : sample_detector_distance
  */
-double LoadSpice2D2::detectorDistance() {
+void LoadSpice2D2::setDetectorDistance() {
 
-  double m_sampleDetectorDistance = getProperty("SampleDetectorDistance");
+  m_sampleDetectorDistance = getProperty("SampleDetectorDistance");
 
   if (!isEmpty(m_sampleDetectorDistance)){
     // SDD is as input
@@ -603,7 +606,7 @@ double LoadSpice2D2::detectorDistance() {
   g_log.debug() << "Sample Detector Distance = " << m_sampleDetectorDistance
                 << " mm." << '\n';
   addRunProperty<double>("sample-detector-distance", m_sampleDetectorDistance, "mm");
-  return m_sampleDetectorDistance;
+  //return m_sampleDetectorDistance;
 }
 
 
@@ -612,7 +615,7 @@ double LoadSpice2D2::detectorDistance() {
  */
 void LoadSpice2D2::moveDetector() {
 
-  double sample_detector_distance = detectorDistance();
+  setDetectorDistance();
   double translation_distance = boost::lexical_cast<double>(
                       m_metadata["Motor_Positions/detector_trans"]);
   translation_distance /= 1000.0;
@@ -626,12 +629,12 @@ void LoadSpice2D2::moveDetector() {
   std::string detID =
       m_workspace->getInstrument()->getStringParameter("detector-name")[0];
 
-  g_log.information() << "Moving: " << detID << " Z=" << sample_detector_distance/1000.0 << 
+  g_log.information() << "Moving: " << detID << " Z=" << m_sampleDetectorDistance/1000.0 << 
     " X=" << translation_distance << '\n';
   try {
     mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
     mover->setProperty("ComponentName", detID);
-    mover->setProperty("Z", sample_detector_distance / 1000.0);
+    mover->setProperty("Z", m_sampleDetectorDistance / 1000.0);
     mover->setProperty("X", -translation_distance);
     mover->execute();
   } catch (std::invalid_argument &e) {
@@ -644,34 +647,53 @@ void LoadSpice2D2::moveDetector() {
   }
 }
 
+/**
+ * From the parameters file get a string parameter
+ * */
+std::string LoadSpice2D2::getInstrumentStringParameter(const std::string &parameter){
+  std::vector<std::string> pars = m_workspace->getInstrument()->getStringParameter(parameter);
+  if (pars.empty()) {
+    g_log.warning() << "Parameter not found: " << parameter << " in the instrument parameter file.\n";
+    return std::string();
+  }
+  else {
+    g_log.debug() << "Found the parameter: " << parameter << " = " << pars[0] <<
+      " in the instrument parameter file.\n";
+      return pars[0];
+  }
+}
 
-double readInstrumentParameter(const std::string &parameter,
-                               API::MatrixWorkspace_sptr dataWS) {
-  std::vector<double> pars =
-      dataWS->getInstrument()->getNumberParameter(parameter);
-  if (pars.empty())
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to find [" + parameter + "] instrument parameter");
-  return pars[0];
+/**
+ * From the parameters file get a double parameter
+ * */
+double LoadSpice2D2::getInstrumentDoubleParameter(const std::string &parameter){
+  std::vector<double> pars = m_workspace->getInstrument()->getNumberParameter(parameter);
+  if (pars.empty()) {
+    g_log.warning() << "Parameter not found: " << parameter << " in the instrument parameter file.\n";
+    return std::numeric_limits<double>::quiet_NaN();
+  }
+  else {
+    g_log.debug() << "Found the parameter: " << parameter << " = " << pars[0] <<
+      " in the instrument parameter file.\n";
+      return pars[0];
+  }
 }
 
 double LoadSpice2D2::getSourceToSampleDistance() {
-  const int nguides =
-      m_workspace->run().getPropertyValueAsType<int>("number-of-guides");
+  const int nguides = static_cast<int>(boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
+      //m_workspace->run().getPropertyValueAsType<int>("number-of-guides");
 
-  std::vector<std::string> pars =
-      m_workspace->getInstrument()->getStringParameter("aperture-distances");
-  if (pars.empty())
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to find [aperture-distances] instrument parameter");
+  // aperture-distances: array from the instrument parameters
+  std::string pars = getInstrumentStringParameter("aperture-distances");
 
   double SSD = 0;
   Mantid::Kernel::StringTokenizer tok(
-      pars[0], ",", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      pars, ",", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (tok.count() > 0 && tok.count() < 10 && nguides >= 0 && nguides < 9) {
     const std::string distance_as_string = tok[8 - nguides];
     try {
-      SSD = boost::lexical_cast<double>(distance_as_string);
+      auto distance_as_string_copy = boost::algorithm::trim_copy(distance_as_string);
+      SSD = boost::lexical_cast<double>(distance_as_string_copy);
     }
     catch(boost::bad_lexical_cast const& e)
     {
@@ -683,11 +705,11 @@ double LoadSpice2D2::getSourceToSampleDistance() {
         "Unable to get source-to-sample distance");
 
   // Check for an offset
-  if (m_workspace->getInstrument()->hasParameter("source-distance-offset")) {
-    const double offset =
-        readInstrumentParameter("source-distance-offset", m_workspace);
-    SSD += offset;
+  double sourceSampleDistanceOffset = getInstrumentDoubleParameter("source-distance-offset");
+  if (!std::isnan(sourceSampleDistanceOffset)){
+    SSD += sourceSampleDistanceOffset;
   }
+  g_log.debug() << "Source Sample Distance = " << SSD << ".\n";
   return SSD;
 }
 
@@ -712,28 +734,17 @@ void LoadSpice2D2::setBeamDiameter(){
     g_log.warning() << "Could not compute SSD from number of guides, taking: " << SourceToSampleDistance << " mm \n";
   }
 
-  const std::string sampleADName = "sample-aperture-diameter";
-  Mantid::Kernel::Property *prop = m_workspace->run().getProperty(sampleADName);
-  Mantid::Kernel::PropertyWithValue<double> *dp =
-      dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
-  if (!dp) {
-    throw std::runtime_error("Could not cast (interpret) the property " +
-                             sampleADName +
-                             " as a floating point numeric value.");
-  }
-  double sampleAperture = *dp;
+  const double sampleAperture = 
+    boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]);
+  const double sourceAperture = 
+    boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]);
+  g_log.debug() << "Computing beam diameter. m_sampleDetectorDistance=" << m_sampleDetectorDistance
+    << " SourceToSampleDistance=" << SourceToSampleDistance <<
+    " sourceAperture= " << sourceAperture << " sampleAperture=" << sampleAperture << "\n";
 
-  const std::string sourceADName = "source-aperture-diameter";
-  prop = m_workspace->run().getProperty(sourceADName);
-  dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
-  if (!dp) {
-    throw std::runtime_error("Could not cast (interpret) the property " +
-                             sourceADName +
-                             " as a floating point numeric value.");
-  }
-  double sourceAperture = *dp;
-  const double beam_diameter = m_sampleDetectorDistance / SourceToSampleDistance * (sourceAperture + sampleAperture) + sampleAperture;
-  m_workspace->mutableRun().addProperty("beam-diameter", beam_diameter, "mm", true);
+  const double beamDiameter = m_sampleDetectorDistance / SourceToSampleDistance * 
+    (sourceAperture + sampleAperture) + sampleAperture;
+  m_workspace->mutableRun().addProperty("beam-diameter", beamDiameter, "mm", true);
 }
 
 } // namespace DataHandling
