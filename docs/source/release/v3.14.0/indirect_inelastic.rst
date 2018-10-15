@@ -70,3 +70,5 @@ Improvements
 - Added 'Default' detector grouping option in ISISEnergyTransfer for TOSCA, to allow a default grouping 
   using the grouping specified in the Instrument Parameter File.
 - ISISEnergyTransfer now allows overlapping detector grouping.
+- The Run button has been moved to be above the output options. The run button, save button and plotting options 
+  are now disabled while a tab is running or plotting.  
