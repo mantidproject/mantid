@@ -4,17 +4,16 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 from __future__ import (absolute_import, division, print_function)
 
 
-class DummyLabelPresenter(object):
-
-    """
-    """
+class ContextExamplePresenter(object):
 
     def __init__(self, view, model):
-        self._view = view
         self._model = model
+        self._view = view
+        self._view.groupChangedSignal.connect(self.groupChanged)
 
     @property
     def widget(self):
@@ -24,10 +23,14 @@ class DummyLabelPresenter(object):
     def model(self):
         return self._model
 
-    def updateLabel(self, message):
-        self._view.updateLabel(message)
+    def groupChanged(self, row):
+        # the groups are all row 0
+        if row == 0:
+            # make sure the context is up to date
+            self.updateContext()
+            # update the whole GUI (not just this MVP)
+            self._view.sendUpdateSignal()
 
-    # interact with context
     def updateContext(self):
         """
         A simple method for updating the context.
