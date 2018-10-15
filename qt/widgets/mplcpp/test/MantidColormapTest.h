@@ -27,8 +27,8 @@ public:
   // ----------------- failure tests ---------------------
 
   void testExistsThrowsIfMapDoesNotExist() {
-    TS_ASSERT_THROWS(MantidColorMap::exists("NotAColormap"),
-                     std::runtime_error);
+    using Mantid::PythonInterface::PythonException;
+    TS_ASSERT_THROWS(MantidColorMap::exists("NotAColormap"), PythonException);
   }
 };
 

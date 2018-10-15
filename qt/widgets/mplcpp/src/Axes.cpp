@@ -19,7 +19,6 @@ using Mantid::PythonInterface::Converters::VectorToNDArray;
 using Mantid::PythonInterface::Converters::WrapReadOnly;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonException;
-using Mantid::PythonInterface::PythonRuntimeError;
 using Mantid::PythonInterface::callMethodNoCheck;
 
 namespace {
@@ -114,7 +113,7 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
                   std::move(xdata), std::move(ydata)};
 
   } catch (Python::ErrorAlreadySet &) {
-    throw PythonRuntimeError();
+    throw PythonException();
   }
 }
 

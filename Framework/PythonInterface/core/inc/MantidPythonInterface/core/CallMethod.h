@@ -41,13 +41,7 @@ ReturnType callMethodImpl(PyObject *obj, const char *methodName,
     return boost::python::call_method<ReturnType, Args...>(obj, methodName,
                                                            args...);
   } catch (boost::python::error_already_set &) {
-    PyObject *exception = PyErr_Occurred();
-    assert(exception);
-    if (PyErr_GivenExceptionMatches(exception, PyExc_RuntimeError)) {
-      throw PythonRuntimeError();
-    } else {
-      throw PythonException();
-    }
+    throw PythonException();
   }
 }
 } // namespace detail

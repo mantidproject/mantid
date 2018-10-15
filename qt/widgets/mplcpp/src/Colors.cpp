@@ -9,7 +9,7 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
-using Mantid::PythonInterface::PythonRuntimeError;
+using Mantid::PythonInterface::PythonException;
 
 namespace MantidQt {
 namespace Widgets {

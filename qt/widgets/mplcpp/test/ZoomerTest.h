@@ -73,7 +73,7 @@ private:
                                   Py_file_input, context.ptr(), context.ptr()));
       return context["createDummyMouseEvent"](xpos, ypos);
     } catch (Python::ErrorAlreadySet &) {
-      throw Mantid::PythonInterface::PythonRuntimeError();
+      throw Mantid::PythonInterface::PythonException();
     }
   }
 };

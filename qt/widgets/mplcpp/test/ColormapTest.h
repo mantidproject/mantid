@@ -12,7 +12,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-using Mantid::PythonInterface::PythonRuntimeError;
+using Mantid::PythonInterface::PythonException;
 using MantidQt::Widgets::MplCpp::Colormap;
 using MantidQt::Widgets::MplCpp::Python::Object;
 using MantidQt::Widgets::MplCpp::cmapExists;
@@ -42,7 +42,7 @@ public:
 
   // ----------------------- Failure tests ------------------------
   void testgetCMapWithUnknownCMapThrowsException() {
-    TS_ASSERT_THROWS(getCMap("AnUnknownName"), PythonRuntimeError);
+    TS_ASSERT_THROWS(getCMap("AnUnknownName"), PythonException);
   }
 
   void testConstructionWithNonColorMapObjectThrows() {

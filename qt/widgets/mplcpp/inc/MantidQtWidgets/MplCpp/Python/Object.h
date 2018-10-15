@@ -42,7 +42,7 @@ inline ssize_t Len(const Python::Object &obj) {
 // Helper to create an Object from a new reference to a raw PyObject*
 inline Python::Object NewRef(PyObject *obj) {
   if (!obj) {
-    throw Mantid::PythonInterface::PythonRuntimeError();
+    throw Mantid::PythonInterface::PythonException();
   }
   return Python::Object(Python::Handle<>(obj));
 }
@@ -50,7 +50,7 @@ inline Python::Object NewRef(PyObject *obj) {
 // Helper to create an Object from a borrowed reference to a raw PyObject*
 inline Python::Object BorrowedRef(PyObject *obj) {
   if (!obj) {
-    throw Mantid::PythonInterface::PythonRuntimeError();
+    throw Mantid::PythonInterface::PythonException();
   }
   return Python::Object(Python::Handle<>(boost::python::borrowed(obj)));
 }

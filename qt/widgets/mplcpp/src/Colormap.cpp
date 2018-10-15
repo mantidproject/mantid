@@ -9,7 +9,7 @@
 
 #include "MantidPythonInterface/core/ErrorHandling.h"
 
-using Mantid::PythonInterface::PythonRuntimeError;
+using Mantid::PythonInterface::PythonException;
 
 namespace MantidQt {
 namespace Widgets {
@@ -38,7 +38,7 @@ bool cmapExists(const QString &name) {
   try {
     getCMap(name);
     return true;
-  } catch (PythonRuntimeError &) {
+  } catch (PythonException &) {
     return false;
   }
 }
@@ -52,7 +52,7 @@ Colormap getCMap(const QString &name) {
   try {
     return cmModule().attr("get_cmap")(name.toLatin1().constData());
   } catch (Python::ErrorAlreadySet &) {
-    throw PythonRuntimeError();
+    throw PythonException();
   }
 }
 
