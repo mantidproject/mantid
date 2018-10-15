@@ -241,6 +241,7 @@ signals:
   void plotSpectrumWithErrorsClicked(const QStringList & workspaceNames);
   void overplotSpectrumWithErrorsClicked(const QStringList & workspaceNames);
   void plotColorfillClicked(const QStringList &workspaceNames);
+  void sampleLogsClicked(const QStringList &workspaceNames);
 };
 
 // ---------------------------------
