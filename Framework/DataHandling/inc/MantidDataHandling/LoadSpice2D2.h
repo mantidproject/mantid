@@ -59,7 +59,6 @@ namespace DataHandling {
 class DLLExport LoadSpice2D2 : public API::IFileLoader<Kernel::FileDescriptor> {
 
 public:
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadSpice2D2"; }
   /// Summary of algorithms purpose
@@ -79,31 +78,29 @@ public:
     return "DataHandling\\Text;SANS\\DataHandling";
   }
 
-
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-
-
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
 
   void setInputFileAsHandler();
-  void setSansSpiceXmlFormatVersion() ;
+  void setSansSpiceXmlFormatVersion();
   void setTimes();
   void setWavelength();
 
   std::pair<int, int> parseDetectorDimensions(const std::string &dims_str);
   std::vector<int> getData(const std::string &dataXpath = "//Data");
 
-  void storeValue(int specID, double value,
-                 double error, double wavelength, double dwavelength);
+  void storeValue(int specID, double value, double error, double wavelength,
+                  double dwavelength);
   void createWorkspace();
-  template <class T> void addRunProperty(const std::string &name, const T &value,
-                                 const std::string &units="");
+  template <class T>
+  void addRunProperty(const std::string &name, const T &value,
+                      const std::string &units = "");
   void setBeamTrapRunProperty();
   void storeMetaDataIntoWS();
   void runLoadInstrument();
@@ -115,8 +112,6 @@ private:
   double getSourceToSampleDistance();
   void setBeamDiameter();
 
-
-
   /* constants */
   /// Number of monitors
   static const int nMonitors = 2;
@@ -127,14 +122,12 @@ private:
   DataObjects::Workspace2D_sptr m_workspace;
   std::map<std::string, std::string> m_metadata;
 
-
   double m_sansSpiceXmlFormatVersion{0.0};
   double m_wavelength;
   double m_dwavelength;
   double m_sampleDetectorDistance;
   Mantid::Types::Core::DateAndTime m_startTime;
   Mantid::Types::Core::DateAndTime m_endTime;
-  
 };
 } // namespace DataHandling
 } // namespace Mantid
