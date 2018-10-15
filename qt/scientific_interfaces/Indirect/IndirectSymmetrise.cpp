@@ -137,9 +137,17 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
           SLOT(xRangeMinChanged(double)));
   connect(negativeERaw, SIGNAL(maxValueChanged(double)), this,
           SLOT(xRangeMaxChanged(double)));
-  // Handle plotting and saving
+  // Handle running, plotting and saving
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+
+  connect(this,
+          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
+                                 QString const &)),
+          this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &,
+                               QString const &)));
 
   // Set default X range values
   m_dblManager->setValue(m_properties["EMin"], 0.1);
@@ -520,6 +528,12 @@ void IndirectSymmetrise::xRangeMaxChanged(double value) {
     m_dblManager->setValue(m_properties["EMin"], std::abs(value));
   }
 }
+
+/**
+ * Handle when Run is clicked
+ */
+void IndirectSymmetrise::runClicked() { runTab(); }
+
 /**
  * Handles mantid plotting
  */
@@ -538,5 +552,36 @@ void IndirectSymmetrise::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
+
+void IndirectSymmetrise::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void IndirectSymmetrise::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+}
+
+void IndirectSymmetrise::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void IndirectSymmetrise::setOutputButtonsEnabled(
+    std::string const &enableOutputButtons) {
+  bool enable = enableOutputButtons == "enable" ? true : false;
+  setPlotEnabled(enable);
+  setSaveEnabled(enable);
+}
+
+void IndirectSymmetrise::updateRunButton(bool enabled,
+                                         std::string const &enableOutputButtons,
+                                         QString const message,
+                                         QString const tooltip) {
+  setRunEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
+  if (enableOutputButtons != "unchanged")
+    setOutputButtonsEnabled(enableOutputButtons);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

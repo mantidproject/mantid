@@ -54,9 +54,19 @@ private slots:
   // files.
   void plotRawComplete(
       bool error); //< Called when the Plot Raw algorithmm chain completes
-  /// Handles plotting and saving
+  /// Handles running, plotting and saving
+  void runClicked();
   void plotClicked();
   void saveClicked();
+
+  void setRunEnabled(bool enabled);
+  void setPlotEnabled(bool enabled);
+  void setSaveEnabled(bool enabled);
+  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
+  void updateRunButton(bool enabled = true,
+                       std::string const &enableOutputButtons = "unchanged",
+                       QString const message = "Run",
+                       QString const tooltip = "");
 
 private:
   Ui::ISISEnergyTransfer m_uiForm;

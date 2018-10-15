@@ -57,8 +57,16 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(momentsAlgComplete(bool)));
 
   // Plot and save
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(this,
+          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
+                                 QString const &)),
+          this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &,
+                               QString const &)));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -207,6 +215,11 @@ void IndirectMoments::momentsAlgComplete(bool error) {
 }
 
 /**
+ * Handle when Run is clicked
+ */
+void IndirectMoments::runClicked() { runTab(); }
+
+/**
  * Handle mantid plotting
  */
 void IndirectMoments::plotClicked() {
@@ -226,6 +239,34 @@ void IndirectMoments::saveClicked() {
   if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), false))
     addSaveWorkspaceToQueue(outputWs);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void IndirectMoments::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+void IndirectMoments::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+}
+void IndirectMoments::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void IndirectMoments::setOutputButtonsEnabled(
+    std::string const &enableOutputButtons) {
+  bool enable = enableOutputButtons == "enable" ? true : false;
+  setPlotEnabled(enable);
+  setSaveEnabled(enable);
+}
+
+void IndirectMoments::updateRunButton(bool enabled,
+                                      std::string const &enableOutputButtons,
+                                      QString const message,
+                                      QString const tooltip) {
+  setRunEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
+  if (enableOutputButtons != "unchanged")
+    setOutputButtonsEnabled(enableOutputButtons);
 }
 
 } // namespace CustomInterfaces

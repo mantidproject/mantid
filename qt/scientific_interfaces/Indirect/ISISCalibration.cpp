@@ -173,9 +173,17 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
-  // Handle plotting and saving
+  // Handle running, plotting and saving
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+
+  connect(this,
+          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
+                                 QString const &)),
+          this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &,
+                               QString const &)));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -618,17 +626,16 @@ void ISISCalibration::resCheck(bool state) {
  * Called when a user starts to type / edit the runs to load.
  */
 void ISISCalibration::pbRunEditing() {
-  emit updateRunButton(false, "Editing...",
-                       "Run numbers are currently being edited.");
+  updateRunButton(false, "unchanged", "Editing...",
+                  "Run numbers are currently being edited.");
 }
 
 /**
  * Called when the FileFinder starts finding the files.
  */
 void ISISCalibration::pbRunFinding() {
-  emit updateRunButton(
-      false, "Finding files...",
-      "Searching for data files for the run numbers entered...");
+  updateRunButton(false, "unchanged", "Finding files...",
+                  "Searching for data files for the run numbers entered...");
   m_uiForm.leRunNo->setEnabled(false);
 }
 
@@ -636,13 +643,12 @@ void ISISCalibration::pbRunFinding() {
  * Called when the FileFinder has finished finding the files.
  */
 void ISISCalibration::pbRunFinished() {
-  if (!m_uiForm.leRunNo->isValid()) {
-    emit updateRunButton(
-        false, "Invalid Run(s)",
+  if (!m_uiForm.leRunNo->isValid())
+    updateRunButton(
+        false, "unchanged", "Invalid Run(s)",
         "Cannot find data files for some of the run numbers entered.");
-  } else {
-    emit updateRunButton();
-  }
+  else
+    updateRunButton();
 
   m_uiForm.leRunNo->setEnabled(true);
 }
@@ -659,6 +665,11 @@ void ISISCalibration::saveClicked() {
   }
   m_batchAlgoRunner->executeBatchAsync();
 }
+
+/**
+ * Handle when Run is clicked
+ */
+void ISISCalibration::runClicked() { runTab(); }
 
 /**
  * Handle mantid plotting
@@ -765,6 +776,36 @@ IAlgorithm_sptr ISISCalibration::energyTransferReductionAlgorithm(
   reductionAlg->setProperty("LoadLogFiles",
                             m_uiForm.ckLoadLogFiles->isChecked());
   return reductionAlg;
+}
+
+void ISISCalibration::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void ISISCalibration::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+}
+
+void ISISCalibration::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void ISISCalibration::setOutputButtonsEnabled(
+    std::string const &enableOutputButtons) {
+  bool enable = enableOutputButtons == "enable" ? true : false;
+  setPlotEnabled(enable);
+  setSaveEnabled(enable);
+}
+
+void ISISCalibration::updateRunButton(bool enabled,
+                                      std::string const &enableOutputButtons,
+                                      QString const message,
+                                      QString const tooltip) {
+  setRunEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
+  if (enableOutputButtons != "unchanged")
+    setOutputButtonsEnabled(enableOutputButtons);
 }
 
 } // namespace CustomInterfaces
