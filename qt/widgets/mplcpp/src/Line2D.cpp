@@ -31,7 +31,7 @@ Line2D::Line2D(Python::Object obj, std::vector<double> xdataOwner,
  * The data is being deleted so the the line is removed from the axes
  * if it is present
  */
-Line2D::~Line2D() {
+Line2D::~Line2D() noexcept {
   // If the Line2D has not been gutted by a std::move() then
   // detach the line
   if (!m_xOwner.empty()) {

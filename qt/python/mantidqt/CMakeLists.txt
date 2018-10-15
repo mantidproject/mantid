@@ -25,6 +25,8 @@ mtd_add_sip_module (
   SIP_SRCS _common.sip
   HEADER_DEPS ${_header_depends}
   PYQT_VERSION 4
+  INCLUDE_DIRS
+    ${PYTHON_INCLUDE_PATH}
   LINK_LIBS
     ${common_link_libs}
     MantidQtWidgetsCommonQt4
@@ -47,6 +49,8 @@ mtd_add_sip_module (
   SIP_SRCS _common.sip
   HEADER_DEPS ${_header_depends}
   PYQT_VERSION 5
+  INCLUDE_DIRS
+    ${PYTHON_INCLUDE_PATH}
   LINK_LIBS
     ${common_link_libs}
     MantidQtWidgetsCommonQt5

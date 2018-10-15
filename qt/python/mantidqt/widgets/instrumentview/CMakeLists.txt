@@ -13,6 +13,8 @@ mtd_add_sip_module (
   TARGET_NAME mantidqt_instrumentviewqt5
   SIP_SRCS _instrumentview.sip
   PYQT_VERSION 5
+  INCLUDE_DIRS
+    ${PYTHON_INCLUDE_PATH}
   LINK_LIBS
     ${common_link_libs}
     MantidQtWidgetsInstrumentViewQt5
