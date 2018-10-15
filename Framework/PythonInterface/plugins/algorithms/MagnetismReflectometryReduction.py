@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init, invalid-name, bare-except
 """
     Magnetism reflectometry reduction
@@ -92,7 +98,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty("QMin", 0.005, doc="Minimum Q-value")
         self.declareProperty("QStep", 0.02, doc="Step size in Q. Enter a negative value to get a log scale")
         self.declareProperty("AngleOffset", 0.0, doc="angle offset (rad)")
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
         self.declareProperty("TimeAxisStep", 40.0,
                              doc="Binning step size for the time axis. TOF for detector binning, wavelength for constant Q")
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
@@ -100,6 +105,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                              doc="With const-Q binning, cut Q bins with contributions fewer than ConstQTrim of WL bins")
         self.declareProperty("SampleLength", 10.0, doc="Length of the sample in mm")
         self.declareProperty("ConstantQBinning", False, doc="If true, we convert to Q before summing")
+        self.declareProperty("DirectPixelOverwrite", Property.EMPTY_DBL, doc="DIRPIX overwrite value")
+        self.declareProperty("DAngle0Overwrite", Property.EMPTY_DBL, doc="DANGLE0 overwrite value (degrees)")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
 
     #pylint: disable=too-many-locals
     def PyExec(self):
@@ -370,7 +378,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                                   ParentWorkspace=workspace, OutputWorkspace=name_output_ws)
 
         # At this point we still have a histogram, and we need to convert to point data
-        q_rebin = ConvertToPointData(InputWorkspace=q_rebin)
+        q_rebin = ConvertToPointData(InputWorkspace=q_rebin, OutputWorkspace=name_output_ws)
         return q_rebin
 
     def convert_to_q(self, workspace):
@@ -554,9 +562,13 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         angle_offset = self.getProperty("AngleOffset").value
         use_sangle = self.getProperty("UseSANGLE").value
         ref_pix = self.getProperty("SpecularPixel").value
+        dirpix_overwrite = self.getProperty("DirectPixelOverwrite").value
+        dangle0_overwrite = self.getProperty("DAngle0Overwrite").value
 
-        _theta = MRGetTheta(Workspace=ws_event_data, AngleOffset = angle_offset,
-                            UseSANGLE = use_sangle, SpecularPixel = ref_pix)
+        _theta = MRGetTheta(Workspace=ws_event_data, AngleOffset=angle_offset,
+                            UseSANGLE=use_sangle, SpecularPixel=ref_pix,
+                            DirectPixelOverwrite=dirpix_overwrite,
+                            DAngle0Overwrite=dangle0_overwrite)
 
         return _theta
 

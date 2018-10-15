@@ -1576,8 +1576,8 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
       case 0x09: // Text&Numeric - Dec1000
       case 0x10: // Numeric    - Scientific
       case 0x19: // Text&Numeric - Scientific
-      case 0x20: // Numeric    - Engeneering
-      case 0x29: // Text&Numeric - Engeneering
+      case 0x20: // Numeric    - Engineering
+      case 0x29: // Text&Numeric - Engineering
       case 0x30: // Numeric    - Dec1,000
       case 0x39: // Text&Numeric - Dec1,000
         SPREADSHEET[spread].column[col_index].value_type =
@@ -1825,8 +1825,8 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
         case 0x09: // Text&Numeric - Dec1000
         case 0x10: // Numeric    - Scientific
         case 0x19: // Text&Numeric - Scientific
-        case 0x20: // Numeric    - Engeneering
-        case 0x29: // Text&Numeric - Engeneering
+        case 0x20: // Numeric    - Engineering
+        case 0x29: // Text&Numeric - Engineering
         case 0x30: // Numeric    - Dec1,000
         case 0x39: // Text&Numeric - Dec1,000
           EXCEL[iexcel].sheet[isheet].column[col_index].value_type =

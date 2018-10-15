@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROJECT_SERIALISER_H
 #define PROJECT_SERIALISER_H
 
@@ -26,26 +32,6 @@ class Folder;
 
   @author Samuel Jackson, ISIS, RAL
   @date 21/06/2016
-
-  Copyright &copy; 2007-2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
 namespace MantidQt {
@@ -57,6 +43,8 @@ using groupNameToWsNamesT =
 class ProjectSerialiser : public QObject {
   Q_OBJECT
 public:
+  static QStringList serialisablePythonInterfaces();
+
   /// Create a new serialiser with the current application window
   explicit ProjectSerialiser(ApplicationWindow *window);
   explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
@@ -67,7 +55,8 @@ public:
 
   /// Save the current state of the project to disk
   bool save(const QString &projectName, const std::vector<std::string> &wsNames,
-            const std::vector<std::string> &windowNames, bool compress = false);
+            const std::vector<std::string> &windowNames,
+            const std::vector<std::string> &interfaces, bool compress = false);
   bool save(const QString &projectName, bool compress = false,
             bool saveAll = true);
   /// Load a project file from disk
@@ -95,6 +84,8 @@ private:
   std::vector<std::string> m_windowNames;
   /// Vector of names of workspaces to save to file
   std::vector<std::string> m_workspaceNames;
+  /// Vector of names of python interfaces to save to file
+  std::vector<std::string> m_interfacesNames;
   /// Store a count of the number of windows during saving
   int m_windowCount;
   /// Flag to check if we should save all workspaces
@@ -125,6 +116,10 @@ private:
   QString saveWorkspaces();
   /// Save additional windows
   QString saveAdditionalWindows();
+  /// Save Python interfaces
+  QString savePythonInterfaces();
+  /// Save Python interfaces
+  QString savePythonInterface(const QString &launcherModuleName);
 
   // Loading Functions
 
@@ -151,6 +146,11 @@ private:
   void loadWsToMantidTree(const std::string &wsName);
   /// Load additional windows (e.g. slice viewer)
   void loadAdditionalWindows(const std::string &lines, const int fileVersion);
+  /// Load any PythonInterfaces in the project
+  void loadPythonInterfaces(const std::string &lines);
+  /// Load a single Python interface
+  void loadPythonInterface(const std::string &launcherModuleName,
+                           const std::string &pySection);
 
   // Misc functions
 

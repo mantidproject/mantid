@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0403,R0902
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
@@ -306,7 +312,7 @@ class PeakProcessRecord(object):
         """
         # get PeaksWorkspace
         if AnalysisDataService.doesExist(self._myPeakWorkspaceName) is False:
-            raise RuntimeError('PeaksWorkspace %s does ot exit.' % self._myPeakWorkspaceName)
+            raise RuntimeError('PeaksWorkspace %s does not exist.' % self._myPeakWorkspaceName)
 
         peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "MantidKernel/Logger.h"
@@ -316,6 +322,23 @@ QString TSVSerialiser::asQString(const size_t i) const {
   return QString::fromStdString(m_curValues.at(i));
 }
 
+void TSVSerialiser::storeDouble(const double val) { m_output << "\t" << val; }
+
+void TSVSerialiser::storeInt(const int val) { m_output << "\t" << val; }
+void TSVSerialiser::storeString(const std::string val) {
+  m_output << "\t" << val;
+}
+
+void TSVSerialiser::storeBool(const bool val) { m_output << "\t" << val; }
+
+double TSVSerialiser::readDouble() { return asDouble(m_curIndex++); }
+
+int TSVSerialiser::readInt() { return asInt(m_curIndex++); }
+
+std::string TSVSerialiser::readString() { return asString(m_curIndex++); }
+
+bool TSVSerialiser::readBool() { return asBool(m_curIndex++); }
+
 TSVSerialiser &TSVSerialiser::operator>>(int &val) {
   val = asInt(m_curIndex++);
   return *this;
@@ -384,7 +407,7 @@ TSVSerialiser &TSVSerialiser::writeLine(const std::string &name) {
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const std::string &val) {
-  m_output << "\t" << val;
+  storeString(val);
   return *this;
 }
 
@@ -400,12 +423,12 @@ TSVSerialiser &TSVSerialiser::operator<<(const QString &val) {
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const double &val) {
-  m_output << "\t" << val;
+  storeDouble(val);
   return *this;
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const int &val) {
-  m_output << "\t" << val;
+  storeInt(val);
   return *this;
 }
 
@@ -415,7 +438,7 @@ TSVSerialiser &TSVSerialiser::operator<<(const size_t &val) {
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const bool &val) {
-  m_output << "\t" << val;
+  storeBool(val);
   return *this;
 }
 

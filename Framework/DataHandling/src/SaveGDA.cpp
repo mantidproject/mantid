@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveGDA.h"
 
 #include "MantidAPI/Axis.h"
@@ -105,7 +111,7 @@ const std::string SaveGDA::category() const {
   return "DataHandling\\Text;Diffraction\\DataHandling";
 }
 
-const std::string SaveGDA::PROP_OUTPUT_FILENAME = "Filename";
+const std::string SaveGDA::PROP_OUTPUT_FILENAME = "OutputFilename";
 
 const std::string SaveGDA::PROP_INPUT_WS = "InputWorkspace";
 

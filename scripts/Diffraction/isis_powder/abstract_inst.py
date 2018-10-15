@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
@@ -182,6 +188,13 @@ class AbstractInst(object):
         :return: List of bin widths or None if no rebinning should take place
         """
         return None
+
+    def get_instrument_prefix(self):
+        """
+        Returns the instrument prefix which tells this abstract instrument what instrument it is
+        :return: The instrument prefix
+        """
+        return self._inst_prefix
 
     def _get_input_batching_mode(self):
         """

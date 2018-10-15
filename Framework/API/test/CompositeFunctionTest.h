@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef COMPOSITEFUNCTIONTEST_H_
 #define COMPOSITEFUNCTIONTEST_H_
 
@@ -10,7 +16,6 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;

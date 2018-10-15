@@ -302,7 +302,7 @@ FittedPeaksWorkspace
 
 It is an optional output :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`.
 
-For each spectrum, in each fit window, the Y values will be replaced by the calcualted peak and background value.
+For each spectrum, in each fit window, the Y values will be replaced by the calculated peak and background value.
 If fitting is bad, then only background is calculated.
 
 

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import glob
 import os
 
@@ -13,11 +19,13 @@ class LModel(object):
     def __init__(self):
         self.run = 0
         self.loaded_runs = {}
+        self.last_loaded_runs = []
 
     def _load(self, inputs):
         """ inputs is a dict mapping filepaths to output names """
         for path, output in iteritems(inputs):
-            mantid.LoadAscii(path, OutputWorkspace=output)
+            workspace = mantid.LoadAscii(path, OutputWorkspace=output)
+            workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
     def load_run(self):
         to_load = search_user_dirs(self.run)
@@ -28,6 +36,7 @@ class LModel(object):
         self._load(workspaces)
         self.loaded_runs[self.run] = group_by_detector(
             self.run, workspaces.values())
+        self.last_loaded_runs.append(self.run)
         return self.loaded_runs[self.run]
 
     def output(self):

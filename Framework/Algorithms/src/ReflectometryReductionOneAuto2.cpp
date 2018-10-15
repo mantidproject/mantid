@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryReductionOneAuto2.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -7,7 +13,12 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/RegexStrings.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
+
+#include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -292,6 +303,20 @@ void ReflectometryReductionOneAuto2::init() {
   setPropertyGroup("Rho", "Polarization Corrections");
   setPropertyGroup("Alpha", "Polarization Corrections");
 
+  // Flood correction
+  propOptions = {"Workspace", "ParameterFile"};
+  declareProperty("FloodCorrection", "Workspace",
+                  boost::make_shared<StringListValidator>(propOptions),
+                  "The way to apply flood correction: "
+                  "Workspace - use FloodWorkspace property to get the flood "
+                  "workspace, ParameterFile - use parameters in the parameter "
+                  "file to construct and apply flood correction workspace.");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "FloodWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "A flood workspace to apply; if empty and FloodCorrection is "
+      "'Workspace' then no correction is applied.");
+
   // Init properties for diagnostics
   initDebugProperties();
 
@@ -318,6 +343,7 @@ void ReflectometryReductionOneAuto2::init() {
  */
 void ReflectometryReductionOneAuto2::exec() {
 
+  applyFloodCorrections();
   setDefaultOutputWorkspaceNames();
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -777,8 +803,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
     if (!firstTransG) {
       alg->setProperty("FirstTransmissionRun", firstTrans);
-    } else if (polarizationAnalysisOn) {
-      firstTransSum = sumTransmissionWorkspaces(firstTransG);
+    } else {
+      alg->setProperty("FirstTransmissionRun", firstTransG->getItem(0));
     }
   }
   const std::string secondTrans = getPropertyValue("SecondTransmissionRun");
@@ -790,8 +816,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
     if (!secondTransG) {
       alg->setProperty("SecondTransmissionRun", secondTrans);
-    } else if (polarizationAnalysisOn) {
-      secondTransSum = sumTransmissionWorkspaces(secondTransG);
+    } else {
+      alg->setProperty("secondTransmissionRun", secondTransG->getItem(0));
     }
   }
 
@@ -805,26 +831,15 @@ bool ReflectometryReductionOneAuto2::processGroups() {
         outputIvsQBinned + "_" + std::to_string(i + 1);
     const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
 
-    if (firstTransG) {
-      if (!polarizationAnalysisOn)
-        alg->setProperty("FirstTransmissionRun",
-                         firstTransG->getItem(i)->getName());
-      else
-        alg->setProperty("FirstTransmissionRun", firstTransSum);
-    }
-    if (secondTransG) {
-      if (!polarizationAnalysisOn)
-        alg->setProperty("SecondTransmissionRun",
-                         secondTransG->getItem(i)->getName());
-      else
-        alg->setProperty("SecondTransmissionRun", secondTransSum);
-    }
-
     alg->setProperty("InputWorkspace", group->getItem(i)->getName());
     alg->setProperty("Debug", true);
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
+    if (!isDefault("FloodWorkspace")) {
+      MatrixWorkspace_sptr flood = getProperty("FloodWorkspace");
+      alg->setProperty("FloodWorkspace", flood);
+    }
     alg->execute();
 
     IvsQGroup.push_back(IvsQName);
@@ -992,34 +1007,94 @@ void ReflectometryReductionOneAuto2::applyPolarizationCorrection(
 }
 
 /**
- * Sum transmission workspaces that belong to a workspace group
- * @param transGroup : The transmission group containing the transmission runs
- * @return :: A workspace pointer containing the sum of transmission
- * workspaces
+ * Get the flood workspace for flood correction. If it is provided via the
+ * FloodWorkspace property return it. Otherwise create it using parameters
+ * in the instrument parameter file.
  */
-MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
-    WorkspaceGroup_sptr &transGroup) {
-
-  const std::string transSum = "trans_sum";
-  Workspace_sptr sumWS = transGroup->getItem(0)->clone();
-
-  /// For this step to appear in the history of the output workspaces I need
-  /// to set child to false and work with the ADS
-  auto plusAlg = createChildAlgorithm("Plus");
-  plusAlg->setChild(false);
-  plusAlg->initialize();
-
-  for (size_t item = 1; item < transGroup->size(); item++) {
-    plusAlg->setProperty("LHSWorkspace", sumWS);
-    plusAlg->setProperty("RHSWorkspace", transGroup->getItem(item));
-    plusAlg->setProperty("OutputWorkspace", transSum);
-    plusAlg->execute();
-    sumWS = AnalysisDataService::Instance().retrieve(transSum);
+MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
+  std::string const method = getProperty("FloodCorrection");
+  if (method == "Workspace" && !isDefault("FloodWorkspace")) {
+    return getProperty("FloodWorkspace");
+  } else if (method == "ParameterFile") {
+    if (!isDefault("FloodWorkspace")) {
+      g_log.warning() << "Flood correction is performed using data in the "
+                         "Parameter File. Value of FloodWorkspace property is "
+                         "ignored."
+                      << std::endl;
+    }
+    MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+    auto const instrument = inputWS->getInstrument();
+    auto const floodRunParam = instrument->getParameterAsString("Flood_Run");
+    if (floodRunParam.empty()) {
+      throw std::invalid_argument(
+          "Instrument parameter file doesn't have the Flood_Run parameter.");
+    }
+    boost::regex separator("\\s*,\\s*|\\s+");
+    auto const parts = Strings::StrParts(floodRunParam, separator);
+    if (!parts.empty()) {
+      std::string fileName = floodRunParam;
+      try {
+        // If the first part is a number treat all parts as run numbers
+        boost::lexical_cast<size_t>(parts.front());
+        fileName = instrument->getName() + Strings::toString(parts);
+      } catch (boost::bad_lexical_cast) {
+        // Do nothing fileName == floodRunParam
+      }
+      auto alg = createChildAlgorithm("CreateFloodWorkspace");
+      alg->initialize();
+      alg->setProperty("Filename", fileName);
+      std::string const prefix("Flood_");
+      for (auto const prop :
+           {"StartSpectrum", "EndSpectrum", "ExcludeSpectra", "Background",
+            "CentralPixelSpectrum", "RangeLower", "RangeUpper"}) {
+        auto const param = instrument->getParameterAsString(prefix + prop);
+        if (!param.empty()) {
+          alg->setPropertyValue(prop, param);
+        }
+      }
+      alg->execute();
+      MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
+      return out;
+    }
   }
-  MatrixWorkspace_sptr result =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(sumWS);
-  AnalysisDataService::Instance().remove(transSum);
-  return result;
+  return MatrixWorkspace_sptr();
 }
+
+/**
+ * Apply flood correction to a single data workspace.
+ * @param flood :: The flood workspace.
+ * @param propertyName :: Name of an input property containing a workspace
+ *   that should be corrected. The corrected workspace replaces the old
+ *   value of this property.
+ */
+void ReflectometryReductionOneAuto2::applyFloodCorrection(
+    MatrixWorkspace_sptr const &flood, const std::string &propertyName) {
+  MatrixWorkspace_sptr ws = getProperty(propertyName);
+  auto alg = createChildAlgorithm("ApplyFloodWorkspace");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", ws);
+  alg->setProperty("FloodWorkspace", flood);
+  alg->execute();
+  MatrixWorkspace_sptr out = alg->getProperty("OutputWOrkspace");
+  setProperty(propertyName, out);
+}
+
+/**
+ * Apply flood correction to all workspaces that need to be corrected:
+ * the input data and the transmission runs.
+ */
+void ReflectometryReductionOneAuto2::applyFloodCorrections() {
+  MatrixWorkspace_sptr flood = getFloodWorkspace();
+  if (flood) {
+    applyFloodCorrection(flood, "InputWorkspace");
+    if (!isDefault("FirstTransmissionRun")) {
+      applyFloodCorrection(flood, "FirstTransmissionRun");
+    }
+    if (!isDefault("SecondTransmissionRun")) {
+      applyFloodCorrection(flood, "SecondTransmissionRun");
+    }
+  }
+}
+
 } // namespace Algorithms
 } // namespace Mantid

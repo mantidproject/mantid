@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 System Test for ISIS Reflectometry autoreduction
 Adapted from scripts provided by Max Skoda.
@@ -373,7 +379,7 @@ def MakeTuples(rlist):
 
 
 def SortRuns(tupsort):
-    # sort tuples of runs into groups beloning to one sample title
+    # sort tuples of runs into groups belonging to one sample title
     row = 0
     complete_list = []
     for _key, group in itertools.groupby(

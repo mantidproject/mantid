@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -121,7 +127,7 @@ void SaveIsawPeaks::exec() {
     throw std::runtime_error(
         "No instrument in PeaksWorkspace. Cannot save peaks file.");
 
-  if (bankPart != "bank" && bankPart != "WISH" && bankPart != "?") {
+  if (bankPart != "bank" && bankPart != "WISHpanel" && bankPart != "?") {
     std::ostringstream mess;
     mess << "Detector module of type " << bankPart
          << " not supported in ISAWPeaks. Cannot save peaks file";
@@ -267,7 +273,10 @@ void SaveIsawPeaks::exec() {
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
     // Start of a new run
-    appendPeakNumb += maxPeakNumb;
+    if (maxPeakNumb > 0) {
+      appendPeakNumb += maxPeakNumb + 1;
+      maxPeakNumb = 0;
+    }
     int run = runMap_it->first;
     bankMap_t &bankMap = runMap_it->second;
 

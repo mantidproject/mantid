@@ -43,7 +43,7 @@ Sample settings
 
 Information about the sample can be introduced either in terms of **Lattice parameters** and orientation vectors,
 or the **UB matrix**. One can also load an ISAW UB matrix or load the UB matrix from the Nexus metadata. For 
-more informations, look at :ref:`SetUB <algm-SetUB>`
+more information, look at :ref:`SetUB <algm-SetUB>`
 
 Viewing axes
 ------------

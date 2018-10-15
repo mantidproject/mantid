@@ -1,11 +1,19 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 from mantidqtpython import MantidQt
 
 
 class LoadView(QtGui.QWidget):
+    sig_loading_finished = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         super(LoadView, self).__init__(parent)
 
@@ -39,6 +47,7 @@ class LoadView(QtGui.QWidget):
         self.spinbox.setEnabled(True)
         self.load_button.setEnabled(True)
         self.co_button.setEnabled(True)
+        self.sig_loading_finished.emit()
 
     def on_load_clicked(self, slot):
         self.load_button.clicked.connect(slot)
@@ -64,5 +73,14 @@ class LoadView(QtGui.QWidget):
     def unreg_on_spinbox_changed(self, slot):
         try:
             self.spinbox.valueChanged.disconnect(slot)
+        except TypeError:
+            return
+
+    def on_loading_finished(self, slot):
+        self.sig_loading_finished.connect(slot)
+
+    def unreg_on_loading_finished(self, slot):
+        try:
+            self.sig_loading_finished.disconnect(slot)
         except TypeError:
             return

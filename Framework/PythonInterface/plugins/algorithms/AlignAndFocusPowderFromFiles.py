@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, ITableWorkspaceProperty, \
@@ -208,12 +214,15 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             numSteps = 7 # one more for accumulating the unfocused workspace
         self.log().information('Processing \'{}\' in {:d} chunks'.format(filename, len(chunks)))
         prog_per_chunk_step = self.prog_per_file * 1./(numSteps*float(len(chunks)))
+        unfocusname_chunk = ''
 
         # inner loop is over chunks
         for (j, chunk) in enumerate(chunks):
             prog_start = file_prog_start + float(j) * float(numSteps - 1) * prog_per_chunk_step
             chunkname = '{}_c{:d}'.format(wkspname, j)
-            unfocusname_chunk = '{}_c{:d}'.format(unfocusname, j)
+            if unfocusname != '':  # only create unfocus chunk if needed
+                unfocusname_chunk = '{}_c{:d}'.format(unfocusname, j)
+
             Load(Filename=filename, OutputWorkspace=chunkname,
                  startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step,
                  **chunk)

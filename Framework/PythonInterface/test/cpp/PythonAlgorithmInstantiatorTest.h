@@ -1,66 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PYTHONOBJECTINSTANTIATORTEST_H_
 #define PYTHONOBJECTINSTANTIATORTEST_H_
 
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/kernel/kernel.h"
-#include <cxxtest/GlobalFixture.h>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/ConfigService.h"
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/python/object.hpp>
-
-// ---------- Test world initialization ---------------------------------
-
-/**
- * The cxxtest code ensures that the setup/tearDownWorld methods
- * are called exactly once per test-process. We use this
- * to initialize/shutdown the python interpreter
- */
-class PythonProcessHandler : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    using Mantid::Kernel::ConfigService;
-    using boost::algorithm::trim_right_copy_if;
-    Py_Initialize();
-    // add location of mantid module to sys.path
-    std::string propDir =
-        trim_right_copy_if(ConfigService::Instance().getPropertiesDir(),
-                           [](char c) { return (c == '/' || c == '\\'); });
-    const std::string appendMantidToPath = "import sys\n"
-                                           "sys.path.insert(0, '" +
-                                           propDir + "')";
-    PyRun_SimpleString(appendMantidToPath.c_str());
-    PyRun_SimpleString("import mantid");
-#ifdef _WIN32
-    // See kernel.h for the explanation
-    kernel_dll_import_numpy_capi_for_unittest();
-#endif
-    return true;
-  }
-
-  bool tearDown() override {
-    // Some test methods leave the Python error handler with an error
-    // set that confuse other tests when the executable is run as a whole
-    // Clear the errors after each suite method is run
-    PyErr_Clear();
-    return CxxTest::GlobalFixture::tearDown();
-  }
-
-  bool tearDownWorld() override {
-    Py_Finalize();
-    return true;
-  }
-};
-
-// From the cxxtest manual:
-//
-// We can rely on this file being included exactly once
-// and declare this global variable in the header file.
-//
-static PythonProcessHandler pythonProcessHandler;
 
 //-------------------------------------------------------------------------
 

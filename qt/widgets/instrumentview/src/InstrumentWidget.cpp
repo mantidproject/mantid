@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -145,6 +151,8 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   setBackgroundColor(
       settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
 
+  m_instrumentActor.reset(
+      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   // Create the b=tabs
   createTabs(settings);
 
@@ -264,9 +272,9 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
       QString defaultView =
           QString::fromStdString(m_instrumentActor->getDefaultView());
       if (defaultView == "3D" &&
-          Mantid::Kernel::ConfigService::Instance()
-              .getValue<bool>("MantidOptions.InstrumentView.UseOpenGL")
-              .get_value_or(false)) {
+          !Mantid::Kernel::ConfigService::Instance()
+               .getValue<bool>("MantidOptions.InstrumentView.UseOpenGL")
+               .get_value_or(true)) {
         // if OpenGL is switched off don't open the 3D view at start up
         defaultView = "CYLINDRICAL_Y";
       }
@@ -289,6 +297,12 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
 void InstrumentWidget::resetInstrument(bool resetGeometry) {
   init(resetGeometry, true, 0.0, 0.0, false);
   updateInstrumentDetectors();
+}
+
+void InstrumentWidget::resetSurface() {
+  auto surface = getSurface();
+  surface->updateDetectors();
+  update();
 }
 
 /**
@@ -410,19 +424,29 @@ void InstrumentWidget::setSurfaceType(int type) {
       auto sample_pos = componentInfo.samplePosition();
       auto axis = getSurfaceAxis(surfaceType);
 
+      m_maskTab->setDisabled(false);
+
       // create the surface
       if (surfaceType == FULL3D) {
+        m_renderTab->forceLayers(false);
+
+        if (m_instrumentActor->hasGridBank())
+          m_maskTab->setDisabled(true);
+
         surface = new Projection3D(m_instrumentActor.get(),
                                    getInstrumentDisplayWidth(),
                                    getInstrumentDisplayHeight());
       } else if (surfaceType <= CYLINDRICAL_Z) {
+        m_renderTab->forceLayers(true);
         surface =
             new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis);
       } else if (surfaceType <= SPHERICAL_Z) {
+        m_renderTab->forceLayers(true);
         surface =
             new UnwrappedSphere(m_instrumentActor.get(), sample_pos, axis);
       } else // SIDE_BY_SIDE
       {
+        m_renderTab->forceLayers(true);
         surface = new PanelsSurface(m_instrumentActor.get(), sample_pos, axis);
       }
     } catch (InstrumentHasNoSampleError &) {
@@ -510,28 +534,30 @@ void InstrumentWidget::tabChanged(int) { updateInfoText(); }
 /**
  * Change color map button slot. This provides the file dialog box to select
  * colormap or sets it directly a string is provided
+ * @param cmapNameOrPath Name of a color map or a file path
  */
-void InstrumentWidget::changeColormap(const QString &filename) {
+void InstrumentWidget::changeColormap(const QString &cmapNameOrPath) {
   if (!m_instrumentActor)
     return;
-  QString fileselection;
-  // Use a file dialog if no parameter is passed
-  if (filename.isEmpty()) {
-    fileselection = MantidColorMap::loadMapDialog(
-        m_instrumentActor->getCurrentColorMap(), this);
-    if (fileselection.isEmpty())
+  const auto currentCMap = m_instrumentActor->getCurrentColorMap();
+  QString selection;
+  if (cmapNameOrPath.isEmpty()) {
+    // ask user
+    selection = ColorMap::chooseColorMap(currentCMap, this);
+    if (selection.isEmpty()) {
+      // assume cancelled request
       return;
+    }
   } else {
-    fileselection = QFileInfo(filename).absoluteFilePath();
-    if (!QFileInfo(fileselection).exists())
-      return;
+    selection = ColorMap::exists(cmapNameOrPath);
   }
 
-  if (!m_instrumentActor->getCurrentColorMap().isEmpty() &&
-      (fileselection == m_instrumentActor->getCurrentColorMap()))
+  if (selection == currentCMap) {
+    // selection matches current
     return;
+  }
+  m_instrumentActor->loadColorMap(selection);
 
-  m_instrumentActor->loadColorMap(fileselection);
   if (this->isVisible()) {
     setupColorMap();
     updateInstrumentView();
@@ -886,15 +912,7 @@ void InstrumentWidget::dragEnterEvent(QDragEnterEvent *e) {
 void InstrumentWidget::dropEvent(QDropEvent *e) {
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace") {
-    QString text = e->mimeData()->text();
-    int endIndex = 0;
-    QStringList wsNames;
-    while (text.indexOf("[\"", endIndex) > -1) {
-      int startIndex = text.indexOf("[\"", endIndex) + 2;
-      endIndex = text.indexOf("\"]", startIndex);
-      wsNames.append(text.mid(startIndex, endIndex - startIndex));
-    }
-
+    QStringList wsNames = e->mimeData()->text().split("\n");
     foreach (const auto &wsName, wsNames) {
       if (this->overlay(wsName))
         e->accept();
@@ -1180,13 +1198,13 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   pickTab->loadSettings(settings);
 
   // Mask controls
-  InstrumentWidgetMaskTab *maskTab = new InstrumentWidgetMaskTab(this);
-  mControlsTab->addTab(maskTab, QString("Draw"));
-  connect(maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
+  m_maskTab = new InstrumentWidgetMaskTab(this);
+  mControlsTab->addTab(m_maskTab, QString("Draw"));
+  connect(m_maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
-  connect(m_xIntegration, SIGNAL(changed(double, double)), maskTab,
+  connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
           SLOT(changedIntegrationRange(double, double)));
-  maskTab->loadSettings(settings);
+  m_maskTab->loadSettings(settings);
 
   // Instrument tree controls
   InstrumentWidgetTreeTab *treeTab = new InstrumentWidgetTreeTab(this);
@@ -1196,7 +1214,7 @@ void InstrumentWidget::createTabs(QSettings &settings) {
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
 
-  m_tabs << m_renderTab << pickTab << maskTab << treeTab;
+  m_tabs << m_renderTab << pickTab << m_maskTab << treeTab;
 }
 
 /**

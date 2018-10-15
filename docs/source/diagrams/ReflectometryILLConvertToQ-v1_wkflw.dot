@@ -4,36 +4,48 @@ digraph ReflectometryILLConvertToQ {
 
   subgraph params {
     $param_style
-    input      [label="InputWorkspace"]
-    output     [label="OutputWorkspace"]
-    direct     [label="DirectBeamWorkspace"]
-    reflected  [label="ReflectedBeamWorkspace"]
-    polarized  [label="Polarized"]
-    q_grouping [label="GroupingQFraction"]
+    input             [label="InputWorkspace"]
+    output            [label="OutputWorkspace"]
+    direct            [label="DirectBeamWorkspace"]
+    direct_foreground [label="DirectForegroundWorkspace"]
+    reflected         [label="ReflectedBeamWorkspace"]
+    polarized         [label="Polarized"]
+    q_grouping        [label="GroupingQFraction"]
   }
 
   subgraph algorithms {
     $algorithm_style
-    to_q          [label="ReflectometryMomentumTransfer"]
-    to_point_data [label="ConvertToPointData"]
-    group_points  [label="Group points to\nQ resolution"]
+    direct_to_q          [label="Copy Q and dQ from\nreflected"]
+    direct_to_point_data [label="ConvertToPointData"]
+    direct_group_points  [label="Optionally group points\nto Q resolution"]
+    refl_to_q            [label="ReflectometryMomentumTransfer"]
+    refl_to_point_data   [label="ConvertToPointData"]
+    refl_group_points    [label="Optionally group points\nto Q resolution"]
+    divide               [label="Divide"]
   }
 
   subgraph decisions {
     $decision_style
-    if_grouping [label="Is GroupingQFraction\ngiven?"]
+    if_direct_foreground [label="Is DirectForegroundWorkspace\navailable?"]
   }
 
-  input -> to_q
-  reflected -> to_q
-  direct -> to_q
-  polarized -> to_q
-  to_q -> to_point_data
-  to_point_data -> if_grouping
+  input -> refl_to_q
+  reflected -> refl_to_q
+  direct -> refl_to_q
+  polarized -> refl_to_q
+  refl_to_q -> refl_to_point_data
+  refl_to_point_data -> refl_group_points
+  refl_group_points -> if_direct_foreground
+  if_direct_foreground -> output              [label="no"]
+  if_direct_foreground -> divide              [label="yes, LHS"]
+  divide -> output
 
-  if_grouping -> output [label="no"]
+  direct_foreground -> direct_to_q
+  refl_to_q -> direct_to_q                    [label="Q and dQ data"]
+  direct_to_q -> direct_to_point_data
+  direct_to_point_data -> direct_group_points
+  direct_group_points -> divide               [label="RHS"]
 
-  if_grouping -> group_points [label="yes"]
-  q_grouping -> group_points
-  group_points -> output
+  q_grouping -> refl_group_points
+  q_grouping -> direct_group_points
 }

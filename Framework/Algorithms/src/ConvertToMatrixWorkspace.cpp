@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -63,10 +69,17 @@ void ConvertToMatrixWorkspace::exec() {
     }
     PARALLEL_CHECK_INTERUPT_REGION
   } else {
-    g_log.information() << "Input workspace does not need converting. Pointing "
-                           "OutputWorkspace property to input.\n";
-    outputWorkspace =
-        boost::const_pointer_cast<MatrixWorkspace>(inputWorkspace);
+    outputWorkspace = getProperty("OutputWorkspace");
+    if (inputWorkspace == outputWorkspace) {
+      g_log.information("InputWorkspace does not need converting. Pointing "
+                        "OutputWorkspace property to input.");
+      outputWorkspace =
+          boost::const_pointer_cast<MatrixWorkspace>(inputWorkspace);
+    } else {
+      g_log.information(
+          "InputWorkspace does not need converting. Cloning InputWorkspace.");
+      outputWorkspace = inputWorkspace->clone();
+    }
   }
 
   setProperty("OutputWorkspace", outputWorkspace);

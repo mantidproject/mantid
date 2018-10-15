@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -15,8 +21,9 @@ from sans.test_helper.user_file_test_helper import create_user_file, sample_user
 class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
     def _get_table_model(option_string="", sample_thickness=8.0):
-        table_index_model = TableIndexModel(0, "SANS2D00022024", "", "", "", "", "", "", "", "",
-                                            "", "", "", "", "", option_string, sample_thickness=sample_thickness)
+        table_index_model = TableIndexModel("SANS2D00022024", "", "", "", "", "", "", "", "",
+                                            "", "", "",options_column_string=option_string,
+                                            sample_thickness=sample_thickness)
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
         return table_model
