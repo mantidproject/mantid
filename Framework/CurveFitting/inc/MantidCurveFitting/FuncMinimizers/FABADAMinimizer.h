@@ -114,6 +114,11 @@ private:
   /// Initialize member variables related to simulated annealing
   void initSimulatedAnnealing();
 
+  Mantid::API::MatrixWorkspace_sptr
+  createWorkspace(std::vector<double> const &xValues,
+                  std::vector<double> const &yValues, int const numberOfSpectra,
+                  std::vector<std::string> const &verticalAxisNames);
+
   // Variables declarations
   /// Pointer to the cost function. Must be the least squares.
   // Intentar encontrar una manera de sacar aqui el numero de parametros  que

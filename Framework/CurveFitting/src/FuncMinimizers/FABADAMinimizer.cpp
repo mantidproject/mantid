@@ -51,25 +51,6 @@ const double LOW_JUMP_LIMIT = 1e-25;
 // random number generator
 std::mt19937 rng;
 
-API::MatrixWorkspace_sptr
-createWorkspace(std::vector<double> const &xValues,
-                std::vector<double> const &yValues, int const numberOfSpectra,
-                std::vector<std::string> const &verticalAxisNames) {
-  auto createWorkspaceAlgorithm =
-      AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
-  createWorkspaceAlgorithm->initialize();
-  createWorkspaceAlgorithm->setChild(true);
-  createWorkspaceAlgorithm->setLogging(false);
-  createWorkspaceAlgorithm->setProperty("DataX", xValues);
-  createWorkspaceAlgorithm->setProperty("DataY", yValues);
-  createWorkspaceAlgorithm->setProperty("NSpec", numberOfSpectra);
-  createWorkspaceAlgorithm->setProperty("VerticalAxisUnit", "Text");
-  createWorkspaceAlgorithm->setProperty("VerticalAxisValues",
-                                        verticalAxisNames);
-  createWorkspaceAlgorithm->setProperty("OutputWorkspace", "__PDF");
-  createWorkspaceAlgorithm->execute();
-  return createWorkspaceAlgorithm->getProperty("OutputWorkspace");
-}
 } // namespace
 
 DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
@@ -1176,6 +1157,27 @@ void FABADAMinimizer::initSimulatedAnnealing() {
     m_leftRefrPoints = 0;
   }
 }
+
+API::MatrixWorkspace_sptr FABADAMinimizer::createWorkspace(
+    std::vector<double> const &xValues, std::vector<double> const &yValues,
+    int const numberOfSpectra,
+    std::vector<std::string> const &verticalAxisNames) {
+  auto createWorkspaceAlgorithm =
+      AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
+  createWorkspaceAlgorithm->initialize();
+  createWorkspaceAlgorithm->setChild(true);
+  createWorkspaceAlgorithm->setLogging(false);
+  createWorkspaceAlgorithm->setProperty("DataX", xValues);
+  createWorkspaceAlgorithm->setProperty("DataY", yValues);
+  createWorkspaceAlgorithm->setProperty("NSpec", numberOfSpectra);
+  createWorkspaceAlgorithm->setProperty("VerticalAxisUnit", "Text");
+  createWorkspaceAlgorithm->setProperty("VerticalAxisValues",
+                                        verticalAxisNames);
+  createWorkspaceAlgorithm->setProperty("OutputWorkspace", "__PDF");
+  createWorkspaceAlgorithm->execute();
+  return createWorkspaceAlgorithm->getProperty("OutputWorkspace");
+}
+
 } // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
