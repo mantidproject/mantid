@@ -991,6 +991,7 @@ public:
         Eigen::AngleAxisd(31.0, Eigen::Vector3d{1, 2, 3}.normalized()));
     auto rootIndex = a.root();
     a.setRotation(rootIndex, rot1);
+    a.setPosition(rootIndex, Eigen::Vector3d{1, 1, 1});
     auto infos2 = cloneInfos(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     // Sanity check
@@ -999,6 +1000,7 @@ public:
     auto infos3 = cloneInfos(infos1);
     ComponentInfo &c = *std::get<0>(infos3);
     c.setRotation(rootIndex, rot2);
+    c.setPosition(rootIndex, Eigen::Vector3d{1, 1, 1});
     TS_ASSERT_THROWS_EQUALS(c.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: "
@@ -1007,8 +1009,13 @@ public:
   }
 
   void test_merge_fail_monitor_mismatch() {
-    auto infos1 = makeFlatTree(PosVec(2), RotVec(2));
-    auto infos2 = makeFlatTreeWithMonitor(PosVec(2), RotVec(2), {1});
+    auto pos = Eigen::Vector3d{1, 1, 1};
+    PosVec posVec({pos, pos});
+    auto rot = Eigen::Quaterniond{
+        Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized())};
+    RotVec rotVec({rot,rot});
+    auto infos1 = makeFlatTree(posVec, rotVec);
+    auto infos2 = makeFlatTreeWithMonitor(posVec, rotVec, {1});
     ComponentInfo &a = *std::get<0>(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     a.setScanInterval({0, 1});
@@ -1217,5 +1224,53 @@ public:
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[1], interval2);
     TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[2], interval3);
   }
+
+  void test_merge_idempotent() {
+    // Test that A + B + B = A + B
+    PosVec pos = {Eigen::Vector3d{0, 0, 0}, Eigen::Vector3d{1, 1, 1}};
+    RotVec rot = {Eigen::Quaterniond{
+        Eigen::AngleAxisd(20.0, Eigen::Vector3d{1, 2, 3}.normalized())}, Eigen::Quaterniond{
+            Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized())}};
+    auto infos1 = makeFlatTree(pos, rot);
+    auto infos2 = makeFlatTree(pos, rot);
+    auto infos3 = makeFlatTree(pos, rot);
+    ComponentInfo &a = *std::get<0>(infos1);
+    ComponentInfo &b = *std::get<0>(infos2);
+    ComponentInfo &c = *std::get<0>(infos3);
+    DetectorInfo &d = *std::get<1>(infos1);
+    DetectorInfo &e = *std::get<1>(infos3);
+    a.setScanInterval({0, 1});
+    b.setScanInterval({1, 2});
+    c.setScanInterval({0, 1});
+    TS_ASSERT_THROWS_NOTHING(c.merge(b));
+    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    TS_ASSERT(d.isEquivalent(e));
+  }
+
+  void test_merge_multiple_associative() {
+    // Test that (A + B) + C == A + (B + C)
+    // This is implied by the ordering guaranteed by merge().
+    auto infos1 = makeFlatTree(PosVec({Eigen::Vector3d{1, 0, 0}}), RotVec({Eigen::Quaterniond::Identity()}));
+    auto infos2 = makeFlatTree(PosVec({Eigen::Vector3d{2, 0, 0}}), RotVec({Eigen::Quaterniond::Identity()}));
+    auto infos3 = makeFlatTree(PosVec({Eigen::Vector3d{3, 0, 0}}), RotVec({Eigen::Quaterniond::Identity()}));
+    auto infos4 = makeFlatTree(PosVec({Eigen::Vector3d{1, 0, 0}}), RotVec({Eigen::Quaterniond::Identity()}));
+    ComponentInfo &a1 = *std::get<0>(infos1);
+    ComponentInfo &b = *std::get<0>(infos2);
+    ComponentInfo &c = *std::get<0>(infos3);
+    ComponentInfo &a2 = *std::get<0>(infos4);
+    DetectorInfo &d = *std::get<1>(infos1);
+    DetectorInfo &e = *std::get<1>(infos4);
+    a1.setScanInterval({0, 1});
+    b.setScanInterval({1, 2});
+    c.setScanInterval({2, 3});
+    a2.setScanInterval({0, 1});
+    TS_ASSERT_THROWS_NOTHING(a1.merge(b));
+    TS_ASSERT_THROWS_NOTHING(a1.merge(c));
+    TS_ASSERT_THROWS_NOTHING(b.merge(c));
+    TS_ASSERT_THROWS_NOTHING(a2.merge(b));
+    TS_ASSERT(d.isEquivalent(e));
+  }
+
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
