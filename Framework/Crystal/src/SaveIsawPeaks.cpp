@@ -165,7 +165,7 @@ void SaveIsawPeaks::exec() {
       double three;
       ss >> three;
       if (three == 3) {
-        int peakNumber
+        int peakNumber;
         ss >> peakNumber;
         appendPeakNumb = std::max(peakNumber, appendPeakNumb);
       }
