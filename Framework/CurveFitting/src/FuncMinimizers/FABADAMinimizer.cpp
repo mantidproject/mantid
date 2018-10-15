@@ -51,6 +51,26 @@ const double LOW_JUMP_LIMIT = 1e-25;
 // random number generator
 std::mt19937 rng;
 
+API::MatrixWorkspace_sptr
+createWorkspace(std::vector<double> const &xValues,
+                std::vector<double> const &yValues, int const numberOfSpectra,
+                std::vector<std::string> const &verticalAxisNames) {
+  auto createWorkspaceAlgorithm =
+      AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
+  createWorkspaceAlgorithm->initialize();
+  createWorkspaceAlgorithm->setChild(true);
+  createWorkspaceAlgorithm->setLogging(false);
+  createWorkspaceAlgorithm->setProperty("DataX", xValues);
+  createWorkspaceAlgorithm->setProperty("DataY", yValues);
+  createWorkspaceAlgorithm->setProperty("NSpec", numberOfSpectra);
+  createWorkspaceAlgorithm->setProperty("VerticalAxisUnit", "Text");
+  createWorkspaceAlgorithm->setProperty("VerticalAxisValues",
+                                        verticalAxisNames);
+  createWorkspaceAlgorithm->setProperty("OutputWorkspace", "__PDF");
+  createWorkspaceAlgorithm->execute();
+  return createWorkspaceAlgorithm->getProperty("OutputWorkspace");
+}
+
 } // namespace
 
 DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
@@ -845,7 +865,18 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues,
   parameterNames.emplace_back("Chi Squared");
   auto const workspace =
       createWorkspace(xValues, yValues, int(m_nParams) + 1, parameterNames);
-  addOutputPDFWorkspaceToGroup("__PDF_Workspace", workspace);
+
+  auto const groupName = "__PDF_Workspace";
+  if (AnalysisDataService::Instance().doesExist(groupName)) {
+    auto groupPDF =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+    groupPDF->addWorkspace(workspace);
+    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
+  } else {
+    auto groupPDF = boost::make_shared<WorkspaceGroup>();
+    groupPDF->addWorkspace(workspace);
+    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
+  }
 }
 
 double FABADAMinimizer::getMostProbableChiSquared(
@@ -900,20 +931,6 @@ void FABADAMinimizer::setParameterXAndYValuesForPDF(
       }
       yValues[startYPos + i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
     }
-  }
-}
-
-void FABADAMinimizer::addOutputPDFWorkspaceToGroup(
-    std::string const &groupName, API::MatrixWorkspace_sptr workspace) {
-  if (AnalysisDataService::Instance().doesExist(groupName)) {
-    auto groupPDF =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-    groupPDF->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
-  } else {
-    auto groupPDF = boost::make_shared<WorkspaceGroup>();
-    groupPDF->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
   }
 }
 
@@ -1156,26 +1173,6 @@ void FABADAMinimizer::initSimulatedAnnealing() {
     m_temperature = 1.0;
     m_leftRefrPoints = 0;
   }
-}
-
-API::MatrixWorkspace_sptr FABADAMinimizer::createWorkspace(
-    std::vector<double> const &xValues, std::vector<double> const &yValues,
-    int const numberOfSpectra,
-    std::vector<std::string> const &verticalAxisNames) {
-  auto createWorkspaceAlgorithm =
-      AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
-  createWorkspaceAlgorithm->initialize();
-  createWorkspaceAlgorithm->setChild(true);
-  createWorkspaceAlgorithm->setLogging(false);
-  createWorkspaceAlgorithm->setProperty("DataX", xValues);
-  createWorkspaceAlgorithm->setProperty("DataY", yValues);
-  createWorkspaceAlgorithm->setProperty("NSpec", numberOfSpectra);
-  createWorkspaceAlgorithm->setProperty("VerticalAxisUnit", "Text");
-  createWorkspaceAlgorithm->setProperty("VerticalAxisValues",
-                                        verticalAxisNames);
-  createWorkspaceAlgorithm->setProperty("OutputWorkspace", "__PDF");
-  createWorkspaceAlgorithm->execute();
-  return createWorkspaceAlgorithm->getProperty("OutputWorkspace");
 }
 
 } // namespace FuncMinimisers

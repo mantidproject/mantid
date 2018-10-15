@@ -85,9 +85,6 @@ private:
   void outputPDF(std::vector<double> &xValues, std::vector<double> &yValues,
                  std::vector<std::vector<double>> &reducedChain,
                  std::size_t const &convLength, int const &pdfLength);
-  void
-  addOutputPDFWorkspaceToGroup(std::string const &groupName,
-                               Mantid::API::MatrixWorkspace_sptr workspace);
   /// Finds the most probable Chi Squared value
   double getMostProbableChiSquared(
       std::size_t const &convLength,
@@ -113,11 +110,6 @@ private:
   void initChainsAndParameters();
   /// Initialize member variables related to simulated annealing
   void initSimulatedAnnealing();
-
-  Mantid::API::MatrixWorkspace_sptr
-  createWorkspace(std::vector<double> const &xValues,
-                  std::vector<double> const &yValues, int const numberOfSpectra,
-                  std::vector<std::string> const &verticalAxisNames);
 
   // Variables declarations
   /// Pointer to the cost function. Must be the least squares.
