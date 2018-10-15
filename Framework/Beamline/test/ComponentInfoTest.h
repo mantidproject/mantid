@@ -1025,6 +1025,24 @@ public:
         "Cannot merge DetectorInfo: monitor flags mismatch");
   }
 
+  void test_merge_identical_interval_with_monitor() {
+    auto pos = Eigen::Vector3d{1, 1, 1};
+    PosVec posVec({pos, pos});
+    auto rot = Eigen::Quaterniond{
+        Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized())};
+    RotVec rotVec({rot, rot});
+    auto infos1 = makeFlatTreeWithMonitor(posVec, rotVec, {1});
+    auto infos2 = makeFlatTreeWithMonitor(posVec, rotVec, {1});
+    ComponentInfo &a = *std::get<0>(infos1);
+    ComponentInfo &b = *std::get<0>(infos2);
+    DetectorInfo &c = *std::get<1>(infos1);
+    DetectorInfo &d = *std::get<1>(infos2);
+    a.setScanInterval({0, 1});
+    b.setScanInterval({0, 1});
+    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    TS_ASSERT(c.isEquivalent(d));
+  }
+
   void test_merge_fail_partial_overlap() {
     auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
