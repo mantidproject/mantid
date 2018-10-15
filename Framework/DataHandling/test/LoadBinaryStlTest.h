@@ -66,4 +66,4 @@ public:
   }
 };
 
-#endif /* LOAD_BINARYSTL_TEST_H_ */ 
+#endif /* LOAD_BINARYSTL_TEST_H_ */

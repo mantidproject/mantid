@@ -1,10 +1,10 @@
 #include "MantidDataHandling/LoadAsciiStl.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <string>
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 namespace Mantid {
 namespace DataHandling {
 
@@ -32,9 +32,10 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
     }
   }
   // Use efficient constructor of MeshObject
-  std::unique_ptr<Geometry::MeshObject> retVal = 
-  Kernel::make_unique<Geometry::MeshObject>(std::move(m_triangle), std::move(m_verticies),
-          Mantid::Kernel::Material());
+  std::unique_ptr<Geometry::MeshObject> retVal =
+      Kernel::make_unique<Geometry::MeshObject>(std::move(m_triangle),
+                                                std::move(m_verticies),
+                                                Mantid::Kernel::Material());
   return retVal;
 }
 
@@ -42,9 +43,10 @@ bool LoadAsciiStl::readSTLTriangle(std::ifstream &file, Kernel::V3D &v1,
                                    Kernel::V3D &v2, Kernel::V3D &v3) {
   if (readSTLLine(file, "facet") && readSTLLine(file, "outer loop")) {
     const bool ok = (readSTLVertex(file, v1) && readSTLVertex(file, v2) &&
-               readSTLVertex(file, v3));
+                     readSTLVertex(file, v3));
     if (!ok) {
-      throw Kernel::Exception::ParseError("Error on reading STL triangle",m_filename,m_lineNumber);
+      throw Kernel::Exception::ParseError("Error on reading STL triangle",
+                                          m_filename, m_lineNumber);
     }
   } else {
     return false; // End of file
@@ -65,7 +67,8 @@ bool LoadAsciiStl::readSTLVertex(std::ifstream &file, Kernel::V3D &vertex) {
       vertex.setZ(std::stod(tokens[3]));
       return true;
     } else {
-      throw Kernel::Exception::ParseError("Error on reading STL vertex",m_filename,m_lineNumber);
+      throw Kernel::Exception::ParseError("Error on reading STL vertex",
+                                          m_filename, m_lineNumber);
     }
   }
   return false;
@@ -81,8 +84,9 @@ bool LoadAsciiStl::readSTLLine(std::ifstream &file, std::string const &type) {
       // Before throwing, check for endsolid statment
       const std::string type2 = "endsolid";
       if (line.size() < type2.size() || line.substr(0, type2.size()) != type2) {
-        throw Kernel::Exception::ParseError("Expected STL line begining with " + type +
-                                 " or " + type2,m_filename,m_lineNumber);
+        throw Kernel::Exception::ParseError("Expected STL line begining with " +
+                                                type + " or " + type2,
+                                            m_filename, m_lineNumber);
       } else {
         return false; // ends reading at endsolid
       }

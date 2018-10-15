@@ -209,7 +209,7 @@ void LoadSampleShape::exec() {
       shape = binaryStlReader.readStl();
     } else {
       throw Kernel::Exception::ParseError(
-          "Could not read file, did not match either STL Format",filename,0);
+          "Could not read file, did not match either STL Format", filename, 0);
     }
   }
 

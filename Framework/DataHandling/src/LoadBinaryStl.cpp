@@ -5,10 +5,6 @@
 namespace Mantid {
 namespace DataHandling {
 
-
-
-
-
 bool LoadBinaryStl::isBinarySTL() {
   Poco::File stlFile = Poco::File(m_filename);
   auto fileSize = stlFile.getSize();
@@ -41,7 +37,6 @@ LoadBinaryStl::getNumberTriangles(Kernel::BinaryStreamReader streamReader) {
   streamReader >> numberTrianglesLong;
   return numberTrianglesLong;
 }
-
 
 std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
   std::ifstream myFile(m_filename.c_str(), std::ios::in | std::ios::binary);
