@@ -168,7 +168,7 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
   if (nameFlag)
     to.setName(from.getName());
   if (environmentFlag)
-    to.setEnvironment(new SampleEnvironment(from.getEnvironment()));
+    to.setEnvironment(boost::make_shared<SampleEnvironment>(from.getEnvironment()));
   if (shapeFlag) {
     Material rhsMaterial;
     if (materialFlag) {

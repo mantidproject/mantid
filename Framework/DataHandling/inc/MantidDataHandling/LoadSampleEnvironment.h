@@ -4,31 +4,30 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAHANDLING_LOAD_SHAPE_H_
-#define DATAHANDLING_LOAD_SHAPE_H_
+#ifndef DATAHANDLING_LOAD_ENVIRONMENT_H_
+#define DATAHANDLING_LOAD_ENVIRONMENT_H_
 
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
-/**  Load Shape into an instrument of a workspace
+/**  Load Environment into an instrument of a workspace
 
      The following file types are supported
 
        STL file with suffix .stl
 
 
-@author Karl Palmen ISIS;
-@date 26/02/2018
+
  */
 
-class DLLExport LoadSampleShape : public Mantid::API::Algorithm {
+class DLLExport LoadSampleEnvironment : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "LoadSampleShape"; };
+  const std::string name() const override { return "LoadSampleEnvironment"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "The algorithm loads a shape into the instrument of a workspace "
+    return "The algorithm loads a Environment into the instrument of a workspace "
            "at the sample.";
   }
 
@@ -36,7 +35,7 @@ public:
   int version() const override { return 1; };
   /// Related algorithms
   const std::vector<std::string> seeAlso() const override {
-    return {"CreateSampleShape", "CopySample", "SetSampleMaterial", "LoadSampleEnvironment"};
+    return {"CreateSampleEnvironment", "CopySample", "SetSampleMaterial", "LoadSampleShape"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
@@ -52,4 +51,4 @@ private:
 } // end namespace DataHandling
 } // namespace Mantid
 
-#endif /* DATAHANDLING_LOAD_SHAPE_H_ */
+#endif /* DATAHANDLING_LOAD_ENVIRONMENT_H_ */

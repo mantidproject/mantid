@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -303,7 +304,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   SampleEnvironmentFactory factory(std::move(finder));
   auto sampleEnviron =
       factory.create(facilityName, instrumentName, envName, canName);
-  workspace->mutableSample().setEnvironment(sampleEnviron.release());
+  workspace->mutableSample().setEnvironment(boost::shared_ptr<SampleEnvironment>(sampleEnviron.release()));
 
   return &(workspace->sample().getEnvironment());
 }
