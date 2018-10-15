@@ -869,10 +869,12 @@ void ISISEnergyTransfer::setRunEnabled(bool enabled) {
 
 void ISISEnergyTransfer::setPlotEnabled(bool enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotType->setEnabled(enabled);
 }
 
 void ISISEnergyTransfer::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
+  m_uiForm.loSaveFormats->setEnabled(enabled);
 }
 
 void ISISEnergyTransfer::setOutputButtonsEnabled(

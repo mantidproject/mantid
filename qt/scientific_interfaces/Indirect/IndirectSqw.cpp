@@ -223,6 +223,7 @@ void IndirectSqw::setRunEnabled(bool enabled) {
 
 void IndirectSqw::setPlotEnabled(bool enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotType->setEnabled(enabled);
 }
 
 void IndirectSqw::setSaveEnabled(bool enabled) {
