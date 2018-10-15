@@ -21,12 +21,12 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
@@ -39,13 +39,13 @@
 #include <Poco/SAX/InputSource.h>
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-#include <limits>
-#include <cmath>
 
 using Poco::XML::Document;
 using Poco::XML::DOMParser;
@@ -64,7 +64,6 @@ using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadSpice2D2)
-
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -148,7 +147,8 @@ void LoadSpice2D2::exec() {
   // ugly hack for Biosans wing detector:
   // it tests if there is metadata tagged with the wing detector
   // if so, puts the detector in the right angle
-  if (m_metadata.find("Motor_Positions/det_west_wing_rot") != m_metadata.end()) {
+  if (m_metadata.find("Motor_Positions/det_west_wing_rot") !=
+      m_metadata.end()) {
     rotateDetector();
     runLoadInstrument();
   }
@@ -158,8 +158,8 @@ void LoadSpice2D2::exec() {
 }
 
 /**
- * - Reads the input file 
- * - parses the data and metadata 
+ * - Reads the input file
+ * - parses the data and metadata
  * - Stores everything in an XML handler
  * - The metadata is stored in a map
  */
@@ -183,14 +183,14 @@ void LoadSpice2D2::setInputFileAsHandler() {
  */
 void LoadSpice2D2::setSansSpiceXmlFormatVersion() {
 
-  if (m_metadata.find("Header/sans_spice_xml_format_version") != m_metadata.end()) {
+  if (m_metadata.find("Header/sans_spice_xml_format_version") !=
+      m_metadata.end()) {
     m_sansSpiceXmlFormatVersion = boost::lexical_cast<double>(
         m_metadata["Header/sans_spice_xml_format_version"]);
   }
   g_log.debug() << "Sans_spice_xml_format_version == "
                 << m_sansSpiceXmlFormatVersion << "\n";
 }
-
 
 void LoadSpice2D2::setTimes() {
   // start_time
@@ -211,13 +211,13 @@ void LoadSpice2D2::setWavelength() {
 
   if (isEmpty(wavelength_input)) {
     m_wavelength = boost::lexical_cast<double>(m_metadata["Header/wavelength"]);
-  }
-  else {
+  } else {
     m_wavelength = wavelength_input;
   }
 
   if (isEmpty(wavelength_spread_input)) {
-    m_dwavelength = boost::lexical_cast<double>(m_metadata["Header/wavelength_spread"]);
+    m_dwavelength =
+        boost::lexical_cast<double>(m_metadata["Header/wavelength_spread"]);
     // 20160720: New wavelength will be a ratio
     // UGLY HACK! Comparing dates...
     DateAndTime changingDate("2016-06-13 00:00:00");
@@ -225,13 +225,12 @@ void LoadSpice2D2::setWavelength() {
       g_log.debug() << "Using wavelength spread as a ratio..." << '\n';
       m_dwavelength = m_wavelength * m_dwavelength;
     }
-  }
-  else {
+  } else {
     m_dwavelength = wavelength_spread_input;
   }
 
-  g_log.debug() << "Final Wavelength: " << m_wavelength << 
-    " :: Wavelength Spread: " << m_dwavelength << '\n';
+  g_log.debug() << "Final Wavelength: " << m_wavelength
+                << " :: Wavelength Spread: " << m_dwavelength << '\n';
 }
 
 /**
@@ -321,7 +320,6 @@ std::vector<int> LoadSpice2D2::getData(const std::string &dataXpath) {
   return data;
 }
 
-
 /**
  * Convenience function to store a detector value into a given spectrum.
  * Note that this type of data doesn't use TOD, so that we use a single dummy
@@ -333,8 +331,8 @@ std::vector<int> LoadSpice2D2::getData(const std::string &dataXpath) {
  * @param wavelength: wavelength value [Angstrom]
  * @param dwavelength: error on the wavelength [Angstrom]
  */
-void LoadSpice2D2::storeValue(int specID, double value,
-                 double error, double wavelength, double dwavelength) {
+void LoadSpice2D2::storeValue(int specID, double value, double error,
+                              double wavelength, double dwavelength) {
   auto &X = m_workspace->mutableX(specID);
   auto &Y = m_workspace->mutableY(specID);
   auto &E = m_workspace->mutableE(specID);
@@ -347,30 +345,31 @@ void LoadSpice2D2::storeValue(int specID, double value,
   m_workspace->getSpectrum(specID).setSpectrumNo(specID);
 }
 
-void LoadSpice2D2::createWorkspace(){
- 
+void LoadSpice2D2::createWorkspace() {
 
   std::vector<int> data = getData("//Data");
   int numSpectra = static_cast<int>(data.size()) + LoadSpice2D2::nMonitors;
 
   m_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-      API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, 2, 1));
+      API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, 2,
+                                               1));
   m_workspace->setTitle(m_metadata["Header/Scan_Title"]);
   m_workspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("Wavelength");
   m_workspace->setYUnit("Counts");
 
-  double monitorCounts = boost::lexical_cast<double>(m_metadata["Counters/monitor"]);
-  double countingTime = boost::lexical_cast<double>(m_metadata["Counters/time"]);
+  double monitorCounts =
+      boost::lexical_cast<double>(m_metadata["Counters/monitor"]);
+  double countingTime =
+      boost::lexical_cast<double>(m_metadata["Counters/time"]);
 
   int specID = 0;
   // Store monitor counts in the beggining
   storeValue(specID++, monitorCounts,
-              monitorCounts > 0 ? sqrt(monitorCounts) : 0.0, m_wavelength,
-              m_dwavelength);
-  
-  storeValue(specID++, countingTime, 0.0, m_wavelength,
-              m_dwavelength);
+             monitorCounts > 0 ? sqrt(monitorCounts) : 0.0, m_wavelength,
+             m_dwavelength);
+
+  storeValue(specID++, countingTime, 0.0, m_wavelength, m_dwavelength);
 
   // Store detector pixels
   for (auto count : data) {
@@ -378,17 +377,15 @@ void LoadSpice2D2::createWorkspace(){
     // The following is what I would suggest instead...
     // error = count > 0 ? sqrt((double)count) : 0.0;
     double error = sqrt(0.5 + fabs(static_cast<double>(count) - 0.5));
-    storeValue(specID++, count, error, m_wavelength,
-                m_dwavelength);
+    storeValue(specID++, count, error, m_wavelength, m_dwavelength);
   }
 }
 
 template <class T>
 void LoadSpice2D2::addRunProperty(const std::string &name, const T &value,
-                                 const std::string &units) {
+                                  const std::string &units) {
   m_workspace->mutableRun().addProperty(name, value, units, true);
 }
-
 
 /**
  * Sets the beam trap as Run Property
@@ -457,7 +454,7 @@ void LoadSpice2D2::setBeamTrapRunProperty() {
  * Add all metadata parsed values as log entries
  * Add any other metadata needed
  * */
-void LoadSpice2D2::storeMetaDataIntoWS(){
+void LoadSpice2D2::storeMetaDataIntoWS() {
 
   for (const auto &keyValuePair : m_metadata) {
     std::string key = keyValuePair.first;
@@ -473,51 +470,64 @@ void LoadSpice2D2::storeMetaDataIntoWS(){
 
   addRunProperty<double>("wavelength", m_wavelength, "Angstrom");
   addRunProperty<double>("wavelength-spread", m_dwavelength, "Angstrom");
-  addRunProperty<double>("wavelength-spread-ratio", m_dwavelength / m_wavelength);
+  addRunProperty<double>("wavelength-spread-ratio",
+                         m_dwavelength / m_wavelength);
 
-  addRunProperty<double>("monitor", boost::lexical_cast<double>(m_metadata["Counters/monitor"]));
-  addRunProperty<double>("timer", boost::lexical_cast<double>(m_metadata["Counters/time"]), "sec");
+  addRunProperty<double>(
+      "monitor", boost::lexical_cast<double>(m_metadata["Counters/monitor"]));
+  addRunProperty<double>(
+      "timer", boost::lexical_cast<double>(m_metadata["Counters/time"]), "sec");
 
   // sample thickness
   // XML 1.03: source distance is now in meters
-  double sample_thickness = boost::lexical_cast<double>(m_metadata["Header/Sample_Thickness"]);
+  double sample_thickness =
+      boost::lexical_cast<double>(m_metadata["Header/Sample_Thickness"]);
   if (m_sansSpiceXmlFormatVersion >= 1.03) {
-    g_log.debug()
-        << "sans_spice_xml_format_version >= 1.03 :: sample_thickness in mm. Converting to cm...";
+    g_log.debug() << "sans_spice_xml_format_version >= 1.03 :: "
+                     "sample_thickness in mm. Converting to cm...";
     sample_thickness *= 0.1;
   }
   addRunProperty<double>("sample-thickness", sample_thickness, "cm");
 
-  addRunProperty<double>("source-aperture-diameter", boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]), "mm");
-  addRunProperty<double>("sample-aperture-diameter", boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]),"mm");
+  addRunProperty<double>(
+      "source-aperture-diameter",
+      boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]),
+      "mm");
+  addRunProperty<double>(
+      "sample-aperture-diameter",
+      boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]),
+      "mm");
   // XML 1.03: source distance is now in meters
-  double source_distance =  boost::lexical_cast<double>(m_metadata["Header/source_distance"]);
+  double source_distance =
+      boost::lexical_cast<double>(m_metadata["Header/source_distance"]);
   if (m_sansSpiceXmlFormatVersion >= 1.03) {
-    g_log.debug() << "sans_spice_xml_format_version >= 1.03 :: source_distance in meters. Converting to mm...";
+    g_log.debug() << "sans_spice_xml_format_version >= 1.03 :: source_distance "
+                     "in meters. Converting to mm...";
     source_distance *= 1000.0;
   }
   addRunProperty<double>("source-sample-distance", source_distance, "mm");
-  addRunProperty<double>("number-of-guides", boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
+  addRunProperty<double>(
+      "number-of-guides",
+      boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
 }
 
-
-/** 
+/**
  * Run the Child Algorithm LoadInstrument
  */
 void LoadSpice2D2::runLoadInstrument() {
 
-
   const std::string &instrumentName = m_metadata["Header/Instrument"];
-  
-  API::IAlgorithm_sptr loadInstrumentAlgorithm = createChildAlgorithm("LoadInstrument");
+
+  API::IAlgorithm_sptr loadInstrumentAlgorithm =
+      createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
     loadInstrumentAlgorithm->setPropertyValue("InstrumentName", instrumentName);
-    loadInstrumentAlgorithm->setProperty<API::MatrixWorkspace_sptr>("Workspace",
-                                                     m_workspace);
+    loadInstrumentAlgorithm->setProperty<API::MatrixWorkspace_sptr>(
+        "Workspace", m_workspace);
     loadInstrumentAlgorithm->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
+                                         Mantid::Kernel::OptionalBool(true));
     loadInstrumentAlgorithm->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");
@@ -527,17 +537,16 @@ void LoadSpice2D2::runLoadInstrument() {
   }
 }
 
-
-
 /**
  * This will rotate the detector named componentName around z-axis
  *
  * @param angle in degrees
- */ 
-void LoadSpice2D2::rotateDetector(){
+ */
+void LoadSpice2D2::rotateDetector() {
 
   // The angle is negative!
-  double angle = - boost::lexical_cast<double>(m_metadata["Motor_Positions/det_west_wing_rot"]);
+  double angle = -boost::lexical_cast<double>(
+      m_metadata["Motor_Positions/det_west_wing_rot"]);
 
   g_log.notice() << "Rotating Wing Detector " << angle << " degrees." << '\n';
 
@@ -548,7 +557,6 @@ void LoadSpice2D2::rotateDetector(){
   p->addValue(DateAndTime::getCurrentTime(), angle);
   runDetails.addLogData(p);
 }
-
 
 /**
  * Calculates the detector distances and sets them as Run properties
@@ -574,41 +582,44 @@ void LoadSpice2D2::setDetectorDistance() {
 
   m_sampleDetectorDistance = getProperty("SampleDetectorDistance");
 
-  if (!isEmpty(m_sampleDetectorDistance)){
+  if (!isEmpty(m_sampleDetectorDistance)) {
     // SDD is as input
-    g_log.debug() << "Getting the SampleDetectorDistance = " << m_sampleDetectorDistance
+    g_log.debug() << "Getting the SampleDetectorDistance = "
+                  << m_sampleDetectorDistance
                   << " from the Algorithm input property.\n";
   } else if (m_metadata.find("Motor_Positions/sdd") != m_metadata.end()) {
     // Newest version: SDD as a specific tag
-    m_sampleDetectorDistance = boost::lexical_cast<double>(m_metadata["Motor_Positions/sdd"]);
+    m_sampleDetectorDistance =
+        boost::lexical_cast<double>(m_metadata["Motor_Positions/sdd"]);
     m_sampleDetectorDistance *= 1000.0;
-  } else if (m_metadata.find("Motor_Positions/sample_det_dist") != m_metadata.end()) {
+  } else if (m_metadata.find("Motor_Positions/sample_det_dist") !=
+             m_metadata.end()) {
     // Old Format
     double sampleDetectorDistancePartial = boost::lexical_cast<double>(
-                        m_metadata["Motor_Positions/sample_det_dist"]);
+        m_metadata["Motor_Positions/sample_det_dist"]);
     sampleDetectorDistancePartial *= 1000.0;
-    
-    double sampleDetectorDistanceOffset = boost::lexical_cast<double>(
-                        m_metadata["Header/tank_internal_offset"]);
 
-    double sampleDetectorDistanceWindow = boost::lexical_cast<double>(
-                        m_metadata["Header/sample_to_flange"]);
-    
+    double sampleDetectorDistanceOffset =
+        boost::lexical_cast<double>(m_metadata["Header/tank_internal_offset"]);
+
+    double sampleDetectorDistanceWindow =
+        boost::lexical_cast<double>(m_metadata["Header/sample_to_flange"]);
+
     m_sampleDetectorDistance = sampleDetectorDistancePartial +
-                                     sampleDetectorDistanceOffset +
-                                     sampleDetectorDistanceWindow;
+                               sampleDetectorDistanceOffset +
+                               sampleDetectorDistanceWindow;
   } else {
     // New format:
     m_sampleDetectorDistance = boost::lexical_cast<double>(
-                        m_metadata["Motor_Positions/sample_det_dist"]);
+        m_metadata["Motor_Positions/sample_det_dist"]);
     m_sampleDetectorDistance *= 1000.0;
   }
   g_log.debug() << "Sample Detector Distance = " << m_sampleDetectorDistance
                 << " mm." << '\n';
-  addRunProperty<double>("sample-detector-distance", m_sampleDetectorDistance, "mm");
-  //return m_sampleDetectorDistance;
+  addRunProperty<double>("sample-detector-distance", m_sampleDetectorDistance,
+                         "mm");
+  // return m_sampleDetectorDistance;
 }
-
 
 /**
  * Places the detector at the right sample_detector_distance
@@ -616,8 +627,8 @@ void LoadSpice2D2::setDetectorDistance() {
 void LoadSpice2D2::moveDetector() {
 
   setDetectorDistance();
-  double translation_distance = boost::lexical_cast<double>(
-                      m_metadata["Motor_Positions/detector_trans"]);
+  double translation_distance =
+      boost::lexical_cast<double>(m_metadata["Motor_Positions/detector_trans"]);
   translation_distance /= 1000.0;
   g_log.debug() << "Detector Translation = " << translation_distance
                 << " meters." << '\n';
@@ -629,8 +640,9 @@ void LoadSpice2D2::moveDetector() {
   std::string detID =
       m_workspace->getInstrument()->getStringParameter("detector-name")[0];
 
-  g_log.information() << "Moving: " << detID << " Z=" << m_sampleDetectorDistance/1000.0 << 
-    " X=" << translation_distance << '\n';
+  g_log.information() << "Moving: " << detID
+                      << " Z=" << m_sampleDetectorDistance / 1000.0
+                      << " X=" << translation_distance << '\n';
   try {
     mover->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_workspace);
     mover->setProperty("ComponentName", detID);
@@ -650,38 +662,43 @@ void LoadSpice2D2::moveDetector() {
 /**
  * From the parameters file get a string parameter
  * */
-std::string LoadSpice2D2::getInstrumentStringParameter(const std::string &parameter){
-  std::vector<std::string> pars = m_workspace->getInstrument()->getStringParameter(parameter);
+std::string
+LoadSpice2D2::getInstrumentStringParameter(const std::string &parameter) {
+  std::vector<std::string> pars =
+      m_workspace->getInstrument()->getStringParameter(parameter);
   if (pars.empty()) {
-    g_log.warning() << "Parameter not found: " << parameter << " in the instrument parameter file.\n";
+    g_log.warning() << "Parameter not found: " << parameter
+                    << " in the instrument parameter file.\n";
     return std::string();
-  }
-  else {
-    g_log.debug() << "Found the parameter: " << parameter << " = " << pars[0] <<
-      " in the instrument parameter file.\n";
-      return pars[0];
+  } else {
+    g_log.debug() << "Found the parameter: " << parameter << " = " << pars[0]
+                  << " in the instrument parameter file.\n";
+    return pars[0];
   }
 }
 
 /**
  * From the parameters file get a double parameter
  * */
-double LoadSpice2D2::getInstrumentDoubleParameter(const std::string &parameter){
-  std::vector<double> pars = m_workspace->getInstrument()->getNumberParameter(parameter);
+double
+LoadSpice2D2::getInstrumentDoubleParameter(const std::string &parameter) {
+  std::vector<double> pars =
+      m_workspace->getInstrument()->getNumberParameter(parameter);
   if (pars.empty()) {
-    g_log.warning() << "Parameter not found: " << parameter << " in the instrument parameter file.\n";
+    g_log.warning() << "Parameter not found: " << parameter
+                    << " in the instrument parameter file.\n";
     return std::numeric_limits<double>::quiet_NaN();
-  }
-  else {
-    g_log.debug() << "Found the parameter: " << parameter << " = " << pars[0] <<
-      " in the instrument parameter file.\n";
-      return pars[0];
+  } else {
+    g_log.debug() << "Found the parameter: " << parameter << " = " << pars[0]
+                  << " in the instrument parameter file.\n";
+    return pars[0];
   }
 }
 
 double LoadSpice2D2::getSourceToSampleDistance() {
-  const int nguides = static_cast<int>(boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
-      //m_workspace->run().getPropertyValueAsType<int>("number-of-guides");
+  const int nguides = static_cast<int>(
+      boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
+  // m_workspace->run().getPropertyValueAsType<int>("number-of-guides");
 
   // aperture-distances: array from the instrument parameters
   std::string pars = getInstrumentStringParameter("aperture-distances");
@@ -692,11 +709,10 @@ double LoadSpice2D2::getSourceToSampleDistance() {
   if (tok.count() > 0 && tok.count() < 10 && nguides >= 0 && nguides < 9) {
     const std::string distance_as_string = tok[8 - nguides];
     try {
-      auto distance_as_string_copy = boost::algorithm::trim_copy(distance_as_string);
+      auto distance_as_string_copy =
+          boost::algorithm::trim_copy(distance_as_string);
       SSD = boost::lexical_cast<double>(distance_as_string_copy);
-    }
-    catch(boost::bad_lexical_cast const& e)
-    {
+    } catch (boost::bad_lexical_cast const &e) {
       throw Kernel::Exception::InstrumentDefinitionError(
           "Bad value for source-to-sample distance");
     }
@@ -705,8 +721,9 @@ double LoadSpice2D2::getSourceToSampleDistance() {
         "Unable to get source-to-sample distance");
 
   // Check for an offset
-  double sourceSampleDistanceOffset = getInstrumentDoubleParameter("source-distance-offset");
-  if (!std::isnan(sourceSampleDistanceOffset)){
+  double sourceSampleDistanceOffset =
+      getInstrumentDoubleParameter("source-distance-offset");
+  if (!std::isnan(sourceSampleDistanceOffset)) {
     SSD += sourceSampleDistanceOffset;
   }
   g_log.debug() << "Source Sample Distance = " << SSD << ".\n";
@@ -716,35 +733,42 @@ double LoadSpice2D2::getSourceToSampleDistance() {
 /**
  * Compute beam diameter at the detector
  * */
-void LoadSpice2D2::setBeamDiameter(){
+void LoadSpice2D2::setBeamDiameter() {
 
   double SourceToSampleDistance = 0.0;
 
   try {
     SourceToSampleDistance = getSourceToSampleDistance();
-    m_workspace->mutableRun().addProperty("source-sample-distance", SourceToSampleDistance,
-                                     "mm", true);
-    g_log.information() << "Computed SSD from number of guides: " << SourceToSampleDistance << " mm \n";
+    m_workspace->mutableRun().addProperty("source-sample-distance",
+                                          SourceToSampleDistance, "mm", true);
+    g_log.information() << "Computed SSD from number of guides: "
+                        << SourceToSampleDistance << " mm \n";
   } catch (...) {
     Mantid::Kernel::Property *prop =
         m_workspace->run().getProperty("source-sample-distance");
     Mantid::Kernel::PropertyWithValue<double> *dp =
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     SourceToSampleDistance = *dp;
-    g_log.warning() << "Could not compute SSD from number of guides, taking: " << SourceToSampleDistance << " mm \n";
+    g_log.warning() << "Could not compute SSD from number of guides, taking: "
+                    << SourceToSampleDistance << " mm \n";
   }
 
-  const double sampleAperture = 
-    boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]);
-  const double sourceAperture = 
-    boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]);
-  g_log.debug() << "Computing beam diameter. m_sampleDetectorDistance=" << m_sampleDetectorDistance
-    << " SourceToSampleDistance=" << SourceToSampleDistance <<
-    " sourceAperture= " << sourceAperture << " sampleAperture=" << sampleAperture << "\n";
+  const double sampleAperture =
+      boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]);
+  const double sourceAperture =
+      boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]);
+  g_log.debug() << "Computing beam diameter. m_sampleDetectorDistance="
+                << m_sampleDetectorDistance
+                << " SourceToSampleDistance=" << SourceToSampleDistance
+                << " sourceAperture= " << sourceAperture
+                << " sampleAperture=" << sampleAperture << "\n";
 
-  const double beamDiameter = m_sampleDetectorDistance / SourceToSampleDistance * 
-    (sourceAperture + sampleAperture) + sampleAperture;
-  m_workspace->mutableRun().addProperty("beam-diameter", beamDiameter, "mm", true);
+  const double beamDiameter = m_sampleDetectorDistance /
+                                  SourceToSampleDistance *
+                                  (sourceAperture + sampleAperture) +
+                              sampleAperture;
+  m_workspace->mutableRun().addProperty("beam-diameter", beamDiameter, "mm",
+                                        true);
 }
 
 } // namespace DataHandling
