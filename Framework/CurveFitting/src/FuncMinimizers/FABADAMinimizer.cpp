@@ -39,6 +39,7 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
+using namespace Mantid::API;
 
 namespace {
 // static logger object
@@ -52,13 +53,12 @@ const double LOW_JUMP_LIMIT = 1e-25;
 // random number generator
 std::mt19937 rng;
 
-Mantid::API::MatrixWorkspace_sptr
+MatrixWorkspace_sptr
 createWorkspace(std::vector<double> const &xValues,
                 std::vector<double> const &yValues, int const numberOfSpectra,
                 std::vector<std::string> const &verticalAxisNames) {
   auto createWorkspaceAlgorithm =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-          "CreateWorkspace");
+      AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
   createWorkspaceAlgorithm->initialize();
   createWorkspaceAlgorithm->setChild(true);
   createWorkspaceAlgorithm->setLogging(false);
@@ -925,18 +925,16 @@ void FABADAMinimizer::setParameterXAndYValuesForPDF(
 }
 
 void FABADAMinimizer::addOutputPDFWorkspaceToGroup(
-    std::string const &groupName, Mantid::API::MatrixWorkspace_sptr workspace) {
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(groupName)) {
-    auto groupPDF = Mantid::API::AnalysisDataService::Instance()
-                        .retrieveWS<Mantid::API::WorkspaceGroup>(groupName);
+    std::string const &groupName, MatrixWorkspace_sptr workspace) {
+  if (AnalysisDataService::Instance().doesExist(groupName)) {
+    auto groupPDF =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
     groupPDF->addWorkspace(workspace);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(groupName,
-                                                              groupPDF);
+    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
   } else {
-    auto groupPDF = boost::make_shared<Mantid::API::WorkspaceGroup>();
+    auto groupPDF = boost::make_shared<WorkspaceGroup>();
     groupPDF->addWorkspace(workspace);
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(groupName,
-                                                              groupPDF);
+    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
   }
 }
 
