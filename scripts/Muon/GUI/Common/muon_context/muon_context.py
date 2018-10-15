@@ -7,8 +7,13 @@
 
 # Muon context - contains all of the values from the GUI
 from __future__ import (absolute_import, division, print_function)
+from six import iteritems
+
 from Muon.GUI.Common import group_object
 from Muon.GUI.Common import pair_object
+
+import pythonTSV as TSV
+import mantidqtpython
 
 # constant variable names
 Tab2Text = "some text"
@@ -55,3 +60,20 @@ class MuonContext(object):
         for pair in self.common_context[Pairs]:
             print(pair.name, pair.FGroup, pair.BGroup, pair.alpha)
         print()
+
+    def save(self):
+        #save ....
+        TSVSec = mantidqtpython.MantidQt.API.TSVSerialiser()
+        TSV0 = mantidqtpython.MantidQt.API.TSVSerialiser()
+        for key ,value in iteritems(self.common_context):
+            TSV0.writeLine(key)
+            try:
+                 TSV.saveToTSV(TSV0,value)
+            except:
+                 pass # add custom stuff later
+        lines = TSV0.outputLines()
+        TSVSec.writeSection("Muon Analysis 2 init",lines)
+        return TSVSec.outputLines()
+
+    def loadFromProject(self, project):
+       print( "load ...")

@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+
 class pair(object):
 
     def __init__(self, name="", F_group="", B_group="", alpha=1.0):

@@ -16,9 +16,10 @@ from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 from Muon.GUI.Common.muon_context.muon_context import *#MuonContext
 
+
 muonGUI = None
 
-
+Name = "Muon Analysis 2"
 class MuonAnalysis2Gui(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
@@ -40,6 +41,9 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         self.setWindowTitle("Muon Analysis version 2")
 
         self.dockWidget.setUpdateContext(self.update)
+
+    def saveToProject(self):
+        return self._context.save()
 
     def update(self):
         # update load
@@ -68,29 +72,36 @@ def qapp():
 def main():
     app = qapp()
     try:
-        global muonGUI
-        muonGUI = MuonAnalysis2Gui()
-        muonGUI.resize(700, 700)
-        muonGUI.show()
+        muon = MuonAnalysis2Gui()
+        muon.resize(700, 700)
+        muon.setProperty("launcher", "Muon_Analysis_2")
+        muon.show()
+        muon.setAccessibleName(Name)
         app.exec_()
-        return muonGUI
+        return muon
     except RuntimeError as error:
-        muonGUI = QtGui.QWidget()
-        QtGui.QMessageBox.warning(muonGUI, "Muon Analysis version 2", str(error))
-        return muonGUI
+        muon = QtGui.QWidget()
+        QtGui.QMessageBox.warning(muon, "Muon Analysis version 2", str(error))
+        return muon
 
 
 def saveToProject():
-    if muonGUI is None:
-        return ""
-    project = "test"
-    return project
+    allWidgets = QtGui.QApplication.allWidgets()
+    for widget in allWidgets:
+       if widget.accessibleName() == Name:
+            print("waa")
+            project = widget.saveToProject()#_context.save()
+            return project
+    return ""
 
 
 def loadFromProject(project):
+    global muonGUI
     muonGUI = main()
-    muonGUI.dockWidget.loadFromProject(project)
+    muonGUI._context.loadFromProject(project)
+    muonGUI.update()
     return muonGUI
 
 if __name__ == '__main__':
+    global muonGUI
     muonGUI = main()
