@@ -79,6 +79,7 @@ private slots:
                        std::string const &enableOutputButtons = "unchanged",
                        QString const message = "Run",
                        QString const tooltip = "");
+  void setPlotIsPlotting(bool plotting);
 
 private:
   void createRESfile(const QString &file);

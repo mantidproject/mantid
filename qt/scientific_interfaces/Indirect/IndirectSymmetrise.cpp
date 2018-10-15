@@ -538,11 +538,12 @@ void IndirectSymmetrise::runClicked() { runTab(); }
  * Handles mantid plotting
  */
 void IndirectSymmetrise::plotClicked() {
-
+  setPlotIsPlotting(true);
   QStringList workspaces;
   workspaces.append(m_uiForm.dsInput->getCurrentDataName());
   workspaces.append(QString::fromStdString(m_pythonExportWsName));
   plotSpectrum(workspaces);
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -581,6 +582,13 @@ void IndirectSymmetrise::updateRunButton(bool enabled,
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
     setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void IndirectSymmetrise::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

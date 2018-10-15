@@ -675,6 +675,7 @@ void ISISCalibration::runClicked() { runTab(); }
  * Handle mantid plotting
  */
 void ISISCalibration::plotClicked() {
+  setPlotIsPlotting(true);
 
   plotTimeBin(m_outputCalibrationName);
   checkADSForPlotSaveWorkspace(m_outputCalibrationName.toStdString(), true);
@@ -687,6 +688,7 @@ void ISISCalibration::plotClicked() {
       plotWorkspaces.append(m_outputResolutionName + "_pre_smooth");
   }
   plotSpectrum(plotWorkspaces);
+  setPlotIsPlotting(false);
 }
 
 void ISISCalibration::addRuntimeSmoothing(const QString &workspaceName) {
@@ -806,6 +808,13 @@ void ISISCalibration::updateRunButton(bool enabled,
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
     setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void ISISCalibration::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

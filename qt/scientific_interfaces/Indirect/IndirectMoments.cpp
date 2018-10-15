@@ -223,11 +223,12 @@ void IndirectMoments::runClicked() { runTab(); }
  * Handle mantid plotting
  */
 void IndirectMoments::plotClicked() {
+  setPlotIsPlotting(true);
   QString outputWs =
       getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
-  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true)) {
+  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true))
     plotSpectra(outputWs, {0, 2, 4});
-  }
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -267,6 +268,13 @@ void IndirectMoments::updateRunButton(bool enabled,
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
     setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void IndirectMoments::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

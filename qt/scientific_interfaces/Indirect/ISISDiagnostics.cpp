@@ -489,8 +489,10 @@ void ISISDiagnostics::runClicked() { runTab(); }
  * Handles mantid plotting
  */
 void ISISDiagnostics::plotClicked() {
+  setPlotIsPlotting(true);
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
     plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -530,6 +532,13 @@ void ISISDiagnostics::updateRunButton(bool enabled,
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
     setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void ISISDiagnostics::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

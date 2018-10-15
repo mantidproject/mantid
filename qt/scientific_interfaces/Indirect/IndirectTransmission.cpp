@@ -32,6 +32,7 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
           SLOT(dataLoaded()));
   connect(m_uiForm.dsCanInput, SIGNAL(dataReady(QString)), this,
           SLOT(dataLoaded()));
+
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -162,10 +163,12 @@ void IndirectTransmission::saveClicked() {
  * Handle mantid plotting
  */
 void IndirectTransmission::plotClicked() {
+  setPlotIsPlotting(true);
   QString outputWs =
       (m_uiForm.dsSampleInput->getCurrentDataName() + "_transmission");
   if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true))
     plotSpectrum(outputWs);
+  setPlotIsPlotting(false);
 }
 
 void IndirectTransmission::setRunEnabled(bool enabled) {
@@ -195,6 +198,13 @@ void IndirectTransmission::updateRunButton(
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
     setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void IndirectTransmission::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

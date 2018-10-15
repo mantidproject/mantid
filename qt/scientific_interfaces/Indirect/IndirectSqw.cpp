@@ -194,6 +194,7 @@ void IndirectSqw::runClicked() { runTab(); }
  * Handles mantid plotting
  */
 void IndirectSqw::plotClicked() {
+  setPlotIsPlotting(true);
   QString plotType = m_uiForm.cbPlotType->currentText();
   if (plotType == "Contour" &&
       (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)))
@@ -206,6 +207,7 @@ void IndirectSqw::plotClicked() {
     int numHist = static_cast<int>(ws->getNumberHistograms());
     plotSpectrum(QString::fromStdString(m_pythonExportWsName), 0, numHist - 1);
   }
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -246,6 +248,13 @@ void IndirectSqw::updateRunButton(bool enabled,
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
     setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void IndirectSqw::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

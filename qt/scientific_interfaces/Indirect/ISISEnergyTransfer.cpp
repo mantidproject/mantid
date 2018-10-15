@@ -830,6 +830,7 @@ void ISISEnergyTransfer::runClicked() { runTab(); }
  * Handle mantid plotting of workspaces
  */
 void ISISEnergyTransfer::plotClicked() {
+  setPlotIsPlotting(true);
   for (const auto &it : m_outputWorkspaces) {
     if (checkADSForPlotSaveWorkspace(it, true)) {
       const auto plotType = m_uiForm.cbPlotType->currentText();
@@ -840,6 +841,7 @@ void ISISEnergyTransfer::plotClicked() {
       m_pythonRunner.runPythonCode(pyInput);
     }
   }
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -893,6 +895,13 @@ void ISISEnergyTransfer::updateRunButton(bool enabled,
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
     setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void ISISEnergyTransfer::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces
