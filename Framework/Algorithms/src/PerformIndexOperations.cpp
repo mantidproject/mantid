@@ -10,7 +10,6 @@
 #include "MantidKernel/Strings.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
