@@ -93,14 +93,24 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         else:
             return None, None, None
 
+    def getUBMatrix(peaks_ws, UBFile):
+        # Load the UB Matrix if one is not already loaded
+        if UBFile == '' and peaks_ws.sample().hasOrientedLattice():
+            logger.information("Using UB file already available in PeaksWorkspace")
+        else:
+            try:
+                from mantid.simpleapi import LoadIsawUB
+                LoadIsawUB(InputWorkspace=peaks_ws, FileName=UBFile)
+            except:
+                logger.error("peaks_ws does not have a UB matrix loaded.  Must provide a file")
+        UBMatrix = peaks_ws.sample().getOrientedLattice().getUB()
+        return UBMatrix
+
     def PyExec(self):
         import ICCFitTools as ICCFT
         import BVGFitTools as BVGFT
-        from mantid.simpleapi import LoadIsawUB
         import pickle
         from scipy.ndimage.filters import convolve
-        reload(BVGFT)
-        reload(ICCFT)
         MDdata = self.getProperty('InputWorkspace').value
         peaks_ws = self.getProperty('PeaksWorkspace').value
         fracStop = self.getProperty('FracStop').value
@@ -122,16 +132,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         iccFitDict = ICCFT.parseConstraints(peaks_ws) #Contains constraints and guesses for ICC Fitting
         padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
 
-        # Load the UB Matrix if one is not already loaded
-        if UBFile == '' and peaks_ws.sample().hasOrientedLattice():
-            logger.information("Using UB file already available in PeaksWorkspace")
-        else:
-            try:
-                LoadIsawUB(InputWorkspace=peaks_ws, FileName=UBFile)
-            except:
-                logger.error("peaks_ws does not have a UB matrix loaded.  Must provide a file")
-        UBMatrix = peaks_ws.sample().getOrientedLattice().getUB()
-
         # There are a few instrument specific parameters that we define here.  In some cases,
         # it may improve fitting to set tweak these parameters, but for simplicity we define these here
         # The default values are good for MaNDi - new instruments can be added by adding a different elif
@@ -149,10 +149,10 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             dQPixel = peaks_ws.getInstrument().getNumberParameter("dQPixel")[0]
             peakMaskSize = peaks_ws.getInstrument().getIntParameter("peakMaskSize")[0]
         except:
-            raise
             logger.error("Cannot find all parameters in instrument parameters file.")
-            sys.exit(1)
+            raise
 
+        UBMatrix = getUBMatrix(peaks_ws, UBFile)
         dQ = np.abs(ICCFT.getDQFracHKL(UBMatrix, frac=0.5))
         dQ[dQ>dQMax] = dQMax
         qMask = ICCFT.getHKLMask(UBMatrix, frac=fracHKL, dQPixel=dQPixel,dQ=dQ)
@@ -160,7 +160,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         # Strong peak profiles - we set up the workspace and determine which peaks we'll fit.
         strongPeakKeys =  ['Phi', 'Theta', 'Scale3d', 'FitPhi', 'FitTheta', 'SigTheta', 'SigPhi', 'SigP', 'PeakNumber']
         strongPeakDatatypes = ['float']*len(strongPeakKeys)
-        strongPeakParams_ws = CreateEmptyTableWorkspace(OutputWorkspace='StrongPeakParameters')
+        strongPeakParams_ws = CreateEmptyTableWorkspace(OutputWorkspace='__StrongPeakParameters')
         for key, datatype in zip(strongPeakKeys,strongPeakDatatypes):
             strongPeakParams_ws.addColumn(datatype, key)
 
@@ -289,7 +289,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 peak.setIntensity(intensity)
                 peak.setSigmaIntensity(sigma)
 
-                if generateStrongPeakParams and ~needsForcedProfile[peakNumber]:# and params['SigX']<0.1 and params['SigY']<0.1 and params['SigX']>0.0024:
+                if generateStrongPeakParams and ~needsForcedProfile[peakNumber]:
                         qPeak = peak.getQLabFrame()
                         theta = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #2theta
                         try:
@@ -300,7 +300,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                             p = np.array(str(p).strip('[]\'').split(),dtype=float)
                             tol = 5.0 #High tolerance since we don't know what the answer will be
                         predSigX = BVGFT.coshPeakWidthModel(theta, p[0],p[1],p[2],p[3])
-                        
+
                         if np.abs((params['SigX'] - predSigX)/1./predSigX) < tol:
                             strongPeakParams[fitNumber, 0] = np.arctan2(qPeak[1], qPeak[0]) # phi
                             strongPeakParams[fitNumber, 1] = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #theta
@@ -319,7 +319,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 raise
 
             except:
-                #raise
                 logger.warning('Error fitting peak number ' + str(peakNumber))
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)
