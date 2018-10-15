@@ -226,7 +226,7 @@ if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
 
     # If the EXE generation succeeded then install the executable and rename it to remove the .install suffix
     set (_workbench_executable_full_name ${_workbench_base_name}.exe)
-    message(STATUS "Generated the Workbench executable: ${_workbench_executable_full_name}")
+    message(STATUS "Generated the Workbench executable for installation: ${_workbench_executable_install_name}")
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} DESTINATION bin RENAME ${_workbench_executable_full_name})
   else ()
     message(STATUS "PowerShell was not found. Not generating the Workbench executable.")
