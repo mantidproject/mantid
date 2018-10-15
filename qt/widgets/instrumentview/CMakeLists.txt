@@ -166,6 +166,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
     "\$ORIGIN/../${LIB_DIR}"
 )
 
+find_package ( BoostPython REQUIRED )
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
   QT_VERSION 5
   SRC
@@ -187,6 +188,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
+    PythonInterfaceCore
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
