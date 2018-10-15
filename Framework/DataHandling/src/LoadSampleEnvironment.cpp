@@ -23,6 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <stdio.h>
+#include <string.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -57,8 +58,10 @@ void LoadSampleEnvironment::init() {
                   "Environment of the sample");
 
   // Environment Name
-  declareProperty("EnvironmentName", "Environment",
-                  "The Name of the Environment", Direction::Input);
+  declareProperty("EnvironmentName", "Environment");
+
+  // New Can or Add
+  declareProperty("Add", false);
 }
 
 void LoadSampleEnvironment::exec() {
@@ -92,14 +95,23 @@ void LoadSampleEnvironment::exec() {
         "Could not read file, did not match either STL Format", filename, 0);
   }
   std::string name = getProperty("EnvironmentName");
-  auto can = boost::make_shared<Container>(environmentMesh);
-  auto environment = boost::make_shared<SampleEnvironment>(name, can);
-  // Put Environment into sample.
+  bool add = getProperty("Add");
   Sample &sample = outputWS->mutableSample();
+  boost::shared_ptr<Geometry::SampleEnvironment> environment = nullptr;
+  if (add){
+    environment = boost::make_shared<Geometry::SampleEnvironment>(sample.getEnvironment());
+    environment->add(environmentMesh);
+  }else{
+    auto can = boost::make_shared<Container>(environmentMesh);
+    environment = boost::make_shared<Geometry::SampleEnvironment>(name, can);
+  }
+  // Put Environment into sample.
   sample.setEnvironment(environment);
 
   // Set output workspace
-  setProperty("OutputWorkspace", outputWS);
+  const std::string debugString = "Enviroment has: " +std::to_string(environment->nelements())+ " elements.";
+
+  g_log.debug(debugString);
 }
 
 } // namespace DataHandling
