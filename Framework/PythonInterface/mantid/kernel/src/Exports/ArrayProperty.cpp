@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
 
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
@@ -18,8 +24,8 @@ using Mantid::Kernel::Direction;
 using Mantid::Kernel::IValidator_sptr;
 using Mantid::Kernel::NullValidator;
 using Mantid::Kernel::PropertyWithValue;
+using Mantid::PythonInterface::NDArray;
 namespace Converters = Mantid::PythonInterface::Converters;
-namespace NumPy = Mantid::PythonInterface::NumPy;
 namespace Policies = Mantid::PythonInterface::Policies;
 using namespace boost::python;
 
@@ -31,6 +37,35 @@ using return_cloned_numpy =
 // Call the dtype helper function
 template <typename type> std::string dtype(ArrayProperty<type> &self) {
   return Converters::dtype(self);
+}
+
+// Check for the special case of a string
+template <> std::string dtype(ArrayProperty<std::string> &self) {
+  // Get a vector of all the strings
+  std::vector<std::string> values = self();
+
+  // Vector of ints to store the sizes of each of the strings
+  std::vector<size_t> stringSizes;
+
+  // Block allocate memory
+  stringSizes.reserve(self.size());
+
+  // Loop for the number of strings
+  // For each string store the number of characters
+  for (auto val : values) {
+    auto size = val.size();
+    stringSizes.emplace_back(size);
+  }
+
+  // Find the maximum number of characters
+  size_t max =
+      *std::max_element(std::begin(stringSizes), std::end(stringSizes));
+
+  // Create the string to return
+  std::stringstream ss;
+  ss << "S" << max;
+  std::string retVal = ss.str();
+  return retVal;
 }
 
 #define EXPORT_ARRAY_PROP(type, prefix)                                        \
@@ -96,7 +131,7 @@ ArrayProperty<T> *createArrayPropertyFromList(const std::string &name,
  */
 template <typename T>
 ArrayProperty<T> *createArrayPropertyFromNDArray(const std::string &name,
-                                                 const NumPy::NdArray &values,
+                                                 const NDArray &values,
                                                  IValidator_sptr validator,
                                                  const unsigned int direction) {
   return new ArrayProperty<T>(name, Converters::NDArrayToVector<T>(values)(),

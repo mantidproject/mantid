@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -6,6 +12,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Glob.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/NetworkProxy.h"
@@ -44,7 +51,6 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/regex.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -1995,6 +2001,57 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   return m_proxyInfo;
 }
 
+std::string ConfigServiceImpl::getFullPath(const std::string &filename,
+                                           const bool ignoreDirs,
+                                           const int options) const {
+  std::string fName = Kernel::Strings::strip(filename);
+  g_log.debug() << "getFullPath(" << fName << ")\n";
+  // If this is already a full path, nothing to do
+  if (Poco::Path(fName).isAbsolute())
+    return fName;
+
+  // First try the path relative to the current directory. Can throw in some
+  // circumstances with extensions that have wild cards
+  try {
+    Poco::File fullPath(Poco::Path().resolve(fName));
+    if (fullPath.exists() && (!ignoreDirs || !fullPath.isDirectory()))
+      return fullPath.path();
+  } catch (std::exception &) {
+  }
+
+  for (const auto &searchPath :
+       Kernel::ConfigService::Instance().getDataSearchDirs()) {
+    g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
+// On windows globbing is not working properly with network drives
+// for example a network drive containing a $
+// For this reason, and since windows is case insensitive anyway
+// a special case is made for windows
+#ifdef _WIN32
+    if (fName.find("*") != std::string::npos) {
+#endif
+      Poco::Path path(searchPath, fName);
+      std::set<std::string> files;
+      Kernel::Glob::glob(path, files, options);
+      if (!files.empty()) {
+        Poco::File matchPath(*files.begin());
+        if (ignoreDirs && matchPath.isDirectory()) {
+          continue;
+        }
+        return *files.begin();
+      }
+#ifdef _WIN32
+    } else {
+      Poco::Path path(searchPath, fName);
+      Poco::File file(path);
+      if (file.exists() && !(ignoreDirs && file.isDirectory())) {
+        return path.toString();
+      }
+    }
+#endif
+  }
+  return "";
+}
+
 /** Sets the log level priority for all logging channels
  * @param logLevel the integer value of the log level to set, 1=Critical,
  * 7=Debug
@@ -2017,8 +2074,11 @@ template DLLExport boost::optional<int>
 ConfigServiceImpl::getValue(const std::string &);
 template DLLExport boost::optional<size_t>
 ConfigServiceImpl::getValue(const std::string &);
+#ifdef _MSC_VER
 template DLLExport boost::optional<bool>
 ConfigServiceImpl::getValue(const std::string &);
+#endif
+
 /// \endcond TEMPLATE
 
 } // namespace Kernel

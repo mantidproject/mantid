@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
@@ -398,7 +404,6 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   auto yrb = m_yvalues[(y * w) + x + 1];
 
   // calculate midpoint of trapeziod
-  // calculate midpoint of trapeziod
   auto xpos = (xlb + xlf + xrf + xrb) / 4;
   auto ypos = (ylb + ylf + yrf + yrb) / 4;
 
@@ -412,9 +417,9 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent,
   yrb -= ypos;
   ylb -= ypos;
 
-  ShapeFactory factory;
   boost::shared_ptr<Mantid::Geometry::IObject> shape =
-      factory.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
+      ShapeFactory{}.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf,
+                                           yrb);
 
   // Create detector
   auto detector = new Detector(name, id, shape, parent);

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LISTINVESTIGATIONTYPES_H_
 #define LISTINVESTIGATIONTYPES_H_
 
@@ -12,6 +18,14 @@ using namespace Mantid::ICat;
 
 class CatalogListInvestigationTypesTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static CatalogListInvestigationTypesTest *createSuite() {
+    return new CatalogListInvestigationTypesTest();
+  }
+  static void destroySuite(CatalogListInvestigationTypesTest *suite) {
+    delete suite;
+  }
+
   /// Skip all unit tests if ICat server is down
   bool skipTests() override { return ICatTestHelper::skipTests(); }
 

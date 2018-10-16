@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WORKSPACEVALIDATORSTEST_H_
 #define WORKSPACEVALIDATORSTEST_H_
 
@@ -5,12 +11,14 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/OrientedLatticeValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/UnitFactory.h"
@@ -216,6 +224,22 @@ public:
       ws->setInstrument(inst);
       TS_ASSERT_EQUALS(instVal->isValid(ws), "");
     }
+  }
+
+  void testOrientedLatticeValidator() {
+    using Mantid::API::OrientedLatticeValidator;
+    using Mantid::DataObjects::Workspace2D;
+    using Mantid::Geometry::OrientedLattice;
+    OrientedLatticeValidator validator;
+    auto ws = boost::make_shared<Workspace2D>();
+    TS_ASSERT_EQUALS(
+        validator.isValid(ws),
+        "Workspace must have a sample with an orientation matrix defined.");
+
+    OrientedLattice lattice;
+    ws->mutableSample().setOrientedLattice(&lattice);
+
+    TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
   void testSampleValidator() {

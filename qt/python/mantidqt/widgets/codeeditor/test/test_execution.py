@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
@@ -23,7 +16,7 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 
@@ -50,8 +43,7 @@ class ReceiverWithProgress(Receiver):
         self.lines_received.append(lineno)
 
 
-@requires_qapp
-class PythonCodeExecutionTest(unittest.TestCase):
+class PythonCodeExecutionTest(GuiTest):
 
     def test_default_construction_yields_empty_context(self):
         executor = PythonCodeExecution()
@@ -65,9 +57,9 @@ class PythonCodeExecutionTest(unittest.TestCase):
         executor.reset_context()
         self.assertEqual(0, len(executor.globals_ns))
 
-    def test_startup_code_executed_by_default(self):
+    def test_startup_code_not_executed_by_default(self):
         executor = PythonCodeExecution(startup_code="x=100")
-        self.assertEqual(100, executor.globals_ns['x'])
+        self.assertFalse('x' in executor.globals_ns)
 
     # ---------------------------------------------------------------------------
     # Successful execution tests
@@ -75,9 +67,9 @@ class PythonCodeExecutionTest(unittest.TestCase):
     def test_execute_places_output_in_globals(self):
         code = "_local=100"
         user_globals = self._verify_serial_execution_successful(code)
-        self.assertEquals(100, user_globals['_local'])
+        self.assertEqual(100, user_globals['_local'])
         user_globals = self._verify_async_execution_successful(code)
-        self.assertEquals(100, user_globals['_local'])
+        self.assertEqual(100, user_globals['_local'])
 
     def test_execute_async_calls_success_signal_on_completion(self):
         code = "x=1+2"

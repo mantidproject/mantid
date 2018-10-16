@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -128,7 +134,7 @@ class PropertyWithValueTest(unittest.TestCase):
         self.assertEquals(result.endswith("98,99"), True)
 
         # Check the dtype return value
-        self.assertEquals(det_list_prop.dtype(), "int32")
+        self.assertEquals(det_list_prop.dtype(), "i")
 
     def _do_vector_double_numpy_test(self, int_type=False):
         create_ws = AlgorithmManager.createUnmanaged('CreateWorkspace')

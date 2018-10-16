@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Rendering/RenderingMesh.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <climits>
@@ -62,8 +69,8 @@ GeometryTriangulator::GeometryTriangulator(const CSGObject *obj)
 #endif
 }
 
-GeometryTriangulator::GeometryTriangulator(const MeshObject *obj)
-    : m_isTriangulated(false), m_meshObj(obj) {}
+GeometryTriangulator::GeometryTriangulator(std::unique_ptr<RenderingMesh> obj)
+    : m_isTriangulated(false), m_meshObj(std::move(obj)) {}
 
 GeometryTriangulator::~GeometryTriangulator() {}
 
@@ -132,7 +139,7 @@ void GeometryTriangulator::OCAnalyzeObject() {
   if (m_csgObj != nullptr) // If object exists
   {
     // Get the top rule tree in Obj
-    const Rule *top = m_csgObj->topRule();
+    const auto *top = m_csgObj->topRule();
     if (top == nullptr) {
       m_objSurface.reset(new TopoDS_Shape());
       return;

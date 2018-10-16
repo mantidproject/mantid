@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MYDATASEARCH_H_
 #define MYDATASEARCH_H_
 
 #include "ICatTestHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidICat/CatalogLogin.h"
 #include "MantidICat/CatalogMyDataSearch.h"
@@ -12,8 +19,16 @@ using namespace Mantid::ICat;
 
 class CatalogMyDataSearchTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static CatalogMyDataSearchTest *createSuite() {
+    return new CatalogMyDataSearchTest();
+  }
+  static void destroySuite(CatalogMyDataSearchTest *suite) { delete suite; }
+
   /// Skip all unit tests if ICat server is down
   bool skipTests() override { return ICatTestHelper::skipTests(); }
+
+  CatalogMyDataSearchTest() { API::FrameworkManager::Instance(); }
 
   void testInit() {
     Mantid::Kernel::ConfigService::Instance().setString("default.facility",

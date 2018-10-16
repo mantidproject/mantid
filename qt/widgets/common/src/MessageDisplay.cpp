@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------
 // Includes
 //-------------------------------------------
@@ -53,9 +59,8 @@ void MessageDisplay::readSettings(const QSettings &storage) {
  * @param storage A pointer to an existing QSettings instance opened
  * at the group where the values should be stored.
  */
-void MessageDisplay::writeSettings(QSettings *storage) {
-  Q_ASSERT(storage);
-  storage->setValue("MessageDisplayPriority", Poco::Logger::root().getLevel());
+void MessageDisplay::writeSettings(QSettings &storage) const {
+  storage.setValue("MessageDisplayPriority", Poco::Logger::root().getLevel());
 }
 
 /**

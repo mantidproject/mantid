@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
@@ -10,7 +17,6 @@
 
 namespace Mantid {
 namespace Geometry {
-
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument
@@ -341,6 +347,16 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   static_cast<void>(getDetector(index));
   return m_lastDetector[thread];
+}
+
+// Begin method for iterator
+DetectorInfoIterator DetectorInfo::begin() const {
+  return DetectorInfoIterator(*this, 0);
+}
+
+// End method for iterator
+DetectorInfoIterator DetectorInfo::end() const {
+  return DetectorInfoIterator(*this, size());
 }
 
 } // namespace Geometry

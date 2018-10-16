@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
@@ -40,6 +46,33 @@ void addPyTimeValue(TimeSeriesProperty<TYPE> &self,
 // Call the dtype helper function
 template <typename TYPE> std::string dtype(TimeSeriesProperty<TYPE> &self) {
   return Mantid::PythonInterface::Converters::dtype(self);
+}
+
+// Check for the special case of a string
+template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
+  // Vector of ints to store the sizes of each of the strings
+  std::vector<size_t> stringSizes;
+
+  // Block allocate memory
+  stringSizes.reserve(self.size());
+
+  // Loop for the number of strings in self
+  for (int i = 0; i < self.size(); i++) {
+    // For each string store the number of characters
+    std::string val = self.nthValue(i);
+    size_t size = val.size();
+    stringSizes.emplace_back(size);
+  }
+
+  // Find the maximum number of characters
+  size_t max =
+      *std::max_element(std::begin(stringSizes), std::end(stringSizes));
+
+  // Create the string to return
+  std::stringstream ss;
+  ss << "S" << max;
+  std::string retVal = ss.str();
+  return retVal;
 }
 
 // Macro to reduce copy-and-paste

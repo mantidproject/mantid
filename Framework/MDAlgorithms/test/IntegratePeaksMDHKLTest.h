@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDAGORITHMS_INTEGRATEPEAKSMDHKLTEST_H_
 #define MANTID_MDAGORITHMS_INTEGRATEPEAKSMDHKLTEST_H_
 
@@ -31,6 +37,12 @@ using Mantid::Kernel::V3D;
 
 class IntegratePeaksMDHKLTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static IntegratePeaksMDHKLTest *createSuite() {
+    return new IntegratePeaksMDHKLTest();
+  }
+  static void destroySuite(IntegratePeaksMDHKLTest *suite) { delete suite; }
+
   IntegratePeaksMDHKLTest() { Mantid::API::FrameworkManager::Instance(); }
   ~IntegratePeaksMDHKLTest() override {}
 

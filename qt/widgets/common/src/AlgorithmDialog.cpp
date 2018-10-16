@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
@@ -944,7 +950,7 @@ QString AlgorithmDialog::getValue(QWidget *widget) {
   }
 }
 
-QString AlgorithmDialog::getPreviousValue(const QString &propName) {
+QString AlgorithmDialog::getPreviousValue(const QString &propName) const {
   QString value;
 
   if (!isForScript()) {

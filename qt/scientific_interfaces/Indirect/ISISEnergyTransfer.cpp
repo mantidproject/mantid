@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 
 #include "../General/UserInputValidator.h"
@@ -5,6 +11,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <QFileInfo>
+
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
@@ -48,6 +56,17 @@ std::string createDetectorGroupingString(std::size_t numberOfDetectors,
                                       numberOfDetectors);
 }
 
+std::vector<std::size_t>
+getCustomGroupingNumbers(std::string const &customString) {
+  std::vector<std::string> customGroupingStrings;
+  std::vector<std::size_t> customGroupingNumbers;
+  // Get the numbers from customString and store them in customGroupingStrings
+  boost::split(customGroupingStrings, customString, boost::is_any_of(" ,-+:"));
+  for (const auto &string : customGroupingStrings)
+    if (!string.empty())
+      customGroupingNumbers.emplace_back(std::stoull(string));
+  return customGroupingNumbers;
+}
 } // namespace
 
 namespace MantidQt {
@@ -230,14 +249,36 @@ bool ISISEnergyTransfer::validate() {
   return uiv.isAllInputValid();
 }
 
-QString ISISEnergyTransfer::validateDetectorGrouping() {
+bool ISISEnergyTransfer::numberInCorrectRange(
+    std::size_t const &spectraNumber) const {
+  QMap<QString, QString> instDetails = getInstrumentDetails();
+  auto spectraMin =
+      static_cast<std::size_t>(instDetails["spectra-min"].toInt());
+  auto spectraMax =
+      static_cast<std::size_t>(instDetails["spectra-max"].toInt());
+  return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
+}
+
+QString ISISEnergyTransfer::checkCustomGroupingNumbersInRange(
+    std::vector<std::size_t> const &customGroupingNumbers) const {
+  for (const auto &number : customGroupingNumbers)
+    if (!numberInCorrectRange(number))
+      return "Please supply a custom grouping within the correct range";
+  return "";
+}
+
+QString ISISEnergyTransfer::validateDetectorGrouping() const {
   if (m_uiForm.cbGroupingOptions->currentText() == "File") {
     if (!m_uiForm.dsMapFile->isValid())
       return "Mapping file is invalid.";
-  }
-  if (m_uiForm.cbGroupingOptions->currentText() == "Custom") {
-    if (m_uiForm.leCustomGroups->text() == "")
+  } else if (m_uiForm.cbGroupingOptions->currentText() == "Custom") {
+    const std::string customString =
+        m_uiForm.leCustomGroups->text().toStdString();
+    if (customString.empty())
       return "Please supply a custom grouping for detectors.";
+    else
+      return checkCustomGroupingNumbersInRange(
+          getCustomGroupingNumbers(customString));
   }
   return "";
 }
@@ -316,6 +357,7 @@ void ISISEnergyTransfer::run() {
 
   std::pair<std::string, std::string> grouping =
       createMapFile(m_uiForm.cbGroupingOptions->currentText().toStdString());
+
   reductionAlg->setProperty("GroupingMethod", grouping.first);
 
   if (grouping.first == "File")
@@ -375,6 +417,37 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   m_uiForm.ckSaveSPE->setEnabled(true);
 }
 
+int ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
+  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
+    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
+      return i;
+  return 0;
+}
+
+bool ISISEnergyTransfer::isOptionHidden(QString const &option) {
+  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
+    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
+      return false;
+  return true;
+}
+
+void ISISEnergyTransfer::setCurrentGroupingOption(QString const &option) {
+  m_uiForm.cbGroupingOptions->setCurrentIndex(getGroupingOptionIndex(option));
+}
+
+void ISISEnergyTransfer::removeGroupingOption(QString const &option) {
+  m_uiForm.cbGroupingOptions->removeItem(getGroupingOptionIndex(option));
+}
+
+void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
+                                                    QString const &option) {
+  if (includeOption && isOptionHidden(option)) {
+    m_uiForm.cbGroupingOptions->addItem(option);
+    setCurrentGroupingOption(option);
+  } else if (!includeOption && !isOptionHidden(option))
+    removeGroupingOption(option);
+}
+
 /**
  * Called when the instrument has changed, used to update default values.
  */
@@ -388,6 +461,12 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   qens << "IRIS"
        << "OSIRIS";
   m_uiForm.spEfixed->setEnabled(qens.contains(instDetails["instrument"]));
+
+  QStringList allowDefaultGroupingInstruments;
+  allowDefaultGroupingInstruments << "TOSCA";
+  includeExtraGroupingOption(
+      allowDefaultGroupingInstruments.contains(instDetails["instrument"]),
+      "Default");
 
   if (instDetails["spectra-min"].isEmpty() ||
       instDetails["spectra-max"].isEmpty()) {

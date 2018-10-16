@@ -60,6 +60,7 @@ set ( EXPORT_FILES
   src/Exports/UsageService.cpp
   src/Exports/Atom.cpp
   src/Exports/StringContainsValidator.cpp
+  src/Exports/PropertyFactory.cpp	
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )
@@ -69,30 +70,22 @@ create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
 # Helper code
 #############################################################################################
 set ( SRC_FILES
-  src/NdArray.cpp
   src/Converters/CloneToNumpy.cpp
   src/Converters/DateAndTime.cpp
   src/Converters/NDArrayToVector.cpp
-  src/Converters/NDArrayTypeIndex.cpp
   src/Converters/NumpyFunctions.cpp
-  src/Converters/PyArrayType.cpp
   src/Converters/PyObjectToMatrix.cpp
   src/Converters/PyObjectToString.cpp
   src/Converters/PyObjectToV3D.cpp
   src/Converters/PyObjectToVMD.cpp
-  src/Converters/WrapWithNumpy.cpp
   src/Registry/MappingTypeHandler.cpp
   src/Registry/PropertyManagerFactory.cpp
   src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
-  src/Environment/ErrorHandling.cpp
-  src/Environment/GlobalInterpreterLock.cpp
-  src/Environment/WrapperHelpers.cpp
 )
 
 set ( INC_FILES
-  ${HEADER_DIR}/kernel/NdArray.h
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/CloneToNumpy.h
   ${HEADER_DIR}/kernel/Converters/ContainerDtype.h
@@ -101,19 +94,11 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
   ${HEADER_DIR}/kernel/Converters/NumpyFunctions.h
   ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
-  ${HEADER_DIR}/kernel/Converters/NDArrayTypeIndex.h
-  ${HEADER_DIR}/kernel/Converters/WrapWithNumpy.h
-  ${HEADER_DIR}/kernel/Converters/VectorToNDArray.h
-  ${HEADER_DIR}/kernel/Converters/PyArrayType.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToString.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToVMD.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
-  ${HEADER_DIR}/kernel/Environment/CallMethod.h
-  ${HEADER_DIR}/kernel/Environment/ErrorHandling.h
-  ${HEADER_DIR}/kernel/Environment/GlobalInterpreterLock.h
-  ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
   ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
   ${HEADER_DIR}/kernel/Policies/RemoveConst.h
   ${HEADER_DIR}/kernel/Policies/ToWeakPtr.h
@@ -197,9 +182,9 @@ add_library ( PythonKernelModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILE
 set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonKernelModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} Types Kernel ${Boost_LIBRARIES}
-                        ${PYTHON_LIBRARIES} ${PYTHON_DEPS} ${POCO_LIBRARIES} ${TBB_LIBRARIES}
-			${TBB_MALLOC_LIBRARIES} )
+target_link_libraries ( PythonKernelModule PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} PythonInterfaceCore
+                        Types Kernel ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PYTHON_DEPS} ${POCO_LIBRARIES}
+                        ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS")

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes,super-on-old-class,too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
@@ -236,8 +242,8 @@ class DimensionSelectorWidget(QtGui.QWidget):
             else:
                 try:
                     tempvalue=float(sender.text())
+                    self.dimMin[senderIndex]=tempvalue
                     if tempvalue<self.dimMax[senderIndex]:
-                        self.dimMin[senderIndex]=tempvalue
                         color = '#ffffff'
                     else:
                         color = '#ff0000'
@@ -250,8 +256,8 @@ class DimensionSelectorWidget(QtGui.QWidget):
                 color = '#ffffff'
             else:
                 tempvalue=float(sender.text())
+                self.dimMax[senderIndex]=tempvalue
                 if tempvalue>self.dimMin[senderIndex]:
-                    self.dimMax[senderIndex]=tempvalue
                     color = '#ffffff'
                 else:
                     color = '#ff0000'

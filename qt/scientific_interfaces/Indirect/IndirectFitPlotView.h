@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTVIEW_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTVIEW_H_
 
@@ -46,14 +52,10 @@ public:
   void removeFromTopPreview(const QString &name);
   void removeFromBottomPreview(const QString &name);
 
-  void disablePlotGuess();
-  void enablePlotGuess();
-
-  void disableSpectrumSelection();
-  void enableSpectrumSelection();
-
-  void disableFitRangeSelection();
-  void enableFitRangeSelection();
+  void enableFitSingleSpectrum(bool enable);
+  void enablePlotGuess(bool enable);
+  void enableSpectrumSelection(bool enable);
+  void enableFitRangeSelection(bool enable);
 
   void setBackgroundLevel(double value);
 
@@ -63,6 +65,8 @@ public:
 
   void setBackgroundRangeVisible(bool visible);
   void setHWHMRangeVisible(bool visible);
+
+  void displayMessage(const std::string &message) const;
 
 public slots:
   void clearTopPreview();
@@ -92,6 +96,8 @@ private slots:
   void emitPlotGuessChanged(int);
 
 private:
+  std::string getSpectrumText() const;
+
   void addFitRangeSelector();
   void addBackgroundRangeSelector();
   void addHWHMRangeSelector();

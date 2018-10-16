@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_JUMPFITMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_JUMPFITMODEL_H_
 
@@ -50,6 +56,7 @@ private:
                        const std::string &hwhmName);
   std::unordered_map<std::string, JumpFitParameters>::const_iterator
   findJumpFitParameters(std::size_t dataIndex) const;
+  std::string getResultXAxisUnit() const override;
 
   std::string m_fitType;
   std::unordered_map<std::string, JumpFitParameters> m_jumpParameters;

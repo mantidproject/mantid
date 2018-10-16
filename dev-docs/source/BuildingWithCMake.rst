@@ -64,6 +64,7 @@ From the command line
 * If you want to use a specific generator (run ``cmake --help`` for a list of available generators for your platform), use the ``-G`` option, e.g. ``cmake -G"NMake Makefiles" /path/to/Mantid``.
 * If you want to set the build type (e.g. Release, Debug) you can run cmake with the ``-i`` option or by passing the argument ``-DCMAKE_BUILD_TYPE=Debug`` to cmake. The default is Release.
 * Please note that the executable is called ``cmake3`` on Red Hat 7 / CentOS7.
+* On Red Hat 7 / CentOS7 mantid uses `devtoolset-7 <https://www.softwarecollections.org/en/scls/rhscl/devtoolset-7/>`_. This means that you need to wrap your initial ``cmake`` command as ``scl enable devtoolset-7 "cmake3 /path/to/source"``
 
 From the CMake gui
 ------------------

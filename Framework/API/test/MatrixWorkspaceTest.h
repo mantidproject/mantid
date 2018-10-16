@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
@@ -2036,6 +2042,11 @@ public:
     TSM_ASSERT_EQUALS(
         "workspace with it's oriented lattice cleared should report false",
         ws->hasOrientedLattice(), false);
+  }
+
+  void test_isGroup() {
+    boost::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
+    TS_ASSERT_EQUALS(ws->isGroup(), false);
   }
 
 private:

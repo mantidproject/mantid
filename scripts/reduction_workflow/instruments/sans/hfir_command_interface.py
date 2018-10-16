@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,unused-import,unused-argument,ungrouped-imports
 """
 
@@ -514,7 +520,7 @@ def NoIQxQy():
 
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0, component_name=""):
     '''
-    Maks edges of a component_name
+    Mask edges of a component_name
     By default is the main detector for both GPSANS and BioSans
     '''
     ReductionSingleton().reduction_properties["MaskedEdges"] = [

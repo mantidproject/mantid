@@ -11,9 +11,12 @@ Description
 -----------
 
 This algorithm is intended to write out portions of an instrument's
-geometry. The resulting file is mean to be copied by-hand into a
-geometry file. The main use of this is if the instrument geometry is
-calibrated in mantid, this algorithm can be used ot help get the
+geometry in the :ref:`Instrument Definition File <InstrumentDefinitionFile>`
+xml format. The resulting file is meant to be copied by-hand into a 
+geometry file, the output is not a useable IDF as written. 
+
+The main use of this algorithm is if the instrument geometry is
+calibrated in mantid, this algorithm can be used to help get the
 information back into the initial instrument definition file.
 
 Usage

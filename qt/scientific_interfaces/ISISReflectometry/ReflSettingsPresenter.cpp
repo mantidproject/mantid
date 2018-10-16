@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflSettingsPresenter.h"
 #include "ExperimentOptionDefaults.h"
 #include "IReflSettingsTabPresenter.h"
@@ -391,15 +397,12 @@ std::string ReflSettingsPresenter::getStitchOptions() const {
 /** Creates hints for 'Stitch1DMany'
  */
 void ReflSettingsPresenter::createStitchHints() {
-
-  // The algorithm
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Stitch1DMany");
-  // The blacklist
-  std::set<std::string> blacklist{"InputWorkspaces", "OutputWorkspace"};
-  AlgorithmHintStrategy strategy(alg, blacklist);
-
+  auto blacklist =
+      std::vector<std::string>({"InputWorkspaces", "OutputWorkspace"});
+  AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
   m_view->createStitchHints(strategy.createHints());
 }
+
 /** Fills experiment settings with default values
  */
 void ReflSettingsPresenter::getExpDefaults() {

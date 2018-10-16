@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_INDEXPROPERTYTEST_H_
 #define MANTID_API_INDEXPROPERTYTEST_H_
 
@@ -125,8 +131,9 @@ public:
 
     auto error = indexProp.setValue("30:35");
 
-    TS_ASSERT_EQUALS(error,
-                     "Indices provided to IndexProperty are out of range.");
+    TS_ASSERT(
+        error.find("Indices provided to IndexProperty are out of range.") !=
+        std::string::npos);
   }
 
   void testIndexAccessWithOperator() {

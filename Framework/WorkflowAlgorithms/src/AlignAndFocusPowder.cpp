@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
@@ -10,7 +16,9 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/PropertyManager.h"
@@ -44,6 +52,11 @@ void AlignAndFocusPowder::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "UnfocussedWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Treated data in d-spacing before focussing (optional). This will likely "
+      "need rebinning.");
   // declareProperty(
   //   new WorkspaceProperty<MatrixWorkspace>("LowResTOFWorkspace", "",
   //   Direction::Output, PropertyMode::Optional),
@@ -116,10 +129,30 @@ void AlignAndFocusPowder::init() {
                   "Width of events (in "
                   "microseconds) near the prompt "
                   "pulse to remove. 0 disables");
-  declareProperty("CompressTolerance", 0.01,
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+  declareProperty(make_unique<PropertyWithValue<double>>("CompressTolerance",
+                                                         1e-5, mustBePositive,
+                                                         Direction::Input),
                   "Compress events (in "
                   "microseconds) within this "
-                  "tolerance. (Default 0.01) ");
+                  "tolerance. (Default 1e-5)");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("CompressWallClockTolerance",
+                                             EMPTY_DBL(), mustBePositive,
+                                             Direction::Input),
+      "The tolerance (in seconds) on the wall-clock time for comparison. Unset "
+      "means compressing all wall-clock times together disabling pulsetime "
+      "resolution.");
+
+  auto dateValidator = boost::make_shared<DateTimeValidator>();
+  dateValidator->allowEmpty(true);
+  declareProperty(
+      "CompressStartTime", "", dateValidator,
+      "An ISO formatted date/time string specifying the timestamp for "
+      "starting filtering. Ignored if WallClockTolerance is not specified. "
+      "Default is start of run",
+      Direction::Input);
   declareProperty("UnwrapRef", 0.,
                   "Reference total flight path for frame "
                   "unwrapping. Zero skips the correction");
@@ -157,6 +190,20 @@ void AlignAndFocusPowder::init() {
                   "Otherwise, the low resolution spectra will have spectrum "
                   "IDs offset from normal ones. ");
   declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
+}
+
+std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  if (!isDefault("UnfocussedWorkspace")) {
+    if (getPropertyValue("OutputWorkspace") ==
+        getPropertyValue("UnfocussedWorkspace")) {
+      result["OutputWorkspace"] = "Cannot be the same as UnfocussedWorkspace";
+      result["UnfocussedWorkspace"] = "Cannot be the same as OutputWorkspace";
+    }
+  }
+
+  return result;
 }
 
 template <typename NumT> struct RegLowVectorPair {
@@ -353,19 +400,27 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = make_unique<Progress>(this, 0., 1., 22);
+  m_progress = make_unique<Progress>(this, 0., 1., 21);
 
   if (m_inputEW) {
     double tolerance = getProperty("CompressTolerance");
     if (tolerance > 0.) {
-      g_log.information() << "running CompressEvents(Tolerance=" << tolerance
-                          << ") started at "
+      double wallClockTolerance = getProperty("CompressWallClockTolerance");
+      g_log.information() << "running CompressEvents(Tolerance=" << tolerance;
+      if (!isEmpty(wallClockTolerance))
+        g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
+      g_log.information() << ") started at "
                           << Types::Core::DateAndTime::getCurrentTime() << "\n";
       API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
       compressAlg->setProperty("InputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
       compressAlg->setProperty("Tolerance", tolerance);
+      if (!isEmpty(wallClockTolerance)) {
+        compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
+        compressAlg->setPropertyValue("StartTime",
+                                      getPropertyValue("CompressStartTime"));
+      }
       compressAlg->executeAsChildAlg();
       m_outputEW = compressAlg->getProperty("OutputWorkspace");
       m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
@@ -588,6 +643,13 @@ void AlignAndFocusPowder::exec() {
     doSortEvents(m_lowResW);
   m_progress->report();
 
+  // copy the output workspace just before `DiffractionFocusing`
+  // this probably should be binned by callers before inspecting
+  if (!isDefault("UnfocussedWorkspace")) {
+    auto wkspCopy = m_outputW->clone();
+    setProperty("UnfocussedWorkspace", std::move(wkspCopy));
+  }
+
   // Diffraction focus
   m_outputW = diffractionFocus(m_outputW);
   if (m_processLowResTOF)
@@ -649,30 +711,26 @@ void AlignAndFocusPowder::exec() {
   double tolerance = getProperty("CompressTolerance");
   m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   if ((m_outputEW) && (tolerance > 0.)) {
-    g_log.information() << "running CompressEvents(Tolerance=" << tolerance
-                        << ") started at "
+    double wallClockTolerance = getProperty("CompressWallClockTolerance");
+    g_log.information() << "running CompressEvents(Tolerance=" << tolerance;
+    if (!isEmpty(wallClockTolerance))
+      g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
+    g_log.information() << ") started at "
                         << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
     compressAlg->setProperty("InputWorkspace", m_outputEW);
     compressAlg->setProperty("OutputWorkspace", m_outputEW);
     compressAlg->setProperty("OutputWorkspace", m_outputEW);
     compressAlg->setProperty("Tolerance", tolerance);
+    if (!isEmpty(wallClockTolerance)) {
+      compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
+      compressAlg->setPropertyValue("StartTime",
+                                    getPropertyValue("CompressStartTime"));
+    }
     compressAlg->executeAsChildAlg();
     m_outputEW = compressAlg->getProperty("OutputWorkspace");
     m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
   }
-  m_progress->report();
-
-  if ((!m_params.empty()) && (m_params.size() != 1)) {
-    m_params.erase(m_params.begin());
-    m_params.pop_back();
-  }
-  if (!m_dmins.empty())
-    m_dmins.clear();
-  if (!m_dmaxs.empty())
-    m_dmaxs.clear();
-
-  m_outputW = rebin(m_outputW);
   m_progress->report();
 
   // return the output workspace

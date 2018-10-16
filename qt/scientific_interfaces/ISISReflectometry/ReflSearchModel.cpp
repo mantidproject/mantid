@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflSearchModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -62,6 +68,10 @@ void ReflSearchModel::addDataFromTable(
     const std::string description = tableWorkspace->String(i, 6);
     const std::string location = tableWorkspace->String(i, 1);
     newRunDetails[run] = SearchResult{description, location};
+  }
+
+  if (newRunDetails.empty()) {
+    return;
   }
 
   // To append, insert the new runs after the last element in the model

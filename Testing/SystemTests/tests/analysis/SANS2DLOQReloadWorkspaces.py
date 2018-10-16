@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
@@ -78,7 +84,7 @@ class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
 
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
         # it is different, because, it will compose the name using its rule,
-        # wich, for sure, will be different of my_workspace.
+        # which, for sure, will be different of my_workspace.
         self.assertFalse(ws_name==my_workspace.name())
         self.assertFalse(mtd[ws_name].dataY(0)[10]==5)
         # it is not necessary to ensure the Reduce occurs
@@ -97,7 +103,7 @@ class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
         # the workspace is renamed, so it seems another workspace
         my_workspace = RenameWorkspace(ws_name)
-        ## trying to assing it again to AssingSample must fail
+        ## trying to assign it again to AssingSample must fail
         self.assertRaises(RuntimeError, AssignSample, my_workspace, False)
 
 

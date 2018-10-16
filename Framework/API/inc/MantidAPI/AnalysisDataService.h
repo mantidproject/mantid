@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_ANALYSISDATASERVICE_H_
 #define MANTID_KERNEL_ANALYSISDATASERVICE_H_
 
@@ -23,9 +29,8 @@ class WorkspaceGroup;
 
 /** The Analysis data service stores instances of the Workspace objects and
     anything that derives from template class
-   DynamicFactory<Mantid::Kernel::IAlgorithm>.
-    This is the primary data service that
-    the users will interact with either through writing scripts or directly
+    DynamicFactory<Mantid::Kernel::IAlgorithm>. This is the primary data service
+    that the users will interact with either through writing scripts or directly
     through the API. It is implemented as a singleton class.
 
     This is the manager/owner of Workspace* when registered.
@@ -35,26 +40,6 @@ class WorkspaceGroup;
     @author L C Chapon, ISIS, Rutherford Appleton Laboratory
 
     Modified to inherit from DataService
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AnalysisDataServiceImpl final
     : public Kernel::DataService<API::Workspace> {
@@ -78,8 +63,7 @@ public:
   };
 
   /// UnGroupingWorkspace notification is sent from UnGroupWorkspace algorithm
-  /// before the WorkspaceGroup is removed from the
-  /// DataService
+  /// before the WorkspaceGroup is removed from the DataService
   class UnGroupingWorkspaceNotification : public DataServiceNotification {
   public:
     /// Constructor
@@ -88,8 +72,8 @@ public:
         : DataServiceNotification(name, obj) {}
   };
 
-  /// GroupWorkspaces notification is send when a group is updated by adding or
-  /// removing members.
+  /// GroupWorkspaces notification is send when a group is updated by adding
+  /// or removing members.
   /// Disable observing the ADS by a group
   /// (WorkspaceGroup::observeADSNotifications(false))
   /// to prevent sending this notification.
@@ -110,12 +94,12 @@ public:
   void setIllegalCharacterList(const std::string &);
   /// Is the given name a valid name for an object in the ADS
   const std::string isValid(const std::string &name) const;
-  /// Overridden add member to attach the name to the workspace when a workspace
-  /// object is added to the service
+  /// Overridden add member to attach the name to the workspace when a
+  /// workspace object is added to the service
   void add(const std::string &name,
            const boost::shared_ptr<API::Workspace> &workspace) override;
-  /// Overridden addOrReplace member to attach the name to the workspace when a
-  /// workspace object is added to the service
+  /// Overridden addOrReplace member to attach the name to the workspace when
+  /// a workspace object is added to the service
   void
   addOrReplace(const std::string &name,
                const boost::shared_ptr<API::Workspace> &workspace) override;
@@ -128,25 +112,26 @@ public:
   /** Retrieve a workspace and cast it to the given WSTYPE
    *
    * @param name :: name of the workspace
-   * @tparam WSTYPE :: type of workspace to cast to. Should sub-class Workspace
+   * @tparam WSTYPE :: type of workspace to cast to. Should sub-class
+   * Workspace
    * @return a shared pointer of WSTYPE
    */
   template <typename WSTYPE>
   boost::shared_ptr<WSTYPE> retrieveWS(const std::string &name) const {
     // Get as a bare workspace
     try {
-      boost::shared_ptr<Mantid::API::Workspace> workspace =
-          Kernel::DataService<API::Workspace>::retrieve(name);
       // Cast to the desired type and return that.
-      return boost::dynamic_pointer_cast<WSTYPE>(workspace);
+      return boost::dynamic_pointer_cast<WSTYPE>(
+          Kernel::DataService<API::Workspace>::retrieve(name));
 
     } catch (Kernel::Exception::NotFoundError &) {
-      throw Kernel::Exception::NotFoundError(
-          "Unable to find workspace type with name '" + name +
-              "': data service ",
-          name);
+      throw;
     }
   }
+
+  std::vector<Workspace_sptr>
+  retrieveWorkspaces(const std::vector<std::string> &names,
+                     bool unrollGroups = false) const;
 
   /** @name Methods to work with workspace groups */
   //@{

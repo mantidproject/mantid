@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_NEARESTNEIGHBOURSTEST_H_
 #define MANTID_KERNEL_NEARESTNEIGHBOURSTEST_H_
 
@@ -9,6 +15,12 @@ using namespace Eigen;
 
 class NearestNeighboursTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static NearestNeighboursTest *createSuite() {
+    return new NearestNeighboursTest();
+  }
+  static void destroySuite(NearestNeighboursTest *suite) { delete suite; }
+
   NearestNeighboursTest() {}
 
   void test_construct() {

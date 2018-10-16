@@ -13,7 +13,7 @@ This algorithm can be run in two modes. The first is construct, which takes a us
 
 .. math:: N_0[1+f(t)] + A\exp(-\lambda t)
 
-where :math:`N_0` is the normalisation constant, :math:`A`  is fixed to zero by default and :math:`\lambda` is fixed to the Muon lifetime. The inital value for the normalisation constant is from the normalisation table. 
+where :math:`N_0` is the normalisation constant, :math:`A`  is fixed to zero by default and :math:`\lambda` is fixed to the Muon lifetime. The initial value for the normalisation constant is from the normalisation table. 
 
 The second mode is extract, if the TF normalisation function is given it will return the user function.
 

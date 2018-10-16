@@ -14,7 +14,7 @@ to the :ref:`DetectorDiagnostic <algm-DetectorDiagnostic>`
 algorithm. The diagram below shows the manipulations
 done by this algorithm. Workspaces that have dashed lines are optional. Parameters
 in italics are retrieved from the
-`instrument parameter file (IPF) <http://www.mantidproject.org/InstrumentParameterFile>`_
+:ref:`instrument parameter file (IPF) <InstrumentParameterFile>`
 unless they are provided to the algorithm via a property manager. The mappings for
 these parameters are shown below.
 
@@ -96,7 +96,7 @@ Usage
 
 .. warning::
 
-    This algorithm is not really intented for use at the command line, but is used
+    This algorithm is not really intended for use at the command line, but is used
     within :ref:`DgsReduction <algm-DgsReduction>`.
 
 .. categories::

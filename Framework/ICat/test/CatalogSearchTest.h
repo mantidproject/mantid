@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SEARCHBYADVANCED_H_
 #define SEARCHBYADVANCED_H_
 
@@ -12,6 +18,10 @@ using namespace Mantid;
 using namespace Mantid::ICat;
 class CatalogSearchTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static CatalogSearchTest *createSuite() { return new CatalogSearchTest(); }
+  static void destroySuite(CatalogSearchTest *suite) { delete suite; }
+
   /// Skip all unit tests if ICat server is down
   bool skipTests() override { return ICatTestHelper::skipTests(); }
 

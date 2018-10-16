@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadAscii2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -79,9 +85,9 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   m_spectrumIDcount = 0;
 
   m_spectra.clear();
-  m_curSpectra =
-      new DataObjects::Histogram1D(HistogramData::Histogram::XMode::Points,
-                                   HistogramData::Histogram::YMode::Counts);
+  m_curSpectra = Kernel::make_unique<DataObjects::Histogram1D>(
+      HistogramData::Histogram::XMode::Points,
+      HistogramData::Histogram::YMode::Counts);
   std::string line;
 
   std::list<std::string> columns;
@@ -123,7 +129,7 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
         << e.what();
     throw std::runtime_error(msg.str());
   }
-  delete m_curSpectra;
+  m_curSpectra.reset();
   return localWorkspace;
 }
 
@@ -514,13 +520,12 @@ void LoadAscii2::newSpectra() {
           m_curSpectra->setPointStandardDeviations(std::move(m_curDx));
         m_spectra.push_back(*m_curSpectra);
       }
-      delete m_curSpectra;
-      m_curSpectra = nullptr;
+      m_curSpectra.reset();
     }
 
-    m_curSpectra =
-        new DataObjects::Histogram1D(HistogramData::Histogram::XMode::Points,
-                                     HistogramData::Histogram::YMode::Counts);
+    m_curSpectra = Kernel::make_unique<DataObjects::Histogram1D>(
+        HistogramData::Histogram::XMode::Points,
+        HistogramData::Histogram::YMode::Counts);
     m_curDx.clear();
     m_spectraStart = true;
   }

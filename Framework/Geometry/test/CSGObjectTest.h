@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTCSGOBJECT__
 #define MANTID_TESTCSGOBJECT__
 
@@ -145,8 +151,9 @@ public:
     auto testMaterial =
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
     auto geom_obj = createUnitCube();
-    TS_ASSERT_THROWS_NOTHING(geom_obj->cloneWithMaterial(testMaterial));
-    auto cloned_obj = geom_obj->cloneWithMaterial(testMaterial);
+    std::unique_ptr<IObject> cloned_obj;
+    TS_ASSERT_THROWS_NOTHING(
+        cloned_obj.reset(geom_obj->cloneWithMaterial(testMaterial)));
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      cloned_obj->material().numberDensity(), 1e-12);
   }

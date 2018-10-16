@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2018 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, print_function
 
 import re
@@ -22,8 +15,7 @@ from qtpy.QtCore import Qt, Signal, QMutex, QMutexLocker
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QHeaderView, QLineEdit,
                             QMenu, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
-import qtawesome as qta
-
+from mantidqt.icons import get_icon
 from mantidqt.utils.flowlayout import FlowLayout
 from mantidqt.py3compat.enum import IntEnum
 from workbench.plotting.qappthreadcall import QAppThreadCall
@@ -629,14 +621,14 @@ class PlotNameWidget(QWidget):
         self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.line_edit.editingFinished.connect(self.rename_plot)
 
-        shown_icon = qta.icon('fa.eye')
+        shown_icon = get_icon('fa.eye')
         self.hide_button = QPushButton(shown_icon, "")
         self.hide_button.setToolTip('Hide')
         self.hide_button.setFlat(True)
         self.hide_button.setMaximumWidth(self.hide_button.iconSize().width() * 5 / 3)
         self.hide_button.clicked.connect(self.toggle_visibility)
 
-        rename_icon = qta.icon('fa.edit')
+        rename_icon = get_icon('fa.edit')
         self.rename_button = QPushButton(rename_icon, "")
         self.rename_button.setToolTip('Rename')
         self.rename_button.setFlat(True)
@@ -644,7 +636,7 @@ class PlotNameWidget(QWidget):
         self.rename_button.setCheckable(True)
         self.rename_button.toggled.connect(self.rename_button_toggled)
 
-        close_icon = qta.icon('fa.close')
+        close_icon = get_icon('fa.close')
         self.close_button = QPushButton(close_icon, "")
         self.close_button.setToolTip('Delete')
         self.close_button.setFlat(True)
@@ -729,10 +721,10 @@ class PlotNameWidget(QWidget):
         :param is_shown: True if plot is shown, false if hidden
         """
         if is_shown:
-            self.hide_button.setIcon(qta.icon('fa.eye'))
+            self.hide_button.setIcon(get_icon('fa.eye'))
             self.hide_button.setToolTip('Hide')
         else:
-            self.hide_button.setIcon(qta.icon('fa.eye', color='lightgrey'))
+            self.hide_button.setIcon(get_icon('fa.eye', color='lightgrey'))
             self.hide_button.setToolTip('Show')
 
     def rename_plot(self):

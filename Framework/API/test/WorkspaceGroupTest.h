@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_WORKSPACEGROUPTEST_H_
 #define MANTID_API_WORKSPACEGROUPTEST_H_
 
@@ -345,6 +351,11 @@ public:
     group->addWorkspace(a);
     add_periods_logs(group, 1);
     TS_ASSERT(group->isMultiperiod());
+  }
+
+  void test_isGroup() {
+    WorkspaceGroup_sptr group = makeGroup();
+    TS_ASSERT_EQUALS(group->isGroup(), true);
   }
 
   void test_isInGroup() {

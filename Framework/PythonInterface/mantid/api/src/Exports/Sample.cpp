@@ -1,4 +1,11 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Sample.h"
+
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Material.h"
@@ -65,6 +72,9 @@ void export_Sample() {
            "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")),
            "Set the width in mm.")
+      .def("getShape", &Sample::getShape, arg("self"),
+           "Returns a shape of a Sample object.",
+           return_value_policy<reference_existing_object>())
       // -------------------------Operators
       // -------------------------------------
       .def("__len__", &Sample::size, arg("self"),

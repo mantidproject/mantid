@@ -98,7 +98,7 @@ Some events are not inside any splitters. They are put to a workspace
 name ended with '\_unfiltered'.
 
 If input property 'OutputWorkspaceIndexedFrom1' is set to True, then
-this workspace shall not be outputed.
+this workspace shall not be outputted.
 
 Using FilterEvents with fast-changing logs
 ##########################################

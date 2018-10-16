@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FILEPROPERTYTEST_H_
 #define FILEPROPERTYTEST_H_
 
@@ -166,7 +172,11 @@ public:
     std::string TestDir("my_nonexistent_folder");
     std::string msg = fp.setValue(TestDir);
     // It gives an error message starting "Directory "X" not found".
-    TS_ASSERT_EQUALS(msg.substr(0, 3), "Dir");
+    auto pos = msg.find("Directory");
+    TS_ASSERT(pos != std::string::npos);
+    // "not found" comes after "Directory"
+    TS_ASSERT(msg.find("not found", pos) !=
+              std::string::npos); //.substr(0, 3), "Dir");
   }
 
   void testDirectoryPasses() {

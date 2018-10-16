@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_EVENTWORKSPACE_H_
 #define MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ 1
 
@@ -112,7 +118,10 @@ public:
                                   bool skipError = false) const;
 
   // Set the x-axis data (histogram bins) for all pixels
-  virtual void setAllX(const HistogramData::BinEdges &x);
+  void setAllX(const HistogramData::BinEdges &x) override;
+
+  // Update all X values to fit around all events
+  void resetAllXToSingleBin() override;
 
   // The total number of events across all of the spectra.
   std::size_t getNumberEvents() const override;

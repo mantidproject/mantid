@@ -1,28 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
 
 # 3rd party imports
-import qtawesome as qta
+from mantid.api import MatrixWorkspace
 from qtpy.QtWidgets import QDialogButtonBox
 
 # local imports
+from mantidqt.icons import get_icon
 from mantidqt.utils.qt import load_ui
 
 # Constants
@@ -34,7 +28,7 @@ RED_ASTERISK = None
 def red_asterisk():
     global RED_ASTERISK
     if RED_ASTERISK is None:
-        RED_ASTERISK = qta.icon('fa.asterisk', color='red', scale_factor=0.6)
+        RED_ASTERISK = get_icon('fa.asterisk', color='red', scale_factor=0.6)
     return RED_ASTERISK
 
 
@@ -54,9 +48,17 @@ class SpectraSelection(object):
 
 class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
+    @staticmethod
+    def raise_error_if_workspaces_not_compatible(workspaces):
+        for ws in workspaces:
+            if not isinstance(ws, MatrixWorkspace):
+                raise ValueError("Expected MatrixWorkspace, found {}.".format(ws.__class__.__name__))
+
     def __init__(self, workspaces,
                  parent=None):
         super(SpectraSelectionDialog, self).__init__(parent)
+        self.raise_error_if_workspaces_not_compatible(workspaces)
+
         # attributes
         self._workspaces = workspaces
         self.spec_min, self.spec_max = None, None
@@ -78,6 +80,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self.accept()
 
     # ------------------- Private -------------------------
+
     def _init_ui(self):
         ui = SpectraSelectionDialogUI()
         ui.setupUi(self)
@@ -161,17 +164,19 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         return self.selection is not None
 
 
-def get_spectra_selection(workspaces, parent_widget):
+def get_spectra_selection(workspaces, parent_widget=None):
     """Decides whether it is necessary to request user input
     when asked to plot a list of workspaces. The input
     dialog will only be shown in the case where all workspaces
     have more than 1 spectrum
 
     :param workspaces: A list of MatrixWorkspaces that will be plotted
-    :param parent_widget: A parent_widget to use for the input selection dialog
+    :param parent_widget: An optional parent_widget to use for the input selection dialog
     :returns: Either a SpectraSelection object containing the details of workspaces to plot or None indicating
     the request was cancelled
+    :raises ValueError: if the workspaces are not of type MatrixWorkspace
     """
+    SpectraSelectionDialog.raise_error_if_workspaces_not_compatible(workspaces)
     single_spectra_ws = [wksp.getNumberHistograms() for wksp in workspaces if wksp.getNumberHistograms() == 1]
     if len(single_spectra_ws) > 0:
         # At least 1 workspace contains only a single spectrum so this is all

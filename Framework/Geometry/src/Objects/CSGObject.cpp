@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/CSGObject.h"
 
 #include "MantidGeometry/Objects/Rules.h"
@@ -134,7 +140,8 @@ bool CSGObject::hasValidShape() const {
  */
 int CSGObject::setObject(const int ON, const std::string &Ln) {
   // Split line
-  const boost::regex letters("[a-zA-Z]"); // Does the string now contain junk...
+  // Does the string now contain junk...
+  static const boost::regex letters("[a-zA-Z]");
   if (Mantid::Kernel::Strings::StrLook(Ln, letters))
     return 0;
 

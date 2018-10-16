@@ -1,3 +1,5 @@
+.. _AddSpinBox:
+
 ==============
 Add a Spin Box
 ==============

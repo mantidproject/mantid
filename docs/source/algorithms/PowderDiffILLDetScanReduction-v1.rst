@@ -24,11 +24,12 @@ Calibration
 -----------
 
 The NeXus files for D2B contain raw data and pre-calibrated data. Either of these can be used when loading.
+Note that, when reading the calibrated data, the even-numbered tubes will not be flipped, since they are flipped in the nexus files already.
 
 Normalisation Options
 ---------------------
 
-The default is for normalisation to monitor, but this can be skipped.
+The default is for normalisation to monitor, in which case the counts will be scaled up by 10ˆ6 after dividing by monitor counts.
 
 Output
 ------
@@ -85,9 +86,9 @@ Output:
 
 .. testoutput:: ExPowderDiffDetScanILLReduction
 
-    '2DTubes' output workspace has 128 diffractograms having 3025 bins each
-    '2D' output workspace has 128 diffractograms having 3025 bins each
-    '1D' output workspace has 1 diffractograms having 3025 bins each
+    '2DTubes' output workspace has 128 diffractograms having 3024 bins each
+    '2D' output workspace has 128 diffractograms having 3024 bins each
+    '1D' output workspace has 1 diffractograms having 3024 bins each
 
 .. testcleanup:: ExPowderDiffDetScanILLReduction
 

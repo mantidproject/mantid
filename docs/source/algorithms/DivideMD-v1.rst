@@ -27,7 +27,7 @@ The error of :math:`f = a / b` is propagated with
 
    -  This is not allowed.
 
--  **`MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_'s**
+-  **:ref:`MDEventWorkspace <MDWorkspace>`'s**
 
    -  This operation is not supported, as it is not clear what its
       meaning would be.

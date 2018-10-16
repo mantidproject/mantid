@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // SaveNexusProcessed
 // @author Ronald Fowler, based on SaveNexus
 #include "MantidDataHandling/SaveNexusProcessed.h"
@@ -15,7 +21,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <Poco/File.h>
-#include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
@@ -220,7 +225,7 @@ void SaveNexusProcessed::doExec(
   nexusFile->openNexusWrite(m_filename, entryNumber);
 
   // Equivalent C++ API handle
-  auto cppFile = new ::NeXus::File(nexusFile->fileID);
+  ::NeXus::File cppFile(nexusFile->fileID);
 
   prog_init.reportIncrement(1, "Opening file");
   if (nexusFile->writeNexusProcessedHeader(m_title, wsName) != 0)
@@ -231,7 +236,7 @@ void SaveNexusProcessed::doExec(
   // write instrument data, if present and writer enabled
   if (matrixWorkspace) {
     // Save the instrument names, ParameterMap, sample, run
-    matrixWorkspace->saveExperimentInfoNexus(cppFile);
+    matrixWorkspace->saveExperimentInfoNexus(&cppFile);
     prog_init.reportIncrement(1, "Writing sample and instrument");
 
     // check if all X() are in fact the same array
@@ -256,23 +261,21 @@ void SaveNexusProcessed::doExec(
                                            spec, "workspace", true);
     }
 
-    cppFile->openGroup("instrument", "NXinstrument");
-    saveSpectraMapNexus(*matrixWorkspace, cppFile, spec, ::NeXus::LZW);
-    cppFile->closeGroup();
+    cppFile.openGroup("instrument", "NXinstrument");
+    saveSpectraMapNexus(*matrixWorkspace, &cppFile, spec, ::NeXus::LZW);
+    cppFile.closeGroup();
 
   } // finish matrix workspace specifics
 
   if (peaksWorkspace) {
     // Save the instrument names, ParameterMap, sample, run
-    peaksWorkspace->saveExperimentInfoNexus(cppFile);
+    peaksWorkspace->saveExperimentInfoNexus(&cppFile);
     prog_init.reportIncrement(1, "Writing sample and instrument");
   }
 
   // peaks workspace specifics
   if (peaksWorkspace) {
-    //  g_log.information("Peaks Workspace saving to Nexus would be done");
-    //  int pNum = peaksWorkspace->getNumberPeaks();
-    peaksWorkspace->saveNexus(cppFile);
+    peaksWorkspace->saveNexus(&cppFile);
 
   }                        // finish peaks workspace specifics
   else if (tableWorkspace) // Table workspace specifics
@@ -294,7 +297,7 @@ void SaveNexusProcessed::doExec(
     }
   }
 
-  inputWorkspace->history().saveNexus(cppFile);
+  inputWorkspace->history().saveNexus(&cppFile);
   nexusFile->closeGroup();
 }
 

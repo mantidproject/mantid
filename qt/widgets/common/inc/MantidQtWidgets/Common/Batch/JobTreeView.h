@@ -1,33 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /**
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
-
-Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_JOBTREEVIEW_H_
 #define MANTIDQTMANTIDWIDGETS_JOBTREEVIEW_H_
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
 #include "MantidQtWidgets/Common/Batch/FilteredTreeModel.h"
+#include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include "MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
@@ -41,71 +27,68 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-class EXPORT_OPT_MANTIDQT_COMMON JobTreeViewSubscriber {
-public:
-  virtual void notifyCellTextChanged(RowLocation const &itemIndex, int column,
-                                     std::string const &oldValue,
-                                     std::string const &newValue) = 0;
-  virtual void notifyRowInserted(RowLocation const &newRowLocation) = 0;
-  virtual void notifyRemoveRowsRequested(
-      std::vector<RowLocation> const &locationsOfRowsToRemove) = 0;
-  virtual void notifyCopyRowsRequested() = 0;
-  virtual void notifyPasteRowsRequested() = 0;
-  virtual void notifyFilterReset() = 0;
-  virtual ~JobTreeViewSubscriber() = default;
-};
-
-class EXPORT_OPT_MANTIDQT_COMMON JobTreeView : public QTreeView {
+class EXPORT_OPT_MANTIDQT_COMMON JobTreeView : public QTreeView,
+                                               public IJobTreeView {
   Q_OBJECT
 public:
   JobTreeView(QStringList const &columnHeadings, Cell const &defaultCellStyle,
               QWidget *parent = nullptr);
 
-  void filterRowsBy(std::unique_ptr<RowPredicate> predicate);
-  void filterRowsBy(RowPredicate *predicate);
-  void resetFilter();
-  bool hasFilter() const;
+  void filterRowsBy(std::unique_ptr<RowPredicate> predicate) override;
+  void filterRowsBy(RowPredicate *predicate) override;
+  void resetFilter() override;
+  bool hasFilter() const override;
 
-  void subscribe(JobTreeViewSubscriber &subscriber);
+  void setHintsForColumn(int column,
+                         std::unique_ptr<HintStrategy> hintStrategy) override;
+  void setHintsForColumn(int column, HintStrategy *hintStrategy) override;
 
-  void insertChildRowOf(RowLocation const &parent, int beforeRow,
-                        std::vector<Cell> const &rowText);
-  void insertChildRowOf(RowLocation const &parent, int beforeRow);
-  void appendChildRowOf(RowLocation const &parent);
-  void appendChildRowOf(RowLocation const &parentLocation,
-                        std::vector<Cell> const &rowText);
+  void subscribe(JobTreeViewSubscriber &subscriber) override;
 
-  void removeRowAt(RowLocation const &location);
-  void removeRows(std::vector<RowLocation> rowsToRemove);
-  bool isOnlyChildOfRoot(RowLocation const &index) const;
+  RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow,
+                               std::vector<Cell> const &rowText) override;
+  RowLocation insertChildRowOf(RowLocation const &parent,
+                               int beforeRow) override;
+  RowLocation appendChildRowOf(RowLocation const &parent) override;
+  RowLocation appendChildRowOf(RowLocation const &parentLocation,
+                               std::vector<Cell> const &rowText) override;
 
-  template <typename InputIterator>
-  void removeRows(InputIterator begin, InputIterator end);
+  void removeRowAt(RowLocation const &location) override;
+  void removeAllRows() override;
+  void removeRows(std::vector<RowLocation> rowsToRemove) override;
+  bool isOnlyChildOfRoot(RowLocation const &location) const override;
 
   void replaceRows(std::vector<RowLocation> replacementPoints,
-                   std::vector<Subtree> replacements);
+                   std::vector<Subtree> replacements) override;
 
   void appendSubtreesAt(RowLocation const &parent,
-                        std::vector<Subtree> subtrees);
-  void appendSubtreeAt(RowLocation const &parent, Subtree const &subtree);
+                        std::vector<Subtree> subtrees) override;
+  void appendSubtreeAt(RowLocation const &parent,
+                       Subtree const &subtree) override;
 
   void replaceSubtreeAt(RowLocation const &rootToRemove,
-                        Subtree const &toInsert);
+                        Subtree const &toInsert) override;
   void insertSubtreeAt(RowLocation const &parent, int index,
-                       Subtree const &subtree);
+                       Subtree const &subtree) override;
 
-  std::vector<Cell> cellsAt(RowLocation const &location) const;
+  std::vector<Cell> cellsAt(RowLocation const &location) const override;
   void setCellsAt(RowLocation const &location,
-                  std::vector<Cell> const &rowText);
+                  std::vector<Cell> const &rowText) override;
 
-  Cell cellAt(RowLocation location, int column) const;
-  void setCellAt(RowLocation location, int column, Cell const &cellText);
+  Cell cellAt(RowLocation location, int column) const override;
+  void setCellAt(RowLocation location, int column,
+                 Cell const &cellText) override;
+
+  void clearSelection() override;
+  void expandAll() override;
+  void collapseAll() override;
 
   QModelIndex moveCursor(CursorAction cursorAction,
                          Qt::KeyboardModifiers modifiers) override;
-  std::vector<RowLocation> selectedRowLocations() const;
-  boost::optional<std::vector<Subtree>> selectedSubtrees() const;
-  boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const;
+  std::vector<RowLocation> selectedRowLocations() const override;
+  boost::optional<std::vector<Subtree>> selectedSubtrees() const override;
+  boost::optional<std::vector<RowLocation>>
+  selectedSubtreeRoots() const override;
 
   bool hasNoSelectedDescendants(QModelIndex const &index) const;
   void appendAllUnselectedDescendants(QModelIndexList &selectedRows,
@@ -113,7 +96,7 @@ public:
   QModelIndexList
   findImplicitlySelected(QModelIndexList const &selectedRows) const;
 
-  Cell deadCell() const;
+  Cell deadCell() const override;
   using QTreeView::edit;
 
 protected:
@@ -123,7 +106,9 @@ protected:
   void setHeaderLabels(QStringList const &columnHeadings);
   void removeSelectedRequested();
   void copySelectedRequested();
+  void cutSelectedRequested();
   void pasteSelectedRequested();
+  void enableFiltering();
 
 protected slots:
   void commitData(QWidget *) override;
@@ -174,8 +159,6 @@ private:
   findOrMakeCellBelow(QModelIndexForFilteredModel const &index);
   bool hasEditorOpen() const;
 
-  void enableFiltering();
-
   QtTreeCursorNavigation navigation() const;
   RowLocationAdapter rowLocation() const;
 
@@ -187,11 +170,6 @@ private:
   QModelIndexForMainModel m_lastEdited;
   bool m_hasEditorOpen;
 };
-
-template <typename InputIterator>
-void JobTreeView::removeRows(InputIterator begin, InputIterator end) {
-  removeRows(std::vector<RowLocation>(begin, end));
-}
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

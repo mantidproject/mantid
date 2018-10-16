@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * Helper file to gather common routines to the Loaders
  * */
@@ -68,7 +74,8 @@ std::vector<double> LoadHelper::getTimeBinningFromNexusPath(
 
   float *timeBinning_p = &timeBinningNexus[0];
   std::vector<double> timeBinning(numberOfBins);
-  timeBinning.assign(timeBinning_p, timeBinning_p + numberOfBins);
+  std::copy(timeBinning_p, timeBinning_p + timeBinningNexus.dim0(),
+            std::begin(timeBinning));
   // calculate the extra bin at the end
   timeBinning[numberOfBins - 1] =
       timeBinning[numberOfBins - 2] + timeBinning[1] - timeBinning[0];

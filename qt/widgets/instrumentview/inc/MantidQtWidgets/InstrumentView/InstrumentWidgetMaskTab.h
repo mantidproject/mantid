@@ -1,10 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTWIDGETMASKTAB_H_
 #define INSTRUMENTWIDGETMASKTAB_H_
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
 
 #include <QFrame>
 #include <QMap>
@@ -41,7 +46,6 @@ class MatrixWorkspace;
 namespace MantidQt {
 namespace MantidWidgets {
 class CollapsiblePanel;
-class OneCurvePlot;
 class Shape2D;
 
 /**

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MESSAGEDISPLAY_H_
 #define MESSAGEDISPLAY_H_
 
@@ -42,7 +48,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget,
 public:
   // Configurable interface
   void readSettings(const QSettings &storage) override;
-  void writeSettings(QSettings *storage) override;
+  void writeSettings(QSettings &storage) const override;
 
 public:
   /// Default constructor with optional parent

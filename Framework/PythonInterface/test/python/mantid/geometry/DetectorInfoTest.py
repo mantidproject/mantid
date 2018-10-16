@@ -1,6 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+import mantid
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
@@ -97,6 +104,43 @@ class DetectorInfoTest(unittest.TestCase):
         info = self._ws.detectorInfo()
         self.assertEquals(type(info.rotation(0)), Quat)
         self.assertEquals(type(info.rotation(1)), Quat)
+
+
+    """
+    ---------------
+    Iteration
+    ---------------
+    """
+
+    def test_basic_iteration(self):
+        info = self._ws.detectorInfo()
+        expected_iterations = len(info) 
+        actual_iterations = len(list(iter(info)))
+        self.assertEquals(expected_iterations, actual_iterations)
+
+    def test_iterator_for_monitors(self):
+        info = self._ws.detectorInfo()
+        # check no monitors in instrument
+        for item in info:
+            self.assertFalse(item.isMonitor)
+            
+    def test_iterator_for_masked(self):
+        info = self._ws.detectorInfo()
+        # nothing should be masked 
+        for item in info:
+            self.assertFalse(item.isMasked)
+
+    def test_iteration_for_position(self):
+        info = self._ws.detectorInfo()
+        lastY = None
+        for i,item in enumerate(info):
+            pos = item.position
+            # See test helper for position construction
+            self.assertAlmostEquals(pos.X(), 0)
+            self.assertAlmostEquals(pos.Z(), 5)
+            if(lastY):
+                self.assertTrue(pos.Y() > lastY)
+            lastY = pos.Y()
 
 
     """

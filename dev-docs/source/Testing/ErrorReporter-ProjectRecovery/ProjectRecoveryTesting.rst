@@ -12,7 +12,7 @@ Project Recovery test
 *Preparation*
 
 - Before running these tests, set project recovery to run every 2 seconds. The instructions for this
-  are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`_.
+  are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`__.
 - Get the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
 - `TOPAZ_3132_event.nxs` - availabe in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target. It should be in ``ExternalData/Testing/Data/SystemTest/``
 - The files `INTER000*` are in the ISIS sample data
@@ -40,7 +40,6 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
    Load(Filename='INTER00013464.nxs', OutputWorkspace='INTER1')
    Load(Filename='INTER00013469.nxs', OutputWorkspace='INTER2')  
    Load(Filename='INTER00013469.nxs', OutputWorkspace='INTER3')  
@@ -65,25 +64,12 @@ Project Recovery test
    GroupWorkspaces(InputWorkspaces='Rename3_fit_Workspace_1_Workspace,Rename1_fit_Workspace_1_Workspace', OutputWorkspace='Rename3_fit_Workspaces') 
    RenameWorkspace(InputWorkspace='Rename3_fit_Workspace_1_Workspace', OutputWorkspace='Sequential5')
    RenameWorkspace(InputWorkspace='Rename1_fit_Workspace_1_Workspace', OutputWorkspace='Sequential6')
-   SaveCSV(InputWorkspace='Sequential4', Filename=testing_directory + '/Sequence4.csv')
-   SaveCSV(InputWorkspace='Sequential5', Filename=testing_directory + '/Sequence5.csv')
-   SaveCSV(InputWorkspace='Sequential6', Filename=testing_directory + '/Sequence6.csv') 
 
 - Wait a few seconds, then provoke a crash by running `Segfault` from the algorithm window
 - Re-start MantidPlot
 - You should be presented with the Project Recovery dialog
 - Choose `Yes`
 - This should re-populate your workspace dialog and pop up a recovery script in the script window
-- Run the following script:
-
-.. code-block:: python
-
-    testing_directory=<path-to-test>
-    SaveCSV(InputWorkspace='Sequential4', Filename=testing_directory + '/Sequence4r.csv')
-    SaveCSV(InputWorkspace='Sequential5', Filename=testing_directory + '/Sequence5r.csv')
-    SaveCSV(InputWorkspace='Sequential6', Filename=testing_directory + '/Sequence6r.csv')
-
-- Compare the contents of the `SequenceX.csv` and `SequenceXr.csv` files, they should be the same
 
 -------- 
 
@@ -94,13 +80,13 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
+   testing_directory=<path-to-test>   # <path-to-test> is the location of a directory for saving workspaces for comparison later
    CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='0Rebinned')
    for i in range(100):
        RenameWorkspace(InputWorkspace='%sRebinned'%str(i), OutputWorkspace='%sRebinned'%str(i+1))
-   for i in range(3000):
+   for i in range(300):
        CloneWorkspace(InputWorkspace='100Rebinned', OutputWorkspace='%sClone'%str(i))
-   SaveCSV(InputWorkspace='2999Clone', Filename=testing_directory + 'Clone.csv')
+   SaveCSV(InputWorkspace='299Clone', Filename=testing_directory + 'Clone.csv')
 
 - Wait a few seconds, then provoke a crash by running `Segfault` from the algorithm window
 - Re-start MantidPlot
@@ -112,7 +98,7 @@ Project Recovery test
 .. code-block:: python
 
    testing_directory=<path-to-test>
-   SaveCSV(InputWorkspace='2999Clone', Filename=testing_directory +'Cloner.csv')
+   SaveCSV(InputWorkspace='299Clone', Filename=testing_directory +'Cloner.csv')
 
 - Compare the contents of `Clone.csv` and `Cloner.csv`, they should be the same
 
@@ -175,33 +161,6 @@ Project Recovery test
 
 --------
 
-4. Multiple instances of Mantid
-
-- Open up MantidPlot, ensure that only one instance is running
-- Right-click in the Results Log and set `Log level` to `Debug`
-- The Results Log should be printing `Nothing to save`
-- Run the following script:
-
-.. code-block:: python
-
-  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace')
-
-- The Results Log should now be printing `Project Recovery: Saving started` and `Project Recovery: Saving finished` on alternate lines
-- Now start a second instance of Mantid - note on OSX this has to be done from the command line, as OSX will not allow two instances of an executable to be run using the `open` command
-- Set `Log level` to `Debug`
-- Watch the `Results log` for 30 seconds (or longer than your interval for project recovery saving, see the `Preparation` section)
-- No message about saving should be printed
-- Now, crash the first instance of Mantid with `Segfault` from the algorithm window
-- Start a new instance of Mantid
-- This should also have no messages about saving
-- Close both instances of Mantid gracefully
-- Start a new instance of Mantid
-- You should be presented with the Project Recovery dialog
-- Choose `Yes`
-- This should repopulate your workspace window
-
---------
-
 4. Recovering plots and windows
 
 - Open MantidPlot - make sure no other instances of MantidPlot are running
@@ -225,27 +184,21 @@ Project Recovery test
 
 5. Test multiple instances of Mantid running
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
-- Run the script:
+- Launch 2 instances of mantid
+- Run the script on the first instance:
 
 .. code-block:: python
 
-  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace1')
+  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='Instance 1')
 
-- Make sure that Log level is set to `Debug` in the results log
-- Open a second instance of Mantid
-- In the results log it should say ``Another MantidPlot process is running. Project recovery is disabled.`` 
-- Run the script:
+- Run this script on the other instance:
 
 .. code-block:: python
 
-  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace2')
+  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='Instance 2')
 
 - Crash the first instance of Mantid with `Segfault`; choose `Do not share information` in the error dialog
 - Do not exit the second instance of Mantid
-- Restart Mantid
-- In the results log it should say ``Another MantidPlot process is running. Project recovery is disabled.`` 
-- Close both instances of Mantid
 - Restart Mantid
 - You should be presented with a dialog offering to attempt a recovery - choose `Yes`
 - `NewWorkspace1` should appear in the workspace dialog
@@ -292,8 +245,10 @@ Project Recovery test
   RenameWorkspace(InputWorkspace='NewWorkspace', OutputWorkspace='Rename2')  
 
 - Save the workspace as a `.nxs` file
-- Delete the workspace
+- Close Mantid normally
+- Re-open Mantid
 - Re-open the workspace from the saved `.nxs` file
+- Wait for saving
 - Crash Mantid with `Segfault` from the algorithm window
 - Reopen Mantid
 - Choose `Only open in script editor`

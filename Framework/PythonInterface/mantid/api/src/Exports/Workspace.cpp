@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -31,10 +37,8 @@ GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
 } // namespace
 
-//--------------------------------------------------------------------------------------
-// Deprecated function
-//--------------------------------------------------------------------------------------
 /**
+ * DEPRECATED. Use DataItem.name()
  * @param self Reference to the calling object
  * @return name of the workspace.
  */

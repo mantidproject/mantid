@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  Base class for common rebinning testing performed by test clases such as
  RebinByPulseTime and RebinByTimeAtSample
@@ -13,6 +19,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -90,6 +97,8 @@ public:
   MOCK_CONST_METHOD5(generateHistogram,
                      void(const std::size_t, const Mantid::MantidVec &,
                           Mantid::MantidVec &, Mantid::MantidVec &, bool));
+  MOCK_METHOD1(setAllX, void(const Mantid::HistogramData::BinEdges &));
+  MOCK_METHOD0(resetAllXToSingleBin, void());
   MOCK_METHOD0(clearMRU, void());
   MOCK_CONST_METHOD0(clearMRU, void());
   MOCK_CONST_METHOD0(blocksize, std::size_t());

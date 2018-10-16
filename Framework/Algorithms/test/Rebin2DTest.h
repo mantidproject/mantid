@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REBIN2DTEST_H_
 #define MANTID_ALGORITHMS_REBIN2DTEST_H_
 
@@ -81,6 +87,10 @@ MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
 
 class Rebin2DTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static Rebin2DTest *createSuite() { return new Rebin2DTest(); }
+  static void destroySuite(Rebin2DTest *suite) { delete suite; }
+
   void test_Init() {
     Rebin2D alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -212,6 +222,13 @@ private:
 class Rebin2DTestPerformance : public CxxTest::TestSuite {
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static Rebin2DTestPerformance *createSuite() {
+    return new Rebin2DTestPerformance();
+  }
+  static void destroySuite(Rebin2DTestPerformance *suite) { delete suite; }
+
   Rebin2DTestPerformance() {
     m_inputWS = makeInputWS(distribution, perf_test, small_bins);
   }

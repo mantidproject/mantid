@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -325,6 +331,8 @@ std::string JumpFitModel::simultaneousFitOutputName() const {
 std::string JumpFitModel::singleFitOutputName(std::size_t, std::size_t) const {
   return sequentialFitOutputName();
 }
+
+std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string JumpFitModel::constructOutputName() const {
   auto name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);
