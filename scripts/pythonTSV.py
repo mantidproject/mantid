@@ -19,3 +19,20 @@ def saveToTSV(TSV,value):
         TSV.storeString(value)
     else:
         raise TypeError
+
+def loadFromTSV(TSV,key,value):
+#    print(value, "waa", key)
+    TSV.selectLine(key)
+    if isinstance(value,int):
+        tmp= TSV.readInt()
+    elif isinstance(value, float):
+        tmp= TSV.readDouble()
+    elif isinstance(value,bool):
+        tmp= TSV.readBool()
+    elif isinstance(value,str):
+        tmp= TSV.readString()
+    else:
+        raise TypeError
+    return tmp
+
+

@@ -17,6 +17,7 @@ from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 from Muon.GUI.Common.muon_context.muon_context import *#MuonContext
 
 
+from mantidqtpython import MantidQt
 muonGUI = None
 
 Name = "Muon Analysis 2"
@@ -25,7 +26,7 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
     def __init__(self, parent=None):
         super(MuonAnalysis2Gui, self).__init__(parent)
 
-        self._context = MuonContext()
+        self._context = MuonContext(Name)
 
         self.loadWidget = DummyLabelWidget(self._context ,LoadText, self)
         self.dockWidget = DockWidget(self._context,self)
@@ -53,6 +54,15 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
 
         self._context.printContext()
         self.dockWidget.loadFromContext(self._context)
+
+    def loadFromContext(self,project):
+        self._context.loadFromProject(project)
+        print("a")
+        self._context.printContext()
+        print("a")
+        self.loadWidget.loadFromContext(self._context)
+        self.dockWidget.loadFromContext(self._context)
+        self.helpWidget.loadFromContext(self._context)
 
     # cancel algs if window is closed
     def closeEvent(self, event):
@@ -98,8 +108,7 @@ def saveToProject():
 def loadFromProject(project):
     global muonGUI
     muonGUI = main()
-    muonGUI._context.loadFromProject(project)
-    muonGUI.update()
+    muonGUI.loadFromContext(project)
     return muonGUI
 
 if __name__ == '__main__':
