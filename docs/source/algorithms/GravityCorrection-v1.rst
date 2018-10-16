@@ -10,7 +10,7 @@
 Description
 -----------
 
-This algorithm may perform a modification of time-of-flight values and their final angles, i.e. angles between the reflected beam and the sample, of neutrons by moving their counts to different detectors to cancel the gravitational effect on a chosen 2DWorkspace (notably the ILL Figaro reflectometer).
+This algorithm performs a correction of time-of-flight values and their final angles, i.e. angles between the reflected beam and the sample, of neutrons by moving their counts to different detectors to cancel the gravitational effect on a chosen 2DWorkspace (notably the ILL Figaro reflectometer).
 An initial computation of the final angle :math:`\theta_f` due to gravitation is required when the neutron flies from the source to the sample.
 For the path from the sample to the detector, gravitation plays a role which can be cancelled.
 Other properties of the :literal:`InputWorkspace` will be present in the :literal:`OutputWorkspace`.
@@ -23,10 +23,22 @@ The potential output workspace adds " cancelled gravitation " to its title. This
 Negative time-of-flight values present in the :literal:`InputWorkspace` are not prohibited.
 The input workspace can have a varying number of bins for each spectrum.
 However, sizes of output workspace and input workspace match.
-In conclusion, this algorithm supports a wide range of special input workspaces, i.e. which can be masked, ragged, have data errors `Dx`.
+In conclusion, this algorithm supports a wide range of special input workspaces, i.e. which can be masked, ragged, and have data errors `Dx`.
 
-Pay attention that the following correction for direct beam measurements (as presented in the example) is under investigation.
-Note also that an improved performance can be addressed after final validation.
+Special measurements
+--------------------
+
+Direct beam measurements
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Pay attention that the following correction for direct beam measurements does not fulfill the requirements, i.e. no sample.
+The algorithm will execute but updated final angles which are smaller than the actual final angle will not be treated.
+This may happen for several spectra whose detector positions have negative `y` values.
+
+Reflection down measurements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The signed theta angle is considered to take into account reflection up and down measurements.
 
 Support for automatic execution
 -------------------------------
@@ -171,32 +183,42 @@ is
 Usage
 -----
 
-Example - GravityCorrection
-
-.. testcode:: General: workspace with instrument where the x axis is parrallel and in direction to the beam.
-
-
-Output:
-
-.. testoutput:: General
-    :options: +NORMALIZE_WHITESPACE
-
 .. include:: ../usagedata-note.txt
 
-.. testcode:: ILL Figaro: direct beam measurement; the instrument is such defined that the z axis is parallel and in direction to the beam.
+.. testcode::
 
-        # Load an ILL Figaro File into a Workspace2D
-        ws = LoadILLReflectometry('ILL/Figaro/592724.nxs')
+  # Load an ILL direct reflected Figaro File into a Workspace2D
+  ws = LoadILLReflectometry('ILL/Figaro/592724.nxs')
 
-        # Perform correction
-        wsCorrected = GravityCorrection(ws)
+  # Perform correction
+  wsCorrected = GravityCorrection(ws)
+
+  # Logarithm of the data
+  gc = Logarithm(wsCorrected)
 
 Output:
 
 .. testoutput:: ILL Figaro
     :options: +NORMALIZE_WHITESPACE
 
-        # Plot the workspaces
+  import matplotlib.pyplot as plt
+  from mantid import plots
+  import numpy as np
+
+  plt.style.use('ggplot')
+  plt.rcParams['figure.figsize'] = (20, 10)
+  fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+  c = ax.pcolormesh(gc, vmin=0, vmax=0.14, cmap=plt.get_cmap('gist_gray'))
+  cbar=fig.colorbar(c)
+  cbar.set_label('Logarithm of counts')
+  ax.set_xlim(0, 40000)
+  ax.set_ylim(92, 163)
+  try:
+    # The sample log entry run_title exists after running the algorithm GravityCorrection
+    title = str(gc.getSampleDetails().getLogData("run_number").value) + gc.getSampleDetails().getLogData("run_title").value
+    plt.title(title)
+  except RuntimeError:
+    pass
 
 References
 ----------
