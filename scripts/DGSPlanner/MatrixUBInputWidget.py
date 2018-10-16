@@ -18,7 +18,6 @@ except ImportError:
     QString = type("")
 
 
-
 class UBTableModel(QtCore.QAbstractTableModel):
     changed=QtCore.Signal(mantid.geometry.OrientedLattice)
 

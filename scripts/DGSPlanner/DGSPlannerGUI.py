@@ -222,9 +222,10 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.iterations = len(gonioAxis0values) * len(gonioAxis1values) * len(gonioAxis2values)
             if self.iterations > 10:
                 reply = QtWidgets.QMessageBox.warning(self, 'Goniometer',
-                                                  "More than 10 goniometer settings. This might be long.\n"
-                                                  "Are you sure you want to proceed?",
-                                                  QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+                                                      "More than 10 goniometer settings. This might be long.\n"
+                                                      "Are you sure you want to proceed?",
+                                                      QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                                      QtWidgets.QMessageBox.No)
                 if reply == QtWidgets.QMessageBox.No:
                     return
 
@@ -254,10 +255,10 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                     mantid.simpleapi.MaskDetectors(Workspace="__temp_instrument", MaskedWorkspace=__maskWS)
                 except (ValueError, RuntimeError) as e:
                     reply = QtWidgets.QMessageBox.critical(self, 'Error',
-                                                       "The following error has occurred in loading the mask:\n" +
-                                                       str(e) + "\nDo you want to continue without mask?",
-                                                       QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                                       QtWidgets.QMessageBox.No)
+                                                           "The following error has occurred in loading the mask:\n" +
+                                                           str(e) + "\nDo you want to continue without mask?",
+                                                           QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+                                                           QtWidgets.QMessageBox.No)
                     if reply == QtWidgets.QMessageBox.No:
                         return
             if self.masterDict['makeFast']:
