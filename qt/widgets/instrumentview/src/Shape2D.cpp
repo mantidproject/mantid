@@ -46,11 +46,10 @@ Shape2D::Shape2D()
 void Shape2D::draw(QPainter &painter) const {
   if (!m_visible)
     return;
-  painter.setPen(m_color);
+  painter.setPen(QPen(m_color, 0));
   this->drawShape(painter);
   if (m_editing || m_selected) {
-    QColor c(255, 255, 255, 100);
-    painter.setPen(c);
+    painter.setPen(QPen(QColor(255, 255, 255, 100), 0));
     painter.drawRect(m_boundingRect.toQRectF());
     size_t np = NCommonCP;
     double rsize = 2;
@@ -66,10 +65,9 @@ void Shape2D::draw(QPainter &painter) const {
       QRectF r(p - QPointF(rsize, rsize), p + QPointF(rsize, rsize));
       painter.save();
       painter.resetTransform();
-      QColor c(255, 255, 255, alpha);
-      painter.fillRect(r, c);
+      painter.fillRect(r, QColor(255, 255, 255, alpha));
       r.adjust(-1, -1, 0, 0);
-      painter.setPen(QColor(0, 0, 0, alpha));
+      painter.setPen(QPen(QColor(0, 0, 0, alpha), 0));
       painter.drawRect(r);
       painter.restore();
     }
