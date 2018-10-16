@@ -31,9 +31,9 @@ class MuonContext(object):
         self.common_context[HelpText] = "Help dummy"
         self.common_context[LoadText] = "load dummy"
         self.common_context[Groups] = [group_object.group(
-                                       "fwd"),
-                                       group_object.group("bwd"),
-                                       group_object.group("top")]
+                                       "fwd", [1,2]),
+                                       group_object.group("bwd",[3,4,5]),
+                                       group_object.group("top",[1,2,3,4,5])]
         self.common_context[
             Pairs] = [
                 pair_object.pair(
@@ -54,7 +54,7 @@ class MuonContext(object):
         print(LoadText, self.common_context[LoadText])
         print(Groups)
         for group in self.common_context[Groups]:
-            print(group.name)
+            group.Print()
         print
         print(Pairs)
         for pair in self.common_context[Pairs]:
@@ -70,10 +70,19 @@ class MuonContext(object):
             try:
                  TSV.saveToTSV(TSV0,value)
             except:
-                 pass # add custom stuff later
+                 try:
+                    self.saveCustom(TSV0,key,value)
+                 except:
+                    pass
         lines = TSV0.outputLines()
-        TSVSec.writeSection("Muon Analysis 2 init",lines)
+        TSVSec.writeSection("Muon Analysis 2",lines)
         return TSVSec.outputLines()
+
+    def saveCustom(self,TSV0,key,value):
+        tmpTSV =  mantidqtpython.MantidQt.API.TSVSerialiser()
+        for obj in value:
+            obj.save(tmpTSV)
+        TSV0.writeSection(key,tmpTSV.outputLines())
 
     def loadFromProject(self, project):
        print( "load ...")

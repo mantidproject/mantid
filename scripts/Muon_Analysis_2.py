@@ -89,7 +89,7 @@ def saveToProject():
     allWidgets = QtGui.QApplication.allWidgets()
     for widget in allWidgets:
        if widget.accessibleName() == Name:
-            print("waa")
+            widget.update()
             project = widget.saveToProject()#_context.save()
             return project
     return ""

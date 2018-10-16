@@ -21,10 +21,14 @@ class ContextExampleModel(object):
     def getSubContext(self):
         subContext = {}
         group_names = []
+        group_dets = []
         tmp = self._context.get(Groups)
         for group in tmp:
             group_names.append(group.name)
+            group_dets.append(group.dets)
         subContext["Group Names"] = group_names
+        subContext["Group dets"] = group_dets
+
         pair = self._context.get(Pairs)[0]  # there is only one
         subContext["Pair_F"] = pair.FGroup
         subContext["Pair_B"] = pair.BGroup
@@ -34,9 +38,10 @@ class ContextExampleModel(object):
 
     def updateContext(self, subContext):
         group_names = subContext["Group Names"]
+        group_dets = subContext["Group dets"]
         groups = []
-        for name in group_names:
-            groups.append(group_object.group(name))
+        for k in range(len(group_names)):
+            groups.append(group_object.group(group_names[k],group_dets[k]))
         self._context.set(Groups, groups)
 
         alpha = subContext["Pair_alpha"]

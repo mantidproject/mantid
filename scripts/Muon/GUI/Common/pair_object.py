@@ -47,3 +47,9 @@ class pair(object):
             return True
 
         return False
+
+    def save(self,TSV):
+       TSV.writeLine(self._name)
+       TSV.storeString(self._F_group)
+       TSV.storeString(self._B_group)
+       TSV.storeDouble(self._alpha)

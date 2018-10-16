@@ -11,10 +11,18 @@ class group(object):
     def __init__(self, name="", dets=[]):
         self._name = name
         self._dets = dets
+        print self._dets
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def dets(self):
+        return self._dets
+
+    def Print(self):
+        print self._name, self._dets
 
     def setName(self, name):
         self._name = name
@@ -27,3 +35,9 @@ class group(object):
             return True
 
         return False
+
+    def save(self,TSV):
+       TSV.writeLine(self._name)
+       TSV.storeInt(len(self._dets))
+       for detector in self._dets:
+           TSV.storeInt(detector)
