@@ -33,7 +33,7 @@ class MANTID_API_DLL SpectrumDetectorMapping {
 
 public:
   explicit SpectrumDetectorMapping(MatrixWorkspace_const_sptr workspace,
-                                   bool useSpecNoIndex = true);
+                                   const bool useSpecNoIndex = true);
   SpectrumDetectorMapping(
       const std::vector<specnum_t> &spectrumNumbers,
       const std::vector<detid_t> &detectorIDs,

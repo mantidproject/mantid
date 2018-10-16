@@ -15,7 +15,7 @@ namespace API {
  *  @throws std::invalid_argument if a null workspace pointer is passed in
  */
 SpectrumDetectorMapping::SpectrumDetectorMapping(
-    MatrixWorkspace_const_sptr workspace, bool useSpecNoIndex)
+    MatrixWorkspace_const_sptr workspace, const bool useSpecNoIndex)
     : m_indexIsSpecNo(useSpecNoIndex) {
   if (!workspace) {
     throw std::invalid_argument(
