@@ -272,10 +272,9 @@ IndirectFitOutput::getResultLocation(IndirectFitData const *fitData,
 }
 
 std::vector<std::string> IndirectFitOutput::getResultParameterNames() const {
-  if (auto resultWorkspace = getLastResultWorkspace()) {
+  if (auto resultWorkspace = getLastResultWorkspace())
     if (auto workspace = getMatrixWorkspaceFromGroup(resultWorkspace, 0))
       return getAxisLabels(workspace, 1);
-  }
   return std::vector<std::string>();
 }
 

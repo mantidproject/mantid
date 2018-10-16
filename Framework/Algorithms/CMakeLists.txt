@@ -834,7 +834,7 @@ set ( TEST_FILES
 	HyspecScharpfCorrectionTest.h
 	IQTransformTest.h
 	IdentifyNoisyDetectorsTest.h
-    IndirectFitDataCreationHelperTest.h
+        IndirectFitDataCreationHelperTest.h
 	IntegrateByComponentTest.h
 	IntegrateEPPTest.h
 	IntegrationTest.h
