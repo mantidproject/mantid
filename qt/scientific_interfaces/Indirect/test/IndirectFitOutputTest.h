@@ -40,8 +40,7 @@ createPopulatedworkspace(std::vector<double> const &xValues,
   return createWorkspaceAlgorithm->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-createPopulatedworkspace(std::size_t const &numberOfSpectra) {
+MatrixWorkspace_sptr createPopulatedworkspace(int const &numberOfSpectra) {
   std::vector<double> xValues{1.0, 2.0, 3.0, 4.0, 5.0};
   std::vector<double> yValues{1.0, 2.0, 3.0, 4.0, 5.0};
   std::vector<std::string> const verticalAxisNames{
@@ -313,6 +312,23 @@ public:
     TS_ASSERT(parameters.at("Msd_Err").value);
   }
 
+  void
+  test_that_addOutput_will_add_new_fitData_without_overwriting_existing_data() {
+    auto const group = getPopulatedGroup(2);
+    auto const table = getPopulatedTable(2);
+    IndirectFitData *data1 = new IndirectFitData(getIndirectFitData(5));
+    SetUpADSWithWorkspace ads("ResultGroup", group);
+    ads.addOrReplace("ResultWorkspaces", group);
+    ads.addOrReplace("ParameterTable", table);
+
+    auto const output = createFitOutput(group, table, group, data1, 0);
+    IndirectFitData const *data2 = new IndirectFitData(getIndirectFitData(2));
+    output->addOutput(group, table, group, data2, 0);
+
+    TS_ASSERT(!output->getParameters(data1, 0).empty());
+    TS_ASSERT(!output->getParameters(data2, 0).empty());
+  }
+
   void test_that_removeOutput_will_erase_the_provided_fitData() {
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
@@ -323,7 +339,42 @@ public:
 
     auto const output = createFitOutput(group, table, group, data, 0);
 
-	output->removeOutput(data);
+    output->removeOutput(data);
+
+    TS_ASSERT(output->getParameters(data, 0).empty());
+    TS_ASSERT(!output->getResultLocation(data, 0));
+  }
+
+  void test_that_removeOutput_will_not_delete_fitData_which_is_not_specified() {
+    auto const group = getPopulatedGroup(2);
+    auto const table = getPopulatedTable(2);
+    IndirectFitData *data1 = new IndirectFitData(getIndirectFitData(5));
+    SetUpADSWithWorkspace ads("ResultGroup", group);
+    ads.addOrReplace("ResultWorkspaces", group);
+    ads.addOrReplace("ParameterTable", table);
+
+    auto const output = createFitOutput(group, table, group, data1, 0);
+    IndirectFitData const *data2 = new IndirectFitData(getIndirectFitData(2));
+    output->addOutput(group, table, group, data2, 0);
+    output->removeOutput(data2);
+
+    TS_ASSERT(!output->getParameters(data1, 0).empty());
+    TS_ASSERT(output->getParameters(data2, 0).empty());
+  }
+
+  void
+  test_that_removeOutput_does_not_throw_when_provided_fitData_which_does_not_exist() {
+    auto const group = getPopulatedGroup(2);
+    auto const table = getPopulatedTable(2);
+    IndirectFitData *data1 = new IndirectFitData(getIndirectFitData(5));
+    SetUpADSWithWorkspace ads("ResultGroup", group);
+    ads.addOrReplace("ResultWorkspaces", group);
+    ads.addOrReplace("ParameterTable", table);
+
+    auto const output = createFitOutput(group, table, group, data1, 0);
+    IndirectFitData const *data2 = new IndirectFitData(getIndirectFitData(2));
+
+    TS_ASSERT_THROWS_NOTHING(output->removeOutput(data2));
   }
 };
 
