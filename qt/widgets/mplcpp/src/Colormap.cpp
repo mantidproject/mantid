@@ -9,6 +9,7 @@
 
 #include "MantidPythonInterface/core/ErrorHandling.h"
 
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonException;
 
 namespace MantidQt {
@@ -50,6 +51,7 @@ bool cmapExists(const QString &name) {
  */
 Colormap getCMap(const QString &name) {
   try {
+    GlobalInterpreterLock lock;
     return cmModule().attr("get_cmap")(name.toLatin1().constData());
   } catch (Python::ErrorAlreadySet &) {
     throw PythonException();

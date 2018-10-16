@@ -27,14 +27,17 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL NormalizeBase : public Python::InstanceHolder {
 public:
-  NormalizeBase(Python::Object obj);
-
   /// Return an appropriate object to determine the tick locations
   /// The default returns None indicating that matplotlib should autoselect it
   virtual Python::Object tickLocator() const { return Python::Object(); }
   /// Return an appropriate object to determine the text format type
   /// The default returns None indicating that matplotlib should autoselect it
   virtual Python::Object labelFormatter() const { return Python::Object(); }
+
+protected:
+  // Only to be called by derived classes. They should ensure
+  // this object is of the correct type
+  NormalizeBase(Python::Object obj);
 };
 
 /**

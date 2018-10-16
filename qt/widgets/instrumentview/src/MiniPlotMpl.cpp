@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/MiniPlotMpl.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
@@ -21,10 +22,10 @@
 #include <QSpacerItem>
 #include <QVBoxLayout>
 
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using MantidQt::Widgets::MplCpp::ColorConverter;
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::cycler;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
 
 namespace {
 const char *ACTIVE_CURVE_FORMAT = "k-";
@@ -34,8 +35,11 @@ const char *LOG_SCALE_NAME = "symlog";
 Mantid::Kernel::Logger g_log("MiniPlotMpl");
 
 QPushButton *createHomeButton() {
-  auto mpl(Python::NewRef(PyImport_ImportModule("matplotlib")));
-  QDir dataPath(TO_CSTRING(Python::Object(mpl.attr("get_data_path")()).ptr()));
+  using MantidQt::Widgets::MplCpp::Python::NewRef;
+  using MantidQt::Widgets::MplCpp::Python::Object;
+
+  auto mpl(NewRef(PyImport_ImportModule("matplotlib")));
+  QDir dataPath(TO_CSTRING(Object(mpl.attr("get_data_path")()).ptr()));
   dataPath.cd("images");
   QIcon icon(dataPath.absoluteFilePath("home.png"));
   auto iconSize(icon.availableSizes().front());
@@ -181,6 +185,9 @@ bool MiniPlotMpl::hasCurve() const { return !m_activeCurveLabel.isEmpty(); }
 void MiniPlotMpl::store() {
   m_storedCurveLabels.append(m_activeCurveLabel);
   m_activeCurveLabel.clear();
+  // lock required when the dict returned by cycler iterator
+  // is destroyed
+  GlobalInterpreterLock lock;
   m_lines.back().set(m_colorCycler());
 }
 
