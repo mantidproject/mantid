@@ -113,8 +113,12 @@ class MatrixUBInputWidget(QtWidgets.QWidget):
         # pylint: disable=bare-except
         try:
             fname = QtWidgets.QFileDialog.getOpenFileName(self, 'Open ISAW UB file',filter=QString('Mat file (*.mat);;All Files (*)'))
+            if isinstance(fname,tuple):
+                fname=fname[0]
+            if not fname:
+                return
             __tempws=mantid.simpleapi.CreateSingleValuedWorkspace(0.)
-            mantid.simpleapi.LoadIsawUB(__tempws,str(fname[0]))
+            mantid.simpleapi.LoadIsawUB(__tempws,str(fname))
             ol=mantid.geometry.OrientedLattice(__tempws.sample().getOrientedLattice())
             ol.setU(__tempws.sample().getOrientedLattice().getU())
             self.UBmodel.updateOL(ol)
@@ -129,7 +133,11 @@ class MatrixUBInputWidget(QtWidgets.QWidget):
             fname = QtWidgets.QFileDialog.getOpenFileName(
                     self, 'Open Nexus file to extract UB matrix',
                     filter=QString('Nexus file (*.nxs.h5);;All Files (*)'))
-            __tempUB = LoadNexusUB(str(fname[0]))
+            if isinstance(fname,tuple):
+                fname=fname[0]
+            if not fname:
+                return
+            __tempUB = LoadNexusUB(str(fname))
             ol=mantid.geometry.OrientedLattice()
             ol.setUB(__tempUB)
             self.UBmodel.updateOL(ol)

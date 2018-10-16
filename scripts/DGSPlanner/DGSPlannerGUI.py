@@ -13,10 +13,6 @@ from . import DimensionSelectorWidget
 from qtpy import QtCore, QtGui,QtWidgets
 import sys
 import mantid
-
-
-#TODO: fix help
-#import mantidqtpython as mqt
 from .ValidateOL import ValidateOL
 import matplotlib
 from MPLwidgets import *
@@ -164,7 +160,17 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                 self.assistantProcess.waitForFinished()
                 self.assistantProcess.start(helpapp, args)
             else:
-                mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
+                try:
+                    from mantidqtpython.MantidQt.API.MantidDesktopServices import openUrl
+                except ImportError:
+                    openUrl=QtGui.QDesktopServices.openUrl
+                sysenv=QtCore.QProcessEnvironment.systemEnvironment()
+                ldp=sysenv.value('LD_PRELOAD')
+                if ldp:
+                    del os.environ['LD_PRELOAD']
+                openUrl(QtCore.QUrl(self.externalUrl))
+                if ldp:
+                    os.environ['LD_PRELOAD']=ldp
 
     def closeEvent(self, event):
         self.assistantProcess.close()
@@ -349,7 +355,11 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         mantid.simpleapi.DeleteWorkspace(__mdws)
 
     def save(self):
-        fileName = str(QtWidgets.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir, '*.png')[0])
+        fileName = QtWidgets.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir, '*.png')
+        if isinstance(fileName,tuple):
+            fileName = fileName[0]
+        if not fileName:
+            return
         data = "Instrument " + self.masterDict['instrument'] + '\n'
         if self.masterDict['instrument'] == 'HYSPEC':
             data += "S2 = " + str(self.masterDict['S2']) + '\n'
