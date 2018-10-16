@@ -90,7 +90,6 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
     ) >= nPixels[0] - dEdge or peak.getCol() <= dEdge or peak.getCol() >= nPixels[1] - dEdge
 
     sigX0Params, sigY0, sigP0Params, doPeakConvolution = getBVGGuesses(peaks_ws, sigX0Params, sigY0, sigP0Params)
-
     if strongPeakParams is not None and useForceParams:  # We will force parameters on this fit
         ph = np.arctan2(q0[1], q0[0])
         th = np.arctan2(q0[2], np.hypot(q0[0], q0[1]))
@@ -201,7 +200,7 @@ def getBVGGuesses(peaks_ws, sigX0Params, sigY0, sigP0Params):
         else:
             sigP0Params = [0.1460775, 1.85816592, 0.26850086, -0.00725352]
 
-    if peaks_ws.getInstrument().hasParameter("fitConvolutedPeak"):
+    if peaks_ws.getInstrument().hasParameter("fitConvolvedPeak"):
         doPeakConvolution = peaks_ws.getInstrument().getBoolParameter("fitConvolvedPeak")[0]
     else:
         doPeakConvolution = False
@@ -549,6 +548,7 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         ), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
         fitResults = Fit(Function=m, InputWorkspace='__bvgWS', Output='__bvgfit',
                          Minimizer='Levenberg-MarquardtMD')
+
     elif forceParams is not None:
         p0 = np.zeros(7)
         p0[0] = np.max(h)
