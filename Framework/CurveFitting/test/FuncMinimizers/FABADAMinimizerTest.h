@@ -154,7 +154,7 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
   TS_ASSERT_EQUALS(Ptable->getColumn(2)->type(), "double");
   TS_ASSERT_EQUALS(Ptable->getColumn(2)->name(), "Left's error");
   TS_ASSERT_EQUALS(Ptable->getColumn(3)->type(), "double");
-  TS_ASSERT_EQUALS(Ptable->getColumn(3)->name(), "Rigth's error");
+  TS_ASSERT_EQUALS(Ptable->getColumn(3)->name(), "Right's error");
   TS_ASSERT(Ptable->Double(0, 1) == fun->getParameter("Height"));
   TS_ASSERT(Ptable->Double(1, 1) == fun->getParameter("Lifetime"));
 }
@@ -264,7 +264,7 @@ public:
     TS_ASSERT_EQUALS(param->getColumn(2)->type(), "double");
     TS_ASSERT_EQUALS(param->getColumn(2)->name(), "Left's error");
     TS_ASSERT_EQUALS(param->getColumn(3)->type(), "double");
-    TS_ASSERT_EQUALS(param->getColumn(3)->name(), "Rigth's error");
+    TS_ASSERT_EQUALS(param->getColumn(3)->name(), "Right's error");
     TS_ASSERT(param->Double(0, 1) == fun->getParameter("Height"));
     TS_ASSERT(param->Double(1, 1) == fun->getParameter("Lifetime"));
   }
