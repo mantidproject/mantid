@@ -3,8 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-//#include "IndirectFitOutput.h"
-#include "IndirectFittingModel.h"
+#include "IndirectFitOutput.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -92,7 +91,7 @@ createFitOutput(WorkspaceGroup_sptr resultGroup,
 
 /// Used to create fit output data where the ads is destructed after leaving the
 /// function scope
-std::unique_ptr<IndirectFitOutput> getFitOutputData() {
+std::unique_ptr<IndirectFitOutput> getDestructedFitOutputData() {
   auto const group = getPopulatedGroup(2);
   auto const table = getPopulatedTable(2);
   IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
@@ -102,6 +101,27 @@ std::unique_ptr<IndirectFitOutput> getFitOutputData() {
   ads.addOrReplace("ParameterTable", table);
 
   return createFitOutput(group, table, group, data, 0);
+}
+
+/// This will return fit output with workspaces still stored in the ADS
+std::unique_ptr<IndirectFitOutput> getFitOutputData() {
+  auto const group = getPopulatedGroup(2);
+  auto const table = getPopulatedTable(2);
+  IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
+
+  SetUpADSWithNoDestructor ads("ResultGroup", group);
+  ads.addOrReplace("ResultWorkspaces", group);
+  ads.addOrReplace("ParameterTable", table);
+
+  return createFitOutput(group, table, group, data, 0);
+}
+
+/// Store workspaces in ADS and won't destruct the ADS when leaving scope
+void storeWorkspacesInADS(WorkspaceGroup_sptr group,
+                          ITableWorkspace_sptr table) {
+  SetUpADSWithNoDestructor ads("ResultGroup", group);
+  ads.addOrReplace("ResultWorkspaces", group);
+  ads.addOrReplace("ParameterTable", table);
 }
 
 std::unordered_map<std::string, std::string>
@@ -125,16 +145,11 @@ public:
 
   static void destroySuite(IndirectFitOutputTest *suite) { delete suite; }
 
+  void tearDown() { Mantid::API::AnalysisDataService::Instance().clear(); }
+
   void
   test_that_IndirectFitOutput_constructor_will_set_the_values_of_the_output_data() {
-    auto const group = getPopulatedGroup(2);
-    auto const table = getPopulatedTable(2);
-    IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
-
-    auto const output = createFitOutput(group, table, group, data, 0);
+    auto const output = getFitOutputData();
 
     TS_ASSERT(output->getLastResultGroup());
     TS_ASSERT(output->getLastResultWorkspace());
@@ -148,9 +163,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
 
@@ -163,9 +176,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
 
@@ -177,9 +188,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
 
@@ -191,9 +200,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
 
@@ -205,9 +212,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
 
@@ -222,9 +227,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
 
@@ -236,9 +239,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
 
@@ -252,9 +253,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
     std::vector<std::string> const expectedParameters{
@@ -270,7 +269,7 @@ public:
   test_that_getResultParameterNames_returns_an_empty_vector_if_the_result_workspace_cannot_be_found() {
     /// The fact that the result workspace has been removed from the ADS is used
     /// here. This means the result workspace won't be available any longer.
-    auto const output = getFitOutputData();
+    auto const output = getDestructedFitOutputData();
     TS_ASSERT(output->getResultParameterNames().empty());
   }
 
@@ -279,9 +278,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
     auto const newParameterNames =
@@ -299,9 +296,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
     auto const newParameterNames = getNewParameterNames({"None1", "None2"});
@@ -317,9 +312,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data1 = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data1, 0);
     IndirectFitData const *data2 = new IndirectFitData(getIndirectFitData(2));
@@ -333,12 +326,9 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data, 0);
-
     output->removeOutput(data);
 
     TS_ASSERT(output->getParameters(data, 0).empty());
@@ -349,9 +339,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data1 = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data1, 0);
     IndirectFitData const *data2 = new IndirectFitData(getIndirectFitData(2));
@@ -367,9 +355,7 @@ public:
     auto const group = getPopulatedGroup(2);
     auto const table = getPopulatedTable(2);
     IndirectFitData *data1 = new IndirectFitData(getIndirectFitData(5));
-    SetUpADSWithWorkspace ads("ResultGroup", group);
-    ads.addOrReplace("ResultWorkspaces", group);
-    ads.addOrReplace("ParameterTable", table);
+    storeWorkspacesInADS(group, table);
 
     auto const output = createFitOutput(group, table, group, data1, 0);
     IndirectFitData const *data2 = new IndirectFitData(getIndirectFitData(2));

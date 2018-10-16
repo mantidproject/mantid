@@ -31,7 +31,7 @@ setWorkspaceProperties(Mantid::API::MatrixWorkspace_sptr workspace,
 Mantid::API::MatrixWorkspace_sptr
 createWorkspaceWithInstrument(int const &xLength, int const &yLength);
 
-/// Simple class to set up the ADS with the configuration required
+/// Simple struct to set up the ADS with the configuration required
 struct SetUpADSWithWorkspace {
 
   template <typename T>
@@ -59,6 +59,33 @@ struct SetUpADSWithWorkspace {
 
   ~SetUpADSWithWorkspace() {
     Mantid::API::AnalysisDataService::Instance().clear();
+  }
+};
+
+/// This struct gives the option of having an ADS instance with no destructor
+struct SetUpADSWithNoDestructor {
+
+  template <typename T>
+  SetUpADSWithNoDestructor(std::string const &inputWSName, T const &workspace) {
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWSName,
+                                                              workspace);
+  }
+
+  template <typename T>
+  void addOrReplace(std::string const &workspaceName, T const &workspace) {
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName,
+                                                              workspace);
+  }
+
+  bool doesExist(std::string const &workspaceName) {
+    return Mantid::API::AnalysisDataService::Instance().doesExist(
+        workspaceName);
+  }
+
+  Mantid::API::MatrixWorkspace_sptr
+  retrieveWorkspace(std::string const &workspaceName) {
+    return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName));
   }
 };
 
