@@ -40,6 +40,9 @@ namespace FuncMinimisers {
 using namespace Mantid::API;
 
 namespace {
+
+std::string const PDF_GROUP_NAME = "__PDF_Workspace";
+
 // static logger object
 Kernel::Logger g_log("FABADAMinimizer");
 // number of iterations when convergence isn't expected
@@ -866,16 +869,15 @@ void FABADAMinimizer::outputPDF(std::vector<double> &xValues,
   auto const workspace =
       createWorkspace(xValues, yValues, int(m_nParams) + 1, parameterNames);
 
-  auto const groupName = "__PDF_Workspace";
-  if (AnalysisDataService::Instance().doesExist(groupName)) {
-    auto groupPDF =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+  if (AnalysisDataService::Instance().doesExist(PDF_GROUP_NAME)) {
+    auto groupPDF = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        PDF_GROUP_NAME);
     groupPDF->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
+    AnalysisDataService::Instance().addOrReplace(PDF_GROUP_NAME, groupPDF);
   } else {
     auto groupPDF = boost::make_shared<WorkspaceGroup>();
     groupPDF->addWorkspace(workspace);
-    AnalysisDataService::Instance().addOrReplace(groupName, groupPDF);
+    AnalysisDataService::Instance().addOrReplace(PDF_GROUP_NAME, groupPDF);
   }
 }
 
