@@ -93,7 +93,6 @@ makeFlatTreeWithMonitor(PosVec detPositions, RotVec detRotations,
   auto detectorInfo = boost::make_shared<DetectorInfo>(
       detPositions, detRotations, monitorIndices);
   auto compInfo = std::get<0>(flatTree);
-  // auto detInfo = std::get<1>(flatTree);
   compInfo->setDetectorInfo(detectorInfo.get());
   return std::make_tuple(compInfo, detectorInfo);
 }
