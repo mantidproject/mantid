@@ -9,6 +9,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <sstream>
 
 namespace Mantid {
@@ -48,6 +51,7 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   setProperties(alg);
+  m_uuid = boost::uuids::random_generator()();
 }
 
 /// Destructor
@@ -64,12 +68,16 @@ AlgorithmHistory::~AlgorithmHistory() = default;
    @param uexeccount ::  an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
+                                   std::string uuid,
                                    const Types::Core::DateAndTime &start,
                                    const double &duration,
                                    std::size_t uexeccount)
     : m_name(name), m_version(vers), m_executionDate(start),
       m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories() {}
+      m_childHistories() {
+  std::istringstream uuidss(uuid);
+  uuidss >> m_uuid;
+}
 
 /**
  *  Set the history properties for an algorithm pointer
@@ -116,7 +124,7 @@ AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory &A)
     : m_name(A.m_name), m_version(A.m_version),
       m_executionDate(A.m_executionDate),
       m_executionDuration(A.m_executionDuration), m_properties(A.m_properties),
-      m_execCount(A.m_execCount) {
+      m_execCount(A.m_execCount), m_uuid(A.m_uuid) {
   m_childHistories = A.m_childHistories;
 }
 
@@ -231,7 +239,7 @@ void AlgorithmHistory::printSelf(std::ostream &os, const int indent,
   os << std::string(indent, ' ') << "Execution Date: " << execDate << '\n';
   os << std::string(indent, ' ')
      << "Execution Duration: " << m_executionDuration << " seconds\n";
-
+  os << std::string(indent, ' ') << "UUID: " << m_uuid << '\n';
   os << std::string(indent, ' ') << "Parameters:\n";
 
   for (const auto &property : m_properties) {

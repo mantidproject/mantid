@@ -15,6 +15,9 @@
 #include "MantidKernel/Property.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "Poco/File.h"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -65,18 +68,20 @@ private:
   };
 
 public:
-  void xtest_New_History_Is_Empty() {
+  void test_New_History_Is_Empty() {
     WorkspaceHistory history;
     TS_ASSERT_EQUALS(history.size(), 0);
     TS_ASSERT_EQUALS(history.empty(), true);
   }
 
-  void xtest_Adding_History_Entry() {
+  void test_Adding_History_Entry() {
     WorkspaceHistory history;
     TS_ASSERT_EQUALS(history.size(), 0);
     TS_ASSERT_EQUALS(history.empty(), true);
 
-    AlgorithmHistory alg1("FirstAlgorithm", 2);
+    AlgorithmHistory alg1(
+        "FirstAlgorithm", 2,
+        boost::uuids::to_string(boost::uuids::random_generator()()));
     alg1.addProperty("FirstAlgProperty", "1", false,
                      Mantid::Kernel::Direction::Input);
 
@@ -130,7 +135,7 @@ public:
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum2", 1);
   }
 
-  void xtest_Empty_History_Throws_When_Retrieving_Attempting_To_Algorithms() {
+  void test_Empty_History_Throws_When_Retrieving_Attempting_To_Algorithms() {
     WorkspaceHistory emptyHistory;
     TS_ASSERT_THROWS(emptyHistory.lastAlgorithm(), std::out_of_range);
     TS_ASSERT_THROWS(emptyHistory.getAlgorithm(1), std::out_of_range);
@@ -139,19 +144,19 @@ public:
 
 class WorkspaceHistoryTestPerformance : public CxxTest::TestSuite {
 public:
-  WorkspaceHistoryTestPerformance(){
+  WorkspaceHistoryTestPerformance() {
     constructAlgHistories1();
-    constructAlgHistories2(); 
+    constructAlgHistories2();
   }
 
-  void setUp() override { 
-    m_wsHist.clearHistory();
-  }
+  void setUp() override { m_wsHist.clearHistory(); }
 
   void test_Wide_History() {
     int depth = 3;
     int width = 50;
-    auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", 1);
+    auto algHist = boost::make_shared<AlgorithmHistory>(
+        "AnAlgorithm", 1,
+        boost::uuids::to_string(boost::uuids::random_generator()()));
     build_Algorithm_History(*algHist, width, depth);
     m_wsHist.addHistory(std::move(algHist));
   }
@@ -160,7 +165,9 @@ public:
     int depth = 10;
     int width = 3;
 
-    auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", 1);
+    auto algHist = boost::make_shared<AlgorithmHistory>(
+        "AnAlgorithm", 1,
+        boost::uuids::to_string(boost::uuids::random_generator()()));
     build_Algorithm_History(*algHist, width, depth);
     m_wsHist.addHistory(std::move(algHist));
   }
@@ -171,13 +178,13 @@ public:
     }
   }
 
-  void test_standard_insertion_1000000_times(){
+  void test_standard_insertion_1000000_times() {
     for (auto i = 0u; i < 1000000; ++i) {
       m_wsHist.addHistory(m_1000000Histories1[i]);
     }
   }
 
-  void test_adding_1000000_to_500000_workspace_histories(){
+  void test_adding_1000000_to_500000_workspace_histories() {
     // It's hard to test this without doing this bit
     for (auto i = 0u; i < 500000; ++i) {
       m_wsHist.addHistory(m_1000000Histories1[i]);
@@ -186,7 +193,7 @@ public:
     m_wsHist.addHistory(m_1000000Histories2);
   }
 
-  void test_adding_1000000_to_1000000_workspace_histories(){
+  void test_adding_1000000_to_1000000_workspace_histories() {
     // It's hard to test this without doing this bit
     for (auto i = 0u; i < 1000000; ++i) {
       m_wsHist.addHistory(m_1000000Histories1[i]);
@@ -200,22 +207,28 @@ private:
                                int depth = 0) {
     if (depth > 0) {
       for (int i = 0; i < width; ++i) {
-        auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", 1);
+        auto algHist = boost::make_shared<AlgorithmHistory>(
+            "AnAlgorithm", 1,
+            boost::uuids::to_string(boost::uuids::random_generator()()));
         build_Algorithm_History(*algHist, width, depth - 1);
         parent.addChildHistory(std::move(algHist));
       }
     }
   }
 
-  void constructAlgHistories1(){
-    for (auto i =1u; i < 1000001; ++i){
-      auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", i);
+  void constructAlgHistories1() {
+    for (auto i = 1u; i < 1000001; ++i) {
+      auto algHist = boost::make_shared<AlgorithmHistory>(
+          "AnAlgorithm", i,
+          boost::uuids::to_string(boost::uuids::random_generator()()));
       m_1000000Histories1.emplace_back(std::move(algHist));
     }
   }
-  void constructAlgHistories2(){
-    for (auto i =1000001u; i < 1000001; ++i){
-      auto algHist = boost::make_shared<AlgorithmHistory>("AnAlgorithm", i);
+  void constructAlgHistories2() {
+    for (auto i = 1000001u; i < 1000001; ++i) {
+      auto algHist = boost::make_shared<AlgorithmHistory>(
+          "AnAlgorithm", i,
+          boost::uuids::to_string(boost::uuids::random_generator()()));
       m_1000000Histories2.addHistory(std::move(algHist));
     }
   }

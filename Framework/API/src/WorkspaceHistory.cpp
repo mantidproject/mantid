@@ -16,6 +16,9 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
@@ -44,8 +47,7 @@ struct AlgorithmHistoryHasher {
 struct AlgorithmHistoryComparator {
   bool operator()(const AlgorithmHistory_sptr &a,
                   const AlgorithmHistory_sptr &b) const {
-    return (a->executionDate() == b->executionDate() &&
-            a->name() == b->name() && a->getProperties() == b->getProperties());
+    return (*a) == (*b);
   }
 };
 } // namespace
@@ -380,7 +382,8 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
     NAME = 0,      //< algorithms name
     EXEC_TIME = 1, //< when the algorithm was run
     EXEC_DUR = 2,  //< execution time for the algorithm
-    PARAMS = 3     //< the algorithm's parameters
+    UUID = 3,      //< the universal unique id of the algorithm
+    PARAMS = 4     //< the algorithm's parameters
   };
 
   std::vector<std::string> info;
@@ -416,14 +419,27 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
                     << "\n";
     dur = -1.0;
   }
+
+  /// To allow legacy files we must check if it is parameters and set the
+  /// variables accordingly.
+  std::string uuid;
+  size_t paramNum;
+  if (info[3] != "Parameters:") {
+    getWordsInString(info[UUID], dummy, dummy, uuid, dummy);
+    paramNum = PARAMS;
+  } else {
+    uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+    paramNum = 3;
+  }
+
   // Create the algorithm history
-  API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,
+  API::AlgorithmHistory alg_hist(algName, version, uuid, utc_start, dur,
                                  Algorithm::g_execCount);
   // Simulate running an algorithm
   ++Algorithm::g_execCount;
 
   // Add property information
-  for (size_t index = static_cast<size_t>(PARAMS) + 1; index < nlines;
+  for (size_t index = static_cast<size_t>(paramNum) + 1; index < nlines;
        ++index) {
     const std::string line = info[index];
     std::string::size_type colon = line.find(':');

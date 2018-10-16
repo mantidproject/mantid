@@ -17,6 +17,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include <boost/uuid/uuid.hpp>
 #include <ctime>
 #include <set>
 #include <vector>
@@ -56,7 +57,7 @@ public:
   ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
-  AlgorithmHistory(const std::string &name, int vers,
+  AlgorithmHistory(const std::string &name, int vers, std::string uuid,
                    const Types::Core::DateAndTime &start =
                        Types::Core::DateAndTime::getCurrentTime(),
                    const double &duration = -1.0, std::size_t uexeccount = 0);
@@ -80,6 +81,8 @@ public:
   }
   /// get the execution count
   const std::size_t &execCount() const { return m_execCount; }
+  /// get the uuid
+  const boost::uuids::uuid uuid() const { return m_uuid; }
   /// get parameter list of algorithm in history const
   const Mantid::Kernel::PropertyHistories &getProperties() const {
     return m_properties;
@@ -105,7 +108,7 @@ public:
   }
   /// Equality operator
   inline bool operator==(const AlgorithmHistory &other) const {
-    return (executionDate() == other.executionDate() && name() == other.name());
+    return uuid() == other.uuid();
   }
   /// Create a concrete algorithm based on a history record
   boost::shared_ptr<IAlgorithm> createAlgorithm() const;
@@ -144,6 +147,8 @@ private:
   std::size_t m_execCount{0};
   /// set of child algorithm histories for this history record
   AlgorithmHistories m_childHistories;
+  /// UUID for this algorithm history
+  boost::uuids::uuid m_uuid;
 };
 
 MANTID_API_DLL std::ostream &operator<<(std::ostream &,
