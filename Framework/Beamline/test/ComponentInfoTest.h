@@ -1253,18 +1253,25 @@ public:
     auto infos1 = makeFlatTree(pos, rot);
     auto infos2 = makeFlatTree(pos, rot);
     auto infos3 = makeFlatTree(pos, rot);
+    auto infos4 = makeFlatTree(pos, rot);
     ComponentInfo &a = *std::get<0>(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     ComponentInfo &c = *std::get<0>(infos3);
-    DetectorInfo &d = *std::get<1>(infos1);
-    DetectorInfo &e = *std::get<1>(infos3);
+    ComponentInfo &d = *std::get<0>(infos4);
+    DetectorInfo &e = *std::get<1>(infos1);
+    DetectorInfo &f = *std::get<1>(infos3);
+    DetectorInfo &g = *std::get<1>(infos4);
     a.setScanInterval({0, 1});
     b.setScanInterval({1, 2});
     c.setScanInterval({0, 1});
+    d.setScanInterval({0, 1});
     TS_ASSERT_THROWS_NOTHING(c.merge(b));
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
-    TS_ASSERT(d.isEquivalent(e));
+    TS_ASSERT(e.isEquivalent(f));
+    // Make sure the merged components are actually different from a tree that
+    // has not gone through any merge operations.
+    TS_ASSERT(!e.isEquivalent(g));
   }
 
   void test_merge_multiple_associative() {
@@ -1278,21 +1285,29 @@ public:
                                RotVec({Eigen::Quaterniond::Identity()}));
     auto infos4 = makeFlatTree(PosVec({Eigen::Vector3d{1, 0, 0}}),
                                RotVec({Eigen::Quaterniond::Identity()}));
+    auto infos5 = makeFlatTree(PosVec({Eigen::Vector3d{1, 0, 0}}),
+                               RotVec({Eigen::Quaterniond::Identity()}));
     ComponentInfo &a1 = *std::get<0>(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     ComponentInfo &c = *std::get<0>(infos3);
     ComponentInfo &a2 = *std::get<0>(infos4);
+    ComponentInfo &a3 = *std::get<0>(infos5);
     DetectorInfo &d = *std::get<1>(infos1);
     DetectorInfo &e = *std::get<1>(infos4);
+    DetectorInfo &f = *std::get<1>(infos5);
     a1.setScanInterval({0, 1});
     b.setScanInterval({1, 2});
     c.setScanInterval({2, 3});
     a2.setScanInterval({0, 1});
+    a3.setScanInterval({0, 1});
     TS_ASSERT_THROWS_NOTHING(a1.merge(b));
     TS_ASSERT_THROWS_NOTHING(a1.merge(c));
     TS_ASSERT_THROWS_NOTHING(b.merge(c));
     TS_ASSERT_THROWS_NOTHING(a2.merge(b));
     TS_ASSERT(d.isEquivalent(e));
+    // Make sure the merged components are actually different from a tree that
+    // has not gone through any merge operations.
+    TS_ASSERT(!d.isEquivalent(f));
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
