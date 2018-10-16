@@ -19,7 +19,6 @@
 #include "MantidQtWidgets/Common/InputController.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <QApplication>

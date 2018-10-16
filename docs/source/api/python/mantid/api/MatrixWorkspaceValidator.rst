@@ -2,7 +2,7 @@
  MatrixWorkspaceValidator
 ==========================
 
-This a python binding to the C++ class Mantid::API::MatrixWorkspaceValidator.
+This is a Python binding to the C++ class Mantid::API::MatrixWorkspaceValidator.
 
 *bases:* :py:obj:`mantid.api.MatrixWorkspaceValidator`
 
