@@ -86,10 +86,10 @@ void LoadSampleEnvironment::exec() {
 
   auto asciiStlReader = LoadAsciiStl(filename);
   auto binaryStlReader = LoadBinaryStl(filename);
-  if (asciiStlReader.isAsciiSTL()) {
-    environmentMesh = asciiStlReader.readStl();
-  } else if (binaryStlReader.isBinarySTL()) {
+  if (binaryStlReader.isBinarySTL()) {
     environmentMesh = binaryStlReader.readStl();
+  } else if (asciiStlReader.isAsciiSTL()) {
+    environmentMesh = asciiStlReader.readStl();
   } else {
     throw Kernel::Exception::ParseError(
         "Could not read file, did not match either STL Format", filename, 0);

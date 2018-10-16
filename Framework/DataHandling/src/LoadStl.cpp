@@ -5,15 +5,16 @@ namespace Mantid {
 namespace DataHandling {
 
 // Adds vertex to list if distinct and returns index to vertex added or equal
-uint16_t LoadStl::addSTLVertex(Kernel::V3D &vertex) {
-  for (uint16_t i = 0; i < m_verticies.size(); ++i) {
+size_t LoadStl::addSTLVertex(Kernel::V3D &vertex) {
+  for (size_t i = 0; i < m_verticies.size(); ++i) {
     if (areEqualVertices(vertex, m_verticies[i])) {
       return i;
     }
   }
   m_verticies.emplace_back(vertex);
-  uint16_t index = static_cast<uint16_t>(m_verticies.size() - 1);
+  size_t index = (m_verticies.size() - 1);
   if (index != m_verticies.size() - 1) {
+    
     throw std::runtime_error("Too many vertices in solid");
   }
   return index;

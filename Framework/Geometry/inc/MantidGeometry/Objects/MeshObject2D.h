@@ -31,11 +31,11 @@ class GeometryHandler;
 class MANTID_GEOMETRY_DLL MeshObject2D : public IObject {
 public:
   /// Constructor
-  MeshObject2D(const std::vector<uint16_t> &faces,
+  MeshObject2D(const std::vector<uint32_t> &faces,
                const std::vector<Kernel::V3D> &vertices,
                const Kernel::Material &material);
   /// Constructor
-  MeshObject2D(std::vector<uint16_t> &&faces,
+  MeshObject2D(std::vector<uint32_t> &&faces,
                std::vector<Kernel::V3D> &&vertices,
                const Kernel::Material &&material);
 
@@ -97,7 +97,7 @@ private:
   void initialize();
   /// Triangles are specified by indices into a list of vertices. Offset is
   /// always 3.
-  std::vector<uint16_t> m_triangles;
+  std::vector<uint32_t> m_triangles;
   /// Vertices
   std::vector<Kernel::V3D> m_vertices;
   /// Material composition

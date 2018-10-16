@@ -49,11 +49,11 @@ Mesh2DObject
 class MANTID_GEOMETRY_DLL MeshObject : public IObject {
 public:
   /// Constructor
-  MeshObject(const std::vector<uint16_t> &faces,
+  MeshObject(const std::vector<uint32_t> &faces,
              const std::vector<Kernel::V3D> &vertices,
              const Kernel::Material &material);
   /// Constructor
-  MeshObject(std::vector<uint16_t> &&faces, std::vector<Kernel::V3D> &&vertices,
+  MeshObject(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices,
              const Kernel::Material &&material);
 
   /// Copy constructor
@@ -170,7 +170,7 @@ private:
 
   /// Contents
   /// Triangles are specified by indices into a list of vertices.
-  std::vector<uint16_t> m_triangles;
+  std::vector<uint32_t> m_triangles;
   std::vector<Kernel::V3D> m_vertices;
   /// material composition
   Kernel::Material m_material;

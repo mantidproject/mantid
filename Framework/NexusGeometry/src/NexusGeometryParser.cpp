@@ -418,28 +418,28 @@ parseNexusCylinder(const Group &shapeGroup) {
 // Parse OFF (mesh) nexus geometry
 boost::shared_ptr<const Geometry::IObject>
 parseNexusMesh(const Group &shapeGroup) {
-  const std::vector<uint16_t> faceIndices = convertVector<int32_t, uint16_t>(
+  const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
       get1DDataset<int32_t>("faces", shapeGroup));
-  const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
+  const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
       get1DDataset<int32_t>("winding_order", shapeGroup));
   const auto vertices = get1DDataset<float>("vertices", shapeGroup);
   return NexusShapeFactory::createFromOFFMesh(faceIndices, windingOrder,
                                               vertices);
 }
 
-void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
-                        const std::vector<uint16_t> &windingOrder,
+void extractFacesAndIDs(const std::vector<uint32_t> &detFaces,
+                        const std::vector<uint32_t> &windingOrder,
                         const std::vector<float> &vertices,
                         const std::unordered_map<int, uint32_t> &detIdToIndex,
                         const size_t vertsPerFace,
                         std::vector<std::vector<Eigen::Vector3d>> &detFaceVerts,
-                        std::vector<std::vector<uint16_t>> &detFaceIndices,
-                        std::vector<std::vector<uint16_t>> &detWindingOrder,
+                        std::vector<std::vector<uint32_t>> &detFaceIndices,
+                        std::vector<std::vector<uint32_t>> &detWindingOrder,
                         std::vector<int32_t> &detIds) {
   const size_t vertStride = 3;
   size_t detFaceIndex = 1;
   std::fill(detFaceIndices.begin(), detFaceIndices.end(),
-            std::vector<uint16_t>(1, 0));
+            std::vector<uint32_t>(1, 0));
   for (size_t i = 0; i < windingOrder.size(); i += vertsPerFace) {
     auto detFaceId = detFaces[detFaceIndex];
     // Id -> Index
@@ -452,27 +452,27 @@ void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
     for (size_t v = 0; v < vertsPerFace; ++v) {
       const auto vi = windingOrder[i + v] * vertStride;
       detVerts.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
-      detWinding.push_back(static_cast<uint16_t>(detWinding.size()));
+      detWinding.push_back(static_cast<uint32_t>(detWinding.size()));
     }
     // Index -> Id
     detIds[detIndex] = detFaceId;
-    detIndices.push_back(static_cast<uint16_t>(detVerts.size()));
+    detIndices.push_back(static_cast<uint32_t>(detVerts.size()));
     // Detector faces is 2N detectors
     detFaceIndex += 2;
   }
 }
 
 void parseNexusMeshAndAddDetectors(
-    const std::vector<uint16_t> &detFaces,
-    const std::vector<uint16_t> &faceIndices,
-    const std::vector<uint16_t> &windingOrder,
+    const std::vector<uint32_t> &detFaces,
+    const std::vector<uint32_t> &faceIndices,
+    const std::vector<uint32_t> &windingOrder,
     const std::vector<float> &vertices, const size_t numDets,
     const std::unordered_map<int, uint32_t> &detIdToIndex,
     const std::string &name, InstrumentBuilder &builder) {
   auto vertsPerFace = windingOrder.size() / faceIndices.size();
   std::vector<std::vector<Eigen::Vector3d>> detFaceVerts(numDets);
-  std::vector<std::vector<uint16_t>> detFaceIndices(numDets);
-  std::vector<std::vector<uint16_t>> detWindingOrder(numDets);
+  std::vector<std::vector<uint32_t>> detFaceIndices(numDets);
+  std::vector<std::vector<uint32_t>> detWindingOrder(numDets);
   std::vector<int> detIds(numDets);
 
   extractFacesAndIDs(detFaces, windingOrder, vertices, detIdToIndex,
@@ -504,11 +504,11 @@ void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
                      const std::string &bankName) {
   // Load mapping between detector IDs and faces, winding order of vertices for
   // faces, and face corner vertices.
-  const std::vector<uint16_t> detFaces = convertVector<int32_t, uint16_t>(
+  const std::vector<uint32_t> detFaces = convertVector<int32_t, uint32_t>(
       get1DDataset<int32_t>("detector_faces", shapeGroup));
-  const std::vector<uint16_t> faceIndices = convertVector<int32_t, uint16_t>(
+  const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
       get1DDataset<int32_t>("faces", shapeGroup));
-  const std::vector<uint16_t> windingOrder = convertVector<int32_t, uint16_t>(
+  const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
       get1DDataset<int32_t>("winding_order", shapeGroup));
   const auto vertices = get1DDataset<float>("vertices", shapeGroup);
 
