@@ -504,9 +504,10 @@ def start_workbench(app, command_line_options):
     if main_window.splash:
         main_window.splash.hide()
 
-    if command_line_options.exe_script is not None:
-        main_window.editor.open_file_in_new_tab(command_line_options.exe_script)
-        main_window.editor.execute_current()  # TODO use the result as an exit code
+    if command_line_options.script is not None:
+        main_window.editor.open_file_in_new_tab(command_line_options.script)
+        if command_line_options.execute:
+            main_window.editor.execute_current()  # TODO use the result as an exit code
 
         if command_line_options.quit:
             main_window.close()
@@ -531,9 +532,10 @@ def main():
 
     # setup command line arguments
     parser = argparse.ArgumentParser(description='Mantid Workbench')
-    parser.add_argument('-x', '--execute', metavar='SCRIPT', dest='exe_script',
+    parser.add_argument('script', nargs='?')
+    parser.add_argument('-x', '--execute', action='store_true',
                         help='execute the script file given as argument')
-    parser.add_argument('-q', '--quit', dest='quit', action='store_true',
+    parser.add_argument('-q', '--quit', action='store_true',
                         help='execute the script file with \'-x\' given as argument and then exit')
     # TODO -a or --about: show about dialog and exit
     # TODO -d or --default-settings: start MantidPlot with the default settings
@@ -557,13 +559,13 @@ def main():
     # TODO handle options that don't require starting the workbench e.g. --help --version
 
     # fix/validate arguments
-    if options.exe_script is not None:
+    if options.script is not None:
         # convert into absolute path
-        options.exe_script = os.path.abspath(os.path.expanduser(options.exe_script))
-        if not os.path.exists(options.exe_script):
+        options.script = os.path.abspath(os.path.expanduser(options.script))
+        if not os.path.exists(options.script):
             # TODO should be logged
-            print('script "{}" does not exist'.format(options.exe_script))
-            options.exe_script = None
+            print('script "{}" does not exist'.format(options.script))
+            options.script = None
 
     app = initialize()
     # the default sys check interval leads to long lags
