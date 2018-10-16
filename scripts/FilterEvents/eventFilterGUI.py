@@ -199,8 +199,6 @@ class MainWindow(QMainWindow):
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface", "EventFilter", False)
 
-        return
-
     def on_mouseDownEvent(self, event):
         """ Respond to pick up a value with mouse down event
         """
@@ -210,8 +208,6 @@ class MainWindow(QMainWindow):
         if x is not None and y is not None:
             msg = "You've clicked on a bar with coords:\n %f, %f" % (x, y)
             QMessageBox.information(self, "Click!", msg)
-
-        return
 
     def computeMock(self):
         """ Compute vecx and vecy as mocking
@@ -250,7 +246,6 @@ class MainWindow(QMainWindow):
             leftx = [newx, newx]
             lefty = self.ui.mainplot.get_ylim()
             setp(self.leftslideline, xdata=leftx, ydata=lefty)
-
             self.canvas.draw()
 
             # Change value
@@ -259,8 +254,6 @@ class MainWindow(QMainWindow):
         else:
             # Reset the value to original value
             self.ui.horizontalSlider.setValue(self._leftSlideValue)
-
-        return
 
     def set_startTime(self):
         """ Set the starting time and left slide bar
@@ -309,7 +302,6 @@ class MainWindow(QMainWindow):
         leftx = [newtime0, newtime0]
         lefty = self.ui.mainplot.get_ylim()
         setp(self.leftslideline, xdata=leftx, ydata=lefty)
-
         self.canvas.draw()
 
         # Set the value to left slider
@@ -317,8 +309,6 @@ class MainWindow(QMainWindow):
         # Reset the value of line edit
         if resetT is True:
             self.ui.lineEdit_3.setText(str(newtime0))
-
-        return
 
     def move_rightSlider(self):
         """ Re-setup left range line in figure.
@@ -334,7 +324,6 @@ class MainWindow(QMainWindow):
             leftx = [newx, newx]
             lefty = self.ui.mainplot.get_ylim()
             setp(self.rightslideline, xdata=leftx, ydata=lefty)
-
             self.canvas.draw()
 
             # Change value
@@ -343,8 +332,6 @@ class MainWindow(QMainWindow):
         else:
             # Reset the value
             self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
-
-        return
 
     def set_stopTime(self):
         """ Set the starting time and left slide bar
@@ -387,7 +374,6 @@ class MainWindow(QMainWindow):
         rightx = [newtimef, newtimef]
         righty = self.ui.mainplot.get_ylim()
         setp(self.rightslideline, xdata=rightx, ydata=righty)
-
         self.canvas.draw()
 
         # Set the value to left slider
@@ -396,8 +382,6 @@ class MainWindow(QMainWindow):
         # Reset to line edit
         if resetT:
             self.ui.lineEdit_4.setText(str(newtimef))
-
-        return
 
     def move_lowerSlider(self):
         """ Re-setup upper range line in figure.
@@ -428,7 +412,6 @@ class MainWindow(QMainWindow):
         lowerx = self.ui.mainplot.get_xlim()
         lowery = [newy, newy]
         setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
-
         self.canvas.draw()
 
         # Set line edit input
@@ -437,8 +420,6 @@ class MainWindow(QMainWindow):
             self.ui.lineEdit_5.setText(str(newy))
             # Reset the class variable
             self._lowerSlideValue = inewy
-
-        return
 
     def set_minLogValue(self):
         """ Set the starting time and left slide bar
@@ -477,7 +458,6 @@ class MainWindow(QMainWindow):
         lowerx = self.ui.mainplot.get_xlim()
         lowery = [newminY, newminY]
         setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
-
         self.canvas.draw()
 
         # Move the slide bar (lower)
@@ -489,8 +469,6 @@ class MainWindow(QMainWindow):
         # Reset line Edit if using default
         if resetL is True:
             self.ui.lineEdit_5.setText(str(newminY))
-
-        return
 
     def move_upperSlider(self):
         """ Re-setup upper range line in figure.
@@ -519,15 +497,12 @@ class MainWindow(QMainWindow):
         upperx = self.ui.mainplot.get_xlim()
         uppery = [newy, newy]
         setp(self.upperslideline, xdata=upperx, ydata=uppery)
-
         self.canvas.draw()
 
         # Change value
         if setLineEdit is True:
             self.ui.lineEdit_6.setText(str(newy))
             self._upperSlideValue = inewy
-
-        return
 
     def set_maxLogValue(self):
         """ Set maximum log value from line-edit
@@ -570,7 +545,6 @@ class MainWindow(QMainWindow):
         upperx = self.ui.mainplot.get_xlim()
         uppery = [newmaxY, newmaxY]
         setp(self.upperslideline, xdata=upperx, ydata=uppery)
-
         self.canvas.draw()
 
         # Set the value to upper slider
@@ -580,8 +554,6 @@ class MainWindow(QMainWindow):
         # Set the value to editor if necessary
         if resetL is True:
             self.ui.lineEdit_6.setText(str(newmaxY))
-
-        return
 
     def browse_File(self):
         """ Open a file dialog to get file
@@ -593,8 +565,6 @@ class MainWindow(QMainWindow):
 
         info_msg = "Selected file: %s." % str(filename)
         Logger("Filter_Events").information(info_msg)
-
-        return
 
     def load_File(self):
         """ Load the file by file name or run number
@@ -614,8 +584,6 @@ class MainWindow(QMainWindow):
         # Reset GUI
         self._resetGUI(resetfilerun=False)
 
-        return
-
     def use_existWS(self):
         """ Set up workspace to an existing one
         """
@@ -629,8 +597,6 @@ class MainWindow(QMainWindow):
 
         # Reset GUI
         self._resetGUI(resetfilerun=True)
-
-        return
 
     def plotLogValue(self):
         """ Plot log value
@@ -689,7 +655,6 @@ class MainWindow(QMainWindow):
         self._upperSlideValue = 100
         self.ui.verticalSlider.setValue(self._upperSlideValue)
         self.ui.lineEdit_6.setText("")
-
         self.canvas.draw()
 
         # Load property's statistic and give suggestion on parallel and fast log
@@ -796,8 +761,6 @@ class MainWindow(QMainWindow):
         if len(eventwsnames) > 0:
             self.ui.comboBox.clear()
             self.ui.comboBox.addItems(eventwsnames)
-
-        return
 
     def _loadFile(self, filename):
         """ Load file or run
@@ -917,10 +880,7 @@ class MainWindow(QMainWindow):
 
         newrightx = xmin + (xmax-xmin)*self._rightSlideValue*0.01
         setp(self.rightslideline, xdata=[newrightx, newrightx], ydata=newslidery)
-
         self.canvas.draw()
-
-        return
 
     def filterByTime(self):
         """ Filter by time
@@ -952,8 +912,6 @@ class MainWindow(QMainWindow):
                                                    **kwargs)
 
         self.splitWksp(splitws, infows)
-
-        return
 
     def filterByLogValue(self):
         """ Filter by log value
@@ -1018,8 +976,6 @@ class MainWindow(QMainWindow):
         except RuntimeError as e:
             self._setErrorMsg("Splitting Failed!\n %s" % (str(e)))
 
-        return
-
     def splitWksp(self, splitws, infows):
         """ Run FilterEvents
         """
@@ -1057,8 +1013,6 @@ class MainWindow(QMainWindow):
                          OutputWorkspaceIndexedFrom1=startfrom1,
                          OutputTOFCorrectionWorkspace='TOFCorrTable', **kwargs)
 
-        return
-
     def showHideEi(self):
         """
         """
@@ -1086,8 +1040,6 @@ class MainWindow(QMainWindow):
             self.ui.comboBox_corrWS.hide()
             self.ui.pushButton_refreshCorrWSList.hide()
 
-        return
-
     def _searchTableWorkspaces(self):
         """ Search table workspaces and add to 'comboBox_corrWS'
         """
@@ -1103,8 +1055,6 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_corrWS.clear()
         if len(tablewsnames) > 0:
             self.ui.comboBox_corrWS.addItems(tablewsnames)
-
-        return
 
     def _setErrorMsg(self, errmsg):
         """ Clear error message
@@ -1150,7 +1100,6 @@ class MainWindow(QMainWindow):
         xlim = self.ui.mainplot.get_xlim()
         setp(self.lowerslideline, xdata=xlim, ydata=[miny, miny])
         setp(self.upperslideline, xdata=xlim, ydata=[maxy, maxy])
-        self.canvas.draw()
 
         self.ui.lineEdit_7.clear()
         self.ui.lineEdit_8.clear()
@@ -1173,7 +1122,4 @@ class MainWindow(QMainWindow):
         self.ui.checkBox_groupWS.setCheckState(True)
         self.ui.checkBox_splitLog.setCheckState(False)
 
-        # Error message
-        # self.ui.plainTextEdit_ErrorMsg.clear()
-
-        return
+        self.canvas.draw()
