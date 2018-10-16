@@ -59,19 +59,19 @@ double eData::operator()(const double, size_t) { return 0.005; }
  * Number of bins = maxt - 1 .
  * @param seed :: Number added to all y-values.
  * @param detectorIDseed :: detector IDs starting from this number.
- * @param hist :: Whether to output histogram data or not
+ * @param isHist :: Whether to output histogram data or not
  * @param xStart :: The start value of the x-axis.
  * @param xEnd :: The end value of the x-axis.
  * @return Pointer to the workspace.
  */
 MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
                                            double seed, size_t detectorIDseed,
-                                           bool hist, double xStart, double xEnd) {
+                                           bool isHist, double xStart, double xEnd) {
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
           yDataCounts(), static_cast<int>(nspec), xStart, xEnd,
-          (1.0 / static_cast<double>(maxt)), hist, eData());
+          (1.0 / static_cast<double>(maxt)), isHist, eData());
 
   ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
       static_cast<int>(nspec)));

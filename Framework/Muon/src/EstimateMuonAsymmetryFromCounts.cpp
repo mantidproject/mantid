@@ -217,8 +217,8 @@ void EstimateMuonAsymmetryFromCounts::exec() {
 
   std::string normString =
       std::accumulate(norm.begin() + 1, norm.end(), std::to_string(norm[0]),
-                      [](const std::string &a, double b) {
-                        return a + ',' + std::to_string(b);
+                      [](const std::string &currentString, double valueToAppend) {
+                        return currentString + ',' + std::to_string(valueToAppend);
                       });
   MuonAlgorithmHelper::addSampleLog(outputWS, "analysis_asymmetry_norm",
                                     normString);

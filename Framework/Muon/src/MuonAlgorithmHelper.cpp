@@ -533,6 +533,7 @@ MatrixWorkspace_sptr sumPeriods(const WorkspaceGroup_sptr &inputWS,
         auto RHSWorkspace = inputWS->getItem(periodsToSum[i] - 1);
         IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
         alg->setChild(true);
+        alg->setRethrows(true);
         alg->setProperty("LHSWorkspace", outWS);
         alg->setProperty("RHSWorkspace", RHSWorkspace);
         alg->setProperty("OutputWorkspace", "__NotUsed__");
@@ -556,6 +557,7 @@ MatrixWorkspace_sptr subtractWorkspaces(const MatrixWorkspace_sptr &lhs,
   if (lhs && rhs) {
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Minus");
     alg->setChild(true);
+    alg->setRethrows(true);
     alg->setProperty("LHSWorkspace", lhs);
     alg->setProperty("RHSWorkspace", rhs);
     alg->setProperty("OutputWorkspace", "__NotUsed__");
@@ -578,6 +580,7 @@ MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS,
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("ExtractSingleSpectrum");
     alg->setChild(true);
+    alg->setRethrows(true);
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("WorkspaceIndex", index);
     alg->setProperty("OutputWorkspace", "__NotUsed__");
@@ -590,6 +593,7 @@ MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS,
 void addSampleLog(MatrixWorkspace_sptr workspace, const std::string& logName, const std::string& logValue) {
 	IAlgorithm_sptr alg = AlgorithmManager::Instance().create("AddSampleLog");
 	alg->setChild(true);
+  alg->setRethrows(true);
 	alg->setProperty("Workspace", workspace);
 	alg->setProperty("LogName", logName);
 	alg->setProperty("LogText", logValue);
