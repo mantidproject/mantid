@@ -338,7 +338,9 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
                                                          "Processed Nexus (*.nxs);;All Files (*)")
         if not fileName:
             return
-        self.editMask.setText(QString(fileName[0]))
+        if isinstance(fileName,tuple):
+            fileName=fileName[0]
+        self.editMask.setText(QString(fileName))
         self.setMaskFile()
 
     def setMaskFile(self):
