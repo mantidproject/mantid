@@ -15,12 +15,13 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/functional/hash.hpp>
 
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using boost::algorithm::split;
 using Mantid::Kernel::EnvironmentHistory;
+using boost::algorithm::split;
 
 namespace Mantid {
 namespace API {
@@ -31,6 +32,20 @@ struct AlgorithmHistorySearch {
   bool operator()(const AlgorithmHistory_sptr &lhs,
                   const AlgorithmHistory_sptr &rhs) {
     return (*lhs) < (*rhs);
+  }
+};
+struct AlgorithmHistoryHasher {
+  size_t operator()(const AlgorithmHistory_sptr &x) const {
+    std::size_t nameAsSeed = std::hash<std::string>{}(x->name());
+    boost::hash_combine(nameAsSeed, x->executionDate().totalNanoseconds());
+    return nameAsSeed;
+  }
+};
+struct AlgorithmHistoryComparator {
+  bool operator()(const AlgorithmHistory_sptr &a,
+                  const AlgorithmHistory_sptr &b) const {
+    return (a->executionDate() == b->executionDate() &&
+            a->name() == b->name() && a->getProperties() == b->getProperties());
   }
 };
 } // namespace
@@ -73,37 +88,32 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory,
   const AlgorithmHistories &otherAlgorithms =
       otherHistory.getAlgorithmHistories();
 
-  // Reserve maximum needed space
-  m_algorithms.reserve(otherAlgorithms.size() + m_algorithms.size());
-
-  for (auto algHistory : otherAlgorithms) {
+  for (const auto &algHistory : otherAlgorithms) {
     this->addHistory(algHistory, alwaysInsert);
   }
-  // Make sure that the vector is sorted
-  std::sort(m_algorithms.begin(), m_algorithms.end(),
-            [](AlgorithmHistory_sptr a, AlgorithmHistory_sptr b) -> bool {
-              return a->execCount() < b->execCount();
-            });
+
+  std::unordered_set<AlgorithmHistory_sptr, AlgorithmHistoryHasher,
+                     AlgorithmHistoryComparator>
+      set;
+  for (auto i : m_algorithms)
+    set.insert(i);
+  m_algorithms.assign(set.begin(), set.end());
+  std::sort(m_algorithms.begin(), m_algorithms.end(), AlgorithmHistorySearch());
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
 void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory,
                                   bool alwaysInsert) {
   // Add default boolean to false for file operations from ProcessFileNexus to
-  // check for presence in the set already
+  // increase the execution date by the exec count, because we need to assume
+  // that the file has them in the correct order and thus none are duplicates.
   if (alwaysInsert) {
-    int counter = 0;
-    while (binarySearchAlgorithms(algHistory) && counter < 1000) {
-      algHistory->increaseExecutionDate();
-      ++counter;
-    }
+    algHistory->increaseExecutionDate(algHistory->execCount());
   }
 
   // Assume it is always sorted as algorithm history should only be inserted in
   // the correct order
-  if (!binarySearchAlgorithms(algHistory)) {
-    m_algorithms.emplace_back(algHistory);
-  }
+  m_algorithms.emplace_back(std::move(algHistory));
 }
 
 /*
@@ -396,16 +406,8 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   // Get the execution date/time
   std::string date, time;
   getWordsInString(info[EXEC_TIME], dummy, dummy, date, time);
-  Poco::DateTime start_timedate;
-  // This is needed by the Poco parsing function
-  int tzdiff(-1);
-  Mantid::Types::Core::DateAndTime utc_start;
-  if (!Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time,
-                                      start_timedate, tzdiff)) {
-    g_log.warning() << "Error parsing start time in algorithm history entry."
-                    << "\n";
-    utc_start = Types::Core::DateAndTime::defaultTime();
-  }
+  Mantid::Types::Core::DateAndTime utc_start(date + "T" + time);
+
   // Get the duration
   getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);
   double dur = boost::lexical_cast<double>(temp);
@@ -414,8 +416,6 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
                     << "\n";
     dur = -1.0;
   }
-  // Convert the timestamp to time_t to DateAndTime
-  utc_start.set_from_time_t(start_timedate.timestamp().epochTime());
   // Create the algorithm history
   API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,
                                  Algorithm::g_execCount);

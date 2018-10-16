@@ -101,11 +101,7 @@ public:
                  const size_t maxPropertyLength = 0) const;
   /// Less than operator
   inline bool operator<(const AlgorithmHistory &other) const {
-    if (executionDate() == other.executionDate()){
-      return name() == other.name();
-    } else {
-      return executionDate() < other.executionDate();
-    }
+    return execCount() < other.execCount();
   }
   /// Equality operator
   inline bool operator==(const AlgorithmHistory &other) const {

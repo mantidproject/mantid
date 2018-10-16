@@ -152,16 +152,7 @@ void AlgorithmHistory::addChildHistory(AlgorithmHistory_sptr childHist) {
     return;
   }
 
-  if (!std::binary_search(m_childHistories.begin(), m_childHistories.end(),
-                          childHist, Detail::AlgorithmHistorySearch())) {
-    m_childHistories.emplace_back(childHist);
-
-    // Make sure that the vector is sorted
-    std::sort(m_childHistories.begin(), m_childHistories.end(),
-              [](AlgorithmHistory_sptr a, AlgorithmHistory_sptr b) -> bool {
-                return a->execCount() < b->execCount();
-              });
-  }
+  m_childHistories.emplace_back(childHist);
 }
 
 /*
@@ -232,11 +223,12 @@ AlgorithmHistory::getChildAlgorithm(const size_t index) const {
  */
 void AlgorithmHistory::printSelf(std::ostream &os, const int indent,
                                  const size_t maxPropertyLength) const {
+  auto execDate = m_executionDate.toISO8601String();
+  execDate.replace(execDate.find("T"), 1, " ");
   os << std::string(indent, ' ') << "Algorithm: " << m_name;
   os << std::string(indent, ' ') << " v" << m_version << '\n';
 
-  os << std::string(indent, ' ')
-     << "Execution Date: " << m_executionDate.toFormattedString() << '\n';
+  os << std::string(indent, ' ') << "Execution Date: " << execDate << '\n';
   os << std::string(indent, ' ')
      << "Execution Duration: " << m_executionDuration << " seconds\n";
 
