@@ -215,11 +215,11 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
 
-  std::string normString =
-      std::accumulate(norm.begin() + 1, norm.end(), std::to_string(norm[0]),
-                      [](const std::string &currentString, double valueToAppend) {
-                        return currentString + ',' + std::to_string(valueToAppend);
-                      });
+  std::string normString = std::accumulate(
+      norm.begin() + 1, norm.end(), std::to_string(norm[0]),
+      [](const std::string &currentString, double valueToAppend) {
+        return currentString + ',' + std::to_string(valueToAppend);
+      });
   MuonAlgorithmHelper::addSampleLog(outputWS, "analysis_asymmetry_norm",
                                     normString);
 

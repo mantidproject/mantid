@@ -590,15 +590,15 @@ MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS,
   return outWS;
 }
 
-void addSampleLog(MatrixWorkspace_sptr workspace, const std::string& logName, const std::string& logValue) {
-	IAlgorithm_sptr alg = AlgorithmManager::Instance().create("AddSampleLog");
-	alg->setChild(true);
+void addSampleLog(MatrixWorkspace_sptr workspace, const std::string &logName,
+                  const std::string &logValue) {
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("AddSampleLog");
+  alg->setChild(true);
   alg->setRethrows(true);
-	alg->setProperty("Workspace", workspace);
-	alg->setProperty("LogName", logName);
-	alg->setProperty("LogText", logValue);
-	alg->execute();
-
+  alg->setProperty("Workspace", workspace);
+  alg->setProperty("LogName", logName);
+  alg->setProperty("LogText", logValue);
+  alg->execute();
 }
 
 } // namespace MuonAlgorithmHelper

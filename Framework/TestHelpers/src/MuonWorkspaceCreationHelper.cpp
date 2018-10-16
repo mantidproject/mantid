@@ -66,7 +66,8 @@ double eData::operator()(const double, size_t) { return 0.005; }
  */
 MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
                                            double seed, size_t detectorIDseed,
-                                           bool isHist, double xStart, double xEnd) {
+                                           bool isHist, double xStart,
+                                           double xEnd) {
 
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
