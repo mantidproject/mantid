@@ -145,7 +145,7 @@ public:
 
   static void destroySuite(IndirectFitOutputTest *suite) { delete suite; }
 
-  void tearDown() { Mantid::API::AnalysisDataService::Instance().clear(); }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void
   test_that_IndirectFitOutput_constructor_will_set_the_values_of_the_output_data() {
