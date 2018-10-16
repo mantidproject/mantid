@@ -28,7 +28,8 @@ The algorithms takes two input workspaces:
    This would be the output of
    :ref:`algm-ConvertToMD`.
 -  As well as a PeaksWorkspace containing single-crystal peak locations.
-   This could be the output of :ref:`algm-FindPeaksMD` or :ref:`algm-PredictPeaks`
+   This could be the output of :ref:`algm-FindPeaksMD` or :ref:`algm-PredictPeaks`.  All peaks should
+   be from the same run.
 -  The OutputPeaksWorkspace will contain a copy of the input PeaksWorkspace,
    with the integrated intensities and errors changed.
 -  The OutputParamsWorkspace is a TableWorkspace containing the fit parameters.
@@ -46,11 +47,11 @@ values are below:
 | Parameter    |  Description               |  MaNDi   |  TOPAZ   | CORELLI |
 +==============+============================+==========+==========+=========+
 | DQPixel      | The side length for each   |          |          |         |
-|              | voxel used for fitting.    | 0.003    | 0.01     | 0.007   |
+|              | voxel used for fitting.    | 0.003    | 0.006    | 0.007   |
 |              | Units: 1/Angstrom          |          |          |         |
 +--------------+----------------------------+----------+----------+---------+
 | FracHKL      | The distance between peaks |          |          |         |
-|              | (in fraction of hkl) that  | 0.4      | 0.4      | 0.4     |
+|              | (in fraction of hkl) that  | 0.25     | 0.25     | 0.25    |
 |              | is used for fitting.       |          |          |         |
 +--------------+----------------------------+----------+----------+---------+
 | MinDtBinWidth| The smallest time bin used |          |          |         |
@@ -157,7 +158,7 @@ Usage
     LoadIsawPeaks(Filename='/SNS/MANDI/shared/ProfileFitting/demo_5921.integrate', OutputWorkspace='peaks_ws')
 
     IntegratePeaksProfileFitting(OutputPeaksWorkspace='peaks_ws_out', OutputParamsWorkspace='params_ws',
-            InputWorkspace='MANDI_5921_md', PeaksWorkspace='peaks_ws', RunNumber=5921,
+            InputWorkspace='MANDI_5921_md', PeaksWorkspace='peaks_ws',
             UBFile='/SNS/MANDI/shared/ProfileFitting/demo_5921.mat', MinpplFrac=0.9, MaxpplFrac=1.1,
             ModeratorCoefficientsFile='/SNS/MANDI/shared/ProfileFitting/franz_coefficients_2017.dat',
             StrongPeakParamsFile='/SNS/MANDI/shared/ProfileFitting/strongPeakParams_beta_lac_mut_mbvg.pkl',
