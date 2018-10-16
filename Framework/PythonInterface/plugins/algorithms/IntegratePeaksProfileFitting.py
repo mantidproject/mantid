@@ -219,7 +219,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             needsForcedProfileIDX, canFitProfileIDX, numPeaksCanFit, peaksToFit = \
             self.initializeStrongPeakSettings(strongPeaksParamsFile, peaks_ws, sampleRun, forceCutoff, edgeCutoff, numDetRows,
                                               numDetCols)
-        
+
         if peakNumberToFit>-1:
             peaksToFit = [peakNumberToFit]
 
