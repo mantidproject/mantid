@@ -6,6 +6,7 @@
 #include "IndirectFitPlotModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
@@ -19,6 +20,16 @@ using ConvolutionFitSequential =
     Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
 
 namespace {
+
+std::string getFittingFunctionString(std::string const &workspaceName) {
+  return "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+         "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+         "name=Resolution,Workspace=" +
+         workspaceName +
+         ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+         "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+         "0175)))";
+}
 
 IFunction_sptr getFunction(std::string const &functionString) {
   return FunctionFactory::Instance().createInitialized(functionString);
@@ -55,15 +66,7 @@ createModelWithSingleWorkspace(std::string const &workspaceName,
   auto model = getEmptyDummyModel();
   SetUpADSWithNoDestructor ads(workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
-  std::string const function =
-      "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-      "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-      "name=Resolution,Workspace=" +
-      workspaceName +
-      ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-      "0175)))";
-  setFittingFunction(model, function);
+  setFittingFunction(model, getFittingFunctionString(workspaceName));
   return model;
 }
 
@@ -122,16 +125,9 @@ IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
 IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModel *model,
                                      MatrixWorkspace_sptr workspace,
                                      std::string const &workspaceName) {
-  std::string const function =
-      "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-      "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-      "name=Resolution,Workspace=" +
-      workspaceName +
-      ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-      "0175)))";
-  setFittingFunction(model, function);
-  auto alg = setupFitAlgorithm(workspace, function);
+  setFittingFunction(model, getFittingFunctionString(workspaceName));
+  auto alg =
+      setupFitAlgorithm(workspace, getFittingFunctionString(workspaceName));
   return alg;
 }
 
@@ -211,6 +207,134 @@ public:
   test_that_getResultWorkspace_returns_a_workspace_when_data_has_been_fit() {
     auto const model = getFitPlotModelWithFitData();
     TS_ASSERT(model.getResultWorkspace());
+  }
+
+  void
+  test_that_getSpectra_returns_the_same_spectra_range_which_was_provided_as_input() {
+    auto const model = getFitPlotModel();
+
+    Spectra const spectra = std::make_pair(0u, 9u);
+    TS_ASSERT(
+        boost::apply_visitor(AreSpectraEqual(), model.getSpectra(), spectra));
+  }
+
+  void
+  test_that_appendGuessToInput_returns_a_workspace_that_is_the_combination_of_the_input_and_guess_workspaces() {
+    auto const model = getFitPlotModel();
+    auto const guess = model.getGuessWorkspace();
+
+    auto const resultWorkspace = model.appendGuessToInput(guess);
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("__QENSInputAndGuess"));
+    TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(0), "Sample");
+    TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(1), "Guess");
+    /// Only two spectra because the guessWorkspace will only ever have one
+    /// spectra, and then spectra are extracted from the input workspace between
+    /// m_activeSpectrum and m_activeSpectrum and so only 1 spectrum is
+    /// extracted. 1 + 1 = 2
+    TS_ASSERT_EQUALS(resultWorkspace->getNumberHistograms(), 2);
+  }
+
+  void
+  test_that_getActiveDataIndex_returns_the_index_which_it_has_been_set_to() {
+    auto model = getFitPlotModel();
+
+    model.setActiveIndex(2);
+
+    TS_ASSERT_EQUALS(model.getActiveDataIndex(), 2);
+  }
+
+  void
+  test_that_getActiveSpectrum_returns_the_spectrum_which_it_has_been_set_to() {
+    auto model = getFitPlotModel();
+
+    model.setActiveSpectrum(3);
+
+    TS_ASSERT_EQUALS(model.getActiveSpectrum(), 3);
+  }
+
+  void test_that_getFitDataName_returns_the_correctly_calculated_name() {
+    auto const model = getFitPlotModel();
+
+    TS_ASSERT_EQUALS(model.getFitDataName(), "Workspace1 (0-9)");
+    TS_ASSERT_EQUALS(model.getFitDataName(1), "Workspace2 (0-9)");
+  }
+
+  void
+  test_that_getFitDataName_does_not_throw_when_provided_an_out_of_range_index() {
+    auto const model = getFitPlotModel();
+    TS_ASSERT_THROWS_NOTHING(model.getFitDataName(10000000));
+  }
+
+  void
+  test_that_getLastFitDataName_returns_the_name_for_the_last_workspace_in_the_model() {
+    auto const model = getFitPlotModel();
+    TS_ASSERT_EQUALS(model.getLastFitDataName(), "Workspace2 (0-9)");
+  }
+
+  void test_that_getRange_returns_the_range_which_is_set() {
+    auto model = getFitPlotModel();
+
+    model.setStartX(2.2);
+    model.setEndX(8.8);
+
+    TS_ASSERT_EQUALS(model.getRange().first, 2.2);
+    TS_ASSERT_EQUALS(model.getRange().second, 8.8);
+  }
+
+  void
+  test_that_setStartX_does_not_set_the_StartX_when_the_provided_value_is_larger_than_the_EndX() {
+    auto model = getFitPlotModel();
+
+    model.setEndX(2.2);
+    model.setStartX(8.8);
+
+    TS_ASSERT_EQUALS(model.getRange().first, 0.0);
+    TS_ASSERT_EQUALS(model.getRange().second, 2.2);
+  }
+
+  void
+  test_that_setEndX_does_not_set_the_EndX_when_the_provided_value_is_smaller_than_the_StartX() {
+    auto model = getFitPlotModel();
+
+    model.setStartX(8.8);
+    model.setEndX(2.2);
+
+    TS_ASSERT_EQUALS(model.getRange().first, 8.8);
+    TS_ASSERT_EQUALS(model.getRange().second, 10.0);
+  }
+
+  void test_that_getWorkspaceRange_returns_the_defaulted_values_before_a_fit() {
+    auto const model = getFitPlotModel();
+
+    TS_ASSERT_EQUALS(model.getWorkspaceRange().first, 0.0);
+    TS_ASSERT_EQUALS(model.getWorkspaceRange().second, 10.0);
+  }
+
+  void
+  test_that_getResultRange_returns_the_different_values_to_the_values_before_the_fit() {
+    auto const model = getFitPlotModelWithFitData();
+
+    TS_ASSERT_DIFFERS(model.getResultRange().first, 0.0);
+    TS_ASSERT_DIFFERS(model.getResultRange().second, 10.0);
+  }
+
+  void
+  test_that_getFirstHWHM_returns_half_the_value_of_the_FWHM_in_the_fitting_function() {
+    auto const model = getFitPlotModel();
+    TS_ASSERT_EQUALS(model.getFirstHWHM(), 0.0175 / 2);
+  }
+
+  void
+  test_that_getFirstPeakCentre_returns_the_value_of_the_first_PeakCentre_in_the_fitting_function() {
+    auto const model = getFitPlotModel();
+    TS_ASSERT_EQUALS(model.getFirstPeakCentre(), 0.0);
+  }
+
+  void
+  test_that_getFirstBackgroundLevel_returns_the_value_of_the_first_background_level_in_the_fitting_function() {
+    auto const model = getFitPlotModel();
+    TS_ASSERT_EQUALS(model.getFirstBackgroundLevel(), 0.0);
   }
 };
 
