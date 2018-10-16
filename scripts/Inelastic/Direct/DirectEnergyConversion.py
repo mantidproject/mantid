@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #pylind: disable=attribute-defined-outside-init
@@ -1922,7 +1928,7 @@ def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
     try:
         masked_wksp.name()
 #pylint: disable=broad-except
-    except Exeption:
+    except Exception:
         prop_man.log("***WARNING: cached mask workspace invalidated. Incorrect masking reported")
         return (failed_spectra,0)
 

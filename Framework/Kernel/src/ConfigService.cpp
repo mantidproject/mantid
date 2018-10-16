@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -45,7 +51,6 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/regex.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -2069,8 +2074,11 @@ template DLLExport boost::optional<int>
 ConfigServiceImpl::getValue(const std::string &);
 template DLLExport boost::optional<size_t>
 ConfigServiceImpl::getValue(const std::string &);
+#ifdef _MSC_VER
 template DLLExport boost::optional<bool>
 ConfigServiceImpl::getValue(const std::string &);
+#endif
+
 /// \endcond TEMPLATE
 
 } // namespace Kernel

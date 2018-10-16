@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------
 // Includes
 //--------------------------
@@ -39,7 +45,7 @@
  *  @param graph :: the graph the dialog is settign the options for
  *  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
  *  @param parent :: the QWidget that acts as this widget's parent in the
- * hierachy
+ * hierarchy
  */
 AxisDetails::AxisDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
                          QWidget *parent)
@@ -336,7 +342,7 @@ void AxisDetails::initWidgets() {
   }
 }
 
-/** Sets the modifed flag to true so that the changes may be applied.
+/** Sets the modified flag to true so that the changes may be applied.
  *
  */
 void AxisDetails::setModified() { m_modified = true; }
@@ -374,7 +380,7 @@ bool AxisDetails::valid() {
            !w);
 }
 
-/** Applies the grid paremeters to the graphs
+/** Applies the grid parameters to the graphs
  *
  */
 void AxisDetails::apply() {
@@ -413,7 +419,7 @@ void AxisDetails::apply() {
   }
 }
 
-/** Applies the grid paremeters to the graphs
+/** Applies the grid parameters to the graphs
  *
  */
 void AxisDetails::showAxis() {
@@ -431,7 +437,7 @@ void AxisDetails::showAxis() {
     m_txtFormula->setEnabled(labels);
 
     // this should so the work of the below IF but on one line and slightly more
-    // efficently as i assume setDisabled negates that given to it
+    // efficiently as i assume setDisabled negates that given to it
     m_spnAngle->setEnabled(
         (m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop) &&
         labels);
@@ -445,7 +451,7 @@ void AxisDetails::showAxis() {
   emit axisShowChanged(shown);
 }
 
-/** Enables, Disables, Hides or Shows widgets apropriate to the current Axis
+/** Enables, Disables, Hides or Shows widgets appropriate to the current Axis
  *Format
  *
  */

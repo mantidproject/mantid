@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
   File                 : PythonScript.cpp
   Project              : QtiPlot
 --------------------------------------------------------------------
-  Copyright            : (C) 2006 by Knut Franke
-  Email (use @ for *)  : knut.franke*gmx.de
-  Description          : Execute Python code from within QtiPlot
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -148,7 +137,7 @@ PyObject *PythonScript::createSipInstanceFromMe() {
 
 /**
  * @param code A lump of python code
- * @return True if the code forms a complete statment
+ * @return True if the code forms a complete statement
  */
 bool PythonScript::compilesToCompleteStatement(const QString &code) const {
   bool result(false);
@@ -263,7 +252,7 @@ void PythonScript::emit_error() {
     filename = TO_CSTRING(tb->tb_frame->f_code->co_filename);
   }
 
-  // the error message is the full (formated) traceback
+  // the error message is the full (formatted) traceback
   PyObject *str_repr = PyObject_Str(value);
   QString message;
   QTextStream msgStream(&message);

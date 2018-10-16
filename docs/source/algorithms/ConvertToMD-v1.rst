@@ -11,10 +11,10 @@ Description
 
 The algorithm is used transform existing :ref:`Event <EventWorkspace>` 
 or :ref:`Matrix <MatrixWorkspace>` workspace into 
-`Multidimensional workspace <http://www.mantidproject.org/MDEventWorkspace>`__ using
+:ref:`Multidimensional workspace <MDWorkspace>` using
 `MD Transformations Factory <http://www.mantidproject.org/MD_Transformation_factory>`_. 
 
-If  the target workspace does not exist, the algorithm creates `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`__
+If  the target workspace does not exist, the algorithm creates :ref:`MDEventWorkspace <MDWorkspace>`
 with selected dimensions, e.g. the reciprocal space of momentums **(Qx, Qy, Qz)** or momentums modules **\|Q|**, energy transfer **dE** if available 
 and any other user specified log values which can be treated as dimensions. If the target workspace do exist, 
 the **MD Events** are added to this workspace.

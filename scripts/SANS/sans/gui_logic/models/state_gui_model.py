@@ -1,4 +1,10 @@
-""" The state gui model contains all the reduction information which is not explictily available in the data table.
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+""" The state gui model contains all the reduction information which is not explicitly available in the data table.
 
 This is one of the two models which is used for the data reduction. It contains generally all the settings which
 are not available in the model associated with the data table.
@@ -128,7 +134,7 @@ class StateGuiModel(object):
         if SetId.centre in self._user_file_items:
             settings = self._user_file_items[SetId.centre]
         else:
-            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overriden
+            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
             # and if not we want it to fail.
             settings = [position_entry(pos1=0.0, pos2=0.0, detector_type=DetectorType.LAB)]
 
@@ -374,7 +380,7 @@ class StateGuiModel(object):
         if LimitsId.wavelength in self._user_file_items:
             settings = self._user_file_items[LimitsId.wavelength]
         else:
-            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overriden
+            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
             # and if not we want it to fail.
             settings = [simple_range(start=-1., stop=-1., step=-1., step_type=RangeStepType.Lin)]
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/LoadDNSSCD.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
@@ -554,7 +560,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
       int64_t nchannels = static_cast<int64_t>(ds.signal[i].size());
       if ((theta > theta_min) && (theta < theta_max)) {
         PARALLEL_FOR_IF(Kernel::threadSafe(*m_OutWS, *normWS))
-        for (auto channel = 0; channel < nchannels; channel++) {
+        for (int64_t channel = 0; channel < nchannels; channel++) {
           PARALLEL_START_INTERUPT_REGION
           double signal = ds.signal[i][channel];
           signal_t error = std::sqrt(signal);

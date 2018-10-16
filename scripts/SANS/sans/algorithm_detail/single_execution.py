@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import (create_child_algorithm,
@@ -13,7 +19,7 @@ import sys
 
 def run_core_reduction(reduction_alg, reduction_setting_bundle):
     """
-    This function runs a core reduction. This is essentially half a reduction (either smaple or can).
+    This function runs a core reduction. This is essentially half a reduction (either sample or can).
 
     :param reduction_alg: a handle to the reduction algorithm.
     :param reduction_setting_bundle: a ReductionSettingBundle tuple

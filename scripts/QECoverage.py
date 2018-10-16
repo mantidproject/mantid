@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements
 # pylint: disable= too-many-branches, no-self-use
 from __future__ import (absolute_import, division, print_function)
@@ -100,7 +106,7 @@ class QECoverageGUI(QtGui.QWidget):
         self.direct_emin_label = QtGui.QLabel("Emin", self.direct_emin)
         self.direct_emin_grid.addWidget(self.direct_emin_label)
         self.direct_emin_input = QtGui.QLineEdit("-10", self.direct_emin)
-        self.direct_emin_input.setToolTip("Mininum energy transfer to plot down to.")
+        self.direct_emin_input.setToolTip("Minimum energy transfer to plot down to.")
         self.direct_emin_grid.addWidget(self.direct_emin_input)
         self.direct_grid.addWidget(self.direct_emin)
         self.direct_plotbtn = QtGui.QPushButton("Plot Q-E", self.tab_direct)
