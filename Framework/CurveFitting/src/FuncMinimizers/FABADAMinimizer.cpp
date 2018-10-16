@@ -955,7 +955,7 @@ void FABADAMinimizer::outputParameterTable(
   wsPdfE->addColumn("str", "Name");
   wsPdfE->addColumn("double", "Value");
   wsPdfE->addColumn("double", "Left's error");
-  wsPdfE->addColumn("double", "Right's error");
+  wsPdfE->addColumn("double", "Rigth's error");
 
   for (size_t j = 0; j < m_nParams; ++j) {
     API::TableRow row = wsPdfE->appendRow();
