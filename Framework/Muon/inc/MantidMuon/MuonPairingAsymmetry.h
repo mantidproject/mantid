@@ -30,7 +30,7 @@ private:
   void init() override;
   void exec() override;
   // Validation split across several functions due to size
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
   void validateManualGroups(std::map<std::string, std::string> &errors);
   void validateGroupsWorkspaces(std::map<std::string, std::string> &errors);
   void validatePeriods(WorkspaceGroup_sptr inputWS,
@@ -51,7 +51,7 @@ private:
   /// Execute the algorithm if "SpecifyGroupsManually" is checked
   MatrixWorkspace_sptr execSpecifyGroupsManually();
 
-  MatrixWorkspace_sptr MuonPairingAsymmetry::execGroupWorkspaceInput();
+  MatrixWorkspace_sptr execGroupWorkspaceInput();
 
   void setPairAsymmetrySampleLogs(MatrixWorkspace_sptr workspace);
   /// Allow WorkspaceGroup property to function correctly.
