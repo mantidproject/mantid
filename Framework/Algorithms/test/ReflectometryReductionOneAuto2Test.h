@@ -1394,7 +1394,7 @@ public:
     alg.setProperty("FirstTransmissionRun", transWS);
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(out->y(0)[0], 0.0782608695, 0.000001);
+    TS_ASSERT_DELTA(out->y(0)[0], 0.0783777600, 0.000001);
     AnalysisDataService::Instance().clear();
   }
 
