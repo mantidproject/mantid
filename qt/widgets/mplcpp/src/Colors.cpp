@@ -69,7 +69,7 @@ Python::Object scaleModule() {
  * @param obj An existing Normalize instance or subtype
  */
 NormalizeBase::NormalizeBase(Python::Object obj)
-    : Python::InstanceHolder(std::move(obj), "autoscale") {}
+    : Python::InstanceHolder(std::move(obj)) {}
 
 // ------------------------ Normalize ------------------------------------------
 

@@ -5,6 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+
+using Mantid::PythonInterface::GlobalInterpreterLock;
 
 namespace MantidQt {
 namespace Widgets {
@@ -31,6 +34,7 @@ inline int toByte(const Python::Object &pyfloat) {
  */
 QColor MantidQt::Widgets::MplCpp::ColorConverter::toRGB(
     const Python::Object &colorSpec) {
+  GlobalInterpreterLock lock;
   auto tuple = Python::Object(colorConverter().attr("to_rgb")(colorSpec));
   return QColor(toByte(tuple[0]), toByte(tuple[1]), toByte(tuple[2]));
 }

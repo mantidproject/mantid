@@ -8,7 +8,6 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
-#include "MantidQtWidgets/MplCpp/ColorConverter.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
 #include "MantidKernel/Logger.h"
@@ -23,7 +22,6 @@
 #include <QVBoxLayout>
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
-using MantidQt::Widgets::MplCpp::ColorConverter;
 using MantidQt::Widgets::MplCpp::FigureCanvasQt;
 using MantidQt::Widgets::MplCpp::cycler;
 
@@ -221,7 +219,7 @@ QColor MiniPlotMpl::getCurveColor(const QString &label) const {
   if (labelIndex < 0)
     return QColor();
   auto lineIter = std::next(std::begin(m_lines), labelIndex);
-  return ColorConverter::toRGB(lineIter->pyobj().attr("get_color")());
+  return lineIter->getColor();
 }
 
 /**

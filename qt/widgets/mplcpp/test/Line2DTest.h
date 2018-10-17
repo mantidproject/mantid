@@ -8,6 +8,7 @@
 #define MPLCPP_LINE2DTEST_H
 
 #include "MantidQtWidgets/MplCpp/Line2D.h"
+#include <QRgb>
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::Widgets::MplCpp;
@@ -20,6 +21,16 @@ public:
   // ---------------------- success tests --------------------
   void testConstructionRequiresMplLine2DObject() {
     TS_ASSERT_THROWS_NOTHING(Line2D line(pyLine2D(), {1, 2}, {1, 2}));
+  }
+
+  void testGetColorReturnsExpectedColor() {
+    Line2D line(pyLine2D(), {1, 2}, {1, 2});
+    line.pyobj().attr("set_color")("r");
+
+    auto color = line.getColor();
+    TS_ASSERT_EQUALS(255, color.red());
+    TS_ASSERT_EQUALS(0, color.green());
+    TS_ASSERT_EQUALS(0, color.blue());
   }
 
   // ---------------------- failure tests --------------------

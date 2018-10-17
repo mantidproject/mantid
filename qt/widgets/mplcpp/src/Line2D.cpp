@@ -5,6 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Line2D.h"
+#include "MantidQtWidgets/MplCpp/ColorConverter.h"
+
+#include <QColor>
+
+using Mantid::PythonInterface::GlobalInterpreterLock;
+using MantidQt::Widgets::MplCpp::ColorConverter;
 
 namespace MantidQt {
 namespace Widgets {
@@ -41,6 +47,14 @@ Line2D::~Line2D() noexcept {
       // line is not attached to an axes
     }
   }
+}
+
+/**
+ * @return A QColor defining the color of the artist
+ */
+QColor Line2D::getColor() const {
+  GlobalInterpreterLock lock;
+  return ColorConverter::toRGB(pyobj().attr("get_color")());
 }
 
 } // namespace MplCpp

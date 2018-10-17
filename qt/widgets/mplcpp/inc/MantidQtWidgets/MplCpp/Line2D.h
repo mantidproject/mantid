@@ -9,6 +9,7 @@
 
 #include "MantidQtWidgets/MplCpp/Artist.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
+#include <QColor>
 #include <vector>
 
 namespace MantidQt {
@@ -32,6 +33,8 @@ public:
   // movable
   Line2D(Line2D &&) = default;
   Line2D &operator=(Line2D &&) = default;
+
+  QColor getColor() const;
 
 private:
   // Containers that own the data making up the line
