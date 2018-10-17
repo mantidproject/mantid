@@ -1,4 +1,5 @@
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 namespace Mantid {
 namespace IndirectFitDataCreationHelper {

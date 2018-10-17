@@ -180,4 +180,4 @@ public:
   }
 };
 
-#endif
+#endif // MANTID_INDIRECTFITDATACREATIONHELPER_TEST

@@ -1,8 +1,11 @@
 #ifndef MANTID_INDIRECTFITDATACREATIONHELPER_H_
 #define MANTID_INDIRECTFITDATACREATIONHELPER_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidHistogramData/BinEdges.h"
+
+#include <string>
 
 #include <boost/variant.hpp>
 #include <boost/variant/apply_visitor.hpp>
@@ -105,4 +108,4 @@ struct AreSpectraEqual : public boost::static_visitor<bool> {
 } // namespace IndirectFitDataCreationHelper
 } // namespace Mantid
 
-#endif
+#endif // MANTID_INDIRECTFITDATACREATIONHELPER_H
