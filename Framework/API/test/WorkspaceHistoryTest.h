@@ -15,9 +15,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "Poco/File.h"
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -79,9 +76,8 @@ public:
     TS_ASSERT_EQUALS(history.size(), 0);
     TS_ASSERT_EQUALS(history.empty(), true);
 
-    AlgorithmHistory alg1(
-        "FirstAlgorithm", 2,
-        boost::uuids::to_string(boost::uuids::random_generator()()));
+    AlgorithmHistory alg1("FirstAlgorithm", 2,
+                          "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
     alg1.addProperty("FirstAlgProperty", "1", false,
                      Mantid::Kernel::Direction::Input);
 
@@ -155,8 +151,7 @@ public:
     int depth = 3;
     int width = 50;
     auto algHist = boost::make_shared<AlgorithmHistory>(
-        "AnAlgorithm", 1,
-        boost::uuids::to_string(boost::uuids::random_generator()()));
+        "AnAlgorithm", 1, "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
     build_Algorithm_History(*algHist, width, depth);
     m_wsHist.addHistory(std::move(algHist));
   }
@@ -166,8 +161,7 @@ public:
     int width = 3;
 
     auto algHist = boost::make_shared<AlgorithmHistory>(
-        "AnAlgorithm", 1,
-        boost::uuids::to_string(boost::uuids::random_generator()()));
+        "AnAlgorithm", 1, "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
     build_Algorithm_History(*algHist, width, depth);
     m_wsHist.addHistory(std::move(algHist));
   }
@@ -208,8 +202,7 @@ private:
     if (depth > 0) {
       for (int i = 0; i < width; ++i) {
         auto algHist = boost::make_shared<AlgorithmHistory>(
-            "AnAlgorithm", 1,
-            boost::uuids::to_string(boost::uuids::random_generator()()));
+            "AnAlgorithm", 1, "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
         build_Algorithm_History(*algHist, width, depth - 1);
         parent.addChildHistory(std::move(algHist));
       }
@@ -219,16 +212,14 @@ private:
   void constructAlgHistories1() {
     for (auto i = 1u; i < 1000001; ++i) {
       auto algHist = boost::make_shared<AlgorithmHistory>(
-          "AnAlgorithm", i,
-          boost::uuids::to_string(boost::uuids::random_generator()()));
+          "AnAlgorithm", i, "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
       m_1000000Histories1.emplace_back(std::move(algHist));
     }
   }
   void constructAlgHistories2() {
     for (auto i = 1000001u; i < 1000001; ++i) {
       auto algHist = boost::make_shared<AlgorithmHistory>(
-          "AnAlgorithm", i,
-          boost::uuids::to_string(boost::uuids::random_generator()()));
+          "AnAlgorithm", i, "207ca8f8-fee0-49ce-86c8-7842a7313c2e");
       m_1000000Histories2.addHistory(std::move(algHist));
     }
   }

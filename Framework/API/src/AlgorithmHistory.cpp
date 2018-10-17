@@ -62,6 +62,8 @@ AlgorithmHistory::~AlgorithmHistory() = default;
    from saved records.
     @param name :: The algorithm name.
     @param vers :: The algorithm version.
+    @param uuid :: The universally unique id assigned to this alghistory on
+   creation during assignment to history.
     @param start :: The start time of the algorithm execution (optional).
     @param duration :: The time (in seconds) that it took to run this algorithm
    (optional).

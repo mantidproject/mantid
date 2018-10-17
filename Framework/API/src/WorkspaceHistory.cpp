@@ -23,8 +23,8 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using Mantid::Kernel::EnvironmentHistory;
 using boost::algorithm::split;
+using Mantid::Kernel::EnvironmentHistory;
 
 namespace Mantid {
 namespace API {
@@ -47,7 +47,7 @@ struct AlgorithmHistoryHasher {
 struct AlgorithmHistoryComparator {
   bool operator()(const AlgorithmHistory_sptr &a,
                   const AlgorithmHistory_sptr &b) const {
-    return (*a) == (*b);
+    return a->uuid() == b->uuid();
   }
 };
 } // namespace
@@ -390,7 +390,7 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   boost::split(info, rawData, boost::is_any_of("\n"));
 
   const size_t nlines = info.size();
-  if (nlines < 4) { // ignore badly formed history entries
+  if (nlines < 5) { // ignore badly formed history entries
     throw std::runtime_error(
         "Malformed history record: Incorrect record size.");
   }
@@ -409,7 +409,24 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   // Get the execution date/time
   std::string date, time;
   getWordsInString(info[EXEC_TIME], dummy, dummy, date, time);
-  Mantid::Types::Core::DateAndTime utc_start(date + "T" + time);
+  Mantid::Types::Core::DateAndTime utc_start;
+  // If not legacy version construct normally else Parse in the legacy data
+  if (std::isdigit(date[6])) {
+    Mantid::Types::Core::DateAndTime timeConstruction(date + "T" + time);
+    utc_start = timeConstruction;
+  } else {
+    Poco::DateTime start_timedate;
+    // This is needed by the Poco parsing function
+    int tzdiff(-1);
+    Mantid::Types::Core::DateAndTime utc_start;
+    if (!Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time,
+                                        start_timedate, tzdiff)) {
+      g_log.warning() << "Error parsing start time in algorithm history entry."
+                      << "\n";
+      utc_start = Types::Core::DateAndTime::defaultTime();
+    }
+    utc_start.set_from_time_t(start_timedate.timestamp().epochTime());
+  }
 
   // Get the duration
   getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);
@@ -421,11 +438,12 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   }
 
   /// To allow legacy files we must check if it is parameters and set the
-  /// variables accordingly.
+  /// variables accordingly. If legacy generate a new UUID for it.
   std::string uuid;
   size_t paramNum;
   if (info[3] != "Parameters:") {
-    getWordsInString(info[UUID], dummy, dummy, uuid, dummy);
+    uuid = info[UUID];
+    uuid.erase(uuid.find("UUID: "), 6);
     paramNum = PARAMS;
   } else {
     uuid = boost::uuids::to_string(boost::uuids::random_generator()());
@@ -481,12 +499,5 @@ std::ostream &operator<<(std::ostream &os, const WorkspaceHistory &WH) {
   WH.printSelf(os);
   return os;
 }
-
-bool WorkspaceHistory::binarySearchAlgorithms(
-    AlgorithmHistory_sptr algHistory) {
-  return std::binary_search(m_algorithms.begin(), m_algorithms.end(),
-                            algHistory, AlgorithmHistorySearch());
-}
-
 } // namespace API
 } // namespace Mantid

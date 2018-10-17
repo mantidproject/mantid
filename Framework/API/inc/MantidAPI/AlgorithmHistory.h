@@ -108,7 +108,7 @@ public:
   }
   /// Equality operator
   inline bool operator==(const AlgorithmHistory &other) const {
-    return uuid() == other.uuid();
+    return (execCount() == other.execCount() && name() == other.name());
   }
   /// Create a concrete algorithm based on a history record
   boost::shared_ptr<IAlgorithm> createAlgorithm() const;
