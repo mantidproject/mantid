@@ -8,9 +8,9 @@
 from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import (QMainWindow)
 from . import ui_OptimizeLattice
-if qtpy.PyQT4:
+if qtpy.PyQT4:  # noqa
     from PyQt4.QtCore import pyqtSignal  # noqa
-elif qtpy.PyQT5:
+elif qtpy.PyQT5:  # noqa
     from PyQt5.QtCore import pyqtSignal  # noqa
 else:
     raise ImportError('Unable to import QtCore.pyqtSignal')
