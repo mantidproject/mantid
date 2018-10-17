@@ -132,6 +132,8 @@ public:
 private:
   static void checkDirectStatisticsContainedInSampleLogs(const API::Run &run) {
     TS_ASSERT(run.hasProperty("beam_stats.beam_rms_variation"))
+    TS_ASSERT_EQUALS(run.getProperty("beam_stats.beam_rms_variation")->units(),
+                     "m")
     TS_ASSERT(!run.hasProperty("beam_stats.bent_sample"))
     TS_ASSERT(!run.hasProperty("beam_stats.first_slit_angular_spread"))
     TS_ASSERT(!run.hasProperty("beam_stats.incident_angular_spread"))
@@ -141,11 +143,25 @@ private:
   static void
   checkReflectedStatisticsContainedInSampleLogs(const API::Run &run) {
     TS_ASSERT(run.hasProperty("beam_stats.beam_rms_variation"))
+    TS_ASSERT_EQUALS(run.getProperty("beam_stats.beam_rms_variation")->units(),
+                     "m")
     TS_ASSERT(run.hasProperty("beam_stats.bent_sample"))
+    TS_ASSERT_EQUALS(run.getProperty("beam_stats.bent_sample")->units(), "")
     TS_ASSERT(run.hasProperty("beam_stats.first_slit_angular_spread"))
+    TS_ASSERT_EQUALS(
+        run.getProperty("beam_stats.first_slit_angular_spread")->units(),
+        "radians")
     TS_ASSERT(run.hasProperty("beam_stats.incident_angular_spread"))
+    TS_ASSERT_EQUALS(
+        run.getProperty("beam_stats.incident_angular_spread")->units(),
+        "radians")
     TS_ASSERT(run.hasProperty("beam_stats.sample_waviness"))
+    TS_ASSERT_EQUALS(run.getProperty("beam_stats.sample_waviness")->units(),
+                     "radians")
     TS_ASSERT(run.hasProperty("beam_stats.second_slit_angular_spread"))
+    TS_ASSERT_EQUALS(
+        run.getProperty("beam_stats.second_slit_angular_spread")->units(),
+        "radians")
   }
 
   void checkWrongSlitsThrows(const int slit) {
@@ -188,11 +204,7 @@ private:
     constexpr double startX{1000.};
     const Kernel::V3D sourcePos{0., 0., -L1};
     const Kernel::V3D &monitorPos = sourcePos;
-    const Kernel::V3D samplePos{
-        0.,
-        0.,
-        0.,
-    };
+    const Kernel::V3D samplePos{0., 0., 0.};
     const auto detZ = DET_DIST * std::cos(2 * braggAngle * deg2rad);
     const auto detY = DET_DIST * std::sin(2 * braggAngle * deg2rad);
     const Kernel::V3D detectorPos{0., detY, detZ};

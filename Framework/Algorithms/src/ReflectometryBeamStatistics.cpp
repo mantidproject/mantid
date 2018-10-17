@@ -190,7 +190,7 @@ void ReflectometryBeamStatistics::exec() {
  * @param ws a reference workspace
  * @param start foreground start workspace index
  * @param end foreground end workspace index
- * @return FWHM
+ * @return FWHM in units of pixel size
  */
 double ReflectometryBeamStatistics::beamRMSVariation(
     API::MatrixWorkspace_sptr &ws, const size_t start, const size_t end) {
@@ -364,7 +364,8 @@ void ReflectometryBeamStatistics::rmsVariationToLogs(API::MatrixWorkspace &ws,
                                                      const double variation) {
   auto &run = ws.mutableRun();
   if (!run.hasProperty(LogEntry::BEAM_RMS_VARIATION)) {
-    run.addProperty(LogEntry::BEAM_RMS_VARIATION, variation);
+    const std::string metres{"m"};
+    run.addProperty(LogEntry::BEAM_RMS_VARIATION, variation, metres);
   }
 }
 
@@ -451,16 +452,17 @@ void ReflectometryBeamStatistics::statisticsToLogs(
     API::MatrixWorkspace &ws, const Statistics &statistics) {
   auto &run = ws.mutableRun();
   constexpr bool overwrite{true};
+  const std::string radians{"radians"};
   run.addProperty(LogEntry::BENT_SAMPLE, statistics.bentSample ? 1 : 0,
                   overwrite);
   run.addProperty(LogEntry::FIRST_SLIT_ANGULAR_SPREAD,
-                  statistics.firstSlitAngularSpread, overwrite);
+                  statistics.firstSlitAngularSpread, radians, overwrite);
   run.addProperty(LogEntry::INCIDENT_ANGULAR_SPREAD,
-                  statistics.incidentAngularSpread, overwrite);
-  run.addProperty(LogEntry::SAMPLE_WAVINESS, statistics.sampleWaviness,
+                  statistics.incidentAngularSpread, radians, overwrite);
+  run.addProperty(LogEntry::SAMPLE_WAVINESS, statistics.sampleWaviness, radians,
                   overwrite);
   run.addProperty(LogEntry::SECOND_SLIT_ANGULAR_SPREAD,
-                  statistics.secondSlitAngularSpread, overwrite);
+                  statistics.secondSlitAngularSpread, radians, overwrite);
 }
 
 } // namespace Algorithms
