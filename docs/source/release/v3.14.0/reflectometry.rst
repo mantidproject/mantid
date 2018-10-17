@@ -40,6 +40,7 @@ Bug fixes
 #########
 
 - Fixed the error propagation in :math:`Q` grouping in :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`
+- Fixed an issue with validation of ScaleFactorFromPeriod not allowing correct period to be given for Group Workspaces in :ref:`algm-Stitch1DMany`
 
 Liquids Reflectometer
 ---------------------
