@@ -6,13 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from .ui_converter import Ui_MainWindow #import line for the UI python class
-from PyQt4 import QtCore, QtGui
+from qtpy.QtWidgets import QMainWindow, QMessageBox
+from qtpy.QtGui import QDoubleValidator
+from mantid.kernel import Logger
 import math
 import TofConverter.convertUnits
 
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("TofConverter").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
-class MainWindow(QtGui.QMainWindow):
+
+class MainWindow(QMainWindow):
     needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
     needsThetaOutputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
     needsFlightPathInputList = ['Time of flight (microseconds)']
@@ -52,16 +59,15 @@ class MainWindow(QtGui.QMainWindow):
             self.flightPathEnable(True)
 
     def __init__(self, parent=None):
-        QtGui.QMainWindow.__init__(self,parent)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.ui.InputVal.setValidator(QtGui.QDoubleValidator(self.ui.InputVal))
-        self.ui.totalFlightPathInput.setValidator(QtGui.QDoubleValidator(self.ui.totalFlightPathInput))
-        self.ui.scatteringAngleInput.setValidator(QtGui.QDoubleValidator(self.ui.scatteringAngleInput))
-        QtCore.QObject.connect(self.ui.convert, QtCore.SIGNAL("clicked()"), self.convert )
-        QtCore.QObject.connect(self.ui.helpButton, QtCore.SIGNAL("clicked()"), self.helpClicked)
-        QtCore.QObject.connect(self.ui.inputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
-        QtCore.QObject.connect(self.ui.outputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
+        QMainWindow.__init__(self,parent)
+        self.ui = load_ui(__file__, 'converter.ui', baseinstance=self)
+        self.ui.InputVal.setValidator(QDoubleValidator(self.ui.InputVal))
+        self.ui.totalFlightPathInput.setValidator(QDoubleValidator(self.ui.totalFlightPathInput))
+        self.ui.scatteringAngleInput.setValidator(QDoubleValidator(self.ui.scatteringAngleInput))
+        self.ui.convertButton.clicked.connect(self.convert)
+        self.ui.helpButton.clicked.connect(self.helpClicked)
+        self.ui.inputUnits.currentIndexChanged.connect(self.setInstrumentInputs)
+        self.ui.outputUnits.currentIndexChanged.connect(self.setInstrumentInputs)
         self.setInstrumentInputs()
 
         ##defaults
@@ -104,11 +110,11 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))
         except UnboundLocalError as ule:
-            QtGui.QMessageBox.warning(self, "TofConverter", str(ule))
+            QMessageBox.warning(self, "TofConverter", str(ule))
             return
         except ArithmeticError as ae:
-            QtGui.QMessageBox.warning(self, "TofConverter", str(ae))
+            QMessageBox.warning(self, "TofConverter", str(ae))
             return
         except RuntimeError as re:
-            QtGui.QMessageBox.warning(self, "TofConverter", str(re))
+            QMessageBox.warning(self, "TofConverter", str(re))
             return

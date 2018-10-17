@@ -7,6 +7,7 @@
 
 import pythonTSV as TSVHelper
 
+
 class pair(object):
 
     def __init__(self, name="", F_group="", B_group="", alpha=1.0):

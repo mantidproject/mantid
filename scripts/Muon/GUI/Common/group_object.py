@@ -7,6 +7,7 @@
 
 import pythonTSV as TSVHelper
 
+
 class group(object):
 
     def __init__(self, name="", dets=[]):

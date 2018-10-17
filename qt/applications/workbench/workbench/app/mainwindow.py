@@ -250,13 +250,8 @@ class MainWindow(QMainWindow):
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
 
-    def launchCustomGUI(self, name):
-        try:
-            importlib.import_module(name)
-        except ImportError:
-            from mantid.kernel import  logger
-            logger.error(str('Failed to load {} interface'.format(name)))  # TODO logger should accept unicode
-            raise
+    def launchCustomGUI(self, script):
+        exec(open(script).read())
 
     def populateAfterMantidImport(self):
         from mantid.kernel import ConfigService, logger
@@ -266,16 +261,19 @@ class MainWindow(QMainWindow):
 
         # list of custom interfaces that have been made qt4/qt5 compatible
         # TODO need to make *anything* compatible
-        GUI_WHITELIST = []
+        GUI_WHITELIST = ['FilterEvents.py',
+                         'TofConverter.py']
 
         # detect the python interfaces
         interfaces = {}
         for item in items:
-            key,scriptname = item.split('/')
+            key, scriptname = item.split('/')
+            # TODO logger should accept unicode
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
-                logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
+                logger.warning(str('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir)))
                 continue
             if scriptname not in GUI_WHITELIST:
+                logger.information(str('Not adding gui "{}"'.format(scriptname)))
                 continue
             temp = interfaces.get(key, [])
             temp.append(scriptname)
@@ -290,8 +288,8 @@ class MainWindow(QMainWindow):
             names.sort()
             for name in names:
                 action = submenu.addAction(name.replace('.py', '').replace('_', ' '))
-                script = name.replace('.py', '')
-                action.triggered.connect(lambda checked, script=script:self.launchCustomGUI(script))
+                script = os.path.join(interface_dir, name)
+                action.triggered.connect(lambda checked, script=script: self.launchCustomGUI(script))
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
@@ -379,6 +377,10 @@ class MainWindow(QMainWindow):
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  # noqa
             plt.close('all')
+
+            app = QApplication.instance()
+            if app is not None:
+                app.closeAllWindows()
 
             event.accept()
         else:
@@ -504,9 +506,10 @@ def start_workbench(app, command_line_options):
     if main_window.splash:
         main_window.splash.hide()
 
-    if command_line_options.exe_script is not None:
-        main_window.editor.open_file_in_new_tab(command_line_options.exe_script)
-        main_window.editor.execute_current()  # TODO use the result as an exit code
+    if command_line_options.script is not None:
+        main_window.editor.open_file_in_new_tab(command_line_options.script)
+        if command_line_options.execute:
+            main_window.editor.execute_current()  # TODO use the result as an exit code
 
         if command_line_options.quit:
             main_window.close()
@@ -531,9 +534,10 @@ def main():
 
     # setup command line arguments
     parser = argparse.ArgumentParser(description='Mantid Workbench')
-    parser.add_argument('-x', '--execute', metavar='SCRIPT', dest='exe_script',
+    parser.add_argument('script', nargs='?')
+    parser.add_argument('-x', '--execute', action='store_true',
                         help='execute the script file given as argument')
-    parser.add_argument('-q', '--quit', dest='quit', action='store_true',
+    parser.add_argument('-q', '--quit', action='store_true',
                         help='execute the script file with \'-x\' given as argument and then exit')
     # TODO -a or --about: show about dialog and exit
     # TODO -d or --default-settings: start MantidPlot with the default settings
@@ -557,13 +561,13 @@ def main():
     # TODO handle options that don't require starting the workbench e.g. --help --version
 
     # fix/validate arguments
-    if options.exe_script is not None:
+    if options.script is not None:
         # convert into absolute path
-        options.exe_script = os.path.abspath(os.path.expanduser(options.exe_script))
-        if not os.path.exists(options.exe_script):
+        options.script = os.path.abspath(os.path.expanduser(options.script))
+        if not os.path.exists(options.script):
             # TODO should be logged
-            print('script "{}" does not exist'.format(options.exe_script))
-            options.exe_script = None
+            print('script "{}" does not exist'.format(options.script))
+            options.script = None
 
     app = initialize()
     # the default sys check interval leads to long lags

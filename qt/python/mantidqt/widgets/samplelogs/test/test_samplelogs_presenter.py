@@ -81,6 +81,25 @@ class SampleLogsTest(unittest.TestCase):
         presenter.clicked()
         self.assertEqual(self.view.get_selected_row_indexes.call_count, 2)
 
+        # plot clicked
+        self.model.reset_mock()
+        self.view.reset_mock()
+
+        event = mock.Mock()
+        type(event).dblclick = mock.PropertyMock(return_value=False)
+        presenter.plot_clicked(event)
+        self.assertEqual(self.view.get_selected_row_indexes.call_count, 0)
+        self.assertEqual(self.view.get_row_log_name.call_count, 0)
+        self.assertEqual(self.model.is_log_plottable.call_count, 0)
+        self.assertEqual(self.view.new_plot_selected_logs.call_count, 0)
+
+        type(event).dblclick = mock.PropertyMock(return_value=True)
+        presenter.plot_clicked(event)
+        self.assertEqual(self.view.get_selected_row_indexes.call_count, 1)
+        self.assertEqual(self.view.get_row_log_name.call_count, 2)
+        self.assertEqual(self.model.is_log_plottable.call_count, 2)
+        self.assertEqual(self.view.new_plot_selected_logs.call_count, 1)
+
         # double clicked
         self.model.reset_mock()
         self.view.reset_mock()
@@ -89,8 +108,9 @@ class SampleLogsTest(unittest.TestCase):
         index.row = mock.Mock(return_value=7)
 
         presenter.doubleClicked(index)
-        self.view.get_row_log_name.assert_called_once_with(7)
-        self.model.get_log.assert_called_once_with("Speed5")
+        self.assertEqual(self.view.get_row_log_name.call_count, 2)
+        self.view.get_row_log_name.assert_called_with(5)
+        self.model.get_log.assert_called_with("Speed5")
 
 
 if __name__ == '__main__':
