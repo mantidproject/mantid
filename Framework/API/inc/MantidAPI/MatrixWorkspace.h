@@ -436,6 +436,8 @@ public:
   /// index, weight>
   using MaskList = std::map<size_t, double>;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
+  const std::vector<size_t>
+  maskedBinsIndices(const size_t &workspaceIndex) const;
   void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace
