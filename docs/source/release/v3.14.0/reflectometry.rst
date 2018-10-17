@@ -40,6 +40,7 @@ Bug fixes
 #########
 
 - Fixed the error propagation in :math:`Q` grouping in :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`
+- Handling of group workspaces containing single workspaces when scaling by period and using :literal:`ScaleFactorFromPeriod`, i.e. :literal:`UseManualScaleFactors` is true, :literal:`ManualScaleFactors` remains empty.
 
 Liquids Reflectometer
 ---------------------
