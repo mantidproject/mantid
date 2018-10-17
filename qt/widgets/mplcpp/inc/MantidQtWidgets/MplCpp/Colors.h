@@ -27,6 +27,9 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL NormalizeBase : public Python::InstanceHolder {
 public:
+  /// Autoscale the limits to vmin, vmax, clamping any invalid values
+  std::tuple<double, double> autoscale(std::tuple<double, double> clim);
+
   /// Return an appropriate object to determine the tick locations
   /// The default returns None indicating that matplotlib should autoselect it
   virtual Python::Object tickLocator() const { return Python::Object(); }
@@ -37,7 +40,7 @@ public:
 protected:
   // Only to be called by derived classes. They should ensure
   // this object is of the correct type
-  NormalizeBase(Python::Object obj);
+  NormalizeBase(Python::Object pyobj);
 };
 
 /**
@@ -48,6 +51,7 @@ protected:
  */
 class MANTID_MPLCPP_DLL Normalize : public NormalizeBase {
 public:
+  Normalize();
   Normalize(double vmin, double vmax);
 };
 
@@ -62,6 +66,7 @@ public:
   static double DefaultLinearScale;
 
 public:
+  SymLogNorm(double linthresh, double linscale);
   SymLogNorm(double linthresh, double linscale, double vmin, double vmax);
 
   Python::Object tickLocator() const override;
@@ -79,6 +84,7 @@ private:
  */
 class MANTID_MPLCPP_DLL PowerNorm : public NormalizeBase {
 public:
+  PowerNorm(double gamma);
   PowerNorm(double gamma, double vmin, double vmax);
 };
 

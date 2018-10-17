@@ -93,7 +93,7 @@ void MantidColorMap::changeScaleType(MantidColorMap::ScaleType type) {
   m_scaleType = type;
   switch (type) {
   case ScaleType::Linear:
-    m_mappable.setNorm(Normalize(0, 1));
+    m_mappable.setNorm(Normalize());
     break;
   case ScaleType::Log10:
     m_mappable.setNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold,

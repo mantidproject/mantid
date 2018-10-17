@@ -155,22 +155,29 @@ void ColorbarWidget::setScaleType(int index) {
   // Protection against a bad index.
   if (index < 0 || index > 2)
     return;
-  m_ui.normTypeOpt->setCurrentIndex(index);
-  auto range = clim();
-  const double vmin(std::get<0>(range)), vmax(std::get<1>(range));
+  // Some ranges will be invalid for some scale types, e.g. x < 0 for PowerNorm.
+  // Compute a valid range and reset user-specified range if necessary
+  auto autoscaleAndSetNorm = [this](auto norm) {
+    auto validRange = norm.autoscale(clim());
+    setNorm(std::move(norm));
+    return validRange;
+  };
+
+  std::tuple<double, double> validRange;
   switch (index) {
   case 0:
-    setNorm(Normalize(vmin, vmax));
+    validRange = autoscaleAndSetNorm(Normalize());
     break;
   case 1:
-    setNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold,
-                       SymLogNorm::DefaultLinearScale, vmin, vmax));
+    validRange = autoscaleAndSetNorm(SymLogNorm(
+        SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale));
     break;
   case 2:
-    setNorm(PowerNorm(getNthPower().toDouble(), vmin, vmax));
+    validRange = autoscaleAndSetNorm(PowerNorm(getNthPower().toDouble()));
     break;
   }
-
+  setClim(std::get<0>(validRange), std::get<1>(validRange));
+  m_ui.normTypeOpt->setCurrentIndex(index);
   emit scaleTypeChanged(index);
 }
 
