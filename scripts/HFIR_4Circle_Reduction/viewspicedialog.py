@@ -6,11 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from . import ui_SpiceViewerDialog
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from qtpy.QtWidgets import (QDialog)  # noqa
 
 
-class ViewSpiceDialog(QtGui.QDialog):
+class ViewSpiceDialog(QDialog):
     """Dialog to view SPICE """
     def __init__(self, parent):
         """Initialization
@@ -52,8 +51,6 @@ class ViewSpiceDialog(QtGui.QDialog):
         :param plain_text:
         :return:
         """
-        assert isinstance(plain_text, str) or isinstance(plain_text, QtCore.QString), \
-            'Type of plain text is not supported.'
-        self.ui.textBrowser_spice.setText(plain_text)
+        self.ui.textBrowser_spice.setText('{}'.format(plain_text))
 
         return

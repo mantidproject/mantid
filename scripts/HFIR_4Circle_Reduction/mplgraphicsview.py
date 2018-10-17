@@ -10,8 +10,13 @@ from six.moves import range
 import os
 import numpy as np
 
-from PyQt4 import QtGui
-from PyQt4.QtCore import pyqtSignal
+from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)
+if qtpy.PyQT4:
+    from PyQt4.QtCore import pyqtSignal
+elif qtpy.PyQT5:
+    from PyQt5.QtCore import pyqtSignal
+else:
+    raise ImportError('Unable to import QtCore.pyqtSignal')
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
@@ -359,7 +364,7 @@ class IndicatorManager(object):
         return
 
 
-class MplGraphicsView(QtGui.QWidget):
+class MplGraphicsView(QWidget):
     """ A combined graphics view including matplotlib canvas and
     a navigation tool bar
 
@@ -369,7 +374,7 @@ class MplGraphicsView(QtGui.QWidget):
         """ Initialization
         """
         # Initialize parent
-        QtGui.QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)
 
         # set up canvas
         self._myCanvas = Qt4MplCanvas(self)
@@ -381,7 +386,7 @@ class MplGraphicsView(QtGui.QWidget):
         self._homeXYLimit = None
 
         # set up layout
-        self._vBox = QtGui.QVBoxLayout(self)
+        self._vBox = QVBoxLayout(self)
         self._vBox.addWidget(self._myCanvas)
         self._vBox.addWidget(self._myToolBar)
 
@@ -1035,7 +1040,7 @@ class MplGraphicsView(QtGui.QWidget):
 
 class Qt4MplCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib figure.
-    It can be used to replace GraphicsView of QtGui
+    It can be used to replace GraphicsView
     """
     def __init__(self, parent):
         """  Initialization
@@ -1060,7 +1065,7 @@ class Qt4MplCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
         # Variables to manage all lines/subplot

@@ -7,7 +7,12 @@
 #pylint: disable=W0403,R0902,R0903,R0904,W0212
 from __future__ import (absolute_import, division, print_function)
 from HFIR_4Circle_Reduction import mpl2dgraphicsview
-from PyQt4 import QtCore
+if qtpy.PyQT4:
+    from PyQt4.QtCore import pyqtSignal
+elif qtpy.PyQT5:
+    from PyQt5.QtCore import pyqtSignal
+else:
+    raise ImportError('Unable to import QtCore.pyqtSignal')
 import numpy as np
 import os
 
@@ -22,7 +27,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         LEFT = 1
         RIGHT = 3
 
-    newROIDefinedSignal = QtCore.pyqtSignal(int, int, int, int)  # return coordinate of the
+    newROIDefinedSignal = pyqtSignal(int, int, int, int)  # return coordinate of the
 
     def __init__(self, parent):
         """

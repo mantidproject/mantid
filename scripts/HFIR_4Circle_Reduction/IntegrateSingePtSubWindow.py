@@ -1,9 +1,13 @@
 #pylint: disable=C0103
 from __future__ import (absolute_import, division, print_function)
-from PyQt4.QtCore import pyqtSignal
+if qtpy.PyQT4:
+    from PyQt4.QtCore import pyqtSignal
+elif qtpy.PyQT5:
+    from PyQt5.QtCore import pyqtSignal
+from qtpy.QtWidgets import (QMainWindow, QFileDialog)
 import HFIR_4Circle_Reduction.ui_SinglePtIntegrationWindow as window_ui
 import HFIR_4Circle_Reduction.guiutility as guiutility
-from PyQt4.QtGui import QMainWindow, QFileDialog
+# from PyQt4.QtGui import QMainWindow, QFileDialog
 import os
 
 

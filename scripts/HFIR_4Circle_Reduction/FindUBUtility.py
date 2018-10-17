@@ -14,10 +14,10 @@ from . import ui_AddUBPeaksDialog
 from . import ui_UBSelectPeaksDialog
 from . import guiutility
 
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QDialog, QFileDialog)  # noqa
 
 
-class AddScansForUBDialog(QtGui.QDialog):
+class AddScansForUBDialog(QDialog):
     """
     Dialog class to add scans to UB scans' table for calculating and
     """
@@ -130,7 +130,7 @@ class AddScansForUBDialog(QtGui.QDialog):
         return
 
 
-class SelectUBMatrixScansDialog(QtGui.QDialog):
+class SelectUBMatrixScansDialog(QDialog):
     """
     Dialog to select scans for processing UB matrix
     """
@@ -182,7 +182,7 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
 
         # get the output file name
         file_filter = 'Text Files (*.dat);;All Files (*.*)'
-        file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'File to export selected scans',
+        file_name = str(QFileDialog.getSaveFileName(self, 'File to export selected scans',
                         self._myParent.working_directory, file_filter))
 
         # write file

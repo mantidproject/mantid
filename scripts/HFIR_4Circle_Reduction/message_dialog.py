@@ -7,12 +7,13 @@
 # Dialog for message
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QDialog)  # noqa
+
 
 from . import ui_messagebox
 
 
-class MessageDialog(QtGui.QDialog):
+class MessageDialog(QDialog):
     """
     extension of QDialog
     """

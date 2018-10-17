@@ -6,18 +6,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=C0103
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui, QtCore
-
+from qtpy.QtWidgets import (QMainWindow)
+if qtpy.PyQT4:
+    from PyQt4.QtCore import pyqtSignal
+elif qtpy.PyQT5:
+    from PyQt5.QtCore import pyqtSignal
+else:
+    raise ImportError('Unable to import QtCore.pyqtSignal')
 from . import ui_OptimizeLattice
 
 
-class OptimizeLatticeWindow(QtGui.QMainWindow):
+class OptimizeLatticeWindow(QMainWindow):
     """
     Main window widget to set up parameters to optimize
     """
 
     # establish signal for communicating from App2 to App1 - must be defined before the constructor
-    mySignal = QtCore.pyqtSignal(int)
+    mySignal = pyqtSignal(int)
 
     def __init__(self, parent=None):
         """
@@ -26,7 +31,7 @@ class OptimizeLatticeWindow(QtGui.QMainWindow):
         :return:
         """
         # init
-        QtGui.QMainWindow.__init__(self, parent)
+        QMainWindow.__init__(self, parent)
 
         self.ui = ui_OptimizeLattice.Ui_MainWindow()
         self.ui.setupUi(self)

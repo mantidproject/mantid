@@ -7,11 +7,15 @@
 #pylint: disable=W0403,R0913,R0902
 from __future__ import (absolute_import, division, print_function)
 import os
-from PyQt4 import QtCore
-from PyQt4.QtCore import QThread
-
-import HFIR_4Circle_Reduction.reduce4circleControl as r4c
-from HFIR_4Circle_Reduction import peak_integration_utility
+if qtpy.PyQT4:
+    from PyQt4.QtCore import pyqtSignal
+elif qtpy.PyQT5:
+    from PyQt5.QtCore import pyqtSignal
+else:
+    raise ImportError('Unable to import QtCore.pyqtSignal')
+from qtpy.QtCore import QThread   # noqa
+import HFIR_4Circle_Reduction.reduce4circleControl as r4c  # noqa
+from HFIR_4Circle_Reduction import peak_integration_utility  # noqa
 
 
 class AddPeaksThread(QThread):
@@ -19,11 +23,11 @@ class AddPeaksThread(QThread):
     A QThread class to add peaks to Mantid to calculate UB matrix
     """
     # signal for a peak is added: int_0 = experiment number, int_1 = scan number
-    peakAddedSignal = QtCore.pyqtSignal(int, int)
+    peakAddedSignal = pyqtSignal(int, int)
     # signal for status: int_0 = experiment number, int_1 = scan number, int_2 = progress (0...)
-    peakStatusSignal = QtCore.pyqtSignal(int, int, int)
+    peakStatusSignal = pyqtSignal(int, int, int)
     # signal for final error report: int_0 = experiment number, str_1 = error message
-    peakAddedErrorSignal = QtCore.pyqtSignal(int, str)
+    peakAddedErrorSignal = pyqtSignal(int, str)
 
     def __init__(self, main_window, exp_number, scan_number_list):
         """
@@ -119,9 +123,9 @@ class IntegratePeaksThread(QThread):
     A thread to integrate peaks
     """
     # signal to emit before a merge/integration status: exp number, scan number, progress, mode
-    peakMergeSignal = QtCore.pyqtSignal(int, int, float, list, int)
+    peakMergeSignal = pyqtSignal(int, int, float, list, int)
     # signal to report state: (1) experiment, (2) scan, (3) mode, (4) message
-    mergeMsgSignal = QtCore.pyqtSignal(int, int, int, str)
+    mergeMsgSignal = pyqtSignal(int, int, int, str)
 
     def __init__(self, main_window, exp_number, scan_tuple_list, mask_det, mask_name, norm_type, num_pt_bg_left,
                  num_pt_bg_right, scale_factor=1.000):
@@ -358,8 +362,8 @@ class MergePeaksThread(QThread):
 
     """
     # signal to report state: (1) scan, (2) message
-    mergeMsgSignal = QtCore.pyqtSignal(int, str)
-    saveMsgSignal = QtCore.pyqtSignal(int, str)
+    mergeMsgSignal = pyqtSignal(int, str)
+    saveMsgSignal = pyqtSignal(int, str)
 
     def __init__(self, main_window, exp_number, scan_number_list, md_file_list):
         """Initialization

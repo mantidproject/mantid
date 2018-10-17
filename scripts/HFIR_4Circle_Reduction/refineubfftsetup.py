@@ -7,16 +7,18 @@
 from __future__ import (absolute_import, division, print_function)
 import HFIR_4Circle_Reduction.ui_RefineUbFftDialog as ui_RefineUbFftDialog
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
 
+from qtpy.QtWidgets import (QDialog)  # noqa
+if qtpy.PYQT4:
+    from PyQt4.QtCore import QString
+    try:
+        _fromUtf8 = QString.fromUtf8
+    except AttributeError:
+        def _fromUtf8(s):
+            return s
+# PyQt5 has no QString
 
-class RefineUBFFTSetupDialog(QtGui.QDialog):
+class RefineUBFFTSetupDialog(QDialog):
     """A dialog window to get the setup for refining UB matrix by FFT.
 
     """

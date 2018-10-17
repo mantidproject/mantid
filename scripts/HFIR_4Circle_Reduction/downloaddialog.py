@@ -8,20 +8,22 @@
 # Dialog to set up HTTP data downloading server and download HB3A data to local
 ##########
 import os
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from qtpy.QtWidgets import (QDialog, QFileDialog, QMessageBox)  # noqa
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
 from HFIR_4Circle_Reduction import ui_httpserversetup as ui_http
 
 
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
+if qtpy.PYQT4:
+    from PyQt4.QtCore import QString
+    try:
+        _fromUtf8 = QString.fromUtf8
+    except AttributeError:
+        def _fromUtf8(s):
+            return s
+# PyQt5 has no QString
 
 
-class DataDownloadDialog(QtGui.QDialog):
+class DataDownloadDialog(QDialog):
     """ dialog for set up HTTP server and download files to local computer
     This feature will be valid until SNS disables the HTTP server for HFIR data
     """
@@ -79,7 +81,7 @@ class DataDownloadDialog(QtGui.QDialog):
         """ Browse local cache directory
         :return:
         """
-        local_cache_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
+        local_cache_dir = str(QFileDialog.getExistingDirectory(self,
                                                                      'Get Local Cache Directory',
                                                                      self._homeSrcDir))
 
@@ -211,7 +213,7 @@ class DataDownloadDialog(QtGui.QDialog):
         """
         assert isinstance(message, str), 'Input message %s must a string but not %s.' \
                                          '' % (str(message), type(message))
-        QtGui.QMessageBox.information(self, '4-circle Data Reduction', message)
+        QMessageBox.information(self, '4-circle Data Reduction', message)
 
         return
 

@@ -7,15 +7,15 @@
 import os
 import time
 import csv
-from PyQt4 import QtGui, QtCore
 import ui_preprocess_window
 import reduce4circleControl
 import guiutility as gui_util
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 import NTableWidget
+from qtpy.QtWidgets import (QFileDialog, QMainWindow)  # noqa
 
 
-class ScanPreProcessWindow(QtGui.QMainWindow):
+class ScanPreProcessWindow(QMainWindow):
     """
     Main window class to pre-process scans
     """
@@ -95,7 +95,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         default_dir = os.path.join('/HFIR/HB3A/Exp{0}/shared/'.format(exp_number))
 
         # get output directory
-        output_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
+        output_dir = str(QFileDialog.getExistingDirectory(self,
                                                                 'Outputs for pre-processed scans',
                                                                 default_dir))
         if output_dir is None or len(output_dir) == 0:

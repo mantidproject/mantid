@@ -12,7 +12,8 @@ from six.moves import range
 import math
 import numpy
 import os
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QDialog, QLineEdit, QVBoxLayout, QDialogButtonBox, QLabel, QPlainTextEdit)  # noqa
+from qtpy import QtCore  # noqa
 
 
 def convert_str_to_matrix(matrix_str, matrix_shape):
@@ -274,10 +275,10 @@ def parse_float_editors(line_edits, allow_blank=False):
     # Set flag
     return_single_value = False
 
-    if isinstance(line_edits, QtGui.QLineEdit) is True:
+    if isinstance(line_edits, QLineEdit):
         line_edit_list = [line_edits]
         return_single_value = True
-    elif isinstance(line_edits, list) is True:
+    elif isinstance(line_edits, list):
         line_edit_list = line_edits
     else:
         raise RuntimeError('Input is not LineEdit or list of LineEdit.')
@@ -286,7 +287,7 @@ def parse_float_editors(line_edits, allow_blank=False):
     float_list = []
 
     for line_edit in line_edit_list:
-        assert isinstance(line_edit, QtGui.QLineEdit)
+        assert isinstance(line_edit, QLineEdit)
         str_value = str(line_edit.text()).strip()
         if len(str_value) == 0 and allow_blank:
             # allow blank and use None
@@ -331,10 +332,10 @@ def parse_integers_editors(line_edits, allow_blank=False):
     # Set flag
     return_single_value = False
 
-    if isinstance(line_edits, QtGui.QLineEdit) is True:
+    if isinstance(line_edits, QLineEdit):
         line_edit_list = [line_edits]
         return_single_value = True
-    elif isinstance(line_edits, list) is True:
+    elif isinstance(line_edits, list):
         line_edit_list = line_edits
     else:
         raise RuntimeError('Input is not LineEdit or list of LineEdit.')
@@ -343,7 +344,7 @@ def parse_integers_editors(line_edits, allow_blank=False):
     integer_list = list()
 
     for line_edit in line_edit_list:
-        assert isinstance(line_edit, QtGui.QLineEdit)
+        assert isinstance(line_edit, QLineEdit)
         str_value = str(line_edit.text()).strip()
         if len(str_value) == 0 and allow_blank:
             # allowed empty string
@@ -373,7 +374,7 @@ def parse_integers_editors(line_edits, allow_blank=False):
     return True, integer_list
 
 
-class GetValueDialog(QtGui.QDialog):
+class GetValueDialog(QDialog):
     """
     A dialog that gets a single value
     """
@@ -384,27 +385,18 @@ class GetValueDialog(QtGui.QDialog):
         """
         super(GetValueDialog, self).__init__(parent)
 
-        layout = QtGui.QVBoxLayout(self)
+        layout = QVBoxLayout(self)
 
         # details information
-        self.info_line = QtGui.QPlainTextEdit(self)
+        self.info_line = QPlainTextEdit(self)
         self.info_line.setEnabled(False)
         layout.addWidget(self.info_line)
 
         # input
-        # TODO - 20180815 - Find out how to construct such a layout by layout structure
-        if False:
-            layout2 = QtGui.QHBoxLayout(self)
-            self.label = QtGui.QLabel(self)
-            self.value_edit = QtGui.QLineEdit(self)
-            layout2.addWidget(self.label)
-            layout2.addWidget(self.value_edit)
-            layout.addWidget(layout2)
-        else:
-            self.label = QtGui.QLabel(self)
-            self.value_edit = QtGui.QLineEdit(self)
-            layout.addWidget(self.label)
-            layout.addWidget(self.value_edit)
+        self.label = QLabel(self)
+        self.value_edit = QLineEdit(self)
+        layout.addWidget(self.label)
+        layout.addWidget(self.value_edit)
         # END-IF-ELSE
 
         # nice widget for editing the date
@@ -414,8 +406,8 @@ class GetValueDialog(QtGui.QDialog):
         # layout.addWidget(self.datetime)
 
         # OK and Cancel buttons
-        buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel,
-                                         QtCore.Qt.Horizontal, self)
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
+                                   QtCore.Qt.Horizontal, self)
 
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
@@ -470,7 +462,7 @@ class GetValueDialog(QtGui.QDialog):
 
 
 # TODO - 20180815 - Clean!
-class DisplayDialog(QtGui.QDialog):
+class DisplayDialog(QDialog):
     """
     This is a simple dialog display which can be configured by users
     """
@@ -480,17 +472,17 @@ class DisplayDialog(QtGui.QDialog):
         """
         super(DisplayDialog, self).__init__(parent)
 
-        layout = QtGui.QVBoxLayout(self)
+        layout = QVBoxLayout(self)
 
         # nice widget for editing the date
-        self.message_edit = QtGui.QPlainTextEdit(self)
+        self.message_edit = QPlainTextEdit(self)
         self.message_edit.setReadOnly(True)
         layout.addWidget(self.message_edit)
 
         self.setWindowTitle('Merged Scans Workspace Names')
 
         # OK and Cancel buttons
-        buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok,
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok,
                                          QtCore.Qt.Horizontal, self)
 
         buttons.accepted.connect(self.accept)
@@ -526,7 +518,7 @@ def get_value(parent=None):
     result = dialog.exec_()
     value = dialog.get_value()
 
-    return value, result == QtGui.QDialog.Accepted
+    return value, result == QDialog.Accepted
 
 
 def get_value_from_dialog(parent, title, details, label_name='Equation'):
