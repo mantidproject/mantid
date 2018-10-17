@@ -593,7 +593,7 @@ void ComponentInfo::checkNoTimeDependence() const {
 }
 
 /// Get the scan intervals
-const std::vector<std::pair<int64_t, int64_t>>
+const std::vector<std::pair<int64_t, int64_t>> &
 ComponentInfo::scanIntervals() const {
   return m_scanIntervals;
 }
@@ -660,7 +660,7 @@ ComponentInfo::buildMergeIndices(const ComponentInfo &other) const {
       const auto interval1 = other.m_scanIntervals[t1];
       const auto interval2 = m_scanIntervals[t2];
       if (interval1 == interval2) {
-        for (size_t compIndex = 0; compIndex < nonDetectorSize(); ++compIndex) {
+        for (size_t compIndex = 0; compIndex < size(); ++compIndex) {
           checkIdenticalIntervals(other,
                                   std::pair<size_t, size_t>(compIndex, t1),
                                   std::pair<size_t, size_t>(compIndex, t2));

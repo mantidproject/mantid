@@ -145,7 +145,7 @@ public:
   size_t scanCount() const;
   size_t scanSize() const;
   bool isScanning() const;
-  const std::vector<std::pair<int64_t, int64_t>> scanIntervals() const;
+  const std::vector<std::pair<int64_t, int64_t>> &scanIntervals() const;
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   void merge(const ComponentInfo &other);
 
