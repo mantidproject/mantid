@@ -66,7 +66,8 @@ template <typename Name, typename... Names>
 void addWorkspacesToModel(std::unique_ptr<DummyModel> &model,
                           int const &numberOfSpectra, Name const &workspaceName,
                           Names const &... workspaceNames) {
-  SetUpADSWithWorkspace ads(workspaceName, createWorkspace(numberOfSpectra));
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(
+      workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
   addWorkspacesToModel(model, numberOfSpectra, workspaceNames...);
 }
