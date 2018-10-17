@@ -48,8 +48,6 @@ public: // public constructor, destructor and functions
 private slots:
   // Run the appropriate action depending based on the selected tab
 
-  /// Slot for clicking on the run button
-  void runClicked();
   /// Slot for clicking on the hlep button
   void helpClicked();
   /// Slot for clicking on the manage directories button
