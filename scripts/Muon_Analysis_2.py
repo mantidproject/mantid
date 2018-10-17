@@ -14,12 +14,12 @@ import PyQt4.QtCore as QtCore
 
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
-from Muon.GUI.Common.muon_context.muon_context import *#MuonContext
-
-from mantidqtpython import MantidQt
+from Muon.GUI.Common.muon_context.muon_context import *  # MuonContext
 
 
 Name = "Muon Analysis 2"
+
+
 class MuonAnalysis2Gui(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
@@ -27,10 +27,10 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
 
         self._context = MuonContext(Name)
 
-        self.loadWidget = DummyLabelWidget(self._context ,LoadText, self)
-        self.dockWidget = DockWidget(self._context,self)
+        self.loadWidget = DummyLabelWidget(self._context, LoadText, self)
+        self.dockWidget = DockWidget(self._context, self)
 
-        self.helpWidget = DummyLabelWidget(self._context,HelpText, self)
+        self.helpWidget = DummyLabelWidget(self._context, HelpText, self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(self.loadWidget.widget)
@@ -54,7 +54,7 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         self._context.printContext()
         self.dockWidget.loadFromContext()
 
-    def loadFromContext(self,project):
+    def loadFromContext(self, project):
         self._context.loadFromProject(project)
         self.loadWidget.loadFromContext()
         self.dockWidget.loadFromContext()
@@ -94,19 +94,21 @@ def main():
         QtGui.QMessageBox.warning(muon, "Muon Analysis version 2", str(error))
         return muon
 
-def getWidgetIfOpen(): 
+
+def getWidgetIfOpen():
     allWidgets = QtGui.QApplication.allWidgets()
     for widget in allWidgets:
-       if widget.accessibleName() == Name:
-          return widget
+        if widget.accessibleName() == Name:
+            return widget
     return None
+
 
 def saveToProject():
     widget = getWidgetIfOpen()
     if widget is None:
-       return ""
+        return ""
     widget.update()
-    project = widget.saveToProject()#_context.save()
+    project = widget.saveToProject()  # _context.save()
     return project
 
 

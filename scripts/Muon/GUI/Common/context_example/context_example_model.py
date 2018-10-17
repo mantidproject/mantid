@@ -35,7 +35,7 @@ class ContextExampleModel(object):
             pair.setFGroup(group_names[0])
         if pair.BGroup not in group_names:
             pair.setBGroup(group_names[1])
- 
+
         subContext["Pair_F"] = pair.FGroup
         subContext["Pair_B"] = pair.BGroup
         subContext["Pair_alpha"] = pair.alpha
@@ -47,7 +47,7 @@ class ContextExampleModel(object):
         group_dets = subContext["Group dets"]
         groups = []
         for k in range(len(group_names)):
-            groups.append(group_object.group(group_names[k],group_dets[k]))
+            groups.append(group_object.group(group_names[k], group_dets[k]))
         self._context.set(Groups, groups)
 
         alpha = subContext["Pair_alpha"]

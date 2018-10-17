@@ -50,16 +50,16 @@ class pair(object):
 
         return False
 
-    def save(self,TSV):
-       TSVHelper.writeLine(TSV,self._name)
-       TSV.storeString(self._F_group)
-       TSV.storeString(self._B_group)
-       TSV.storeDouble(self._alpha)
+    def save(self, TSV):
+        TSVHelper.writeLine(TSV, self._name)
+        TSV.storeString(self._F_group)
+        TSV.storeString(self._B_group)
+        TSV.storeDouble(self._alpha)
 
-    def load(self, TSV,name):
-       self._name = name
-       safeName = TSVHelper.makeLineNameSafe(name)
-       TSV.selectLine(safeName)
-       self._F_group = TSV.readString()
-       self._B_group = TSV.readString()
-       self._alpha = TSV.readDouble()
+    def load(self, TSV, name):
+        self._name = name
+        safeName = TSVHelper.makeLineNameSafe(name)
+        TSV.selectLine(safeName)
+        self._F_group = TSV.readString()
+        self._B_group = TSV.readString()
+        self._alpha = TSV.readDouble()
