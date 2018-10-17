@@ -71,10 +71,8 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
 
-  // Post saving
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-
-  // Post plotting
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
@@ -461,6 +459,11 @@ void Quasi::saveClicked() {
   const auto resultPath = saveDirectory + QresultWS + ".nxs";
   addSaveWorkspaceToQueue(QresultWS, resultPath);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void Quasi::runClicked() {
+  if (validateTab())
+    runTab();
 }
 
 /**

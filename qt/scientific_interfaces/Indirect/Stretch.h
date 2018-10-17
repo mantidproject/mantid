@@ -37,7 +37,8 @@ private slots:
   void handleSampleInputReady(const QString &filename);
   /// Save the workspaces produces from the algorithm
   void saveWorkspaces();
-  /// Plot the workspaces specified by the interface
+
+  void runClicked();
   void plotWorkspaces();
   void algorithmComplete(const bool &error);
   void plotCurrentPreview();

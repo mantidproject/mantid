@@ -71,6 +71,7 @@ Stretch::Stretch(QWidget *parent)
   m_uiForm.spPreviewSpectrum->setMaximum(0);
 
   // Connect the plot and save push buttons
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
@@ -210,6 +211,11 @@ void Stretch::saveWorkspaces() {
   addSaveWorkspaceToQueue(fitWorkspace, fitFullPath);
   addSaveWorkspaceToQueue(contourWorkspace, fitFullPath);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void Stretch::runClicked() {
+  if (validateTab())
+    runTab();
 }
 
 /**

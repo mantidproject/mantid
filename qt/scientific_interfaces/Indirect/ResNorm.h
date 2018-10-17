@@ -41,6 +41,7 @@ private slots:
   /// Slot to handle the preview spectrum being changed
   void previewSpecChanged(int value);
   /// Slots to handle plot and save
+  void runClicked();
   void saveClicked();
   void plotClicked();
   void plotCurrentPreview();

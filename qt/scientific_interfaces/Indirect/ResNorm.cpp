@@ -51,6 +51,7 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
           SLOT(handleAlgorithmComplete(bool)));
 
   // Post Plot and Save
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this,
@@ -337,10 +338,14 @@ void ResNorm::plotCurrentPreview() {
   plotMultipleSpectra(plotWorkspaces, plotIndices);
 }
 
+void ResNorm::runClicked() {
+  if (validateTab())
+    runTab();
+}
+
 /**
  * Handles saving when button is clicked
  */
-
 void ResNorm::saveClicked() {
 
   const auto resWsName(m_uiForm.dsResolution->getCurrentDataName());
@@ -358,7 +363,6 @@ void ResNorm::saveClicked() {
 /**
  * Handles plotting when button is clicked
  */
-
 void ResNorm::plotClicked() {
   WorkspaceGroup_sptr fitWorkspaces =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(

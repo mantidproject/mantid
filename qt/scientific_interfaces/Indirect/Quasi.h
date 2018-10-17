@@ -44,12 +44,11 @@ private slots:
   void updateMiniPlot();
   /// Handles what happen after the algorithm is run
   void algorithmComplete(bool error);
-  // Handles saving of workspace
-  void saveClicked();
-  // Handles plotting
+
+  void runClicked();
   void plotClicked();
-  // Handles plotting current preview
   void plotCurrentPreview();
+  void saveClicked();
 
 private:
   /// Current preview spectrum
