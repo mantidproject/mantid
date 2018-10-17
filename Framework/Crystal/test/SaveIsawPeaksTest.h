@@ -17,6 +17,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -51,6 +52,7 @@ public:
           p.setIntensity(static_cast<double>(i) + 0.1);
           p.setSigmaIntensity(sqrt(static_cast<double>(i)));
           p.setBinCount(static_cast<double>(i));
+          p.setPeakNumber(static_cast<int>((run-1000)*numBanks*numPeaksPerBank+b*numPeaksPerBank+i));
           ws->addPeak(p);
         }
 
@@ -63,9 +65,30 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
+    // Test appending same file to check peak numbers
+    SaveIsawPeaks alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize())
+    TS_ASSERT(alg2.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("InputWorkspace", ws));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", outfile));
+    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("AppendFile", true));
+    TS_ASSERT_THROWS_NOTHING(alg2.execute(););
+
     // Get the file
-    outfile = alg.getPropertyValue("Filename");
+    outfile = alg2.getPropertyValue("Filename");
     TS_ASSERT(Poco::File(outfile).exists());
+    std::ifstream in(outfile.c_str());
+    std::string line, line0;
+    while (!in.eof()) // To get you all the lines.
+    {
+      getline(in, line0); // Saves the line in STRING.
+      if (in.eof())
+        break;
+      line = line0;
+    }
+    if (numPeaksPerBank > 0)
+    TS_ASSERT_EQUALS(line, "3     71   -3   -3   -3    3.00     4.00    27086  2061.553   0.24498   0.92730   3.500000   14.3227        3       3.10    1.73   310");
+      
     if (Poco::File(outfile).exists())
       Poco::File(outfile).remove();
   }
