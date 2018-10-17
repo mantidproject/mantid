@@ -220,8 +220,9 @@ public:
     auto const model = getFitPlotModel();
 
     Spectra const spectra = std::make_pair(0u, 9u);
-    TS_ASSERT(
-        boost::apply_visitor(AreSpectraEqual(), model.getSpectra(), spectra));
+    Spectra const storedSpectra = model.getSpectra();
+
+    TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), storedSpectra, spectra));
   }
 
   void
