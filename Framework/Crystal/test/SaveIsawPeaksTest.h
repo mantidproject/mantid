@@ -52,7 +52,9 @@ public:
           p.setIntensity(static_cast<double>(i) + 0.1);
           p.setSigmaIntensity(sqrt(static_cast<double>(i)));
           p.setBinCount(static_cast<double>(i));
-          p.setPeakNumber(static_cast<int>((run-1000)*numBanks*numPeaksPerBank+b*numPeaksPerBank+i));
+          p.setPeakNumber(
+              static_cast<int>((run - 1000) * numBanks * numPeaksPerBank +
+                               b * numPeaksPerBank + i));
           ws->addPeak(p);
         }
 
@@ -87,8 +89,10 @@ public:
       line = line0;
     }
     if (numPeaksPerBank > 0)
-    TS_ASSERT_EQUALS(line, "3     71   -3   -3   -3    3.00     4.00    27086  2061.553   0.24498   0.92730   3.500000   14.3227        3       3.10    1.73   310");
-      
+      TS_ASSERT_EQUALS(line, "3     71   -3   -3   -3    3.00     4.00    "
+                             "27086  2061.553   0.24498   0.92730   3.500000   "
+                             "14.3227        3       3.10    1.73   310");
+
     if (Poco::File(outfile).exists())
       Poco::File(outfile).remove();
   }
