@@ -26,6 +26,7 @@
 #include <boost/python/implicit.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
@@ -244,6 +245,14 @@ void export_MatrixWorkspace() {
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
            "Returns the caption for the Y axis")
+      .def("isCommonBins", &MatrixWorkspace::isCommonBins, arg("self"),
+           "Returns whether the workspace contains common X bins")
+      .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
+           (arg("self"), arg("workspaceIndex")),
+           "Checks if this spectrum contains any masked bins")
+      .def("maskedBinsIndices", &MatrixWorkspace::maskedBinsIndices,
+           (arg("self"), arg("workspaceIndex")),
+           "Returns all the masked bins' IDs")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
