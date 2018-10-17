@@ -15,6 +15,7 @@ import sys
 import mantid
 from .ValidateOL import ValidateOL
 import matplotlib
+from gui_helper import show_interface_help
 from MPLwidgets import *
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
@@ -116,12 +117,13 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.instrumentWidget.updateAll()
         self.dimensionWidget.updateChanges()
         # help
-        self.assistantProcess = QtCore.QProcess(self)
+        self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
-        self.collectionFile = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
+        self.mantidplot_name='DGS Planner'
+        self.collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
         version = ".".join(mantid.__version__.split(".")[:2])
-        self.qtUrl = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/DGS Planner.html'
-        self.externalUrl = 'http://docs.mantidproject.org/nightly/interfaces/DGS Planner.html'
+        self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/DGS Planner.html'
+        self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/DGS Planner.html'
         # control for cancel button
         self.iterations = 0
         self.progress_canceled = False
@@ -146,35 +148,15 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.masterDict.update(copy.deepcopy(d))
 
     def help(self):
-        try:
-            import pymantidplot
-            pymantidplot.proxies.showCustomInterfaceHelp('DGS Planner')
-        except ImportError:
-            self.assistantProcess.close()
-            self.assistantProcess.waitForFinished()
-            helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
-            helpapp += 'assistant'
-            args = ['-enableRemoteControl', '-collectionFile', self.collectionFile, '-showUrl', self.qtUrl]
-            if os.path.isfile(helpapp) and os.path.isfile(self.collectionFile):
-                self.assistantProcess.close()
-                self.assistantProcess.waitForFinished()
-                self.assistantProcess.start(helpapp, args)
-            else:
-                try:
-                    from mantidqtpython.MantidQt.API.MantidDesktopServices import openUrl
-                except ImportError:
-                    openUrl=QtGui.QDesktopServices.openUrl
-                sysenv=QtCore.QProcessEnvironment.systemEnvironment()
-                ldp=sysenv.value('LD_PRELOAD')
-                if ldp:
-                    del os.environ['LD_PRELOAD']
-                openUrl(QtCore.QUrl(self.externalUrl))
-                if ldp:
-                    os.environ['LD_PRELOAD']=ldp
+        show_interface_help(self.mantidplot_name, 
+                            self.assistant_process,
+                            self.collection_file, 
+                            self.qt_url, 
+                            self.external_url)
 
     def closeEvent(self, event):
-        self.assistantProcess.close()
-        self.assistantProcess.waitForFinished()
+        self.assistant_process.close()
+        self.assistant_process.waitForFinished()
         event.accept()
 
     def _create_goniometer_workspaces(self, gonioAxis0values, gonioAxis1values, gonioAxis2values, progressDialog):

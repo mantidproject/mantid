@@ -7,13 +7,12 @@
 # pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements
 # pylint: disable= too-many-branches, no-self-use
 from __future__ import (absolute_import, division, print_function)
-import sys
-
+from gui_helper import get_qapplication, show_interface_help
 import numpy as np
 import mantid
-from PyQt4 import QtGui
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from qtpy import QtWidgets
+from MPLwidgets import *
+import matplotlib
 from matplotlib.figure import Figure
 from scipy import constants
 
@@ -47,7 +46,7 @@ def calcQE(efix, tthlims, **kwargs):
     return qe_array
 
 
-class QECoverageGUI(QtGui.QWidget):
+class QECoverageGUI(QtWidgets.QWidget):
     """
     QECoverage - Calculates the Q(E) limits multi-detector spectrometers
     """
@@ -56,68 +55,68 @@ class QECoverageGUI(QtGui.QWidget):
     # Rewritten as a Mantid interface by Duc Le (2016)
 
     def __init__(self, parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
         self.setWindowTitle("QECoverage")
-        self.grid = QtGui.QVBoxLayout()
+        self.grid = QtWidgets.QVBoxLayout()
         self.setLayout(self.grid)
-        self.mainframe = QtGui.QFrame(self)
-        self.mainframe_grid = QtGui.QHBoxLayout()
+        self.mainframe = QtWidgets.QFrame(self)
+        self.mainframe_grid = QtWidgets.QHBoxLayout()
         self.mainframe.setLayout(self.mainframe_grid)
         # Left panel - inputs
-        self.tabs = QtGui.QTabWidget(self)
+        self.tabs = QtWidgets.QTabWidget(self)
         #      Direct geometry spectrometer tab
-        self.tab_direct = QtGui.QWidget(self.tabs)
-        self.direct_grid = QtGui.QVBoxLayout()
+        self.tab_direct = QtWidgets.QWidget(self.tabs)
+        self.direct_grid = QtWidgets.QVBoxLayout()
         self.tab_direct.setLayout(self.direct_grid)
         self.direct_inst_list = ['LET', 'MAPS', 'MARI', 'MERLIN', 'ARCS', 'CNCS', 'HYSPEC', 'SEQUOIA',
                                  'IN4', 'IN5', 'IN6', 'FOCUS', 'MIBEMOL', 'DNS', 'TOFTOF']
-        self.direct_inst_box = QtGui.QComboBox(self.tab_direct)
+        self.direct_inst_box = QtWidgets.QComboBox(self.tab_direct)
         for inst in self.direct_inst_list:
             self.direct_inst_box.addItem(inst)
         self.direct_grid.addWidget(self.direct_inst_box)
         self.direct_inst_box.activated[str].connect(self.onDirectInstActivated)
-        self.direct_ei = QtGui.QFrame(self.tab_direct)
-        self.direct_ei_grid = QtGui.QHBoxLayout()
+        self.direct_ei = QtWidgets.QFrame(self.tab_direct)
+        self.direct_ei_grid = QtWidgets.QHBoxLayout()
         self.direct_ei.setLayout(self.direct_ei_grid)
-        self.direct_ei_label = QtGui.QLabel("Ei", self.direct_ei)
+        self.direct_ei_label = QtWidgets.QLabel("Ei", self.direct_ei)
         self.direct_ei_grid.addWidget(self.direct_ei_label)
-        self.direct_ei_input = QtGui.QLineEdit("55", self.direct_ei)
+        self.direct_ei_input = QtWidgets.QLineEdit("55", self.direct_ei)
         self.direct_ei_input.setToolTip("Incident Energy in meV")
         self.direct_ei_grid.addWidget(self.direct_ei_input)
-        self.emptyfield_msgbox = QtGui.QMessageBox()
+        self.emptyfield_msgbox = QtWidgets.QMessageBox()
         self.emptyfield_msgbox.setText("Invalid input has been provided for Ei or Emin! Please try again")
-        self.ei_msgbox = QtGui.QMessageBox()
+        self.ei_msgbox = QtWidgets.QMessageBox()
         self.ei_msgbox.setText("Ei cannot be negative! Please try again")
-        self.ei_emin_msgbox = QtGui.QMessageBox()
+        self.ei_emin_msgbox = QtWidgets.QMessageBox()
         self.ei_emin_msgbox.setText("Emin must be less than the values provided for Ei! Please try again")
         self.direct_grid.addWidget(self.direct_ei)
-        self.emaxfield_msgbox = QtGui.QMessageBox()
-        self.direct_plotover = QtGui.QCheckBox("Plot Over", self.tab_direct)
+        self.emaxfield_msgbox = QtWidgets.QMessageBox()
+        self.direct_plotover = QtWidgets.QCheckBox("Plot Over", self.tab_direct)
         self.direct_plotover.setToolTip("Hold this plot?")
         self.direct_grid.addWidget(self.direct_plotover)
         self.direct_plotover.stateChanged.connect(self.onDirectPlotOverChanged)
-        self.direct_createws = QtGui.QCheckBox("Create Workspace", self.tab_direct)
+        self.direct_createws = QtWidgets.QCheckBox("Create Workspace", self.tab_direct)
         self.direct_createws.setToolTip("Create a Mantid workspace?")
         self.direct_grid.addWidget(self.direct_createws)
         self.direct_createws.stateChanged.connect(self.onDirectCreateWSChanged)
-        self.direct_emin = QtGui.QFrame(self.tab_direct)
-        self.direct_emin_grid = QtGui.QHBoxLayout()
+        self.direct_emin = QtWidgets.QFrame(self.tab_direct)
+        self.direct_emin_grid = QtWidgets.QHBoxLayout()
         self.direct_emin.setLayout(self.direct_emin_grid)
-        self.direct_emin_label = QtGui.QLabel("Emin", self.direct_emin)
+        self.direct_emin_label = QtWidgets.QLabel("Emin", self.direct_emin)
         self.direct_emin_grid.addWidget(self.direct_emin_label)
-        self.direct_emin_input = QtGui.QLineEdit("-10", self.direct_emin)
+        self.direct_emin_input = QtWidgets.QLineEdit("-10", self.direct_emin)
         self.direct_emin_input.setToolTip("Minimum energy transfer to plot down to.")
         self.direct_emin_grid.addWidget(self.direct_emin_input)
         self.direct_grid.addWidget(self.direct_emin)
-        self.direct_plotbtn = QtGui.QPushButton("Plot Q-E", self.tab_direct)
+        self.direct_plotbtn = QtWidgets.QPushButton("Plot Q-E", self.tab_direct)
         self.direct_grid.addWidget(self.direct_plotbtn)
         self.direct_plotbtn.clicked.connect(self.onClickDirectPlot)
-        self.direct_s2 = QtGui.QFrame(self.tab_direct)
-        self.direct_s2_grid = QtGui.QHBoxLayout()
+        self.direct_s2 = QtWidgets.QFrame(self.tab_direct)
+        self.direct_s2_grid = QtWidgets.QHBoxLayout()
         self.direct_s2.setLayout(self.direct_s2_grid)
-        self.direct_s2_label = QtGui.QLabel("s2", self.direct_s2)
+        self.direct_s2_label = QtWidgets.QLabel("s2", self.direct_s2)
         self.direct_s2_grid.addWidget(self.direct_s2_label)
-        self.direct_s2_input = QtGui.QLineEdit("30", self.direct_s2)
+        self.direct_s2_input = QtWidgets.QLineEdit("30", self.direct_s2)
         self.direct_s2_input.setToolTip("Scattering angle of middle of the HYSPEC detector bank.")
         self.direct_s2_grid.addWidget(self.direct_s2_input)
         self.direct_s2_input.textChanged[str].connect(self.onS2Changed)
@@ -127,21 +126,21 @@ class QECoverageGUI(QtGui.QWidget):
         self.tabs.addTab(self.tab_direct, "Direct")
         self.tthlims = [2.65, 140]
         #      Indirect geometry spectrometer tab
-        self.tab_indirect = QtGui.QWidget(self.tabs)
-        self.indirect_grid = QtGui.QVBoxLayout()
+        self.tab_indirect = QtWidgets.QWidget(self.tabs)
+        self.indirect_grid = QtWidgets.QVBoxLayout()
         self.tab_indirect.setLayout(self.indirect_grid)
         self.indirect_inst_list = ['IRIS', 'OSIRIS', 'TOSCA', 'VESUVIO', 'BASIS', 'VISION']
-        self.indirect_inst_box = QtGui.QComboBox(self.tab_indirect)
+        self.indirect_inst_box = QtWidgets.QComboBox(self.tab_indirect)
         for inst in self.indirect_inst_list:
             self.indirect_inst_box.addItem(inst)
         self.indirect_grid.addWidget(self.indirect_inst_box)
         self.indirect_inst_box.activated[str].connect(self.onIndirectInstActivated)
-        self.indirect_ef = QtGui.QFrame(self.tab_indirect)
-        self.indirect_ef_grid = QtGui.QHBoxLayout()
+        self.indirect_ef = QtWidgets.QFrame(self.tab_indirect)
+        self.indirect_ef_grid = QtWidgets.QHBoxLayout()
         self.indirect_ef.setLayout(self.indirect_ef_grid)
-        self.indirect_ef_label = QtGui.QLabel("Ef", self.indirect_ef)
+        self.indirect_ef_label = QtWidgets.QLabel("Ef", self.indirect_ef)
         self.indirect_ef_grid.addWidget(self.indirect_ef_label)
-        self.indirect_ef_input = QtGui.QComboBox(self.indirect_ef)
+        self.indirect_ef_input = QtWidgets.QComboBox(self.indirect_ef)
         self.indirect_analysers = \
             {'IRIS': {'PG002': 1.84, 'PG004': 7.38, 'Mica002': 0.207, 'Mica004': 0.826, 'Mica006': 1.86},
              'OSIRIS': {'PG002': 1.84, 'PG004': 7.38},
@@ -156,25 +155,25 @@ class QECoverageGUI(QtGui.QWidget):
         self.indirect_ef_grid.addWidget(self.indirect_ef_input)
         self.indirect_ef_input.activated[str].connect(self.onIndirectEfActivated)
         self.indirect_grid.addWidget(self.indirect_ef)
-        self.indirect_plotover = QtGui.QCheckBox("Plot Over", self.tab_indirect)
+        self.indirect_plotover = QtWidgets.QCheckBox("Plot Over", self.tab_indirect)
         self.indirect_plotover.setToolTip("Hold this plot?")
         self.indirect_grid.addWidget(self.indirect_plotover)
         self.indirect_plotover.stateChanged.connect(self.onIndirectPlotOverChanged)
-        self.indirect_createws = QtGui.QCheckBox("Create Workspace", self.tab_indirect)
+        self.indirect_createws = QtWidgets.QCheckBox("Create Workspace", self.tab_indirect)
         self.indirect_createws.setToolTip("Create a Mantid workspace?")
         self.indirect_grid.addWidget(self.indirect_createws)
         self.indirect_createws.stateChanged.connect(self.onIndirectCreateWSChanged)
-        self.indirect_emax = QtGui.QFrame(self.tab_direct)
-        self.indirect_emax = QtGui.QFrame(self.tab_indirect)
-        self.indirect_emax_grid = QtGui.QHBoxLayout()
+        self.indirect_emax = QtWidgets.QFrame(self.tab_direct)
+        self.indirect_emax = QtWidgets.QFrame(self.tab_indirect)
+        self.indirect_emax_grid = QtWidgets.QHBoxLayout()
         self.indirect_emax.setLayout(self.indirect_emax_grid)
-        self.indirect_emax_label = QtGui.QLabel("Emax", self.indirect_emax)
+        self.indirect_emax_label = QtWidgets.QLabel("Emax", self.indirect_emax)
         self.indirect_emax_grid.addWidget(self.indirect_emax_label)
-        self.indirect_emax_input = QtGui.QLineEdit("10", self.indirect_emax)
+        self.indirect_emax_input = QtWidgets.QLineEdit("10", self.indirect_emax)
         self.indirect_emax_input.setToolTip("Max energy loss to plot up to.")
         self.indirect_emax_grid.addWidget(self.indirect_emax_input)
         self.indirect_grid.addWidget(self.indirect_emax)
-        self.indirect_plotbtn = QtGui.QPushButton("Plot Q-E", self.tab_indirect)
+        self.indirect_plotbtn = QtWidgets.QPushButton("Plot Q-E", self.tab_indirect)
         self.indirect_grid.addWidget(self.indirect_plotbtn)
         self.indirect_plotbtn.clicked.connect(self.onClickIndirectPlot)
         self.indirect_grid.addStretch(10)
@@ -182,8 +181,8 @@ class QECoverageGUI(QtGui.QWidget):
         self.mainframe_grid.addWidget(self.tabs)
         self.tabs.currentChanged.connect(self.onTabChange)
         # Right panel, matplotlib figure to show Q-E
-        self.figure_frame = QtGui.QFrame(self.mainframe)
-        self.figure_grid = QtGui.QVBoxLayout()
+        self.figure_frame = QtWidgets.QFrame(self.mainframe)
+        self.figure_grid = QtWidgets.QVBoxLayout()
         self.figure_frame.setLayout(self.figure_grid)
         self.figure = Figure()
         self.figure.patch.set_facecolor('white')
@@ -194,23 +193,38 @@ class QECoverageGUI(QtGui.QWidget):
         self.axes.set_ylabel('Energy Transfer (meV)')
         self.mainframe_grid.addWidget(self.canvas)
         self.figure_grid.addWidget(self.canvas)
-        self.figure_controls = NavigationToolbar(self.canvas, self.figure_frame)
+        self.figure_controls = NavigationToolbar2QT(self.canvas, self.figure_frame)
         self.figure_grid.addWidget(self.figure_controls)
         self.mainframe_grid.addWidget(self.figure_frame)
         self.grid.addWidget(self.mainframe)
-        self.helpbtn = QtGui.QPushButton("?", self)
+        self.helpbtn = QtWidgets.QPushButton("?", self)
         self.helpbtn.setMaximumWidth(30)
         self.helpbtn.clicked.connect(self.onHelp)
         self.grid.addWidget(self.helpbtn)
         # Matplotlib does seem to rescale x-axis properly after axes.clear()
         self.xlim = 0
-
+        #help
+        self.assistant_process = QtCore.QProcess(self)
+        # pylint: disable=protected-access
+        self.mantidplot_name='QE Coverage'
+        self.collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
+        version = ".".join(mantid.__version__.split(".")[:2])
+        self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/QE Coverage.html'
+        self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/QE Coverage.html'
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","QECoverage",False)
 
-    def onHelp(self):
-        from pymantidplot.proxies import showCustomInterfaceHelp
-        showCustomInterfaceHelp("QE Coverage")
+    def onHelp(self):        
+        show_interface_help(self.mantidplot_name, 
+                            self.assistant_process,
+                            self.collection_file, 
+                            self.qt_url, 
+                            self.external_url)
+
+    def closeEvent(self, event):
+        self.assistant_process.close()
+        self.assistant_process.waitForFinished()
+        event.accept()
 
     def onDirectPlotOverChanged(self, state):
         self.indirect_plotover.setCheckState(state)
@@ -342,7 +356,8 @@ class QECoverageGUI(QtGui.QWidget):
             self.xlim = 0
             self.axes.clear()
             self.axes.axhline(color='k')
-        self.axes.hold(True)
+        if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+            self.axes.hold(True) # hold is deprecated since 2.1.0, true by default
         Inst = self.direct_inst_box.currentText()
         for n in range(len(qe)):
             name = Inst + '_Ei=' + str(ei_vec[n])
@@ -377,7 +392,8 @@ class QECoverageGUI(QtGui.QWidget):
             self.axes.clear()
             self.axes.axhline(color='k')
         else:
-            self.axes.hold(True)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                self.axes.hold(True) # hold is deprecated since 2.1.0, true by default
         line, = self.axes.plot(qe[0][0], qe[0][1])
         line.set_label(inst + '_' + ana)
         if max(qe[0][0]) > self.xlim:
@@ -460,15 +476,8 @@ class QECoverageGUI(QtGui.QWidget):
             self.emaxfield_msgbox.show()
 
 
-def qapp():
-    if QtGui.QApplication.instance():
-        _app = QtGui.QApplication.instance()
-    else:
-        _app = QtGui.QApplication(sys.argv)
-    return _app
-
-
-app = qapp()
+app, within_mantid = get_qapplication()
 mainForm = QECoverageGUI()
 mainForm.show()
-app.exec_()
+if not within_mantid:
+    app.exec_()
