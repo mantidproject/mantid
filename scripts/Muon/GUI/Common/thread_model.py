@@ -8,7 +8,9 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal as Signal
+from PyQt4.QtCore import pyqtSlot
 from Muon.GUI.Common import message_box
+import time
 
 
 class WorkerSignals(QtCore.QObject):
@@ -35,6 +37,7 @@ class ThreadModelWorker(QtCore.QObject):
         self.signals = WorkerSignals()
         self.model = model
 
+    @pyqtSlot()
     def run(self):
         self.signals.started.emit()
         try:
