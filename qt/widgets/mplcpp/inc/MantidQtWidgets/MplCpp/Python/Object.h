@@ -77,6 +77,7 @@ public:
    * object
    */
   InstanceHolder(Object obj, const char *attr) : m_instance(std::move(obj)) {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
     if (PyObject_HasAttrString(pyobj().ptr(), attr) == 0) {
       throw std::invalid_argument(std::string("object has no attribute ") +
                                   attr);
