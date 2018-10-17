@@ -150,12 +150,13 @@ public:
     TS_ASSERT_EQUALS(storedWorkspace->getNumberHistograms(), 10);
   }
 
-  void test_that_the_ads_instance_is_destructed_when_it_goes_out_of_scope() {
+  void
+  test_that_the_ads_instance_is_not_destructed_when_it_goes_out_of_scope() {
     auto const workspace = createWorkspace(10);
 
     storeWorkspaceInADS("WorkspaceName", workspace);
 
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("WorkspaceName"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("WorkspaceName"));
   }
 
   void
