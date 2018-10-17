@@ -967,8 +967,7 @@ public:
     a.setScanInterval({0, 1});
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
-    auto rootIndex = a.root();
-    a.setPosition(rootIndex, pos1);
+    a.setPosition(a.root(), pos1);
     auto infos2 = cloneInfos(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     // Sanity check
@@ -976,13 +975,13 @@ public:
 
     auto infos3 = cloneInfos(infos1);
     ComponentInfo &c = *std::get<0>(infos3);
-    c.setPosition(rootIndex, pos2);
+    c.setPosition(c.root(), pos2);
     TS_ASSERT_THROWS_EQUALS(c.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: "
                             "matching scan interval but "
                             "positions differ");
-    c.setPosition(rootIndex, pos1);
+    c.setPosition(c.root(), pos1);
     TS_ASSERT_THROWS_NOTHING(c.merge(a));
   }
 
@@ -994,9 +993,10 @@ public:
         Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized()));
     Eigen::Quaterniond rot2(
         Eigen::AngleAxisd(31.0, Eigen::Vector3d{1, 2, 3}.normalized()));
-    auto rootIndex = a.root();
-    a.setRotation(rootIndex, rot1);
-    a.setPosition(rootIndex, Eigen::Vector3d{1, 1, 1});
+    auto rootIndexA = a.root();
+    a.setRotation(rootIndexA, rot1);
+    a.setPosition(rootIndexA, Eigen::Vector3d{1, 1, 1});
+    a.setPosition(0, Eigen::Vector3d{1, 1, 1});
     auto infos2 = cloneInfos(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     // Sanity check
@@ -1004,9 +1004,64 @@ public:
 
     auto infos3 = cloneInfos(infos1);
     ComponentInfo &c = *std::get<0>(infos3);
-    c.setRotation(rootIndex, rot2);
-    c.setPosition(rootIndex, Eigen::Vector3d{1, 1, 1});
+    auto rootIndexC = c.root();
+    c.setRotation(rootIndexC, rot2);
+    c.setPosition(rootIndexC, Eigen::Vector3d{1, 1, 1});
+    c.setPosition(0, Eigen::Vector3d{1, 1, 1});
     TS_ASSERT_THROWS_EQUALS(c.merge(a), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: "
+                            "matching scan interval but "
+                            "rotations differ");
+  }
+
+  void test_merge_fail_identical_interval_but_component_positions_differ() {
+    // Now make a strange situation where the components have different
+    // positions but detector positions are the same
+    auto pos1 = Eigen::Vector3d{1, 0, 0};
+    auto pos2 = Eigen::Vector3d{1, 0, 3};
+    auto rot = Eigen::Quaterniond{
+        Eigen::AngleAxisd(5.0, Eigen::Vector3d{-1, 2, -3}.normalized())};
+
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    ComponentInfo &a = *std::get<0>(infos1);
+    a.setScanInterval({0, 1});
+    a.setPosition(a.root(), pos1);
+    a.setRotation(a.root(), rot);
+    auto infos2 = cloneInfos(infos1);
+    ComponentInfo &b = *std::get<0>(infos2);
+    b.setPosition(b.root(), pos2);
+    b.setRotation(b.root(), rot);
+    DetectorInfo &c = *std::get<1>(infos2);
+    c.setPosition(0, pos1);
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: "
+                            "matching scan interval but "
+                            "positions differ");
+  }
+
+  void test_merge_fail_identical_interval_when_component_rotations_differ() {
+    // Now make a strange situation where the components have different
+    // positions but detector rotations are the same
+    auto pos = Eigen::Vector3d{1, 0, 0};
+    auto rot1 = Eigen::Quaterniond{
+        Eigen::AngleAxisd(5.0, Eigen::Vector3d{-1, 2, -3}.normalized())};
+    auto rot2 = Eigen::Quaterniond{
+        Eigen::AngleAxisd(5.0, Eigen::Vector3d{-1, 2, -3}.normalized())};
+
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    ComponentInfo &a = *std::get<0>(infos1);
+    a.setScanInterval({0, 1});
+    a.setPosition(a.root(), pos);
+    a.setRotation(a.root(), rot1);
+    auto infos2 = cloneInfos(infos1);
+    ComponentInfo &b = *std::get<0>(infos2);
+    b.setPosition(b.root(), pos);
+    b.setRotation(b.root(), rot2);
+    DetectorInfo &c = *std::get<1>(infos2);
+    c.setRotation(0, rot1);
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: "
                             "matching scan interval but "
