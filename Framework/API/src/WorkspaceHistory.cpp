@@ -23,8 +23,8 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using boost::algorithm::split;
 using Mantid::Kernel::EnvironmentHistory;
+using boost::algorithm::split;
 
 namespace Mantid {
 namespace API {
