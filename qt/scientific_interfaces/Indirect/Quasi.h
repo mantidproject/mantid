@@ -51,6 +51,13 @@ private slots:
   void saveClicked();
 
 private:
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form
