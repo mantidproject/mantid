@@ -251,7 +251,7 @@ class MainWindow(QMainWindow):
         add_actions(self.view_menu, self.view_menu_actions)
 
     def launchCustomGUI(self, script):
-        exec(open(script).read())
+        exec(open(script).read(), globals())
 
     def populateAfterMantidImport(self):
         from mantid.kernel import ConfigService, logger
@@ -269,12 +269,11 @@ class MainWindow(QMainWindow):
         interfaces = {}
         for item in items:
             key, scriptname = item.split('/')
-            # TODO logger should accept unicode
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
-                logger.warning(str('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir)))
+                logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
                 continue
             if scriptname not in GUI_WHITELIST:
-                logger.information(str('Not adding gui "{}"'.format(scriptname)))
+                logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             temp = interfaces.get(key, [])
             temp.append(scriptname)
