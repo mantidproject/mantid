@@ -61,6 +61,8 @@ public:
     delete suite;
   }
 
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
   void
   test_that_createWorkspace_returns_a_workspace_with_the_number_of_spectra_specified() {
     auto const workspace = createWorkspace(10);

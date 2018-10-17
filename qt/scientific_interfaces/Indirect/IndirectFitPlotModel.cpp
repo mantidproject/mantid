@@ -17,7 +17,7 @@
 namespace {
 using namespace Mantid::API;
 
-// The name of the conjoined input and guess name -- required for
+// The name of the conjoined input and guess workspaces -- required for
 // creating an external guess plot.
 const std::string INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
 

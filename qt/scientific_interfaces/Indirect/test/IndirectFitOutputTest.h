@@ -80,6 +80,14 @@ WorkspaceGroup_sptr getPopulatedGroup(std::size_t const &size) {
   return group;
 }
 
+/// Store workspaces in ADS and won't destruct the ADS when leaving scope
+void storeWorkspacesInADS(WorkspaceGroup_sptr group,
+                          ITableWorkspace_sptr table) {
+  SetUpADSWithWorkspace ads("ResultGroup", group);
+  ads.addOrReplace("ResultWorkspaces", group);
+  ads.addOrReplace("ParameterTable", table);
+}
+
 std::unique_ptr<IndirectFitOutput>
 createFitOutput(WorkspaceGroup_sptr resultGroup,
                 ITableWorkspace_sptr parameterTable,
@@ -89,39 +97,15 @@ createFitOutput(WorkspaceGroup_sptr resultGroup,
       resultGroup, parameterTable, resultWorkspace, fitData, spectrum);
 }
 
-/// Used to create fit output data where the ads is destructed after leaving the
-/// function scope
-std::unique_ptr<IndirectFitOutput> getDestructedFitOutputData() {
-  auto const group = getPopulatedGroup(2);
-  auto const table = getPopulatedTable(2);
-  IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
-
-  SetUpADSWithWorkspace ads("ResultGroup", group);
-  ads.addOrReplace("ResultWorkspaces", group);
-  ads.addOrReplace("ParameterTable", table);
-
-  return createFitOutput(group, table, group, data, 0);
-}
-
 /// This will return fit output with workspaces still stored in the ADS
 std::unique_ptr<IndirectFitOutput> getFitOutputData() {
   auto const group = getPopulatedGroup(2);
   auto const table = getPopulatedTable(2);
   IndirectFitData *data = new IndirectFitData(getIndirectFitData(5));
 
-  SetUpADSWithNoDestructor ads("ResultGroup", group);
-  ads.addOrReplace("ResultWorkspaces", group);
-  ads.addOrReplace("ParameterTable", table);
+  storeWorkspacesInADS(group, table);
 
   return createFitOutput(group, table, group, data, 0);
-}
-
-/// Store workspaces in ADS and won't destruct the ADS when leaving scope
-void storeWorkspacesInADS(WorkspaceGroup_sptr group,
-                          ITableWorkspace_sptr table) {
-  SetUpADSWithNoDestructor ads("ResultGroup", group);
-  ads.addOrReplace("ResultWorkspaces", group);
-  ads.addOrReplace("ParameterTable", table);
 }
 
 std::unordered_map<std::string, std::string>
@@ -267,9 +251,12 @@ public:
 
   void
   test_that_getResultParameterNames_returns_an_empty_vector_if_the_result_workspace_cannot_be_found() {
-    /// The fact that the result workspace has been removed from the ADS is used
-    /// here. This means the result workspace won't be available any longer.
-    auto const output = getDestructedFitOutputData();
+    /// The fact that the result workspace has been removed from the ADS means
+    /// the parameter names won't be available any longer.
+    auto const output = getFitOutputData();
+
+    AnalysisDataService::Instance().clear();
+
     TS_ASSERT(output->getResultParameterNames().empty());
   }
 

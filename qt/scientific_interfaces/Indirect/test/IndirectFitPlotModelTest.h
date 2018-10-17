@@ -21,13 +21,16 @@ using ConvolutionFitSequential =
 
 namespace {
 
+/// The name of the conjoined input and guess workspaces
+std::string const INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
+
 std::string getFittingFunctionString(std::string const &workspaceName) {
   return "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
          "(composite=Convolution,FixResolution=true,NumDeriv=true;"
          "name=Resolution,Workspace=" +
          workspaceName +
          ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-         "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+         "false;name=Lorentzian,Amplitude=1,PeakCentre=1,FWHM=0."
          "0175)))";
 }
 
@@ -54,19 +57,23 @@ private:
 };
 
 void setFittingFunction(IndirectFittingModel *model,
-                        std::string const &functionString) {
-  model->setFitFunction(getFunction(functionString));
+                        std::string const &functionString,
+                        bool setFitFunction) {
+  if (setFitFunction)
+    model->setFitFunction(getFunction(functionString));
 }
 
 IndirectFittingModel *getEmptyDummyModel() { return new DummyModel(); }
 
 IndirectFittingModel *
 createModelWithSingleWorkspace(std::string const &workspaceName,
-                               int const &numberOfSpectra) {
+                               int const &numberOfSpectra,
+                               bool setFitFunction) {
   auto model = getEmptyDummyModel();
-  SetUpADSWithNoDestructor ads(workspaceName, createWorkspace(numberOfSpectra));
+  SetUpADSWithWorkspace ads(workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
-  setFittingFunction(model, getFittingFunctionString(workspaceName));
+  setFittingFunction(model, getFittingFunctionString(workspaceName),
+                     setFitFunction);
   return model;
 }
 
@@ -80,17 +87,17 @@ template <typename Name, typename... Names>
 void addWorkspacesToModel(IndirectFittingModel *model,
                           int const &numberOfSpectra, Name const &workspaceName,
                           Names const &... workspaceNames) {
-  SetUpADSWithNoDestructor ads(workspaceName, createWorkspace(numberOfSpectra));
+  SetUpADSWithWorkspace ads(workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
   addWorkspacesToModel(model, numberOfSpectra, workspaceNames...);
 }
 
 template <typename Name, typename... Names>
-IndirectFittingModel *
-createModelWithMultipleWorkspaces(int const &numberOfSpectra,
-                                  Name const &workspaceName,
-                                  Names const &... workspaceNames) {
-  auto model = createModelWithSingleWorkspace(workspaceName, numberOfSpectra);
+IndirectFittingModel *createModelWithMultipleWorkspaces(
+    int const &numberOfSpectra, bool setFitFunction, Name const &workspaceName,
+    Names const &... workspaceNames) {
+  auto model = createModelWithSingleWorkspace(workspaceName, numberOfSpectra,
+                                              setFitFunction);
   addWorkspacesToModel(model, numberOfSpectra, workspaceNames...);
   return model;
 }
@@ -98,8 +105,8 @@ createModelWithMultipleWorkspaces(int const &numberOfSpectra,
 IndirectFittingModel *createModelWithSingleInstrumentWorkspace(
     std::string const &workspaceName, int const &xLength, int const &yLength) {
   auto model = getEmptyDummyModel();
-  SetUpADSWithNoDestructor ads(workspaceName,
-                               createWorkspaceWithInstrument(xLength, yLength));
+  SetUpADSWithWorkspace ads(workspaceName,
+                            createWorkspaceWithInstrument(xLength, yLength));
   model->addWorkspace(workspaceName);
   return model;
 }
@@ -125,7 +132,7 @@ IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
 IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModel *model,
                                      MatrixWorkspace_sptr workspace,
                                      std::string const &workspaceName) {
-  setFittingFunction(model, getFittingFunctionString(workspaceName));
+  setFittingFunction(model, getFittingFunctionString(workspaceName), true);
   auto alg =
       setupFitAlgorithm(workspace, getFittingFunctionString(workspaceName));
   return alg;
@@ -142,16 +149,15 @@ IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModel *model,
 IndirectFittingModel *getModelWithFitOutputData() {
   auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
   auto const modelWorkspace = model->getWorkspace(0);
-  SetUpADSWithNoDestructor ads("__ConvFit", modelWorkspace);
 
   auto const alg = getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
   model->addOutput(alg);
   return model;
 }
 
-IndirectFitPlotModel getFitPlotModel() {
-  return IndirectFitPlotModel(
-      createModelWithMultipleWorkspaces(10, "Workspace1", "Workspace2"));
+IndirectFitPlotModel getFitPlotModel(bool setFitFunction = true) {
+  return IndirectFitPlotModel(createModelWithMultipleWorkspaces(
+      10, setFitFunction, "Workspace1", "Workspace2"));
 }
 
 IndirectFitPlotModel getFitPlotModelWithFitData() {
@@ -225,7 +231,7 @@ public:
 
     auto const resultWorkspace = model.appendGuessToInput(guess);
 
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("__QENSInputAndGuess"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
     TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(0), "Sample");
     TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(1), "Guess");
     /// Only two spectra because the guessWorkspace will only ever have one
@@ -328,13 +334,83 @@ public:
   void
   test_that_getFirstPeakCentre_returns_the_value_of_the_first_PeakCentre_in_the_fitting_function() {
     auto const model = getFitPlotModel();
-    TS_ASSERT_EQUALS(model.getFirstPeakCentre(), 0.0);
+    TS_ASSERT_EQUALS(model.getFirstPeakCentre(), 1.0);
   }
 
   void
   test_that_getFirstBackgroundLevel_returns_the_value_of_the_first_background_level_in_the_fitting_function() {
     auto const model = getFitPlotModel();
     TS_ASSERT_EQUALS(model.getFirstBackgroundLevel(), 0.0);
+  }
+
+  void test_that_calculateHWHMMaximum_returns_the_value_expected() {
+    auto const model = getFitPlotModel();
+
+    auto const hwhm = model.getFirstHWHM();
+    auto const peakCentre = model.getFirstPeakCentre().get_value_or(0.);
+
+    auto const minimum = peakCentre + *hwhm;
+    TS_ASSERT_EQUALS(model.calculateHWHMMaximum(minimum), 0.99125);
+  }
+
+  void test_that_calculateHWHMMinimum_returns_the_value_expected() {
+    auto const model = getFitPlotModel();
+
+    auto const hwhm = model.getFirstHWHM();
+    auto const peakCentre = model.getFirstPeakCentre().get_value_or(0.);
+
+    auto const maximum = peakCentre - *hwhm;
+    TS_ASSERT_EQUALS(model.calculateHWHMMinimum(maximum), 1.00875);
+  }
+
+  void
+  test_that_canCalculateGuess_returns_false_when_there_is_no_fitting_function() {
+    auto const model = getFitPlotModel(false);
+    TS_ASSERT(!model.canCalculateGuess());
+  }
+
+  void
+  test_that_canCalculateGuess_returns_true_when_there_is_a_fitting_function_and_a_model_with_a_workspace() {
+    auto const model = getFitPlotModel();
+    TS_ASSERT(model.canCalculateGuess());
+  }
+
+  void
+  test_that_setFWHM_will_change_the_value_of_the_FWHM_in_the_fitting_function() {
+    auto model = getFitPlotModel();
+
+    auto const fwhm = 1.1;
+    model.setFWHM(fwhm);
+
+    TS_ASSERT_EQUALS(model.getFirstHWHM(), fwhm / 2);
+  }
+
+  void
+  test_that_setBackground_will_change_the_value_of_A0_in_the_fitting_function() {
+    auto model = getFitPlotModel();
+
+    auto const background = 0.12;
+    model.setBackground(background);
+
+    TS_ASSERT_EQUALS(model.getFirstBackgroundLevel(), background);
+  }
+
+  void
+  test_that_deleteExternalGuessWorkspace_removes_the_guess_workspace_from_the_ADS() {
+    auto model = getFitPlotModel();
+
+    auto const guess = model.getGuessWorkspace();
+    (void)model.appendGuessToInput(guess);
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
+    model.deleteExternalGuessWorkspace();
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
+  }
+
+  void
+  test_that_deleteExternalGuessWorkspace_does_not_throw_if_the_guess_workspace_does_not_exist() {
+    auto model = getFitPlotModel();
+    TS_ASSERT_THROWS_NOTHING(model.deleteExternalGuessWorkspace());
   }
 };
 
