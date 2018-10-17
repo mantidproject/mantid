@@ -7,13 +7,13 @@
 #pylint: disable=C0103
 from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import (QMainWindow)
+from . import ui_OptimizeLattice
 if qtpy.PyQT4:
-    from PyQt4.QtCore import pyqtSignal
+    from PyQt4.QtCore import pyqtSignal  # noqa
 elif qtpy.PyQT5:
-    from PyQt5.QtCore import pyqtSignal
+    from PyQt5.QtCore import pyqtSignal  # noqa
 else:
     raise ImportError('Unable to import QtCore.pyqtSignal')
-from . import ui_OptimizeLattice
 
 
 class OptimizeLatticeWindow(QMainWindow):

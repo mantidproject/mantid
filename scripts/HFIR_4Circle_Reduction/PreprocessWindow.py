@@ -95,12 +95,9 @@ class ScanPreProcessWindow(QMainWindow):
         default_dir = os.path.join('/HFIR/HB3A/Exp{0}/shared/'.format(exp_number))
 
         # get output directory
-        output_dir = str(QFileDialog.getExistingDirectory(self,
-                                                                'Outputs for pre-processed scans',
-                                                                default_dir))
+        output_dir = str(QFileDialog.getExistingDirectory(self, 'Outputs for pre-processed scans', default_dir))
         if output_dir is None or len(output_dir) == 0:
             return
-
         self.ui.lineEdit_outputDir.setText(output_dir)
 
         return

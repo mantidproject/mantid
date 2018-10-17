@@ -482,8 +482,7 @@ class DisplayDialog(QDialog):
         self.setWindowTitle('Merged Scans Workspace Names')
 
         # OK and Cancel buttons
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok,
-                                         QtCore.Qt.Horizontal, self)
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok, QtCore.Qt.Horizontal, self)
 
         buttons.accepted.connect(self.accept)
         layout.addWidget(buttons)

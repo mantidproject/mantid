@@ -7,9 +7,9 @@
 #pylint: disable=W0403,R0913,R0902
 from __future__ import (absolute_import, division, print_function)
 import os
-if qtpy.PyQT4:
+if qtpy.PyQT4:   # noqa
     from PyQt4.QtCore import pyqtSignal
-elif qtpy.PyQT5:
+elif qtpy.PyQT5:   # noqa
     from PyQt5.QtCore import pyqtSignal
 else:
     raise ImportError('Unable to import QtCore.pyqtSignal')

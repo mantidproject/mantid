@@ -9,20 +9,19 @@ from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import os
 import numpy as np
-
-from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)
-if qtpy.PyQT4:
-    from PyQt4.QtCore import pyqtSignal
-elif qtpy.PyQT5:
-    from PyQt5.QtCore import pyqtSignal
-else:
-    raise ImportError('Unable to import QtCore.pyqtSignal')
-
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
 import matplotlib.collections
+from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)   # noqa
+if qtpy.PyQT4:   # noqa
+    from PyQt4.QtCore import pyqtSignal
+elif qtpy.PyQT5:   # noqa
+    from PyQt5.QtCore import pyqtSignal
+else:
+    raise ImportError('Unable to import QtCore.pyqtSignal')
+
 
 MplLineStyles = ['-', '--', '-.', ':', 'None', ' ', '']
 MplLineMarkers = [

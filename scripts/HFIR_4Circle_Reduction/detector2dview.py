@@ -7,14 +7,14 @@
 #pylint: disable=W0403,R0902,R0903,R0904,W0212
 from __future__ import (absolute_import, division, print_function)
 from HFIR_4Circle_Reduction import mpl2dgraphicsview
-if qtpy.PyQT4:
+import numpy as np
+import os
+if qtpy.PyQT4:  # noqa
     from PyQt4.QtCore import pyqtSignal
-elif qtpy.PyQT5:
+elif qtpy.PyQT5:   # noqa
     from PyQt5.QtCore import pyqtSignal
 else:
     raise ImportError('Unable to import QtCore.pyqtSignal')
-import numpy as np
-import os
 
 
 class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):

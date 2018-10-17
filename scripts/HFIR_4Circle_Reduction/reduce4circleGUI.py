@@ -40,13 +40,13 @@ import HFIR_4Circle_Reduction.generalplotview as generalplotview
 # import line for the UI python class
 from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
 
-from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QMainWindow)  # noqa
+from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog)  # noqa
 from qtpy.QtCore import (QSettings)  # noqa
-
+from qtpy import QtCore  # noqa
 if six.PY3:
     unicode = str
 
-if qtpy.PYQT4:
+if qtpy.PYQT4:  # noqa
     from PyQt4.QtCore import QString
     try:
         _fromUtf8 = QString.fromUtf8
@@ -1866,7 +1866,7 @@ class MainWindow(QMainWindow):
         # scan_number = par_val_list[1]
 
         # get the user specified name from ...
-        roi_name, ok = QtGui.QInputDialog.getText(self, 'Input Mask Name', 'Enter mask name:')
+        roi_name, ok = QInputDialog.getText(self, 'Input Mask Name', 'Enter mask name:')
 
         # return if cancelled
         if not ok:
@@ -3733,8 +3733,8 @@ class MainWindow(QMainWindow):
         """
         # get file name
         out_file_name = QFileDialog.getSaveFileName(self, caption='Select a file to save 2theta-Sigma-Scan',
-                                                          directory=self._myControl.get_working_directory(),
-                                                          filter='Data Files (*.dat);;All File (*.*)')
+                                                    directory=self._myControl.get_working_directory(),
+                                                    filter='Data Files (*.dat);;All File (*.*)')
         out_file_name = str(out_file_name)
         if len(out_file_name) == 0:
             # cancelled

@@ -9,7 +9,7 @@ import HFIR_4Circle_Reduction.ui_RefineUbFftDialog as ui_RefineUbFftDialog
 
 
 from qtpy.QtWidgets import (QDialog)  # noqa
-if qtpy.PYQT4:
+if qtpy.PYQT4:  # noqa
     from PyQt4.QtCore import QString
     try:
         _fromUtf8 = QString.fromUtf8
@@ -17,6 +17,7 @@ if qtpy.PYQT4:
         def _fromUtf8(s):
             return s
 # PyQt5 has no QString
+
 
 class RefineUBFFTSetupDialog(QDialog):
     """A dialog window to get the setup for refining UB matrix by FFT.

@@ -9,11 +9,9 @@
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import csv
-# from PyQt4 import QtGui, QtCore
-# from PyQt4.QtGui import QCheckBox, QTableWidgetItem
-
 from qtpy.QtWidgets import (QCheckBox, QTableWidget, QTableWidgetItem)  # noqa
-if qtpy.PYQT4:
+from qtpy import QtCore  # noqa
+if qtpy.PYQT4:  # noqa
     from PyQt4.QtCore import QString
     try:
         _fromUtf8 = QString.fromUtf8
@@ -21,7 +19,6 @@ if qtpy.PYQT4:
         def _fromUtf8(s):
             return s
 # PyQt5 has no QString
-from qtpy import QtCore
 
 
 class NTableWidget(QTableWidget):
