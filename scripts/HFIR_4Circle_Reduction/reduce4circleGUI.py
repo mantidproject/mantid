@@ -46,15 +46,6 @@ from qtpy import QtCore  # noqa
 if six.PY3:
     unicode = str
 
-if qtpy.PYQT4:  # noqa
-    from PyQt4.QtCore import QString
-    try:
-        _fromUtf8 = QString.fromUtf8
-    except AttributeError:
-        def _fromUtf8(s):
-            return s
-# PyQt5 has no QString
-
 try:
     from mantidqtpython import MantidQt
 except ImportError as e:
@@ -122,7 +113,8 @@ class MainWindow(QMainWindow):
 
         # Tab 'Data Access'
         self.ui.pushButton_applySetup.clicked.connect(self.do_apply_setup)
-        self.ui.pushButton_browseLocalDataDir.clicked.connect(self.do_browse_local_spice_data)
+        # self.ui.pushButton_browseLocalDataDir.clicked.connect(self.do_browse_local_spice_data)
+        self.ui.pushButton_browseLocalDataDir.clicked.connect(self.do_set_experiment)
         self.ui.pushButton_applyCalibratedSampleDistance.clicked.connect(self.do_set_user_detector_distance)
         self.ui.pushButton_applyUserDetCenter.clicked.connect(self.do_set_user_detector_center)
         self.ui.pushButton_applyUserWavelength.clicked.connect(self.do_set_user_wave_length)
@@ -883,6 +875,7 @@ class MainWindow(QMainWindow):
         """ browse the pre-processed merged scans' directory
         :return:
         """
+        print ('Here...2')
         # determine default directory
         exp_number_str = str(self.ui.lineEdit_exp.text())
         default_pp_dir = os.path.join('/HFIR/HB3A/exp{0}/Shared/'.format(exp_number_str))
@@ -898,6 +891,7 @@ class MainWindow(QMainWindow):
     def do_browse_local_spice_data(self):
         """ Browse local source SPICE data directory
         """
+        print ('Here...1')
         src_spice_dir = str(QFileDialog.getExistingDirectory(self, 'Get Directory',
                                                                    self._homeSrcDir))
         # Set local data directory to controller
@@ -916,6 +910,7 @@ class MainWindow(QMainWindow):
         Browse and set up working directory
         :return:
         """
+        print ('Here...2')
         work_dir = str(QFileDialog.getExistingDirectory(self, 'Get Working Directory', self._homeDir))
         status, error_message = self._myControl.set_working_directory(work_dir)
         if status is False:
@@ -2194,7 +2189,7 @@ class MainWindow(QMainWindow):
         return
 
     # add slot for UB refinement configuration window's signal to connect to
-    @QtCore.pyqtSlot(int)
+    # @QtCore.pyqtSlot(int)
     def refine_ub_lattice(self, val):
         """
         Refine UB matrix by constraining on lattice type.
@@ -2554,6 +2549,11 @@ class MainWindow(QMainWindow):
         """
         # get exp number
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
+
+        print (ret_obj)
+        print (status)
+        print ('blabla')
+
         if status:
             # new experiment number
             exp_number = ret_obj[0]
@@ -2656,6 +2656,9 @@ class MainWindow(QMainWindow):
         except (IndexError, ValueError) as error:
             self.pop_one_button_dialog('[ERROR] Unable to parse default detector center %s due to %s.'
                                        '' % (det_center_str, str(error)))
+
+
+        print ('Exis setting experiment')
 
         return
 

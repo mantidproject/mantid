@@ -4,10 +4,7 @@ import HFIR_4Circle_Reduction.ui_SinglePtIntegrationWindow as window_ui
 import HFIR_4Circle_Reduction.guiutility as guiutility
 import os
 from qtpy.QtWidgets import (QMainWindow, QFileDialog)  # noqa
-if qtpy.PyQT4:  # noqa
-    from PyQt4.QtCore import pyqtSignal
-elif qtpy.PyQT5:  # noqa
-    from PyQt5.QtCore import pyqtSignal
+from qtpy.QtCore import Signal as pyqtSignal
 
 
 class IntegrateSinglePtIntensityWindow(QMainWindow):

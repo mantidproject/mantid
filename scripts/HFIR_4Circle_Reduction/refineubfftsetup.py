@@ -6,17 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import HFIR_4Circle_Reduction.ui_RefineUbFftDialog as ui_RefineUbFftDialog
-
-
 from qtpy.QtWidgets import (QDialog)  # noqa
-if qtpy.PYQT4:  # noqa
-    from PyQt4.QtCore import QString
-    try:
-        _fromUtf8 = QString.fromUtf8
-    except AttributeError:
-        def _fromUtf8(s):
-            return s
-# PyQt5 has no QString
 
 
 class RefineUBFFTSetupDialog(QDialog):

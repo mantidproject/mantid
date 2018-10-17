@@ -15,12 +15,7 @@ from matplotlib.figure import Figure
 import matplotlib.image
 import matplotlib.collections
 from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)   # noqa
-if qtpy.PyQT4:   # noqa
-    from PyQt4.QtCore import pyqtSignal
-elif qtpy.PyQT5:   # noqa
-    from PyQt5.QtCore import pyqtSignal
-else:
-    raise ImportError('Unable to import QtCore.pyqtSignal')
+from qtpy.QtCore import Signal as pyqtSignal
 
 
 MplLineStyles = ['-', '--', '-.', ':', 'None', ' ', '']

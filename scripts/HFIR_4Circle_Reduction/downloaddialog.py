@@ -11,14 +11,7 @@ import os
 from qtpy.QtWidgets import (QDialog, QFileDialog, QMessageBox)  # noqa
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
 from HFIR_4Circle_Reduction import ui_httpserversetup as ui_http
-if qtpy.PYQT4:   # noqa
-    from PyQt4.QtCore import QString
-    try:
-        _fromUtf8 = QString.fromUtf8
-    except AttributeError:
-        def _fromUtf8(s):
-            return s
-# PyQt5 has no QString
+import qtpy  # noqa
 
 
 class DataDownloadDialog(QDialog):

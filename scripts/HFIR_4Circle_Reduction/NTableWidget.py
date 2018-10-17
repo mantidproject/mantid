@@ -11,14 +11,11 @@ from six.moves import range
 import csv
 from qtpy.QtWidgets import (QCheckBox, QTableWidget, QTableWidgetItem)  # noqa
 from qtpy import QtCore  # noqa
-if qtpy.PYQT4:  # noqa
-    from PyQt4.QtCore import QString
-    try:
-        _fromUtf8 = QString.fromUtf8
-    except AttributeError:
-        def _fromUtf8(s):
-            return s
-# PyQt5 has no QString
+import qtpy  # noqa
+
+
+def _fromUtf8(s):
+    return s
 
 
 class NTableWidget(QTableWidget):
