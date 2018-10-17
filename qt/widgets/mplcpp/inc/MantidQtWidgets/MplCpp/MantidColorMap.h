@@ -42,6 +42,7 @@ public:
   ScaleType getScaleType() const;
   void setNthPower(double gamma);
   double getNthPower() const { return m_gamma; }
+  Colormap cmap() const { return m_mappable.cmap(); }
 
   QRgb rgb(double vmin, double vmax, double value) const;
   std::vector<QRgb> rgb(double vmin, double vmax,

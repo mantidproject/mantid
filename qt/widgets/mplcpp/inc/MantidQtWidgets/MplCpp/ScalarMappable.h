@@ -31,6 +31,7 @@ public:
   ScalarMappable(const NormalizeBase &norm, const Colormap &cmap);
   ScalarMappable(const NormalizeBase &norm, const QString &cmap);
 
+  Colormap cmap() const;
   void setCmap(const Colormap &cmap);
   void setCmap(const QString &cmap);
   void setNorm(const NormalizeBase &norm);

@@ -99,6 +99,9 @@ std::tuple<double, double> ColorbarWidget::clim() const {
  * @param mtdCMap A reference to the MantidColorMap wrapper
  */
 void ColorbarWidget::setupColorBarScaling(const MantidColorMap &mtdCMap) {
+  // Sync the colormap first as resetting the scale type forces a redraw
+  // anyway
+  m_mappable.setCmap(mtdCMap.cmap());
   // block signals to avoid infinite loop while setting scale type
   this->blockSignals(true);
   setScaleType(static_cast<int>(mtdCMap.getScaleType()));

@@ -53,6 +53,9 @@ ScalarMappable::ScalarMappable(const NormalizeBase &norm, const Colormap &cmap)
 ScalarMappable::ScalarMappable(const NormalizeBase &norm, const QString &cmap)
     : ScalarMappable(norm, getCMap(cmap)) {}
 
+/// @return A reference to the colormap instance
+Colormap ScalarMappable::cmap() const { return Colormap(pyobj().attr("cmap")); }
+
 /**
  * Reset the underlying colormap
  * @param cmap An instance of a Colormap
