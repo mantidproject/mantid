@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CALCULATEQMINMAX_H_
-#define MANTID_ALGORITHMS_CALCULATEQMINMAX_H_
+#ifndef MANTID_ALGORITHMS_CALCULATEDYNAMICRANGE_H_
+#define MANTID_ALGORITHMS_CALCULATEDYNAMICRANGE_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** CalculateQMinMax
+/** CalculateDynamicRange
 
   Calculates the Qmin and Qmax of SANS workspace, sets to sample logs.
 
@@ -32,7 +32,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL CalculateQMinMax : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateDynamicRange : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -42,10 +42,9 @@ public:
 private:
   void init() override;
   void exec() override;
-  double calculateQ(double, double) const;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_CALCULATEQMINMAX_H_ */
+#endif /* MANTID_ALGORITHMS_CALCULATEDYNAMICRANGE_H_ */

@@ -2,10 +2,10 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.api import MatrixWorkspace
-from mantid.simpleapi import ILLSANSReduction, config, mtd
+from mantid.simpleapi import SANSILLReduction, config, mtd
 
 
-class ILLSANSReductionTest(unittest.TestCase):
+class SANSILLReductionTest(unittest.TestCase):
 
     _facility = None
 
@@ -19,12 +19,14 @@ class ILLSANSReductionTest(unittest.TestCase):
         mtd.clear()
 
     def test_absorber(self):
-        ILLSANSReduction(Run='010462', ProcessAs='Absorber', OutputWorkspace='Cd')
+        SANSILLReduction(Run='010462', ProcessAs='Absorber', OutputWorkspace='Cd')
         self._check_output(mtd['Cd'])
+        self._check_process_flag(mtd['Cd'], 'Absorber')
 
     def test_beam(self):
-        ILLSANSReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
+        SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
         self._check_output(mtd['Db'])
+        self._check_process_flag(mtd['Db'], 'Beam')
         run = mtd['Db'].getRun()
         self.assertAlmostEqual(run.getLogData('BeamCenterX').value, -0.0048, delta=1e-4)
         self.assertAlmostEqual(run.getLogData('BeamCenterY').value, -0.0027, delta=1e-4)
@@ -32,23 +34,31 @@ class ILLSANSReductionTest(unittest.TestCase):
         self.assertAlmostEqual(run.getLogData('BeamFluxError').value, 8554, delta=1)
 
     def test_transmission(self):
-        ILLSANSReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
-        ILLSANSReduction(Run='010585', ProcessAs='Transmission', BeamInputWorkspace='Db', OutputWorkspace='Tr')
+        SANSILLReduction(Run='010414', ProcessAs='Beam', OutputWorkspace='Db')
+        SANSILLReduction(Run='010585', ProcessAs='Transmission', BeamInputWorkspace='Db', OutputWorkspace='Tr')
         self.assertAlmostEqual(mtd['Tr'].readY(0)[0], 0.640, delta=1e-3)
         self.assertAlmostEqual(mtd['Tr'].readE(0)[0], 0.0019, delta=1e-4)
+        self._check_process_flag(mtd['Tr'], 'Transmission')
 
     def test_container(self):
-        ILLSANSReduction(Run='010460', ProcessAs='Container', OutputWorkspace='can')
+        SANSILLReduction(Run='010460', ProcessAs='Container', OutputWorkspace='can')
         self._check_output(mtd['can'])
+        self._check_process_flag(mtd['can'], 'Container')
 
     def test_reference(self):
-        ILLSANSReduction(Run='010453', ProcessAs='Reference', SensitivityOutputWorkspace='sens', OutputWorkspace='water')
+        SANSILLReduction(Run='010453', ProcessAs='Reference', SensitivityOutputWorkspace='sens', OutputWorkspace='water')
         self._check_output(mtd['water'])
         self._check_output(mtd['sens'], logs=False)
+        self._check_process_flag(mtd['water'], 'Reference')
+        self._check_process_flag(mtd['sens'], 'Sensitivity')
 
     def test_sample(self):
-        ILLSANSReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample')
+        SANSILLReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample')
         self._check_output(mtd['sample'])
+        self._check_process_flag(mtd['sample'], 'Sample')
+
+    def _check_process_flag(self, ws, value):
+        self.assertTrue(ws.getRun().getLogData('ProcessedAs'), value)
 
     def _check_output(self, ws, logs=True):
         self.assertTrue(ws)

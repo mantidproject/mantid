@@ -55,70 +55,77 @@ Sample
 Full Treatment
 --------------
 
-This example performs the complete reduction for D11. :ref:`Q1DWeighted <algm-Q1DWeighted>` can be called over the final result to produce the I of Q.
+This example performs the complete reduction for D11. :ref:`Q1DWeighted <algm-Q1DWeighted>` can be called over the final result to produce the :math:'I(Q)'.
 
-**Example - full treatment of a sample**
+.. note::
+
+  For transmission calculation, the beam run and the transmission run have to be recorded at the same instrument configuration.
+  For beam flux normalisation and beam center movement, the beam run and the sample run have to be recorded at the same configuration.
+  For container subtraction, the container and the sample run have to be recorded at the same configuration.
+  Otherwise a warning is logged, but the execution does not stop.
 
 .. include:: ../usagedata-note.txt
 
-.. testsetup:: ExILLSANSReduction
+**Example - full treatment of a sample**
+
+.. testsetup:: ExSANSILLReduction
 
     config['default.facility'] = 'ILL'
     config.appendDataSearchSubDir('ILL/D11/')
 
-.. testcode:: ExILLSANSReduction
+.. testcode:: ExSANSILLReduction
 
     # Process the dark current Cd/B4C for water
-    ILLSANSReduction(Run='010455.nxs', ProcessAs='Absorber', OutputWorkspace='Cdw')
+    SANSILLReduction(Run='010455.nxs', ProcessAs='Absorber', OutputWorkspace='Cdw')
 
     # Process the empty beam for water
-    ILLSANSReduction(Run='010414.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw')
+    SANSILLReduction(Run='010414.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw')
 
     # Water container transmission
-    ILLSANSReduction(Run='010446.nxs', ProcessAs='Transmission',
+    SANSILLReduction(Run='010446.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
                      OutputWorkspace='wc_tr')
     print('Water container transmission is {0:.3f}'.format(mtd['wc_tr'].readY(0)[0]))
 
     # Water container
-    ILLSANSReduction(Run='010454.nxs', ProcessAs='Container',
+    SANSILLReduction(Run='010454.nxs', ProcessAs='Container',
                      AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
                      TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc')
 
     # Water transmission
-    ILLSANSReduction(Run='010445.nxs', ProcessAs='Transmission',
+    SANSILLReduction(Run='010445.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
     print('Water transmission is {0:.3f}'.format(mtd['w_tr'].readY(0)[0]))
 
     # Water
-    ILLSANSReduction(Run='010453.nxs', ProcessAs='Reference',
+    SANSILLReduction(Run='010453.nxs', ProcessAs='Reference',
                      AbsorberInputWorkspace='Cdw', ContainerInputWorkspace='wc',
                      BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
                      SensitivityOutputWorkspace='sens', OutputWorkspace='water')
 
     # Process the dark current Cd/B4C for sample
-    ILLSANSReduction(Run='010462.nxs', ProcessAs='Absorber', OutputWorkspace='Cd')
+    SANSILLReduction(Run='010462.nxs', ProcessAs='Absorber', OutputWorkspace='Cd')
 
     # Process the empty beam for sample
-    ILLSANSReduction(Run='010413.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
+    SANSILLReduction(Run='010413.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
 
     # Sample container transmission
-    ILLSANSReduction(Run='010444.nxs', ProcessAs='Transmission',
+    SANSILLReduction(Run='010444.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='sc_tr')
     print('Sample container transmission is {0:.3f}'.format(mtd['sc_tr'].readY(0)[0]))
 
     # Sample container
-    ILLSANSReduction(Run='010460.nxs', ProcessAs='Container',
+    SANSILLReduction(Run='010460.nxs', ProcessAs='Container',
                      AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
                      TransmissionInputWorkspace='sc_tr', OutputWorkspace='sc')
 
     # Sample transmission
-    ILLSANSReduction(Run='010585.nxs', ProcessAs='Transmission',
+    SANSILLReduction(Run='010585.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='s_tr')
     print('Sample transmission is {0:.3f}'.format(mtd['s_tr'].readY(0)[0]))
 
     # Sample
-    ILLSANSReduction(Run='010569.nxs', ProcessAs='Sample',
+    SANSILLReduction(Run='010569.nxs', ProcessAs='Sample',
                      AbsorberInputWorkspace='Cd', ContainerInputWorkspace='sc',
                      BeamInputWorkspace='Db', SensitivityInputWorkspace='sens',
                      TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux')
@@ -128,14 +135,14 @@ This example performs the complete reduction for D11. :ref:`Q1DWeighted <algm-Q1
 
 Output:
 
-.. testoutput:: ExILLSANSReduction
+.. testoutput:: ExSANSILLReduction
 
     Water container transmission is 0.945
     Water transmission is 0.500
     Sample container transmission is 0.665
     Sample transmission is 0.640
 
-.. testcleanup:: ExILLSANSReduction
+.. testcleanup:: ExSANSILLReduction
 
     mtd.clear()
 
@@ -154,62 +161,62 @@ Plot the I(Q):
 
 .. plot::
 
-    from mantid.simpleapi import ILLSANSReduction, Q1DWeighted, mtd, config
+    from mantid.simpleapi import SANSILLReduction, Q1DWeighted, mtd, config
 
     config['default.facility'] = 'ILL'
     config.appendDataSearchSubDir('ILL/D11/')
 
     # Process the dark current Cd/B4C for water
-    ILLSANSReduction(Run='010455.nxs', ProcessAs='Absorber', OutputWorkspace='Cdw')
+    SANSILLReduction(Run='010455.nxs', ProcessAs='Absorber', OutputWorkspace='Cdw')
 
     # Process the empty beam for water
-    ILLSANSReduction(Run='010414.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw')
+    SANSILLReduction(Run='010414.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw')
 
     # Water container transmission
-    ILLSANSReduction(Run='010446.nxs', ProcessAs='Transmission',
+    SANSILLReduction(Run='010446.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
                      OutputWorkspace='wc_tr')
     print('Water container transmission is {0:.3f}'.format(mtd['wc_tr'].readY(0)[0]))
 
     # Water container
-    ILLSANSReduction(Run='010454.nxs', ProcessAs='Container',
+    SANSILLReduction(Run='010454.nxs', ProcessAs='Container',
                      AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
                      TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc')
 
     # Water transmission
-    ILLSANSReduction(Run='010445.nxs', ProcessAs='Transmission',
+    SANSILLReduction(Run='010445.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
     print('Water transmission is {0:.3f}'.format(mtd['w_tr'].readY(0)[0]))
 
     # Water
-    ILLSANSReduction(Run='010453.nxs', ProcessAs='Reference',
+    SANSILLReduction(Run='010453.nxs', ProcessAs='Reference',
                      AbsorberInputWorkspace='Cdw', ContainerInputWorkspace='wc',
                      BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
                      SensitivityOutputWorkspace='sens', OutputWorkspace='water')
 
     # Process the dark current Cd/B4C for sample
-    ILLSANSReduction(Run='010462.nxs', ProcessAs='Absorber', OutputWorkspace='Cd')
+    SANSILLReduction(Run='010462.nxs', ProcessAs='Absorber', OutputWorkspace='Cd')
 
     # Process the empty beam for sample
-    ILLSANSReduction(Run='010413.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
+    SANSILLReduction(Run='010413.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
 
     # Sample container transmission
-    ILLSANSReduction(Run='010444.nxs', ProcessAs='Transmission',
+    SANSILLReduction(Run='010444.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='sc_tr')
     print('Sample container transmission is {0:.3f}'.format(mtd['sc_tr'].readY(0)[0]))
 
     # Sample container
-    ILLSANSReduction(Run='010460.nxs', ProcessAs='Container',
+    SANSILLReduction(Run='010460.nxs', ProcessAs='Container',
                      AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
                      TransmissionInputWorkspace='sc_tr', OutputWorkspace='sc')
 
     # Sample transmission
-    ILLSANSReduction(Run='010585.nxs', ProcessAs='Transmission',
+    SANSILLReduction(Run='010585.nxs', ProcessAs='Transmission',
                      AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='s_tr')
     print('Sample transmission is {0:.3f}'.format(mtd['s_tr'].readY(0)[0]))
 
     # Sample
-    ILLSANSReduction(Run='010569.nxs', ProcessAs='Sample',
+    SANSILLReduction(Run='010569.nxs', ProcessAs='Sample',
                      AbsorberInputWorkspace='Cd', ContainerInputWorkspace='sc',
                      BeamInputWorkspace='Db', SensitivityInputWorkspace='sens',
                      TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux')
@@ -225,14 +232,7 @@ Plot the I(Q):
     ax.errorbar(mtd['iq'],'-rs')
     ax.set_ylabel('I [cm-1]')
     ax.legend()
-    fig.show()
-
-.. note::
-
-  For transmission calculation, the beam run and the transmission run have to be recorded at the same instrument configuration.
-  For beam flux normalisation and beam center movement, the beam run and the sample run have to be recorded at the same configuration.
-  For container subtraction, the container and the sample run have to be recorded at the same configuration.
-  Otherwise a warning is logged, but the execution does not stop.
+    #fig.show()
 
 .. categories::
 

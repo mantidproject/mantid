@@ -1,50 +1,51 @@
-#ifndef MANTID_ALGORITHMS_CALCULATEQMINMAXTEST_H_
-#define MANTID_ALGORITHMS_CALCULATEQMINMAXTEST_H_
+#ifndef MANTID_ALGORITHMS_CALCULATEDYNAMICRANGETEST_H_
+#define MANTID_ALGORITHMS_CALCULATEDYNAMICRANGETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAlgorithms/CalculateQMinMax.h"
+#include "MantidAlgorithms/CalculateDynamicRange.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 
 #include <boost/cast.hpp>
 
+using Mantid::Algorithms::CalculateDynamicRange;
+using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::API::FrameworkManager;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace;
 using Mantid::API::Workspace_sptr;
-using Mantid::Algorithms::CalculateQMinMax;
-using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::DataHandling::MaskDetectorsInShape;
 using Mantid::DataHandling::MoveInstrumentComponent;
 
-class CalculateQMinMaxTest : public CxxTest::TestSuite {
+class CalculateDynamicRangeTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateQMinMaxTest *createSuite() {
-    return new CalculateQMinMaxTest();
+  static CalculateDynamicRangeTest *createSuite() {
+    return new CalculateDynamicRangeTest();
   }
-  static void destroySuite(CalculateQMinMaxTest *suite) { delete suite; }
+  static void destroySuite(CalculateDynamicRangeTest *suite) { delete suite; }
 
-  void setUp() override { FrameworkManager::Instance(); }
+  CalculateDynamicRangeTest() { FrameworkManager::Instance(); }
 
   void test_init() {
-    CalculateQMinMax alg;
+    CalculateDynamicRange alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
   void test_exec() {
-    CalculateQMinMax alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    CalculateDynamicRange alg;
     alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())    
     MatrixWorkspace_sptr ws = create_workspace();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -100,4 +101,4 @@ private:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_CALCULATEQMINMAXTEST_H_ */
+#endif /* MANTID_ALGORITHMS_CALCULATEDYNAMICRANGETEST_H_ */

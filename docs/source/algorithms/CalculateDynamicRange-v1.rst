@@ -10,17 +10,18 @@
 Description
 -----------
 
-Calculates the minimum and maximum momentum transfer (Q) for the workspace.
+Calculates the minimum and maximum momentum transfer (Q) for a SANS workspace.
 The input workspace must have instrument defined and data in units of wavelength [Angstroms].
+Elastic scattering is assumed.
 Masked detectors and monitors do not enter the calculation.
 The calculated values (in inverse Angstroms) will be set in sample logs as **qmin** and **qmax** respectively.
 
 Usage
 -----
 
-**Example - CalculateQMinMax**
+**Example - CalculateDynamicRange**
 
-.. testcode:: CalculateQMinMaxExample
+.. testcode:: CalculateDynamicRangeExample
 
   ws = CreateSampleWorkspace(XUnit='Wavelength', NumBanks=1, PixelSpacing=0.1, XMin=1, XMax=5, BinWidth=0.4)
   MoveInstrumentComponent(Workspace=ws, RelativePosition=True, ComponentName="bank1", Y=-0.5, X=-0.5)
@@ -33,13 +34,13 @@ Usage
   </infinite-cylinder>
   """
   MaskDetectorsInShape(ws, ShapeXML=shapeXML)
-  CalculateQMinMax(Workspace=ws)
+  CalculateDynamicRange(Workspace=ws)
   print("QMin = %.5f" % ws.getRun().getLogData("qmin").value)
   print("QMax = %.5f" % ws.getRun().getLogData("qmax").value)
 
 Output:
 
-.. testoutput:: CalculateQMinMaxExample
+.. testoutput:: CalculateDynamicRangeExample
 
   QMin = 0.03553
   QMax = 0.88200
