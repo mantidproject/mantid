@@ -1,8 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include <Poco/File.h>
 #include <fstream>
 #include <string>
-#include "MantidKernel/MultiThreaded.h"
 namespace Mantid {
 namespace DataHandling {
 
@@ -69,24 +74,15 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
 
 void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader) {
   // read in the verticies
-  //g_logstl.debug(std::to_string(m_triangle.size()));
-  //g_logstl.debug(std::to_string(m_triangle.capacity()));
-  //g_logstl.debug(std::to_string(m_verticies.capacity()));
   for (int i = 0; i < 3; i++) {
     float xVal;
     float yVal;
     float zVal;
     streamReader >> xVal;
-    //g_logstl.debug("Read V1");
     streamReader >> yVal;
-    //g_logstl.debug("Read V2");
     streamReader >> zVal;
-    //g_logstl.debug("Read V3");
     Kernel::V3D vec = Kernel::V3D(double(xVal), double(yVal), double(zVal));
-    // add index of new vertex to triangle
     m_triangle.emplace_back(addSTLVertex(vec));
-    //g_logstl.debug("Add");
-
   }
 }
 
