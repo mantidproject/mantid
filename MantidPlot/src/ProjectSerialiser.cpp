@@ -130,7 +130,7 @@ constexpr auto PY_INTERFACE_SECTION = "pythoninterface";
 //     w = MainWindow()
 //     w.show()
 //
-QStringList SERIALISABLE_PY_INTERFACES = {"Frequency_Domain_Analysis","Muon_Analysis_2"};
+QStringList SERIALISABLE_PY_INTERFACES = {"Muon_Analysis_2"};
 
 } // namespace
 

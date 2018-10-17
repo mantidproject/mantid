@@ -60,6 +60,7 @@ set ( TEST_PY_FILES
       test/IndirectCommonTests.py
       test/ISISDirecInelasticConfigTest.py
       test/PyChopTest.py
+      test/pythonTSVTest.py
       test/ReductionSettingsTest.py
       test/ReductionWrapperTest.py
       test/ReflectometryQuickAuxiliaryTest.py

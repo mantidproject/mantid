@@ -62,4 +62,3 @@ class pair(object):
        self._F_group = TSV.readString()
        self._B_group = TSV.readString()
        self._alpha = TSV.readDouble()
-       print("moo",self._name,self._alpha)

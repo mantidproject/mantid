@@ -16,9 +16,8 @@ from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 from Muon.GUI.Common.muon_context.muon_context import *#MuonContext
 
-
 from mantidqtpython import MantidQt
-muonGUI = None
+
 
 Name = "Muon Analysis 2"
 class MuonAnalysis2Gui(QtGui.QMainWindow):
@@ -39,7 +38,7 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         splitter.addWidget(self.helpWidget.widget)
 
         self.setCentralWidget(splitter)
-        self.setWindowTitle("Muon Analysis version 2")
+        self.setWindowTitle(Name)
 
         self.dockWidget.setUpdateContext(self.update)
 
@@ -53,22 +52,18 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         self.helpWidget.updateContext()
 
         self._context.printContext()
-        self.dockWidget.loadFromContext(self._context)
+        self.dockWidget.loadFromContext()
 
     def loadFromContext(self,project):
         self._context.loadFromProject(project)
-        print("a")
-        self._context.printContext()
-        print("a")
-        self.loadWidget.loadFromContext(self._context)
-        self.dockWidget.loadFromContext(self._context)
-        self.helpWidget.loadFromContext(self._context)
+        self.loadWidget.loadFromContext()
+        self.dockWidget.loadFromContext()
+        self.helpWidget.loadFromContext()
 
     # cancel algs if window is closed
     def closeEvent(self, event):
         self.dockWidget.closeEvent(event)
-        global muonGUI
-        muonGUI = None
+        self = None
 
 
 def qapp():
@@ -80,6 +75,11 @@ def qapp():
 
 
 def main():
+    widget = getWidgetIfOpen()
+    if widget is not None:
+        # if GUI is open bring to front
+        widget.raise_()
+        return widget
     app = qapp()
     try:
         muon = MuonAnalysis2Gui()
@@ -94,23 +94,26 @@ def main():
         QtGui.QMessageBox.warning(muon, "Muon Analysis version 2", str(error))
         return muon
 
-
-def saveToProject():
+def getWidgetIfOpen(): 
     allWidgets = QtGui.QApplication.allWidgets()
     for widget in allWidgets:
        if widget.accessibleName() == Name:
-            widget.update()
-            project = widget.saveToProject()#_context.save()
-            return project
-    return ""
+          return widget
+    return None
+
+def saveToProject():
+    widget = getWidgetIfOpen()
+    if widget is None:
+       return ""
+    widget.update()
+    project = widget.saveToProject()#_context.save()
+    return project
 
 
 def loadFromProject(project):
-    global muonGUI
     muonGUI = main()
     muonGUI.loadFromContext(project)
     return muonGUI
 
 if __name__ == '__main__':
-    global muonGUI
     muonGUI = main()

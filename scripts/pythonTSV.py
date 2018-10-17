@@ -7,8 +7,16 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
+"""
+Some simple helpers for dealing with the TSV
+"""
+
 
 def saveToTSV(TSV,value):
+    """
+    This will record the value based on its type,
+    will only record default TSV data types
+    """
     if isinstance(value,int):
         TSV.storeInt(value)
     elif isinstance(value, float):
@@ -20,7 +28,13 @@ def saveToTSV(TSV,value):
     else:
         raise TypeError
 
+
 def loadFromTSV(TSV,key,value):
+    """
+    Will return the stored data from a TSV
+    with from the line called key and with
+    a data type of value
+    """
     safeKey = makeLineNameSafe(key)
     TSV.selectLine(safeKey)
     if isinstance(value,int):
@@ -34,17 +48,24 @@ def loadFromTSV(TSV,key,value):
     else:
         raise TypeError
 
-# the line name cannot contain:
-# spaces, underscores or dashes
+"""
+The line name cannot contain:
+spaces, underscores or dashes
+"""
 def makeLineNameSafe(oldName):
     newName = removeUnsafeCharacter(oldName," ")
     newName = removeUnsafeCharacter(newName,"_")
     newName = removeUnsafeCharacter(newName,"-")
     return newName
 
+
+"""
+write a lines and make sure it is safe
+"""
 def writeLine(TSV, name):
     newName = makeLineNameSafe(name)
     TSV.writeLine(newName)
+
 
 def removeUnsafeCharacter(oldName,character):
     tmp = oldName.split(character)
