@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SolidAngle.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -99,7 +105,7 @@ void SolidAngle::exec() {
       // Copy over the spectrum number & detector IDs
       outputWS->getSpectrum(j).copyInfoFrom(inputWS->getSpectrum(i));
       double solidAngle = 0.0;
-      for (const auto detID : inputWS->getSpectrum(j).getDetectorIDs()) {
+      for (const auto detID : inputWS->getSpectrum(i).getDetectorIDs()) {
         const auto index = detectorInfo.indexOf(detID);
         if (!detectorInfo.isMasked(index))
           solidAngle += detectorInfo.detector(index).solidAngle(samplePos);

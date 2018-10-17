@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -626,6 +632,7 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
       hint, ",",
       Mantid::Kernel::StringTokenizer::TOK_TRIM |
           Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  static const boost::regex digits("[0-9]+");
   auto h = hints.begin();
 
   for (; h != hints.end(); ++h) {
@@ -663,7 +670,6 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
       runEnd.replace(runEnd.end() - range[1].size(), runEnd.end(), range[1]);
 
       // Throw if runEnd contains something else other than a digit.
-      boost::regex digits("[0-9]+");
       if (!boost::regex_match(runEnd, digits))
         throw std::invalid_argument("Malformed range of runs: Part of the run "
                                     "has a non-digit character in it.");

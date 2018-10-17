@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import matplotlib.pyplot as plt
 import numpy as np
@@ -282,7 +288,6 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
     maxppl = maxppl_frac*pred_ppl
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck > minppl]
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck < maxppl]
-
     if pp_lambda_toCheck == []:
         pp_lambda_toCheck = [meanBG*1.96]
         print('Cannot find suitable background.  Consider adjusting MinpplFrac or MaxpplFrac')
@@ -656,7 +661,7 @@ def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.
 
     if workspaceNumber is None:
         tofWS = CreateWorkspace(
-            OutputWorkspace='tofWS', DataX=tPoints, DataY=yPoints, DataE=np.sqrt(yPoints))
+            OutputWorkspace='__tofWS', DataX=tPoints, DataY=yPoints, DataE=np.sqrt(yPoints))
     else:
         tofWS = CreateWorkspace(OutputWorkspace='tofWS%i' % workspaceNumber,
                                 DataX=tPoints, DataY=yPoints, DataE=np.sqrt(yPoints))
@@ -882,10 +887,11 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
         HatWidth0 = [0., 5.]
         Scale0 = [0., np.inf]
         KConv0 = [100, 140]
-
         # Now we see what instrument specific parameters we have
         if iccFitDict is not None:
+            #TODO This is only a temporary fix to not fix iccB - need to update parameters files
             possibleKeys = ['iccA', 'iccB', 'iccR', 'iccT0', 'iccScale0', 'iccHatWidth', 'iccKConv']
+            #possibleKeys = ['iccA', 'iccR', 'iccT0', 'iccScale0', 'iccHatWidth', 'iccKConv']
             for keyIDX, (key, bounds) in enumerate(zip(possibleKeys, [A0, B0, R0, T00, Scale0, HatWidth0, KConv0])):
                 if key in iccFitDict:
                     bounds[0] = iccFitDict[key][0]
@@ -911,7 +917,7 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
         bg['A'+str(fitOrder-i)] = bgx0[i]
     bg.constrain('-1.0 < A%i < 1.0' % fitOrder)
     fitFun = f + bg
-    fitResults = Fit(Function=fitFun, InputWorkspace='tofWS',
+    fitResults = Fit(Function=fitFun, InputWorkspace='__tofWS',
                      Output=outputWSName)
     return fitResults, fICC
 
@@ -999,8 +1005,7 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                                                          pplmin_frac=minpplfrac, pplmax_frac=maxpplfrac,
                                                          constraintScheme=constraintScheme,
                                                          peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
-                # --IN PRINCIPLE!!! WE CALCULATE THIS BEFORE GETTING HERE
-                tofWS = mtd['tofWS']
+                tofWS = mtd['__tofWS']
 
                 fitResults, fICC = doICCFit(
                     tofWS, energy, flightPath, padeCoefficients, fitOrder=bgPolyOrder, constraintScheme=constraintScheme,
@@ -1009,7 +1014,7 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
 
                 r = mtd['fit_Workspace']
                 param = mtd['fit_Parameters']
-                tofWS = mtd['tofWS']
+                tofWS = mtd['__tofWS']
 
                 iii = fICC.numParams() - 1
                 fitBG = [param.row(int(iii+bgIDX+1))['Value']

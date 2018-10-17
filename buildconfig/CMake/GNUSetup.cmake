@@ -22,7 +22,7 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
   endif()
   set( GCC_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION} CACHE INTERNAL "")
   message( STATUS "gcc version: ${GCC_COMPILER_VERSION}" )
-  if ( GCC_COMPILER_VERSION VERSION_LESS "5.1.0" )
+  if ( NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1.0") )
     # Add an option to use the old C++ ABI if gcc is 5 series
     option ( USE_CXX98_ABI "If enabled, sets the _GLIBCXX_USE_CXX11_ABI=0 compiler flag" OFF)
     if ( USE_CXX98_ABI )
