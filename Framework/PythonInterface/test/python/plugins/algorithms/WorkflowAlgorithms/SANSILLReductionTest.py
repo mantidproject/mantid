@@ -58,7 +58,7 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['sample'], 'Sample')
 
     def _check_process_flag(self, ws, value):
-        self.assertTrue(ws.getRun().getLogData('ProcessedAs'), value)
+        self.assertTrue(ws.getRun().getLogData('ProcessedAs').value, value)
 
     def _check_output(self, ws, logs=True):
         self.assertTrue(ws)

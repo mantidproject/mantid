@@ -237,6 +237,10 @@ class SANSILLReduction(PythonAlgorithm):
         l2_2 = ws2.getRun().getLogData('L2').value
         return fabs(l2_1 - l2_2) < tolerance
 
+    @staticmethod
+    def _check_processed_flag(ws, value):
+        return ws.getRun().getLogData('ProcessedAs').value == value
+
     def PyExec(self): # noqa: C901
 
         process = self.getPropertyValue('ProcessAs')
@@ -247,12 +251,16 @@ class SANSILLReduction(PythonAlgorithm):
         if process in ['Beam', 'Transmission', 'Container', 'Reference', 'Sample']:
             absorber_ws = self.getProperty('AbsorberInputWorkspace').value
             if absorber_ws:
+                if not self._check_processed_flag(absorber_ws, 'Absorber'):
+                    self.log().warning('Absorber input workspace is not processed as absorber.')
                 Minus(LHSWorkspace=ws, RHSWorkspace=absorber_ws, OutputWorkspace=ws)
             if process == 'Beam':
                 self._process_beam(ws)
             else:
                 beam_ws = self.getProperty('BeamInputWorkspace').value
                 if beam_ws:
+                    if not self._check_processed_flag(beam_ws, 'Beam'):
+                        self.log().warning('Beam input workspace is not processed as beam.')
                     beam_x = beam_ws.getRun().getLogData('BeamCenterX').value
                     beam_y = beam_ws.getRun().getLogData('BeamCenterY').value
                     MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
@@ -270,6 +278,8 @@ class SANSILLReduction(PythonAlgorithm):
                 else:
                     transmission_ws = self.getProperty('TransmissionInputWorkspace').value
                     if transmission_ws:
+                        if not self._check_processed_flag(transmission_ws, 'Transmission'):
+                            self.log().warning('Transmission input workspace is not processed as transmission.')
                         transmission = transmission_ws.readY(0)[0]
                         transmission_err = transmission_ws.readE(0)[0]
                         ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
@@ -281,6 +291,8 @@ class SANSILLReduction(PythonAlgorithm):
                     if process in ['Reference', 'Sample']:
                         container_ws = self.getProperty('ContainerInputWorkspace').value
                         if container_ws:
+                            if not self._check_processed_flag(container_ws, 'Container'):
+                                self.log().warning('Container input workspace is not processed as container.')
                             if not self._check_distances_match(mtd[ws], container_ws):
                                 self.log().warning(
                                     'Different detector distances found for container and sample runs!')
@@ -304,11 +316,15 @@ class SANSILLReduction(PythonAlgorithm):
                             reference_ws = self.getProperty('ReferenceInputWorkspace').value
                             coll_ws = None
                             if reference_ws:
+                                if not self._check_processed_flag(reference_ws, 'Reference'):
+                                    self.log().warning('Reference input workspace is not processed as reference.')
                                 Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws)
                                 coll_ws = reference_ws
                             else:
                                 sensitivity_in = self.getProperty('SensitivityInputWorkspace').value
                                 if sensitivity_in:
+                                    if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
+                                        self.log().warning('Sensitivity input workspace is not processed as sensitivity.')
                                     Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
                                 if beam_ws:
                                     coll_ws = beam_ws
