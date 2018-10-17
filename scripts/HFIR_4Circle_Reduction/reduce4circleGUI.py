@@ -174,7 +174,7 @@ class MainWindow(QMainWindow):
         # Tab 'Setup'
         self.ui.pushButton_browseWorkDir.clicked.connect(self.do_browse_working_dir)
         self.ui.comboBox_instrument.currentIndexChanged.connect(self.do_change_instrument_name)
-        self.ui.pushButton_browsePreprocessed.clicked.connect(self.do_browse_preprocessed_dir)
+        # FIXME self.ui.pushButton_browsePreprocessed.clicked.connect(self.do_browse_preprocessed_dir)
 
         # Tab 'UB Matrix'
         self.ui.pushButton_showUB2Edit.clicked.connect(self.do_show_ub_in_box)
@@ -373,7 +373,7 @@ class MainWindow(QMainWindow):
         self.ui.lineEdit_numPt4BackgroundRight.setText('1')
 
         # about pre-processed data
-        self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
+        # FIXME self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
 
         # hide and disable some push buttons for future implementation
         self.ui.pushButton_viewScan3D.hide()
