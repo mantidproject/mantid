@@ -13,13 +13,13 @@
 
 #include <boost/cast.hpp>
 
-using Mantid::Algorithms::CalculateDynamicRange;
-using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::API::FrameworkManager;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace;
 using Mantid::API::Workspace_sptr;
+using Mantid::Algorithms::CalculateDynamicRange;
+using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::DataHandling::MaskDetectorsInShape;
 using Mantid::DataHandling::MoveInstrumentComponent;
 
@@ -45,7 +45,7 @@ public:
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())    
+    TS_ASSERT(alg.isInitialized())
     MatrixWorkspace_sptr ws = create_workspace();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
