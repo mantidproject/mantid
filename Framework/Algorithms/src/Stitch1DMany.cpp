@@ -183,11 +183,15 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
 
       int scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
       m_scaleFactorFromPeriod = static_cast<size_t>(scaleFactorFromPeriod);
-      m_scaleFactorFromPeriod--; // To account for period being indexed from
-                                 // 1
-      if (m_scaleFactorFromPeriod >= m_inputWSMatrix.size()) {
+
+      size_t maxScaleFactorFromPeriod = numStitchableWS;
+      // If workspaces are greater than entered ws then they were grouped
+      if (workspaces.size() > numStitchableWS)
+        maxScaleFactorFromPeriod = workspaces.size() / numStitchableWS;
+
+      if (m_scaleFactorFromPeriod > maxScaleFactorFromPeriod) {
         std::stringstream expectedRange;
-        expectedRange << m_inputWSMatrix.size();
+        expectedRange << maxScaleFactorFromPeriod;
         issues["ScaleFactorFromPeriod"] =
             "Period index out of range, must be smaller than " +
             expectedRange.str();
@@ -368,12 +372,11 @@ void Stitch1DMany::doStitch1DMany(const size_t period,
                                   const bool useManualScaleFactors,
                                   std::string &outName,
                                   std::vector<double> &outScaleFactors) {
-
   // List of workspaces to stitch
   std::vector<std::string> toProcess;
 
   for (const auto &ws : m_inputWSMatrix) {
-    const std::string &wsName = ws[period]->getName();
+    const std::string &wsName = ws[period - 1]->getName();
     toProcess.emplace_back(wsName);
     outName += "_" + wsName;
   }
