@@ -9,17 +9,18 @@
 from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 from collections import OrderedDict
+import copy
 
 from Muon.GUI.Common import group_object
 from Muon.GUI.Common import pair_object
 
-import pythonTSV as TSV
+import pythonTSV as TSVHelper
 from mantidqtpython import MantidQt
 
 # constant variable names
-Tab2Text = "someText"
-HelpText = "helpText"
-LoadText = "loadDummy"
+Tab2Text = "some text"
+HelpText = "help_text"
+LoadText = "load-dummy"
 Groups = "groups"
 Pairs = "pairs"
 
@@ -39,9 +40,9 @@ class MuonContext(object):
         self.common_context[
             Pairs] = [
                 pair_object.pair(
-                    "test pair",
+                    "test_pair",
+                    "fwd",
                     "bwd",
-                    "top",
                     0.9)]
 
     def set(self, key, value):
@@ -74,58 +75,65 @@ class MuonContext(object):
         for key  in keys:
              TSV0.storeString(key)
         for key  in keys:
-            TSV0.writeLine(key)
+            TSVHelper.writeLine(TSV0,key)
             value = self.common_context[key]
             try:
-                 TSV.saveToTSV(TSV0,value)
+                 TSVHelper.saveToTSV(TSV0,value)
             except:
                  try:
                     self.saveCustom(TSV0,key,value)
                  except:
                     pass
         lines = TSV0.outputLines()
-
-        #tmp  = MantidQt.API.TSVSerialiser()
-        #tmp.writeLine("test")
-        #tmp.storeString("hi")
-        #lines=tmp.outputLines()
-        print(lines)
-        #TSVSec.writeSection(self._name,lines)
-        return lines#TSVSec.outputLines()
+        safeName = TSVHelper.makeLineNameSafe(self._name)
+        TSVSec.writeSection(safeName,lines)
+        return TSVSec.outputLines()
 
     def saveCustom(self,TSV0,key,value):
         tmpTSV = MantidQt.API.TSVSerialiser()
+        tmpTSV.writeLine("members")
+        tmpTSV.storeInt(len(value))
+        # store all of the names/keys on one line
+        for obj in value:
+            tmpTSV.storeString(obj.name)
+        # the below method writes a new line
         for obj in value:
             obj.save(tmpTSV)
-        TSV0.writeSection(key,tmpTSV.outputLines())
+        safeKey = TSVHelper.makeLineNameSafe(key)
+        TSV0.writeSection(safeKey,tmpTSV.outputLines())
 
     def loadFromProject(self, project):
-        #print(p)
-        #print()
-        #full_load = mantidqtpython.MantidQt.API.TSVSerialiser(project)
+        full_load = MantidQt.API.TSVSerialiser(project)
         #get section
-        #secs = full_load.sections(self._name)
-        #print(secs)
+        safeName = TSVHelper.makeLineNameSafe(self._name)
+        secs = full_load.sections(safeName)
 
-        load = MantidQt.API.TSVSerialiser(project)#tmp.outputLines())#secs[0])
+        load = MantidQt.API.TSVSerialiser(secs[0])
         load.selectLine("keys")
         numKeys = load.readInt()
         keys = []
         for k in range(numKeys):
            tmp = load.readString()
            keys.append(tmp)
-        #print("baaa")
-        #load.selectLine(Tab2Text)
-        #kkk = load.readInt()
-        #tmp = load.readString()
-        #print(tmp,"mmmm", kkk)
         for key in keys:
-            try:
-                #load.selectLine(key)
-                #print("waa",key,load.lineAsString(key))
-                
-                value= self.common_context[key]
-                self.common_context[key] = TSV.loadFromTSV(load,key, value)
-                print("boo",self.common_context[key],key,value)
+            value= self.common_context[key]
+            try:    
+                self.common_context[key] = TSVHelper.loadFromTSV(load,key, value)
             except:
+                self.customLoad(load,key,value)
                 pass
+
+    def customLoad(self, load, key, value):
+        safeKey = TSVHelper.makeLineNameSafe(key)
+        sec = load.sections(safeKey)
+        tmpTSV = MantidQt.API.TSVSerialiser(sec[0])
+        tmpTSV.selectLine("members")
+        num = tmpTSV.readInt()
+        names = []
+        for k in range(num):
+            names.append(tmpTSV.readString())
+        loaded_values = []
+        for name in names:
+            loaded_values.append(copy.deepcopy(value[0]))
+            loaded_values[-1].load(tmpTSV,name)
+        self.common_context[key] = loaded_values

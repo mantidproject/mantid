@@ -21,18 +21,35 @@ def saveToTSV(TSV,value):
         raise TypeError
 
 def loadFromTSV(TSV,key,value):
-#    print(value, "waa", key)
-    TSV.selectLine(key)
+    safeKey = makeLineNameSafe(key)
+    TSV.selectLine(safeKey)
     if isinstance(value,int):
-        tmp= TSV.readInt()
+        return TSV.readInt()
     elif isinstance(value, float):
-        tmp= TSV.readDouble()
+        return TSV.readDouble()
     elif isinstance(value,bool):
-        tmp= TSV.readBool()
+        return TSV.readBool()
     elif isinstance(value,str):
-        tmp= TSV.readString()
+        return TSV.readString()
     else:
         raise TypeError
-    return tmp
 
+# the line name cannot contain:
+# spaces, underscores or dashes
+def makeLineNameSafe(oldName):
+    newName = removeUnsafeCharacter(oldName," ")
+    newName = removeUnsafeCharacter(newName,"_")
+    newName = removeUnsafeCharacter(newName,"-")
+    return newName
+
+def writeLine(TSV, name):
+    newName = makeLineNameSafe(name)
+    TSV.writeLine(newName)
+
+def removeUnsafeCharacter(oldName,character):
+    tmp = oldName.split(character)
+    newName = ""
+    for word in tmp:
+        newName+=word[0].upper() + word[1:]
+    return newName
 

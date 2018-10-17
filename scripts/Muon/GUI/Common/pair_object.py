@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+import pythonTSV as TSVHelper
 
 class pair(object):
 
@@ -49,7 +50,16 @@ class pair(object):
         return False
 
     def save(self,TSV):
-       TSV.writeLine(self._name)
+       TSVHelper.writeLine(TSV,self._name)
        TSV.storeString(self._F_group)
        TSV.storeString(self._B_group)
        TSV.storeDouble(self._alpha)
+
+    def load(self, TSV,name):
+       self._name = name
+       safeName = TSVHelper.makeLineNameSafe(name)
+       TSV.selectLine(safeName)
+       self._F_group = TSV.readString()
+       self._B_group = TSV.readString()
+       self._alpha = TSV.readDouble()
+       print("moo",self._name,self._alpha)

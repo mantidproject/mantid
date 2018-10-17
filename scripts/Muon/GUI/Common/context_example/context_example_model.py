@@ -30,6 +30,12 @@ class ContextExampleModel(object):
         subContext["Group dets"] = group_dets
 
         pair = self._context.get(Pairs)[0]  # there is only one
+        # do some validation on pairs
+        if pair.FGroup not in group_names:
+            pair.setFGroup(group_names[0])
+        if pair.BGroup not in group_names:
+            pair.setBGroup(group_names[1])
+ 
         subContext["Pair_F"] = pair.FGroup
         subContext["Pair_B"] = pair.BGroup
         subContext["Pair_alpha"] = pair.alpha
@@ -46,7 +52,11 @@ class ContextExampleModel(object):
 
         alpha = subContext["Pair_alpha"]
         F_group = subContext["Pair_F"]
+        if F_group not in group_names:
+            F_group = group_names[0]
         B_group = subContext["Pair_B"]
+        if B_group not in group_names:
+            B_group = group_names[0]
         name = "pair test"
         pair = pair_object.pair(name, F_group, B_group, alpha)
         self._context.set(Pairs, [pair])
