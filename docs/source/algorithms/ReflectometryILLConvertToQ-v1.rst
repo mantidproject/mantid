@@ -15,6 +15,8 @@ The diagram below shows the workflow of this algorithm:
 
 .. diagram:: ReflectometryILLConvertToQ-v1_wkflw.dot
 
+The algorithm expects to find a ``foreground.summation_type`` entry in the *InputWorkspace*'s sample logs containing either ``SumInLambda`` or ``SumInQ``. This entry is automatically added to the workspace by :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>`.
+
 Usage
 -----
 

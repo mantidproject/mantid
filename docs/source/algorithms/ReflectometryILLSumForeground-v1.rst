@@ -17,6 +17,8 @@ The following diagram gives an overview of the algorithm:
 
 .. diagram:: ReflectometryILLSumForeground-v1_wkflw.dot
 
+The algorihtm runs :ref:`ReflectometryBeamStatistics <algm-ReflectometryBeamStatistics>` when processing the reflected beam. This adds some sample log entries to *OutputWorkspace* and *DirectBeamWorkspace*. See the :ref:`algorithm's documentation <algm-ReflectometryBeamStatistics>` for more details.
+
 Summation type
 ##############
 
@@ -26,6 +28,8 @@ The *SummationType* property controls how the foreground pixels are summed.
     extracts the centre pixel histogram using :ref:`ExtractSingleSpectrum <algm-ExtractSingleSpectrum>` and adds the intensities of the rest of the foreground pixels.
 *SumInQ*
     sums the foreground pixels using :ref:`ReflectometrySumInQ <algm-ReflectometrySumInQ>`. Before summation, the data is divided by the direct beam.
+
+The chosen *SummationType* will be added to the sample logs of *OutputWorkspace* under the ``foreground.summation_type`` entry.
 
 Foreground pixels
 #################

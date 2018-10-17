@@ -96,7 +96,7 @@ const std::string ReflectometryMomentumTransfer::category() const {
 
 /// Return a vector of related algorithms.
 const std::vector<std::string> ReflectometryMomentumTransfer::seeAlso() const {
-  return {"ReflectometryBeamStatistics, ConvertToReflectometryQ",
+  return {"ReflectometryBeamStatistics", "ConvertToReflectometryQ",
           "ConvertUnits"};
 }
 
