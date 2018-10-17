@@ -6,20 +6,21 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtCore, QtGui
+from qtpy import QtWidgets, QtGui, QtCore
 import sys
 import mantid
 import numpy
 from DGSPlanner.ValidateOL import ValidateOL
+
 try:
-    from PyQt4.QtCore import QString
+    from qtpy.QtCore import QString
 except ImportError:
     QString = type("")
 
 
-class ClassicUBInputWidget(QtGui.QWidget):
+class ClassicUBInputWidget(QtWidgets.QWidget):
     #signal when lattice is changed and valid
-    changed=QtCore.pyqtSignal(mantid.geometry.OrientedLattice)
+    changed=QtCore.Signal(mantid.geometry.OrientedLattice)
 
     def __init__(self,ol=None,parent=None):
         # pylint: disable=unused-argument,super-on-old-class
@@ -47,43 +48,43 @@ class ClassicUBInputWidget(QtGui.QWidget):
         else:
             self.ol=mantid.geometry.OrientedLattice()
         #labels
-        self._labela=QtGui.QLabel('a')
-        self._labelb=QtGui.QLabel('b')
-        self._labelc=QtGui.QLabel('c')
-        self._labelalpha=QtGui.QLabel('alpha')
-        self._labelbeta=QtGui.QLabel(' beta')
-        self._labelgamma=QtGui.QLabel('gamma')
-        self._labelux=QtGui.QLabel('ux')
-        self._labeluy=QtGui.QLabel('uy')
-        self._labeluz=QtGui.QLabel('uz')
-        self._labelvx=QtGui.QLabel('vx')
-        self._labelvy=QtGui.QLabel('vy')
-        self._labelvz=QtGui.QLabel('vz')
-        self._labelclassic=QtGui.QLabel('Lattice parameters')
+        self._labela=QtWidgets.QLabel('a')
+        self._labelb=QtWidgets.QLabel('b')
+        self._labelc=QtWidgets.QLabel('c')
+        self._labelalpha=QtWidgets.QLabel('alpha')
+        self._labelbeta=QtWidgets.QLabel(' beta')
+        self._labelgamma=QtWidgets.QLabel('gamma')
+        self._labelux=QtWidgets.QLabel('ux')
+        self._labeluy=QtWidgets.QLabel('uy')
+        self._labeluz=QtWidgets.QLabel('uz')
+        self._labelvx=QtWidgets.QLabel('vx')
+        self._labelvy=QtWidgets.QLabel('vy')
+        self._labelvz=QtWidgets.QLabel('vz')
+        self._labelclassic=QtWidgets.QLabel('Lattice parameters')
         #lineedits
-        self._edita=QtGui.QLineEdit()
+        self._edita=QtWidgets.QLineEdit()
         self._edita.setValidator(self.latticeLengthValidator)
-        self._editb=QtGui.QLineEdit()
+        self._editb=QtWidgets.QLineEdit()
         self._editb.setValidator(self.latticeLengthValidator)
-        self._editc=QtGui.QLineEdit()
+        self._editc=QtWidgets.QLineEdit()
         self._editc.setValidator(self.latticeLengthValidator)
-        self._editalpha=QtGui.QLineEdit()
+        self._editalpha=QtWidgets.QLineEdit()
         self._editalpha.setValidator(self.latticeAngleValidator)
-        self._editbeta=QtGui.QLineEdit()
+        self._editbeta=QtWidgets.QLineEdit()
         self._editbeta.setValidator(self.latticeAngleValidator)
-        self._editgamma=QtGui.QLineEdit()
+        self._editgamma=QtWidgets.QLineEdit()
         self._editgamma.setValidator(self.latticeAngleValidator)
-        self._editux=QtGui.QLineEdit()
+        self._editux=QtWidgets.QLineEdit()
         self._editux.setValidator(self.doubleValidator)
-        self._edituy=QtGui.QLineEdit()
+        self._edituy=QtWidgets.QLineEdit()
         self._edituy.setValidator(self.doubleValidator)
-        self._edituz=QtGui.QLineEdit()
+        self._edituz=QtWidgets.QLineEdit()
         self._edituz.setValidator(self.doubleValidator)
-        self._editvx=QtGui.QLineEdit()
+        self._editvx=QtWidgets.QLineEdit()
         self._editvx.setValidator(self.doubleValidator)
-        self._editvy=QtGui.QLineEdit()
+        self._editvy=QtWidgets.QLineEdit()
         self._editvy.setValidator(self.doubleValidator)
-        self._editvz=QtGui.QLineEdit()
+        self._editvz=QtWidgets.QLineEdit()
         self._editvz.setValidator(self.doubleValidator)
         self._edita.setFixedWidth(metrics.width("8888.88888"))
         self._editb.setFixedWidth(metrics.width("8888.88888"))
@@ -98,7 +99,7 @@ class ClassicUBInputWidget(QtGui.QWidget):
         self._editvy.setFixedWidth(metrics.width("8888.88888"))
         self._editvz.setFixedWidth(metrics.width("8888.88888"))
         #layout
-        grid = QtGui.QGridLayout()
+        grid = QtWidgets.QGridLayout()
         self.setLayout(grid)
         grid.addWidget(self._labelclassic,0,0,1,3)
         grid.addWidget(self._labela,1,0,QtCore.Qt.AlignRight)
@@ -225,7 +226,7 @@ class ClassicUBInputWidget(QtGui.QWidget):
 
 
 if __name__=='__main__':
-    app=QtGui.QApplication(sys.argv)
+    app=QtWidgets.QApplication(sys.argv)
     mainForm=ClassicUBInputWidget()
     mainForm.show()
     sys.exit(app.exec_())

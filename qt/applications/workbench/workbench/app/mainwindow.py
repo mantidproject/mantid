@@ -261,7 +261,8 @@ class MainWindow(QMainWindow):
 
         # list of custom interfaces that have been made qt4/qt5 compatible
         # TODO need to make *anything* compatible
-        GUI_WHITELIST = ['FilterEvents.py',
+        GUI_WHITELIST = ['DGSPlanner.py',
+                         'FilterEvents.py',
                          'TofConverter.py']
 
         # detect the python interfaces
