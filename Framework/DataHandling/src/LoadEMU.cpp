@@ -1,14 +1,12 @@
-#include <math.h>
-#include <stdio.h>
 
+#include "MantidDataHandling/LoadANSTOEventFile.h"
+#include "MantidDataHandling/LoadEMU.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LogManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
-#include "MantidDataHandling/LoadANSTOEventFile.h"
-#include "MantidDataHandling/LoadEMU.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -26,27 +24,108 @@
 #include <Poco/TemporaryFile.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
 
+#include <math.h>
+
 namespace Mantid {
 namespace DataHandling {
 
 using namespace Kernel;
-using ANSTO::EventVector_pt;
 
-// Detector consts
-static const size_t DETECTORS = 51;
-static const size_t HISTO_BINS_X =
-    DETECTORS * 2; // direct and indirect detectors
-static const size_t HISTO_BINS_Y = 1024;
-static const size_t HISTO_BINS_Y_DENUMERATOR = 16;
-static const size_t HISTOGRAMS =
-    HISTO_BINS_X * HISTO_BINS_Y / HISTO_BINS_Y_DENUMERATOR;
-static const size_t PIXELS_PER_TUBE = HISTO_BINS_Y / HISTO_BINS_Y_DENUMERATOR;
-static const size_t HORIZONTAL_TUBES = 16;
-static const size_t VERTICAL_TUBES = 35;
+namespace {
 
+// number of physical detectors
+constexpr size_t DETECTORS = 51;
+// analysed and direct detectors
+constexpr size_t HISTO_BINS_X = DETECTORS * 2;
+constexpr size_t HISTO_BINS_Y = 1024;
+constexpr size_t HISTO_BINS_Y_DENUMERATOR = 16;
+constexpr size_t PIXELS_PER_TUBE = HISTO_BINS_Y / HISTO_BINS_Y_DENUMERATOR;
+constexpr size_t HORIZONTAL_TUBES = 16;
+constexpr size_t VERTICAL_TUBES = 35;
+constexpr size_t HISTOGRAMS =
+	HISTO_BINS_X * HISTO_BINS_Y / HISTO_BINS_Y_DENUMERATOR;
+
+// File loading progress boundaries
+constexpr size_t Progress_LoadBinFile = 48;
+constexpr size_t Progress_ReserveMemory = 4;
+constexpr size_t Progress_Total =
+    2 * Progress_LoadBinFile + Progress_ReserveMemory;
+
+// Algorithm parameter names
+constexpr char FilenameStr[] = "Filename";
+constexpr char MaskStr[] = "Mask";
+constexpr char SelectDetectorTubesStr[] = "SelectDetectorTubes";
+constexpr char OverrideDopplerPhaseStr[] = "OverrideDopplerPhase";
+constexpr char FilterByTimeStartStr[] = "FilterByTimeStart";
+constexpr char FilterByTimeStopStr[] = "FilterByTimeStop";
+constexpr char RawDopplerTimeStr[] = "LoadAsRawDopplerTime";
+
+// Common pairing of limits
 using TimeLimits = std::pair<double, double>;
 
-namespace EMU {
+// Utility functions for loading values with defaults
+// Single value properties only support int, double, string and bool
+template <typename Type>
+Type GetNeXusValue(NeXus::NXEntry &entry, const std::string &path,
+	const Type &defval) {
+	try {
+		NeXus::NXDataSetTyped<Type> dataSet = entry.openNXDataSet<Type>(path);
+		dataSet.load();
+
+		return *dataSet();
+	}
+	catch (std::runtime_error &) {
+		return defval;
+	}
+}
+// string and double are special cases
+template <>
+double GetNeXusValue<double>(NeXus::NXEntry &entry, const std::string &path,
+	const double &defval) {
+	try {
+		NeXus::NXDataSetTyped<float> dataSet = entry.openNXDataSet<float>(path);
+		dataSet.load();
+
+		return *dataSet();
+	}
+	catch (std::runtime_error &) {
+		return defval;
+	}
+}
+template <>
+std::string GetNeXusValue<std::string>(NeXus::NXEntry &entry,
+	const std::string &path,
+	const std::string &defval) {
+
+	try {
+		NeXus::NXChar dataSet = entry.openNXChar(path);
+		dataSet.load();
+
+		return std::string(dataSet(), dataSet.dim0());
+	}
+	catch (std::runtime_error &) {
+		return defval;
+	}
+}
+
+template <typename T>
+void MapNeXusToProperty(NeXus::NXEntry &entry, const std::string &path,
+	const T &defval, API::LogManager &logManager,
+	const std::string &name, const T &factor) {
+
+	T value = GetNeXusValue<T>(entry, path, defval);
+	logManager.addProperty<T>(name, value * factor);
+}
+
+// sting is a special case
+template <>
+void MapNeXusToProperty<std::string>(
+	NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
+	API::LogManager &logManager, const std::string &name, const std::string &) {
+
+	std::string value = GetNeXusValue<std::string>(entry, path, defval);
+	logManager.addProperty<std::string>(name, value);
+}
 
 // map the comma separated range of indexes to the vector via a lambda function
 // throws an exception if it is outside the vector range
@@ -159,14 +238,18 @@ public:
   }
 };
 
+} // anonymous namespace
+
+namespace EMU {
+
 // Implement emu specific handlers for the more general EMU events. The main
 // differences with the current impementation of handlers:
 // - tof needs to be derived from the observed time because of the doppler drive
 // - emu includes direct and indirect virtual detectors that account for
-// alternate paths
-// - the loader returns returns the doppler and auxillary time along with the
-// absolute time rather
-//   than just the primary observed time that is equivalent to tof
+//   alternate paths
+// - the loader returns the doppler and auxillary time along with the
+//   absolute time rather than just the primary observed time that is 
+//   equivalent to tof
 //
 // In the future the ANSTO helper and event file loader will be generalized to
 // handle the instruments consistently.
@@ -325,82 +408,6 @@ public:
 // register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadEMU)
 
-static const size_t Progress_LoadBinFile = 48;
-static const size_t Progress_ReserveMemory = 4;
-static const size_t Progress_Total =
-    2 * Progress_LoadBinFile + Progress_ReserveMemory;
-
-static char const *const FilenameStr = "Filename";
-static char const *const MaskStr = "Mask";
-static char const *const SelectDetectorTubesStr = "SelectDetectorTubes";
-
-static char const *const OverrideDopplerPhaseStr = "OverrideDopplerPhase";
-static char const *const FilterByTimeStartStr = "FilterByTimeStart";
-static char const *const FilterByTimeStopStr = "FilterByTimeStop";
-
-static char const *const RawDopplerTimeStr = "LoadAsRawDopplerTime";
-
-// Single value properties only support int, double, string and bool
-template <typename Type>
-Type GetNeXusValue(NeXus::NXEntry &entry, const std::string &path,
-                   const Type &defval) {
-  try {
-    NeXus::NXDataSetTyped<Type> dataSet = entry.openNXDataSet<Type>(path);
-    dataSet.load();
-
-    return *dataSet();
-  } catch (std::runtime_error &) {
-    return defval;
-  }
-}
-
-// string and double are special cases
-template <>
-double GetNeXusValue<double>(NeXus::NXEntry &entry, const std::string &path,
-                             const double &defval) {
-  try {
-    NeXus::NXDataSetTyped<float> dataSet = entry.openNXDataSet<float>(path);
-    dataSet.load();
-
-    return *dataSet();
-  } catch (std::runtime_error &) {
-    return defval;
-  }
-}
-template <>
-std::string GetNeXusValue<std::string>(NeXus::NXEntry &entry,
-                                       const std::string &path,
-                                       const std::string &defval) {
-
-  try {
-    NeXus::NXChar dataSet = entry.openNXChar(path);
-    dataSet.load();
-
-    return std::string(dataSet(), dataSet.dim0());
-  } catch (std::runtime_error &) {
-    return defval;
-  }
-}
-
-template <typename T>
-void MapNeXusToProperty(NeXus::NXEntry &entry, const std::string &path,
-                        const T &defval, API::LogManager &logManager,
-                        const std::string &name, const T &factor) {
-
-  T value = GetNeXusValue<T>(entry, path, defval);
-  logManager.addProperty<T>(name, value * factor);
-}
-
-// sting is a special case
-template <>
-void MapNeXusToProperty<std::string>(
-    NeXus::NXEntry &entry, const std::string &path, const std::string &defval,
-    API::LogManager &logManager, const std::string &name, const std::string &) {
-
-  std::string value = GetNeXusValue<std::string>(entry, path, defval);
-  logManager.addProperty<std::string>(name, value);
-}
-
 /**
  * Return the confidence value that this algorithm can load the file
  * @param descriptor A descriptor for the file
@@ -457,41 +464,27 @@ void LoadEMU::init() {
                       MaskStr, "", API::FileProperty::OptionalLoad, exts),
                   "The input filename of the mask data");
 
-  declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
-          SelectDetectorTubesStr, "", Kernel::Direction::Input),
-      "Optional: Comma separated range of detectors tubes to be loaded,"
-      "  eg. 16,19-45,47");
+  declareProperty(SelectDetectorTubesStr, "",
+      "Comma separated range of detectors tubes to be loaded,\n"
+      "  e.g. 16,19-45,47");
 
-  // OutputWorkspace
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output));
 
-  // OverrideDopplerPhase
-  declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
-          OverrideDopplerPhaseStr, EMPTY_DBL(), Kernel::Direction::Input),
-      "Optional: Override the Doppler phase, in degrees.");
+  declareProperty(OverrideDopplerPhaseStr, EMPTY_DBL(),
+      "Override the Doppler phase, in degrees.");
 
-  // RawDopplerTime
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
-                      RawDopplerTimeStr, false, Kernel::Direction::Input),
-                  "Optional: Load file as observed time relative the Doppler "
-                  "drive, in microsecs.");
+  declareProperty(RawDopplerTimeStr, false,
+      "Import file as observed time relative the Doppler "
+      "drive, in microsecs.");
 
-  // FilterByTimeStart
-  declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
-          FilterByTimeStartStr, 0.0, Kernel::Direction::Input),
-      "Optional: To only include events after the provided start time, in "
+  declareProperty(FilterByTimeStartStr, 0.0,
+      "Only include events after the provided start time, in "
       "seconds (relative to the start of the run).");
 
-  // FilterByTimeStop
-  declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
-          FilterByTimeStopStr, EMPTY_DBL(), Kernel::Direction::Input),
-      "Optional: To only include events before the provided stop time, in "
+  declareProperty(FilterByTimeStopStr, EMPTY_DBL(),
+      "Only include events before the provided stop time, in "
       "seconds (relative to the start of the run).");
 
   std::string grpOptional = "Filters";
@@ -504,20 +497,9 @@ void LoadEMU::init() {
  */
 void LoadEMU::createWorkspace(ANSTO::Tar::File &tarFile) {
 
-  // Clean up and check file
-  // -----------------------
-  // Delete the output workspace name if it existed
-  std::string outName = getPropertyValue("OutputWorkspace");
-  if (API::AnalysisDataService::Instance().doesExist(outName))
-    API::AnalysisDataService::Instance().remove(outName);
-
   // Create the workspace
-  // --------------------
   m_localWorkspace = boost::make_shared<DataObjects::EventWorkspace>();
-
-  m_localWorkspace->initialize(HISTOGRAMS,
-                               2, // number of TOF bin boundaries
-                               1);
+  m_localWorkspace->initialize(HISTOGRAMS, 2, 1);
 
   // set the units
   m_localWorkspace->getAxis(0)->unit() =
@@ -548,11 +530,12 @@ void LoadEMU::createWorkspace(ANSTO::Tar::File &tarFile) {
  *   Load the instrument from the IDF
  *   Reposition the relevant neutronic values for model based on the parameters
  *   Load the data values and convert to TOF
+ *   Setting up the masks
  */
 void LoadEMU::exec() {
 
   // Create workspace
-  //
+  // ----------------
   std::string filename = getPropertyValue(FilenameStr);
   ANSTO::Tar::File tarFile(filename);
   if (!tarFile.good())
@@ -562,81 +545,51 @@ void LoadEMU::exec() {
   API::Progress prog(this, 0.0, 1.0, Progress_Total);
 
   // Load instrument and workspace properties
-  //
+  // ----------------------------------------
   loadParameters(tarFile, logManager);
+  prog.doReport("creating instrument");
+  loadInstrument();
 
-  // region of intreset and load filters
+  // Get the region of interest and filters
+  //
   std::string maskfile = getPropertyValue(MaskStr);
   std::string seltubes = getPropertyValue(SelectDetectorTubesStr);
   std::vector<bool> roi = createRoiVector(seltubes, maskfile);
-
-  // absolute time limits when loading data
   double timeMaxBoundary = getProperty(FilterByTimeStopStr);
   if (isEmpty(timeMaxBoundary))
     timeMaxBoundary = std::numeric_limits<double>::infinity();
   TimeLimits timeBoundary(getProperty(FilterByTimeStartStr), timeMaxBoundary);
 
-  prog.doReport("creating instrument");
-
-  // Load the instrument model
-  //
-  API::IAlgorithm_sptr loadInstrumentAlg =
-      createChildAlgorithm("LoadInstrument");
-  loadInstrumentAlg->setProperty("Workspace", m_localWorkspace);
-  loadInstrumentAlg->setPropertyValue("InstrumentName", "EMUau");
-  loadInstrumentAlg->setProperty("RewriteSpectraMap",
-                                 Mantid::Kernel::OptionalBool(false));
-  loadInstrumentAlg->executeAsChildAlg();
-
-  // simplify loading instrument parameters
+  // lambda to simplify loading instrument parameters
   auto instr = m_localWorkspace->getInstrument();
   auto iparam = [&instr](std::string tag) {
     return instr->getNumberParameter(tag)[0];
   };
 
-  // Update the neutronic positions
+  // Update the neutronic positions for the indirect detectors
+  // noting that the vertical and horizontal are a continuous
+  // sequence starting from 0
   //
   double sampleAnalyser = iparam("SampleAnalyser");
-
-  // Indirect hz tubes idstart = 0
-  detid_t endID = static_cast<detid_t>(HORIZONTAL_TUBES * PIXELS_PER_TUBE);
+  auto endID = static_cast<detid_t>(DETECTORS * PIXELS_PER_TUBE);
   for (detid_t detID = 0; detID < endID; detID++)
     updateNeutronicPostions(detID, sampleAnalyser);
 
-  // Indirect vertical tubes idstart = 16 * 64
-  detid_t startID = 16 * static_cast<detid_t>(PIXELS_PER_TUBE);
-  endID = startID + static_cast<detid_t>(VERTICAL_TUBES * PIXELS_PER_TUBE);
-  for (detid_t detID = startID; detID < endID; detID++)
-    updateNeutronicPostions(detID, sampleAnalyser);
-
-  // get the detector map from raw to physical detector
+  // get the detector map from raw input to a physical detector
+  //
   std::string dmapStr = instr->getParameterAsString("DetectorMap");
   std::vector<size_t> detMapIndex = std::vector<size_t>(DETECTORS, 0);
-  EMU::mapRangeToIndex(dmapStr, detMapIndex, [](size_t n) { return n; });
+  mapRangeToIndex(dmapStr, detMapIndex, [](size_t n) { return n; });
 
-  // Collect the L2 distances, Doppler characteristics and initiate TOF
-  // converter
+  // Collect the L2 distances, Doppler characteristics and 
+  // initiate the TOF converter
   //
   loadDetectorL2Values();
-  auto dopplerFreq =
-      logManager.getPropertyValueAsType<double>("DopplerFrequency");
-  auto dopplerAmpl =
-      logManager.getPropertyValueAsType<double>("DopplerAmplitude");
-  double dopplerPhase = getProperty(OverrideDopplerPhaseStr);
-  if (isEmpty(dopplerPhase)) {
-    // sinusoidal motion crossing a threshold with a delay
-    double doppThreshold = iparam("DopplerReferenceThreshold");
-    double doppDelay = iparam("DopplerReferenceDelay");
-    dopplerPhase = 180.0 -
-                   asin(0.001 * doppThreshold / dopplerAmpl) * 180.0 / M_PI +
-                   doppDelay * dopplerFreq;
-  }
-  logManager.addProperty<double>("DopplerPhase", dopplerPhase);
-
+  loadDopplerParameters(logManager);
   double v2 = iparam("AnalysedV2"); // analysed velocity in metres per sec
-  double framePeriod = 1.0e6 / dopplerFreq; // period and max direct as microsec
+  double framePeriod = 1.0e6 / m_dopplerFreq; // period and max direct as microsec
   double sourceSample = iparam("SourceSample");
-  EMU::ConvertTOF convertTOF(dopplerAmpl, dopplerFreq, dopplerPhase,
+  ConvertTOF convertTOF(m_dopplerAmpl, m_dopplerFreq, m_dopplerPhase,
                              sourceSample, v2, m_detectorL2);
 
   Types::Core::DateAndTime start_time(
@@ -666,64 +619,27 @@ void LoadEMU::exec() {
   double gatePeriod = 1.0e6 / fabs(logManager.getPropertyValueAsType<double>(
                                   "GraphiteChopperFrequency"));
 
-  // count total events per pixel to reserve necessary memory
+  // count total events per pixel and reserve necessary memory
   EMU::EventCounter eventCounter(roi, detMapIndex, PIXELS_PER_TUBE, framePeriod,
                                  gatePeriod, timeBoundary, directLimits,
                                  analysedLimits, eventCounts);
-
   loadEvents(prog, "loading neutron counts", tarFile, eventCounter);
-
-  // prepare event storage
   ANSTO::ProgressTracker progTracker(prog, "creating neutron event lists",
                                      numberHistograms, Progress_ReserveMemory);
+  prepareEventStorage(progTracker, eventCounts, eventVectors);
 
-  for (size_t i = 0; i != numberHistograms; ++i) {
-    DataObjects::EventList &eventList = m_localWorkspace->getSpectrum(i);
-
-    eventList.setSortOrder(DataObjects::PULSETIME_SORT);
-    eventList.reserve(eventCounts[i]);
-
-    eventList.setDetectorID(static_cast<detid_t>(i));
-    eventList.setSpectrumNo(static_cast<detid_t>(i));
-
-    DataObjects::getEventsFrom(eventList, eventVectors[i]);
-
-    progTracker.update(i);
-  }
-  progTracker.complete();
-
+  // now perfrom the actual event collection and TOF convert if necessary
   bool saveAsTOF = !getProperty(RawDopplerTimeStr);
   EMU::EventAssigner eventAssigner(
       roi, detMapIndex, PIXELS_PER_TUBE, framePeriod, gatePeriod, timeBoundary,
       directLimits, analysedLimits, convertTOF, eventVectors, saveAsTOF);
-
   loadEvents(prog, "loading neutron events (TOF)", tarFile, eventAssigner);
 
-  // just to make sure the bins hold it all
+  // just to make sure the bins hold it all and setup the detector masks
   m_localWorkspace->setAllX(
       HistogramData::BinEdges{std::max(0.0, floor(eventAssigner.tofMin())),
                               eventAssigner.tofMax() + 1});
-
-  // count total number of masked bins
-  size_t maskedBins = 0;
-  for (size_t i = 0; i != roi.size(); i++)
-    if (!roi[i])
-      maskedBins++;
-
-  if (maskedBins > 0) {
-    // create list of masked bins
-    std::vector<size_t> maskIndexList(maskedBins);
-    size_t maskIndex = 0;
-
-    for (size_t i = 0; i != roi.size(); i++)
-      if (!roi[i])
-        maskIndexList[maskIndex++] = i;
-
-    API::IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
-    maskingAlg->setProperty("Workspace", m_localWorkspace);
-    maskingAlg->setProperty("WorkspaceIndexList", maskIndexList);
-    maskingAlg->executeAsChildAlg();
-  }
+  setupDetectorMasks(roi);
 
   // set log values
   auto frame_count = static_cast<int>(eventCounter.numFrames());
@@ -740,9 +656,74 @@ void LoadEMU::exec() {
   setProperty("OutputWorkspace", m_localWorkspace);
 }
 
-/**
- *	Recovers the L2 neutronic distance for each detector.
- */
+// set up the detector masks
+void LoadEMU::setupDetectorMasks(std::vector<bool>& roi) {
+
+	// count total number of masked bins
+	size_t maskedBins = 0;
+	for (size_t i = 0; i != roi.size(); i++)
+		if (!roi[i])
+			maskedBins++;
+
+	if (maskedBins > 0) {
+		// create list of masked bins
+		std::vector<size_t> maskIndexList(maskedBins);
+		size_t maskIndex = 0;
+
+		for (size_t i = 0; i != roi.size(); i++)
+			if (!roi[i])
+				maskIndexList[maskIndex++] = i;
+
+		API::IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
+		maskingAlg->setProperty("Workspace", m_localWorkspace);
+		maskingAlg->setProperty("WorkspaceIndexList", maskIndexList);
+		maskingAlg->executeAsChildAlg();
+	}
+}
+
+// prepare the event storage 
+void LoadEMU::prepareEventStorage(ANSTO::ProgressTracker& progTracker,
+	                              std::vector<size_t>& eventCounts,
+	                              std::vector<EventVector_pt>& eventVectors) {
+
+	size_t numberHistograms = eventCounts.size();
+	for (size_t i = 0; i != numberHistograms; ++i) {
+		DataObjects::EventList &eventList = m_localWorkspace->getSpectrum(i);
+
+		eventList.setSortOrder(DataObjects::PULSETIME_SORT);
+		eventList.reserve(eventCounts[i]);
+
+		eventList.setDetectorID(static_cast<detid_t>(i));
+		eventList.setSpectrumNo(static_cast<detid_t>(i));
+
+		DataObjects::getEventsFrom(eventList, eventVectors[i]);
+
+		progTracker.update(i);
+	}
+	progTracker.complete();
+}
+
+// get and log the Doppler parameters 
+void LoadEMU::loadDopplerParameters(API::LogManager &logm) {
+
+	auto instr = m_localWorkspace->getInstrument();
+	m_dopplerFreq =
+		logm.getPropertyValueAsType<double>("DopplerFrequency");
+	m_dopplerAmpl =
+		logm.getPropertyValueAsType<double>("DopplerAmplitude");
+	m_dopplerPhase = getProperty(OverrideDopplerPhaseStr);
+	if (isEmpty(m_dopplerPhase)) {
+		// sinusoidal motion crossing a threshold with a delay
+		double doppThreshold = instr->getNumberParameter("DopplerReferenceThreshold")[0];
+		double doppDelay = instr->getNumberParameter("DopplerReferenceDelay")[0];
+		m_dopplerPhase = 180.0 -
+			asin(0.001 * doppThreshold / m_dopplerAmpl) * 180.0 / M_PI +
+			doppDelay * m_dopplerFreq;
+	}
+	logm.addProperty<double>("DopplerPhase", m_dopplerPhase);
+}
+
+// Recovers the L2 neutronic distance for each detector.
 void LoadEMU::loadDetectorL2Values() {
 
   m_detectorL2 = std::vector<double>(HISTOGRAMS);
@@ -795,7 +776,7 @@ std::vector<bool> LoadEMU::createRoiVector(const std::string &selected,
   // turn off pixels linked to missing tubes
   if (!selected.empty()) {
     std::vector<bool> tubes(HISTO_BINS_X, false);
-    EMU::mapRangeToIndex(selected, tubes, [](size_t) { return true; });
+    mapRangeToIndex(selected, tubes, [](size_t) { return true; });
     for (size_t i = 0; i < HISTO_BINS_X; i++) {
       if (tubes[i] == false) {
         for (size_t j = 0; j < PIXELS_PER_TUBE; j++) {
@@ -819,14 +800,14 @@ std::vector<bool> LoadEMU::createRoiVector(const std::string &selected,
 
     if ((i0 != std::string::npos) && (iN != std::string::npos) && (i0 < iN)) {
       line = line.substr(i0 + 8, iN - i0 - 8); // 8 = len("<detids>")
-      EMU::mapRangeToIndex(line, result, [](size_t) { return false; });
+      mapRangeToIndex(line, result, [](size_t) { return false; });
     }
   }
 
   return result;
 }
 
-// instrument creation
+// load parameters from input file
 void LoadEMU::loadParameters(ANSTO::Tar::File &tarFile, API::LogManager &logm) {
 
   // extract log and hdf file
@@ -899,6 +880,19 @@ void LoadEMU::loadParameters(ANSTO::Tar::File &tarFile, API::LogManager &logm) {
       logm.addProperty("SampleName", name);
     }
   }
+}
+
+// load the instrument definition and instrument parameters
+void LoadEMU::loadInstrument() {
+
+	// loads the IDF and parameter file
+	API::IAlgorithm_sptr loadInstrumentAlg =
+		createChildAlgorithm("LoadInstrument");
+	loadInstrumentAlg->setProperty("Workspace", m_localWorkspace);
+	loadInstrumentAlg->setPropertyValue("InstrumentName", "EMUau");
+	loadInstrumentAlg->setProperty("RewriteSpectraMap",
+		Mantid::Kernel::OptionalBool(false));
+	loadInstrumentAlg->executeAsChildAlg();
 }
 
 // read counts/events from binary file

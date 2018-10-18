@@ -10,15 +10,11 @@ namespace ANSTO {
 // The function reads a binary ANSTO event file,
 // It opens the file and returns the data through the callbacks.
 
-#define EVENTFILEHEADER_BASE_MAGIC_NUMBER 0x0DAE0DAE
-#define EVENTFILEHEADER_BASE_FORMAT_NUMBER 0x00010002
+constexpr int32_t EVENTFILEHEADER_BASE_MAGIC_NUMBER = 0x0DAE0DAE;
+constexpr int32_t EVENTFILEHEADER_BASE_FORMAT_NUMBER = 0x00010002;
 
 // all events contain some or all of these fields
-#define NVAL 5 // x, y, v, w, wa
-
-#define SELECTION_NONE 0
-#define SELECTION_INCLUDED 1
-#define SELECTION_EXCLUDED 2
+constexpr int32_t NVAL = 5; // x, y, v, w, wa
 
 #pragma pack(push, 1) // otherwise may get 8 byte aligned, no good for us
 
@@ -69,30 +65,23 @@ enum event_decode_state {
 };
 
 /*
-
-// Types of OOB events, and 'NEUTRON' event.  Not all are used for all
+Types of OOB events, and 'NEUTRON' event.  Not all are used for all
 instruments, or supported yet.
-// NEUTRON = 0 = a neutron detected, FRAME_START = -2 = T0 pulse (e.g. from
+
+NEUTRON = 0 = a neutron detected, FRAME_START = -2 = T0 pulse (e.g. from
 chopper, or from Doppler on Emu).  For most instruments, these are the only
 types used.
-// FRAME_AUX_START = -3 (e.g. from reflecting chopper on Emu), VETO = -6 (e.g.
-veto signal from ancillary)
-// BEAM_MONITOR = -7 (e.g. if beam monitors connected direct to Mesytec MCPD8
-DAE)
-// RAW = -8 = pass-through, non-decoded raw event directly from the DAE (e.g.
-Mesytec MCPD8).  Used to access special features of DAE.
-// Other types are not used in general (DATASIZES = -1 TBD in future, FLUSH = -4
-deprecated, FRAME_DEASSERT = -5 only on Fastcomtec P7888 DAE). const char
-*oob_event_type_str[16] = { // note the c values are negative, hence the
-reversed order...
-// NEUTRON = 0, 1-7 unused
-"NEUTRON", "UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN",
-"UNKNOWN",
-// RAW = -8, BEAM_MONITOR = -7, VETO = -6, FRAME_DEASSERT = -5, FLUSH = -4,
-FRAME_AUX_START = -3, FRAME_START = -2, DATASIZES = -1 "RAW", "BEAM_MONITOR",
-"VETO", "FRAME_DEASSERT", "FLUSH", "FRAME_AUX_START", "FRAME_START", "DATASIZES"
-};
 
+FRAME_AUX_START = -3 (e.g. from reflecting chopper on Emu), VETO = -6 (e.g.
+veto signal from ancillary)
+
+BEAM_MONITOR = -7 (e.g. if beam monitors connected direct to Mesytec MCPD8 DAE)
+
+RAW = -8 = pass-through, non-decoded raw event directly from the DAE (e.g.
+Mesytec MCPD8).  Used to access special features of DAE.
+
+Other types are not used in general (DATASIZES = -1 TBD in future, FLUSH = -4
+deprecated, FRAME_DEASSERT = -5 only on Fastcomtec P7888 DAE). 
 */
 
 template <class IReader, class IEventHandler, class IProgress>
@@ -132,15 +121,14 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
   }
 
   // Setup the clock_scale.  In format 0x00010001 this was not part of the
-  // headers, hence a command line option -c is provided to allow it to be
+  // headers, hence a function argument is provided to allow it to be
   // specified manually. In the current format 0x00010002, clock_scale is
   // written to the header and need not be specified, unless some alternate
   // scale is needed.
   double scale_microsec = hdr_base.clock_scale / 1000.0;
-  if (!hdr_base
-           .clock_scale) { // old eventfile format did not have clock_scale...
+  if (!hdr_base.clock_scale) { 
+    // old eventfile format did not have clock_scale...
     scale_microsec = def_clock_scale / 1000.0;
-    ;
   }
 
   // the initial time is not set correctly so wait until primary and auxillary

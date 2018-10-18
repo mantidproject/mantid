@@ -11,10 +11,6 @@ Description
 
 Load data from the EMU beamline at ANSTO. The workspace generated is a TOF EventWorkspace.
 
-.. categories::
-
-.. sourcelink::
-
 Usage
 -----
 
@@ -33,3 +29,8 @@ Output:
 .. testoutput:: ExSimple
 
    Number of spectra: 6528
+
+   
+.. categories::
+
+.. sourcelink::
