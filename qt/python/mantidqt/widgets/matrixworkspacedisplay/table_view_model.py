@@ -22,6 +22,15 @@ MatrixWorkspaceTableViewModelType = enum(x='x', y='y', e='e')
 
 
 class MatrixWorkspaceTableViewModel(QAbstractTableModel):
+    HORIZONTAL_HEADER_DISPLAY_STRING = u"{0}\n{1:0.1f}{2}"
+    HORIZONTAL_HEADER_TOOLTIP_STRING = u"index {0}\n{1}{2:0.1f}{3} (bin centre)"
+
+    HORIZONTAL_HEADER_DISPLAY_STRING_FOR_X_VALUES = "{0}"
+    HORIZONTAL_HEADER_TOOLTIP_STRING_FOR_X_VALUES = "index {0}"
+
+    VERTICAL_HEADER_DISPLAY_STRING = "{0}{1}{2}"
+    VERTICAL_HEADER_TOOLTIP_STRING = "index {0}\nspectra no {1}"
+
     def __init__(self, ws, model_type):
         """
         :param ws:
@@ -63,10 +72,11 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         # check that the vertical axis actually exists in the workspace
         if self.ws.axes() > axis_index:
             if role == Qt.DisplayRole:
-                return "{0}{1}{2}".format(section, " ", self.ws.getAxis(axis_index).label(section))
+                return self.VERTICAL_HEADER_DISPLAY_STRING.format(section, " ",
+                                                                  self.ws.getAxis(axis_index).label(section))
             else:
                 spectrum_number = self.ws.getSpectrum(section).getSpectrumNo()
-                return "index {0}\nspectra no {1}".format(section, spectrum_number)
+                return self.VERTICAL_HEADER_TOOLTIP_STRING.format(section, spectrum_number)
         else:
             raise NotImplementedError("What do we do here? Handle if the vertical axis does NOT exist")
 
@@ -75,30 +85,27 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         if self.type == MatrixWorkspaceTableViewModelType.x:
             if role == Qt.DisplayRole:
                 # for display, just the bin number
-                return "{0}".format(section)
+                return self.HORIZONTAL_HEADER_DISPLAY_STRING_FOR_X_VALUES.format(section)
             else:
                 # for tooltip index <bin number>
-                return "index {0}".format(section)
+                return self.HORIZONTAL_HEADER_TOOLTIP_STRING_FOR_X_VALUES.format(section)
 
         # for the Y and E values, create a label with the units
         axis_index = 0
-        axis_label_separator = "\n"
         x_vec = self.ws.readX(0)
         if self.ws.isHistogramData():
             bin_centre_value = (x_vec[section] + x_vec[section + 1]) / 2.0
         else:
             bin_centre_value = x_vec[section]
 
+        symbol = self.ws.getAxis(axis_index).getUnit().symbol()
         if role == Qt.DisplayRole:
             # format for the label display
-            return u"{0}{1}{2:0.1f}{3}".format(section, axis_label_separator, bin_centre_value,
-                                               self.ws.getAxis(axis_index).getUnit().symbol().utf8())
+            return self.HORIZONTAL_HEADER_DISPLAY_STRING.format(section, bin_centre_value, symbol.utf8())
         else:
             # format for the tooltip
-            unit = self.ws.getAxis(axis_index).getUnit()
-            return u"index {0}{1}{2}{3:0.1f}{4} (bin centre)".format(section, axis_label_separator,
-                                                                     unit.symbol().ascii(), bin_centre_value,
-                                                                     unit.symbol().utf8())
+            return self.HORIZONTAL_HEADER_TOOLTIP_STRING.format(section, symbol.ascii(), bin_centre_value,
+                                                                symbol.utf8())
 
     def headerData(self, section, orientation, role=None):
         if not (role == Qt.DisplayRole or role == Qt.ToolTipRole):

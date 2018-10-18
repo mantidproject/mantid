@@ -21,11 +21,29 @@ from mock import Mock, call
 from qtpy.QtCore import Qt
 
 
+class MockMantidSymbol:
+    TEST_ASCII = "MANTID_ASCII_SYMBOL"
+    TEST_UTF8 = "MANTID_UTF8_SYMBOL"
+
+    def __init__(self):
+        self.utf8 = Mock(return_value=self.TEST_UTF8)
+        self.ascii = Mock(return_value=self.TEST_ASCII)
+
+
+class MockMantidUnit:
+    def __init__(self):
+        self.mock_symbol = MockMantidSymbol()
+        self.symbol = Mock(return_value=self.mock_symbol)
+
+
 class MockMantidAxis:
     TEST_LABEL = "MANTID_TEST_AXIS"
 
     def __init__(self):
         self.label = Mock(return_value=self.TEST_LABEL)
+
+        self.mock_unit = MockMantidUnit()
+        self.getUnit = Mock(return_value=self.mock_unit)
 
 
 class MockQModelIndex:
@@ -53,14 +71,14 @@ class MockWorkspace:
     def _return_MockSpectrumInfo():
         return MockSpectrumInfo()
 
-    def __init__(self, read_return=None, axes=2):
+    def __init__(self, read_return=None, axes=2, isHistogramData=True):
         if read_return is None:
             read_return = [1, 2, 3, 4, 5]
         # This is assigned to a function, as the original implementation is a function that returns
         # the spectrumInfo object
         self.spectrumInfo = self._return_MockSpectrumInfo
         self.getNumberHistograms = Mock()
-        self.isHistogramData = Mock()
+        self.isHistogramData = Mock(return_value=isHistogramData)
         self.blocksize = Mock()
         self.readX = Mock(return_value=read_return)
         self.readY = Mock(return_value=read_return)
@@ -78,6 +96,8 @@ class MockWorkspace:
 
 class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
     WORKSPACE = r"C:\Users\qbr77747\dev\m\workbench_matrixworkspace\test_masked_bins.nxs"
+    AXIS_INDEX_FOR_HORIZONTAL = 0
+    AXIS_INDEX_FOR_VERTICAL = 1
 
     def test_correct_model_type(self):
         ws = MockWorkspace()
@@ -273,10 +293,13 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         mock_section = 0
         output = model.headerData(mock_section, Qt.Vertical, Qt.DisplayRole)
 
-        axis_index_for_vertical = 1
-        ws.getAxis.assert_called_once_with(axis_index_for_vertical)
+        ws.getAxis.assert_called_once_with(self.AXIS_INDEX_FOR_VERTICAL)
         ws.mock_axis.label.assert_called_once_with(mock_section)
-        self.assertEqual("{0}{1}{2}".format(mock_section, " ", MockMantidAxis.TEST_LABEL), output)
+
+        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING.format(mock_section, " ",
+                                                                                              MockMantidAxis.TEST_LABEL)
+
+        self.assertEqual(expected_output, output)
 
     def test_headerData_vertical_header_tooltip_role(self):
         ws = MockWorkspace()
@@ -287,7 +310,10 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
 
         ws.getSpectrum.assert_called_once_with(mock_section)
         ws.mock_spectrum.getSpectrumNo.assert_called_once_with()
-        self.assertEqual("index {0}\nspectra no {1}".format(mock_section, MockSpectrum.TEST_SPECTRUM_NO), output)
+
+        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_TOOLTIP_STRING.format(mock_section,
+                                                                                              MockSpectrum.TEST_SPECTRUM_NO)
+        self.assertEqual(expected_output, output)
 
     def test_headerData_horizontal_header_display_role_for_X_values(self):
         ws = MockWorkspace()
@@ -295,8 +321,9 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         model = MatrixWorkspaceTableViewModel(ws, model_type)
         mock_section = 0
         output = model.headerData(mock_section, Qt.Horizontal, Qt.DisplayRole)
-
-        self.assertEqual("{0}".format(mock_section), output)
+        expected_output = MatrixWorkspaceTableViewModel.HORIZONTAL_HEADER_DISPLAY_STRING_FOR_X_VALUES.format(
+            mock_section)
+        self.assertEqual(expected_output, output)
 
     def test_headerData_horizontal_header_tooltip_role_for_X_values(self):
         ws = MockWorkspace()
@@ -305,12 +332,82 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         mock_section = 0
         output = model.headerData(mock_section, Qt.Horizontal, Qt.ToolTipRole)
 
-        self.assertEqual("index {0}".format(mock_section), output)
+        expected_output = MatrixWorkspaceTableViewModel.HORIZONTAL_HEADER_TOOLTIP_STRING_FOR_X_VALUES.format(
+            mock_section)
+        self.assertEqual(expected_output, output)
 
-# self.fail("Not Implemented")
+    def test_headerData_horizontal_header_display_role_histogram_data(self):
+        mock_section = 0
+        mock_return_values = [0, 1, 2, 3, 4, 5, 6]
+        expected_bin_centre = (mock_return_values[mock_section] + mock_return_values[mock_section + 1]) / 2.0
+        is_histogram_data = True
 
-# def test_data_tooltip_role(self):
-#     self.fail("Not Implemented")
+        self._run_test_headerData_horizontal_header_display_role(is_histogram_data, mock_return_values, mock_section,
+                                                                 expected_bin_centre)
+
+    def test_headerData_horizontal_header_display_role_not_histogram_data(self):
+        mock_section = 0
+        mock_return_values = [0, 1, 2, 3, 4, 5, 6]
+        expected_bin_centre = mock_return_values[mock_section]
+        is_histogram_data = False
+
+        self._run_test_headerData_horizontal_header_display_role(is_histogram_data, mock_return_values, mock_section,
+                                                                 expected_bin_centre)
+
+    def _run_test_headerData_horizontal_header_display_role(self, is_histogram_data, mock_return_values, mock_section,
+                                                            expected_bin_centre):
+        ws = MockWorkspace(read_return=mock_return_values, isHistogramData=is_histogram_data)
+        model_type = MatrixWorkspaceTableViewModelType.y
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+        output = model.headerData(mock_section, Qt.Horizontal, Qt.DisplayRole)
+
+        ws.isHistogramData.assert_called_once_with()
+        ws.readX.assert_called_once_with(0)
+        ws.getAxis.assert_called_once_with(self.AXIS_INDEX_FOR_HORIZONTAL)
+        ws.mock_axis.getUnit.assert_called_once_with()
+        ws.mock_axis.mock_unit.symbol.assert_called_once_with()
+        ws.mock_axis.mock_unit.mock_symbol.utf8.assert_called_once_with()
+        expected_output = MatrixWorkspaceTableViewModel \
+            .HORIZONTAL_HEADER_DISPLAY_STRING \
+            .format(mock_section, expected_bin_centre, MockMantidSymbol.TEST_UTF8)
+        self.assertEqual(expected_output, output)
+
+    def test_headerData_horizontal_header_tooltip_role_histogram_data(self):
+        mock_section = 0
+        mock_return_values = [0, 1, 2, 3, 4, 5, 6]
+        expected_bin_centre = (mock_return_values[mock_section] + mock_return_values[mock_section + 1]) / 2.0
+        is_histogram_data = True
+
+        self._run_test_headerData_horizontal_header_tooltip_role(is_histogram_data, mock_return_values, mock_section,
+                                                                 expected_bin_centre)
+
+    def test_headerData_horizontal_header_tooltip_role_not_histogram_data(self):
+        mock_section = 0
+        mock_return_values = [0, 1, 2, 3, 4, 5, 6]
+        expected_bin_centre = mock_return_values[mock_section]
+        is_histogram_data = False
+        self._run_test_headerData_horizontal_header_tooltip_role(is_histogram_data, mock_return_values, mock_section,
+                                                                 expected_bin_centre)
+
+    def _run_test_headerData_horizontal_header_tooltip_role(self, is_histogram_data, mock_return_values, mock_section,
+                                                            expected_bin_centre):
+        ws = MockWorkspace(read_return=mock_return_values, isHistogramData=is_histogram_data)
+        model_type = MatrixWorkspaceTableViewModelType.y
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+        output = model.headerData(mock_section, Qt.Horizontal, Qt.ToolTipRole)
+
+        ws.isHistogramData.assert_called_once_with()
+        ws.readX.assert_called_once_with(0)
+        ws.getAxis.assert_called_once_with(self.AXIS_INDEX_FOR_HORIZONTAL)
+        ws.mock_axis.getUnit.assert_called_once_with()
+        ws.mock_axis.mock_unit.symbol.assert_called_once_with()
+        ws.mock_axis.mock_unit.mock_symbol.utf8.assert_called_once_with()
+        ws.mock_axis.mock_unit.mock_symbol.ascii.assert_called_once_with()
+
+        expected_output = MatrixWorkspaceTableViewModel \
+            .HORIZONTAL_HEADER_TOOLTIP_STRING \
+            .format(mock_section, MockMantidSymbol.TEST_ASCII, expected_bin_centre, MockMantidSymbol.TEST_UTF8)
+        self.assertEqual(expected_output, output)
 
 
 if __name__ == '__main__':
