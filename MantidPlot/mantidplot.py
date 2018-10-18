@@ -13,8 +13,24 @@
 from __future__ import (absolute_import, division,
                         print_function)
 
+import os.path as osp
 import pymantidplot
 from pymantidplot import *
 
 # and the old qtiplot stuff
 import pymantidplot.qtiplot
+
+def load_ui(caller_filename, ui_relfilename, baseinstance=None):
+    '''This is copied from mantidqt.utils.qt and should be deprecated as
+    soon as possible.'''
+    from qtpy.uic import loadUi, loadUiType  # noqa
+
+    filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
+    if not osp.exists(filepath):
+        raise ImportError('File "{}" does not exist'.format(filepath))
+    if not osp.isfile(filepath):
+        raise ImportError('File "{}" is not a file'.format(filepath))
+    if baseinstance is not None:
+        return loadUi(filepath, baseinstance=baseinstance)
+    else:
+        return loadUiType(filepath)

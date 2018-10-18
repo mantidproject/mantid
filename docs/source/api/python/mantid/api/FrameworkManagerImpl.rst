@@ -2,7 +2,7 @@
  FrameworkManagerImpl
 ======================
 
-This a python binding to the C++ class Mantid::API::FrameworkManagerImpl.
+This is a Python binding to the C++ class Mantid::API::FrameworkManagerImpl.
 
 
 .. module:`mantid.api`

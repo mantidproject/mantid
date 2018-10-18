@@ -15,9 +15,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
-
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include <cmath>
 #include <numeric>
@@ -74,7 +74,8 @@ void EstimateMuonAsymmetryFromCounts::init() {
 
   declareProperty(
       make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "NormalizationTable", "", Direction::InOut),
+          "NormalizationTable", "", Direction::InOut,
+          API::PropertyMode::Optional),
       "Name of the table containing the normalizations for the asymmetries.");
 }
 
@@ -213,10 +214,20 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   }
   // update table
   Mantid::API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
-  updateNormalizationTable(table, wsNames, norm, methods);
-  setProperty("NormalizationTable", table);
+  if (table) {
+    updateNormalizationTable(table, wsNames, norm, methods);
+    setProperty("NormalizationTable", table);
+  }
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
+
+  std::string normString = std::accumulate(
+      norm.begin() + 1, norm.end(), std::to_string(norm[0]),
+      [](const std::string &currentString, double valueToAppend) {
+        return currentString + ',' + std::to_string(valueToAppend);
+      });
+  MuonAlgorithmHelper::addSampleLog(outputWS, "analysis_asymmetry_norm",
+                                    normString);
 
   setProperty("OutputWorkspace", outputWS);
 }

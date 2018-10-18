@@ -54,6 +54,7 @@ Improvements
 - :ref:`GroupWorkspaces <algm-GroupWorkspaces>` supports glob patterns for matching workspaces in the ADS.
 - :ref:`LoadSampleShape <algm-LoadSampleShape-v1>` now supports loading from binary .stl files.
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` now supports masking a workspace in addition to writing the masking information to a calfile.
+- :ref:`LoadSampleShape <algm-LoadSampleShape-v1>` now supports loading from binary .stl files.
 
 Bugfixes
 ########
@@ -92,6 +93,9 @@ Improvements
 ############
 
 - :ref:`ChudleyElliot <func-ChudleyElliot>` includes hbar in the definition
+- :ref:`Functions <FitFunctionsInPython>` may now have their constraint penalties for fitting set in python using ``function.setConstraintPenaltyFactor("parameterName", double)``.
+- :py:obj:`mantid.kernel.Logger` now handles unicode in python2
+
 
 Bugfixes
 ########

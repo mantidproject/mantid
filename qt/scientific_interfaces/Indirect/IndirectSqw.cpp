@@ -28,8 +28,16 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(sqwAlgDone(bool)));
 
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(this,
+          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
+                                 QString const &)),
+          this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &,
+                               QString const &)));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -178,9 +186,15 @@ void IndirectSqw::plotContour() {
 }
 
 /**
+ * Handle when Run is clicked
+ */
+void IndirectSqw::runClicked() { runTab(); }
+
+/**
  * Handles mantid plotting
  */
 void IndirectSqw::plotClicked() {
+  setPlotIsPlotting(true);
   QString plotType = m_uiForm.cbPlotType->currentText();
   if (plotType == "Contour" &&
       (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)))
@@ -193,6 +207,7 @@ void IndirectSqw::plotClicked() {
     int numHist = static_cast<int>(ws->getNumberHistograms());
     plotSpectrum(QString::fromStdString(m_pythonExportWsName), 0, numHist - 1);
   }
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -203,5 +218,44 @@ void IndirectSqw::saveClicked() {
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatch();
 }
+
+void IndirectSqw::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void IndirectSqw::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotType->setEnabled(enabled);
+}
+
+void IndirectSqw::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void IndirectSqw::setOutputButtonsEnabled(
+    std::string const &enableOutputButtons) {
+  bool enable = enableOutputButtons == "enable" ? true : false;
+  setPlotEnabled(enable);
+  setSaveEnabled(enable);
+}
+
+void IndirectSqw::updateRunButton(bool enabled,
+                                  std::string const &enableOutputButtons,
+                                  QString const message,
+                                  QString const tooltip) {
+  setRunEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
+  if (enableOutputButtons != "unchanged")
+    setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void IndirectSqw::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

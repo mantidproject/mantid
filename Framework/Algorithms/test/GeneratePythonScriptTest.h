@@ -27,7 +27,6 @@
 #include "MantidKernel/make_unique.h"
 
 #include <Poco/File.h>
-#include <boost/regex.hpp>
 
 #include <fstream>
 
