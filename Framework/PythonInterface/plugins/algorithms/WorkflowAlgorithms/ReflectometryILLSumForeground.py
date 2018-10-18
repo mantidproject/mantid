@@ -162,10 +162,10 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
     def validateInputs(self):
         """Validate the algorithm's input properties."""
         issues = dict()
-        if self.getProperty(Prop.SUM_TYPE).value == SumType.IN_Q:
-            if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+        if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+            if self.getProperty(Prop.SUM_TYPE).value == SumType.IN_Q:
                 issues[Prop.DIRECT_FOREGROUND_WS] = 'Direct foreground workspace is needed for summing in Q.'
-        if not self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+        else:
             directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
             if directWS.getNumberHistograms() != 1:
                 issues[Prop.DIRECT_FOREGROUND_WS] = 'The workspace should have only a single histogram. Was foreground summation forgotten?'
