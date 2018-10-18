@@ -26,6 +26,9 @@ class InternetHelper;
 namespace Catalog {
 namespace ONCat {
 
+class ONCat;
+using ONCat_uptr = std::unique_ptr<ONCat>;
+
 using Mantid::Catalog::OAuth::IOAuthTokenStore_sptr;
 using Mantid::Catalog::OAuth::IOAuthTokenStore_uptr;
 using Mantid::Catalog::OAuth::OAuthFlow;
@@ -96,13 +99,14 @@ using QueryParameters = std::vector<QueryParameter>;
 */
 class MANTID_CATALOG_DLL ONCat {
 public:
-  static ONCat fromMantidSettings(bool authenticate = true);
+  static ONCat_uptr fromMantidSettings(bool authenticate = true);
 
   ONCat() = delete;
   ONCat(const ONCat &other);
   ~ONCat();
 
   bool isUserLoggedIn() const;
+  std::string url() const;
 
   void login(const std::string &username, const std::string &password);
   void logout();

@@ -12,23 +12,32 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IArchiveSearch.h"
 #include "MantidKernel/System.h"
+#include "MantidCatalog/ONCat.h"
 
 #include <string>
+
+using Mantid::Catalog::ONCat::ONCat_uptr;
 
 namespace Mantid {
 namespace DataHandling {
 /**
- This class is for searching the SNS data archive
-
- @date 02/22/2012
+ * Please see the .cpp file for more information.
  */
 
 class DLLExport SNSDataArchive : public API::IArchiveSearch {
 public:
-  /// Find the archive location of a set of files.
   std::string
-  getArchivePath(const std::set<std::string> &filenames,
-                 const std::vector<std::string> &exts) const override;
+  getArchivePath(const std::set<std::string> &basenames,
+                 const std::vector<std::string> &suffixes) const override;
+
+  //////////////////////////////////////////////////////////////////////
+  // Exposed publicly for testing purposes only.
+  //////////////////////////////////////////////////////////////////////
+  void setONCat(ONCat_uptr oncat);
+  //////////////////////////////////////////////////////////////////////
+
+private:
+   ONCat_uptr m_oncat = nullptr;
 };
 } // namespace DataHandling
 } // namespace Mantid
