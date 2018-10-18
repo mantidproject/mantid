@@ -19,7 +19,7 @@ from Muon.GUI.Common.muon_context.muon_context import *  # MuonContext
 
 Name = "Muon Analysis 2"
 
-
+muonGUI = None
 class MuonAnalysis2Gui(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
@@ -84,7 +84,7 @@ def main():
     try:
         muon = MuonAnalysis2Gui()
         muon.resize(700, 700)
-        muon.setProperty("launcher", "Muon_Analysis_2")
+        muon.setProperty("launcher", Name)
         muon.show()
         muon.setAccessibleName(Name)
         app.exec_()
@@ -113,6 +113,7 @@ def saveToProject():
 
 
 def loadFromProject(project):
+    global muonGUI
     muonGUI = main()
     muonGUI.loadFromContext(project)
     return muonGUI
