@@ -45,16 +45,20 @@ private slots:
                        QString const tooltip = "");
 
 private:
+  Mantid::API::MatrixWorkspace_const_sptr
+  getADSWorkspace(std::string const &name) const;
+  std::size_t getOutWsNumberOfSpectra() const;
+
+  void setPlotSpectrumIndexMax(int maximum);
+
   void setRunEnabled(bool enabled);
   void setPlotSpectrumEnabled(bool enabled);
   void setPlotContourEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
   void setOutputButtonsEnabled(std::string const &enableOutputButtons);
-
   void setPlotSpectrumIsPlotting(bool plotting);
   void setPlotContourIsPlotting(bool plotting);
 
-private:
   Ui::IndirectSqw m_uiForm;
 };
 } // namespace CustomInterfaces

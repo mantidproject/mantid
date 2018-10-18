@@ -8,6 +8,7 @@
 #include "../General/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QFileInfo>
 
@@ -142,6 +143,15 @@ void IndirectSqw::run() {
   m_batchAlgoRunner->executeBatch();
 }
 
+MatrixWorkspace_const_sptr
+IndirectSqw::getADSWorkspace(std::string const &name) const {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+}
+
+std::size_t IndirectSqw::getOutWsNumberOfSpectra() const {
+  return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
+}
+
 /**
  * Handles plotting the S(Q, w) workspace when the algorithm chain is finished.
  *
@@ -152,7 +162,14 @@ void IndirectSqw::sqwAlgDone(bool error) {
     setPlotSpectrumEnabled(true);
     setPlotContourEnabled(true);
     setSaveEnabled(true);
+
+    setPlotSpectrumIndexMax(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
   }
+}
+
+void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  m_uiForm.spSpectrum->setMaximum(maximum);
 }
 
 /**
