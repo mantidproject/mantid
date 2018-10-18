@@ -1,9 +1,9 @@
 #ifndef DATAHANDING_ANSTOEVENTFILE_H_
 #define DATAHANDING_ANSTOEVENTFILE_H_
 
-#include <stdint.h>
 #include <cstdio>
 #include <stdexcept>
+#include <stdint.h>
 
 namespace Mantid {
 namespace DataHandling {
