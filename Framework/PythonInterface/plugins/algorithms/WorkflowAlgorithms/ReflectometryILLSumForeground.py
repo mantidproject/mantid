@@ -135,7 +135,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 direction=Direction.Input,
                 optional=PropertyMode.Optional,
                 validator=inWavelength),
-            doc='Summed direct beam workspace.')
+            doc='Summed direct beam workspace (units wavelength).')
         self.declareProperty(
             IntArrayProperty(
                 Prop.FOREGROUND_INDICES,
@@ -149,7 +149,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 direction=Direction.Input,
                 optional=PropertyMode.Optional,
                 validator=inWavelength),
-            doc='The (not summed) direct beam workspace in wavelength.')
+            doc='The (not summed) direct beam workspace (units wavelength).')
         self.declareProperty(
             FloatArrayProperty(
                 Prop.WAVELENGTH_RANGE,
