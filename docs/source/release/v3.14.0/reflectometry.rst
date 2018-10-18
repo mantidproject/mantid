@@ -77,7 +77,7 @@ Algorithms
 New
 ###
 
-
+- Some computations from :ref:`algm-ReflectometryMomentumTransfer` were extracted to a new algorithm, :ref:`algm-ReflectometryBeamStatistics`.
 
 Improved
 ########
@@ -90,13 +90,6 @@ Bug fixes
 
 - A bug has been fixed on the Settings tab where the IncludePartialBins check box had been hidden by a misplaced text entry box.
 - :ref:`algm-ReflectometryReductionOneAuto` No longer sums all of a transmission run's workspaces and instead will use the first run only
-
-Algorithms
-----------
-
-Bug fixes
-#########
-
 - In :ref:`algm-ReflectometryReductionOneAuto` an issue where if you gave only one of either MomentumTransferMax or MomentumTransferMin were specified it would be ignored, this has been fixed.
 
 :ref:`Release 3.14.0 <v3.14.0>`
