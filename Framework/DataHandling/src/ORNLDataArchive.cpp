@@ -151,7 +151,7 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   // "unauthenticated" mode.  If we were to authenticate we'd be able to see
   // more information, but that would require users logging in and publically
   // available information is more than enough for our purposes here, anyway.
-  auto defaultOncat = ONCat::fromMantidSettings(false);
+  auto defaultOncat = ONCat::fromMantidSettings();
   auto * oncat = m_oncat ? m_oncat.get() : defaultOncat.get();
 
   const auto datafiles = [&]() {

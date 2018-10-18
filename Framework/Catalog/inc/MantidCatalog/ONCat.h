@@ -52,11 +52,11 @@ using QueryParameters = std::vector<QueryParameter>;
  *
  * Creation of an ONCat object can be done as follows:
  *
- *     auto oncat = ONCat::fromMantidSettings();
+ *     auto oncat = ONCat::fromMantidSettings(true);
  *
  * Or, when *unauthenticated* access is preferred, as follows:
  *
- *     auto oncat = ONCat::fromMantidSettings(false);
+ *     auto oncat = ONCat::fromMantidSettings();
  *
  * Once you have that, logging in either assumes that a client ID and
  * client secret have been added to the Mantid.local.properties file (this
@@ -99,7 +99,7 @@ using QueryParameters = std::vector<QueryParameter>;
 */
 class MANTID_CATALOG_DLL ONCat {
 public:
-  static ONCat_uptr fromMantidSettings(bool authenticate = true);
+  static ONCat_uptr fromMantidSettings(bool authenticate = false);
 
   ONCat() = delete;
   ONCat(const ONCat &other);

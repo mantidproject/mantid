@@ -82,7 +82,7 @@ make_mock_oncat_api(const MockResponseMap &responseMap) {
 
 std::unique_ptr<ONCat>
 make_oncat_with_mock_api(const std::shared_ptr<MockONCatAPI> &mockAPI) {
-  auto oncat = ONCat::fromMantidSettings(false);
+  auto oncat = ONCat::fromMantidSettings();
   oncat->setInternetHelper(mockAPI);
   return oncat;
 }
