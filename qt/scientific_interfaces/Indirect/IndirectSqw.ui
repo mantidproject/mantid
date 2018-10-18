@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>601</width>
-    <height>268</height>
+    <height>303</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -442,46 +442,34 @@
       <item>
        <widget class="QLabel" name="lbPlotOutput">
         <property name="text">
-         <string>Plot Output:</string>
+         <string>Plot Spectrum:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="cbPlotType">
+       <widget class="QSpinBox" name="spSpectrum">
         <property name="enabled">
          <bool>false</bool>
         </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>0</height>
-         </size>
-        </property>
-        <item>
-         <property name="text">
-          <string>Contour</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Spectra</string>
-         </property>
-        </item>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pbPlot">
+       <widget class="QPushButton" name="pbPlotSpectrum">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Plot</string>
+         <string>Plot Spectrum</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbPlotContour">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Plot Contour</string>
         </property>
        </widget>
       </item>
@@ -528,7 +516,6 @@
   <tabstop>spELow</tabstop>
   <tabstop>spEWidth</tabstop>
   <tabstop>spEHigh</tabstop>
-  <tabstop>cbPlotType</tabstop>
   <tabstop>pbSave</tabstop>
  </tabstops>
  <resources/>
