@@ -77,21 +77,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg2.execute(););
 
     // Get the file
-    outfile = alg2.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(outfile).exists());
-    std::ifstream in(outfile.c_str());
-    std::string line, line0;
-    while (!in.eof()) // To get you all the lines.
-    {
-      getline(in, line0); // Saves the line in STRING.
-      if (in.eof())
-        break;
-      line = line0;
-    }
-    if (numPeaksPerBank > 0)
+    if (numPeaksPerBank > 0){
+      outfile = alg2.getPropertyValue("Filename");
+      TS_ASSERT(Poco::File(outfile).exists());
+      std::ifstream in(outfile.c_str());
+      std::string line, line0;
+      while (!in.eof()) // To get you all the lines.
+      {
+        getline(in, line0); // Saves the line in STRING.
+        if (in.eof())
+          break;
+        line = line0;
+      }
       TS_ASSERT_EQUALS(line, "3     71   -3   -3   -3    3.00     4.00    "
-                             "27086  2061.553   0.24498   0.92730   3.500000   "
-                             "14.3227        3       3.10    1.73   310");
+                               "27086  2061.553   0.24498   0.92730   3.500000   "
+                               "14.3227        3       3.10    1.73   310");
+    }
 
     if (Poco::File(outfile).exists())
       Poco::File(outfile).remove();
