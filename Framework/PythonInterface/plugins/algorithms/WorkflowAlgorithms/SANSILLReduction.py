@@ -22,9 +22,8 @@ class SANSILLReduction(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        if 'ProcessAs' == 'Transmission' and self.getProperty('BeamInputWorkspace').isDefault:
+        if self.getPropertyValue('ProcessAs') == 'Transmission' and self.getProperty('BeamInputWorkspace').isDefault:
             issues['BeamInputWorkspace'] = 'Beam input workspace is mandatory for transmission calculation.'
-
         return issues
 
     def PyInit(self):
