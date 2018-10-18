@@ -51,6 +51,9 @@ private slots:
   void saveClicked();
 
 private:
+  void displayMessageAndRun(std::string const &saveDirectory);
+  int displaySaveDirectoryMessage();
+
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);

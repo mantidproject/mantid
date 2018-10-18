@@ -418,6 +418,12 @@
              <property name="enabled">
               <bool>false</bool>
              </property>
+             <property name="minimumSize">
+              <size>
+               <width>75</width>
+               <height>0</height>
+              </size>
+             </property>
              <item>
               <property name="text">
                <string>Amplitude</string>

@@ -448,22 +448,30 @@ void Quasi::runClicked() {
     auto const saveDirectory =
         Mantid::Kernel::ConfigService::Instance().getString(
             "defaultsave.directory");
-    if (saveDirectory.empty()) {
-      char const *textMessage =
-          "BayesQuasi requires a default save directory and "
-          "one is not currently set."
-          " If run, the algorithm will default to saving files "
-          "to the current working directory."
-          " Would you still like to run the algorithm?";
-      int const result = QMessageBox::question(
-          nullptr, tr("Save Directory"), tr(textMessage), QMessageBox::Yes,
-          QMessageBox::No, QMessageBox::NoButton);
-      if (result != QMessageBox::No) {
-        setRunIsRunning(true);
-        runTab();
-      }
+    displayMessageAndRun(saveDirectory);
+  }
+}
+
+void Quasi::displayMessageAndRun(std::string const &saveDirectory) {
+  if (saveDirectory.empty()) {
+    int const result = displaySaveDirectoryMessage();
+    if (result != QMessageBox::No) {
+      setRunIsRunning(true);
+      runTab();
     }
   }
+}
+
+int Quasi::displaySaveDirectoryMessage() {
+  char const *textMessage =
+      "BayesQuasi requires a default save directory and "
+      "one is not currently set."
+      " If run, the algorithm will default to saving files "
+      "to the current working directory."
+      " Would you still like to run the algorithm?";
+  return QMessageBox::question(nullptr, tr("Save Directory"), tr(textMessage),
+                               QMessageBox::Yes, QMessageBox::No,
+                               QMessageBox::NoButton);
 }
 
 /**
@@ -548,7 +556,7 @@ void Quasi::setRunIsRunning(bool running) {
 }
 
 void Quasi::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
   setButtonsEnabled(!plotting);
 }
 

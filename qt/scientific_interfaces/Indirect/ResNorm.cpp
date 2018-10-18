@@ -154,16 +154,14 @@ void ResNorm::run() {
  * @param error If the algorithm failed
  */
 void ResNorm::handleAlgorithmComplete(bool error) {
-  if (error)
-    return;
-
-  // Enable plot and save
-  m_uiForm.cbPlot->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
-
-  // Update preview plot
-  previewSpecChanged(m_previewSpec);
+  setRunIsRunning(false);
+  if (!error)
+    // Update preview plot
+    previewSpecChanged(m_previewSpec);
+  else {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
+  }
 }
 
 /**
@@ -339,8 +337,10 @@ void ResNorm::plotCurrentPreview() {
 }
 
 void ResNorm::runClicked() {
-  if (validateTab())
+  if (validateTab()) {
+    setRunIsRunning(true);
     runTab();
+  }
 }
 
 /**
@@ -364,6 +364,7 @@ void ResNorm::saveClicked() {
  * Handles plotting when button is clicked
  */
 void ResNorm::plotClicked() {
+  setPlotResultIsPlotting(true);
   WorkspaceGroup_sptr fitWorkspaces =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           m_pythonExportWsName + "_Fit_Workspaces");
@@ -381,6 +382,37 @@ void ResNorm::plotClicked() {
     plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
   if (plotOptions == "Fit" || plotOptions == "All")
     plotSpectrum(fitWsName, 0, 1);
+
+  setPlotResultIsPlotting(false);
+}
+
+void ResNorm::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void ResNorm::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlot->setEnabled(enabled);
+}
+
+void ResNorm::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void ResNorm::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
+void ResNorm::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void ResNorm::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces
