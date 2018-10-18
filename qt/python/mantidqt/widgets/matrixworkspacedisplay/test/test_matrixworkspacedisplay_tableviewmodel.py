@@ -7,97 +7,24 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
-import qtpy
-from qtpy import QtCore
-
-from mantid.simpleapi import Load
-from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModel, \
-    MatrixWorkspaceTableViewModelType
+from __future__ import absolute_import, absolute_import, division, division, print_function, print_function
 
 import unittest
+
+import qtpy
 from mock import Mock, call
+from qtpy import QtCore
 from qtpy.QtCore import Qt
 
-
-class MockMantidSymbol:
-    TEST_ASCII = "MANTID_ASCII_SYMBOL"
-    TEST_UTF8 = "MANTID_UTF8_SYMBOL"
-
-    def __init__(self):
-        self.utf8 = Mock(return_value=self.TEST_UTF8)
-        self.ascii = Mock(return_value=self.TEST_ASCII)
-
-
-class MockMantidUnit:
-    def __init__(self):
-        self.mock_symbol = MockMantidSymbol()
-        self.symbol = Mock(return_value=self.mock_symbol)
-
-
-class MockMantidAxis:
-    TEST_LABEL = "MANTID_TEST_AXIS"
-
-    def __init__(self):
-        self.label = Mock(return_value=self.TEST_LABEL)
-
-        self.mock_unit = MockMantidUnit()
-        self.getUnit = Mock(return_value=self.mock_unit)
-
-
-class MockQModelIndex:
-    def __init__(self, row, column):
-        self.row = Mock(return_value=row)
-        self.column = Mock(return_value=column)
-
-
-class MockSpectrumInfo:
-    def __init__(self):
-        self.hasDetectors = Mock()
-        self.isMasked = Mock()
-        self.isMonitor = Mock()
-
-
-class MockSpectrum:
-    TEST_SPECTRUM_NO = 123123
-
-    def __init__(self):
-        self.getSpectrumNo = Mock(return_value=self.TEST_SPECTRUM_NO)
-
-
-class MockWorkspace:
-    @staticmethod
-    def _return_MockSpectrumInfo():
-        return MockSpectrumInfo()
-
-    def __init__(self, read_return=None, axes=2, isHistogramData=True):
-        if read_return is None:
-            read_return = [1, 2, 3, 4, 5]
-        # This is assigned to a function, as the original implementation is a function that returns
-        # the spectrumInfo object
-        self.spectrumInfo = self._return_MockSpectrumInfo
-        self.getNumberHistograms = Mock()
-        self.isHistogramData = Mock(return_value=isHistogramData)
-        self.blocksize = Mock()
-        self.readX = Mock(return_value=read_return)
-        self.readY = Mock(return_value=read_return)
-        self.readE = Mock(return_value=read_return)
-        self.axes = Mock(return_value=axes)
-        self.hasMaskedBins = Mock()
-        self.maskedBinsIndices = Mock()
-
-        self.mock_spectrum = MockSpectrum()
-        self.getSpectrum = Mock(return_value=self.mock_spectrum)
-
-        self.mock_axis = MockMantidAxis()
-        self.getAxis = Mock(return_value=self.mock_axis)
+from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModel, \
+    MatrixWorkspaceTableViewModelType
+from mantidqt.widgets.matrixworkspacedisplay.test_helpers.test_matrixworkspacedisplay_tableviewmodel_common import \
+    MockQModelIndex, MockWorkspace, setup_common_for_test_data, AXIS_INDEX_FOR_VERTICAL, MockMantidAxis, MockSpectrum, \
+    MockMantidSymbol, AXIS_INDEX_FOR_HORIZONTAL
 
 
 class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
     WORKSPACE = r"C:\Users\qbr77747\dev\m\workbench_matrixworkspace\test_masked_bins.nxs"
-    AXIS_INDEX_FOR_HORIZONTAL = 0
-    AXIS_INDEX_FOR_VERTICAL = 1
 
     def test_correct_model_type(self):
         ws = MockWorkspace()
@@ -119,11 +46,12 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
     def test_correct_relevant_data(self):
         ws = MockWorkspace()
         model = MatrixWorkspaceTableViewModel(ws, MatrixWorkspaceTableViewModelType.x)
-        self.assertEqual(ws.readX, model.relevant_data)
+        msg = "The function is not set correctly! The wrong data will be read."
+        self.assertEqual(ws.readX, model.relevant_data, msg=msg)
         model = MatrixWorkspaceTableViewModel(ws, MatrixWorkspaceTableViewModelType.y)
-        self.assertEqual(ws.readY, model.relevant_data)
+        self.assertEqual(ws.readY, model.relevant_data, msg=msg)
         model = MatrixWorkspaceTableViewModel(ws, MatrixWorkspaceTableViewModelType.e)
-        self.assertEqual(ws.readE, model.relevant_data)
+        self.assertEqual(ws.readE, model.relevant_data, msg=msg)
 
     def test_invalid_model_type(self):
         ws = MockWorkspace()
@@ -151,8 +79,16 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         model.relevant_data.assert_called_once_with(row)
         self.assertEqual(str(mock_data[column]), output)
 
+    def test_row_and_column_count(self):
+        ws = MockWorkspace()
+        model_type = MatrixWorkspaceTableViewModelType.x
+        MatrixWorkspaceTableViewModel(ws, model_type)
+        # these are called when the TableViewModel is initialised
+        ws.getNumberHistograms.assert_called_once_with()
+        ws.blocksize.assert_called_once_with()
+
     def test_data_background_role_masked_row(self):
-        ws, model, row, index = self._common_for_test_data_background()
+        ws, model, row, index = setup_common_for_test_data()
 
         model.ws_spectrum_info.isMasked = Mock(return_value=True)
 
@@ -180,7 +116,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         self.assertFalse(index.column.called)
 
     def test_data_background_role_monitor_row(self):
-        ws, model, row, index = self._common_for_test_data_background()
+        ws, model, row, index = setup_common_for_test_data()
 
         model.ws_spectrum_info.isMasked = Mock(return_value=False)
         model.ws_spectrum_info.isMonitor = Mock(return_value=True)
@@ -213,7 +149,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         self.assertFalse(index.column.called)
 
     def test_data_background_role_masked_bin(self):
-        ws, model, row, index = self._common_for_test_data_background()
+        ws, model, row, index = setup_common_for_test_data()
 
         model.ws_spectrum_info.isMasked = Mock(return_value=False)
         model.ws_spectrum_info.isMonitor = Mock(return_value=False)
@@ -249,33 +185,145 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         self.assertEqual(2, index.row.call_count)
         self.assertEqual(2, index.column.call_count)
 
-    def _common_for_test_data_background(self):
-        # Create some mock data for the mock workspace
-        row = 2
-        column = 2
-        # make a workspace with 0s
-        mock_data = [0] * 10
-        # set one of them to be not 0
-        mock_data[column] = 999
-        model_type = MatrixWorkspaceTableViewModelType.x
-        # pass onto the MockWorkspace so that it returns it when read from the TableViewModel
-        ws = MockWorkspace(read_return=mock_data)
-        ws.hasMaskedBins = Mock(return_value=True)
-        ws.maskedBinsIndices = Mock(return_value=[column])
-        model = MatrixWorkspaceTableViewModel(ws, model_type)
-        # The model retrieves the spectrumInfo object, and our MockWorkspace has already given it
-        # the MockSpectrumInfo, so all that needs to be done here is to set up the correct method Mocks
-        model.ws_spectrum_info.hasDetectors = Mock(return_value=True)
-        index = MockQModelIndex(row, column)
-        return ws, model, row, index
+    def test_data_tooltip_role_masked_row(self):
+        if not qtpy.PYQT5:
+            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
+        ws, model, row, index = setup_common_for_test_data()
 
-    def test_row_and_column_count(self):
-        ws = MockWorkspace()
-        model_type = MatrixWorkspaceTableViewModelType.x
-        MatrixWorkspaceTableViewModel(ws, model_type)
-        # these are called when the TableViewModel is initialised
-        ws.getNumberHistograms.assert_called_once_with()
-        ws.blocksize.assert_called_once_with()
+        model.ws_spectrum_info.hasDetectors = Mock(return_value=True)
+        model.ws_spectrum_info.isMasked = Mock(return_value=True)
+        model.ws_spectrum_info.isMonitor = Mock(return_value=False)
+
+        output = model.data(index, Qt.ToolTipRole)
+
+        model.ws_spectrum_info.hasDetectors.assert_has_calls([call.do_work(row), call.do_work(row)])
+        model.ws_spectrum_info.isMasked.assert_called_once_with(row)
+        model.ws_spectrum_info.isMonitor.assert_called_once_with(row)
+
+        self.assertEqual(MatrixWorkspaceTableViewModel.MASKED_ROW_STRING, output)
+
+        output = model.data(index, Qt.ToolTipRole)
+
+        # The row was masked so it should have been cached
+        model.ws_spectrum_info.isMasked.assert_called_once_with(row)
+
+        # However it is checked if it is a monitor again
+        self.assertEqual(3, model.ws_spectrum_info.hasDetectors.call_count)
+        self.assertEqual(2, model.ws_spectrum_info.isMonitor.call_count)
+
+        self.assertEqual(MatrixWorkspaceTableViewModel.MASKED_ROW_STRING, output)
+
+    def test_data_tooltip_role_masked_monitor_row(self):
+        if not qtpy.PYQT5:
+            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
+        ws, model, row, index = setup_common_for_test_data()
+
+        model.ws_spectrum_info.isMasked = Mock(return_value=True)
+        model.ws_spectrum_info.isMonitor = Mock(return_value=True)
+
+        output = model.data(index, Qt.ToolTipRole)
+
+        model.ws_spectrum_info.hasDetectors.assert_has_calls([call.do_work(row), call.do_work(row)])
+        model.ws_spectrum_info.isMasked.assert_called_once_with(row)
+        model.ws_spectrum_info.isMonitor.assert_called_once_with(row)
+
+        self.assertEqual(MatrixWorkspaceTableViewModel.MASKED_MONITOR_ROW_STRING, output)
+
+        # Doing the same thing a second time should hit the cache, so no additional calls will have been made
+        output = model.data(index, Qt.ToolTipRole)
+        model.ws_spectrum_info.hasDetectors.assert_has_calls([call.do_work(row), call.do_work(row)])
+        model.ws_spectrum_info.isMasked.assert_called_once_with(row)
+        model.ws_spectrum_info.isMonitor.assert_called_once_with(row)
+
+        self.assertEqual(MatrixWorkspaceTableViewModel.MASKED_MONITOR_ROW_STRING, output)
+
+    def test_data_tooltip_role_monitor_row(self):
+        if not qtpy.PYQT5:
+            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
+        ws, model, row, index = setup_common_for_test_data()
+
+        # necessary otherwise it is returned that there is a masked bin, and we get the wrong output
+        ws.hasMaskedBins = Mock(return_value=False)
+
+        model.ws_spectrum_info.isMasked = Mock(return_value=False)
+        model.ws_spectrum_info.isMonitor = Mock(return_value=True)
+
+        output = model.data(index, Qt.ToolTipRole)
+
+        model.ws_spectrum_info.hasDetectors.assert_has_calls([call.do_work(row), call.do_work(row)])
+        model.ws_spectrum_info.isMasked.assert_called_once_with(row)
+        model.ws_spectrum_info.isMonitor.assert_called_once_with(row)
+
+        self.assertEqual(MatrixWorkspaceTableViewModel.MONITOR_ROW_STRING, output)
+
+        # Doing the same thing a second time should hit the cache, so no additional calls will have been made
+        output = model.data(index, Qt.ToolTipRole)
+        model.ws_spectrum_info.hasDetectors.assert_has_calls([call.do_work(row), call.do_work(row)])
+        self.assertEqual(2, model.ws_spectrum_info.isMasked.call_count)
+        # This was called only once because the monitor was cached
+        model.ws_spectrum_info.isMonitor.assert_called_once_with(row)
+
+        self.assertEqual(MatrixWorkspaceTableViewModel.MONITOR_ROW_STRING, output)
+
+    def test_data_tooltip_role_masked_bin_in_monitor_row(self):
+        if not qtpy.PYQT5:
+            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
+
+        ws, model, row, index = setup_common_for_test_data()
+
+        model.ws_spectrum_info.isMasked = Mock(return_value=False)
+        model.ws_spectrum_info.isMonitor = Mock(return_value=True)
+        ws.hasMaskedBins = Mock(return_value=True)
+        ws.maskedBinsIndices = Mock(return_value=[index.column()])
+
+        output = model.data(index, Qt.ToolTipRole)
+
+        model.ws_spectrum_info.hasDetectors.assert_has_calls([call.do_work(row), call.do_work(row)])
+        model.ws_spectrum_info.isMasked.assert_called_once_with(row)
+        model.ws_spectrum_info.isMonitor.assert_called_once_with(row)
+
+        self.assertEqual(
+            MatrixWorkspaceTableViewModel.MONITOR_ROW_STRING + MatrixWorkspaceTableViewModel.MASKED_BIN_STRING, output)
+
+        # Doing the same thing a second time should hit the cache, so no additional calls will have been made
+        output = model.data(index, Qt.ToolTipRole)
+        model.ws_spectrum_info.hasDetectors.assert_has_calls([call.do_work(row), call.do_work(row)])
+        self.assertEqual(2, model.ws_spectrum_info.isMasked.call_count)
+        # This was called only once because the monitor was cached
+        model.ws_spectrum_info.isMonitor.assert_called_once_with(row)
+
+        self.assertEqual(
+            MatrixWorkspaceTableViewModel.MONITOR_ROW_STRING + MatrixWorkspaceTableViewModel.MASKED_BIN_STRING, output)
+
+    def test_data_tooltip_role_masked_bin(self):
+        if not qtpy.PYQT5:
+            self.skipTest("QVariant cannot be instantiated in QT4, and the test fails with an error.")
+
+        ws, model, row, index = setup_common_for_test_data()
+
+        model.ws_spectrum_info.isMasked = Mock(return_value=False)
+        model.ws_spectrum_info.isMonitor = Mock(return_value=False)
+        ws.hasMaskedBins = Mock(return_value=True)
+        ws.maskedBinsIndices = Mock(return_value=[index.column()])
+
+        output = model.data(index, Qt.ToolTipRole)
+
+        model.ws_spectrum_info.hasDetectors.assert_has_calls([call.do_work(row), call.do_work(row)])
+        model.ws_spectrum_info.isMasked.assert_called_once_with(row)
+        model.ws_spectrum_info.isMonitor.assert_called_once_with(row)
+
+        self.assertEqual(MatrixWorkspaceTableViewModel.MASKED_BIN_STRING, output)
+
+        # Doing the same thing a second time should hit the cache, so no additional calls will have been made
+        output = model.data(index, Qt.ToolTipRole)
+        self.assertEqual(4, model.ws_spectrum_info.hasDetectors.call_count)
+        self.assertEqual(2, model.ws_spectrum_info.isMasked.call_count)
+        self.assertEqual(2, model.ws_spectrum_info.isMonitor.call_count)
+        # This was called only once because the monitor was cached
+        ws.hasMaskedBins.assert_called_once_with(row)
+        ws.maskedBinsIndices.assert_called_once_with(row)
+
+        self.assertEqual(MatrixWorkspaceTableViewModel.MASKED_BIN_STRING, output)
 
     def test_headerData_not_display_or_tooltip(self):
         if not qtpy.PYQT5:
@@ -293,7 +341,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         mock_section = 0
         output = model.headerData(mock_section, Qt.Vertical, Qt.DisplayRole)
 
-        ws.getAxis.assert_called_once_with(self.AXIS_INDEX_FOR_VERTICAL)
+        ws.getAxis.assert_called_once_with(AXIS_INDEX_FOR_VERTICAL)
         ws.mock_axis.label.assert_called_once_with(mock_section)
 
         expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING.format(mock_section, " ",
@@ -363,7 +411,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
 
         ws.isHistogramData.assert_called_once_with()
         ws.readX.assert_called_once_with(0)
-        ws.getAxis.assert_called_once_with(self.AXIS_INDEX_FOR_HORIZONTAL)
+        ws.getAxis.assert_called_once_with(AXIS_INDEX_FOR_HORIZONTAL)
         ws.mock_axis.getUnit.assert_called_once_with()
         ws.mock_axis.mock_unit.symbol.assert_called_once_with()
         ws.mock_axis.mock_unit.mock_symbol.utf8.assert_called_once_with()
@@ -398,7 +446,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
 
         ws.isHistogramData.assert_called_once_with()
         ws.readX.assert_called_once_with(0)
-        ws.getAxis.assert_called_once_with(self.AXIS_INDEX_FOR_HORIZONTAL)
+        ws.getAxis.assert_called_once_with(AXIS_INDEX_FOR_HORIZONTAL)
         ws.mock_axis.getUnit.assert_called_once_with()
         ws.mock_axis.mock_unit.symbol.assert_called_once_with()
         ws.mock_axis.mock_unit.mock_symbol.utf8.assert_called_once_with()

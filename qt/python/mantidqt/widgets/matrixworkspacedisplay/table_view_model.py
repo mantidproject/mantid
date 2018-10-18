@@ -31,6 +31,12 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
     VERTICAL_HEADER_DISPLAY_STRING = "{0}{1}{2}"
     VERTICAL_HEADER_TOOLTIP_STRING = "index {0}\nspectra no {1}"
 
+    MASKED_MONITOR_ROW_STRING = "This is a masked monitor spectrum. "
+    MASKED_ROW_STRING = "This is a masked spectrum. "
+
+    MONITOR_ROW_STRING = "This is a monitor spectrum. "
+    MASKED_BIN_STRING = "This bin is masked. "
+
     def __init__(self, ws, model_type):
         """
         :param ws:
@@ -54,8 +60,6 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         self.masked_color = QtGui.QColor(240, 240, 240)
 
         self.monitor_color = QtGui.QColor(255, 253, 209)
-        # TODO implement and account for in data
-        # self.start_row = start_row
 
         self.type = model_type.lower()
         if self.type == MatrixWorkspaceTableViewModelType.x:
@@ -135,33 +139,56 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             # colored as a masked row, rather than as a monitor row.
             # First do the check in the cache, and only if not present go through SpectrumInfo and cache it. This logic
             # is repeated in the other checks below
-            if row in self.masked_rows_cache:
-                return self.masked_color
-            elif self.ws_spectrum_info.hasDetectors(row) and self.ws_spectrum_info.isMasked(row):
-                self.masked_rows_cache.append(row)
+            if self.checkMaskedCache(row):
                 return self.masked_color
 
             # Checks if the row is a MONITOR, if so makes it the specified color for monitors
-            elif row in self.monitor_rows_cache:
-                return self.monitor_color
-            elif self.ws_spectrum_info.hasDetectors(row) and self.ws_spectrum_info.isMonitor(row):
-                self.monitor_rows_cache.append(row)
+            elif self.checkMonitorCache(row):
                 return self.monitor_color
 
             # Checks if the BIN is MASKED, if so makes it the specified color for masked
-            elif row in self.masked_bins_cache:
-                # retrieve the masked bins IDs from the cache
-                if index.column() in self.masked_bins_cache[row]:
-                    return self.masked_color
-            elif self.ws.hasMaskedBins(row):
-                masked_bins = self.ws.maskedBinsIndices(row)
-                if index.column() in masked_bins:
-                    self.masked_bins_cache[row] = masked_bins
-                    return self.masked_color
+            elif self.checkMaskedBinCache(row, index):
+                return self.masked_color
 
         elif role == Qt.ToolTipRole:
-            # print("ToolTip Role not implemented but avoiding NotImplementedException.")
-            # TODO Show tooltip for monitor spectrum, masked spectrum & masked monitor spectrum zzz fucking FIZZ BUZZ over here
-            pass
+            tooltip = QVariant()
+            if self.checkMaskedCache(row):
+                if self.checkMonitorCache(row):
+                    tooltip = self.MASKED_MONITOR_ROW_STRING
+                else:
+                    tooltip = self.MASKED_ROW_STRING
+            elif self.checkMonitorCache(row):
+                tooltip = self.MONITOR_ROW_STRING
+                if self.checkMaskedBinCache(row, index):
+                    tooltip += self.MASKED_BIN_STRING
+            elif self.checkMaskedBinCache(row, index):
+                tooltip = self.MASKED_BIN_STRING
+            return tooltip
         else:
             return QVariant()
+
+    def checkMaskedCache(self, row):
+        if row in self.masked_rows_cache:
+            return True
+        elif self.ws_spectrum_info.hasDetectors(row) and self.ws_spectrum_info.isMasked(row):
+            self.masked_rows_cache.append(row)
+            return True
+
+    def checkMonitorCache(self, row):
+        if row in self.monitor_rows_cache:
+            return True
+        elif self.ws_spectrum_info.hasDetectors(row) and self.ws_spectrum_info.isMonitor(row):
+            self.monitor_rows_cache.append(row)
+            return True
+
+    def checkMaskedBinCache(self, row, index):
+        if row in self.masked_bins_cache:
+            # retrieve the masked bins IDs from the cache
+            if index.column() in self.masked_bins_cache[row]:
+                return True
+
+        elif self.ws.hasMaskedBins(row):
+            masked_bins = self.ws.maskedBinsIndices(row)
+            if index.column() in masked_bins:
+                self.masked_bins_cache[row] = masked_bins
+                return True
