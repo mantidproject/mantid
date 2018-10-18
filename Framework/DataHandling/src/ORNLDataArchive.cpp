@@ -54,7 +54,7 @@ DECLARE_ARCHIVESEARCH(ORNLDataArchive, ORNLDataSearch)
  * PLEASE READ THIS
  * ****************
  *
- * This archive searcher now retrieves SNS / HFIR run locations from ONCat.
+ * This archive searcher retrieves SNS / HFIR run locations from ONCat.
  *
  * Something to bear in mind here, however, is that the signature of
  * IArchiveSearch's getArchivePath is quite counter-intuitive, and so probably
