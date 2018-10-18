@@ -12,7 +12,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspac
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
-                           PropertyCriterion, StringListValidator, VisibleWhenProperty)
+                           StringListValidator)
 from mantid.simpleapi import (AddSampleLog, CropWorkspace, Divide, ExtractSingleSpectrum, RebinToWorkspace,
                               ReflectometryBeamStatistics, ReflectometrySumInQ)
 import numpy
@@ -156,8 +156,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 values=[0.],
                 validator=nonnegativeFloatArray),
             doc='The wavelength bounds.')
-        wavelengthRange = VisibleWhenProperty(Prop.SUM_TYPE, PropertyCriterion.IsEqualTo, SumType.IN_LAMBDA)
-        self.setPropertySettings(Prop.WAVELENGTH_RANGE, wavelengthRange)
 
     def validateInputs(self):
         """Validate the algorithm's input properties."""
