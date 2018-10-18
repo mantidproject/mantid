@@ -450,17 +450,6 @@
      <baseURL>https://fermi.ornl.gov/MantidRemote</baseURL>
    </computeResource>
 
-   <catalog name="ICat4Catalog">
-     <soapendpoint url="https://icat.sns.gov:8181/ICATService/ICAT"></soapendpoint>
-     <externaldownload url="https://icat.sns.gov/ids/"></externaldownload>
-     <filelocation>
-       <prefix regex=""></prefix>
-       <windows replacement=""></windows>
-       <linux replacement=""></linux>
-       <mac replacement=""></mac>
-     </filelocation>
-   </catalog>
-
    <timezone>US/Eastern</timezone>
 
    <instrument name="DAS">
