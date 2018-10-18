@@ -81,6 +81,9 @@ void ContainerSubtraction::run() {
       containerWs = requestRebinToSample(containerWs);
 
       if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
+        setRunIsRunning(false);
+        setPlotResultEnabled(false);
+        setSaveResultEnabled(false);
         g_log.error("Cannot apply container corrections using a sample and "
                     "container with different binning.");
         return;
@@ -554,18 +557,20 @@ void ContainerSubtraction::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
+void ContainerSubtraction::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
 void ContainerSubtraction::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void ContainerSubtraction::setPlotResultIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setPlotResultEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveResultEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces
