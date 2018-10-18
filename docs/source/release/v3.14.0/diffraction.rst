@@ -55,6 +55,7 @@ Improvements
 - Removed save_angles flag for Gem , as it was set by the texture mode.
 - Added save_all flag to Gem that is set to true by default, setting it to false disables the saving of .NXS files.
 - Changed spline coefficient so that the default for long_mode on and long_mode off can be set separately.
+- Focus on Pearl now saves out xye_tof files.
 
 Bugfixes
 ########

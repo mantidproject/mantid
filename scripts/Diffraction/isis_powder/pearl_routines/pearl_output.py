@@ -72,8 +72,9 @@ def _focus_mode_all(output_file_paths, processed_spectra, attenuation_filepath):
 
         ws_to_save = mantid.ConvertUnits(InputWorkspace=ws_to_save, OutputWorkspace=ws_to_save, Target="TOF")
         mantid.SaveGSS(InputWorkspace=ws_to_save, Filename=output_file_paths["gss_filename"], Append=True, Bank=i + 2)
-        mantid.SaveFocusedXYE(InputWorkspace=ws_to_save, Filename=output_file_paths["tof_xye_filename"]+str(i+10),
-                              Append=False, IncludeHeader=False)
+        tof_xye_name = output_file_paths["tof_xye_filename"].split(".")[0] + "-" + str(i + 10) \
+            + output_file_paths["tof_xye_filename"].split(".")[1]
+        mantid.SaveFocusedXYE(InputWorkspace=ws_to_save, Filename=tof_xye_name, Append=False, IncludeHeader=False)
         ws_to_save = mantid.ConvertUnits(InputWorkspace=ws_to_save, OutputWorkspace=output_name, Target="dSpacing")
         mantid.SaveNexus(Filename=output_file_paths["nxs_filename"], InputWorkspace=ws_to_save, Append=True)
 
@@ -115,9 +116,10 @@ def _focus_mode_groups(output_file_paths, calibrated_spectra):
         to_save = mantid.CloneWorkspace(InputWorkspace=monitor_ws, OutputWorkspace=monitor_ws_name)
 
         to_save = mantid.ConvertUnits(InputWorkspace=to_save, OutputWorkspace=to_save, Target="TOF")
+        tof_xye_name = output_file_paths["tof_xye_filename"].split(".")[0] + "-" +str(i+10)\
+            + output_file_paths["tof_xye_filename"].split(".")[1]
         mantid.SaveGSS(InputWorkspace=to_save, Filename=output_file_paths["gss_filename"], Append=True, Bank=i + 5)
-        mantid.SaveFocusedXYE(InputWorkspace=to_save, Filename=output_file_paths["tof_xye_filename"]+str(i+10),
-                              Append=False, IncludeHeader=False)
+        mantid.SaveFocusedXYE(InputWorkspace=to_save, Filename=tof_xye_name, Append=False, IncludeHeader=False)
         to_save = mantid.ConvertUnits(InputWorkspace=to_save, OutputWorkspace=monitor_ws_name, Target="dSpacing")
         mantid.SaveNexus(Filename=output_file_paths["nxs_filename"], InputWorkspace=to_save, Append=True)
 
