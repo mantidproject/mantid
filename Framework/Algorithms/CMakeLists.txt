@@ -21,11 +21,11 @@ set ( SRC_FILES
 	src/CalculateCarpenterSampleCorrection.cpp
 	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
-        src/CalculateDynamicRange.cpp
+    src/CalculateDynamicRange.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
 	src/CalculateIqt.cpp
-        src/CalculatePolynomialBackground.cpp
+    src/CalculatePolynomialBackground.cpp
 	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
@@ -352,11 +352,11 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
 	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
-        inc/MantidAlgorithms/CalculateDynamicRange.h
+    inc/MantidAlgorithms/CalculateDynamicRange.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateIqt.h
-        inc/MantidAlgorithms/CalculatePolynomialBackground.h
+    inc/MantidAlgorithms/CalculatePolynomialBackground.h
 	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -697,11 +697,11 @@ set ( TEST_FILES
 	CalculateCarpenterSampleCorrectionTest.h
 	CalculateCountRateTest.h
 	CalculateDIFCTest.h
-        CalculateDynamicRangeTest.h
+    CalculateDynamicRangeTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateIqtTest.h
-        CalculatePolynomialBackgroundTest.h
+    CalculatePolynomialBackgroundTest.h
 	CalculateSlitsTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h

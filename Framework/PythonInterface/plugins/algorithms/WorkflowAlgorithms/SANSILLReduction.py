@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
@@ -68,7 +74,7 @@ class SANSILLReduction(PythonAlgorithm):
                                  EnabledWhenProperty(beam, transmission, LogicOperator.Or))
 
         self.declareProperty('BeamFinderMethod', 'DirectBeam', StringListValidator(['DirectBeam', 'ScatteredBeam']),
-                             doc='Use direct beam method of the beam finding, if not, use the scattered beam method.')
+                             doc='Choose between direct beam or scattered beam method for beam center finding.')
 
         self.setPropertySettings('BeamFinderMethod', beam)
 
