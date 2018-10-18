@@ -22,6 +22,8 @@ Improvements
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
+- Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
+
 
 Single Crystal Diffraction
 --------------------------
