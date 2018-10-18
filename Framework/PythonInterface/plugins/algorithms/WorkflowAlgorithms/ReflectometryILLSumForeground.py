@@ -8,11 +8,13 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode,
+                        WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
-                           IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property, StringListValidator)
-from mantid.simpleapi import (AddSampleLog, CropWorkspace, Divide, ExtractSingleSpectrum, RebinToWorkspace,ReflectometryBeamStatistics,
-                              ReflectometrySumInQ)
+                           IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
+                           PropertyCriterion, StringListValidator, VisibleWhenProperty)
+from mantid.simpleapi import (AddSampleLog, CropWorkspace, Divide, ExtractSingleSpectrum, RebinToWorkspace,
+                              ReflectometryBeamStatistics, ReflectometrySumInQ)
 import numpy
 import ReflectometryILL_common as common
 
@@ -155,6 +157,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 values=[0.],
                 validator=nonnegativeFloatArray),
             doc='The wavelength bounds when summing in Q.')
+        wavelengthRange = VisibleWhenProperty(Prop.SUM_TYPE, PropertyCriterion.IsEqualTo, SumType.IN_LAMBDA)
+        self.setPropertySettings(Prop.WAVELENGTH_RANGE, wavelengthRange)
 
     def validateInputs(self):
         """Validate the algorithm's input properties."""
@@ -210,6 +214,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
     def _applyWavelengthRange(self, ws):
         """Cut wavelengths outside the wavelength range from a TOF workspace."""
         if self.getProperty(Prop.WAVELENGTH_RANGE).isDefault:
+            return ws
+        if self.getProperty(Prop.SUM_TYPE) == SumType.IN_LAMBDA:
             return ws
         wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
         rangeProp = {'XMin': wRange[0]}
