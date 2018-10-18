@@ -148,7 +148,8 @@ double ConvertToConstantL2::getRunProperty(std::string s) {
   Mantid::Kernel::Property *prop = run.getProperty(s);
   double val;
   if (!Strings::convert(prop->value(), val)) {
-    const std::string mesg = "Cannot convert sample log '" + s + "' to a number.";
+    const std::string mesg =
+        "Cannot convert sample log '" + s + "' to a number.";
     throw std::runtime_error(mesg);
   }
   return val;

@@ -154,6 +154,7 @@ public:
       boost::filesystem::remove(parFile);
     }
   }
+
 private:
   std::string parFilename(const std::string &xmlFilename) {
     std::string parFile = xmlFilename;
