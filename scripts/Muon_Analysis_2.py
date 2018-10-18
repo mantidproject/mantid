@@ -15,7 +15,7 @@ import PyQt4.QtCore as QtCore
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 from Muon.GUI.Common.muon_context.muon_context import *  # MuonContext
-
+from save_python import getWidgetIfOpen
 
 Name = "Muon Analysis 2"
 
@@ -75,7 +75,7 @@ def qapp():
 
 
 def main():
-    widget = getWidgetIfOpen()
+    widget = getWidgetIfOpen(Name)
     if widget is not None:
         # if GUI is open bring to front
         widget.raise_()
@@ -91,24 +91,15 @@ def main():
         return muon
     except RuntimeError as error:
         muon = QtGui.QWidget()
-        QtGui.QMessageBox.warning(muon, "Muon Analysis version 2", str(error))
+        QtGui.QMessageBox.warning(muon, Name, str(error))
         return muon
 
-
-def getWidgetIfOpen():
-    allWidgets = QtGui.QApplication.allWidgets()
-    for widget in allWidgets:
-        if widget.accessibleName() == Name:
-            return widget
-    return None
-
-
 def saveToProject():
-    widget = getWidgetIfOpen()
+    widget = getWidgetIfOpen(Name)
     if widget is None:
         return ""
     widget.update()
-    project = widget.saveToProject()  # _context.save()
+    project = widget.saveToProject()
     return project
 
 
@@ -119,4 +110,7 @@ def loadFromProject(project):
     return muonGUI
 
 if __name__ == '__main__':
-    muonGUI = main()
+    muon = main()
+    # cannot assign straight to muonGUI
+    # prevents reopening to the same GUI
+    muonGUI = muon
