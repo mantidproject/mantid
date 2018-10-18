@@ -83,8 +83,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             if processReflected:
                 ws = self._rebinToDirect(ws)
         else:
-            if processReflected:
-                ws = self._divideByDirect(ws)
+            ws = self._divideByDirect(ws)
             ws = self._sumForegroundInQ(ws)
             self._addSumTypeToLogs(ws, SumType.IN_Q)
         ws = self._applyWavelengthRange(ws)
@@ -156,7 +155,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 Prop.WAVELENGTH_RANGE,
                 values=[0.],
                 validator=nonnegativeFloatArray),
-            doc='The wavelength bounds when summing in Q.')
+            doc='The wavelength bounds.')
         wavelengthRange = VisibleWhenProperty(Prop.SUM_TYPE, PropertyCriterion.IsEqualTo, SumType.IN_LAMBDA)
         self.setPropertySettings(Prop.WAVELENGTH_RANGE, wavelengthRange)
 
@@ -213,10 +212,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
 
     def _applyWavelengthRange(self, ws):
         """Cut wavelengths outside the wavelength range from a TOF workspace."""
-        if self.getProperty(Prop.WAVELENGTH_RANGE).isDefault:
-            return ws
-        if self.getProperty(Prop.SUM_TYPE) == SumType.IN_LAMBDA:
-            return ws
         wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
         rangeProp = {'XMin': wRange[0]}
         if len(wRange) == 2:
