@@ -420,7 +420,10 @@ std::size_t IndirectFittingModel::numberOfWorkspaces() const {
 std::size_t IndirectFittingModel::getNumberOfSpectra(std::size_t index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->numberOfSpectra();
-  return 0;
+  else
+    throw std::runtime_error(
+        "Cannot find the number of spectra for a workspace: the workspace "
+        "index provided is too large.");
 }
 
 std::vector<std::string> IndirectFittingModel::getFitParameterNames() const {
@@ -515,9 +518,17 @@ void IndirectFittingModel::addNewWorkspace(MatrixWorkspace_sptr workspace,
       createDefaultParameters(m_fittingData.size() - 1));
 }
 
-void IndirectFittingModel::removeWorkspace(std::size_t index) {
+void IndirectFittingModel::removeWorkspaceFromFittingData(
+    std::size_t const &index) {
   if (m_fittingData.size() > index)
     removeFittingData(index);
+  else
+    throw std::runtime_error("Cannot remove a workspace from the fitting data: "
+                             "the workspace index provided is too large.");
+}
+
+void IndirectFittingModel::removeWorkspace(std::size_t index) {
+  removeWorkspaceFromFittingData(index);
 
   if (index > 0 && m_fittingData.size() > index) {
     const auto previousWS = m_fittingData[index - 1]->workspace();
