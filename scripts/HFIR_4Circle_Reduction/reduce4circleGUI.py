@@ -113,8 +113,7 @@ class MainWindow(QMainWindow):
 
         # Tab 'Data Access'
         self.ui.pushButton_applySetup.clicked.connect(self.do_apply_setup)
-        # self.ui.pushButton_browseLocalDataDir.clicked.connect(self.do_browse_local_spice_data)
-        self.ui.pushButton_browseLocalDataDir.clicked.connect(self.do_set_experiment)
+        self.ui.pushButton_browseLocalDataDir.clicked.connect(self.do_browse_local_spice_data)
         self.ui.pushButton_applyCalibratedSampleDistance.clicked.connect(self.do_set_user_detector_distance)
         self.ui.pushButton_applyUserDetCenter.clicked.connect(self.do_set_user_detector_center)
         self.ui.pushButton_applyUserWavelength.clicked.connect(self.do_set_user_wave_length)
@@ -2550,10 +2549,6 @@ class MainWindow(QMainWindow):
         # get exp number
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
 
-        print (ret_obj)
-        print (status)
-        print ('blabla')
-
         if status:
             # new experiment number
             exp_number = ret_obj[0]
@@ -2656,8 +2651,6 @@ class MainWindow(QMainWindow):
         except (IndexError, ValueError) as error:
             self.pop_one_button_dialog('[ERROR] Unable to parse default detector center %s due to %s.'
                                        '' % (det_center_str, str(error)))
-
-        print ('Exis setting experiment')
 
         return
 
