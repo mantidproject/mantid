@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include "MantidKernel/V3D.h"
 
@@ -12,7 +18,7 @@ using namespace boost::python;
 void export_DetectorInfoItem() {
 
   // Export to Python
-  class_<DetectorInfoItem, boost::noncopyable>("DetectorInfoItem", no_init)
+  class_<DetectorInfoItem>("DetectorInfoItem", no_init)
       .add_property("isMonitor", &DetectorInfoItem::isMonitor)
       .add_property("isMasked", &DetectorInfoItem::isMasked)
       .add_property("twoTheta", &DetectorInfoItem::twoTheta)

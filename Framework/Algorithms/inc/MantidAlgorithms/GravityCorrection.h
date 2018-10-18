@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GRAVITYCORRECTION_H_
-#define GRAVITYCORRECTION_H_
+#ifndef MANTID_ALGORITHMS_GRAVITYCORRECTION_H_
+#define MANTID_ALGORITHMS_GRAVITYCORRECTION_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -97,4 +97,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*GRAVITYCORRECTION_H_*/
+#endif /*MANTID_ALGORITHMS_GRAVITYCORRECTION_H_*/

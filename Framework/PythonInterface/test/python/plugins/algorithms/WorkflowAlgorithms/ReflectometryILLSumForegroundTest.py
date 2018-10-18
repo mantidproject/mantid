@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -30,6 +36,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
     def testReflectedBeamSumInLambdaExecutes(self):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.add_chopper_configuration_D17(dirWS)
+        illhelpers.add_slit_configuration_D17(dirWS, 0.03, 0.02)
         dirBeamPosWS = illhelpers.refl_create_beam_position_ws('dirBeamPosWS', dirWS, 0., 128)
         dirWS = illhelpers.refl_preprocess('dirWS', dirWS, dirBeamPosWS)
         args = {
@@ -45,6 +52,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         reflWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(reflWS, 1.2)
         illhelpers.add_chopper_configuration_D17(reflWS)
+        illhelpers.add_slit_configuration_D17(reflWS, 0.03, 0.02)
         reflBeamPosWS = illhelpers.refl_create_beam_position_ws('reflBeamPosWS', reflWS, 1.2, 128)
         reflWS = illhelpers.refl_preprocess('refWS', reflWS, reflBeamPosWS)
         args = {
@@ -52,6 +60,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
             'OutputWorkspace': 'foreground',
             'DirectForegroundWorkspace': dirForeground,
             'SummationType': 'SumInLambda',
+            'DirectBeamWorkspace': dirWS,
             'rethrow': True,
             'child': True
         }
@@ -62,6 +71,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
     def testReflectedBeamSumInQExecutes(self):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.add_chopper_configuration_D17(dirWS)
+        illhelpers.add_slit_configuration_D17(dirWS, 0.02, 0.03)
         dirBeamPosWS = illhelpers.refl_create_beam_position_ws('dirBeamPosWS', dirWS, 0., 128)
         dirWS = illhelpers.refl_preprocess('dirWS', dirWS, dirBeamPosWS)
         args = {
@@ -77,6 +87,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         reflWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.refl_rotate_detector(reflWS, 1.2)
         illhelpers.add_chopper_configuration_D17(reflWS)
+        illhelpers.add_slit_configuration_D17(reflWS, 0.02, 0.03)
         reflBeamPosWS = illhelpers.refl_create_beam_position_ws('reflBeamPosWS', reflWS, 1.2, 128)
         reflWS = illhelpers.refl_preprocess('refWS', reflWS, reflBeamPosWS)
         args = {
@@ -84,6 +95,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
             'OutputWorkspace': 'foreground',
             'DirectForegroundWorkspace': dirForeground,
             'SummationType': 'SumInQ',
+            'DirectBeamWorkspace': dirWS,
             'rethrow': True,
             'child': True
         }
@@ -120,7 +132,8 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         args = {
             'InputWorkspace': 'reflected',
             'OutputWorkspace': 'reflected-fgd',
-            'DirectForegroundWorkspace': 'direct-fgd'
+            'DirectForegroundWorkspace': 'direct-fgd',
+            'DirectBeamWorkspace': 'direct'
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)

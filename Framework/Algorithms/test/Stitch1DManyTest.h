@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_STITCH1DMANYTEST_H_
 #define MANTID_ALGORITHMS_STITCH1DMANYTEST_H_
 
@@ -364,6 +370,10 @@ public:
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), stitched2->y(0).rawData());
     TS_ASSERT_EQUALS(stitched->e(0).rawData(), stitched2->e(0).rawData());
 
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: ws1, ws2
+    TS_ASSERT_EQUALS(wsInADS.size(), 2)
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
   }
@@ -419,6 +429,10 @@ public:
     TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001);
     TS_ASSERT_DELTA(scales.back(), 0.6666, 0.0001);
 
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: ws1, ws2, ws3
+    TS_ASSERT_EQUALS(wsInADS.size(), 3)
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
   }
@@ -437,6 +451,12 @@ public:
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: ws1, ws2, ws3
+    TS_ASSERT_EQUALS(wsInADS.size(), 3)
+    // Remove workspaces from ADS
+    AnalysisDataService::Instance().clear();
   }
 
   void test_three_workspaces_single_scale_factor_given() {
@@ -488,6 +508,9 @@ public:
     TS_ASSERT_EQUALS(scales[0], 0.5);
     TS_ASSERT_EQUALS(scales[1], 0.5);
 
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: ws1, ws2, ws3
+    TS_ASSERT_EQUALS(wsInADS.size(), 3)
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
   }
@@ -542,6 +565,10 @@ public:
     TS_ASSERT_EQUALS(scales[0], 0.5);
     TS_ASSERT_EQUALS(scales[1], 0.7);
 
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: ws1, ws2, ws3
+    TS_ASSERT_EQUALS(wsInADS.size(), 3)
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
   }
@@ -563,7 +590,6 @@ public:
     alg.setProperty("EndOverlaps", "1.1");
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
-
     AnalysisDataService::Instance().clear();
   }
 
@@ -629,6 +655,12 @@ public:
     TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001);
     TS_ASSERT_DELTA(scales.back(), 0.6666, 0.0001);
 
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: group1, group2, group3, ws1, ws2, ws3 and
+    TS_ASSERT_EQUALS(wsInADS.size(), 8)
+    TS_ASSERT_EQUALS(wsInADS[3], "outws")
+    TS_ASSERT_EQUALS(wsInADS[4], "outws_ws1_ws2_ws3")
     // Clear the ADS
     AnalysisDataService::Instance().clear();
   }
@@ -645,9 +677,8 @@ public:
     createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
     createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
     doGroupWorkspaces("ws3, ws4", "group2");
-    // ws1 will be stitched with ws3
-    // ws2 will be stitched with ws4
 
+    // will produce a group outws containing outws_ws1_ws3, outws_ws2_ws4
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -714,6 +745,13 @@ public:
     TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001);
     TS_ASSERT_DELTA(scales.back(), 0.9375, 0.0001);
 
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: group1, group2, ws1, ws2, ws3, ws4, and
+    TS_ASSERT_EQUALS(wsInADS.size(), 9)
+    TS_ASSERT_EQUALS(wsInADS[2], "outws")
+    TS_ASSERT_EQUALS(wsInADS[3], "outws_ws1_ws3")
+    TS_ASSERT_EQUALS(wsInADS[4], "outws_ws2_ws4")
     // Clear the ADS
     AnalysisDataService::Instance().clear();
   }
@@ -730,9 +768,8 @@ public:
     createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
     createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
     doGroupWorkspaces("ws3, ws4", "group2");
-    // ws1 will be stitched with ws3
-    // ws2 will be stitched with ws4
 
+    // Will produce a group outws containing outws_ws1_ws3, outws_ws2_ws4
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -805,6 +842,13 @@ public:
     TS_ASSERT_DELTA(scales.front(), 0.5000, 0.0001);
     TS_ASSERT_DELTA(scales.back(), 0.5000, 0.0001);
 
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: group1, group2, ws1, ws2, ws3, ws4 and
+    TS_ASSERT_EQUALS(wsInADS.size(), 9)
+    TS_ASSERT_EQUALS(wsInADS[2], "outws")
+    TS_ASSERT_EQUALS(wsInADS[3], "outws_ws1_ws3")
+    TS_ASSERT_EQUALS(wsInADS[4], "outws_ws2_ws4")
     // Clear the ADS
     AnalysisDataService::Instance().clear();
   }
@@ -825,9 +869,9 @@ public:
     createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws5");
     createUniformWorkspace(1.6, 0.1, 1.6, 3.0, "ws6");
     doGroupWorkspaces("ws5, ws6", "group3");
-    // ws1 will be stitched with ws3 and ws5
-    // ws2 will be stitched with ws4 and ws6
 
+    // Will produce a group outws containing outws_ws1_ws3_ws5,
+    // outws_ws2_ws4_ws6
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -909,6 +953,13 @@ public:
     TS_ASSERT_DELTA(scales[2], 0.5, 0.0001);
     TS_ASSERT_DELTA(scales[3], 0.7, 0.0001);
 
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: group1, group2, grou3, ws1, ws2, ws3, ws4, ws5, ws6 and
+    TS_ASSERT_EQUALS(wsInADS.size(), 12)
+    TS_ASSERT_EQUALS(wsInADS[3], "outws")
+    TS_ASSERT_EQUALS(wsInADS[4], "outws_ws1_ws3_ws5")
+    TS_ASSERT_EQUALS(wsInADS[5], "outws_ws2_ws4_ws6")
     // Clear the ADS
     AnalysisDataService::Instance().clear();
   }
@@ -929,9 +980,9 @@ public:
     createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws5");
     createUniformWorkspace(1.6, 0.1, 1.6, 3.0, "ws6");
     doGroupWorkspaces("ws5, ws6", "group3");
-    // ws1 will be stitched with ws3 and ws5
-    // ws2 will be stitched with ws4 and ws6
 
+    // Will produce a group outws containing outws_ws1_ws3_ws5 and
+    // outws_ws2_ws4_ws6
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -1016,7 +1067,110 @@ public:
     TS_ASSERT_DELTA(scales[1], 0.6249, 0.0001);
     TS_ASSERT_DELTA(scales[2], 0.9375, 0.0001);
     TS_ASSERT_DELTA(scales[3], 0.6249, 0.0001);
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: group1, group2, grou3, ws1, ws2, ws3, ws4, ws5, ws6 and
+    TS_ASSERT_EQUALS(wsInADS.size(), 12)
+    TS_ASSERT_EQUALS(wsInADS[3], "outws")
+    TS_ASSERT_EQUALS(wsInADS[4], "outws_ws1_ws3_ws5")
+    TS_ASSERT_EQUALS(wsInADS[5], "outws_ws2_ws4_ws6")
+    // Clear the ADS
+    AnalysisDataService::Instance().clear();
+  }
 
+  void test_groups_containing_single_workspaces_scale_factor_from_period() {
+    // Three groups with one matrix workspaces each.
+    // Each matrix workspace has two spectra.
+
+    // First group
+    createUniformWorkspace(0.1, 0.1, 1., 2., "ws1");
+    doGroupWorkspaces("ws1", "group1");
+    // Second group
+    createUniformWorkspace(0.8, 0.1, 1.1, 2.1, "ws3");
+    doGroupWorkspaces("ws3", "group2");
+    // Third group
+    createUniformWorkspace(1.6, 0.1, 1.5, 2.5, "ws5");
+    doGroupWorkspaces("ws5", "group3");
+    // ws1 will be stitched with ws3 and ws5
+
+    // Perid 2 is out of range, must be one like tested below
+    Stitch1DMany alg0;
+    alg0.setChild(true);
+    alg0.initialize();
+    alg0.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(
+        alg0.setProperty("InputWorkspaces", "group1, group2, group3"))
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("Params", "0.1, 0.1, 2.6"))
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("StartOverlaps", "0.8, 1.6"))
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("EndOverlaps", "1.1, 1.9"))
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("UseManualScaleFactors", "1"))
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("ScaleFactorFromPeriod", 2))
+    TS_ASSERT_THROWS_NOTHING(alg0.setProperty("OutputWorkspace", "outws"))
+    TS_ASSERT_THROWS(alg0.execute(), std::runtime_error);
+    TS_ASSERT(!alg0.isExecuted())
+
+    // Will produce a group outws containing a single workspace named
+    // outws_ws1_ws3_ws5
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputWorkspaces", "group1, group2, group3"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Params", "0.1, 0.1, 2.6"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartOverlaps", "0.8, 1.6"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndOverlaps", "1.1, 1.9"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseManualScaleFactors", "1"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactorFromPeriod", 1))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outws"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    // By keeping ManualScaleFactors empty (default value) it allows workspaces
+    // in other periods to be scaled by scale factors from a specific period.
+    // Periods 0 and 2 workspaces will be scaled by scale factors from period 1.
+
+    // Test output ws
+    Workspace_sptr outws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outws)
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(outws);
+    TS_ASSERT_EQUALS(group->getNumberOfEntries(), 1)
+
+    // First item in the output group
+    auto stitched =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
+    TS_ASSERT_EQUALS(stitched->blocksize(), 25)
+    // First spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(0)[0], 0.99999, 1.e-5)
+    TS_ASSERT_DELTA(stitched->y(0)[9], 0.99999, 1.e-5)
+    TS_ASSERT_DELTA(stitched->y(0)[16], 0.74860, 1.e-5)
+    TS_ASSERT_DELTA(stitched->y(0)[24], 0.66666, 1.e-5)
+    // Second spectrum, Y values
+    TS_ASSERT_DELTA(stitched->y(1)[0], 2., 1.e-5)
+    TS_ASSERT_DELTA(stitched->y(1)[9], 1.95132, 1.e-5)
+    TS_ASSERT_DELTA(stitched->y(1)[16], 1.28787, 1.e-5)
+    TS_ASSERT_DELTA(stitched->y(1)[24], 1.11111, 1.e-5)
+    // First spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(0)[0], 1., 1.e-5)
+    TS_ASSERT_DELTA(stitched->e(0)[9], 0.69006, 1.e-5)
+    TS_ASSERT_DELTA(stitched->e(0)[16], 0.47271, 1.e-5)
+    TS_ASSERT_DELTA(stitched->e(0)[24], 0.54433, 1.e-5)
+    // Second spectrum, E values
+    TS_ASSERT_DELTA(stitched->e(1)[0], 1.414213, 1.e-5)
+    TS_ASSERT_DELTA(stitched->e(1)[9], 0.963952, 1.e-5)
+    TS_ASSERT_DELTA(stitched->e(1)[16], 0.62003, 1.e-5)
+    TS_ASSERT_DELTA(stitched->e(1)[24], 0.702728, 1.e-5)
+
+    // Test out scale factors
+    std::vector<double> scales = alg.getProperty("OutScaleFactors");
+    TS_ASSERT_EQUALS(scales.size(), 2);
+    TS_ASSERT_DELTA(scales[0], 0.90909, 1.e-5)
+    TS_ASSERT_DELTA(scales[1], 0.44444, 1.e-5)
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: group1, group2, group3, ws1, ws3, ws5
+    TS_ASSERT_EQUALS(wsInADS.size(), 8)
     // Clear the ADS
     AnalysisDataService::Instance().clear();
   }
@@ -1049,6 +1203,11 @@ public:
     TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[2], "Stitch1DMany");
 
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: outws, ws1, ws2
+    TS_ASSERT_EQUALS(wsInADS.size(), 3)
+    TS_ASSERT_EQUALS(wsInADS[0], "outws")
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
   }
@@ -1092,7 +1251,7 @@ public:
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
-    TS_ASSERT_EQUALS(histNames.size(), 8)
+    TS_ASSERT_EQUALS(histNames.size(), 7)
     TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[2], "GroupWorkspaces");
@@ -1100,8 +1259,11 @@ public:
     TS_ASSERT_EQUALS(histNames[4], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[5], "GroupWorkspaces");
     TS_ASSERT_EQUALS(histNames[6], "Stitch1DMany");
-    TS_ASSERT_EQUALS(histNames[7], "Stitch1DMany");
 
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: group1, group2, outws_ws1_ws3, outws_ws2_ws4, ws1, ws2, ws3, ws4
+    TS_ASSERT_EQUALS(wsInADS.size(), 9)
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
   }
@@ -1160,6 +1322,15 @@ public:
     TS_ASSERT_EQUALS(histNames[8], "GroupWorkspaces");
     TS_ASSERT_EQUALS(histNames[9], "Stitch1DMany");
 
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: group1, group2, group3,
+    // ws1, ws2, ws3, ws4, ws5, ws6 and
+    TS_ASSERT_EQUALS(wsInADS.size(), 12)
+    TS_ASSERT_EQUALS(wsInADS[3], "outws")
+    TS_ASSERT_EQUALS(wsInADS[4], "outws_ws1_ws3_ws5")
+    TS_ASSERT_EQUALS(wsInADS[5], "outws_ws2_ws4_ws6")
+    TS_ASSERT_EQUALS(wsInADS.size(), 12)
     // Clear the ADS
     AnalysisDataService::Instance().clear();
   }
@@ -1213,6 +1384,10 @@ public:
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
     const std::vector<double> dx_values{2., 1.34, 1., 1.4, 3.589, 3.1};
     TS_ASSERT_EQUALS(stitched->dx(0).rawData(), dx_values);
+    // Check workspaces in ADS
+    auto wsInADS = AnalysisDataService::Instance().getObjectNames();
+    // In ADS: ws1, ws2
+    TS_ASSERT_EQUALS(wsInADS.size(), 2)
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 };

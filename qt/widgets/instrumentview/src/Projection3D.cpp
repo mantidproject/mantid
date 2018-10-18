@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -13,7 +19,6 @@
 #include "MantidQtWidgets/Common/InputController.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <QApplication>
