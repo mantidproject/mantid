@@ -55,47 +55,43 @@ public:
 
     auto mockAPI = make_mock_oncat_api(
         {{generateRunUrl("SNS", "PG3", "7390"),
-          std::make_pair(
-              HTTPResponse::HTTP_OK,
-              "["
-              "  {"
-              "    \"location\": "
-              "    \"/SNS/PG3/IPTS-2767/0/7390/NeXus/PG3_7390_event.nxs\","
-              "    \"id\": \"5b9be1154e7bcae781c9ca09\","
-              "    \"indexed\": {"
-              "      \"run_number\": 7390"
-              "    },"
-              "    \"type\": \"datafile\""
-              "  }"
-              "]")},
+          {HTTPResponse::HTTP_OK,
+           "["
+           "  {"
+           "    \"location\": "
+           "    \"/SNS/PG3/IPTS-2767/0/7390/NeXus/PG3_7390_event.nxs\","
+           "    \"id\": \"5b9be1154e7bcae781c9ca09\","
+           "    \"indexed\": {"
+           "      \"run_number\": 7390"
+           "    },"
+           "    \"type\": \"datafile\""
+           "  }"
+           "]"}},
          {generateRunUrl("HFIR", "HB2C", "26506"),
-          std::make_pair(
-              HTTPResponse::HTTP_OK,
-              "["
-              "  {"
-              "    \"location\": "
-              "    \"/HFIR/HB2C/IPTS-7776/nexus/HB2C_26506.nxs.h5\","
-              "    \"id\": \"5ba1c86a4e7bcae781440283\","
-              "    \"indexed\": {"
-              "      \"run_number\": 26506"
-              "    },"
-              "    \"type\": \"datafile\""
-              "  }"
-              "]")},
+          {HTTPResponse::HTTP_OK,
+           "["
+           "  {"
+           "    \"location\": "
+           "    \"/HFIR/HB2C/IPTS-7776/nexus/HB2C_26506.nxs.h5\","
+           "    \"id\": \"5ba1c86a4e7bcae781440283\","
+           "    \"indexed\": {"
+           "      \"run_number\": 26506"
+           "    },"
+           "    \"type\": \"datafile\""
+           "  }"
+           "]"}},
          {generateRunUrl("SNS", "PG3", "9999999"),
-          std::make_pair(HTTPResponse::HTTP_OK, "[]")},
+          {HTTPResponse::HTTP_OK, "[]"}},
          {generateRunUrl("SNS", "PG3", "500"),
-          std::make_pair(
-              HTTPResponse::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR,
-              "{\"message\" : \"Stack trace or similar...\"}")},
+          {HTTPResponse::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR,
+           "{\"message\" : \"Stack trace or similar...\"}"}},
          {generateRunUrl("SNS", "PG3", "200"),
-          std::make_pair(
-              HTTPResponse::HTTPResponse::HTTP_OK,
-              "["
-              "  {"
-              "    \"location\": "
-              "    \"/SNS/PG3/IPTS-2767/0/7390/NeXus/PG3_7390_event.nxs\","
-              "    \"id\": \"5b9be115")}});
+          {HTTPResponse::HTTPResponse::HTTP_OK,
+           "["
+           "  {"
+           "    \"location\": "
+           "    \"/SNS/PG3/IPTS-2767/0/7390/NeXus/PG3_7390_event.nxs\","
+           "    \"id\": \"5b9be115"}}});
 
     auto oncat = make_oncat_with_mock_api(mockAPI);
     arch.setONCat(std::move(oncat));

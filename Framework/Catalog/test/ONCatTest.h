@@ -205,7 +205,7 @@ public:
     oncat.setInternetHelper(mock_oncat_api);
 
     const auto entity = oncat.retrieve("api", "instruments", "HB2C",
-                                       {QueryParameter("facility", "HFIR")});
+                                       {{"facility", "HFIR"}});
 
     TS_ASSERT_EQUALS(entity.id(), std::string("HB2C"));
     TS_ASSERT_EQUALS(entity.get<std::string>("name"), std::string("HB2C"));
@@ -229,7 +229,7 @@ public:
     oncat.setInternetHelper(mock_oncat_api);
 
     const auto entity = oncat.retrieve("api", "instruments", "HB2C",
-                                       {QueryParameter("facility", "HFIR")});
+                                       {{"facility", "HFIR"}});
 
     TS_ASSERT_EQUALS(entity.id(), std::string("HB2C"));
     TS_ASSERT_EQUALS(entity.get<std::string>("name"), std::string("HB2C"));
@@ -263,7 +263,7 @@ public:
     oncat.setInternetHelper(mock_oncat_api);
 
     const auto entities =
-        oncat.list("api", "instruments", {QueryParameter("facility", "HFIR")});
+        oncat.list("api", "instruments", {{"facility", "HFIR"}});
 
     TS_ASSERT_EQUALS(entities.size(), 2);
     TS_ASSERT_EQUALS(entities[0].id(), std::string("HB2C"));
@@ -287,7 +287,7 @@ public:
     oncat.setInternetHelper(mock_oncat_api);
 
     TS_ASSERT_THROWS(
-        oncat.list("api", "instruments", {QueryParameter("facility", "HFIR")}),
+        oncat.list("api", "instruments", {{"facility", "HFIR"}}),
         TokenRejectedError);
     TS_ASSERT(!oncat.isUserLoggedIn());
 
@@ -316,7 +316,7 @@ public:
     oncat.setInternetHelper(mock_oncat_api);
 
     oncat.retrieve("api", "instruments", "HB2C",
-                   {QueryParameter("facility", "HFIR")});
+                   {{"facility", "HFIR"}});
 
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
 

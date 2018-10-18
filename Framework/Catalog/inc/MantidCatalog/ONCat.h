@@ -73,10 +73,10 @@ using QueryParameters = std::vector<QueryParameter>;
  *     // Get a list of the experiments for NOMAD, specifying the fields
  *     // we are interested in as a "projection".
  *     const auto nomadExperiments = oncat.list("api", "experiments", {
- *       QueryParameter("facility", "SNS"),
- *       QueryParameter("instrument", "NOM"),
- *       QueryParameter("projection", "name"),
- *       QueryParameter("projection", "size")
+ *         {"facility", "SNS"},
+ *         {"instrument", "NOM"},
+ *         {"projection", "name"},
+ *         {"projection", "size"}
  *     });
  *
  *     // Print out the IPTS numbers of each one.

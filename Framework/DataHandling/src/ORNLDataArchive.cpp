@@ -136,14 +136,13 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   // and run number, and *not* filtering by suffix at this point.  (ONCat has
   // a strict definition of what a file "extension" is, and has no way of
   // filtering by, for example, "_event.nxs".)
-  const QueryParameters params {QueryParameter("facility", facility),
-                                QueryParameter("instrument", instrument),
-                                QueryParameter("projection", "location"),
-                                QueryParameter("tags", "type/raw"),
-                                QueryParameter("sort_by", "ingested"),
-                                QueryParameter("sort_direction", "DESCENDING"),
-                                QueryParameter("ranges_q",
-                                               "indexed.run_number:" + run)};
+  const QueryParameters params {{"facility", facility},
+                                {"instrument", instrument},
+                                {"projection", "location"},
+                                {"tags", "type/raw"},
+                                {"sort_by", "ingested"},
+                                {"sort_direction", "DESCENDING"},
+                                {"ranges_q", "indexed.run_number:" + run}};
 
   // If we've not manually set up an ONCat instance (presumably for testing
   // purposes) then we must instead create one using the settings in the
