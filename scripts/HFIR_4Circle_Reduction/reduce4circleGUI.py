@@ -174,7 +174,7 @@ class MainWindow(QMainWindow):
         # Tab 'Setup'
         self.ui.pushButton_browseWorkDir.clicked.connect(self.do_browse_working_dir)
         self.ui.comboBox_instrument.currentIndexChanged.connect(self.do_change_instrument_name)
-        # FIXME self.ui.pushButton_browsePreprocessed.clicked.connect(self.do_browse_preprocessed_dir)
+        self.ui.pushButton_browsePreprocessed.clicked.connect(self.do_browse_preprocessed_dir)
 
         # Tab 'UB Matrix'
         self.ui.pushButton_showUB2Edit.clicked.connect(self.do_show_ub_in_box)
@@ -2656,7 +2656,6 @@ class MainWindow(QMainWindow):
         except (IndexError, ValueError) as error:
             self.pop_one_button_dialog('[ERROR] Unable to parse default detector center %s due to %s.'
                                        '' % (det_center_str, str(error)))
-
 
         print ('Exis setting experiment')
 

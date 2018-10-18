@@ -7,7 +7,6 @@
 #pylint: disable=W0403,R0913,R0902
 from __future__ import (absolute_import, division, print_function)
 import os
-import qtpy
 from qtpy.QtCore import Signal as pyqtSignal
 from qtpy.QtCore import QThread   # noqa
 import HFIR_4Circle_Reduction.reduce4circleControl as r4c  # noqa
