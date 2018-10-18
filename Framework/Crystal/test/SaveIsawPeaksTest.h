@@ -52,8 +52,9 @@ public:
           p.setIntensity(static_cast<double>(i) + 0.1);
           p.setSigmaIntensity(sqrt(static_cast<double>(i)));
           p.setBinCount(static_cast<double>(i));
-          p.setPeakNumber( (run - 1000) * static_cast<int>(numBanks * numPeaksPerBank) +
-                               static_cast<int>(b * numPeaksPerBank + i));
+          p.setPeakNumber((run - 1000) *
+                              static_cast<int>(numBanks * numPeaksPerBank) +
+                          static_cast<int>(b * numPeaksPerBank + i));
           ws->addPeak(p);
         }
 
