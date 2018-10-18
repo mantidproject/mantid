@@ -251,7 +251,7 @@ class MainWindow(QMainWindow):
         add_actions(self.view_menu, self.view_menu_actions)
 
     def launchCustomGUI(self, script):
-        exec(open(script).read(), globals(), {'__name__':'__main__'})
+        exec(open(script).read(), globals())
 
     def populateAfterMantidImport(self):
         from mantid.kernel import ConfigService, logger

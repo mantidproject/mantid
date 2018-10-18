@@ -15,9 +15,8 @@ from PyChop import PyChopGui
 from gui_helper import set_matplotlib_backend, get_qapplication
 set_matplotlib_backend()  # must be called before anything tries to use matplotlib
 
-if __name__ == '__main__':
-    app, within_mantid = get_qapplication()
-    window = PyChopGui.PyChopGui()
-    window.show()
-    if not within_mantid:
-        sys.exit(app.exec_())
+app, within_mantid = get_qapplication()
+window = PyChopGui.PyChopGui()
+window.show()
+if not within_mantid:
+    sys.exit(app.exec_())
