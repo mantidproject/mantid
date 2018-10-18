@@ -993,9 +993,9 @@ public:
         Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized()));
     Eigen::Quaterniond rot2(
         Eigen::AngleAxisd(31.0, Eigen::Vector3d{1, 2, 3}.normalized()));
-    auto rootIndexA = a.root();
-    a.setRotation(rootIndexA, rot1);
-    a.setPosition(rootIndexA, Eigen::Vector3d{1, 1, 1});
+    auto rootIndex = a.root();
+    a.setRotation(rootIndex, rot1);
+    a.setPosition(rootIndex, Eigen::Vector3d{1, 1, 1});
     // a.setPosition(0, Eigen::Vector3d{1, 1, 1});
     auto infos2 = cloneInfos(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
@@ -1004,9 +1004,9 @@ public:
 
     auto infos3 = cloneInfos(infos1);
     ComponentInfo &c = *std::get<0>(infos3);
-    auto rootIndexC = c.root();
-    c.setRotation(rootIndexC, rot2);
-    c.setPosition(rootIndexC, Eigen::Vector3d{1, 1, 1});
+    // auto rootIndexC = c.root();
+    c.setRotation(rootIndex, rot2);
+    c.setPosition(rootIndex, Eigen::Vector3d{1, 1, 1});
     // c.setPosition(0, Eigen::Vector3d{1, 1, 1});
     TS_ASSERT_THROWS_EQUALS(c.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
