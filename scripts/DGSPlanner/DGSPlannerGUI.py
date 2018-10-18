@@ -10,7 +10,7 @@ from . import InstrumentSetupWidget
 from . import ClassicUBInputWidget
 from . import MatrixUBInputWidget
 from . import DimensionSelectorWidget
-from qtpy import QtCore, QtGui,QtWidgets
+from qtpy import QtCore, QtWidgets
 import sys
 import mantid
 from .ValidateOL import ValidateOL
@@ -148,10 +148,10 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.masterDict.update(copy.deepcopy(d))
 
     def help(self):
-        show_interface_help(self.mantidplot_name, 
+        show_interface_help(self.mantidplot_name,
                             self.assistant_process,
-                            self.collection_file, 
-                            self.qt_url, 
+                            self.collection_file,
+                            self.qt_url,
                             self.external_url)
 
     def closeEvent(self, event):

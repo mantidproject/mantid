@@ -11,7 +11,6 @@ from qtpy.QtGui import QDoubleValidator
 from qtpy import QtCore
 import os
 from mantid.kernel import Logger
-import mantid
 from gui_helper import show_interface_help
 import math
 import TofConverter.convertUnits

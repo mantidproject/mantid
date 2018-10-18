@@ -214,11 +214,11 @@ class QECoverageGUI(QtWidgets.QWidget):
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","QECoverage",False)
 
-    def onHelp(self):        
-        show_interface_help(self.mantidplot_name, 
+    def onHelp(self):
+        show_interface_help(self.mantidplot_name,
                             self.assistant_process,
-                            self.collection_file, 
-                            self.qt_url, 
+                            self.collection_file,
+                            self.qt_url,
                             self.external_url)
 
     def closeEvent(self, event):

@@ -8,7 +8,8 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import (QApplication)  # noqa
 from qtpy import QtCore, QtGui
 import matplotlib
-import sys, os
+import sys
+import os
 
 
 def set_matplotlib_backend():
@@ -48,6 +49,7 @@ def get_qapplication():
         return app, app.applicationName().lower().startswith('mantid')
     else:
         return QApplication(sys.argv), False
+
 
 def show_interface_help(mantidplot_name, assistant_process, collection_file, qt_url, external_url):
     ''' Shows the help page for a custom interface
