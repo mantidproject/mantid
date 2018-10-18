@@ -993,10 +993,8 @@ public:
         Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized()));
     Eigen::Quaterniond rot2(
         Eigen::AngleAxisd(31.0, Eigen::Vector3d{1, 2, 3}.normalized()));
-    auto rootIndex = a.root();
-    a.setRotation(rootIndex, rot1);
-    a.setPosition(rootIndex, Eigen::Vector3d{1, 1, 1});
-    // a.setPosition(0, Eigen::Vector3d{1, 1, 1});
+    a.setRotation(a.root(), rot1);
+    a.setPosition(a.root(), Eigen::Vector3d{1, 1, 1});
     auto infos2 = cloneInfos(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     // Sanity check
@@ -1004,10 +1002,8 @@ public:
 
     auto infos3 = cloneInfos(infos1);
     ComponentInfo &c = *std::get<0>(infos3);
-    // auto rootIndexC = c.root();
-    c.setRotation(rootIndex, rot2);
-    c.setPosition(rootIndex, Eigen::Vector3d{1, 1, 1});
-    // c.setPosition(0, Eigen::Vector3d{1, 1, 1});
+    c.setRotation(c.root(), rot2);
+    c.setPosition(c.root(), Eigen::Vector3d{1, 1, 1});
     TS_ASSERT_THROWS_EQUALS(c.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: "
