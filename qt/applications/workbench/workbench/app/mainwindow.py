@@ -251,20 +251,24 @@ class MainWindow(QMainWindow):
         add_actions(self.view_menu, self.view_menu_actions)
 
     def launchCustomGUI(self, script):
-        exec(open(script).read(), globals())
+        exec(open(script).read(), globals(), {'__name__':'__main__'})
 
     def populateAfterMantidImport(self):
         from mantid.kernel import ConfigService, logger
-        # TODO ConfigService should accept unicode strings
+        # TODO ConfigService should accept unicode strings https://github.com/mantidproject/mantid/pull/23826
         interface_dir = ConfigService[str('mantidqt.python_interfaces_directory')]
         items = ConfigService[str('mantidqt.python_interfaces')].split()
 
-        # list of custom interfaces that have been made qt4/qt5 compatible
-        # TODO need to make *anything* compatible
-        GUI_WHITELIST = ['DGSPlanner.py',
-                         'FilterEvents.py',
-                         'QECoverage.py',
-                         'TofConverter.py']
+        # list of custom interfaces that are not qt4/qt5 compatible
+        GUI_BLACKLIST = ['DGS_Reduction.py',
+                         'MSlice.py',
+                         'ORNL_SANS.py',
+                         'ISIS_Reflectometry_Old.py',
+                         'Powder_Diffraction_Reduction.py',
+                         'HFIR_4Circle_Reduction.py',
+                         'ISIS_SANS_v2_experimental.py',
+                         'Frequency_Domain_Analysis.py',
+                         'Elemental_Analysis.py']
 
         # detect the python interfaces
         interfaces = {}
@@ -273,7 +277,7 @@ class MainWindow(QMainWindow):
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
                 logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
                 continue
-            if scriptname not in GUI_WHITELIST:
+            if scriptname in GUI_BLACKLIST:
                 logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             temp = interfaces.get(key, [])
