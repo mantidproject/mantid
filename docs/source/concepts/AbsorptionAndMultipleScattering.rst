@@ -7,11 +7,11 @@ Absorption and Multiple Scattering Corrections
 
 
 Introduction
-~~~~~~~~~~~~~
+-------------
 To discuss sample corrections, specifically the absorption and multiple scattering, we must first define terms pertinent to the calculations of these corrections.
 
 Total cross section (:math:`\sigma_t`)
----------------------------------------
+#######################################
 First, we define the total cross section per atom, which for the majority of elements, is equal to the sum of the element's scattering and absorption cross sections:
 
 .. math::
@@ -23,7 +23,7 @@ where :math:`\lambda` is the neutron wavelength, :math:`\sigma_s = \int_{\Omega}
 :math:`\frac{d\sigma}{d\Omega} \left( \lambda, 2\theta \right)` is the differential cross-section which is the cross-section (:math:`\sigma`) per solid angle (:math:`d\Omega`).
 
 Scattering cross section (:math:`\sigma_s` )
----------------------------------------------
+#############################################
 Typically, the scattering cross section is directly found from tabulated single atom values [1]_ and with good approximation, assumed independent of wavelength. 
 If we observe the equation above for :math:`\sigma_s`, we have that it is equal to the integration of the differential cross section. Yet, for the typical diffraction experiment, 
 the differential cross-section is exactly the quantity we wish to measure. Thus, to proceed one could chose from the following:
@@ -36,7 +36,7 @@ For the energies used to measure structure of materials, :math:`\sigma_s` is to
 reasonable approximation independent of :math:`\lambda`. However, exceptions include nuclear resonances, strong Bragg scattering as in beryllium, and significant inelastic effects. [2]_
  
 Absorption cross section (:math:`\sigma_a`)
--------------------------------------------
+###########################################
 For the absorption cross section, again typically the cross section is used from the same tabulated single atom values [1]_ but is only valid for the reference wavelength, 1.7982 :math:`\AA`,
 at which it was measured at. Thus, we can look up the value of :math:`\sigma_a (1.7982 \AA)`. Yet, the absorption cross section is a linear function of wavelength (away from nuclear resonances). 
 Thus, we can calculate the absorption cross section at other wavelengths from:
@@ -50,7 +50,7 @@ Thus, we can calculate the absorption cross section at other wavelengths from:
 calculate :math:`\sigma_a (\lambda)` from this reference wavelength.
 
 Attenuation Length (:math:`\mu`)
----------------------------------
+#################################
 The attenuation length is defined as: 
 
 .. math::
@@ -70,7 +70,7 @@ perfectly and thus there would be a given packing fraction, :math:`f`. Then, if 
 The definition of :math:`\rho` is used throughout the rest of this documentation.
 
 Techniques for Calculating Corrections
---------------------------------------
+######################################
 
 Methods for calculating the absorption corrections (and also the multiple scattering)  generally fall into two categories:
 
@@ -93,16 +93,16 @@ However, in many cases analytical solutions are satisfactory and allow much more
 .. _Absorption Corrections:
 
 Absorption
-~~~~~~~~~~~~
+------------
 
 Introduction
----------------
+###############
 Determination of the structure and/or dynamics of samples depends on the analysis of single scattering data. 
 Overall, the absorption correction is a factor, :math:`A`, such that 0 < :math:`A` < 1 . It is a factor that accounts for the loss of intensity from single scattering in the sample (or other component in the instrument).
 due to both scattering and capture events in the sample. The factor :math:`A` is divided by the measured intensity. Thus, the absorption correction has an overall multiplicative enhancement of the measured intensity.
 
 Basic Sample Absorption Theory
--------------------------------
+###############################
 The figure shows how a general single scattering process might occur. The neutron travels 
 a certain distance :math:`l_1` through the sample before a single scattering event occurs in
 the volume element :math:`dV` of the sample. Then, the neutron travels a final length :math:`l_2` before leaving the sample and being picked up by 
@@ -151,7 +151,7 @@ For elastic scattering, :math:`\lambda_1` = :math:`\lambda_2` = :math:`\lambda` 
     A_{elastic} = \frac{1}{V} \int_{V} exp \left[ -\mu (\lambda) \left( l_1 + l_2 \right) \right] dV
 
 Partial Absorption Correction Factors: Paalman and Pings Formalism
--------------------------------------------------------------------
+###################################################################
 
 When the scattering of a sample (liquid, powder, gas, etc.) is measured, the sample is often held in a thick sample container. This container contributes significantly to the measured neutron beam. Often the empty container is measured and the signal from the container (:math:`C`) subtracted from the signal of sample plus container (:math:`S+C`). 
 
@@ -191,10 +191,10 @@ The full PPF for the sample and container measurement (neglecting multiple scatt
 As discussed above, the final term in this expression is generally neglected.
 
 General Notes
---------------
+##############
 
 Analytical Methods
-******************
+^^^^^^^^^^^^^^^^^^
 
 The analytically approach has been further extended in a number of ways:
 
@@ -211,7 +211,7 @@ where :math:`V = \int_V P(dV) D(dV) dV` is the effective volume of the cylinder 
 
 
 Absorption Correction Algorithms in Mantid
--------------------------------------------
+###########################################
 
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
 | Algorithm                                                                           | Energy Mode | Technique  | Geometry                        | Input Units        | Functions           | Notes                                                                                 |
@@ -221,9 +221,9 @@ Absorption Correction Algorithms in Mantid
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
 | :ref:`AnnularRingAbsorption <algm-AnnularRingAbsorption>`                           | E,D,I       | MC         | Annular / Hollow Cylinder       | Wavelength         | A,PI                |                                                                                       |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
-| :ref:`AnvredCorrection <algm-AnvredCorrection>`                                     | E           | NI         | Sphere                          | Wavelength or TOF  | A,FI,W              ||  Absorption for spheres with additional corrections in ANVRED program from ISAW:      |
+| :ref:`AnvredCorrection <algm-AnvredCorrection>`                                     | E           | NI         | Sphere                          | Wavelength or TOF  | A,FI,W              ||  Absorption for spheres with additional corrections in ANVRED program from ISAW:     |
 |                                                                                     |             |            |                                 |                    |                     ||  - weight factors for pixels of instrument                                           |
-|                                                                                     |             |            |                                 |                    |                     ||  - correct for the slant path through the scintillator glass and scale factors      |
+|                                                                                     |             |            |                                 |                    |                     ||  - correct for the slant path through the scintillator glass and scale factors       |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
 | :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`               | E,D,I       | NI         | Cylinder or Flat Plate / Slab   | Wavelength         | W                   || Simply applies the correction workspaces from other Paalman-Pings-style algorithms   |
 |                                                                                     |             |            |                                 |                    |                     || Can also apply shift and scale factors to container workspaces                       |
@@ -307,10 +307,10 @@ Absorption Correction Algorithms in Mantid
 .. _Multiple Scattering Corrections:
 
 Multiple Scattering
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Introduction
-------------
+############
 
 Determination of the structure and/or dynamics of samples depends on the analysis of single scattering data. 
 Small but unwanted higher-order scattering is always present although in many typical 
@@ -344,7 +344,7 @@ Increasing the absorption cross section is not always attainable - due to the ty
 the accompanying intensity losses becoming overly prohibitive. 
 
 Theory
-------------
+############
 The figure shows how a general double scattering process might occur. The neutron travels 
 a certain distance :math:`l_1` through the sample before the first scattering event in the volume
 element :math:`dV_1`. The second scattering occurs in another volume element :math:`dV_2` after a distance 
@@ -423,10 +423,10 @@ Thus, some of the difficulties in correcting multiple scattering arises from:
 5. This kind of calculation is difficult for all but the simplest of geometries (i.e. cylindrical, planar and spherical) although Monte Carlo integration methods may be utilized for the multiple scattering calculations of more general shapes.
 
 Assumptions
-------------
+############
 
 Elastic Scattering
-******************
+^^^^^^^^^^^^^^^^^^
 To address (2) above, we can assume elastic scattering and then Eq. :eq:`Im` becomes:
 
 .. math::
@@ -435,7 +435,7 @@ To address (2) above, we can assume elastic scattering and then Eq. :eq:`Im` bec
     I_{m,elastic} &= \sum_{i=2}^{n} J_0 \rho^i \prod_{j=1}^{i} \frac{d\sigma}{d\Omega} \left( \theta_j \right) \int_V ... \int_V \frac{exp \left[ -\mu (\lambda) \left( l_1 + \sum_{j=1}^{i-1} l_{j,j+1} + l_i \right) \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
 
 Isotropic Scattering
-*********************
+^^^^^^^^^^^^^^^^^^^^^
 To address (3) above, we can assume isotropic scattering and then Eq. :eq:`Im` becomes:
 
 .. math::
@@ -444,7 +444,7 @@ To address (3) above, we can assume isotropic scattering and then Eq. :eq:`Im` b
     I_{m,isotropic} &= \sum_{i=2}^{n} J_0 \rho^i \left( \frac{\sigma}{4\pi} \right)^i \int_V ... \int_V \frac{exp \left[ -\mu (\lambda_1) l_1 + - \sum_{j=1}^{i-1} \mu (\lambda_{j,j+1}) l_{j,j+1} + - \mu (\lambda_i) l_i \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
 
 Elastic + Isotropic Scattering
-******************************
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Combining both the elastic and isotropic assumptions, we have:
 
 .. math::
@@ -453,7 +453,7 @@ Combining both the elastic and isotropic assumptions, we have:
     I_{m,elastic+isotropic} &= \sum_{i=2}^{n} J_0 \rho^i \left( \frac{\sigma}{4\pi} \right)^i \int_V ... \int_V \frac{exp \left[ -\mu (\lambda) \left( l_1 + \sum_{j=1}^{i-1} l_{j,j+1} + l_i \right) \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
 
 Constant Ratio for  :math:`\frac{I_n}{I_{n-1}} = \Delta`
-********************************************************
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 To address (4), a typical assumption in the analytical method [6]_ [9]_ approaches is to assume that the ratio :math:`\frac{I_n}{I_{n-1}}` is a constant, :math:`\Delta`, thus:
 
 .. math::
@@ -510,7 +510,7 @@ From Eq. :eq:`Im_geometric`, we are left with calculating :math:`\Delta`:
 Using the isotropic approximation, we arrive at:
 
 .. math::
-    :label: delta_equation
+    :label: delta_equation_elastic
 
     \Delta_{elastic} &= \frac{ \rho \left( \frac{\sigma_s}{4 \pi} \right)^2 \int_{V} \int_{V} \frac{exp \left[ -\mu (\lambda_1) l_1 + - \mu (\lambda_{12}) l_{12} + - \mu (\lambda_2) l_2 \right]}{l_{12}^2} dV dV }
                              { \frac{\sigma_s}{4 \pi}  \int_{V} exp \left[ -\mu (\lambda_1) l_1 + -\mu (\lambda_2) l_2 \right] dV  } \\
@@ -537,7 +537,7 @@ Solving this for :math:`I_1`, we see that:
     I_1 &= I_{total} \left( 1 - \Delta \right) \\
         &= I_{total}  - I_{total} \Delta
 
-Thus, comparing Eq. :eq:`ms_derivation_part2` and Eq. :eq:`delta_equation` with Eq. :eq:`Itotal`, we see that:
+Thus, comparing Eq. :eq:`ms_derivation_part2` and Eq. :eq:`delta_equation_elastic` with Eq. :eq:`Itotal`, we see that:
 
 .. math::
     :label: Im_equation
@@ -546,10 +546,10 @@ Thus, comparing Eq. :eq:`ms_derivation_part2` and Eq. :eq:`delta_equation` with 
         &= I_{total} \frac{ \rho V \sigma_s A_2 }{ 4 \pi A_1  } 
 
 General Notes
---------------
+##############
 
 Analytical Methods
-*********************
+^^^^^^^^^^^^^^^^^^^^^
 
 The analytical approach has been further extended in a number of ways:
 
@@ -558,7 +558,7 @@ The analytical approach has been further extended in a number of ways:
 3. The constant ratio assumption can be tested by computing the higher orders of scattering terms with comparison to Monte Carlo (for flat plate and cylinder comparisons to Monte Carlo, see [12]_).
 
 Monte Carlo Methods
-********************
+^^^^^^^^^^^^^^^^^^^^
 
 Monte Carlo approaches are a "brute force" technique that does require more computational time than the analytical approaches yet does not suffer many of the drawbacks 
 to the analytical approach. Such drawbacks included assumptions of isotropic scattering required to formulate the solvable equations, not being able to include
@@ -571,7 +571,7 @@ is easily obtained from the result.
 
 
 Small Angle Scattering
-**********************
+^^^^^^^^^^^^^^^^^^^^^^
 In some areas, such as small angle scattering, there may be useful approximations that can be 
 applied that are not present for the more general wide angle scattering case. 
 Again matters may become complicated, as for example small angle scatter followed by incoherent 
@@ -581,7 +581,7 @@ For early considerations of multiple small angle scattering see for example [13]
 
 
 Multiple Scattering Correction Algorithms in Mantid
-----------------------------------------------------
+####################################################
 
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
 | Algorithm                                                                           | Energy Mode | Technique  | Geometry                        | Input Units          | Functions           | Notes                                                                                 |
@@ -610,7 +610,7 @@ Multiple Scattering Correction Algorithms in Mantid
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
 | :ref:`VesuvioCalculateMS <algm-VesuvioCalculateMS>`                                 | I           | MC         | Flat Plate / Slab               | TOF                  | FI                  ||  Monte Carlo ray tracing algorithm for deep inelastic neutron scattering.            |
 |                                                                                     |             |            |                                 |                      |                     ||  Calculates both total and multiple scattering output workspaces. Specific to        |
-|                                                                                     |             |            |                                 |                      |                     ||  `Vesuvio <https://www.isis.stfc.ac.uk/Pages/Vesuvio.aspx>`_ but possibly general.   |
+|                                                                                     |             |            |                                 |                      |                     ||  `Vesuvio <https://www.isis.stfc.ac.uk/Pages/Vesuvio.aspx>`__ but possibly general.  |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
 
 
@@ -634,24 +634,24 @@ Multiple Scattering Correction Algorithms in Mantid
 
 
 References
-~~~~~~~~~~~~
+------------
 
 .. [1] NIST Center for Neutron Research tabulated neutron scattering lengths and cross sections. - https://www.ncnr.nist.gov/resources/n-lengths/list.html
 .. [2] A.K. Soper (2012). GudrunN and GudrunX manual. - https://www.isis.stfc.ac.uk/OtherFiles/Disordered%20Materials/Gudrun-Manual-2017-10.pdf
-.. [3] Mantid source code for `NeutronAtom.cpp to define ReferenceLambda variable. <https://github.com/mantidproject/mantid/blob/master/Framework/Kernel/src/NeutronAtom.cpp#L23>`_
-.. [4] H. H. Paalman, and C. J. Pings. (1962) *Numerical Evaluation of X‐Ray Absorption Factors for Cylindrical Samples and Annular Sample Cells*, Journal of Applied Physics 33:8 2635–2639 `doi: 10.1063/1.1729034 <http://dx.doi.org/10.1063/1.1729034>`_
-.. [5] H. L. Ritter, R. L. Harris, & R. E. Wood (1951) *On the X-Ray Absorption Correction for Encased Diffracters in the Debye-Sherrer Technique*, Journal of Applied Physics 22:2 169-176 `doi: 10.1063/1.699919 <https://doi.org/10.1063/1.1699919>`_
+.. [3] Mantid source code for `NeutronAtom.cpp to define ReferenceLambda variable. <https://github.com/mantidproject/mantid/blob/master/Framework/Kernel/src/NeutronAtom.cpp#L23>`__
+.. [4] H. H. Paalman, and C. J. Pings. (1962) *Numerical Evaluation of X‐Ray Absorption Factors for Cylindrical Samples and Annular Sample Cells*, Journal of Applied Physics 33:8 2635–2639 `doi: 10.1063/1.1729034 <http://dx.doi.org/10.1063/1.1729034>`__
+.. [5] H. L. Ritter, R. L. Harris, & R. E. Wood (1951) *On the X-Ray Absorption Correction for Encased Diffracters in the Debye-Sherrer Technique*, Journal of Applied Physics 22:2 169-176 `doi: 10.1063/1.699919 <https://doi.org/10.1063/1.1699919>`__
 .. [6] E. J. Lindley & J. Mayers (Ed.). (1988). *Chapter 10: Experimental method and corrections to data*. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574 
 .. [7] V.F. Sears (1975): *Slow-neutron multiple scattering*, `Advances in Physics <http://dx.doi.org/10.1080/00018737500101361>`__, 24:1, 1-45
 .. [8] A.K.Soper, W.S.Howells and A.C.Hannon *ATLAS - Analysis of Time-of-Flight Diffraction Data from Liquid and Amorphous Samples* Rutherford Appleton Laboratory Report (1989): `RAL-89-046 <http://wwwisis2.isis.rl.ac.uk/disordered/Manuals/ATLAS/ATLAS%20manual%20v1.0.pdf>`__
-.. [9] I. A. Blech,& B. L. Averbach (Ed.). (1965). *Multiple Scattering of Neutrons in Vanadium and Copper*. Physical Review 137:4A A1113–A1116 `doi: 10.1103/PhysRev.137.A1113 <https://doi.org/10.1103/PhysRev.137.A1113>`_ 
-.. [10] A. K. Soper & P. A. Egelstaff (1980). *Multiple Scattering and Attenuation of Neutrons in Concentric Cylinders: I. Isotropic First Scattering*. Nuclear Instruments and Methods 178 415–425 `doi: 10.1016/0029-554X(80)90820-4 <https://doi.org/10.1016/0029-554X(80)90820-4>`_ 
+.. [9] I. A. Blech,& B. L. Averbach (Ed.). (1965). *Multiple Scattering of Neutrons in Vanadium and Copper*. Physical Review 137:4A A1113–A1116 `doi: 10.1103/PhysRev.137.A1113 <https://doi.org/10.1103/PhysRev.137.A1113>`__ 
+.. [10] A. K. Soper & P. A. Egelstaff (1980). *Multiple Scattering and Attenuation of Neutrons in Concentric Cylinders: I. Isotropic First Scattering*. Nuclear Instruments and Methods 178 415–425 `doi: 10.1016/0029-554X(80)90820-4 <https://doi.org/10.1016/0029-554X(80)90820-4>`__ 
 .. [11] S. J. Cocking & C. R. T. Heard (1965). *Multiple Scattering in Plane Samples: Application to Scattering of Thermal Neutrons*. Report AERE - R5016, Harwell, Berkshire.
-.. [12] J. Mayers & R. Cywinski (1985). *A Monte Carlo Evaluation of Analytical Multiple Scattering Corrections for Unpolarised Neutron Scatting and Polarization Analysis Data*. Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors, and Associated Equipment 241, 519-531 `doi: 10.1016/0168-9002(85)90607-2 <https://doi.org/10.1016/0168-9002(85)90607-2>_
+.. [12] J. Mayers & R. Cywinski (1985). *A Monte Carlo Evaluation of Analytical Multiple Scattering Corrections for Unpolarised Neutron Scatting and Polarization Analysis Data*. Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors, and Associated Equipment 241, 519-531 `doi: 10.1016/0168-9002(85)90607-2 <https://doi.org/10.1016/0168-9002(85)90607-2>`__ 
 .. [13] J.Schelten & W.Schmatz, J.Appl.Cryst. 13(1980)385-390
 .. [14] J.R.D.Copley J.Appl.Cryst 21(1988)639-644
-.. [15] McStas: A neutron ray-trace simulation package `website <http://mcstas.org/>`_
-.. [16] M. W. Johnson, (1974). *Discus: A computer program for calculation of multiple scattering effects in inelastic neutron scattering experiments*. Report AERE-R7682 UKAEA AERE Harwell, Oxfordshire. `Report <https://www.isis.stfc.ac.uk/Pages/discus-manual6827.pdf>`_
-.. [17] `FORTRAN source code for MUSCAT as 3rd party software in Mantid. <https://github.com/mantidproject/3rdpartysources/tree/master/Fortran/Indirect/AbsCorrection>`_
+.. [15] McStas: A neutron ray-trace simulation package `website <http://mcstas.org/>`__
+.. [16] M. W. Johnson, (1974). *Discus: A computer program for calculation of multiple scattering effects in inelastic neutron scattering experiments*. Report AERE-R7682 UKAEA AERE Harwell, Oxfordshire. `Report <https://www.isis.stfc.ac.uk/Pages/discus-manual6827.pdf>`__
+.. [17] `FORTRAN source code for MUSCAT as 3rd party software in Mantid. <https://github.com/mantidproject/3rdpartysources/tree/master/Fortran/Indirect/AbsCorrection>`__
 
 .. categories:: Concepts
