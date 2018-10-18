@@ -77,7 +77,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg2.execute(););
 
     // Get the file
-    if (numPeaksPerBank > 0){
+    if (numPeaksPerBank > 0) {
       outfile = alg2.getPropertyValue("Filename");
       TS_ASSERT(Poco::File(outfile).exists());
       std::ifstream in(outfile.c_str());
@@ -90,8 +90,8 @@ public:
         line = line0;
       }
       TS_ASSERT_EQUALS(line, "3     71   -3   -3   -3    3.00     4.00    "
-                               "27086  2061.553   0.24498   0.92730   3.500000   "
-                               "14.3227        3       3.10    1.73   310");
+                             "27086  2061.553   0.24498   0.92730   3.500000   "
+                             "14.3227        3       3.10    1.73   310");
     }
 
     if (Poco::File(outfile).exists())
