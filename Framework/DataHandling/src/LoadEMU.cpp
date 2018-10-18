@@ -34,14 +34,14 @@ using namespace Kernel;
 namespace {
 
 // number of physical detectors
-constexpr size_t DETECTORS = 51;
+constexpr size_t HORIZONTAL_TUBES = 16;
+constexpr size_t VERTICAL_TUBES = 35;
+constexpr size_t DETECTORS = HORIZONTAL_TUBES + VERTICAL_TUBES;
 // analysed and direct detectors
 constexpr size_t HISTO_BINS_X = DETECTORS * 2;
 constexpr size_t HISTO_BINS_Y = 1024;
 constexpr size_t HISTO_BINS_Y_DENUMERATOR = 16;
 constexpr size_t PIXELS_PER_TUBE = HISTO_BINS_Y / HISTO_BINS_Y_DENUMERATOR;
-constexpr size_t HORIZONTAL_TUBES = 16;
-constexpr size_t VERTICAL_TUBES = 35;
 constexpr size_t HISTOGRAMS =
     HISTO_BINS_X * HISTO_BINS_Y / HISTO_BINS_Y_DENUMERATOR;
 
