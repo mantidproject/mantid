@@ -16,10 +16,48 @@ It can be one of the 6: absorber, beam, transmission, container, reference and s
 The full data treatment of the complete experiment should be build up as a chain with multiple calls of this algorithm over various types of acquisitions.
 The sequence should be logical, typically as enumerated above, since the later processes need the outputs of earlier processes as input.
 The common mandatory input is a run file (numor), or a list of them, in which case they will be summed at raw level, so right after loading.
+The other common input is the normalisation type (time or monitor) that must be the same for all the runs in full reduction.
 The common mandatory output is a workspace, but up to which step it is processed, depends on **ProcessAs**.
 
 ProcessAs
 ---------
+Different input properties can be specified depending on the value of **ProcessAs**, as summarized in the table:
+
++--------------+-------------------------------+------------------------+
+| ProcessAs    | Input Workspace Properties    | Other Input Properties |
++==============+===============================+========================+
+| Absorber     |                               |                        |
++--------------+-------------------------------+------------------------+
+| Beam         | * AbsorberInputWorkspace      | * BeamRadius           |
+|              |                               | * BeamFinderMethod     |
++--------------+-------------------------------+------------------------+
+| Transmission | * AbsorberInputWorkspace      | * BeamRadius           |
+|              | * **BeamInputWorkspace**      |                        |
++--------------+-------------------------------+------------------------+
+| Container    | * AbsorberInputWorkspace      |                        |
+|              | * BeamInputWorkspace          |                        |
+|              | * TransmissionInputWorkspace  |                        |
++--------------+-------------------------------+------------------------+
+| Reference    | * AbsorberInputWorkspace      | * SampleThickness      |
+|              | * BeamInputWorkspace          |                        |
+|              | * TransmissionInputWorkspace  |                        |
+|              | * ContainerInputWorkspace     |                        |
+|              | * MaskedInputWorkspace        |                        |
++--------------+-------------------------------+------------------------+
+| Sample       | * AbsorberInputWorkspace      | * SampleThickness      |
+|              | * BeamInputWorkspace          |                        |
+|              | * TransmissionInputWorkspace  |                        |
+|              | * ContainerInputWorkspace     |                        |
+|              | * MaskedInputWorkspace        |                        |
+|              | * ReferenceInputWorkspace     |                        |
+|              | * SensitivityInputWorkspace   |                        |
++--------------+-------------------------------+------------------------+
+
+All the input workspace properties above are optional.
+For example, if processing as sample, if a container input is specified, subtraction will be performed, if not, the step will be skipped.
+The only exception is when processing as transmission, when beam input workspace is mandatory.
+When processing as reference there is an additional optional output workspace for sensitivity.
+
 In the flowcharts below the yellow ovals represent the inputs, the grey parallelograms are the outputs for each process type.
 
 Absorber
