@@ -51,7 +51,7 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   setProperties(alg);
-  m_uuid = boost::uuids::random_generator()();
+  m_uuid = uuidGen();
 }
 
 /// Destructor

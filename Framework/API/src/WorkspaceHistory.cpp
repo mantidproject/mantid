@@ -23,8 +23,8 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using Mantid::Kernel::EnvironmentHistory;
 using boost::algorithm::split;
+using Mantid::Kernel::EnvironmentHistory;
 
 namespace Mantid {
 namespace API {
@@ -390,7 +390,8 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   boost::split(info, rawData, boost::is_any_of("\n"));
 
   const size_t nlines = info.size();
-  if (nlines < 5) { // ignore badly formed history entries
+  if (nlines < 4) { // ignore badly formed history entries still at 4 so that
+                    // legacy files can be loaded, 5 is ideal for newer files
     throw std::runtime_error(
         "Malformed history record: Incorrect record size.");
   }
@@ -418,7 +419,6 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
     Poco::DateTime start_timedate;
     // This is needed by the Poco parsing function
     int tzdiff(-1);
-    Mantid::Types::Core::DateAndTime utc_start;
     if (!Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time,
                                         start_timedate, tzdiff)) {
       g_log.warning() << "Error parsing start time in algorithm history entry."

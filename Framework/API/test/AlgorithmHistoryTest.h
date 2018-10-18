@@ -195,7 +195,7 @@ private:
   AlgorithmHistory createTestHistory() {
     m_correctOutput = "Algorithm: testalg ";
     m_correctOutput += "v1\n";
-    m_correctOutput += "Execution Date: 2008-Feb-29 09:54:49\n";
+    m_correctOutput += "Execution Date: 2008-02-29 09:54:49\n";
     m_correctOutput += "Execution Duration: 14 seconds\n";
     // This line is newer than the rest and cannot be predicted
     // m_correctOutput += "UUID: 207ca8f8-fee0-49ce-86c8-7842a7313c2e\n";
