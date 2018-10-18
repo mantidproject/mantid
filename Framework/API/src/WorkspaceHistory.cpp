@@ -23,8 +23,8 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using Mantid::Kernel::EnvironmentHistory;
 using boost::algorithm::split;
+using Mantid::Kernel::EnvironmentHistory;
 
 namespace Mantid {
 namespace API {
@@ -79,8 +79,7 @@ WorkspaceHistory::getEnvironmentHistory() const {
 }
 
 /// Append the algorithm history from another WorkspaceHistory into this one
-void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory,
-                                  bool alwaysInsert) {
+void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory) {
   // Don't copy one's own history onto oneself
   if (this == &otherHistory) {
     return;
@@ -91,7 +90,7 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory,
       otherHistory.getAlgorithmHistories();
 
   for (const auto &algHistory : otherAlgorithms) {
-    this->addHistory(algHistory, alwaysInsert);
+    this->addHistory(algHistory);
   }
 
   std::unordered_set<AlgorithmHistory_sptr, AlgorithmHistoryHasher,
@@ -104,15 +103,7 @@ void WorkspaceHistory::addHistory(const WorkspaceHistory &otherHistory,
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
-void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory,
-                                  bool alwaysInsert) {
-  // Add default boolean to false for file operations from ProcessFileNexus to
-  // increase the execution date by the exec count, because we need to assume
-  // that the file has them in the correct order and thus none are duplicates.
-  if (alwaysInsert) {
-    algHistory->increaseExecutionDate(algHistory->execCount());
-  }
-
+void WorkspaceHistory::addHistory(AlgorithmHistory_sptr algHistory) {
   // Assume it is always sorted as algorithm history should only be inserted in
   // the correct order
   m_algorithms.emplace_back(std::move(algHistory));
@@ -334,7 +325,7 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File *file,
       } else {
         // if not parent point is supplied, assume we're at the top
         // and attach the history to the workspace
-        this->addHistory(history, true);
+        this->addHistory(history);
       }
     } catch (std::runtime_error &e) {
       // just log the exception as a warning and continue parsing history

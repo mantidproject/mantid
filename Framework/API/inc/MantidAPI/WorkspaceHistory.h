@@ -48,10 +48,9 @@ public:
   /// Retrieve the environment history
   const Kernel::EnvironmentHistory &getEnvironmentHistory() const;
   /// Append an workspace history to this one
-  void addHistory(const WorkspaceHistory &otherHistory,
-                  bool alwaysInsert = false);
+  void addHistory(const WorkspaceHistory &otherHistory);
   /// Append an algorithm history to this one
-  void addHistory(AlgorithmHistory_sptr algHistory, bool alwaysInsert = false);
+  void addHistory(AlgorithmHistory_sptr algHistory);
   /// How many entries are there
   size_t size() const;
   /// Is the history empty
