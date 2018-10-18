@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SNSDATAARCHIVE_H_
-#define MANTID_DATAHANDLING_SNSDATAARCHIVE_H_
+#ifndef MANTID_DATAHANDLING_ORNLDATAARCHIVE_H_
+#define MANTID_DATAHANDLING_ORNLDATAARCHIVE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -24,7 +24,7 @@ namespace DataHandling {
  * Please see the .cpp file for more information.
  */
 
-class DLLExport SNSDataArchive : public API::IArchiveSearch {
+class DLLExport ORNLDataArchive : public API::IArchiveSearch {
 public:
   std::string
   getArchivePath(const std::set<std::string> &basenames,
@@ -42,4 +42,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_DATAHANDLING_SNSDATAARCHIVE_H_ */
+#endif /* MANTID_DATAHANDLING_ORNLDATAARCHIVE_H_ */

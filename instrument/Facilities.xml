@@ -376,7 +376,11 @@
 </facility>
 
 
-<facility name="HFIR" FileExtensions=".nxs,.dat,.xml">
+<facility name="HFIR" FileExtensions=".nxs,.nxs.h5,.dat,.xml">
+
+   <archive>
+      <archiveSearch plugin="ORNLDataSearch" />
+   </archive>
 
    <timezone>US/Eastern</timezone>
 
@@ -439,7 +443,7 @@
 <facility name="SNS" delimiter="_" FileExtensions=".nxs.h5,_event.nxs,.nxs,.dat,_runinfo.xml,_histo.nxs">
 
    <archive>
-      <archiveSearch plugin="SNSDataSearch" />
+      <archiveSearch plugin="ORNLDataSearch" />
    </archive>
 
    <computeResource name="Fermi">

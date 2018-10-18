@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SNSDATAARCHIVETEST_H_
-#define SNSDATAARCHIVETEST_H_
+#ifndef ORNLDATAARCHIVETEST_H_
+#define ORNLDATAARCHIVETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/ArchiveSearchFactory.h"
-#include "MantidDataHandling/SNSDataArchive.h"
+#include "MantidDataHandling/ORNLDataArchive.h"
 #include "MantidCatalog/Exception.h"
 #include "MantidCatalog/ONCat.h"
 #include "MantidKernel/Exception.h"
@@ -34,25 +34,27 @@ using Mantid::Kernel::Exception::InternetError;
 using Mantid::TestHelpers::make_mock_oncat_api;
 using Mantid::TestHelpers::make_oncat_with_mock_api;
 
-class SNSDataArchiveTest : public CxxTest::TestSuite {
+class ORNLDataArchiveTest : public CxxTest::TestSuite {
 public:
   void testSearch() {
-    SNSDataArchive arch;
+    ORNLDataArchive arch;
 
-    const auto generatePowgenRunUrl = [](const std::string &runNumber)  {
+    const auto generateRunUrl = [](const std::string &facility,
+                                   const std::string &instrument,
+                                   const std::string &runNumber)  {
       return std::string(
           "https://oncat.ornl.gov/api/datafiles"
-          "?facility=SNS"
-          "&instrument=PG3"
+          "?facility=") + facility +
+          "&instrument=" + instrument +
           "&projection=location"
           "&tags=type/raw"
           "&sort_by=ingested"
           "&sort_direction=DESCENDING"
-          "&ranges_q=indexed.run_number:") + runNumber;
+          "&ranges_q=indexed.run_number:" + runNumber;
     };
 
     auto mockAPI = make_mock_oncat_api(
-        {{generatePowgenRunUrl("7390"),
+        {{generateRunUrl("SNS", "PG3", "7390"),
           std::make_pair(
               HTTPResponse::HTTP_OK,
               "["
@@ -66,13 +68,27 @@ public:
               "    \"type\": \"datafile\""
               "  }"
               "]")},
-         {generatePowgenRunUrl("9999999"),
+         {generateRunUrl("HFIR", "HB2C", "26506"),
+          std::make_pair(
+              HTTPResponse::HTTP_OK,
+              "["
+              "  {"
+              "    \"location\": "
+              "    \"/HFIR/HB2C/IPTS-7776/nexus/HB2C_26506.nxs.h5\","
+              "    \"id\": \"5ba1c86a4e7bcae781440283\","
+              "    \"indexed\": {"
+              "      \"run_number\": 26506"
+              "    },"
+              "    \"type\": \"datafile\""
+              "  }"
+              "]")},
+         {generateRunUrl("SNS", "PG3", "9999999"),
           std::make_pair(HTTPResponse::HTTP_OK, "[]")},
-         {generatePowgenRunUrl("500"),
+         {generateRunUrl("SNS", "PG3", "500"),
           std::make_pair(
               HTTPResponse::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR,
               "{\"message\" : \"Stack trace or similar...\"}")},
-         {generatePowgenRunUrl("200"),
+         {generateRunUrl("SNS", "PG3", "200"),
           std::make_pair(
               HTTPResponse::HTTPResponse::HTTP_OK,
               "["
@@ -91,11 +107,18 @@ public:
     TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390_event.nxs"}, {}),
                      "/SNS/PG3/IPTS-2767/0/7390/NeXus/PG3_7390_event.nxs");
 
+    // Make sure we support HFIR, too!
+    TS_ASSERT_EQUALS(arch.getArchivePath({"HB2C_26506"}, {".nxs.h5"}),
+                     "/HFIR/HB2C/IPTS-7776/nexus/HB2C_26506.nxs.h5");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"HB2C_26506.nxs.h5"}, {}),
+                     "/HFIR/HB2C/IPTS-7776/nexus/HB2C_26506.nxs.h5");
+
     // Return nothing when the run has not been cataloged in ONCat.
     TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_9999999"}, {"_event.nxs"}), "");
 
     // Mimic old behaviour by returning nothing when asking for a run known to
     // ONCat but without providing the "suffix" of the basename.
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390"}, {}), "");
     TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390"}, {""}), "");
 
     // Ask stupid questions, get stupid answers.
@@ -111,14 +134,19 @@ public:
     // bit of JSON has been returned.
     TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_200"}, {"_event.nxs"}), "");
 
+    // Instruments not known to Mantid, or not compatible with the archive
+    // class should not return anything, either.
+    TS_ASSERT_EQUALS(arch.getArchivePath({"DOESNOTEXIST_200"}, {""}), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"MERLIN_200"}, {""}), "");
+
     TS_ASSERT(mockAPI->allResponsesCalled());
   }
 
   void testFactory() {
     boost::shared_ptr<IArchiveSearch> arch =
-        ArchiveSearchFactory::Instance().create("SNSDataSearch");
+        ArchiveSearchFactory::Instance().create("ORNLDataSearch");
     TS_ASSERT(arch);
   }
 };
 
-#endif // SNSDATAARCHIVETEST_H_
+#endif // ORNLDATAARCHIVETEST_H_

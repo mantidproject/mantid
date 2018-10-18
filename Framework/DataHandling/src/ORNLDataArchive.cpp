@@ -10,8 +10,10 @@
 #include <sstream>
 
 #include "MantidAPI/ArchiveSearchFactory.h"
-#include "MantidDataHandling/SNSDataArchive.h"
+#include "MantidDataHandling/ORNLDataArchive.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Logger.h"
 
@@ -39,20 +41,20 @@ std::string toUpperCase(const std::string & s) {
 const static boost::regex FILE_REGEX("^(.*?)_(\\d+).*$");
 const static std::string NOT_FOUND("");
 
-Mantid::Kernel::Logger g_log("SNSDataArchive");
+Mantid::Kernel::Logger g_log("ORNLDataArchive");
 }
 
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_ARCHIVESEARCH(SNSDataArchive, SNSDataSearch)
+DECLARE_ARCHIVESEARCH(ORNLDataArchive, ORNLDataSearch)
 
 /**
  * ****************
  * PLEASE READ THIS
  * ****************
  *
- * This archive searcher now retrieves SNS run locations from ONCat.
+ * This archive searcher now retrieves SNS / HFIR run locations from ONCat.
  *
  * Something to bear in mind here, however, is that the signature of
  * IArchiveSearch's getArchivePath is quite counter-intuitive, and so probably
@@ -73,7 +75,7 @@ DECLARE_ARCHIVESEARCH(SNSDataArchive, SNSDataSearch)
  *    want to search for a range of runs then you will either have to extend
  *    the interface, or make multiple calls to the existing one.)
  *
- * 3) The SNSDataArchive implementation has never (and will never) require all
+ * 3) The implementation for SNS / ORNL has never (and will never) require all
  *    the basenames passed to it -- it just discards all but the first and then
  *    uses that.
  *
@@ -95,7 +97,7 @@ DECLARE_ARCHIVESEARCH(SNSDataArchive, SNSDataSearch)
  *     empty string.
  */
 std::string
-SNSDataArchive::getArchivePath(const std::set<std::string> &basenames,
+ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
                                const std::vector<std::string> &suffixes) const {
   if (basenames.size() == 0) {
     return NOT_FOUND;
@@ -116,11 +118,25 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &basenames,
   const std::string instrument = toUpperCase(result[1]);
   const std::string run = result[2];
 
+  const auto &configService = Mantid::Kernel::ConfigService::Instance();
+  std::string facility;
+  try {
+    facility = configService.getInstrument(instrument).facility().name();
+
+    if (facility != "HFIR" && facility != "SNS") {
+      return NOT_FOUND;
+    }
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+    g_log.debug() << "\"" << instrument
+                  << "\" is not an instrument known to Mantid." << std::endl;
+    return NOT_FOUND;
+  }
+
   // Note that we will only be asking for raw files with the given instrument
   // and run number, and *not* filtering by suffix at this point.  (ONCat has
   // a strict definition of what a file "extension" is, and has no way of
   // filtering by, for example, "_event.nxs".)
-  const QueryParameters params {QueryParameter("facility", "SNS"),
+  const QueryParameters params {QueryParameter("facility", facility),
                                 QueryParameter("instrument", instrument),
                                 QueryParameter("projection", "location"),
                                 QueryParameter("tags", "type/raw"),
@@ -184,7 +200,7 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &basenames,
   return NOT_FOUND;
 }
 
-void SNSDataArchive::setONCat(ONCat_uptr oncat) {
+void ORNLDataArchive::setONCat(ONCat_uptr oncat) {
   m_oncat = std::move(oncat);
 }
 
