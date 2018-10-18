@@ -270,7 +270,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                   forceCutoff=forceCutoff, edgeCutoff=edgeCutoff,
                                                                   peakMaskSize=peakMaskSize,
                                                                   iccFitDict=iccFitDict, sigX0Params=sigX0Params,
-                                                                  sigY0=sigY0, sigP0Params=sigP0Params)
+                                                                  sigY0=sigY0, sigP0Params=sigP0Params, fitPenalty=1.e7)
                 # First we get the peak intensity
                 peakIDX = Y3D/Y3D.max() > fracStop
                 intensity = np.sum(Y3D[peakIDX])

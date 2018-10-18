@@ -836,7 +836,7 @@ def getBoxFracHKL(peak, peaks_ws, MDdata, UBMatrix, peakNumber, dQ, dQPixel=0.00
 
 
 def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None, outputWSName='fit', fitOrder=1,
-             iccFitDict=None):
+             iccFitDict=None, fitPenalty=None):
     """
     doICCFit - Carries out the actual least squares fit for the TOF workspace.
     Intput:
@@ -889,9 +889,7 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
         KConv0 = [100, 140]
         # Now we see what instrument specific parameters we have
         if iccFitDict is not None:
-            #TODO This is only a temporary fix to not fix iccB - need to update parameters files
             possibleKeys = ['iccA', 'iccB', 'iccR', 'iccT0', 'iccScale0', 'iccHatWidth', 'iccKConv']
-            #possibleKeys = ['iccA', 'iccR', 'iccT0', 'iccScale0', 'iccHatWidth', 'iccKConv']
             for keyIDX, (key, bounds) in enumerate(zip(possibleKeys, [A0, B0, R0, T00, Scale0, HatWidth0, KConv0])):
                 if key in iccFitDict:
                     bounds[0] = iccFitDict[key][0]
@@ -899,17 +897,10 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
                     if len(iccFitDict[key] == 3):
                         x0[keyIDX] = iccFitDict[key][2]
                         fICC.setParameter(keyIDX, x0[keyIDX])
-        try:
-            fICC.setPenalizedConstraints(A0=A0, B0=B0, R0=R0, T00=T00, KConv0=KConv0, penalty=1.0e10)
-        except:
-            fICC.setPenalizedConstraints(A0=A0, B0=B0, R0=R0, T00=T00, KConv0=KConv0, penalty=None)
+        fICC.setPenalizedConstraints(A0=A0, B0=B0, R0=R0, T00=T00, KConv0=KConv0, penalty=fitPenalty)
     if constraintScheme == 2:
-        try:
-            fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], Scale0=[
-                                         0.0, 1.0e10], T00=[0, 1.0e10], KConv0=[100., 140.], penalty=1.0e20)
-        except:
-            fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], Scale0=[
-                                         0.0, 1.0e10], T00=[0, 1.0e10], KConv0=[100, 140.], penalty=None)
+        fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], Scale0=[
+                                         0.0, 1.0e10], T00=[0, 1.0e10], KConv0=[100., 140.], penalty=fitPenalty)
     f = FunctionWrapper(fICC)
     bg = Polynomial(n=fitOrder)
 
