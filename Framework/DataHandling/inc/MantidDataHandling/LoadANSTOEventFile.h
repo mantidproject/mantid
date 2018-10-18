@@ -81,7 +81,7 @@ RAW = -8 = pass-through, non-decoded raw event directly from the DAE (e.g.
 Mesytec MCPD8).  Used to access special features of DAE.
 
 Other types are not used in general (DATASIZES = -1 TBD in future, FLUSH = -4
-deprecated, FRAME_DEASSERT = -5 only on Fastcomtec P7888 DAE). 
+deprecated, FRAME_DEASSERT = -5 only on Fastcomtec P7888 DAE).
 */
 
 template <class IReader, class IEventHandler, class IProgress>
@@ -126,7 +126,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
   // written to the header and need not be specified, unless some alternate
   // scale is needed.
   double scale_microsec = hdr_base.clock_scale / 1000.0;
-  if (!hdr_base.clock_scale) { 
+  if (!hdr_base.clock_scale) {
     // old eventfile format did not have clock_scale...
     scale_microsec = def_clock_scale / 1000.0;
   }
@@ -351,7 +351,7 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
     }
   }
 }
-}
+} // namespace ANSTO
 } // namespace DataHandling
 } // namespace Mantid
 

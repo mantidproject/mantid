@@ -19,7 +19,7 @@ namespace DataHandling {
 using ANSTO::EventVector_pt;
 
 /*
-Loads an ANSTO EMU event file and stores it in an event workspace. 
+Loads an ANSTO EMU event file and stores it in an event workspace.
 LoadEMU is an algorithm and as such inherits  from the Algorithm class,
 via DataHandlingCommand, and overrides the init() & exec() methods.
 
@@ -29,7 +29,7 @@ Required Properties:
 <LI> OutputWorkspace - Name of the workspace which stores the data</LI>
 </UL>
 
-Optional Properties: 
+Optional Properties:
 <UL>
 <LI> Mask - The input filename of the mask data</LI>
 <LI> SelectDetectorTubes - Range of detector tubes to be loaded</LI>
@@ -100,20 +100,20 @@ private:
   // create workspace
   void createWorkspace(ANSTO::Tar::File &tarFile);
 
-  // dynamically update the neutronic position 
+  // dynamically update the neutronic position
   void loadDetectorL2Values();
   void updateNeutronicPostions(detid_t detID, double sampleAnalyser);
 
-  // load and log the Doppler parameters 
+  // load and log the Doppler parameters
   void loadDopplerParameters(API::LogManager &logm);
 
-  // prepare event storage 
-  void prepareEventStorage(ANSTO::ProgressTracker& prog, 
-	                       std::vector<size_t>& eventCounts, 
-	                       std::vector<EventVector_pt>& eventVectors);
+  // prepare event storage
+  void prepareEventStorage(ANSTO::ProgressTracker &prog,
+                           std::vector<size_t> &eventCounts,
+                           std::vector<EventVector_pt> &eventVectors);
 
   // set up the detector masks
-  void setupDetectorMasks(std::vector<bool>& roi);
+  void setupDetectorMasks(std::vector<bool> &roi);
 
   // binary file access
   template <class EventProcessor>
