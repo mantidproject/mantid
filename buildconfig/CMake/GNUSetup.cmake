@@ -43,7 +43,7 @@ add_compile_options ( -Wall -Wextra -Wconversion -Winit-self -Wpointer-arith
                       -Wcast-qual -Wcast-align -fno-common -Wno-deprecated
                       -Wno-write-strings -Wno-unused-result )
 # C++-specific flags
-set ( is_cxx "$<COMPILE_LANGUAGE:CXX>" )
+set ( is_cxx "1" )
 add_compile_options ( $<${is_cxx}:-Woverloaded-virtual>
   $<${is_cxx}:-fno-operator-names>
 )
