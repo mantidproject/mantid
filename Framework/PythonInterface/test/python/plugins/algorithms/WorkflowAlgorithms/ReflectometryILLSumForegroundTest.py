@@ -167,8 +167,6 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         illhelpers.refl_rotate_detector(ws, 1.2)
         beamPosWS = illhelpers.refl_create_beam_position_ws('beamPosWS', ws, 1.2, 128)
         ws = illhelpers.refl_preprocess('ws', ws, beamPosWS)
-        xMin = 2.3
-        xMax = 4.2
         args = {
             'InputWorkspace': ws,
             'OutputWorkspace': 'foreground',
@@ -183,6 +181,29 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         self.assertGreater(len(Xs), 1)
         self.assertGreater(Xs[0], 0.)
         self.assertLess(Xs[-1], 30.)
+
+    def testWavelengthRangeSumInQRaises(self):
+        ws = illhelpers.create_poor_mans_d17_workspace()
+        illhelpers.refl_rotate_detector(ws, 1.2)
+        beamPosWS = illhelpers.refl_create_beam_position_ws('beamPosWS', ws, 1.2, 128)
+        ws = illhelpers.refl_preprocess('ws', ws, beamPosWS)
+        xMin = 2.3
+        xMax = 4.2
+        args = {
+            'InputWorkspace': ws,
+            'OutputWorkspace': 'foreground',
+            'SummationType': 'SumInQ',
+            'WavelengthRange': [xMin, xMax],
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLSumForeground', **args)
+        with self.assertRaises(AssertionError) as contextManager:
+            assertRaisesNothing(self, alg.execute)
+        self.assertTrue(contextManager.exception)
+        # ReflectometryILLSumForeground-[Warning] Invalid value for DirectForegroundWorkspace:
+        # Direct foreground workspace is needed for summing in Q.
+
 
 if __name__ == "__main__":
     unittest.main()
