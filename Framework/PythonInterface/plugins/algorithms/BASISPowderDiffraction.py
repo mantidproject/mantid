@@ -534,8 +534,8 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         _t_w = LoadEventNexus(Filename=file_name, NXentryName='entry-diff',
                               SingleBankPixelsOnly=False)
         wavelength = np.mean(_t_w.getRun().getProperty('LambdaRequest').value)
-        midpoint = (self._wavelength_bands['111'][0] +\
-            self._wavelength_bands['311'][0]) / 2.0
+        wavs = self._wavelength_bands
+        midpoint = (wavs['111'][0] + wavs['311'][0]) / 2.0
         reflection = '111' if wavelength > midpoint else '311'
         self._wavelength_band = self._wavelength_bands[reflection]
 
