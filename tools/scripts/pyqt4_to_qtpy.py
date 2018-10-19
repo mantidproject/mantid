@@ -71,8 +71,8 @@ def convert_signal_connect(cmd, linenum):
 
     return '{0}{1}.{2}.connect({3})\n'.format(whitespace, widget_name, signal_call, handler_method)
 
-QT4_TO_QTPY_FIXES = {'QtCore.QEventLoop': ('qtpy.QtCore', 'QEventLoop,'),
-                     'QtCore.QFileInfo': ('qtpy.QtCore', 'QFileInfo,'),
+QT4_TO_QTPY_FIXES = {'QtCore.QEventLoop': ('qtpy.QtCore', 'QEventLoop'),
+                     'QtCore.QFileInfo': ('qtpy.QtCore', 'QFileInfo'),
                      'QtCore.QRegExp': ('qtpy.QtCore', 'QRegExp'),
                      'QtCore.QSettings': ('qtpy.QtCore', 'QSettings'),
                      'QtGui.QAction': ('qtpy.QtWidgets', 'QAction'),

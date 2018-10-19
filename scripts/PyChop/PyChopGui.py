@@ -609,7 +609,7 @@ class PyChopGui(QMainWindow):
         self.txtwin.setMinimumSize(400, 600)
         self.txtwin.resize(400, 600)
         self.txtwin.show()
-        self.txtloop = QEventLoop,()
+        self.txtloop = QEventLoop()
         self.txtloop.exec_()
 
     def saveText(self):
@@ -673,7 +673,7 @@ class PyChopGui(QMainWindow):
             self.hlpwin.setMinimumSize(370, 300)
             self.hlpwin.resize(370, 300)
             self.hlpwin.show()
-            self.hlploop = QEventLoop,()
+            self.hlploop = QEventLoop()
             self.hlploop.exec_()
 
     def drawLayout(self):
