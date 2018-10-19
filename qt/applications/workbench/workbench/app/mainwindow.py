@@ -263,6 +263,7 @@ class MainWindow(QMainWindow):
         # TODO need to make *anything* compatible
         GUI_WHITELIST = ['DGSPlanner.py',
                          'FilterEvents.py',
+                         'QECoverage.py',
                          'TofConverter.py']
 
         # detect the python interfaces
