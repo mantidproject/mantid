@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLSANS.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -458,10 +464,7 @@ void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
   moveDetectorVertical(-detPos.shiftDown, "front_detector_bottom");
   // Set the sample log
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  if (runDetails.hasProperty("L2")) {
-    runDetails.removeProperty("L2");
-  }
-  runDetails.addProperty<double>("L2", detPos.distanceSampleRear);
+  runDetails.addProperty<double>("L2", detPos.distanceSampleRear, true);
 }
 
 /**
@@ -484,10 +487,7 @@ void LoadILLSANS::moveDetectorDistance(double distance,
   g_log.debug() << "Moving component '" << componentName
                 << "' to Z = " << distance << '\n';
   API::Run &runDetails = m_localWorkspace->mutableRun();
-  if (runDetails.hasProperty("L2")) {
-    runDetails.removeProperty("L2");
-  }
-  runDetails.addProperty<double>("L2", distance);
+  runDetails.addProperty<double>("L2", distance, true);
 }
 
 /**
@@ -688,7 +688,7 @@ void LoadILLSANS::moveSource() {
  * Sets the width (x) and height (y) of the pixel
  */
 void LoadILLSANS::setPixelSize() {
-  const auto &instrument = m_localWorkspace->getInstrument();
+  const auto instrument = m_localWorkspace->getInstrument();
   const std::string component =
       (m_instrumentName == "D33") ? "back_detector" : "detector";
   auto detector = instrument->getComponentByName(component);

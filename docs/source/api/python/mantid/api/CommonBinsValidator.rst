@@ -2,7 +2,7 @@
  CommonBinsValidator
 =====================
 
-This a python binding to the C++ class Mantid::API::CommonBinsValidator.
+This is a Python binding to the C++ class Mantid::API::CommonBinsValidator.
 
 *bases:* :py:obj:`mantid.api.MatrixWorkspaceValidator`
 

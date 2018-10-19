@@ -17,7 +17,6 @@ set ( TEST_PY_FILES
   DirectILLSelfShieldingTest.py
   EnergyWindowScanTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
-  ILLSANSReductionTest.py
   IndirectAnnulusAbsorptionTest.py
   IndirectAnnulusAbsorption2Test.py
   IndirectCalibrationTest.py
@@ -50,6 +49,7 @@ set ( TEST_PY_FILES
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py
+  SANSILLReductionTest.py
   SANSMaskTest.py
   SANSStitchTest.py
   SavePlot1DTest.py

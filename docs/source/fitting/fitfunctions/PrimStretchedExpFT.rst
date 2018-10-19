@@ -18,7 +18,7 @@ each energy bin.
 
 .. math:: S(Q,E) = \int_{E-\delta E}^{E+\delta E} dE' StretchedExpFT(E', Centre, Tau, Beta)
 
-with :math:`StretchedExpFT` is fit function `StretchedExpFT <func-StretchedExpFT>`__.
+with :math:`StretchedExpFT` is fit function :ref:`StretchedExpFT <func-StretchedExpFT>`.
 Quantity :math:`\delta E` is evaluated at run time. If we request to evaluate this
 function over a set of energy values :math:`E_0,..,E_N`,
 then :math:`2\delta E = \frac{E_N-E_0}{N}`
