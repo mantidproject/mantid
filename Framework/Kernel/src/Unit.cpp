@@ -1235,9 +1235,9 @@ double Degrees::conversionTOFMin() const {
 
 Unit *Degrees::clone() const { return new Degrees(*this); }
 
-/* ==============================================================================
- * Temperature in kelvin
- * ==============================================================================
+// ================================================================================
+/* Temperature in kelvin
+ * ================================================================================
  *
  * TemperatureKelvin prints Temperature in units of Kelvin as a label
  */
