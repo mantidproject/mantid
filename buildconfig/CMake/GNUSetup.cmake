@@ -43,8 +43,9 @@ add_compile_options ( -Wall -Wextra -Wconversion -Winit-self -Wpointer-arith
                       -Wcast-qual -Wcast-align -fno-common -Wno-deprecated
                       -Wno-write-strings -Wno-unused-result )
 # C++-specific flags
-add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
-  $<$<COMPILE_LANGUAGE:CXX>:-fno-operator-names>
+set ( is_cxx "$<COMPILE_LANGUAGE:CXX>" )
+add_compile_options ( $<${is_cxx}:-Woverloaded-virtual>
+  $<${is_cxx}:-fno-operator-names>
 )
 
 #Linking errors on Ubuntu 18.04 with --enable-new-dtags 
@@ -58,7 +59,7 @@ endif ()
 if ( CMAKE_COMPILER_IS_GNUCXX )
   add_compile_options ( -Wpedantic )
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
-    add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override> )
+    add_compile_options ( $<${is_cxx}:-Wsuggest-override> )
   endif()
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "7.1"))
     # Consider enabling once [[fallthrough]] is available on all platforms.
@@ -109,7 +110,7 @@ if( CMAKE_COMPILER_IS_GNUCXX )
   if( STATIC_LIBSTDCXX )
     add_compile_options (
       -static-libgcc
-      $<$<COMPILE_LANGUAGE:CXX>:-static-libstdc++>
+      $<${is_cxx}:-static-libstdc++>
     )
     set( CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc" )
     set( CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++" )
