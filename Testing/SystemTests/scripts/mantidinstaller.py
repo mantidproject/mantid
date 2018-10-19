@@ -161,9 +161,19 @@ class NSISInstaller(MantidInstaller):
     """
 
     def __init__(self, package_dir, do_install):
-        MantidInstaller.__init__(self, package_dir, 'Mantid-*-win*.exe', do_install)
-        self.mantidPlotPath = 'C:/MantidInstall/bin/launch_mantidplot.bat'
-        self.python_cmd = "C:/MantidInstall/bin/mantidpython.bat"
+        MantidInstaller.__init__(self, package_dir, 'mantid*.exe', do_install)
+        package = os.path.basename(self.mantidInstaller)
+        install_prefix = 'C:/'
+        if 'mantidnightly' in package:
+            install_prefix += 'MantidNightlyInstall'
+        elif 'mantidunstable' in package:
+            install_prefix += 'MantidUnstableInstall'
+        else:
+            install_prefix += 'MantidInstall'
+
+        self.uninstallPath = install_prefix + '/Uninstall.exe'
+        self.mantidPlotPath = install_prefix + '/bin/launch_mantidplot.bat'
+        self.python_cmd = install_prefix + '/bin/mantidpython.bat'
 
     def do_install(self):
         """
@@ -178,11 +188,10 @@ class NSISInstaller(MantidInstaller):
 
     def do_uninstall(self):
         "Runs the uninstall exe"
-        uninstall_path = 'C:/MantidInstall/Uninstall.exe'
         # The NSIS uninstaller actually runs a new process & detaches itself from the parent
         # process so that it is able to remove itself. This means that the /WAIT has no affect
         # because the parent appears to finish almost immediately
-        run(uninstall_path + ' /S')
+        run(self.uninstallPath + ' /S')
         # Wait for 30 seconds for it to finish
         log("Waiting 30 seconds for uninstaller to finish")
         time.sleep(30)
