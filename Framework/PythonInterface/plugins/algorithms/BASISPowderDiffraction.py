@@ -78,8 +78,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     _mask_file = '/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/'\
                  'BASIS_Mask_default_diff.xml'
     # Consider only events with these wavelengths
-    _wavelength_bands = {'311': [3.07, 3.6],
-                         '111': [6.1, 6.6]}
+    _wavelength_bands = {'311': [3.07, 3.6], '111': [6.1, 6.6]}
 
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
@@ -112,7 +111,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         return ['BASISReduction', 'BASISCrystalDiffraction']
 
     @staticmethod
-    def _add_previous_pulse(w):
+    def add_previous_pulse(w):
         """
         Duplicate the events but shift them by one pulse, then add to
         input workspace
@@ -332,7 +331,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         """
         MaskDetectors(w, MaskedWorkspace=self._t_mask)
         _t_corr = ModeratorTzeroLinear(w)  # delayed emission from moderator
-        _t_corr = self._add_previous_frame(_t_corr)
+        _t_corr = self.add_previous_pulse(_t_corr)
         _t_corr = ConvertUnits(_t_corr, Target='Wavelength', Emode='Elastic')
         l_s, l_e = self._wavelength_band[0], self._wavelength_band[1]
         _t_corr = CropWorkspace(_t_corr, XMin=l_s, XMax=l_e)
@@ -534,9 +533,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
         _t_w = LoadEventNexus(Filename=file_name, NXentryName='entry-diff',
                               SingleBankPixelsOnly=False)
-        wavelength = np.mean(_t_w.getRun().getProperty('LambdaRequest'))
-        midpoint = self._wavelength_bands['111'][0] +\
-                   self._wavelength_bands['311'][0]
+        wavelength = np.mean(_t_w.getRun().getProperty('LambdaRequest').value)
+        midpoint = (self._wavelength_bands['111'][0] +\
+            self._wavelength_bands['311'][0]) / 2.0
         reflection = '111' if wavelength > midpoint else '311'
         self._wavelength_band = self._wavelength_bands[reflection]
 
