@@ -93,13 +93,13 @@ class MaskAngle(mantid.api.PythonAlgorithm):
                     # Two theta
                     val =spectrum.twoTheta
                 if val>= ttmin and val<= ttmax:
-                    spectrum.setMasked(True)
                     detectors = spectrum.spectrumDefinition
                     for j in range(len(detectors)):
                         masked_ids.append(det_ids[detectors[j][0]])
-
         if not masked_ids:
             self.log().information("no detectors within this range")
+        else:
+            mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=numpy.array(masked_ids))
         self.setProperty("MaskedDetectors", numpy.array(masked_ids))
 
 

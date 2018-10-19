@@ -10,6 +10,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTypes/SpectrumDefinition.h"
+#include <type_traits>
 
 using Mantid::Kernel::V3D;
 using Mantid::SpectrumDefinition;
@@ -43,6 +44,7 @@ public:
   bool isMasked() const { return m_spectrumInfo->isMasked(m_index); }
 
   void setMasked(bool masked) {
+    static_assert(!std::is_const<T>::value, "Operation disabled on const T");
     return m_spectrumInfo->setMasked(m_index, masked);
   }
 

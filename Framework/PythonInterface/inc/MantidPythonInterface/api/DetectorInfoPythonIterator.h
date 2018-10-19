@@ -42,7 +42,7 @@ public:
       : m_begin(detectorInfo.begin()), m_end(detectorInfo.end()),
         m_firstOrDone(true) {}
 
-  const DetectorInfoItem &next() {
+  const DetectorInfoItem<DetectorInfo> &next() {
     if (!m_firstOrDone)
       ++m_begin;
     else
@@ -55,8 +55,8 @@ public:
   }
 
 private:
-  DetectorInfoIterator m_begin;
-  DetectorInfoIterator m_end;
+  DetectorInfoIterator<DetectorInfo> m_begin;
+  DetectorInfoIterator<DetectorInfo> m_end;
   bool m_firstOrDone;
 };
 
