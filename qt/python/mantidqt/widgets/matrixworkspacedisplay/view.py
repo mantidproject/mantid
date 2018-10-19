@@ -44,6 +44,9 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.setWindowTitle("{} - Mantid".format(name))
         self.setWindowFlags(Qt.Window)
 
+        self.active_tab_index = 0
+        self.currentChanged.connect(self.set_scroll_position_on_new_focused_tab)
+
         self.table_y = QTableView()
         self.table_y.setSelectionBehavior(QAbstractItemView.SelectItems)
         self.addTab(self.table_y, "Y values")
@@ -56,45 +59,20 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.table_e.setSelectionBehavior(QAbstractItemView.SelectItems)
         self.addTab(self.table_e, "E values")
 
-        self.connect_table_scrolling(self.table_y, self.table_x, self.table_e)
-        self.connect_table_scrolling(self.table_x, self.table_y, self.table_e)
-        self.connect_table_scrolling(self.table_e, self.table_y, self.table_x)
-
         self.resize(600, 400)
         self.show()
 
-    @staticmethod
-    def connect_table_scrolling(source_table, receiving_table_1, receiving_table_2):
+    def set_scroll_position_on_new_focused_tab(self, new_tab_index):
         """
-        Connect the scrolling signals from a source table to two receiving tables. 
-        This will change where the receiving tables point to depending on where
-        the source table is scrolled to.
-
-        :param source_table: Source of scrolling signals
-        :type source_table: QTableView
-        :param receiving_table_1: Receiver of the scrolling signals
-        :type receiving_table_1: QTableView
-        :param receiving_table_2: Receiver of the scrolling signals
-        :type receiving_table_2: QTableView
-        :return:
+        Updates the new focused tab's scroll position to match the old one.
+        :param new_tab_index: The widget position index in the parent's widget list
         """
-        assert receiving_table_1 != receiving_table_2, "The receiving tables cannot be the same"
-        repeating_table_message = "Source table cannot be the same as the receiving table, " \
-                                  "check the parameters with which the function is called"
-        assert source_table != receiving_table_1, repeating_table_message
-        assert source_table != receiving_table_2, repeating_table_message
+        old_tab = self.widget(self.active_tab_index)
+        new_tab = self.widget(new_tab_index)
 
-        def _change_horizontal_position(position):
-            receiving_table_1.horizontalScrollBar().setValue(position)
-            receiving_table_2.horizontalScrollBar().setValue(position)
-
-        source_table.horizontalScrollBar().valueChanged.connect(_change_horizontal_position)
-
-        def _change_vertical_position(position):
-            receiving_table_1.verticalScrollBar().setValue(position)
-            receiving_table_2.verticalScrollBar().setValue(position)
-
-        source_table.verticalScrollBar().valueChanged.connect(_change_vertical_position)
+        new_tab.horizontalScrollBar().setValue(old_tab.horizontalScrollBar().value())
+        new_tab.verticalScrollBar().setValue(old_tab.verticalScrollBar().value())
+        self.active_tab_index = new_tab_index
 
     def set_context_menu_actions(self, table, ws_read_function):
         """
