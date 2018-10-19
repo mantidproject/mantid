@@ -167,7 +167,6 @@ variable_help = {
 }
 
 
-
 def get_all_adv_variables(is_long_mode_on=False):
     long_mode_params = long_mode_on_params if is_long_mode_on else long_mode_off_params
     advanced_config_dict = {}
