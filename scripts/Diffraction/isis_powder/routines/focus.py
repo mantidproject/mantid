@@ -118,7 +118,7 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
                                sample_details=sample_details, vanadium_path=vanadium_splines)
-    if instrument.get_instrument_prefix() == "PEARL":
+    if instrument.get_instrument_prefix() == "PEARL" and vanadium_splines is not None :
         mantid.DeleteWorkspace(vanadium_splines.OutputWorkspace)
     return output
 
@@ -163,8 +163,6 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
         output = _focus_one_ws(input_workspace=ws[0], run_number=run, instrument=instrument, absorb=absorb,
                                perform_vanadium_norm=perform_vanadium_norm, sample_details=sample_details,
                                vanadium_path=vanadium_splines)
-        if instrument.get_instrument_prefix() == "PEARL":
-            mantid.DeleteWorkspace(vanadium_splines.OutputWorkspace)
     return output
 
 
