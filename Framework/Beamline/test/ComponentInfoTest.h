@@ -942,15 +942,14 @@ public:
   }
 
   void test_merge_identical() {
-    auto infos1 = makeFlatTree(PosVec(1, Eigen::Vector3d(0, 0, 0)),
-                               RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
-                                             0, Eigen::Vector3d::UnitY()))));
+    auto pos = Eigen::Vector3d(0, 1, 2);
+    auto rot =
+        Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY()));
+    auto infos1 = makeFlatTree(PosVec(1, pos), RotVec(1, rot));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval({0, 10});
 
-    auto infos2 = makeFlatTree(PosVec(1, Eigen::Vector3d(0, 0, 0)),
-                               RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
-                                             0, Eigen::Vector3d::UnitY()))));
+    auto infos2 = makeFlatTree(PosVec(1, pos), RotVec(1, rot));
     ComponentInfo &b = *std::get<0>(infos2);
     b.setScanInterval({0, 10});
 
@@ -962,7 +961,10 @@ public:
   }
 
   void test_merge_identical_interval_when_positions_differ() {
-    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    auto pos = Eigen::Vector3d(0, 1, -1);
+    auto rot =
+        Eigen::Quaterniond(Eigen::AngleAxisd(1, Eigen::Vector3d::UnitX()));
+    auto infos1 = makeFlatTree(PosVec(1, pos), RotVec(1, rot));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval({0, 1});
     Eigen::Vector3d pos1(1, 0, 0);
@@ -986,7 +988,10 @@ public:
   }
 
   void test_merge_identical_interval_when_rotations_differ() {
-    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    auto pos = Eigen::Vector3d(0, 1, 0);
+    auto rot =
+        Eigen::Quaterniond(Eigen::AngleAxisd(2, Eigen::Vector3d::UnitZ()));
+    auto infos1 = makeFlatTree(PosVec(1, pos), RotVec(1, rot));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval({0, 1});
     Eigen::Quaterniond rot1(
@@ -996,6 +1001,7 @@ public:
     auto rootIndexA = a.root();
     a.setRotation(rootIndexA, rot1);
     a.setPosition(rootIndexA, Eigen::Vector3d{1, 1, 1});
+    a.setPosition(0, Eigen::Vector3d{2, 3, 4});
     auto infos2 = cloneInfos(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
     // Sanity check
@@ -1006,6 +1012,7 @@ public:
     auto rootIndexC = c.root();
     c.setRotation(rootIndexC, rot2);
     c.setPosition(rootIndexC, Eigen::Vector3d{1, 1, 1});
+    c.setPosition(0, Eigen::Vector3d{2, 3, 4});
     TS_ASSERT_THROWS_EQUALS(c.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: "
@@ -1014,24 +1021,23 @@ public:
   }
 
   void test_merge_fail_identical_interval_but_component_positions_differ() {
+    auto pos0 = Eigen::Vector3d(1, 1, 1);
+    auto rot0 =
+        Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY()));
+    auto infos1 = makeFlatTree(PosVec(1, pos0), RotVec(1, rot0));
     // Now make a strange situation where the components have different
     // positions but detector positions are the same
     auto pos1 = Eigen::Vector3d{1, 0, 0};
     auto pos2 = Eigen::Vector3d{1, 0, 3};
-    auto rot = Eigen::Quaterniond{
-        Eigen::AngleAxisd(5.0, Eigen::Vector3d{-1, 2, -3}.normalized())};
-
-    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval({0, 1});
     a.setPosition(a.root(), pos1);
-    a.setRotation(a.root(), rot);
-    auto infos2 = cloneInfos(infos1);
+    a.setPosition(0, pos1);
+    auto infos2 = makeFlatTree(PosVec(1, pos0), RotVec(1, rot0));
     ComponentInfo &b = *std::get<0>(infos2);
+    b.setScanInterval({0, 1});
     b.setPosition(b.root(), pos2);
-    b.setRotation(b.root(), rot);
-    DetectorInfo &c = *std::get<1>(infos2);
-    c.setPosition(0, pos1);
+    b.setPosition(0, pos1); // same as a's detector position
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: "
@@ -1040,25 +1046,28 @@ public:
   }
 
   void test_merge_fail_identical_interval_when_component_rotations_differ() {
+    auto pos0 = Eigen::Vector3d(1, 1, 1);
+    auto rot0 =
+        Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY()));
+    auto infos1 = makeFlatTree(PosVec(1, pos0), RotVec(1, rot0));
     // Now make a strange situation where the components have different
     // positions but detector rotations are the same
     auto pos = Eigen::Vector3d{1, 0, 0};
     auto rot1 = Eigen::Quaterniond{
         Eigen::AngleAxisd(5.0, Eigen::Vector3d{-1, 2, -3}.normalized())};
     auto rot2 = Eigen::Quaterniond{
-        Eigen::AngleAxisd(5.0, Eigen::Vector3d{-1, 2, -3}.normalized())};
-
-    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+        Eigen::AngleAxisd(5.0, Eigen::Vector3d{-1, 2, -4}.normalized())};
     ComponentInfo &a = *std::get<0>(infos1);
     a.setScanInterval({0, 1});
-    a.setPosition(a.root(), pos);
     a.setRotation(a.root(), rot1);
+    a.setPosition(a.root(), pos);
+    a.setPosition(0, pos);
     auto infos2 = cloneInfos(infos1);
     ComponentInfo &b = *std::get<0>(infos2);
-    b.setPosition(b.root(), pos);
     b.setRotation(b.root(), rot2);
-    DetectorInfo &c = *std::get<1>(infos2);
-    c.setRotation(0, rot1);
+    b.setPosition(b.root(), pos);
+    b.setPosition(0, pos);
+    b.setRotation(0, rot1); // same as a's detector rotation
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
                             std::string(e.what()),
                             "Cannot merge ComponentInfo: "
