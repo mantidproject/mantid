@@ -7,15 +7,15 @@
 import os
 import time
 import csv
-from PyQt4 import QtGui, QtCore
 import ui_preprocess_window
 import reduce4circleControl
 import guiutility as gui_util
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 import NTableWidget
+from qtpy.QtWidgets import (QFileDialog, QMainWindow)  # noqa
 
 
-class ScanPreProcessWindow(QtGui.QMainWindow):
+class ScanPreProcessWindow(QMainWindow):
     """
     Main window class to pre-process scans
     """
@@ -62,16 +62,11 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self.ui.tableView_scanProcessState.resizeColumnsToContents()
 
         # define event handling
-        self.connect(self.ui.pushButton_browseOutputDir, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_output_dir)
-        self.connect(self.ui.pushButton_preProcessScan, QtCore.SIGNAL('clicked()'),
-                     self.do_start_pre_process)
-        self.connect(self.ui.pushButton_changeSettings, QtCore.SIGNAL('clicked()'),
-                     self.do_change_calibration_settings)
-        self.connect(self.ui.pushButton_fixSettings, QtCore.SIGNAL('clicked()'),
-                     self.do_fix_calibration_settings)
-        self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
-                     self.do_quit)
+        self.ui.pushButton_browseOutputDir.clicked.connect(self.do_browse_output_dir)
+        self.ui.pushButton_preProcessScan.clicked.connect(self.do_start_pre_process)
+        self.ui.pushButton_changeSettings.clicked.connect(self.do_change_calibration_settings)
+        self.ui.pushButton_fixSettings.clicked.connect(self.do_fix_calibration_settings)
+        self.ui.actionExit.triggered.connect(self.do_quit)
 
         return
 
@@ -100,12 +95,9 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         default_dir = os.path.join('/HFIR/HB3A/Exp{0}/shared/'.format(exp_number))
 
         # get output directory
-        output_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
-                                                                'Outputs for pre-processed scans',
-                                                                default_dir))
+        output_dir = str(QFileDialog.getExistingDirectory(self, 'Outputs for pre-processed scans', default_dir))
         if output_dir is None or len(output_dir) == 0:
             return
-
         self.ui.lineEdit_outputDir.setText(output_dir)
 
         return
