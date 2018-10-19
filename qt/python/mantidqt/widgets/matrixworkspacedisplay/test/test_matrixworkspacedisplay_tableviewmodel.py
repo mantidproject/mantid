@@ -344,7 +344,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         ws.getAxis.assert_called_once_with(AXIS_INDEX_FOR_VERTICAL)
         ws.mock_axis.label.assert_called_once_with(mock_section)
 
-        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING.format(mock_section, " ",
+        expected_output = MatrixWorkspaceTableViewModel.VERTICAL_HEADER_DISPLAY_STRING.format(mock_section,
                                                                                               MockMantidAxis.TEST_LABEL)
 
         self.assertEqual(expected_output, output)
@@ -456,6 +456,32 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
             .HORIZONTAL_HEADER_TOOLTIP_STRING \
             .format(mock_section, MockMantidSymbol.TEST_ASCII, expected_bin_centre, MockMantidSymbol.TEST_UTF8)
         self.assertEqual(expected_output, output)
+
+    def test_not_common_bins_horizontal_display_role(self):
+        mock_section = 0
+        mock_return_values = [0, 1, 2, 3, 4, 5, 6]
+        is_histogram_data = False
+
+        ws = MockWorkspace(read_return=mock_return_values, isHistogramData=is_histogram_data)
+        ws.isCommonBins = Mock(return_value=False)
+        model_type = MatrixWorkspaceTableViewModelType.y
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+        output = model.headerData(mock_section, Qt.Horizontal, Qt.DisplayRole)
+
+        self.assertEqual(MatrixWorkspaceTableViewModel.HORIZONTAL_BINS_VARY_DISPLAY_STRING.format(mock_section), output)
+
+    def test_not_common_bins_horizontal_tooltip_role(self):
+        mock_section = 0
+        mock_return_values = [0, 1, 2, 3, 4, 5, 6]
+        is_histogram_data = False
+
+        ws = MockWorkspace(read_return=mock_return_values, isHistogramData=is_histogram_data)
+        ws.isCommonBins = Mock(return_value=False)
+        model_type = MatrixWorkspaceTableViewModelType.y
+        model = MatrixWorkspaceTableViewModel(ws, model_type)
+        output = model.headerData(mock_section, Qt.Horizontal, Qt.ToolTipRole)
+
+        self.assertEqual(MatrixWorkspaceTableViewModel.HORIZONTAL_BINS_VARY_TOOLTIP_STRING.format(mock_section), output)
 
 
 if __name__ == '__main__':

@@ -108,6 +108,7 @@ class MockWorkspace:
         self.axes = Mock(return_value=axes)
         self.hasMaskedBins = None
         self.maskedBinsIndices = None
+        self.isCommonBins = Mock(return_value=True)
 
         self.mock_spectrum = MockSpectrum()
         self.getSpectrum = Mock(return_value=self.mock_spectrum)

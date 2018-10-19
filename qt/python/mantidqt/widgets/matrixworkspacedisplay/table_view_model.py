@@ -28,8 +28,11 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
     HORIZONTAL_HEADER_DISPLAY_STRING_FOR_X_VALUES = "{0}"
     HORIZONTAL_HEADER_TOOLTIP_STRING_FOR_X_VALUES = "index {0}"
 
-    VERTICAL_HEADER_DISPLAY_STRING = "{0}{1}{2}"
+    VERTICAL_HEADER_DISPLAY_STRING = "{0} {1}"
     VERTICAL_HEADER_TOOLTIP_STRING = "index {0}\nspectra no {1}"
+
+    HORIZONTAL_BINS_VARY_DISPLAY_STRING = "{0}\nbins vary"
+    HORIZONTAL_BINS_VARY_TOOLTIP_STRING = "index {0}\nbin centre value varies\nRebin to set common bins"
 
     MASKED_MONITOR_ROW_STRING = "This is a masked monitor spectrum. "
     MASKED_ROW_STRING = "This is a masked spectrum. "
@@ -76,8 +79,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         # check that the vertical axis actually exists in the workspace
         if self.ws.axes() > axis_index:
             if role == Qt.DisplayRole:
-                return self.VERTICAL_HEADER_DISPLAY_STRING.format(section, " ",
-                                                                  self.ws.getAxis(axis_index).label(section))
+                return self.VERTICAL_HEADER_DISPLAY_STRING.format(section, self.ws.getAxis(axis_index).label(section))
             else:
                 spectrum_number = self.ws.getSpectrum(section).getSpectrumNo()
                 return self.VERTICAL_HEADER_TOOLTIP_STRING.format(section, spectrum_number)
@@ -93,6 +95,12 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             else:
                 # for tooltip index <bin number>
                 return self.HORIZONTAL_HEADER_TOOLTIP_STRING_FOR_X_VALUES.format(section)
+
+        if not self.ws.isCommonBins():
+            if role == Qt.DisplayRole:
+                return self.HORIZONTAL_BINS_VARY_DISPLAY_STRING.format(section)
+            else:
+                return self.HORIZONTAL_BINS_VARY_TOOLTIP_STRING.format(section)
 
         # for the Y and E values, create a label with the units
         axis_index = 0
