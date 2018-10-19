@@ -2,7 +2,7 @@
  IPropertyManager
 ==================
 
-This a python binding to the C++ class Mantid::Kernel::IPropertyManager.
+This is a Python binding to the C++ class Mantid::Kernel::IPropertyManager.
 
 
 .. module:`mantid.kernel`

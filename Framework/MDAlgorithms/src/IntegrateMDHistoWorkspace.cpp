@@ -24,7 +24,6 @@
 #include <utility>
 
 #include <boost/make_shared.hpp>
-#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

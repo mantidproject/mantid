@@ -4,6 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -13,6 +14,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
@@ -35,8 +37,12 @@
 namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
+using namespace Mantid::API;
 
 namespace {
+
+std::string const PDF_GROUP_NAME = "__PDF_Workspace";
+
 // static logger object
 Kernel::Logger g_log("FABADAMinimizer");
 // number of iterations when convergence isn't expected
@@ -47,6 +53,27 @@ const size_t JUMP_CHECKING_RATE = 200;
 const double LOW_JUMP_LIMIT = 1e-25;
 // random number generator
 std::mt19937 rng;
+
+API::MatrixWorkspace_sptr
+createWorkspace(std::vector<double> const &xValues,
+                std::vector<double> const &yValues, int const numberOfSpectra,
+                std::vector<std::string> const &verticalAxisNames) {
+  auto createWorkspaceAlgorithm =
+      AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
+  createWorkspaceAlgorithm->initialize();
+  createWorkspaceAlgorithm->setChild(true);
+  createWorkspaceAlgorithm->setLogging(false);
+  createWorkspaceAlgorithm->setProperty("DataX", xValues);
+  createWorkspaceAlgorithm->setProperty("DataY", yValues);
+  createWorkspaceAlgorithm->setProperty("NSpec", numberOfSpectra);
+  createWorkspaceAlgorithm->setProperty("VerticalAxisUnit", "Text");
+  createWorkspaceAlgorithm->setProperty("VerticalAxisValues",
+                                        verticalAxisNames);
+  createWorkspaceAlgorithm->setProperty("OutputWorkspace", "__PDF");
+  createWorkspaceAlgorithm->execute();
+  return createWorkspaceAlgorithm->getProperty("OutputWorkspace");
+}
+
 } // namespace
 
 DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
@@ -88,10 +115,7 @@ FABADAMinimizer::FABADAMinimizer()
                   " constant during the convergence period)."
                   " Useful to find the exact minimum.");
   // Output Properties
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
-                      "PDF", "PDF", Kernel::Direction::Output),
-                  "The name to give the output workspace for the"
-                  " Probability Density Functions");
+  declareProperty("PDF", true, "If the PDF's should be calculated or not.");
   declareProperty("NumberBinsPDF", 20,
                   "Number of bins used for the output PDFs");
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
@@ -792,7 +816,7 @@ void FABADAMinimizer::outputCostFunctionTable(size_t convLength,
  * @return :: most probable chi square value
  */
 double
-FABADAMinimizer::outputPDF(size_t convLength,
+FABADAMinimizer::outputPDF(std::size_t const &convLength,
                            std::vector<std::vector<double>> &reducedChain) {
 
   // To store the most probable chi square value
@@ -806,66 +830,110 @@ FABADAMinimizer::outputPDF(size_t convLength,
                        " Default value (20 bins) taken\n";
     pdfLength = 20;
   }
-  API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", m_nParams + 1, pdfLength + 1, pdfLength);
 
   // Calculate the cost function Probability Density Function
   if (convLength > 0) {
     std::sort(reducedChain[m_nParams].begin(), reducedChain[m_nParams].end());
+    std::vector<double> xValues((m_nParams + 1) * (pdfLength + 1));
+    std::vector<double> yValues((m_nParams + 1) * pdfLength);
     std::vector<double> PDFYAxis(pdfLength, 0);
-    double start = reducedChain[m_nParams][0];
-    double bin =
+    double const start = reducedChain[m_nParams][0];
+    double const bin =
         (reducedChain[m_nParams][convLength - 1] - start) / double(pdfLength);
-    size_t step = 0;
-    MantidVec &X = ws->dataX(m_nParams);
-    MantidVec &Y = ws->dataY(m_nParams);
-    X[0] = start;
-    for (size_t i = 1; i < static_cast<size_t>(pdfLength) + 1; i++) {
-      double binEnd = start + double(i) * bin;
-      X[i] = binEnd;
-      while (step < convLength && reducedChain[m_nParams][step] <= binEnd) {
-        PDFYAxis[i - 1] += 1;
-        ++step;
-      }
-      // Divided by convLength * bin to normalize
-      Y[i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
-    }
 
-    auto indexMostProbableChi2 =
-        std::max_element(PDFYAxis.begin(), PDFYAxis.end());
+    mostPchi2 =
+        getMostProbableChiSquared(convLength, reducedChain, pdfLength, xValues,
+                                  yValues, PDFYAxis, start, bin);
 
-    mostPchi2 = X[indexMostProbableChi2 - PDFYAxis.begin()] + (bin / 2.0);
+    if (getProperty("PDF"))
+      outputPDF(xValues, yValues, reducedChain, convLength, pdfLength);
 
-    // Do one iteration for each parameter.
-    for (size_t j = 0; j < m_nParams; ++j) {
-      // Calculate the Probability Density Function
-      std::vector<double> PDFYAxis(pdfLength, 0);
-      double start = reducedChain[j][0];
-      double bin =
-          (reducedChain[j][convLength - 1] - start) / double(pdfLength);
-      size_t step = 0;
-      MantidVec &X = ws->dataX(j);
-      MantidVec &Y = ws->dataY(j);
-      X[0] = start;
-      for (size_t i = 1; i < static_cast<size_t>(pdfLength) + 1; i++) {
-        double binEnd = start + double(i) * bin;
-        X[i] = binEnd;
-        while (step < convLength && reducedChain[j][step] <= binEnd) {
-          PDFYAxis[i - 1] += 1;
-          ++step;
-        }
-        Y[i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
-      }
-    }
   } // if convLength > 0
   else {
-    g_log.warning() << "No points to create PDF. Empty Wokspace returned.\n";
+    g_log.warning() << "No points to create PDF. Empty Workspace returned.\n";
     mostPchi2 = -1;
   }
 
-  // Set and name the PDF workspace.
-  setProperty("PDF", ws);
   return mostPchi2;
+}
+
+void FABADAMinimizer::outputPDF(std::vector<double> &xValues,
+                                std::vector<double> &yValues,
+                                std::vector<std::vector<double>> &reducedChain,
+                                std::size_t const &convLength,
+                                int const &pdfLength) {
+  setParameterXAndYValuesForPDF(xValues, yValues, reducedChain, convLength,
+                                pdfLength);
+  auto parameterNames = m_fitFunction->getParameterNames();
+  parameterNames.emplace_back("Chi Squared");
+  auto const workspace =
+      createWorkspace(xValues, yValues, int(m_nParams) + 1, parameterNames);
+
+  if (AnalysisDataService::Instance().doesExist(PDF_GROUP_NAME)) {
+    auto groupPDF = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        PDF_GROUP_NAME);
+    groupPDF->addWorkspace(workspace);
+    AnalysisDataService::Instance().addOrReplace(PDF_GROUP_NAME, groupPDF);
+  } else {
+    auto groupPDF = boost::make_shared<WorkspaceGroup>();
+    groupPDF->addWorkspace(workspace);
+    AnalysisDataService::Instance().addOrReplace(PDF_GROUP_NAME, groupPDF);
+  }
+}
+
+double FABADAMinimizer::getMostProbableChiSquared(
+    std::size_t const &convLength,
+    std::vector<std::vector<double>> &reducedChain, int const &pdfLength,
+    std::vector<double> &xValues, std::vector<double> &yValues,
+    std::vector<double> &PDFYAxis, double const &start, double const &bin) {
+  std::size_t step = 0;
+  std::size_t const chiXStartPos = m_nParams * (pdfLength + 1);
+  std::size_t const chiYStartPos = m_nParams * pdfLength;
+
+  xValues[chiXStartPos] = start;
+  for (std::size_t i = 1; i < static_cast<std::size_t>(pdfLength) + 1; i++) {
+    double binEnd = start + double(i) * bin;
+    xValues[chiXStartPos + i] = binEnd;
+    while (step < convLength && reducedChain[m_nParams][step] <= binEnd) {
+      PDFYAxis[i - 1] += 1;
+      ++step;
+    }
+    // Divided by convLength * bin to normalize
+    yValues[chiYStartPos + i - 1] =
+        PDFYAxis[i - 1] / (double(convLength) * bin);
+  }
+
+  auto indexMostProbableChi2 =
+      std::max_element(PDFYAxis.begin(), PDFYAxis.end());
+
+  return xValues[indexMostProbableChi2 - PDFYAxis.begin()] + (bin / 2.0);
+}
+
+void FABADAMinimizer::setParameterXAndYValuesForPDF(
+    std::vector<double> &xValues, std::vector<double> &yValues,
+    std::vector<std::vector<double>> &reducedChain,
+    std::size_t const &convLength, int const &pdfLength) {
+  for (std::size_t j = 0; j < m_nParams; ++j) {
+
+    // Calculate the Probability Density Function
+    std::vector<double> PDFYAxis(pdfLength, 0);
+    double start = reducedChain[j][0];
+    double bin = (reducedChain[j][convLength - 1] - start) / double(pdfLength);
+    std::size_t step = 0;
+    std::size_t const startXPos = j * (pdfLength + 1);
+    std::size_t const startYPos = j * pdfLength;
+
+    xValues[startXPos] = start;
+    for (std::size_t i = 1; i < static_cast<std::size_t>(pdfLength) + 1; i++) {
+      double binEnd = start + double(i) * bin;
+      xValues[startXPos + i] = binEnd;
+      while (step < convLength && reducedChain[j][step] <= binEnd) {
+        PDFYAxis[i - 1] += 1;
+        ++step;
+      }
+      yValues[startYPos + i - 1] = PDFYAxis[i - 1] / (double(convLength) * bin);
+    }
+  }
 }
 
 /** Create the table workspace containing parameter values
@@ -887,7 +955,7 @@ void FABADAMinimizer::outputParameterTable(
   wsPdfE->addColumn("str", "Name");
   wsPdfE->addColumn("double", "Value");
   wsPdfE->addColumn("double", "Left's error");
-  wsPdfE->addColumn("double", "Rigth's error");
+  wsPdfE->addColumn("double", "Right's error");
 
   for (size_t j = 0; j < m_nParams; ++j) {
     API::TableRow row = wsPdfE->appendRow();
@@ -1108,6 +1176,7 @@ void FABADAMinimizer::initSimulatedAnnealing() {
     m_leftRefrPoints = 0;
   }
 }
+
 } // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
