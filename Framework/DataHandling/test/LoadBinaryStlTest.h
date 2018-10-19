@@ -66,4 +66,14 @@ public:
   }
 };
 
+class LoadBinaryStlTestPerformance : public CxxTest::TestSuite {
+public:
+  void test_loading_large_stl() {
+    std::string path = FileFinder::Instance().getFullPath("SI-4200-610.stl");
+    auto loader = LoadBinaryStl(path);
+    auto LargeFile = loader.readStl();
+  }
+  
+  
+};
 #endif /* LOAD_BINARYSTL_TEST_H_ */

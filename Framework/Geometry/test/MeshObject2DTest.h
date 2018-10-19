@@ -30,14 +30,14 @@ MeshObject2D makeSimpleTriangleMesh() {
   vertices.emplace_back(V3D(-1, 0, 0));
   vertices.emplace_back(V3D(1, 0, 0));
   vertices.emplace_back(V3D(0, 1, 0));
-  std::vector<uint16_t> triangles;
+  std::vector<uint32_t> triangles;
   triangles.insert(triangles.end(), {0, 1, 2});
   return MeshObject2D(triangles, vertices, Mantid::Kernel::Material());
 }
 MeshObject2D makeTrapezoidMesh(const V3D &a, const V3D &b, const V3D &c,
                                const V3D &d) {
   std::vector<V3D> vertices{a, b, c, d};
-  std::vector<uint16_t> triangles;
+  std::vector<uint32_t> triangles;
   triangles.insert(triangles.end(), {0, 1, 2});
   triangles.insert(triangles.end(), {2, 3, 0});
   return MeshObject2D(triangles, vertices, Mantid::Kernel::Material());
@@ -108,7 +108,7 @@ public:
     vertices.emplace_back(V3D(0, 0, 0));
     vertices.emplace_back(V3D(1, 0, 0));
 
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(),
                      {0, 1, 1}); // invalid, but doesn't matter for this test
 
@@ -131,7 +131,7 @@ public:
     vertices.emplace_back(V3D(1, 0, 0));
     vertices.emplace_back(V3D(2, 0, 0));
 
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {0, 1, 2});
 
     // Test constructor taking lvalue references
@@ -155,7 +155,7 @@ public:
     vertices.emplace_back(V3D(1, 1, 0));
     vertices.emplace_back(V3D(1, 0, 1));
 
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {0, 1, 2});
 
     // Test constructor taking lvalue references
@@ -176,7 +176,7 @@ public:
     vertices.emplace_back(V3D(-1, 0, 0));
     vertices.emplace_back(V3D(1, 0, 0));
     vertices.emplace_back(V3D(0, 1, 0));
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {0, 1, 2});
 
     MeshObject2D mesh(triangles, vertices, Mantid::Kernel::Material());

@@ -74,7 +74,7 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   vertices.emplace_back(centre + V3D(max, min, min));
   vertices.emplace_back(centre + V3D(min, min, min));
 
-  std::vector<uint16_t> triangles;
+  std::vector<uint32_t> triangles;
   // top face of cube - z max
   triangles.insert(triangles.end(), {0, 1, 2});
   triangles.insert(triangles.end(), {2, 1, 3});
@@ -124,7 +124,7 @@ std::unique_ptr<MeshObject> createOctahedron() {
   vertices.emplace_back(V3D(0, -u, 0));
   vertices.emplace_back(V3D(0, 0, -u));
 
-  std::vector<uint16_t> triangles;
+  std::vector<uint32_t> triangles;
   // +++ face
   triangles.insert(triangles.end(), {0, 1, 2});
   //++- face
@@ -168,7 +168,7 @@ std::unique_ptr<MeshObject> createLShape() {
   vertices.emplace_back(V3D(1, 2, 1));
   vertices.emplace_back(V3D(0, 2, 1));
 
-  std::vector<uint16_t> triangles;
+  std::vector<uint32_t> triangles;
   // z min
   triangles.insert(triangles.end(), {0, 5, 1});
   triangles.insert(triangles.end(), {1, 3, 2});
@@ -214,7 +214,7 @@ public:
     vertices.emplace_back(V3D(0, 1, 0));
     vertices.emplace_back(V3D(0, 0, 1));
 
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {1, 2, 3});
     triangles.insert(triangles.end(), {2, 1, 0});
     triangles.insert(triangles.end(), {3, 0, 1});
@@ -237,7 +237,7 @@ public:
 
   void testTooManyVertices() {
     auto tooManyVertices = std::vector<V3D>(70000);
-    auto triangles = std::vector<uint16_t>(1000);
+    auto triangles = std::vector<uint32_t>(1000);
     TS_ASSERT_THROWS_ANYTHING(
         MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
   }
@@ -250,7 +250,7 @@ public:
     vertices.emplace_back(V3D(0, 1, 0));
     vertices.emplace_back(V3D(0, 0, 1));
 
-    std::vector<uint16_t> triangles;
+    std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {1, 2, 3});
     triangles.insert(triangles.end(), {2, 1, 0});
     triangles.insert(triangles.end(), {3, 0, 1});
