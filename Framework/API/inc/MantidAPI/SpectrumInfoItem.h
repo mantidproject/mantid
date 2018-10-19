@@ -68,7 +68,6 @@ public:
     return m_spectrumInfo->position(m_index);
   }
 
-  // Private constructor, can only be created by SpectrumInfoIterator
   SpectrumInfoItem(T &spectrumInfo, const size_t index)
       : m_spectrumInfo(&spectrumInfo), m_index(index) {}
 

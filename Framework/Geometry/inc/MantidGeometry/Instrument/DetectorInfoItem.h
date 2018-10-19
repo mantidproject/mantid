@@ -54,7 +54,6 @@ public:
     return m_detectorInfo->rotation(m_index);
   }
 
-  // Private constructor, can only be created by DetectorInfoIterator
   DetectorInfoItem(T &detectorInfo, const size_t index)
       : m_detectorInfo(&detectorInfo), m_index(index) {}
 

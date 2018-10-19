@@ -7,8 +7,8 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 #define MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
-
 #include <boost/iterator/iterator_facade.hpp>
 
 using Mantid::Geometry::DetectorInfoItem;
