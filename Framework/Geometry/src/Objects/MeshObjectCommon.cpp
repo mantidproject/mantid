@@ -6,13 +6,11 @@
 namespace Mantid {
 namespace Geometry {
 
-using Mantid::Kernel::V3D;
-
 namespace MeshObjectCommon {
 /**
- * getVertices converts vector V3D to vector doubles. 3x size of input. ordered
- * x,y,z,x,y,z...
- * @param vertices : input vector of V3D
+ * getVertices converts vector Kernel::V3D to vector doubles. 3x size of input.
+ * ordered x,y,z,x,y,z...
+ * @param vertices : input vector of Kernel::V3D
  * @return: vector of doubles. Elements of input.
  */
 std::vector<double> getVertices(const std::vector<Kernel::V3D> &vertices) {
@@ -44,11 +42,12 @@ std::vector<double> getVertices(const std::vector<Kernel::V3D> &vertices) {
  * This duplicates code in CSGOjbect both need a place to be merged.
  * To aid this, this function has been defined as a non-member.
  */
-double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
-                             const V3D &observer) {
-  const V3D ao = a - observer;
-  const V3D bo = b - observer;
-  const V3D co = c - observer;
+double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b,
+                             const Kernel::V3D &c,
+                             const Kernel::V3D &observer) {
+  const Kernel::V3D ao = a - observer;
+  const Kernel::V3D bo = b - observer;
+  const Kernel::V3D co = c - observer;
   const double modao = ao.norm();
   const double modbo = bo.norm();
   const double modco = co.norm();
@@ -75,8 +74,8 @@ double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
  * @returns true if the specified triangle exists
  */
 bool getTriangle(const size_t index, const std::vector<uint16_t> &triangles,
-                 const std::vector<Kernel::V3D> &vertices, V3D &vertex1,
-                 V3D &vertex2, V3D &vertex3) {
+                 const std::vector<Kernel::V3D> &vertices, Kernel::V3D &vertex1,
+                 Kernel::V3D &vertex2, Kernel::V3D &vertex3) {
   bool triangleExists = index < triangles.size() / 3;
   if (triangleExists) {
     vertex1 = vertices[triangles[3 * index]];
@@ -91,7 +90,7 @@ double solidAngle(const Kernel::V3D &observer,
                   const std::vector<Kernel::V3D> &vertices) {
 
   double solidAngleSum(0), solidAngleNegativeSum(0);
-  V3D vertex1, vertex2, vertex3;
+  Kernel::V3D vertex1, vertex2, vertex3;
   for (size_t i = 0;
        getTriangle(i, triangles, vertices, vertex1, vertex2, vertex3); ++i) {
     double sa = getTriangleSolidAngle(vertex1, vertex2, vertex3, observer);
@@ -108,12 +107,10 @@ double solidAngle(const Kernel::V3D &observer,
                   const std::vector<uint16_t> &triangles,
                   const std::vector<Kernel::V3D> &vertices,
                   const Kernel::V3D scaleFactor) {
-  std::vector<V3D> scaledVertices;
+  std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(vertices.size());
   for (const auto &vertex : vertices) {
-    scaledVertices.emplace_back(scaleFactor.X() * vertex.X(),
-                                scaleFactor.Y() * vertex.Y(),
-                                scaleFactor.Z() * vertex.Z());
+    scaledVertices.emplace_back(scaleFactor * vertex);
   }
   return solidAngle(observer, triangles, scaledVertices);
 }
@@ -183,10 +180,10 @@ bool isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &v1,
  * @returns true if there is an intersection
  */
 bool rayIntersectsTriangle(const Kernel::V3D &start,
-                           const Kernel::V3D &direction, const V3D &v1,
-                           const V3D &v2, const V3D &v3, V3D &intersection,
-                           int &entryExit) {
-  // Implements Möller–Trumbore intersection algorithm
+                           const Kernel::V3D &direction, const Kernel::V3D &v1,
+                           const Kernel::V3D &v2, const Kernel::V3D &v3,
+                           Kernel::V3D &intersection, int &entryExit) {
+  // Implements Moller Trumbore intersection algorithm
 
   // Eq line x = x0 + tV
   //
@@ -232,7 +229,7 @@ bool rayIntersectsTriangle(const Kernel::V3D &start,
     intersection = start + direction * t;
 
     // determine entry exit assuming anticlockwise triangle view from outside
-    V3D normalDirection = edge1.cross_prod(edge2);
+    Kernel::V3D normalDirection = edge1.cross_prod(edge2);
     if (normalDirection.scalar_prod(direction) > 0.0) {
       entryExit = -1; // exit
     } else {

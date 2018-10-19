@@ -72,8 +72,8 @@ public:
   }
 
 private:
-  SpectrumInfoIterator m_begin;
-  SpectrumInfoIterator m_end;
+  SpectrumInfoIterator<SpectrumInfo> m_begin;
+  SpectrumInfoIterator<SpectrumInfo> m_end;
   bool m_firstOrDone;
 };
 
