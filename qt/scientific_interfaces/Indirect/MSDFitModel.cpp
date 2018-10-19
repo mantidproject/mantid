@@ -32,7 +32,9 @@ std::string MSDFitModel::singleFitOutputName(std::size_t index,
                                    spectrum);
 }
 
-std::string MSDFitModel::getResultXAxisUnit() const { return ""; }
+std::string MSDFitModel::getResultXAxisUnit() const {
+  return "TemperatureKelvin";
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

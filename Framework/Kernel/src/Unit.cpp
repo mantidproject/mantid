@@ -1222,7 +1222,7 @@ double Degrees::singleToTOF(const double x) const {
 
 double Degrees::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw std::runtime_error("Degrees is not allwed to be converted from TOF. ");
+  throw std::runtime_error("Degrees is not allowed to be converted from TOF. ");
 }
 
 double Degrees::conversionTOFMax() const {
@@ -1234,6 +1234,42 @@ double Degrees::conversionTOFMin() const {
 }
 
 Unit *Degrees::clone() const { return new Degrees(*this); }
+
+/* ==============================================================================
+ * Temperature in kelvin
+ * ==============================================================================
+ *
+ * TemperatureKelvin prints Temperature in units of Kelvin as a label
+ */
+
+DECLARE_UNIT(TemperatureKelvin)
+
+TemperatureKelvin::TemperatureKelvin() : Empty(), m_label("Kelvin") {}
+
+const UnitLabel TemperatureKelvin::label() const { return m_label; }
+
+void TemperatureKelvin::init() {}
+
+double TemperatureKelvin::singleToTOF(const double x) const {
+  UNUSED_ARG(x);
+  throw std::runtime_error("Temperature is not allowed to be convert to TOF. ");
+}
+
+double TemperatureKelvin::singleFromTOF(const double tof) const {
+  UNUSED_ARG(tof);
+  throw std::runtime_error(
+      "Temperature is not allowed to be converted from TOF. ");
+}
+
+double TemperatureKelvin::conversionTOFMin() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+double TemperatureKelvin::conversionTOFMax() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+Unit *TemperatureKelvin::clone() const { return new TemperatureKelvin(*this); }
 
 } // namespace Units
 
