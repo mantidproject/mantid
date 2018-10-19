@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import
 
 # system imports
@@ -113,9 +106,9 @@ class AsyncTaskTest(unittest.TestCase):
                         msg="Expected RuntimeError, found " + recv.task_exc.__class__.__name__)
         self.assertEqual(2, len(recv.task_exc_stack))
         # line number of self.target in async.py
-        self.assertEqual(100, recv.task_exc_stack[0][1])
+        self.assertEqual(93, recv.task_exc_stack[0][1])
         # line number of raise statement above
-        self.assertEqual(101, recv.task_exc_stack[1][1])
+        self.assertEqual(94, recv.task_exc_stack[1][1])
 
     def test_unsuccessful_args_and_kwargs_operation_calls_error_and_finished_callback(self):
         def foo(scale, shift):
@@ -148,8 +141,8 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, RuntimeError))
         self.assertEqual(2, len(recv.task_exc_stack))
-        self.assertEqual(140, recv.task_exc_stack[0][1])
-        self.assertEqual(139, recv.task_exc_stack[1][1])
+        self.assertEqual(133, recv.task_exc_stack[0][1])
+        self.assertEqual(132, recv.task_exc_stack[1][1])
 
     # ---------------------------------------------------------------
     # Failure cases
