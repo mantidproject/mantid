@@ -20,7 +20,7 @@ from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorks
     MatrixWorkspaceTableViewModelType
 from mantidqt.widgets.matrixworkspacedisplay.test_helpers.test_matrixworkspacedisplay_tableviewmodel_common import \
     MockQModelIndex, MockWorkspace, setup_common_for_test_data, AXIS_INDEX_FOR_VERTICAL, MockMantidAxis, MockSpectrum, \
-    MockMantidSymbol, AXIS_INDEX_FOR_HORIZONTAL
+    MockMantidSymbol, AXIS_INDEX_FOR_HORIZONTAL, MockMantidUnit
 
 
 class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
@@ -449,12 +449,12 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         ws.getAxis.assert_called_once_with(AXIS_INDEX_FOR_HORIZONTAL)
         ws.mock_axis.getUnit.assert_called_once_with()
         ws.mock_axis.mock_unit.symbol.assert_called_once_with()
+        ws.mock_axis.mock_unit.caption.assert_called_once_with()
         ws.mock_axis.mock_unit.mock_symbol.utf8.assert_called_once_with()
-        ws.mock_axis.mock_unit.mock_symbol.ascii.assert_called_once_with()
 
         expected_output = MatrixWorkspaceTableViewModel \
             .HORIZONTAL_HEADER_TOOLTIP_STRING \
-            .format(mock_section, MockMantidSymbol.TEST_ASCII, expected_bin_centre, MockMantidSymbol.TEST_UTF8)
+            .format(mock_section, MockMantidUnit.TEST_CAPTION, expected_bin_centre, MockMantidSymbol.TEST_UTF8)
         self.assertEqual(expected_output, output)
 
     def test_not_common_bins_horizontal_display_role(self):

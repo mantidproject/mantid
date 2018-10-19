@@ -23,7 +23,7 @@ MatrixWorkspaceTableViewModelType = enum(x='x', y='y', e='e')
 
 class MatrixWorkspaceTableViewModel(QAbstractTableModel):
     HORIZONTAL_HEADER_DISPLAY_STRING = u"{0}\n{1:0.1f}{2}"
-    HORIZONTAL_HEADER_TOOLTIP_STRING = u"index {0}\n{1}{2:0.1f}{3} (bin centre)"
+    HORIZONTAL_HEADER_TOOLTIP_STRING = u"index {0}\n{1} {2:0.1f}{3} (bin centre)"
 
     HORIZONTAL_HEADER_DISPLAY_STRING_FOR_X_VALUES = "{0}"
     HORIZONTAL_HEADER_TOOLTIP_STRING_FOR_X_VALUES = "index {0}"
@@ -110,14 +110,14 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         else:
             bin_centre_value = x_vec[section]
 
-        symbol = self.ws.getAxis(axis_index).getUnit().symbol()
+        unit = self.ws.getAxis(axis_index).getUnit()
         if role == Qt.DisplayRole:
             # format for the label display
-            return self.HORIZONTAL_HEADER_DISPLAY_STRING.format(section, bin_centre_value, symbol.utf8())
+            return self.HORIZONTAL_HEADER_DISPLAY_STRING.format(section, bin_centre_value, unit.symbol().utf8())
         else:
             # format for the tooltip
-            return self.HORIZONTAL_HEADER_TOOLTIP_STRING.format(section, symbol.ascii(), bin_centre_value,
-                                                                symbol.utf8())
+            return self.HORIZONTAL_HEADER_TOOLTIP_STRING.format(section, unit.caption(), bin_centre_value,
+                                                                unit.symbol().utf8())
 
     def headerData(self, section, orientation, role=None):
         if not (role == Qt.DisplayRole or role == Qt.ToolTipRole):

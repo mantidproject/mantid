@@ -53,9 +53,12 @@ class MockMantidSymbol:
 
 
 class MockMantidUnit:
+    TEST_CAPTION = "MANTID_TEST_CAPTION"
+
     def __init__(self):
         self.mock_symbol = MockMantidSymbol()
         self.symbol = Mock(return_value=self.mock_symbol)
+        self.caption = Mock(return_value=self.TEST_CAPTION)
 
 
 class MockMantidAxis:
