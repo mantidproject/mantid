@@ -68,7 +68,7 @@ public:
   }
 
   void test_components() {
-    CalculateQMinMax alg;
+    CalculateDynamicRange alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     alg.setChild(true);

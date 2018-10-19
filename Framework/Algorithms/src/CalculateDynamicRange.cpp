@@ -8,8 +8,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace {
 /**
@@ -73,9 +73,9 @@ void CalculateDynamicRange::init() {
  * @param indices : the list of workspace indices
  * @param compName : the name of the detector component
  */
-void CalculateQMinMax::calculateQMinMax(MatrixWorkspace_sptr workspace,
-                                        const std::vector<size_t> &indices,
-                                        const std::string &compName = "") {
+void CalculateDynamicRange::calculateQMinMax(MatrixWorkspace_sptr workspace,
+                                             const std::vector<size_t> &indices,
+                                             const std::string &compName = "") {
   const auto &spectrumInfo = workspace->spectrumInfo();
   double min = std::numeric_limits<double>::max(),
          max = std::numeric_limits<double>::min();

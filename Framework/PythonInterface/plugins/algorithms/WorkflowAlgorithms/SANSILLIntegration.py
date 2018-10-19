@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator, WorkspaceGroupProperty, \
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator, WorkspaceGroupProperty, \
     PropertyMode, MatrixWorkspace, NumericAxis
 from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, StringListValidator, \
     IntBoundedValidator, FloatBoundedValidator, PropertyCriterion, LogicOperator
@@ -8,7 +14,7 @@ from mantid.simpleapi import *
 from MildnerCarpenter import *
 
 
-class ILLSANSIntegration(DataProcessorAlgorithm):
+class SANSILLIntegration(PythonAlgorithm):
 
     _input_ws = ''
     _output_ws = ''
@@ -22,10 +28,10 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         return 'Performs SANS integration and resolution calculation based on corrected data.'
 
     def seeAlso(self):
-        return ['Q1DWeighted', 'Qxy', 'ILLSANSReduction']
+        return ['Q1DWeighted', 'Qxy', 'SANSILLReduction']
 
     def name(self):
-        return 'ILLSANSIntegration'
+        return 'SANSILLIntegration'
 
     def validateInputs(self):
         issues = dict()
@@ -51,7 +57,6 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         return issues
 
     def PyInit(self):
-
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input,
                              validator=WorkspaceUnitValidator('Wavelength')),
                              doc='The input workspace.')
@@ -105,11 +110,11 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         self.setPropertyGroup('WedgeOffset', 'I(Q) Options')
         self.setPropertyGroup('AsymmetricWedges', 'I(Q) Options')
 
-        self.declareProperty(name='MaxQxy', defaultValue=-0.1, validator=FloatBoundedValidator(lower=0.),
+        self.declareProperty(name='MaxQxy', defaultValue=0., validator=FloatBoundedValidator(lower=0.),
                              doc='Maximum of absolute Qx and Qy.')
         self.setPropertySettings('MaxQxy', output_iqxy)
 
-        self.declareProperty(name='DeltaQ', defaultValue=-0.1, validator=FloatBoundedValidator(lower=0),
+        self.declareProperty(name='DeltaQ', defaultValue=0., validator=FloatBoundedValidator(lower=0),
                              doc='The dimension of a Qx-Qy cell.')
         self.setPropertySettings('DeltaQ', output_iqxy)
 
@@ -258,4 +263,4 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
                     mtd[self._output_ws].setDx(i, res)
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(ILLSANSIntegration)
+AlgorithmFactory.subscribe(SANSILLIntegration)

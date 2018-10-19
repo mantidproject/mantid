@@ -352,9 +352,9 @@ class SANSILLReduction(PythonAlgorithm):
                                                      NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
 
         if mtd[ws].getInstrument().getName() == 'D33':
-            CalculateQMinMax(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
+            CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
         else:
-            CalculateQMinMax(Workspace=ws)
+            CalculateDynamicRange(Workspace=ws)
         mtd[ws].getRun().addProperty('ProcessedAs', process, True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
