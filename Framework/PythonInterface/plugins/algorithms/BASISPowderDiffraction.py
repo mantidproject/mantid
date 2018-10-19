@@ -21,7 +21,8 @@ from mantid.simpleapi import (DeleteWorkspace, LoadMask, LoadEventNexus,
                               CropWorkspace, RenameWorkspace,
                               LoadNexusMonitors, OneMinusExponentialCor,
                               Scale, Divide, Rebin, MedianDetectorTest,
-                              SumSpectra, Integration, CreateWorkspace)
+                              SumSpectra, Integration, CreateWorkspace,
+                              ScaleX, Plus)
 from mantid.kernel import (FloatArrayProperty, Direction)
 debug_flag = False  # set to True to prevent erasing temporary workspaces
 
@@ -76,6 +77,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
 
     _mask_file = '/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/'\
                  'BASIS_Mask_default_diff.xml'
+    # Consider only events with these wavelengths
+    _wavelength_bands = {'311': [3.07, 3.6],
+                         '111': [6.1, 6.6]}
 
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
@@ -106,6 +110,25 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     @staticmethod
     def seeAlso():
         return ['BASISReduction', 'BASISCrystalDiffraction']
+
+    @staticmethod
+    def _add_previous_pulse(w):
+        """
+        Duplicate the events but shift them by one pulse, then add to
+        input workspace
+
+        Parameters
+        ----------
+        w: Mantid.EventsWorkspace
+
+        Returns
+        -------
+        Mantid.EventsWorkspace
+        """
+        pulse_width = 1.e6/60  # in micro-seconds
+        _t_w = ScaleX(w, Factor=-pulse_width, Operation='Add')
+        _t_w = Plus(w, _t_w, OutputWorkspace=w.name())
+        return _t_w
 
     def PyInit(self):
         #
@@ -309,6 +332,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         """
         MaskDetectors(w, MaskedWorkspace=self._t_mask)
         _t_corr = ModeratorTzeroLinear(w)  # delayed emission from moderator
+        _t_corr = self._add_previous_frame(_t_corr)
         _t_corr = ConvertUnits(_t_corr, Target='Wavelength', Emode='Elastic')
         l_s, l_e = self._wavelength_band[0], self._wavelength_band[1]
         _t_corr = CropWorkspace(_t_corr, XMin=l_s, XMax=l_e)
@@ -503,32 +527,18 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
 
     def _calculate_wavelength_band(self):
         """
-        Calculate the wavelength band using the monitors from the sample runs
-
-        Consider wavelenghts with an associated intensity above a certain
-        fraction of the maximum observed intensity.
+        Select the wavelength band examining the logs of the first sample
         """
-        _t_w = self._load_monitors('sample')
-        _t_w = ConvertUnits(_t_w, Target='Wavelength', Emode='Elastic')
-        l_min, l_max = 0.0, 20.0
-        _t_w = CropWorkspace(_t_w, XMin=l_min, XMax=l_max)
-        _t_w = OneMinusExponentialCor(_t_w, C='0.20749999999999999',
-                                      C1='0.001276')
-        _t_w = Scale(_t_w, Factor='1e-06', Operation='Multiply')
-        _t_w = Rebin(_t_w, Params=[l_min, self._wavelength_dl, l_max],
-                     PreserveEvents=False)
-        y = _t_w.readY(0)
-        k = np.argmax(y)  # y[k] is the maximum observed intensity
-        factor = 0.8  # 80% of the maximum intensity
-        i_s = k - 1
-        while y[i_s] > factor * y[k]:
-            i_s -= 1
-        i_e = k + 1
-        while y[i_e] > factor * y[k]:
-            i_e += 1
-        x = _t_w.readX(0)
-        self._wavelength_band = [x[i_s], x[i_e]]
-
+        runs = self.getProperty('RunNumbers').value
+        run = self._run_lists(runs)[0]
+        file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
+        _t_w = LoadEventNexus(Filename=file_name, NXentryName='entry-diff',
+                              SingleBankPixelsOnly=False)
+        wavelength = np.mean(_t_w.getRun().getProperty('LambdaRequest'))
+        midpoint = self._wavelength_bands['111'][0] +\
+                   self._wavelength_bands['311'][0]
+        reflection = '111' if wavelength > midpoint else '311'
+        self._wavelength_band = self._wavelength_bands[reflection]
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISPowderDiffraction)
