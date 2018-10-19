@@ -178,7 +178,7 @@ public:
     vertices.emplace_back(V3D(0, 1, 0));
     std::vector<uint32_t> triangles;
     triangles.insert(triangles.end(), {0, 1, 2});
-
+#
     MeshObject2D mesh(triangles, vertices, Mantid::Kernel::Material());
     TS_ASSERT(mesh.hasValidShape());
     TS_ASSERT_EQUALS(mesh.volume(), 0);

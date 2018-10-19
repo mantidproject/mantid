@@ -62,15 +62,14 @@ public:
   test_That_An_Environment_Can_Be_Set_And_The_Same_Environment_Is_Returned() {
     Sample sample;
     const std::string envName("TestKit");
-    boost::shared_ptr<Geometry::SampleEnvironment> environment = nullptr;
-    environment = boost::make_shared<SampleEnvironment>(envName, boost::make_shared<const Container>(""));
-    environment->add(boost::make_shared<const CSGObject>());
+    auto kit = boost::make_shared<SampleEnvironment>(envName, boost::make_shared<const Container>(""));
+    kit->add(boost::make_shared<const CSGObject>());
 
-    TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(environment));
+    TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
 
     const SampleEnvironment &sampleKit = sample.getEnvironment();
     // Test that this references the correct object
-    TS_ASSERT_EQUALS(&sampleKit, environment.get());
+    TS_ASSERT_EQUALS(&sampleKit, kit.get());
     TS_ASSERT_EQUALS(sampleKit.name(), envName);
     TS_ASSERT_EQUALS(sampleKit.nelements(), 2);
   }

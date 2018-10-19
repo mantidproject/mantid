@@ -8,6 +8,8 @@
 #include <Poco/File.h>
 #include <fstream>
 #include <string>
+#include <vector>
+#include <boost/make_shared.hpp>
 namespace Mantid {
 namespace DataHandling {
 
@@ -43,6 +45,38 @@ LoadBinaryStl::getNumberTriangles(Kernel::BinaryStreamReader streamReader) {
   streamReader >> numberTrianglesLong;
   return numberTrianglesLong;
 }
+
+
+std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
+  std::ifstream myFile(m_filename.c_str(), std::ios::in | std::ios::binary);
+  myFile.seekg(0, std::ios_base::end);
+  std::size_t size=myFile.tellg();
+  myFile.seekg(0, std::ios_base::beg);
+  char Header[80];
+  char buffer[size-84];
+  char temp[4];
+  myFile.read(Header, 80);
+  myFile.read(temp,4);
+  myFile.read(buffer, size);
+  uint32_t nTriLong = *((uint32_t*)temp) ;
+  for(int i =0;i++;i<nTriLong){
+    for (int j = 0; j < 3; j++) {
+      auto vec =makeV3D(buffer,(12+(i*50)+(j*12)));
+      m_triangle.emplace_back(addSTLVertex(vec));
+    }
+  }
+  m_verticies.shrink_to_fit();
+  m_triangle.shrink_to_fit();
+  // Close the file
+  myFile.close();
+  std::unique_ptr<Geometry::MeshObject> retVal =
+      std::unique_ptr<Geometry::MeshObject>(new Geometry::MeshObject(
+          std::move(m_triangle), std::move(m_verticies),
+          Mantid::Kernel::Material()));
+  return retVal;
+}
+
+
 
 std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
   std::ifstream myFile(m_filename.c_str(), std::ios::in | std::ios::binary);
@@ -84,6 +118,25 @@ void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader) {
     Kernel::V3D vec = Kernel::V3D(double(xVal), double(yVal), double(zVal));
     m_triangle.emplace_back(addSTLVertex(vec));
   }
+}
+
+Kernel::V3D LoadBinaryStl::makeV3D(char* facet, int index)
+{
+
+    char f1[4] = {facet[index],
+        facet[index+1],facet[index+2],facet[index+3]};
+
+    char f2[4] = {facet[index+4],
+        facet[index+5],facet[index+6],facet[index+7]};
+
+    char f3[4] = {facet[index+8],
+        facet[index+9],facet[index+10],facet[index+11]};
+
+    float xx = *((float*) f1 );
+    float yy = *((float*) f2 );
+    float zz = *((float*) f3 );
+    Kernel::V3D vec = Kernel::V3D(double(xx), double(yy), double(zz));
+    return vec;
 }
 
 } // namespace DataHandling

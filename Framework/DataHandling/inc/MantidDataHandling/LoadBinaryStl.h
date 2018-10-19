@@ -24,6 +24,7 @@ public:
   bool isBinarySTL();
 
 private:
+  Kernel::V3D LoadBinaryStl::makeV3D(char* facet, int index);
   uint32_t getNumberTriangles(Kernel::BinaryStreamReader);
   void readTriangle(Kernel::BinaryStreamReader);
 };
