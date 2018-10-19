@@ -11,7 +11,7 @@ import numpy
 import sys
 from HFIR_4Circle_Reduction import fourcircle_utility
 from HFIR_4Circle_Reduction import guiutility
-from PyQt4 import QtCore
+from qtpy import QtCore   # noqa
 import math
 import HFIR_4Circle_Reduction.NTableWidget as tableBase
 import os

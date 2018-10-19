@@ -1171,14 +1171,8 @@ class Qt4MplCanvas(FigureCanvas):
         # Register
         line_key = self._lineIndex
         if plot_error:
-            # plot with error bar
+            # plot with error bar: data_line = r[0],  error_bar_line = r[2][0]
             self._errorBarDict[line_key] = r[0], r[2][0]
-            # data_line = r[0]
-            # error_bar_line = r[2][0]
-            #
-            # msg = 'Return from plot is a {0}-tuple: {1} with plot error is {2}\n'.format(len(r), r, plot_error)
-            # for i_r in range(len(r)):
-            #     msg += 'r[%d] = %s\n' % (i_r, str(r[i_r]))
         else:
             assert len(r) > 0, 'There must be at least 1 figure returned'
             self._lineDict[line_key] = r[0]
@@ -1379,12 +1373,6 @@ class Qt4MplCanvas(FigureCanvas):
             else:
                 # error bar: but not likely to be set to _lineDict
                 raise RuntimeError('It is not correct to set a line with error bar to _lineDict')
-                # plot[0].remove()
-                # for line in plot[1]:
-                #     line.remove()
-                # for line in plot[2]:
-                #     line.remove()
-                # del self._lineDict[ikey]
             # ENDIF(plot)
         # ENDFOR
 

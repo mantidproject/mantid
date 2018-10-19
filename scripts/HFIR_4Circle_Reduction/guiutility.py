@@ -461,7 +461,6 @@ class GetValueDialog(QDialog):
 # END-DEF-CLASS
 
 
-# TODO - 20180815 - Clean!
 class DisplayDialog(QDialog):
     """
     This is a simple dialog display which can be configured by users
