@@ -26,6 +26,7 @@ namespace {
 
 Python::Object createScalarMappable(const NormalizeBase &norm,
                                     const Colormap &cmap) {
+  GlobalInterpreterLock lock;
   return cmModule().attr("ScalarMappable")(norm.pyobj(), cmap.pyobj());
 }
 } // namespace
@@ -54,7 +55,10 @@ ScalarMappable::ScalarMappable(const NormalizeBase &norm, const QString &cmap)
     : ScalarMappable(norm, getCMap(cmap)) {}
 
 /// @return A reference to the colormap instance
-Colormap ScalarMappable::cmap() const { return Colormap(pyobj().attr("cmap")); }
+Colormap ScalarMappable::cmap() const {
+  GlobalInterpreterLock lock;
+  return Colormap(pyobj().attr("cmap"));
+}
 
 /**
  * Reset the underlying colormap
