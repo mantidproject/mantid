@@ -1994,7 +1994,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     def clear_table(self):
         self.data_processor_table.removeAllRows()
-        self.enable_process_all()
+        # self.enable_process_all()
 
     def clear_selection(self):
         self.data_processor_table.clearSelection()
@@ -2006,12 +2006,10 @@ class SANSDataProcessorGui(QMainWindow,
     def add_row(self, value):
         value = [self.cell(x) for x in value]
         self.data_processor_table.appendChildRowOf(self.row([]), value)
-        self.enable_process_all()
 
     def remove_rows(self, rows):
         rows = [self.row([item]) for item in rows]
         self.data_processor_table.removeRows(rows)
-        self.enable_process_all()
 
     def insert_empty_row(self, row_index):
         self.data_processor_table.insertChildRowOf(self.row([]), row_index)

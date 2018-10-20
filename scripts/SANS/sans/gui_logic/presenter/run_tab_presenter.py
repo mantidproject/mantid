@@ -50,6 +50,24 @@ row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Process
                                RowState.Error: '#accbff'}
 
 
+def log_times(func):
+    """
+    Generic decorator to time the execution of the function and
+    print it to the logger.
+    """
+
+    def run(*args, **kwargs):
+        t0 = time.time()
+        result = func(*args, **kwargs)
+        t1 = time.time()
+        time_taken = t1 - t0
+        # args[0] is the self parameter
+        args[0].sans_logger.information("The generation of all states took {}s".format(time_taken))
+        return result
+
+    return run
+
+
 class RunTabPresenter(object):
     class ConcreteRunTabListener(SANSDataProcessorGui.RunTabListener):
         def __init__(self, presenter):
@@ -384,9 +402,15 @@ class RunTabPresenter(object):
                 self._view.show_period_columns()
         self._view.remove_rows([0])
         self._view.clear_selection()
+        self.enable_process_all_button()
 
     def on_data_changed(self, row, column, new_value, old_value):
         self._table_model.update_table_entry(row, column, new_value)
+        self._view.change_row_color(row_state_to_colour_mapping[RowState.Unprocessed], row)
+        self._view.set_row_tooltip('', row)
+        self._beam_centre_presenter.on_update_rows()
+        self._masking_table_presenter.on_update_rows()
+        self.enable_process_all_button()
 
     def on_instrument_changed(self):
         self._setup_instrument_specific_settings()
@@ -395,16 +419,27 @@ class RunTabPresenter(object):
     # Processing
     # ----------------------------------------------------------------------------------------------
 
+    def enable_process_all_button(self):
+        """
+        Determines whether to enable/disable process all based on whether there are non-empty rows
+        in the table.
+        """
+        rows = self._table_model.get_number_of_rows()
+        for row in range(rows):
+            # If any rows are not empty, enable the button
+            if not self._table_model.is_empty_row(row):
+                self._view.set_process_all_enabled(True)
+                return
+        self._view.set_process_all_enabled(False)
+
     def _handle_get_states(self, rows):
         """
-        Return the states for the supplied rows, calling
-        on_processing_error for any errors which occur.
+        Return the states for the supplied rows, calling on_processing_error for any errors
+        which occur.
         """
         states, errors = self.get_states(row_index=rows)
-
         for row, error in errors.items():
             self.on_processing_error(row, error)
-
         return states
 
     def _plot_graph(self):
@@ -474,12 +509,15 @@ class RunTabPresenter(object):
             self._process_rows(selected_rows)
 
     def on_processing_error(self, row, error_msg):
+        """
+        An error occurs while processing the row with index row, error_msg is displayed as a
+        tooltip on the row.
+        """
         self.increment_progress()
         self._table_model.set_row_to_error(row, error_msg)
         self.update_view_from_table_model()
 
     def on_processing_finished(self, result):
-        # TODO : is this unused?
         self._view.enable_buttons()
         self._processing = False
 
@@ -508,24 +546,46 @@ class RunTabPresenter(object):
     # Row manipulation
     # ----------------------------------------------------------------------------------------------
 
+    def num_rows(self):
+        return self._table_model.get_number_of_rows()
+
     def on_row_inserted(self, index, row):
+        """
+
+        """
         row_table_index = TableIndexModel(*row)
         self._table_model.add_table_entry(index, row_table_index)
 
     def on_insert_row(self):
+        """
+        Add an empty row to the table after the first selected row (or at the end of the table
+        if nothing is selected).
+        """
         selected_rows = self._view.get_selected_rows()
         selected_row = selected_rows[
                            0] + 1 if selected_rows else self._table_model.get_number_of_rows()
         table_entry_row = self._table_model.create_empty_row()
         self._table_model.add_table_entry(selected_row, table_entry_row)
 
+        '''selected_row = selected_rows[0] + 1 if selected_rows else self.num_rows()
+        empty_row = self._table_model.create_empty_row()
+        self._table_model.add_table_entry(selected_row, empty_row)
+        self.update_view_from_table_model()'''
+
     def on_erase_rows(self):
+        """
+        Make all selected rows empty.
+        """
         selected_rows = self._view.get_selected_rows()
+        empty_row = self._table_model.create_empty_row()
         for row in selected_rows:
             empty_row = TableModel.create_empty_row()
             self._table_model.replace_table_entries([row], [empty_row])
 
     def on_rows_removed(self, rows):
+        """
+        Remove rows from the table
+        """
         self._table_model.remove_table_entries(rows)
 
     def on_copy_rows_requested(self):
@@ -543,8 +603,7 @@ class RunTabPresenter(object):
     def on_paste_rows_requested(self):
         if self._clipboard:
             selected_rows = self._view.get_selected_rows()
-            selected_rows = selected_rows if selected_rows else [
-                self._table_model.get_number_of_rows()]
+            selected_rows = selected_rows if selected_rows else [self.num_rows()]
             replacement_table_index_models = [TableIndexModel(*x) for x in self._clipboard]
             self._table_model.replace_table_entries(selected_rows, replacement_table_index_models)
 
@@ -633,21 +692,7 @@ class RunTabPresenter(object):
     # Table Model and state population
     # ----------------------------------------------------------------------------------------------
 
-    def log_times(self, func):
-        """Generic decorator to time the execution of the function and
-        print it to the logger."""
-
-        # TODO : Implement
-        def run(*args, **kwargs):
-            t0 = time.time()
-            result = func(*args, **kwargs)
-            t1 = time.time()
-            time_taken = t1 - t0
-            self.sans_logger.information("The generation of all states took {}s".format(time_taken))
-            return result
-
-        return run
-
+    @log_times
     def get_states(self, row_index=None, file_lookup=True):
         """
         Gathers the state information for all rows.
@@ -655,26 +700,18 @@ class RunTabPresenter(object):
                           else all the state for all rows is returned.
         :return: a list of states.
         """
-        start_time_state_generation = time.time()
-
         # 1. Update the state model
         state_model_with_view_update = self._get_state_model_with_view_update()
         # 2. Update the table model
         table_model = self._table_model
-
         # 3. Go through each row and construct a state object
+        states, errors = None, None
         if table_model and state_model_with_view_update:
             states, errors = create_states(state_model_with_view_update, table_model,
                                            self._view.instrument,
                                            self._facility,
                                            row_index=row_index,
                                            file_lookup=file_lookup)
-        else:
-            states = None
-            errors = None
-        stop_time_state_generation = time.time()
-        time_taken = stop_time_state_generation - start_time_state_generation
-        self.sans_logger.information("The generation of all states took {}s".format(time_taken))
 
         if errors:
             self.sans_logger.warning("Errors in getting states...")
