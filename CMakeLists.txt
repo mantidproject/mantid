@@ -368,10 +368,10 @@ if ( ENABLE_CPACK )
                                            "ipython-notebook,"
                                            "libhdf5-cpp-11" )
       else()  # bionic and newer
-        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23"
-                                           "liboce-foundation11,liboce-modeling11"
-                                           "libqscintilla2-qt4-13"
-                                           "jupyter-notebook"
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23,"
+                                           "liboce-foundation11,liboce-modeling11,"
+                                           "libqscintilla2-qt4-13,"
+                                           "jupyter-notebook,"
                                            "libhdf5-cpp-100" )
       endif()
 
