@@ -12,6 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy
 import datetime
 from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
+from mantid.api import MultipleExperimentInfos
 import mantid.kernel, mantid.api
 
 
@@ -21,10 +22,11 @@ import mantid.kernel, mantid.api
 # ====================================================
 # Validation
 # ====================================================
-def validate_args(*args):
+def validate_args(*args, **kwargs):
     return len(args) > 0 and (isinstance(args[0], EventWorkspace) or
                               isinstance(args[0], Workspace2D) or
-                              isinstance(args[0], MDHistoWorkspace))
+                              isinstance(args[0], MDHistoWorkspace) or
+                              isinstance(args[0], MultipleExperimentInfos) and "LogName" in kwargs)
 
 
 # ====================================================
@@ -370,7 +372,7 @@ def get_data_uneven_flag(workspace, **kwargs):
 def get_sample_log(workspace, **kwargs):
     LogName = kwargs.pop('LogName')
     ExperimentInfo = kwargs.pop('ExperimentInfo',0)
-    if isinstance(workspace, MDHistoWorkspace):
+    if isinstance(workspace, MultipleExperimentInfos):
         run = workspace.getExperimentInfo(ExperimentInfo).run()
     else:
         run = workspace.run()
@@ -378,8 +380,10 @@ def get_sample_log(workspace, **kwargs):
         raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
     tsp = run[LogName]
     units = tsp.units
-    if not isinstance(tsp, mantid.kernel.FloatTimeSeriesProperty):
-        raise RuntimeError('This function can only plot FloatTimeSeriesProperty objects')
+    if not isinstance(tsp, (mantid.kernel.FloatTimeSeriesProperty,
+                            mantid.kernel.Int32TimeSeriesProperty,
+                            mantid.kernel.Int64TimeSeriesProperty)):
+        raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
     times = tsp.times.astype('datetime64[us]')
     y = tsp.value
     FullTime = kwargs.pop('FullTime', False)
@@ -411,7 +415,7 @@ def get_axes_labels(workspace):
 
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
     """
-    if isinstance(workspace, MDHistoWorkspace):
+    if isinstance(workspace, MultipleExperimentInfos):
         axes = ['Intensity']
         dims = workspace.getNonIntegratedDimensions()
         for d in dims:

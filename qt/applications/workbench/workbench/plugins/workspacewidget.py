@@ -20,6 +20,7 @@ from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 # local package imports
 from workbench.plugins.base import PluginWidget
 from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names
+from mantidqt.widgets.samplelogs.presenter import SampleLogs
 
 
 class WorkspaceWidget(PluginWidget):
@@ -46,6 +47,7 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
                                                                                          errors=True, overplot=True))
         self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
+        self.workspacewidget.sampleLogsClicked.connect(self._do_sample_logs)
 
     # ----------------- Plugin API --------------------
 
@@ -55,7 +57,10 @@ class WorkspaceWidget(PluginWidget):
     def get_plugin_title(self):
         return "Workspaces"
 
-    def read_user_settings(self, _):
+    def readSettings(self, _):
+        pass
+
+    def writeSettings(self, _):
         pass
 
     # ----------------- Behaviour --------------------
@@ -88,3 +93,7 @@ class WorkspaceWidget(PluginWidget):
         except BaseException:
             import traceback
             traceback.print_exc()
+
+    def _do_sample_logs(self, names):
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            SampleLogs(ws=ws, parent=self)
