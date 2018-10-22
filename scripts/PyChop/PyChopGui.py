@@ -29,6 +29,7 @@ from qtpy.QtWidgets import (QAction, QCheckBox, QComboBox, QDialog, QFileDialog,
                             QTextEdit, QVBoxLayout, QWidget)  # noqa
 from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from MPLwidgets import NavigationToolbar2QT as NavigationToolbar
+import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider
 
@@ -232,7 +233,8 @@ class PyChopGui(QMainWindow):
     def _set_overplot(self, overplot, axisname):
         axis = getattr(self, axisname)
         if overplot:
-            axis.hold(True)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                axis.hold(True)
         else:
             setattr(self, axisname+'_xlim', 0)
             axis.clear()
@@ -251,7 +253,8 @@ class PyChopGui(QMainWindow):
         if hasattr(freq, '__len__'):
             freq = freq[0]
         if multiplot:
-            self.resaxes.hold(True)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                self.resaxes.hold(True)
             for ie, Ei in enumerate(self.eis):
                 en = np.linspace(0, 0.95*Ei, 200)
                 if any(self.res[ie]):
@@ -263,7 +266,8 @@ class PyChopGui(QMainWindow):
                     if self.tabs.isTabEnabled(self.qetabID):
                         self.plot_qe(Ei, label_text, hold=True)
                     self.resaxes_xlim = max(Ei, self.resaxes_xlim)
-            self.resaxes.hold(False)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                self.resaxes.hold(False)
         else:
             ei = self.engine.getEi()
             en = np.linspace(0, 0.95*ei, 200)
@@ -329,8 +333,9 @@ class PyChopGui(QMainWindow):
         if update:
             self.flxaxes1.clear()
             self.flxaxes2.clear()
-            self.flxaxes1.hold(True)
-            self.flxaxes2.hold(True)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                self.flxaxes1.hold(True)
+                self.flxaxes2.hold(True)
             for ii, instrument in enumerate(tmpinst):
                 for ie, ei in enumerate(eis):
                     with warnings.catch_warnings(record=True):
@@ -347,8 +352,9 @@ class PyChopGui(QMainWindow):
                     flux[ie] = self.engine.getFlux(ei)
                     elres[ie] = self.engine.getResolution(0., ei)[0]
             if overplot:
-                self.flxaxes1.hold(True)
-                self.flxaxes2.hold(True)
+                if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                    self.flxaxes1.hold(True)
+                    self.flxaxes2.hold(True)
             else:
                 self.flxaxes1.clear()
                 self.flxaxes2.clear()
@@ -413,8 +419,9 @@ class PyChopGui(QMainWindow):
                 flux[ie] = self.engine.getFlux(ei)
                 elres[ie] = self.engine.getResolution(0., ei)[0]
         if overplot:
-            self.frqaxes1.hold(True)
-            self.frqaxes2.hold(True)
+            if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
+                self.frqaxes1.hold(True)
+                self.frqaxes2.hold(True)
         else:
             self.frqaxes1.clear()
             self.frqaxes2.clear()
