@@ -1073,6 +1073,8 @@ namespace Mantid {
                 m_orig_K = other.m_orig_K;
                 m_orig_L = other.m_orig_L;
                 m_detIDs = other.m_detIDs;
+                m_IntHKL = other.m_IntHKL;
+                m_IntMNP = other.m_IntMNP;
                 convention = other.convention;
                 m_peakShape.reset(other.m_peakShape->clone());
             }
