@@ -24,9 +24,10 @@ public:
   bool isBinarySTL();
 
 private:
-  Kernel::V3D LoadBinaryStl::makeV3D(char* facet, int index);
+  Kernel::V3D makeV3D(char* facet, int index);
   uint32_t getNumberTriangles(Kernel::BinaryStreamReader);
   void readTriangle(Kernel::BinaryStreamReader);
+  void add3Vertex(Kernel::V3D vec1, Kernel::V3D vec2, Kernel::V3D vec3);
 };
 
 } // namespace DataHandling
