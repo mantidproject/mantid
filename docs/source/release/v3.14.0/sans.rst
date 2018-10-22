@@ -27,6 +27,7 @@ Improved
 * Removed instrument selection box. Instrument is now determined by user file.
 * Automatically remembers last loaded user file
 * Added display of current save directory
+* Added a "process all" and "process selected" button to the batch table in place of "process" button.
 
 Bug fixes
 #########
