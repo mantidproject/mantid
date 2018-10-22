@@ -87,12 +87,12 @@ public:
   Eigen::Vector3d sourcePosition() const;
   Eigen::Vector3d samplePosition() const;
 
-  /** The merge() operation was made private in DetectorInfo, and only
-   * accessible through ComponentInfo (via this friend declaration)
-   * because we need to avoid merging DetectorInfo without merging
-   * ComponentInfo, since that would effectively let us create a non-sync
+  /** The `merge()` operation was made private in `DetectorInfo`, and only
+   * accessible through `ComponentInfo` (via this `friend` declaration)
+   * because we need to avoid merging `DetectorInfo` without merging
+   * `ComponentInfo`, since that would effectively let us create a non-sync
    * scan. Otherwise we cannot provide scanning-related methods in
-   * ComponentInfo without component index.
+   * `ComponentInfo` without component index.
    */
   friend class ComponentInfo;
 

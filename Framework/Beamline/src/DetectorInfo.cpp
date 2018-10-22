@@ -174,7 +174,20 @@ void failMerge(const std::string &what) {
  * incremented by the scan count of that detector in `this`. The relative order
  * of time indices added from `other` is preserved. If the interval for a time
  * index in `other` is identical to a corresponding interval in `this`, it is
- * ignored, i.e., no time index is added. */
+ * ignored, i.e., no time index is added.
+ *
+ * The `merge()` operation is private in `DetectorInfo`, and only
+ * accessible through `ComponentInfo` (via a `friend` declaration)
+ * because we need to avoid merging `DetectorInfo` without merging
+ * `ComponentInfo`, since that would effectively let us create a non-sync
+ * scan. Otherwise we cannot provide scanning-related methods in
+ * `ComponentInfo` without component index.
+ *
+ * The `scanIntervals` are stored in `ComponentInfo` only, to make sure all
+ * components have the same ones. The `bool` vector `merge` dictating whether
+ * a given interval should be merged or not was built by `ComponentInfo` and
+ * passed on to this function.
+ */
 void DetectorInfo::merge(const DetectorInfo &other,
                          const std::vector<bool> &merge) {
   checkSizes(other);

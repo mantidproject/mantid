@@ -618,7 +618,7 @@ void ComponentInfo::setScanInterval(
 }
 
 /**
-Merges the contents of other ComponentInfo into this. The assumption is that
+Merges the contents of other `ComponentInfo` into this. The assumption is that
 this has no time dependence prior to this operation.
  *
  * Scan intervals in both other and this must be set. Intervals must be
@@ -630,6 +630,9 @@ this has no time dependence prior to this operation.
  * of time indices added from `other` is preserved. If the interval for a time
  * index in `other` is identical to a corresponding interval in `this`, it is
  * ignored, i.e., no time index is added.
+ *
+ * This function also conducts the merging of the `DetectorInfo` to ensute that
+ * there is no asynchronicity in the scans.
 **/
 void ComponentInfo::merge(const ComponentInfo &other) {
   const auto &toMerge = buildMergeIndices(other);
