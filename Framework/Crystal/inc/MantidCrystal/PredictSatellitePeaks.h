@@ -40,6 +40,7 @@ namespace Crystal {
   */
 class DLLExport PredictSatellitePeaks : public API::Algorithm {
 public:
+  PredictSatellitePeaks();
   /// Algorithm's name for identification
   const std::string name() const override { return "PredictSatellitePeaks"; };
   /// Summary of algorithms purpose
@@ -59,6 +60,7 @@ public:
 
 private:
   const size_t MAX_NUMBER_HKLS = 10000000000;
+  double m_qConventionFactor;
   /// Initialise the properties
   void init() override;
 

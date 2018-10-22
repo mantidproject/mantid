@@ -25,9 +25,29 @@ using namespace Mantid::API;
 using namespace std;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+
 namespace Crystal {
 
 DECLARE_ALGORITHM(PredictSatellitePeaks)
+
+namespace {
+/// Small helper function that return -1 if convention
+/// is "Crystallography" and 1 otherwise.
+double get_factor_for_q_convention(const std::string &convention) {
+  if (convention == "Crystallography") {
+    return -1.0;
+  }
+  return 1.0;
+}
+} // namespace
+
+
+/** Constructor
+ */
+
+PredictSatellitePeaks::PredictSatellitePeaks()
+    : m_qConventionFactor(get_factor_for_q_convention(
+          ConfigService::Instance().getString("Q.convention"))) { }
 
 /// Initialise the properties
 void PredictSatellitePeaks::init() {
@@ -318,11 +338,11 @@ void PredictSatellitePeaks::predictOffsets(
     if (!lambdaFilter.isAllowed(satelliteHKL) && includePeaksInRange)
       continue;
 
-    Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI;
+    Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
 
     // Check if Q is non-physical
-    if (Qs[2] <= 0)
-      continue;
+    /*if (Qs[2] <= 0)
+      continue;*/
 
     auto peak(Peaks->createPeak(Qs, 1));
 
@@ -343,12 +363,12 @@ void PredictSatellitePeaks::predictOffsets(
       continue;
     }
 
-    peak->setHKL(satelliteHKL);
-    peak->setIntHKL(hkl);
+    peak->setHKL(satelliteHKL * m_qConventionFactor);
+    peak->setIntHKL(hkl * m_qConventionFactor);
     peak->setRunNumber(RunNumber);
     V3D mnp;
     mnp[iVector] = order;
-    peak->setIntMNP(mnp);
+    peak->setIntMNP(mnp * m_qConventionFactor);
     outPeaks->addPeak(*peak);
   }
 }
@@ -391,7 +411,7 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
         if (!lambdaFilter.isAllowed(satelliteHKL) && includePeaksInRange)
           continue;
 
-        Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI;
+        Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
 
         // Check if Q is non-physical
         if (Qs[2] <= 0)
@@ -417,10 +437,10 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
           continue;
         }
 
-        peak->setHKL(satelliteHKL);
-        peak->setIntHKL(hkl);
+        peak->setHKL(satelliteHKL * m_qConventionFactor);
+        peak->setIntHKL(hkl * m_qConventionFactor);
         peak->setRunNumber(RunNumber);
-        peak->setIntMNP(V3D(m, n, p));
+        peak->setIntMNP(V3D(m, n, p) * m_qConventionFactor);
         outPeaks->addPeak(*peak);
       }
 }
