@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
 #include <boost/python/class.hpp>
