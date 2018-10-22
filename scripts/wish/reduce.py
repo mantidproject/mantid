@@ -364,7 +364,7 @@ def Wish_Run(input, cal_directory, user_directory, outputfolder, deleteWorkspace
             mantid.Divide(LHSWorkspace=w, RHSWorkspace="T", OutputWorkspace=w)
             mantid.DeleteWorkspace("T")
             mantid.ConvertUnits(InputWorkspace=w, OutputWorkspace=w, Target="TOF", EMode="Elastic")
-        # wfoc = WISH_focus(w, panel)
+        wfoc = WISH_focus(w, panel)
         print "focussing done!"
         if type(number) is int:
             wfocname = "w" + str(number) + "-" + str(panel) + "foc"
