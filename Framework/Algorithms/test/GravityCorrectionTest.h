@@ -186,19 +186,22 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws1{
         WorkspaceCreationHelper::
             create2DWorkspaceWithReflectometryInstrument()};
-    ws1->flagMasked(0, 4, 0.4);
-    ws1->flagMasked(0, 52, 1.0); // fully masked
-    ws1->flagMasked(0, 53, 0.1);
-
+    std::map<size_t, double> masks;
+    masks[4] = 0.4;
+    masks[52] = 1.;
+    masks[53] = 0.8;
+    const std::map<size_t, double> mask = masks;
+    ws1->setMaskedBins(0, mask);
+    TS_ASSERT_EQUALS(mask.size(), 3)
+    Mantid::API::MatrixWorkspace::MaskList mList0 = ws1->maskedBins(0);
     GravityCorrection gc10;
     auto ws2 = this->runGravityCorrection(gc10, ws1, "ws2");
+    TS_ASSERT_EQUALS(ws1->blocksize(), ws2->blocksize())
     Mantid::API::MatrixWorkspace::MaskList mList = ws2->maskedBins(0);
-    auto iterator = mList.begin();
-    // TS_ASSERT_EQUALS(iterator->second, 0.4)
-    ++iterator;
-    // TS_ASSERT_EQUALS(iterator->second, 1.0)
-    ++iterator;
-    // TS_ASSERT_EQUALS(iterator->second, 0.1)
+    TS_ASSERT_EQUALS(mList0.size(), mList.size())
+    auto val = masks.begin();
+    for (auto &list : mList)
+      TS_ASSERT_EQUALS(list.second, (val++)->second)
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().clear())
   }

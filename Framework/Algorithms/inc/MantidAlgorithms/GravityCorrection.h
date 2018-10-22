@@ -70,11 +70,9 @@ private:
   Mantid::Geometry::Instrument_const_sptr m_virtualInstrument;
   double m_beam1;
   double m_beam2;
-
   std::map<double, size_t> m_finalAngles;
   std::map<double, size_t>::key_compare m_smallerThan =
       Mantid::Algorithms::GravityCorrection::m_finalAngles.key_comp();
-
   /// Initialisation code
   void init() override;
   /// Name of a string component wich may be defined in parameters file

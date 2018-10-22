@@ -555,15 +555,6 @@ void GravityCorrection::exec() {
     double finalAngleValue = spectrumInfo.signedTwoTheta(i) / 2.;
     this->m_finalAngles.emplace_hint(this->m_finalAngles.end(),
                                      std::make_pair(finalAngleValue, i));
-
-    // unmask bins of OutputWorkspace
-    if (outWS->hasMaskedBins(i)) {
-      this->g_log.debug("Unmask bins.");
-      const MatrixWorkspace::MaskList &maskOut = outWS->maskedBins(i);
-      MatrixWorkspace::MaskList::const_iterator maskit;
-      for (maskit = maskOut.begin(); maskit != maskOut.end(); ++maskit)
-        outWS->flagMasked(i, maskit->first, 0.0);
-    }
     this->m_progress->report();
   }
   if (this->m_finalAngles.empty())
@@ -646,29 +637,29 @@ void GravityCorrection::exec() {
         outWS->mutableDx(j)[i_tofit] += this->m_ws->dx(i)[i_tofit];
       ++i_tofit;
       this->m_progress->report();
-    }
-
+    } // end loop over all x values
     this->m_progress->report("Mask bins consideration ...");
     if (this->m_ws->hasMaskedBins(i)) {
       // store mask of InputWorkspace
       HistogramX &tof2 = outWS->mutableX(i);
       const MatrixWorkspace::MaskList &maskIn = this->m_ws->maskedBins(i);
-      MatrixWorkspace::MaskList::const_iterator maskit;
-      for (maskit = maskIn.begin(); maskit != maskIn.end(); ++maskit) {
-        // determine offset for new bin index
+      g_log.debug("Found " + to_string(maskIn.size()) + " masked bins");
+      const size_t nXValues = this->m_ws->blocksize();
+      for (auto &maskit : maskIn) {
+        // determine new bin index
         HistogramX::iterator t =
             find_if(tof2.begin(), tof2.end(), [&](const double &ii) {
-              return ii > this->m_ws->x(i)[maskit->first];
+              return ii > this->m_ws->x(i)[maskit.first];
             });
-        if (t != tof2.end()) {
-          // get left bin boundary (index) of t
+        if (*t != tof2[nXValues]) { // success find_if
+                                    // get left bin boundary (index) of t
           pair<size_t, double> ti = outWS->getXIndex(i, *t, true, 0);
-          outWS->flagMasked(i, ti.first, maskit->second);
+          outWS->flagMasked(i, ti.first, maskit.second);
+          this->m_progress->report();
         }
-        this->m_progress->report();
       }
     }
-  }
+  } // end loop over all spectra
   this->setProperty("OutputWorkspace", outWS);
 }
 
