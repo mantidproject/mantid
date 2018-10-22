@@ -16,6 +16,7 @@ New Algorithms
 ##############
 - :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` replaces :ref:`BASISDiffraction <algm-BASISDiffraction>`, now deprecated.
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` obtains scattered elastic intensity versus momentum transfer and versus scattering angle.
+- TOF correction for neutrons incorrectly interpreted as slow neutrons in :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>`
 - Deprecated algorithm BASISReduction311 has been removed.
 - :ref:`LoadEMU <algm-LoadEMU>` loader for an ANSTO EMU backscattering event file.
 
