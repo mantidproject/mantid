@@ -577,6 +577,9 @@ void GravityCorrection::exec() {
     const HistogramX &tof = this->m_ws->x(i);
     const auto y = this->m_ws->y(i);
     const auto e = this->m_ws->e(i);
+    HistogramData::HistogramDx dx(this->m_ws->blocksize());
+    if (this->m_ws->hasDx(i))
+      dx = this->m_ws->dx(i);
     // correct tof angles, velocity, characteristic length
     size_t i_tofit{0};
     const auto theta = this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.;
@@ -634,7 +637,7 @@ void GravityCorrection::exec() {
       outWS->mutableE(j)[i_tofit] += e[i_tofit];
       // must be always positiv
       if (this->m_ws->hasDx(i))
-        outWS->mutableDx(j)[i_tofit] += this->m_ws->dx(i)[i_tofit];
+        outWS->mutableDx(j)[i_tofit] += dx[i_tofit];
       ++i_tofit;
       this->m_progress->report();
     } // end loop over all x values

@@ -328,9 +328,22 @@ public:
         Mantid::API::AnalysisDataService::Instance().clear())
   }
 
+  void testDx() {
+    auto ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+    auto dx = Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramDx>(
+        ws->y(0).size(), Mantid::HistogramData::LinearGenerator(0.1, 0.33));
+    ws->setSharedDx(0, dx);
+    GravityCorrection gc23;
+    const auto out = this->runGravityCorrection(gc23, ws, "hasDx");
+    TS_ASSERT_EQUALS(out->hasDx(0), ws->hasDx(0))
+    // TODO: WorkspaceCreation creates dx for all spectra if spectrum 0 has dx
+    TS_ASSERT_EQUALS(out->hasDx(1), !ws->hasDx(1))
+  }
+
   // Real data tests
 
-  void testInputWorkspace1D() {
+  void testInputWorkspace2D() {
     Mantid::API::IAlgorithm *lAlg;
     TS_ASSERT_THROWS_NOTHING(
         lAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
@@ -354,22 +367,6 @@ public:
     }
     TS_ASSERT_EQUALS(totalCounts, totalCountsCorrected)
   }
-
-  void testDx() {
-    auto ws =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
-    auto dx = Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramDx>(
-        ws->y(0).size(), Mantid::HistogramData::LinearGenerator(0.1, 0.33));
-    ws->setSharedDx(1, dx);
-    GravityCorrection gc23;
-    const auto out = this->runGravityCorrection(gc23, ws, "hasDx");
-    TS_ASSERT_EQUALS(out->hasDx(0), ws->hasDx(0))
-    // TS_ASSERT_EQUALS(out->hasDx(1), ws->hasDx(1))
-  }
-
-  void testInputWorkspace2D() {}
-
-  void testDetectorMask() {}
 
   void testReflectionUp() {} // real data
 
