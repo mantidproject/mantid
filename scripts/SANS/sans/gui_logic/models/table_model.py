@@ -29,6 +29,7 @@ class TableModel(object):
                              "can_scatter", "can_scatter_period",
                              "can_transmission", "can_transmission_period", "can_direct", "can_direct_period",
                              "output_name", "user_file", "sample_thickness", "options_column_model"]
+    THICKNESS_ROW = 14
 
     def __init__(self):
         super(TableModel, self).__init__()
@@ -144,19 +145,25 @@ class TableModel(object):
         self.notify_subscribers()
 
     def get_thickness_for_rows(self, rows=None):
+        """
+        Read in the sample thickness for the given rows from the file and set it in the table.
+        :param rows: list of table rows
+        """
         if not rows:
             rows = range(len(self._table_entries))
         for row in rows:
             entry = self._table_entries[row]
             if entry.is_empty():
                 continue
-            success_callback = functools.partial(self.update_thickness_from_file_information, entry.id)
+            success_callback = functools.partial(self.update_thickness_from_file_information,
+                                                 entry.id)
             error_callback = functools.partial(self.failure_handler, entry.id)
-            create_file_information(entry.sample_scatter, error_callback, success_callback, self.work_handler, entry.id)
+            create_file_information(entry.sample_scatter, error_callback, success_callback,
+                                    self.work_handler, entry.id)
 
     def failure_handler(self, id, error):
         row = self.get_row_from_id(id)
-        self.update_table_entry(row, 14, '')
+        self.update_table_entry(row, self.THICKNESS_ROW, '')
         self._table_entries[row].update_attribute('file_information', '')
         self.set_row_to_error(row, str(error[1]))
 
@@ -164,7 +171,7 @@ class TableModel(object):
         row = self.get_row_from_id(id)
         if file_information:
             rounded_file_thickness = round(file_information.get_thickness(), 2)
-            self.update_table_entry(row, 14, rounded_file_thickness)
+            self.update_table_entry(row, self.THICKNESS_ROW, rounded_file_thickness)
             self._table_entries[row].update_attribute('file_information', file_information)
         self.notify_subscribers()
 

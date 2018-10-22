@@ -9,7 +9,16 @@ from ui.sans_isis.work_handler import WorkHandler
 
 
 class GenericWorkHandlerListener(WorkHandler.WorkListener):
+    """
+    A concrete class to act as a "listener" for the WorkHandler.
+    """
+
     def __init__(self, error_callback, success_callback):
+        """
+        The callbacks are assigned to the abstract methods of the base class, and are called
+        after certain actions of a running Worker (for example errors being raised or the
+        Worker finishing its task).
+        """
         super(GenericWorkHandlerListener, self).__init__()
         self.error_callback = error_callback
         self.success_callback = success_callback
