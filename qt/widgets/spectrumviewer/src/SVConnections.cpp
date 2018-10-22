@@ -546,7 +546,7 @@ void SVConnections::loadColorMap(const QString &file_name) {
     m_colorMapFileName = MantidColorMap::chooseColorMap("", m_svMainWindow);
 
   MantidColorMap *mantid_color_map =
-      new MantidColorMap(file_name, GraphOptions::Linear);
+      new MantidColorMap(file_name, MantidColorMap::ScaleType::Linear);
 
   QwtDoubleInterval interval(0.0, 255.0);
   QVector<QRgb> mantid_color_table;
