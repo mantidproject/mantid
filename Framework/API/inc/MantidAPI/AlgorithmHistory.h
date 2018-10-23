@@ -82,7 +82,7 @@ public:
   /// get the execution count
   const std::size_t &execCount() const { return m_execCount; }
   /// get the uuid
-  const boost::uuids::uuid uuid() const { return m_uuid; }
+  const std::string uuid() const { return m_uuid; }
   /// get parameter list of algorithm in history const
   const Mantid::Kernel::PropertyHistories &getProperties() const {
     return m_properties;
@@ -148,7 +148,7 @@ private:
   /// set of child algorithm histories for this history record
   AlgorithmHistories m_childHistories;
   /// UUID for this algorithm history
-  boost::uuids::uuid m_uuid;
+  std::string m_uuid;
 };
 
 MANTID_API_DLL std::ostream &operator<<(std::ostream &,

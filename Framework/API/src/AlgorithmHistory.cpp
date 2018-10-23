@@ -47,7 +47,7 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   setProperties(alg);
-  m_uuid = uuidGen();
+  m_uuid = boost::uuids::to_string(uuidGen());
 }
 
 /// Destructor
@@ -72,10 +72,7 @@ AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
                                    std::size_t uexeccount)
     : m_name(name), m_version(vers), m_executionDate(start),
       m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories() {
-  std::istringstream uuidss(uuid);
-  uuidss >> m_uuid;
-}
+      m_childHistories(), m_uuid(uuid) {}
 
 /**
  *  Set the history properties for an algorithm pointer
