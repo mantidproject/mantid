@@ -47,7 +47,9 @@ struct AlgorithmHistoryHasher {
 struct AlgorithmHistoryComparator {
   bool operator()(const AlgorithmHistory_sptr &a,
                   const AlgorithmHistory_sptr &b) const {
-    return a->uuid() == b->uuid();
+	  std::cerr << "comp: " << a->uuid() << ' ' << b->uuid() << std::endl;
+	  std::cerr << "comp: " << a->uuid().size() << ' ' << b->uuid().size() << std::endl;
+	  return a->uuid() == b->uuid();
   }
 };
 } // namespace

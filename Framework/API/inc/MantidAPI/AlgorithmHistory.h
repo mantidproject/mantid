@@ -130,7 +130,7 @@ public:
 
 private:
   // private constructor
-  AlgorithmHistory() = default;
+	AlgorithmHistory();
   // Set properties of algorithm
   void setProperties(const Algorithm *const alg);
   /// The name of the Algorithm
