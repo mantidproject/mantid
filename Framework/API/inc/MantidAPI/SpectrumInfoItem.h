@@ -35,7 +35,7 @@ methods include:
 @author Bhuvan Bezawada, STFC
 @date 2018
 */
-template <typename T> class MANTID_API_DLL SpectrumInfoItem {
+template <typename T> class SpectrumInfoItem {
 
 public:
   // Methods that can be called via the iterator

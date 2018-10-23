@@ -7,7 +7,6 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFOITEM_H_
 #define MANTID_GEOMETRY_DETECTORINFOITEM_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
@@ -31,7 +30,7 @@ methods include:
 @author Bhuvan Bezawada, STFC
 @date 2018
 */
-template <typename T> class MANTID_GEOMETRY_DLL DetectorInfoItem {
+template <typename T> class DetectorInfoItem {
 
 public:
   // Methods that can be accessed via the iterator
