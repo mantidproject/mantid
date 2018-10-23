@@ -62,7 +62,8 @@ public:
   test_That_An_Environment_Can_Be_Set_And_The_Same_Environment_Is_Returned() {
     Sample sample;
     const std::string envName("TestKit");
-    auto kit = boost::make_shared<SampleEnvironment>(envName, boost::make_shared<const Container>(""));
+    auto kit = boost::make_shared<SampleEnvironment>(
+        envName, boost::make_shared<const Container>(""));
     kit->add(boost::make_shared<const CSGObject>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));

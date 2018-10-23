@@ -98,10 +98,11 @@ void LoadSampleEnvironment::exec() {
   bool add = getProperty("Add");
   Sample &sample = outputWS->mutableSample();
   boost::shared_ptr<Geometry::SampleEnvironment> environment = nullptr;
-  if (add){
-    environment = boost::make_shared<Geometry::SampleEnvironment>(sample.getEnvironment());
+  if (add) {
+    environment = boost::make_shared<Geometry::SampleEnvironment>(
+        sample.getEnvironment());
     environment->add(environmentMesh);
-  }else{
+  } else {
     auto can = boost::make_shared<Container>(environmentMesh);
     environment = boost::make_shared<Geometry::SampleEnvironment>(name, can);
   }
@@ -109,7 +110,9 @@ void LoadSampleEnvironment::exec() {
   sample.setEnvironment(environment);
 
   // Set output workspace
-  const std::string debugString = "Enviroment has: " +std::to_string(environment->nelements())+ " elements.";
+  const std::string debugString =
+      "Enviroment has: " + std::to_string(environment->nelements()) +
+      " elements.";
 
   g_log.debug(debugString);
 }

@@ -73,7 +73,5 @@ public:
     auto loader = LoadBinaryStl(path);
     auto LargeFile = loader.readStl();
   }
-  
-  
 };
 #endif /* LOAD_BINARYSTL_TEST_H_ */

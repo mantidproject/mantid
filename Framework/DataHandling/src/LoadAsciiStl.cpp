@@ -33,22 +33,22 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
     // Add triangle if all 3 vertices are distinct
     if (!areEqualVertices(t1, t2) && !areEqualVertices(t1, t3) &&
         !areEqualVertices(t2, t3)) {
-      auto vertexPair = std::pair<Kernel::V3D, uint32_t>(t1,vertexCount);
+      auto vertexPair = std::pair<Kernel::V3D, uint32_t>(t1, vertexCount);
       auto emplacementResult = addSTLVertex(vertexPair);
-      if(emplacementResult.second){
-      vertexCount++;
+      if (emplacementResult.second) {
+        vertexCount++;
       }
       m_triangle.emplace_back(emplacementResult.first->second);
-      vertexPair = std::pair<Kernel::V3D, uint32_t>(t2,vertexCount);
+      vertexPair = std::pair<Kernel::V3D, uint32_t>(t2, vertexCount);
       emplacementResult = addSTLVertex(vertexPair);
-      if(emplacementResult.second){
-      vertexCount++;
+      if (emplacementResult.second) {
+        vertexCount++;
       }
       m_triangle.emplace_back(emplacementResult.first->second);
-      vertexPair = std::pair<Kernel::V3D, uint32_t>(t3,vertexCount);
+      vertexPair = std::pair<Kernel::V3D, uint32_t>(t3, vertexCount);
       emplacementResult = addSTLVertex(vertexPair);
-      if(emplacementResult.second){
-      vertexCount++;
+      if (emplacementResult.second) {
+        vertexCount++;
       }
       m_triangle.emplace_back(emplacementResult.first->second);
     }
