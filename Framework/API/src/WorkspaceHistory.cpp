@@ -23,8 +23,8 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using boost::algorithm::split;
 using Mantid::Kernel::EnvironmentHistory;
+using boost::algorithm::split;
 
 namespace Mantid {
 namespace API {
@@ -47,9 +47,10 @@ struct AlgorithmHistoryHasher {
 struct AlgorithmHistoryComparator {
   bool operator()(const AlgorithmHistory_sptr &a,
                   const AlgorithmHistory_sptr &b) const {
-	  std::cerr << "comp: " << a->uuid() << ' ' << b->uuid() << std::endl;
-	  std::cerr << "comp: " << a->uuid().size() << ' ' << b->uuid().size() << std::endl;
-	  return a->uuid() == b->uuid();
+    std::cerr << "comp: " << a->uuid() << ' ' << b->uuid() << std::endl;
+    std::cerr << "comp: " << a->uuid().size() << ' ' << b->uuid().size()
+              << std::endl;
+    return a->uuid() == b->uuid();
   }
 };
 } // namespace

@@ -52,7 +52,7 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
 
 /// Default constructor
 AlgorithmHistory::AlgorithmHistory() {
-	m_uuid = boost::uuids::to_string(uuidGen());
+  m_uuid = boost::uuids::to_string(uuidGen());
 }
 
 /// Destructor
@@ -270,7 +270,7 @@ AlgorithmHistory &AlgorithmHistory::operator=(const AlgorithmHistory &A) {
     // to an ancestor
     auto temp = A.m_childHistories;
     m_childHistories = temp;
-	m_uuid = A.m_uuid;
+    m_uuid = A.m_uuid;
   }
   return *this;
 }
