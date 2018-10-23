@@ -7,13 +7,12 @@
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <Poco/File.h>
+#include <boost/functional/hash.hpp>
+#include <boost/make_shared.hpp>
+#include <chrono>
 #include <fstream>
 #include <string>
 #include <vector>
-#include <string>
-#include <boost/make_shared.hpp>
-#include <chrono>
-#include <boost/functional/hash.hpp>
 namespace Mantid {
 namespace DataHandling {
 
@@ -58,15 +57,16 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
   uint32_t nextToRead =
       HEADER_SIZE + TRIANGLE_COUNT_DATA_SIZE + VECTOR_DATA_SIZE;
   // now read in all the triangles
-  m_triangle.reserve(3*numberTrianglesLong);
-  m_verticies.reserve(3*numberTrianglesLong);
-  g_logstl.debug("Began reading " + std::to_string(numberTrianglesLong) + " triangles.");
+  m_triangle.reserve(3 * numberTrianglesLong);
+  m_verticies.reserve(3 * numberTrianglesLong);
+  g_logstl.debug("Began reading " + std::to_string(numberTrianglesLong) +
+                 " triangles.");
   uint32_t vertexCount = 0;
   for (uint32_t i = 0; i < numberTrianglesLong; i++) {
-    
+
     // find next triangle, skipping the normal and attribute
     streamReader.moveStreamToPosition(nextToRead);
-    readTriangle(streamReader,vertexCount);
+    readTriangle(streamReader, vertexCount);
     nextToRead += TRIANGLE_DATA_SIZE;
   }
   changeToVector();
@@ -81,7 +81,8 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
   return retVal;
 }
 
-void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader,uint32_t &vertexCount) {
+void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader,
+                                 uint32_t &vertexCount) {
   // read in the verticies
   for (int i = 0; i < 3; i++) {
     float xVal;
@@ -91,13 +92,13 @@ void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader,uint32_
     streamReader >> yVal;
     streamReader >> zVal;
     Kernel::V3D vec = Kernel::V3D(double(xVal), double(yVal), double(zVal));
-    auto vertexPair = std::pair<Kernel::V3D,uint32_t>(vec,vertexCount);
+    auto vertexPair = std::pair<Kernel::V3D, uint32_t>(vec, vertexCount);
     auto emplacementResult = addSTLVertex(vertexPair);
-    if(emplacementResult.second){
+    //check if the value was new to the map and increase the value to assign to the next if so
+    if (emplacementResult.second) {
       vertexCount++;
     }
     m_triangle.emplace_back(emplacementResult.first->second);
-    
   }
 }
 

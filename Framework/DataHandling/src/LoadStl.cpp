@@ -12,7 +12,7 @@ std::pair<std::__detail::_Node_iterator<
               std::pair<Mantid::Kernel::V3D, unsigned int>, true, true>,
           bool>
 LoadStl::addSTLVertex(std::pair<Kernel::V3D, uint32_t> &vertex) {
-  auto inserted = hashmap.insert(vertex);
+  auto inserted = vertexSet.insert(vertex);
   return inserted;
 }
 
@@ -22,8 +22,8 @@ bool LoadStl::areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) {
 }
 
 void LoadStl::changeToVector() {
-  m_verticies.resize(hashmap.size());
-  for (auto const &mapValue : hashmap) {
+  m_verticies.resize(vertexSet.size());
+  for (auto const &mapValue : vertexSet) {
     m_verticies[mapValue.second] = mapValue.first;
   }
 }
