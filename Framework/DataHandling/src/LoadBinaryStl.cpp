@@ -13,6 +13,7 @@
 #include <string>
 #include <boost/make_shared.hpp>
 #include <chrono>
+#include <boost/functional/hash.hpp>
 namespace Mantid {
 namespace DataHandling {
 
@@ -64,15 +65,27 @@ LoadBinaryStl::getNumberTriangles(Kernel::BinaryStreamReader streamReader) {
 //   myFile.read(buffer.get(), size);
 //   const uint32_t nTriLong = *((uint32_t*)temp);
 //   g_logstl.debug(std::to_string(nTriLong) + " Triangles to read");
+//   m_triangle.reserve(3*nTriLong);
+//   m_verticies.reserve(3*nTriLong);
+//   std::chrono::high_resolution_clock::time_point t2 ;
+//   std::chrono::high_resolution_clock::time_point t3 ;
+//   std::chrono::high_resolution_clock::time_point t4 ;
 //   PARALLEL_FOR_NO_WSP_CHECK()
 //   for(uint32_t i = 0;i<nTriLong;i++){
-
+//       t2 = std::chrono::high_resolution_clock::now();
 //       auto vec1 = makeV3D(buffer.get(),((i*TRIANGLE_DATA_SIZE)+(VECTOR_DATA_SIZE)));
 //       auto vec2 = makeV3D(buffer.get(),((i*TRIANGLE_DATA_SIZE)+(2*VECTOR_DATA_SIZE)));
 //       auto vec3 = makeV3D(buffer.get(),((i*TRIANGLE_DATA_SIZE)+(3*VECTOR_DATA_SIZE)));
+//       t3 = std::chrono::high_resolution_clock::now();
 //       #pragma omp critical
 //       add3Vertex(vec1, vec2, vec3);    
+//       t4 = std::chrono::high_resolution_clock::now();
 //   }
+  
+//   auto duration2 = std::chrono::duration_cast<std::chrono::seconds>( t3 - t2 ).count();
+//   auto duration3 = std::chrono::duration_cast<std::chrono::seconds>( t4 - t3 ).count();
+//   g_logstl.information("Part 2 Took "+ std::to_string(duration2)+" seconds");
+//   g_logstl.information("Part 3 Took "+ std::to_string(duration3)+" seconds");
 //   m_verticies.shrink_to_fit();
 //   m_triangle.shrink_to_fit();
 //   // Close the file
@@ -81,9 +94,9 @@ LoadBinaryStl::getNumberTriangles(Kernel::BinaryStreamReader streamReader) {
 //       std::unique_ptr<Geometry::MeshObject>(new Geometry::MeshObject(
 //           std::move(m_triangle), std::move(m_verticies),
 //           Mantid::Kernel::Material()));
-//   std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-//   auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-//   g_logstl.information("Took "+ std::to_string(duration)+" microseconds");
+//   std::chrono::high_resolution_clock::time_point t5 = std::chrono::high_resolution_clock::now();
+//   auto duration = std::chrono::duration_cast<std::chrono::minutes>( t5 - t1 ).count();
+//   g_logstl.information("Took "+ std::to_string(duration)+" minutes");
 //   return retVal;
 // }
 // void LoadBinaryStl::add3Vertex(Kernel::V3D vec1, Kernel::V3D vec2, Kernel::V3D vec3){
@@ -104,13 +117,15 @@ std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution
   // now read in all the triangles
   m_triangle.reserve(3*numberTrianglesLong);
   m_verticies.reserve(3*numberTrianglesLong);
+  uint32_t vertexCount = 0;
   for (uint32_t i = 0; i < numberTrianglesLong; i++) {
     g_logstl.debug(std::to_string(i+1));
     // find next triangle, skipping the normal and attribute
     streamReader.moveStreamToPosition(nextToRead);
-    readTriangle(streamReader);
+    readTriangle(streamReader,vertexCount);
     nextToRead += TRIANGLE_DATA_SIZE;
   }
+  changeToVector();
   m_verticies.shrink_to_fit();
   m_triangle.shrink_to_fit();
   g_logstl.debug("Read All");
@@ -120,12 +135,12 @@ std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution
           std::move(m_triangle), std::move(m_verticies),
           Mantid::Kernel::Material()));
   std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-  g_logstl.information("Took "+ std::to_string(duration)+" microseconds");
+  auto duration = std::chrono::duration_cast<std::chrono::minutes>( t2 - t1 ).count();
+  g_logstl.information("Took "+ std::to_string(duration)+" minutes");
   return retVal;
 }
 
-void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader) {
+void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader,uint32_t &vertexCount) {
   // read in the verticies
   for (int i = 0; i < 3; i++) {
     float xVal;
@@ -135,28 +150,37 @@ void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader) {
     streamReader >> yVal;
     streamReader >> zVal;
     Kernel::V3D vec = Kernel::V3D(double(xVal), double(yVal), double(zVal));
-    m_triangle.emplace_back(addSTLVertex(vec));
+    auto vertexPair = std::pair<Kernel::V3D,uint32_t>(vec,vertexCount);
+    g_logstl.information("Vertex=" + std::to_string(xVal)+" ,"+ std::to_string(yVal)+" ,"+ std::to_string(zVal)+" , at point "+ std::to_string(vertexCount));
+    auto emplacementResult = addSTLVertex(vertexPair);
+    if(emplacementResult.second){
+      vertexCount++;
+    }
+    m_triangle.emplace_back(emplacementResult.first->second);
+    
   }
 }
 
-Kernel::V3D LoadBinaryStl::makeV3D(char* facet, int index)
-{
 
-    char f1[4] = {facet[index],
-        facet[index+1],facet[index+2],facet[index+3]};
 
-    char f2[4] = {facet[index+4],
-        facet[index+5],facet[index+6],facet[index+7]};
+// Kernel::V3D LoadBinaryStl::makeV3D(char* facet, int index)
+// {
 
-    char f3[4] = {facet[index+8],
-        facet[index+9],facet[index+10],facet[index+11]};
+//     char f1[4] = {facet[index],
+//         facet[index+1],facet[index+2],facet[index+3]};
 
-    float xx = *((float*) f1 );
-    float yy = *((float*) f2 );
-    float zz = *((float*) f3 );
-    Kernel::V3D vec = Kernel::V3D(double(xx), double(yy), double(zz));
-    return vec;
-}
+//     char f2[4] = {facet[index+4],
+//         facet[index+5],facet[index+6],facet[index+7]};
+
+//     char f3[4] = {facet[index+8],
+//         facet[index+9],facet[index+10],facet[index+11]};
+
+//     float xx = *((float*) f1 );
+//     float yy = *((float*) f2 );
+//     float zz = *((float*) f3 );
+//     Kernel::V3D vec = Kernel::V3D(double(xx), double(yy), double(zz));
+//     return vec;
+// }
 
 } // namespace DataHandling
 } // namespace Mantid

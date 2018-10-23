@@ -26,7 +26,7 @@ public:
 private:
   Kernel::V3D makeV3D(char* facet, int index);
   uint32_t getNumberTriangles(Kernel::BinaryStreamReader);
-  void readTriangle(Kernel::BinaryStreamReader);
+  void readTriangle(Kernel::BinaryStreamReader, uint32_t &vertexCount);
   void add3Vertex(Kernel::V3D vec1, Kernel::V3D vec2, Kernel::V3D vec3);
 };
 
