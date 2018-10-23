@@ -52,7 +52,6 @@ class ThreadModelWorker(QtCore.QObject):
                 self.signals.error.emit("")
         finally:
             self.signals.finished.emit()
-        self.signals.finished.emit()
 
 
 class ThreadModel(QtGui.QWidget):
@@ -72,7 +71,7 @@ class ThreadModel(QtGui.QWidget):
         self._thread = QtCore.QThread(self)
 
         # callbacks for the .started() and .finished() signals of the worker
-        self._default_exception_callback = lambda message: message_box.warning(message, parent=self)
+        self._default_exception_callback = lambda message: message_box.warning(message)
         self.start_slot = lambda: 0
         self.end_slot = lambda: 0
         self._exception_callback = self._default_exception_callback
