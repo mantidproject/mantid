@@ -53,6 +53,7 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
       m_triangle.emplace_back(emplacementResult.first->second);
     }
   }
+  changeToVector();
   // Use efficient constructor of MeshObject
   std::unique_ptr<Geometry::MeshObject> retVal =
       Kernel::make_unique<Geometry::MeshObject>(std::move(m_triangle),

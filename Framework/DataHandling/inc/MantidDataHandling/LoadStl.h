@@ -21,9 +21,12 @@ struct hashV3D {
     return seed;
   }
 };
+//we only care if the values are hashed to the same place, but unordered set requires a comparator, so always return true;
 struct trueComparator {
   bool operator()(const std::pair<Kernel::V3D, uint32_t> &v1,
                  const std::pair<Kernel::V3D, uint32_t> &v2) const {
+  (void)v1;
+  (void)v2;
   return true;
  }
 };
