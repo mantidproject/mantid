@@ -24,14 +24,10 @@ using Kernel::PropertyHistory_const_sptr;
 using Kernel::PropertyHistory_sptr;
 using Types::Core::DateAndTime;
 
-namespace Detail {
-struct AlgorithmHistorySearch {
-  bool operator()(const AlgorithmHistory_sptr &lhs,
-                  const AlgorithmHistory_sptr &rhs) const {
-    return (*lhs) < (*rhs);
-  }
-};
-} // namespace Detail
+namespace {
+/// The generator for algorithm history UUIDs
+static boost::uuids::random_generator uuidGen;
+} // namespace
 
 /** Constructor
  *  @param alg ::      A pointer to the algorithm for which the history should

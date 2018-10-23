@@ -18,15 +18,10 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
 #include <ctime>
 #include <set>
 #include <vector>
 
-namespace {
-/// The generator for algorithm history UUIDs
-static boost::uuids::random_generator uuidGen;
-} // namespace
 namespace Mantid {
 namespace API {
 class IAlgorithm;
