@@ -4,14 +4,23 @@
 set ( TEST_FILES
   ArtistTest.h
   AxesTest.h
-  ColorsTest.h
   ColormapTest.h
+  ColorConverterTest.h
+  CyclerTest.h
   FigureTest.h
-  FigureCanvasQtTest.h
   Line2DTest.h
+  MantidColormapTest.h
   ScalarMappableTest.h
-  SipTest.h
+  ZoomerTest.h
 )
+
+if ( NOT APPLE )
+  list ( APPEND TEST_FILES
+    ColorsTest.h
+    FigureCanvasQtTest.h
+    SipTest.h
+  )
+endif()
 
 set (CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/MplCppTestInitialization.h)
 

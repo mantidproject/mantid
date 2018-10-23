@@ -2,7 +2,7 @@
  FunctionFactoryImpl
 =====================
 
-This a python binding to the C++ class Mantid::API::FunctionFactoryImpl.
+This is a Python binding to the C++ class Mantid::API::FunctionFactoryImpl.
 
 
 .. module:`mantid.api`

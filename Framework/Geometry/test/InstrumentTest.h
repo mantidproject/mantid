@@ -650,8 +650,8 @@ public:
     const auto legacyMap = instr->makeLegacyParameterMap();
 
     // Legacy instrument does not support positions in ParameterMap for
-    // RectangularDetectorPixel (parameters ignored by
-    // RectangularDetectorPixel::getRelativePos), so we cannot support this.
+    // GridDetectorPixel (parameters ignored by
+    // GridDetectorPixel::getRelativePos), so we cannot support this.
     detInfo.setPosition(3, detInfo.position(3) + detOffset);
     TS_ASSERT_THROWS(instr->makeLegacyParameterMap(), std::runtime_error);
 

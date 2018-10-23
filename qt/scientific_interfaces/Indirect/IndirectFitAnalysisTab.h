@@ -74,6 +74,7 @@ public:
   void addComboBoxFunctionGroup(
       const QString &groupName,
       const std::vector<Mantid::API::IFunction_sptr> &functions);
+  void clearFitTypeComboBox();
 
   void setBackgroundOptions(const QStringList &backgrounds);
 
@@ -157,6 +158,7 @@ signals:
   void functionChanged();
   void parameterChanged(const Mantid::API::IFunction *);
   void customBoolChanged(const QString &key, bool value);
+  void updateFitTypes();
 
 protected slots:
 
@@ -195,6 +197,9 @@ protected slots:
 
   void updateResultOptions();
   void saveResult();
+
+private slots:
+  void emitUpdateFitTypes();
 
 private:
   /// Overidden by child class.

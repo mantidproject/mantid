@@ -14,6 +14,8 @@ import functools
 
 # third-party library imports
 from mantid.api import AnalysisDataService
+from mantidqt.widgets.samplelogs.presenter import SampleLogs
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
@@ -46,6 +48,8 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
                                                                                          errors=True, overplot=True))
         self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
+        self.workspacewidget.sampleLogsClicked.connect(self._do_sample_logs)
+        self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
 
     # ----------------- Plugin API --------------------
 
@@ -55,7 +59,10 @@ class WorkspaceWidget(PluginWidget):
     def get_plugin_title(self):
         return "Workspaces"
 
-    def read_user_settings(self, _):
+    def readSettings(self, _):
+        pass
+
+    def writeSettings(self, _):
         pass
 
     # ----------------- Behaviour --------------------
@@ -88,3 +95,22 @@ class WorkspaceWidget(PluginWidget):
         except BaseException:
             import traceback
             traceback.print_exc()
+
+    def _do_sample_logs(self, names):
+        """
+        Show the sample log window for the given workspaces
+
+        :param names: A list of workspace names
+        """
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            SampleLogs(ws=ws, parent=self)
+
+    def _do_show_instrument(self, names):
+        """
+        Show an instrument widget for the given workspaces
+
+        :param names: A list of workspace names
+        """
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            presenter = InstrumentViewPresenter(ws, parent=self)
+            presenter.view.show()

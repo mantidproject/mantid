@@ -29,7 +29,6 @@
 
 #include <QStringList>
 #include <algorithm>
-#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
 #include <iterator>
