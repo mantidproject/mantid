@@ -80,7 +80,6 @@ void LoadSampleEnvironment::exec() {
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
-
   boost::shared_ptr<MeshObject> environmentMesh = nullptr;
 
   auto asciiStlReader = LoadAsciiStl(filename);
