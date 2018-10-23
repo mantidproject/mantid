@@ -151,7 +151,6 @@ void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader,uint32_
     streamReader >> zVal;
     Kernel::V3D vec = Kernel::V3D(double(xVal), double(yVal), double(zVal));
     auto vertexPair = std::pair<Kernel::V3D,uint32_t>(vec,vertexCount);
-    g_logstl.information("Vertex=" + std::to_string(xVal)+" ,"+ std::to_string(yVal)+" ,"+ std::to_string(zVal)+" , at point "+ std::to_string(vertexCount));
     auto emplacementResult = addSTLVertex(vertexPair);
     if(emplacementResult.second){
       vertexCount++;
