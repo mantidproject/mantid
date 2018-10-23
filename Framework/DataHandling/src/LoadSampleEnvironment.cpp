@@ -80,7 +80,6 @@ void LoadSampleEnvironment::exec() {
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
-  std::string filetype = filename.substr(filename.size() - 3);
 
   boost::shared_ptr<MeshObject> environmentMesh = nullptr;
 
