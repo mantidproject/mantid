@@ -433,7 +433,6 @@ InstrumentVisitor::makeWrappers() const {
   auto detInfo = detectorInfo();
   // Cross link Component and Detector info objects
   compInfo->setDetectorInfo(detInfo.get());
-  detInfo->setComponentInfo(compInfo.get());
 
   auto compInfoWrapper = Kernel::make_unique<ComponentInfo>(
       std::move(compInfo), componentIds(), componentIdToIndexMap(), m_shapes);

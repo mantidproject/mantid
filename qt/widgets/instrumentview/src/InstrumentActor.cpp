@@ -5,7 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
@@ -679,7 +681,7 @@ const std::vector<Mantid::detid_t> &InstrumentActor::getAllDetIDs() const {
  * @param type :: 0 - linear, 1 - log10.
  */
 void InstrumentActor::changeScaleType(int type) {
-  m_renderer->changeScaleType(type);
+  m_renderer->changeScaleType(ColorMap::ScaleType(type));
   resetColors();
 }
 
@@ -691,10 +693,10 @@ void InstrumentActor::changeNthPower(double nth_power) {
 void InstrumentActor::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
-  m_scaleType = static_cast<GraphOptions::ScaleType>(
-      settings.value("ScaleType", 0).toInt());
+  m_scaleType = ColorMap::ScaleType(settings.value("ScaleType", 0).toInt());
   // Load Colormap. If the file is invalid the default stored colour map is used
-  m_currentCMap = settings.value("ColormapFile", "").toString();
+  m_currentCMap =
+      settings.value("ColormapFile", ColorMap::defaultColorMap()).toString();
   // Set values from settings
   m_showGuides = settings.value("ShowGuides", false).toBool();
   settings.endGroup();
@@ -704,7 +706,8 @@ void InstrumentActor::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
   settings.setValue("ColormapFile", m_currentCMap);
-  settings.setValue("ScaleType", (int)m_renderer->getColorMap().getScaleType());
+  settings.setValue("ScaleType",
+                    static_cast<int>(m_renderer->getColorMap().getScaleType()));
   settings.setValue("ShowGuides", m_showGuides);
   settings.endGroup();
 }
@@ -1178,6 +1181,7 @@ InstrumentActor::getStringParameter(const std::string &name,
  * @return string representing the current state of the instrumet actor.
  */
 std::string InstrumentActor::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   const std::string currentColorMap = getCurrentColorMap().toStdString();
 
@@ -1186,6 +1190,10 @@ std::string InstrumentActor::saveToProject() const {
 
   tsv.writeSection("binmasks", m_maskBinsData.saveToProject());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "InstrumentActor::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 /**
@@ -1193,6 +1201,7 @@ std::string InstrumentActor::saveToProject() const {
  * @param lines :: string representing the current state of the instrumet actor.
  */
 void InstrumentActor::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
   if (tsv.selectLine("FileName")) {
     QString filename;
@@ -1205,6 +1214,11 @@ void InstrumentActor::loadFromProject(const std::string &lines) {
     tsv >> binMaskLines;
     m_maskBinsData.loadFromProject(binMaskLines);
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "InstrumentActor::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 bool InstrumentActor::hasGridBank() const { return m_hasGrid; }
