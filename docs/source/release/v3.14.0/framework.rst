@@ -55,6 +55,7 @@ Improvements
 - :ref:`LoadSampleShape <algm-LoadSampleShape-v1>` now supports loading from binary .stl files.
 - :ref:`MaskDetectorsIf <algm-MaskDetectorsIf>` now supports masking a workspace in addition to writing the masking information to a calfile.
 - :ref:`LoadSampleShape <algm-LoadSampleShape-v1>` now supports loading from binary .stl files.
+- :ref:`GroupDetectors <algm-GroupDetectors>` now takes masked bins correctly into account when processing histogram workspaces.
 
 Bugfixes
 ########

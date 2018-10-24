@@ -204,10 +204,6 @@ private:
                          DataObjects::EventWorkspace_sptr outputWS,
                          const double prog4Copy);
 
-  /// Returns true if detectors exists and is masked
-  bool isMaskedDetector(const API::SpectrumInfo &detector,
-                        const size_t index) const;
-
   /// Copy the ungrouped spectra from the input workspace to the output
   template <class TIn, class TOut>
   void moveOthers(const std::set<int64_t> &unGroupedSet, const TIn &inputWS,
