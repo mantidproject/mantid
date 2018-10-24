@@ -118,10 +118,10 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   const std::string instrument = toUpperCase(result[1]);
   const std::string run = result[2];
 
-  const auto &configService = Mantid::Kernel::ConfigService::Instance();
+  const auto &config = Mantid::Kernel::ConfigService::Instance();
   std::string facility;
   try {
-    facility = configService.getInstrument(instrument).facility().name();
+    facility = config.getInstrument(instrument).facility().name();
 
     if (facility != "HFIR" && facility != "SNS") {
       return NOT_FOUND;
