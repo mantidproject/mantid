@@ -299,6 +299,8 @@ class PyChopGui(QMainWindow):
         line.set_label(label_text)
         self.qeaxes.set_xlim([0, self.qeaxes_xlim])
         self.qeaxes.legend().draggable()
+        self.qeaxes.set_xlabel(r'$|Q| (\mathrm{\AA}^{-1})$')
+        self.qeaxes.set_ylabel('Energy Transfer (meV)')
         self.qecanvas.draw()
 
     def plot_flux_ei(self, **kwargs):
