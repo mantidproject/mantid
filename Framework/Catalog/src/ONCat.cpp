@@ -91,11 +91,8 @@ static const std::string DEFAULT_CLIENT_ID =
  */
 ONCat_uptr ONCat::fromMantidSettings(bool authenticate) {
   if (!authenticate) {
-    return Mantid::Kernel::make_unique<ONCat>(DEFAULT_ONCAT_URL,
-                                              nullptr,
-                                              OAuthFlow::NONE,
-                                              boost::none,
-                                              boost::none);
+    return Mantid::Kernel::make_unique<ONCat>(
+        DEFAULT_ONCAT_URL, nullptr, OAuthFlow::NONE, boost::none, boost::none);
   }
 
   auto &config = Mantid::Kernel::ConfigService::Instance();
@@ -114,8 +111,7 @@ ONCat_uptr ONCat::fromMantidSettings(bool authenticate) {
   }
 
   return Mantid::Kernel::make_unique<ONCat>(
-      DEFAULT_ONCAT_URL,
-      Mantid::Kernel::make_unique<ConfigServiceTokenStore>(),
+      DEFAULT_ONCAT_URL, Mantid::Kernel::make_unique<ConfigServiceTokenStore>(),
       hasClientCredentials ? OAuthFlow::CLIENT_CREDENTIALS
                            : OAuthFlow::RESOURCE_OWNER_CREDENTIALS,
       hasClientCredentials ? client_id : DEFAULT_CLIENT_ID,
@@ -186,9 +182,7 @@ bool ONCat::isUserLoggedIn() const {
   return m_tokenStore->getToken().is_initialized();
 }
 
-std::string ONCat::url() const {
-  return m_url;
-}
+std::string ONCat::url() const { return m_url; }
 
 void ONCat::logout() {
   // Currently, ONCat OAuth does *not* allow clients to revoke tokens

@@ -24,7 +24,7 @@ namespace {
 std::vector<std::string> namesOfFacilitiesWithICAT() {
   const auto &config = Kernel::ConfigService::Instance();
 
-  const auto facilityHasICAT = [&](std::string name){
+  const auto facilityHasICAT = [&](std::string name) {
     return !config.getFacility(name).catalogInfo().soapEndPoint().empty();
   };
 
@@ -42,8 +42,7 @@ std::string defaultFacility() {
   // empty string.
   const auto facility = Kernel::ConfigService::Instance().getFacility().name();
   const auto facilitiesWithICAT = namesOfFacilitiesWithICAT();
-  if (std::find(facilitiesWithICAT.begin(),
-                facilitiesWithICAT.end(),
+  if (std::find(facilitiesWithICAT.begin(), facilitiesWithICAT.end(),
                 facility) != facilitiesWithICAT.end()) {
     return facility;
   }
@@ -54,7 +53,7 @@ std::string defaultFacility() {
 
   return "";
 }
-}
+} // namespace
 
 /// Init method to declare algorithm properties
 void CatalogLogin::init() {
@@ -65,8 +64,7 @@ void CatalogLogin::init() {
   declareProperty(Kernel::make_unique<Kernel::MaskedProperty<std::string>>(
                       "Password", "", requireValue),
                   "The password of the related username to use.");
-  declareProperty("FacilityName",
-                  defaultFacility(),
+  declareProperty("FacilityName", defaultFacility(),
                   boost::make_shared<Kernel::StringListValidator>(
                       namesOfFacilitiesWithICAT()),
                   "Select a facility to log in to.");

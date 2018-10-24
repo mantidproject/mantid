@@ -32,7 +32,7 @@ using Mantid::Catalog::ONCat::QueryParameters;
 
 namespace {
 
-std::string toUpperCase(const std::string & s) {
+std::string toUpperCase(const std::string &s) {
   std::string result(s);
   std::transform(s.begin(), s.end(), result.begin(), toupper);
   return result;
@@ -42,7 +42,7 @@ const static boost::regex FILE_REGEX("^(.*?)_(\\d+).*$");
 const static std::string NOT_FOUND("");
 
 Mantid::Kernel::Logger g_log("ORNLDataArchive");
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -96,9 +96,9 @@ DECLARE_ARCHIVESEARCH(ORNLDataArchive, ORNLDataSearch)
  * @return The first matching location of an archived raw datafile, else an
  *     empty string.
  */
-std::string
-ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
-                               const std::vector<std::string> &suffixes) const {
+std::string ORNLDataArchive::getArchivePath(
+    const std::set<std::string> &basenames,
+    const std::vector<std::string> &suffixes) const {
   if (basenames.size() == 0) {
     return NOT_FOUND;
   }
@@ -109,8 +109,8 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   // Validate and parse the basename.
   boost::smatch result;
   if (!boost::regex_match(basename, result, FILE_REGEX)) {
-    g_log.debug() << "Unexpected input passed to getArchivePath():"
-                  << std::endl << basename << std::endl;
+    g_log.debug() << "Unexpected input passed to getArchivePath():" << std::endl
+                  << basename << std::endl;
     return NOT_FOUND;
   }
 
@@ -136,13 +136,13 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   // and run number, and *not* filtering by suffix at this point.  (ONCat has
   // a strict definition of what a file "extension" is, and has no way of
   // filtering by, for example, "_event.nxs".)
-  const QueryParameters params {{"facility", facility},
-                                {"instrument", instrument},
-                                {"projection", "location"},
-                                {"tags", "type/raw"},
-                                {"sort_by", "ingested"},
-                                {"sort_direction", "DESCENDING"},
-                                {"ranges_q", "indexed.run_number:" + run}};
+  const QueryParameters params{{"facility", facility},
+                               {"instrument", instrument},
+                               {"projection", "location"},
+                               {"tags", "type/raw"},
+                               {"sort_by", "ingested"},
+                               {"sort_direction", "DESCENDING"},
+                               {"ranges_q", "indexed.run_number:" + run}};
 
   // If we've not manually set up an ONCat instance (presumably for testing
   // purposes) then we must instead create one using the settings in the
@@ -151,7 +151,7 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   // more information, but that would require users logging in and publically
   // available information is more than enough for our purposes here, anyway.
   auto defaultOncat = ONCat::fromMantidSettings();
-  auto * oncat = m_oncat ? m_oncat.get() : defaultOncat.get();
+  auto *oncat = m_oncat ? m_oncat.get() : defaultOncat.get();
 
   const auto datafiles = [&]() {
     try {
@@ -170,7 +170,7 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   }
 
   g_log.debug() << "All datafiles returned from ONCat:" << std::endl;
-  for (const auto &datafile: datafiles) {
+  for (const auto &datafile : datafiles) {
     g_log.debug() << datafile.toString() << std::endl;
   }
 
@@ -199,9 +199,7 @@ ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
   return NOT_FOUND;
 }
 
-void ORNLDataArchive::setONCat(ONCat_uptr oncat) {
-  m_oncat = std::move(oncat);
-}
+void ORNLDataArchive::setONCat(ONCat_uptr oncat) { m_oncat = std::move(oncat); }
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -1579,8 +1579,10 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
   }
 
   const auto &config = Mantid::Kernel::ConfigService::Instance();
-  const auto showCatalogMenu = !config.getFacility(
-      config.getFacility().name()).catalogInfo().soapEndPoint().empty();
+  const auto showCatalogMenu = !config.getFacility(config.getFacility().name())
+                                    .catalogInfo()
+                                    .soapEndPoint()
+                                    .empty();
 
   if (showCatalogMenu) {
     auto catalogMenuAction = myMenuBar()->addMenu(icat);

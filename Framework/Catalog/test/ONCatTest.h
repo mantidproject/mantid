@@ -35,10 +35,10 @@ using Mantid::Catalog::OAuth::OAuthToken;
 using Mantid::Catalog::ONCat::ONCat;
 using Mantid::Catalog::ONCat::QueryParameter;
 using Mantid::Kernel::Exception::InternetError;
-using Mantid::Types::Core::DateAndTime;
 using Mantid::TestHelpers::make_mock_oncat_api;
 using Mantid::TestHelpers::make_mock_token_store;
 using Mantid::TestHelpers::make_mock_token_store_already_logged_in;
+using Mantid::Types::Core::DateAndTime;
 
 //----------------------------------------------------------------------
 // Helpers, Mocks and Variables
@@ -204,8 +204,8 @@ public:
 
     oncat.setInternetHelper(mock_oncat_api);
 
-    const auto entity = oncat.retrieve("api", "instruments", "HB2C",
-                                       {{"facility", "HFIR"}});
+    const auto entity =
+        oncat.retrieve("api", "instruments", "HB2C", {{"facility", "HFIR"}});
 
     TS_ASSERT_EQUALS(entity.id(), std::string("HB2C"));
     TS_ASSERT_EQUALS(entity.get<std::string>("name"), std::string("HB2C"));
@@ -228,8 +228,8 @@ public:
 
     oncat.setInternetHelper(mock_oncat_api);
 
-    const auto entity = oncat.retrieve("api", "instruments", "HB2C",
-                                       {{"facility", "HFIR"}});
+    const auto entity =
+        oncat.retrieve("api", "instruments", "HB2C", {{"facility", "HFIR"}});
 
     TS_ASSERT_EQUALS(entity.id(), std::string("HB2C"));
     TS_ASSERT_EQUALS(entity.get<std::string>("name"), std::string("HB2C"));
@@ -286,9 +286,8 @@ public:
 
     oncat.setInternetHelper(mock_oncat_api);
 
-    TS_ASSERT_THROWS(
-        oncat.list("api", "instruments", {{"facility", "HFIR"}}),
-        TokenRejectedError);
+    TS_ASSERT_THROWS(oncat.list("api", "instruments", {{"facility", "HFIR"}}),
+                     TokenRejectedError);
     TS_ASSERT(!oncat.isUserLoggedIn());
 
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
@@ -315,8 +314,7 @@ public:
 
     oncat.setInternetHelper(mock_oncat_api);
 
-    oncat.retrieve("api", "instruments", "HB2C",
-                   {{"facility", "HFIR"}});
+    oncat.retrieve("api", "instruments", "HB2C", {{"facility", "HFIR"}});
 
     TS_ASSERT(mock_oncat_api->allResponsesCalledOnce());
 

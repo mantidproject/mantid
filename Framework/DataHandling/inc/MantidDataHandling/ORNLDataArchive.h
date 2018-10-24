@@ -11,8 +11,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IArchiveSearch.h"
-#include "MantidKernel/System.h"
 #include "MantidCatalog/ONCat.h"
+#include "MantidKernel/System.h"
 
 #include <string>
 
@@ -37,7 +37,7 @@ public:
   //////////////////////////////////////////////////////////////////////
 
 private:
-   ONCat_uptr m_oncat = nullptr;
+  ONCat_uptr m_oncat = nullptr;
 };
 } // namespace DataHandling
 } // namespace Mantid

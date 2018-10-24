@@ -28,16 +28,14 @@ MockONCatAPI::MockONCatAPI(const MockResponseMap &responseMap)
 MockONCatAPI::~MockONCatAPI() {}
 
 bool MockONCatAPI::allResponsesCalledOnce() const {
-  return std::all_of(m_responseCallCounts.cbegin(),
-                     m_responseCallCounts.cend(),
+  return std::all_of(m_responseCallCounts.cbegin(), m_responseCallCounts.cend(),
                      [](const MockResponseCallMapping &mapping) {
                        return mapping.second == 1;
                      });
 }
 
 bool MockONCatAPI::allResponsesCalled() const {
-  return std::all_of(m_responseCallCounts.cbegin(),
-                     m_responseCallCounts.cend(),
+  return std::all_of(m_responseCallCounts.cbegin(), m_responseCallCounts.cend(),
                      [](const MockResponseCallMapping &mapping) {
                        return mapping.second >= 1;
                      });
@@ -56,8 +54,7 @@ int MockONCatAPI::sendHTTPSRequest(const std::string &url,
     // If the test that is using this has not set up a corresponding URL
     // then throw an exception rather than segfault.
     throw NotImplementedError(
-      url + " has not been assigned a corresponding response."
-    );
+        url + " has not been assigned a corresponding response.");
   }
 
   m_responseCallCounts[url] += 1;
@@ -89,14 +86,11 @@ make_oncat_with_mock_api(const std::shared_ptr<MockONCatAPI> &mockAPI) {
 
 MockTokenStore::MockTokenStore() : m_token(boost::none) {}
 
-void MockTokenStore::setToken(
-    const boost::optional<OAuthToken> &token) {
+void MockTokenStore::setToken(const boost::optional<OAuthToken> &token) {
   m_token = token;
 }
 
-boost::optional<OAuthToken> MockTokenStore::getToken() {
-  return m_token;
-}
+boost::optional<OAuthToken> MockTokenStore::getToken() { return m_token; }
 
 IOAuthTokenStore_uptr make_mock_token_store() {
   return Mantid::Kernel::make_unique<MockTokenStore>();

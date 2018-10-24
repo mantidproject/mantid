@@ -10,9 +10,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/ArchiveSearchFactory.h"
-#include "MantidDataHandling/ORNLDataArchive.h"
 #include "MantidCatalog/Exception.h"
 #include "MantidCatalog/ONCat.h"
+#include "MantidDataHandling/ORNLDataArchive.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/make_unique.h"
@@ -41,16 +41,16 @@ public:
 
     const auto generateRunUrl = [](const std::string &facility,
                                    const std::string &instrument,
-                                   const std::string &runNumber)  {
-      return std::string(
-          "https://oncat.ornl.gov/api/datafiles"
-          "?facility=") + facility +
-          "&instrument=" + instrument +
-          "&projection=location"
-          "&tags=type/raw"
-          "&sort_by=ingested"
-          "&sort_direction=DESCENDING"
-          "&ranges_q=indexed.run_number:" + runNumber;
+                                   const std::string &runNumber) {
+      return std::string("https://oncat.ornl.gov/api/datafiles"
+                         "?facility=") +
+             facility + "&instrument=" + instrument +
+             "&projection=location"
+             "&tags=type/raw"
+             "&sort_by=ingested"
+             "&sort_direction=DESCENDING"
+             "&ranges_q=indexed.run_number:" +
+             runNumber;
     };
 
     auto mockAPI = make_mock_oncat_api(
