@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_BEAMLINE_COMPONENTINFO_H_
 #define MANTID_BEAMLINE_COMPONENTINFO_H_
 
@@ -18,27 +24,6 @@ class DetectorInfo;
 /** ComponentInfo : Provides a component centric view on to the instrument.
   Indexes
   are per component.
-
-  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_BEAMLINE_DLL ComponentInfo {
 private:
@@ -65,9 +50,8 @@ private:
   const int64_t m_sourceIndex = -1;
   const int64_t m_sampleIndex = -1;
   DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
-  size_t m_scanCounts = 1;
-  Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
-      nullptr};
+  /// The default initialisation is a single interval, i.e. no scan
+  std::vector<std::pair<int64_t, int64_t>> m_scanIntervals{{0, 1}};
   /// For (component index, time index) -> linear index conversions
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
   /// For linear index -> (detector index, time index) conversions
@@ -76,12 +60,12 @@ private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
   void initScanIntervals();
   void checkNoTimeDependence() const;
-  std::vector<bool> buildMergeIndicesSync(const ComponentInfo &other) const;
+  std::vector<bool> buildMergeIndices(const ComponentInfo &other) const;
   void checkSizes(const ComponentInfo &other) const;
   void initIndices();
   void checkIdenticalIntervals(const ComponentInfo &other,
-                               const size_t linearIndexOther,
-                               const size_t linearIndexThis) const;
+                               const std::pair<size_t, size_t> indexOther,
+                               const std::pair<size_t, size_t> indexThis) const;
   void checkSpecialIndices(size_t componentIndex) const;
   size_t nonDetectorSize() const;
   /// Copy constructor is private because of the way DetectorInfo stored
@@ -158,11 +142,10 @@ public:
                       const Eigen::Vector3d &scaleFactor);
   ComponentType componentType(const size_t componentIndex) const;
 
-  size_t scanCount(const size_t index) const;
+  size_t scanCount() const;
   size_t scanSize() const;
   bool isScanning() const;
-  std::pair<int64_t, int64_t>
-  scanInterval(const std::pair<size_t, size_t> &index) const;
+  const std::vector<std::pair<int64_t, int64_t>> &scanIntervals() const;
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   void merge(const ComponentInfo &other);
 

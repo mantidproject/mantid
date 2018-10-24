@@ -2,7 +2,7 @@
  Unit
 ======
 
-This a python binding to the C++ class Mantid::Kernel::Unit.
+This is a Python binding to the C++ class Mantid::Kernel::Unit.
 
 
 .. module:`mantid.kernel`

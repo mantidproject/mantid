@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
@@ -33,7 +39,13 @@ protected:
 
   void setRunIsRunning(bool running) override;
 
+private slots:
+  void updateParameterFitTypes();
+
 private:
+  void addEISFFunctionsToFitTypeComboBox();
+  void addWidthFunctionsToFitTypeComboBox();
+
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);
 

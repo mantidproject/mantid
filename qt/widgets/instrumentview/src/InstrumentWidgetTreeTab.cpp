@@ -1,5 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -62,6 +70,7 @@ void InstrumentWidgetTreeTab::showEvent(QShowEvent *) {
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetTreeTab::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("treetab"))
@@ -85,12 +94,18 @@ void InstrumentWidgetTreeTab::loadFromProject(const std::string &lines) {
       m_instrumentTree->setExpanded(index, true);
     }
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "InstrumentWidgetTreeTab::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the tree tab to a Mantid project file
  * @return a string representing the state of the tree tab
  */
 std::string InstrumentWidgetTreeTab::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv, tab;
 
   auto index = m_instrumentTree->currentIndex();
@@ -110,6 +125,10 @@ std::string InstrumentWidgetTreeTab::saveToProject() const {
 
   tsv.writeSection("treetab", tab.outputLines());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "InstrumentWidgetTreeTab::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 } // namespace MantidWidgets

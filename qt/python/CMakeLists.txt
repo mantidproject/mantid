@@ -40,9 +40,10 @@ if ( ENABLE_WORKBENCH )
 
   # Setup dependency chain
   add_dependencies ( mantidqt
+    mantidqt_resources
     mantidqt_commonqt4
     mantidqt_commonqt5
-    mantidqt_resources
+    mantidqt_instrumentviewqt5
   )
 
   if ( MSVC )
@@ -84,6 +85,9 @@ endif ()
 
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py
+
+    mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
+    mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
   )
 
   # Tests
