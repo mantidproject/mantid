@@ -93,7 +93,7 @@ void LoadBinaryStl::readTriangle(Kernel::BinaryStreamReader streamReader,
     streamReader >> zVal;
     Kernel::V3D vec = Kernel::V3D(double(xVal), double(yVal), double(zVal));
     auto vertexPair = std::pair<Kernel::V3D, uint32_t>(vec, vertexCount);
-    auto emplacementResult = addSTLVertex(vertexPair);
+    auto emplacementResult = vertexSet.insert(vertexPair);
     // check if the value was new to the map and increase the value to assign to
     // the next if so
     if (emplacementResult.second) {

@@ -5,14 +5,13 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include <boost/functional/hash.hpp>
-#include <unordered_set>
 #include <functional>
+#include <unordered_set>
 namespace {
 Mantid::Kernel::Logger g_logstl("LoadStl");
 }
 namespace Mantid {
 namespace DataHandling {
-
 
 struct HashV3DPair {
   size_t operator()(const std::pair<Kernel::V3D, uint32_t> &v) const {
@@ -33,17 +32,12 @@ struct V3DTrueComparator {
   }
 };
 
-
 class DLLExport LoadStl {
 public:
   LoadStl(std::string filename) : m_filename(filename) {}
   virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
 
 protected:
-  std::pair<std::__detail::_Node_iterator<
-                std::pair<Mantid::Kernel::V3D, unsigned int>, true, true>,
-            bool>
-  addSTLVertex(std::pair<Kernel::V3D, uint32_t> &vertex);
   bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2);
   void changeToVector();
   std::string m_filename;
