@@ -31,6 +31,7 @@ class TableModel(object):
                              "can_transmission", "can_transmission_period", "can_direct", "can_direct_period",
                              "output_name", "user_file", "sample_thickness", "sample_height", "sample_width",
                              "sample_shape", "options_column_model"]
+    THICKNESS_ROW = 14
 
     def __init__(self):
         super(TableModel, self).__init__()
@@ -146,6 +147,10 @@ class TableModel(object):
         self.notify_subscribers()
 
     def get_thickness_for_rows(self, rows=None):
+        """
+        Read in the sample thickness for the given rows from the file and set it in the table.
+        :param rows: list of table rows
+        """
         if not rows:
             rows = range(len(self._table_entries))
         for row in rows:
@@ -154,8 +159,10 @@ class TableModel(object):
                 continue
             entry.file_finding = True
             success_callback = functools.partial(self.update_thickness_from_file_information, entry.id)
+
             error_callback = functools.partial(self.failure_handler, entry.id)
-            create_file_information(entry.sample_scatter, error_callback, success_callback, self.work_handler, entry.id)
+            create_file_information(entry.sample_scatter, error_callback, success_callback,
+                                    self.work_handler, entry.id)
 
     def failure_handler(self, id, error):
         row = self.get_row_from_id(id)
@@ -173,6 +180,7 @@ class TableModel(object):
             rounded_file_thickness = round(file_information.get_thickness(), 2)
             rounded_file_height = round(file_information.get_height(), 2)
             rounded_file_width = round(file_information.get_width(), 2)
+
             self._table_entries[row].update_attribute('file_information', file_information)
             self._table_entries[row].update_attribute('sample_thickness', rounded_file_thickness)
             self._table_entries[row].update_attribute('sample_height', rounded_file_height)

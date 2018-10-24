@@ -12,15 +12,25 @@ from PyQt4 import QtGui
 
 class DummyLabelView(QtGui.QWidget):
 
-    def __init__(self, name, parent=None):
+    def __init__(self, subcontext, parent=None):
         super(DummyLabelView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
 
-        self.label = QtGui.QLabel(name)
+        self.label = QtGui.QLabel("none")
         self.grid.addWidget(self.label)
+        self.loadFromContext(subcontext)
 
     def getLayout(self):
         return self.grid
 
     def updateLabel(self, message):
         self.label.setText("The " + message + " has been pressed")
+
+    # interact with context
+    def loadFromContext(self, subcontext):
+        self.label.setText(subcontext["label"])
+
+    def getSubContext(self):
+        subcontext = {}
+        subcontext["label"] = str(self.label.text())
+        return subcontext

@@ -181,7 +181,6 @@
 #include <gsl/gsl_sort.h>
 
 #include <boost/regex.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <Poco/Path.h>
 

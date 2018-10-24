@@ -63,7 +63,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.plot`.
         '''
-        if mantid.plots.helperfunctions.validate_args(*args):
+        if mantid.plots.helperfunctions.validate_args(*args, **kwargs):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
             return mantid.plots.plotfunctions.plot(self, *args, **kwargs)
         else:

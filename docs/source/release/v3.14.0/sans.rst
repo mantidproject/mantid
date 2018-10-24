@@ -5,10 +5,13 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
-ISIS SANS Interface
--------------------
 New
 ###
+
+- :ref:`SANSILLReduction <algm-SANSILLReduction>` performs common SANS reduction for ILL instruments.
+
+ISIS SANS Interface
+-------------------
 
 Improved
 ########

@@ -44,8 +44,19 @@ protected slots:
   /// Called when the algorithm completes to update preview plot
   void momentsAlgComplete(bool error);
   /// Slots for plot and save
-  void saveClicked();
+  void runClicked();
   void plotClicked();
+  void saveClicked();
+
+  void setRunEnabled(bool enabled);
+  void setPlotEnabled(bool enabled);
+  void setSaveEnabled(bool enabled);
+  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
+  void updateRunButton(bool enabled = true,
+                       std::string const &enableOutputButtons = "unchanged",
+                       QString const message = "Run",
+                       QString const tooltip = "");
+  void setPlotIsPlotting(bool plotting);
 
 private:
   Ui::IndirectMoments m_uiForm;

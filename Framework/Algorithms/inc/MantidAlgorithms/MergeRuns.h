@@ -150,7 +150,6 @@ private:
   std::vector<SpectrumDefinition>
   buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
                      const Geometry::DetectorInfo &addeeDetInfo,
-                     const Geometry::DetectorInfo &outDetInfo,
                      const Geometry::DetectorInfo &newOutDetInfo);
 };
 

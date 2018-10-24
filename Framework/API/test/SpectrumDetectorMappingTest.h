@@ -12,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include <exception>
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::SpectrumDetectorMapping;
@@ -25,8 +26,9 @@ public:
   }
   static void destroySuite(SpectrumDetectorMappingTest *suite) { delete suite; }
 
-  void test_workspace_constructor_null_pointer() {
-    TS_ASSERT_THROWS(SpectrumDetectorMapping(nullptr), std::invalid_argument);
+  void test_workspace_constructor() {
+    MatrixWorkspace_const_sptr ws;
+    TS_ASSERT_THROWS(SpectrumDetectorMapping map(ws), std::invalid_argument);
   }
 
   void test_workspace_constructor_fills_map() {
@@ -36,7 +38,7 @@ public:
     ws->getSpectrum(0).setDetectorIDs(std::set<detid_t>());
     int detids[] = {10, 20};
     ws->getSpectrum(2).setDetectorIDs(std::set<detid_t>(detids, detids + 2));
-    SpectrumDetectorMapping map(ws.get());
+    SpectrumDetectorMapping map(ws);
 
     TS_ASSERT(map.getDetectorIDsForSpectrumNo(1).empty());
     auto idsFor2 = map.getDetectorIDsForSpectrumNo(2);
@@ -149,8 +151,8 @@ public:
   }
 
   void test_getDetectorIDsForSpectrumNo() {
-    MatrixWorkspace_sptr ws = boost::make_shared<WorkspaceTester>();
-    SpectrumDetectorMapping map(ws.get());
+    MatrixWorkspace_const_sptr ws = boost::make_shared<WorkspaceTester>();
+    SpectrumDetectorMapping map(ws);
     // The happy path is tested in the methods above. Just test invalid entry
     // here.
     TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(1), std::out_of_range);

@@ -63,7 +63,6 @@ public:
   size_t size() const;
   size_t scanSize() const;
   bool isScanning() const;
-  bool isSyncScan() const;
 
   bool isMonitor(const size_t index) const;
   bool isMonitor(const std::pair<size_t, size_t> &index) const;
@@ -104,16 +103,10 @@ public:
   /// This will throw an out of range exception if the detector does not exist.
   size_t indexOf(const detid_t id) const { return m_detIDToIndex->at(id); }
 
-  size_t scanCount(const size_t index) const;
-  std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
-  scanInterval(const std::pair<size_t, size_t> &index) const;
-  void setScanInterval(const size_t index,
-                       const std::pair<Types::Core::DateAndTime,
-                                       Types::Core::DateAndTime> &interval);
-  void setScanInterval(const std::pair<Types::Core::DateAndTime,
-                                       Types::Core::DateAndTime> &interval);
-
-  void merge(const DetectorInfo &other);
+  size_t scanCount() const;
+  const std::vector<
+      std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+  scanIntervals() const;
 
   friend class API::SpectrumInfo;
   friend class Instrument;

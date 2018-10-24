@@ -4,6 +4,17 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+"""
+The WorkHandler class handles the multi-threading of function calls; used to keep the GUI
+responsive whilst processing time consuming functions.
+
+Concretely, the QThreadPool is used.
+
+The "worker" handles running the function via a unique process ID; "listeners" may be defined for
+each process which are then notified upon certain actions (such as an error being thrown by the
+worker, or the worker finishing its task) using the nested class WorkListener.
+"""
+
 from PyQt4.QtCore import pyqtSlot, QThreadPool
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
@@ -13,7 +24,20 @@ import uuid
 
 
 class WorkHandler(object):
+    """
+    Class to handle threading of "work" (concretely this is just the evaluation of a function of the
+     form func(*args, **kwargs).
+
+     The process ID identifies (uniquely) each instance of a Worker; but the caller also defines
+     an ID which is then used to identify the Worker through the API.
+    """
+
     class WorkListener(with_metaclass(ABCMeta, object)):
+        """
+        This abstract base class defines methods which must be overriden and which
+        handle responses to certain worker actions such as raised errors, or completion.
+        """
+
         def __init__(self):
             pass
 
@@ -33,8 +57,9 @@ class WorkHandler(object):
 
     def _add_listener(self, listener, process_id, id):
         if not isinstance(listener, WorkHandler.WorkListener):
-            raise ValueError("The listener is not of type WorkListener but rather {}".format(type(listener)))
-        self._listener.update({process_id: {'id':id,'listener': listener}})
+            raise ValueError("The listener is not of type "
+                             "WorkListener but rather {}".format(type(listener)))
+        self._listener.update({process_id: {'id': id, 'listener': listener}})
 
     @pyqtSlot()
     def on_finished(self, process_id):
@@ -50,6 +75,15 @@ class WorkHandler(object):
         self._listener[process_id]['listener'].on_processing_error(error)
 
     def process(self, caller, func, id, *args, **kwargs):
+        """
+        Process a function call with arbitrary arguments on a new thread.
+
+        :param caller: ??
+        :param func: The function to be evaluated.
+        :param id: An identifying integer for the task.
+        :param args: args for func.
+        :param kwargs: keyword args for func.
+        """
         self.remove_already_processing(id)
         process_id = uuid.uuid4()
         # Add the caller
@@ -67,6 +101,10 @@ class WorkHandler(object):
         self.thread_pool.start(self._worker[process_id]['worker'])
 
     def remove_already_processing(self, id):
+        """
+        Remove workers with ID
+        :param id:
+        """
         for key, process in list(self._listener.items()):
             if process['id'] == id:
                 self._listener.pop(key)
