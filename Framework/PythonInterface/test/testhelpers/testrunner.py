@@ -153,5 +153,5 @@ if __name__ == "__main__":
         # Import mantid so that it sets up the additional paths to scripts etc
         # It would be good to try & remove this to soften the impact on tests
         # that don't require importing mantid at all
-        import mantid  # noqa
+        import mantid.simpleapi  # noqa
     main(sys.argv)

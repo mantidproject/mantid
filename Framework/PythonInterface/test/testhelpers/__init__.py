@@ -10,11 +10,7 @@ are for use in unit tests only!
 from __future__ import (absolute_import, division,
                         print_function)
 
-from six import iteritems
-# Define all mantid exported classes first
-import mantid
-
-#Add workspace creation namespace
+# Add workspace creation namespace
 from . import WorkspaceCreationHelper
 
 # Define some pure-Python functions to add to the mix
@@ -46,6 +42,8 @@ def create_algorithm(name, **kwargs):
         kwargs - A dictionary of property name:value pairs
     @returns The algorithm handle
     """
+    # Initialize the whole framework
+    import mantid.simpleapi  # noqa
     if 'Version' in kwargs:
         alg = mantid.api.AlgorithmManager.createUnmanaged(name, kwargs['Version'])
         del kwargs['Version']
