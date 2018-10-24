@@ -34,7 +34,7 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
     if (!areEqualVertices(t1, t2) && !areEqualVertices(t1, t3) &&
         !areEqualVertices(t2, t3)) {
       auto vertexPair = std::pair<Kernel::V3D, uint32_t>(t1, vertexCount);
-      auto emplacementResult =vertexSet.insert(vertexPair);
+      auto emplacementResult = vertexSet.insert(vertexPair);
       if (emplacementResult.second) {
         vertexCount++;
       }
