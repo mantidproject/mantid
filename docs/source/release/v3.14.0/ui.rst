@@ -11,6 +11,15 @@ UI & Usability Changes
 
 - Added time standard deviation to the sample log dialog
 
+Installation
+------------
+Changes
+#######
+The following changes have been made _only_ on Windows, bringing it in line with Mantid's installation naming on Linux.
+
+- The Mantid Nightly build will now be installed in a different directory by default, to avoid overwriting the release Mantid installation.
+- The Mantid Nightly build desktop and start menu shortcuts will have the "Nightly" suffix appended, to distinguish from the release Mantid installation.
+
 Project Recovery
 ----------------
 New
@@ -22,6 +31,10 @@ New
     :class: screenshot
     :align: right
     :figwidth: 70%
+    
+- Project Recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
+- Project Recovery now adds a lock file at the start of saving so if MantidPlot crashes when saving it will no longer use that checkpoint as it is incomplete.
+
 
 Changes
 #######

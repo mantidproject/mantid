@@ -103,14 +103,20 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         self.instrument = instrument
         component_list = get_detector_strings_for_gui(self.instrument)
         self.set_component_options(component_list)
+        self.lab_centre_label.setText('Centre Position {}'.format(component_list[0]))
+        self.update_lab_check_box.setText('Update {}'.format(component_list[0]))
         if len(component_list) < 2:
             self.hab_pos_1_line_edit.setEnabled(False)
             self.hab_pos_2_line_edit.setEnabled(False)
             self.update_hab_check_box.setEnabled(False)
+            self.hab_centre_label.setText('Centre Position HAB')
+            self.update_hab_check_box.setText('Update HAB')
         else:
             self.hab_pos_1_line_edit.setEnabled(True)
             self.hab_pos_2_line_edit.setEnabled(True)
             self.update_hab_check_box.setEnabled(True)
+            self.hab_centre_label.setText('Centre Position {}'.format(component_list[1]))
+            self.update_hab_check_box.setText('Update {}'.format(component_list[1]))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions

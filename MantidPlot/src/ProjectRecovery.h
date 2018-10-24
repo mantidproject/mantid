@@ -37,6 +37,7 @@ class ProjectRecovery {
 public:
   /// Constructor
   explicit ProjectRecovery(ApplicationWindow *windowHandle);
+
   /// Destructor the ensures background thread stops
   ~ProjectRecovery();
 
@@ -53,6 +54,7 @@ public:
 
   /// Starts the background thread
   void startProjectSaving();
+
   /// Stops the background thread
   void stopProjectSaving();
 
@@ -85,6 +87,8 @@ public:
   /// Open a recovery checkpoint in the scripting window
   void openInEditor(const Poco::Path &inputFolder,
                     const Poco::Path &historyDest);
+  /// Remove checkpoints if it has lock file
+  void removeLockedCheckpoints();
 
 private:
   /// Captures the current object in the background thread
@@ -128,8 +132,10 @@ private:
 
   /// Mutex for conditional variable and background thread flag
   std::mutex m_notifierMutex;
+
   /// Flag to indicate to the thread to exit
   std::atomic<bool> m_stopBackgroundThread;
+
   /// Atomic to detect when the thread should fire or exit
   std::condition_variable m_threadNotifier;
 

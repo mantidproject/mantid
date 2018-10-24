@@ -38,6 +38,7 @@ private slots:
   /// Handles mantid plot and save
   void saveClicked();
   void plotClicked();
+  void runClicked();
   void plotCurrentPreview();
 
 private:
@@ -51,6 +52,12 @@ private:
   void plotInPreview(const QString &curveName,
                      Mantid::API::MatrixWorkspace_sptr &ws,
                      const QColor &curveColor);
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
 
   Ui::ApplyAbsorptionCorrections m_uiForm;
 

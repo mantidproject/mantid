@@ -31,6 +31,19 @@ std::string pyObjToStr(const python::object &value) {
   return valuestr;
 }
 
+bool pyObjIsStr(const boost::python::object &value) {
+  python::extract<std::string> extractor(value);
+  if (extractor.check()) {
+    return true;
+#if PY_VERSION_HEX < 0x03000000
+  } else if (PyUnicode_Check(value.ptr())) {
+    return true;
+#endif
+  }
+
+  return false;
+}
+
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid

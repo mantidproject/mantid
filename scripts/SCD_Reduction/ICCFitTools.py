@@ -288,7 +288,6 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
     maxppl = maxppl_frac*pred_ppl
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck > minppl]
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck < maxppl]
-
     if pp_lambda_toCheck == []:
         pp_lambda_toCheck = [meanBG*1.96]
         print('Cannot find suitable background.  Consider adjusting MinpplFrac or MaxpplFrac')
@@ -662,7 +661,7 @@ def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.
 
     if workspaceNumber is None:
         tofWS = CreateWorkspace(
-            OutputWorkspace='tofWS', DataX=tPoints, DataY=yPoints, DataE=np.sqrt(yPoints))
+            OutputWorkspace='__tofWS', DataX=tPoints, DataY=yPoints, DataE=np.sqrt(yPoints))
     else:
         tofWS = CreateWorkspace(OutputWorkspace='tofWS%i' % workspaceNumber,
                                 DataX=tPoints, DataY=yPoints, DataE=np.sqrt(yPoints))
@@ -837,7 +836,7 @@ def getBoxFracHKL(peak, peaks_ws, MDdata, UBMatrix, peakNumber, dQ, dQPixel=0.00
 
 
 def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None, outputWSName='fit', fitOrder=1,
-             iccFitDict=None):
+             iccFitDict=None, fitPenalty=None):
     """
     doICCFit - Carries out the actual least squares fit for the TOF workspace.
     Intput:
@@ -888,7 +887,6 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
         HatWidth0 = [0., 5.]
         Scale0 = [0., np.inf]
         KConv0 = [100, 140]
-
         # Now we see what instrument specific parameters we have
         if iccFitDict is not None:
             possibleKeys = ['iccA', 'iccB', 'iccR', 'iccT0', 'iccScale0', 'iccHatWidth', 'iccKConv']
@@ -899,17 +897,10 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
                     if len(iccFitDict[key] == 3):
                         x0[keyIDX] = iccFitDict[key][2]
                         fICC.setParameter(keyIDX, x0[keyIDX])
-        try:
-            fICC.setPenalizedConstraints(A0=A0, B0=B0, R0=R0, T00=T00, KConv0=KConv0, penalty=1.0e10)
-        except:
-            fICC.setPenalizedConstraints(A0=A0, B0=B0, R0=R0, T00=T00, KConv0=KConv0, penalty=None)
+        fICC.setPenalizedConstraints(A0=A0, B0=B0, R0=R0, T00=T00, KConv0=KConv0, penalty=fitPenalty)
     if constraintScheme == 2:
-        try:
-            fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], Scale0=[
-                                         0.0, 1.0e10], T00=[0, 1.0e10], KConv0=[100., 140.], penalty=1.0e20)
-        except:
-            fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], Scale0=[
-                                         0.0, 1.0e10], T00=[0, 1.0e10], KConv0=[100, 140.], penalty=None)
+        fICC.setPenalizedConstraints(A0=[0.0001, 1.0], B0=[0.005, 1.5], R0=[0.00, 1.], Scale0=[
+                                         0.0, 1.0e10], T00=[0, 1.0e10], KConv0=[100., 140.], penalty=fitPenalty)
     f = FunctionWrapper(fICC)
     bg = Polynomial(n=fitOrder)
 
@@ -917,7 +908,7 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
         bg['A'+str(fitOrder-i)] = bgx0[i]
     bg.constrain('-1.0 < A%i < 1.0' % fitOrder)
     fitFun = f + bg
-    fitResults = Fit(Function=fitFun, InputWorkspace='tofWS',
+    fitResults = Fit(Function=fitFun, InputWorkspace='__tofWS',
                      Output=outputWSName)
     return fitResults, fICC
 
@@ -1005,8 +996,7 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                                                          pplmin_frac=minpplfrac, pplmax_frac=maxpplfrac,
                                                          constraintScheme=constraintScheme,
                                                          peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
-                # --IN PRINCIPLE!!! WE CALCULATE THIS BEFORE GETTING HERE
-                tofWS = mtd['tofWS']
+                tofWS = mtd['__tofWS']
 
                 fitResults, fICC = doICCFit(
                     tofWS, energy, flightPath, padeCoefficients, fitOrder=bgPolyOrder, constraintScheme=constraintScheme,
@@ -1015,7 +1005,7 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
 
                 r = mtd['fit_Workspace']
                 param = mtd['fit_Parameters']
-                tofWS = mtd['tofWS']
+                tofWS = mtd['__tofWS']
 
                 iii = fICC.numParams() - 1
                 fitBG = [param.row(int(iii+bgIDX+1))['Value']

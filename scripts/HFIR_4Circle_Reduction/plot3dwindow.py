@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import sys
 import numpy as np
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QMainWindow)
 
 from . import ui_View3DWidget
 from HFIR_4Circle_Reduction import guiutility
@@ -17,7 +17,7 @@ from HFIR_4Circle_Reduction import guiutility
 __author__ = 'wzz'
 
 
-class Plot3DWindow(QtGui.QMainWindow):
+class Plot3DWindow(QMainWindow):
     """
     Main window to view merged data in 3D
     """
@@ -29,7 +29,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         :return:
         """
         # Init
-        QtGui.QMainWindow.__init__(self, parent)
+        QMainWindow.__init__(self, parent)
 
         self.ui = ui_View3DWidget.Ui_MainWindow()
         self.ui.setupUi(self)
@@ -42,17 +42,11 @@ class Plot3DWindow(QtGui.QMainWindow):
         self.ui.comboBox_scans.addItem('unclassified')
 
         # Event handling
-        self.connect(self.ui.pushButton_plot3D, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_3d)
-        self.connect(self.ui.pushButton_checkCounts, QtCore.SIGNAL('clicked()'),
-                     self.do_check_counts)
-        self.connect(self.ui.pushButton_clearPlots, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_plots)
-        self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
-
-        self.connect(self.ui.comboBox_scans, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.evt_change_scan)
+        self.ui.pushButton_plot3D.clicked.connect(self.do_plot_3d)
+        self.ui.pushButton_checkCounts.clicked.connect(self.do_check_counts)
+        self.ui.pushButton_clearPlots.clicked.connect(self.do_clear_plots)
+        self.ui.pushButton_quit.clicked.connect(self.do_quit)
+        self.ui.comboBox_scans.currentIndexChanged.connect(self.evt_change_scan)
 
         # Set up
         # list of data keys for management

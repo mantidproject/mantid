@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MPLCPP_LINE2DTEST_H
 #define MPLCPP_LINE2DTEST_H
 
 #include "MantidQtWidgets/MplCpp/Line2D.h"
+#include <QRgb>
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::Widgets::MplCpp;
@@ -13,7 +20,17 @@ public:
 
   // ---------------------- success tests --------------------
   void testConstructionRequiresMplLine2DObject() {
-    TS_ASSERT_THROWS_NOTHING(Line2D line(pyLine2D(), {}, {}));
+    TS_ASSERT_THROWS_NOTHING(Line2D line(pyLine2D(), {1, 2}, {1, 2}));
+  }
+
+  void testGetColorReturnsExpectedColor() {
+    Line2D line(pyLine2D(), {1, 2}, {1, 2});
+    line.pyobj().attr("set_color")("r");
+
+    auto color = line.getColor();
+    TS_ASSERT_EQUALS(255, color.red());
+    TS_ASSERT_EQUALS(0, color.green());
+    TS_ASSERT_EQUALS(0, color.blue());
   }
 
   // ---------------------- failure tests --------------------

@@ -22,8 +22,6 @@
 #include "ui_EnggDiffractionQtTabPreproc.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
-#include <boost/scoped_ptr.hpp>
-
 // Qt classes forward declarations
 class QMessageBox;
 class QMutex;
