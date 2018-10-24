@@ -72,23 +72,31 @@ The definition of :math:`\rho` is used throughout the rest of this documentation
 Techniques for Calculating Corrections
 ######################################
 
-Methods for calculating the absorption corrections (and also the multiple scattering)  generally fall into two categories:
+Methods for calculating the absorption corrections (and also the multiple scattering)  generally fall into these categories:
 
 1) Analytical solutions, based on the Boltzmann transport equation. Numerical integration is required for most shapes.
 
-* Generally provides quicker solutions
-* Some assumptions are included: sample geometries and the scattering processes
-* Less flexible than the Monte Carlo technique for tackling different problems.
+* Generally provides quicker solutions.
+* Some assumptions are included: sample geometries and the scattering processes.
+* Less flexible than the Monte Carlo integration or ray-tracing for tackling different problems.
+* Implemented in Mantid
 
-2) Monte Carlo simulations of scattering processes. This includes both Monte Carlo integration and Monte Carlo ray tracing techniques.
+2) Monte Carlo integration
+ 
+* Generally a more computationally demanding calculation and slower to solution. Monte Carlo is used for the numerical integration technique.
+* Relaxation of most assumptions needed by analytical solutions.
+* More flexible than the analytical techniques for shapes, beam profiles, and mixed number of scattering processes.
+* Implemented in Mantid
 
-* Generally a more computationally demanding calculation and slower to solution
-* Relaxation of most assumptions needed by analytical solutions
-* More flexible than the analytical technique.
+3) Monte Carlo ray tracing 
 
-The former generally provide quicker solutions, but at the expense of having to make assumptions about sample geometries and scattering processes that make them less flexible than the latter. 
+* Most general solution in that it is a virtual neutron experiment with all neutron histories kept. Slowest to solution.
+* Relatively no assumptions needed. Can simulate mixed numbers of scattering, complex scattering processes (ie scattering sample to sample environment back to sample then to detector), moderator and guides included.
+* Most flexible but mainly a tool for designing new instruments than for calculating sample corrections.
+* Typically calculated in another program specific to ray tracing and then imported into Mantid. 
+
+The analytical method generally provides a quicker solution, but at the expense of having to make assumptions about sample geometries and scattering processes that make them less flexible than the Monte Carlo techniques (integration and ray-tracing).
 However, in many cases analytical solutions are satisfactory and allow much more efficient analysis of results. 
-
 
 .. _Absorption Corrections:
 
@@ -210,8 +218,57 @@ where :math:`V = \int_V P(dV) D(dV) dV` is the effective volume of the cylinder 
 2. Building on (1), the PPF can also be generalized to include the beam and detector profiles. [10]_
 
 
-Absorption Correction Algorithms in Mantid
-###########################################
+Legends for Absorption Correction Algorithms in Mantid Table
+#############################################################
+
+Indicates the energy modes that the algorithm can accommodate:
+
++-------------+-----------+ 
+| Legend for Energy Mode  | 
++=============+===========+ 
+| E           | Elastic   | 
++-------------+-----------+ 
+| D           | Direct    | 
++-------------+-----------+ 
+| I           | Indirect  | 
++-------------+-----------+ 
+
+Indicates the technique used for calculating the absorption correction:
+
++------------+-------------------------+ 
+|  Legend for Technique                | 
++============+=========================+ 
+|  NI        | Numerical Integration   | 
++------------+-------------------------+ 
+|  MC        | Monte Carlo Integration | 
++------------+-------------------------+ 
+
+Options that describe what functions the algorithm is capable of and the output types:
+
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| Legend for Functions                                                                                                                     |
++===========+==============================================================================================================================+
+| L         | Loads correction from file                                                                                                   |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| MS        | Multiple scattering correction calculated                                                                                    |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| FI        | Full illumination of sample by beam                                                                                          |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| PI        | Full or partial illumination of sample by beam                                                                               |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| W         | Outputs a corrected sample workspace                                                                                         |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| A         | Absorption correction calculated                                                                                             |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| A\+       | Calculates both sample and container absorption corrections (:math:`A_{s,s}`, :math:`A_{c,c}`)                               |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| A\++      | Calculates full set of partial absorption corrections (:math:`A_{s,s}`, :math:`A_{s,sc}`, :math:`A_{c,c}`, :math:`A_{c,sc}`) |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+
+
+
+Absorption Correction Algorithms in Mantid Table
+#################################################
 
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
 | Algorithm                                                                           | Energy Mode | Technique  | Geometry                        | Input Units        | Functions           | Notes                                                                                 |
@@ -282,27 +339,7 @@ Absorption Correction Algorithms in Mantid
 | :ref:`SphericalAbsorption <algm-SphericalAbsorption>`                               | E           | NI         | Sphere                          | Wavelength         | A,FI,W              |  Wrapper around :ref:`AvredCorrection <algm-AnvredCorrection>`                        |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+--------------------+---------------------+---------------------------------------------------------------------------------------+
 
-+-------------+-----------+------------+-------------------------+-----------+------------------------------------------------------------------------------------------------------------------------------+
-|                                                                   Legend                                                                                                                                  |
-+-------------+-----------+------------+-------------------------+-----------+------------------------------------------------------------------------------------------------------------------------------+
-| Energy Mode             |  Technique                           | Functions                                                                                                                                |
-+=============+===========+============+=========================+===========+==============================================================================================================================+
-| E           | Elastic   | NI         | Numerical Integration   | L         | Loads correction from file                                                                                                   |
-+-------------+-----------+------------+-------------------------+-----------+------------------------------------------------------------------------------------------------------------------------------+
-| D           | Direct    | MC         | Monte Carlo Integration | FI        | Full illumination of sample by beam                                                                                          |
-+-------------+-----------+------------+-------------------------+-----------+------------------------------------------------------------------------------------------------------------------------------+
-| I           | Indirect  |            |                         | PI        | Full or partial illumination of sample by beam                                                                               |
-+-------------+-----------+            +                         +-----------+------------------------------------------------------------------------------------------------------------------------------+
-|             |           |            |                         | MS        | Multiple scattering correction calculated                                                                                    |
-+             +           +            +                         +-----------+------------------------------------------------------------------------------------------------------------------------------+
-|             |           |            |                         | W         | Outputs a corrected sample workspace                                                                                         |
-+             +           +            +                         +-----------+------------------------------------------------------------------------------------------------------------------------------+
-|             |           |            |                         | A         | Absorption correction calculated                                                                                             |
-+             +           +            +                         +-----------+------------------------------------------------------------------------------------------------------------------------------+
-|             |           |            |                         | A\+       | Calculates both sample and container absorption corrections (:math:`A_{s,s}`, :math:`A_{c,c}`)                               |
-+             +           +            +                         +-----------+------------------------------------------------------------------------------------------------------------------------------+
-|             |           |            |                         | A\++      | Calculates full set of partial absorption corrections (:math:`A_{s,s}`, :math:`A_{s,sc}`, :math:`A_{c,c}`, :math:`A_{c,sc}`) |
-+-------------+-----------+------------+-------------------------+-----------+------------------------------------------------------------------------------------------------------------------------------+
+
 
 .. _Multiple Scattering Corrections:
 
@@ -579,9 +616,53 @@ scatter from hydrogen can be more significant in blurring sharp features than do
 For early considerations of multiple small angle scattering see for example [13]_ [14]_.
 
 
+Legends for Multiple Scattering Correction Algorithms in Mantid Table
+######################################################################
+Indicates the energy modes that the algorithm can accommodate:
 
-Multiple Scattering Correction Algorithms in Mantid
-####################################################
++-------------+-----------+ 
+| Legend for Energy Mode  | 
++=============+===========+ 
+| E           | Elastic   | 
++-------------+-----------+ 
+| D           | Direct    | 
++-------------+-----------+ 
+| I           | Indirect  | 
++-------------+-----------+ 
+
+Indicates the technique used for calculating the absorption correction:
+
++------------+-------------------------+ 
+|  Legend for Technique                | 
++============+=========================+ 
+|  NI        | Numerical Integration   | 
++------------+-------------------------+ 
+|  MC        | Monte Carlo Integration | 
++------------+-------------------------+ 
+
+Options that describe what functions the algorithm is capable of, assumptions, and the output types:
+
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| Functions                                                                                                                                |
++===========+==============================================================================================================================+
+| L         | Loads correction from file                                                                                                   |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| FI        | Full illumination of sample by beam                                                                                          |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| PI        | Full or partial illumination of sample by beam                                                                               |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| W         | Outputs a corrected sample workspace                                                                                         |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| IA        | Isotropic assumption is used for all orders of scattering                                                                    |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+| EA        | Elastic scattering assumption is used                                                                                        |
++-----------+------------------------------------------------------------------------------------------------------------------------------+
+
+
+
+
+Multiple Scattering Correction Algorithms in Mantid Table
+##########################################################
 
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
 | Algorithm                                                                           | Energy Mode | Technique  | Geometry                        | Input Units          | Functions           | Notes                                                                                 |
@@ -612,25 +693,6 @@ Multiple Scattering Correction Algorithms in Mantid
 |                                                                                     |             |            |                                 |                      |                     ||  Calculates both total and multiple scattering output workspaces. Specific to        |
 |                                                                                     |             |            |                                 |                      |                     ||  `Vesuvio <https://www.isis.stfc.ac.uk/Pages/Vesuvio.aspx>`__ but possibly general.  |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
-
-
-+-------------+-----------+------------+-------------------------+-----------+------------------------------------------------------------------------------------------------------------------------------+
-|                                                                   Legend                                                                                                                                  |
-+-------------+-----------+------------+-------------------------+-----------+------------------------------------------------------------------------------------------------------------------------------+
-| Energy Mode             |  Technique                           | Functions                                                                                                                                |
-+=============+===========+============+=========================+===========+==============================================================================================================================+
-| E           | Elastic   | NI         | Numerical Integration   | L         | Loads correction from file                                                                                                   |
-+-------------+-----------+------------+-------------------------+-----------+------------------------------------------------------------------------------------------------------------------------------+
-| D           | Direct    | MC         | Monte Carlo Integration | FI        | Full illumination of sample by beam                                                                                          |
-+-------------+-----------+------------+-------------------------+-----------+------------------------------------------------------------------------------------------------------------------------------+
-| I           | Indirect  |            |                         | PI        | Full or partial illumination of sample by beam                                                                               |
-+-------------+-----------+            +                         +-----------+------------------------------------------------------------------------------------------------------------------------------+
-|             |           |            |                         | W         | Outputs a corrected sample workspace                                                                                         |
-+             +           +            +                         +-----------+------------------------------------------------------------------------------------------------------------------------------+
-|             |           |            |                         | IA        | Isotropic assumption is used for all orders of scattering                                                                    |
-+             +           +            +                         +-----------+------------------------------------------------------------------------------------------------------------------------------+
-|             |           |            |                         | EA        | Elastic scattering assumption is used                                                                                        |
-+-------------+-----------+------------+-------------------------+-----------+------------------------------------------------------------------------------------------------------------------------------+
 
 
 References
