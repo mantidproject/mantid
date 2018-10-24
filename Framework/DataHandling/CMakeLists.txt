@@ -128,6 +128,7 @@
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
+	src/ORNLDataArchive.cpp
 	src/PDLoadCharacterizations.cpp
 	src/ParallelEventLoader.cpp
 	src/PatchBBY.cpp
@@ -137,7 +138,7 @@
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/RotateSource.cpp
-	src/ORNLDataArchive.cpp
+	src/SNSDataArchive.cpp
     	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
@@ -317,6 +318,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NXcanSASDefinitions.h
 	inc/MantidDataHandling/NexusTester.h
+	inc/MantidDataHandling/ORNLDataArchive.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
 	inc/MantidDataHandling/ParallelEventLoader.h
 	inc/MantidDataHandling/PatchBBY.h
@@ -326,7 +328,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/RotateSource.h
-	inc/MantidDataHandling/ORNLDataArchive.h
+	inc/MantidDataHandling/SNSDataArchive.h
 	inc/MantidDataHandling/SaveANSTOAscii.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveAscii2.h
@@ -500,13 +502,14 @@ set ( TEST_FILES
 	ModifyDetectorDotDatFileTest.h
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h
+	ORNLDataArchiveTest.h
 	PDLoadCharacterizationsTest.h
 	RawFileInfoTest.h
 	RemoveLogsTest.h
 	RenameLogTest.h
 	RotateInstrumentComponentTest.h
 	RotateSourceTest.h
-	ORNLDataArchiveTest.h
+	SNSDataArchiveTest.h
 	SaveANSTOAsciiTest.h
 	SaveAscii2Test.h
 	SaveAsciiTest.h
