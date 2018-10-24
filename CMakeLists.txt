@@ -391,7 +391,7 @@ if ( ENABLE_CPACK )
           set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt4" )
         endif()
         if (ENABLE_WORKBENCH)
-          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-qt5" )
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5" )
         endif()
       else() # python 2
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-h5py,"
@@ -409,7 +409,7 @@ if ( ENABLE_CPACK )
           set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-qt4" )
         endif()
         if (ENABLE_WORKBENCH)
-          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-qt5" )
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-pyqt5" )
         endif()
       endif ()
       # parse list to string required for deb package
