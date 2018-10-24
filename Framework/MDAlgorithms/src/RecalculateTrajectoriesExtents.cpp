@@ -16,6 +16,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RecalculateTrajectoriesExtents)
@@ -84,7 +85,7 @@ void RecalculateTrajectoriesExtents::exec() {
     outWS = inWS->clone();
   }
 
-  //check if using diffraction or direct inelastic
+  // check if using diffraction or direct inelastic
   bool diffraction(true);
   double Ei(0.0);
   if (outWS->getNumDims() > 3){
@@ -101,20 +102,44 @@ void RecalculateTrajectoriesExtents::exec() {
       }
   }
 
+  // get limits for all dimensions
+  double qxmin = outWS->getDimension(0)->getMinimum();
+  double qxmax = outWS->getDimension(0)->getMaximum();
+  double qymin = outWS->getDimension(1)->getMinimum();
+  double qymax = outWS->getDimension(1)->getMaximum();
+  double qzmin = outWS->getDimension(2)->getMinimum();
+  double qzmax = outWS->getDimension(2)->getMaximum();
+  double dEmin(0.0), dEmax(0.0);
+  size_t nqedims=3;
+  if(!diffraction){
+    nqedims=4;
+    dEmin = outWS->getDimension(3)->getMinimum();
+    dEmax = outWS->getDimension(3)->getMaximum();
+  }
+  std::vector<double> otherDimsMin, otherDimsMax;
+  std::vector<std::string> otherDimsNames;
+  for (size_t i=nqedims;i<outWS->getNumDims();i++) {
+    otherDimsMin.emplace_back(outWS->getDimension(i)->getMinimum());
+    otherDimsMax.emplace_back(outWS->getDimension(i)->getMaximum());
+    otherDimsNames.emplace_back(outWS->getDimension(i)->getName());
+  }
+
+
+  // Loop over experiment infos
   size_t nExperimentInfos = outWS->getNumExperimentInfo();
   if (nExperimentInfos >1) {
     g_log.warning("More than one experiment info. On merged workspaces, the "
                   "limits recalculations might be wrong");
   }
-  for (size_t i=0; i<nExperimentInfos; i++){
-    const auto &currentExptInfo = *(outWS->getExperimentInfo(static_cast<uint16_t>(i)));
+
+  for (size_t iExpInfo=0; iExpInfo<nExperimentInfos; iExpInfo++){
+    auto &currentExptInfo = *(outWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
     // get instrument and goniometer
     const auto &spectrumInfo = currentExptInfo.spectrumInfo();
     const int64_t nspectra = static_cast<int64_t>(spectrumInfo.size());
     std::vector<double> lowValues, highValues;
 
     if (currentExptInfo.run().hasProperty("MDNorm_low")){
-      using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
       auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(
           currentExptInfo.getLog("MDNorm_low"));
           lowValues = (*lowValuesLog)();
@@ -123,7 +148,6 @@ void RecalculateTrajectoriesExtents::exec() {
       lowValues = std::vector<double>(nspectra, minValue);
     }
     if (currentExptInfo.run().hasProperty("MDNorm_high")){
-      using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
       auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(
           currentExptInfo.getLog("MDNorm_high"));
           highValues = (*highValuesLog)();
@@ -131,11 +155,32 @@ void RecalculateTrajectoriesExtents::exec() {
       double maxValue=currentExptInfo.run().getBinBoundaries().back();
       highValues = std::vector<double>(nspectra, maxValue);
     }
-    g_log.warning()<<lowValues[0]<<"\n";
-    g_log.warning()<<highValues[0]<<"\n";
 
-    // loop over detectors
+    // deal with other dimensions first
+    bool zeroWeights(false);
+    for(size_t iOtherDims=0; iOtherDims<otherDimsNames.size(); iOtherDims++) {
+      // check other dimensions. there might be no events, but if the first log value is
+      // not within limits, the weight should be zero as well
+      auto *otherDimsLog=dynamic_cast<VectorDoubleProperty *>(
+            currentExptInfo.getLog(otherDimsNames[iOtherDims]));
+      if (((*otherDimsLog)()[0] < otherDimsMin[iOtherDims]) ||((*otherDimsLog)()[0] > otherDimsMax[iOtherDims])){
+        zeroWeights=true;
+        g_log.warning()<<"In experimentInfo "<<iExpInfo<<", log "<<otherDimsNames[iOtherDims]<<" is outside limits\n";
+        continue;
+      }
+    }
+    if (zeroWeights) {
+      highValues = lowValues;
+    } else {
+        // loop over detectors
+
+    }
+
+    // set the new values for the MDNorm_low and MDNorm_high
+    currentExptInfo.mutableRun().addProperty("MDNorm_low",lowValues,true);
+    currentExptInfo.mutableRun().addProperty("MDNorm_high",highValues,true);
   }
+
 
   setProperty("OutputWorkspace", outWS);
 }
