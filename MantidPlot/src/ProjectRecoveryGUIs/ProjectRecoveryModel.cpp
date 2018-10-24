@@ -99,6 +99,7 @@ void ProjectRecoveryModel::openLastInEditor() {
         mostRecentCheckpoint.directory(mostRecentCheckpoint.depth() - 1));
   }
 
+  m_failedRun = false;
   // Close View
   m_presenter->closeView();
 }
@@ -154,6 +155,7 @@ void ProjectRecoveryModel::openSelectedInEditor(std::string &selected) {
     updateCheckpointTried(selected);
   }
 
+  m_failedRun = false;
   // Close View
   m_presenter->closeView();
 }
@@ -200,6 +202,6 @@ void ProjectRecoveryModel::createThreadAndManage(const Poco::Path &checkpoint) {
   // Wait for the thread to finish
   recoverThread->wait();
 
-  // Set failed run memver to the value from the thread
+  // Set failed run member to the value from the thread
   m_failedRun = recoverThread->getFailedRun();
 }
