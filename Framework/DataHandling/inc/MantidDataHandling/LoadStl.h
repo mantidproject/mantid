@@ -6,13 +6,14 @@
 #include "MantidKernel/V3D.h"
 #include <boost/functional/hash.hpp>
 #include <unordered_set>
+#include <functional>
 namespace {
 Mantid::Kernel::Logger g_logstl("LoadStl");
 }
 namespace Mantid {
 namespace DataHandling {
 
-namespace {
+
 struct HashV3DPair {
   size_t operator()(const std::pair<Kernel::V3D, uint32_t> &v) const {
     size_t seed = std::hash<double>{}(v.first.X());
@@ -32,7 +33,7 @@ struct V3DTrueComparator {
   }
 };
 
-} // namespace
+
 class DLLExport LoadStl {
 public:
   LoadStl(std::string filename) : m_filename(filename) {}
