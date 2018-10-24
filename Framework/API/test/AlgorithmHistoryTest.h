@@ -252,7 +252,6 @@ private:
 
   std::string m_correctOutput;
   size_t m_execCount;
-  static int64_t m_executionDate;
 };
 
 #endif /* ALGORITHMHISTORYTEST_H_*/

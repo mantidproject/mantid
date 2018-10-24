@@ -17,7 +17,6 @@
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include <boost/uuid/uuid.hpp>
 #include <ctime>
 #include <set>
 #include <vector>
@@ -122,8 +121,6 @@ public:
   void fillAlgorithmHistory(const Algorithm *const alg,
                             const Types::Core::DateAndTime &start,
                             const double &duration, std::size_t uexeccount);
-  /// Increment the execution date by 1 or the defined amount of nano seconds
-  void increaseExecutionDate(const int64_t nanosecondIncrement = 1);
   // Allow Algorithm::execute to change the exec count & duration after the
   // algorithm was executed
   friend class Algorithm;
