@@ -235,13 +235,6 @@ public:
     TS_ASSERT(cloned);
   }
 
-  void testTooManyVertices() {
-    auto tooManyVertices = std::vector<V3D>(70000);
-    auto triangles = std::vector<uint32_t>(1000);
-    TS_ASSERT_THROWS_ANYTHING(
-        MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
-  }
-
   void testMaterial() {
     using Mantid::Kernel::Material;
     std::vector<V3D> vertices;
