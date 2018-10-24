@@ -258,7 +258,7 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
     for i in range(nframe):
         t0 = i * uSec / source_rep
         lines = findLine(chop_times[-1], dist[-1], [t0, t0+tmod])
-        lines = checkPath(chop_times[0:-1], lines, dist[:-1], dist[-1])
+        lines = checkPath([np.array(ct)+t0 for ct in chop_times[0:-1]], lines, dist[:-1], dist[-1])
         if lines:
             for line in lines:
                 lines_all.append(line)

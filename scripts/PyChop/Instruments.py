@@ -296,7 +296,7 @@ class ChopperSystem(object):
             x1 = ((modSamDist-lines[i][0][1]) / lines[i][0][0] + (modSamDist-lines[i][1][1]) / lines[i][1][0]) / 2.
             plt.plot([x0, x1], [0, modSamDist], c='b')
             x2 = ((totDist-lines[i][0][1]) / lines[i][0][0] + (totDist-lines[i][1][1]) / lines[i][1][0]) / 2.
-            lineM = totDist / x2
+            lineM = totDist / (x2 - x0)
             plt.plot([x1, x2], [modSamDist, totDist], c='b')
             newline = [lineM * np.sqrt(1 + self.overlap_ei_frac), modSamDist - lineM * np.sqrt(1 + self.overlap_ei_frac) * x1]
             x3 = (totDist-newline[1]) / (newline[0])
