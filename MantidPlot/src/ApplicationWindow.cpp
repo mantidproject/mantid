@@ -1578,8 +1578,14 @@ void ApplicationWindow::customMenu(MdiSubWindow *w) {
     itemMenuAction->setText(item->title());
   }
 
-  auto catalogMenuAction = myMenuBar()->addMenu(icat);
-  catalogMenuAction->setText(tr("&Catalog"));
+  const auto &config = Mantid::Kernel::ConfigService::Instance();
+  const auto showCatalogMenu = !config.getFacility(
+      config.getFacility().name()).catalogInfo().soapEndPoint().empty();
+
+  if (showCatalogMenu) {
+    auto catalogMenuAction = myMenuBar()->addMenu(icat);
+    catalogMenuAction->setText(tr("&Catalog"));
+  }
 
   // -- INTERFACE MENU --
   auto interfaceMenuAction = myMenuBar()->addMenu(interfaceMenu);
