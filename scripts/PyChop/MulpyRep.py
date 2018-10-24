@@ -92,7 +92,8 @@ def calcEnergy(lines, samDist):
     massN = 1.674927e-27
     for i in range(len(lines)):
         # look at the middle of the time window
-        v = 0.5 * (lines[i][0][0] + lines[i][1][0])
+        x1 = ((samDist-lines[i][0][1]) / lines[i][0][0] + (samDist-lines[i][1][1]) / lines[i][1][0]) / 2.
+        v = samDist / (x1-lines[i][0][1])
         Ei[i] = (v*1e6)**2 * massN / 2. / 1.60217662e-22
     return Ei
 
