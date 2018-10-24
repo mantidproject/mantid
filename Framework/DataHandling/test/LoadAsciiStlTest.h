@@ -23,7 +23,6 @@ public:
   static LoadAsciiStlTest *createSuite() { return new LoadAsciiStlTest(); }
   static void destroySuite(LoadAsciiStlTest *suite) { delete suite; }
 
-  void testInit() {}
   void test_cube() {
     std::string path = FileFinder::Instance().getFullPath("cube.stl");
     auto Loader = LoadAsciiStl(path);
