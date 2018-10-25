@@ -664,9 +664,9 @@ void ReflectometryReductionOne2::findDetectorGroups() {
   for (const auto &group : m_detectorGroups) {
     for (const auto &wsIdx : group) {
       if (m_spectrumInfo->isMonitor(wsIdx)) {
-        throw std::invalid_argument(
-            m_processingInstructions +
-            " is not a valid spectrum number, because it is a monitor.");
+        throw std::invalid_argument("A detector is expected at workspace index " +
+                                    std::to_string(wsIdx) +
+                                    " (Was converted from specnum), found a monitor");
       }
       if (wsIdx > m_spectrumInfo->size() - 1) {
         throw std::runtime_error(

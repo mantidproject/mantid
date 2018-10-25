@@ -106,15 +106,17 @@ protected:
 
 private:
   std::string
-  workspaceIndexesToSpecNum(const std::string &num,
-                            Mantid::API::MatrixWorkspace_const_sptr ws) const;
-  std::string convertProcessingInstructionsToWorkspaceIndexes(
+  convertToSpectrumNumber(const std::string &workspaceIndex,
+                          Mantid::API::MatrixWorkspace_const_sptr ws) const;
+
+  std::string convertProcessingInstructionsToWorkspaceIndices(
       const std::string &instructions,
       Mantid::API::MatrixWorkspace_const_sptr ws) const;
-  std::string
-  specNumToWorkspaceIndexes(const std::string &num,
-                            Mantid::API::MatrixWorkspace_const_sptr ws) const;
-  std::string convertWorkspaceIndexProcInstToSpecNum(
+
+  std::string convertToWorkspaceIndex(const std::string &spectrumNumber,
+                                      MatrixWorkspace_const_sptr ws) const;
+
+  std::string convertProcessingInstructionsToSpectrumNumbers(
       const std::string &instructions,
       Mantid::API::MatrixWorkspace_const_sptr ws) const;
 };

@@ -693,7 +693,7 @@ ReflectometryWorkflowBase2::getRunNumber(MatrixWorkspace const &ws) const {
 }
 
 std::string
-ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndexes(
+ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndices(
     const std::string &instructions, MatrixWorkspace_const_sptr ws) const {
   std::string converted = "";
   std::string currentNumber = "";
@@ -701,8 +701,8 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndexes(
   for (auto i = 0u; i < instructions.size(); ++i) {
     if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
         ignoreThese.end()) {
-      // Found a spacer so add currentNumber to converted after seperator
-      converted.append(workspaceIndexesToSpecNum(currentNumber, ws));
+      // Found a spacer so add currentNumber to converted followed by separator
+      converted.append(convertToWorkspaceIndex(currentNumber, ws));
       converted.push_back(instructions[i]);
       currentNumber = "";
     } else {
@@ -710,23 +710,20 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndexes(
     }
   }
   // Add currentNumber onto converted
-  converted.append(workspaceIndexesToSpecNum(currentNumber, ws));
+  converted.append(convertToWorkspaceIndex(currentNumber, ws));
   return converted;
 }
 
-std::string ReflectometryWorkflowBase2::workspaceIndexesToSpecNum(
-    const std::string &num, MatrixWorkspace_const_sptr ws) const {
-  if (num == "0") {
-    throw std::runtime_error(
-        "0 is not a valid WorkspaceIndex, so cannot be converted to SpecNum");
-  }
-  auto specNum = convertStringNumToInt(num);
+std::string ReflectometryWorkflowBase2::convertToWorkspaceIndex(
+    const std::string &spectrumNumber, MatrixWorkspace_const_sptr ws) const {
+  auto specNum = convertStringNumToInt(spectrumNumber);
   std::string wsIdx = std::to_string(
       ws->getIndexFromSpectrumNumber(static_cast<specnum_t>(specNum)));
   return wsIdx;
 }
 
-std::string ReflectometryWorkflowBase2::convertWorkspaceIndexProcInstToSpecNum(
+std::string
+ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
     const std::string &instructions,
     Mantid::API::MatrixWorkspace_const_sptr ws) const {
   std::string converted = "";
@@ -736,7 +733,7 @@ std::string ReflectometryWorkflowBase2::convertWorkspaceIndexProcInstToSpecNum(
     if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
         ignoreThese.end()) {
       // Found a spacer so add currentNumber to converted after seperator
-      converted.append(specNumToWorkspaceIndexes(currentNumber, ws));
+      converted.append(convertToSpectrumNumber(currentNumber, ws));
       converted.push_back(instructions[i]);
       currentNumber = "";
     } else {
@@ -744,12 +741,13 @@ std::string ReflectometryWorkflowBase2::convertWorkspaceIndexProcInstToSpecNum(
     }
   }
   // Add currentNumber onto converted
-  converted.append(specNumToWorkspaceIndexes(currentNumber, ws));
+  converted.append(convertToSpectrumNumber(currentNumber, ws));
   return converted;
 }
-std::string ReflectometryWorkflowBase2::specNumToWorkspaceIndexes(
-    const std::string &num, Mantid::API::MatrixWorkspace_const_sptr ws) const {
-  auto wsIndx = convertStringNumToInt(num);
+std::string ReflectometryWorkflowBase2::convertToSpectrumNumber(
+    const std::string &workspaceIndex,
+    Mantid::API::MatrixWorkspace_const_sptr ws) const {
+  auto wsIndx = convertStringNumToInt(workspaceIndex);
   std::string specId = std::to_string(
       static_cast<int32_t>(ws->indexInfo().spectrumNumber(wsIndx)));
   return specId;
@@ -760,12 +758,12 @@ void ReflectometryWorkflowBase2::convertProcessingInstructions(
   m_processingInstructions = getPropertyValue("ProcessingInstructions");
   if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
     m_processingInstructionsWorkspaceIndex =
-        convertProcessingInstructionsToWorkspaceIndexes(
+        convertProcessingInstructionsToWorkspaceIndices(
             m_processingInstructions, inputWS);
   } else {
     m_processingInstructionsWorkspaceIndex =
         findProcessingInstructions(instrument, inputWS);
-    m_processingInstructions = convertWorkspaceIndexProcInstToSpecNum(
+    m_processingInstructions = convertProcessingInstructionsToSpectrumNumbers(
         m_processingInstructionsWorkspaceIndex, inputWS);
   }
 }
@@ -774,7 +772,7 @@ void ReflectometryWorkflowBase2::convertProcessingInstructions(
     MatrixWorkspace_sptr inputWS) {
   m_processingInstructions = getPropertyValue("ProcessingInstructions");
   m_processingInstructionsWorkspaceIndex =
-      convertProcessingInstructionsToWorkspaceIndexes(m_processingInstructions,
+      convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions,
                                                       inputWS);
 }
 } // namespace Algorithms
