@@ -947,7 +947,7 @@ void Peak::setPeakNumber(int m_peakNumber) {
 
 // -------------------------------------------------------------------------------------
 /** Sets the modulated peak structure number
- * @param modulatedStructure :: modulated peak structure value   */
+ * @param MNP :: modulated peak structure value   */
 void Peak::setIntMNP(V3D MNP) { m_IntMNP = MNP; }
 
 // -------------------------------------------------------------------------------------
