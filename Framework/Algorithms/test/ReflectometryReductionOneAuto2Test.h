@@ -1136,9 +1136,10 @@ public:
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), std::invalid_argument & e, std::string(e.what()),
-        "A detector is expected at workspace index 0 (Was converted from specnum), found a monitor");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e,
+                            std::string(e.what()),
+                            "A detector is expected at workspace index 0 (Was "
+                            "converted from specnum), found a monitor");
   }
 
   void test_I0MonitorIndex_is_detector() {
