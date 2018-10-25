@@ -254,6 +254,18 @@ void PredictSatellitePeaks::exec_peaks() {
   int maxOrder = getProperty("MaxOrder");
   bool crossTerms = getProperty("CrossTerms");
 
+  API::Sample sample = Peaks->mutableSample();
+
+  OrientedLattice lattice = sample.getOrientedLattice();
+
+  if (getProperty("GetModVectorsFromUB")) {
+    offsets1 = lattice.getModVec(1);
+    offsets2 = lattice.getModVec(2);
+    offsets3 = lattice.getModVec(3);
+    if (maxOrder == 0)
+      maxOrder = lattice.getMaxOrder();
+  }
+
   bool includePeaksInRange = false;
   bool includeOrderZero = getProperty("IncludeIntegerHKL");
 
@@ -261,10 +273,6 @@ void PredictSatellitePeaks::exec_peaks() {
     g_log.error() << "There are No peaks in the input PeaksWorkspace\n";
     return;
   }
-
-  API::Sample sample = Peaks->mutableSample();
-
-  OrientedLattice lattice = sample.getOrientedLattice();
 
   const auto instrument = Peaks->getInstrument();
 
@@ -341,8 +349,8 @@ void PredictSatellitePeaks::predictOffsets(
     Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
 
     // Check if Q is non-physical
-    /*if (Qs[2] <= 0)
-      continue;*/
+    if (Qs[2] * m_qConventionFactor <= 0)
+      continue;
 
     auto peak(Peaks->createPeak(Qs, 1));
 

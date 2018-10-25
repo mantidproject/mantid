@@ -834,7 +834,7 @@ namespace Mantid {
          *
          * @param HKL :: vector with integer x,y,z -> h,k,l
          */
-        void Peak::setIntHKL(const Mantid::Kernel::V3D HKL)
+        void Peak::setIntHKL(V3D HKL)
         {
             m_IntHKL = V3D(boost::math::iround(HKL[0]),boost::math::iround(HKL[1]),boost::math::iround(HKL[2]));
         }
