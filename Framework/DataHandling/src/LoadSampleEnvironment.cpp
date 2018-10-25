@@ -16,7 +16,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 
-
 #include "MantidKernel/Exception.h"
 
 #include <Poco/File.h>

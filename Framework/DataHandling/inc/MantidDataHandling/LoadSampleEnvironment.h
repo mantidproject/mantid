@@ -27,7 +27,7 @@ public:
   const std::string name() const override { return "LoadSampleEnvironment"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "The algorithm loads a Environment into the instrument of a "
+    return "The algorithm loads an Environment into the instrument of a "
            "workspace "
            "at the sample.";
   }
