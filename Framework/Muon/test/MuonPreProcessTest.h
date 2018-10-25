@@ -35,7 +35,7 @@ algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
 class setUpADSWithWorkspace {
 public:
   static constexpr const char *inputWSName = "inputData";
-  
+
   setUpADSWithWorkspace(Workspace_sptr ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
   };
