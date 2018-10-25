@@ -227,27 +227,27 @@ void SaveIsawUB::exec() {
 
     out << "\n";
 
-    if (ModDim == 0)
-    {
-        out << "The above matrix is the Transpose of the UB Matrix. ";
-        out << "The UB matrix maps the column\n";
-        out << "vector (h,k,l ) to the column vector ";
-        out << "(q'x,q'y,q'z).\n";
-        out << "|Q'|=1/dspacing and its coordinates are a ";
-        out << "right-hand coordinate system where\n";
-        out << " x is the beam direction and z is vertically ";
-        out << "upward.(IPNS convention)\n";
-    }
-    else
-    {
-        out << "The above matrix is the Transpose of the UB Matrix and the Transpose of ModUB. ";
-        out << "The UB matrix together with ModUB maps the column vector (h,k,l,m,n,p) \n";
-        out << "to the column vector (q'x,q'y,q'z).\n";
-        out << "The columns of ModUB are the coordinates of modulation vectors in Qlab. \n";
-        out << "|Q'|=1/dspacing and its coordinates are a ";
-        out << "right-hand coordinate system where";
-        out << " x is the beam direction and z is vertically ";
-        out << "upward.(IPNS convention)\n";
+    if (ModDim == 0) {
+      out << "The above matrix is the Transpose of the UB Matrix. ";
+      out << "The UB matrix maps the column\n";
+      out << "vector (h,k,l ) to the column vector ";
+      out << "(q'x,q'y,q'z).\n";
+      out << "|Q'|=1/dspacing and its coordinates are a ";
+      out << "right-hand coordinate system where\n";
+      out << " x is the beam direction and z is vertically ";
+      out << "upward.(IPNS convention)\n";
+    } else {
+      out << "The above matrix is the Transpose of the UB Matrix and the "
+             "Transpose of ModUB. ";
+      out << "The UB matrix together with ModUB maps the column vector "
+             "(h,k,l,m,n,p) \n";
+      out << "to the column vector (q'x,q'y,q'z).\n";
+      out << "The columns of ModUB are the coordinates of modulation vectors "
+             "in Qlab. \n";
+      out << "|Q'|=1/dspacing and its coordinates are a ";
+      out << "right-hand coordinate system where";
+      out << " x is the beam direction and z is vertically ";
+      out << "upward.(IPNS convention)\n";
     }
 
     out.close();

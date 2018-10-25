@@ -41,13 +41,12 @@ double get_factor_for_q_convention(const std::string &convention) {
 }
 } // namespace
 
-
 /** Constructor
  */
 
 PredictSatellitePeaks::PredictSatellitePeaks()
     : m_qConventionFactor(get_factor_for_q_convention(
-          ConfigService::Instance().getString("Q.convention"))) { }
+          ConfigService::Instance().getString("Q.convention"))) {}
 
 /// Initialise the properties
 void PredictSatellitePeaks::init() {
@@ -346,7 +345,8 @@ void PredictSatellitePeaks::predictOffsets(
     if (!lambdaFilter.isAllowed(satelliteHKL) && includePeaksInRange)
       continue;
 
-    Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
+    Kernel::V3D Qs =
+        goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
 
     // Check if Q is non-physical
     if (Qs[2] * m_qConventionFactor <= 0)
@@ -419,7 +419,8 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
         if (!lambdaFilter.isAllowed(satelliteHKL) && includePeaksInRange)
           continue;
 
-        Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
+        Kernel::V3D Qs =
+            goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
 
         // Check if Q is non-physical
         if (Qs[2] <= 0)

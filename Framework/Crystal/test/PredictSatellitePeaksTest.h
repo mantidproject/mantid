@@ -57,8 +57,10 @@ public:
     FindUBUsingIndexedPeaks alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize())
     TS_ASSERT(alg2.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("ToleranceForSatellite", "0.05"));
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("PeaksWorkspace", "Modulated"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg2.setPropertyValue("ToleranceForSatellite", "0.05"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg2.setPropertyValue("PeaksWorkspace", "Modulated"));
     TS_ASSERT_THROWS_NOTHING(alg2.execute(););
     TS_ASSERT(alg2.isExecuted());
 

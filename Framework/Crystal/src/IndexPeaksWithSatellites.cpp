@@ -9,8 +9,8 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -48,27 +48,27 @@ void IndexPeaksWithSatellites::init() {
   this->declareProperty("CommonUBForAll", false,
                         "Index all orientations with a common UB");
   this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-                      std::string("ModVector1"), "0.0,0.0,0.0"),
-                  "Modulation Vector 1: dh, dk, dl");
+                            std::string("ModVector1"), "0.0,0.0,0.0"),
+                        "Modulation Vector 1: dh, dk, dl");
 
   this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-                      std::string("ModVector2"), "0.0,0.0,0.0"),
-                  "Modulation Vector 2: dh, dk, dl");
+                            std::string("ModVector2"), "0.0,0.0,0.0"),
+                        "Modulation Vector 2: dh, dk, dl");
 
   this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-                      std::string("ModVector3"), "0.0,0.0,0.0"),
-                  "Modulation Vector 3: dh, dk, dl");
+                            std::string("ModVector3"), "0.0,0.0,0.0"),
+                        "Modulation Vector 3: dh, dk, dl");
 
   this->declareProperty(
       make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
       "Maximum order to apply Modulation Vectors. Default = 0");
 
   this->declareProperty("GetModVectorsFromUB", false,
-                  "If false Modulation Vectors will be read from input");
+                        "If false Modulation Vectors will be read from input");
 
-  this->declareProperty(make_unique<PropertyWithValue<bool>>("CrossTerms", false,
-                                                       Direction::Input),
-                  "Include cross terms (false)");
+  this->declareProperty(make_unique<PropertyWithValue<bool>>(
+                            "CrossTerms", false, Direction::Input),
+                        "Include cross terms (false)");
 
   this->declareProperty(
       make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),

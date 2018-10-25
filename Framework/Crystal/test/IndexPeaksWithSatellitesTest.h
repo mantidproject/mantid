@@ -10,8 +10,8 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidCrystal/IndexPeaksWithSatellites.h"
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
+#include "MantidCrystal/IndexPeaksWithSatellites.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -34,7 +34,7 @@ public:
   }
 
   void test_exec() {
-   LoadIsawPeaks alg1;
+    LoadIsawPeaks alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize())
     TS_ASSERT(alg1.isInitialized())
     alg1.setPropertyValue("Filename", "Modulated.peaks");
@@ -54,7 +54,8 @@ public:
     FindUBUsingIndexedPeaks alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize())
     TS_ASSERT(alg2.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("ToleranceForSatellite", "0.05"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg2.setPropertyValue("ToleranceForSatellite", "0.05"));
     TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("PeaksWorkspace", "peaks"));
     TS_ASSERT_THROWS_NOTHING(alg2.execute(););
     TS_ASSERT(alg2.isExecuted());
@@ -88,7 +89,6 @@ public:
     TS_ASSERT_DELTA(peak3.getH(), 1.49, .01);
     TS_ASSERT_DELTA(peak3.getK(), -0.56, .01);
     TS_ASSERT_DELTA(peak3.getL(), 1.61, .01);
-
 
     AnalysisDataService::Instance().remove("peaks");
   }

@@ -361,7 +361,8 @@ void SaveIsawPeaks::exec() {
             out << firstNumber << std::setw(7) << sequenceNumber;
             sequenceNumber++;
           } else {
-            out << firstNumber << std::setw(7) << p.getPeakNumber() + appendPeakNumb;
+            out << firstNumber << std::setw(7)
+                << p.getPeakNumber() + appendPeakNumb;
           }
 
           // HKL's are flipped by -1 because of the internal Q convention
