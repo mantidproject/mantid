@@ -49,7 +49,7 @@ Usage
     # Single period data with four spectra
     dataX = [0, 1, 2, 3, 4, 5] * 4
     dataY = [10, 20, 30, 20, 10] * 4
-    input_workspace = simpleapi.CreateWorkspace(dataX, dataY, NSpec=4)
+    input_workspace = CreateWorkspace(dataX, dataY, NSpec=4)
     for i in range(4):
         # set detector IDs to be 1,2,3,4
         # these do not have to be the same as the spectrum numbers
@@ -59,9 +59,9 @@ Usage
     # We are not actually applying any processing to the data
     # but the algorithm will convert our single period data into
     # the required form (a WorkspaceGroup)
-    pre_processed_workspace = simpleapi.MuonPreProcess(InputWorkspace=input_workspace)
+    pre_processed_workspace = MuonPreProcess(InputWorkspace=input_workspace)
 
-    output_workspace = simpleapi.MuonGroupingCounts(InputWorkspace=pre_processed_workspace,
+    output_workspace = MuonGroupingCounts(InputWorkspace=pre_processed_workspace,
                                                     GroupName="fwd",
                                                     Grouping=[1, 2, 3, 4])
 
@@ -73,7 +73,7 @@ Output:
 
 .. testoutput:: ConvertToGroup
 
-	X values are : [ 0.  1.  2.  3.  4.  5.]
+    X values are : [ 0.  1.  2.  3.  4.  5.]
     Y values are : [  40.   80.  120.   80.   40.]
 
 **Example - Using Only MuonGroupingCounts on Single Period Data**
@@ -83,7 +83,7 @@ Output:
     # Create a workspaces with four spectra
     dataX = [0, 1, 2, 3, 4, 5] * 4
     dataY = [10, 20, 30, 20, 10] * 4
-    ws = simpleapi.CreateWorkspace(dataX, dataY, NSpec=4)
+    ws = CreateWorkspace(dataX, dataY, NSpec=4)
     for i in range(4):
         # set detector IDs to be 1,2,3,4
         # these do not have to be the same as the spectrum numbers
@@ -94,7 +94,7 @@ Output:
     input_workspace = api.WorkspaceGroup()
     input_workspace.addWorkspace(ws)
 
-    output_workspace = simpleapi.MuonGroupingCounts(InputWorkspace=input_workspace,
+    output_workspace = MuonGroupingCounts(InputWorkspace=input_workspace,
                                                     GroupName="fwd",
                                                     Grouping=[1, 2, 3, 4])
 
@@ -116,8 +116,8 @@ Output:
     # Create two workspaces with four spectra
     dataX = [0, 1, 2, 3, 4, 5] * 4
     dataY = [10, 20, 30, 20, 10] * 4
-    ws1 = simpleapi.CreateWorkspace(dataX, dataY, NSpec=4)
-    ws2 = simpleapi.CreateWorkspace(dataX, dataY, NSpec=4)
+    ws1 = CreateWorkspace(dataX, dataY, NSpec=4)
+    ws2 = CreateWorkspace(dataX, dataY, NSpec=4)
     for i in range(4):
         # set detector IDs to be 1,2,3,4
         # these do not have to be the same as the spectrum numbers
@@ -133,7 +133,7 @@ Output:
     # This time we won't run MuonPreProcess, as we don't want to apply any pre-processing
     # and we already have a WorkspaceGroup
 
-    output_workspace = simpleapi.MuonGroupingCounts(InputWorkspace=multi_period_data,
+    output_workspace = MuonGroupingCounts(InputWorkspace=multi_period_data,
                                                     GroupName="fwd",
                                                     Grouping=[1, 2, 3, 4],
                                                     SummedPeriods=[1, 2])
