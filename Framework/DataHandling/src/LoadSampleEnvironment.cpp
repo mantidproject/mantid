@@ -72,8 +72,8 @@ void LoadSampleEnvironment::exec() {
     outputWS = inputWS->clone();
   }
 
-  std::string filename = getProperty("Filename");
-  std::ifstream file(filename.c_str());
+  const std::string filename = getProperty("Filename");
+  const std::ifstream file(filename.c_str());
   if (!file) {
     g_log.error("Unable to open file: " + filename);
     throw Exception::FileError("Unable to open file: ", filename);
@@ -92,7 +92,7 @@ void LoadSampleEnvironment::exec() {
         "Could not read file, did not match either STL Format", filename, 0);
   }
   std::string name = getProperty("EnvironmentName");
-  bool add = getProperty("Add");
+  const bool add = getProperty("Add");
   Sample &sample = outputWS->mutableSample();
   boost::shared_ptr<Geometry::SampleEnvironment> environment = nullptr;
   if (add) {

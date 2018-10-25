@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadAsciiStl::isAsciiSTL() {
+bool LoadAsciiStl::isAsciiSTL()const {
   std::ifstream file(m_filename.c_str());
   std::string line;
   getline(file, line);

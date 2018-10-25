@@ -188,14 +188,14 @@ void LoadSampleShape::exec() {
     outputWS = inputWS->clone();
   }
 
-  std::string filename = getProperty("Filename");
+  const std::string filename = getProperty("Filename");
   std::ifstream file(filename.c_str());
   if (!file) {
     g_log.error("Unable to open file: " + filename);
     throw Exception::FileError("Unable to open file: ", filename);
   }
 
-  std::string filetype = filename.substr(filename.size() - 3);
+  const std::string filetype = filename.substr(filename.size() - 3);
 
   boost::shared_ptr<MeshObject> shape = nullptr;
   if (filetype == "off") {

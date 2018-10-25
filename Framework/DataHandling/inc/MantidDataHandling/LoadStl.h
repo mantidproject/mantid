@@ -31,8 +31,9 @@ struct HashV3DPair {
 struct V3DTrueComparator {
   bool operator()(const std::pair<Kernel::V3D, uint32_t> &v1,
                   const std::pair<Kernel::V3D, uint32_t> &v2) const {
-    Kernel::V3D diff = v1.first - v2.first;
-    return diff.norm() < 1e-9;
+    const Kernel::V3D diff = v1.first - v2.first;
+    const double nanoMetre = 1e-9;
+    return diff.norm() < nanoMetre;
   }
 };
 
@@ -42,9 +43,9 @@ public:
   virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
 
 protected:
-  bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2);
+  bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const;
   void changeToVector();
-  std::string m_filename;
+  const std::string m_filename;
   std::vector<uint32_t> m_triangle;
   std::vector<Kernel::V3D> m_verticies;
   std::unordered_set<std::pair<Kernel::V3D, uint32_t>, HashV3DPair,
