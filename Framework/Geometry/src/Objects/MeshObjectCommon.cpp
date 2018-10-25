@@ -100,7 +100,7 @@ double solidAngle(const Kernel::V3D &observer,
       solidAngleNegativeSum += sa;
     }
   }
-  return 0.5 * (solidAngleSum - solidAngleNegativeSum);
+  return solidAngleSum - solidAngleNegativeSum;
 }
 
 double solidAngle(const Kernel::V3D &observer,

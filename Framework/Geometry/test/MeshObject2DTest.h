@@ -270,32 +270,6 @@ public:
     TS_ASSERT_EQUALS(a, *c);
   }
 
-  void test_solidAngle_side_on() {
-    using namespace Mantid::Kernel;
-
-    auto mesh = makeSimpleTriangleMesh();
-    auto solidAngle = mesh.solidAngle(
-        V3D{0, 2, 0}); // observer is in plane of triangle, outside the triangle
-
-    TS_ASSERT_EQUALS(solidAngle, 0); // seen side-on solid angle is 0
-  }
-
-  void test_solidAngle() {
-
-    double expected = M_PI / 3.0; //  0.5 * 4pi/6
-    // Unit square at distance 0.5 from observer
-    double unitSphereRadius = 1;
-    double halfSideLength = unitSphereRadius * sin(M_PI / 4);
-    double observerDistance = unitSphereRadius * cos(M_PI / 4);
-    auto mesh = makeTrapezoidMesh(
-        V3D{-halfSideLength, -halfSideLength, observerDistance},
-        V3D{-halfSideLength, halfSideLength, observerDistance},
-        V3D{halfSideLength, halfSideLength, observerDistance},
-        V3D{halfSideLength, -halfSideLength, observerDistance});
-    double solidAngle = mesh.solidAngle(V3D{0, 0, 0});
-    TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
-  }
-
   void test_boundingBox() {
     auto mesh = makeSimpleTriangleMesh(); // Lies in z plane
     auto boundingBox = mesh.getBoundingBox();
