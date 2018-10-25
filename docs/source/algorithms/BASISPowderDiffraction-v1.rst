@@ -68,6 +68,35 @@ Usage
 The color image shows the nine diffraction detectors with a Bragg peak spilling
 intensity on the edges of two tubes at a scattering angle of 60 degrees.
 
+Developer's Corner
+------------------
+
+Adding the Previous Pulse
+#########################
+
+because of the legacy hardware used at BASIS (ROC2 instead of ROC5),
+the diffraction detectors frame is forced to coincide with the
+inelastic detectors frame, introducing a shift in the minimal TOF.
+
+In the figures below, we have represented the TOF and wavelength dependence
+of the intensities for the monitors (black), sample from the current
+pulse (red), and sample from the previous pulse (green)
+
+**111 Reflection:**
+
+.. figure:: /images/BASISPowderDiffraction_2.png
+
+**311 Reflection:**
+
+.. figure:: /images/BASISPowderDiffraction_2.png
+
+The figures show that the "slow" neutrons from the previous pulse should be
+accounted as the fast neutrons for the current pulse.
+
+The solution is to: (1) pile together events from the previous and current
+pulses; (2) discard events with under-represented wavelegths. We use the
+monitor counts for the last step.
+
 .. categories::
 
 .. sourcelink::

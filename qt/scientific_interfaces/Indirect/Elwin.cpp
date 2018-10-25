@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "Elwin.h"
 #include "../General/UserInputValidator.h"
 
@@ -526,6 +532,8 @@ void Elwin::setSaveResultEnabled(bool enabled) {
 void Elwin::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
 }
 
 void Elwin::setPlotResultIsPlotting(bool plotting) {

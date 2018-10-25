@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import stresstesting
@@ -168,8 +174,8 @@ class PowderSampleTest(stresstesting.MantidStressTest, PreppingMixin):
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
-                'BSS_74799_event.nxs',
-                'BASISPowderSample.nxs']
+                'BSS_74799_event.nxs', 'BSS_75527_event.nxs',
+                'BSS_64642_event.nxs', 'BASISPowderSample.nxs']
 
     def runTest(self):
         r"""

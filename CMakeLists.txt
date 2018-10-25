@@ -300,104 +300,130 @@ if ( ENABLE_CPACK )
     elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )
 
-      # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
-      # OCE
-      set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},sip >= 4.18" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML" )
-      # scipy
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
+      ########## rhel requirements - only used if package requested is rpm
+      set ( CPACK_RPM_PACKAGE_REQUIRES "nexus >= 4.3.1,gsl,glibc,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka,"
+                                       "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
+                                       "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
+                                       "sip >= 4.18,"
+                                       "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
+                                       "scipy,"
+                                       "hdf,hdf5,jsoncpp >= 0.7.0" )
+      if (ENABLE_MANTIDPLOT)
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,PyQt4,qwtplot3d-qt4" )
+      endif()
       if (ENABLE_WORKBENCH)
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-qt5" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,python-qt5" )
       endif()
 
       if( "${UNIX_CODENAME}" MATCHES "Santiago" ) # RHEL6
+        if ( ENABLE_WORKBENCH )
+          message ( FATAL_ERROR "mantidworkbench is not supported on RHEL6" )
+        endif ()
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6, boost157,python-matplotlib" )
-        # On RHEL6 we are using SCL packages for Qt
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4" )
-      else()
-        # Require matplotlib >= 1.5 to fix bug in latex rendering
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python2-matplotlib-qt4 >= 1.5.2,python2-QtAwesome,boost >= 1.53.0" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla >= 2.4.6,boost157,python-matplotlib,"
+                                         # On RHEL6 we are using SCL packages for Qt
+                                         "scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4" )
+      else() # assumes RHEL7
+        # Require matplotlib >= 1.5 to fix bug in latex rendering - oddly matplotlib-qt4 contains qt5 backend as well
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python2-QtAwesome,boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2" )
+        if (ENABLE_MANTIDPLOT)
+          set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla,qwt5-qt4" )
+        endif()
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla-qt5" )
+        endif()
       endif()
+      string ( REPLACE ";" "," CPACK_RPM_PACKAGE_REQUIRES ${CPACK_RPM_PACKAGE_REQUIRES} ) # fix up the fact that it was made as an array
+      string ( REPLACE ",," "," CPACK_RPM_PACKAGE_REQUIRES ${CPACK_RPM_PACKAGE_REQUIRES} )
 
-      # Add software collections for RHEL
-      if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # RHEL6
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} scl-utils" )
-      endif()
-
-      if( "${UNIX_DIST}" MATCHES "Ubuntu" )
-        # common packages
-        set ( DEPENDS_LIST "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+      ########## ubuntu requirements - only used if package requested is deb
+      set ( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-serialization${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-filesystem${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libnexus0v5 (>= 4.3),"
-                           "libgsl2,"
-                           "libqtcore4 (>= 4.2),"
-                           "libqtgui4 (>= 4.2),"
-                           "libqt4-opengl (>= 4.2),"
-                           "libqt4-xml (>= 4.2),"
-                           "libqt4-svg (>= 4.2),"
-                           "libqt4-qt3support (>= 4.2),"
-                           "qt4-dev-tools,"
-                           "libqwt5-qt4,"
-                           "libqwtplot3d-qt4-0v5,"
-                           "libqtwebkit4,"
-                           "python-h5py,"
-                           "python-numpy,"
-                           "python-sip,"
-                           "python-qt4,"
-                           "python-nxs (>= 4.3),"
-                           "python-six,"
                            "libjsoncpp1 (>=0.7.0),"
-                           "libqscintilla2-12v5,"
-                           "liboce-foundation10,liboce-modeling10,"
                            "libmuparser2v5,"
-                           "ipython-qtconsole (>= 1.1),"
-                           "ipython-notebook,"
-                           "python-matplotlib,"
-                           "python-scipy,"
                            "libtbb2,"
-                           "librdkafka1,"
-                           "librdkafka++1,"
-                           "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION},"
-                           "libhdf5-cpp-11,"
-                           "python-pycifrw (>= 4.2.1),"
-                           "python-yaml,"
-                           "python-qtawesome")
-        set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
-        if( "${UNIX_CODENAME}" STREQUAL "bionic")
-            list ( APPEND DEPENDS_LIST ",libgsl23,liboce-foundation11,liboce-modeling11,libqscintilla2-qt4-13,jupyter-notebook,libhdf5-cpp-100")
-            list (REMOVE_ITEM DEPENDS_LIST "libgsl2," "liboce-foundation10,liboce-modeling10," "libqscintilla2-12v5," "ipython-notebook," "libhdf5-cpp-11,")
-        endif()
-        # Change DEPENDS_LIST for python 3
-        if ( PYTHON_VERSION_MAJOR EQUAL 3 )
-          list (REMOVE_ITEM DEPENDS_LIST "python-nxs (>= 4.3),")
-          string ( REPLACE "python-" "python3-" DEPENDS_LIST ${DEPENDS_LIST} )
-          string ( REPLACE "python3-qt4" "python3-pyqt4" DEPENDS_LIST ${DEPENDS_LIST} )
-          if (ENABLE_WORKBENCH)
-            set ( APPEND DEPENDS_LIST ",python3-qt5" )
-          endif()
-        else()
-          if (ENABLE_WORKBENCH)
-            set ( APPEND DEPENDS_LIST ",pyqt5" )
-          endif()
-        endif ()
-        # parse list to string required for deb package
-        string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )
+                           "librdkafka1,librdkafka++1,"
+                           "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION}")
+      if (ENABLE_MANTIDPLOT)
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqtcore4 (>= 4.2),"
+                                           "libqtgui4 (>= 4.2),"
+                                           "libqt4-opengl (>= 4.2),"
+                                           "libqt4-xml (>= 4.2),"
+                                           "libqt4-svg (>= 4.2),"
+                                           "libqt4-qt3support (>= 4.2),"
+                                           "qt4-dev-tools,"
+                                           "libqwt5-qt4,"
+                                           "libqwtplot3d-qt4-0v5,"
+                                           "libqtwebkit4" )
       endif()
-      # soft requirement of tcmalloc if selected
-      IF ( USE_TCMALLOC )
-        message ( STATUS "Adding gperftools to the package requirements" )
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
-        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},${PERFTOOLS_DEB_PACKAGE}" )
-      ENDIF ( )
-    ENDIF ()
+
+      if( "${UNIX_CODENAME}" STREQUAL "xenial")
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl2,"
+                                           "liboce-foundation10,liboce-modeling10,"
+                                           "libqscintilla2-12v5,"
+                                           "ipython-notebook,"
+                                           "libhdf5-cpp-11" )
+      else()  # bionic and newer
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23,"
+                                           "liboce-foundation11,liboce-modeling11,"
+                                           "libqscintilla2-qt4-13,"
+                                           "jupyter-notebook,"
+                                           "libhdf5-cpp-100" )
+      endif()
+
+      if ( PYTHON_VERSION_MAJOR EQUAL 3 )
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
+                                           "python3-numpy,"
+                                           "python3-sip,"
+                                           "python3-six,"
+                                           "python3-matplotlib,"
+                                           "python3-scipy,"
+                                           "python3-pycifrw (>= 4.2.1),"
+                                           "python3-yaml,"
+                                           "python3-qtawesome,"
+                                           "ipython3-qtconsole" )  # transitional package for bionic
+
+        if (ENABLE_MANTIDPLOT)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt4" )
+        endif()
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5" )
+        endif()
+      else() # python 2
+        set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-h5py,"
+                                           "python-numpy,"
+                                           "python-sip,"
+                                           "python-six,"
+                                           "python-matplotlib,"
+                                           "python-scipy,"
+                                           "python-pycifrw (>= 4.2.1),"
+                                           "python-yaml,"
+                                           "python-qtawesome,"
+                                           "ipython-qtconsole" )
+
+        if (ENABLE_MANTIDPLOT)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-qt4" )
+        endif()
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-pyqt5" )
+        endif()
+      endif ()
+      # parse list to string required for deb package
+      string ( REPLACE ";" "," CPACK_DEBIAN_PACKAGE_DEPENDS ${CPACK_DEBIAN_PACKAGE_DEPENDS} ) # fix up the fact that it was made as an array
+      string ( REPLACE ",," "," CPACK_DEBIAN_PACKAGE_DEPENDS ${CPACK_DEBIAN_PACKAGE_DEPENDS} )
+    endif()
+
+    # soft requirement of tcmalloc if selected
+    IF ( USE_TCMALLOC )
+      message ( STATUS "Adding gperftools to the package requirements" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
+      set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgoogle-perftools4 (>= 1.7)" )
+    ENDIF ( )
+
     # run cpack configuration
     include ( CPack )
     # let people know what is coming out the other end - must be after cpack generates value for rpm

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -279,9 +285,8 @@ std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
   const std::string::size_type prefix_end(instrumentFile.find(definitionPart));
   const std::string::size_type suffix_start =
       prefix_end + definitionPart.length();
-  // Make prefix and force it to be upper case
+  // Get prefix and leave case sensitive
   std::string prefix = instrumentFile.substr(0, prefix_end);
-  std::transform(prefix.begin(), prefix.end(), prefix.begin(), toupper);
   // Make suffix ensuring it has positive length
   std::string suffix = ".xml";
   if (suffix_start < instrumentFile.length()) {
