@@ -31,9 +31,9 @@ The four operations listed above correspond to a run of :ref:`algm-ApplyDeadTime
 
 As already mentioned; the output of this algorithm can (and is intended to be) fed into one of the following algorithms;
 
-#. TODO
-#. TODO
-#. TODO
+#. MuonGroupingCounts
+#. MuonGroupingAsymmetry
+#. MuonPairingAsymmetry
 
 
 Usage
@@ -55,9 +55,9 @@ Usage
     # Single period data
     dataX = [0, 1, 2, 3, 4, 5]
     dataY = [10, 20, 30, 20, 10]
-    input_workspace = simpleapi.CreateWorkspace(dataX, dataY)
+    input_workspace = CreateWorkspace(dataX, dataY)
 
-    output_workspace = simpleapi.MuonPreProcess(InputWorkspace=input_workspace)
+    output_workspace = MuonPreProcess(InputWorkspace=input_workspace)
 
     print("Input workspace is a {}".format(input_workspace.id()))
     print("Output workspace is a {}".format(output_workspace.id()))
@@ -80,9 +80,9 @@ Output:
 
     dataX = [0, 1, 2, 3, 4, 5]
     dataY = [10, 20, 30, 20, 10]
-    input_workspace = simpleapi.CreateWorkspace(dataX, dataY)
+    input_workspace = CreateWorkspace(dataX, dataY)
 
-    output_workspace = simpleapi.MuonPreProcess(InputWorkspace=input_workspace,
+    output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
                                                 TimeOffset=0.5)
 
     print("X values are : {}".format(output_workspace[0].readX(0)))
@@ -102,9 +102,9 @@ Output:
 
     dataX = [0, 1, 2, 3, 4, 5]
     dataY = [10, 20, 30, 20, 10]
-    input_workspace = simpleapi.CreateWorkspace(dataX, dataY)
+    input_workspace = CreateWorkspace(dataX, dataY)
 
-    output_workspace = simpleapi.MuonPreProcess(InputWorkspace=input_workspace,
+    output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
                                                 RebinArgs=2)
 
     print("X values are : {}".format(output_workspace[0].readX(0)))
@@ -124,9 +124,9 @@ Output:
 
     dataX = [0, 1, 2, 3, 4, 5]
     dataY = [10, 20, 30, 20, 10]
-    input_workspace = simpleapi.CreateWorkspace(dataX, dataY)
+    input_workspace = CreateWorkspace(dataX, dataY)
 
-    output_workspace = simpleapi.MuonPreProcess(InputWorkspace=input_workspace,
+    output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
                                                 TimeMin=2,
                                                 TimeMax=4)
 
@@ -147,17 +147,17 @@ Output:
 
     dataX = [0, 1, 2, 3, 4, 5] * 4
     dataY = [100, 200, 300, 200, 100] * 4
-    input_workspace = simpleapi.CreateWorkspace(dataX, dataY, NSpec=4)
+    input_workspace = CreateWorkspace(dataX, dataY, NSpec=4)
     # dead time correction requires the number of good frames to be set
-    simpleapi.AddSampleLog(Workspace=input_workspace, LogName="goodfrm", LogText="1")
+    AddSampleLog(Workspace=input_workspace, LogName="goodfrm", LogText="1")
 
     # create the dead time table
-    dead_times = simpleapi.CreateEmptyTableWorkspace()
+    dead_times = CreateEmptyTableWorkspace()
     dead_times.addColumn("int", "spectrum", 0)
     dead_times.addColumn("float", "dead-time", 0)
     [dead_times.addRow([i + 1, 0.5]) for i in range(4)]
 
-    output_workspace = simpleapi.MuonPreProcess(InputWorkspace=input_workspace,
+    output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
                                                 DeadTimeTable=dead_times)
     print("X values are : {}".format(output_workspace[0].readX(0)))
     print("Y values are : {}".format(map(lambda x: round(x, 1), output_workspace[0].readY(0))))
