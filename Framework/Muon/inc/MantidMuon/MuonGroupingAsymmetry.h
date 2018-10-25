@@ -29,7 +29,7 @@ private:
   void init() override;
   void exec() override;
 
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
   void addGroupingAsymmetrySampleLogs(MatrixWorkspace_sptr workspace);
 };

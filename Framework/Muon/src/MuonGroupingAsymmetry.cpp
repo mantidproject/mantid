@@ -55,8 +55,8 @@ MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
 
 Mantid::API::MatrixWorkspace_sptr
 calculateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
-                       const std::vector<int> summedPeriods,
-                       const std::vector<int> subtractedPeriods, int groupIndex,
+                       const std::vector<int> &summedPeriods,
+                       const std::vector<int> &subtractedPeriods, int groupIndex,
                        const double startX, const double endX) {
   MatrixWorkspace_sptr tempWS;
   int numPeriods = inputWS->getNumberOfEntries();
