@@ -135,8 +135,8 @@ public:
     auto alg = boost::make_shared<MuonGroupingCounts>();
     alg->initialize();
 
-    TSM_ASSERT_THROWS_NOTHING("", 
-        alg->setProperty("InputWorkspace", setup.inputWSName))
+    TSM_ASSERT_THROWS_NOTHING(
+        "", alg->setProperty("InputWorkspace", setup.inputWSName))
   }
 
   void test_that_group_name_must_be_supplied() {
