@@ -240,7 +240,6 @@ private:
   QLabel *lblNumCheckpoints;
   QSpinBox *boxNumCheckpoint;
 
-
   // MDPlotting
   QTabWidget *mdPlottingTabWidget;
   QWidget *vsiPage, *mdPlottingGeneralPage;
