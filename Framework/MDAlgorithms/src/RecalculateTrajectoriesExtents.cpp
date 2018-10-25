@@ -11,6 +11,10 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -102,6 +106,10 @@ void RecalculateTrajectoriesExtents::exec() {
       }
   }
 
+  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
+    PhysicalConstants::meV * 1e-20 /(PhysicalConstants::h * PhysicalConstants::h);
+
+  auto convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // get limits for all dimensions
   double qxmin = outWS->getDimension(0)->getMinimum();
   double qxmax = outWS->getDimension(0)->getMaximum();
@@ -161,9 +169,9 @@ void RecalculateTrajectoriesExtents::exec() {
     for(size_t iOtherDims=0; iOtherDims<otherDimsNames.size(); iOtherDims++) {
       // check other dimensions. there might be no events, but if the first log value is
       // not within limits, the weight should be zero as well
-      auto *otherDimsLog=dynamic_cast<VectorDoubleProperty *>(
-            currentExptInfo.getLog(otherDimsNames[iOtherDims]));
-      if (((*otherDimsLog)()[0] < otherDimsMin[iOtherDims]) ||((*otherDimsLog)()[0] > otherDimsMax[iOtherDims])){
+      auto *otherDimsLog=dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+        currentExptInfo.run().getProperty(otherDimsNames[iOtherDims]));
+      if ((otherDimsLog->firstValue() < otherDimsMin[iOtherDims]) ||(otherDimsLog->firstValue() > otherDimsMax[iOtherDims])){
         zeroWeights=true;
         g_log.warning()<<"In experimentInfo "<<iExpInfo<<", log "<<otherDimsNames[iOtherDims]<<" is outside limits\n";
         continue;
@@ -172,7 +180,140 @@ void RecalculateTrajectoriesExtents::exec() {
     if (zeroWeights) {
       highValues = lowValues;
     } else {
-        // loop over detectors
+      auto source = currentExptInfo.getInstrument()->getSource()->getPos();
+      auto sample = currentExptInfo.getInstrument()->getSample()->getPos();
+      auto beamDir = sample - source;
+      beamDir.normalize();
+      auto gon = currentExptInfo.run().getGoniometerMatrix();
+      gon.Invert();
+
+      //calculate limits in Q_lab
+
+      // loop over detectors
+      for (int64_t i = 0; i < nspectra; i++) {
+        if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
+            spectrumInfo.isMasked(i)) {
+          highValues[i]=lowValues[i];
+          continue;
+        }
+        const auto &detector = spectrumInfo.detector(i);
+        double theta = detector.getTwoTheta(sample, beamDir);
+        double phi = detector.getPhi();
+        V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)),
+          qin(0., 0., 1.), qLabLow, qLabHigh, qSampleLow, qSampleHigh;
+        double kfmin,kfmax, ki;
+        if (convention == "Crystallography") {
+          qout *= -1;
+          qin *= -1;
+        }
+        if(diffraction){
+          //units of limits are momentum
+          kfmin = lowValues[i];
+          kfmax = highValues[i];
+          qLabLow = (qin - qout) * kfmin;
+          qLabHigh = (qin - qout) * kfmax;
+        } else {
+          ki = std::sqrt(energyToK * Ei);
+          if (dEmin>lowValues[i]) {
+            lowValues[i]=dEmin;
+          }
+          if (dEmax<highValues[i]) {
+            highValues[i]=dEmax;
+          }
+          if (lowValues[i] > Ei){
+            lowValues[i] = Ei;
+          }
+          if (highValues[i] > Ei){
+            highValues[i] = Ei;
+          }
+
+          kfmin = std::sqrt(energyToK * (Ei - lowValues[i]));
+          kfmax = std::sqrt(energyToK * (Ei - highValues[i]));
+          qLabLow = qin * ki -qout * kfmin;
+          qLabHigh = qin * ki - qout * kfmax;
+        }
+        qSampleLow = gon * qLabLow;
+        qSampleHigh = gon * qLabHigh;
+
+        // check intersection with the box
+        // completely outside the box -> no weight
+        if (((qSampleLow.X()<qxmin) && (qSampleHigh.X()<qxmin)) ||
+            ((qSampleLow.X()>qxmax) && (qSampleHigh.X()>qxmax)) ||
+            ((qSampleLow.Y()<qymin) && (qSampleHigh.Y()<qymin)) ||
+            ((qSampleLow.Y()>qymax) && (qSampleHigh.Y()>qymax)) ||
+            ((qSampleLow.Z()<qzmin) && (qSampleHigh.Z()<qzmin)) ||
+            ((qSampleLow.Z()>qzmax) && (qSampleHigh.Z()>qzmax))) {
+          highValues[i] = lowValues[i];
+          continue;
+        }
+        // either intersection or completely indide the box
+        double eps =1e-10;
+        if (fabs(qSampleHigh.X()-qSampleLow.X())>eps){
+           double kfIntersectionMin = (qxmin-qSampleLow.X())*(kfmax-kfmin)/(qSampleHigh.X()-qSampleLow.X())+kfmin;
+           double kfIntersectionMax = (qxmax-qSampleLow.X())*(kfmax-kfmin)/(qSampleHigh.X()-qSampleLow.X())+kfmin;
+           g_log.warning()<<kfIntersectionMin<<" "<<kfIntersectionMax<<" "<<lowValues[i]<<highValues[i]<<"\n";
+           return;
+           // if not diffraction, convert these values to DeltaE
+           if (!diffraction){
+             kfIntersectionMin = Ei - kfIntersectionMin * kfIntersectionMin / energyToK;
+             kfIntersectionMax = Ei - kfIntersectionMax * kfIntersectionMax / energyToK;
+           }
+           if (kfIntersectionMin < lowValues[i]){
+             lowValues[i] = kfIntersectionMin;
+           }
+           if (kfIntersectionMin > highValues[i]){
+             highValues[i] = kfIntersectionMin;
+           }
+           if (kfIntersectionMax < lowValues[i]){
+             lowValues[i] = kfIntersectionMax;
+           }
+           if (kfIntersectionMax > highValues[i]){
+             highValues[i] = kfIntersectionMax;
+           }
+        }
+        if (fabs(qSampleHigh.Y()-qSampleLow.Y())>eps){
+           double kfIntersectionMin = (qymin-qSampleLow.Y())*(kfmax-kfmin)/(qSampleHigh.Y()-qSampleLow.Y())+kfmin;
+           double kfIntersectionMax = (qymax-qSampleLow.Y())*(kfmax-kfmin)/(qSampleHigh.Y()-qSampleLow.Y())+kfmin;
+           // if not diffraction, convert these values to DeltaE
+           if (!diffraction){
+             kfIntersectionMin = Ei - kfIntersectionMin * kfIntersectionMin / energyToK;
+             kfIntersectionMax = Ei - kfIntersectionMax * kfIntersectionMax / energyToK;
+           }
+           if (kfIntersectionMin < lowValues[i]){
+             lowValues[i] = kfIntersectionMin;
+           }
+           if (kfIntersectionMin > highValues[i]){
+             highValues[i] = kfIntersectionMin;
+           }
+           if (kfIntersectionMax < lowValues[i]){
+             lowValues[i] = kfIntersectionMax;
+           }
+           if (kfIntersectionMax > highValues[i]){
+             highValues[i] = kfIntersectionMax;
+           }
+        }
+        if (fabs(qSampleHigh.Z()-qSampleLow.Z())>eps){
+           double kfIntersectionMin = (qzmin-qSampleLow.Z())*(kfmax-kfmin)/(qSampleHigh.Z()-qSampleLow.Z())+kfmin;
+           double kfIntersectionMax = (qzmax-qSampleLow.Z())*(kfmax-kfmin)/(qSampleHigh.Z()-qSampleLow.Z())+kfmin;
+           // if not diffraction, convert these values to DeltaE
+           if (!diffraction){
+             kfIntersectionMin = Ei - kfIntersectionMin * kfIntersectionMin / energyToK;
+             kfIntersectionMax = Ei - kfIntersectionMax * kfIntersectionMax / energyToK;
+           }
+           if (kfIntersectionMin < lowValues[i]){
+             lowValues[i] = kfIntersectionMin;
+           }
+           if (kfIntersectionMin > highValues[i]){
+             highValues[i] = kfIntersectionMin;
+           }
+           if (kfIntersectionMax < lowValues[i]){
+             lowValues[i] = kfIntersectionMax;
+           }
+           if (kfIntersectionMax > highValues[i]){
+             highValues[i] = kfIntersectionMax;
+           }
+        }
+      }//end loop over spectra
 
     }
 
