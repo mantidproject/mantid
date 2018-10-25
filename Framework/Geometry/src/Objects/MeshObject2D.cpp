@@ -292,13 +292,8 @@ const BoundingBox &MeshObject2D::getBoundingBox() const {
 void MeshObject2D::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                   double &xmin, double &ymin,
                                   double &zmin) const {
-  auto bb = this->getBoundingBox();
-  xmax = bb.xMax();
-  xmin = bb.xMin();
-  ymax = bb.yMax();
-  ymin = bb.yMin();
-  zmax = bb.zMax();
-  zmin = bb.zMin();
+  return MeshObjectCommon::getBoundingBox(m_vertices, m_boundingBox, xmax, ymax,
+                                          zmax, xmin, ymin, zmin);
 }
 
 /**

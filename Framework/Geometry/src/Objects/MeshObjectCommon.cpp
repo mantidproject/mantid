@@ -261,6 +261,18 @@ std::vector<uint32_t> getTriangles_uint32(const std::vector<uint16_t> &input) {
   return faces;
 }
 
+/**
+ * Takes input vertices and calculates bounding box. Returns the bounding box.
+ *
+ * @param vertices :: vertices to create BB from
+ * @param cacheBB :: mutable BB object to write to.
+ * @param xmax :: Maximum value for the bounding box in x direction
+ * @param ymax :: Maximum value for the bounding box in y direction
+ * @param zmax :: Maximum value for the bounding box in z direction
+ * @param xmin :: Minimum value for the bounding box in x direction
+ * @param ymin :: Minimum value for the bounding box in y direction
+ * @param zmin :: Minimum value for the bounding box in z direction
+ */
 const BoundingBox &getBoundingBox(const std::vector<Kernel::V3D> &vertices,
                                   BoundingBox &cacheBB) {
 
@@ -295,6 +307,31 @@ const BoundingBox &getBoundingBox(const std::vector<Kernel::V3D> &vertices,
   }
 
   return cacheBB;
+}
+
+/**
+ * From vertices calculates the bounding box. Returns them back in max and min
+ * points as well as mutated BB object.
+ *
+ * @param vertices :: vertices to create BB from
+ * @param cacheBB :: mutable BB object to write to.
+ * @param xmax :: Maximum value for the bounding box in x direction
+ * @param ymax :: Maximum value for the bounding box in y direction
+ * @param zmax :: Maximum value for the bounding box in z direction
+ * @param xmin :: Minimum value for the bounding box in x direction
+ * @param ymin :: Minimum value for the bounding box in y direction
+ * @param zmin :: Minimum value for the bounding box in z direction
+ */
+void getBoundingBox(const std::vector<Kernel::V3D> &vertices,
+                    BoundingBox &cacheBB, double &xmax, double &ymax,
+                    double &zmax, double &xmin, double &ymin, double &zmin) {
+  auto bb = getBoundingBox(vertices, cacheBB);
+  xmax = bb.xMax();
+  xmin = bb.xMin();
+  ymax = bb.yMax();
+  ymin = bb.yMin();
+  zmax = bb.zMax();
+  zmin = bb.zMin();
 }
 
 } // namespace MeshObjectCommon

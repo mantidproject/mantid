@@ -59,6 +59,10 @@ MANTID_GEOMETRY_DLL std::vector<uint32_t>
 getTriangles_uint32(const std::vector<uint16_t> &input);
 MANTID_GEOMETRY_DLL const BoundingBox &
 getBoundingBox(const std::vector<Kernel::V3D> &vertices, BoundingBox &cacheBB);
+MANTID_GEOMETRY_DLL void
+getBoundingBox(const std::vector<Kernel::V3D> &vertices, BoundingBox &cacheBB,
+               double &xmax, double &ymax, double &zmax, double &xmin,
+               double &ymin, double &zmin);
 } // namespace MeshObjectCommon
 
 } // namespace Geometry

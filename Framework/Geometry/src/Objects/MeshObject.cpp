@@ -247,13 +247,8 @@ int MeshObject::calcValidType(const Kernel::V3D &point,
 void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                 double &xmin, double &ymin,
                                 double &zmin) const {
-  BoundingBox bb = getBoundingBox();
-  xmin = bb.xMin();
-  xmax = bb.xMax();
-  ymin = bb.yMin();
-  ymax = bb.yMax();
-  zmin = bb.zMin();
-  zmax = bb.zMax();
+  return MeshObjectCommon::getBoundingBox(m_vertices, m_boundingBox, xmax, ymax,
+                                          zmax, xmin, ymin, zmin);
 }
 
 /**
