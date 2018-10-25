@@ -31,8 +31,8 @@ struct HashV3DPair {
 struct V3DTrueComparator {
   bool operator()(const std::pair<Kernel::V3D, uint32_t> &v1,
                   const std::pair<Kernel::V3D, uint32_t> &v2) const {
-  Kernel::V3D diff = v1.first - v2.first;
-  return diff.norm() < 1e-9;
+    Kernel::V3D diff = v1.first - v2.first;
+    return diff.norm() < 1e-9;
   }
 };
 
