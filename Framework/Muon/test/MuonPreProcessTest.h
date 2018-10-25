@@ -30,21 +30,6 @@ algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
   return alg;
 }
 
-// Set sensible default algorithm properties
-IAlgorithm_sptr algorithmWithPropertiesSet(const std::string &inputWSName) {
-
-  auto alg = boost::make_shared<MuonPreProcess>();
-  alg->initialize();
-  alg->setProperty("InputWorkspace", inputWSName);
-  alg->setProperty("OutputWorkspace", "output");
-  alg->setProperty("TimeMin", 0.0);
-  alg->setProperty("TimeMax", 50.0);
-  alg->setProperty("RebinArgs", "");
-  alg->setProperty("TimeOffset", 0.0);
-  alg->setLogging(false);
-  return alg;
-}
-
 // Simple class to set up the ADS with the configuration required by the
 // algorithm (a MatrixWorkspace).
 class setUpADSWithWorkspace {
