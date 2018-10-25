@@ -69,7 +69,7 @@ Output:
 
 .. testoutput:: ConvertToGroup
 
-	Input workspace is a Workspace2D
+    Input workspace is a Workspace2D
     Output workspace is a WorkspaceGroup
     X values are : [ 0.  1.  2.  3.  4.  5.]
     Y values are : [ 10.  20.  30.  20.  10.]
@@ -93,7 +93,7 @@ Output:
 
 .. testoutput:: ExampleTimeOffset
 
-	X values are : [ 0.5  1.5  2.5  3.5  4.5  5.5]
+    X values are : [ 0.5  1.5  2.5  3.5  4.5  5.5]
     Y values are : [ 10.  20.  30.  20.  10.]
 
 **Example - Applying only a rebin**
@@ -115,7 +115,7 @@ Output:
 
 .. testoutput:: ExampleRebin
 
-	X values are : [ 0.  2.  4.  5.]
+    X values are : [ 0.  2.  4.  5.]
     Y values are : [ 30.  50.  10.]
 
 **Example - Applying only a crop**
@@ -138,7 +138,7 @@ Output:
 
 .. testoutput:: ExampleCrop
 
-	X values are : [ 2.  3.  4.]
+    X values are : [ 2.  3.  4.]
     Y values are : [ 30.  20.]
 
 **Example - Applying only a dead time correction**
@@ -160,14 +160,14 @@ Output:
     output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
                                                 DeadTimeTable=dead_times)
     print("X values are : {}".format(output_workspace[0].readX(0)))
-    print("Y values are : {}".format(map(lambda x: round(x, 1), output_workspace[0].readY(0))))
+    print("Y values are : {}".format(list(map(lambda x: round(x, 1), output_workspace[0].readY(0)))))
 
 
 Output:
 
 .. testoutput:: ExampleDeadTime
 
-	X values are : [ 0.  1.  2.  3.  4.  5.]
+    X values are : [ 0.  1.  2.  3.  4.  5.]
     Y values are : [100.3, 201.2, 302.8, 201.2, 100.3]
 
 .. categories::
