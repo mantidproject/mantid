@@ -135,7 +135,7 @@ public:
     auto alg = boost::make_shared<MuonGroupingCounts>();
     alg->initialize();
 
-    TSM_ASSERT_THROWS_NOTHING(
+    TSM_ASSERT_THROWS_NOTHING("", 
         alg->setProperty("InputWorkspace", setup.inputWSName))
   }
 
@@ -156,7 +156,7 @@ public:
     std::vector<std::string> validNames = {"fwd", "fwd2", "bwd_2"};
     for (auto &&validName : validNames) {
       auto alg = setUpAlgorithmWithGroupName(ws, validName);
-      TSM_ASSERT_THROWS_NOTHING(alg->execute());
+      TSM_ASSERT_THROWS_NOTHING("", alg->execute());
     }
   }
 
