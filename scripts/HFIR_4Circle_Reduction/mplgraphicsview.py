@@ -1,16 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches,C0302
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import os
 import numpy as np
-
-from PyQt4 import QtGui
-from PyQt4.QtCore import pyqtSignal
-
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
+import matplotlib.collections
+from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)   # noqa
+from qtpy.QtCore import Signal as pyqtSignal
+
 
 MplLineStyles = ['-', '--', '-.', ':', 'None', ' ', '']
 MplLineMarkers = [
@@ -352,7 +358,7 @@ class IndicatorManager(object):
         return
 
 
-class MplGraphicsView(QtGui.QWidget):
+class MplGraphicsView(QWidget):
     """ A combined graphics view including matplotlib canvas and
     a navigation tool bar
 
@@ -362,7 +368,7 @@ class MplGraphicsView(QtGui.QWidget):
         """ Initialization
         """
         # Initialize parent
-        QtGui.QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)
 
         # set up canvas
         self._myCanvas = Qt4MplCanvas(self)
@@ -374,7 +380,7 @@ class MplGraphicsView(QtGui.QWidget):
         self._homeXYLimit = None
 
         # set up layout
-        self._vBox = QtGui.QVBoxLayout(self)
+        self._vBox = QVBoxLayout(self)
         self._vBox.addWidget(self._myCanvas)
         self._vBox.addWidget(self._myToolBar)
 
@@ -430,13 +436,14 @@ class MplGraphicsView(QtGui.QWidget):
 
         return key_list
 
-    def add_plot_1d(self, vec_x, vec_y, y_err=None, color=None, label='', x_label=None, y_label=None,
-                    marker=None, line_style=None, line_width=1, show_legend=True):
+    def add_plot_1d(self, vec_x, vec_y, y_err=None, annotation_list=None, color=None, label='', x_label=None, y_label=None,
+                    marker=None, line_style=None, line_width=1, show_legend=True, update_plot=True):
         """
         Add a 1-D plot to canvas
         :param vec_x:
         :param vec_y:
         :param y_err:
+        :param annotation_list:  list of string for annotation of each data point OR None
         :param color:
         :param label:
         :param x_label:
@@ -445,10 +452,11 @@ class MplGraphicsView(QtGui.QWidget):
         :param line_style:
         :param line_width:
         :param show_legend:
+        :param update_plot:
         :return: line ID (key to the line)
         """
         line_id = self._myCanvas.add_plot_1d(vec_x, vec_y, y_err, color, label, x_label, y_label, marker, line_style,
-                                             line_width, show_legend)
+                                             line_width, show_legend, annotation_list)
 
         return line_id
 
@@ -611,8 +619,10 @@ class MplGraphicsView(QtGui.QWidget):
 
         return
 
+    @property
     def canvas(self):
-        """ Get the canvas
+        """
+        provide reference to Canvas
         :return:
         """
         return self._myCanvas
@@ -1024,7 +1034,7 @@ class MplGraphicsView(QtGui.QWidget):
 
 class Qt4MplCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib figure.
-    It can be used to replace GraphicsView of QtGui
+    It can be used to replace GraphicsView
     """
     def __init__(self, parent):
         """  Initialization
@@ -1049,11 +1059,12 @@ class Qt4MplCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
         # Variables to manage all lines/subplot
-        self._lineDict = {}
+        self._lineDict = dict()
+        self._errorBarDict = dict()  # containing two tuple: r[0] as line, r[2][0] as error bar offsets
         self._lineIndex = 0
 
         # legend and color bar
@@ -1088,7 +1099,7 @@ class Qt4MplCanvas(FigureCanvas):
         return
 
     def add_plot_1d(self, vec_x, vec_y, y_err=None, color=None, label="", x_label=None, y_label=None,
-                    marker=None, line_style=None, line_width=1, show_legend=True):
+                    marker=None, line_style=None, line_width=1, show_legend=True, annotation_list=None):
         """
 
         :param vec_x: numpy array X
@@ -1102,6 +1113,7 @@ class Qt4MplCanvas(FigureCanvas):
         :param line_style:
         :param line_width:
         :param show_legend:
+        :param annotation_list:
         :return: new key
         """
         # Check input
@@ -1159,10 +1171,8 @@ class Qt4MplCanvas(FigureCanvas):
         # Register
         line_key = self._lineIndex
         if plot_error:
-            msg = 'Return from plot is a {0}-tuple: {1} with plot error is {2}\n'.format(len(r), r, plot_error)
-            for i_r in range(len(r)):
-                msg += 'r[%d] = %s\n' % (i_r, str(r[i_r]))
-            raise NotImplementedError(msg)
+            # plot with error bar: data_line = r[0],  error_bar_line = r[2][0]
+            self._errorBarDict[line_key] = r[0], r[2][0]
         else:
             assert len(r) > 0, 'There must be at least 1 figure returned'
             self._lineDict[line_key] = r[0]
@@ -1172,6 +1182,11 @@ class Qt4MplCanvas(FigureCanvas):
                 # remove the un-defined extra lines
                 self.axes.lines.remove(r[i_r])
         # END-IF-ELSE
+
+        if annotation_list is not None and len(annotation_list) == len(vec_y):
+            for ipt in range(len(annotation_list)):
+                self.axes.annotate(annotation_list[ipt], (vec_x[ipt], vec_y[ipt]))
+        # END-IF
 
         # Flush/commit
         self.draw()
@@ -1356,15 +1371,23 @@ class Qt4MplCanvas(FigureCanvas):
                         str(plot), len(self.axes.lines), str(e)))
                 del self._lineDict[ikey]
             else:
-                # error bar
-                plot[0].remove()
-                for line in plot[1]:
-                    line.remove()
-                for line in plot[2]:
-                    line.remove()
-                del self._lineDict[ikey]
+                # error bar: but not likely to be set to _lineDict
+                raise RuntimeError('It is not correct to set a line with error bar to _lineDict')
             # ENDIF(plot)
         # ENDFOR
+
+        # clear all 1D plot with error bar
+        for line_key in self._errorBarDict:
+            # check whether this line has been removed
+            if self._errorBarDict[line_key] is None:
+                del self._errorBarDict[line_key]
+                continue
+
+            # remove data line and error bar
+            line_obj, error_bar_obj = self._errorBarDict[line_key]
+            line_obj.remove()
+            error_bar_obj.remove()
+        # END-FOR
 
         self._setup_legend()
 
@@ -1490,6 +1513,19 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
+    def save_figure(self, file_name):
+        """ save the current figure to an image file
+        save to image
+        :param file_name:
+        :return:
+        """
+        assert isinstance(file_name, str), 'File name {} must be a string.'.format(file_name)
+
+        # TODO - NEXT - Provide many more options for figures to save
+        self.fig.savefig(file_name)
+
+        return
+
     def set_title(self, title, color, location='center'):
         """
         set title to the figure (canvas) with default location at center
@@ -1502,8 +1538,8 @@ class Qt4MplCanvas(FigureCanvas):
         assert isinstance(title, str), 'Title {0} must be a string but not a {1}.'.format(title, type(title))
         assert isinstance(color, str) and len(color) > 0, 'Color {0} must be a non-empty string but not a {1}.' \
                                                           ''.format(color, type(color))
-        assert isinstance(location, str) and len(location) > 0, 'Location {0} must be a non-empty string but not a {1}.' \
-                                                                ''.format(location, type(location))
+        assert isinstance(location, str) and len(location) > 0, 'Location {0} must be a non-empty string but not a' \
+                                                                ' {1}.'.format(location, type(location))
 
         # set title and re-draw to apply
         self.axes.set_title(title, loc=location, color=color)
@@ -1608,16 +1644,74 @@ class Qt4MplCanvas(FigureCanvas):
         :param line_id:
         :return: 2-tuple as vector X and vector Y
         """
-        # check
-        if line_id not in self._lineDict:
+        if line_id in self._lineDict:
+            # single line
+            # get line and check
+            line = self._lineDict[line_id]
+            if line is None:
+                raise RuntimeError('Line ID %s has been removed.' % line_id)
+
+        elif line_id in self._errorBarDict:
+            # single line with error
+            # get line and check
+            content = self._errorBarDict[line_id]
+            if content is None:
+                raise RuntimeError('Line ID {0} has been removed from error-bar dict.'.format(line_id))
+            line = content[0]
+
+        else:
+            # not anywhere
             raise KeyError('Line ID %s does not exist.' % str(line_id))
 
-        # get line
-        line = self._lineDict[line_id]
-        if line is None:
-            raise RuntimeError('Line ID %s has been removed.' % line_id)
-
         return line.get_xdata(), line.get_ydata()
+
+    def get_data_error(self, line_id):
+        """
+        get data with error bar if there is an error bar set with data; otherwise, set error bar to None
+        :param line_id:
+        :return:
+        """
+        def retrieve_error_bar(error_bar_lineset):
+            """
+            retrieve error bar from a
+            :param error_bar_lineset:
+            :return:
+            """
+            # check input
+            assert isinstance(error_bar_lineset, matplotlib.collections.LineCollection), 'Error bar line set type'
+
+            segments = error_bar_lineset.get_segments()
+            vec_error = np.ndarray(shape=(len(segments),), dtype='float')
+            for iseg, segment in enumerate(segments):
+                error_i = segment[1, 1] - segment[0, 1]
+                vec_error[iseg] = error_i * 0.5
+
+            return vec_error
+
+        if line_id in self._lineDict:
+            # single line
+            # get line and check
+            line = self._lineDict[line_id]
+            if line is None:
+                raise RuntimeError('Line ID %s has been removed.' % line_id)
+            vec_e = None
+
+        elif line_id in self._errorBarDict:
+            # single line with error
+            # get line and check
+            content = self._errorBarDict[line_id]
+            if content is None:
+                raise RuntimeError('Line ID {0} has been removed from error-bar dict.'.format(line_id))
+            line = content[0]
+
+            # get vector for error
+            vec_e = retrieve_error_bar(content[1])
+
+        else:
+            # not anywhere
+            raise KeyError('Line ID %s does not exist.' % str(line_id))
+
+        return line.get_xdata(), line.get_ydata(), vec_e
 
     def getLineStyleList(self):
         """

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -23,6 +29,7 @@ class GuiCommonTest(unittest.TestCase):
         table_index_model_1 = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
         self.table_model.add_table_entry(0, table_index_model_0)
         self.table_model.add_table_entry(1, table_index_model_1)
+        self.table_model.wait_for_done()
 
         self.fake_state = mock.MagicMock(spec=State)
         self.gui_state_director_instance = mock.MagicMock()

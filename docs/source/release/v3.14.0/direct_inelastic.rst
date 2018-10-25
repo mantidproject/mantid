@@ -18,6 +18,11 @@ New Algorithms
 
 - Added a new algorithm to ILL's reduction workflow: :ref:`DirectILLTubeBackground <algm-DirectILLTubeBackground>` which can be used to calculate the time-independent backgrounds for instruments with PSD detectors such as IN5.
 
+Improvements
+############
+
+- :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>` now masks zero counting detectors from the integral.
+
 Bugfixes
 ########
 
@@ -41,6 +46,15 @@ Improvements
 - Behavior of the :ref:`LoadDNSLegacy <algm-LoadDNSLegacy>` for TOF data has been changed: the algorithm does not try to guess elastic channel any more, but asks for the user input.
 - :ref:`LoadDNSSCD <algm-LoadDNSSCD>` has been improved to be able to load TOF data.
 - :ref:`MDNormDirectSC <algm-MDNormDirectSC>` now can handle merged MD workspaces.
+
+Python
+------
+
+
+Improved
+########
+
+- The ``directtools`` plotting and utility module has been updated with improved automatic E ranges, cut labels and other visuals. All functions now should also be applicable to non-ILL data as well.
 
 :ref:`Release 3.14.0 <v3.14.0>`
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
 #include <boost/python/extract.hpp>
 #include <boost/python/str.hpp>
@@ -23,6 +29,19 @@ std::string pyObjToStr(const python::object &value) {
     throw std::invalid_argument("Failed to convert python object a string");
   }
   return valuestr;
+}
+
+bool pyObjIsStr(const boost::python::object &value) {
+  python::extract<std::string> extractor(value);
+  if (extractor.check()) {
+    return true;
+#if PY_VERSION_HEX < 0x03000000
+  } else if (PyUnicode_Check(value.ptr())) {
+    return true;
+#endif
+  }
+
+  return false;
 }
 
 } // namespace Converters

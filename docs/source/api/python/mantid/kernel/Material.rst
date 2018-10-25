@@ -2,7 +2,7 @@
  Material
 ==========
 
-This a python binding to the C++ class Mantid::Kernel::Material.
+This is a Python binding to the C++ class Mantid::Kernel::Material.
 
 
 .. module:`mantid.kernel`
