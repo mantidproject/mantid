@@ -2,7 +2,7 @@
  InstrumentViewPickTab
 =======================
 
-This a python binding to the C++ class Mantidplot::InstrumentViewPickTab.
+This is a Python binding to the C++ class Mantidplot::InstrumentViewPickTab.
 
 *bases:* :py:obj:`mantidplot.InstrumentViewTab`
 
