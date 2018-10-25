@@ -34,7 +34,7 @@ algorithmWithoutOptionalPropertiesSet(const std::string &inputWSName) {
 // algorithm (a MatrixWorkspace).
 class setUpADSWithWorkspace {
 public:
-  static constexpr const char *inputWSName = "inputData";
+  std::string const inputWSName = "inputData";
 
   setUpADSWithWorkspace(Workspace_sptr ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
