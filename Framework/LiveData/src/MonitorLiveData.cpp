@@ -140,9 +140,12 @@ void MonitorLiveData::exec() {
   // Grab a copy of the WorkspaceHistory StartLiveData object from original
   // workspace
   auto outputWorkspaceExists = ads.doesExist(OutputWorkspace);
-  Mantid::API::WorkspaceHistory *originalHistory;
+  std::unique_ptr<Mantid::API::WorkspaceHistory> originalHistory =
+      std::make_unique<Mantid::API::WorkspaceHistory>();
+      
   if (outputWorkspaceExists)
-    originalHistory = &ads.retrieveWS<Workspace>(OutputWorkspace)->history();
+    originalHistory = std::make_unique<Mantid::API::WorkspaceHistory>(
+        ads.retrieveWS<Workspace>(OutputWorkspace)->history());
 
   // Keep going until you get cancelled
   while (true) {
