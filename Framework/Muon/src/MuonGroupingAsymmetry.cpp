@@ -56,8 +56,8 @@ MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
 Mantid::API::MatrixWorkspace_sptr
 calculateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
                        const std::vector<int> &summedPeriods,
-                       const std::vector<int> &subtractedPeriods, int groupIndex,
-                       const double startX, const double endX) {
+                       const std::vector<int> &subtractedPeriods,
+                       int groupIndex, const double startX, const double endX) {
   MatrixWorkspace_sptr tempWS;
   int numPeriods = inputWS->getNumberOfEntries();
   if (numPeriods > 1) {
@@ -140,10 +140,10 @@ void MuonGroupingAsymmetry::init() {
                   "Defaults to the end time of the InputWorkspace.",
                   Direction::Input);
 
-  declareProperty(
-      make_unique<ArrayProperty<int>>("SummedPeriods", defaultGrouping,
+  declareProperty(make_unique<ArrayProperty<int>>(
+                      "SummedPeriods", defaultGrouping,
                       IValidator_sptr(new NullValidator), Direction::Input),
-      "A list of periods to sum in multiperiod data.");
+                  "A list of periods to sum in multiperiod data.");
   declareProperty(
       make_unique<ArrayProperty<int>>("SubtractedPeriods", Direction::Input),
       "A list of periods to subtract in multiperiod data.");
