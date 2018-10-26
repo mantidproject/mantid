@@ -508,7 +508,7 @@ void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
   if (m_scaleFactor < 1e-2 || m_scaleFactor > 1e2 ||
       std::isnan(m_scaleFactor)) {
     std::stringstream messageBuffer;
-    messageBuffer << "Stitch1D calculated scale factor is: " << m_scaleFactor
+    messageBuffer << "Calculated scale factor is: " << m_scaleFactor
                   << ". Check that in both input workspaces the integrated "
                      "overlap region is non-zero.";
     g_log.warning(messageBuffer.str());
@@ -540,8 +540,7 @@ void Stitch1D::exec() {
   if (lhsWS->isHistogramData()) {
     if (startOverlap > endOverlap) {
       std::string message = boost::str(
-          boost::format("Stitch1D cannot have a StartOverlap > EndOverlap. "
-                        "StartOverlap: %0.9f, EndOverlap: %0.9f") %
+          boost::format("StartOverlap (%0.9f) > EndOverlap (%0.9f).") %
           startOverlap % endOverlap);
       throw std::runtime_error(message);
     }
@@ -557,15 +556,14 @@ void Stitch1D::exec() {
 
     if (startOverlap < xMin) {
       std::string message = boost::str(
-          boost::format(
-              "Stitch1D StartOverlap is outside the available X range. "
-              "StartOverlap: %10.9f, X min: %10.9f") %
+          boost::format("StartOverlap is outside the available X range. "
+                        "StartOverlap: %10.9f, X min: %10.9f") %
           startOverlap % xMin);
       throw std::runtime_error(message);
     }
     if (endOverlap > xMax) {
       std::string message = boost::str(
-          boost::format("Stitch1D EndOverlap is outside the available X range. "
+          boost::format("EndOverlap is outside the available X range. "
                         "EndOverlap: %10.9f, X max: %10.9f") %
           endOverlap % xMax);
       throw std::runtime_error(message);
@@ -618,7 +616,7 @@ void Stitch1D::exec() {
     if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2)) {
       overlapave = weightedMean(overlap1, overlap2);
     } else {
-      g_log.information("Using un-weighted mean for Stitch1D overlap mean");
+      g_log.information("Using un-weighted mean scaling for overlap mean");
       MatrixWorkspace_sptr sum = overlap1 + overlap2;
       MatrixWorkspace_sptr denominator = singleValueWS(2.0);
       overlapave = sum / denominator;
