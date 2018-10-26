@@ -35,13 +35,14 @@ Mantid::Kernel::Logger g_log("ScriptBuilder");
 
 const std::string COMMENT_ALG = "Comment";
 
-ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
-                             std::string versionSpecificity,
-                             bool appendTimestamp,
-                             std::vector<std::string> ignoreTheseAlgs)
+ScriptBuilder::ScriptBuilder(
+    boost::shared_ptr<HistoryView> view, std::string versionSpecificity,
+    bool appendTimestamp, std::vector<std::string> ignoreTheseAlgs,
+    std::vector<std::pair<std::string, std::string>> ignoreTheseAlgProperties)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(versionSpecificity),
-      m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs) {}
+      m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs),
+      m_propertiesToIgnore(ignoreTheseAlgProperties) {}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -174,6 +175,15 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
     return buildCommentString(algHistory);
 
   auto props = algHistory.getProperties();
+
+  // Remove all none-needed properties
+  for (auto c : m_propertiesToIgnore) {
+    props.erase(std::remove_if(
+        props.begin(), props.end(),
+        [&c, name](boost::shared_ptr<Mantid::Kernel::PropertyHistory> &v) {
+          return name == c.first && v->name() == c.second;
+        }));
+  }
 
   try {
     // create a fresh version of the algorithm - unmanaged

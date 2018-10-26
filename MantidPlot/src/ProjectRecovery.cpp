@@ -685,6 +685,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
     alg->setProperty("IgnoreTheseAlgs", m_algsToIgnore);
+    alg->setProperty("IgnoreTheseAlgProperties", m_propertiesToIgnore);
 
     alg->execute();
   }

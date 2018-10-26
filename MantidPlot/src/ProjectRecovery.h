@@ -135,9 +135,12 @@ private:
 
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
-
+  std::vector<std::pair<std::string, std::string>> m_propertiesToIgnore = {
+      {"StartLiveData", "MonitorLiveData"}
+  };
+  
   std::vector<std::string> m_algsToIgnore = {
-      "StartLiveData",
+      "MonitorLiveData",
       "EnggSaveGSASIIFitResultsToHDF5",
       "EnggSaveSinglePeakFitResultsToHDF5",
       "ExampleSaveAscii",
@@ -199,7 +202,6 @@ private:
       "SaveYDA",
       "SaveZODS"};
 };
-
 } // namespace MantidQt
 
 #endif // PROJECT_RECOVERY_H_
