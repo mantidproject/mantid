@@ -40,6 +40,7 @@ Bugfixes
 - Project Recovery will actually recover fully cases where multiple workspaces were passed as a list to an algorithm (Fixes a known bug with GroupWorkspaces as well)
 - Project Recovery will now run normally when you select no or the recovery fails when recovering from a ungraceful exit.
 - When autosaving or saving a recovery checkpoint with the Instrument View open the results log would be filled with excess logging and no longer does this.
+- Project recovery will now successfully recover live data, it will however be unable to recover any data that was up at the time, but will start the live data streams again from scratch.
 
 MantidPlot
 ----------

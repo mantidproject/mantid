@@ -35,7 +35,7 @@ public:
                 std::string versionSpecificity = "old",
                 bool appendTimestamp = false,
                 std::vector<std::string> ignoreTheseAlgs = {},
-                std::vector<std::pair<std::string, std::string>>
+                std::vector<std::vector<std::string>>
                     ignoreTheseAlgProperties = {});
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
@@ -61,7 +61,7 @@ private:
   std::string m_versionSpecificity;
   bool m_timestampCommands;
   std::vector<std::string> m_algsToIgnore;
-  std::vector<std::pair<std::string, std::string>> m_propertiesToIgnore;
+  std::vector<std::vector<std::string>> m_propertiesToIgnore;
 };
 
 } // namespace API

@@ -38,7 +38,7 @@ const std::string COMMENT_ALG = "Comment";
 ScriptBuilder::ScriptBuilder(
     boost::shared_ptr<HistoryView> view, std::string versionSpecificity,
     bool appendTimestamp, std::vector<std::string> ignoreTheseAlgs,
-    std::vector<std::pair<std::string, std::string>> ignoreTheseAlgProperties)
+    std::vector<std::vector<std::string>> ignoreTheseAlgProperties)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(versionSpecificity),
       m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs),
@@ -181,7 +181,7 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
     props.erase(std::remove_if(
         props.begin(), props.end(),
         [&c, name](boost::shared_ptr<Mantid::Kernel::PropertyHistory> &v) {
-          return name == c.first && v->name() == c.second;
+          return name == c[0] && v->name() == c[1];
         }));
   }
 

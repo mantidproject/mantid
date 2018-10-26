@@ -135,7 +135,8 @@ private:
 
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
-  std::vector<std::pair<std::string, std::string>> m_propertiesToIgnore = {
+  
+  std::vector<std::vector<std::string>> m_propertiesToIgnore = {
       {"StartLiveData", "MonitorLiveData"}
   };
   
