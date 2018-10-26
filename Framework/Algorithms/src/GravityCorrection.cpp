@@ -607,8 +607,8 @@ void GravityCorrection::exec() {
       auto j = this->spectrumNumber(angle, theta);
       if (j > m_finalAngles.size() - 2) {
         this->g_log.debug("Count(s) not present in final workspace since not "
-                          "detected, skip bin " +
-                          to_string(i));
+                          "detected, skip bin " + to_string(i_tofit) +
+                          " of spectrum " + to_string(i));
         continue;
       }
 

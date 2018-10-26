@@ -7,27 +7,13 @@
 #ifndef GRAVITYCORRECTIONTEST_H
 #define GRAVITYCORRECTIONTEST_H
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/GravityCorrection.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/make_cow.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cmath>
 #include <cxxtest/TestSuite.h>
-#include <string>
 
 using namespace Mantid::Algorithms;
 
@@ -74,7 +60,7 @@ public:
   void testReplaceInputWS() {
     // OutputWorkspace should replace the InputWorkspace
     GravityCorrection gc31;
-    runGravityCorrection(gc31, inWS1, "myOutput1");
+    this->runGravityCorrection(gc31, inWS1, "myOutput1");
 
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().addOrReplace("myOutput2",
@@ -161,6 +147,8 @@ public:
       TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Data mismatch")
       TS_ASSERT_THROWS_ANYTHING(table->cell<std::string>(1, 0))
     }
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().clear())
   }
 
   void testInstrumentUnchanged() {
@@ -195,7 +183,7 @@ public:
     TS_ASSERT_EQUALS(mask.size(), 3)
     Mantid::API::MatrixWorkspace::MaskList mList0 = ws1->maskedBins(0);
     GravityCorrection gc10;
-    auto ws2 = this->runGravityCorrection(gc10, ws1, "ws2");
+    const auto ws2 = this->runGravityCorrection(gc10, ws1, "ws2");
     TS_ASSERT_EQUALS(ws1->blocksize(), ws2->blocksize())
     Mantid::API::MatrixWorkspace::MaskList mList = ws2->maskedBins(0);
     TS_ASSERT_EQUALS(mList0.size(), mList.size())
@@ -221,7 +209,7 @@ public:
 
   void testMonitor() {
     GravityCorrection gc12;
-    auto ws2 = this->runGravityCorrection(gc12, inWS1, "out1");
+    const auto ws2 = this->runGravityCorrection(gc12, inWS1, "out1");
     // spectrum 1 is a monitor, compare input and output spectrum 1
     for (size_t i = 0; i < ws2->blocksize(); ++i) {
       TS_ASSERT_EQUALS(ws2->x(1)[i], inWS1->x(1)[i])
@@ -232,7 +220,7 @@ public:
 
   void testSizes() {
     GravityCorrection gc13;
-    auto ws3 = this->runGravityCorrection(gc13, inWS1, "out1");
+    const auto ws3 = this->runGravityCorrection(gc13, inWS1, "out1");
     TSM_ASSERT_EQUALS("Number indexable items", ws3->size(), inWS1->size())
     TSM_ASSERT_EQUALS("Number of bins", ws3->blocksize(), inWS1->blocksize())
     TSM_ASSERT_EQUALS("Number of spectra", ws3->getNumberHistograms(),
@@ -342,116 +330,58 @@ public:
   }
 
   // Real data tests
-
-  void testInputWorkspace2D() {
-    Mantid::API::IAlgorithm *lAlg;
-    TS_ASSERT_THROWS_NOTHING(
-        lAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "LoadILLReflectometry");
-        lAlg->setRethrows(true); lAlg->setProperty("Filename", directBeamFile);
-        lAlg->setProperty("OutputWorkspace", "ws");
-        lAlg->setProperty("XUnit", "TimeOfFlight"); lAlg->setChild(true);
-        lAlg->initialize(); lAlg->execute();)
-    TS_ASSERT(lAlg->isExecuted())
-    Mantid::API::MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = lAlg->getProperty("OutputWorkspace"))
-    GravityCorrection gc00;
-    auto corrected = this->runGravityCorrection(gc00, ws, "OutputWorkspace");
-    // no loss of counts
-    double totalCounts{0.}, totalCountsCorrected{0.};
-    for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      for (size_t k = 0; k < ws->blocksize(); k++) {
-        totalCounts += ws->y(i)[k];
-        totalCountsCorrected += corrected->y(i)[k];
-      }
-    }
-    TS_ASSERT_EQUALS(totalCounts, totalCountsCorrected)
-  }
-
-  void testReflectionUp() {} // real data
-
-  void testReflectionDown() {} // real data
-
-  // Counts moved
-  void testOutputThetaFinalCorrected() {
-
-    // ReferenceFrame is up:Y along beam:X
-    using Mantid::Kernel::V3D;
-    V3D source{-3., 0., 0.};
-    V3D slit1{-2., 0., 0.};
-    V3D slit2{-1., 0., 0.};
-    V3D monitor{-.5, 0., 0.};
-    V3D sample{0., 0., 0.};
-    V3D detector1{2., 1., 0.};
-
-    V3D l1 = sample - source;
-    V3D l2 = detector1 - sample;
-
-    const double tof{8000.}; // mu seconds
-
-    using Mantid::PhysicalConstants::g;
-    using std::abs;
-    using std::pow;
-
-    const double v{(l1.norm() + l2.norm()) / tof}; // (metre / mu seconds!)
-    const double k{g / (2. * pow(v * 1.e6, 2.))};
-    const double s1{slit1.X()};
-    const double s2{slit2.X()};
-    const double tanAngle{tan(cos(detector1.X() / l2.norm()))};
-    const double sdist{s1 - s2};
-    const double sx{(k * (pow(s1, 2.) - pow(s2, 2.)) + (sdist * tanAngle)) /
-                    (2 * k * sdist)};
-    const double up2{s2 * tanAngle};
-    const double sy{up2 + k * pow(s2 - sx, 2.)};
-    // const double finalAngle{atan(2. * k * sqrt(abs(sy / k)))};
-
-    // V3D detector2{cos(finalAngle) * l2.norm(), sin(finalAngle) * l2.norm(),
-    // 0.};
-
-    Mantid::API::MatrixWorkspace_sptr ws{
-        WorkspaceCreationHelper::
-            create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-                tof, 0.25, slit1, slit2, 0.2, 0.3, source, monitor, sample,
-                detector1, 4, 50, 0.02)};
-
-    // TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(4) / 2, finalAngle,
-    // 1e-6)
-
-    // input counts
-    // error: no match for ‘operator==’ (operand types are
-    // ‘Mantid::HistogramData::HistogramY’ and ‘int’)
-    // TS_ASSERT_EQUALS(ws->y(3), 2);
-
-    GravityCorrection gc20;
-    auto res = this->runGravityCorrection(gc20, ws, "ws");
-
-    // resulting final angle
-    // TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(3), 2. * .5, 1e-6)
-    // resulting counts
-    // TS_ASSERT_EQUALS(ws->y(4), 0); // counts removed
-    // TS_ASSERT_EQUALS(ws->y(3), 2); // counts inserted
-  }
-
-  // TOF values modified
-  void testOutputTOFCorrected() {}
-
   // Use of slit1 and slit2 default values from sample logs
   // Example: FIGARO parameter file defines slit1 and slit2
-  void testDefaultSlitNames() {
-    Mantid::API::FrameworkManager::Instance().exec(
-        "LoadILLReflectometry", 6, "Filename", "ILL/Figaro/592724.nxs",
-        "OutputWorkspace", "592724", "XUnit", "TimeOfFlight");
-    GravityCorrection gc21;
-    TS_ASSERT_THROWS_NOTHING(gc21.initialize())
-    gc21.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(gc21.setProperty("InputWorkspace", "592724"))
+
+  void testInputWorkspace2D_1() {
+    TS_ASSERT_THROWS_NOTHING(Mantid::API::FrameworkManager::Instance().exec(
+        "LoadILLReflectometry", 6, "Filename", "ILL/Figaro/000002",
+        "OutputWorkspace", "ws", "XUnit", "TimeOfFlight");)
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("ws"));
+    auto ws = Mantid::API::AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
+    GravityCorrection gc00;
+    Mantid::API::MatrixWorkspace_const_sptr corrected = this->runGravityCorrection(gc00, ws, "OutputWorkspace");
+    Mantid::API::MatrixWorkspace_const_sptr cws = Mantid::API::AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
+    this->noLossOfCounts(cws, corrected);
+    //this->notCommonBinCheck(cws, corrected);
+    // TOF values, first spectrum
+    const auto x1 = ws->x(0);
+    const auto x2 = corrected->x(0);
+    //TS_ASSERT_EQUALS(x1[0], 0.)tbc
+    //TS_ASSERT_EQUALS(x2[0], 0.)tbc
+    //TS_ASSERT_EQUALS(x1[1], 0.)tbc
+    //TS_ASSERT_EQUALS(x2[1], 0.)tbc
     TS_ASSERT_THROWS_NOTHING(
-        gc21.setProperty("OutputWorkspace", "default_test"))
-    TS_ASSERT_THROWS_NOTHING(gc21.execute())
-    TS_ASSERT(gc21.isExecuted())
+        Mantid::API::AnalysisDataService::Instance().clear())
   }
 
-  Mantid::API::MatrixWorkspace_sptr runGravityCorrection(
+  void testInputWorkspace2D_2() {
+    TS_ASSERT_THROWS_NOTHING(Mantid::API::FrameworkManager::Instance().exec(
+        "LoadILLReflectometry", 6, "Filename", "ILL/Figaro/592724.nxs",
+        "OutputWorkspace", "ws", "XUnit", "TimeOfFlight");)
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("ws"));
+    auto ws = Mantid::API::AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
+    GravityCorrection gc00;
+    Mantid::API::MatrixWorkspace_const_sptr corrected = this->runGravityCorrection(gc00, ws, "OutputWorkspace");
+    Mantid::API::MatrixWorkspace_const_sptr cws = Mantid::API::AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
+    this->noLossOfCounts(cws, corrected);
+    //this->notCommonBinCheck(cws, corrected);
+    // TOF values, first spectrum
+    const auto x1 = cws->x(0);
+    const auto x2 = corrected->x(0);
+    //TS_ASSERT_EQUALS(x1[0], 0.)tbc
+    //TS_ASSERT_EQUALS(x2[0], 0.)tbc
+    //TS_ASSERT_EQUALS(x1[1], 0.)tbc
+    //TS_ASSERT_EQUALS(x2[1], 0.)tbc
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().clear())
+  }
+
+  Mantid::API::MatrixWorkspace_const_sptr runGravityCorrection(
       GravityCorrection &gravityCorrection,
       Mantid::API::MatrixWorkspace_sptr &inWS, const std::string outName,
       std::string firstSlitName = "", std::string secondSlitName = "") {
@@ -471,13 +401,31 @@ public:
           gravityCorrection.setProperty("SecondSlitName", secondSlitName))
     TS_ASSERT_THROWS_NOTHING(gravityCorrection.execute())
     TS_ASSERT(gravityCorrection.isExecuted())
-    try {
-      return Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::MatrixWorkspace>(outName);
-      TS_FAIL("OutputWorkspace was not created.");
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
-      return inWS;
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance()
+              .doesExist(outName))
+    return Mantid::API::AnalysisDataService::Instance()
+                          .retrieveWS<Mantid::API::MatrixWorkspace>(outName);
+  }
+
+  void notCommonBinCheck(Mantid::API::MatrixWorkspace_const_sptr &ws1,
+                         Mantid::API::MatrixWorkspace_const_sptr &ws2) {
+    // Typically bin edges changed after running the algorithm
+    for (size_t i = 0; i < ws1->getNumberHistograms(); ++i) {
+      const auto x1 = ws1->x(i);
+      const auto x2 = ws2->x(i);
+      TS_ASSERT_DIFFERS(x1, x2)
     }
+  }
+
+  void noLossOfCounts(Mantid::API::MatrixWorkspace_const_sptr &ws1,
+                         Mantid::API::MatrixWorkspace_const_sptr &ws2) {
+      double totalCounts{0.}, totalCountsCorrected{0.};
+      for (size_t i = 0; i < ws1->getNumberHistograms(); i++) {
+        for (size_t k = 0; k < ws1->blocksize(); k++) {
+          totalCounts += ws1->y(i)[k];
+          totalCountsCorrected += ws2->y(i)[k];
+        }
+      }
   }
 
   void comparer(CompareWorkspaces &compare, const std::string &in1,
@@ -498,10 +446,6 @@ public:
   }
 
 private:
-  const std::string directBeamFile{"/home/cs/reimund/Desktop/Figaro/"
-                                   "GravityCorrection/ReflectionUp/"
-                                   "exp_9-12-488/rawdata/596071.nxs"};
-  // const std::string directBeamFile{"ILL/Figaro/592724.nxs"};
   const std::string outWSName{"GravityCorrectionTest_OutputWorkspace"};
   const std::string inWSName{"GravityCorrectionTest_InputWorkspace"};
   const std::string TRUE{"1"};
