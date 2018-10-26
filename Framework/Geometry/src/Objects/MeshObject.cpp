@@ -257,7 +257,22 @@ void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
  * @return :: estimate of solid angle of object.
  */
 double MeshObject::solidAngle(const Kernel::V3D &observer) const {
-  return MeshObjectCommon::solidAngle(observer, m_triangles, m_vertices);
+  double solidAngleSum(0), solidAngleNegativeSum(0);
+  Kernel::V3D vertex1, vertex2, vertex3;
+  for (size_t i = 0; this->getTriangle(i, vertex1, vertex2, vertex3); ++i) {
+    double sa = MeshObjectCommon::getTriangleSolidAngle(vertex1, vertex2,
+                                                        vertex3, observer);
+    if (sa > 0.0) {
+      solidAngleSum += sa;
+    } else {
+      solidAngleNegativeSum += sa;
+    }
+  }
+  /*
+    Same implementation as CSGObject. Assumes a convex closed mesh with
+    solidAngleSum == -solidAngleNegativeSum
+  */
+  return 0.5 * (solidAngleSum - solidAngleNegativeSum);
 }
 
 /**
@@ -271,8 +286,13 @@ double MeshObject::solidAngle(const Kernel::V3D &observer,
                               const Kernel::V3D &scaleFactor) const
 
 {
-  return MeshObjectCommon::solidAngle(observer, m_triangles, m_vertices,
-                                      scaleFactor);
+  std::vector<Kernel::V3D> scaledVertices;
+  scaledVertices.reserve(m_vertices.size());
+  for (const auto &vertex : m_vertices) {
+    scaledVertices.emplace_back(scaleFactor * vertex);
+  }
+  MeshObject meshScaled(m_triangles, scaledVertices, m_material);
+  return meshScaled.solidAngle(observer);
 }
 
 /**

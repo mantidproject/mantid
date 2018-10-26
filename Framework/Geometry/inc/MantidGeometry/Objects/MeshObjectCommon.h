@@ -35,14 +35,6 @@ namespace MeshObjectCommon {
 
 MANTID_GEOMETRY_DLL std::vector<double>
 getVertices(const std::vector<Kernel::V3D> &vertices);
-MANTID_GEOMETRY_DLL double solidAngle(const Kernel::V3D &observer,
-                                      const std::vector<uint16_t> &triangles,
-                                      const std::vector<Kernel::V3D> &vertices);
-
-MANTID_GEOMETRY_DLL double solidAngle(const Kernel::V3D &observer,
-                                      const std::vector<uint16_t> &triangles,
-                                      const std::vector<Kernel::V3D> &vertices,
-                                      const Kernel::V3D scaleFactor);
 
 MANTID_GEOMETRY_DLL bool isOnTriangle(const Kernel::V3D &point,
                                       const Kernel::V3D &v1,
@@ -63,6 +55,15 @@ MANTID_GEOMETRY_DLL void
 getBoundingBox(const std::vector<Kernel::V3D> &vertices, BoundingBox &cacheBB,
                double &xmax, double &ymax, double &zmax, double &xmin,
                double &ymin, double &zmin);
+MANTID_GEOMETRY_DLL bool getTriangle(const size_t index,
+                                     const std::vector<uint16_t> &triangles,
+                                     const std::vector<Kernel::V3D> &vertices,
+                                     Kernel::V3D &vertex1, Kernel::V3D &vertex2,
+                                     Kernel::V3D &vertex3);
+MANTID_GEOMETRY_DLL double getTriangleSolidAngle(const Kernel::V3D &a,
+                                                 const Kernel::V3D &b,
+                                                 const Kernel::V3D &c,
+                                                 const Kernel::V3D &observer);
 } // namespace MeshObjectCommon
 
 } // namespace Geometry

@@ -253,14 +253,42 @@ int MeshObject2D::getName() const {
   // where this is used.
 }
 
+/**
+ * Solid angle only considers triangle facing sample. Back faces do NOT
+ * contribute.
+ *
+ * This is tantamount to defining an object that is opaque to neutrons. Note
+ * that it is still possible to define a facing surface which is obscured by
+ * another. In that case there would still be a solid angle contribution as
+ * there is no way of detecting the shadowing.
+ *
+ * @param observer
+ * @return
+ */
 double MeshObject2D::solidAngle(const Kernel::V3D &observer) const {
-  return MeshObjectCommon::solidAngle(observer, m_triangles, m_vertices);
+  double solidAngleSum(0);
+  Kernel::V3D vertex1, vertex2, vertex3;
+  for (size_t i = 0; MeshObjectCommon::getTriangle(i, m_triangles, m_vertices,
+                                                   vertex1, vertex2, vertex3);
+       ++i) {
+    double sa = MeshObjectCommon::getTriangleSolidAngle(vertex1, vertex2,
+                                                        vertex3, observer);
+    if (sa > 0) {
+      solidAngleSum += sa;
+    }
+  }
+  return solidAngleSum;
 }
 
 double MeshObject2D::solidAngle(const Kernel::V3D &observer,
                                 const Kernel::V3D &scaleFactor) const {
-  return MeshObjectCommon::solidAngle(observer, m_triangles, m_vertices,
-                                      scaleFactor);
+  std::vector<Kernel::V3D> scaledVertices;
+  scaledVertices.reserve(m_vertices.size());
+  for (const auto &vertex : m_vertices) {
+    scaledVertices.emplace_back(scaleFactor * vertex);
+  }
+  MeshObject2D meshScaled(m_triangles, scaledVertices, m_material);
+  return meshScaled.solidAngle(observer);
 }
 
 bool MeshObject2D::operator==(const MeshObject2D &other) const {

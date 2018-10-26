@@ -63,58 +63,6 @@ double getTriangleSolidAngle(const Kernel::V3D &a, const Kernel::V3D &b,
     return 0.0; // not certain this is correct
 }
 
-/*
- * Get a triangle - For iterating over triangles
- * @param index :: Index of triangle in MeshObject
- * @param triangles :: indices into vertices 3 consecutive form triangle
- * @param vertices :: Vertices to lookup
- * @param v1 :: First vertex of triangle
- * @param v2 :: Second vertex of triangle
- * @param v3 :: Third vertex of triangle
- * @returns true if the specified triangle exists
- */
-bool getTriangle(const size_t index, const std::vector<uint16_t> &triangles,
-                 const std::vector<Kernel::V3D> &vertices, Kernel::V3D &vertex1,
-                 Kernel::V3D &vertex2, Kernel::V3D &vertex3) {
-  bool triangleExists = index < triangles.size() / 3;
-  if (triangleExists) {
-    vertex1 = vertices[triangles[3 * index]];
-    vertex2 = vertices[triangles[3 * index + 1]];
-    vertex3 = vertices[triangles[3 * index + 2]];
-  }
-  return triangleExists;
-}
-
-double solidAngle(const Kernel::V3D &observer,
-                  const std::vector<uint16_t> &triangles,
-                  const std::vector<Kernel::V3D> &vertices) {
-
-  double solidAngleSum(0), solidAngleNegativeSum(0);
-  Kernel::V3D vertex1, vertex2, vertex3;
-  for (size_t i = 0;
-       getTriangle(i, triangles, vertices, vertex1, vertex2, vertex3); ++i) {
-    double sa = getTriangleSolidAngle(vertex1, vertex2, vertex3, observer);
-    if (sa > 0.0) {
-      solidAngleSum += sa;
-    } else {
-      solidAngleNegativeSum += sa;
-    }
-  }
-  return solidAngleSum - solidAngleNegativeSum;
-}
-
-double solidAngle(const Kernel::V3D &observer,
-                  const std::vector<uint16_t> &triangles,
-                  const std::vector<Kernel::V3D> &vertices,
-                  const Kernel::V3D scaleFactor) {
-  std::vector<Kernel::V3D> scaledVertices;
-  scaledVertices.reserve(vertices.size());
-  for (const auto &vertex : vertices) {
-    scaledVertices.emplace_back(scaleFactor * vertex);
-  }
-  return solidAngle(observer, triangles, scaledVertices);
-}
-
 /**
  * @brief isOnTriangle
  * @param point : point to test
@@ -337,6 +285,28 @@ void getBoundingBox(const std::vector<Kernel::V3D> &vertices,
   ymin = bb.yMin();
   zmax = bb.zMax();
   zmin = bb.zMin();
+}
+
+/**
+ * Get a triangle - For iterating over triangles
+ * @param index :: Index of triangle in MeshObject
+ * @param triangles :: indices into vertices 3 consecutive form triangle
+ * @param vertices :: Vertices to lookup
+ * @param v1 :: First vertex of triangle
+ * @param v2 :: Second vertex of triangle
+ * @param v3 :: Third vertex of triangle
+ * @returns true if the specified triangle exists
+ */
+bool getTriangle(const size_t index, const std::vector<uint16_t> &triangles,
+                 const std::vector<Kernel::V3D> &vertices, Kernel::V3D &vertex1,
+                 Kernel::V3D &vertex2, Kernel::V3D &vertex3) {
+  bool triangleExists = index < triangles.size() / 3;
+  if (triangleExists) {
+    vertex1 = vertices[triangles[3 * index]];
+    vertex2 = vertices[triangles[3 * index + 1]];
+    vertex3 = vertices[triangles[3 * index + 2]];
+  }
+  return triangleExists;
 }
 
 } // namespace MeshObjectCommon
