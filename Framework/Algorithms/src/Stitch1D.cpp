@@ -533,19 +533,18 @@ void Stitch1D::exec() {
   const double intersectionMax = intesectionXRegion.get<1>();
   double startOverlap = getStartOverlap(intersectionMin, intersectionMax);
   double endOverlap = getEndOverlap(intersectionMin, intersectionMax);
-  if (startOverlap > endOverlap) {
-    std::string message = boost::str(
-        boost::format("Stitch1D cannot have a StartOverlap > EndOverlap. "
-                      "StartOverlap: %0.9f, EndOverlap: %0.9f") %
-        startOverlap % endOverlap);
-    throw std::runtime_error(message);
-  }
-
   const bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
 
   MatrixWorkspace_sptr lhs = lhsWS->clone();
   MatrixWorkspace_sptr rhs = rhsWS->clone();
   if (lhsWS->isHistogramData()) {
+    if (startOverlap > endOverlap) {
+      std::string message = boost::str(
+          boost::format("Stitch1D cannot have a StartOverlap > EndOverlap. "
+                        "StartOverlap: %0.9f, EndOverlap: %0.9f") %
+          startOverlap % endOverlap);
+      throw std::runtime_error(message);
+    }
     MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
     const double xMin = params.front();
     const double xMax = params.back();
