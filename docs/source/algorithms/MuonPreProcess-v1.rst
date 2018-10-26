@@ -160,8 +160,7 @@ Output:
     output_workspace = MuonPreProcess(InputWorkspace=input_workspace,
                                                 DeadTimeTable=dead_times)
     print("X values are : {}".format(output_workspace[0].readX(0)))
-    print("Y values are : {}".format(list(map(lambda x: round(x, 1), output_workspace[0].readY(0)))))
-
+    print("Y values are : {}".format(output_workspace[0].readY(0).round(1)))
 
 Output:
 
