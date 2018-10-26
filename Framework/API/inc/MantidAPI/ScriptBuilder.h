@@ -31,12 +31,11 @@ namespace API {
 
 class MANTID_API_DLL ScriptBuilder {
 public:
-  ScriptBuilder(boost::shared_ptr<HistoryView> view,
-                std::string versionSpecificity = "old",
-                bool appendTimestamp = false,
-                std::vector<std::string> ignoreTheseAlgs = {},
-                std::vector<std::vector<std::string>>
-                    ignoreTheseAlgProperties = {});
+  ScriptBuilder(
+      boost::shared_ptr<HistoryView> view,
+      std::string versionSpecificity = "old", bool appendTimestamp = false,
+      std::vector<std::string> ignoreTheseAlgs = {},
+      std::vector<std::vector<std::string>> ignoreTheseAlgProperties = {});
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
   const std::string build();

@@ -135,11 +135,10 @@ private:
 
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
-  
+
   std::vector<std::vector<std::string>> m_propertiesToIgnore = {
-      {"StartLiveData", "MonitorLiveData"}
-  };
-  
+      {"StartLiveData", "MonitorLiveData"}};
+
   std::vector<std::string> m_algsToIgnore = {
       "MonitorLiveData",
       "EnggSaveGSASIIFitResultsToHDF5",
