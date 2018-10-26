@@ -26,7 +26,7 @@ Usage
 
 **Example - Using Only MuonGroupingAsymmetry on Single Period Data**
 .. testcode:: SinglePeriod
-    # Create a workspaces with four spectra
+# Create a workspaces with four spectra
     dataX = [0, 1, 2, 3, 4, 5] * 4
     dataY = [10, 20, 30, 20, 10] * 4
     ws = CreateWorkspace(dataX, dataY, NSpec=4)
