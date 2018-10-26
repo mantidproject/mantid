@@ -137,6 +137,7 @@ private:
   ApplicationWindow *m_windowPtr;
 
   std::vector<std::string> m_algsToIgnore = {
+      "StartLiveData",
       "EnggSaveGSASIIFitResultsToHDF5",
       "EnggSaveSinglePeakFitResultsToHDF5",
       "ExampleSaveAscii",
