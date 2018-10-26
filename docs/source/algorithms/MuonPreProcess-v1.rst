@@ -167,7 +167,7 @@ Output:
 .. testoutput:: ExampleDeadTime
 
     X values are : [ 0.  1.  2.  3.  4.  5.]
-    Y values are : [ 100.3, 201.2, 302.8, 201.2, 100.3]
+    Y values are : [ 100.3  201.2  302.8  201.2  100.3]
 
 .. categories::
 
