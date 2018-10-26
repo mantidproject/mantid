@@ -1052,7 +1052,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
         V3D vp3 =
             V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
         double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
-        if (sa > 0.0) 
+        if (sa > 0.0)
           sangle += sa;
       }
       return sangle;
