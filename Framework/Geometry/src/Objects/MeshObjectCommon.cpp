@@ -286,9 +286,9 @@ void getBoundingBox(const std::vector<Kernel::V3D> &vertices,
  * @param index :: Index of triangle in MeshObject
  * @param triangles :: indices into vertices 3 consecutive form triangle
  * @param vertices :: Vertices to lookup
- * @param v1 :: First vertex of triangle
- * @param v2 :: Second vertex of triangle
- * @param v3 :: Third vertex of triangle
+ * @param vertex1 :: First vertex of triangle
+ * @param vertex2 :: Second vertex of triangle
+ * @param vertex3 :: Third vertex of triangle
  * @returns true if the specified triangle exists
  */
 bool getTriangle(const size_t index, const std::vector<uint16_t> &triangles,
