@@ -186,11 +186,10 @@ void RecalculateTrajectoriesExtents::exec() {
       beamDir.normalize();
       auto gon = currentExptInfo.run().getGoniometerMatrix();
       gon.Invert();
+      g_log.warning()<<gon<<"\n";
 
       //calculate limits in Q_lab
-
-      // loop over detectors
-      for (int64_t i = 0; i < nspectra; i++) {
+      for (int64_t i = 0; i < 5/*nspectra*/; i++) {
         if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
             spectrumInfo.isMasked(i)) {
           highValues[i]=lowValues[i];
@@ -234,7 +233,7 @@ void RecalculateTrajectoriesExtents::exec() {
         }
         qSampleLow = gon * qLabLow;
         qSampleHigh = gon * qLabHigh;
-
+        g_log.warning()<<qSampleLow<< "           "<<qSampleHigh<<"   "<<qxmin<<"\n";
         // check intersection with the box
         // completely outside the box -> no weight
         if (((qSampleLow.X()<qxmin) && (qSampleHigh.X()<qxmin)) ||
@@ -247,72 +246,85 @@ void RecalculateTrajectoriesExtents::exec() {
           continue;
         }
         // either intersection or completely indide the box
-        double eps =1e-10;
-        if (fabs(qSampleHigh.X()-qSampleLow.X())>eps){
-           double kfIntersectionMin = (qxmin-qSampleLow.X())*(kfmax-kfmin)/(qSampleHigh.X()-qSampleLow.X())+kfmin;
-           double kfIntersectionMax = (qxmax-qSampleLow.X())*(kfmax-kfmin)/(qSampleHigh.X()-qSampleLow.X())+kfmin;
-           g_log.warning()<<kfIntersectionMin<<" "<<kfIntersectionMax<<" "<<lowValues[i]<<highValues[i]<<"\n";
-           return;
-           // if not diffraction, convert these values to DeltaE
-           if (!diffraction){
-             kfIntersectionMin = Ei - kfIntersectionMin * kfIntersectionMin / energyToK;
-             kfIntersectionMax = Ei - kfIntersectionMax * kfIntersectionMax / energyToK;
-           }
-           if (kfIntersectionMin < lowValues[i]){
-             lowValues[i] = kfIntersectionMin;
-           }
-           if (kfIntersectionMin > highValues[i]){
-             highValues[i] = kfIntersectionMin;
-           }
-           if (kfIntersectionMax < lowValues[i]){
-             lowValues[i] = kfIntersectionMax;
-           }
-           if (kfIntersectionMax > highValues[i]){
-             highValues[i] = kfIntersectionMax;
-           }
+        if((qxmin-qSampleLow.X())*(qxmin-qSampleHigh.X())<0){
+          double kfIntersection = (qxmin-qSampleLow.X())*(kfmax-kfmin)/(qSampleHigh.X()-qSampleLow.X())+kfmin;
+          if (!diffraction){
+            kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
+          }
+          g_log.warning()<<kfIntersection<<"\n";
+          if ((qSampleLow.X()<qxmin) && (lowValues[i] <kfIntersection)) {
+            lowValues[i]=kfIntersection;
+          }
+          if (qSampleHigh.X()<qxmin) {
+            highValues[i]=kfIntersection;
+          }
+        }/*
+        g_log.warning()<<qSampleLow<< "           "<<qSampleHigh<<"   "<<qxmax<<"\n";
+        if((qxmax-qSampleLow.X())*(qxmax-qSampleHigh.X())<0){
+          double kfIntersection = (qxmax-qSampleLow.X())*(kfmax-kfmin)/(qSampleHigh.X()-qSampleLow.X())+kfmin;
+          if (!diffraction){
+            kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
+          }
+          g_log.warning()<<kfIntersection<<"\n";
+          if (qSampleLow.X()<qxmax) {
+            lowValues[i]=kfIntersection;
+          }
+          if (qSampleHigh.X()<qxmax) {
+            highValues[i]=kfIntersection;
+          }
         }
-        if (fabs(qSampleHigh.Y()-qSampleLow.Y())>eps){
-           double kfIntersectionMin = (qymin-qSampleLow.Y())*(kfmax-kfmin)/(qSampleHigh.Y()-qSampleLow.Y())+kfmin;
-           double kfIntersectionMax = (qymax-qSampleLow.Y())*(kfmax-kfmin)/(qSampleHigh.Y()-qSampleLow.Y())+kfmin;
-           // if not diffraction, convert these values to DeltaE
-           if (!diffraction){
-             kfIntersectionMin = Ei - kfIntersectionMin * kfIntersectionMin / energyToK;
-             kfIntersectionMax = Ei - kfIntersectionMax * kfIntersectionMax / energyToK;
-           }
-           if (kfIntersectionMin < lowValues[i]){
-             lowValues[i] = kfIntersectionMin;
-           }
-           if (kfIntersectionMin > highValues[i]){
-             highValues[i] = kfIntersectionMin;
-           }
-           if (kfIntersectionMax < lowValues[i]){
-             lowValues[i] = kfIntersectionMax;
-           }
-           if (kfIntersectionMax > highValues[i]){
-             highValues[i] = kfIntersectionMax;
-           }
+
+        if((qymin-qSampleLow.Y())*(qymin-qSampleHigh.Y())<0){
+          double kfIntersection = (qymin-qSampleLow.Y())*(kfmax-kfmin)/(qSampleHigh.Y()-qSampleLow.Y())+kfmin;
+          if (!diffraction){
+            kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
+          }
+          if (qSampleLow.Y()<qymin) {
+            lowValues[i]=kfIntersection;
+          }
+          if (qSampleHigh.Y()<qymin) {
+            highValues[i]=kfIntersection;
+          }
         }
-        if (fabs(qSampleHigh.Z()-qSampleLow.Z())>eps){
-           double kfIntersectionMin = (qzmin-qSampleLow.Z())*(kfmax-kfmin)/(qSampleHigh.Z()-qSampleLow.Z())+kfmin;
-           double kfIntersectionMax = (qzmax-qSampleLow.Z())*(kfmax-kfmin)/(qSampleHigh.Z()-qSampleLow.Z())+kfmin;
-           // if not diffraction, convert these values to DeltaE
-           if (!diffraction){
-             kfIntersectionMin = Ei - kfIntersectionMin * kfIntersectionMin / energyToK;
-             kfIntersectionMax = Ei - kfIntersectionMax * kfIntersectionMax / energyToK;
-           }
-           if (kfIntersectionMin < lowValues[i]){
-             lowValues[i] = kfIntersectionMin;
-           }
-           if (kfIntersectionMin > highValues[i]){
-             highValues[i] = kfIntersectionMin;
-           }
-           if (kfIntersectionMax < lowValues[i]){
-             lowValues[i] = kfIntersectionMax;
-           }
-           if (kfIntersectionMax > highValues[i]){
-             highValues[i] = kfIntersectionMax;
-           }
+
+        if((qymax-qSampleLow.Y())*(qymax-qSampleHigh.Y())<0){
+          double kfIntersection = (qymax-qSampleLow.Y())*(kfmax-kfmin)/(qSampleHigh.Y()-qSampleLow.Y())+kfmin;
+          if (!diffraction){
+            kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
+          }
+          if (qSampleLow.Y()<qymax) {
+            lowValues[i]=kfIntersection;
+          }
+          if (qSampleHigh.Y()<qymax) {
+            highValues[i]=kfIntersection;
+          }
         }
+
+        if((qzmin-qSampleLow.Z())*(qzmin-qSampleHigh.Z())<0){
+          double kfIntersection = (qzmin-qSampleLow.Z())*(kfmax-kfmin)/(qSampleHigh.Z()-qSampleLow.Z())+kfmin;
+          if (!diffraction){
+            kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
+          }
+          if (qSampleLow.Z()<qzmin) {
+            lowValues[i]=kfIntersection;
+          }
+          if (qSampleHigh.Z()<qzmin) {
+            highValues[i]=kfIntersection;
+          }
+        }
+
+        if((qzmax-qSampleLow.Z())*(qzmax-qSampleHigh.Z())<0){
+          double kfIntersection = (qzmax-qSampleLow.Z())*(kfmax-kfmin)/(qSampleHigh.Z()-qSampleLow.Z())+kfmin;
+          if (!diffraction){
+            kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
+          }
+          if (qSampleLow.Z()<qzmax) {
+            lowValues[i]=kfIntersection;
+          }
+          if (qSampleHigh.Z()<qzmax) {
+            highValues[i]=kfIntersection;
+          }
+        }*/
       }//end loop over spectra
 
     }
