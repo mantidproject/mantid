@@ -110,6 +110,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
 /** Execute the algorithm.
  */
 void MonitorLiveData::exec() {
+  auto &ads = AnalysisDataService::Instance();
   double UpdateEvery = getProperty("UpdateEvery");
   if (UpdateEvery <= 0)
     throw std::runtime_error("UpdateEvery must be > 0");
@@ -138,9 +139,10 @@ void MonitorLiveData::exec() {
 
   // Grab a copy of the WorkspaceHistory StartLiveData object from original
   // workspace
-  auto originalHistory = AnalysisDataService::Instance()
-                             .retrieveWS<Workspace>(OutputWorkspace)
-                             ->getHistory();
+  auto outputWorkspaceExists = ads.doesExist(OutputWorkspace);
+  Mantid::API::WorkspaceHistory *originalHistory;
+  if (outputWorkspaceExists)
+    originalHistory = &ads.retrieveWS<Workspace>(OutputWorkspace)->history();
 
   // Keep going until you get cancelled
   while (true) {
@@ -180,10 +182,11 @@ void MonitorLiveData::exec() {
       loadAlg->executeAsChildAlg();
 
       // Copy StartLiveData to new workspace
-      AnalysisDataService::Instance()
-          .retrieveWS<Workspace>(OutputWorkspace)
-          ->history()
-          .addHistory(originalHistory);
+      if (outputWorkspaceExists)
+        AnalysisDataService::Instance()
+            .retrieveWS<Workspace>(OutputWorkspace)
+            ->history()
+            .addHistory(*originalHistory);
 
       NextAccumulationMethod = this->getPropertyValue("AccumulationMethod");
 
