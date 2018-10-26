@@ -142,7 +142,7 @@ void MonitorLiveData::exec() {
   auto outputWorkspaceExists = ads.doesExist(OutputWorkspace);
   std::unique_ptr<Mantid::API::WorkspaceHistory> originalHistory =
       std::make_unique<Mantid::API::WorkspaceHistory>();
-      
+
   if (outputWorkspaceExists)
     originalHistory = std::make_unique<Mantid::API::WorkspaceHistory>(
         ads.retrieveWS<Workspace>(OutputWorkspace)->history());
