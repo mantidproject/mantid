@@ -1042,7 +1042,7 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
     } else { // Compute a generic shape that has been triangulated
       const auto &vertices = this->getTriangleVertices();
       const auto &faces = this->getTriangleFaces();
-      double sangle(0.0), sneg(0.0);
+      double sangle(0.0);
       for (size_t i = 0; i < nTri; i++) {
         int p1 = faces[i * 3], p2 = faces[i * 3 + 1], p3 = faces[i * 3 + 2];
         V3D vp1 =
@@ -1052,13 +1052,10 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
         V3D vp3 =
             V3D(vertices[3 * p3], vertices[3 * p3 + 1], vertices[3 * p3 + 2]);
         double sa = getTriangleSolidAngle(vp1, vp2, vp3, observer);
-        if (sa > 0.0) {
+        if (sa > 0.0) 
           sangle += sa;
-        } else {
-          sneg += sa;
-        }
       }
-      return 0.5 * (sangle - sneg);
+      return sangle;
     }
   }
 }
