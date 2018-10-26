@@ -91,7 +91,7 @@ Output:
         ws.getSpectrum(i).setDetectorID(i + 1)
 
     # Put the workspace inside a WorkspaceGroup
-    input_workspace = api.WorkspaceGroup()
+    input_workspace = WorkspaceGroup()
     input_workspace.addWorkspace(ws)
 
     output_workspace = MuonGroupingCounts(InputWorkspace=input_workspace,
@@ -126,7 +126,7 @@ Output:
         ws2.getSpectrum(i).setDetectorID(i + 1)
 
     # Create multi period data
-    multi_period_data = api.WorkspaceGroup()
+    multi_period_data = WorkspaceGroup()
     multi_period_data.addWorkspace(ws1)
     multi_period_data.addWorkspace(ws2)
 
