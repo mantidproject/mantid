@@ -106,6 +106,7 @@ DECLARE_ALGORITHM(MuonGroupingAsymmetry)
 void MuonGroupingAsymmetry::init() {
 
   std::string emptyString("");
+  std::vector<int> defaultGrouping = {1};
 
   declareProperty(
       Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
@@ -114,7 +115,7 @@ void MuonGroupingAsymmetry::init() {
       "Input workspace containing data from detectors which are to "
       "be grouped.");
 
-  declareProperty(Mantid::Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", emptyString, Direction::Output),
                   "Output workspace which will hold the results of the group "
                   "asymmetry calculation.");
@@ -140,7 +141,8 @@ void MuonGroupingAsymmetry::init() {
                   Direction::Input);
 
   declareProperty(
-      make_unique<ArrayProperty<int>>("SummedPeriods", Direction::Input),
+      make_unique<ArrayProperty<int>>("SummedPeriods", defaultGrouping,
+                      IValidator_sptr(new NullValidator), Direction::Input),
       "A list of periods to sum in multiperiod data.");
   declareProperty(
       make_unique<ArrayProperty<int>>("SubtractedPeriods", Direction::Input),
