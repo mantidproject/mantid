@@ -186,10 +186,9 @@ void RecalculateTrajectoriesExtents::exec() {
       beamDir.normalize();
       auto gon = currentExptInfo.run().getGoniometerMatrix();
       gon.Invert();
-      g_log.warning()<<gon<<"\n";
 
       //calculate limits in Q_lab
-      for (int64_t i = 0; i < 5/*nspectra*/; i++) {
+      for (int64_t i = 0; i < nspectra; i++) {
         if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
             spectrumInfo.isMasked(i)) {
           highValues[i]=lowValues[i];
@@ -233,7 +232,6 @@ void RecalculateTrajectoriesExtents::exec() {
         }
         qSampleLow = gon * qLabLow;
         qSampleHigh = gon * qLabHigh;
-        g_log.warning()<<qSampleLow<< "           "<<qSampleHigh<<"   "<<qxmin<<"\n";
         // check intersection with the box
         // completely outside the box -> no weight
         if (((qSampleLow.X()<qxmin) && (qSampleHigh.X()<qxmin)) ||
@@ -251,25 +249,23 @@ void RecalculateTrajectoriesExtents::exec() {
           if (!diffraction){
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
-          g_log.warning()<<kfIntersection<<"\n";
-          if ((qSampleLow.X()<qxmin) && (lowValues[i] <kfIntersection)) {
+          if ((qSampleLow.X()<qxmin) && (lowValues[i] < kfIntersection)) {
             lowValues[i]=kfIntersection;
           }
-          if (qSampleHigh.X()<qxmin) {
+          if ((qSampleHigh.X()<qxmin) && (highValues[i] > kfIntersection)) {
             highValues[i]=kfIntersection;
           }
-        }/*
-        g_log.warning()<<qSampleLow<< "           "<<qSampleHigh<<"   "<<qxmax<<"\n";
+        }
+
         if((qxmax-qSampleLow.X())*(qxmax-qSampleHigh.X())<0){
           double kfIntersection = (qxmax-qSampleLow.X())*(kfmax-kfmin)/(qSampleHigh.X()-qSampleLow.X())+kfmin;
           if (!diffraction){
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
-          g_log.warning()<<kfIntersection<<"\n";
-          if (qSampleLow.X()<qxmax) {
+          if ((qSampleLow.X()>qxmax) && (lowValues[i] < kfIntersection)) {
             lowValues[i]=kfIntersection;
           }
-          if (qSampleHigh.X()<qxmax) {
+          if ((qSampleHigh.X()>qxmax) && (highValues[i] > kfIntersection)) {
             highValues[i]=kfIntersection;
           }
         }
@@ -279,10 +275,10 @@ void RecalculateTrajectoriesExtents::exec() {
           if (!diffraction){
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
-          if (qSampleLow.Y()<qymin) {
+          if ((qSampleLow.Y()<qymin) && (lowValues[i] < kfIntersection)) {
             lowValues[i]=kfIntersection;
           }
-          if (qSampleHigh.Y()<qymin) {
+          if ((qSampleHigh.Y()<qymin) && (highValues[i] > kfIntersection)) {
             highValues[i]=kfIntersection;
           }
         }
@@ -292,10 +288,10 @@ void RecalculateTrajectoriesExtents::exec() {
           if (!diffraction){
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
-          if (qSampleLow.Y()<qymax) {
+          if ((qSampleLow.Y()>qymax) && (lowValues[i] < kfIntersection)) {
             lowValues[i]=kfIntersection;
           }
-          if (qSampleHigh.Y()<qymax) {
+          if ((qSampleHigh.Y()>qymax) && (highValues[i] > kfIntersection)) {
             highValues[i]=kfIntersection;
           }
         }
@@ -305,10 +301,10 @@ void RecalculateTrajectoriesExtents::exec() {
           if (!diffraction){
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
-          if (qSampleLow.Z()<qzmin) {
+          if ((qSampleLow.Z()<qzmin) && (lowValues[i] < kfIntersection)) {
             lowValues[i]=kfIntersection;
           }
-          if (qSampleHigh.Z()<qzmin) {
+          if ((qSampleHigh.Z()<qzmin) && (highValues[i] > kfIntersection)) {
             highValues[i]=kfIntersection;
           }
         }
@@ -318,13 +314,13 @@ void RecalculateTrajectoriesExtents::exec() {
           if (!diffraction){
             kfIntersection = Ei - kfIntersection * kfIntersection / energyToK;
           }
-          if (qSampleLow.Z()<qzmax) {
+          if ((qSampleLow.Z()>qzmax) && (lowValues[i] < kfIntersection)) {
             lowValues[i]=kfIntersection;
           }
-          if (qSampleHigh.Z()<qzmax) {
+          if ((qSampleHigh.Z()>qzmax) && (highValues[i] > kfIntersection)) {
             highValues[i]=kfIntersection;
           }
-        }*/
+        }
       }//end loop over spectra
 
     }
@@ -333,7 +329,6 @@ void RecalculateTrajectoriesExtents::exec() {
     currentExptInfo.mutableRun().addProperty("MDNorm_low",lowValues,true);
     currentExptInfo.mutableRun().addProperty("MDNorm_high",highValues,true);
   }
-
 
   setProperty("OutputWorkspace", outWS);
 }
