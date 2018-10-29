@@ -199,19 +199,20 @@ install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin R
 # On Windows we don't use the setuptools install executable at the moment, because it is
 # generated with a hard coded path to the build Python, that fails to run on
 # other machines, or if the build Python is moved. Instead we have a Python script to
-# run the workbench ourselves and a Batch and PowerShell wrappers to run it with the
+# run the workbench ourselves and a PowerShell wrapper to run it with the
 # correct Python from Mantid's installation directory
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_workbench.bat DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_workbench.pyw DESTINATION bin )
 
 if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
-  find_program(POWERSHELL_AVAILABLE NAMES "powershell")
+  find_program(_powershell_available NAMES "powershell")
   # Name of the workbench executable without any extensions
   set(_workbench_base_name launch_workbench)
   # Installs the PowerShell run script in the bin directory
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/${_workbench_base_name}.ps1 DESTINATION bin )
 
-  if ( POWERSHELL_AVAILABLE )
+  if ( NOT _powershell_available )
+    message(FATAL_ERROR "PowerShell was not found. The Workbench executable cannot be generated. Please check that PowerShell is available in your PATH variable.")
+  else()
     message(STATUS "Found PowerShell: ${POWERSHELL_AVAILABLE}")
     # Add the extensions for the executable after it is generated in the build directory
     set(_workbench_executable_install_name ${_workbench_base_name}.exe.install)
@@ -229,8 +230,6 @@ if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
     set (_workbench_executable_full_name ${_workbench_base_name}.exe)
     message(STATUS "Generated the Workbench executable for installation: ${_workbench_executable_install_name}")
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} DESTINATION bin RENAME ${_workbench_executable_full_name})
-  else ()
-    message(STATUS "PowerShell was not found. Not generating the Workbench executable.")
   endif ()
 endif ()
 
@@ -278,8 +277,9 @@ set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
   RMDir \\\"$INSTDIR\\\\docs\\\"
 ")
 
-# if the workbench executable was generated then add the shortcut installation and deletion everywhere
-if (_workbench_executable_full_name)
+# if the workbench is being packaged we want to add the shortcut commands for the installation
+# this is done via appending the relevant commands to the already declared variables
+if ( PACKAGE_WORKBENCH )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico DESTINATION bin )
   set ( MANTIDWORKBENCH_LINK_NAME "MantidWorkbench${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
   message(STATUS "Adding icons for Workbench as EXE was generated.")
