@@ -63,12 +63,6 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     DEPENDS ${_outputs}
   )
 
-  # Specify the installation directory based on OS
-  if ( WIN32 )
-    set ( _package_install_destination bin)
-  else ()
-    set ( _package_install_destination .)
-  endif ()
 
   if ( ${PACKAGE_WORKBENCH} )
     # setuptools by default wants to build into a directory called 'build' relative the to the working directory. We have overridden
@@ -76,6 +70,13 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     # --install-scripts=bin --install-lib=lib removes any of the platform/distribution specific install directories so we can have a flat
     # structure
     install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})")
+
+    # Specify the installation directory based on OS
+    if ( WIN32 )
+      set ( _package_install_destination bin )
+    else ()
+      set ( _package_install_destination . )
+    endif ()
     # Registers the "installed" components with CMake so it will carry them over
     # The / after lib tells cmake to copy over the _CONTENTS_ of the lib directory
     # placing the installed files inside the DESTINATION folder. This copies the
