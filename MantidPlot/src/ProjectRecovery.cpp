@@ -58,10 +58,6 @@ boost::optional<T> getConfigValue(const std::string &key) {
   return Mantid::Kernel::ConfigService::Instance().getValue<T>(key);
 }
 
-boost::optional<bool> getConfigBool(const std::string &key) {
-  return Mantid::Kernel::ConfigService::Instance().getValue<bool>(key);
-}
-
 /// Returns a string to the folder it should output to
 std::string getRecoveryFolderOutput() {
   static std::string appData =
@@ -248,14 +244,9 @@ Poco::File addLockFile(const Poco::Path &lockFilePath) {
 
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
 
-// Config keys
-const std::string SAVING_ENABLED_CONFIG_KEY = "projectRecovery.enabled";
 const std::string SAVING_TIME_KEY = "projectRecovery.secondsBetween";
 const std::string NO_OF_CHECKPOINTS_KEY = "projectRecovery.numberOfCheckpoints";
 
-// Config values
-bool SAVING_ENABLED =
-    getConfigBool(SAVING_ENABLED_CONFIG_KEY).get_value_or(false);
 const int SAVING_TIME =
     getConfigValue<int>(SAVING_TIME_KEY).get_value_or(60); // Seconds
 const int NO_OF_CHECKPOINTS =
@@ -277,7 +268,6 @@ namespace MantidQt {
  */
 ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
     : m_backgroundSavingThread(), m_stopBackgroundThread(true),
-      m_configKeyObserver(*this, &ProjectRecovery::configKeyChanged),
       m_windowPtr(windowHandle), m_recoveryGui(nullptr) {}
 
 /// Destructor which also stops any background threads currently in progress
@@ -344,22 +334,6 @@ std::thread ProjectRecovery::createBackgroundThread() {
   // Using a lambda helps the compiler deduce the this pointer
   // otherwise the resolution is ambiguous
   return std::thread([this] { projectSavingThreadWrapper(); });
-}
-
-/// Callback for POCO when a config change had fired for the enabled key
-void ProjectRecovery::configKeyChanged(
-    Mantid::Kernel::ConfigValChangeNotification_ptr notif) {
-  if (notif->key() != (SAVING_ENABLED_CONFIG_KEY)) {
-    return;
-  }
-
-  if (notif->curValue() == "True") {
-    SAVING_ENABLED = true;
-    startProjectSaving();
-  } else {
-    SAVING_ENABLED = false;
-    stopProjectSaving();
-  }
 }
 
 void ProjectRecovery::compileRecoveryScript(const Poco::Path &inputFolder,
@@ -441,10 +415,6 @@ void ProjectRecovery::startProjectSaving() {
   // Close the existing thread first
   stopProjectSaving();
 
-  if (!SAVING_ENABLED) {
-    return;
-  }
-
   // Spin up a new thread
   {
     std::lock_guard<std::mutex> lock(m_notifierMutex);
@@ -457,6 +427,7 @@ void ProjectRecovery::startProjectSaving() {
 /// Stops any existing background threads which are running
 void ProjectRecovery::stopProjectSaving() {
   {
+
     std::lock_guard<std::mutex> lock(m_notifierMutex);
     m_stopBackgroundThread = true;
     m_threadNotifier.notify_all();

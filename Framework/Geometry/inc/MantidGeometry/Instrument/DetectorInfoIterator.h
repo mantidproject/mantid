@@ -7,8 +7,8 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 #define MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
-
 #include <boost/iterator/iterator_facade.hpp>
 
 using Mantid::Geometry::DetectorInfoItem;
@@ -26,14 +26,14 @@ iterator.
 @author Bhuvan Bezawada, STFC
 @date 2018
 */
-
+template <typename T>
 class MANTID_GEOMETRY_DLL DetectorInfoIterator
-    : public boost::iterator_facade<DetectorInfoIterator,
-                                    const DetectorInfoItem &,
+    : public boost::iterator_facade<DetectorInfoIterator<T>,
+                                    DetectorInfoItem<T> &,
                                     boost::random_access_traversal_tag> {
 
 public:
-  DetectorInfoIterator(const DetectorInfo &detectorInfo, const size_t index)
+  DetectorInfoIterator(T &detectorInfo, const size_t index)
       : m_item(detectorInfo, index) {}
 
 private:
@@ -69,18 +69,18 @@ private:
 
   void setIndex(const size_t index) { m_item.m_index = index; }
 
-  bool equal(const DetectorInfoIterator &other) const {
+  bool equal(const DetectorInfoIterator<T> &other) const {
     return getIndex() == other.getIndex();
   }
 
-  const DetectorInfoItem &dereference() const { return m_item; }
+  DetectorInfoItem<T> &dereference() const { return m_item; }
 
-  uint64_t distance_to(const DetectorInfoIterator &other) const {
+  uint64_t distance_to(const DetectorInfoIterator<T> &other) const {
     return static_cast<uint64_t>(other.getIndex()) -
            static_cast<uint64_t>(getIndex());
   }
 
-  DetectorInfoItem m_item;
+  mutable DetectorInfoItem<T> m_item;
 };
 
 } // namespace Geometry
