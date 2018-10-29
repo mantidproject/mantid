@@ -41,11 +41,13 @@ CustomInstallLib = patch_setuptools_command('install_lib')
         set ( _executable_name ${pkg_name}.exe )
         set ( _startup_script_full_name ${pkg_name}-script.pyw )
         set ( _startup_script ${_egg_link_dir}/${_startup_script_full_name} )
+        set ( _package_install_destination bin)
     else ()
         set ( _startup_script_full_name )
         set ( _startup_script )
         set ( _executable_name ${pkg_name} )
-      endif ()
+        set ( _package_install_destination .)
+        endif ()
       set ( _startup_exe ${_egg_link_dir}/${_executable_name} )
     endif ()
 
@@ -75,7 +77,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
     # placing the installed files inside the DESTINATION folder. This copies the
     # installed Python package inside the bin directory of Mantid's installation
     install(DIRECTORY ${_setup_py_build_root}/install/lib/
-            DESTINATION bin
+            DESTINATION ${_package_install_destination}
             PATTERN "test" EXCLUDE )
 
     # install the generated executable - only tested with "workbench"
