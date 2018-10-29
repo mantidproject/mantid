@@ -51,7 +51,7 @@ private:
   const std::string buildAlgorithmString(const AlgorithmHistory &algHistory);
   const std::string
   buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory,
-                      const std::string &name);
+                      const std::string &algName);
   void createStringForAlg(
       std::ostringstream &os,
       boost::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory);

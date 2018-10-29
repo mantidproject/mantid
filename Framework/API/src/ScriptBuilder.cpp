@@ -249,18 +249,20 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
  * Build the script output for a single property
  *
  * @param propHistory :: reference to a property history object
+ * @param algName :: reference to the algorithm that the property is from's name
  * @returns std::string for this property
  */
 const std::string ScriptBuilder::buildPropertyString(
     const Mantid::Kernel::PropertyHistory &propHistory,
-    const std::string &name) {
+    const std::string &algName) {
   using Mantid::Kernel::Direction;
 
   // If the property is to be ignored then return with an empty string
-  if (std::find_if(m_propertiesToIgnore.begin(), m_propertiesToIgnore.end(),
-                   [&propHistory, name](std::vector<std::string> &c) -> bool {
-                     return name == c[0] && propHistory.name() == c[1];
-                   }) != m_propertiesToIgnore.end()) {
+  if (std::find_if(
+          m_propertiesToIgnore.begin(), m_propertiesToIgnore.end(),
+          [&propHistory, algName](std::vector<std::string> &c) -> bool {
+            return algName == c[0] && propHistory.name() == c[1];
+          }) != m_propertiesToIgnore.end()) {
     return "";
   }
 
