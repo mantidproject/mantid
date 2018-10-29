@@ -274,8 +274,11 @@ const std::string ScriptBuilder::buildPropertyString(
     if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(),
              propHistory.type()) != nonWorkspaceTypes.end() &&
         propHistory.direction() == Direction::Output) {
-      g_log.debug() << "Ignoring property " << propHistory.name() << " of type "
-                    << propHistory.type() << '\n';
+      // If algs are to be ignored (Common use case is project recovery) ignore
+      if (m_algsToIgnore.size() == 0) {
+        g_log.debug() << "Ignoring property " << propHistory.name()
+                      << " of type " << propHistory.type() << '\n';
+      }
       // Handle numerical properties
     } else if (propHistory.type() == "number") {
       prop = propHistory.name() + "=" + propHistory.value();

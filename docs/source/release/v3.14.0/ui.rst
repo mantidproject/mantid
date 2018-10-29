@@ -33,6 +33,7 @@ Changes
 - MantidPlot no longer checks for the existence of files in the "Recent Files" menu. Fixes case where files on slow mounted network drives can cause a lag on MantidPlot startup.
 - Workspaces now save locally as a number of how many workspaces have already been saved instead of workspace names
 - Project Recovery will now attempt to recover multiple instances of mantid that are ran at the same time.
+- Project Recovery will now output less unhelpful logging information into the results log
 
 Bugfixes
 ########
@@ -40,6 +41,7 @@ Bugfixes
 - Project Recovery will actually recover fully cases where multiple workspaces were passed as a list to an algorithm (Fixes a known bug with GroupWorkspaces as well)
 - Project Recovery will now run normally when you select no or the recovery fails when recovering from a ungraceful exit.
 - When autosaving or saving a recovery checkpoint with the Instrument View open the results log would be filled with excess logging and no longer does this.
+- Fixed an issue where Project Recovery would start regardless of the config options
 - Project recovery will now successfully recover live data, it will however be unable to recover any data that was up at the time, but will start the live data streams again from scratch.
 
 MantidPlot
