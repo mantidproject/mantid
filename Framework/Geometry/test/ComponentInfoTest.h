@@ -273,30 +273,6 @@ public:
                      Mantid::Kernel::Exception::NullPointerException &);
   }
 
-  // Test adapted from ObjComponentTest
-  void test_solidAngle() {
-
-    auto position = Eigen::Vector3d{10, 0, 0};
-    auto rotation = Eigen::Quaterniond(
-        Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
-    auto internalInfo = makeSingleBeamlineComponentInfo(position, rotation);
-    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
-
-    auto componentIds =
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-            std::vector<Mantid::Geometry::ComponentID>{&comp1});
-
-    auto shapes = boost::make_shared<
-        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(createCappedCylinder());
-
-    ComponentInfo info(std::move(internalInfo), componentIds,
-                       makeComponentIDMap(componentIds), shapes);
-
-    double satol = 2e-2; // tolerance for solid angle
-    TS_ASSERT_DELTA(info.solidAngle(0, V3D(10, 1.7, 0)), 1.840302, satol);
-  }
-
   void test_boundingBox_single_component() {
 
     const double radius = 2;
