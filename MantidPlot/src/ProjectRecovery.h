@@ -8,6 +8,7 @@
 #define PROJECT_RECOVERY_H_
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/Workspace.h"
 
 #include <Poco/NObserver.h>
 
@@ -113,6 +114,10 @@ private:
 
   // Return true if the folder at the end of the path is older than a month.
   bool olderThanAGivenTime(const Poco::Path &path, int64_t elapsedTime);
+
+  // Remove Empty WorkspaceGroups from the ADS and passed vector
+  void removeEmptyGroupsFromADS(
+      std::vector<boost::shared_ptr<Mantid::API::Workspace>> &wsHandles);
 
   /// Background thread which runs the saving body
   std::thread m_backgroundSavingThread;

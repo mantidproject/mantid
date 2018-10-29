@@ -13,8 +13,10 @@
 #include "ScriptingWindow.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -630,6 +632,8 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   std::vector<boost::shared_ptr<Mantid::API::Workspace>> wsHandles =
       ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
 
+  removeEmptyGroupsFromADS(wsHandles);
+
   if (wsHandles.empty()) {
     return;
   }
@@ -658,6 +662,21 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->setProperty("IgnoreTheseAlgs", m_algsToIgnore);
 
     alg->execute();
+  }
+}
+
+void ProjectRecovery::removeEmptyGroupsFromADS(
+    std::vector<boost::shared_ptr<Mantid::API::Workspace>> &wsHandles) {
+  for (auto i = 0u; i < wsHandles.size(); ++i) {
+    auto groupWS =
+        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wsHandles[i]);
+    if (groupWS && groupWS->isEmpty()) {
+      // Remove from ADS and from wsHandles
+      g_log.warning("Empty group was present when recovery ran so was removed");
+      Mantid::API::AnalysisDataService::Instance().remove(
+          wsHandles[i]->getName());
+      wsHandles.erase(wsHandles.begin() + i);
+    }
   }
 }
 
