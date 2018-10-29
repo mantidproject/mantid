@@ -44,7 +44,10 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         presenter.action_copy_spectrum_values(mock_table, mock_read)
 
+        mock_table.selectionModel.assert_called_once_with()
+        mock_table.mock_selection_model.hasSelection.assert_called_once_with()
         view.copy_to_clipboard.assert_called_once_with(expected_string)
+        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
     def test_action_copy_spectrum_values_no_selection(self):
         ws = MockWorkspace()
@@ -57,8 +60,11 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         presenter.action_copy_spectrum_values(mock_table, None)
 
+        mock_table.selectionModel.assert_called_once_with()
+        mock_table.mock_selection_model.hasSelection.assert_called_once_with()
         # the action should never look for rows if there is no selection
         self.assertEqual(0, mock_table.mock_selection_model.selectedRows.call_count)
+        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
     def test_action_copy_bin_values(self):
         ws = MockWorkspace()
@@ -77,10 +83,27 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         presenter.action_copy_bin_values(mock_table, mock_read)
 
+        mock_table.selectionModel.assert_called_once_with()
         view.copy_to_clipboard.assert_called_once_with(expected_string)
+        mock_table.mock_selection_model.hasSelection.assert_called_once_with()
+        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
     def test_action_copy_bin_values_no_selection(self):
-        self.skipTest("Not Implemented")
+        ws = MockWorkspace()
+        view = MockMatrixWorkspaceDisplayView()
+        presenter = MatrixWorkspaceDisplay(ws, view=view)
+
+        mock_table = MockQTableView()
+        mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
+        mock_table.mock_selection_model.selectedColumns = Mock()
+
+        presenter.action_copy_bin_values(mock_table, None)
+
+        mock_table.selectionModel.assert_called_once_with()
+        mock_table.mock_selection_model.hasSelection.assert_called_once_with()
+        # the action should never look for rows if there is no selection
+        self.assertEqual(0, mock_table.mock_selection_model.selectedColumns.call_count)
+        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
     def test_action_copy_cell(self):
         ws = MockWorkspace()
@@ -94,7 +117,25 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         ws.getNumberHistograms = Mock(return_value=3)
         presenter.action_copy_cell(mock_table)
 
+        mock_table.selectionModel.assert_called_once_with()
         view.copy_to_clipboard.assert_called_once_with(MockQModelIndexSibling.TEST_SIBLING_DATA)
+        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
+
+    def test_action_copy_cell_no_selection(self):
+        ws = MockWorkspace()
+        view = MockMatrixWorkspaceDisplayView()
+        presenter = MatrixWorkspaceDisplay(ws, view=view)
+        mock_table = MockQTableView()
+
+        # two columns are selected at different positions
+        mock_table.mock_selection_model.currentIndex = Mock(return_value=MockQModelIndex(0, 2))
+        # change the mock ws to have 3 histograms
+        ws.getNumberHistograms = Mock(return_value=3)
+        presenter.action_copy_cell(mock_table)
+
+        mock_table.selectionModel.assert_called_once_with()
+        view.copy_to_clipboard.assert_called_once_with(MockQModelIndexSibling.TEST_SIBLING_DATA)
+        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
 
 if __name__ == '__main__':

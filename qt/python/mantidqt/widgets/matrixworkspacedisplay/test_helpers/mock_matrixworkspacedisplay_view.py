@@ -48,3 +48,4 @@ class MockMatrixWorkspaceDisplayView:
         self.table_e = MockQTableView()
         self.set_model = Mock()
         self.copy_to_clipboard = Mock()
+        self.show_mouse_toast = Mock()

@@ -14,6 +14,9 @@ from .view import MatrixWorkspaceDisplayView
 
 
 class MatrixWorkspaceDisplay(object):
+    NO_SELECTION_MESSAGE = "No selection to Copy"
+    COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
+
     def __init__(self, ws, parent=None, model=None, view=None):
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
@@ -39,7 +42,7 @@ class MatrixWorkspaceDisplay(object):
         """
         selection_model = table.selectionModel()
         if not selection_model.hasSelection():
-            # TODO Consider displaying a tooltip that says "No Selection" or something
+            self.show_no_selection_to_copy_toast()
             return
 
         selected_rows = selection_model.selectedRows()  # type: list
@@ -52,11 +55,18 @@ class MatrixWorkspaceDisplay(object):
             row_data.append(data)
 
         self.view.copy_to_clipboard("\n".join(row_data))
+        self.show_successful_copy_toast()
+
+    def show_no_selection_to_copy_toast(self):
+        self.view.show_mouse_toast(self.NO_SELECTION_MESSAGE)
+
+    def show_successful_copy_toast(self):
+        self.view.show_mouse_toast(self.COPY_SUCCESSFUL_MESSAGE)
 
     def action_copy_bin_values(self, table, ws_read, *args):
         selection_model = table.selectionModel()
         if not selection_model.hasSelection():
-            # TODO Consider displaying a tooltip that says "No Selection" or something
+            self.show_no_selection_to_copy_toast()
             return
         selected_columns = selection_model.selectedColumns()  # type: list
 
@@ -75,8 +85,8 @@ class MatrixWorkspaceDisplay(object):
 
         # Finally all rows are joined together with a new line at the end of each row
         final_string = "\n".join(all_string_rows)
-        # TODO Consider displaying a tooltip that says "Copy Successful" or something
         self.view.copy_to_clipboard(final_string)
+        self.show_successful_copy_toast()
 
     def action_copy_cell(self, table, *args):
         """
@@ -85,13 +95,19 @@ class MatrixWorkspaceDisplay(object):
         :param args: Arguments passed by Qt. Not used
         :return:
         """
-        index = table.selectionModel().currentIndex()
+        model = table.selectionModel()
+        if not model.hasSelection():
+            self.show_no_selection_to_copy_toast()
+            return
+
+        index = model.currentIndex()
         data = index.sibling(index.row(), index.column()).data()
         self.view.copy_to_clipboard(data)
-
-    @staticmethod
-    def action_view_detectors_table(table, *args):
-        print("I am in actionViewDetectorsTable")
-        index = table.selectionModel().currentIndex()
-        print("Currently selected row:", index.row())
-        print("Currently selected col:", index.column())
+        self.show_successful_copy_toast()
+    #
+    # @staticmethod
+    # def action_view_detectors_table(table, *args):
+    #     print("I am in actionViewDetectorsTable")
+    #     index = table.selectionModel().currentIndex()
+    #     print("Currently selected row:", index.row())
+    #     print("Currently selected col:", index.column())
