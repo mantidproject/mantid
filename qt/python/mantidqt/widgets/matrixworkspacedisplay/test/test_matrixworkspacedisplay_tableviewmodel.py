@@ -18,7 +18,7 @@ from qtpy.QtCore import Qt
 
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModel, \
     MatrixWorkspaceTableViewModelType
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.test_matrixworkspacedisplay_tableviewmodel_common import \
+from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import \
     MockQModelIndex, MockWorkspace, setup_common_for_test_data, AXIS_INDEX_FOR_VERTICAL, MockMantidAxis, MockSpectrum, \
     MockMantidSymbol, AXIS_INDEX_FOR_HORIZONTAL, MockMantidUnit
 

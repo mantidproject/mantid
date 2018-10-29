@@ -9,88 +9,81 @@
 #
 from __future__ import (absolute_import, division, print_function)
 
-import matplotlib
-matplotlib.use('Agg') # noqa: E402
-
-from mantidqt.widgets.samplelogs.model import SampleLogsModel
-from mantidqt.widgets.samplelogs.presenter import SampleLogs
-from mantidqt.widgets.samplelogs.view import SampleLogsView
-
 import unittest
-try:
-    from unittest import mock
-except ImportError:
-    import mock
+
+from mock import Mock
+
+from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
+from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockWorkspace, \
+    MockQModelIndex, MockQModelIndexSibling
+from mantidqt.widgets.matrixworkspacedisplay.test_helpers.mock_matrixworkspacedisplay_view import \
+    MockMatrixWorkspaceDisplayView, MockQTableView
 
 
-class SampleLogsTest(unittest.TestCase):
+class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
 
-    def setUp(self):
-        self.view = mock.Mock(spec=SampleLogsView)
-        self.view.get_row_log_name =  mock.Mock(return_value="Speed5")
-        self.view.get_selected_row_indexes =  mock.Mock(return_value=[5])
-        self.view.get_exp = mock.Mock(return_value=1)
+    def test_setup_table(self):
+        ws = MockWorkspace()
+        view = MockMatrixWorkspaceDisplayView()
+        presenter = MatrixWorkspaceDisplay(ws, view=view)
+        self.assertEqual(3, view.set_context_menu_actions.call_count)
+        self.assertEqual(1, view.set_model.call_count)
 
-        self.model = mock.Mock(spec=SampleLogsModel)
-        self.model.get_ws = mock.Mock(return_value='ws')
-        self.model.is_log_plottable = mock.Mock(return_value=True)
-        self.model.get_statistics = mock.Mock(return_value=[1,2,3,4])
-        self.model.get_exp = mock.Mock(return_value=0)
+    def test_action_copy_spectrum_values(self):
+        ws = MockWorkspace()
+        view = MockMatrixWorkspaceDisplayView()
+        presenter = MatrixWorkspaceDisplay(ws, view=view)
 
-    def test_sampleLogs(self):
+        mock_table = MockQTableView()
 
-        presenter = SampleLogs(None, model=self.model, view=self.view)
+        # two rows are selected in different positions
+        mock_indexes = [MockQModelIndex(0, 1), MockQModelIndex(3, 1)]
+        mock_table.mock_selection_model.selectedRows = Mock(return_value=mock_indexes)
+        mock_read = Mock(return_value=[43, 99])
+        expected_string = "43 99\n43 99"
 
-        # setup calls
-        self.assertEqual(self.view.set_model.call_count, 1)
-        self.assertEqual(self.model.getItemModel.call_count, 1)
+        presenter.action_copy_spectrum_values(mock_table, mock_read)
 
-        # plot_logs
-        presenter.plot_logs()
-        self.model.is_log_plottable.assert_called_once_with("Speed5")
-        self.assertEqual(self.model.get_ws.call_count, 1)
-        self.view.plot_selected_logs.assert_called_once_with('ws', 0, [5])
+        view.copy_to_clipboard.assert_called_once_with(expected_string)
 
-        # update_stats
-        presenter.update_stats()
-        self.assertEqual(self.model.get_statistics.call_count, 1)
-        self.view.get_row_log_name.assert_called_with(5)
-        self.view.set_statistics.assert_called_once_with([1,2,3,4])
-        self.assertEqual(self.view.clear_statistics.call_count, 0)
+    def test_action_copy_spectrum_values_no_selection(self):
+        self.skipTest("Not implemented")
 
-        self.view.reset_mock()
-        self.view.get_selected_row_indexes =  mock.Mock(return_value=[2,5])
-        presenter.update_stats()
-        self.assertEqual(self.view.set_statistics.call_count, 0)
-        self.assertEqual(self.view.clear_statistics.call_count, 1)
+    def test_action_copy_bin_values(self):
+        ws = MockWorkspace()
+        view = MockMatrixWorkspaceDisplayView()
+        presenter = MatrixWorkspaceDisplay(ws, view=view)
+        mock_table = MockQTableView()
 
-        # changeExpInfo
-        self.model.reset_mock()
-        self.view.reset_mock()
+        # two columns are selected at different positions
+        mock_indexes = [MockQModelIndex(0, 0), MockQModelIndex(0, 3)]
+        mock_table.mock_selection_model.selectedColumns = Mock(return_value=mock_indexes)
+        # change the mock ws to have 3 histograms
+        ws.getNumberHistograms = Mock(return_value=3)
 
-        presenter.changeExpInfo()
-        self.assertEqual(self.view.get_selected_row_indexes.call_count, 3)
-        self.assertEqual(self.view.get_exp.call_count, 1)
-        self.model.set_exp.assert_called_once_with(1)
-        self.view.set_selected_rows.assert_called_once_with([2,5])
+        mock_read = Mock(return_value=[83, 11, 33, 70])
+        expected_string = "83 70\n83 70\n83 70"
 
-        # clicked
-        self.model.reset_mock()
-        self.view.reset_mock()
+        presenter.action_copy_bin_values(mock_table, mock_read)
 
-        presenter.clicked()
-        self.assertEqual(self.view.get_selected_row_indexes.call_count, 2)
+        view.copy_to_clipboard.assert_called_once_with(expected_string)
 
-        # double clicked
-        self.model.reset_mock()
-        self.view.reset_mock()
+    def test_action_copy_bin_values_no_selection(self):
+        self.skipTest("Not Implemented")
 
-        index = mock.Mock()
-        index.row = mock.Mock(return_value=7)
+    def test_action_copy_cell(self):
+        ws = MockWorkspace()
+        view = MockMatrixWorkspaceDisplayView()
+        presenter = MatrixWorkspaceDisplay(ws, view=view)
+        mock_table = MockQTableView()
 
-        presenter.doubleClicked(index)
-        self.view.get_row_log_name.assert_called_once_with(7)
-        self.model.get_log.assert_called_once_with("Speed5")
+        # two columns are selected at different positions
+        mock_table.mock_selection_model.currentIndex = Mock(return_value=MockQModelIndex(0, 2))
+        # change the mock ws to have 3 histograms
+        ws.getNumberHistograms = Mock(return_value=3)
+        presenter.action_copy_cell(mock_table)
+
+        view.copy_to_clipboard.assert_called_once_with(MockQModelIndexSibling.TEST_SIBLING_DATA)
 
 
 if __name__ == '__main__':
