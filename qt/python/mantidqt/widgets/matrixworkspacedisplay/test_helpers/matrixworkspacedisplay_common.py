@@ -71,10 +71,20 @@ class MockMantidAxis:
         self.getUnit = Mock(return_value=self.mock_unit)
 
 
+class MockQModelIndexSibling:
+    TEST_SIBLING_DATA = "MANTID_TEST_SIBLING_DATA"
+
+    def __init__(self):
+        self.data = Mock(return_value=self.TEST_SIBLING_DATA)
+
+
 class MockQModelIndex:
+
     def __init__(self, row, column):
         self.row = Mock(return_value=row)
         self.column = Mock(return_value=column)
+        self.mock_sibling = MockQModelIndexSibling()
+        self.sibling = Mock(return_value=self.mock_sibling)
 
 
 class MockSpectrumInfo:
@@ -102,7 +112,7 @@ class MockWorkspace:
         # This is assigned to a function, as the original implementation is a function that returns
         # the spectrumInfo object
         self.spectrumInfo = self._return_MockSpectrumInfo
-        self.getNumberHistograms = Mock()
+        self.getNumberHistograms = Mock(return_value=1)
         self.isHistogramData = Mock(return_value=isHistogramData)
         self.blocksize = Mock(return_value=len(read_return))
         self.readX = Mock(return_value=read_return)
@@ -118,3 +128,5 @@ class MockWorkspace:
 
         self.mock_axis = MockMantidAxis()
         self.getAxis = Mock(return_value=self.mock_axis)
+
+        self.name = None
