@@ -176,15 +176,6 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
 
   auto props = algHistory.getProperties();
 
-  // Remove all none-needed properties
-  for (auto c : m_propertiesToIgnore) {
-    props.erase(std::remove_if(
-        props.begin(), props.end(),
-        [&c, name](boost::shared_ptr<Mantid::Kernel::PropertyHistory> &v) {
-          return name == c[0] && v->name() == c[1];
-        }));
-  }
-
   try {
     // create a fresh version of the algorithm - unmanaged
     auto algFresh = AlgorithmManager::Instance().createUnmanaged(
@@ -215,7 +206,7 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
   }
 
   for (auto &propIter : props) {
-    prop = buildPropertyString(*propIter);
+    prop = buildPropertyString(*propIter, name);
     if (prop.length() > 0) {
       properties << prop << ", ";
     }
@@ -261,8 +252,17 @@ ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
  * @returns std::string for this property
  */
 const std::string ScriptBuilder::buildPropertyString(
-    const Mantid::Kernel::PropertyHistory &propHistory) {
+    const Mantid::Kernel::PropertyHistory &propHistory,
+    const std::string &name) {
   using Mantid::Kernel::Direction;
+
+  // If the property is to be ignored then return with an empty string
+  if (std::find_if(m_propertiesToIgnore.begin(), m_propertiesToIgnore.end(),
+                   [&propHistory, name](std::vector<std::string> &c) -> bool {
+                     return name == c[0] && propHistory.name() == c[1];
+                   }) != m_propertiesToIgnore.end()) {
+    return "";
+  }
 
   // Create a vector of all non workspace property type names
   std::vector<std::string> nonWorkspaceTypes{"number", "boolean", "string"};

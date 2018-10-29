@@ -50,7 +50,7 @@ private:
   const std::string buildCommentString(const AlgorithmHistory &algHistory);
   const std::string buildAlgorithmString(const AlgorithmHistory &algHistory);
   const std::string
-  buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory);
+  buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory, const std::string &name);
   void createStringForAlg(
       std::ostringstream &os,
       boost::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory);
