@@ -13,10 +13,10 @@ import sys
 from functools import partial
 from logging import warning
 
-from PyQt5.QtGui import QIcon, QPixmap
 from qtpy import QtGui
+from qtpy.QtGui import QIcon, QPixmap
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QTabWidget, QTableView)
+from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QTabWidget, QTableView, QMessageBox)
 
 from mantidqt.widgets.matrixworkspacedisplay.pixmaps import copy_xpm, table_xpm, graph_xpm, new_graph_xpm
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
@@ -65,6 +65,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
     def set_scroll_position_on_new_focused_tab(self, new_tab_index):
         """
         Updates the new focused tab's scroll position to match the old one.
+        :type new_tab_index: int
         :param new_tab_index: The widget position index in the parent's widget list
         """
         old_tab = self.widget(self.active_tab_index)
@@ -77,6 +78,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
     def set_context_menu_actions(self, table, ws_read_function):
         """
         Sets up the context menu actions for the table
+        :type table: QTableView
         :param table: The table whose context menu actions will be set up.
         :param ws_read_function: The read function used to efficiently retrieve data directly from the workspace
         """
@@ -90,7 +92,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
 
         # Decorates the function with the correct table. This is done
         # instead of having to manually check from which table the callback is coming
-        decorated_view_action_with_correct_table = partial(self.presenter.action_view_detectors_table, table)
+        decorated_view_action_with_correct_table = partial(self.not_implemented, table)
         view_detectors_table_action.triggered.connect(decorated_view_action_with_correct_table)
 
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -156,8 +158,15 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self._set_table_model(self.table_y, model_y, MatrixWorkspaceTableViewModelType.y)
         self._set_table_model(self.table_e, model_e, MatrixWorkspaceTableViewModelType.e)
 
-    def not_implemented(self):
-        raise NotImplementedError("This method is not implemented yet")
+    def not_implemented(self, *args):
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Information)
+        msg.setWindowTitle("Not Implemented")
+        msg.setText("This action is connected but not implemented.")
+        msg.addButton(QMessageBox.Ok)
+
+        msg.setDefaultButton(QMessageBox.Ok)
+        msg.show()
 
     @staticmethod
     def _set_table_model(table, model, expected_model_type):
@@ -169,6 +178,8 @@ class MatrixWorkspaceDisplayView(QTabWidget):
     @staticmethod
     def copy_to_clipboard(data):
         """
+        Uses the QGuiApplication to copy to the system clipboard.
+
         :type data: str
         :param data: The data that will be copied to the clipboard
         :return:
