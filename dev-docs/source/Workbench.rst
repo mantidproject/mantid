@@ -87,3 +87,18 @@ For example to run the MatrixWorkspaceDisplay, copy your default configuration (
 Set the Script Path to ``<Mantid Source Dir>/qt/python/mantidqt/widgets/matrixworkspaceviewer/run.py``.
 Leave the working directory to ``<Mantid Build Dir>/bin/Debug``.
 Running the configration should start the MatrixWorkspaceDisplay.
+
+Remote Debugging with PyCharm
+-----------------------------
+This approach can be used to more easily debug unit tests. However, as the required package ``pydevd`` is not shipped with Mantid, we need to point Python to it manually in our script.
+This can be done by appending a directory that contains the installed ``pydevd`` package on the PYTHONPATH. The following code does so at runtime::
+
+    PYTHON_ROOT="<Change this to point to a Python installation that has pydevd installed>"
+    PYTHON_ROOT="c:\\users\\qbr77747\\apps\\miniconda3"
+    import os
+    import sys
+    sys.path.append(os.path.join(PYTHON_ROOT, "lib/site-packages"))
+    import pydevd
+    pydevd.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
+
+
