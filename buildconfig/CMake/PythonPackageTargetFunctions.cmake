@@ -73,15 +73,18 @@ CustomInstallLib = patch_setuptools_command('install_lib')
 
     # Specify the installation directory based on OS
     if ( WIN32 )
+      # The / after lib tells cmake to copy over the _CONTENTS_ of the lib directory
+      # placing the installed files inside the DESTINATION folder. This copies the
+      # installed Python package inside the bin directory of Mantid's installation
+      set ( _package_source_directory ${_setup_py_build_root}/install/lib/ )
       set ( _package_install_destination bin )
     else ()
+      # NOTE the lack of slash at the end - this means the _whole_ lib directory will be moved
+      set ( _package_source_directory ${_setup_py_build_root}/install/lib )
       set ( _package_install_destination . )
     endif ()
     # Registers the "installed" components with CMake so it will carry them over
-    # The / after lib tells cmake to copy over the _CONTENTS_ of the lib directory
-    # placing the installed files inside the DESTINATION folder. This copies the
-    # installed Python package inside the bin directory of Mantid's installation
-    install(DIRECTORY ${_setup_py_build_root}/install/lib/
+    install(DIRECTORY ${_package_source_directory}
             DESTINATION ${_package_install_destination}
             PATTERN "test" EXCLUDE )
 
