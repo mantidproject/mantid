@@ -87,7 +87,7 @@ void MultiProcessEventLoader::load(
         std::vector<bp::child> vChilds;
 
         // prepare command for launching of parallel processes
-        for (unsigned i = 1; i < m_numProcesses; ++i) {
+        for (unsigned i = 0; i < m_numProcesses; ++i) {
           std::size_t upperBound =
               i < m_numProcesses - 1 ? evPerPr * (i + 1) : numEvents;
 
@@ -131,7 +131,7 @@ void MultiProcessEventLoader::load(
     } shared_memory_destroyer(m_segmentNames);
 
     std::vector<Poco::ProcessHandle> vChilds;
-    for (unsigned i = 1; i < m_numProcesses; ++i) {
+    for (unsigned i = 0; i < m_numProcesses; ++i) {
       std::size_t upperBound =
           i < m_numProcesses - 1 ? evPerPr * (i + 1) : numEvents;
       std::vector<std::string> processArgs;
@@ -162,12 +162,6 @@ void MultiProcessEventLoader::load(
             std::runtime_error("MultiProcessEventLoader::load()"));
       }
     }
-
-    // Do self piece of multiprocess work
-    EventsListsShmemStorage storage(m_segmentNames[0], m_storageName,
-                                    storageSize, 1, m_numPixels);
-    fillFromFile(storage, filename, groupname, bankNames, bankOffsets, 0,
-                 numEvents / m_numProcesses, m_precalculateEvents);
 
     /*  boost::process implementation can be used
      * with proper boost version instead of Poco*/
