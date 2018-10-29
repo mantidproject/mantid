@@ -16,7 +16,7 @@ if ($help) {
   exit
 }
 
-# Getting script directory in PowerShell 2.0, source: https://stackoverflow.com/a/35622732/2823526
+# Getting script directory in PowerShell 2.0, sourced from PS2EXE `Get-ScriptPath.ps1` example
 if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript") {
   # Powershell script
   $scriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
@@ -38,7 +38,7 @@ else {
 # The -PassThru parameters tells PowerShell to return the process object
 $p = Start-Process -NoNewWindow -PassThru -FilePath "$scriptPath/$python_executable" "$scriptPath/launch_workbench.pyw" 2>&1
 
-# Getting the process ExitCode source from https://stackoverflow.com/a/23797762/2823526
+# Getting the process ExitCode, source from https://stackoverflow.com/a/23797762/2823526
 # It is important that we cache the handle here, otherwise when reading
 # the ExitCode, the implementation verifies that the process handle is present, and
 # if it was not cached then an internal exception is thrown and the ExitCode is null
