@@ -14,9 +14,9 @@ from functools import partial
 from logging import warning
 
 from qtpy import QtGui
-from qtpy.QtGui import QIcon, QPixmap
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QTabWidget, QTableView, QMessageBox)
+from qtpy.QtGui import QIcon, QPixmap, QCursor
+from qtpy.QtCore import Qt, QPoint
+from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QTabWidget, QTableView, QMessageBox, QToolTip)
 
 from mantidqt.widgets.matrixworkspacedisplay.pixmaps import copy_xpm, table_xpm, graph_xpm, new_graph_xpm
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
@@ -189,3 +189,12 @@ class MatrixWorkspaceDisplayView(QTabWidget):
             warning("Copying to clipboard has not been tested on UNIX systems.")
         cb = QtGui.QGuiApplication.clipboard()
         cb.setText(data, mode=cb.Clipboard)
+
+    def show_mouse_toast(self, message):
+        mouse_pos = self.mapFromGlobal(QCursor.pos())
+
+        # Add the position of the widget itself is added with self.pos(), essentially moving the
+        # position inside the widget, then mapFromGlobal gives us the offset of the mouse in the widget,
+        # the two added are at the exact position of the tip of the cursor
+        # Finally a custom offset is added to move the tooltip below the mouse cursor
+        QToolTip.showText(self.pos() + mouse_pos + QPoint(0, 33), message)
