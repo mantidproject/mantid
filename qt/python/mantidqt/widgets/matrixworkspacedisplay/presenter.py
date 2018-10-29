@@ -20,63 +20,34 @@ class MatrixWorkspaceDisplay(object):
         self.view = view if view else MatrixWorkspaceDisplayView(self,
                                                                  parent,
                                                                  self.model.get_name())
-        self.setup_table()
+        self.setup_tables()
         self.view.set_context_menu_actions(self.view.table_y, self.model._ws.readY)
         self.view.set_context_menu_actions(self.view.table_x, self.model._ws.readX)
         self.view.set_context_menu_actions(self.view.table_e, self.model._ws.readE)
 
-    def clicked(self):
-        self.update_stats()
-        self.plot_logs()
-
-    def doubleClicked(self, i):
-        # print the log, later this should display the data in a table workspace or something
-        log_text = self.view.get_row_log_name(i.row())
-        log = self.model.get_log(log_text)
-        print('# {}'.format(log.name))
-        print(log.valueAsPrettyStr())
-        if self.model.is_log_plottable(log_text):
-            self.view.new_plot_log(self.model.get_ws(), self.model.get_exp(), log_text)
-
-    def changeExpInfo(self):
-        selected_rows = self.view.get_selected_row_indexes()
-        self.model.set_exp(self.view.get_exp())
-        self.setup_table()
-        self.view.set_selected_rows(selected_rows)
-        self.update_stats()
-        self.plot_logs()
-
-    def update_stats(self):
-        selected_rows = self.view.get_selected_row_indexes()
-        if len(selected_rows) == 1:
-            stats = self.model.get_statistics(self.view.get_row_log_name(selected_rows[0]))
-            if stats:
-                self.view.set_statistics(stats)
-            else:
-                self.view.clear_statistics()
-        else:
-            self.view.clear_statistics()
-
-    def plot_logs(self):
-        selected_rows = self.view.get_selected_row_indexes()
-        to_plot = [row for row in selected_rows if self.model.is_log_plottable(self.view.get_row_log_name(row))]
-        self.view.plot_selected_logs(self.model.get_ws(), self.model.get_exp(), to_plot)
-
-    def setup_table(self):
+    def setup_tables(self):
         # unpacks the list of models returned from getItemModel
         self.view.set_model(*self.model.get_item_model())
 
     def action_copy_spectrum_values(self, table, ws_read, *args):
+        """
+        Copies the values selected by the user to the system's clipboard
+
+        :param table: Table from which the selection will be read
+        :param ws_read: The workspace read function, that is used to access the data directly
+        :param args: Additional unused parameters passed from Qt
+        """
         selection_model = table.selectionModel()
         if not selection_model.hasSelection():
             # TODO Consider displaying a tooltip that says "No Selection" or something
             return
+
         selected_rows = selection_model.selectedRows()  # type: list
         row_data = []
 
         for index in selected_rows:
             row = index.row()
-            data = " ".join([str(x) for x in ws_read(row)])
+            data = " ".join(map(str, ws_read(row)))
 
             row_data.append(data)
 
@@ -116,7 +87,7 @@ class MatrixWorkspaceDisplay(object):
         """
         index = table.selectionModel().currentIndex()
         data = index.sibling(index.row(), index.column()).data()
-        self.copy_to_clipboard(data)
+        self.view.copy_to_clipboard(data)
 
     @staticmethod
     def action_view_detectors_table(table, *args):
