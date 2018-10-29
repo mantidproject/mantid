@@ -197,42 +197,6 @@ public:
                      Exception::NullPointerException);
   }
 
-  void testSolidAngleCappedCylinder() {
-    ObjComponent A("ocyl", createCappedCylinder());
-    A.setPos(10, 0, 0);
-    A.setRot(Quat(90.0, V3D(0, 0, 1)));
-    double satol = 2e-2; // tolerance for solid angle
-
-    ParameterMap_const_sptr pmap(new ParameterMap());
-    ObjComponent pA(&A, pmap.get());
-
-    TS_ASSERT_DELTA(pA.solidAngle(V3D(10, 1.7, 0)), 1.840302, satol);
-    // Surface point
-    TS_ASSERT_DELTA(pA.solidAngle(V3D(10, -1, 0.5)), 2 * M_PI, satol);
-
-    // Add a parent with a rotation of its own;
-    Component parent("parent", V3D(0, 10, 0), Quat(90.0, V3D(0, 1, 0)));
-    A.setParent(&parent);
-
-    // See testSolidAngleCappedCylinder in ObjectTest - these tests are a subset
-    // of them
-    TS_ASSERT_DELTA(pA.solidAngle(V3D(0, 11.7, -10)), 1.840302, satol);
-    TS_ASSERT_DELTA(pA.solidAngle(V3D(0, 6.13333333, -10)), 1.25663708, satol);
-    // internal point (should be 4pi)
-    TS_ASSERT_DELTA(pA.solidAngle(V3D(0, 10, -10)), 4 * M_PI, satol);
-    // surface point
-    TS_ASSERT_DELTA(pA.solidAngle(V3D(0.5, 10, -10)), 2 * M_PI, satol);
-
-    // Calling on an ObjComponent without an associated geometric object will
-    // throw
-    ObjComponent B("noShape");
-
-    ObjComponent pB(&B, pmap.get());
-
-    TS_ASSERT_THROWS(pB.solidAngle(V3D(1, 2, 3)),
-                     Exception::NullPointerException);
-  }
-
   void testBoundingBoxCappedCylinder() {
     // Check that getBoundingBox transforms input guess to Object coordinates
     // and
