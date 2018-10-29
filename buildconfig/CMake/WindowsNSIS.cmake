@@ -282,7 +282,7 @@ set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
 if ( PACKAGE_WORKBENCH )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico DESTINATION bin )
   set ( MANTIDWORKBENCH_LINK_NAME "MantidWorkbench${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
-  message(STATUS "Adding icons for Workbench as EXE was generated.")
+  message(STATUS "Adding icons for Workbench as it is being packaged in the installation.")
   set (CPACK_NSIS_CREATE_ICONS_EXTRA "
     CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\launch_workbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'
 
