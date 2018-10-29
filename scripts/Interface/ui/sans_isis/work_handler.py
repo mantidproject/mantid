@@ -53,6 +53,7 @@ class WorkHandler(object):
         self.thread_pool = None
         self._listener = {}
         self._worker = {}
+        self.thread_pool = QThreadPool()
 
     def _add_listener(self, listener, process_id, id):
         if not isinstance(listener, WorkHandler.WorkListener):
@@ -97,7 +98,7 @@ class WorkHandler(object):
 
         self._worker.update({process_id: {'id': id, 'worker': worker}})
 
-        QThreadPool.globalInstance().start(self._worker[process_id]['worker'])
+        self.thread_pool.start(self._worker[process_id]['worker'])
 
     def remove_already_processing(self, id):
         """
@@ -109,9 +110,8 @@ class WorkHandler(object):
                 self._listener.pop(key)
                 self._worker.pop(key)
 
-    @staticmethod
-    def wait_for_done():
-        QThreadPool.globalInstance().waitForDone()
+    def wait_for_done(self):
+        self.thread_pool.waitForDone()
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
