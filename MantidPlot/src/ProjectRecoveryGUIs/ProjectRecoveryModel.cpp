@@ -73,6 +73,10 @@ void ProjectRecoveryModel::recoverLast() {
 
   if (m_failedRun) {
     createThreadAndManage(mostRecentCheckpoint);
+    auto checkpointToCheck =
+        mostRecentCheckpoint.directory(mostRecentCheckpoint.depth() - 1);
+    updateCheckpointTried(
+        checkpointToCheck.replace(checkpointToCheck.find("T"), 1, " "));
   }
 
   // Close View
@@ -104,7 +108,6 @@ void ProjectRecoveryModel::openLastInEditor() {
   m_presenter->closeView();
 }
 void ProjectRecoveryModel::startMantidNormally() {
-  // Close the window and save if nessercary (Probably not)
   m_projRec->clearAllUnusedCheckpoints();
   m_projRec->startProjectSaving();
 
@@ -179,15 +182,22 @@ void ProjectRecoveryModel::fillRows() {
     std::vector<std::string> newVector = {"", "", ""};
     m_rows.emplace_back(newVector);
   }
+
+  // order the vector based on save date and time Most recent first
+  std::sort(m_rows.begin(), m_rows.end(),
+            [](auto &a, auto &b) -> bool { return a[0] > b[0]; });
 }
 
 void ProjectRecoveryModel::updateCheckpointTried(
     const std::string &checkpointName) {
-  for (auto c : m_rows) {
+  for (auto &c : m_rows) {
     if (c[0] == checkpointName) {
       c[2] = "Yes";
+      return;
     }
   }
+  throw std::runtime_error("Passed checkpoint name for update was incorrect: " +
+                           checkpointName);
 }
 
 bool ProjectRecoveryModel::getFailedRun() const { return m_failedRun; }
