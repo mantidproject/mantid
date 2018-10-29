@@ -47,7 +47,18 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.copy_to_clipboard.assert_called_once_with(expected_string)
 
     def test_action_copy_spectrum_values_no_selection(self):
-        self.skipTest("Not implemented")
+        ws = MockWorkspace()
+        view = MockMatrixWorkspaceDisplayView()
+        presenter = MatrixWorkspaceDisplay(ws, view=view)
+
+        mock_table = MockQTableView()
+        mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
+        mock_table.mock_selection_model.selectedRows = Mock()
+
+        presenter.action_copy_spectrum_values(mock_table, None)
+
+        # the action should never look for rows if there is no selection
+        self.assertEqual(0, mock_table.mock_selection_model.selectedRows.call_count)
 
     def test_action_copy_bin_values(self):
         ws = MockWorkspace()
