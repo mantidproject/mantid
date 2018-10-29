@@ -129,6 +129,10 @@ private:
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
 
+  // To ignore a property you need to first put the algorithm name in the first
+  // part of the vector for which you want to ignore the property for then the
+  // property name in the second part of the vector 0 and 1 as indexes
+  // respectively
   std::vector<std::vector<std::string>> m_propertiesToIgnore = {
       {"StartLiveData", "MonitorLiveData"}};
 

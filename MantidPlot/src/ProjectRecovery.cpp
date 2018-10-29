@@ -462,7 +462,6 @@ void ProjectRecovery::startProjectSaving() {
 /// Stops any existing background threads which are running
 void ProjectRecovery::stopProjectSaving() {
   {
-
     std::lock_guard<std::mutex> lock(m_notifierMutex);
     m_stopBackgroundThread = true;
     m_threadNotifier.notify_all();
