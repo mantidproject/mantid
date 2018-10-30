@@ -221,7 +221,7 @@ if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
 
     # If the EXE generation failed then display an error and stop the CMAKE generation
     if ( _workbench_powershell_return_code GREATER 0 )
-      message(${_workbench_powershell_output})
+      message(STATUS ${_workbench_powershell_output})
       message(FATAL_ERROR "Generating the Workbench executable encountered an error.")
     endif ()
 
