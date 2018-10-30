@@ -137,11 +137,13 @@ public:
   }
 
   void setUp() override {
-    HistogramData::BinEdges edges(1000, HistogramData::LinearGenerator(-100., 23.));
+    HistogramData::BinEdges edges(1000,
+                                  HistogramData::LinearGenerator(-100., 23.));
     HistogramData::Counts counts(edges.size() - 1, 2);
     m_ws = DataObjects::create<DataObjects::Workspace2D>(
         10000, HistogramData::Histogram(edges, counts));
-    edges = HistogramData::BinEdges(200, HistogramData::LinearGenerator(100., 2.3));
+    edges =
+        HistogramData::BinEdges(200, HistogramData::LinearGenerator(100., 2.3));
     counts = HistogramData::Counts(edges.size() - 1, 2);
     m_compWS = DataObjects::create<DataObjects::Workspace2D>(
         10000, HistogramData::Histogram(edges, counts));
@@ -154,12 +156,9 @@ public:
     m_alg.setProperty("MaskPartiallyOverlapping", true);
   }
 
-  void tearDown() override {
-  }
+  void tearDown() override {}
 
-  void test_performance() {
-    TS_ASSERT_THROWS_NOTHING(m_alg.execute())
-  }
+  void test_performance() { TS_ASSERT_THROWS_NOTHING(m_alg.execute()) }
 
 private:
   API::MatrixWorkspace_sptr m_ws;
