@@ -585,12 +585,14 @@ private:
   /// A text label for use when plotting spectra
   std::string m_YUnitLabel;
 
+protected:
   /// Flag indicating whether the m_isCommonBinsFlag has been set. False by
   /// default
   mutable bool m_isCommonBinsFlagSet{false};
   /// Flag indicating whether the data has common bins. False by default
   mutable bool m_isCommonBinsFlag{false};
 
+private:
   /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;
 

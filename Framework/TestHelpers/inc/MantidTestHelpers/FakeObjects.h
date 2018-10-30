@@ -200,6 +200,31 @@ protected:
         "Cloning of AxeslessWorkspaceTester is not implemented.");
   }
 
+  bool isCommonBins() const override {
+    if (!m_isCommonBinsFlagSet) {
+      m_isCommonBinsFlag = true;
+      const size_t numHist = this->getNumberHistograms();
+      // there being only one or zero histograms is accepted as not being an
+      // error
+      if (numHist > 1) {
+        // First check if the x-axis shares a common cow_ptr.
+        auto first = data[0]->ptrX();
+        for (const auto &st : data) {
+          if (st->ptrX() != first) {
+            m_isCommonBinsFlag = false;
+            break;
+          }
+        }
+        // If false, we need to check more carefully.
+        if (!m_isCommonBinsFlag) {
+          return MatrixWorkspace::isCommonBins();
+        }
+      }
+      m_isCommonBinsFlagSet = true;
+    }
+    return m_isCommonBinsFlag;
+  }
+
 private:
   std::vector<SpectrumTester> m_vec;
   size_t m_spec;

@@ -92,7 +92,7 @@ public:
   Mantid::Types::Core::DateAndTime
   getTimeAtSampleMax(double tofOffset = 0) const override;
 
-  double getEventXMin() const;
+  double getEventMatrixWorkXMin() const;
   double getEventXMax() const;
   void getEventXMinMax(double &xmin, double &xmax) const;
 
@@ -150,6 +150,9 @@ public:
                             const double maxX,
                             const bool entireRange) const override;
   EventWorkspace &operator=(const EventWorkspace &other) = delete;
+
+  /// Returns true if the workspace contains has common X bins
+  bool isCommonBins() const override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

@@ -359,11 +359,33 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 }
 
 Workspace2D *Workspace2D::doClone() const { return new Workspace2D(*this); }
-
 Workspace2D *Workspace2D::doCloneEmpty() const {
   return new Workspace2D(storageMode());
 }
 
+bool Workspace2D::isCommonBins() const {
+  if (!m_isCommonBinsFlagSet) {
+    m_isCommonBinsFlag = true;
+    const size_t numHist = this->getNumberHistograms();
+    // there being only one or zero histograms is accepted as not being an error
+    if (numHist > 1) {
+      // First check if the x-axis shares a common cow_ptr.
+      auto first = data[0]->ptrX();
+      for (const auto &histogram : data) {
+        if (histogram->ptrX() != first) {
+          m_isCommonBinsFlag = false;
+          break;
+        }
+      }
+      // If false, we need to check more carefully.
+      if (!m_isCommonBinsFlag) {
+        return MatrixWorkspace::isCommonBins();
+      }
+    }
+    m_isCommonBinsFlagSet = true;
+  }
+  return m_isCommonBinsFlag;
+}
 } // namespace DataObjects
 } // namespace Mantid
 

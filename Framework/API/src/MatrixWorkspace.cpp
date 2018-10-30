@@ -23,6 +23,7 @@
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
@@ -979,30 +980,30 @@ bool MatrixWorkspace::isCommonBins() const {
       // there being only one or zero histograms is accepted as not being an
       // error
       if (m_isCommonBinsFlag) {
-        // otherwise will compare some of the data, to save time just check two
-        // the first and the last
+        const size_t numBins = x(0).size();
         const size_t lastSpec = numHist - 1;
-        // Quickest check is to see if they are actually the same vector
-        if (&(x(0)[0]) != &(x(lastSpec)[0])) {
-          // Now check numerically
-          const double first = std::accumulate(x(0).begin(), x(0).end(), 0.);
-          const double last =
-              std::accumulate(x(lastSpec).begin(), x(lastSpec).end(), 0.);
-          if (std::abs(first - last) / std::abs(first + last) > 1.0E-9) {
-            m_isCommonBinsFlag = false;
-          }
-
-          // handle Nan's and inf's
-          if ((std::isinf(first) != std::isinf(last)) ||
-              (std::isnan(first) != std::isnan(last))) {
-            m_isCommonBinsFlag = false;
+        for (size_t i = 0; i < lastSpec; ++i) {
+          const auto &xi = x(i);
+          const auto &xip1 = x(i + 1);
+          for (size_t j = 0; j < numBins; ++j) {
+            const double first = xi[j];
+            const double next = xip1[j];
+            if (std::abs(first - next) / std::abs(first + next) > 1.0E-9) {
+              m_isCommonBinsFlag = false;
+              break;
+            }
+            // handle Nan's and inf's
+            if ((std::isinf(first) != std::isinf(next)) ||
+                (std::isnan(first) != std::isnan(next))) {
+              m_isCommonBinsFlag = false;
+              break;
+            }
           }
         }
       }
     }
     m_isCommonBinsFlagSet = true;
   }
-
   return m_isCommonBinsFlag;
 }
 

@@ -80,6 +80,9 @@ public:
                      bool loadAsRectImg = false, double scale_1 = 1.0,
                      bool parallelExecution = true);
 
+  /// Returns true if the workspace contains has common X bins
+  bool isCommonBins() const override;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace2D(const Workspace2D &other);
