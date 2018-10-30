@@ -61,7 +61,7 @@ Usage
         InstrumentName='Bizarrio')
     spectrumInfo = ws.spectrumInfo()
     for i in range(ws.getNumberHistograms()):
-        print('Histogram {} scattering angle: {} degrees'.format(i + 1, numpy.rad2deg(spectrumInfo.twoTheta(i))))
+        print('Histogram {} scattering angle: {:.3} degrees'.format(i + 1, numpy.rad2deg(spectrumInfo.twoTheta(i))))
 
 Output:
 
