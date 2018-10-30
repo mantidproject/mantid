@@ -26,6 +26,6 @@ p = R"C:\Users\qbr77747\dev\m\source\build\ExternalData\Testing\Data\UnitTest"
 # for f in all_nxs_files:
 #     full_path = os.path.join(p, f)
 app = QApplication([])
-ws = Load(os.path.join(p, r"ARCS_2963.nxs"))
+ws = Load(os.path.join(p, r"workspaceEmptyTextAxis.nxs"))
 window = MatrixWorkspaceDisplay(ws)
 app.exec_()
