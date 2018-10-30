@@ -251,20 +251,20 @@ class MainWindow(QMainWindow):
         add_actions(self.view_menu, self.view_menu_actions)
 
     def launchCustomGUI(self, script):
-        exec(open(script).read(), globals())
+        try:
+            exec(open(script).read(), globals())
+        except RuntimeError as e:
+            print('RuntimeError', type(e))
+            print(e)
 
     def populateAfterMantidImport(self):
         from mantid.kernel import ConfigService, logger
-        # TODO ConfigService should accept unicode strings https://github.com/mantidproject/mantid/pull/23826
-        interface_dir = ConfigService[str('mantidqt.python_interfaces_directory')]
-        items = ConfigService[str('mantidqt.python_interfaces')].split()
+        interface_dir = ConfigService['mantidqt.python_interfaces_directory']
+        items = ConfigService['mantidqt.python_interfaces'].split()
 
         # list of custom interfaces that are not qt4/qt5 compatible
-        GUI_BLACKLIST = ['DGS_Reduction.py',
-                         'MSlice.py',
-                         'ORNL_SANS.py',
+        GUI_BLACKLIST = ['MSlice.py',
                          'ISIS_Reflectometry_Old.py',
-                         'Powder_Diffraction_Reduction.py',
                          'HFIR_4Circle_Reduction.py',
                          'ISIS_SANS_v2_experimental.py',
                          'Frequency_Domain_Analysis.py',

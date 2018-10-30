@@ -2,13 +2,11 @@
 # Subdirectories from which ui files need processing to py files
 # FilterEvents doesn't need any special work
 add_subdirectory(Interface/ui)
-add_subdirectory(TofConverter)
 add_subdirectory(HFIR_4Circle_Reduction)
 add_subdirectory(ErrorReporter)
 
 # Chain all required interface custom targets into CompilePyUI
 add_custom_target(CompilePyUI DEPENDS
-  CompileUITofConverter
   CompileUIUI
   CompileUIHFIR_4Circle_Reduction
   CompileUIErrorReporter
@@ -16,7 +14,6 @@ add_custom_target(CompilePyUI DEPENDS
 
 # Put them into the 'CompileUI' folder or group in VS and the like, for convenience
 set_property ( TARGET CompilePyUI PROPERTY FOLDER "CompilePyUI" )
-set_property ( TARGET CompileUITofConverter PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIHFIR_4Circle_Reduction PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIErrorReporter PROPERTY FOLDER "CompilePyUI" )

@@ -11,9 +11,9 @@
 TOFTOF reduction workflow gui.
 """
 from __future__ import (absolute_import, division, print_function)
-from PyQt4.QtCore import *
-from PyQt4.QtGui  import *
-
+from qtpy.QtCore import (Qt)  # noqa
+from qtpy.QtGui import (QDoubleValidator)  # noqa
+from qtpy.QtWidgets import (QButtonGroup, QCheckBox, QDoubleSpinBox, QFileDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLayout, QLineEdit, QPushButton, QRadioButton, QSizePolicy, QSpacerItem, QWidget, QVBoxLayout)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
 from reduction_gui.widgets.data_table_view import DataTableView, DataTableModel
@@ -411,8 +411,9 @@ class TOFTOFSetupWidget(BaseWidget):
         self.ecTemp.setText(str(elem.ecTemp))
         self.ecFactor.setValue(elem.ecFactor)
 
+        self.runDataModel.beginResetModel()
         self.runDataModel.tableData = elem.dataRuns
-        self.runDataModel.reset()
+        self.runDataModel.endResetModel()
 
         self.binEon.setChecked(elem.binEon)
 
