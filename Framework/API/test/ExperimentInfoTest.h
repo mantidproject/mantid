@@ -588,6 +588,28 @@ public:
                                         instDir);
   }
 
+  void test_nexus_geometry_getInstrumentFilename() {
+
+    const auto originalInstDirectories =
+        ConfigService::Instance().getInstrumentDirectories();
+    auto instrumentDirectories = originalInstDirectories;
+    const auto dataDirectories = ConfigService::Instance().getDataSearchDirs();
+    // Data directories contain UnitTest data including instrument HDF files
+    instrumentDirectories.insert(instrumentDirectories.end(),
+                                 dataDirectories.begin(),
+                                 dataDirectories.end());
+    ConfigService::Instance().setInstrumentDirectories(instrumentDirectories);
+    const std::string instrumentName = "LOKI";
+    ExperimentInfo info;
+    const auto path =
+        info.getInstrumentFilename(instrumentName, "", FileType::Nexus);
+    TS_ASSERT(!path.empty());
+    TS_ASSERT(
+        boost::regex_match(path, boost::regex(".*LOKI_Definition\\.hdf5$")));
+    // Rest instrument directories
+    ConfigService::Instance().setInstrumentDirectories(originalInstDirectories);
+  }
+
   void test_nexus() {
     std::string filename = "ExperimentInfoTest1.nxs";
     NexusTestHelper th(true);

@@ -955,14 +955,15 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
  */
 std::string
 ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
-                                      const std::string &date) {
+                                      const std::string &date,
+                                      const FileType &filetype) {
   if (date.empty()) {
     // Just use the current date
     g_log.debug() << "No date specified, using current date and time.\n";
     const std::string now =
         Types::Core::DateAndTime::getCurrentTime().toISO8601String();
     // Recursively call this method, but with both parameters.
-    return ExperimentInfo::getInstrumentFilename(instrumentName, now);
+    return ExperimentInfo::getInstrumentFilename(instrumentName, now, filetype);
   }
 
   g_log.debug() << "Looking for instrument XML file for " << instrumentName
@@ -975,8 +976,10 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   const std::vector<std::string> &directoryNames =
       Kernel::ConfigService::Instance().getInstrumentDirectories();
 
-  boost::regex regex(instrument + "_Definition.*\\.xml",
-                     boost::regex_constants::icase);
+  const boost::regex idf_regex(instrument + "_Definition.*\\.xml",
+                               boost::regex_constants::icase);
+
+  const boost::regex nexus_regex(instrument + "_Definition.*\\.(nxs|hdf5)");
   Poco::DirectoryIterator end_iter;
   DateAndTime d(date);
   bool foundGoodFile =
@@ -1000,7 +1003,9 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
         continue;
 
       const std::string &l_filenamePart = filePath.getFileName();
-      if (regex_match(l_filenamePart, regex)) {
+
+      if ((filetype == FileType::Idf || filetype == FileType::Both) &&
+          regex_match(l_filenamePart, idf_regex)) {
         const auto &pathName = filePath.toString();
         g_log.debug() << "Found file: '" << pathName << "'\n";
         std::string validFrom, validTo;
@@ -1030,6 +1035,13 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
           refDate = from;
           mostRecentIDF = pathName;
         }
+      }
+      if ((filetype == FileType::Nexus || filetype == FileType::Both) &&
+          regex_match(l_filenamePart, nexus_regex)) {
+        /*Note that date intervals are not considered. The first file found
+         * matching the pattern is taken. We would have to decide how start-end
+         * dates are taken from the NexusFiles*/
+        return filePath.toString();
       }
     }
   }

@@ -44,6 +44,8 @@ class Run;
 class Sample;
 class SpectrumInfo;
 
+enum class FileType { Idf, Nexus, Both };
+
 /** This class is shared by a few Workspace types
  * and holds information related to a particular experiment/run:
  *
@@ -165,8 +167,10 @@ public:
                              std::string &outValidFrom,
                              std::string &outValidTo);
   /// Get the IDF using the instrument name and date
-  static std::string getInstrumentFilename(const std::string &instrumentName,
-                                           const std::string &date = "");
+  static std::string
+  getInstrumentFilename(const std::string &instrumentName,
+                        const std::string &date = "",
+                        const FileType &filetype = FileType::Idf);
 
   const Geometry::DetectorInfo &detectorInfo() const;
   Geometry::DetectorInfo &mutableDetectorInfo();
