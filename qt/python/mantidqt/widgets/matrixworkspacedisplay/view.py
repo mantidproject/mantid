@@ -14,7 +14,7 @@ from functools import partial
 from logging import warning
 
 from qtpy import QtGui
-from qtpy.QtGui import QIcon, QPixmap, QCursor
+from qtpy.QtGui import QIcon, QPixmap, QCursor, QFont, QFontMetrics
 from qtpy.QtCore import Qt, QPoint
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QTabWidget, QTableView, QMessageBox, QToolTip)
 
@@ -191,10 +191,9 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         cb.setText(data, mode=cb.Clipboard)
 
     def show_mouse_toast(self, message):
-        mouse_pos = self.mapFromGlobal(QCursor.pos())
-
-        # Add the position of the widget itself is added with self.pos(), essentially moving the
-        # position inside the widget, then mapFromGlobal gives us the offset of the mouse in the widget,
-        # the two added are at the exact position of the tip of the cursor
-        # Finally a custom offset is added to move the tooltip below the mouse cursor
-        QToolTip.showText(self.pos() + mouse_pos + QPoint(0, 33), message)
+        # Creates a text with empty space to get the height of the rendered text - this is used
+        # to provide the same offset for the tooltip, scaled relative to the current resolution and zoom.
+        a = QFontMetrics(QFont(" "))
+        # The height itself is divided by 2 just to reduce the offset so that the tooltip is
+        # reasonably position relative to the cursor
+        QToolTip.showText(QCursor.pos() + QPoint(a.height() / 2, 0), message)
