@@ -7,7 +7,6 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 #define MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include <boost/iterator/iterator_facade.hpp>
 
@@ -27,7 +26,7 @@ iterator.
 @date 2018
 */
 template <typename T>
-class MANTID_GEOMETRY_DLL DetectorInfoIterator
+class DetectorInfoIterator
     : public boost::iterator_facade<DetectorInfoIterator<T>,
                                     DetectorInfoItem<T> &,
                                     boost::random_access_traversal_tag> {
