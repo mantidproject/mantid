@@ -99,8 +99,10 @@ void ProjectRecoveryModel::openLastInEditor() {
   m_projRec->startProjectSaving();
 
   if (m_failedRun) {
+    auto checkpointToRecover = mostRecentCheckpoint.directory(mostRecentCheckpoint.depth() - 1);
+    checkpointToRecover.replace(checkpointToRecover.find("T"), 1, " ");
     updateCheckpointTried(
-        mostRecentCheckpoint.directory(mostRecentCheckpoint.depth() - 1));
+        checkpointToRecover);
   }
 
   m_failedRun = false;
