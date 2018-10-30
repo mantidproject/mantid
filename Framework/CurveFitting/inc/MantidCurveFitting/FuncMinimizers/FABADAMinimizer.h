@@ -60,7 +60,6 @@ private:
   /// current one
   void tieApplication(const size_t &parameterIndex, GSLVector &newParameters,
                       double &newValue);
-  void applyFix(std::size_t const &parameterIndex, GSLVector &newParameters);
   /// Given the new chi2, next position is calculated and updated.
   /// m_changes[ParameterIndex] updated too
   void algorithmDisplacement(const size_t &parameterIndex,
