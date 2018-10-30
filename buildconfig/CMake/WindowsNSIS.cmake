@@ -217,7 +217,7 @@ if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
     # Add the extensions for the executable after it is generated in the build directory
     set(_workbench_executable_install_name ${_workbench_base_name}.exe.install)
     # Generate an executable from the PowerShell script
-    execute_process(COMMAND powershell.exe -version 2.0 -noprofile -windowstyle hidden ${THIRD_PARTY_DIR}/bin/ps2exe.ps1 -inputFile ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/${_workbench_base_name}.ps1 -outputFile ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} -x64 -runtime2 -noconsole RESULT_VARIABLE _workbench_powershell_return_code OUTPUT_VARIABLE _workbench_powershell_output)
+    execute_process(COMMAND powershell.exe -version 2.0 -noprofile -windowstyle hidden -ExecutionPolicy Bypass ${THIRD_PARTY_DIR}/bin/ps2exe.ps1 -inputFile ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/${_workbench_base_name}.ps1 -outputFile ${CMAKE_CURRENT_BINARY_DIR}/${_workbench_executable_install_name} -x64 -runtime2 -noconsole RESULT_VARIABLE _workbench_powershell_return_code OUTPUT_VARIABLE _workbench_powershell_output)
 
     # If the EXE generation failed then display an error and stop the CMAKE generation
     if ( _workbench_powershell_return_code GREATER 0 )
