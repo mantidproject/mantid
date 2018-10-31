@@ -22,9 +22,9 @@ if ( ENABLE_WORKBENCH )
 
   # Configure the file necessary for installation packages to run and detect Qt's plugins
   # The relative path is expanded to an absolute one at runtime. The path is relative
-  # to the working directory of the PYTHON executable's that launches the Workbench.
+  # to the working directory of the PYTHON executable that launches the Workbench.
   # E.g. if python.exe is at MantidInstall/bin/python.exe, then the ../plugins is relative to that
-  # directory - not where the plugins.py is installed!
+  # bin directory - not where the plugins.py is installed!
   set ( QT_PLUGINS_PATH "../plugins/qt%V" )
   configure_file ( mantidqt/utils/qt/plugins.py.in ${CMAKE_CURRENT_BINARY_DIR}/plugins.py.install )
   add_python_package ( mantidqt )

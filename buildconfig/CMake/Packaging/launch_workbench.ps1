@@ -35,7 +35,7 @@ else {
 
 # The 2>&1 at the end flushes STDERR into STDOUT and removes the new popup Windows that come from PS2EXE
 # Additionally that will correctly capture the output when run with just python.exe (console visible)
-# The -PassThru parameters tells PowerShell to return the process object
+# The -PassThru parameter tells PowerShell to return the process object
 $p = Start-Process -NoNewWindow -PassThru -FilePath "$scriptPath/$python_executable" "$scriptPath/launch_workbench.pyw" 2>&1
 
 # Getting the process ExitCode, source from https://stackoverflow.com/a/23797762/2823526
