@@ -67,8 +67,8 @@ Explanation of Inputs
    will become more spherical and less well adapted to the actual shape
    of the peak.
 
-.. figure:: /images/IntegrateEllipsoidsWithSatellites.png
-   :alt: IntegrateEllipsoidsWithSatellites.png
+.. figure:: /images/IntegrateEllipsoids.png
+   :alt: IntegrateEllipsoids.png
 
    Integrate ellipsoids algorithm regions map.
 
