@@ -9,6 +9,8 @@
 
 #include "MantidAPI/Algorithm.h"
 
+#include "MantidGeometry/IDTypes.h"
+
 namespace Mantid {
 namespace Geometry {
 class Instrument;
@@ -43,7 +45,8 @@ private:
   void exec() override;
   void correctDetectorPosition(API::MatrixWorkspace_sptr &outWS,
                                const std::string &detectorName,
-                               const int detectorID, const double twoThetaInRad,
+                               const detid_t detectorID,
+                               const double twoThetaInRad,
                                const std::string &correctionType,
                                const Geometry::ReferenceFrame &referenceFrame,
                                const Kernel::V3D &samplePosition,
@@ -51,12 +54,12 @@ private:
                                const double beamOffsetOld);
   static Kernel::V3D declareDetectorPosition(const Geometry::Instrument &inst,
                                              const std::string &detectorName,
-                                             const int detectorID);
+                                             const detid_t detectorID);
   Kernel::V3D declareSamplePosition(const API::MatrixWorkspace &ws);
   double twoThetaFromProperties(const API::MatrixWorkspace &inWS,
                                 const double l2);
   double twoThetaFromDirectLine(const std::string &detectorName,
-                                const int detectorID,
+                                const detid_t detectorID,
                                 const Kernel::V3D &samplePosition,
                                 const double l2, const Kernel::V3D &alongDir,
                                 const double beamOffset);

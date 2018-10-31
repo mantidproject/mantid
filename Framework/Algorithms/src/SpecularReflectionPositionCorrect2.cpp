@@ -164,10 +164,10 @@ SpecularReflectionPositionCorrect2::validateInputs() {
     }
     if (isDefault("DirectLineWorkspace")) {
       issues["DirectLineWorkspace"] =
-          "Direct beam workspcae required when no TwoTheta supplied.";
+          "Direct beam workspace required when no TwoTheta supplied.";
     }
     if (isDefault("PixelSize")) {
-      issues["PixelSize"] = "Pixel size required for direct beam calibarion.";
+      issues["PixelSize"] = "Pixel size required for direct beam calibration.";
     }
   }
   return issues;
@@ -189,7 +189,7 @@ void SpecularReflectionPositionCorrect2::exec() {
   const std::string correctionType = getProperty("DetectorCorrectionType");
   // Detector
   auto inst = inWS->getInstrument();
-  const int detectorID = getProperty("DetectorID");
+  const detid_t detectorID = static_cast<int>(getProperty("DetectorID"));
   const std::string detectorName = getProperty("DetectorComponentName");
   const V3D detectorPosition =
       declareDetectorPosition(*inst, detectorName, detectorID);
@@ -227,7 +227,7 @@ void SpecularReflectionPositionCorrect2::exec() {
  */
 void SpecularReflectionPositionCorrect2::correctDetectorPosition(
     MatrixWorkspace_sptr &outWS, const std::string &detectorName,
-    const int detectorID, const double twoThetaInRad,
+    const detid_t detectorID, const double twoThetaInRad,
     const std::string &correctionType, const ReferenceFrame &referenceFrame,
     const V3D &samplePosition, const V3D &sampleToDetector,
     const double beamOffsetOld) {
@@ -317,7 +317,7 @@ void SpecularReflectionPositionCorrect2::correctDetectorPosition(
  */
 Kernel::V3D SpecularReflectionPositionCorrect2::declareDetectorPosition(
     const Geometry::Instrument &inst, const std::string &detectorName,
-    const int detectorID) {
+    const detid_t detectorID) {
   // Detector
   IComponent_const_sptr detector;
   if (detectorName.empty()) {
@@ -380,7 +380,7 @@ double SpecularReflectionPositionCorrect2::twoThetaFromProperties(
  * @return TwoTheta, in radians
  */
 double SpecularReflectionPositionCorrect2::twoThetaFromDirectLine(
-    const std::string &detectorName, const int detectorID,
+    const std::string &detectorName, const detid_t detectorID,
     const V3D &samplePosition, const double l2, const V3D &alongDir,
     const double beamOffset) {
   double twoThetaInRad;
