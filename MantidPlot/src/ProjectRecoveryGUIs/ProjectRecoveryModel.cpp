@@ -112,7 +112,7 @@ void ProjectRecoveryModel::openLastInEditor() {
 void ProjectRecoveryModel::startMantidNormally() {
   m_projRec->clearAllUnusedCheckpoints();
   m_projRec->startProjectSaving();
-
+  m_failedRun = false;
   // Close view
   m_presenter->closeView();
 }
