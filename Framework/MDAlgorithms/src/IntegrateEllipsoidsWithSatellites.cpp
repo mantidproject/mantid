@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateEllipsoidsWithSatellites.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
@@ -281,7 +287,7 @@ void IntegrateEllipsoidsWithSatellites::init() {
                   "major radius for second pass when SpecifySize is false.");
 
   declareProperty(
-      "IntegrateIfOnEdge", false,
+      "IntegrateIfOnEdge", true,
       "Set to false to not integrate if peak radius is off edge of detector."
       "Background will be scaled if background radius is off edge.");
 
@@ -387,17 +393,11 @@ void IntegrateEllipsoidsWithSatellites::exec() {
     if (mnp[2] != 0 && ModDim == 2)
       ModDim = 3;
 
-    if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0) ||
-        Geometry::IndexingUtils::ValidIndex(
-            mnp, 1.0)) // use tolerance == 1 to
+    if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) // use tolerance == 1 to
                        // just check for (0,0,0,0,0,0)
     {
       peak_q_list.emplace_back(peaks[i].getQLabFrame());
       qList.emplace_back(1., V3D(peaks[i].getQLabFrame()));
-      //                    V3D
-      //                    miller_ind(static_cast<double>(boost::math::iround<double>(hkl[0])),
-      //                                   static_cast<double>(boost::math::iround<double>(hkl[1])),
-      //                                   static_cast<double>(boost::math::iround<double>(hkl[2])));
       hkl_vectors.push_back(hkl);
       mnp_vectors.push_back(mnp);
       indexed_count++;
@@ -416,14 +416,11 @@ void IntegrateEllipsoidsWithSatellites::exec() {
   Geometry::IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors,
                                          ModDim, peak_q_list);
 
-  OrientedLattice lattice;
-  //            lattice = peak_ws->mutableSample().getOrientedLattice();
-  //            UB = lattice.getUB();
+  OrientedLattice lattice = peak_ws->mutableSample().getOrientedLattice();
   lattice.setUB(UB);
   lattice.setModUB(modUB);
   modHKL = lattice.getModHKL();
 
-  lattice = peak_ws->mutableSample().getOrientedLattice();
   int maxOrder = lattice.getMaxOrder();
   bool CT = lattice.getCrossTerm();
 

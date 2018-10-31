@@ -752,7 +752,7 @@ int64_t Integrate3DEvents::getHklKey(int h, int k, int l) {
   int64_t key(0);
 
   if (h != 0 || k != 0 || l != 0)
-    key = 1000000000000 * h + 1000000 * k + l;
+    key = 1000000000000 * h + 100000000 * k + 10000 * l;
 
   return key;
 }
@@ -801,10 +801,6 @@ int64_t Integrate3DEvents::getHklMnpKey2(V3D const &hkl) {
   V3D modvec2 = V3D(m_ModHKL[0][1], m_ModHKL[1][1], m_ModHKL[2][1]);
   V3D modvec3 = V3D(m_ModHKL[0][2], m_ModHKL[1][2], m_ModHKL[2][2]);
   if (Geometry::IndexingUtils::ValidIndex(hkl, m_radius))
-
-  //            if (fabs(hkl[0]-boost::math::iround<double>(hkl[0]))<m_radius &&
-  //            fabs(hkl[1]-boost::math::iround<double>(hkl[1]))<m_radius &&
-  //            fabs(hkl[2]-boost::math::iround<double>(hkl[2]))<m_radius)
   {
     int h = boost::math::iround<double>(hkl[0]);
     int k = boost::math::iround<double>(hkl[1]);
@@ -821,12 +817,6 @@ int64_t Integrate3DEvents::getHklMnpKey2(V3D const &hkl) {
         hkl1[1] -= order * modvec1[1];
         hkl1[2] -= order * modvec1[2];
         if (Geometry::IndexingUtils::ValidIndex(hkl1, s_radius))
-        //                        if
-        //                        (fabs(hkl1[0]-boost::math::iround<double>(hkl1[0]))<m_radius
-        //                        &&
-        //                        fabs(hkl1[1]-boost::math::iround<double>(hkl1[1]))<m_radius
-        //                        &&
-        //                        fabs(hkl1[2]-boost::math::iround<double>(hkl1[2]))<m_radius)
         {
           int h = boost::math::iround<double>(hkl1[0]);
           int k = boost::math::iround<double>(hkl1[1]);
