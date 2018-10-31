@@ -13,12 +13,13 @@ import sys
 from functools import partial
 from logging import warning
 
+import qtawesome as qta
 from qtpy import QtGui
-from qtpy.QtGui import QIcon, QPixmap, QCursor, QFont, QFontMetrics
-from qtpy.QtCore import Qt, QPoint
-from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QTabWidget, QTableView, QMessageBox, QToolTip)
+from qtpy.QtCore import QPoint, Qt
+from qtpy.QtGui import QCursor, QFont, QFontMetrics
+from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView, QToolTip)
 
-from mantidqt.widgets.matrixworkspacedisplay.pixmaps import copy_xpm, table_xpm, graph_xpm, new_graph_xpm
+import mantidqt.icons
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 
 
@@ -27,13 +28,8 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         super(MatrixWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
-        # These must be initialised here, if initialised outside of a function
-        # the widget does not start at all, and Python just exits silently with
-        # exit code -1073741819 (0xC0000005), as it is killed by Windows' Data Execution Prevention
-        self.COPY_ICON = QIcon(QPixmap(copy_xpm))
-        self.VIEW_DETECTORS_ICON = QIcon(QPixmap(table_xpm))
-        self.GRAPH_ICON = QIcon(QPixmap(graph_xpm))
-        self.NEW_GRAPH_ICON = QIcon(QPixmap(new_graph_xpm))
+        self.COPY_ICON = mantidqt.icons.get_icon("fa.files-o")
+        self.GRAPH_ICON = mantidqt.icons.get_icon('fa.line-chart')
 
         # change the default color of the rows - makes them light blue
         # monitors and masked rows are colored in the table's custom model
@@ -88,16 +84,8 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         decorated_copy_action_with_correct_table = partial(self.presenter.action_copy_cell, table)
         copy_action.triggered.connect(decorated_copy_action_with_correct_table)
 
-        view_detectors_table_action = QAction(self.VIEW_DETECTORS_ICON, "View detectors table", table)
-
-        # Decorates the function with the correct table. This is done
-        # instead of having to manually check from which table the callback is coming
-        decorated_view_action_with_correct_table = partial(self.not_implemented, table)
-        view_detectors_table_action.triggered.connect(decorated_view_action_with_correct_table)
-
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
         table.addAction(copy_action)
-        table.addAction(view_detectors_table_action)
 
         horizontalHeader = table.horizontalHeader()
         horizontalHeader.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -106,22 +94,15 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         copy_bin_values = QAction(self.COPY_ICON, "Copy", horizontalHeader)
         copy_bin_values.triggered.connect(partial(self.presenter.action_copy_bin_values, table, ws_read_function))
 
-        copy_bin_to_table_action = QAction(self.COPY_ICON, "Copy bin to table", horizontalHeader)
-        copy_bin_to_table_action.triggered.connect(self.not_implemented)
-        plot_bin_action = QAction(self.NEW_GRAPH_ICON, "Plot bin (values only)", horizontalHeader)
+        plot_bin_action = QAction(self.GRAPH_ICON, "Plot bin (values only)", horizontalHeader)
         plot_bin_action.triggered.connect(self.not_implemented)
-        plot_bin_with_errors_action = QAction(self.NEW_GRAPH_ICON, "Plot bin (values + errors)", horizontalHeader)
+        plot_bin_with_errors_action = QAction(self.GRAPH_ICON, "Plot bin (values + errors)", horizontalHeader)
         plot_bin_with_errors_action.triggered.connect(self.not_implemented)
         separator1 = QAction(horizontalHeader)
         separator1.setSeparator(True)
-        separator2 = QAction(horizontalHeader)
-        separator2.setSeparator(True)
 
         horizontalHeader.addAction(copy_bin_values)
-        horizontalHeader.addAction(copy_bin_to_table_action)
         horizontalHeader.addAction(separator1)
-        horizontalHeader.addAction(view_detectors_table_action)
-        horizontalHeader.addAction(separator2)
         horizontalHeader.addAction(plot_bin_action)
         horizontalHeader.addAction(plot_bin_with_errors_action)
 
@@ -133,23 +114,17 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         copy_spectrum_values.triggered.connect(
             partial(self.presenter.action_copy_spectrum_values, table, ws_read_function))
 
-        copy_spectrum_to_table_action = QAction(self.COPY_ICON, "Copy spectrum to table", verticalHeader)
-        copy_spectrum_to_table_action.triggered.connect(self.not_implemented)
-        plot_spectrum_action = QAction(self.NEW_GRAPH_ICON, "Plot spectrum (values only)", verticalHeader)
-        plot_spectrum_action.triggered.connect(self.not_implemented)
-        plot_spectrum_with_errors_action = QAction(self.NEW_GRAPH_ICON, "Plot spectrum (values + errors)",
+        plot_spectrum_action = QAction(self.GRAPH_ICON, "Plot spectrum (values only)", verticalHeader)
+        plot_spectrum_action.triggered.connect(partial(self.presenter.action_plot_spectrum, table, ws_read_function))
+        plot_spectrum_with_errors_action = QAction(self.GRAPH_ICON, "Plot spectrum (values + errors)",
                                                    verticalHeader)
-        plot_spectrum_with_errors_action.triggered.connect(self.not_implemented)
+        plot_spectrum_with_errors_action.triggered.connect(
+            partial(self.presenter.action_plot_spectrum_with_errors, table, ws_read_function))
         separator1 = QAction(verticalHeader)
         separator1.setSeparator(True)
-        separator2 = QAction(verticalHeader)
-        separator2.setSeparator(True)
 
         verticalHeader.addAction(copy_spectrum_values)
-        verticalHeader.addAction(copy_spectrum_to_table_action)
         verticalHeader.addAction(separator1)
-        verticalHeader.addAction(view_detectors_table_action)
-        verticalHeader.addAction(separator2)
         verticalHeader.addAction(plot_spectrum_action)
         verticalHeader.addAction(plot_spectrum_with_errors_action)
 
@@ -193,7 +168,15 @@ class MatrixWorkspaceDisplayView(QTabWidget):
     def show_mouse_toast(self, message):
         # Creates a text with empty space to get the height of the rendered text - this is used
         # to provide the same offset for the tooltip, scaled relative to the current resolution and zoom.
-        a = QFontMetrics(QFont(" "))
+        font_metrics = QFontMetrics(QFont(" "))
         # The height itself is divided by 2 just to reduce the offset so that the tooltip is
         # reasonably position relative to the cursor
-        QToolTip.showText(QCursor.pos() + QPoint(a.height() / 2, 0), message)
+        QToolTip.showText(QCursor.pos() + QPoint(font_metrics.height() / 2, 0), message)
+
+    def ask_confirmation(self, message, title="Mantid Workbench"):
+        """
+        :param message:
+        :return:
+        """
+        reply = QMessageBox.question(self, title, message, QMessageBox.Yes, QMessageBox.No)
+        return True if reply == QMessageBox.Yes else False
