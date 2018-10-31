@@ -377,7 +377,7 @@ public:
 
 // clang-format off
 class IntegrateEllipsoidsWithSatellitesTestPerformance : public CxxTest::TestSuite {
-// clang-format on
+  // clang-format on
 
 private:
   Mantid::API::MatrixWorkspace_sptr m_eventWS;
@@ -387,7 +387,7 @@ private:
 public:
   // clang-format off
   static void destroySuite(IntegrateEllipsoidsWithSatellitesTestPerformance *suite) {
-  // clang-format on
+    // clang-format on
     delete suite;
   }
 
