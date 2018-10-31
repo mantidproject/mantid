@@ -7,15 +7,18 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
+import matplotlib.pyplot as plt
+from mantid import plots
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
 
 
 class MatrixWorkspaceDisplay(object):
-    NO_SELECTION_MESSAGE = "No selection to Copy"
+    NO_SELECTION_MESSAGE = "No selection"
     COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
+    A_LOT_OF_SPECTRA_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
 
     def __init__(self, ws, parent=None, model=None, view=None):
         # Create model and view, or accept mocked versions
@@ -44,7 +47,6 @@ class MatrixWorkspaceDisplay(object):
         if not selection_model.hasSelection():
             self.show_no_selection_to_copy_toast()
             return
-
         selected_rows = selection_model.selectedRows()  # type: list
         row_data = []
 
@@ -104,6 +106,47 @@ class MatrixWorkspaceDisplay(object):
         data = index.sibling(index.row(), index.column()).data()
         self.view.copy_to_clipboard(data)
         self.show_successful_copy_toast()
+
+    def action_plot_spectrum(self, table, *args):
+        selection_model = table.selectionModel()
+        if not selection_model.hasSelection():
+            self.show_no_selection_to_copy_toast()
+            return
+        selected_rows = selection_model.selectedRows()  # type: list
+
+        if len(selected_rows) > 10 and not self.view.ask_confirmation(
+                self.A_LOT_OF_SPECTRA_TO_PLOT_MESSAGE.format(len(selected_rows))):
+            return
+
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        for index in selected_rows:
+            ax.plot(self.model._ws,
+                    label='{}-{}'.format(self.model.get_name(), self.model.get_spectrum_label(index.row())),
+                    wkspIndex=index.row())
+        ax.legend()
+        fig.show()
+
+    def action_plot_spectrum_with_errors(self, table, *args):
+        selection_model = table.selectionModel()
+        if not selection_model.hasSelection():
+            self.show_no_selection_to_copy_toast()
+            return
+        selected_rows = selection_model.selectedRows()  # type: list
+
+        if len(selected_rows) > 10 and not self.view.ask_confirmation(
+                self.A_LOT_OF_SPECTRA_TO_PLOT_MESSAGE.format(len(selected_rows))):
+            return
+
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        for index in selected_rows:
+            row = index.row()
+            ax.errorbar(self.model._ws, wkspIndex=row)
+            ax.plot(self.model._ws,
+                    label='{}-{}'.format(self.model.get_name(), self.model.get_spectrum_label(index.row())),
+                    wkspIndex=row)
+        ax.legend()
+        fig.show()
+
     #
     # @staticmethod
     # def action_view_detectors_table(table, *args):

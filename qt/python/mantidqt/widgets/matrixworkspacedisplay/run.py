@@ -26,6 +26,8 @@ p = R"C:\Users\qbr77747\dev\m\source\build\ExternalData\Testing\Data\UnitTest"
 # for f in all_nxs_files:
 #     full_path = os.path.join(p, f)
 app = QApplication([])
-ws = Load(os.path.join(p, r"workspaceEmptyTextAxis.nxs"))
-window = MatrixWorkspaceDisplay(ws)
+LOQ74044 = Load(os.path.join(p, r"LOQ74044.nxs"))
+
+# ws = Load(os.path.join(p, r"AddedEvent-add.nxs"))
+window = MatrixWorkspaceDisplay(LOQ74044)
 app.exec_()

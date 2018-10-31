@@ -21,6 +21,14 @@ class MatrixWorkspaceDisplayModel(object):
     def get_name(self):
         return self._ws.name()
 
+    def get_spectrum_label(self, histogram_id):
+        """
+        :type histogram_id: int
+        :param histogram_id:
+        :return:
+        """
+        return self._ws.getAxis(1).label(histogram_id)
+
     def get_item_model(self):
         return MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x), \
                MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y), \
