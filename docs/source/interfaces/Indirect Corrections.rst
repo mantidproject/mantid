@@ -196,7 +196,7 @@ References:
 3. H H Paalman & C J Pings, `J Appl Phys 33 2635 (1962) <http://dx.doi.org/10.1063/1.1729034>`_
 
 Apply Absorption Corrections
--------------------
+----------------------------
 
 .. interface:: Corrections
   :widget: tabApplyAbsorptionCorrections
