@@ -375,8 +375,9 @@ public:
   }
 };
 
-class IntegrateEllipsoidsWithSatellitesTestPerformance \
-    : public CxxTest::TestSuite {
+// clang-format off
+class IntegrateEllipsoidsWithSatellitesTestPerformance : public CxxTest::TestSuite {
+// clang-format on
 
 private:
   Mantid::API::MatrixWorkspace_sptr m_eventWS;
@@ -384,8 +385,9 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
 public:
-  static void \
-  destroySuite(IntegrateEllipsoidsWithSatellitesTestPerformance *suite) {
+  // clang-format off
+  static void destroySuite(IntegrateEllipsoidsWithSatellitesTestPerformance *suite) {
+  // clang-format on
     delete suite;
   }
 
