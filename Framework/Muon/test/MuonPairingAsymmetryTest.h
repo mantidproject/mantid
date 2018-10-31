@@ -22,12 +22,12 @@ IAlgorithm_sptr algorithmWithPropertiesSet(const std::string &inputWSName) {
   auto alg = boost::make_shared<MuonPairingAsymmetry>();
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWSName);
- // alg->setProperty("GroupName", "fwd");
- // alg->setProperty("DetectorIndex", 1);
- // alg->setProperty("AsymmetryTimeMin", 0.0);
- // alg->setProperty("AsymmetryTimeMax", 30.0);
- // alg->setProperty("SummedPeriods", std::to_string(1));
- // alg->setProperty("SubtractedPeriods", "");
+  // alg->setProperty("GroupName", "fwd");
+  // alg->setProperty("DetectorIndex", 1);
+  // alg->setProperty("AsymmetryTimeMin", 0.0);
+  // alg->setProperty("AsymmetryTimeMax", 30.0);
+  // alg->setProperty("SummedPeriods", std::to_string(1));
+  // alg->setProperty("SubtractedPeriods", "");
   alg->setLogging(false);
   return alg;
 }
