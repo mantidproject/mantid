@@ -152,7 +152,9 @@ private:
   }
 
 public:
-  static void destroySuite(IntegrateEllipsoidsWithSatellitesTest *suite) { delete suite; }
+  static void destroySuite(IntegrateEllipsoidsWithSatellitesTest *suite) {
+    delete suite;
+  }
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -373,7 +375,8 @@ public:
   }
 };
 
-class IntegrateEllipsoidsWithSatellitesTestPerformance : public CxxTest::TestSuite {
+class IntegrateEllipsoidsWithSatellitesTestPerformance
+    : public CxxTest::TestSuite {
 
 private:
   Mantid::API::MatrixWorkspace_sptr m_eventWS;
@@ -381,7 +384,8 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
 public:
-  static void destroySuite(IntegrateEllipsoidsWithSatellitesTestPerformance *suite) {
+  static void
+  destroySuite(IntegrateEllipsoidsWithSatellitesTestPerformance *suite) {
     delete suite;
   }
 

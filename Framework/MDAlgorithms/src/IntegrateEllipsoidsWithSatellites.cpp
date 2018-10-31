@@ -393,7 +393,8 @@ void IntegrateEllipsoidsWithSatellites::exec() {
     if (mnp[2] != 0 && ModDim == 2)
       ModDim = 3;
 
-    if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) // use tolerance == 1 to
+    if (Geometry::IndexingUtils::ValidIndex(
+            hkl, 1.0)) // use tolerance == 1 to
                        // just check for (0,0,0,0,0,0)
     {
       peak_q_list.emplace_back(peaks[i].getQLabFrame());
