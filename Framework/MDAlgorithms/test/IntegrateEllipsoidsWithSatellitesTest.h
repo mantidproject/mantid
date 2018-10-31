@@ -375,7 +375,7 @@ public:
   }
 };
 
-class IntegrateEllipsoidsWithSatellitesTestPerformance
+class IntegrateEllipsoidsWithSatellitesTestPerformance \
     : public CxxTest::TestSuite {
 
 private:
@@ -384,7 +384,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
 public:
-  static void
+  static void \
   destroySuite(IntegrateEllipsoidsWithSatellitesTestPerformance *suite) {
     delete suite;
   }
