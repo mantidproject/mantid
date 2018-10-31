@@ -153,8 +153,6 @@ if ( ENABLE_WORKBENCH AND PACKAGE_WORKBENCH )
   find_program(_powershell_available NAMES "powershell")
   # Name of the workbench executable without any extensions
   set(_workbench_base_name launch_workbench)
-  # Installs the PowerShell run script in the bin directory
-  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/${_workbench_base_name}.ps1 DESTINATION bin )
 
   if ( NOT _powershell_available )
     message(FATAL_ERROR "PowerShell was not found. The Workbench executable cannot be generated. Please check that PowerShell is available in your PATH variable.")
