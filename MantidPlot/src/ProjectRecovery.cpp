@@ -469,30 +469,16 @@ bool ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
 
   auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
 
-  bool loadCompleted = false;
   if (!QMetaObject::invokeMethod(
-          m_windowPtr, "loadProjectRecovery", Qt::DirectConnection,
-          Q_RETURN_ARG(bool, loadCompleted),
-          Q_ARG(const std::string, projectFile.toString()))) {
+          m_windowPtr, "loadProjectRecovery", Qt::QueuedConnection,
+          Q_ARG(const std::string, projectFile.toString()),
+          Q_ARG(const std::string, recoveryFolder.toString()))) {
     throw std::runtime_error("Project Recovery: Failed to load project "
                              "windows - Qt binding failed");
   }
+  g_log.notice("Project Recovery workspace loading finished");
 
-  if (!loadCompleted) {
-    g_log.warning("Loading failed to recovery everything completely");
-    // This has failed so terminate the thread
-    return loadCompleted;
-  }
-  g_log.notice("Project Recovery finished");
-
-  // Restart project recovery when the async part finishes
-  Poco::Path deletePath = recoveryFolder;
-  deletePath.setFileName("");
-  deletePath.popDirectory();
-  clearAllCheckpoints(deletePath);
-  startProjectSaving();
-
-  return loadCompleted;
+  return true;
 }
 
 /**

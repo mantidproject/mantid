@@ -16783,11 +16783,26 @@ bool ApplicationWindow::isOfType(const QObject *obj,
  * @param sourceFile The full path to the .project file
  * @return True is loading was successful, false otherwise
  */
-bool ApplicationWindow::loadProjectRecovery(std::string sourceFile) {
+bool ApplicationWindow::loadProjectRecovery(std::string sourceFile,
+                                            std::string recoveryFolder) {
+  // Wait on this thread until scriptWindow is finished (Should be a seperate
+  // thread)
+  do {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  } while (scriptingWindow->isExecuting());
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
   // File version is not applicable to project recovery - so set to 0
-  return projectWriter.load(sourceFile, 0);
+  auto fileVersion = projectWriter.load(sourceFile, 0);
+
+  // Handle the removal of old checkpoints and start project saving again
+  Poco::Path deletePath(recoveryFolder);
+  deletePath.setFileName("");
+  deletePath.popDirectory();
+  m_projectRecovery.clearAllCheckpoints(deletePath);
+  m_projectRecovery.startProjectSaving();
+
+  return fileVersion;
 }
 
 /**
