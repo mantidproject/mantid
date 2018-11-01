@@ -18,8 +18,8 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using Mantid::Kernel::EnvironmentHistory;
 using boost::algorithm::split;
+using Mantid::Kernel::EnvironmentHistory;
 
 namespace Mantid {
 namespace API {
@@ -430,6 +430,10 @@ boost::shared_ptr<HistoryView> WorkspaceHistory::createView() const {
 std::ostream &operator<<(std::ostream &os, const WorkspaceHistory &WH) {
   WH.printSelf(os);
   return os;
+}
+
+bool WorkspaceHistory::operator==(const WorkspaceHistory &otherHistory) const {
+  return m_algorithms == otherHistory.m_algorithms;
 }
 
 } // namespace API

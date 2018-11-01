@@ -190,13 +190,6 @@ bool RenameWorkspace::processGroups() {
       }
     }
   }
-  // Put history of the call into each child
-  auto historyTime = Types::Core::DateAndTime::getCurrentTime();
-  for (auto i = 0; i < inputGroup->getNumberOfEntries(); ++i) {
-    auto groupHistory = boost::make_shared<AlgorithmHistory>(this, historyTime,
-                                                             0, ++g_execCount);
-    inputGroup->getItem(i)->history().addHistory(groupHistory);
-  }
 
   setProperty("OutputWorkspace", inputGroup);
 
