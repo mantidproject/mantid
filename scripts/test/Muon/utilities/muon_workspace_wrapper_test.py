@@ -8,7 +8,7 @@ import mantid.api as api
 from mantid.api import ITableWorkspace, WorkspaceGroup
 from mantid.dataobjects import Workspace2D
 
-from Muon.GUI.Common.muon_workspace import MuonWorkspace, add_directory_structure
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, add_directory_structure
 
 
 def create_simple_workspace(data_x, data_y):
@@ -39,7 +39,7 @@ def create_simple_table_workspace():
 
 class MuonWorkspaceTest(unittest.TestCase):
     """
-    The MuonWorkspace object is a key class in the muon interface. It is a wrapper around a normal
+    The MuonWorkspaceWrapper object is a key class in the muon interface. It is a wrapper around a normal
     Mantid workspace, which maintains a handle to the workspace whilst allowing it to be in the ADS
     or not.
 
@@ -73,41 +73,42 @@ class MuonWorkspaceTest(unittest.TestCase):
 
     def test_that_cannot_initialize_without_supplying_a_workspace(self):
         with self.assertRaises(TypeError):
-            MuonWorkspace()
+            MuonWorkspaceWrapper()
 
     def test_that_can_initialize_with_Workspace2D_object(self):
-        MuonWorkspace(workspace=self.workspace)
+        MuonWorkspaceWrapper(workspace=self.workspace)
 
     def test_that_can_initialize_with_TableWorkspace_object(self):
         table_workspace = create_simple_table_workspace()
         assert isinstance(table_workspace, ITableWorkspace)
 
-        MuonWorkspace(workspace=table_workspace)
+        MuonWorkspaceWrapper(workspace=table_workspace)
 
     def test_that_cannot_initialize_with_WorkspaceGroup_object(self):
         group_workspace = api.WorkspaceGroup()
         assert isinstance(group_workspace, WorkspaceGroup)
 
         with self.assertRaises(AttributeError):
-            MuonWorkspace(workspace=group_workspace)
+            MuonWorkspaceWrapper(workspace=group_workspace)
 
     def test_that_cannot_initialize_with_non_workspace_objects(self):
         with self.assertRaises(AttributeError):
-            MuonWorkspace(workspace="string")
+            MuonWorkspaceWrapper(workspace="string")
 
         with self.assertRaises(AttributeError):
-            MuonWorkspace(workspace=1234)
+            MuonWorkspaceWrapper(workspace=1234)
 
         with self.assertRaises(AttributeError):
-            MuonWorkspace(workspace=5.5)
+            MuonWorkspaceWrapper(workspace=5.5)
 
     def test_that_initialized_object_is_not_in_ADS_by_default(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
         self.assertEqual(workspace_handle.is_hidden, True)
+        self.assertEqual(simpleapi.mtd.size(), 0)
 
     def test_that_initialized_object_starts_with_empty_string_for_name(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
         self.assertEqual(workspace_handle.name, "")
 
@@ -117,19 +118,19 @@ class MuonWorkspaceTest(unittest.TestCase):
 
     def test_that_cannot_modify_is_hidden_property(self):
         # the ADS handling interface is restricted to the show() / hide() methods
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
         with self.assertRaises(AttributeError):
             workspace_handle.is_hidden = True
 
     def test_that_showing_the_workspace_with_empty_string_for_name_raises_ValueError(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
         with self.assertRaises(ValueError):
             workspace_handle.show("")
 
     def test_that_showing_the_workspace_puts_it_in_ADS(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
         workspace_handle.show("test")
 
@@ -139,7 +140,7 @@ class MuonWorkspaceTest(unittest.TestCase):
         six.assertCountEqual(self, ads_workspace.readY(0), [10, 10, 10, 10])
 
     def test_that_hiding_the_workspace_removes_it_from_ADS(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
         workspace_handle.show("test")
 
         workspace_handle.hide()
@@ -148,7 +149,7 @@ class MuonWorkspaceTest(unittest.TestCase):
         self.assertFalse(simpleapi.mtd.doesExist("test"))
 
     def test_that_workspace_property_returns_workspace_when_not_in_ADS(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
         ws_property = workspace_handle.workspace
 
@@ -156,7 +157,7 @@ class MuonWorkspaceTest(unittest.TestCase):
         six.assertCountEqual(self, ws_property.readY(0), [10, 10, 10, 10])
 
     def test_that_workspace_property_returns_workspace_when_in_ADS(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
         workspace_handle.show("arbitrary_name")
         ws_property = workspace_handle.workspace
@@ -165,14 +166,14 @@ class MuonWorkspaceTest(unittest.TestCase):
         six.assertCountEqual(self, ws_property.readY(0), [10, 10, 10, 10])
 
     def test_that_can_change_name_when_workspace_not_in_ADS(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
         workspace_handle.name = "new_name"
 
         self.assertEqual(workspace_handle.name, "new_name")
 
     def test_that_running_show_twice_with_different_names_causes_the_workspace_to_be_moved(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
         workspace_handle.show("name1")
         workspace_handle.show("name2")
@@ -181,7 +182,7 @@ class MuonWorkspaceTest(unittest.TestCase):
         self.assertTrue(simpleapi.mtd.doesExist("name2"))
 
     def test_that_cannot_change_name_when_workspace_in_ADS(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
         workspace_handle.show("name1")
 
@@ -189,7 +190,7 @@ class MuonWorkspaceTest(unittest.TestCase):
             workspace_handle.name = "new_name"
 
     def test_that_hiding_workspace_more_than_once_has_no_effect_but_raises_RuntimeWarning(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
         workspace_handle.show("name1")
 
         workspace_handle.hide()
@@ -198,7 +199,7 @@ class MuonWorkspaceTest(unittest.TestCase):
             workspace_handle.hide()
 
     def test_that_if_workspace_deleted_from_ADS_then_hide_raises_a_RuntimeWarning(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
         workspace_handle.show("name1")
 
         simpleapi.mtd.clear()
@@ -219,7 +220,7 @@ class MuonWorkspaceTest(unittest.TestCase):
     # ----------------------------------------------------------------------------------------------
 
     def test_that_setting_a_new_workspace_removes_the_previous_one_from_the_ADS(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
         workspace_handle.show("name1")
 
         workspace2 = create_simple_workspace(data_x=[5, 6, 7, 8], data_y=[20, 20, 20, 20])
@@ -229,7 +230,7 @@ class MuonWorkspaceTest(unittest.TestCase):
         self.assertFalse(simpleapi.mtd.doesExist("name1"))
 
     def test_that_setting_a_new_workspace_resets_the_name_to_empty_string(self):
-        workspace_handle = MuonWorkspace(workspace=self.workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
         workspace_handle.show("name1")
 
         workspace2 = create_simple_workspace(data_x=[5, 6, 7, 8], data_y=[20, 20, 20, 20])
@@ -333,21 +334,21 @@ class MuonWorkspaceAddDirectoryTest(unittest.TestCase):
         self.assert_group1_is_inside_group2("testGroup2", "testGroup1")
 
     # ----------------------------------------------------------------------------------------------
-    # Test directory structure functionality in MuonWorkspace
+    # Test directory structure functionality in MuonWorkspaceWrapper
     # ----------------------------------------------------------------------------------------------
 
     def test_that_if_workspace_exists_with_same_name_as_group_then_it_is_replaced(self):
         workspace = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
         simpleapi.mtd.add("group", workspace)
 
-        workspace_handle = MuonWorkspace(workspace=workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=workspace)
         workspace_handle.show("group/ws1")
 
         self.assert_group_workspace_exists("group")
 
     def test_that_workspace_added_correctly_for_single_nested_structure(self):
         workspace = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
-        workspace_handle = MuonWorkspace(workspace=workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=workspace)
 
         workspace_handle.show("group1/ws1")
 
@@ -356,7 +357,7 @@ class MuonWorkspaceAddDirectoryTest(unittest.TestCase):
 
     def test_that_workspace_added_correctly_for_doubly_nested_structure(self):
         workspace = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
-        workspace_handle = MuonWorkspace(workspace=workspace)
+        workspace_handle = MuonWorkspaceWrapper(workspace=workspace)
 
         workspace_handle.show("group1/group2/ws1")
 
@@ -368,8 +369,8 @@ class MuonWorkspaceAddDirectoryTest(unittest.TestCase):
     def test_that_workspaces_in_existing_folders_are_not_moved_by_directory_manipulation(self):
         workspace1 = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
         workspace2 = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
-        workspace_handle1 = MuonWorkspace(workspace=workspace1)
-        workspace_handle2 = MuonWorkspace(workspace=workspace2)
+        workspace_handle1 = MuonWorkspaceWrapper(workspace=workspace1)
+        workspace_handle2 = MuonWorkspaceWrapper(workspace=workspace2)
 
         workspace_handle1.show("group1/group2/ws1")
         workspace_handle2.show("group1/group2/group3/ws2")

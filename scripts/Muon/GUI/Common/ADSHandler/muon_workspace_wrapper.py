@@ -39,7 +39,7 @@ def add_directory_structure(dirs):
         previous_dir = directory
 
 
-class MuonWorkspace(object):
+class MuonWorkspaceWrapper(object):
     """
     A wrapper around a single workspace for use with MuonAnalysis.
 
@@ -65,7 +65,7 @@ class MuonWorkspace(object):
         self.workspace = workspace
 
     def __str__(self):
-        return "MuonWorkspace Object \n" \
+        return "MuonWorkspaceWrapper Object \n" \
                "In ADS         : {}\n" \
                "Name           : {}\n" \
                "Directory      : {}\n" \
@@ -123,9 +123,6 @@ class MuonWorkspace(object):
 
         if len(name) > 0 and self.is_hidden:
             self.name = str(name)
-            # remove workspace with the same name if it exists
-            if mtd.doesExist(self._workspace_name):
-                mtd.remove(self._workspace_name)
             # add workspace to ADS
             mtd.addOrReplace(self._workspace_name, self._workspace)
 
