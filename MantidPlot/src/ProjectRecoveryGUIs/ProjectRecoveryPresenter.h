@@ -21,7 +21,7 @@ class ProjectRecoveryView;
 class RecoveryFailureView;
 class ProjectRecoveryPresenter {
 public:
-  enum OpenView { RecoveryView, FailureView};
+  enum OpenView { RecoveryView, FailureView };
   // Interestingly this nullptr should never be used
   ProjectRecoveryPresenter(MantidQt::ProjectRecovery *projectRecovery,
                            ApplicationWindow *parentWindow);

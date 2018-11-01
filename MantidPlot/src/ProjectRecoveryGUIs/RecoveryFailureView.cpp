@@ -5,16 +5,16 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RecoveryFailureView.h"
-#include "ui_RecoveryFailure.h"
 #include "ApplicationWindow.h"
-#include "ScriptingWindow.h"
-#include "Script.h"
 #include "MantidKernel/UsageService.h"
+#include "Script.h"
+#include "ScriptingWindow.h"
+#include "ui_RecoveryFailure.h"
 #include <boost/smart_ptr/make_shared.hpp>
 
 RecoveryFailureView::RecoveryFailureView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QDialog(parent), ui(new Ui::RecoveryFailure), m_presenter(presenter){
+    : QDialog(parent), ui(new Ui::RecoveryFailure), m_presenter(presenter) {
   ui->setupUi(this);
   ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
@@ -113,7 +113,7 @@ void RecoveryFailureView::setProgressBarMaximum(int newValue) {
 
 void RecoveryFailureView::connectProgressBar() {
   connect(&m_presenter->m_mainWindow->getScriptWindowHandle()
-              ->getCurrentScriptRunner(),
+               ->getCurrentScriptRunner(),
           SIGNAL(currentLineChanged(int, bool)), this,
           SLOT(updateProgressBar(int, bool)));
 }

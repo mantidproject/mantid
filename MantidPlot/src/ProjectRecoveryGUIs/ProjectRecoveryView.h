@@ -36,7 +36,7 @@ private slots:
 
 private:
   void addDataToTable(Ui::ProjectRecoveryWidget *ui);
-  
+
   Ui::ProjectRecoveryWidget *ui;
   ProjectRecoveryPresenter *m_presenter;
 };

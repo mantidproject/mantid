@@ -14,9 +14,9 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <QApplication>
 #include <QThread>
 #include <fstream>
-#include <QApplication>
 #include <memory>
 
 namespace {
@@ -175,7 +175,7 @@ void ProjectRecoveryModel::createThreadAndManage(const Poco::Path &checkpoint) {
   recoverThread.setCheckpoint(checkpoint);
   recoverThread.start(QThread::LowPriority);
 
-  while (!recoverThread.isFinished()){
+  while (!recoverThread.isFinished()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     QApplication::processEvents();
   }

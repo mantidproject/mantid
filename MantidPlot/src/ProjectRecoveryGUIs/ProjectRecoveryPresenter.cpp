@@ -139,11 +139,10 @@ void ProjectRecoveryPresenter::setUpProgressBar(
   }
 }
 
-void ProjectRecoveryPresenter::connectProgressBarToRecoveryView(){
-  if (m_openView == RecoveryView){
+void ProjectRecoveryPresenter::connectProgressBarToRecoveryView() {
+  if (m_openView == RecoveryView) {
     m_recView->connectProgressBar();
   } else {
     m_failureView->connectProgressBar();
   }
-  
 }
