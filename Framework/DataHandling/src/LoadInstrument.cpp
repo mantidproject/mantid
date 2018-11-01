@@ -28,7 +28,6 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 namespace Mantid {

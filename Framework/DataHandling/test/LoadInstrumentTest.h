@@ -16,6 +16,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -291,6 +292,54 @@ public:
     TS_ASSERT_DELTA(ptrDet.getPos().Z(), 4.8888, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void testExecLOKI() {
+    LoadInstrument loaderLOKI;
+
+    TS_ASSERT_THROWS_NOTHING(loaderLOKI.initialize());
+
+    // // create a workspace with some sample data
+    wsName = "LoadInstrumentTestLOKI";
+    Workspace_sptr ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    // put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    const std::string definitionFile = "LOKI_Definition.hdf5";
+    loaderLOKI.setPropertyValue("Filename", definitionFile);
+    loaderLOKI.setPropertyValue("Workspace", wsName);
+    loaderLOKI.setProperty("RewriteSpectraMap", OptionalBool(true));
+    inputFile = loaderLOKI.getPropertyValue("Filename");
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING(result =
+                                 loaderLOKI.getPropertyValue("Filename"));
+    TS_ASSERT(!result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING(result =
+                                 loaderLOKI.getPropertyValue("Workspace"));
+    TS_ASSERT(!result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loaderLOKI.execute());
+
+    TS_ASSERT(loaderLOKI.isExecuted());
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr outputWs;
+    TS_ASSERT_THROWS_NOTHING(
+        outputWs = loaderLOKI.getProperty("Workspace"));
+
+    auto &componentInfo = outputWs->componentInfo();
+    auto &detectorInfo = outputWs->detectorInfo();
+    TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "LOKI");
+    TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
+
+    TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0])
+    TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1])
+
   }
 
   void testExecHRP2() {
