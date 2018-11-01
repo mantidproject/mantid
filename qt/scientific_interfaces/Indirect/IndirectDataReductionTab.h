@@ -69,8 +69,9 @@ public slots:
 
 signals:
   /// Update the Run button on the IDR main window
-  void updateRunButton(bool enabled = true, QString message = "Run",
-                       QString tooltip = "");
+  void updateRunButton(bool enabled = true,
+                       std::string const &enableOutputButtons = "unchanged",
+                       QString message = "Run", QString tooltip = "");
   /// Emitted when the instrument setup is changed
   void newInstrumentConfiguration();
 

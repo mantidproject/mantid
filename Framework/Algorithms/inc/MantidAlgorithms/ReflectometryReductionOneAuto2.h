@@ -34,10 +34,6 @@ public:
   bool checkGroups() override;
   bool processGroups() override;
 
-  /// Sums transmission workspaces belonging to a group
-  Mantid::API::MatrixWorkspace_sptr
-  sumTransmissionWorkspaces(Mantid::API::WorkspaceGroup_sptr &transGroup);
-
 private:
   void init() override;
   void exec() override;
@@ -67,6 +63,10 @@ private:
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
   getPolarizationEfficiencies();
   void applyPolarizationCorrection(std::string const &outputIvsLam);
+  API::MatrixWorkspace_sptr getFloodWorkspace();
+  void applyFloodCorrection(API::MatrixWorkspace_sptr const &flood,
+                            const std::string &propertyName);
+  void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
                               const double defaultValue);
   void setOutputWorkspaces(std::vector<std::string> &IvsLamGroup,

@@ -58,10 +58,6 @@ boost::optional<T> getConfigValue(const std::string &key) {
   return Mantid::Kernel::ConfigService::Instance().getValue<T>(key);
 }
 
-boost::optional<bool> getConfigBool(const std::string &key) {
-  return Mantid::Kernel::ConfigService::Instance().getValue<bool>(key);
-}
-
 /// Returns a string to the folder it should output to
 std::string getRecoveryFolderOutput() {
   static std::string appData =
@@ -230,6 +226,8 @@ void removeEmptyFolders(std::vector<Poco::Path> &checkpointPaths) {
     if (listOfFolders.size() == 0) {
       // Remove actual folder to stop this happening again in further checks
       Poco::File(checkpointPaths[i]).remove(true);
+      // Erase from checkpointPaths vector
+      checkpointPaths.erase(checkpointPaths.begin() + i);
     }
   }
 }
@@ -246,14 +244,9 @@ Poco::File addLockFile(const Poco::Path &lockFilePath) {
 
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
 
-// Config keys
-const std::string SAVING_ENABLED_CONFIG_KEY = "projectRecovery.enabled";
 const std::string SAVING_TIME_KEY = "projectRecovery.secondsBetween";
 const std::string NO_OF_CHECKPOINTS_KEY = "projectRecovery.numberOfCheckpoints";
 
-// Config values
-bool SAVING_ENABLED =
-    getConfigBool(SAVING_ENABLED_CONFIG_KEY).get_value_or(false);
 const int SAVING_TIME =
     getConfigValue<int>(SAVING_TIME_KEY).get_value_or(60); // Seconds
 const int NO_OF_CHECKPOINTS =
@@ -275,7 +268,6 @@ namespace MantidQt {
  */
 ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
     : m_backgroundSavingThread(), m_stopBackgroundThread(true),
-      m_configKeyObserver(*this, &ProjectRecovery::configKeyChanged),
       m_windowPtr(windowHandle), m_recoveryGui(nullptr) {}
 
 /// Destructor which also stops any background threads currently in progress
@@ -300,8 +292,12 @@ void ProjectRecovery::attemptRecovery() {
 
 bool ProjectRecovery::checkForRecovery() const noexcept {
   try {
-    const auto checkpointPaths =
+    auto checkpointPaths =
         getRecoveryFolderCheckpoints(getRecoveryFolderCheck());
+    // Since adding removal of checkpoints before this check it is possible that
+    // a PID is there with no checkpoint this loop fixes that issue removing
+    // them.
+    removeEmptyFolders(checkpointPaths);
     return checkpointPaths.size() != 0 &&
            (checkpointPaths.size() > Process::numberOfMantids());
   } catch (...) {
@@ -338,22 +334,6 @@ std::thread ProjectRecovery::createBackgroundThread() {
   // Using a lambda helps the compiler deduce the this pointer
   // otherwise the resolution is ambiguous
   return std::thread([this] { projectSavingThreadWrapper(); });
-}
-
-/// Callback for POCO when a config change had fired for the enabled key
-void ProjectRecovery::configKeyChanged(
-    Mantid::Kernel::ConfigValChangeNotification_ptr notif) {
-  if (notif->key() != (SAVING_ENABLED_CONFIG_KEY)) {
-    return;
-  }
-
-  if (notif->curValue() == "True") {
-    SAVING_ENABLED = true;
-    startProjectSaving();
-  } else {
-    SAVING_ENABLED = false;
-    stopProjectSaving();
-  }
 }
 
 void ProjectRecovery::compileRecoveryScript(const Poco::Path &inputFolder,
@@ -435,10 +415,6 @@ void ProjectRecovery::startProjectSaving() {
   // Close the existing thread first
   stopProjectSaving();
 
-  if (!SAVING_ENABLED) {
-    return;
-  }
-
   // Spin up a new thread
   {
     std::lock_guard<std::mutex> lock(m_notifierMutex);
@@ -451,6 +427,7 @@ void ProjectRecovery::startProjectSaving() {
 /// Stops any existing background threads which are running
 void ProjectRecovery::stopProjectSaving() {
   {
+
     std::lock_guard<std::mutex> lock(m_notifierMutex);
     m_stopBackgroundThread = true;
     m_threadNotifier.notify_all();
@@ -649,6 +626,61 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->setProperty("IgnoreTheseAlgs", m_algsToIgnore);
 
     alg->execute();
+  }
+}
+
+void ProjectRecovery::removeOlderCheckpoints() {
+  // Currently set to a month in microseconds
+  const int64_t timeToDeleteAfter = 2592000000000;
+  std::string recoverFolder = getRecoveryFolderCheck();
+  // Get the PIDS
+  std::vector<Poco::Path> possiblePidsPaths =
+      getListOfFoldersInDirectory(recoverFolder);
+  // Order pids based on date last modified descending
+  std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
+  // check if pid exists
+  std::vector<std::string> folderPaths;
+  for (auto i = 0u; i < possiblePids.size(); ++i) {
+    if (!isPIDused(possiblePids[i])) {
+      std::string folder = recoverFolder;
+      folder.append(std::to_string(possiblePids[i]) + "/");
+      if (olderThanAGivenTime(Poco::Path(folder), timeToDeleteAfter)) {
+        folderPaths.emplace_back(folder);
+      }
+    }
+  }
+
+  bool recurse = true;
+  for (size_t i = 0; i < folderPaths.size(); i++) {
+    Poco::File(folderPaths[i]).remove(recurse);
+  }
+}
+
+void ProjectRecovery::removeLockedCheckpoints() {
+  std::string recoverFolder = getRecoveryFolderCheck();
+  // Get the PIDS
+  std::vector<Poco::Path> possiblePidsPaths =
+      getListOfFoldersInDirectory(recoverFolder);
+  // Order pids based on date last modified descending
+  std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
+  // check if pid exists
+  std::vector<Poco::Path> files;
+  for (auto i = 0u; i < possiblePids.size(); ++i) {
+    if (!isPIDused(possiblePids[i])) {
+      std::string folder = recoverFolder;
+      folder.append(std::to_string(possiblePids[i]) + "/");
+      auto checkpointsInsidePIDs = getListOfFoldersInDirectory(folder);
+      for (auto c : checkpointsInsidePIDs) {
+        if (Poco::File(c.setFileName(LOCK_FILE_NAME)).exists()) {
+          files.emplace_back(c.setFileName(""));
+        }
+      }
+    }
+  }
+
+  bool recurse = true;
+  for (auto c : files) {
+    Poco::File(c).remove(recurse);
   }
 }
 

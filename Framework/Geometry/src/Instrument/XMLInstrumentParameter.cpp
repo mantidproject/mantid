@@ -68,7 +68,7 @@ XMLInstrumentParameter::XMLInstrumentParameter(
       m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp),
       m_angleConvertConst(angleConvertConst), m_description("") {
   if (!description.empty()) { // remove multiple spaces
-    boost::regex re("\\s+");
+    static const boost::regex re("\\s+");
     std::string desc = boost::regex_replace(description, re, " ");
     (const_cast<std::string *>(&m_description))->assign(desc);
   }

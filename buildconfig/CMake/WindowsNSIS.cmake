@@ -176,6 +176,8 @@ install ( FILES ${QT_PLUGIN_DIR}/sqldrivers/qsqlite4.dll DESTINATION plugins/qt4
 ###########################################################################
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
+install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin 
+    RENAME mantidpython.bat )
 
 ###########################################################################	
 # Icons for shortcuts	

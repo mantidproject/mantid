@@ -21,6 +21,8 @@ Improvements
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
+- :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
+- Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
 
 
 Single Crystal Diffraction
@@ -29,11 +31,12 @@ Single Crystal Diffraction
 Improvements
 ############
 
-- :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.  In addition, the algorithm can now automatically generate a strong peaks library is one is not provided.
+- :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.  In addition, the algorithm can now automatically generate a strong peaks library is one is not provided.  Peakshapes will be learned to improve initial guesses as the strong peak library is generated.
 - :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
   data streaming from TOPAZ new Adara data server.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
+- :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
 
 Bugfixes
 ########
@@ -53,6 +56,7 @@ Improvements
 - Focusing on Gem now crops values that would be divided by very small or zero vanadium values
 - Removed save_angles flag for Gem , as it was set by the texture mode.
 - Added save_all flag to Gem that is set to true by default, setting it to false disables the saving of .NXS files.
+- Added subtract_empty_instrument flag to Gem that is true by default, setting it to false disables subrtracting the empty.
 - Changed spline coefficient so that the default for long_mode on and long_mode off can be set separately.
 
 Bugfixes
@@ -60,6 +64,7 @@ Bugfixes
 
 - multiple_scattering flag is now optional for Polaris focus when absorb_correction is true.
 - Normalisation is fixed in :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`, which was causing very low peak to background ratio for reduced D2B data.
+- sudden drops at either end of spectra in Pearl caused by partial bins are now cropped.
 
 New
 ###

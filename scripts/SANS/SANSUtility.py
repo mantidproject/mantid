@@ -1548,7 +1548,7 @@ def can_load_as_event_workspace(filename):
             # and check for event_eventworkspace in the next level
             with h5.File(filename) as h5f:
                 try:
-                    rootKeys = h5f.keys()
+                    rootKeys = list(h5f.keys()) # python3 fix
                     entry0 = h5f[rootKeys[0]]
                     ew = entry0['event_workspace']
                     is_event_workspace = ew is not None

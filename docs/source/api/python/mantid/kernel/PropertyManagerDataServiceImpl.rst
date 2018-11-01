@@ -2,7 +2,7 @@
  PropertyManagerDataServiceImpl
 ================================
 
-This a python binding to the C++ class Mantid::Kernel::PropertyManagerDataServiceImpl.
+This is a Python binding to the C++ class Mantid::Kernel::PropertyManagerDataServiceImpl.
 
 
 .. module:`mantid.api`

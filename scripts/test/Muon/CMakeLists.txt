@@ -17,8 +17,9 @@ set ( TEST_PY_FILES
    PlottingPresenter_test.py
    PlottingUtils_test.py
    PlottingView_test.py
-   thread_model_test.py
+   #thread_model_test.py
    transformWidget_test.py
+   subplotObject_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

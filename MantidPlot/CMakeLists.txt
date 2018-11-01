@@ -667,7 +667,6 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 ###########################################################################
 
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/images.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/MantidWidgets.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images//fonts/fonts.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/scripts/ErrorReporter/errorreporter.qrc )

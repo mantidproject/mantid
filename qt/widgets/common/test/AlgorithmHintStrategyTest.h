@@ -16,8 +16,6 @@
 #include "MantidQtWidgets/Common/HintStrategy.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/scoped_ptr.hpp>
-
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 

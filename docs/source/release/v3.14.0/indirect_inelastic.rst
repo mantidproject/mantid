@@ -16,7 +16,9 @@ New Algorithms
 ##############
 - :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` replaces :ref:`BASISDiffraction <algm-BASISDiffraction>`, now deprecated.
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` obtains scattered elastic intensity versus momentum transfer and versus scattering angle.
+- TOF correction for neutrons incorrectly interpreted as slow neutrons in :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>`
 - Deprecated algorithm BASISReduction311 has been removed.
+- :ref:`LoadEMU <algm-LoadEMU>` loader for an ANSTO EMU backscattering event file.
 
 :ref:`Release 3.14.0 <v3.14.0>`
 
@@ -45,6 +47,9 @@ Bugfixes
   option in ConvFit.
 - An unexpected crash is prevented when Plot Current Preview is clicked when no data is loaded. A meaningful error
   message is now displayed.
+- The Probability Density Functions (PDF) workspaces for the FABADA minimiser in ConvFit no longer overwrite each other. 
+  Various other improvements in the display of the FABADA PDF's have also been finished.
+- The expression for the Fit type Yi in MSDFit was incorrect and has now been corrected.
 
 
 Data Corrections Interface
@@ -70,3 +75,6 @@ Improvements
 - Added 'Default' detector grouping option in ISISEnergyTransfer for TOSCA, to allow a default grouping 
   using the grouping specified in the Instrument Parameter File.
 - ISISEnergyTransfer now allows overlapping detector grouping.
+- The Run button has been moved to be above the output options. The run button, save button and plotting options 
+  are now disabled while a tab is running or plotting.  
+- It is now possible to choose which spectrum to Plot Output for in the S(Q,w) Tab.
