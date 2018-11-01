@@ -15,19 +15,46 @@ from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorks
 
 
 class MatrixWorkspaceDisplayModel(object):
+    SPECTRUM_PLOT_LEGEND_STRING = '{}-{}'
+    BIN_PLOT_LEGEND_STRING = '{}-bin-{}'
+
     def __init__(self, ws):
         self._ws = ws
 
     def get_name(self):
         return self._ws.name()
 
-    def get_spectrum_label(self, histogram_id):
+    def get_spectrum_label(self, index):
         """
-        :type histogram_id: int
-        :param histogram_id:
+        :type index: int
+        :param index: The index for which the label will be retrieved
         :return:
         """
-        return self._ws.getAxis(1).label(histogram_id)
+        return self._ws.getAxis(1).label(index)
+
+    def get_spectrum_plot_label(self, index):
+        """
+        :type index: int
+        :param index: The index for which the plot label will be constructed
+        :return:
+        """
+        return self.SPECTRUM_PLOT_LEGEND_STRING.format(self.get_name(), self.get_spectrum_label(index))
+
+    def get_bin_label(self, index):
+        """
+        :type index: int
+        :param index: The index for which the label will be retrieved
+        :return:
+        """
+        return self._ws.getAxis(0).label(index)
+
+    def get_bin_plot_label(self, index):
+        """
+        :type index: int
+        :param index: The index for which the plot label will be constructed
+        :return:
+        """
+        return self.BIN_PLOT_LEGEND_STRING.format(self.get_name(), self.get_bin_label(index))
 
     def get_item_model(self):
         return MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x), \

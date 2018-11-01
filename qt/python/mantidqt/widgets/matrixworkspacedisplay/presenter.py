@@ -9,8 +9,13 @@
 #
 from __future__ import absolute_import, division, print_function
 
+import matplotlib
+
+from mantid.plots import MantidAxes
+# TODO remove before PR / figure our where to do it properly
+matplotlib.use('Qt5Agg')
+print("MPL version:", matplotlib.__version__)
 import matplotlib.pyplot as plt
-from mantid import plots
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
 
@@ -18,7 +23,7 @@ from .view import MatrixWorkspaceDisplayView
 class MatrixWorkspaceDisplay(object):
     NO_SELECTION_MESSAGE = "No selection"
     COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
-    A_LOT_OF_SPECTRA_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
+    A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
 
     def __init__(self, ws, parent=None, model=None, view=None):
         # Create model and view, or accept mocked versions
@@ -107,50 +112,44 @@ class MatrixWorkspaceDisplay(object):
         self.view.copy_to_clipboard(data)
         self.show_successful_copy_toast()
 
-    def action_plot_spectrum(self, table, *args):
+    def _do_action_plot(self, table, axis, get_label, get_index, plot_errors=False):
         selection_model = table.selectionModel()
         if not selection_model.hasSelection():
             self.show_no_selection_to_copy_toast()
             return
-        selected_rows = selection_model.selectedRows()  # type: list
-
-        if len(selected_rows) > 10 and not self.view.ask_confirmation(
-                self.A_LOT_OF_SPECTRA_TO_PLOT_MESSAGE.format(len(selected_rows))):
+        selected = selection_model.selectedRows() if axis == MantidAxes.SPECTRUM else selection_model.selectedColumns()  # type: list
+        if len(selected) > 10 and not self.view.ask_confirmation(
+                self.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(len(selected))):
             return
 
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-        for index in selected_rows:
-            ax.plot(self.model._ws,
-                    label='{}-{}'.format(self.model.get_name(), self.model.get_spectrum_label(index.row())),
-                    wkspIndex=index.row())
+        for index in selected:
+            workspace_index = get_index(index)
+
+            plot = ax.plot(self.model._ws,
+                           label=get_label(workspace_index),
+                           wkspIndex=workspace_index,
+                           axis=axis)
+            if plot_errors:
+                # keep the error bars the same color s the plot
+                color = plot[0].get_color()
+                # to turn on caps add capsize=3
+                ax.errorbar(self.model._ws, '|', ecolor=color, wkspIndex=workspace_index, axis=axis, label=None)
         ax.legend()
         fig.show()
 
-    def action_plot_spectrum_with_errors(self, table, *args):
-        selection_model = table.selectionModel()
-        if not selection_model.hasSelection():
-            self.show_no_selection_to_copy_toast()
-            return
-        selected_rows = selection_model.selectedRows()  # type: list
+    def action_plot_spectrum(self, table):
+        self._do_action_plot(table, MantidAxes.SPECTRUM, self.model.get_spectrum_plot_label,
+                             lambda index: index.row())
 
-        if len(selected_rows) > 10 and not self.view.ask_confirmation(
-                self.A_LOT_OF_SPECTRA_TO_PLOT_MESSAGE.format(len(selected_rows))):
-            return
+    def action_plot_spectrum_with_errors(self, table):
+        self._do_action_plot(table, MantidAxes.SPECTRUM, self.model.get_spectrum_plot_label,
+                             lambda index: index.row(), plot_errors=True)
 
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-        for index in selected_rows:
-            row = index.row()
-            ax.errorbar(self.model._ws, wkspIndex=row)
-            ax.plot(self.model._ws,
-                    label='{}-{}'.format(self.model.get_name(), self.model.get_spectrum_label(index.row())),
-                    wkspIndex=row)
-        ax.legend()
-        fig.show()
+    def action_plot_bin(self, table):
+        self._do_action_plot(table, MantidAxes.BIN, self.model.get_bin_plot_label,
+                             lambda index: index.column())
 
-    #
-    # @staticmethod
-    # def action_view_detectors_table(table, *args):
-    #     print("I am in actionViewDetectorsTable")
-    #     index = table.selectionModel().currentIndex()
-    #     print("Currently selected row:", index.row())
-    #     print("Currently selected col:", index.column())
+    def action_plot_bin_with_errors(self, table):
+        self._do_action_plot(table, MantidAxes.BIN, self.model.get_bin_plot_label,
+                             lambda index: index.column(), plot_errors=True)

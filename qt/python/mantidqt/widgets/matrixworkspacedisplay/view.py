@@ -95,9 +95,9 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         copy_bin_values.triggered.connect(partial(self.presenter.action_copy_bin_values, table, ws_read_function))
 
         plot_bin_action = QAction(self.GRAPH_ICON, "Plot bin (values only)", horizontalHeader)
-        plot_bin_action.triggered.connect(self.not_implemented)
+        plot_bin_action.triggered.connect(partial(self.presenter.action_plot_bin, table))
         plot_bin_with_errors_action = QAction(self.GRAPH_ICON, "Plot bin (values + errors)", horizontalHeader)
-        plot_bin_with_errors_action.triggered.connect(self.not_implemented)
+        plot_bin_with_errors_action.triggered.connect(partial(self.presenter.action_plot_bin_with_errors, table))
         separator1 = QAction(horizontalHeader)
         separator1.setSeparator(True)
 
@@ -115,11 +115,11 @@ class MatrixWorkspaceDisplayView(QTabWidget):
             partial(self.presenter.action_copy_spectrum_values, table, ws_read_function))
 
         plot_spectrum_action = QAction(self.GRAPH_ICON, "Plot spectrum (values only)", verticalHeader)
-        plot_spectrum_action.triggered.connect(partial(self.presenter.action_plot_spectrum, table, ws_read_function))
+        plot_spectrum_action.triggered.connect(partial(self.presenter.action_plot_spectrum, table))
         plot_spectrum_with_errors_action = QAction(self.GRAPH_ICON, "Plot spectrum (values + errors)",
                                                    verticalHeader)
         plot_spectrum_with_errors_action.triggered.connect(
-            partial(self.presenter.action_plot_spectrum_with_errors, table, ws_read_function))
+            partial(self.presenter.action_plot_spectrum_with_errors, table))
         separator1 = QAction(verticalHeader)
         separator1.setSeparator(True)
 
