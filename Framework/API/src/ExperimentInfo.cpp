@@ -64,9 +64,132 @@ using namespace Poco::XML;
 namespace Mantid {
 
 namespace API {
+
 namespace {
 /// static logger object
 Kernel::Logger g_log("ExperimentInfo");
+
+std::string findNexus(const std::string &instrumentName,
+                      const std::vector<std::string> &directoryNames) {
+
+  const boost::regex nexus_regex(instrumentName + "_Definition.*\\.(nxs|hdf5)");
+  Poco::DirectoryIterator end_iter;
+  for (const auto &directoryName : directoryNames) {
+    // This will iterate around the directories from user ->etc ->install, and
+    // find the first beat file
+    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
+         ++dir_itr) {
+
+      const auto &filePath = dir_itr.path();
+      if (!filePath.isFile())
+        continue;
+
+      const std::string &l_filenamePart = filePath.getFileName();
+
+      if (boost::regex_match(l_filenamePart, nexus_regex)) {
+        /*Note that date intervals are not considered. The first file found
+         * matching the pattern is taken. We would have to decide how start-end
+         * dates are taken from the NexusFiles*/
+        return filePath.toString();
+      }
+    }
+  }
+  return std::string{};
+}
+// used to terminate SAX process
+class DummyException {
+public:
+  std::string m_validFrom;
+  std::string m_validTo;
+  DummyException(const std::string &validFrom, const std::string &validTo)
+      : m_validFrom(validFrom), m_validTo(validTo) {}
+};
+// SAX content handler for grapping stuff quickly from IDF
+class myContentHandler : public Poco::XML::ContentHandler {
+  void startElement(const XMLString &, const XMLString &localName,
+                    const XMLString &, const Attributes &attrList) override {
+    if (localName == "instrument") {
+      throw DummyException(
+          static_cast<std::string>(attrList.getValue("", "valid-from")),
+          static_cast<std::string>(attrList.getValue("", "valid-to")));
+    }
+  }
+  void endElement(const XMLString &, const XMLString &,
+                  const XMLString &) override {}
+  void startDocument() override {}
+  void endDocument() override {}
+  void characters(const XMLChar[], int, int) override {}
+  void endPrefixMapping(const XMLString &) override {}
+  void ignorableWhitespace(const XMLChar[], int, int) override {}
+  void processingInstruction(const XMLString &, const XMLString &) override {}
+  void setDocumentLocator(const Locator *) override {}
+  void skippedEntity(const XMLString &) override {}
+  void startPrefixMapping(const XMLString &, const XMLString &) override {}
+};
+
+std::string findIDF(const std::string &instrumentName,
+                    const std::vector<std::string> &directoryNames,
+                    const DateAndTime &date) {
+  const boost::regex idf_regex(instrumentName + "_Definition.*\\.xml",
+                               boost::regex_constants::icase);
+  DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
+                                              // recently starting IDF, if none
+                                              // match
+  DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
+                                                      // the most recently
+  bool foundGoodFile =
+      false; // True if we have found a matching file (valid at the given date)
+  Poco::DirectoryIterator end_iter;
+  std::string mostRecentIDF;
+  for (const auto &directoryName : directoryNames) {
+    // This will iterate around the directories from user ->etc ->install, and
+    // find the first beat file
+    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
+         ++dir_itr) {
+
+      const auto &filePath = dir_itr.path();
+      if (!filePath.isFile())
+        continue;
+
+      const std::string &l_filenamePart = filePath.getFileName();
+
+      if (regex_match(l_filenamePart, idf_regex)) {
+        const auto &pathName = filePath.toString();
+        g_log.debug() << "Found file: '" << pathName << "'\n";
+        std::string validFrom, validTo;
+        ExperimentInfo::getValidFromTo(pathName, validFrom, validTo);
+        g_log.debug() << "File '" << pathName << " valid dates: from '"
+                      << validFrom << "' to '" << validTo << "'\n";
+        DateAndTime from(validFrom);
+        // Use a default valid-to date if none was found.
+        DateAndTime to;
+        if (validTo.length() > 0)
+          to.setFromISO8601(validTo);
+        else
+          to.setFromISO8601("2100-01-01T00:00:00");
+
+        if (from <= date && date <= to) {
+          if (from > refDateGoodFile) { // We'd found a matching file more
+                                        // recently starting than any other
+                                        // matching file found
+            foundGoodFile = true;
+            refDateGoodFile = from;
+            mostRecentIDF = pathName;
+          }
+        }
+        if (!foundGoodFile && (from > refDate)) { // Use most recently starting
+                                                  // file, in case we don't find
+                                                  // a matching file.
+          refDate = from;
+          mostRecentIDF = pathName;
+        }
+      }
+    }
+  }
+  g_log.debug() << "IDF selected is " << mostRecentIDF << '\n';
+  return mostRecentIDF;
+}
+
 } // namespace
 
 /** Constructor
@@ -822,63 +945,6 @@ void ExperimentInfo::setEFixed(const detid_t detID, const double value) {
   pmap.addDouble(det.get(), "Efixed", value);
 }
 
-// used to terminate SAX process
-class DummyException {
-public:
-  std::string m_validFrom;
-  std::string m_validTo;
-  DummyException(const std::string &validFrom, const std::string &validTo)
-      : m_validFrom(validFrom), m_validTo(validTo) {}
-};
-
-// SAX content handler for grapping stuff quickly from IDF
-class myContentHandler : public Poco::XML::ContentHandler {
-  void startElement(const XMLString &, const XMLString &localName,
-                    const XMLString &, const Attributes &attrList) override {
-    if (localName == "instrument") {
-      throw DummyException(
-          static_cast<std::string>(attrList.getValue("", "valid-from")),
-          static_cast<std::string>(attrList.getValue("", "valid-to")));
-    }
-  }
-  void endElement(const XMLString &, const XMLString &,
-                  const XMLString &) override {}
-  void startDocument() override {}
-  void endDocument() override {}
-  void characters(const XMLChar[], int, int) override {}
-  void endPrefixMapping(const XMLString &) override {}
-  void ignorableWhitespace(const XMLChar[], int, int) override {}
-  void processingInstruction(const XMLString &, const XMLString &) override {}
-  void setDocumentLocator(const Locator *) override {}
-  void skippedEntity(const XMLString &) override {}
-  void startPrefixMapping(const XMLString &, const XMLString &) override {}
-};
-
-/** Return from an IDF the values of the valid-from and valid-to attributes
- *
- *  @param IDFfilename :: Full path of an IDF
- *  @param[out] outValidFrom :: Used to return valid-from date
- *  @param[out] outValidTo :: Used to return valid-to date
- */
-void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
-                                    std::string &outValidFrom,
-                                    std::string &outValidTo) {
-  SAXParser pParser;
-  // Create on stack to ensure deletion. Relies on pParser also being local
-  // variable.
-  myContentHandler conHand;
-  pParser.setContentHandler(&conHand);
-
-  try {
-    pParser.parse(IDFfilename);
-  } catch (DummyException &e) {
-    outValidFrom = e.m_validFrom;
-    outValidTo = e.m_validTo;
-  } catch (...) {
-    // should throw some sensible here
-  }
-}
-
 /** Return workspace start date as an ISO 8601 string. If this info not stored
  *in workspace the
  *   method returns current date. This date is used for example to retrieve the
@@ -934,6 +1000,31 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
   return date;
 }
 
+/** Return from an IDF the values of the valid-from and valid-to attributes
+ *
+ *  @param IDFfilename :: Full path of an IDF
+ *  @param[out] outValidFrom :: Used to return valid-from date
+ *  @param[out] outValidTo :: Used to return valid-to date
+ */
+void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
+                                    std::string &outValidFrom,
+                                    std::string &outValidTo) {
+  SAXParser pParser;
+  // Create on stack to ensure deletion. Relies on pParser also being local
+  // variable.
+  myContentHandler conHand;
+  pParser.setContentHandler(&conHand);
+
+  try {
+    pParser.parse(IDFfilename);
+  } catch (DummyException &e) {
+    outValidFrom = e.m_validFrom;
+    outValidTo = e.m_validTo;
+  } catch (...) {
+    // should throw some sensible here
+  }
+}
+
 /** A given instrument may have multiple IDFs associated with it. This method
  *return an identifier which identify a given IDF for a given instrument.
  * An IDF filename is required to be of the form IDFname + _Definition +
@@ -955,14 +1046,15 @@ std::string ExperimentInfo::getAvailableWorkspaceEndDate() const {
  */
 std::string
 ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
-                                      const std::string &date) {
+                                      const std::string &date,
+                                      const FileType &filetype) {
   if (date.empty()) {
     // Just use the current date
     g_log.debug() << "No date specified, using current date and time.\n";
     const std::string now =
         Types::Core::DateAndTime::getCurrentTime().toISO8601String();
     // Recursively call this method, but with both parameters.
-    return ExperimentInfo::getInstrumentFilename(instrumentName, now);
+    return ExperimentInfo::getInstrumentFilename(instrumentName, now, filetype);
   }
 
   g_log.debug() << "Looking for instrument XML file for " << instrumentName
@@ -974,67 +1066,15 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   // Get the search directory for XML instrument definition files (IDFs)
   const std::vector<std::string> &directoryNames =
       Kernel::ConfigService::Instance().getInstrumentDirectories();
+  const DateAndTime d(date);
 
-  boost::regex regex(instrument + "_Definition.*\\.xml",
-                     boost::regex_constants::icase);
-  Poco::DirectoryIterator end_iter;
-  DateAndTime d(date);
-  bool foundGoodFile =
-      false; // True if we have found a matching file (valid at the given date)
-  std::string mostRecentIDF; // store most recently starting matching IDF if
-                             // found, else most recently starting IDF.
-  DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
-                                              // recently starting IDF, if none
-                                              // match
-  DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
-                                                      // the most recently
-                                                      // starting matching IDF
-  for (const auto &directoryName : directoryNames) {
-    // This will iterate around the directories from user ->etc ->install, and
-    // find the first beat file
-    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
-         ++dir_itr) {
-
-      const auto &filePath = dir_itr.path();
-      if (!filePath.isFile())
-        continue;
-
-      const std::string &l_filenamePart = filePath.getFileName();
-      if (regex_match(l_filenamePart, regex)) {
-        const auto &pathName = filePath.toString();
-        g_log.debug() << "Found file: '" << pathName << "'\n";
-        std::string validFrom, validTo;
-        getValidFromTo(pathName, validFrom, validTo);
-        g_log.debug() << "File '" << pathName << " valid dates: from '"
-                      << validFrom << "' to '" << validTo << "'\n";
-        DateAndTime from(validFrom);
-        // Use a default valid-to date if none was found.
-        DateAndTime to;
-        if (validTo.length() > 0)
-          to.setFromISO8601(validTo);
-        else
-          to.setFromISO8601("2100-01-01T00:00:00");
-
-        if (from <= d && d <= to) {
-          if (from > refDateGoodFile) { // We'd found a matching file more
-                                        // recently starting than any other
-                                        // matching file found
-            foundGoodFile = true;
-            refDateGoodFile = from;
-            mostRecentIDF = pathName;
-          }
-        }
-        if (!foundGoodFile && (from > refDate)) { // Use most recently starting
-                                                  // file, in case we don't find
-                                                  // a matching file.
-          refDate = from;
-          mostRecentIDF = pathName;
-        }
-      }
-    }
-  }
-  g_log.debug() << "IDF selected is " << mostRecentIDF << '\n';
-  return mostRecentIDF;
+  if (filetype == FileType::Idf || filetype == FileType::Both)
+    return findIDF(instrument, directoryNames,
+                   d); // store most recently starting matching IDF if
+                       // found, else most recently starting IDF.
+  else if (filetype == FileType::Nexus || filetype == FileType::Both)
+    return findNexus(instrument, directoryNames);
+  return std::string{};
 }
 
 /** Return a const reference to the DetectorInfo object.
