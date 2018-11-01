@@ -59,56 +59,16 @@ std::vector<std::string> ProjectRecoveryModel::getRow(int i) {
   return m_rows.at(i);
 }
 
-void ProjectRecoveryModel::recoverLast() {
-  // Clear the ADS
-  Mantid::API::AnalysisDataService::Instance().clear();
-
-  // Recover using the last checkpoint
-  Poco::Path output(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
-  output.append("ordered_recovery.py");
-  auto mostRecentCheckpoints = m_projRec->getRecoveryFolderCheckpointsPR(
-      m_projRec->getRecoveryFolderLoadPR());
-  auto mostRecentCheckpoint = mostRecentCheckpoints.back();
-  m_projRec->openInEditor(mostRecentCheckpoint, output);
-
-  if (m_failedRun) {
-    createThreadAndManage(mostRecentCheckpoint);
-    auto checkpointToCheck =
-        mostRecentCheckpoint.directory(mostRecentCheckpoint.depth() - 1);
-    updateCheckpointTried(
-        checkpointToCheck.replace(checkpointToCheck.find("T"), 1, " "));
+std::vector<std::string>
+ProjectRecoveryModel::getRow(std::string checkpointName) {
+  for (auto c : m_rows) {
+    if (c[0] == checkpointName) {
+      return c;
+    }
   }
-
-  // Close View
-  m_presenter->closeView();
+  return std::vector<std::string>({"", "", "0"});
 }
-void ProjectRecoveryModel::openLastInEditor() {
-  // Clear the ADS
-  Mantid::API::AnalysisDataService::Instance().clear();
 
-  // Open the last made checkpoint in editor
-  auto beforeCheckpoints = m_projRec->getRecoveryFolderLoadPR();
-  auto mostRecentCheckpoints =
-      m_projRec->getRecoveryFolderCheckpointsPR(beforeCheckpoints);
-  auto mostRecentCheckpoint = mostRecentCheckpoints.back();
-  Poco::Path output(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
-  output.append("ordered_recovery.py");
-  m_projRec->openInEditor(mostRecentCheckpoint, output);
-  // Restart project recovery as we stay synchronous
-  m_projRec->clearAllCheckpoints(beforeCheckpoints);
-  m_projRec->startProjectSaving();
-
-  if (m_failedRun) {
-    auto checkpointToRecover =
-        mostRecentCheckpoint.directory(mostRecentCheckpoint.depth() - 1);
-    checkpointToRecover.replace(checkpointToRecover.find("T"), 1, " ");
-    updateCheckpointTried(checkpointToRecover);
-  }
-
-  m_failedRun = false;
-  // Close View
-  m_presenter->closeView();
-}
 void ProjectRecoveryModel::startMantidNormally() {
   m_projRec->clearAllUnusedCheckpoints();
   m_projRec->startProjectSaving();
@@ -216,4 +176,10 @@ void ProjectRecoveryModel::createThreadAndManage(const Poco::Path &checkpoint) {
 
   // Set failed run member to the value from the thread
   m_failedRun = recoverThread->getFailedRun();
+}
+
+std::string ProjectRecoveryModel::decideLastCheckpoint() {
+  auto mostRecentCheckpoints = m_projRec->getRecoveryFolderCheckpointsPR(
+      m_projRec->getRecoveryFolderLoadPR());
+  return mostRecentCheckpoints.back().toString();
 }

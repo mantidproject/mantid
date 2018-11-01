@@ -8,7 +8,9 @@
 #define PROJECTRECOVERYPRESENTER_H
 
 #include "ProjectRecoveryModel.h"
+#include <QDialog>
 #include <QStringList>
+#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace MantidQt {
@@ -27,15 +29,20 @@ public:
   bool startRecoveryView();
   bool startRecoveryFailure();
   QStringList getRow(int i);
-  void recoverLast();
+  void recoverLast(boost::shared_ptr<QDialog> view);
   void openLastInEditor();
   void startMantidNormally();
-  void recoverSelectedCheckpoint(QString &selected);
+  void recoverSelectedCheckpoint(QString &selected,
+                                 boost::shared_ptr<QDialog> view);
   void openSelectedInEditor(QString &selected);
   void closeView();
   ProjectRecoveryPresenter &operator=(const ProjectRecoveryPresenter &obj);
 
 private:
+  void setUpProgressBar(std::string checkpointToRecover,
+                        boost::shared_ptr<QDialog> view);
+  friend class ProjectRecoveryView;
+  friend class RecoveryFailureView;
   ProjectRecoveryModel *m_model;
   ProjectRecoveryView *m_recView;
   RecoveryFailureView *m_failureView;

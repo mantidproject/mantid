@@ -6,16 +6,26 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ProjectRecoveryView.h"
 #include "MantidKernel/UsageService.h"
+#include "ApplicationWindow.h"
+#include "ScriptingWindow.h"
+#include "ScriptFileInterpreter.h"
+#include "Script.h"
 #include "ui_ProjectRecoveryWidget.h"
+#include <boost/smart_ptr/make_shared.hpp>
 
 ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QDialog(parent), ui(new Ui::ProjectRecoveryWidget),
-      m_presenter(presenter) {
-
+    : QDialog(parent), m_progressBarCounter(0) {
+  ui = new Ui::ProjectRecoveryWidget;
+  m_presenter = presenter;      
+  connect(m_presenter->m_mainWindow->getScriptWindowHandle()
+              ->getCurrentScriptInterpreter()->getRunner().data(),
+          SIGNAL(currentLineChanged(int, bool)), this,
+          SLOT(updateProgressBar(int, bool)));
   ui->setupUi(this);
   ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+  ui->progressBar->setMinimum(0);
   // Set the table information
   addDataToTable(ui);
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
@@ -32,7 +42,7 @@ void ProjectRecoveryView::addDataToTable(Ui::ProjectRecoveryWidget *ui) {
 
 void ProjectRecoveryView::onClickLastCheckpoint() {
   // Recover last checkpoint
-  m_presenter->recoverLast();
+  m_presenter->recoverLast(boost::make_shared<QDialog>(this));
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "ProjectRecoveryWindow->RecoverLastCheckpoint", false);
 }
@@ -52,8 +62,18 @@ void ProjectRecoveryView::onClickStartMantidNormally() {
 }
 
 void ProjectRecoveryView::reject() {
-  // Do nothing just absorb request
+  // Do the same as startMantidNormally
   m_presenter->startMantidNormally();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "ProjectRecoveryWindow->StartMantidNormally", false);
+}
+
+void ProjectRecoveryView::updateProgressBar(int newValue, bool err) {
+  if (!err) {
+    ui->progressBar->setValue(newValue);
+  }
+}
+
+void ProjectRecoveryView::setProgressBarMaximum(int newValue) {
+  ui->progressBar->setMaximum(newValue);
 }

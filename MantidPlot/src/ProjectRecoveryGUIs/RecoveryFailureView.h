@@ -23,6 +23,8 @@ public:
                                ProjectRecoveryPresenter *presenter = nullptr);
   ~RecoveryFailureView();
   void reject() override;
+  void updateProgressBar(int newValue);
+  void setProgressBarMaximum(int newValue);
 
 private slots:
   void onClickLastCheckpoint();
@@ -33,6 +35,7 @@ private slots:
 private:
   void addDataToTable(Ui::RecoveryFailure *ui);
 
+  unsigned int m_progressBarCounter;
   Ui::RecoveryFailure *ui;
   ProjectRecoveryPresenter *m_presenter;
 };

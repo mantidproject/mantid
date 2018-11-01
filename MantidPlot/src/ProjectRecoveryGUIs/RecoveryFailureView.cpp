@@ -6,12 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RecoveryFailureView.h"
 #include "ui_RecoveryFailure.h"
-
+#include "ApplicationWindow.h"
 #include "MantidKernel/UsageService.h"
+#include <boost/smart_ptr/make_shared.hpp>
 
 RecoveryFailureView::RecoveryFailureView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QDialog(parent), ui(new Ui::RecoveryFailure), m_presenter(presenter) {
+    : QDialog(parent), ui(new Ui::RecoveryFailure), m_presenter(presenter),
+      m_progressBarCounter(0) {
   ui->setupUi(this);
   ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
@@ -48,7 +50,7 @@ void RecoveryFailureView::addDataToTable(Ui::RecoveryFailure *ui) {
 
 void RecoveryFailureView::onClickLastCheckpoint() {
   // Recover last checkpoint
-  m_presenter->recoverLast();
+  m_presenter->recoverLast(boost::make_shared<QDialog>(this));
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "ProjectRecoveryFailureWindow->RecoverLastCheckpoint", false);
 }
@@ -61,7 +63,8 @@ void RecoveryFailureView::onClickSelectedCheckpoint() {
     if (text.toStdString() == "") {
       return;
     }
-    m_presenter->recoverSelectedCheckpoint(text);
+    m_presenter->recoverSelectedCheckpoint(text,
+                                           boost::make_shared<QDialog>(this));
   }
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "ProjectRecoveryFailureWindow->RecoverSelectedCheckpoint",
@@ -95,4 +98,12 @@ void RecoveryFailureView::reject() {
   m_presenter->startMantidNormally();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "ProjectRecoveryFailureWindow->StartMantidNormally", false);
+}
+
+void RecoveryFailureView::updateProgressBar(int newValue) {
+  ui->progressBar->setValue(newValue);
+}
+
+void RecoveryFailureView::setProgressBarMaximum(int newValue) {
+  ui->progressBar->setMaximum(newValue);
 }

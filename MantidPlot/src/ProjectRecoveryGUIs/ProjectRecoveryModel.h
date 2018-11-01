@@ -20,12 +20,12 @@ public:
   ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery,
                        ProjectRecoveryPresenter *presenter);
   std::vector<std::string> getRow(int i);
-  void recoverLast();
-  void openLastInEditor();
+  std::vector<std::string> getRow(std::string checkpointName);
   void startMantidNormally();
   void recoverSelectedCheckpoint(std::string &selected);
   void openSelectedInEditor(std::string &selected);
   bool getFailedRun() const;
+  std::string decideLastCheckpoint();
 
 private:
   void fillRows();

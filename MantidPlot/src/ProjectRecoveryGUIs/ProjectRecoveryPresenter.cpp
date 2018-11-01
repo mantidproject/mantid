@@ -11,6 +11,7 @@
 #include "ProjectRecoveryView.h"
 #include "RecoveryFailureView.h"
 
+#include <QDialog>
 #include <memory>
 
 ProjectRecoveryPresenter::ProjectRecoveryPresenter(
@@ -75,24 +76,31 @@ QStringList ProjectRecoveryPresenter::getRow(int i) {
   return returnVal;
 }
 
-void ProjectRecoveryPresenter::recoverLast() { m_model->recoverLast(); }
+void ProjectRecoveryPresenter::recoverLast(boost::shared_ptr<QDialog> view) {
+  auto checkpointToRecover = m_model->decideLastCheckpoint();
+  setUpProgressBar(checkpointToRecover, view);
+  m_model->recoverSelectedCheckpoint(checkpointToRecover);
+}
 
 void ProjectRecoveryPresenter::openLastInEditor() {
-  m_model->openLastInEditor();
+  auto checkpointToRecover = m_model->decideLastCheckpoint();
+  m_model->openSelectedInEditor(checkpointToRecover);
 }
 
 void ProjectRecoveryPresenter::startMantidNormally() {
   m_model->startMantidNormally();
 }
 
-void ProjectRecoveryPresenter::recoverSelectedCheckpoint(QString &selected) {
-  std::string stdString = selected.toStdString();
-  m_model->recoverSelectedCheckpoint(stdString);
+void ProjectRecoveryPresenter::recoverSelectedCheckpoint(
+    QString &selected, boost::shared_ptr<QDialog> view) {
+  auto checkpointToRecover = selected.toStdString();
+  setUpProgressBar(checkpointToRecover, view);
+  m_model->recoverSelectedCheckpoint(checkpointToRecover);
 }
 
 void ProjectRecoveryPresenter::openSelectedInEditor(QString &selected) {
-  std::string stdString = selected.toStdString();
-  m_model->openSelectedInEditor(stdString);
+  auto checkpointToRecover = selected.toStdString();
+  m_model->openSelectedInEditor(checkpointToRecover);
 }
 
 void ProjectRecoveryPresenter::closeView() {
@@ -114,4 +122,17 @@ operator=(const ProjectRecoveryPresenter &obj) {
     m_mainWindow = obj.m_mainWindow;
   }
   return *this;
+}
+
+void ProjectRecoveryPresenter::setUpProgressBar(
+    std::string checkpointToRecover, boost::shared_ptr<QDialog> view) {
+  auto row = m_model->getRow(checkpointToRecover);
+  auto firstView = boost::dynamic_pointer_cast<ProjectRecoveryView>(view);
+  auto secondView = boost::dynamic_pointer_cast<RecoveryFailureView>(view);
+  if (firstView) {
+    firstView->setProgressBarMaximum(std::stoi(row[2]));
+  }
+  if (secondView) {
+    secondView->setProgressBarMaximum(std::stoi(row[2]));
+  }
 }
