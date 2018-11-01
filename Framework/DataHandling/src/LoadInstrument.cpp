@@ -4,19 +4,20 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidDataHandling/LoadGeometry.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
-
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidNexusGeometry/NexusGeometryParser.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -28,6 +29,7 @@
 #include <Poco/Path.h>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -48,12 +50,14 @@ void LoadInstrument::init() {
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace to load the instrument definition "
                   "into. Any existing instrument will be replaced.");
+  const std::vector<std::string> extensions{".xml", ".nxs", ".hdf5"};
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                ".xml"),
+                                extensions),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
-      "specifying an instrument definition file. Note Filename or "
+      "specifying an instrument definition file. Files can also be .hdf5 or "
+      ".nxs for usage with NeXus Geometry files. Note Filename or "
       "InstrumentName must be specified but not both.");
   declareProperty(
       make_unique<ArrayProperty<detid_t>>("MonitorList", Direction::Output),
@@ -99,6 +103,29 @@ void LoadInstrument::exec() {
   m_filename = getPropertyValue("Filename");
   m_instName = getPropertyValue("InstrumentName");
 
+  // Decide whether to use Nexus or IDF loading
+  if (LoadGeometry::isIDF(m_filename, m_instName))
+    IDFInstrumentLoader();
+  else if (LoadGeometry::isNexus(m_filename))
+    NexusInstrumentLoader();
+  else
+    throw Kernel::Exception::FileError("Instrument input cannot be read",m_filename);
+
+  // Set the monitors output property
+  // auto instr = m_workspace->getInstrument();
+  setProperty("MonitorList", (m_workspace->getInstrument())->getMonitors());
+
+  // Rebuild the spectra map for this workspace so that it matches the
+  // instrument
+  // if required
+  const OptionalBool RewriteSpectraMap = getProperty("RewriteSpectraMap");
+  if (RewriteSpectraMap == OptionalBool::True)
+    m_workspace->rebuildSpectraMapping();
+}
+
+/// Load instrument from IDF XML file
+void LoadInstrument::IDFInstrumentLoader() {
+
   // We will parse the XML using the InstrumentDefinitionParser
   InstrumentDefinitionParser parser;
 
@@ -129,28 +156,7 @@ void LoadInstrument::exec() {
   }
   // otherwise we need either Filename or InstrumentName to be set
   else {
-    // Retrieve the filename from the properties
-    if (m_filename.empty()) {
-      // look to see if an Instrument name provided in which case create
-      // IDF filename on the fly
-      if (m_instName.empty()) {
-        g_log.error("Either the InstrumentName or Filename property of "
-                    "LoadInstrument most be specified");
-        throw Kernel::Exception::FileError(
-            "Either the InstrumentName or Filename property of LoadInstrument "
-            "most be specified to load an IDF",
-            m_filename);
-      } else {
-        const std::string date = m_workspace->getWorkspaceStartDate();
-        m_filename = ExperimentInfo::getInstrumentFilename(m_instName, date);
-      }
-    }
-
-    if (m_filename.empty()) {
-      throw Exception::NotFoundError(
-          "Unable to find an Instrument Definition File for", m_instName);
-    }
-
+    checkAndRetrieveInstrumentFilename();
     // Remove the path from the filename for use with the InstrumentDataService
     const std::string::size_type stripPath = m_filename.find_last_of("\\/");
     std::string instrumentFile =
@@ -201,16 +207,39 @@ void LoadInstrument::exec() {
     if (!m_filename.empty())
       runLoadParameterFile();
   }
+}
 
-  // Set the monitors output property
-  setProperty("MonitorList", instrument->getMonitors());
+void LoadInstrument::NexusInstrumentLoader() {
+  checkAndRetrieveInstrumentFilename();
+  m_filename = ExperimentInfo::getInstrumentFilename(m_instName,
+               m_workspace->getWorkspaceStartDate());
+  Instrument_const_sptr instrument = NexusGeometry::NexusGeometryParser::createInstrument(m_filename);
+  m_workspace->setInstrument(instrument);
+  m_workspace->populateInstrumentParameters();
+}
 
-  // Rebuild the spectra map for this workspace so that it matches the
-  // instrument
-  // if required
-  const OptionalBool RewriteSpectraMap = getProperty("RewriteSpectraMap");
-  if (RewriteSpectraMap == OptionalBool::True)
-    m_workspace->rebuildSpectraMapping();
+/// Get the file name from the instrument name if it is not defined
+void LoadInstrument::checkAndRetrieveInstrumentFilename() {
+  // Retrieve the filename from the properties
+  if (m_filename.empty()) {
+    // look to see if an Instrument name provided in which case create
+    // filename on the fly
+    if (m_instName.empty()) {
+      g_log.error("Either the InstrumentName or Filename property of "
+                  "LoadInstrument most be specified");
+      throw Kernel::Exception::FileError(
+          "Either the InstrumentName or Filename property of LoadInstrument "
+          "most be specified to load an IDF",
+          m_filename);
+    } else {
+      m_filename = ExperimentInfo::getInstrumentFilename(m_instName,
+                   m_workspace->getWorkspaceStartDate());
+    }
+  }
+  if (m_filename.empty()) {
+    throw Exception::NotFoundError(
+        "Unable to find an Instrument Definition File for", m_instName);
+  }
 }
 
 //-----------------------------------------------------------------------------------------------------------------------

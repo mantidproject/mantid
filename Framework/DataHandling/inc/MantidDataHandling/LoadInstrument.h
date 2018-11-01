@@ -78,6 +78,12 @@ public:
   const std::string category() const override {
     return "DataHandling\\Instrument";
   }
+  /// Load instrument from IDF XML file
+  void IDFInstrumentLoader();
+  /// Load instrument from Nexus file
+  void NexusInstrumentLoader();
+  /// Retrieve file name if undefined
+  void checkAndRetrieveInstrumentFilename();
 
 private:
   void init() override;

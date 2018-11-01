@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/LoadGeometry.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -16,8 +17,8 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/NexusDescriptor.h"
+// #include "MantidKernel/FileDescriptor.h"
+// #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
@@ -32,25 +33,25 @@ using namespace Geometry;
 using namespace DataObjects;
 using namespace HistogramData;
 
-namespace {
-bool isIDF(const std::string &filename, const std::string &instrumentname) {
-  if (!filename.empty()) {
-    FileDescriptor descriptor(filename);
-    return ((descriptor.isAscii() && descriptor.extension() == ".xml"));
-  }
-  return !instrumentname.empty();
-}
-
-bool isNexus(const std::string &filename) {
-  if (!filename.empty() && !FileDescriptor(filename).isAscii(filename)) {
-    NexusDescriptor descriptor(filename);
-    return descriptor.isHDF(filename) &&
-           (descriptor.classTypeExists("NXcylindrical_geometry") ||
-            descriptor.classTypeExists("NXoff_geometry"));
-  }
-  return false;
-}
-} // namespace
+// namespace {
+// bool isIDF(const std::string &filename, const std::string &instrumentname) {
+//   if (!filename.empty()) {
+//     FileDescriptor descriptor(filename);
+//     return ((descriptor.isAscii() && descriptor.extension() == ".xml"));
+//   }
+//   return !instrumentname.empty();
+// }
+//
+// bool isNexus(const std::string &filename) {
+//   if (!filename.empty() && !FileDescriptor(filename).isAscii(filename)) {
+//     NexusDescriptor descriptor(filename);
+//     return descriptor.isHDF(filename) &&
+//            (descriptor.classTypeExists("NXcylindrical_geometry") ||
+//             descriptor.classTypeExists("NXoff_geometry"));
+//   }
+//   return false;
+// }
+// } // namespace
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -132,10 +133,10 @@ void LoadEmptyInstrument::exec() {
   const std::string instrumentname = getPropertyValue("InstrumentName");
   Instrument_const_sptr instrument;
   Progress prog(this, 0.0, 1.0, 10);
-  if (isNexus(filename)) {
+  if (LoadGeometry::isNexus(filename)) {
     prog.reportIncrement(0, "Loading geometry from file");
     instrument = NexusGeometry::NexusGeometryParser::createInstrument(filename);
-  } else if (isIDF(filename, instrumentname)) {
+  } else if (LoadGeometry::isIDF(filename, instrumentname)) {
     MatrixWorkspace_sptr ws = this->runLoadInstrument(filename, instrumentname);
     instrument = ws->getInstrument();
   } else {
