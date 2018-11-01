@@ -15,7 +15,8 @@ if ( ENABLE_WORKBENCH )
  # Configure utils.qt.plugins file for build. It is placed in the source
   # directory and added to the .gitignore for simplicity.
   if ( WIN32 )
-    set ( QT_PLUGINS_PATH "${THIRD_PARTY_DIR}/lib/qt%V/plugins" )
+    # Note: single quotes are added here to make this a Python string
+    set ( QT_PLUGINS_PATH "'${THIRD_PARTY_DIR}/lib/qt%V/plugins'" )
   endif ()
   # Configure the file necessary for builds to run and detect Qt's plugins
   configure_file ( mantidqt/utils/qt/plugins.py.in ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py )
@@ -25,7 +26,7 @@ if ( ENABLE_WORKBENCH )
   # to the working directory of the PYTHON executable that launches the Workbench.
   # E.g. if python.exe is at MantidInstall/bin/python.exe, then the ../plugins is relative to that
   # bin directory - not where the plugins.py is installed!
-  set ( QT_PLUGINS_PATH "../plugins/qt%V" )
+  set ( QT_PLUGINS_PATH "os.path.join(os.path.dirname(__file__), '../../../../plugins/qt%V')" )
   configure_file ( mantidqt/utils/qt/plugins.py.in ${CMAKE_CURRENT_BINARY_DIR}/plugins.py.install )
   add_python_package ( mantidqt )
   # overwrite the plugins.py with the installation specific plugins.py
