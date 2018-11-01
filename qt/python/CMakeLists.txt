@@ -11,17 +11,18 @@ add_subdirectory ( mantidqtpython )
 ###########################################################################
 
 if ( ENABLE_WORKBENCH )
-
- # Configure utils.qt.plugins file for build. It is placed in the source
+  # The default value is just an empty string - this prevents a Python syntax error when not on Windows
+  set ( QT_PLUGINS_PATH "''" )
+  # Configure utils.qt.plugins file for build. It is placed in the source
   # directory and added to the .gitignore for simplicity.
   if ( WIN32 )
     # Note: single quotes are added here to make this a Python string
     set ( QT_PLUGINS_PATH "'${THIRD_PARTY_DIR}/lib/qt%V/plugins'" )
   endif ()
-  # Configure the file necessary for builds to run and detect Qt's plugins
+  # Configure the file necessary for DEVELOPMENT builds to run and detect Qt's plugins
   configure_file ( mantidqt/utils/qt/plugins.py.in ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py )
 
-  # Configure the file necessary for installation packages to run and detect Qt's plugins
+  # Configure the file necessary for INSTALLATION packages to run and detect Qt's plugins
   # The relative path is expanded to an absolute one at runtime.
   if ( WIN32 )
     set ( QT_PLUGINS_PATH "os.path.join(os.path.dirname(__file__), '../../../../plugins/qt%V')" )
@@ -29,8 +30,6 @@ if ( ENABLE_WORKBENCH )
     # overwrite the plugins.py with the installation specific plugins.py
     install( FILES ${CMAKE_CURRENT_BINARY_DIR}/plugins.py.install DESTINATION bin/mantidqt/utils/qt RENAME plugins.py )
   endif ()
-  # TODO see if this work after the install above, or needs to be before it
-  # TODO check if the correct plugins.py is present in bin/mantidqt/utils/qt
   add_python_package ( mantidqt )
 
   # Configure resources data in place for ease of development. The output
