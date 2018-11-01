@@ -12,6 +12,8 @@ Description
 This Algorithm indexes a PeaksWorkspace with peaks occurring at specific
 fractional offsets from h,k,or l values.
 The order can be 1 for +/-1 or 2 for +/-1 and +/-2, etc.
+See 
+:ref:`ModulatedStructure <ModulatedStructure>` for equations.
 
 The input PeaksWorkspace must contain an orientation matrix.
 

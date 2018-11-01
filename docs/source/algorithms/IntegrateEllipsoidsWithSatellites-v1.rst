@@ -12,9 +12,10 @@ Description
 Overview and similar algorithms
 ###############################
 
-This algorithm will integrate disjoint single crystal Bragg peaks by
-summing the number of raw or weighted events in a 3D ellipsoidal peak region in
-reciprocal space (See *IntegrateInHKL* option for integrating in HKL)
+This algorithm will integrate disjoint single crystal Bragg peaks and satellites
+(See :ref:`ModulatedStructure <ModulatedStructure>`)
+by summing the number of raw or weighted events in a 3D ellipsoidal peak region in
+reciprocal space 
 and subtracting an estimate of the background obtained
 from an ellipsoidal shell. In some ways it is similar to the
 :ref:`algm-IntegratePeaksMD` algorithm. In particular the size parameters to
