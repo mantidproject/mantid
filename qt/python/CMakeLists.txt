@@ -23,11 +23,15 @@ if ( ENABLE_WORKBENCH )
 
   # Configure the file necessary for installation packages to run and detect Qt's plugins
   # The relative path is expanded to an absolute one at runtime.
-  set ( QT_PLUGINS_PATH "os.path.join(os.path.dirname(__file__), '../../../../plugins/qt%V')" )
-  configure_file ( mantidqt/utils/qt/plugins.py.in ${CMAKE_CURRENT_BINARY_DIR}/plugins.py.install )
+  if ( WIN32 )
+    set ( QT_PLUGINS_PATH "os.path.join(os.path.dirname(__file__), '../../../../plugins/qt%V')" )
+    configure_file ( mantidqt/utils/qt/plugins.py.in ${CMAKE_CURRENT_BINARY_DIR}/plugins.py.install )
+    # overwrite the plugins.py with the installation specific plugins.py
+    install( FILES ${CMAKE_CURRENT_BINARY_DIR}/plugins.py.install DESTINATION bin/mantidqt/utils/qt RENAME plugins.py )
+  endif ()
+  # TODO see if this work after the install above, or needs to be before it
+  # TODO check if the correct plugins.py is present in bin/mantidqt/utils/qt
   add_python_package ( mantidqt )
-  # overwrite the plugins.py with the installation specific plugins.py
-  install( FILES ${CMAKE_CURRENT_BINARY_DIR}/plugins.py.install DESTINATION bin/mantidqt/utils/qt RENAME plugins.py )
 
   # Configure resources data in place for ease of development. The output
   # file is added to the toplevel gitignore
