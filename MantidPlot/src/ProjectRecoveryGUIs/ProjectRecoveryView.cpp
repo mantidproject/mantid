@@ -5,23 +5,19 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ProjectRecoveryView.h"
-#include "MantidKernel/UsageService.h"
 #include "ApplicationWindow.h"
-#include "ScriptingWindow.h"
-#include "ScriptFileInterpreter.h"
+#include "MantidKernel/UsageService.h"
+#include "MultiTabScriptInterpreter.h"
 #include "Script.h"
+#include "ScriptFileInterpreter.h"
+#include "ScriptingWindow.h"
 #include "ui_ProjectRecoveryWidget.h"
 #include <boost/smart_ptr/make_shared.hpp>
 
 ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QDialog(parent), m_progressBarCounter(0) {
-  ui = new Ui::ProjectRecoveryWidget;
-  m_presenter = presenter;      
-  connect(m_presenter->m_mainWindow->getScriptWindowHandle()
-              ->getCurrentScriptInterpreter()->getRunner().data(),
-          SIGNAL(currentLineChanged(int, bool)), this,
-          SLOT(updateProgressBar(int, bool)));
+    : QDialog(parent), ui(new Ui::ProjectRecoveryWidget),
+      m_presenter(presenter) {
   ui->setupUi(this);
   ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
@@ -76,4 +72,11 @@ void ProjectRecoveryView::updateProgressBar(int newValue, bool err) {
 
 void ProjectRecoveryView::setProgressBarMaximum(int newValue) {
   ui->progressBar->setMaximum(newValue);
+}
+
+void ProjectRecoveryView::connectProgressBar() {
+  connect(&m_presenter->m_mainWindow->getScriptWindowHandle()
+               ->getCurrentScriptRunner(),
+          SIGNAL(currentLineChanged(int, bool)), this,
+          SLOT(updateProgressBar(int, bool)));
 }

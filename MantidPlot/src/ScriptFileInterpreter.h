@@ -57,7 +57,7 @@ public:
   /// Is the script running
   virtual bool isExecuting() const;
 
-  QSharedPointer<Script> getRunner() { return m_runner; }
+  const Script &getRunner() const{ return *m_runner.data(); }
 
 public slots:
   /// Save to the currently stored name

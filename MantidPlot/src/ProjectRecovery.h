@@ -91,6 +91,7 @@ public:
   void removeLockedCheckpoints();
 
 private:
+  friend class RecoveryThread;
   /// Captures the current object in the background thread
   std::thread createBackgroundThread();
 

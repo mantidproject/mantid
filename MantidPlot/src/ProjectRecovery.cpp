@@ -453,6 +453,8 @@ bool ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
     throw std::runtime_error("Could not get handle to scripting window");
   }
 
+  m_recoveryGui->connectProgressBarToRecoveryView();
+
   // Ensure the window repaints so it doesn't appear frozen before exec
   scriptWindow->executeCurrentTab(Script::ExecutionMode::Serialised);
   if (scriptWindow->getSynchronousErrorFlag()) {

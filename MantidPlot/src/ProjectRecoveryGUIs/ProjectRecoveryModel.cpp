@@ -16,6 +16,7 @@
 #include <Poco/Path.h>
 #include <QThread>
 #include <fstream>
+#include <QApplication>
 #include <memory>
 
 namespace {
@@ -81,7 +82,9 @@ void ProjectRecoveryModel::recoverSelectedCheckpoint(std::string &selected) {
   Mantid::API::AnalysisDataService::Instance().clear();
 
   // Recovery given the checkpoint selected here
-  selected.replace(selected.find(" "), 1, "T");
+  auto stringSpacePos = selected.find(" ");
+  if (stringSpacePos != std::string::npos)
+    selected.replace(stringSpacePos, 1, "T");
   Poco::Path checkpoint(m_projRec->getRecoveryFolderLoadPR());
   checkpoint.append(selected);
   Poco::Path output(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
@@ -103,7 +106,9 @@ void ProjectRecoveryModel::openSelectedInEditor(std::string &selected) {
   Mantid::API::AnalysisDataService::Instance().clear();
 
   // Open editor for this checkpoint
-  selected.replace(selected.find(" "), 1, "T");
+  auto stringSpacePos = selected.find(" ");
+  if (stringSpacePos != std::string::npos)
+    selected.replace(stringSpacePos, 1, "T");
   auto beforeCheckpoint = m_projRec->getRecoveryFolderLoadPR();
   Poco::Path checkpoint(beforeCheckpoint);
   checkpoint.append(selected);
@@ -165,21 +170,24 @@ void ProjectRecoveryModel::updateCheckpointTried(
 bool ProjectRecoveryModel::getFailedRun() const { return m_failedRun; }
 
 void ProjectRecoveryModel::createThreadAndManage(const Poco::Path &checkpoint) {
-  std::unique_ptr<RecoveryThread> recoverThread =
-      std::make_unique<RecoveryThread>();
-  recoverThread->setProjRecPtr(m_projRec);
-  recoverThread->setCheckpoint(checkpoint);
-  recoverThread->start(QThread::HighestPriority);
+  RecoveryThread recoverThread;
+  recoverThread.setProjRecPtr(m_projRec);
+  recoverThread.setCheckpoint(checkpoint);
+  recoverThread.start(QThread::LowPriority);
 
-  // Wait for the thread to finish
-  recoverThread->wait();
+  while (!recoverThread.isFinished()){
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    QApplication::processEvents();
+  }
 
   // Set failed run member to the value from the thread
-  m_failedRun = recoverThread->getFailedRun();
+  m_failedRun = recoverThread.getFailedRun();
 }
 
 std::string ProjectRecoveryModel::decideLastCheckpoint() {
   auto mostRecentCheckpoints = m_projRec->getRecoveryFolderCheckpointsPR(
       m_projRec->getRecoveryFolderLoadPR());
-  return mostRecentCheckpoints.back().toString();
+  auto mostRecentCheckpointPath = mostRecentCheckpoints.back();
+  return mostRecentCheckpointPath.directory(mostRecentCheckpointPath.depth() -
+                                            1);
 }

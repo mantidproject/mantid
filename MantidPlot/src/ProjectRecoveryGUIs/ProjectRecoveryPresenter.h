@@ -21,6 +21,7 @@ class ProjectRecoveryView;
 class RecoveryFailureView;
 class ProjectRecoveryPresenter {
 public:
+  enum OpenView { RecoveryView, FailureView};
   // Interestingly this nullptr should never be used
   ProjectRecoveryPresenter(MantidQt::ProjectRecovery *projectRecovery,
                            ApplicationWindow *parentWindow);
@@ -36,6 +37,7 @@ public:
                                  boost::shared_ptr<QDialog> view);
   void openSelectedInEditor(QString &selected);
   void closeView();
+  void connectProgressBarToRecoveryView();
   ProjectRecoveryPresenter &operator=(const ProjectRecoveryPresenter &obj);
 
 private:
@@ -43,6 +45,7 @@ private:
                         boost::shared_ptr<QDialog> view);
   friend class ProjectRecoveryView;
   friend class RecoveryFailureView;
+  OpenView m_openView;
   ProjectRecoveryModel *m_model;
   ProjectRecoveryView *m_recView;
   RecoveryFailureView *m_failureView;

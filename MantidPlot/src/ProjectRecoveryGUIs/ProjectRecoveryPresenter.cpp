@@ -40,6 +40,7 @@ ProjectRecoveryPresenter::~ProjectRecoveryPresenter() {
 
 bool ProjectRecoveryPresenter::startRecoveryView() {
   try {
+    m_openView = RecoveryView;
     m_recView = new ProjectRecoveryView(m_mainWindow, this);
     m_recView->exec();
   } catch (...) {
@@ -54,6 +55,7 @@ bool ProjectRecoveryPresenter::startRecoveryView() {
 
 bool ProjectRecoveryPresenter::startRecoveryFailure() {
   try {
+    m_openView = FailureView;
     m_failureView = new RecoveryFailureView(m_mainWindow, this);
     m_failureView->exec();
   } catch (...) {
@@ -135,4 +137,13 @@ void ProjectRecoveryPresenter::setUpProgressBar(
   if (secondView) {
     secondView->setProgressBarMaximum(std::stoi(row[2]));
   }
+}
+
+void ProjectRecoveryPresenter::connectProgressBarToRecoveryView(){
+  if (m_openView == RecoveryView){
+    m_recView->connectProgressBar();
+  } else {
+    m_failureView->connectProgressBar();
+  }
+  
 }

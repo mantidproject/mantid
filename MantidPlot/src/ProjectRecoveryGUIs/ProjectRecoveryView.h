@@ -24,6 +24,7 @@ public:
   ~ProjectRecoveryView();
   void reject() override;
   void setProgressBarMaximum(int newValue);
+  void connectProgressBar();
 
 public slots:
   void updateProgressBar(int newValue, bool err);
@@ -35,7 +36,7 @@ private slots:
 
 private:
   void addDataToTable(Ui::ProjectRecoveryWidget *ui);
-  unsigned int m_progressBarCounter;
+  
   Ui::ProjectRecoveryWidget *ui;
   ProjectRecoveryPresenter *m_presenter;
 };
