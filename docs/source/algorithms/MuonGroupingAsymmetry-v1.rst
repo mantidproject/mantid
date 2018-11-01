@@ -122,7 +122,7 @@ Output:
 .. testoutput:: MultiPeriod
 
     X values are : [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
-    Y values are : [-0.696, -0.329, 0.359, 0.666, 0.876]
+    Y values are : [-0.806, -0.572, -0.133, 0.063, 0.197]
 
 .. categories::
 
