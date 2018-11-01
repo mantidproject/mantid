@@ -10,7 +10,7 @@ def add_directory_structure(dirs):
     """
     create the nested WorkspaceGroup structure in the ADS specified by the
     stored directory attribute.
-    dirs = ["dir1", "dir2"]
+    dirs = ["dir1", "dir2"] eg. ['Muon Data', 'MUSR72105', 'MUSR72105 Raw Data']
     """
     if not dirs:
         return
