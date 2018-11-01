@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import FunctionFactory, Workspace, AlgorithmManager, IFunction1D
 
 
@@ -17,7 +23,7 @@ class FunctionWrapper(object):
                 return wrapper(fun, *args, **kwargs)
         return FunctionWrapper(fun, **kwargs)
 
-    def __init__ (self, name, **kwargs):
+    def __init__(self, name, **kwargs):
         """
         Called when creating an instance
 
