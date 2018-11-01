@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
@@ -16,6 +17,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
 namespace {
+
+bool is_alnum_underscore(char c) {
+  return (isalpha(c) || isdigit(c) || (c == '_'));
+}
 
 bool checkPeriodInWorkspaceGroup(const int &period,
                                  WorkspaceGroup_sptr workspace) {
@@ -55,9 +60,9 @@ MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
 
 Mantid::API::MatrixWorkspace_sptr
 calculateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
-                       const std::vector<int> &summedPeriods,
-                       const std::vector<int> &subtractedPeriods,
-                       int groupIndex, const double startX, const double endX) {
+                       const std::vector<int> summedPeriods,
+                       const std::vector<int> subtractedPeriods, int groupIndex,
+                       const double startX, const double endX) {
   MatrixWorkspace_sptr tempWS;
   int numPeriods = inputWS->getNumberOfEntries();
   if (numPeriods > 1) {
@@ -95,6 +100,31 @@ calculateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
   return outWS;
 }
 
+MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
+                                    const std::vector<int> &detectorIDs) {
+
+  auto outputWS = WorkspaceFactory::Instance().create(workspace, 1);
+
+  std::vector<size_t> wsIndices =
+      workspace->getIndicesFromDetectorIDs(detectorIDs);
+
+  if (wsIndices.size() != detectorIDs.size())
+    throw std::invalid_argument("Some of the detector IDs were not found");
+
+  outputWS->getSpectrum(0).clearDetectorIDs();
+  outputWS->setSharedX(0, workspace->sharedX(wsIndices.front()));
+
+  auto hist = outputWS->histogram(0);
+  for (auto &wsIndex : wsIndices) {
+    hist += workspace->histogram(wsIndex);
+    outputWS->getSpectrum(0).addDetectorIDs(
+        workspace->getSpectrum(wsIndex).getDetectorIDs());
+  }
+  outputWS->setHistogram(0, hist);
+  outputWS->getSpectrum(0).setSpectrumNo(static_cast<int32_t>(1));
+  return outputWS;
+}
+
 } // namespace
 
 namespace Mantid {
@@ -104,9 +134,9 @@ namespace Muon {
 DECLARE_ALGORITHM(MuonGroupingAsymmetry)
 
 void MuonGroupingAsymmetry::init() {
-
   std::string emptyString("");
   std::vector<int> defaultGrouping = {1};
+  std::vector<int> defaultPeriods = {1};
 
   declareProperty(
       Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
@@ -115,7 +145,7 @@ void MuonGroupingAsymmetry::init() {
       "Input workspace containing data from detectors which are to "
       "be grouped.");
 
-  declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(Mantid::Kernel::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", emptyString, Direction::Output),
                   "Output workspace which will hold the results of the group "
                   "asymmetry calculation.");
@@ -126,9 +156,11 @@ void MuonGroupingAsymmetry::init() {
                   "character.",
                   Direction::Input);
 
-  declareProperty("DetectorIndex", 1,
-                  "The detector index to perform the asymmetry on.",
-                  Direction::Input);
+  declareProperty(make_unique<ArrayProperty<int>>(
+                      "Grouping", defaultGrouping,
+                      IValidator_sptr(new NullValidator), Direction::Input),
+                  "The grouping of detectors, comma separated list of detector "
+                  "IDs or hyphenated ranges of IDs.");
 
   declareProperty("AsymmetryTimeMin", 0.0,
                   "Start time for the asymmetry calculation (in micro "
@@ -141,7 +173,7 @@ void MuonGroupingAsymmetry::init() {
                   Direction::Input);
 
   declareProperty(make_unique<ArrayProperty<int>>(
-                      "SummedPeriods", defaultGrouping,
+                      "SummedPeriods", defaultPeriods,
                       IValidator_sptr(new NullValidator), Direction::Input),
                   "A list of periods to sum in multiperiod data.");
   declareProperty(
@@ -152,7 +184,7 @@ void MuonGroupingAsymmetry::init() {
 
   std::string groupingGrp("Grouping Information");
   setPropertyGroup("GroupName", groupingGrp);
-  setPropertyGroup("DetectorIndex", groupingGrp);
+  setPropertyGroup("Grouping", groupingGrp);
   setPropertyGroup("AsymmetryTimeMin", groupingGrp);
   setPropertyGroup("AsymmetryTimeMax", groupingGrp);
 
@@ -163,6 +195,17 @@ void MuonGroupingAsymmetry::init() {
 
 std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
   std::map<std::string, std::string> errors;
+
+  std::string groupName = this->getProperty("GroupName");
+  if (groupName.empty()) {
+    errors["GroupName"] = "Group name must be specified.";
+  }
+
+  if (!std::all_of(std::begin(groupName), std::end(groupName),
+                   is_alnum_underscore)) {
+    errors["GroupName"] =
+        "The group name must contain alphnumeric characters and _ only.";
+  }
 
   WorkspaceGroup_sptr inputWS = getProperty("InputWorkspace");
   std::vector<int> summedPeriods = getProperty("SummedPeriods");
@@ -216,6 +259,19 @@ std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
   return errors;
 }
 
+WorkspaceGroup_sptr
+MuonGroupingAsymmetry::createGroupWorkspace(WorkspaceGroup_sptr inputWS) {
+  std::vector<int> group = this->getProperty("Grouping");
+  auto groupedPeriods = boost::make_shared<WorkspaceGroup>();
+  // for each period
+  for (auto &&workspace : *inputWS) {
+    auto groupWS = groupDetectors(
+        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), group);
+    groupedPeriods->addWorkspace(groupWS);
+  }
+  return groupedPeriods;
+}
+
 void MuonGroupingAsymmetry::exec() {
 
   WorkspaceGroup_sptr inputWS = getProperty("InputWorkspace");
@@ -223,13 +279,15 @@ void MuonGroupingAsymmetry::exec() {
 
   const double startX = getProperty("AsymmetryTimeMin");
   const double endX = getProperty("AsymmetryTimeMax");
-  const int detectorIndex = getProperty("DetectorIndex");
+  std::vector<int> grouping = getProperty("Grouping");
 
   std::vector<int> summedPeriods = getProperty("SummedPeriods");
   std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
 
-  outWS = calculateMuonAsymmetry(inputWS, summedPeriods, subtractedPeriods,
-                                 detectorIndex, startX, endX);
+  WorkspaceGroup_sptr groupedWS = createGroupWorkspace(inputWS);
+
+  outWS = calculateMuonAsymmetry(groupedWS, summedPeriods, subtractedPeriods, 0,
+                                 startX, endX);
 
   addGroupingAsymmetrySampleLogs(outWS);
   setProperty("OutputWorkspace", outWS);
@@ -240,7 +298,7 @@ void MuonGroupingAsymmetry::addGroupingAsymmetrySampleLogs(
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_asymmetry_group_name",
                                     getPropertyValue("GroupName"));
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_asymmetry_group",
-                                    getPropertyValue("DetectorIndex"));
+                                    getPropertyValue("Grouping"));
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_asymmetry_x_min",
                                     getPropertyValue("AsymmetryTimeMin"));
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_asymmetry_x_max",
