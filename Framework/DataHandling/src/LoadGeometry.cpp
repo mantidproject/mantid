@@ -11,7 +11,8 @@
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadGeometry::isIDF(const std::string &filename, const std::string &instrumentname) {
+bool LoadGeometry::isIDF(const std::string &filename,
+                         const std::string &instrumentname) {
   if (!filename.empty()) {
     Mantid::Kernel::FileDescriptor descriptor(filename);
     return ((descriptor.isAscii() && descriptor.extension() == ".xml"));
@@ -20,7 +21,8 @@ bool LoadGeometry::isIDF(const std::string &filename, const std::string &instrum
 }
 
 bool LoadGeometry::isNexus(const std::string &filename) {
-  if (!filename.empty() && !Mantid::Kernel::FileDescriptor(filename).isAscii(filename)) {
+  if (!filename.empty() &&
+      !Mantid::Kernel::FileDescriptor(filename).isAscii(filename)) {
     Mantid::Kernel::NexusDescriptor descriptor(filename);
     return descriptor.isHDF(filename) &&
            (descriptor.classTypeExists("NXcylindrical_geometry") ||

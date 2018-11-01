@@ -4,12 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/LoadGeometry.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -28,8 +28,8 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <fstream>
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -109,7 +109,8 @@ void LoadInstrument::exec() {
   else if (LoadGeometry::isNexus(m_filename))
     NexusInstrumentLoader();
   else
-    throw Kernel::Exception::FileError("Instrument input cannot be read",m_filename);
+    throw Kernel::Exception::FileError("Instrument input cannot be read",
+                                       m_filename);
 
   // Set the monitors output property
   // auto instr = m_workspace->getInstrument();
@@ -211,9 +212,10 @@ void LoadInstrument::IDFInstrumentLoader() {
 
 void LoadInstrument::NexusInstrumentLoader() {
   checkAndRetrieveInstrumentFilename();
-  m_filename = ExperimentInfo::getInstrumentFilename(m_instName,
-               m_workspace->getWorkspaceStartDate());
-  Instrument_const_sptr instrument = NexusGeometry::NexusGeometryParser::createInstrument(m_filename);
+  m_filename = ExperimentInfo::getInstrumentFilename(
+      m_instName, m_workspace->getWorkspaceStartDate());
+  Instrument_const_sptr instrument =
+      NexusGeometry::NexusGeometryParser::createInstrument(m_filename);
   m_workspace->setInstrument(instrument);
   m_workspace->populateInstrumentParameters();
 }
@@ -232,8 +234,8 @@ void LoadInstrument::checkAndRetrieveInstrumentFilename() {
           "most be specified to load an IDF",
           m_filename);
     } else {
-      m_filename = ExperimentInfo::getInstrumentFilename(m_instName,
-                   m_workspace->getWorkspaceStartDate());
+      m_filename = ExperimentInfo::getInstrumentFilename(
+          m_instName, m_workspace->getWorkspaceStartDate());
     }
   }
   if (m_filename.empty()) {
