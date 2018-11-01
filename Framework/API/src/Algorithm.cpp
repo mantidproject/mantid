@@ -1370,8 +1370,8 @@ bool Algorithm::doCallProcessGroups(
     // Log that execution has completed.
     reportCompleted(duration, true /* this is for group processing*/);
 
-    m_history = boost::make_shared<AlgorithmHistory>(this, startTime,
-                                                     duration, ++g_execCount);
+    m_history = boost::make_shared<AlgorithmHistory>(this, startTime, duration,
+                                                     ++g_execCount);
 
     if (trackingHistory() && m_history) {
 
@@ -1379,11 +1379,11 @@ bool Algorithm::doCallProcessGroups(
       findWorkspaceProperties(inputWorkspaces, outputWorkspaces);
 
       // We need to find the workspaces to add the history to.
-      if (outputWorkspaces.size() == 0 && inputWorkspaces.size() == 0){
-        for (auto ws : m_groupWorkspaces){
+      if (outputWorkspaces.size() == 0 && inputWorkspaces.size() == 0) {
+        for (auto ws : m_groupWorkspaces) {
           outputWorkspaces.emplace_back(ws);
         }
-      } else if (outputWorkspaces.size() == 0){
+      } else if (outputWorkspaces.size() == 0) {
         outputWorkspaces = inputWorkspaces;
       }
 
