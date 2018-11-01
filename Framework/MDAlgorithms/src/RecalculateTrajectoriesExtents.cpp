@@ -135,6 +135,9 @@ void RecalculateTrajectoriesExtents::exec() {
 
   // Loop over experiment infos
   size_t nExperimentInfos = outWS->getNumExperimentInfo();
+  if (nExperimentInfos == 0) {
+    throw std::runtime_error("There is no experiment info");
+  }
   if (nExperimentInfos >1) {
     g_log.warning("More than one experiment info. On merged workspaces, the "
                   "limits recalculations might be wrong");
@@ -142,7 +145,7 @@ void RecalculateTrajectoriesExtents::exec() {
 
   for (size_t iExpInfo=0; iExpInfo<nExperimentInfos; iExpInfo++){
     auto &currentExptInfo = *(outWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
-    // get instrument and goniometer
+
     const auto &spectrumInfo = currentExptInfo.spectrumInfo();
     const int64_t nspectra = static_cast<int64_t>(spectrumInfo.size());
     std::vector<double> lowValues, highValues;
@@ -187,7 +190,7 @@ void RecalculateTrajectoriesExtents::exec() {
       auto gon = currentExptInfo.run().getGoniometerMatrix();
       gon.Invert();
 
-      //calculate limits in Q_lab
+      //calculate limits in Q_sample
       for (int64_t i = 0; i < nspectra; i++) {
         if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
             spectrumInfo.isMasked(i)) {

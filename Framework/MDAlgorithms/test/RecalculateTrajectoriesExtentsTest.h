@@ -8,10 +8,20 @@
 #define MANTID_MDALGORITHMS_RECALCULATETRAJECTORIESEXTENTSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidMDAlgorithms/RecalculateTrajectoriesExtents.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using Mantid::MDAlgorithms::RecalculateTrajectoriesExtents;
+using namespace Mantid::MDAlgorithms;
+using namespace Mantid::Geometry;
+using namespace Mantid::API;
+using VectorDoubleProperty = Mantid::Kernel::PropertyWithValue<std::vector<double>>;
 
 class RecalculateTrajectoriesExtentsTest : public CxxTest::TestSuite {
 public:
@@ -20,7 +30,37 @@ public:
   static RecalculateTrajectoriesExtentsTest *createSuite() { return new RecalculateTrajectoriesExtentsTest(); }
   static void destroySuite( RecalculateTrajectoriesExtentsTest *suite ) { delete suite; }
 
+  IMDEventWorkspace_sptr create_workspace(std::vector<double> extents,std::string name){
+    // ---- empty MDEW ----
+    TS_ASSERT_EQUALS(extents.size(),6)
+    CreateMDWorkspace algC;
+    algC.initialize();
+    algC.setProperty("Dimensions", "3");
+    algC.setProperty("Extents", extents);
+    std::string frames = Mantid::Geometry::QSample::QSampleName + "," +
+                         Mantid::Geometry::QSample::QSampleName + "," +
+                         Mantid::Geometry::QSample::QSampleName;
+    algC.setProperty("Frames", frames);
+    algC.setPropertyValue("Names", "x,y,z");
+    algC.setPropertyValue("Units", "m,mm,um");
+    algC.setPropertyValue("OutputWorkspace", name);
+    algC.execute();
+    IMDEventWorkspace_sptr out = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(name));
+    TS_ASSERT(out);
 
+    std::vector<double> L2{1,1,1},pol{0.1,0.2,0.3},azi{0,1,2};
+    Instrument_sptr inst=ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(L2,pol,azi);
+    inst->setName("Test");
+
+    ExperimentInfo_sptr ei=ExperimentInfo_sptr(new Mantid::API::ExperimentInfo());
+    ei->setInstrument(inst);
+    std::vector<double> high(3,3),low(3,1);
+    ei->mutableRun().addProperty("MDNorm_high",high);
+    ei->mutableRun().addProperty("MDNorm_low",low);
+    out->addExperimentInfo(ei);
+    TS_ASSERT_EQUALS(out->getNumExperimentInfo(),1)
+    return out;
+  }
   void test_Init()
   {
     RecalculateTrajectoriesExtents alg;
@@ -28,10 +68,8 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void test_exec()
-  {
-    // Create test input if necessary
-    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
+  void do_test(std::string name, std::vector<double> extents){
+    IMDEventWorkspace_sptr inputWS = create_workspace(extents,name);
 
     RecalculateTrajectoriesExtents alg;
     // Don't put output in ADS by default
@@ -39,21 +77,41 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", name) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
     // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
     // be the type using in declareProperty for the "OutputWorkspace" type.
     // We can't use auto as it's an implicit conversion.
-    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    IMDEventWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
-    TS_FAIL("TODO: Check the results and remove this line");
+    auto ei=outputWS->getExperimentInfo(0);
+    TS_ASSERT(ei);
+    auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(ei->getLog("MDNorm_low"));
+    auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(ei->getLog("MDNorm_high"));
+    const auto &spectrumInfo = ei->spectrumInfo();
+    for (size_t i=0;i<3;i++) {
+        const auto &detector = spectrumInfo.detector(i);
+        double theta = detector.getTwoTheta(Mantid::Kernel::V3D(0,0,0), Mantid::Kernel::V3D(0,0,1));
+        double phi = detector.getPhi();
+        double Qx =-sin(theta)*cos(phi);
+        //TS_ASSERT_DELTA((*lowValuesLog)()[i]*Qx,extents[1],1e-6)
+        //TS_ASSERT_DELTA((*highValuesLog)()[i],3,1e-6)
+      }
+  }
+  void test_exec()
+  {
+    std::vector<double> extents{-10,10,-10,10,-10,10};
+    std::string name("RecalculateTrajectoriesExtents_Large_test");
+    do_test(name,extents);
   }
   
   void test_Something()
   {
-    TS_FAIL( "You forgot to write a test!");
+      std::vector<double> extents{-0.2,10,-10,10,-10,10};
+      std::string name("RecalculateTrajectoriesExtents_small_test");
+      do_test(name,extents);
   }
 
 
