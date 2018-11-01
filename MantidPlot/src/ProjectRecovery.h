@@ -87,7 +87,7 @@ public:
 
   /// Looks at the recovery checkpoints and repairs some faults
   void repairCheckpointDirectory();
-  
+
   /// Remove checkpoints if it has lock file
   void removeLockedCheckpoints();
 
