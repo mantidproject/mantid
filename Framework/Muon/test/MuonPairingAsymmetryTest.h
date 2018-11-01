@@ -151,23 +151,23 @@ createMultiPeriodGroupedWorkspace(const std::string &groupName,
   auto wsGroup = boost::make_shared<WorkspaceGroup>();
 
   for (int i = 1; i < nPeriods + 1; i++) {
-	  std::vector<int> periods = { i };
-	  auto alg = boost::make_shared<MuonGroupingCounts>();
-	  alg->initialize();
-	  alg->setProperty("OutputWorkspace", "__notUsed");
-	  alg->setProperty("InputWorkspace", ws);
-	  alg->setProperty("GroupName", groupName);
-	  alg->setProperty("Grouping", grouping);
-	  alg->setProperty("SummedPeriods", periods);
-	  alg->setAlwaysStoreInADS(false);
-	  alg->setLogging(false);
+    std::vector<int> periods = {i};
+    auto alg = boost::make_shared<MuonGroupingCounts>();
+    alg->initialize();
+    alg->setProperty("OutputWorkspace", "__notUsed");
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("GroupName", groupName);
+    alg->setProperty("Grouping", grouping);
+    alg->setProperty("SummedPeriods", periods);
+    alg->setAlwaysStoreInADS(false);
+    alg->setLogging(false);
 
-	  alg->execute();
+    alg->execute();
 
-	  Workspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-	  wsGroup->addWorkspace(outputWS);
+    Workspace_sptr outputWS = alg->getProperty("OutputWorkspace");
+    wsGroup->addWorkspace(outputWS);
   }
-  
+
   return wsGroup;
 }
 
@@ -316,40 +316,39 @@ public:
   // --------------------------------------------------------------------------
 
   void test_that_at_least_one_period_must_be_specified() {
-	  auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-	  std::vector<int> detectors = { 1, 2 };
-	  auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "pair1");
+    auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
+    std::vector<int> detectors = {1, 2};
+    auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "pair1");
 
-	  std::vector<int> summedPeriods = {};
-	  std::vector<int> subtractedPeriods = {};
-	  alg->setProperty("SummedPeriods", summedPeriods);
-	  alg->setProperty("SubtractedPeriods", subtractedPeriods);
+    std::vector<int> summedPeriods = {};
+    std::vector<int> subtractedPeriods = {};
+    alg->setProperty("SummedPeriods", summedPeriods);
+    alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
-	  TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void
-	  test_that_supplying_too_many_periods_to_SummedPeriods_throws_on_execute() {
-	  auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-	  auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "pair1");
+  test_that_supplying_too_many_periods_to_SummedPeriods_throws_on_execute() {
+    auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
+    auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "pair1");
 
-	  std::vector<int> summedPeriods = { 3 };
-	  alg->setProperty("SummedPeriods", summedPeriods);
+    std::vector<int> summedPeriods = {3};
+    alg->setProperty("SummedPeriods", summedPeriods);
 
-	  TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void
-	  test_that_supplying_too_many_periods_to_SubtractedPeriods_throws_on_execute() {
-	  auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-	  auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "pair1");
+  test_that_supplying_too_many_periods_to_SubtractedPeriods_throws_on_execute() {
+    auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
+    auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "pair1");
 
-	  std::vector<int> subtractedPeriods = { 3 };
-	  alg->setProperty("SubtractedPeriods", subtractedPeriods);
+    std::vector<int> subtractedPeriods = {3};
+    alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
-	  TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
-
 
   // --------------------------------------------------------------------------
   // Correct Output : Single Period
