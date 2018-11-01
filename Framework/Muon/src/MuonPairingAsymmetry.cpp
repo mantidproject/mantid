@@ -170,7 +170,6 @@ void MuonPairingAsymmetry::init() {
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
-  std::vector<int> defaultPeriods = {1};
   declareProperty(make_unique<ArrayProperty<int>>("SummedPeriods", "1"),
                   "A list of periods to sum in multiperiod data.");
   setPropertySettings("SummedPeriods",
