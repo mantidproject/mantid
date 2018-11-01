@@ -30,23 +30,6 @@ public:
   const std::string inputWSName = "inputData";
 };
 
-// Set sensible default algorithm properties
-IAlgorithm_sptr algorithmWithPropertiesSet(const std::string &inputWSName) {
-  std::vector<int> group = {1};
-
-  auto alg = boost::make_shared<MuonGroupingAsymmetry>();
-  alg->initialize();
-  alg->setProperty("InputWorkspace", inputWSName);
-  alg->setProperty("GroupName", "fwd");
-  alg->setProperty("Grouping", group);
-  alg->setProperty("AsymmetryTimeMin", 0.0);
-  alg->setProperty("AsymmetryTimeMax", 30.0);
-  alg->setProperty("SummedPeriods", std::to_string(1));
-  alg->setProperty("SubtractedPeriods", "");
-  alg->setLogging(false);
-  return alg;
-}
-
 // Set only mandatory fields; input and output workspace
 IAlgorithm_sptr
 algorithmWithWorkspacePropertiesSet(const std::string &inputWSName) {
@@ -282,7 +265,7 @@ public:
     std::vector<double> xvals = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5};
     auto upper = std::lower_bound(xvals.begin(), xvals.end(), 0.05);
 
-    size_t i = std::distance(xvals.begin(), upper + 1);
+    // size_t i = std::distance(xvals.begin(), upper + 1);
   }
 
   void
