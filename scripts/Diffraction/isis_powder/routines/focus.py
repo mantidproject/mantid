@@ -78,16 +78,15 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
 
     # Output
     d_spacing_group, tof_group = instrument._output_focused_ws(output_spectra, run_details=run_details)
-    common.remove_intermediate_workspace(input_workspace)
-    common.remove_intermediate_workspace(aligned_ws)
-    common.remove_intermediate_workspace(focused_ws)
-    common.remove_intermediate_workspace(output_spectra)
 
     common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                unit_to_keep=instrument._get_unit_to_keep())
 
     # Tidy workspaces from Mantid
-
+    common.remove_intermediate_workspace(input_workspace)
+    common.remove_intermediate_workspace(aligned_ws)
+    common.remove_intermediate_workspace(focused_ws)
+    common.remove_intermediate_workspace(output_spectra)
 
     return d_spacing_group
 
