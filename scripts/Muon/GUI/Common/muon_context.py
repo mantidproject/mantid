@@ -231,7 +231,7 @@ class MuonContext(object):
 
     def _show_single_workspace(self, workspace, name):
         """
-        workspace must be MuonWorkspace type.
+        workspace must be MuonWorkspaceWrapper type.
         """
         # workspace.hide()
         workspace.show(name=name)
@@ -259,7 +259,7 @@ class MuonContext(object):
         directory = self.get_base_data_directory() + self.get_group_data_directory()
         workspace = self.calculate_group_data(group_name)
 
-        self._groups[group_name].workspace = load_utils.MuonWorkspace(workspace)
+        self._groups[group_name].workspace = load_utils.MuonWorkspaceWrapper(workspace)
         if show:
             self._groups[group_name].workspace.show(directory + name)
 
@@ -272,7 +272,7 @@ class MuonContext(object):
         directory = self.get_base_data_directory() + self.get_pair_data_directory()
         workspace = self.calculate_pair_data(pair_name)
 
-        self._pairs[pair_name].workspace = load_utils.MuonWorkspace(workspace)
+        self._pairs[pair_name].workspace = load_utils.MuonWorkspaceWrapper(workspace)
         if show:
             self._pairs[pair_name].workspace.show(directory + name)
 
@@ -373,9 +373,6 @@ class MuonContext(object):
         return group_data
 
     def calculate_pair_data(self, pair_name):
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
-
         processed_data = self._run_pre_processing()
 
         params = self._get_MuonPairingAsymmetry_parameters(pair_name)

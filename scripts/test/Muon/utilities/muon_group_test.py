@@ -1,7 +1,7 @@
 import unittest
 
 from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.muon_workspace import MuonWorkspace
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class MuonGroupTest(unittest.TestCase):
@@ -37,7 +37,7 @@ class MuonGroupTest(unittest.TestCase):
         group = MuonGroup(group_name="group1")
 
         self.assertIsNone(group.workspace)
-        group.workspace = MuonWorkspace([1, 2, 3])
+        group.workspace = MuonWorkspaceWrapper([1, 2, 3])
         self.assertIsNotNone(group.workspace)
 
     def test_that_AttributeError_thrown_if_setting_workspace_to_non_MuonWorkspace_object(self):

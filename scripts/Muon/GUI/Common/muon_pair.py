@@ -1,7 +1,7 @@
 # pylint: disable=C0111
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.muon_workspace import MuonWorkspace
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class MuonPair(object):
@@ -11,7 +11,7 @@ class MuonPair(object):
     - The name is set at initialization and after that cannot be changed.
     - The pair has two groups associated to it, and we store only their names.
     - The "alpha" parameter is stored and modifiable.
-    - The workspace associated to the pair can be set, but must be of type MuonWorkspace.
+    - The workspace associated to the pair can be set, but must be of type MuonWorkspaceWrapper.
     """
 
     def __init__(self, pair_name,
@@ -31,11 +31,11 @@ class MuonPair(object):
 
     @workspace.setter
     def workspace(self, new_workspace):
-        if isinstance(new_workspace, MuonWorkspace):
+        if isinstance(new_workspace, MuonWorkspaceWrapper):
             self._workspace = new_workspace
         else:
             raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) +
-                                 " but should be MuonWorkspace")
+                                 " but should be MuonWorkspaceWrapper")
 
     @property
     def name(self):
