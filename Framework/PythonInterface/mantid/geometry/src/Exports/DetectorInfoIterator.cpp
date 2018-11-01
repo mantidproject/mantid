@@ -5,10 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/module.hpp>
 
+using Mantid::Geometry::DetectorInfo;
 using Mantid::Geometry::DetectorInfoIterator;
 using namespace boost::python;
 
@@ -16,5 +18,5 @@ using namespace boost::python;
 void export_DetectorInfoIterator() {
 
   // Export to Python
-  class_<DetectorInfoIterator>("DetectorInfoIterator", no_init);
+  class_<DetectorInfoIterator<DetectorInfo>>("DetectorInfoIterator", no_init);
 }

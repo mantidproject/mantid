@@ -19,15 +19,15 @@ class BeamCentreModel(object):
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def reset_to_defaults_for_instrument(self, state_data = None):
+    def reset_to_defaults_for_instrument(self, file_information = None):
         r_range = {}
         instrument = None
 
-        if state_data:
-            instrument_file_path = get_instrument_paths_for_sans_file(state_data.sample_scatter)
+        if file_information:
+            instrument_file_path = get_instrument_paths_for_sans_file(file_information=file_information)
             r_range = get_named_elements_from_ipf_file(instrument_file_path[1],
                                                        ["beam_centre_radius_min", "beam_centre_radius_max"], float)
-            instrument = state_data.instrument
+            instrument = file_information.get_instrument()
 
         self._max_iterations = 10
         self._r_min = r_range["beam_centre_radius_min"] if "beam_centre_radius_min" in r_range else 60

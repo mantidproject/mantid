@@ -26,6 +26,10 @@ void export_SpectrumDefinition() {
            "Returns the pair of detector index and time index at given index "
            "of spectrum definition.")
 
+      .def("__len__", &SpectrumDefinition::size, arg("self"),
+           "Returns the size of the SpectrumDefinition i.e. the number of "
+           "detectors for the spectrum.")
+
       .def("size", &SpectrumDefinition::size, arg("self"),
            "Returns the size of the SpectrumDefinition i.e. the number of "
            "detectors for the spectrum.")
