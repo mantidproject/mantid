@@ -61,7 +61,7 @@ std::vector<std::string> ProjectRecoveryModel::getRow(int i) {
 }
 
 std::vector<std::string>
-ProjectRecoveryModel::getRow(std::string checkpointName) {
+ProjectRecoveryModel::getRow(const std::string &checkpointName) {
   for (auto c : m_rows) {
     if (c[0] == checkpointName) {
       return c;

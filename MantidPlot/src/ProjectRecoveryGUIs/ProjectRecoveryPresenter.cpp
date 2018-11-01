@@ -20,6 +20,7 @@ ProjectRecoveryPresenter::ProjectRecoveryPresenter(
   m_recView = nullptr;
   m_failureView = nullptr;
   m_model = new ProjectRecoveryModel(projectRecovery, this);
+  m_openView = RecoveryView;
 }
 
 ProjectRecoveryPresenter::ProjectRecoveryPresenter(
@@ -30,6 +31,7 @@ ProjectRecoveryPresenter::ProjectRecoveryPresenter(
   m_model = new ProjectRecoveryModel(nullptr, this);
   *m_model = *obj.m_model;
   m_mainWindow = obj.m_mainWindow;
+  m_openView = = obj.m_openView;
 }
 
 ProjectRecoveryPresenter::~ProjectRecoveryPresenter() {
@@ -122,6 +124,7 @@ operator=(const ProjectRecoveryPresenter &obj) {
     m_model = new ProjectRecoveryModel(nullptr, this);
     *m_model = *obj.m_model;
     m_mainWindow = obj.m_mainWindow;
+    m_openView = obj.m_openView;
   }
   return *this;
 }
