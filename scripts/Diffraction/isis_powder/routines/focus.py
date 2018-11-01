@@ -127,7 +127,7 @@ def _divide_one_spectrum_by_spline(spectrum, spline, instrument):
     if instrument.get_instrument_prefix() == "GEM":
         divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum,
                                 StoreInADS=False)
-        return _crop_spline_to_percent_of_max(rebinned_spline, divided, spectrum)
+        return _crop_spline_to_percent_of_max(rebinned_spline, divided, spectrum, 1000, 2000)
 
     divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum)
     return divided
@@ -173,14 +173,14 @@ def _test_splined_vanadium_exists(instrument, run_details):
                          " \nHave you run the method to create a Vanadium spline with these settings yet?\n")
 
 
-def _crop_spline_to_percent_of_max(spline, input_ws, output_workspace):
+def _crop_spline_to_percent_of_max(spline, input_ws, output_workspace, min_value, max_value):
     spline_spectrum = spline.readY(0)
     if not spline_spectrum.any():
         return mantid.CloneWorkspace(inputWorkspace=input_ws, OutputWorkspace=output_workspace)
 
     x_list = input_ws.readX(0)
-    min_index = x_list.searchsorted(1000)
-    max_index = x_list.searchsorted(2000)
+    min_index = x_list.searchsorted(min_value)
+    max_index = x_list.searchsorted(max_value)
     sliced_spline_spectrum = spline_spectrum[min_index:max_index:1]
     y_val = numpy.amax(sliced_spline_spectrum)
     y_val = y_val / 100

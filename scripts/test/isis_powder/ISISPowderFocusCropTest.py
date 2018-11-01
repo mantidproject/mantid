@@ -15,7 +15,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         x = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         y = [0, 0, 10, 30, 2000, 80, 50, 40, 30, 25, 30]
         test_ws = mantid.CreateWorkspace(DataX=x, DataY=y)
-        test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws, test_ws)
+        test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws, test_ws,0,100)
         y_compare = [30, 2000, 80, 50, 40, 30, 25, 30]
         result = test_ws.readY(0)
         for compare, val in zip(y_compare, result):
@@ -25,7 +25,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         x = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         y = [50, 100, 300, 500, 2000, 80, 50, 0, 0, 0, 0]
         test_ws = mantid.CreateWorkspace(DataX=x, DataY=y)
-        test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws, test_ws)
+        test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws, test_ws,0,100)
         y_compare = [50, 100, 300, 500, 2000, 80, 50]
         result = test_ws.readY(0)
         for compare, val in zip(y_compare, result):
@@ -35,7 +35,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         x = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         y = [0, 0, 10, 30, 2000, 80, 50, 0, 0, 0, 0]
         test_ws = mantid.CreateWorkspace(DataX=x, DataY=y)
-        test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws, test_ws)
+        test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws, test_ws,0,100)
         y_compare = [30, 2000, 80, 50]
         result = test_ws.readY(0)
         for compare, val in zip(y_compare, result):
@@ -45,8 +45,28 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         x = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         y = [1, 5, 10, 30, 20, 80, 50, 40, 20, 10, 1]
         test_ws = mantid.CreateWorkspace(DataX=x, DataY=y)
-        test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws, test_ws)
+        test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws, test_ws,0,100)
         y_compare = [1, 5, 10, 30, 20, 80, 50, 40, 20, 10, 1]
+        result = test_ws.readY(0)
+        for compare, val in zip(y_compare, result):
+            self.assertEqual(compare, val)
+
+    def test_no_crop_subrange(self):
+        x = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        y = [1, 5, 10, 30, 20, 80, 50, 40, 20, 10, 10000]
+        test_ws = mantid.CreateWorkspace(DataX=x, DataY=y)
+        test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws, test_ws, 0, 20)
+        y_compare = [1, 5, 10, 30, 20, 80, 50, 40, 20, 10, 10000]
+        result = test_ws.readY(0)
+        for compare, val in zip(y_compare, result):
+            self.assertEqual(compare, val)
+
+    def test_crop_subrange(self):
+        x = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        y = [1, 50, 2000, 30, 20, 80, 50, 40, 20, 10, 1]
+        test_ws = mantid.CreateWorkspace(DataX=x, DataY=y)
+        test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws, test_ws, 0, 30)
+        y_compare = [50, 2000, 30, 20, 80, 50, 40]
         result = test_ws.readY(0)
         for compare, val in zip(y_compare, result):
             self.assertEqual(compare, val)
