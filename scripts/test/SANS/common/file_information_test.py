@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
@@ -117,6 +123,19 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_height() == 8.0)
         self.assertTrue(file_information.get_thickness() == 1.0)
         self.assertTrue(file_information.get_shape() is SampleShape.FlatPlate)
+
+    def test_that_can_find_data_with_numbers_but_no_instrument(self):
+        # Arrange
+        # The file is a single period, histogram-based and added
+
+        file_name = "74044-add"
+        factory = SANSFileInformationFactory()
+
+        # Act
+        file_information = factory.create_sans_file_information(file_name)
+
+        # Assert
+        self.assertTrue(file_information)
 
 
 class SANSFileInformationGeneralFunctionsTest(unittest.TestCase):

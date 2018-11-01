@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import CompositeValidator, Direction, FloatArrayLengthValidator, FloatArrayOrderedPairsValidator, \
@@ -21,7 +27,7 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         return 'Performs powder diffraction data reduction for D2B and D20 (when doing a detector scan).'
 
     def seeAlso(self):
-        return [ "PowderDiffILLReduction" ]
+        return [ "PowderDiffILLReduction", "PowderDiffILLDetEffCorr" ]
 
     def name(self):
         return "PowderDiffILLDetScanReduction"
@@ -35,6 +41,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
             issues['Output2DTubes'] = 'No output chosen'
             issues['Output2D'] = 'No output chosen'
             issues['Output1D'] = 'No output chosen'
+
+        if self.getPropertyValue("ComponentsToReduce") and self.getProperty("CropNegativeScatteringAngles").value:
+            issues['CropNegativeScatteringAngles'] = 'For component-wise reduction, this has to be unchecked.'
 
         return issues
 
@@ -88,6 +97,12 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
 
         self.declareProperty(name='ComponentsToMask', defaultValue='',
                              doc='Comma separated list of component names to mask, for instance: tube_1, tube_2')
+
+        self.declareProperty(name='ComponentsToReduce', defaultValue='',
+                             doc='Comma separated list of component names to output the reduced data for; for example tube_1')
+
+        self.declareProperty(name='AlignTubes', defaultValue=True,
+                             doc='Align the tubes vertically and horizontally according to IPF.')
 
     def _generate_mask(self, n_pix, instrument):
         """
@@ -151,16 +166,17 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
 
         return output2D
 
-    def PyExec(self):
+    def PyExec(self): # noqa C901
         data_type = 'Raw'
         if self.getProperty('UseCalibratedData').value:
             data_type = 'Calibrated'
+        align_tubes = self.getProperty('AlignTubes').value
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=6)
         self._progress.report('Loading data')
         input_workspace = LoadAndMerge(Filename=self.getPropertyValue('Run'),
                                        LoaderName='LoadILLDiffraction',
-                                       LoaderOptions={'DataType': data_type})
+                                       LoaderOptions={'DataType': data_type, 'AlignTubes': align_tubes})
         # We might already have a group, but group just in case
         input_group = GroupWorkspaces(InputWorkspaces=input_workspace)
 
@@ -178,6 +194,8 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         self._progress.report('Normalising to monitor')
         if self.getPropertyValue('NormaliseTo') == 'Monitor':
             input_group = NormaliseToMonitor(InputWorkspace=input_group, MonitorID=0)
+            if instrument.getName() == 'D2B':
+                input_group = Scale(InputWorkspace=input_group, Factor=1e+6)
 
         calib_file = self.getPropertyValue('CalibrationFile')
         if calib_file:
@@ -214,6 +232,12 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
         if instrument.hasParameter("mirror_scattering_angles"):
             self._mirror = instrument.getBoolParameter("mirror_scattering_angles")[0]
         self._final_mask = self.getProperty('FinalMask').value
+
+        components = self.getPropertyValue('ComponentsToReduce')
+        if components:
+            for ws in input_group:
+                CropToComponent(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(),
+                                ComponentNames=components)
 
         self._progress.report('Doing Output2DTubes Option')
         if self.getProperty('Output2DTubes').value:

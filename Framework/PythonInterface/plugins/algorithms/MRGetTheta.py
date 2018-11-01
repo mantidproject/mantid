@@ -1,7 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
-from mantid.kernel import Direction, FloatBoundedValidator
+from mantid.kernel import Direction, FloatBoundedValidator, Property
 import mantid.simpleapi
 import math
 
@@ -27,8 +33,9 @@ class MRGetTheta(PythonAlgorithm):
         self.declareProperty("AngleOffset", 0.,FloatBoundedValidator(lower=0.), "Angle offset (rad)")
         self.declareProperty("UseSANGLE", False, doc="If True, use SANGLE as the scattering angle. If False, use DANGLE.")
         self.declareProperty("SpecularPixel", 0., doc="Pixel position of the specular reflectivity [optional]")
-        self.declareProperty("Theta", 0., direction=Direction.Output, doc="Scattering angle theta [rad]")
-
+        self.declareProperty("DirectPixelOverwrite", Property.EMPTY_DBL, doc="DIRPIX overwrite value")
+        self.declareProperty("DAngle0Overwrite", Property.EMPTY_DBL, doc="DANGLE0 overwrite value (degrees)")
+        self.declareProperty("Theta", 0., direction=Direction.Output, doc="Scattering angle theta (rad)")
         return
 
     def PyExec(self):
@@ -36,14 +43,23 @@ class MRGetTheta(PythonAlgorithm):
         _w=self.getProperty("Workspace").value
 
         angle_offset = self.getProperty("AngleOffset").value
+        dirpix_overwrite = self.getProperty("DirectPixelOverwrite").value
+        dangle0_overwrite = self.getProperty("DAngle0Overwrite").value
+        use_sangle = self.getProperty("UseSANGLE").value
 
-        if self.getProperty("UseSANGLE").value:
+        if use_sangle:
             theta = self.read_log(_w, 'SANGLE', target_units='rad', assumed_units='deg')
         else:
             dangle = self.read_log(_w, 'DANGLE', target_units='rad', assumed_units='deg')
-            dangle0 = self.read_log(_w, 'DANGLE0', target_units='rad', assumed_units='deg')
+            if dangle0_overwrite == Property.EMPTY_DBL:
+                dangle0 = self.read_log(_w, 'DANGLE0', target_units='rad', assumed_units='deg')
+            else:
+                dangle0 = dangle0_overwrite * math.pi / 180.0
             det_distance = self.read_log(_w, 'SampleDetDis', target_units='m', assumed_units='mm')
-            direct_beam_pix = _w.getRun()['DIRPIX'].getStatistics().mean
+            if dirpix_overwrite == Property.EMPTY_DBL:
+                direct_beam_pix = _w.getRun()['DIRPIX'].getStatistics().mean
+            else:
+                direct_beam_pix = dirpix_overwrite
             ref_pix = self.getProperty("SpecularPixel").value
             if ref_pix == 0.:
                 ref_pix = direct_beam_pix

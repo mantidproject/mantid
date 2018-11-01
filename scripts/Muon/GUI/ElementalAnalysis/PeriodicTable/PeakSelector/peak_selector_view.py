@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from PyQt4 import QtGui, QtCore
 
 from six import iteritems
@@ -19,9 +25,17 @@ class PeakSelectorView(QtGui.QListWidget):
         self.list = QtGui.QVBoxLayout(self)
 
         primary = peak_data["Primary"]
-        self._create_checkbox_list("Primary", primary)
+        self.primary_checkboxes = self._create_checkbox_list(
+            "Primary", primary)
         secondary = peak_data["Secondary"]
-        self._create_checkbox_list("Secondary", secondary, checked=False)
+        self.secondary_checkboxes = self._create_checkbox_list(
+            "Secondary", secondary, checked=False)
+        try:
+            gammas = peak_data["Gammas"]
+            self.gamma_checkboxes = self._create_checkbox_list(
+                "Gammas", gammas, checked=False)
+        except KeyError:
+            self.gamma_checkboxes = []
 
         widget.setLayout(self.list)
         scroll = QtGui.QScrollArea()
@@ -34,8 +48,11 @@ class PeakSelectorView(QtGui.QListWidget):
 
         self.setLayout(scroll_layout)
 
-    def closeEvent(self, event):
+    def finish_selection(self):
         self.sig_finished_selection.emit(self.element, self.new_data)
+
+    def closeEvent(self, event):
+        self.finish_selection()
         event.accept()
 
     def update_new_data(self, data):
@@ -45,15 +62,23 @@ class PeakSelectorView(QtGui.QListWidget):
         new_data = data["Primary"].copy()
         self.new_data = new_data
 
+    def _setup_checkbox(self, name, checked):
+        checkbox = Checkbox(name)
+        checkbox.setChecked(checked)
+        checkbox.on_checkbox_unchecked(self._remove_value_from_new_data)
+        checkbox.on_checkbox_checked(self._add_value_to_new_data)
+        self.list.addWidget(checkbox)
+        return checkbox
+
     def _create_checkbox_list(self, heading, checkbox_data, checked=True):
         _heading = QtGui.QLabel(heading)
         self.list.addWidget(_heading)
+        checkboxes = []
         for peak_type, value in iteritems(checkbox_data):
-            checkbox = Checkbox("{}: {}".format(peak_type, value))
-            checkbox.setChecked(checked)
-            checkbox.on_checkbox_unchecked(self._remove_value_from_new_data)
-            checkbox.on_checkbox_checked(self._add_value_to_new_data)
-            self.list.addWidget(checkbox)
+            checkboxes.append(
+                self._setup_checkbox(
+                    "{}: {}".format(peak_type, value), checked))
+        return checkboxes
 
     def _parse_checkbox_name(self, name):
         peak_type, value = name.replace(" ", "").split(":")

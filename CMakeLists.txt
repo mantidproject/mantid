@@ -21,6 +21,9 @@ set ( SYSTEM_PACKAGE_TARGET "" )
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
+# Send libraries to common place, reference in several places so must be at top level
+set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
+set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 
 set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Enable Qt4-based gui & components" )
 set ( ENABLE_WORKBENCH OFF CACHE BOOL "Enable Qt5-based gui & components" )

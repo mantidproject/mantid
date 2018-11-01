@@ -3,6 +3,7 @@
 ###########################################################################
 add_subdirectory ( common )
 add_subdirectory ( legacyqwt )
+add_subdirectory ( mplcpp )
 add_subdirectory ( instrumentview )
 add_subdirectory ( sliceviewer )
 add_subdirectory ( spectrumviewer )

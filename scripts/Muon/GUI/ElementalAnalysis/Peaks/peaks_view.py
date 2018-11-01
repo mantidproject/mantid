@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from PyQt4 import QtGui
 
 from Muon.GUI.Common.checkbox import Checkbox
@@ -13,6 +19,12 @@ class PeaksView(QtGui.QWidget):
         self.minor = Checkbox("Minor Peaks")
         self.gamma = Checkbox("Gamma Peaks")
         self.electron = Checkbox("Electron Peaks")
-        for peak_type in [self.major, self.minor, self.gamma, self.electron]:
+
+        self.peak_checkboxes = [
+            self.major,
+            self.minor,
+            self.gamma,
+            self.electron]
+        for peak_type in self.peak_checkboxes:
             self.list.addWidget(peak_type)
         self.setLayout(self.list)

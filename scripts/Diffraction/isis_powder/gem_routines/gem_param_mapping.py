@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.routines.param_map_entry import ParamMapEntry
@@ -24,13 +30,13 @@ attr_mapping = \
      ParamMapEntry(ext_name="run_number",                int_name="run_number"),
      ParamMapEntry(ext_name="sample_empty",              int_name="sample_empty",   optional=True),
      ParamMapEntry(ext_name="sample_empty_scale",        int_name="sample_empty_scale"),
-     ParamMapEntry(ext_name="save_angles",               int_name="save_angles"),
+     ParamMapEntry(ext_name="save_all",                  int_name="save_all"),
      ParamMapEntry(ext_name="save_gda",                  int_name="save_gda"),
      ParamMapEntry(ext_name="save_maud_calib",           int_name="save_maud_calib"),
      ParamMapEntry(ext_name="save_maud",                 int_name="save_maud"),
      ParamMapEntry(ext_name="spline_coefficient",        int_name="spline_coeff"),
      ParamMapEntry(ext_name="suffix",                    int_name="suffix",         optional=True),
-     ParamMapEntry(ext_name="texture_mode",              int_name="texture_mode"),
+     ParamMapEntry(ext_name="texture_mode",              int_name="texture_mode",         optional=True),
      ParamMapEntry(ext_name="output_directory",          int_name="output_dir"),
      ParamMapEntry(ext_name="unit_to_keep",              int_name="unit_to_keep",
                    enum_class=WORKSPACE_UNITS,           optional=True),

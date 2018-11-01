@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
+#include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -38,31 +45,11 @@ using MantidWidgets::ProgressableView;
 
 ReflRunsTabPresenter is a presenter class for the Reflectometry Interface. It
 handles any interface functionality and model manipulation.
-
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflRunsTabPresenter
     : public IReflRunsTabPresenter,
-      public MantidWidgets::DataProcessor::DataProcessorMainPresenter {
+      public MantidWidgets::DataProcessor::DataProcessorMainPresenter,
+      public Mantid::API::AlgorithmObserver {
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
@@ -126,6 +113,8 @@ private:
   static const std::string MeasureTransferMethod;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
+  /// The name to use for the live data workspace
+  Mantid::API::IAlgorithm_sptr m_monitorAlg;
 
   /// searching
   bool search();
@@ -167,6 +156,23 @@ private:
       const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns);
   /// Get the data for a cell in the search results table as a string
   std::string searchModelData(const int row, const int column);
+  /// Start the live data monitor
+  void startMonitor();
+  void stopMonitor();
+  void startMonitorComplete();
+  std::string liveDataReductionAlgorithm();
+  std::string liveDataReductionOptions(const std::string &instrument);
+  Mantid::API::IAlgorithm_sptr setupLiveDataMonitorAlgorithm();
+
+  void handleError(const std::string &message, const std::exception &e);
+  void handleError(const std::string &message);
+
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override;
+  void errorHandle(const Mantid::API::IAlgorithm *alg,
+                   const std::string &what) override;
+  void updateViewWhenMonitorStarting();
+  void updateViewWhenMonitorStarted();
+  void updateViewWhenMonitorStopped();
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

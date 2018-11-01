@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore
@@ -112,9 +118,6 @@ class ThreadModel(QtCore.QObject):
 
     # if there are multiple inputs (alg>1)
     def loadData(self, inputs):
-        if not hasattr(self.model, "loadData"):
-            raise AttributeError("The model passed to ThreadModel has not implemented"
-                                 " loadData() method, which it is attempting to call.")
         self.model.loadData(inputs)
 
     def threadWrapperSetUp(self,

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyHelper.h"
 #include "MantidKernel/Exception.h"
@@ -426,5 +432,13 @@ const TYPE PropertyWithValue<TYPE>::getValueForAlias(const TYPE &alias) const {
   return value;
 }
 
+/**Returns the validator as a constant variable so it cannot be changed
+ * @tparam TYPE :: The type of the property value
+ * @return IValidator_sptr :: the validator
+ */
+template <typename TYPE>
+IValidator_sptr PropertyWithValue<TYPE>::getValidator() const {
+  return m_validator;
+}
 } // namespace Kernel
 } // namespace Mantid

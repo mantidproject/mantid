@@ -21,6 +21,7 @@ set ( TEST_PY_FILES
    utilities/muon_group_test.py
    utilities/muon_pair_test.py
    utilities/thread_model_test.py
+   subplotObject_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

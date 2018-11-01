@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTWIDGETRENDERTAB_H_
 #define INSTRUMENTWIDGETRENDERTAB_H_
 
@@ -15,6 +21,10 @@ class QAction;
 class QActionGroup;
 class QMenu;
 class QLineEdit;
+class QSlider;
+class QLabel;
+class QVBoxLayout;
+class QHBoxLayout;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -76,15 +86,25 @@ private slots:
   void glOptionChanged(bool);
   void showMenuToolTip(QAction *);
   void setUCorrection();
+  void toggleLayerDisplay(bool on);
+  void setVisibleLayer(int layer);
 
-private:
+private: // methods
   void showEvent(QShowEvent *) override;
   QMenu *createPeaksMenu();
   QFrame *setupAxisFrame();
   void setPrecisionMenuItemChecked(int n);
   void enable3DSurface(bool on);
   QPointF getUCorrection() const;
+  void connectInstrumentWidgetSignals() const;
+  void setupSurfaceTypeOptions();
+  QPushButton *setupDisplaySettings();
+  void setupColorMapWidget();
+  void setupUnwrappedControls(QHBoxLayout *parentLayout);
+  void setupGridBankMenu(QVBoxLayout *parentLayout);
+  void forceLayers(bool on);
 
+private: // members
   QPushButton *m_surfaceTypeButton;
   QPushButton *mSaveImage;
   DraggableColorBarWidget *m_colorMapWidget;
@@ -114,6 +134,12 @@ private:
   QAction *m_UCorrection;
   QActionGroup *m_precisionActionGroup;
   QList<QAction *> m_precisionActions;
+
+  QCheckBox *m_layerCheck;
+  QSlider *m_layerSlide;
+  QLabel *m_layerDisplay;
+
+  bool m_usingLayerStore;
 
   friend class InstrumentWidget;
 };

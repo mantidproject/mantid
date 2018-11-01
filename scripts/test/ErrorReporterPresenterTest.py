@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import sys
@@ -29,11 +35,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
         continue_working = True
         name = ''
         email = ''
+        textBox = ''
         view = mock.MagicMock()
         exit_code = 0
         presenter = ErrorReporterPresenter(view, exit_code)
 
-        presenter.error_handler(continue_working, share, name, email)
+        presenter.error_handler(continue_working, share, name, email, textBox)
 
         self.assertEqual(error_reporter_mock.call_count, 0)
         self.assertEqual(presenter._view.quit.call_count, 0)
@@ -49,11 +56,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
         continue_working = False
         name = ''
         email = ''
+        textBox = ''
         view = mock.MagicMock()
         exit_code = 0
         presenter = ErrorReporterPresenter(view, exit_code)
 
-        presenter.error_handler(continue_working, share, name, email)
+        presenter.error_handler(continue_working, share, name, email, textBox)
 
         self.assertEqual(error_reporter_mock.call_count, 1)
         error_reporter_mock_instance.sendErrorReport.asser_called_once_with(
@@ -71,11 +79,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
         continue_working = False
         name = ''
         email = ''
+        textBox = ''
         view = mock.MagicMock()
         exit_code = 0
         presenter = ErrorReporterPresenter(view, exit_code)
 
-        presenter.error_handler(continue_working, share, name, email)
+        presenter.error_handler(continue_working, share, name, email, textBox)
 
         self.assertEqual(error_reporter_mock.call_count, 1)
         error_reporter_mock_instance.sendErrorReport.asser_called_once_with(
@@ -93,11 +102,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
         continue_working = False
         name = ''
         email = ''
+        textBox = ''
         view = mock.MagicMock()
         exit_code = 0
         presenter = ErrorReporterPresenter(view, exit_code)
 
-        presenter.error_handler(continue_working, share, name, email)
+        presenter.error_handler(continue_working, share, name, email, textBox)
 
         self.assertEqual(error_reporter_mock.call_count, 1)
         error_reporter_mock_instance.sendErrorReport.asser_called_once_with(

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTWIDGET_H_
 #define INSTRUMENTWIDGET_H_
 
@@ -44,6 +50,7 @@ namespace MantidWidgets {
 class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
+class InstrumentWidgetMaskTab;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;
@@ -119,6 +126,7 @@ public:
   }
   InstrumentActor &getInstrumentActor() { return *m_instrumentActor; }
   void resetInstrument(bool resetGeometry);
+  void resetSurface();
   void selectTab(int tab);
   void selectTab(Tab tab) { selectTab(int(tab)); }
   InstrumentWidgetTab *getTab(const QString &title = "") const;
@@ -245,6 +253,7 @@ protected:
   /// Control tabs
   QList<InstrumentWidgetTab *> m_tabs;
   InstrumentWidgetRenderTab *m_renderTab;
+  InstrumentWidgetMaskTab *m_maskTab;
   XIntegrationControl *m_xIntegration;
   /// The OpenGL widget to display the instrument
   MantidGLWidget *m_InstrumentDisplay;

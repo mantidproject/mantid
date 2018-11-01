@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -52,9 +58,9 @@ void SequenceTypeHandler<ContainerType>::set(
   }
   // numpy arrays requires special handling to extract their types. Hand-off to
   // a more appropriate handler
-  else if (NumPy::NdArray::check(value)) {
-    alg->setProperty(name, Converters::NDArrayToVector<DestElementType>(
-                               NumPy::NdArray(value))());
+  else if (NDArray::check(value)) {
+    alg->setProperty(
+        name, Converters::NDArrayToVector<DestElementType>(NDArray(value))());
   } else if (PySequence_Check(value.ptr())) {
     alg->setProperty(name,
                      Converters::PySequenceToVector<DestElementType>(value)());

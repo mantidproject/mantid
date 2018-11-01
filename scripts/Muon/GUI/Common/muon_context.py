@@ -233,7 +233,7 @@ class MuonContext(object):
         """
         workspace must be MuonWorkspace type.
         """
-        workspace.hide()
+        # workspace.hide()
         workspace.show(name=name)
 
     def show_raw_data(self):
@@ -373,6 +373,9 @@ class MuonContext(object):
         return group_data
 
     def calculate_pair_data(self, pair_name):
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+
         processed_data = self._run_pre_processing()
 
         params = self._get_MuonPairingAsymmetry_parameters(pair_name)

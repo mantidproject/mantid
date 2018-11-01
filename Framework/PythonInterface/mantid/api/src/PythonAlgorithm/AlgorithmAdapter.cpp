@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/SerialAlgorithm.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/WrapperHelpers.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/python/class.hpp>
@@ -19,8 +25,6 @@
 namespace Mantid {
 namespace PythonInterface {
 using namespace boost::python;
-using Environment::UndefinedAttributeError;
-using Environment::callMethod;
 
 /**
  * Construct the "wrapper" and stores the reference to the PyObject
@@ -33,7 +37,7 @@ AlgorithmAdapter<BaseAlgorithm>::AlgorithmAdapter(PyObject *self)
   // Only cache the isRunning attribute if it is overridden by the
   // inheriting type otherwise we end up with an infinite recursive call
   // as isRunning always exists from the interface
-  if (Environment::typeHasAttribute(self, "isRunning"))
+  if (typeHasAttribute(self, "isRunning"))
     m_isRunningObj = PyObject_GetAttrString(self, "isRunning");
 }
 
@@ -104,7 +108,7 @@ AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
   try {
     // The GIL is required so that the the reference count of the
     // list object can be decremented safely
-    Environment::GlobalInterpreterLock gil;
+    GlobalInterpreterLock gil;
     return Converters::PySequenceToVector<std::string>(
         callMethod<list>(getSelf(), "seeAlso"))();
   } catch (UndefinedAttributeError &) {
@@ -145,12 +149,12 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
   if (!m_isRunningObj) {
     return SuperClass::isRunning();
   } else {
-    Environment::GlobalInterpreterLock gil;
+    GlobalInterpreterLock gil;
 
     GNU_DIAG_OFF("parentheses-equality")
     PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
-      throw Environment::PythonException();
+      throw PythonException();
     if (PyBool_Check(result)) {
 
 #if PY_MAJOR_VERSION >= 3
@@ -187,7 +191,7 @@ AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
   std::map<std::string, std::string> resultMap;
 
   try {
-    Environment::GlobalInterpreterLock gil;
+    GlobalInterpreterLock gil;
     dict resultDict = callMethod<dict>(getSelf(), "validateInputs");
     // convert to a map<string,string>
     boost::python::list keys = resultDict.keys();

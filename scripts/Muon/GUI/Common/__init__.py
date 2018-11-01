@@ -1,4 +1,6 @@
-"""
-The Common module contains all functionality which may be shared between muon interfaces, i.e.
-Muon Analysis, Frequency Domain Analysis, Element Analysis, etc.
-"""
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
