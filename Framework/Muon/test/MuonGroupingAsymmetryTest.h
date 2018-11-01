@@ -27,7 +27,7 @@ public:
   };
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
 
-  static constexpr const char *inputWSName = "inputData";
+  const std::string inputWSName = "inputData";
 };
 
 // Set sensible default algorithm properties
