@@ -276,13 +276,13 @@ public:
   void
   test_grouping_asymmetry_with_subtracted_multiple_periods_gives_correct_values() {
 
-	  //std::vector<double> xvals = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5 };
-	  //auto i = std::lower_bound(xvals.begin(), xvals.end(), 0.0);
+    // std::vector<double> xvals = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5 };
+    // auto i = std::lower_bound(xvals.begin(), xvals.end(), 0.0);
 
-	  std::vector<double> xvals = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5 };
-	  auto upper = std::lower_bound(xvals.begin(), xvals.end(), 0.05);
+    std::vector<double> xvals = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5};
+    auto upper = std::lower_bound(xvals.begin(), xvals.end(), 0.05);
 
-	  size_t i = std::distance(xvals.begin(), upper + 1);
+    size_t i = std::distance(xvals.begin(), upper + 1);
   }
 
   void
