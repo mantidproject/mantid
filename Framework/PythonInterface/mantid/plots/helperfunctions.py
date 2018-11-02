@@ -65,7 +65,7 @@ def points_from_boundaries(input_array):
     assert isinstance(input_array, numpy.ndarray), 'Not a numpy array'
     if len(input_array) < 2:
         raise ValueError('could not get centers from less than two boundaries')
-    return .5*(input_array[0:-1]+input_array[1:])
+    return .5 * (input_array[0:-1] + input_array[1:])
 
 
 def _dim2array(d):
@@ -78,48 +78,64 @@ def _dim2array(d):
     """
     dmin = d.getMinimum()
     dmax = d.getMaximum()
-    return numpy.linspace(dmin, dmax, d.getNBins()+1)
+    return numpy.linspace(dmin, dmax, d.getNBins() + 1)
 
 
-def get_wksp_index_dist_and_label(workspace, **kwargs):
+def get_wksp_index_dist_and_label(workspace, axis, **kwargs):
     """
     Get workspace index, whether the workspace is a distribution,
     and label for the spectrum
 
     :param workspace: a Workspace2D or an EventWorkspace
+    :param axis: The axis on which we're operating
+    :param kwargs: Keyword arguments passed to the plot function, passed by reference as it is mutated
+    :rtype (int, bool, dict)
     """
     # get the special arguments out of kwargs
-    specNum = kwargs.pop('specNum', None)
-    wkspIndex = kwargs.pop('wkspIndex', None)
-
-    # don't worry if there is only one spectrum
-    if workspace.getNumberHistograms() == 1:
-        specNum = None
-        wkspIndex = 0
-
-    # error check input parameters
-    if (specNum is not None) and (wkspIndex is not None):
-        raise RuntimeError('Must specify only specNum or wkspIndex')
-    if (specNum is None) and (wkspIndex is None):
-        raise RuntimeError('Must specify either specNum or wkspIndex')
-
-    # convert the spectrum number to a workspace index and vice versa
-    if specNum is not None:
-        wkspIndex = workspace.getIndexFromSpectrumNumber(int(specNum))
-    else:
-        specNum = workspace.getSpectrum(wkspIndex).getSpectrumNo()
+    workspace_index, spectrum_number, kwargs = _get_wksp_index_and_spec_num(workspace, axis, **kwargs)
 
     # create a label if it isn't already specified
     if 'label' not in kwargs:
-        wsName = workspace.name()
-        if wsName:
-            kwargs['label'] = '{0}: spec {1}'.format(wsName, specNum)
+        ws_name = workspace.name()
+        if ws_name:
+            kwargs['label'] = '{0}: spec {1}'.format(ws_name, spectrum_number)
         else:
-            kwargs['label'] = 'spec {0}'.format(specNum)
+            kwargs['label'] = 'spec {0}'.format(spectrum_number)
 
     (distribution, kwargs) = get_distribution(workspace, **kwargs)
 
-    return wkspIndex, distribution, kwargs
+    return workspace_index, distribution, kwargs
+
+
+def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
+    """
+    Get the workspace index and the spectrum number from the kwargs provided
+    :param workspace: a Workspace2D or an EventWorkspace
+    :param kwargs: Dict of keyword arguments, passed by reference as it is mutated
+    :rtype (int, int, dict)
+    :return The workspace index and the spectrum number
+    """
+    spectrum_number = kwargs.pop('specNum', None)
+    workspace_index = kwargs.pop('wkspIndex', None)
+
+    # don't worry if there is only one spectrum
+    if workspace.getNumberHistograms() == 1:
+        spectrum_number = None
+        workspace_index = 0
+
+    # error check input parameters
+    if (spectrum_number is not None) and (workspace_index is not None):
+        raise RuntimeError('Must specify only specNum or wkspIndex')
+    if (spectrum_number is None) and (workspace_index is None):
+        raise RuntimeError('Must specify either specNum or wkspIndex')
+
+    # convert the spectrum number to a workspace index and vice versa
+    if spectrum_number is not None:
+        workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
+    elif axis != 0:  # Do not try to get the Spectrum number if we are traversing a bin's indices
+        spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
+
+    return workspace_index, spectrum_number, kwargs
 
 
 def get_md_data1d(workspace, normalization):
@@ -149,13 +165,13 @@ def get_md_data(workspace, normalization, withError=False):
     dims = workspace.getNonIntegratedDimensions()
     dim_arrays = [_dim2array(d) for d in dims]
     # get data
-    data = workspace.getSignalArray()*1.
+    data = workspace.getSignalArray() * 1.
     if normalization == mantid.api.MDNormalization.NumEventsNormalization:
         nev = workspace.getNumEventsArray()
         data /= nev
     err = None
     if withError:
-        err2 = workspace.getErrorSquaredArray()*1.
+        err2 = workspace.getErrorSquaredArray() * 1.
         if normalization == mantid.api.MDNormalization.NumEventsNormalization:
             err2 /= (nev * nev)
         err = numpy.sqrt(err2)
@@ -209,6 +225,27 @@ def get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
     return x, y, dy, dx
 
 
+def get_bins(workspace, wkspIndex, withDy=False):
+    """
+    Extract all the bins for a spectrum
+
+    :param workspace: a Workspace2D or an EventWorkspace
+    :param wkspIndex: workspace index
+    :param withDy: if True, it will return the error in the "counts", otherwise None
+
+    """
+    num_hist = workspace.getNumberHistograms()
+    x = range(0, num_hist)
+    y = []
+    dy = [] if withDy else None
+    for i in x:
+        y.append(workspace.readY(i)[wkspIndex])
+        dy.append(workspace.readE(i)[wkspIndex])
+
+    dx = None
+    return x, y, dy, dx
+
+
 def get_md_data2d_bin_bounds(workspace, normalization):
     """
     Function to transform data in an MDHisto workspace with exactly
@@ -247,10 +284,10 @@ def boundaries_from_points(input_array):
     if len(input_array) == 0:
         raise ValueError('could not extend array with no elements')
     if len(input_array) == 1:
-        return numpy.array([input_array[0]-0.5, input_array[0]+0.5])
-    return numpy.concatenate(([(3*input_array[0]-input_array[1])*0.5],
-                             (input_array[1:]+input_array[:-1])*0.5,
-                             [(3*input_array[-1]-input_array[-2])*0.5]))
+        return numpy.array([input_array[0] - 0.5, input_array[0] + 0.5])
+    return numpy.concatenate(([(3 * input_array[0] - input_array[1]) * 0.5],
+                              (input_array[1:] + input_array[:-1]) * 0.5,
+                              [(3 * input_array[-1] - input_array[-2]) * 0.5]))
 
 
 def common_x(arr):
@@ -291,20 +328,20 @@ def get_matrix_2d_data(workspace, distribution, histogram2D=False):
                 y = boundaries_from_points(y)
             x = numpy.vstack((x, x[-1]))
         else:
-            x = .5*(x[:, 0:-1]+x[:, 1:])
-            if len(y) == z.shape[0]+1:
+            x = .5 * (x[:, 0:-1] + x[:, 1:])
+            if len(y) == z.shape[0] + 1:
                 y = points_from_boundaries(y)
     else:
         if histogram2D:
             if common_x(x):
-                x = numpy.tile(boundaries_from_points(x[0]), z.shape[0]+1).reshape(z.shape[0]+1, -1)
+                x = numpy.tile(boundaries_from_points(x[0]), z.shape[0] + 1).reshape(z.shape[0] + 1, -1)
             else:
                 x = numpy.vstack((x, x[-1]))
                 x = numpy.array([boundaries_from_points(xi) for xi in x])
             if len(y) == z.shape[0]:
                 y = boundaries_from_points(y)
         else:
-            if len(y) == z.shape[0]+1:
+            if len(y) == z.shape[0] + 1:
                 y = points_from_boundaries(y)
     y = numpy.tile(y, x.shape[1]).reshape(x.shape[1], x.shape[0]).transpose()
     z = numpy.ma.masked_invalid(z)
@@ -342,7 +379,7 @@ def get_uneven_data(workspace, distribution):
         zvals = numpy.ma.masked_invalid(zvals)
         z.append(zvals)
         x.append(xvals)
-        y.append([yvals[index], yvals[index+1]])
+        y.append([yvals[index], yvals[index + 1]])
     return x, y, z
 
 
@@ -365,13 +402,14 @@ def get_data_uneven_flag(workspace, **kwargs):
         aligned = True
     return aligned, kwargs
 
+
 # ====================================================
 # extract logs
 # ====================================================
 
 def get_sample_log(workspace, **kwargs):
     LogName = kwargs.pop('LogName')
-    ExperimentInfo = kwargs.pop('ExperimentInfo',0)
+    ExperimentInfo = kwargs.pop('ExperimentInfo', 0)
     if isinstance(workspace, MultipleExperimentInfos):
         run = workspace.getExperimentInfo(ExperimentInfo).run()
     else:
@@ -396,7 +434,7 @@ def get_sample_log(workspace, **kwargs):
             try:
                 t0 = run['proton_charge'].times.astype('datetime64[us]')[0]
             except:
-                pass #TODO: Maybe raise a warning?
+                pass  # TODO: Maybe raise a warning?
         x = (times - t0).astype(float) * 1e-6
     return x, y, FullTime, LogName, units, kwargs
 

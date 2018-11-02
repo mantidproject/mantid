@@ -16,6 +16,7 @@ from mantid.plots.helperfunctions import *
 import matplotlib.colors
 import matplotlib.dates as mdates
 
+
 # ================================================
 # Private 2D Helper functions
 # ================================================
@@ -38,13 +39,14 @@ def _setLabels2D(axes, workspace):
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[2])
 
+
 # ========================================================
 # Plot functions
 # ========================================================
 
 
 def plot(axes, workspace, *args, **kwargs):
-    '''
+    """
     Unpack mantid workspace and render it with matplotlib. ``args`` and
     ``kwargs`` are passed to :py:meth:`matplotlib.axes.Axes.plot` after special
     keyword arguments are removed. This will automatically label the
@@ -71,12 +73,15 @@ def plot(axes, workspace, *args, **kwargs):
                       instead of the time difference
     :param ExperimentInfo: for MD Workspaces with multiple :class:`mantid.api.ExperimentInfo` is the
                            ExperimentInfo object from which to extract the log. It's 0 by default
+    :param axis: Specify which axis will be plotted. User axis=0 to plot a bins, and axis=1 to plot a spectrum.
+                 The default value is axis=1, plotting spectra by default.
+
 
     For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
     needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
-    '''
+    """
     if 'LogName' in kwargs:
         (x, y, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
         axes.set_ylabel('{0} ({1})'.format(LogName, units))
@@ -85,14 +90,23 @@ def plot(axes, workspace, *args, **kwargs):
             axes.xaxis_date()
             axes.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S\n%b-%d'))
             axes.set_xlabel('Time')
-        kwargs['linestyle']='steps-post'
+        kwargs['linestyle'] = 'steps-post'
         return axes.plot(x, y, *args, **kwargs)
     if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         (x, y, dy) = get_md_data1d(workspace, normalization)
     else:
-        (wkspIndex, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
-        (x, y, dy, dx) = get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
+        # default to spectra axis, which is 1
+        axis = kwargs.pop("axis", 1)
+        workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
+        if axis == 0:
+            # Overwrite any user specified xlabel
+            axes.set_xlabel("Spectrum")
+            x, y, dy, dx = get_bin(workspace, workspace_index)
+        elif axis == 1:
+            x, y, dy, dx = get_spectrum(workspace, workspace_index, distribution, withDy=False, withDx=False)
+        else:
+            raise ValueError("Axis {} is not a valid axis number.".format(axis))
     _setLabels1D(axes, workspace)
     return axes.plot(x, y, *args, **kwargs)
 
@@ -115,6 +129,8 @@ def errorbar(axes, workspace, *args, **kwargs):
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
+    :param axis: Specify which axis will be plotted. User axis=0 to plot a bins, and axis=1 to plot a spectrum.
+                 The default value is axis=1, plotting spectra by default.
 
     For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
     needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
@@ -126,8 +142,14 @@ def errorbar(axes, workspace, *args, **kwargs):
         (x, y, dy) = get_md_data1d(workspace, normalization)
         dx = None
     else:
-        (wkspIndex, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
-        (x, y, dy, dx) = get_spectrum(workspace, wkspIndex, distribution, withDy=True, withDx=True)
+        axis = kwargs.pop("axis", 1)
+        (wkspIndex, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
+        if axis == 0:
+            (x, y, dy, dx) = get_bins(workspace, wkspIndex, withDy=True)
+        elif axis == 1:
+            (x, y, dy, dx) = get_spectrum(workspace, wkspIndex, distribution, withDy=True, withDx=True)
+        else:
+            raise ValueError("Axis {} is not a valid axis number.".format(axis))
     _setLabels1D(axes, workspace)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
