@@ -69,7 +69,7 @@ public:
   /// Get a reference to the sample's environment
   const Geometry::SampleEnvironment &getEnvironment() const;
   /// Set the environment used to contain the sample
-  void setEnvironment(boost::shared_ptr<Geometry::SampleEnvironment> env);
+  void setEnvironment(std::unique_ptr<Geometry::SampleEnvironment> &env);
   //@}
 
   /** @name Access the sample's lattice structure and orientation */

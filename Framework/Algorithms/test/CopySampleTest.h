@@ -47,7 +47,7 @@ public:
     const std::string envName("TestKit");
     auto canShape = ComponentCreationHelper::cappedCylinderXML(
         0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
-    auto kit = boost::make_shared<SampleEnvironment>(
+    auto kit = std::make_unique<SampleEnvironment>(
         envName,
         boost::make_shared<Container>(ShapeFactory().createShape(canShape)));
     sample.setEnvironment(kit);

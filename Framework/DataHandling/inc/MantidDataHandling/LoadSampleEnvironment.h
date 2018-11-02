@@ -11,7 +11,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-/**  Load Environment into an instrument of a workspace
+/**  Load Environment into the sample a workspace
 
      The following file types are supported
 

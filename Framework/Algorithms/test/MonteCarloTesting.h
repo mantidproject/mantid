@@ -103,7 +103,7 @@ inline Mantid::API::Sample createSamplePlusContainer() {
   }
   auto can = boost::make_shared<Container>(canShape);
   auto environment =
-      boost::make_shared<SampleEnvironment>("Annulus Container", can);
+      std::make_unique<SampleEnvironment>("Annulus Container", can);
   // Sample volume
   auto sampleCell = ComponentCreationHelper::createCappedCylinder(
       innerRadius, height, centre, upAxis, "sample");

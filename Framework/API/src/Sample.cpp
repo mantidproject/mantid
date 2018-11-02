@@ -146,8 +146,8 @@ const SampleEnvironment &Sample::getEnvironment() const {
  * @param env :: A pointer to a created sample environment. This takes
  * ownership of the object.
  */
-void Sample::setEnvironment(boost::shared_ptr<SampleEnvironment> env) {
-  m_environment = env;
+void Sample::setEnvironment(std::unique_ptr<SampleEnvironment> &env) {
+  m_environment = boost::shared_ptr<SampleEnvironment>(env.get());
 }
 
 /** Return a const reference to the OrientedLattice of this sample

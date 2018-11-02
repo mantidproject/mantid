@@ -94,14 +94,14 @@ void LoadSampleEnvironment::exec() {
   std::string name = getProperty("EnvironmentName");
   const bool add = getProperty("Add");
   Sample &sample = outputWS->mutableSample();
-  boost::shared_ptr<Geometry::SampleEnvironment> environment = nullptr;
+  std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
   if (add) {
-    environment = boost::make_shared<Geometry::SampleEnvironment>(
+    environment = std::make_unique<Geometry::SampleEnvironment>(
         sample.getEnvironment());
     environment->add(environmentMesh);
   } else {
     auto can = boost::make_shared<Container>(environmentMesh);
-    environment = boost::make_shared<Geometry::SampleEnvironment>(name, can);
+    environment = std::make_unique<Geometry::SampleEnvironment>(name, can);
   }
   // Put Environment into sample.
   sample.setEnvironment(environment);

@@ -304,9 +304,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   SampleEnvironmentFactory factory(std::move(finder));
   auto sampleEnviron =
       factory.create(facilityName, instrumentName, envName, canName);
-  workspace->mutableSample().setEnvironment(
-      boost::shared_ptr<SampleEnvironment>(sampleEnviron.release()));
-
+  workspace->mutableSample().setEnvironment(sampleEnviron);
   return &(workspace->sample().getEnvironment());
 }
 
