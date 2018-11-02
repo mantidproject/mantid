@@ -43,6 +43,8 @@ class MantidAxes(Axes):
     '''
 
     name = 'mantid'
+    VERTICAL = SPECTRUM = 0
+    HORIZONTAL = BIN = 1
 
     def plot(self, *args, **kwargs):
         '''

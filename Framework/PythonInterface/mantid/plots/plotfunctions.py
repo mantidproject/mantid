@@ -73,7 +73,7 @@ def plot(axes, workspace, *args, **kwargs):
                       instead of the time difference
     :param ExperimentInfo: for MD Workspaces with multiple :class:`mantid.api.ExperimentInfo` is the
                            ExperimentInfo object from which to extract the log. It's 0 by default
-    :param axis: Specify which axis will be plotted. User axis=0 to plot a bins, and axis=1 to plot a spectrum.
+    :param axis: Specify which axis will be plotted. User axis=0 to plot bins, and axis=1 to plot a spectrum.
                  The default value is axis=1, plotting spectra by default.
 
 
@@ -102,7 +102,7 @@ def plot(axes, workspace, *args, **kwargs):
         if axis == 0:
             # Overwrite any user specified xlabel
             axes.set_xlabel("Spectrum")
-            x, y, dy, dx = get_bin(workspace, workspace_index)
+            x, y, dy, dx = get_bins(workspace, workspace_index)
         elif axis == 1:
             x, y, dy, dx = get_spectrum(workspace, workspace_index, distribution, withDy=False, withDx=False)
         else:

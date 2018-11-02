@@ -81,7 +81,7 @@ def _dim2array(d):
     return numpy.linspace(dmin, dmax, d.getNBins() + 1)
 
 
-def get_wksp_index_dist_and_label(workspace, axis, **kwargs):
+def get_wksp_index_dist_and_label(workspace, axis=0, **kwargs):
     """
     Get workspace index, whether the workspace is a distribution,
     and label for the spectrum
@@ -240,7 +240,8 @@ def get_bins(workspace, wkspIndex, withDy=False):
     dy = [] if withDy else None
     for i in x:
         y.append(workspace.readY(i)[wkspIndex])
-        dy.append(workspace.readE(i)[wkspIndex])
+        if withDy:
+            dy.append(workspace.readE(i)[wkspIndex])
 
     dx = None
     return x, y, dy, dx
