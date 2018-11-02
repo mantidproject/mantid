@@ -31,7 +31,7 @@ ProjectRecoveryPresenter::ProjectRecoveryPresenter(
   m_model = new ProjectRecoveryModel(nullptr, this);
   *m_model = *obj.m_model;
   m_mainWindow = obj.m_mainWindow;
-  m_openView = = obj.m_openView;
+  m_openView = obj.m_openView;
 }
 
 ProjectRecoveryPresenter::~ProjectRecoveryPresenter() {
