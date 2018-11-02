@@ -2,9 +2,10 @@
 # Testing
 ###########################################################################
 set ( TEST_FILES
-  IndirectFittingModelTest.h
   IndirectFitDataTest.h
   IndirectFitOutputTest.h
+  IndirectFitPlotModelTest.h
+  IndirectFittingModelTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest

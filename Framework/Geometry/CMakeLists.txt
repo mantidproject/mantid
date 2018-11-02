@@ -48,6 +48,7 @@ set ( SRC_FILES
 	src/Instrument/Component.cpp
 	src/Instrument/ComponentHelper.cpp
 	src/Instrument/ComponentInfo.cpp
+	src/Instrument/ComponentInfoBankHelpers.cpp
 	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
 	src/Instrument/DetectorGroup.cpp
@@ -105,8 +106,8 @@ set ( SRC_FILES
 	src/Objects/BoundingBox.cpp
 	src/Objects/CSGObject.cpp
 	src/Objects/InstrumentRayTracer.cpp
-        src/Objects/MeshObject2D.cpp
 	src/Objects/MeshObject.cpp
+	src/Objects/MeshObject2D.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
 	src/Objects/ShapeFactory.cpp
@@ -195,11 +196,14 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/ComponentHelper.h
 	inc/MantidGeometry/Instrument/ComponentInfo.h
+	inc/MantidGeometry/Instrument/ComponentInfoBankHelpers.h
 	inc/MantidGeometry/Instrument/ComponentVisitor.h
 	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/Detector.h
 	inc/MantidGeometry/Instrument/DetectorGroup.h
 	inc/MantidGeometry/Instrument/DetectorInfo.h
+	inc/MantidGeometry/Instrument/DetectorInfoItem.h
+	inc/MantidGeometry/Instrument/DetectorInfoIterator.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
         inc/MantidGeometry/Instrument/GridDetector.h
@@ -222,8 +226,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/StructuredDetector.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/Instrument_fwd.h
-	inc/MantidGeometry/Instrument/DetectorInfoIterator.h
-	inc/MantidGeometry/Instrument/DetectorInfoItem.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/GeneralFrame.h
 	inc/MantidGeometry/MDGeometry/HKL.h
@@ -302,6 +304,7 @@ set ( TEST_FILES
 	CSGObjectTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
+	ComponentInfoBankHelpersTest.h
 	ComponentInfoTest.h
 	ComponentParserTest.h
 	ComponentTest.h
@@ -316,6 +319,7 @@ set ( TEST_FILES
 	CyclicGroupTest.h
 	CylinderTest.h
 	DetectorGroupTest.h
+	DetectorInfoIteratorTest.h
 	DetectorTest.h
 	FitParameterTest.h
 	GeneralFrameTest.h
@@ -352,7 +356,7 @@ set ( TEST_FILES
 	MathSupportTest.h
 	MatrixVectorPairParserTest.h
 	MatrixVectorPairTest.h
-        MeshObject2DTest.h
+	MeshObject2DTest.h
 	MeshObjectTest.h
 	NiggliCellTest.h
 	NullImplicitFunctionTest.h
@@ -420,7 +424,6 @@ set ( TEST_FILES
 	UnitCellTest.h
 	V3RTest.h
 	XMLInstrumentParameterTest.h
-	DetectorInfoIteratorTest.h
 )
 
 set ( GMOCK_TEST_FILES

@@ -133,6 +133,8 @@ protected:
   void removeFittingData(std::size_t index);
 
 private:
+  void removeWorkspaceFromFittingData(std::size_t const &index);
+
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function,
                       const std::string &input,

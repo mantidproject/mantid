@@ -43,7 +43,8 @@ void IndirectDataReductionTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
     m_tabRunning = true;
-    emit updateRunButton(false, "Running...", "Running data reduction...");
+    emit updateRunButton(false, "disable", "Running...",
+                         "Running data reduction...");
     run();
   } else {
     g_log.warning("Failed to validate indirect tab input!");
@@ -60,7 +61,8 @@ void IndirectDataReductionTab::tabExecutionComplete(bool error) {
   UNUSED_ARG(error);
   if (m_tabRunning) {
     m_tabRunning = false;
-    emit updateRunButton();
+    auto const enableOutputButtons = error == false ? "enable" : "disable";
+    emit updateRunButton(true, enableOutputButtons);
   }
 }
 

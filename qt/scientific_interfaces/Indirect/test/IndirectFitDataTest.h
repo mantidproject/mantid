@@ -36,6 +36,8 @@ public:
 
   static void destroySuite(IndirectFitDataTest *suite) { delete suite; }
 
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
   void test_data_is_instantiated() {
     auto const workspace = createWorkspace(1);
     Spectra const spec =

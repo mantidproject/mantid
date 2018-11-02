@@ -181,7 +181,6 @@
 #include <gsl/gsl_sort.h>
 
 #include <boost/regex.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <Poco/Path.h>
 
@@ -16668,8 +16667,13 @@ void ApplicationWindow::onAboutToStart() {
   resultsLog->scrollToTop();
 
   // Kick off project recovery
-  g_log.debug("Starting project autosaving.");
-  checkForProjectRecovery();
+  if (Mantid::Kernel::ConfigService::Instance().getString(
+          "projectRecovery.enabled") == "true") {
+    g_log.debug("Starting project autosaving.");
+    checkForProjectRecovery();
+  } else {
+    g_log.debug("Project Recovery is disabled.");
+  }
 }
 
 /**

@@ -18,12 +18,13 @@ set ( SRC_FILES
 	src/Bin2DPowderDiffraction.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
+	src/CalculateCarpenterSampleCorrection.cpp
 	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
+	src/CalculateDynamicRange.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
 	src/CalculateIqt.cpp
-	src/CalculateCarpenterSampleCorrection.cpp
 	src/CalculatePolynomialBackground.cpp
 	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
@@ -238,6 +239,7 @@ set ( SRC_FILES
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
+	src/ReflectometryBeamStatistics.cpp
 	src/ReflectometryMomentumTransfer.cpp
 	src/ReflectometryReductionOne2.cpp
 	src/ReflectometryReductionOneAuto2.cpp
@@ -348,12 +350,13 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
+	inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
 	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
+	inc/MantidAlgorithms/CalculateDynamicRange.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateIqt.h
-	inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
 	inc/MantidAlgorithms/CalculatePolynomialBackground.h
 	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
@@ -572,6 +575,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
+	inc/MantidAlgorithms/ReflectometryBeamStatistics.h
 	inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
 	inc/MantidAlgorithms/ReflectometryReductionOne2.h
 	inc/MantidAlgorithms/ReflectometryReductionOneAuto2.h
@@ -695,6 +699,7 @@ set ( TEST_FILES
 	CalculateCarpenterSampleCorrectionTest.h
 	CalculateCountRateTest.h
 	CalculateDIFCTest.h
+ 	CalculateDynamicRangeTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateIqtTest.h
@@ -907,6 +912,7 @@ set ( TEST_FILES
 	RebinToWorkspaceTest.h
 	RebunchTest.h
 	RectangularBeamProfileTest.h
+	ReflectometryBeamStatisticsTest.h
 	ReflectometryMomentumTransferTest.h
 	ReflectometryReductionOne2Test.h
 	ReflectometryReductionOneAuto2Test.h

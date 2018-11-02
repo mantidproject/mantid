@@ -67,7 +67,8 @@ template <typename Name, typename... Names>
 void addWorkspacesToModel(std::unique_ptr<DummyModel> &model,
                           int const &numberOfSpectra, Name const &workspaceName,
                           Names const &... workspaceNames) {
-  SetUpADSWithWorkspace ads(workspaceName, createWorkspace(numberOfSpectra));
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(
+      workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
   addWorkspacesToModel(model, numberOfSpectra, workspaceNames...);
 }
@@ -141,7 +142,6 @@ IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<DummyModel> &model,
 std::unique_ptr<DummyModel> getModelWithFitOutputData() {
   auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
   auto const modelWorkspace = model->getWorkspace(0);
-  SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
 
   auto const alg = getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
   model->addOutput(alg);
@@ -160,6 +160,8 @@ public:
   }
 
   static void destroySuite(IndirectFittingModelTest *suite) { delete suite; }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_model_is_instantiated_correctly() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
@@ -400,7 +402,6 @@ public:
   void test_that_ConvolutionSequentialFit_algorithm_initializes() {
     auto model = createModelWithSingleInstrumentWorkspace("Name", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
     auto const alg = getSetupFitAlgorithm(model, modelWorkspace, "Name");
 
@@ -410,7 +411,6 @@ public:
   void test_that_ConvolutionSequentialFit_algorithm_executes_without_error() {
     auto model = createModelWithSingleInstrumentWorkspace("Name", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
     auto const alg = getSetupFitAlgorithm(model, modelWorkspace, "Name");
 
@@ -421,7 +421,6 @@ public:
   void test_that_addOutput_adds_the_output_of_a_fit_into_the_model() {
     auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
 
     auto const alg =
         getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
@@ -478,7 +477,6 @@ public:
   void test_isInvalidFunction_returns_none_if_the_activeFunction_is_valid() {
     auto model = createModelWithSingleInstrumentWorkspace("Name", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
     (void)getSetupFitAlgorithm(model, modelWorkspace, "Name");
 
@@ -492,10 +490,9 @@ public:
     TS_ASSERT_EQUALS(model->numberOfWorkspaces(), 3);
   }
 
-  void
-  test_that_getNumberOfSpectra_returns_zero_if_dataIndex_is_out_of_range() {
+  void test_that_getNumberOfSpectra_throws_if_dataIndex_is_out_of_range() {
     auto const model = createModelWithSingleWorkspace("WorkspaceName", 3);
-    TS_ASSERT_EQUALS(model->getNumberOfSpectra(1), 0);
+    TS_ASSERT_THROWS(model->getNumberOfSpectra(1), std::runtime_error);
   }
 
   void
@@ -514,7 +511,6 @@ public:
   test_that_getFitParameterNames_returns_a_vector_of_fit_parameters_if_the_fitOutput_contains_parameters() {
     auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
 
     auto const alg =
         getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
@@ -601,9 +597,9 @@ public:
   }
 
   void
-  test_that_removeWorkspace_does_not_throw_when_provided_an_out_of_range_dataIndex() {
+  test_that_removeWorkspace_throws_when_provided_an_out_of_range_dataIndex() {
     auto model = createModelWithMultipleWorkspaces(3, "Ws1", "Ws2");
-    TS_ASSERT_THROWS_NOTHING(model->removeWorkspace(2));
+    TS_ASSERT_THROWS(model->removeWorkspace(2), std::runtime_error);
   }
 
   void test_that_clearWorkspaces_will_empty_the_fittingData() {
@@ -620,7 +616,6 @@ public:
   test_that_setDefaultParameterValue_will_set_the_value_of_the_provided_parameter() {
     auto model = createModelWithSingleWorkspace("Name", 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
     (void)getSetupFitAlgorithm(model, modelWorkspace, "Name");
     model->setDefaultParameterValue("Amplitude", 1.5, 0);
@@ -639,7 +634,6 @@ public:
   test_that_getParameterValues_returns_the_default_parameters_if_there_are_no_fit_parameters() {
     auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
 
     (void)getSetupFitAlgorithm(model, modelWorkspace, "__ConvFit");
     model->setDefaultParameterValue("Amplitude", 1.5, 0);
@@ -661,7 +655,6 @@ public:
   void test_getFitParameters_returns_an_empty_map_when_there_is_no_fitOutput() {
     auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
 
     (void)getSetupFitAlgorithm(model, modelWorkspace, "__ConvFit");
 
