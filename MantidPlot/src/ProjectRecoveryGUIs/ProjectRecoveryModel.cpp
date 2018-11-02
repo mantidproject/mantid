@@ -54,6 +54,7 @@ ProjectRecoveryModel::ProjectRecoveryModel(
   fillRows();
   // Default to failed run
   m_failedRun = true;
+  m_recoveryRunning = false;
 }
 
 std::vector<std::string> ProjectRecoveryModel::getRow(int i) {
