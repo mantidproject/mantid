@@ -104,13 +104,15 @@ void LoadSampleEnvironment::exec() {
     environment = std::make_unique<Geometry::SampleEnvironment>(name, can);
   }
   // Put Environment into sample.
-  sample.setEnvironment(environment);
 
-  // Set output workspace
   const std::string debugString =
       "Enviroment has: " + std::to_string(environment->nelements()) +
       " elements.";
+  sample.setEnvironment(std::move(environment));
 
+  // Set output workspace
+  
+  setProperty("OutputWorkspace", outputWS);
   g_log.debug(debugString);
 }
 
