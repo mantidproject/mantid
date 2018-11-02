@@ -10,7 +10,7 @@
 Description
 -----------
 
-This algorithm masks the bins in ``InputWorkspace`` which lie in :math:`X` range that is not covered by ``ComparisonWorkspace``. The ``MaskPartiallyOverlapping`` flag affect the behavior with regards to bins which are partially covered by ``ComparisonWorkspace``.
+This algorithm masks the bins in ``InputWorkspace`` which lie in :math:`X` range that is not covered by ``ComparisonWorkspace``. The ``MaskPartiallyOverlapping`` flag affect the behavior with regards to bins which are partially covered by ``ComparisonWorkspace``. The algorithm works only with the X data sorted in ascending order. This is checked before the data is processed. If there is no doubt that this is the case, the chekcing can be skipped by setting ``CheckSortedX`` to ``False``.
 
 The algorithm currently applies the default masking weight to the bins which does not clear the data.
 

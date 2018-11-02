@@ -74,6 +74,28 @@ public:
     runTestWithAlwaysSameExpectedOutcome(comparison, expected);
   }
 
+  void test_unsortedXThrows() {
+    API::MatrixWorkspace_sptr inputWS =
+        makeWorkspace(HistogramData::BinEdges{-1.1, -0.1, 0.2, 1.8});
+    inputWS->mutableX(0)[2] = -0.9;
+    API::MatrixWorkspace_sptr comparisonWS =
+        makeWorkspace(HistogramData::BinEdges{-1.1, 1.8});
+    Algorithms::MaskNonOverlappingBins alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("ComparisonWorkspace", comparisonWS))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument const &e,
+                            e.what(),
+                            std::string("InputWorkspace has unsorted X."))
+    TS_ASSERT(!alg.isExecuted())
+  }
+
 private:
   template <typename BinEdges>
   static API::MatrixWorkspace_sptr makeWorkspace(BinEdges &&binEdges) {
