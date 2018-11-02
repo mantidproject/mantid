@@ -206,8 +206,8 @@ class ConvertTOF {
 public:
   ConvertTOF(double Amp, double freq, double phase, double L1, double v2,
              std::vector<double> &L2)
-      : m_w(2 * M_PI * freq), m_phi(phase), m_L0(L1), m_v2(v2), m_A(Amp),
-        m_L2(L2) {}
+      : m_w(2 * M_PI * freq), m_phi(M_PI * phase / 180.0), m_L0(L1), m_v2(v2),
+        m_A(Amp), m_L2(L2) {}
 
   double directTOF(size_t detID, double tobs) const {
 

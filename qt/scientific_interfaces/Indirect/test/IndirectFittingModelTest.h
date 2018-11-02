@@ -9,110 +9,26 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
-#include <iostream>
+#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace MantidQt::CustomInterfaces::IDA;
+using namespace Mantid::IndirectFitDataCreationHelper;
 
 using ConvolutionFitSequential =
     Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
 
 namespace {
 
-MatrixWorkspace_sptr createWorkspace(int const &numberOfSpectra) {
-  return WorkspaceCreationHelper::create2DWorkspace(numberOfSpectra, 10);
-}
-
-MatrixWorkspace_sptr setWorkspaceEFixed(MatrixWorkspace_sptr workspace,
-                                        int const &xLength) {
-  for (int i = 0; i < xLength; i++)
-    workspace->setEFixed((i + 1), 0.50);
-  return workspace;
-}
-
-MatrixWorkspace_sptr
-setWorkspaceBinEdges(MatrixWorkspace_sptr workspace, int const &yLength,
-                     Mantid::HistogramData::BinEdges const &binEdges) {
-  for (int i = 0; i < yLength; i++)
-    workspace->setBinEdges(i, binEdges);
-  return workspace;
-}
-
-MatrixWorkspace_sptr setWorkspaceBinEdges(MatrixWorkspace_sptr workspace,
-                                          int const &xLength,
-                                          int const &yLength) {
-  Mantid::HistogramData::BinEdges binEdges(xLength - 1, 0.0);
-  int j = 0;
-  std::generate(begin(binEdges), end(binEdges),
-                [&j] { return 0.5 + 0.75 * j++; });
-  setWorkspaceBinEdges(workspace, yLength, binEdges);
-  return workspace;
-}
-
-MatrixWorkspace_sptr setWorkspaceProperties(MatrixWorkspace_sptr workspace,
-                                            int const &xLength,
-                                            int const &yLength) {
-  setWorkspaceBinEdges(workspace, xLength, yLength);
-  setWorkspaceEFixed(workspace, xLength);
-  return workspace;
-}
-
-MatrixWorkspace_sptr createWorkspaceWithInstrument(int const &xLength,
-                                                   int const &yLength) {
-  auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-      xLength, yLength - 1, false, false, true, "testInst");
-  workspace->initialize(yLength, xLength, xLength - 1);
-  return setWorkspaceProperties(workspace, xLength, yLength);
-}
-
 IFunction_sptr getFunction(std::string const &functionString) {
   return FunctionFactory::Instance().createInitialized(functionString);
 }
 
-/// Simple class to set up the ADS with the configuration required
-struct SetUpADSWithWorkspace {
-
-  template <typename T>
-  SetUpADSWithWorkspace(std::string const &inputWSName, T const &workspace) {
-    AnalysisDataService::Instance().addOrReplace(inputWSName, workspace);
-  }
-
-  template <typename T>
-  void addOrReplace(std::string const &workspaceName, T const &workspace) {
-    AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
-  }
-
-  bool doesExist(std::string const &workspaceName) {
-    return AnalysisDataService::Instance().doesExist(workspaceName);
-  }
-
-  MatrixWorkspace_sptr retrieveWorkspace(std::string const &workspaceName) {
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(workspaceName));
-  }
-
-  ~SetUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); }
-};
-
-/// This is used to compare Spectra which is implemented as a boost::variant
-struct AreSpectraEqual : public boost::static_visitor<bool> {
-
-  template <typename T, typename U>
-  bool operator()(const T &, const U &) const {
-    return false; // cannot compare different types
-  }
-
-  template <typename T> bool operator()(const T &lhs, const T &rhs) const {
-    return lhs == rhs;
-  }
-};
-
-class DummyModel : public IndirectFittingModel {
+/// A dummy model used to inherit the methods which need testing
+class DummyModel
+    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
 public:
   ~DummyModel(){};
 
@@ -150,7 +66,8 @@ template <typename Name, typename... Names>
 void addWorkspacesToModel(std::unique_ptr<DummyModel> &model,
                           int const &numberOfSpectra, Name const &workspaceName,
                           Names const &... workspaceNames) {
-  SetUpADSWithWorkspace ads(workspaceName, createWorkspace(numberOfSpectra));
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(
+      workspaceName, createWorkspace(numberOfSpectra));
   model->addWorkspace(workspaceName);
   addWorkspacesToModel(model, numberOfSpectra, workspaceNames...);
 }
@@ -174,6 +91,62 @@ std::unique_ptr<DummyModel> createModelWithSingleInstrumentWorkspace(
   return model;
 }
 
+void setFittingFunction(std::unique_ptr<DummyModel> &model,
+                        std::string const &functionString) {
+  model->setFitFunction(getFunction(functionString));
+}
+
+IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
+                                  std::string const &functionString) {
+  auto alg = boost::make_shared<ConvolutionFitSequential>();
+  alg->initialize();
+  alg->setProperty("InputWorkspace", workspace);
+  alg->setProperty("Function", functionString);
+  alg->setProperty("StartX", 0.0);
+  alg->setProperty("EndX", 3.0);
+  alg->setProperty("SpecMin", 0);
+  alg->setProperty("SpecMax", 5);
+  alg->setProperty("ConvolveMembers", true);
+  alg->setProperty("Minimizer", "Levenberg-Marquardt");
+  alg->setProperty("MaxIterations", 500);
+  alg->setProperty("OutputWorkspace", "output");
+  alg->setLogging(false);
+  return alg;
+}
+
+IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<DummyModel> &model,
+                                     MatrixWorkspace_sptr workspace,
+                                     std::string const &workspaceName) {
+  std::string const function =
+      "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+      "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+      "name=Resolution,Workspace=" +
+      workspaceName +
+      ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+      "0175)))";
+  setFittingFunction(model, function);
+  auto alg = setupFitAlgorithm(workspace, function);
+  return alg;
+}
+
+IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<DummyModel> &model,
+                                        MatrixWorkspace_sptr workspace,
+                                        std::string const &workspaceName) {
+  auto const alg = getSetupFitAlgorithm(model, workspace, workspaceName);
+  alg->execute();
+  return alg;
+}
+
+std::unique_ptr<DummyModel> getModelWithFitOutputData() {
+  auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
+  auto const modelWorkspace = model->getWorkspace(0);
+
+  auto const alg = getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
+  model->addOutput(alg);
+  return model;
+}
+
 } // namespace
 
 class IndirectFittingModelTest : public CxxTest::TestSuite {
@@ -186,6 +159,8 @@ public:
   }
 
   static void destroySuite(IndirectFittingModelTest *suite) { delete suite; }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_model_is_instantiated_correctly() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
@@ -426,7 +401,6 @@ public:
   void test_that_ConvolutionSequentialFit_algorithm_initializes() {
     auto model = createModelWithSingleInstrumentWorkspace("Name", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
     auto const alg = getSetupFitAlgorithm(model, modelWorkspace, "Name");
 
@@ -436,7 +410,6 @@ public:
   void test_that_ConvolutionSequentialFit_algorithm_executes_without_error() {
     auto model = createModelWithSingleInstrumentWorkspace("Name", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
     auto const alg = getSetupFitAlgorithm(model, modelWorkspace, "Name");
 
@@ -447,7 +420,6 @@ public:
   void test_that_addOutput_adds_the_output_of_a_fit_into_the_model() {
     auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
 
     auto const alg =
         getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
@@ -504,7 +476,6 @@ public:
   void test_isInvalidFunction_returns_none_if_the_activeFunction_is_valid() {
     auto model = createModelWithSingleInstrumentWorkspace("Name", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
     (void)getSetupFitAlgorithm(model, modelWorkspace, "Name");
 
@@ -539,7 +510,6 @@ public:
   test_that_getFitParameterNames_returns_a_vector_of_fit_parameters_if_the_fitOutput_contains_parameters() {
     auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
 
     auto const alg =
         getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
@@ -645,7 +615,6 @@ public:
   test_that_setDefaultParameterValue_will_set_the_value_of_the_provided_parameter() {
     auto model = createModelWithSingleWorkspace("Name", 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("Name", modelWorkspace);
 
     (void)getSetupFitAlgorithm(model, modelWorkspace, "Name");
     model->setDefaultParameterValue("Amplitude", 1.5, 0);
@@ -664,7 +633,6 @@ public:
   test_that_getParameterValues_returns_the_default_parameters_if_there_are_no_fit_parameters() {
     auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
 
     (void)getSetupFitAlgorithm(model, modelWorkspace, "__ConvFit");
     model->setDefaultParameterValue("Amplitude", 1.5, 0);
@@ -686,7 +654,6 @@ public:
   void test_getFitParameters_returns_an_empty_map_when_there_is_no_fitOutput() {
     auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
     auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
 
     (void)getSetupFitAlgorithm(model, modelWorkspace, "__ConvFit");
 
@@ -761,66 +728,6 @@ public:
     TS_ASSERT(ads.doesExist("__ConvolutionFitSequential_ws1"));
     model->cleanFailedSingleRun(alg, 0);
     TS_ASSERT(!ads.doesExist("__ConvolutionFitSequential_ws1"));
-  }
-
-private:
-  void setFittingFunction(std::unique_ptr<DummyModel> &model,
-                          std::string const &functionString) const {
-    model->setFitFunction(getFunction(functionString));
-  }
-
-  IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
-                                    std::string const &functionString) const {
-    auto alg = boost::make_shared<ConvolutionFitSequential>();
-    TS_ASSERT_THROWS_NOTHING(alg->initialize());
-    alg->setProperty("InputWorkspace", workspace);
-    alg->setProperty("Function", functionString);
-    alg->setProperty("StartX", 0.0);
-    alg->setProperty("EndX", 3.0);
-    alg->setProperty("SpecMin", 0);
-    alg->setProperty("SpecMax", 5);
-    alg->setProperty("ConvolveMembers", true);
-    alg->setProperty("Minimizer", "Levenberg-Marquardt");
-    alg->setProperty("MaxIterations", 500);
-    alg->setProperty("OutputWorkspace", "output");
-    alg->setLogging(false);
-    return alg;
-  }
-
-  IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<DummyModel> &model,
-                                       MatrixWorkspace_sptr workspace,
-                                       std::string const &workspaceName) const {
-    std::string const function =
-        "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-        "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-        "name=Resolution,Workspace=" +
-        workspaceName +
-        ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-        "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-        "0175)))";
-    setFittingFunction(model, function);
-    auto alg = setupFitAlgorithm(workspace, function);
-    return alg;
-  }
-
-  IAlgorithm_sptr
-  getExecutedFitAlgorithm(std::unique_ptr<DummyModel> &model,
-                          MatrixWorkspace_sptr workspace,
-                          std::string const &workspaceName) const {
-    auto const alg = getSetupFitAlgorithm(model, workspace, workspaceName);
-    alg->execute();
-    return alg;
-  }
-
-  std::unique_ptr<DummyModel> getModelWithFitOutputData() {
-    auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
-    auto const modelWorkspace = model->getWorkspace(0);
-    SetUpADSWithWorkspace ads("__ConvFit", modelWorkspace);
-
-    auto const alg =
-        getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
-    model->addOutput(alg);
-    return model;
   }
 };
 
