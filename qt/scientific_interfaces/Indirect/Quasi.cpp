@@ -459,6 +459,9 @@ void Quasi::displayMessageAndRun(std::string const &saveDirectory) {
       setRunIsRunning(true);
       runTab();
     }
+  } else {
+    setRunIsRunning(true);
+    runTab();
   }
 }
 

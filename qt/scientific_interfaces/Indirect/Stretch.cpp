@@ -209,6 +209,9 @@ void Stretch::displayMessageAndRun(std::string const &saveDirectory) {
       setRunIsRunning(true);
       runTab();
     }
+  } else {
+    setRunIsRunning(true);
+    runTab();
   }
 }
 
