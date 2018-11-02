@@ -512,7 +512,7 @@ void Quasi::plotClicked() {
   IndirectTab::checkADSForPlotSaveWorkspace(resultName, true);
   QString const QresultWS = QString::fromStdString(resultName);
   auto const paramNames = {"Amplitude", "FWHM", "Beta"};
-  for (std::string const paramName : paramNames) {
+  for (std::string const &paramName : paramNames) {
 
     if (plot == paramName || plot == "All") {
       std::vector<int> spectraIndices = {};
