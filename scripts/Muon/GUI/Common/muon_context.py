@@ -26,7 +26,7 @@ class MuonContext(object):
     # ADS base directory for all workspaces
     base_directory = "Muon Data"
 
-    def __init__(self):
+    def __init__(self, load_data=MuonLoadData()):
         """
         Currently, only a single run is loaded into the Home/Grouping tab at once. This is held in the _current_data
         member. The load widget may load multiple runs at once, these are stored in the _loaded_data member.
@@ -35,7 +35,7 @@ class MuonContext(object):
         self._groups = OrderedDict()
         self._pairs = OrderedDict()
 
-        self._loaded_data = MuonLoadData()
+        self._loaded_data = load_data
         self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
     def is_data_loaded(self):
@@ -355,8 +355,8 @@ class MuonContext(object):
         if pair:
             params["SpecifyGroupsManually"] = True
             params["PairName"] = str(pair_name)
-            detectors1 = ",".join([str(i) for i in self._groups[pair.group1].detectors])
-            detectors2 = ",".join([str(i) for i in self._groups[pair.group2].detectors])
+            detectors1 = ",".join([str(i) for i in self._groups[pair.forward_group].detectors])
+            detectors2 = ",".join([str(i) for i in self._groups[pair.backward_group].detectors])
             params["Group1"] = detectors1
             params["Group2"] = detectors2
             params["Alpha"] = str(pair.alpha)
@@ -394,6 +394,8 @@ class MuonContext(object):
 
     def get_default_grouping(self, _instrument):
         parameter_name = "Default grouping file"
+        if self.instrument == "MUSR":
+            parameter_name += " - " + self.main_field_direction
         workspace = self.loaded_workspace
         try:
             grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
@@ -436,4 +438,4 @@ class MuonContext(object):
             group1 = None
             group2 = None
         return MuonPair(pair_name=new_pair_name,
-                        group1_name=group1, group2_name=group2, alpha=1.0)
+                        forward_group_name=group1, backward_group_name=group2, alpha=1.0)
