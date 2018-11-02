@@ -41,6 +41,7 @@ Changes
 - Project Recovery will now attempt to recover multiple instances of mantid that are ran at the same time.
 - The project recovery prompt on mantid restart is improved and shows which checkpoint you will be getting. (See image below)
 - Project Recovery will now output less unhelpful logging information into the results log
+
 .. figure:: ../../images/ProjectRecoveryDialog.png
     :class: screenshot
     :align: right
