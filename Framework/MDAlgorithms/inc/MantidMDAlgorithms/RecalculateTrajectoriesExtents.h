@@ -7,22 +7,23 @@
 #ifndef MANTID_MDALGORITHMS_RECALCULATETRAJECTORIESEXTENTS_H_
 #define MANTID_MDALGORITHMS_RECALCULATETRAJECTORIESEXTENTS_H_
 
-#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** RecalculateTrajectoriesExtents : TODO: DESCRIPTION
-*/
-class MANTID_MDALGORITHMS_DLL RecalculateTrajectoriesExtents : public API::Algorithm {
+/** RecalculateTrajectoriesExtents :
+ */
+class MANTID_MDALGORITHMS_DLL RecalculateTrajectoriesExtents
+    : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override {
-      return {"CropWorkspaceForMDNorm", "MDNormSCD", "MDNormDirectSC"};
+    return {"CropWorkspaceForMDNorm", "MDNormSCD", "MDNormDirectSC"};
   }
 
 private:
