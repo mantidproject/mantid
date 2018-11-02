@@ -59,6 +59,13 @@ except ImportError as e:
     NO_SCROLL = True
 else:
     NO_SCROLL = False
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 
 # define constants
 IndexFromSpice = 'From Spice (pre-defined)'
@@ -82,8 +89,8 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self,parent)
 
         # UI Window (from Qt Designer)
-        ui_path = os.path.join(os.path.dirname(__file__), "MainWindow.ui")
-        self.ui = load_ui(ui_path, baseinstance=self)
+        ui_path = "MainWindow.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
         self._promote_widgets()
 
         # children windows

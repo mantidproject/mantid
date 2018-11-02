@@ -9,12 +9,14 @@ Containing a set of classes used for finding (calculating and refining) UB matri
 """
 from __future__ import (absolute_import, division, print_function)
 import os
-
-
-
 from . import guiutility
-
 from qtpy.QtWidgets import (QDialog, QFileDialog)  # noqa
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
 class AddScansForUBDialog(QDialog):
@@ -30,8 +32,8 @@ class AddScansForUBDialog(QDialog):
         self._myParent = parent
 
         # set up UI
-        ui_path = os.path.join(os.path.dirname(__file__), "AddUBPeaksDialog.ui")
-        self.ui = load_ui(ui_path, baseinstance=self)
+        ui_path =  "AddUBPeaksDialog.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
 
         # initialize widgets
@@ -144,8 +146,8 @@ class SelectUBMatrixScansDialog(QDialog):
         self._myParent = parent
 
         # set ui
-        ui_path = os.path.join(os.path.dirname(__file__), "UBSelectPeaksDialog.ui")
-        self.ui = load_ui(ui_path, baseinstance=self)
+        ui_path = "UBSelectPeaksDialog.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
 
         # define event handling methods

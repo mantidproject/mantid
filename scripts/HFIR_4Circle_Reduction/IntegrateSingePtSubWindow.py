@@ -6,6 +6,13 @@ import HFIR_4Circle_Reduction.guiutility as guiutility
 import os
 from qtpy.QtWidgets import (QMainWindow, QFileDialog)  # noqa
 from qtpy.QtCore import Signal as pyqtSignal
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 
 
 class IntegrateSinglePtIntensityWindow(QMainWindow):
@@ -32,8 +39,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.scanIntegratedSignal.connect(self._parent_window.process_single_pt_scan_intensity)
 
         # init UI
-        ui_path = os.path.join(os.path.dirname(__file__), "SinglePtIntegrationWindow.ui")
-        self.ui = load_ui(ui_path, baseinstance=self)
+        ui_path = "SinglePtIntegrationWindow.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
         self._promote_widgets()
 
         # initialize widgets

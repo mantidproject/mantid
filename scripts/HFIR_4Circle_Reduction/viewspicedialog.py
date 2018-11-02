@@ -5,8 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-
 from qtpy.QtWidgets import (QDialog)  # noqa
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 
 
 class ViewSpiceDialog(QDialog):
@@ -19,8 +25,8 @@ class ViewSpiceDialog(QDialog):
         super(ViewSpiceDialog, self).__init__()
 
         # define UI
-        ui_path = os.path.join(os.path.dirname(__file__), "SpiceViewerDialog.ui")
-        self.ui = load_ui(ui_path, baseinstance=self)
+        ui_path = "SpiceViewerDialog.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
 
         # define event handlers
