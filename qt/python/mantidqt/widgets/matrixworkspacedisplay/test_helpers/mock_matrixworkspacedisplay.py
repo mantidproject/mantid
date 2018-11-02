@@ -49,3 +49,10 @@ class MockMatrixWorkspaceDisplayView:
         self.set_model = Mock()
         self.copy_to_clipboard = Mock()
         self.show_mouse_toast = Mock()
+        self.ask_confirmation = None
+
+
+class MockMatrixWorkspaceDisplayModel:
+    def __init__(self):
+        self.get_spectrum_plot_label = Mock()
+        self.get_bin_plot_label = Mock()

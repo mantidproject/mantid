@@ -27,7 +27,13 @@ p = R"C:\Users\qbr77747\dev\m\source\build\ExternalData\Testing\Data\UnitTest"
 #     full_path = os.path.join(p, f)
 app = QApplication([])
 LOQ74044 = Load(os.path.join(p, r"LOQ74044.nxs"))
+import matplotlib
+
+# TODO remove before PR / figure our where to do it properly
+matplotlib.use('Qt5Agg')
+print("MPL version:", matplotlib.__version__)
+import matplotlib.pyplot as plt
 
 # ws = Load(os.path.join(p, r"AddedEvent-add.nxs"))
-window = MatrixWorkspaceDisplay(LOQ74044)
+window = MatrixWorkspaceDisplay(LOQ74044, plt)
 app.exec_()

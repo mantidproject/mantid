@@ -9,13 +9,8 @@
 #
 from __future__ import absolute_import, division, print_function
 
-import matplotlib
-
 from mantid.plots import MantidAxes
-# TODO remove before PR / figure our where to do it properly
-matplotlib.use('Qt5Agg')
-print("MPL version:", matplotlib.__version__)
-import matplotlib.pyplot as plt
+
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
 
@@ -24,13 +19,16 @@ class MatrixWorkspaceDisplay(object):
     NO_SELECTION_MESSAGE = "No selection"
     COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
+    NUM_SELECTED_FOR_CONFIRMATION = 10
 
-    def __init__(self, ws, parent=None, model=None, view=None):
+    def __init__(self, ws, plt=None, parent=None, model=None, view=None):
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
         self.view = view if view else MatrixWorkspaceDisplayView(self,
                                                                  parent,
                                                                  self.model.get_name())
+
+        self.plt = plt
         self.setup_tables()
         self.view.set_context_menu_actions(self.view.table_y, self.model._ws.readY)
         self.view.set_context_menu_actions(self.view.table_x, self.model._ws.readX)
@@ -113,16 +111,18 @@ class MatrixWorkspaceDisplay(object):
         self.show_successful_copy_toast()
 
     def _do_action_plot(self, table, axis, get_label, get_index, plot_errors=False):
+        if self.plt is None:
+            raise ValueError("Trying to do a plot, but no plotting class dependency was injected in the constructor")
         selection_model = table.selectionModel()
         if not selection_model.hasSelection():
             self.show_no_selection_to_copy_toast()
             return
         selected = selection_model.selectedRows() if axis == MantidAxes.SPECTRUM else selection_model.selectedColumns()  # type: list
-        if len(selected) > 10 and not self.view.ask_confirmation(
+        if len(selected) > self.NUM_SELECTED_FOR_CONFIRMATION and not self.view.ask_confirmation(
                 self.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(len(selected))):
             return
 
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        fig, ax = self.plt.subplots(subplot_kw={'projection': 'mantid'})
         for index in selected:
             workspace_index = get_index(index)
 
@@ -131,7 +131,7 @@ class MatrixWorkspaceDisplay(object):
                            wkspIndex=workspace_index,
                            axis=axis)
             if plot_errors:
-                # keep the error bars the same color s the plot
+                # keep the error bars the same color as the plot
                 color = plot[0].get_color()
                 # to turn on caps add capsize=3
                 ax.errorbar(self.model._ws, '|', ecolor=color, wkspIndex=workspace_index, axis=axis, label=None)

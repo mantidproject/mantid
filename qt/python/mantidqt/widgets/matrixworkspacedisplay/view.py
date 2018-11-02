@@ -13,7 +13,6 @@ import sys
 from functools import partial
 from logging import warning
 
-import qtawesome as qta
 from qtpy import QtGui
 from qtpy.QtCore import QPoint, Qt
 from qtpy.QtGui import QCursor, QFont, QFontMetrics
