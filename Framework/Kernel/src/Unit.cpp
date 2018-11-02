@@ -1188,7 +1188,7 @@ double Time::singleToTOF(const double x) const {
 
 double Time::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
-  throw std::runtime_error("Time is not allwed to be converted from TOF. ");
+  throw std::runtime_error("Time is not allowed to be converted from TOF. ");
 }
 
 double Time::conversionTOFMax() const {
