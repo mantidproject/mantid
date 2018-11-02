@@ -18,8 +18,8 @@ namespace DataHandling {
 
 bool LoadBinaryStl::isBinarySTL() {
   Poco::File stlFile = Poco::File(m_filename);
-  if (!stlFile.exists()){
-    //if the file cannot be read then it is not a valid binary Stl File
+  if (!stlFile.exists()) {
+    // if the file cannot be read then it is not a valid binary Stl File
     return false;
   }
   auto fileSize = stlFile.getSize();

@@ -169,7 +169,7 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
     to.setName(from.getName());
   if (environmentFlag) {
     to.setEnvironment(
-      std::make_unique<SampleEnvironment>(from.getEnvironment()));
+        std::make_unique<SampleEnvironment>(from.getEnvironment()));
   }
   if (shapeFlag) {
     Material rhsMaterial;

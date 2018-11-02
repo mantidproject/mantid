@@ -111,7 +111,7 @@ void LoadSampleEnvironment::exec() {
   sample.setEnvironment(std::move(environment));
 
   // Set output workspace
-  
+
   setProperty("OutputWorkspace", outputWS);
   g_log.debug(debugString);
 }
