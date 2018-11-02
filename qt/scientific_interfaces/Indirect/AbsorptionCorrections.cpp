@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "AbsorptionCorrections.h"
 
 #include "MantidAPI/Axis.h"
@@ -15,8 +21,27 @@ using namespace Mantid::Geometry;
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
 
+bool isWorkspaceInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+}
+
+WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
+template <typename T>
+void addWorkspaceToADS(std::string const &workspaceName, T const &workspace) {
+  AnalysisDataService::Instance().addOrReplace(workspaceName, workspace);
+}
+
 MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
-                                  const std::string &target) {
+                                  std::string const &target) {
   auto convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
   convertAlg->initialize();
   convertAlg->setChild(true);
@@ -32,7 +57,7 @@ MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
 }
 
 WorkspaceGroup_sptr
-groupWorkspaces(const std::vector<std::string> &workspaceNames) {
+groupWorkspaces(std::vector<std::string> const &workspaceNames) {
   auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupAlg->initialize();
   groupAlg->setChild(true);
@@ -43,15 +68,15 @@ groupWorkspaces(const std::vector<std::string> &workspaceNames) {
 }
 
 WorkspaceGroup_sptr convertUnits(WorkspaceGroup_sptr workspaceGroup,
-                                 const std::string &target) {
+                                 std::string const &target) {
   std::vector<std::string> convertedNames;
   convertedNames.reserve(workspaceGroup->size());
 
-  for (const auto &workspace : *workspaceGroup) {
-    const auto name = "__" + workspace->getName() + "_" + target;
-    const auto wavelengthWorkspace = convertUnits(
+  for (auto const &workspace : *workspaceGroup) {
+    auto const name = "__" + workspace->getName() + "_" + target;
+    auto const wavelengthWorkspace = convertUnits(
         boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), target);
-    AnalysisDataService::Instance().addOrReplace(name, wavelengthWorkspace);
+    addWorkspaceToADS(name, wavelengthWorkspace);
     convertedNames.emplace_back(name);
   }
   return groupWorkspaces(convertedNames);
@@ -71,17 +96,14 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
 
   // Change of input
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(getBeamDefaults(const QString &)));
-  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(getMonteCarloDefaults(const QString &)));
-
+          SLOT(getParameterDefaults(const QString &)));
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
-  // Handle plotting and saving
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  // Handle running, plotting and saving
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
-
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   // Handle density units
   connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
           SLOT(changeSampleDensityUnit(int)));
@@ -97,25 +119,22 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
 }
 
 AbsorptionCorrections::~AbsorptionCorrections() {
-  if (AnalysisDataService::Instance().doesExist("__mc_corrections_wavelength"))
+  if (isWorkspaceInADS("__mc_corrections_wavelength"))
     AnalysisDataService::Instance().remove("__mc_corrections_wavelength");
 }
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
-  const auto sampleWSName =
-      m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-
-  if (AnalysisDataService::Instance().doesExist(sampleWSName))
-    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        sampleWSName);
-  return nullptr;
+  auto const name = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
+  return isWorkspaceInADS(name) ? getADSMatrixWorkspace(name) : nullptr;
 }
 
 void AbsorptionCorrections::setup() { doValidation(); }
 
 void AbsorptionCorrections::run() {
+  setRunIsRunning(true);
+
   // Get correct corrections algorithm
-  QString sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
+  QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
 
   IAlgorithm_sptr monteCarloAbsCor =
       AlgorithmManager::Instance().create("CalculateMonteCarloAbsorption");
@@ -126,7 +145,7 @@ void AbsorptionCorrections::run() {
   addShapeSpecificSampleOptions(monteCarloAbsCor, sampleShape);
 
   // Sample details
-  QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+  QString const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   monteCarloAbsCor->setProperty("SampleWorkspace", sampleWsName.toStdString());
 
   monteCarloAbsCor->setProperty(
@@ -135,28 +154,29 @@ void AbsorptionCorrections::run() {
   monteCarloAbsCor->setProperty("SampleDensity",
                                 m_uiForm.spSampleDensity->value());
 
-  QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
+  QString const sampleChemicalFormula =
+      m_uiForm.leSampleChemicalFormula->text();
   monteCarloAbsCor->setProperty("SampleChemicalFormula",
                                 sampleChemicalFormula.toStdString());
 
   // General details
   monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
   monteCarloAbsCor->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
-  long wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
+  long const wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
   monteCarloAbsCor->setProperty("NumberOfWavelengthPoints", wave);
-  long events = static_cast<long>(m_uiForm.spNumberEvents->value());
+  long const events = static_cast<long>(m_uiForm.spNumberEvents->value());
   monteCarloAbsCor->setProperty("EventsPerPoint", events);
   auto const interpolation =
       m_uiForm.cbInterpolation->currentText().toStdString();
   monteCarloAbsCor->setProperty("Interpolation", interpolation);
-  long maxAttempts =
+  long const maxAttempts =
       static_cast<long>(m_uiForm.spMaxScatterPtAttempts->value());
   monteCarloAbsCor->setProperty("MaxScatterPtAttempts", maxAttempts);
 
   // Can details
-  bool useCan = m_uiForm.ckUseCan->isChecked();
+  bool const useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
-    std::string canWsName =
+    std::string const canWsName =
         m_uiForm.dsCanInput->getCurrentDataName().toStdString();
     monteCarloAbsCor->setProperty("ContainerWorkspace", canWsName);
 
@@ -166,7 +186,7 @@ void AbsorptionCorrections::run() {
     monteCarloAbsCor->setProperty("ContainerDensity",
                                   m_uiForm.spCanDensity->value());
 
-    const auto canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+    auto const canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
     monteCarloAbsCor->setProperty("ContainerChemicalFormula",
                                   canChemicalFormula.toStdString());
 
@@ -178,7 +198,7 @@ void AbsorptionCorrections::run() {
   if (nameCutIndex == -1)
     nameCutIndex = sampleWsName.length();
 
-  const auto outputWsName =
+  auto const outputWsName =
       sampleWsName.left(nameCutIndex) + "_" + sampleShape + "_MC_Corrections";
 
   monteCarloAbsCor->setProperty("CorrectionsWorkspace",
@@ -206,33 +226,33 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
                                                           QString shape) {
 
   if (shape == "FlatPlate") {
-    double sampleHeight = m_uiForm.spFlatSampleHeight->value();
+    double const sampleHeight = m_uiForm.spFlatSampleHeight->value();
     alg->setProperty("Height", sampleHeight);
 
-    double sampleWidth = m_uiForm.spFlatSampleWidth->value();
+    double const sampleWidth = m_uiForm.spFlatSampleWidth->value();
     alg->setProperty("SampleWidth", sampleWidth);
 
-    double sampleThickness = m_uiForm.spFlatSampleThickness->value();
+    double const sampleThickness = m_uiForm.spFlatSampleThickness->value();
     alg->setProperty("SampleThickness", sampleThickness);
 
-    double sampleAngle = m_uiForm.spFlatSampleAngle->value();
+    double const sampleAngle = m_uiForm.spFlatSampleAngle->value();
     alg->setProperty("SampleAngle", sampleAngle);
 
   } else if (shape == "Annulus") {
-    double sampleHeight = m_uiForm.spAnnSampleHeight->value();
+    double const sampleHeight = m_uiForm.spAnnSampleHeight->value();
     alg->setProperty("Height", sampleHeight);
 
-    double sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
+    double const sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
     alg->setProperty("SampleInnerRadius", sampleInnerRadius);
 
-    double sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
+    double const sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
     alg->setProperty("SampleOuterRadius", sampleOuterRadius);
 
   } else if (shape == "Cylinder") {
-    double sampleRadius = m_uiForm.spCylSampleRadius->value();
+    double const sampleRadius = m_uiForm.spCylSampleRadius->value();
     alg->setProperty("SampleRadius", sampleRadius);
 
-    double sampleHeight = m_uiForm.spCylSampleHeight->value();
+    double const sampleHeight = m_uiForm.spCylSampleHeight->value();
     alg->setProperty("Height", sampleHeight);
   }
 }
@@ -246,25 +266,25 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
  * @param shape Sample shape
  */
 void AbsorptionCorrections::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
-                                                       QString shape) {
+                                                       QString const &shape) {
   if (shape == "FlatPlate") {
-    double canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
+    double const canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
     alg->setProperty("ContainerFrontThickness", canFrontThickness);
 
-    double canBackThickness = m_uiForm.spFlatCanBackThickness->value();
+    double const canBackThickness = m_uiForm.spFlatCanBackThickness->value();
     alg->setProperty("ContainerBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
-    double canInnerRadius = m_uiForm.spCylSampleRadius->value();
+    double const canInnerRadius = m_uiForm.spCylSampleRadius->value();
     alg->setProperty("ContainerInnerRadius", canInnerRadius);
 
-    double canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
+    double const canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
     alg->setProperty("ContainerOuterRadius", canOuterRadius);
 
   } else if (shape == "Annulus") {
-    double canInnerRadius = m_uiForm.spAnnCanInnerRadius->value();
+    double const canInnerRadius = m_uiForm.spAnnCanInnerRadius->value();
     alg->setProperty("ContainerInnerRadius", canInnerRadius);
 
-    double canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
+    double const canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
     alg->setProperty("ContainerOuterRadius", canOuterRadius);
   }
 }
@@ -274,10 +294,9 @@ bool AbsorptionCorrections::validate() {
 
   // Give error for failed validation
   if (!uiv.isAllInputValid()) {
-    QString error = uiv.generateErrorMessage();
+    auto const error = uiv.generateErrorMessage();
     showMessageBox(error);
   }
-
   return uiv.isAllInputValid();
 }
 
@@ -295,7 +314,7 @@ UserInputValidator AbsorptionCorrections::doValidation() {
     uiv.checkFieldIsValid("Sample Chemical Formula",
                           m_uiForm.leSampleChemicalFormula,
                           m_uiForm.valSampleChemicalFormula);
-  const auto sampleChem =
+  auto const sampleChem =
       m_uiForm.leSampleChemicalFormula->text().toStdString();
   try {
     Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
@@ -307,20 +326,16 @@ UserInputValidator AbsorptionCorrections::doValidation() {
 
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
-    const auto containerChem =
+    auto const containerChem =
         m_uiForm.leCanChemicalFormula->text().toStdString();
     uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
 
-    const auto containerWsName =
+    auto const containerWsName =
         m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-    bool containerExists =
-        AnalysisDataService::Instance().doesExist(containerWsName);
-    if (containerExists &&
-        !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            containerWsName)) {
+    if (isWorkspaceInADS(containerWsName) &&
+        !getADSMatrixWorkspace(containerWsName))
       uiv.addErrorMessage(
           "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
-    }
 
     if (uiv.checkFieldIsNotEmpty("Container Chemical Formula",
                                  m_uiForm.leCanChemicalFormula,
@@ -348,105 +363,100 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsCanInput->readSettings(settings.group());
 }
 
+void AbsorptionCorrections::processWavelengthWorkspace() {
+  auto const correctionsWs = getADSWorkspaceGroup(m_pythonExportWsName);
+  if (correctionsWs) {
+    auto const wavelengthWorkspace = convertUnits(correctionsWs, "Wavelength");
+    addWorkspaceToADS("__mc_corrections_wavelength", wavelengthWorkspace);
+  }
+}
+
 /**
  * Handle completion of the absorption correction algorithm.
  *
  * @param error True if algorithm has failed.
  */
 void AbsorptionCorrections::algorithmComplete(bool error) {
-  if (error) {
+  setRunIsRunning(false);
+  if (!error)
+    processWavelengthWorkspace();
+  else {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
     emit showMessageBox(
         "Could not run absorption corrections.\nSee Results Log for details.");
-    return;
-  }
-
-  auto correctionsWorkspace =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          m_pythonExportWsName);
-
-  if (correctionsWorkspace) {
-    auto wavelengthWorkspace = convertUnits(correctionsWorkspace, "Wavelength");
-    AnalysisDataService::Instance().addOrReplace("__mc_corrections_wavelength",
-                                                 wavelengthWorkspace);
-
-    // Enable plot and save
-    m_uiForm.pbPlot->setEnabled(true);
-    m_uiForm.cbPlotOutput->setEnabled(true);
-    m_uiForm.pbSave->setEnabled(true);
   }
 }
 
-void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
-  auto sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      dataName.toStdString());
-
-  if (!sampleWs) {
+void AbsorptionCorrections::getParameterDefaults(QString const &dataName) {
+  auto const sampleWs = getADSMatrixWorkspace(dataName.toStdString());
+  if (sampleWs)
+    getParameterDefaults(sampleWs->getInstrument());
+  else
     displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
-    return;
-  }
+}
 
-  auto instrument = sampleWs->getInstrument();
-  const std::string beamWidthParamName = "Workflow.beam-width";
+void AbsorptionCorrections::getParameterDefaults(
+    Instrument_const_sptr instrument) {
+  setBeamWidthValue(instrument, "Workflow.beam-width");
+  setBeamHeightValue(instrument, "Workflow.beam-height");
+  setWavelengthsValue(instrument, "Workflow.absorption-wavelengths");
+  setEventsValue(instrument, "Workflow.absorption-events");
+  setInterpolationValue(instrument, "Workflow.absorption-interpolation");
+  setMaxAttemptsValue(instrument, "Workflow.absorption-attempts");
+}
+
+void AbsorptionCorrections::setBeamWidthValue(
+    Instrument_const_sptr instrument,
+    std::string const &beamWidthParamName) const {
   if (instrument->hasParameter(beamWidthParamName)) {
-    const auto beamWidth = QString::fromStdString(
+    auto const beamWidth = QString::fromStdString(
         instrument->getStringParameter(beamWidthParamName)[0]);
-    const auto beamWidthValue = beamWidth.toDouble();
-
+    auto const beamWidthValue = beamWidth.toDouble();
     m_uiForm.spBeamWidth->setValue(beamWidthValue);
   }
-  const std::string beamHeightParamName = "Workflow.beam-height";
-  if (instrument->hasParameter(beamHeightParamName)) {
-    const auto beamHeight = QString::fromStdString(
-        instrument->getStringParameter(beamHeightParamName)[0]);
-    const auto beamHeightValue = beamHeight.toDouble();
+}
 
+void AbsorptionCorrections::setBeamHeightValue(
+    Instrument_const_sptr instrument,
+    std::string const &beamHeightParamName) const {
+  if (instrument->hasParameter(beamHeightParamName)) {
+    auto const beamHeight = QString::fromStdString(
+        instrument->getStringParameter(beamHeightParamName)[0]);
+    auto const beamHeightValue = beamHeight.toDouble();
     m_uiForm.spBeamHeight->setValue(beamHeightValue);
   }
 }
 
-void AbsorptionCorrections::getMonteCarloDefaults(const QString &dataName) {
-  auto sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      dataName.toStdString());
-
-  if (sampleWs) {
-    auto instrument = sampleWs->getInstrument();
-    setWavelengthsValue(instrument, "Workflow.absorption-wavelengths");
-    setEventsValue(instrument, "Workflow.absorption-events");
-    setInterpolationValue(instrument, "Workflow.absorption-interpolation");
-    setMaxAttemptsValue(instrument, "Workflow.absorption-attempts");
-  } else
-    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
-}
-
 void AbsorptionCorrections::setWavelengthsValue(
     Instrument_const_sptr instrument,
-    const std::string &wavelengthsParamName) const {
+    std::string const &wavelengthsParamName) const {
   if (instrument->hasParameter(wavelengthsParamName)) {
-    const auto wavelengths = QString::fromStdString(
+    auto const wavelengths = QString::fromStdString(
         instrument->getStringParameter(wavelengthsParamName)[0]);
-    const auto wavelengthsValue = wavelengths.toInt();
+    auto const wavelengthsValue = wavelengths.toInt();
     m_uiForm.spNumberWavelengths->setValue(wavelengthsValue);
   }
 }
 
 void AbsorptionCorrections::setEventsValue(
     Instrument_const_sptr instrument,
-    const std::string &eventsParamName) const {
+    std::string const &eventsParamName) const {
   if (instrument->hasParameter(eventsParamName)) {
-    const auto events = QString::fromStdString(
+    auto const events = QString::fromStdString(
         instrument->getStringParameter(eventsParamName)[0]);
-    const auto eventsValue = events.toInt();
+    auto const eventsValue = events.toInt();
     m_uiForm.spNumberEvents->setValue(eventsValue);
   }
 }
 
 void AbsorptionCorrections::setInterpolationValue(
     Instrument_const_sptr instrument,
-    const std::string &interpolationParamName) const {
+    std::string const &interpolationParamName) const {
   if (instrument->hasParameter(interpolationParamName)) {
-    const auto interpolation = QString::fromStdString(
+    auto const interpolation = QString::fromStdString(
         instrument->getStringParameter(interpolationParamName)[0]);
-    const auto interpolationValue = interpolation.toStdString();
+    auto const interpolationValue = interpolation.toStdString();
     m_uiForm.cbInterpolation->setCurrentIndex(
         interpolationValue == "CSpline" ? 1 : 0);
   }
@@ -454,36 +464,30 @@ void AbsorptionCorrections::setInterpolationValue(
 
 void AbsorptionCorrections::setMaxAttemptsValue(
     Instrument_const_sptr instrument,
-    const std::string &maxAttemptsParamName) const {
+    std::string const &maxAttemptsParamName) const {
   if (instrument->hasParameter(maxAttemptsParamName)) {
-    const auto maxScatterAttempts = QString::fromStdString(
+    auto const maxScatterAttempts = QString::fromStdString(
         instrument->getStringParameter(maxAttemptsParamName)[0]);
-    const auto maxScatterAttemptsValue = maxScatterAttempts.toInt();
+    auto const maxScatterAttemptsValue = maxScatterAttempts.toInt();
     m_uiForm.spMaxScatterPtAttempts->setValue(maxScatterAttemptsValue);
   }
 }
 
-/**
- * Handle saving of workspace
- */
+void AbsorptionCorrections::addSaveWorkspace(std::string const &workspaceName) {
+  if (checkADSForPlotSaveWorkspace(workspaceName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(workspaceName));
+}
+
 void AbsorptionCorrections::saveClicked() {
-
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
-
-  std::string factorsWs =
-      m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
-  if (checkADSForPlotSaveWorkspace(factorsWs, false))
-    addSaveWorkspaceToQueue(QString::fromStdString(factorsWs));
-
+  auto const factorsWs = m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
+  addSaveWorkspace(m_pythonExportWsName);
+  addSaveWorkspace(factorsWs);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/**
- * Handle mantid plotting
- */
 void AbsorptionCorrections::plotClicked() {
-  const auto plotType = m_uiForm.cbPlotOutput->currentText();
+  setPlotResultIsPlotting(true);
+  auto const plotType = m_uiForm.cbPlotOutput->currentText();
 
   if (checkADSForPlotSaveWorkspace("__mc_corrections_wavelength", false)) {
     if (plotType == "Both" || plotType == "Wavelength")
@@ -492,30 +496,46 @@ void AbsorptionCorrections::plotClicked() {
     if (plotType == "Both" || plotType == "Angle")
       plotTimeBin(QString::fromStdString("__mc_corrections_wavelength"));
   }
+  setPlotResultIsPlotting(false);
 }
 
-/**
- * Handle changing of the sample density unit
- */
+void AbsorptionCorrections::runClicked() { runTab(); }
+
 void AbsorptionCorrections::changeSampleDensityUnit(int index) {
-
-  if (index == 0) {
-    m_uiForm.spSampleDensity->setSuffix(" g/cm3");
-  } else {
-    m_uiForm.spSampleDensity->setSuffix(" 1/A3");
-  }
+  QString const suffix = index == 0 ? " g/cm3" : " 1/A3";
+  m_uiForm.spSampleDensity->setSuffix(suffix);
 }
 
-/**
- * Handle changing of the container density unit
- */
 void AbsorptionCorrections::changeCanDensityUnit(int index) {
+  QString const suffix = index == 0 ? " g/cm3" : " 1/A3";
+  m_uiForm.spCanDensity->setSuffix(suffix);
+}
 
-  if (index == 0) {
-    m_uiForm.spCanDensity->setSuffix(" g/cm3");
-  } else {
-    m_uiForm.spCanDensity->setSuffix(" 1/A3");
-  }
+void AbsorptionCorrections::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void AbsorptionCorrections::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotOutput->setEnabled(enabled);
+}
+
+void AbsorptionCorrections::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void AbsorptionCorrections::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
+  setPlotResultEnabled(!running);
+  setSaveResultEnabled(!running);
+}
+
+void AbsorptionCorrections::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotResultEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveResultEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

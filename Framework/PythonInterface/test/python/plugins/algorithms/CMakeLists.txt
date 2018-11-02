@@ -79,6 +79,7 @@ set ( TEST_PY_FILES
   NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
   ReflectometryReductionOneLiveDataTest.py
+  ReflectometrySliceEventWorkspaceTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SaveGEMMAUDParamFileTest.py
