@@ -121,28 +121,33 @@ private:
         makeWorkspace(HistogramData::BinEdges{-1.1, -0.1, 0.9, 1.8});
     API::MatrixWorkspace_sptr comparisonWS =
         makeWorkspace(std::forward<BinEdges>(comparisonBinEdges));
-    Algorithms::MaskNonOverlappingBins alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("ComparisonWorkspace", comparisonWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("MaskPartiallyOverlapping", maskPartial))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
-    if (!expected.empty()) {
-      auto const mask = outputWS->maskedBins(0);
-      TS_ASSERT_EQUALS(mask, expected)
-    } else {
-      TS_ASSERT(!outputWS->hasMaskedBins(0))
+    std::array<bool, 2> raggedOptions{{true, false}};
+    for (auto const isRagged : raggedOptions) {
+      Algorithms::MaskNonOverlappingBins alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      TS_ASSERT_THROWS_NOTHING(alg.initialize())
+      TS_ASSERT(alg.isInitialized())
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("ComparisonWorkspace", comparisonWS))
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("MaskPartiallyOverlapping", maskPartial))
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("SameXAcrossHistograms", !isRagged))
+      TS_ASSERT_THROWS_NOTHING(alg.execute())
+      TS_ASSERT(alg.isExecuted())
+      API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+      TS_ASSERT(outputWS);
+      TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+      if (!expected.empty()) {
+        auto const mask = outputWS->maskedBins(0);
+        TS_ASSERT_EQUALS(mask, expected)
+      } else {
+        TS_ASSERT(!outputWS->hasMaskedBins(0))
+      }
     }
   }
 };

@@ -30,6 +30,12 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void checkXSorting(API::MatrixWorkspace const &inputWS,
                      API::MatrixWorkspace const &comparisonWS);
+  void processRagged(API::MatrixWorkspace const &inputWS,
+                     API::MatrixWorkspace const &comparisonWS,
+                     API::MatrixWorkspace &outputWS);
+  void processNonRagged(API::MatrixWorkspace const &inputWS,
+                        API::MatrixWorkspace const &comparisonWS,
+                        API::MatrixWorkspace &outputWS);
 };
 
 } // namespace Algorithms

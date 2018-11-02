@@ -10,9 +10,17 @@
 Description
 -----------
 
-This algorithm masks the bins in ``InputWorkspace`` which lie in :math:`X` range that is not covered by ``ComparisonWorkspace``. The ``MaskPartiallyOverlapping`` flag affect the behavior with regards to bins which are partially covered by ``ComparisonWorkspace``. The algorithm works only with the X data sorted in ascending order. This is checked before the data is processed. If there is no doubt that this is the case, the chekcing can be skipped by setting ``CheckSortedX`` to ``False``.
+This algorithm masks the bins in ``InputWorkspace`` which lie in :math:`X` range that is not covered by ``ComparisonWorkspace``. The ``MaskPartiallyOverlapping`` flag affect the behavior with regards to bins which are partially covered by ``ComparisonWorkspace``. The algorithm works only with the X data sorted in ascending order.
 
 The algorithm currently applies the default masking weight to the bins which does not clear the data.
+
+Optimizations
+#############
+
+Some small optimizations are possible via ``CheckSortedX`` and ``SameXAcrossHistograms``. Make sure the input workspaces fill the expectations before using these properties!
+
+- If there is no doubt that X data in ``InputWorkspace`` and ``ComparisonWorkspace`` is sorted, the checking for ascending X can be skipped by setting ``CheckSortedX`` to ``False``.
+- If both ``InputWorkspace`` and ``ComparisonWorkspace`` are *not* :ref:`ragged workspaces <Ragged_Workspace>`, i.e. they have the same X across all histograms, ``SameXAcrossHistograms`` can be set to ``True``.
 
 Usage
 -----
