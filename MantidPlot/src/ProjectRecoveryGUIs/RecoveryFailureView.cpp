@@ -124,6 +124,6 @@ void RecoveryFailureView::emitAbortScript() {
   emit(abortProjectRecoveryScript());
 }
 
-void RecoveryFailureView::changeStartMantidButton(const QString &string){
+void RecoveryFailureView::changeStartMantidButton(const QString &string) {
   ui->pushButton_3->setText(string);
 }

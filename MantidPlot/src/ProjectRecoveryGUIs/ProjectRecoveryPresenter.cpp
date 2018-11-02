@@ -178,7 +178,7 @@ void ProjectRecoveryPresenter::emitAbortScript() {
   }
 }
 
-void ProjectRecoveryPresenter::changeStartMantidToCancelLabel(){
+void ProjectRecoveryPresenter::changeStartMantidToCancelLabel() {
   if (m_openView == RecoveryView) {
     m_recView->changeStartMantidButton("Cancel Recovery");
   } else {

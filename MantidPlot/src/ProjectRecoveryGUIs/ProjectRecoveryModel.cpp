@@ -78,8 +78,8 @@ void ProjectRecoveryModel::startMantidNormally() {
   m_projRec->startProjectSaving();
   m_failedRun = false;
 
-  //If project recovery is running on script window we need to abort
-  if (m_recoveryRunning){
+  // If project recovery is running on script window we need to abort
+  if (m_recoveryRunning) {
     m_presenter->emitAbortScript();
   }
 

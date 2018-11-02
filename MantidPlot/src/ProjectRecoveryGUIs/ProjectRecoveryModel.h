@@ -25,7 +25,7 @@ public:
   void recoverSelectedCheckpoint(std::string &selected);
   void openSelectedInEditor(std::string &selected);
   bool getFailedRun() const;
-  bool hasRecoveryStarted() const { return m_recoveryRunning;}
+  bool hasRecoveryStarted() const { return m_recoveryRunning; }
   std::string decideLastCheckpoint();
 
 private:

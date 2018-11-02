@@ -88,6 +88,6 @@ void ProjectRecoveryView::emitAbortScript() {
   emit(abortProjectRecoveryScript());
 }
 
-void ProjectRecoveryView::changeStartMantidButton(const QString &string){
+void ProjectRecoveryView::changeStartMantidButton(const QString &string) {
   ui->startmantidButton->setText(string);
 }
