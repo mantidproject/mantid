@@ -16,6 +16,10 @@ if (POLICY CMP0072)
   cmake_policy (SET CMP0072 OLD)
 endif ()
 
+if (POLICY CMP0074)
+  cmake_policy (SET CMP0074 NEW)
+endif ()
+
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "" )
 
@@ -367,12 +371,18 @@ if ( ENABLE_CPACK )
                                            "libqscintilla2-12v5,"
                                            "ipython-notebook,"
                                            "libhdf5-cpp-11" )
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqt5scintilla2-12v5" )
+        endif()
       else()  # bionic and newer
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23,"
                                            "liboce-foundation11,liboce-modeling11,"
                                            "libqscintilla2-qt4-13,"
                                            "jupyter-notebook,"
                                            "libhdf5-cpp-100" )
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13" )
+        endif()
       endif()
 
       if ( PYTHON_VERSION_MAJOR EQUAL 3 )

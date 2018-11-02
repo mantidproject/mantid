@@ -331,6 +331,14 @@ DetectorInfo::scanIntervals() const {
   return {intervals.begin(), intervals.end()};
 }
 
+const DetectorInfoConstIt DetectorInfo::cbegin() const {
+  return DetectorInfoConstIt(*this, 0);
+}
+
+const DetectorInfoConstIt DetectorInfo::cend() const {
+  return DetectorInfoConstIt(*this, size());
+}
+
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] != index) {
@@ -350,14 +358,10 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
 }
 
 // Begin method for iterator
-DetectorInfoIterator DetectorInfo::begin() const {
-  return DetectorInfoIterator(*this, 0);
-}
+DetectorInfoIt DetectorInfo::begin() { return DetectorInfoIt(*this, 0); }
 
 // End method for iterator
-DetectorInfoIterator DetectorInfo::end() const {
-  return DetectorInfoIterator(*this, size());
-}
+DetectorInfoIt DetectorInfo::end() { return DetectorInfoIt(*this, size()); }
 
 } // namespace Geometry
 } // namespace Mantid
