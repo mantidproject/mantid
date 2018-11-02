@@ -787,7 +787,7 @@ p, li { white-space: pre-wrap; }
                    </layout>
                   </item>
                   <item>
-                   <widget class="ScanSurveyTable" name="tableWidget_surveyTable"/>
+                   <widget class="QFrame" name="frame_tableWidget_surveyTable"/>
                   </item>
                  </layout>
                 </item>
@@ -1409,7 +1409,7 @@ p, li { white-space: pre-wrap; }
             <item row="0" column="0">
              <layout class="QGridLayout" name="gridLayout_3">
               <item row="0" column="0">
-               <widget class="Detector2DView" name="graphicsView_detector2dPlot">
+               <widget class="QFrame" name="frame_graphicsView_detector2dPlot">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -1851,7 +1851,7 @@ p, li { white-space: pre-wrap; }
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_4">
                 <item>
-                 <widget class="UBMatrixPeakTable" name="tableWidget_peaksCalUB">
+                 <widget class="QFrame" name="frame_tableWidget_peaksCalUB">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                     <horstretch>0</horstretch>
@@ -2518,7 +2518,7 @@ p, li { white-space: pre-wrap; }
                 </property>
                 <layout class="QGridLayout" name="gridLayout_30">
                  <item row="0" column="0">
-                  <widget class="UBMatrixTable" name="tableWidget_ubMatrix">
+                  <widget class="QFrame" name="frame_tableWidget_ubMatrix">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>0</horstretch>
@@ -2971,7 +2971,7 @@ p, li { white-space: pre-wrap; }
                </widget>
               </item>
               <item>
-               <widget class="UBMatrixTable" name="tableWidget_ubInUse">
+               <widget class="QFrame" name="frame_tableWidget_ubInUse">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -3528,7 +3528,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item row="3" column="0">
-             <widget class="ProcessTableWidget" name="tableWidget_mergeScans">
+             <widget class="QFrame" name="frame_tableWidget_mergeScans">
               <property name="font">
                <font>
                 <pointsize>9</pointsize>
@@ -4478,7 +4478,7 @@ p, li { white-space: pre-wrap; }
              </layout>
             </item>
             <item row="2" column="3">
-             <widget class="IntegratedPeakView" name="graphicsView_integratedPeakView">
+             <widget class="QFrame" name="frame_graphicsView_integratedPeakView">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -4968,7 +4968,7 @@ p, li { white-space: pre-wrap; }
                </spacer>
               </item>
               <item>
-               <widget class="MatrixTable" name="tableWidget_covariance">
+               <widget class="QFrame" name="frame_tableWidget_covariance">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -5192,7 +5192,7 @@ p, li { white-space: pre-wrap; }
                   </layout>
                  </item>
                  <item>
-                  <widget class="KShiftTableWidget" name="tableWidget_kShift"/>
+                  <widget class="QFrame" name="frame_tableWidget_kShift"/>
                  </item>
                 </layout>
                </widget>
