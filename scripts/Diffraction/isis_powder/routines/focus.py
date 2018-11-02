@@ -126,6 +126,7 @@ def _divide_one_spectrum_by_spline(spectrum, spline, instrument):
     if instrument.get_instrument_prefix() == "GEM":
         divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum,
                                 StoreInADS=False)
+        # crop based off max between 1000 and 2000 tof as the vanadium peak on Gem will always occur here
         return _crop_spline_to_percent_of_max(rebinned_spline, divided, spectrum, 1000, 2000)
 
     divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum)
