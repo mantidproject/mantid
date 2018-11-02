@@ -1,7 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_workspace import MuonWorkspace
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class MuonPairTest(unittest.TestCase):
@@ -52,7 +58,7 @@ class MuonPairTest(unittest.TestCase):
         pair = MuonPair(pair_name="pair1")
         self.assertIsNone(pair.workspace)
 
-        pair.workspace = MuonWorkspace([1, 2, 3])
+        pair.workspace = MuonWorkspaceWrapper([1, 2, 3])
         self.assertIsNotNone(pair.workspace)
 
     def test_that_AttributeError_thrown_if_setting_workspace_to_non_MuonWorkspace_object(self):

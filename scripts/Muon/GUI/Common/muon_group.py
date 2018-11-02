@@ -1,7 +1,13 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=C0111
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.muon_workspace import MuonWorkspace
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 import six
 
 
@@ -12,7 +18,7 @@ class MuonGroup(object):
     - The name is set at initialization and after that cannot be changed.
     - The detector list can be modified by passing a list of ints (type checks for this).
     - The number of detectors is stored.
-    - The workspace associated to the group can be set, but must be of type MuonWorkspace.
+    - The workspace associated to the group can be set, but must be of type MuonWorkspaceWrapper.
     """
 
     def __init__(self, group_name, detector_ids=[]):
@@ -28,11 +34,11 @@ class MuonGroup(object):
 
     @workspace.setter
     def workspace(self, new_workspace):
-        if isinstance(new_workspace, MuonWorkspace):
+        if isinstance(new_workspace, MuonWorkspaceWrapper):
             self._workspace = new_workspace
         else:
             raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) +
-                                 " but should be MuonWorkspace")
+                                 " but should be MuonWorkspaceWrapper")
 
     @property
     def name(self):
