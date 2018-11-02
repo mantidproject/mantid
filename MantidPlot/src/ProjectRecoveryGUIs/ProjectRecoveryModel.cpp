@@ -61,7 +61,10 @@ std::vector<std::string> ProjectRecoveryModel::getRow(int i) {
 }
 
 std::vector<std::string>
-ProjectRecoveryModel::getRow(const std::string &checkpointName) {
+ProjectRecoveryModel::getRow(std::string checkpointName) {
+  auto stringSpacePos = checkpointName.find("T");
+  if (stringSpacePos != std::string::npos)
+    checkpointName.replace(stringSpacePos, 1, " ");
   for (auto c : m_rows) {
     if (c[0] == checkpointName) {
       return c;
@@ -74,10 +77,18 @@ void ProjectRecoveryModel::startMantidNormally() {
   m_projRec->clearAllUnusedCheckpoints();
   m_projRec->startProjectSaving();
   m_failedRun = false;
+
+  //If project recovery is running on script window we need to abort
+  if (m_recoveryRunning){
+    m_presenter->emitAbortScript();
+  }
+
   // Close view
   m_presenter->closeView();
 }
 void ProjectRecoveryModel::recoverSelectedCheckpoint(std::string &selected) {
+  m_recoveryRunning = true;
+  m_presenter->changeStartMantidToCancelLabel();
   // Clear the ADS
   Mantid::API::AnalysisDataService::Instance().clear();
 
@@ -97,11 +108,12 @@ void ProjectRecoveryModel::recoverSelectedCheckpoint(std::string &selected) {
   if (m_failedRun) {
     updateCheckpointTried(selected);
   }
-
+  m_recoveryRunning = false;
   // Close View
   m_presenter->closeView();
 }
 void ProjectRecoveryModel::openSelectedInEditor(std::string &selected) {
+  m_recoveryRunning = true;
   // Clear the ADS
   Mantid::API::AnalysisDataService::Instance().clear();
 
@@ -124,7 +136,7 @@ void ProjectRecoveryModel::openSelectedInEditor(std::string &selected) {
   if (m_failedRun) {
     updateCheckpointTried(selected);
   }
-
+  m_recoveryRunning = false;
   m_failedRun = false;
   // Close View
   m_presenter->closeView();

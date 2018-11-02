@@ -21,6 +21,7 @@ ProjectRecoveryPresenter::ProjectRecoveryPresenter(
   m_failureView = nullptr;
   m_model = new ProjectRecoveryModel(projectRecovery, this);
   m_openView = RecoveryView;
+  m_startMantidNormallyCalled = false;
 }
 
 ProjectRecoveryPresenter::ProjectRecoveryPresenter(
@@ -32,6 +33,7 @@ ProjectRecoveryPresenter::ProjectRecoveryPresenter(
   *m_model = *obj.m_model;
   m_mainWindow = obj.m_mainWindow;
   m_openView = obj.m_openView;
+  m_startMantidNormallyCalled = obj.m_startMantidNormallyCalled;
 }
 
 ProjectRecoveryPresenter::~ProjectRecoveryPresenter() {
@@ -49,6 +51,12 @@ bool ProjectRecoveryPresenter::startRecoveryView() {
     return true;
   }
 
+  // If start mantid normally was called we want to cancel
+  if (m_startMantidNormallyCalled) {
+    return false;
+  }
+
+  // If run has failed and recovery is not running
   if (m_model->getFailedRun()) {
     return true;
   }
@@ -64,6 +72,12 @@ bool ProjectRecoveryPresenter::startRecoveryFailure() {
     return true;
   }
 
+  // If start mantid normally was called we want to cancel
+  if (m_startMantidNormallyCalled) {
+    return false;
+  }
+
+  // If run has failed and recovery is not running
   if (m_model->getFailedRun()) {
     return true;
   }
@@ -80,29 +94,37 @@ QStringList ProjectRecoveryPresenter::getRow(int i) {
   return returnVal;
 }
 
-void ProjectRecoveryPresenter::recoverLast(boost::shared_ptr<QDialog> view) {
+void ProjectRecoveryPresenter::recoverLast() {
+  if (m_model->hasRecoveryStarted())
+    return;
   auto checkpointToRecover = m_model->decideLastCheckpoint();
-  setUpProgressBar(checkpointToRecover, view);
+  setUpProgressBar(checkpointToRecover);
   m_model->recoverSelectedCheckpoint(checkpointToRecover);
 }
 
 void ProjectRecoveryPresenter::openLastInEditor() {
+  if (m_model->hasRecoveryStarted())
+    return;
   auto checkpointToRecover = m_model->decideLastCheckpoint();
   m_model->openSelectedInEditor(checkpointToRecover);
 }
 
 void ProjectRecoveryPresenter::startMantidNormally() {
+  m_startMantidNormallyCalled = true;
   m_model->startMantidNormally();
 }
 
-void ProjectRecoveryPresenter::recoverSelectedCheckpoint(
-    QString &selected, boost::shared_ptr<QDialog> view) {
+void ProjectRecoveryPresenter::recoverSelectedCheckpoint(QString &selected) {
+  if (m_model->hasRecoveryStarted())
+    return;
   auto checkpointToRecover = selected.toStdString();
-  setUpProgressBar(checkpointToRecover, view);
+  setUpProgressBar(checkpointToRecover);
   m_model->recoverSelectedCheckpoint(checkpointToRecover);
 }
 
 void ProjectRecoveryPresenter::openSelectedInEditor(QString &selected) {
+  if (m_model->hasRecoveryStarted())
+    return;
   auto checkpointToRecover = selected.toStdString();
   m_model->openSelectedInEditor(checkpointToRecover);
 }
@@ -125,20 +147,18 @@ operator=(const ProjectRecoveryPresenter &obj) {
     *m_model = *obj.m_model;
     m_mainWindow = obj.m_mainWindow;
     m_openView = obj.m_openView;
+    m_startMantidNormallyCalled = obj.m_startMantidNormallyCalled;
   }
   return *this;
 }
 
 void ProjectRecoveryPresenter::setUpProgressBar(
-    std::string checkpointToRecover, boost::shared_ptr<QDialog> view) {
+    std::string checkpointToRecover) {
   auto row = m_model->getRow(checkpointToRecover);
-  auto firstView = boost::dynamic_pointer_cast<ProjectRecoveryView>(view);
-  auto secondView = boost::dynamic_pointer_cast<RecoveryFailureView>(view);
-  if (firstView) {
-    firstView->setProgressBarMaximum(std::stoi(row[2]));
-  }
-  if (secondView) {
-    secondView->setProgressBarMaximum(std::stoi(row[2]));
+  if (m_openView == RecoveryView && m_recView) {
+    m_recView->setProgressBarMaximum(std::stoi(row[1]) + 1);
+  } else if (m_failureView) {
+    m_failureView->setProgressBarMaximum(std::stoi(row[1]) + 1);
   }
 }
 
@@ -147,5 +167,21 @@ void ProjectRecoveryPresenter::connectProgressBarToRecoveryView() {
     m_recView->connectProgressBar();
   } else {
     m_failureView->connectProgressBar();
+  }
+}
+
+void ProjectRecoveryPresenter::emitAbortScript() {
+  if (m_openView == RecoveryView) {
+    m_recView->emitAbortScript();
+  } else {
+    m_failureView->emitAbortScript();
+  }
+}
+
+void ProjectRecoveryPresenter::changeStartMantidToCancelLabel(){
+  if (m_openView == RecoveryView) {
+    m_recView->changeStartMantidButton("Cancel Recovery");
+  } else {
+    m_failureView->changeStartMantidButton("Cancel Recovery");
   }
 }

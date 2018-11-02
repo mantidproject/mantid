@@ -38,7 +38,7 @@ void ProjectRecoveryView::addDataToTable(Ui::ProjectRecoveryWidget *ui) {
 
 void ProjectRecoveryView::onClickLastCheckpoint() {
   // Recover last checkpoint
-  m_presenter->recoverLast(boost::make_shared<QDialog>(this));
+  m_presenter->recoverLast();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "ProjectRecoveryWindow->RecoverLastCheckpoint", false);
 }
@@ -79,4 +79,15 @@ void ProjectRecoveryView::connectProgressBar() {
                ->getCurrentScriptRunner(),
           SIGNAL(currentLineChanged(int, bool)), this,
           SLOT(updateProgressBar(int, bool)));
+}
+
+void ProjectRecoveryView::emitAbortScript() {
+  connect(this, SIGNAL(abortProjectRecoveryScript()),
+          m_presenter->m_mainWindow->getScriptWindowHandle(),
+          SLOT(abortCurrent()));
+  emit(abortProjectRecoveryScript());
+}
+
+void ProjectRecoveryView::changeStartMantidButton(const QString &string){
+  ui->startmantidButton->setText(string);
 }

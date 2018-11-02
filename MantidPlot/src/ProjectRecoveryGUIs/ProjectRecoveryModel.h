@@ -20,11 +20,12 @@ public:
   ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery,
                        ProjectRecoveryPresenter *presenter);
   std::vector<std::string> getRow(int i);
-  std::vector<std::string> getRow(const std::string &checkpointName);
+  std::vector<std::string> getRow(std::string checkpointName);
   void startMantidNormally();
   void recoverSelectedCheckpoint(std::string &selected);
   void openSelectedInEditor(std::string &selected);
   bool getFailedRun() const;
+  bool hasRecoveryStarted() const { return m_recoveryRunning;}
   std::string decideLastCheckpoint();
 
 private:
@@ -36,6 +37,7 @@ private:
   MantidQt::ProjectRecovery *m_projRec;
   ProjectRecoveryPresenter *m_presenter;
   bool m_failedRun;
+  bool m_recoveryRunning;
 };
 
 #endif // PROJECTRECOVERYMODEL_H

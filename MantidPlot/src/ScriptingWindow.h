@@ -77,6 +77,7 @@ public:
   // We set a flag on failure to avoid problems with Async not returning success
   bool getSynchronousErrorFlag() { return m_failureFlag; }
 
+  /// Get a reference to the runner of the current script on the current tab
   const Script &getCurrentScriptRunner();
 
 signals:

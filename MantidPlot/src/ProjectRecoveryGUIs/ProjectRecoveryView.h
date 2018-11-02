@@ -25,6 +25,11 @@ public:
   void reject() override;
   void setProgressBarMaximum(int newValue);
   void connectProgressBar();
+  void emitAbortScript();
+  void changeStartMantidButton(const QString &string);
+
+signals:
+  void abortProjectRecoveryScript();
 
 public slots:
   void updateProgressBar(int newValue, bool err);

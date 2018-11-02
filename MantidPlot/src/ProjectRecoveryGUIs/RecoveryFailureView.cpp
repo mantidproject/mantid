@@ -51,7 +51,7 @@ void RecoveryFailureView::addDataToTable(Ui::RecoveryFailure *ui) {
 
 void RecoveryFailureView::onClickLastCheckpoint() {
   // Recover last checkpoint
-  m_presenter->recoverLast(boost::make_shared<QDialog>(this));
+  m_presenter->recoverLast();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "ProjectRecoveryFailureWindow->RecoverLastCheckpoint", false);
 }
@@ -64,8 +64,7 @@ void RecoveryFailureView::onClickSelectedCheckpoint() {
     if (text.toStdString() == "") {
       return;
     }
-    m_presenter->recoverSelectedCheckpoint(text,
-                                           boost::make_shared<QDialog>(this));
+    m_presenter->recoverSelectedCheckpoint(text);
   }
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "ProjectRecoveryFailureWindow->RecoverSelectedCheckpoint",
@@ -116,4 +115,15 @@ void RecoveryFailureView::connectProgressBar() {
                ->getCurrentScriptRunner(),
           SIGNAL(currentLineChanged(int, bool)), this,
           SLOT(updateProgressBar(int, bool)));
+}
+
+void RecoveryFailureView::emitAbortScript() {
+  connect(this, SIGNAL(abortProjectRecoveryScript()),
+          m_presenter->m_mainWindow->getScriptWindowHandle(),
+          SLOT(abortCurrent()));
+  emit(abortProjectRecoveryScript());
+}
+
+void RecoveryFailureView::changeStartMantidButton(const QString &string){
+  ui->pushButton_3->setText(string);
 }

@@ -30,22 +30,23 @@ public:
   bool startRecoveryView();
   bool startRecoveryFailure();
   QStringList getRow(int i);
-  void recoverLast(boost::shared_ptr<QDialog> view);
+  void recoverLast();
   void openLastInEditor();
   void startMantidNormally();
-  void recoverSelectedCheckpoint(QString &selected,
-                                 boost::shared_ptr<QDialog> view);
+  void recoverSelectedCheckpoint(QString &selected);
   void openSelectedInEditor(QString &selected);
   void closeView();
   void connectProgressBarToRecoveryView();
   ProjectRecoveryPresenter &operator=(const ProjectRecoveryPresenter &obj);
+  void emitAbortScript();
+  void changeStartMantidToCancelLabel();
 
 private:
-  void setUpProgressBar(std::string checkpointToRecover,
-                        boost::shared_ptr<QDialog> view);
+  void setUpProgressBar(std::string checkpointToRecover);
   friend class ProjectRecoveryView;
   friend class RecoveryFailureView;
   OpenView m_openView;
+  bool m_startMantidNormallyCalled;
   ProjectRecoveryModel *m_model;
   ProjectRecoveryView *m_recView;
   RecoveryFailureView *m_failureView;
