@@ -8,6 +8,13 @@ from __future__ import (absolute_import, division, print_function)
 import os
 
 from qtpy.QtWidgets import (QDialog, QFileDialog)  # noqa
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 from HFIR_4Circle_Reduction.hfctables import PeaksIntegrationSpreadSheet
 
 
@@ -23,8 +30,8 @@ class PeaksIntegrationReportDialog(QDialog):
         super(PeaksIntegrationReportDialog, self).__init__(parent)
 
         # set up UI
-        ui_path = os.path.join(os.path.dirname(__file__), "PeakIntegrationSpreadSheet.ui")
-        self.ui = load_ui(ui_path, baseinstance=self)
+        ui_path = "PeakIntegrationSpreadSheet.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
         self._promote_widgets()
 
         # initialize widget

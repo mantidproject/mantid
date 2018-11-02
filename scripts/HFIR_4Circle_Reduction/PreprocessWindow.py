@@ -13,6 +13,13 @@ import guiutility as gui_util
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 import NTableWidget
 from qtpy.QtWidgets import (QFileDialog, QMainWindow)  # noqa
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 
 
 class ScanPreProcessWindow(QMainWindow):
@@ -42,8 +49,8 @@ class ScanPreProcessWindow(QMainWindow):
         self._outputDir = None
 
         # define UI
-        ui_path = os.path.join(os.path.dirname(__file__), "preprocess_window.ui")
-        self.ui = load_ui(ui_path, baseinstance=self)
+        ui_path = "preprocess_window.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
         self._promote_widgets()
 
         # initialize the widgets
@@ -475,7 +482,7 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
     """
     Extended table widget for scans to process
     """
-    TableSetup = [('Scan', 'int'),
+    Table_Setup = [('Scan', 'int'),
                   ('Status', 'str'),
                   ('File', 'str'),
                   ('Note', 'str')]

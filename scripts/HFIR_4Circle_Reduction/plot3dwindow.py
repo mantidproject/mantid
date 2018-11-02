@@ -10,6 +10,13 @@ from six.moves import range
 import sys
 import numpy as np
 from qtpy.QtWidgets import (QMainWindow)
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+
 
 from HFIR_4Circle_Reduction.mplgraphicsview3d import MplPlot3dCanvas
 from HFIR_4Circle_Reduction import guiutility
@@ -31,8 +38,8 @@ class Plot3DWindow(QMainWindow):
         # Init
         QMainWindow.__init__(self, parent)
 
-        ui_path = os.path.join(os.path.dirname(__file__), "View3DWidget.ui")
-        self.ui = load_ui(ui_path, baseinstance=self)
+        ui_path ="View3DWidget.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
         self._promote_widgets()
 
         # Initialize widgets
