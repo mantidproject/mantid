@@ -629,61 +629,6 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   }
 }
 
-void ProjectRecovery::removeOlderCheckpoints() {
-  // Currently set to a month in microseconds
-  const int64_t timeToDeleteAfter = 2592000000000;
-  std::string recoverFolder = getRecoveryFolderCheck();
-  // Get the PIDS
-  std::vector<Poco::Path> possiblePidsPaths =
-      getListOfFoldersInDirectory(recoverFolder);
-  // Order pids based on date last modified descending
-  std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
-  // check if pid exists
-  std::vector<std::string> folderPaths;
-  for (auto i = 0u; i < possiblePids.size(); ++i) {
-    if (!isPIDused(possiblePids[i])) {
-      std::string folder = recoverFolder;
-      folder.append(std::to_string(possiblePids[i]) + "/");
-      if (olderThanAGivenTime(Poco::Path(folder), timeToDeleteAfter)) {
-        folderPaths.emplace_back(folder);
-      }
-    }
-  }
-
-  bool recurse = true;
-  for (size_t i = 0; i < folderPaths.size(); i++) {
-    Poco::File(folderPaths[i]).remove(recurse);
-  }
-}
-
-void ProjectRecovery::removeLockedCheckpoints() {
-  std::string recoverFolder = getRecoveryFolderCheck();
-  // Get the PIDS
-  std::vector<Poco::Path> possiblePidsPaths =
-      getListOfFoldersInDirectory(recoverFolder);
-  // Order pids based on date last modified descending
-  std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
-  // check if pid exists
-  std::vector<Poco::Path> files;
-  for (auto i = 0u; i < possiblePids.size(); ++i) {
-    if (!isPIDused(possiblePids[i])) {
-      std::string folder = recoverFolder;
-      folder.append(std::to_string(possiblePids[i]) + "/");
-      auto checkpointsInsidePIDs = getListOfFoldersInDirectory(folder);
-      for (auto c : checkpointsInsidePIDs) {
-        if (Poco::File(c.setFileName(LOCK_FILE_NAME)).exists()) {
-          files.emplace_back(c.setFileName(""));
-        }
-      }
-    }
-  }
-
-  bool recurse = true;
-  for (auto c : files) {
-    Poco::File(c).remove(recurse);
-  }
-}
-
 bool ProjectRecovery::olderThanAGivenTime(const Poco::Path &path,
                                           int64_t elapsedTime) {
   return Poco::File(path).getLastModified().isElapsed(elapsedTime);

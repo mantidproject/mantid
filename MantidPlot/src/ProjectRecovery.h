@@ -88,9 +88,6 @@ public:
   /// Looks at the recovery checkpoints and repairs some faults
   void repairCheckpointDirectory();
 
-  /// Remove checkpoints if it has lock file
-  void removeLockedCheckpoints();
-
 private:
   /// Captures the current object in the background thread
   std::thread createBackgroundThread();
