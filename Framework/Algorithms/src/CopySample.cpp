@@ -167,8 +167,9 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
                                 bool orientationOnlyFlag) {
   if (nameFlag)
     to.setName(from.getName());
-  if (environmentFlag){
-    auto environment = std::make_unique<SampleEnvironment>(from.getEnvironment());
+  if (environmentFlag) {
+    auto environment =
+        std::make_unique<SampleEnvironment>(from.getEnvironment());
     to.setEnvironment(environment);
   }
   if (shapeFlag) {

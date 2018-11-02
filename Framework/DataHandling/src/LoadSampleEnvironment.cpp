@@ -96,8 +96,8 @@ void LoadSampleEnvironment::exec() {
   Sample &sample = outputWS->mutableSample();
   std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
   if (add) {
-    environment = std::make_unique<Geometry::SampleEnvironment>(
-        sample.getEnvironment());
+    environment =
+        std::make_unique<Geometry::SampleEnvironment>(sample.getEnvironment());
     environment->add(environmentMesh);
   } else {
     auto can = boost::make_shared<Container>(environmentMesh);
