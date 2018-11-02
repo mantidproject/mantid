@@ -38,7 +38,14 @@ import HFIR_4Circle_Reduction.PeaksIntegrationReport as PeaksIntegrationReport
 import HFIR_4Circle_Reduction.IntegrateSingePtSubWindow as IntegrateSingePtSubWindow
 import HFIR_4Circle_Reduction.generalplotview as generalplotview
 # import line for the UI python class
-from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
+from HFIR_4Circle_Reduction.hfctables import UBMatrixPeakTable
+from HFIR_4Circle_Reduction.hfctables import UBMatrixTable
+from HFIR_4Circle_Reduction.hfctables import ProcessTableWidget
+from HFIR_4Circle_Reduction.hfctables import ScanSurveyTable
+from HFIR_4Circle_Reduction.integratedpeakview import IntegratedPeakView
+from HFIR_4Circle_Reduction.detector2dview import Detector2DView
+from HFIR_4Circle_Reduction.hfctables import KShiftTableWidget
+from HFIR_4Circle_Reduction.hfctables import MatrixTable
 
 from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog)  # noqa
 from qtpy.QtCore import (QSettings)  # noqa
@@ -75,8 +82,9 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self,parent)
 
         # UI Window (from Qt Designer)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
+        ui_path = os.path.join(os.path.dirname(__file__), "MainWindow.ui")
+        self.ui = load_ui(ui_path, baseinstance=self)
+        self._promote_widgets()
 
         # children windows
         self._my3DWindow = None
@@ -280,6 +288,54 @@ class MainWindow(QMainWindow):
 
         return
 
+
+    def _promote_widgets(self):
+        tableWidget_surveyTable_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_surveyTable.setLayout(tableWidget_surveyTable_layout)
+        self.ui.tableWidget_surveyTable = ScanSurveyTable(self)
+        tableWidget_surveyTable_layout.addWidget(self.ui.tableWidget_surveyTable)
+
+        graphicsView_detector2dPlot_layout = QVBoxLayout()
+        self.ui.frame_graphicsView_detector2dPlot.setLayout(graphicsView_detector2dPlot_layout)
+        self.ui.graphicsView_detector2dPlot = Detector2DView(self)
+        graphicsView_detector2dPlot_layout.addWidget(self.ui.graphicsView_detector2dPlot)
+
+        tableWidget_peaksCalUB_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_peaksCalUB.setLayout(tableWidget_peaksCalUB_layout)
+        self.ui.tableWidget_peaksCalUB = UBMatrixPeakTable(self)
+        tableWidget_peaksCalUB_layout.addWidget(self.ui.tableWidget_peaksCalUB)
+
+        tableWidget_ubMatrix_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_ubMatrix.setLayout(tableWidget_ubMatrix_layout)
+        self.ui.tableWidget_ubMatrix = UBMatrixTable(self)
+        tableWidget_ubMatrix_layout.addWidget(self.ui.tableWidget_ubMatrix)
+
+        tableWidget_ubInUse_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_ubInUse.setLayout(tableWidget_ubInUse_layout)
+        self.ui.tableWidget_ubInUse = UBMatrixTable(self)
+        tableWidget_ubInUse_layout.addWidget(self.ui.tableWidget_ubInUse)
+
+        tableWidget_mergeScans_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_mergeScans.setLayout(tableWidget_mergeScans_layout)
+        self.ui.tableWidget_mergeScans = ProcessTableWidget(self)
+        tableWidget_mergeScans_layout.addWidget(self.ui.tableWidget_mergeScans)
+
+        graphicsView_integratedPeakView_layout = QVBoxLayout()
+        self.ui.frame_graphicsView_integratedPeakView.setLayout(graphicsView_integratedPeakView_layout)
+        self.ui.graphicsView_integratedPeakView = IntegratedPeakView(self)
+        graphicsView_integratedPeakView_layout.addWidget(self.ui.graphicsView_integratedPeakView)
+
+        tableWidget_covariance_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_covariance.setLayout(tableWidget_covariance_layout)
+        self.ui.tableWidget_covariance = MatrixTable(self)
+        tableWidget_covariance_layout.addWidget(self.ui.tableWidget_covariance)
+
+        tableWidget_kShift_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_kShift.setLayout(tableWidget_kShift_layout)
+        self.ui.tableWidget_kShift = KShiftTableWidget(self)
+        tableWidget_kShift_layout.addWidget(self.ui.tableWidget_kShift)
+
+        return
     @property
     def controller(self):
         """ Parameter controller

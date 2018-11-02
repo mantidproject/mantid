@@ -7,7 +7,7 @@
 #pylint: disable=C0103
 from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import (QMainWindow)
-from . import ui_OptimizeLattice
+
 from qtpy.QtCore import Signal as pyqtSignal
 
 
@@ -28,8 +28,9 @@ class OptimizeLatticeWindow(QMainWindow):
         # init
         QMainWindow.__init__(self, parent)
 
-        self.ui = ui_OptimizeLattice.Ui_MainWindow()
-        self.ui.setupUi(self)
+        ui_path = os.path.join(os.path.dirname(__file__), "OptimizeLattice.ui")
+        self.ui = load_ui(ui_path, baseinstance=self)
+
 
         # initialize widgets
         self.ui.comboBox_unitCellTypes.addItems(['Cubic',

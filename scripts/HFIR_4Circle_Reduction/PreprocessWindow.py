@@ -7,7 +7,7 @@
 import os
 import time
 import csv
-import ui_preprocess_window
+from HFIR_4Circle_Reduction.pre_process_table import ScanPreProcessStatusTable
 import reduce4circleControl
 import guiutility as gui_util
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
@@ -42,8 +42,9 @@ class ScanPreProcessWindow(QMainWindow):
         self._outputDir = None
 
         # define UI
-        self.ui = ui_preprocess_window.Ui_PreprocessWindow()
-        self.ui.setupUi(self)
+        ui_path = os.path.join(os.path.dirname(__file__), "preprocess_window.ui")
+        self.ui = load_ui(ui_path, baseinstance=self)
+        self._promote_widgets()
 
         # initialize the widgets
         self.enable_calibration_settings(False)
@@ -70,6 +71,14 @@ class ScanPreProcessWindow(QMainWindow):
 
         return
 
+
+    def _promote_widgets(self):
+        tableView_scanProcessState_layout = QVBoxLayout()
+        self.ui.frame_tableView_scanProcessState.setLayout(tableView_scanProcessState_layout)
+        self.ui.tableView_scanProcessState = ScanPreProcessStatusTable(self)
+        tableView_scanProcessState_layout.addWidget(self.ui.tableView_scanProcessState)
+
+        return
     @property
     def controller(self):
         """

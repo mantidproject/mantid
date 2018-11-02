@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from . import ui_SpiceViewerDialog
+
 from qtpy.QtWidgets import (QDialog)  # noqa
 
 
@@ -19,8 +19,9 @@ class ViewSpiceDialog(QDialog):
         super(ViewSpiceDialog, self).__init__()
 
         # define UI
-        self.ui = ui_SpiceViewerDialog.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = os.path.join(os.path.dirname(__file__), "SpiceViewerDialog.ui")
+        self.ui = load_ui(ui_path, baseinstance=self)
+
 
         # define event handlers
         self.ui.pushButton_close.clicked.connect(self.do_quit)

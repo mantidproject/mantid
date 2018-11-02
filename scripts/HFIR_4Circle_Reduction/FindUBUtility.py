@@ -10,8 +10,8 @@ Containing a set of classes used for finding (calculating and refining) UB matri
 from __future__ import (absolute_import, division, print_function)
 import os
 
-from . import ui_AddUBPeaksDialog
-from . import ui_UBSelectPeaksDialog
+
+
 from . import guiutility
 
 from qtpy.QtWidgets import (QDialog, QFileDialog)  # noqa
@@ -30,8 +30,9 @@ class AddScansForUBDialog(QDialog):
         self._myParent = parent
 
         # set up UI
-        self.ui = ui_AddUBPeaksDialog.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = os.path.join(os.path.dirname(__file__), "AddUBPeaksDialog.ui")
+        self.ui = load_ui(ui_path, baseinstance=self)
+
 
         # initialize widgets
         self.ui.checkBox_loadHKLfromFile.setChecked(True)
@@ -143,8 +144,9 @@ class SelectUBMatrixScansDialog(QDialog):
         self._myParent = parent
 
         # set ui
-        self.ui = ui_UBSelectPeaksDialog.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = os.path.join(os.path.dirname(__file__), "UBSelectPeaksDialog.ui")
+        self.ui = load_ui(ui_path, baseinstance=self)
+
 
         # define event handling methods
         self.ui.pushButton_selectScans.clicked.connect(self.do_select_scans)

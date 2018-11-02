@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import HFIR_4Circle_Reduction.ui_RefineUbFftDialog as ui_RefineUbFftDialog
+
 from qtpy.QtWidgets import (QDialog)  # noqa
 
 
@@ -21,8 +21,9 @@ class RefineUBFFTSetupDialog(QDialog):
         super(RefineUBFFTSetupDialog, self).__init__(parent)
 
         # create UI
-        self.ui = ui_RefineUbFftDialog.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = os.path.join(os.path.dirname(__file__), "RefineUbFftDialog.ui")
+        self.ui = load_ui(ui_path, baseinstance=self)
+
 
         # init widget value
         self.ui.lineEdit_minD.setText('1.0')

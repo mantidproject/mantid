@@ -10,7 +10,7 @@ from six.moves import range
 from qtpy.QtWidgets import (QDialog)  # noqa
 
 
-from . import ui_messagebox
+
 
 
 class MessageDialog(QDialog):
@@ -26,8 +26,9 @@ class MessageDialog(QDialog):
         super(MessageDialog, self).__init__(parent)
 
         # set up UI
-        self.ui = ui_messagebox.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = os.path.join(os.path.dirname(__file__), "messagebox.ui")
+        self.ui = load_ui(ui_path, baseinstance=self)
+
 
         # define operation
         self.ui.pushButton_close.clicked.connect(self.do_quit)
