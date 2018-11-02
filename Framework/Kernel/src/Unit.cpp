@@ -1244,7 +1244,7 @@ Unit *Degrees::clone() const { return new Degrees(*this); }
 
 DECLARE_UNIT(TemperatureKelvin)
 
-TemperatureKelvin::TemperatureKelvin() : Empty(), m_label("Kelvin") {}
+TemperatureKelvin::TemperatureKelvin() : Empty(), m_label("K") {}
 
 const UnitLabel TemperatureKelvin::label() const { return m_label; }
 

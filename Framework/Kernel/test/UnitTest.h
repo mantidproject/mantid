@@ -1429,7 +1429,7 @@ public:
   }
 
   void test_that_label_returns_the_correct_unit_for_TemperatureKelvin() {
-    TS_ASSERT_EQUALS(temperatureKelvin.label(), "Kelvin");
+    TS_ASSERT_EQUALS(temperatureKelvin.label(), "K");
   }
 
   void test_that_singleToTOF_throws_for_the_TemperatureKelvin_unit() {
