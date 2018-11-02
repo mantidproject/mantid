@@ -271,6 +271,9 @@ double MeshObject::solidAngle(const Kernel::V3D &observer) const {
   /*
     Same implementation as CSGObject. Assumes a convex closed mesh with
     solidAngleSum == -solidAngleNegativeSum
+
+    Average is used to bypass issues with winding order. Surface normal
+    affects magnitude of solid angle. See CSGObject.
   */
   return 0.5 * (solidAngleSum - solidAngleNegativeSum);
 }

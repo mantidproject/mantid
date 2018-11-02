@@ -206,10 +206,10 @@ public:
     using namespace Mantid::Kernel;
     auto mesh = makeSimpleTriangleMesh();
     auto solidAngle = mesh.solidAngle(
-        V3D{0, 2, 0}); // observer is in plane of triangle, outside the
+        V3D{0, 2, 0}); // observer is in plane of triangle, outside the triangle
     TS_ASSERT_EQUALS(solidAngle, 0); // seen side-on solid angle is 0
   }
-  void test_triangle_solid_angle() {
+  void test_square_solid_angle() {
 
     // Unit square inside unit cube. Any cube face will have solid angle 1/6th
     // of total 4pi steradians. Observer at origin.
@@ -229,7 +229,8 @@ public:
     double solidAngle = mesh.solidAngle(V3D{0, 0, 0});
     TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
 
-    // Solid angle is the same from other side of square.
+    // Only the positive solid angle is counted. Observe from the other side and
+    // solid angle is zero.
     solidAngle = mesh.solidAngle(V3D{0, 0, 2 * observerDistance});
     TS_ASSERT_DELTA(solidAngle, 0, 1e-3);
   }
@@ -250,14 +251,14 @@ public:
         V3D{halfSideLength, -halfSideLength, observerDistance}};
     std::vector<uint16_t> triangles{2, 1, 0, 0, 3, 2};
     // Scaling square uniformly (and reducing distance to origin by same
-    // factory), yields same angular area 4pi/6
+    // factor), yields same angular area 4pi/6
     V3D scaleFactor{0.5, 0.5, 0.5};
     MeshObject2D mesh(triangles, vertices, Mantid::Kernel::Material{});
     double solidAngle = mesh.solidAngle(V3D{0, 0, 0}, scaleFactor);
     TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
 
     // Scaling square uniformly (and increasing distance to origin by same
-    // factory), yields same angular area 4pi/6
+    // factor), yields same angular area 4pi/6
     scaleFactor = {2, 2, 2};
     solidAngle = mesh.solidAngle(V3D{0, 0, 0}, scaleFactor);
     TS_ASSERT_DELTA(solidAngle, expected, 1e-3);

@@ -281,28 +281,6 @@ void getBoundingBox(const std::vector<Kernel::V3D> &vertices,
   zmin = bb.zMin();
 }
 
-/**
- * Get a triangle - For iterating over triangles
- * @param index :: Index of triangle in MeshObject
- * @param triangles :: indices into vertices 3 consecutive form triangle
- * @param vertices :: Vertices to lookup
- * @param vertex1 :: First vertex of triangle
- * @param vertex2 :: Second vertex of triangle
- * @param vertex3 :: Third vertex of triangle
- * @returns true if the specified triangle exists
- */
-bool getTriangle(const size_t index, const std::vector<uint16_t> &triangles,
-                 const std::vector<Kernel::V3D> &vertices, Kernel::V3D &vertex1,
-                 Kernel::V3D &vertex2, Kernel::V3D &vertex3) {
-  bool triangleExists = index < triangles.size() / 3;
-  if (triangleExists) {
-    vertex1 = vertices[triangles[3 * index]];
-    vertex2 = vertices[triangles[3 * index + 1]];
-    vertex3 = vertices[triangles[3 * index + 2]];
-  }
-  return triangleExists;
-}
-
 } // namespace MeshObjectCommon
 } // namespace Geometry
 } // namespace Mantid
