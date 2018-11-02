@@ -174,8 +174,8 @@ class PowderSampleTest(stresstesting.MantidStressTest, PreppingMixin):
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
-                'BSS_74799_event.nxs',
-                'BASISPowderSample.nxs']
+                'BSS_74799_event.nxs', 'BSS_75527_event.nxs',
+                'BSS_64642_event.nxs', 'BASISPowderSample.nxs']
 
     def runTest(self):
         r"""

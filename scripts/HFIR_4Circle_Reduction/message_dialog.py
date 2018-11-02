@@ -7,12 +7,13 @@
 # Dialog for message
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QDialog)  # noqa
+
 
 from . import ui_messagebox
 
 
-class MessageDialog(QtGui.QDialog):
+class MessageDialog(QDialog):
     """
     extension of QDialog
     """
@@ -29,8 +30,7 @@ class MessageDialog(QtGui.QDialog):
         self.ui.setupUi(self)
 
         # define operation
-        self.connect(self.ui.pushButton_close, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
+        self.ui.pushButton_close.clicked.connect(self.do_quit)
 
         return
 
