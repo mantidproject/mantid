@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
@@ -364,7 +370,9 @@ void export_MatrixWorkspace() {
            "some subsequent algorithms may expect it to be "
            "monitor workspace later.")
       .def("clearMonitorWorkspace", &clearMonitorWorkspace, args("self"),
-           "Forget about monitor workspace, attached to the current workspace");
+           "Forget about monitor workspace, attached to the current workspace")
+      .def("isCommonBins", &MatrixWorkspace::isCommonBins,
+           "Returns true if the workspace has common X bins.");
 
   RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }

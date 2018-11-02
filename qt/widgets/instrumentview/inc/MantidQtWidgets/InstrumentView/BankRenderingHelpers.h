@@ -1,7 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BANKRENDERINGHELPERS_H
 #define BANKRENDERINGHELPERS_H
 #include "DllOption.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/GridTextureFace.h"
 #include <vector>
 
 namespace Mantid {
@@ -16,6 +23,22 @@ namespace BankRenderingHelpers {
 
 EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW std::pair<size_t, size_t>
 getCorrectedTextureSize(const size_t width, const size_t height);
+
+/** Render GridDetector Bank as 6 bitmaps for all layers or one bitmap for the
+selected layer Makes OpenGL calls for drawing the bank in an OpenGL window as
+textures. NB glBegin() and glEnd() are called within this function.
+*/
+EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
+renderGridBankLayer(const Mantid::Geometry::ComponentInfo &compInfo,
+                    size_t index, size_t layer);
+
+EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
+renderGridBankOutline(const Mantid::Geometry::ComponentInfo &compInfo,
+                      size_t index);
+
+EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
+renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
+                   size_t index, detail::GridTextureFace gridFace);
 
 /** Render RectangularDetector Bank as bitmap texture
 Makes OpenGL calls for drawing the bank in an OpenGL window. NB glBegin() and

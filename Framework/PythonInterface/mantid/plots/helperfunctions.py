@@ -1,24 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, division, print_function)
 
 import numpy
 import datetime
 from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
+from mantid.api import MultipleExperimentInfos
 import mantid.kernel, mantid.api
 
 
@@ -28,10 +22,11 @@ import mantid.kernel, mantid.api
 # ====================================================
 # Validation
 # ====================================================
-def validate_args(*args):
+def validate_args(*args, **kwargs):
     return len(args) > 0 and (isinstance(args[0], EventWorkspace) or
                               isinstance(args[0], Workspace2D) or
-                              isinstance(args[0], MDHistoWorkspace))
+                              isinstance(args[0], MDHistoWorkspace) or
+                              isinstance(args[0], MultipleExperimentInfos) and "LogName" in kwargs)
 
 
 # ====================================================
@@ -377,7 +372,7 @@ def get_data_uneven_flag(workspace, **kwargs):
 def get_sample_log(workspace, **kwargs):
     LogName = kwargs.pop('LogName')
     ExperimentInfo = kwargs.pop('ExperimentInfo',0)
-    if isinstance(workspace, MDHistoWorkspace):
+    if isinstance(workspace, MultipleExperimentInfos):
         run = workspace.getExperimentInfo(ExperimentInfo).run()
     else:
         run = workspace.run()
@@ -385,8 +380,10 @@ def get_sample_log(workspace, **kwargs):
         raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
     tsp = run[LogName]
     units = tsp.units
-    if not isinstance(tsp, mantid.kernel.FloatTimeSeriesProperty):
-        raise RuntimeError('This function can only plot FloatTimeSeriesProperty objects')
+    if not isinstance(tsp, (mantid.kernel.FloatTimeSeriesProperty,
+                            mantid.kernel.Int32TimeSeriesProperty,
+                            mantid.kernel.Int64TimeSeriesProperty)):
+        raise RuntimeError('This function can only plot Float or Int TimeSeriesProperties objects')
     times = tsp.times.astype('datetime64[us]')
     y = tsp.value
     FullTime = kwargs.pop('FullTime', False)
@@ -418,7 +415,7 @@ def get_axes_labels(workspace):
 
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
     """
-    if isinstance(workspace, MDHistoWorkspace):
+    if isinstance(workspace, MultipleExperimentInfos):
         axes = ['Intensity']
         dims = workspace.getNonIntegratedDimensions()
         for d in dims:
