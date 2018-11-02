@@ -629,8 +629,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
 
   // Hold a copy to the shared pointers so they do not get deleted under us
-  std::vector<boost::shared_ptr<Mantid::API::Workspace>> wsHandles =
-      ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
+  auto wsHandles = ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
 
   removeEmptyGroupsFromADS(wsHandles);
 
