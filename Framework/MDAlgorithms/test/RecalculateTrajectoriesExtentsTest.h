@@ -96,21 +96,30 @@ public:
         double theta = detector.getTwoTheta(Mantid::Kernel::V3D(0,0,0), Mantid::Kernel::V3D(0,0,1));
         double phi = detector.getPhi();
         double Qx =-sin(theta)*cos(phi);
-        //TS_ASSERT_DELTA((*lowValuesLog)()[i]*Qx,extents[1],1e-6)
-        //TS_ASSERT_DELTA((*highValuesLog)()[i],3,1e-6)
+        double lamMin=(*lowValuesLog)()[i];
+        double lamMax=((*highValuesLog)()[i]);
+        // correct answer if the trajectory is all outside the box
+        // otherwise both ends must be in or on the box
+        if (lamMin!=lamMax){
+            // float has 7 digits of precision
+            TS_ASSERT_LESS_THAN_EQUALS((Qx*lamMin-extents[0])*(Qx*lamMin-extents[1]),1e-7*(extents[1]-extents[0]))
+            TS_ASSERT_LESS_THAN_EQUALS((Qx*lamMax-extents[0])*(Qx*lamMax-extents[1]),1e-7*(extents[1]-extents[0]))
+        }
       }
+    AnalysisDataService::Instance().remove(name);
   }
-  void test_exec()
+
+  void test_exec_no_cut()
   {
     std::vector<double> extents{-10,10,-10,10,-10,10};
-    std::string name("RecalculateTrajectoriesExtents_Large_test");
+    std::string name("RecalculateTrajectoriesExtents_no_cut_test");
     do_test(name,extents);
   }
   
-  void test_Something()
+  void test_exec_cut()
   {
       std::vector<double> extents{-0.2,10,-10,10,-10,10};
-      std::string name("RecalculateTrajectoriesExtents_small_test");
+      std::string name("RecalculateTrajectoriesExtents_cut_test");
       do_test(name,extents);
   }
 

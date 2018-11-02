@@ -72,6 +72,24 @@ std::map<std::string, std::string> RecalculateTrajectoriesExtents::validateInput
       }
     }
   }
+  //Check for property MDNorm_low and MDNorm_high
+  size_t nExperimentInfos = inputWS->getNumExperimentInfo();
+  if (nExperimentInfos == 0) {
+    errorMessage.emplace("InputWorkspace",
+                         "There must be at least one experiment info");
+  } else {
+    for (size_t iExpInfo=0; iExpInfo<nExperimentInfos; iExpInfo++){
+      auto &currentExptInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
+      if (!currentExptInfo.run().hasProperty("MDNorm_low")){
+        errorMessage.emplace("InputWorkspace",
+                             "Missing MDNorm_low log. Please use CropWorkspaceForMDNorm before converting to MD");
+      }
+      if (!currentExptInfo.run().hasProperty("MDNorm_high")){
+        errorMessage.emplace("InputWorkspace",
+                             "Missing MDNorm_high log. Please use CropWorkspaceForMDNorm before converting to MD");
+      }
+    }
+  }
   return errorMessage;
 }
 
@@ -135,9 +153,6 @@ void RecalculateTrajectoriesExtents::exec() {
 
   // Loop over experiment infos
   size_t nExperimentInfos = outWS->getNumExperimentInfo();
-  if (nExperimentInfos == 0) {
-    throw std::runtime_error("There is no experiment info");
-  }
   if (nExperimentInfos >1) {
     g_log.warning("More than one experiment info. On merged workspaces, the "
                   "limits recalculations might be wrong");
@@ -150,22 +165,14 @@ void RecalculateTrajectoriesExtents::exec() {
     const int64_t nspectra = static_cast<int64_t>(spectrumInfo.size());
     std::vector<double> lowValues, highValues;
 
-    if (currentExptInfo.run().hasProperty("MDNorm_low")){
-      auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(
-          currentExptInfo.getLog("MDNorm_low"));
-          lowValues = (*lowValuesLog)();
-    } else {
-      double minValue=currentExptInfo.run().getBinBoundaries().front();
-      lowValues = std::vector<double>(nspectra, minValue);
-    }
-    if (currentExptInfo.run().hasProperty("MDNorm_high")){
-      auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(
-          currentExptInfo.getLog("MDNorm_high"));
-          highValues = (*highValuesLog)();
-    } else {
-      double maxValue=currentExptInfo.run().getBinBoundaries().back();
-      highValues = std::vector<double>(nspectra, maxValue);
-    }
+
+    auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(
+      currentExptInfo.getLog("MDNorm_low"));
+      lowValues = (*lowValuesLog)();
+
+    auto *highValuesLog = dynamic_cast<VectorDoubleProperty *>(
+      currentExptInfo.getLog("MDNorm_high"));
+      highValues = (*highValuesLog)();
 
     // deal with other dimensions first
     bool zeroWeights(false);
