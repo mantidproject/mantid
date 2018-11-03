@@ -27,6 +27,7 @@ The master equation for transforming from lab coordinate system to HKL units is 
                                         k \\
                                         l
                                  \end{array}\right)
+
 We define the sample frame as
 
 .. math::
