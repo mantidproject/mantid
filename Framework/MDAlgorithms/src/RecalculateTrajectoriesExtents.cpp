@@ -221,7 +221,7 @@ void RecalculateTrajectoriesExtents::exec() {
         double phi = detector.getPhi();
         V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)),
             qin(0., 0., 1.), qLabLow, qLabHigh, qSampleLow, qSampleHigh;
-        double kfmin, kfmax, ki;
+        double kfmin, kfmax;
         if (convention == "Crystallography") {
           qout *= -1;
           qin *= -1;
@@ -233,7 +233,6 @@ void RecalculateTrajectoriesExtents::exec() {
           qLabLow = (qin - qout) * kfmin;
           qLabHigh = (qin - qout) * kfmax;
         } else {
-          ki = std::sqrt(energyToK * Ei);
           if (dEmin > lowValues[i]) {
             lowValues[i] = dEmin;
           }
@@ -247,6 +246,7 @@ void RecalculateTrajectoriesExtents::exec() {
             highValues[i] = Ei;
           }
 
+          double ki = std::sqrt(energyToK * Ei);
           kfmin = std::sqrt(energyToK * (Ei - lowValues[i]));
           kfmax = std::sqrt(energyToK * (Ei - highValues[i]));
           qLabLow = qin * ki - qout * kfmin;
