@@ -27,12 +27,12 @@ class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionView
   Q_OBJECT
 public:
   IndirectSpectrumSelectionView(QWidget *parent = nullptr);
-  ~IndirectSpectrumSelectionView() override;
+  virtual ~IndirectSpectrumSelectionView() override;
 
   SpectrumSelectionMode selectionMode() const;
 
-  std::size_t minimumSpectrum() const;
-  std::size_t maximumSpectrum() const;
+  virtual std::size_t minimumSpectrum() const;
+  virtual std::size_t maximumSpectrum() const;
 
   std::string spectraString() const;
   std::string maskString() const;

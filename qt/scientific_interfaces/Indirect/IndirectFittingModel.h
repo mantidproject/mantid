@@ -10,6 +10,7 @@
 #include "IndirectFitData.h"
 #include "IndirectFitOutput.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IAlgorithm.h"
 
@@ -41,7 +42,7 @@ private:
     IndirectFittingModel - Provides methods for specifying and
     performing a QENS fit, as well as accessing the results of the fit.
 */
-class DLLExport IndirectFittingModel {
+class MANTIDQT_INDIRECT_DLL IndirectFittingModel {
 public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
