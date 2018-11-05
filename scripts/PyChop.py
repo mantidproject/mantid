@@ -11,17 +11,12 @@ Module to import and run the PyChop GUI for use either on the commandline or as 
 """
 
 import sys
-from PyQt4 import QtGui
 from PyChop import PyChopGui
+from gui_helper import set_matplotlib_backend, get_qapplication
+set_matplotlib_backend()  # must be called before anything tries to use matplotlib
 
-if __name__ == '__main__':
-    if QtGui.QApplication.instance():
-        app = QtGui.QApplication.instance()
-    else:
-        app = QtGui.QApplication(sys.argv)
-    window = PyChopGui.PyChopGui()
-    window.show()
-    try: # check if started from within mantidplot
-        import mantidplot # noqa
-    except ImportError:
-        sys.exit(app.exec_())
+app, within_mantid = get_qapplication()
+window = PyChopGui.PyChopGui()
+window.show()
+if not within_mantid:
+    sys.exit(app.exec_())

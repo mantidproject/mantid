@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import inspect
 import os
@@ -126,6 +126,7 @@ class ConfigServiceTest(unittest.TestCase):
                            'workspace.sendto.SansView.arguments', 'workspace.sendto.SansView.saveusing', # related to SASview in menu
                            'workspace.sendto.SansView.target', 'workspace.sendto.SansView.visible', # related to SASview in menu
                            'workspace.sendto.name.SansView', # related to SASview in menu
+                           'catalog.oncat.token.accessToken', 'catalog.oncat.token.expiresIn', 'catalog.oncat.token.refreshToken', 'catalog.oncat.token.scope', 'catalog.oncat.token.tokenType', # Shouldn't be changed by users.
 
                            ########## TODO should be documented!
                            'filefinder.casesensitive',

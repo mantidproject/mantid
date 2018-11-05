@@ -94,6 +94,10 @@ private:
   /// Add a single constraint to the created function
   void addConstraint(boost::shared_ptr<IFunction> fun,
                      const Expression &expr) const;
+  /// Add a single constraint to the created function with non-default penalty
+  void addConstraint(boost::shared_ptr<IFunction> fun,
+                     const Expression &constraint_expr,
+                     const Expression &penalty_expr) const;
   /// Add ties to the created function
   void addTies(boost::shared_ptr<IFunction> fun, const Expression &expr) const;
   /// Add a tie to the created function

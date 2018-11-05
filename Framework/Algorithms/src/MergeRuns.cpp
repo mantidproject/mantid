@@ -16,6 +16,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -124,16 +125,19 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
   MatrixWorkspace_sptr newOutWS = DataObjects::create<MatrixWorkspace>(
       *outWS, numOutputSpectra, outWS->histogram(0).binEdges());
 
-  newOutWS->mutableDetectorInfo().merge(addeeWS->detectorInfo());
+  newOutWS->mutableComponentInfo().merge(addeeWS->componentInfo());
 
-  if (newOutWS->detectorInfo().scanSize() == outWS->detectorInfo().scanSize()) {
+  if (newOutWS->detectorInfo().size() * newOutWS->detectorInfo().scanCount() ==
+      outWS->detectorInfo().size() * outWS->detectorInfo().scanCount()) {
     // In this case the detector info objects were identical. We just add the
     // workspaces as we normally would for MergeRuns.
     g_log.information()
         << "Workspaces had identical detector scan information and were "
            "merged.";
     return outWS + addeeWS;
-  } else if (newOutWS->detectorInfo().scanSize() != numOutputSpectra) {
+  } else if (newOutWS->detectorInfo().size() *
+                 newOutWS->detectorInfo().scanCount() !=
+             numOutputSpectra) {
     throw std::runtime_error("Unexpected DetectorInfo size. Merging workspaces "
                              "with some, but not all overlapping scan "
                              "intervals is not currently supported.");
@@ -146,9 +150,8 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
   auto outSpecDefs = *(outWS->indexInfo().spectrumDefinitions());
   const auto &addeeSpecDefs = *(addeeWS->indexInfo().spectrumDefinitions());
 
-  const auto newAddeeSpecDefs =
-      buildScanIntervals(addeeSpecDefs, addeeWS->detectorInfo(),
-                         outWS->detectorInfo(), newOutWS->detectorInfo());
+  const auto newAddeeSpecDefs = buildScanIntervals(
+      addeeSpecDefs, addeeWS->detectorInfo(), newOutWS->detectorInfo());
 
   outSpecDefs.insert(outSpecDefs.end(), newAddeeSpecDefs.begin(),
                      newAddeeSpecDefs.end());
@@ -714,27 +717,23 @@ void MergeRuns::fillHistory() {
  *the scan times for the addee workspace and output workspace are the same this
  *builds the same indexing as the workspace had before. Otherwise, the correct
  *time indexes are set here.
+ *
+ *This function translates time indices from the addee to the new workspace.
  */
 std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
     const std::vector<SpectrumDefinition> &addeeSpecDefs,
-    const DetectorInfo &addeeDetInfo, const DetectorInfo &outDetInfo,
-    const DetectorInfo &newOutDetInfo) {
+    const DetectorInfo &addeeDetInfo, const DetectorInfo &newOutDetInfo) {
   std::vector<SpectrumDefinition> newAddeeSpecDefs(addeeSpecDefs.size());
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
     for (auto &index : addeeSpecDefs[i]) {
       SpectrumDefinition newSpecDef;
-      const auto &addeeScanInterval = addeeDetInfo.scanInterval(index);
-      if (addeeScanInterval == outDetInfo.scanInterval(index)) {
-        newSpecDef.add(index.first, index.second);
-      } else {
-        // Find the correct time index for this entry
-        for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
-          if (addeeScanInterval ==
-              newOutDetInfo.scanInterval({index.first, i})) {
-            newSpecDef.add(index.first, i);
-          }
+      for (size_t time_index = 0; time_index < newOutDetInfo.scanCount();
+           time_index++) {
+        if (addeeDetInfo.scanIntervals()[index.second] ==
+            newOutDetInfo.scanIntervals()[time_index]) {
+          newSpecDef.add(index.first, time_index);
         }
       }
       newAddeeSpecDefs[i] = newSpecDef;

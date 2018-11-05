@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
@@ -8,14 +9,19 @@ from six import iteritems
 
 from mantid import plots
 from collections import OrderedDict
+from copy import copy
 
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 
 from matplotlib.figure import Figure
 from matplotlib import gridspec
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+
 # pyplot should not be imported:
 # https://stackoverflow.com/posts/comments/26295260
+
+from Muon.GUI.ElementalAnalysis.Plotting.navigation_toolbar import myToolbar
+from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot
 
 from Muon.GUI.ElementalAnalysis.Plotting import plotting_utils as putils
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
@@ -23,12 +29,14 @@ from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import Ax
 
 
 class PlotView(QtWidgets.QWidget):
+    subplotRemovedSignal = QtCore.Signal(object)
+    plotCloseSignal = QtCore.Signal()
+
     def __init__(self):
         super(PlotView, self).__init__()
         self.plots = OrderedDict({})
         self.errors_list = set()
-        self.workspaces = {}
-        self.workspace_plots = {}  # stores the plotted 'graphs' for deletion
+        self.plot_storage = {}  # stores lines and info to create lines
         self.current_grid = None
         self.gridspecs = {
             1: gridspec.GridSpec(1, 1),
@@ -62,9 +70,20 @@ class PlotView(QtWidgets.QWidget):
         button_layout.addWidget(self.errors)
 
         grid = QtWidgets.QGridLayout()
-        grid.addWidget(self.canvas, 0, 0)
-        grid.addLayout(button_layout, 1, 0)
+
+        self.toolbar = myToolbar(self.canvas, self)
+        self.toolbar.update()
+
+        grid.addWidget(self.toolbar, 0, 0)
+        grid.addWidget(self.canvas, 1, 0)
+        grid.addLayout(button_layout, 2, 0)
         self.setLayout(grid)
+
+    def setAddConnection(self, slot):
+        self.toolbar.setAddConnection(slot)
+
+    def setRmConnection(self, slot):
+        self.toolbar.setRmConnection(slot)
 
     def _redo_layout(func):
         """
@@ -172,14 +191,12 @@ class PlotView(QtWidgets.QWidget):
         Removes the previous plot and redraws with/without errors depending on the state.
         """
         self._modify_errors_list(name, state)
-        workspaces = self.workspaces[name]
-        self.workspaces[name] = []
+        # get a copy of all the workspaces
+        workspaces = copy(self.plot_storage[name].ws)
         # get the limits before replotting, so they appear unchanged.
         x, y = plot.get_xlim(), plot.get_ylim()
-        for old_plot in self.workspace_plots[name]:
-            old_plot.remove()
-            del old_plot
-        self.workspace_plots[name] = []
+        # clear out the old container
+        self.plot_storage[name].delete()
         for workspace in workspaces:
             self.plot(name, workspace)
         plot.set_xlim(x)
@@ -228,46 +245,41 @@ class PlotView(QtWidgets.QWidget):
         self.plot_selector.addItem("All")
         self.plot_selector.addItems(list(self.plots.keys()))
 
-    def _add_workspace_name(self, name, workspace):
-        """ Adds a workspace to a plot's list of workspaces. """
-        try:
-            if workspace not in self.workspaces[name]:
-                self.workspaces[name].append(workspace)
-        except KeyError:
-            self.workspaces[name] = [workspace]
-
     @_redo_layout
     def plot(self, name, workspace):
         """ Plots a workspace to a subplot (with errors, if necessary). """
-        self._add_workspace_name(name, workspace)
         if name in self.errors_list:
             self.plot_workspace_errors(name, workspace)
         else:
             self.plot_workspace(name, workspace)
         self._set_bounds(name)
 
-    def _add_plotted_line(self, name, lines):
+    def _add_plotted_line(self, name, label, lines, workspace):
         """ Appends plotted lines to the related subplot list. """
-        try:
-            self.workspace_plots[name].extend(lines)
-        except KeyError:
-            self.workspace_plots[name] = lines
+        self.plot_storage[name].addLine(label, lines, workspace)
 
     def plot_workspace_errors(self, name, workspace):
         """ Plots a workspace with errors, and appends caps/bars to the subplot list. """
         subplot = self.get_subplot(name)
         line, cap_lines, bar_lines = plots.plotfunctions.errorbar(
             subplot, workspace, specNum=1)
+        # make a tmp plot to get auto generated legend name
+        tmp, = plots.plotfunctions.plot(subplot, workspace, specNum=1)
+        label = tmp.get_label()
+        # remove the tmp line
+        tmp.remove()
+        del tmp
+        # collect results
         all_lines = [line]
         all_lines.extend(cap_lines)
         all_lines.extend(bar_lines)
-        self._add_plotted_line(name, all_lines)
+        self._add_plotted_line(name, label, all_lines, workspace)
 
     def plot_workspace(self, name, workspace):
         """ Plots a workspace normally. """
         subplot = self.get_subplot(name)
         line, = plots.plotfunctions.plot(subplot, workspace, specNum=1)
-        self._add_plotted_line(name, [line])
+        self._add_plotted_line(name, line.get_label(), [line], workspace)
 
     def get_subplot(self, name):
         """ Returns the subplot corresponding to a given name """
@@ -280,14 +292,19 @@ class PlotView(QtWidgets.QWidget):
     def add_subplot(self, name):
         """ will raise KeyError if: plots exceed 4 """
         self._update_gridspec(len(self.plots) + 1, last=name)
+        self.plot_storage[name] = subPlot(name)
         return self.get_subplot(name)
 
     def remove_subplot(self, name):
         """ will raise KeyError if: 'name' isn't a plot; there are no plots """
         self.figure.delaxes(self.get_subplot(name))
         del self.plots[name]
-        del self.workspaces[name]
+        del self.plot_storage[name]
         self._update_gridspec(len(self.plots))
+        self.subplotRemovedSignal.emit(name)
+
+    def removeLine(self, subplot, label):
+        self.plot_storage[subplot].removeLine(label)
 
     @_redo_layout
     def add_moveable_vline(self, plot_name, x_value, y_minx, y_max, **kwargs):
@@ -296,3 +313,16 @@ class PlotView(QtWidgets.QWidget):
     @_redo_layout
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         pass
+
+    def closeEvent(self, event):
+        self.plotCloseSignal.emit()
+
+    def plotCloseConnection(self, slot):
+        self.plotCloseSignal.connect(slot)
+
+    @property
+    def subplot_names(self):
+        return self.plot_storage.keys()
+
+    def line_labels(self, subplot):
+        return self.plot_storage[subplot].lines.keys()

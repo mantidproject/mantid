@@ -34,12 +34,12 @@ private slots:
   void plotPreview(int wsIndex);
   /// Handle abs. correction algorithm completion
   void containerSubtractionComplete();
-  /// Handles saving workspace
-  void saveClicked();
-  /// Handles mantid plotting
-  void plotClicked();
   /// Handles plotting the preview.
   void plotCurrentPreview();
+
+  void saveClicked();
+  void plotClicked();
+  void runClicked();
 
 private:
   void setup() override;
@@ -89,6 +89,13 @@ private:
   addSampleLogAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace,
                         const std::string &name, const std::string &type,
                         const std::string &value) const;
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
 
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;

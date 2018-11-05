@@ -49,22 +49,8 @@ void JumpFit::setupFitTab() {
   setSampleWSSuffices({"_Result"});
   setSampleFBSuffices({"_Result.nxs"});
 
-  auto &functionFactory = FunctionFactory::Instance();
-  auto chudleyElliot = functionFactory.createFunction("ChudleyElliot");
-  auto hallRoss = functionFactory.createFunction("HallRoss");
-  auto fickDiffusion = functionFactory.createFunction("FickDiffusion");
-  auto teixeiraWater = functionFactory.createFunction("TeixeiraWater");
-  auto eisfDiffCylinder = functionFactory.createFunction("EISFDiffCylinder");
-  auto eisfDiffSphere = functionFactory.createFunction("EISFDiffSphere");
-  auto eisfDiffSphereAklyl =
-      functionFactory.createFunction("EISFDiffSphereAlkyl");
-  addComboBoxFunctionGroup("ChudleyElliot", {chudleyElliot});
-  addComboBoxFunctionGroup("HallRoss", {hallRoss});
-  addComboBoxFunctionGroup("FickDiffusion", {fickDiffusion});
-  addComboBoxFunctionGroup("TeixeiraWater", {teixeiraWater});
-  addComboBoxFunctionGroup("EISFDiffCylinder", {eisfDiffCylinder});
-  addComboBoxFunctionGroup("EISFDiffSphere", {eisfDiffSphere});
-  addComboBoxFunctionGroup("EISFDiffSphereAlkyl", {eisfDiffSphereAklyl});
+  addWidthFunctionsToFitTypeComboBox();
+  addEISFFunctionsToFitTypeComboBox();
 
   m_uiForm->cbParameter->setEnabled(false);
 
@@ -74,6 +60,43 @@ void JumpFit::setupFitTab() {
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(this, SIGNAL(functionChanged()), this,
           SLOT(updateModelFitTypeString()));
+  connect(m_uiForm->cbParameterType, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updateParameterFitTypes()));
+  connect(this, SIGNAL(updateFitTypes()), this,
+          SLOT(updateParameterFitTypes()));
+}
+
+void JumpFit::addEISFFunctionsToFitTypeComboBox() {
+  auto &functionFactory = FunctionFactory::Instance();
+  auto const eisfDiffCylinder =
+      functionFactory.createFunction("EISFDiffCylinder");
+  auto const eisfDiffSphere = functionFactory.createFunction("EISFDiffSphere");
+  auto const eisfDiffSphereAklyl =
+      functionFactory.createFunction("EISFDiffSphereAlkyl");
+  addComboBoxFunctionGroup("EISFDiffCylinder", {eisfDiffCylinder});
+  addComboBoxFunctionGroup("EISFDiffSphere", {eisfDiffSphere});
+  addComboBoxFunctionGroup("EISFDiffSphereAlkyl", {eisfDiffSphereAklyl});
+}
+
+void JumpFit::addWidthFunctionsToFitTypeComboBox() {
+  auto &functionFactory = FunctionFactory::Instance();
+  auto const chudleyElliot = functionFactory.createFunction("ChudleyElliot");
+  auto const hallRoss = functionFactory.createFunction("HallRoss");
+  auto const fickDiffusion = functionFactory.createFunction("FickDiffusion");
+  auto const teixeiraWater = functionFactory.createFunction("TeixeiraWater");
+  addComboBoxFunctionGroup("ChudleyElliot", {chudleyElliot});
+  addComboBoxFunctionGroup("HallRoss", {hallRoss});
+  addComboBoxFunctionGroup("FickDiffusion", {fickDiffusion});
+  addComboBoxFunctionGroup("TeixeiraWater", {teixeiraWater});
+}
+
+void JumpFit::updateParameterFitTypes() {
+  auto const parameter = m_uiForm->cbParameterType->currentText().toStdString();
+  clearFitTypeComboBox();
+  if (parameter == "EISF")
+    addEISFFunctionsToFitTypeComboBox();
+  else if (parameter == "Width")
+    addWidthFunctionsToFitTypeComboBox();
 }
 
 void JumpFit::updateModelFitTypeString() {
@@ -114,17 +137,21 @@ void JumpFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
 
+void JumpFit::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
+}
+
 void JumpFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
-  setFitSingleSpectrumEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void JumpFit::setPlotResultIsPlotting(bool plotting) {
   m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setPlotResultEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 void JumpFit::runClicked() { runTab(); }

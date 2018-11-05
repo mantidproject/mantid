@@ -36,9 +36,14 @@ class PluginWidget(QWidget):
     def get_plugin_title(self):
         raise NotImplementedError()
 
-    def read_user_settings(self, qsettings):
+    def readSettings(self, qsettings):
         """Called by the main window to ask the plugin to
         load user configuration"""
+        raise NotImplementedError()
+
+    def writeSettings(self, qsettings):
+        """Called by the main window to ask the plugin to
+        save user configuration"""
         raise NotImplementedError()
 
     def register_plugin(self, menu=None):

@@ -117,6 +117,8 @@ void IndirectFitAnalysisTab::setup() {
 
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateResultOptions()));
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
+          SLOT(emitUpdateFitTypes()));
 
   connectDataAndSpectrumPresenters();
   connectDataAndPlotPresenters();
@@ -222,6 +224,8 @@ void IndirectFitAnalysisTab::connectDataAndSpectrumPresenters() {
 void IndirectFitAnalysisTab::connectDataAndFitBrowserPresenters() {
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateBrowserFittingRange()));
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
+          SLOT(setBrowserWorkspace()));
   connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
           SLOT(setDataTableStartX(double)));
   connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
@@ -369,6 +373,14 @@ void IndirectFitAnalysisTab::updateBrowserFittingRange() {
   setBrowserEndX(range.second);
 }
 
+void IndirectFitAnalysisTab::setBrowserWorkspace() {
+  if (m_fittingModel->numberOfWorkspaces() != 0) {
+    auto const name =
+        m_fittingModel->getWorkspace(getSelectedDataIndex())->getName();
+    m_fitPropertyBrowser->setWorkspaceName(QString::fromStdString(name));
+  }
+}
+
 void IndirectFitAnalysisTab::setBrowserWorkspace(std::size_t dataIndex) {
   const auto name = m_fittingModel->getWorkspace(dataIndex)->getName();
   m_fitPropertyBrowser->setWorkspaceName(QString::fromStdString(name));
@@ -499,6 +511,14 @@ void IndirectFitAnalysisTab::addSpinnerFunctionGroup(
 void IndirectFitAnalysisTab::addComboBoxFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions) {
   m_fitPropertyBrowser->addComboBoxFunctionGroup(groupName, functions);
+}
+
+/**
+ * Removes all options from the Fit Type combo-box apart from the 'None' option
+ *
+ */
+void IndirectFitAnalysisTab::clearFitTypeComboBox() {
+  m_fitPropertyBrowser->clearFitTypeComboBox();
 }
 
 /**
@@ -963,6 +983,8 @@ void IndirectFitAnalysisTab::updateResultOptions() {
   setPlotResultEnabled(isFit);
   setSaveResultEnabled(isFit);
 }
+
+void IndirectFitAnalysisTab::emitUpdateFitTypes() { emit updateFitTypes(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

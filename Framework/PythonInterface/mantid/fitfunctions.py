@@ -23,7 +23,7 @@ class FunctionWrapper(object):
                 return wrapper(fun, *args, **kwargs)
         return FunctionWrapper(fun, **kwargs)
 
-    def __init__ (self, name, **kwargs):
+    def __init__(self, name, **kwargs):
         """
         Called when creating an instance
 

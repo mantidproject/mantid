@@ -20,6 +20,9 @@ namespace Converters {
  */
 DLLExport std::string pyObjToStr(const boost::python::object &value);
 
+/// Return true if the supplied object can be converted to a string.
+DLLExport bool pyObjIsStr(const boost::python::object &value);
+
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
