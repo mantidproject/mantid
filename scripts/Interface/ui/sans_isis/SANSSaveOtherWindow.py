@@ -9,6 +9,12 @@ from PyQt4 import QtGui, QtCore
 from sans.common.enums import SaveType
 from mantidqtpython import MantidQt
 
+try:
+    from mantidplot import *
+    canMantidPlot = True
+except ImportError:
+    canMantidPlot = False
+
 
 class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog):
     def __init__(self):
@@ -21,6 +27,7 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
         self.filename_lineEdit.textChanged.connect(self.on_file_name_changed)
         self.browse_pushButton.pressed.connect(self.on_browse_clicked)
         self.save_button.pressed.connect(self.on_save_clicked)
+        self.help_button.clicked.connect(self._on_help_button_clicked)
         self.cancel_button.pressed.connect(self.on_cancel_clicked)
         self.directory_lineEdit.textChanged.connect(self.on_directory_changed)
         self.NxCanSAS_checkBox.setChecked(True)
@@ -93,6 +100,9 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
 
     def enable_filename(self):
         self.filename_lineEdit.setEnabled(True)
+
+    def _on_help_button_clicked(self):
+        pymantidplot.proxies.showCustomInterfaceHelp('sans_save_other')
 
     @property
     def current_directory(self):

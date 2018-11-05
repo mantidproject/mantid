@@ -9,6 +9,7 @@ ISIS SANS Interface
 -------------------
 New
 ###
+* Added manual saving functionality to the new GUI.
 
 Improved
 ########
