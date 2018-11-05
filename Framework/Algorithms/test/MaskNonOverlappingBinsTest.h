@@ -16,6 +16,8 @@
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
+#include <array>
+
 using namespace Mantid;
 
 class MaskNonOverlappingBinsTest : public CxxTest::TestSuite {
