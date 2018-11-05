@@ -70,8 +70,7 @@ void MaskBinsIf::init() {
 std::map<std::string, std::string> MaskBinsIf::validateInputs() {
   std::map<std::string, std::string> issues;
   double y = 0., e = 0., x = 0., dx = 0., s = 0.;
-  mu::Parser parser =
-      makeParser(y, e, x, dx, s, getPropertyValue("Criterion"));
+  mu::Parser parser = makeParser(y, e, x, dx, s, getPropertyValue("Criterion"));
   try {
     parser.Eval();
   } catch (mu::Parser::exception_type &e) {
