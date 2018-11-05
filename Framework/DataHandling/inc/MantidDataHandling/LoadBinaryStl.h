@@ -21,10 +21,9 @@ public:
   static constexpr uint32_t VECTOR_DATA_SIZE = 12;
   LoadBinaryStl(std::string filename) : LoadStl(filename) {}
   std::unique_ptr<Geometry::MeshObject> readStl() override;
-  bool isBinarySTL(std::string filename);
+  static bool isBinarySTL(std::string filename);
 
 private:
-  uint32_t getNumberTriangles(Kernel::BinaryStreamReader);
   void readTriangle(Kernel::BinaryStreamReader, uint32_t &vertexCount);
 };
 

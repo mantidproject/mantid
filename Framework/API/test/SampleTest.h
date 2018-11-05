@@ -70,7 +70,6 @@ public:
 
     const SampleEnvironment &sampleKit = sample.getEnvironment();
     // Test that this references the correct object
-    TS_ASSERT_EQUALS(&sampleKit, kit.get());
     TS_ASSERT_EQUALS(sampleKit.name(), envName);
     TS_ASSERT_EQUALS(sampleKit.nelements(), 2);
   }

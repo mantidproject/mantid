@@ -16,6 +16,17 @@
 namespace Mantid {
 namespace DataHandling {
 
+namespace{
+uint32_t getNumberTriangles(Kernel::BinaryStreamReader streamReader, const int header) {
+  uint32_t numberTrianglesLong;
+  // skip header
+  streamReader.moveStreamToPosition(header);
+  // Read the number of triangles
+  streamReader >> numberTrianglesLong;
+  return numberTrianglesLong;
+}
+}
+
 bool LoadBinaryStl::isBinarySTL(std::string filename) {
   Poco::File stlFile = Poco::File(filename);
   if (!stlFile.exists()) {
@@ -31,7 +42,7 @@ bool LoadBinaryStl::isBinarySTL(std::string filename) {
   uint32_t numberTrianglesLong;
   std::ifstream myFile(filename.c_str(), std::ios::in | std::ios::binary);
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
-  numberTrianglesLong = getNumberTriangles(streamReader);
+  numberTrianglesLong = getNumberTriangles(streamReader, HEADER_SIZE);
   myFile.close();
   if (!(fileSize == (HEADER_SIZE + TRIANGLE_COUNT_DATA_SIZE +
                      (numberTrianglesLong * TRIANGLE_DATA_SIZE)))) {
@@ -43,21 +54,12 @@ bool LoadBinaryStl::isBinarySTL(std::string filename) {
   return true;
 }
 
-uint32_t
-LoadBinaryStl::getNumberTriangles(Kernel::BinaryStreamReader streamReader) {
-  uint32_t numberTrianglesLong;
-  // skip header
-  streamReader.moveStreamToPosition(HEADER_SIZE);
-  // Read the number of triangles
-  streamReader >> numberTrianglesLong;
-  return numberTrianglesLong;
-}
 
 std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
   std::ifstream myFile(m_filename.c_str(), std::ios::in | std::ios::binary);
 
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
-  const auto numberTrianglesLong = getNumberTriangles(streamReader);
+  const auto numberTrianglesLong = getNumberTriangles(streamReader, HEADER_SIZE);
   uint32_t nextToRead =
       HEADER_SIZE + TRIANGLE_COUNT_DATA_SIZE + VECTOR_DATA_SIZE;
   // now read in all the triangles
