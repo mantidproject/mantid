@@ -17,7 +17,7 @@ New
 - Added algorithm :ref:`algm-ReflectometrySliceEventWorkspace` which slices an input event workspace into multiple slices, producing a histogram workspace suitable for use with :ref:`algm-ReflectometryReductionOneAuto`.
 - :ref:`algm-SaveReflectometryAscii` is a general algorithm which saves the first spectrum of a workspace in Ascii format particularly suited for reflectometry data.
 - Some computations from :ref:`algm-ReflectometryMomentumTransfer` were extracted to a new algorithm, :ref:`algm-ReflectometryBeamStatistics`.
-- :ref:`algm-GroupToXResolution`
+- :ref:`algm-GroupToXResolution` can be used to group the reflectivity data (as point data) to the :math`Q_z` resolution.
 
 Improved
 ########
@@ -27,6 +27,7 @@ Improved
 - The four Ascii save algorithms :ref:`algm-SaveANSTOAscii`, :ref:`algm-SaveILLCosmosAscii`, :ref:`algm-SaveReflCustomAscii` and :ref:`algm-SaveReflThreeColumnAscii` now correctly save x-error and can treat correctly point data and histograms. They are, however, deprecated in favour of :ref:`algm_SaveReflectometryAscii`. Please see :ref:`algm-SaveReflectometryAscii` for more documentation.
 - :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
 - Common naming of slit component name and size properties across algorithms.
+- :ref:`algm-SpecularReflectionPositionCorrect` is now compatible with the reflectometers at ILL.
 
 Bug fixes
 #########
@@ -63,5 +64,28 @@ Improved
 Bug fixes
 #########
 
+
+
+Algorithms
+----------
+
+
+New
+###
+
+- Some computations from :ref:`algm-ReflectometryMomentumTransfer` were extracted to a new algorithm, :ref:`algm-ReflectometryBeamStatistics`.
+
+Improved
+########
+
+- :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
+- Common naming of slit component name and size properties across algorithms.
+
+Bug fixes
+#########
+
+- A bug has been fixed on the Settings tab where the IncludePartialBins check box had been hidden by a misplaced text entry box.
+- :ref:`algm-ReflectometryReductionOneAuto` No longer sums all of a transmission run's workspaces and instead will use the first run only
+- In :ref:`algm-ReflectometryReductionOneAuto` an issue where if you gave only one of either MomentumTransferMax or MomentumTransferMin were specified it would be ignored, this has been fixed.
 
 :ref:`Release 3.14.0 <v3.14.0>`
