@@ -103,6 +103,10 @@ void LoadInstrument::exec() {
   m_instName = getPropertyValue("InstrumentName");
 
   // Decide whether to use Nexus or IDF loading
+  // Note: for now, if only the instrument name is provided, the IDF loader will
+  // be used by default. This should be updated in the future, so that the
+  // Nexus loader can also take in an instrument name. Possibly by adding
+  // a "FileType" property to the LoadInstrument algorithm.
   if (LoadGeometry::isIDF(m_filename, m_instName))
     IDFInstrumentLoader();
   else if (LoadGeometry::isNexus(m_filename))
@@ -112,12 +116,10 @@ void LoadInstrument::exec() {
                                        m_filename);
 
   // Set the monitors output property
-  // auto instr = m_workspace->getInstrument();
   setProperty("MonitorList", (m_workspace->getInstrument())->getMonitors());
 
   // Rebuild the spectra map for this workspace so that it matches the
-  // instrument
-  // if required
+  // instrument, if required
   const OptionalBool RewriteSpectraMap = getProperty("RewriteSpectraMap");
   if (RewriteSpectraMap == OptionalBool::True)
     m_workspace->rebuildSpectraMapping();
@@ -156,7 +158,7 @@ void LoadInstrument::IDFInstrumentLoader() {
   }
   // otherwise we need either Filename or InstrumentName to be set
   else {
-    checkAndRetrieveInstrumentFilename();
+    checkAndRetrieveInstrumentFilename(FileType::Idf);
     // Remove the path from the filename for use with the InstrumentDataService
     const std::string::size_type stripPath = m_filename.find_last_of("\\/");
     std::string instrumentFile =
@@ -210,7 +212,7 @@ void LoadInstrument::IDFInstrumentLoader() {
 }
 
 void LoadInstrument::NexusInstrumentLoader() {
-  checkAndRetrieveInstrumentFilename();
+  checkAndRetrieveInstrumentFilename(FileType::Nexus);
   Instrument_const_sptr instrument =
       NexusGeometry::NexusGeometryParser::createInstrument(m_filename);
   m_workspace->setInstrument(instrument);
@@ -218,7 +220,8 @@ void LoadInstrument::NexusInstrumentLoader() {
 }
 
 /// Get the file name from the instrument name if it is not defined
-void LoadInstrument::checkAndRetrieveInstrumentFilename() {
+void LoadInstrument::checkAndRetrieveInstrumentFilename(
+    const FileType &filetype) {
   // Retrieve the filename from the properties
   if (m_filename.empty()) {
     // look to see if an Instrument name provided in which case create
@@ -232,7 +235,7 @@ void LoadInstrument::checkAndRetrieveInstrumentFilename() {
           m_filename);
     } else {
       m_filename = ExperimentInfo::getInstrumentFilename(
-          m_instName, m_workspace->getWorkspaceStartDate());
+          m_instName, m_workspace->getWorkspaceStartDate(), filetype);
     }
   }
   if (m_filename.empty()) {

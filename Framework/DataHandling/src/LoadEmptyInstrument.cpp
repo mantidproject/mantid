@@ -17,8 +17,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
-// #include "MantidKernel/FileDescriptor.h"
-// #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
@@ -32,26 +30,6 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 using namespace HistogramData;
-
-// namespace {
-// bool isIDF(const std::string &filename, const std::string &instrumentname) {
-//   if (!filename.empty()) {
-//     FileDescriptor descriptor(filename);
-//     return ((descriptor.isAscii() && descriptor.extension() == ".xml"));
-//   }
-//   return !instrumentname.empty();
-// }
-//
-// bool isNexus(const std::string &filename) {
-//   if (!filename.empty() && !FileDescriptor(filename).isAscii(filename)) {
-//     NexusDescriptor descriptor(filename);
-//     return descriptor.isHDF(filename) &&
-//            (descriptor.classTypeExists("NXcylindrical_geometry") ||
-//             descriptor.classTypeExists("NXoff_geometry"));
-//   }
-//   return false;
-// }
-// } // namespace
 
 /**
  * Return the confidence with with this algorithm can load the file

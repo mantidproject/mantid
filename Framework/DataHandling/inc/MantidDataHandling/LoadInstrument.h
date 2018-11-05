@@ -36,6 +36,7 @@ class Instrument;
 } // namespace Geometry
 
 namespace DataHandling {
+
 /** @class LoadInstrument LoadInstrument.h DataHandling/LoadInstrument.h
 
 Loads instrument data from a XML instrument description file and adds it
@@ -83,7 +84,7 @@ public:
   /// Load instrument from Nexus file
   void NexusInstrumentLoader();
   /// Retrieve file name if undefined
-  void checkAndRetrieveInstrumentFilename();
+  void checkAndRetrieveInstrumentFilename(const API::FileType &filetype);
 
 private:
   void init() override;

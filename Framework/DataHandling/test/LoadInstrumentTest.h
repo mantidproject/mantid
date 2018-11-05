@@ -294,12 +294,12 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  void testExecLOKI() {
+  /// Test the Nexus geometry loader from file
+  void testExecNexusLOKI() {
     LoadInstrument loaderLOKI;
-
     TS_ASSERT_THROWS_NOTHING(loaderLOKI.initialize());
 
-    // // create a workspace with some sample data
+    // create a workspace with some sample data
     wsName = "LoadInstrumentTestLOKI";
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
@@ -338,6 +338,9 @@ public:
 
     TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0])
     TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1])
+
+    // Remove workspace from ADS
+    AnalysisDataService::Instance().remove(wsName);
   }
 
   void testExecHRP2() {
