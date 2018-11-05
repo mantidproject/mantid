@@ -89,7 +89,7 @@ protected:
   std::string m_processingInstructionsWorkspaceIndex;
   std::string m_processingInstructions;
 
-private:
+protected:
   std::string
   convertToSpectrumNumber(const std::string &workspaceIndex,
                           Mantid::API::MatrixWorkspace_const_sptr ws) const;

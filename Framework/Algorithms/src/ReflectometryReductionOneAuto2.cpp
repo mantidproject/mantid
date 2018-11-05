@@ -892,12 +892,19 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   alg->setProperty("FirstTransmissionRun", "");
   alg->setProperty("SecondTransmissionRun", "");
   alg->setProperty("CorrectionAlgorithm", "None");
+
   auto outputIvsLamNames = workspaceNamesInGroup(outputIvsLam);
   for (size_t i = 0; i < outputIvsLamNames.size(); ++i) {
     const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
     const std::string IvsQBinnedName =
         outputIvsQBinned + "_" + std::to_string(i + 1);
     const std::string IvsLamName = outputIvsLamNames[i];
+
+    // Find the spectrum processing instructions for ws index 0
+    auto currentWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(outputIvsLamNames[i]));
+    auto newProcInst = convertToSpectrumNumber("0", currentWorkspace);
+    alg->setProperty("ProcessingInstructions", newProcInst);
     alg->setProperty("InputWorkspace", IvsLamName);
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
