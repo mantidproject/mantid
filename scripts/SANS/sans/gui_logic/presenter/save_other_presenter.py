@@ -61,6 +61,8 @@ class SaveOtherPresenter():
     def get_filenames(self, selected_workspaces, filename):
         if filename and len(selected_workspaces) == 1:
             return [os.path.join(self.current_directory, filename)]
+        elif filename:
+            return [os.path.join(self.current_directory, x + '_' + filename) for x in selected_workspaces]
         else:
             return [os.path.join(self.current_directory, x) for x in selected_workspaces]
 
