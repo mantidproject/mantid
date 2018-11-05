@@ -12,7 +12,6 @@ try:
 except ImportError:
     Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
     from mantidplot import load_ui
-from qtpy.QtWidgets import (QVBoxLayout)
 
 
 class ViewSpiceDialog(QDialog):
@@ -27,7 +26,6 @@ class ViewSpiceDialog(QDialog):
         # define UI
         ui_path = "SpiceViewerDialog.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
-
 
         # define event handlers
         self.ui.pushButton_close.clicked.connect(self.do_quit)

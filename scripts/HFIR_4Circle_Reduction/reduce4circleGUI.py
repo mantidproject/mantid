@@ -46,26 +46,24 @@ from HFIR_4Circle_Reduction.integratedpeakview import IntegratedPeakView
 from HFIR_4Circle_Reduction.detector2dview import Detector2DView
 from HFIR_4Circle_Reduction.hfctables import KShiftTableWidget
 from HFIR_4Circle_Reduction.hfctables import MatrixTable
-
+from mantid.kernel import Logger
 from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog)  # noqa
 from qtpy.QtCore import (QSettings)  # noqa
 from qtpy import QtCore  # noqa
-if six.PY3:
-    unicode = str
-
-try:
-    from mantidqtpython import MantidQt
-except ImportError as e:
-    NO_SCROLL = True
-else:
-    NO_SCROLL = False
-from mantid.kernel import Logger
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
     from mantidplot import load_ui
 from qtpy.QtWidgets import (QVBoxLayout)
+try:
+    from mantidqtpython import MantidQt
+except ImportError as e:
+    NO_SCROLL = True
+else:
+    NO_SCROLL = False
+if six.PY3:
+    unicode = str
 
 # define constants
 IndexFromSpice = 'From Spice (pre-defined)'
@@ -295,7 +293,6 @@ class MainWindow(QMainWindow):
 
         return
 
-
     def _promote_widgets(self):
         tableWidget_surveyTable_layout = QVBoxLayout()
         self.ui.frame_tableWidget_surveyTable.setLayout(tableWidget_surveyTable_layout)
@@ -343,6 +340,7 @@ class MainWindow(QMainWindow):
         tableWidget_kShift_layout.addWidget(self.ui.tableWidget_kShift)
 
         return
+
     @property
     def controller(self):
         """ Parameter controller

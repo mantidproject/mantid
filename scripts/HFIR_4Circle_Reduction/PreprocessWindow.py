@@ -7,7 +7,6 @@
 import os
 import time
 import csv
-from HFIR_4Circle_Reduction.pre_process_table import ScanPreProcessStatusTable
 import reduce4circleControl
 import guiutility as gui_util
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
@@ -77,7 +76,6 @@ class ScanPreProcessWindow(QMainWindow):
         self.ui.actionExit.triggered.connect(self.do_quit)
 
         return
-
 
     def _promote_widgets(self):
         tableView_scanProcessState_layout = QVBoxLayout()
@@ -483,9 +481,9 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
     Extended table widget for scans to process
     """
     Table_Setup = [('Scan', 'int'),
-                  ('Status', 'str'),
-                  ('File', 'str'),
-                  ('Note', 'str')]
+                   ('Status', 'str'),
+                   ('File', 'str'),
+                   ('Note', 'str')]
 
     def __init__(self, parent):
         """

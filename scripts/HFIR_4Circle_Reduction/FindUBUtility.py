@@ -35,7 +35,6 @@ class AddScansForUBDialog(QDialog):
         ui_path =  "AddUBPeaksDialog.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
-
         # initialize widgets
         self.ui.checkBox_loadHKLfromFile.setChecked(True)
 
@@ -148,7 +147,6 @@ class SelectUBMatrixScansDialog(QDialog):
         # set ui
         ui_path = "UBSelectPeaksDialog.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
-
 
         # define event handling methods
         self.ui.pushButton_selectScans.clicked.connect(self.do_select_scans)

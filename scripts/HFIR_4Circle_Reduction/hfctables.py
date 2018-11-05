@@ -111,7 +111,7 @@ class MatrixTable(tableBase.NTableWidget):
         # check inputs
         assert isinstance(num_rows, int) and num_rows > 0, 'Number of rows larger than 0.'
         assert isinstance(num_cols, int) and num_cols > 0, 'Number of columns larger than 0.'
-        
+
         self.init_size(4, 4)
 
         # think of reset

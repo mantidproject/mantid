@@ -30,7 +30,6 @@ class RefineUBFFTSetupDialog(QDialog):
         ui_path = "RefineUbFftDialog.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
-
         # init widget value
         self.ui.lineEdit_minD.setText('1.0')
         self.ui.lineEdit_maxD.setText('40.0')

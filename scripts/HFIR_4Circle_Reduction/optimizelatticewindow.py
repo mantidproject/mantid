@@ -14,7 +14,6 @@ try:
 except ImportError:
     Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
     from mantidplot import load_ui
-from qtpy.QtWidgets import (QVBoxLayout)
 
 
 class OptimizeLatticeWindow(QMainWindow):
@@ -36,7 +35,6 @@ class OptimizeLatticeWindow(QMainWindow):
 
         ui_path = "OptimizeLattice.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
-
 
         # initialize widgets
         self.ui.comboBox_unitCellTypes.addItems(['Cubic',

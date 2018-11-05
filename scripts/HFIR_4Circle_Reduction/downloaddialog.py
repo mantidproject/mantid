@@ -18,7 +18,6 @@ try:
 except ImportError:
     Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
     from mantidplot import load_ui
-from qtpy.QtWidgets import (QVBoxLayout)
 
 
 class DataDownloadDialog(QDialog):
@@ -35,7 +34,6 @@ class DataDownloadDialog(QDialog):
         # set up UI
         ui_path = "httpserversetup.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
-
 
         # initialize widgets
         self._init_widgets()
