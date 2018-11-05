@@ -243,6 +243,24 @@ Poco::File addLockFile(const Poco::Path &lockFilePath) {
   return lockFile;
 }
 
+/**
+ * Checks the passed parameter and if it is an empty group then it returns true.
+ *
+ * @param ws :: check this workspace to see if it's an empty group
+ * @return true :: bool when it is an empty group
+ * @return false :: bool when it is not an empty group
+ */
+bool checkIfEmptyGroup(const Mantid::API::Workspace_sptr &ws) {
+  if (auto groupWS =
+          boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+    if (groupWS->isEmpty()) {
+      g_log.debug("Empty group was present when recovery ran so was removed");
+      return true;
+    }
+  }
+  return false;
+}
+
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
 
 const std::string SAVING_TIME_KEY = "projectRecovery.secondsBetween";
@@ -631,8 +649,6 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   // Hold a copy to the shared pointers so they do not get deleted under us
   auto wsHandles = ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
 
-  removeEmptyGroupsFromADS(wsHandles);
-
   if (wsHandles.empty()) {
     return;
   }
@@ -647,6 +663,11 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   alg->setLogging(false);
 
   for (auto i = 0u; i < wsHandles.size(); ++i) {
+    // Check if workspace is an empty worksapce group and remove it if it is as
+    // well as skip
+    if (checkIfEmptyGroup(wsHandles[i]))
+      continue;
+
     std::string filename = std::to_string(i) + ".py";
 
     Poco::Path destFilename = historyDestFolder;
@@ -661,21 +682,6 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->setProperty("IgnoreTheseAlgs", m_algsToIgnore);
 
     alg->execute();
-  }
-}
-
-void ProjectRecovery::removeEmptyGroupsFromADS(
-    std::vector<boost::shared_ptr<Mantid::API::Workspace>> &wsHandles) {
-  for (auto i = 0u; i < wsHandles.size(); ++i) {
-    auto groupWS =
-        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wsHandles[i]);
-    if (groupWS && groupWS->isEmpty()) {
-      // Remove from ADS and from wsHandles
-      g_log.warning("Empty group was present when recovery ran so was removed");
-      Mantid::API::AnalysisDataService::Instance().remove(
-          wsHandles[i]->getName());
-      wsHandles.erase(wsHandles.begin() + i);
-    }
   }
 }
 
