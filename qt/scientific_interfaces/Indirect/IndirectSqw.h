@@ -35,20 +35,30 @@ private slots:
   void sqwAlgDone(bool error);
 
   void runClicked();
-  void plotClicked();
+  void plotSpectrumClicked();
+  void plotContourClicked();
   void saveClicked();
 
-  void setRunEnabled(bool enabled);
-  void setPlotEnabled(bool enabled);
-  void setSaveEnabled(bool enabled);
-  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
   void updateRunButton(bool enabled = true,
                        std::string const &enableOutputButtons = "unchanged",
                        QString const message = "Run",
                        QString const tooltip = "");
-  void setPlotIsPlotting(bool plotting);
 
 private:
+  Mantid::API::MatrixWorkspace_const_sptr
+  getADSWorkspace(std::string const &name) const;
+  std::size_t getOutWsNumberOfSpectra() const;
+
+  void setPlotSpectrumIndexMax(int maximum);
+
+  void setRunEnabled(bool enabled);
+  void setPlotSpectrumEnabled(bool enabled);
+  void setPlotContourEnabled(bool enabled);
+  void setSaveEnabled(bool enabled);
+  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
+  void setPlotSpectrumIsPlotting(bool plotting);
+  void setPlotContourIsPlotting(bool plotting);
+
   Ui::IndirectSqw m_uiForm;
 };
 } // namespace CustomInterfaces

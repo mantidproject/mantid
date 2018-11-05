@@ -1,0 +1,29 @@
+digraph Absorber {
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    NormaliseBy
+  }
+
+  subgraph params {
+    $param_style
+    Run
+  }
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadAndMerge
+    Divide
+  }
+
+  Run -> LoadAndMerge
+  LoadAndMerge -> NormaliseBy
+  NormaliseBy -> Divide
+  Divide -> OutputWorkspace
+}

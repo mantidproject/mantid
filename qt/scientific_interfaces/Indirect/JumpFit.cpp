@@ -137,17 +137,21 @@ void JumpFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
 
+void JumpFit::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
+}
+
 void JumpFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
-  setFitSingleSpectrumEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void JumpFit::setPlotResultIsPlotting(bool plotting) {
   m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setPlotResultEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 void JumpFit::runClicked() { runTab(); }
