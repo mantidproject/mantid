@@ -286,7 +286,7 @@ void Quasi::updateMiniPlot() {
       curveColour = Qt::magenta;
 
     else if (specName.contains("diff.1"))
-      curveColour = Qt::green;
+      curveColour = Qt::blue;
     else if (specName.contains("diff.2"))
       curveColour = Qt::cyan;
 
