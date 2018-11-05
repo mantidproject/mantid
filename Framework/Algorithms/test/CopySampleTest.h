@@ -50,7 +50,7 @@ public:
     auto kit = std::make_unique<SampleEnvironment>(
         envName,
         boost::make_shared<Container>(ShapeFactory().createShape(canShape)));
-    sample.setEnvironment(kit);
+    sample.setEnvironment(std::move(kit));
     OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
     sample.setOrientedLattice(latt);
     delete latt;

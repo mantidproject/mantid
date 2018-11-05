@@ -116,7 +116,7 @@ inline Mantid::API::Sample createSamplePlusContainer() {
   // Sample object
   Sample testSample;
   testSample.setShape(sampleCell);
-  testSample.setEnvironment(environment);
+  testSample.setEnvironment(std::move(environment));
   return testSample;
 }
 
