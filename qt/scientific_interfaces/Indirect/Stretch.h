@@ -66,7 +66,6 @@ private:
   std::string m_fitWorkspaceName;
   std::string m_contourWorkspaceName;
   // state of plot and save when algorithm is run
-  std::string m_plotType;
   bool m_save;
 };
 } // namespace CustomInterfaces

@@ -112,9 +112,6 @@ void Stretch::run() {
   auto const resName =
       m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
-  // Obtain save and plot state
-  m_plotType = m_uiForm.cbPlot->currentText().toStdString();
-
   // Collect input from options section
   auto const background = m_uiForm.cbBackground->currentText().toStdString();
 
@@ -154,8 +151,6 @@ void Stretch::run() {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
-
-  m_plotType = m_uiForm.cbPlot->currentText().toStdString();
 
   // Set the name of the result workspace for Python export
   QString contourName =
@@ -251,17 +246,11 @@ void Stretch::plotWorkspaces() {
   if (sigma.right(5).compare("Sigma") == 0 &&
       beta.right(4).compare("Beta") == 0) {
 
-    QString pyInput = "from mantidplot import plot2D\n";
-    pyInput += "importMatrixWorkspace('";
-
-    if (m_plotType.compare("All") == 0 || m_plotType.compare("Beta") == 0)
-      pyInput += beta;
-    if (m_plotType.compare("All") == 0 || m_plotType.compare("Sigma") == 0)
-      pyInput += sigma;
-
-    pyInput += "').plotGraph2D()\n";
-    m_pythonRunner.runPythonCode(pyInput);
-
+    std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
+    if (plotType == "All" || plotType == "Beta")
+      plotSpectrum(beta);
+    if (plotType == "All" || plotType == "Sigma")
+      plotSpectrum(sigma);
   } else {
     g_log.error(
         "Beta and Sigma workspace were not found and could not be plotted.");
