@@ -37,7 +37,7 @@ If else
 -  The simplest control structure runs one of two different blocks of
    code depending on the value of a test,
 
-.. code:: python
+.. testcode:: python
 
    if x == 5:
        print('x has the value 5')
@@ -48,7 +48,7 @@ If else
 
 -  To test for ranges combine test with the ``and`` keyword
 
-.. code:: python
+.. testcode:: python
 
    if x > 0 and x < 5:
        print('x is between 0 and 5 (not inclusive)')
@@ -58,7 +58,7 @@ If else
 -  Here we show an example of incorrect indentation and the subsequent
    error,
 
-.. code:: python
+.. testcode:: python
 
    if x == 5:
        print('In x = 5 routine')
@@ -75,7 +75,7 @@ If ... elif ... else
    enhanced version of ``if ... else`` using the keyword ``elif`` to add
    additional blocks, e.g.
 
-.. code:: python
+.. testcode:: python
 
    if x == 1:
        print('Running scenario 1')
@@ -89,7 +89,7 @@ If ... elif ... else
 -  Tests can also be combined with the **not** to negate the test or
    with the **or** keyword to test one of two values.
 
-.. code:: python
+.. testcode:: python
 
    if x == 1 or x == 2:
        print('Running scenario first range')
