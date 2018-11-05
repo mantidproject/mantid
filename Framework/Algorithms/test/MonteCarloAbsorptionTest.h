@@ -65,7 +65,8 @@ void addSample(Mantid::API::MatrixWorkspace_sptr ws,
     canShape->setMaterial(Material(
         "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
     auto can = boost::make_shared<Container>(canShape);
-    ws->mutableSample().setEnvironment(std::make_unique<SampleEnvironment>("can", can));
+    ws->mutableSample().setEnvironment(
+        std::make_unique<SampleEnvironment>("can", can));
   } else if (environment == Environment::UserBeamSize) {
     auto inst = ws->getInstrument();
     auto &pmap = ws->instrumentParameters();
