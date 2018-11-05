@@ -48,7 +48,7 @@ class TableModelTest(unittest.TestCase):
     def test_that_can_set_the_options_column_model(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
-                                            "WavelengthMin=1, WavelengthMax=3, NotRegister2=1")
+                                            options_column_string="WavelengthMin=1, WavelengthMax=3, NotRegister2=1")
         options_column_model = table_index_model.options_column_model
         options = options_column_model.get_options()
         self.assertTrue(len(options) == 2)
@@ -56,9 +56,9 @@ class TableModelTest(unittest.TestCase):
         self.assertTrue(options["WavelengthMax"] == 3.)
 
     def test_that_raises_for_missing_equal(self):
-        args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                "WavelengthMin=1, WavelengthMax=3, NotRegister2"]
-        self.assertRaises(ValueError,  TableIndexModel, *args)
+        args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+        kwargs = {'options_column_string': "WavelengthMin=1, WavelengthMax=3, NotRegister2"}
+        self.assertRaises(ValueError,  TableIndexModel, *args, **kwargs)
 
     def test_that_querying_nonexistent_row_index_raises_IndexError_exception(self):
         table_model = TableModel()

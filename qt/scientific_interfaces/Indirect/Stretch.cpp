@@ -71,6 +71,7 @@ Stretch::Stretch(QWidget *parent)
   m_uiForm.spPreviewSpectrum->setMaximum(0);
 
   // Connect the plot and save push buttons
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
@@ -105,47 +106,30 @@ bool Stretch::validate() {
 void Stretch::run() {
 
   // Workspace input
-  const auto sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
-  const auto resName =
+  auto const sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
+  auto const resName =
       m_uiForm.dsResolution->getCurrentDataName().toStdString();
-
-  auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
-      "defaultsave.directory");
-  if (saveDirectory.compare("") == 0) {
-    const char *textMessage =
-        "BayesStretch requires a default save directory and "
-        "one is not currently set."
-        " If run, the algorithm will default to saving files "
-        "to the current working directory."
-        " Would you still like to run the algorithm?";
-    int result = QMessageBox::question(nullptr, tr("Save Directory"),
-                                       tr(textMessage), QMessageBox::Yes,
-                                       QMessageBox::No, QMessageBox::NoButton);
-    if (result == QMessageBox::No) {
-      return;
-    }
-  }
 
   // Obtain save and plot state
   m_plotType = m_uiForm.cbPlot->currentText().toStdString();
 
   // Collect input from options section
-  const auto background = m_uiForm.cbBackground->currentText().toStdString();
+  auto const background = m_uiForm.cbBackground->currentText().toStdString();
 
   // Collect input from the properties browser
-  const auto eMin = m_properties["EMin"]->valueText().toDouble();
-  const auto eMax = m_properties["EMax"]->valueText().toDouble();
-  const auto beta = m_properties["Beta"]->valueText().toLong();
-  const auto sigma = m_properties["Sigma"]->valueText().toLong();
-  const auto nBins = m_properties["SampleBinning"]->valueText().toLong();
+  auto const eMin = m_properties["EMin"]->valueText().toDouble();
+  auto const eMax = m_properties["EMax"]->valueText().toDouble();
+  auto const beta = m_properties["Beta"]->valueText().toLong();
+  auto const sigma = m_properties["Sigma"]->valueText().toLong();
+  auto const nBins = m_properties["SampleBinning"]->valueText().toLong();
 
   // Bool options
-  const auto elasticPeak = m_uiForm.chkElasticPeak->isChecked();
-  const auto sequence = m_uiForm.chkSequentialFit->isChecked();
+  auto const elasticPeak = m_uiForm.chkElasticPeak->isChecked();
+  auto const sequence = m_uiForm.chkSequentialFit->isChecked();
 
   // Construct OutputNames
-  auto cutIndex = sampleName.find_last_of("_");
-  auto baseName = sampleName.substr(0, cutIndex);
+  auto const cutIndex = sampleName.find_last_of("_");
+  auto const baseName = sampleName.substr(0, cutIndex);
   m_fitWorkspaceName = baseName + "_Stretch_Fit";
   m_contourWorkspaceName = baseName + "_Stretch_Contour";
 
@@ -169,7 +153,6 @@ void Stretch::run() {
           SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 
-  m_uiForm.cbPlot->setEnabled(true);
   m_plotType = m_uiForm.cbPlot->currentText().toStdString();
 }
 
@@ -180,13 +163,11 @@ void Stretch::algorithmComplete(const bool &error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 
-  if (error)
-    return;
-
-  // Enables plot and save
-  m_uiForm.cbPlot->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
+  setRunIsRunning(false);
+  if (error) {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
+  }
 }
 
 /**
@@ -212,11 +193,45 @@ void Stretch::saveWorkspaces() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
+void Stretch::runClicked() {
+  if (validateTab()) {
+    auto const saveDirectory =
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "defaultsave.directory");
+    displayMessageAndRun(saveDirectory);
+  }
+}
+
+void Stretch::displayMessageAndRun(std::string const &saveDirectory) {
+  if (saveDirectory.empty()) {
+    int const result = displaySaveDirectoryMessage();
+    if (result != QMessageBox::No) {
+      setRunIsRunning(true);
+      runTab();
+    }
+  } else {
+    setRunIsRunning(true);
+    runTab();
+  }
+}
+
+int Stretch::displaySaveDirectoryMessage() {
+  char const *textMessage =
+      "BayesQuasi requires a default save directory and "
+      "one is not currently set."
+      " If run, the algorithm will default to saving files "
+      "to the current working directory."
+      " Would you still like to run the algorithm?";
+  return QMessageBox::question(nullptr, tr("Save Directory"), tr(textMessage),
+                               QMessageBox::Yes, QMessageBox::No,
+                               QMessageBox::NoButton);
+}
+
 /**
  * Handles the plotting of workspace post algorithm completion
  */
 void Stretch::plotWorkspaces() {
-
+  setPlotResultIsPlotting(true);
   WorkspaceGroup_sptr fitWorkspace;
   fitWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       m_fitWorkspaceName);
@@ -246,6 +261,7 @@ void Stretch::plotWorkspaces() {
     g_log.error(
         "Beta and Sigma workspace were not found and could not be plotted.");
   }
+  setPlotResultIsPlotting(false);
 }
 
 /**
@@ -347,6 +363,35 @@ void Stretch::updateProperties(QtProperty *prop, double val) {
     setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
                      bounds);
   }
+}
+
+void Stretch::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void Stretch::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlot->setEnabled(enabled);
+}
+
+void Stretch::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void Stretch::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
+void Stretch::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void Stretch::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces
