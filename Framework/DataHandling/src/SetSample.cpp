@@ -304,7 +304,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   SampleEnvironmentFactory factory(std::move(finder));
   auto sampleEnviron =
       factory.create(facilityName, instrumentName, envName, canName);
-  workspace->mutableSample().setEnvironment(std::move(sampleEnviron);
+  workspace->mutableSample().setEnvironment(std::move(sampleEnviron));
   return &(workspace->sample().getEnvironment());
 }
 
