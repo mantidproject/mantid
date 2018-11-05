@@ -58,12 +58,12 @@ Output (the numbers on your machine my not match exactly):
 .. testoutput:: ExGeneratedDataFit
   :options: +ELLIPSIS
 	
-	Using Gauss Model
-	A0: [ 0.87...]
-	A1: [ 0.03...]
-	Using Yi Model
-	A0: [ 0.95...]
-	A1: [ 0.58...]
+    Using Gauss Model
+    A0: [ 0.87...]
+    A1: [ 0.03...]
+    Using Yi Model
+    A0: [ 0.95...]
+    A1: [ 0.58...]
 
 .. categories::
 
