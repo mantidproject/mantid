@@ -494,17 +494,6 @@ void Quasi::plotClicked() {
     QString const QprobWS = QString::fromStdString(probWS);
     IndirectTab::plotSpectrum(QprobWS, 1, 2);
   }
-  if (plot == "Fit" || plot == "All") {
-    std::string fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
-    fitName.pop_back();
-    fitName.append("_0");
-    IndirectTab::checkADSForPlotSaveWorkspace(fitName, true);
-    QString const QfitWS = QString::fromStdString(fitName);
-    if (program == "Lorentzians")
-      IndirectTab::plotSpectra(QfitWS, {0, 1, 2, 4});
-    else
-      IndirectTab::plotSpectra(QfitWS, {0, 1, 2});
-  }
 
   auto const resultWS =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
