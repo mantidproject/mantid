@@ -56,7 +56,7 @@ Usage
 Output (the numbers on your machine my not match exactly):
 
 .. testoutput:: ExGeneratedDataFit
-  :options: +ELLIPSIS
+  :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 	
     Using Gauss Model
     A0: [ 0.87...]
