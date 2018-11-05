@@ -497,8 +497,9 @@ void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
 
   // Get length of recovery script
   std::ifstream fileCount(historyDest.toString());
-  auto lineLength = std::count(std::istreambuf_iterator<char>(fileCount),
-                               std::istreambuf_iterator<char>(), '\n');
+  int lineLength =
+      static_cast<int>(std::count(std::istreambuf_iterator<char>(fileCount),
+                                  std::istreambuf_iterator<char>(), '\n'));
   fileCount.close();
 
   // Update Progress bar

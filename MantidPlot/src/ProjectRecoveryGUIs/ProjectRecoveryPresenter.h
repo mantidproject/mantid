@@ -41,7 +41,7 @@ public:
   void emitAbortScript();
   void changeStartMantidToCancelLabel();
   void fillAllRows();
-  void setUpProgressBar(size_t barMax);
+  void setUpProgressBar(int barMax);
 
 private:
   friend class ProjectRecoveryView;

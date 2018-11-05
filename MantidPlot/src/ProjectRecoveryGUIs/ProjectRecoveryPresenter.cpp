@@ -150,7 +150,7 @@ operator=(const ProjectRecoveryPresenter &obj) {
   return *this;
 }
 
-void ProjectRecoveryPresenter::setUpProgressBar(size_t barMax) {
+void ProjectRecoveryPresenter::setUpProgressBar(int barMax) {
   if (m_openView == RecoveryView && m_recView) {
     m_recView->setProgressBarMaximum(barMax);
   } else if (m_failureView) {
