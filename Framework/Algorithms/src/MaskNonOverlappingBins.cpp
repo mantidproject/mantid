@@ -20,8 +20,8 @@ std::string const OUTPUT_WS{"OutputWorkspace"};
 bool isXSorted(Mantid::API::MatrixWorkspace const &ws) {
   int unsorted{0};
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(ws))
-  for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-    auto const &Xs = ws.x(i);
+  for (int64_t i = 0; static_cast<size_t>(i) < ws.getNumberHistograms(); ++i) {
+    auto const &Xs = ws.x(static_cast<size_t>(i));
     if (!std::is_sorted(Xs.cbegin(), Xs.cend())) {
       PARALLEL_ATOMIC
       ++unsorted;
