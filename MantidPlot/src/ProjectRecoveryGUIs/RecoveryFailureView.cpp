@@ -18,6 +18,8 @@ RecoveryFailureView::RecoveryFailureView(QWidget *parent,
   ui->setupUi(this);
   ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+  // Make sure the UI has all the data it needs to display
+  m_presenter->fillAllRows();
   // Set the table information
   addDataToTable(ui);
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(

@@ -27,9 +27,11 @@ public:
   bool getFailedRun() const;
   bool hasRecoveryStarted() const { return m_recoveryRunning; }
   std::string decideLastCheckpoint();
+  void fillRows();
 
 private:
-  void fillRows();
+  void fillFirstRow();
+  void fillRow(Poco::Path path, std::string checkpointName);
   void updateCheckpointTried(const std::string &checkpointName);
   bool checkRecoverWasASuccess(const std::string &projectFile);
   void createThreadAndManage(const Poco::Path &checkpoint);

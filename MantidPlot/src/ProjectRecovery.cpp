@@ -495,6 +495,15 @@ void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
                                    const Poco::Path &historyDest) {
   compileRecoveryScript(inputFolder, historyDest);
 
+  // Get length of recovery script
+  std::ifstream fileCount(historyDest.toString());
+  auto lineLength = std::count(std::istreambuf_iterator<char>(fileCount),
+                               std::istreambuf_iterator<char>(), '\n');
+  fileCount.close();
+
+  // Update Progress bar
+  m_recoveryGui->setUpProgressBar(lineLength);
+
   // Force application window to create the script window first
   const bool forceVisible = true;
   m_windowPtr->showScriptWindow(forceVisible);

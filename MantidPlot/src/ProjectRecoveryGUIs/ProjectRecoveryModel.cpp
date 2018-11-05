@@ -20,30 +20,12 @@
 #include <memory>
 
 namespace {
-std::string lengthOfRecoveryFile(Poco::Path path) {
-  Poco::Path output(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
-  output.append("ordered_temp.py");
-  const std::string algName = "OrderWorkspaceHistory";
-  auto alg =
-      Mantid::API::AlgorithmManager::Instance().createUnmanaged(algName, 1);
-  alg->initialize();
-  alg->setChild(true);
-  alg->setLogging(false);
-  alg->setRethrows(true);
-  alg->setProperty("RecoveryCheckpointFolder", path.toString());
-  alg->setProperty("OutputFilepath", output.toString());
-  alg->execute();
-
-  std::ifstream fileCount(output.toString());
-  auto lineLength = std::count(std::istreambuf_iterator<char>(fileCount),
-                               std::istreambuf_iterator<char>(), '\n');
-
-  // Clean up this length creation
-  fileCount.close();
-  Poco::File file(output);
-  file.remove();
-
-  return std::to_string(lineLength);
+std::string findNumberOfWorkspacesInDirectory(Poco::Path path) {
+  std::vector<std::string> files;
+  Poco::File(path).list(files);
+  // Number of workspaces is equal to the number of files in the path directory
+  // -1 of that value.
+  return std::to_string(files.size() - 1);
 }
 } // namespace
 
@@ -51,7 +33,7 @@ ProjectRecoveryModel::ProjectRecoveryModel(
     MantidQt::ProjectRecovery *projectRecovery,
     ProjectRecoveryPresenter *presenter)
     : m_projRec(projectRecovery), m_presenter(presenter) {
-  fillRows();
+  fillFirstRow();
   // Default to failed run
   m_failedRun = true;
   m_recoveryRunning = false;
@@ -143,19 +125,50 @@ void ProjectRecoveryModel::openSelectedInEditor(std::string &selected) {
   m_presenter->closeView();
 }
 
+void ProjectRecoveryModel::fillRow(Poco::Path path,
+                                   std::string checkpointName) {
+  std::string lengthOfFile = findNumberOfWorkspacesInDirectory(path);
+  std::string checked = "No";
+  std::vector<std::string> nextVector = {checkpointName, lengthOfFile, checked};
+  m_rows.emplace_back(nextVector);
+}
+
+void ProjectRecoveryModel::fillFirstRow() {
+  auto paths = m_projRec->getListOfFoldersInDirectoryPR(
+      m_projRec->getRecoveryFolderLoadPR());
+
+  std::sort(paths.begin(), paths.end(), [](auto &a, auto &b) {
+    Poco::File a1(a);
+    Poco::File b1(b); // Last modified is first!
+    return a1.getLastModified() > b1.getLastModified();
+  });
+
+  // Grab the last path as that is the one that should be loaded
+  auto path = paths[0];
+  std::string checkpointName = path.directory(path.depth() - 1);
+  checkpointName.replace(checkpointName.find("T"), 1, " ");
+  fillRow(path, checkpointName);
+}
+
 void ProjectRecoveryModel::fillRows() {
   auto paths = m_projRec->getListOfFoldersInDirectoryPR(
       m_projRec->getRecoveryFolderLoadPR());
+
+  std::sort(paths.begin(), paths.end(), [](auto &a, auto &b) {
+    Poco::File a1(a);
+    Poco::File b1(b); // Last modified is first!
+    return a1.getLastModified() > b1.getLastModified();
+  });
 
   // Sort the rows first string of the vector lists
   for (auto c : paths) {
     std::string checkpointName = c.directory(c.depth() - 1);
     checkpointName.replace(checkpointName.find("T"), 1, " ");
-    std::string lengthOfFile = lengthOfRecoveryFile(c);
-    std::string checked = "No";
-    std::vector<std::string> nextVector = {checkpointName, lengthOfFile,
-                                           checked};
-    m_rows.emplace_back(nextVector);
+    // Check if there is a first row already and skip first one
+    if (m_rows[0][0] == checkpointName)
+      continue;
+
+    fillRow(c, checkpointName);
   }
 
   for (auto i = paths.size(); i < 5; ++i) {

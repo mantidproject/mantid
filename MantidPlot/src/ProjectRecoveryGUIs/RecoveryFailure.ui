@@ -69,7 +69,7 @@
        </column>
        <column>
         <property name="text">
-         <string>Lines in Recovery Script</string>
+         <string>Workspaces to recover</string>
         </property>
        </column>
        <column>

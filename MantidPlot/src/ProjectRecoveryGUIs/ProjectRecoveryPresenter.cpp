@@ -98,7 +98,6 @@ void ProjectRecoveryPresenter::recoverLast() {
   if (m_model->hasRecoveryStarted())
     return;
   auto checkpointToRecover = m_model->decideLastCheckpoint();
-  setUpProgressBar(checkpointToRecover);
   m_model->recoverSelectedCheckpoint(checkpointToRecover);
 }
 
@@ -118,7 +117,6 @@ void ProjectRecoveryPresenter::recoverSelectedCheckpoint(QString &selected) {
   if (m_model->hasRecoveryStarted())
     return;
   auto checkpointToRecover = selected.toStdString();
-  setUpProgressBar(checkpointToRecover);
   m_model->recoverSelectedCheckpoint(checkpointToRecover);
 }
 
@@ -152,13 +150,11 @@ operator=(const ProjectRecoveryPresenter &obj) {
   return *this;
 }
 
-void ProjectRecoveryPresenter::setUpProgressBar(
-    std::string checkpointToRecover) {
-  auto row = m_model->getRow(checkpointToRecover);
+void ProjectRecoveryPresenter::setUpProgressBar(size_t barMax) {
   if (m_openView == RecoveryView && m_recView) {
-    m_recView->setProgressBarMaximum(std::stoi(row[1]) + 1);
+    m_recView->setProgressBarMaximum(barMax);
   } else if (m_failureView) {
-    m_failureView->setProgressBarMaximum(std::stoi(row[1]) + 1);
+    m_failureView->setProgressBarMaximum(barMax);
   }
 }
 
@@ -185,3 +181,5 @@ void ProjectRecoveryPresenter::changeStartMantidToCancelLabel() {
     m_failureView->changeStartMantidButton("Cancel Recovery");
   }
 }
+
+void ProjectRecoveryPresenter::fillAllRows() { m_model->fillRows(); }

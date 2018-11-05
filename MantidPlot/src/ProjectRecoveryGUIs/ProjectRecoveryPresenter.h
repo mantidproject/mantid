@@ -40,9 +40,10 @@ public:
   ProjectRecoveryPresenter &operator=(const ProjectRecoveryPresenter &obj);
   void emitAbortScript();
   void changeStartMantidToCancelLabel();
+  void fillAllRows();
+  void setUpProgressBar(size_t barMax);
 
 private:
-  void setUpProgressBar(std::string checkpointToRecover);
   friend class ProjectRecoveryView;
   friend class RecoveryFailureView;
   OpenView m_openView;
