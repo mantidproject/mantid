@@ -378,12 +378,19 @@ def imshow(axes, workspace, *args, **kwargs):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         x, y, z = get_md_data2d_bin_bounds(workspace, normalization)
     else:
-        (aligned, kwargs) = get_data_uneven_flag(workspace, **kwargs)
+        (uneven_bins, kwargs) = get_data_uneven_flag(workspace, **kwargs)
         (distribution, kwargs) = get_distribution(workspace, **kwargs)
-        if aligned:
+        if uneven_bins:
             raise Exception('Variable number of bins is not supported by imshow.')
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
+
+    diffs = numpy.diff(x, axis=1)
+    x_spacing_equal = numpy.alltrue(diffs == diffs[0])
+    diffs = numpy.diff(y, axis=0)
+    y_spacing_equal = numpy.alltrue(diffs == diffs[0])
+    if not x_spacing_equal or not y_spacing_equal:
+        raise Exception('Unevenly spaced bins are not supported by imshow')
     kwargs['extent'] = [x[0,0],x[0,-1],y[0,0],y[-1,0]]
     return axes.imshow(z, *args, **kwargs)
 
