@@ -68,7 +68,7 @@ Improved
 Bug fixes
 #########
 
-
+- The SaveASCII tab from the interface was unable to save in some places on Windows and that has now been fixed.
 
 Algorithms
 ----------
