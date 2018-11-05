@@ -1395,7 +1395,8 @@ bool Algorithm::doCallProcessGroups(
           for (auto i = 0; i < outputGroupWS->getNumberOfEntries(); ++i) {
             outputGroupWS->getItem(i)->history().addHistory(m_history);
           }
-        } else {
+        } else if (outputWorkspace) {
+          // If it's a valid pointer add history else skip for optionals
           outputWorkspace->history().addHistory(m_history);
         }
       }
