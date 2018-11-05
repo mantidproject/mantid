@@ -12,7 +12,7 @@ Project Recovery test
 *Preparation*
 
 - Before running these tests, set project recovery to run every 2 seconds. The instructions for this
-  are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`_.
+  are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`__.
 - Get the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
 - `TOPAZ_3132_event.nxs` - availabe in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target. It should be in ``ExternalData/Testing/Data/SystemTest/``
 - The files `INTER000*` are in the ISIS sample data
@@ -184,27 +184,21 @@ Project Recovery test
 
 5. Test multiple instances of Mantid running
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
-- Run the script:
+- Launch 2 instances of mantid
+- Run the script on the first instance:
 
 .. code-block:: python
 
-  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace1')
+  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='Instance 1')
 
-- Make sure that Log level is set to `Debug` in the results log
-- Open a second instance of Mantid
-- In the results log it should say ``Another MantidPlot process is running. Project recovery is disabled.`` 
-- Run the script:
+- Run this script on the other instance:
 
 .. code-block:: python
 
-  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace2')
+  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='Instance 2')
 
 - Crash the first instance of Mantid with `Segfault`; choose `Do not share information` in the error dialog
 - Do not exit the second instance of Mantid
-- Restart Mantid
-- In the results log it should say ``Another MantidPlot process is running. Project recovery is disabled.`` 
-- Close both instances of Mantid
 - Restart Mantid
 - You should be presented with a dialog offering to attempt a recovery - choose `Yes`
 - `NewWorkspace1` should appear in the workspace dialog

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import LoadEventNexus
@@ -17,7 +23,7 @@ class ISISLoadingEventData(stresstesting.MantidStressTest):
         ev_ws = LoadEventNexus('LET00006278.nxs')
         # isis_vms_compat/SPB[2]
         self.assertEqual(ev_ws.sample().getGeometryFlag(), 1,
-                         "Geometry flag mimatch. vms_compat block not read correctly")
+                         "Geometry flag mismatch. vms_compat block not read correctly")
         # Isis correct the tof using loadTimeOfFlight method.
         self.assertDelta(ev_ws.getSpectrum(10).getTofs()[1], 1041.81, 0.01,
                          "The ISIS event correction is incorrect (check LoadEventNexus::loadTimeOfFlight)")

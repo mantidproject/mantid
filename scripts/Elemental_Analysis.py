@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
 from PyQt4 import QtGui
@@ -30,6 +36,7 @@ import mantid.simpleapi as mantid
 
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
+
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
         self.menu = self.menuBar()
@@ -70,6 +77,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.widget_list.addWidget(self.load_widget.view)
         self.plotting = PlotPresenter(PlotView())
         self.plotting.view.setMinimumSize(self.plotting.view.sizeHint())
+
+        self.plotting.removeSubplotConnection(self.subplotRemoved)
 
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
@@ -338,6 +347,11 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             self.plotting.remove_subplot(checkbox.name)
             if not self.plotting.get_subplots():
                 self.plotting.view.close()
+
+    def subplotRemoved(self, name):
+        # need to change the state without sending signal
+        # as the plot has already been removed
+        self.detectors.setStateQuietly(name, False)
 
 
 def qapp():

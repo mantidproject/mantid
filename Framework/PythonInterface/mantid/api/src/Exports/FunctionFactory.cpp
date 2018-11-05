@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction.h"
@@ -38,7 +44,7 @@ template <>
 boost::shared_ptr<IFunction>
 PythonObjectInstantiator<IFunction>::createInstance() const {
   using namespace boost::python;
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
 
   // The class may instantiate different objects depending on whether
   // it is being created by the function factory or not

@@ -372,7 +372,7 @@ The consequences are as follows:
   It should not be logged, written as output, or used for branching execution paths since it is meaningless.
   If the total number of spectra in a workspace is required it can be accessed via ``MatrixWorkspace::indexInfo()::globalSize()``.
 - User input providing indices or spectrum numbers in one way or another must be translated into local indices by ``IndexInfo``.
-  The most common cases are a workspace property that also accepts indices, see `IndexProperty <../concepts/IndexProperty.html>`__.
+  The most common cases are a workspace property that also accepts indices, see :ref:`IndexProperty <IndexProperty>`.
 - The distinction between local and global indices must not be exposed to the user.
   In particular, the 'global' prefix should be omitted, i.e., for the user interface we keep referring to 'workspace index', even though it is internally not what used to be the workspace index but rather a global index.
   Indices provided by a user may never be interpreted as local indices, since a local index has no fixed meaning.

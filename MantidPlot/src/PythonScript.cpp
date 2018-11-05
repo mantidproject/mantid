@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
   File                 : PythonScript.cpp
   Project              : QtiPlot
 --------------------------------------------------------------------
-  Copyright            : (C) 2006 by Knut Franke
-  Email (use @ for *)  : knut.franke*gmx.de
-  Description          : Execute Python code from within QtiPlot
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -37,7 +26,16 @@
 
 #include "sipAPI_qti.h"
 
+// Python
+#include "MantidPythonInterface/core/VersionCompat.h"
+#include <compile.h>
+#include <eval.h>
+#include <frameobject.h>
+#include <traceback.h>
+
 #include <stdexcept>
+
+using Mantid::PythonInterface::GlobalInterpreterLock;
 
 namespace {
 // Avoids a compiler warning about implicit 'const char *'->'char*' conversion
@@ -82,7 +80,7 @@ PythonScript::PythonScript(PythonScripting *env, const QString &name,
     : Script(env, name, interact, context), m_interp(env), localDict(nullptr),
       stdoutSave(nullptr), stderrSave(nullptr), m_codeFileObject(nullptr),
       m_threadID(-1), isFunction(false), m_isInitialized(false),
-      m_pathHolder(name), m_recursiveAsyncGIL() {
+      m_pathHolder(name), m_recursiveAsyncGIL(PyGILState_UNLOCKED) {
   initialize(name, context);
 }
 
@@ -90,7 +88,7 @@ PythonScript::PythonScript(PythonScripting *env, const QString &name,
  * Destructor
  */
 PythonScript::~PythonScript() {
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
   this->abort();
   observeAdd(false);
   observeAfterReplace(false);
@@ -139,11 +137,11 @@ PyObject *PythonScript::createSipInstanceFromMe() {
 
 /**
  * @param code A lump of python code
- * @return True if the code forms a complete statment
+ * @return True if the code forms a complete statement
  */
 bool PythonScript::compilesToCompleteStatement(const QString &code) const {
   bool result(false);
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
   PyObject *compiledCode = Py_CompileString(code.toAscii(), "", Py_file_input);
   if (PyObject *exception = PyErr_Occurred()) {
     // Certain exceptions still mean the code is complete
@@ -187,7 +185,7 @@ void PythonScript::sendLineChangeSignal(int lineNo, bool error) {
  * Create a list autocomplete keywords
  */
 void PythonScript::generateAutoCompleteList() {
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
   PyObject *keywords = PyObject_CallFunctionObjArgs(
       PyDict_GetItemString(m_interp->globalDict(),
                            "_ScopeInspector_GetFunctionAttributes"),
@@ -207,7 +205,7 @@ void PythonScript::generateAutoCompleteList() {
  */
 void PythonScript::emit_error() {
   // gil is necessary so other things don't continue
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
 
   // return early if nothing happened
   if (!PyErr_Occurred()) {
@@ -254,7 +252,7 @@ void PythonScript::emit_error() {
     filename = TO_CSTRING(tb->tb_frame->f_code->co_filename);
   }
 
-  // the error message is the full (formated) traceback
+  // the error message is the full (formatted) traceback
   PyObject *str_repr = PyObject_Str(value);
   QString message;
   QTextStream msgStream(&message);
@@ -381,7 +379,7 @@ void PythonScript::setContext(QObject *context) {
  * the dictionary context back to the default set
  */
 void PythonScript::clearLocals() {
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
 
   PyObject *mainModule = PyImport_AddModule("__main__");
   PyObject *cleanLocals = PyDict_Copy(PyModule_GetDict(mainModule));
@@ -407,7 +405,7 @@ void PythonScript::clearLocals() {
 void PythonScript::initialize(const QString &name, QObject *context) {
   clearLocals(); // holds and releases GIL
 
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
   PythonScript::setIdentifier(name);
   setContext(context);
 
@@ -455,8 +453,8 @@ void PythonScript::endStdoutRedirect() {
  * @return True if the lock was released by this call, false otherwise
  */
 bool PythonScript::recursiveAsyncSetup() {
-  if (PythonGIL::locked()) {
-    m_recursiveAsyncGIL.release();
+  if (GlobalInterpreterLock::locked()) {
+    GlobalInterpreterLock::release(m_recursiveAsyncGIL);
     return true;
   }
   return false;
@@ -470,7 +468,7 @@ bool PythonScript::recursiveAsyncSetup() {
  */
 void PythonScript::recursiveAsyncTeardown(bool relock) {
   if (relock) {
-    m_recursiveAsyncGIL.acquire();
+    m_recursiveAsyncGIL = GlobalInterpreterLock::acquire();
   }
 }
 
@@ -490,7 +488,7 @@ bool PythonScript::compileImpl() {
  * @return
  */
 QVariant PythonScript::evaluateImpl() {
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
   PyObject *compiledCode = this->compileToByteCode(true);
   if (!compiledCode) {
     return QVariant("");
@@ -618,7 +616,7 @@ void PythonScript::abortImpl() {
   // hasn't implemented cancel() checking so that when control returns the
   // Python the
   // interrupt should be picked up.
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
   m_interp->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
   PyObject *curAlg =
       PyObject_CallFunction(m_algorithmInThread, STR_LITERAL("l"), m_threadID);
@@ -633,7 +631,7 @@ void PythonScript::abortImpl() {
  * @return A long int giving a unique ID for the thread
  */
 long PythonScript::getThreadID() {
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
   return PyThreadState_Get()->thread_id;
 }
 
@@ -641,7 +639,7 @@ long PythonScript::getThreadID() {
 bool PythonScript::executeString() {
   emit started(MSG_STARTED);
   bool success(false);
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
 
   PyObject *compiledCode = compileToByteCode(false);
   PyObject *result(nullptr);

@@ -279,7 +279,7 @@ public slots:
   /// Update application window post save
   void postSaveProject();
 
-  //! Set the project status to modifed
+  //! Set the project status to modified
   void modifiedProject();
   //! Set the project status to saved (not modified)
   void savedProject();
@@ -462,7 +462,7 @@ public slots:
    * @param label :: window label (compare MdiSubWindow::MdiSubWindow)
    * @param r :: number of rows
    * @param c :: number of columns
-   * @param text :: tab/newline - seperated initial content; may be empty
+   * @param text :: tab/newline - separated initial content; may be empty
    */
   Table *newHiddenTable(const QString &name, const QString &label, int r, int c,
                         const QString &text = QString());
@@ -974,11 +974,11 @@ public slots:
   //! Show the currently selected windows from the list view #lv.
   void showSelectedWindows();
 
-  //! Sets all items in the folders list view to be desactivated (QPixmap =
+  //! Sets all items in the folders list view to be deactivated (QPixmap =
   // folder_closed_xpm)
   void desactivateFolders();
 
-  //! Changes the current folder. Returns true if successfull
+  //! Changes the current folder. Returns true if successful
   bool changeFolder(Folder *newFolder, bool force = false);
 
   //! Changes the current folder when the user changes the current item in the
@@ -1009,7 +1009,7 @@ public slots:
   // depending on the user's viewing policy
   void showAllFolderWindows();
 
-  //!  forces hidding all windows in the current folder and subfolders,
+  //!  forces hiding all windows in the current folder and subfolders,
   // depending on the user's viewing policy
   void hideAllFolderWindows();
 
@@ -1132,6 +1132,10 @@ public slots:
 
   /// Checks for and attempts project recovery if required
   void checkForProjectRecovery();
+
+  /// Make a Recovery checkpoint so you don't have to wait for it to happen
+  /// normally
+  void saveRecoveryCheckpoint();
 
 signals:
   void modified();
@@ -1424,7 +1428,7 @@ public:
   ImageMarker *d_image_copy;
   //@}
 
-  //! Equals true if an automatical search for updates was performed on start-up
+  //! Equals true if an automatic search for updates was performed on start-up
   // otherwise is set to false;
   bool autoSearchUpdatesRequest;
 

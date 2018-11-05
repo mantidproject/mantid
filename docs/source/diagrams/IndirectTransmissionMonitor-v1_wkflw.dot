@@ -2,7 +2,7 @@ digraph IndirectTransmissionMonitor {
   label="IndirectTransmissionMonitor Flowchart"
   $global_style
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     ExtractMonitor_HaveMonitor2_1   [label="Have Monitor 2?"]
     ExtractMonitor_HaveMonitor2_2   [label="Have Monitor 2?"]

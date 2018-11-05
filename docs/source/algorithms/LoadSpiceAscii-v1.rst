@@ -29,7 +29,7 @@ The first item is an integer as the index of experimental data point.
 Output Worskpaces
 #################
 
-Two table worskpaces will be exported from the algorith. 
+Two table worskpaces will be exported from the algorithm. 
 
 'OutputWorkspace' is the table workspace containing the measured experimental data. 
 Each row of it contains all the measured parameters of one data point.  

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MERGERUNSTEST_H_
 #define MERGERUNSTEST_H_
 
@@ -1541,10 +1547,8 @@ public:
     const auto PAIR_1 = std::pair<DateAndTime, DateAndTime>(TIME_1, TIME_2);
     const auto PAIR_2 = std::pair<DateAndTime, DateAndTime>(TIME_2, TIME_3);
 
-    TS_ASSERT_EQUALS(detInfo.scanInterval({0, 0}), PAIR_1)
-    TS_ASSERT_EQUALS(detInfo.scanInterval({1, 0}), PAIR_1)
-    TS_ASSERT_EQUALS(detInfo.scanInterval({0, 1}), PAIR_2)
-    TS_ASSERT_EQUALS(detInfo.scanInterval({1, 1}), PAIR_2)
+    TS_ASSERT_EQUALS(detInfo.scanIntervals()[0], PAIR_1)
+    TS_ASSERT_EQUALS(detInfo.scanIntervals()[1], PAIR_2)
 
     if (extraTimes) {
       const auto TIME_4 = DateAndTime(20, 0);
@@ -1554,10 +1558,8 @@ public:
       const auto PAIR_3 = std::pair<DateAndTime, DateAndTime>(TIME_4, TIME_5);
       const auto PAIR_4 = std::pair<DateAndTime, DateAndTime>(TIME_5, TIME_6);
 
-      TS_ASSERT_EQUALS(detInfo.scanInterval({0, 2}), PAIR_3)
-      TS_ASSERT_EQUALS(detInfo.scanInterval({1, 2}), PAIR_3)
-      TS_ASSERT_EQUALS(detInfo.scanInterval({0, 3}), PAIR_4)
-      TS_ASSERT_EQUALS(detInfo.scanInterval({1, 3}), PAIR_4)
+      TS_ASSERT_EQUALS(detInfo.scanIntervals()[2], PAIR_3)
+      TS_ASSERT_EQUALS(detInfo.scanIntervals()[3], PAIR_4)
     }
   }
 
@@ -1612,8 +1614,7 @@ public:
 
     const auto &detInfo = outputWS->detectorInfo();
     TS_ASSERT_EQUALS(detInfo.size(), 2)
-    TS_ASSERT_EQUALS(detInfo.scanCount(0), 4)
-    TS_ASSERT_EQUALS(detInfo.scanCount(1), 4)
+    TS_ASSERT_EQUALS(detInfo.scanCount(), 4)
     assert_scan_intervals_are_correct(detInfo, true);
 
     const auto &specInfo = outputWS->spectrumInfo();
@@ -1634,16 +1635,15 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             std::string(e.what()),
-                            "Cannot merge DetectorInfo: "
-                            "sync scan intervals "
-                            "overlap but not identical")
+                            "Cannot merge ComponentInfo: "
+                            "scan intervals overlap but not identical")
   }
 
   void test_merging_detector_scan_workspaces_does_not_append_workspaces() {
     auto outputWS = do_MergeRuns_with_scanning_workspaces();
 
     TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
-    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(), 2)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
 
     // Check bins are set correctly
@@ -1668,7 +1668,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             std::string(e.what()),
-                            "Cannot merge DetectorInfo: "
+                            "Cannot merge ComponentInfo: "
                             "matching scan interval but "
                             "positions differ")
   }
@@ -1689,9 +1689,8 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
                             std::string(e.what()),
-                            "Cannot merge DetectorInfo: "
-                            "sync scan intervals "
-                            "overlap but not identical")
+                            "Cannot merge ComponentInfo: "
+                            "scan intervals overlap but not identical")
   }
 
   void test_merging_detector_scan_workspaces_failure_case() {
@@ -1721,7 +1720,7 @@ public:
             "outWS"));
 
     TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
-    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(), 2)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
 
     // Check bins are set correctly

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCE_H_
 #define MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCE_H_
 
@@ -6,7 +12,6 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include <boost/scoped_ptr.hpp>
 
 namespace Mantid {
 namespace DataObjects {

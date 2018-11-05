@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm allows instrument parameters to be saved into an
-`instrument parameter file <http://www.mantidproject.org/InstrumentParameterFile>`__.
+:ref:`instrument parameter file <InstrumentParameterFile>`.
 The parameter file can then be inspected and or modified. It can also be loaded back into
 Mantid using the :ref:`algm-LoadParameterFile` algorithm.
 

@@ -14,7 +14,7 @@ This simple algorithm just adds a comment record to the history of a workspace a
 
 It does not change the data within a workspace in any way.
 
-When outputing the histroy to Python this comment will be rendered as a python comment.
+When outputting the history to Python this comment will be rendered as a python comment.
 
 
 Usage

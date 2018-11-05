@@ -13,7 +13,7 @@ Description
 
    This algorithm does not perform any consistency check of the input data. It is the users responsibility to choose a physically reasonable dataset.
 
-This algorithm loads a list  of DNS `.d_dat` data files into a `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_. If the algorithm fails to process a file, this file will be ignored. In this case the algorithm produces a warning and continues to process further files. Only if no valid files are provided, the algorithm terminates with an error message.
+This algorithm loads a list  of DNS `.d_dat` data files into a :ref:`MDEventWorkspace <MDWorkspace>`. If the algorithm fails to process a file, this file will be ignored. In this case the algorithm produces a warning and continues to process further files. Only if no valid files are provided, the algorithm terminates with an error message.
 
 This algorithm is meant to replace the :ref:`algm-LoadDNSLegacy` for single crystal diffraction data.
 
@@ -23,7 +23,7 @@ As a result, two workspaces are created:
 
 - `OutputWorkspace` contains the raw neutron counts.
 
-- `NormalizationWorkspace` contains the choosen normalization data (either monitor counts or experiment duration time).
+- `NormalizationWorkspace` contains the chosen normalization data (either monitor counts or experiment duration time).
 
 Both workspaces have :math:`(H,K,L,dE)` dimensions. The metadata are loaded into time series sample logs.
 
@@ -44,9 +44,9 @@ Data replication
 
 For standard data (vanadium, NiCr, background) the sample rotation angle is assumed to be not important. These data are typically measured only for one sample rotation angle. The algorithm can replicate these data for the same sample rotation angles as a single crystal sample has been measured. For this purpose optional input fields *SaveHuberTo* and *LoadHuberFrom* can be used.
 
-- *SaveHuberTo* should contain a name of the `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ where sample rotation angles (Huber) read from the data files will be saved. If the specified workspace exists, it will be overwritten.
+- *SaveHuberTo* should contain a name of the :ref:`TableWorkspace <Table Workspaces>` where sample rotation angles (Huber) read from the data files will be saved. If the specified workspace exists, it will be overwritten.
 
-- *LoadHuberFrom* should contain a name of the `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_. The workspace must exist and contain one column with the name *Huber(degrees)*, where the sample rotation angles are specified.
+- *LoadHuberFrom* should contain a name of the :ref:`TableWorkspace <Table Workspaces>`. The workspace must exist and contain one column with the name *Huber(degrees)*, where the sample rotation angles are specified.
 
 .. note::
 

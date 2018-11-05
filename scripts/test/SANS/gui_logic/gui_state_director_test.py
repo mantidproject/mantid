@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -15,10 +21,11 @@ from sans.test_helper.user_file_test_helper import create_user_file, sample_user
 class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
     def _get_table_model(option_string="", sample_thickness=8.0):
-        table_index_model = TableIndexModel(0, "SANS2D00022024", "", "", "", "", "", "", "", "",
-                                            "", "", "", "", "", option_string, sample_thickness=sample_thickness)
+        table_index_model = TableIndexModel("SANS2D00022024", "", "", "", "", "", "", "", "",
+                                            "", "", "",options_column_string=option_string,
+                                            sample_thickness=sample_thickness)
         table_model = TableModel()
-        table_model.add_table_entry(0, table_index_model)
+        table_model.add_table_entry_no_thread_or_signal(0, table_index_model)
         return table_model
 
     @staticmethod
@@ -65,28 +72,14 @@ class GuiStateDirectorTest(unittest.TestCase):
         self.assertTrue(state.wavelength.wavelength_high == [10.3])
 
     def test_that_sample_thickness_set_on_state(self):
-        table_model = self._get_table_model(sample_thickness = 78.0)
+        table_model = self._get_table_model()
         state_model = self._get_state_gui_model()
         director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
 
         state = director.create_state(0)
         self.assertTrue(isinstance(state, State))
 
-        self.assertEqual(state.scale.thickness, 78.0)
-
-    def test_state_created_with_default_sample_thickness_when_file_lookup_disabled(self):
-        table_model = self._get_table_model()
-        state_model = self._get_state_gui_model()
-        director = GuiStateDirector(table_model, state_model, SANSFacility.ISIS)
-
-        state = director.create_state(0, file_lookup=False)
-        self.assertTrue(isinstance(state, State))
-
-        self.assertEqual(state.scale.thickness_from_file, 1.0)
-        self.assertEqual(state.scale.height_from_file, 8.0)
-        self.assertEqual(state.scale.width_from_file, 8.0)
-        self.assertEqual(state.scale.thickness, 8.0)
-
+        self.assertEqual(state.scale.thickness, 1.0)
 
 if __name__ == '__main__':
     unittest.main()

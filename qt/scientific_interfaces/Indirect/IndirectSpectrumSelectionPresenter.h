@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONPRESENTER_H_
 
@@ -17,28 +23,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 /** IndirectSpectrumSelectionPresenter
-
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-    National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+ */
 class DLLExport IndirectSpectrumSelectionPresenter : public QObject {
   Q_OBJECT
 public:
@@ -49,9 +34,9 @@ public:
 
 signals:
   void spectraChanged(std::size_t);
-  void maskChanged(const std::string &);
-  void invalidSpectraString(const QString &errorMessage);
-  void invalidMaskBinsString(const QString &errorMessage);
+  void maskChanged(std::string const &);
+  void invalidSpectraString(QString const &errorMessage);
+  void invalidMaskBinsString(QString const &errorMessage);
 
 public slots:
   void setActiveModelIndex(std::size_t index);
@@ -62,15 +47,16 @@ public slots:
   void enableView();
 
 private slots:
-  void setBinMask(const std::string &maskString);
-  void setMaskSpectraList(const std::string &spectraList);
-  void updateSpectraList(const std::string &spectraList);
+  void setBinMask(std::string const &maskString);
+  void setMaskSpectraList(std::string const &spectraList);
+  void updateSpectraList(std::string const &spectraList);
   void updateSpectraRange(std::size_t minimum, std::size_t maximum);
+  void displaySpectraList(std::string const &spectra);
   void setMaskIndex(int index);
 
 private:
   void setSpectraRange(std::size_t minimum, std::size_t maximum);
-  void setModelSpectra(const Spectra &spectra);
+  void setModelSpectra(Spectra const &spectra);
 
   UserInputValidator validateSpectraString();
   UserInputValidator &validateSpectraString(UserInputValidator &validator);

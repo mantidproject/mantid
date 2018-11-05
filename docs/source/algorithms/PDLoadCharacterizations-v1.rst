@@ -10,12 +10,12 @@ Description
 -----------
 
 This algorithm loads information into a
-`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ for the
+:ref:`TableWorkspace <Table Workspaces>` for the
 characterization information and a collection of output parameters for
 the focus positions to be used in :ref:`algm-EditInstrumentGeometry`. If
 a section is missing then those parameters will be empty. This includes an empty
 table (zero rows) if that information is missing. The resulting TableWorkspace
-is intented to be used by :ref:`algm-PDDetermineCharacterizations`
+is intended to be used by :ref:`algm-PDDetermineCharacterizations`
 
 This algorithm is one of the workflow algorithms that helps
 :ref:`algm-SNSPowderReduction`.
@@ -52,7 +52,7 @@ specifying azimuthal angles for the focus positions is being supplied
 as it uncommon except for preferred orientation studies.
 
 The second section of the characterizations file is read into the output
-`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ as described below.
+:ref:`TableWorkspace <Table Workspaces>` as described below.
 
 A second example from NOMAD demonstrates how to specify different
 ranges for each focused spectrum as well as the optional wavelength

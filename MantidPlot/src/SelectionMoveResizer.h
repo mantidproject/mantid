@@ -73,7 +73,7 @@ class ImageMarker;
  *
  * \section design Design Ideas
  *   - Keep as much of the select/move/resize code as possible in one class to
- *ease maintanance.
+ *ease maintenance.
  *   - Use the same class for layer and marker handling to avoid duplicating
  *code.
  *     Good for bugfixing and for maintaining a consistent user interface.
@@ -144,16 +144,16 @@ public slots:
   //! Add target to the list of items to be moved/resized together.
   void add(QWidget *target);
   //! Remove target from the list of items to be moved/resized together and
-  // returns the number of occurences removed.
+  // returns the number of occurrences removed.
   int removeAll(LegendWidget *target);
   //! Remove target from the list of items to be moved/resized together and
-  // returns the number of occurences removed.
+  // returns the number of occurrences removed.
   int removeAll(ArrowMarker *target);
   //! Remove target from the list of items to be moved/resized together and
-  // returns the number of occurences removed.
+  // returns the number of occurrences removed.
   int removeAll(ImageMarker *target);
   //! Remove target from the list of items to be moved/resized together and
-  // returns the number of occurences removed.
+  // returns the number of occurrences removed.
   int removeAll(QWidget *target);
   //! Calculate #d_bounding_rect based on the bounding rectangles of all
   // targets.
