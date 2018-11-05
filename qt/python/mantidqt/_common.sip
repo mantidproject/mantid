@@ -256,3 +256,14 @@ class ManageUserDirectories : QDialog {
 public:
   ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
 };
+
+// ---------------------------------
+// Fit Property Browser
+// ---------------------------------
+class FitPropertyBrowser : public QDockWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+%End
+public:
+    FitPropertyBrowser(QWidget *parent = nullptr, QObject *mantidui = nullptr);
+};
