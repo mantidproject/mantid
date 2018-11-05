@@ -8,8 +8,8 @@
 
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceHasDxValidator.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -21,9 +21,9 @@ namespace Prop {
 const std::string FRACTION{"FractionOfDx"};
 const std::string INPUT_WS{"InputWorkspace"};
 const std::string OUTPUT_WS{"OutputWorkspace"};
-}
+} // namespace Prop
 constexpr double FWHM_GAUSSIAN_EQUIVALENT{0.68};
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -31,7 +31,9 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GroupToXResolution)
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string GroupToXResolution::name() const { return "GroupToXResolution"; }
+const std::string GroupToXResolution::name() const {
+  return "GroupToXResolution";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int GroupToXResolution::version() const { return 1; }
@@ -52,25 +54,28 @@ void GroupToXResolution::init() {
   auto inputValidator = boost::make_shared<Kernel::CompositeValidator>();
   inputValidator->add(boost::make_shared<API::WorkspaceHasDxValidator>());
   constexpr bool acceptHistograms{false};
-  inputValidator->add(boost::make_shared<API::HistogramValidator>(acceptHistograms));
+  inputValidator->add(
+      boost::make_shared<API::HistogramValidator>(acceptHistograms));
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<>>(Prop::INPUT_WS, "",
-                                                             Kernel::Direction::Input,  inputValidator),
+      Kernel::make_unique<API::WorkspaceProperty<>>(
+          Prop::INPUT_WS, "", Kernel::Direction::Input, inputValidator),
       "An input workspace with Dx values.");
-  declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<>>(Prop::OUTPUT_WS, "",
-                                                             Kernel::Direction::Output),
-      "The grouped workspace.");
-  auto betweenZeroAndOne = boost::make_shared<Kernel::BoundedValidator<double>>(0., 1.);
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      Prop::OUTPUT_WS, "", Kernel::Direction::Output),
+                  "The grouped workspace.");
+  auto betweenZeroAndOne =
+      boost::make_shared<Kernel::BoundedValidator<double>>(0., 1.);
   betweenZeroAndOne->setLowerExclusive(true);
-  declareProperty(Prop::FRACTION, 0.2, betweenZeroAndOne, "A fraction of Dx to group the points to.");
+  declareProperty(Prop::FRACTION, 0.2, betweenZeroAndOne,
+                  "A fraction of Dx to group the points to.");
 }
 
 std::map<std::string, std::string> GroupToXResolution::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr inWS = getProperty(Prop::INPUT_WS);
   if (inWS->getNumberHistograms() != 1) {
-    issues[Prop::INPUT_WS] = "The workspace should contain only a single histogram.";
+    issues[Prop::INPUT_WS] =
+        "The workspace should contain only a single histogram.";
   }
   return issues;
 }
@@ -81,7 +86,8 @@ void GroupToXResolution::exec() {
   using boost::math::pow;
   API::MatrixWorkspace_const_sptr inWS = getProperty(Prop::INPUT_WS);
   double const groupingFraction = getProperty(Prop::FRACTION);
-   HistogramData::Histogram h(HistogramData::Histogram::XMode::Points, HistogramData::Histogram::YMode::Counts);
+  HistogramData::Histogram h(HistogramData::Histogram::XMode::Points,
+                             HistogramData::Histogram::YMode::Counts);
   auto const &inXs = inWS->x(0);
   auto const &inYs = inWS->y(0);
   auto const &inEs = inWS->e(0);
@@ -99,28 +105,36 @@ void GroupToXResolution::exec() {
   while (true) {
     auto const Dx = inDxs[pointIndex];
     if (Dx <= 0.) {
-      throw std::out_of_range("Nonpositive DX value encountered in the workspace.");
+      throw std::out_of_range(
+          "Nonpositive DX value encountered in the workspace.");
     }
     auto const width = groupingFraction * Dx;
     auto const end = inXs[pointIndex] + width;
-    auto const beginXIterator = std::lower_bound(inXs.cbegin(), inXs.cend(), begin);
+    auto const beginXIterator =
+        std::lower_bound(inXs.cbegin(), inXs.cend(), begin);
     auto const endXIterator = std::lower_bound(inXs.cbegin(), inXs.cend(), end);
-    auto const pickSize = static_cast<size_t>(std::distance(beginXIterator, endXIterator));
+    auto const pickSize =
+        static_cast<size_t>(std::distance(beginXIterator, endXIterator));
     if (pickSize > 0) {
-      auto const offset = static_cast<size_t>(std::distance(inXs.cbegin(), beginXIterator));
+      auto const offset =
+          static_cast<size_t>(std::distance(inXs.cbegin(), beginXIterator));
       double xSum{0.};
       double ySum{0.};
       double eSquaredSum{0.};
-      for (size_t pickIndex = offset; pickIndex < offset + pickSize; ++pickIndex) {
+      for (size_t pickIndex = offset; pickIndex < offset + pickSize;
+           ++pickIndex) {
         xSum += inXs[pickIndex];
         ySum += inYs[pickIndex];
         eSquaredSum += pow<2>(inEs[pickIndex]);
       }
       outXs.emplace_back(xSum / static_cast<double>(pickSize));
       outYs.emplace_back(ySum / static_cast<double>(pickSize));
-      outEs.emplace_back(std::sqrt(eSquaredSum) / static_cast<double>(pickSize));
+      outEs.emplace_back(std::sqrt(eSquaredSum) /
+                         static_cast<double>(pickSize));
       auto const groupedXWidth = *(endXIterator - 1) - *beginXIterator;
-      outDxs.emplace_back(std::sqrt(pow<2>(inDxs[pointIndex]) + pow<2>(FWHM_GAUSSIAN_EQUIVALENT * groupedXWidth)));
+      outDxs.emplace_back(
+          std::sqrt(pow<2>(inDxs[pointIndex]) +
+                    pow<2>(FWHM_GAUSSIAN_EQUIVALENT * groupedXWidth)));
     }
     begin = end;
     if (begin > inXs.back()) {
@@ -134,7 +148,9 @@ void GroupToXResolution::exec() {
   constructionYard.setE(std::move(outEs));
   constructionYard.setDx(std::move(outDxs));
   constructionYard.setDistribution(false);
-  API::MatrixWorkspace_sptr outWS = DataObjects::create<DataObjects::Workspace2D>(*inWS, constructionYard.build());
+  API::MatrixWorkspace_sptr outWS =
+      DataObjects::create<DataObjects::Workspace2D>(*inWS,
+                                                    constructionYard.build());
   setProperty(Prop::OUTPUT_WS, outWS);
 }
 
