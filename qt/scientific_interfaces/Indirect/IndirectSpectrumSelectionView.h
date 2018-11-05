@@ -34,16 +34,16 @@ public:
   virtual std::size_t minimumSpectrum() const;
   virtual std::size_t maximumSpectrum() const;
 
-  std::string spectraString() const;
-  std::string maskString() const;
+  virtual std::string spectraString() const;
+  virtual std::string maskString() const;
 
-  void displaySpectra(const std::string &spectraString);
-  void displaySpectra(int minimum, int maximum);
+  virtual void displaySpectra(const std::string &spectraString);
+  virtual void displaySpectra(int minimum, int maximum);
 
-  void setSpectraRange(int minimum, int maximum);
+  virtual void setSpectraRange(int minimum, int maximum);
 
-  void setSpectraRegex(const std::string &regex);
-  void setMaskBinsRegex(const std::string &regex);
+  virtual void setSpectraRegex(const std::string &regex);
+  virtual void setMaskBinsRegex(const std::string &regex);
 
   UserInputValidator &validateSpectraString(UserInputValidator &uiv) const;
   UserInputValidator &validateMaskBinsString(UserInputValidator &uiv) const;
@@ -54,7 +54,7 @@ public:
   void hideMaskBinErrorLabel();
 
   void setMaskSelectionEnabled(bool enabled);
-  void clear();
+  virtual void clear();
 
 public slots:
   void setMinimumSpectrum(std::size_t spectrum);

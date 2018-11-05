@@ -12,6 +12,7 @@
 
 #include "IndirectSpectrumSelectionPresenter.h"
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -24,35 +25,52 @@ namespace {
 
 class MockIndirectSpectrumSelectionView : public IndirectSpectrumSelectionView {
 public:
-  void modifySelectedSpectra(std::string const &spectra) {
+  void changeSelectedSpectra(std::string const &spectra) {
     emit selectedSpectraChanged(spectra);
   }
 
-  void modifySelectedSpectra(std::size_t const &minimum,
+  void changeSelectedSpectra(std::size_t const &minimum,
                              std::size_t const &maximum) {
     emit selectedSpectraChanged(minimum, maximum);
   }
 
-  void modifyMaskSpectrum(int const &spectrum) {
+  void changeMaskedSpectrum(int const &spectrum) {
     emit maskSpectrumChanged(spectrum);
   }
 
-  void modifyMask(std::string const &mask) { emit maskChanged(mask); }
+  void changeMask(std::string const &mask) { emit maskChanged(mask); }
+
+  MOCK_CONST_METHOD0(minimumSpectrum, std::size_t());
+  // MOCK_CONST_METHOD0(maximumSpectrum, std::size_t());
+
+  // MOCK_CONST_METHOD0(spectraString, std::string());
+  // MOCK_CONST_METHOD0(maskString, std::string());
+
+  // MOCK_METHOD1(displaySpectra, void(std::string const &spectraString));
+  // MOCK_METHOD2(displaySpectra, void(int minimum, int maximum));
+
+  // MOCK_METHOD2(setSpectraRange, void(int minimum, int maximum));
+
+  // MOCK_METHOD1(setSpectraRegex, void(std::string const &regex));
+  // MOCK_METHOD1(setMaskBinsRegex, void(std::string const &regex));
+
+  // MOCK_METHOD0(clear, void());
 };
 
 class MockIndirectFittingModel : public IndirectFittingModel {
-public:
-  MOCK_CONST_METHOD0(isMultiFit, bool());
-  MOCK_CONST_METHOD0(isInvalidFunction, boost::optional<std::string>());
-  MOCK_CONST_METHOD0(getFittingFunction, IFunction_sptr());
-
-  MOCK_METHOD2(addWorkspace,
-               void(MatrixWorkspace_sptr workspace, Spectra const &spectra));
-  MOCK_METHOD1(removeWorkspace, void(std::size_t index));
-  MOCK_METHOD1(setFitFunction, void(IFunction_sptr function));
-  MOCK_METHOD1(addOutput, void(IAlgorithm_sptr fitAlgorithm));
-
-  MOCK_CONST_METHOD0(getFittingAlgorithm, IAlgorithm_sptr());
+  // public:
+  //  MOCK_CONST_METHOD0(isMultiFit, bool());
+  //  MOCK_CONST_METHOD0(isInvalidFunction, boost::optional<std::string>());
+  //  MOCK_CONST_METHOD0(getFittingFunction, IFunction_sptr());
+  //
+  //  MOCK_METHOD2(addWorkspace,
+  //               void(MatrixWorkspace_sptr workspace, Spectra const
+  //               &spectra));
+  //  MOCK_METHOD1(removeWorkspace, void(std::size_t index));
+  //  MOCK_METHOD1(setFitFunction, void(IFunction_sptr function));
+  //  MOCK_METHOD1(addOutput, void(IAlgorithm_sptr fitAlgorithm));
+  //
+  //  MOCK_CONST_METHOD0(getFittingAlgorithm, IAlgorithm_sptr());
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
@@ -69,6 +87,9 @@ private:
 
 class IndirectSpectrumSelectionPresenterTest : public CxxTest::TestSuite {
 public:
+  /// To make sure everything is initialized
+  IndirectSpectrumSelectionPresenterTest() { FrameworkManager::Instance(); }
+
   static IndirectSpectrumSelectionPresenterTest *createSuite() {
     return new IndirectSpectrumSelectionPresenterTest();
   }
@@ -83,14 +104,22 @@ public:
     m_presenter = new IndirectSpectrumSelectionPresenter(m_model, m_view);
   }
 
-  void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
+  // void tearDown() override {
+  //  TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
+  //  TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
 
-    delete m_presenter;
-    delete m_model;
-    delete m_view;
-  }
+  //  delete m_presenter;
+  //  delete m_model;
+  //  delete m_view;
+  //}
+
+  // void test_initialize() {
+  //  MockIndirectSpectrumSelectionView view;
+  //  MockIndirectFittingModel model;
+  //  IndirectSpectrumSelectionPresenter presenter(&model, &view);
+
+  //  EXPECT_CALL(view, maximumSpectrum()).Times(0);
+  //}
 
   void test_test() {}
 
