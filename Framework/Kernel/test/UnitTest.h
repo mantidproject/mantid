@@ -1420,24 +1420,24 @@ public:
 
   void
   test_that_caption_returns_the_correct_label_for_the_TemperatureKelvin_unit() {
-    TS_ASSERT_EQUALS(temperatureKelvin.caption(), "Temperature");
+    TS_ASSERT_EQUALS(temperature.caption(), "Temperature");
   }
 
   void
   test_that_unitID_returns_the_correct_ID_for_the_TemperatureKelvin_unit() {
-    TS_ASSERT_EQUALS(temperatureKelvin.unitID(), "TemperatureKelvin");
+    TS_ASSERT_EQUALS(temperature.unitID(), "Temperature");
   }
 
   void test_that_label_returns_the_correct_unit_for_TemperatureKelvin() {
-    TS_ASSERT_EQUALS(temperatureKelvin.label(), "K");
+    TS_ASSERT_EQUALS(temperature.label(), "K");
   }
 
   void test_that_singleToTOF_throws_for_the_TemperatureKelvin_unit() {
-    TS_ASSERT_THROWS(temperatureKelvin.singleToTOF(1.0), std::runtime_error);
+    TS_ASSERT_THROWS(temperature.singleToTOF(1.0), std::runtime_error);
   }
 
   void test_that_singleFromTOF_throws_for_the_TemperatureKelvin_unit() {
-    TS_ASSERT_THROWS(temperatureKelvin.singleFromTOF(1.0), std::runtime_error);
+    TS_ASSERT_THROWS(temperature.singleFromTOF(1.0), std::runtime_error);
   }
 
 private:
@@ -1457,7 +1457,7 @@ private:
   Units::SpinEchoLength delta;
   Units::SpinEchoTime tau;
   Units::Degrees degrees;
-  Units::TemperatureKelvin temperatureKelvin;
+  Units::Temperature temperature;
 };
 
 #endif /*UNITTEST_H_*/

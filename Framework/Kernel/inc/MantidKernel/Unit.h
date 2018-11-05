@@ -640,10 +640,10 @@ class MANTID_KERNEL_DLL Phi : public Degrees {
 
 //=================================================================================================
 /// Temperature in kelvin
-class MANTID_KERNEL_DLL TemperatureKelvin : public Empty {
+class MANTID_KERNEL_DLL Temperature : public Empty {
 public:
-  TemperatureKelvin();
-  const std::string unitID() const override; ///< "TemperatureKelvin"
+  Temperature();
+  const std::string unitID() const override; ///< "Temperature"
   const std::string caption() const override { return "Temperature"; }
   const UnitLabel label() const override;
 
