@@ -211,7 +211,7 @@ class MantidAxes(Axes):
             ax.imshow(C)     #for arrays
             fig.show()
 
-        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.pcolormesh`
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.imshow`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
