@@ -336,7 +336,7 @@ void Quasi::plotCurrentPreview() {
     QString QfitWS = QString::fromStdString(fitName + "_");
     QfitWS += QString::number(m_previewSpec);
     if (program == "Lorentzians")
-      plotSpectra(QfitWS, {0, 1, 2, 4});
+      plotSpectra(QfitWS, {0, 1, 2, 3, 4});
     else
       plotSpectra(QfitWS, {0, 1, 2});
   } else if (m_uiForm.ppPlot->hasCurve("Sample")) {
