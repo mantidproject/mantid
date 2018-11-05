@@ -857,6 +857,12 @@
   <instrument name="Bilby">
     <technique>Small Angle Scattering</technique>
   </instrument>
+  
+  <instrument name="EMUau">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+  
 </facility>
 
 <!-- HZB -->

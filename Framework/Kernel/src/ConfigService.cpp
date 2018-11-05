@@ -51,7 +51,6 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/regex.hpp>
 
 #include <algorithm>
 #include <cctype>
