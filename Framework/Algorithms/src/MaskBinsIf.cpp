@@ -58,7 +58,7 @@ void MaskBinsIf::init() {
   declareProperty("Criterion", "",
                   "Masking criterion as a muparser expression; y: bin count, "
                   "e: bin error, x: bin center, dx: bin center error, s: "
-                  "spectrum axis value, i: workspace index.");
+                  "spectrum axis value.");
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
