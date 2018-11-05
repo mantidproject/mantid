@@ -111,15 +111,10 @@ void LoadEmptyInstrument::exec() {
   const std::string instrumentname = getPropertyValue("InstrumentName");
   Instrument_const_sptr instrument;
   Progress prog(this, 0.0, 1.0, 10);
-  if (LoadGeometry::isNexus(filename)) {
-    prog.reportIncrement(0, "Loading geometry from file");
-    instrument = NexusGeometry::NexusGeometryParser::createInstrument(filename);
-  } else if (LoadGeometry::isIDF(filename, instrumentname)) {
-    MatrixWorkspace_sptr ws = this->runLoadInstrument(filename, instrumentname);
-    instrument = ws->getInstrument();
-  } else {
-    throw std::invalid_argument("Input " + filename + " cannot be read");
-  }
+
+  // Call LoadIstrument as a child algorithm
+  MatrixWorkspace_sptr ws = this->runLoadInstrument(filename, instrumentname);
+  instrument = ws->getInstrument();
 
   // Get number of detectors stored in instrument
   const size_t number_spectra = instrument->getNumberDetectors();
