@@ -14,15 +14,18 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 
+#include <boost/math/special_functions/pow.hpp>
+
 using namespace Mantid;
 
 class GroupToXResolutionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GroupToXResolutionTest *createSuite() { return new GroupToXResolutionTest(); }
-  static void destroySuite( GroupToXResolutionTest *suite ) { delete suite; }
-
+  static GroupToXResolutionTest *createSuite() {
+    return new GroupToXResolutionTest();
+  }
+  static void destroySuite(GroupToXResolutionTest *suite) { delete suite; }
 
   void test_Init() {
     Algorithms::GroupToXResolution alg;
@@ -30,11 +33,12 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec() {
+  void test_single_point_remains_unchanged() {
     HistogramData::Points Xs{0.23};
     HistogramData::Counts Ys{1.42};
     HistogramData::Histogram h(Xs, Ys);
-    API::MatrixWorkspace_sptr inputWS = DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
+    API::MatrixWorkspace_sptr inputWS =
+        DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
     auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(1, 1.);
     inputWS->setSharedDx(0, std::move(Dxs));
     Algorithms::GroupToXResolution alg;
@@ -42,7 +46,8 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -55,7 +60,126 @@ public:
     TS_ASSERT(outputWS->hasDx(0))
     TS_ASSERT_EQUALS(outputWS->dx(0).front(), 1.)
   }
-};
 
+  void test_two_points_get_averaged() {
+    using boost::math::pow;
+    HistogramData::Points Xs{0.2, 0.6};
+    HistogramData::Counts Ys{1.5, 2.5};
+    HistogramData::CountStandardDeviations Es{2., 3.};
+    HistogramData::Histogram h(Xs, Ys, Es);
+    API::MatrixWorkspace_sptr inputWS =
+        DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
+    auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(2);
+    {
+      auto &DxData = Dxs.access();
+      DxData.front() = 1.2;
+      DxData.back() = 1.7;
+    }
+    inputWS->setSharedDx(0, std::move(Dxs));
+    Algorithms::GroupToXResolution alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FractionOfDx", 1.))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT_EQUALS(outputWS->x(0).front(), (0.2 + 0.6) / 2.)
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), (1.5 + 2.5) / 2.)
+    TS_ASSERT_EQUALS(outputWS->e(0).front(),
+                     std::sqrt(pow<2>(2.) + pow<2>(3.)) / 2.)
+    TS_ASSERT(outputWS->hasDx(0))
+    TS_ASSERT_EQUALS(outputWS->dx(0).front(),
+                     std::sqrt(pow<2>(1.2) + pow<2>(0.68 * (0.6 - 0.2))))
+  }
+
+  void test_two_spearate_points_remain_unchanged() {
+    HistogramData::Points Xs{0.2, 0.6};
+    HistogramData::Counts Ys{1.5, 2.5};
+    HistogramData::CountStandardDeviations Es{2., 3.};
+    HistogramData::Histogram h(Xs, Ys, Es);
+    API::MatrixWorkspace_sptr inputWS =
+        DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
+    auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(2);
+    {
+      auto &DxData = Dxs.access();
+      DxData.front() = 0.1;
+      DxData.back() = 0.3;
+    }
+    inputWS->setSharedDx(0, std::move(Dxs));
+    Algorithms::GroupToXResolution alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FractionOfDx", 1.))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 2)
+    TS_ASSERT_EQUALS(outputWS->x(0).front(), 0.2)
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), 1.5)
+    TS_ASSERT_EQUALS(outputWS->e(0).front(), 2.)
+    TS_ASSERT(outputWS->hasDx(0))
+    TS_ASSERT_EQUALS(outputWS->dx(0).front(), 0.1)
+    TS_ASSERT_EQUALS(outputWS->x(0).back(), 0.6)
+    TS_ASSERT_EQUALS(outputWS->y(0).back(), 2.5)
+    TS_ASSERT_EQUALS(outputWS->e(0).back(), 3.)
+    TS_ASSERT_EQUALS(outputWS->dx(0).back(), 0.3)
+  }
+
+  void test_four_points_grouped_into_two() {
+    using boost::math::pow;
+    HistogramData::Points Xs{0.2, 0.6, 5.1, 5.7};
+    HistogramData::Counts Ys{1.5, 2.5, -2.5, -1.5};
+    HistogramData::CountStandardDeviations Es{2., 3., 2.5, 1.5};
+    HistogramData::Histogram h(Xs, Ys, Es);
+    API::MatrixWorkspace_sptr inputWS =
+        DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
+    auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(4);
+    {
+      auto &DxData = Dxs.access();
+      DxData = {1., 0.1, 2., 0.2};
+    }
+    inputWS->setSharedDx(0, std::move(Dxs));
+    Algorithms::GroupToXResolution alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FractionOfDx", 1.))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 2)
+    TS_ASSERT_EQUALS(outputWS->x(0).front(), (0.2 + 0.6) / 2.)
+    TS_ASSERT_EQUALS(outputWS->y(0).front(), (1.5 + 2.5) / 2.)
+    TS_ASSERT_EQUALS(outputWS->e(0).front(),
+                     std::sqrt(pow<2>(2.) + pow<2>(3.)) / 2.)
+    TS_ASSERT(outputWS->hasDx(0))
+    TS_ASSERT_EQUALS(outputWS->dx(0).front(),
+                     std::sqrt(pow<2>(1.) + pow<2>(0.68 * (0.6 - 0.2))))
+    TS_ASSERT_EQUALS(outputWS->x(0).back(), (5.1 + 5.7) / 2.)
+    TS_ASSERT_EQUALS(outputWS->y(0).back(), (-2.5 + -1.5) / 2)
+    TS_ASSERT_EQUALS(outputWS->e(0).back(),
+                     std::sqrt(pow<2>(2.5) + pow<2>(1.5)) / 2.)
+    TS_ASSERT_EQUALS(outputWS->dx(0).back(),
+                     std::sqrt(pow<2>(2.) + pow<2>(0.68 * (5.7 - 5.1))))
+  }
+};
 
 #endif /* MANTID_ALGORITHMS_GROUPTOXRESOLUTIONTEST_H_ */
