@@ -147,7 +147,7 @@ const SampleEnvironment &Sample::getEnvironment() const {
  * ownership of the object.
  */
 void Sample::setEnvironment(std::unique_ptr<SampleEnvironment> env) {
-  m_environment = boost::shared_ptr<SampleEnvironment>(env.get());
+  m_environment = boost::shared_ptr<SampleEnvironment>(std::move(env));
 }
 
 /** Return a const reference to the OrientedLattice of this sample

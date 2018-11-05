@@ -66,7 +66,7 @@ public:
         envName, boost::make_shared<const Container>(""));
     kit->add(boost::make_shared<const CSGObject>());
 
-    TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
+    TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(std::move(kit)));
 
     const SampleEnvironment &sampleKit = sample.getEnvironment();
     // Test that this references the correct object
