@@ -77,6 +77,10 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     return the form class
     """
     filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
+    if not osp.exists(filepath):
+        raise ImportError('File "{}" does not exist'.format(filepath))
+    if not osp.isfile(filepath):
+        raise ImportError('File "{}" is not a file'.format(filepath))
     if baseinstance is not None:
         return loadUi(filepath, baseinstance=baseinstance)
     else:
@@ -152,3 +156,12 @@ def add_actions(target, actions):
         else:
             raise ValueError("Unexpected action type. "
                              "Expected one of (QAction,QMenu) but found '{}'".format(type(action)))
+
+
+def toQSettings(settings):
+    '''Utility function to convert supplied settings object to a qtpy.QtCore.QSettings
+    '''
+    if hasattr(settings, 'qsettings'):  # workbench.config.user
+        return settings.qsettings
+    else:  # must be a QSettings already
+        return settings

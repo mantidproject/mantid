@@ -47,9 +47,10 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
           SLOT(validateChemical()));
   connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
           SLOT(validateChemical()));
-  // Connect slots for plot and save
+  // Connect slots for run, plot and save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
   // Connect slots for toggling the mass/number density unit
   connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
@@ -71,6 +72,8 @@ void CalculatePaalmanPings::setup() { doValidation(true); }
 void CalculatePaalmanPings::validateChemical() { doValidation(true); }
 
 void CalculatePaalmanPings::run() {
+  setRunIsRunning(true);
+
   // Get correct corrections algorithm
   auto sampleShape = m_uiForm.cbSampleShape->currentText();
   auto algorithmName = sampleShape.replace(" ", "") + "PaalmanPingsCorrection";
@@ -303,49 +306,48 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
 
-  if (error) {
+  if (!error) {
+    // Convert the spectrum axis of correction factors to Q
+    const auto sampleWsName =
+        m_uiForm.dsSample->getCurrentDataName().toStdString();
+    MatrixWorkspace_sptr sampleWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            sampleWsName);
+    WorkspaceGroup_sptr corrections =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            m_pythonExportWsName);
+    for (size_t i = 0; i < corrections->size(); i++) {
+      MatrixWorkspace_sptr factorWs =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+      if (!factorWs || !sampleWs)
+        continue;
+
+      if (getEMode(sampleWs) == "Indirect") {
+        API::BatchAlgorithmRunner::AlgorithmRuntimeProps convertSpecProps;
+        IAlgorithm_sptr convertSpecAlgo =
+            AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+        convertSpecAlgo->initialize();
+        convertSpecAlgo->setProperty("InputWorkspace", factorWs);
+        convertSpecAlgo->setProperty("OutputWorkspace", factorWs->getName());
+        convertSpecAlgo->setProperty("Target", "ElasticQ");
+        convertSpecAlgo->setProperty("EMode", "Indirect");
+
+        try {
+          convertSpecAlgo->setProperty("EFixed", getEFixed(factorWs));
+        } catch (std::runtime_error &) {
+        }
+
+        m_batchAlgoRunner->addAlgorithm(convertSpecAlgo);
+      }
+    }
+
+    // Run algorithm queue
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+            SLOT(postProcessComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  } else
     emit showMessageBox("Absorption correction calculation failed.\nSee "
                         "Results Log for more details.");
-    return;
-  }
-
-  // Convert the spectrum axis of correction factors to Q
-  const auto sampleWsName =
-      m_uiForm.dsSample->getCurrentDataName().toStdString();
-  MatrixWorkspace_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName);
-  WorkspaceGroup_sptr corrections =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          m_pythonExportWsName);
-  for (size_t i = 0; i < corrections->size(); i++) {
-    MatrixWorkspace_sptr factorWs =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
-    if (!factorWs || !sampleWs)
-      continue;
-
-    if (getEMode(sampleWs) == "Indirect") {
-      API::BatchAlgorithmRunner::AlgorithmRuntimeProps convertSpecProps;
-      IAlgorithm_sptr convertSpecAlgo =
-          AlgorithmManager::Instance().create("ConvertSpectrumAxis");
-      convertSpecAlgo->initialize();
-      convertSpecAlgo->setProperty("InputWorkspace", factorWs);
-      convertSpecAlgo->setProperty("OutputWorkspace", factorWs->getName());
-      convertSpecAlgo->setProperty("Target", "ElasticQ");
-      convertSpecAlgo->setProperty("EMode", "Indirect");
-
-      try {
-        convertSpecAlgo->setProperty("EFixed", getEFixed(factorWs));
-      } catch (std::runtime_error &) {
-      }
-
-      m_batchAlgoRunner->addAlgorithm(convertSpecAlgo);
-    }
-  }
-
-  // Run algorithm queue
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(postProcessComplete(bool)));
-  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
@@ -356,17 +358,13 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
 void CalculatePaalmanPings::postProcessComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(postProcessComplete(bool)));
-
+  setRunIsRunning(false);
   if (error) {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
     emit showMessageBox("Correction factor post processing failed.\nSee "
                         "Results Log for more details.");
-    return;
   }
-
-  // Enable post processing plot and save
-  m_uiForm.cbPlotOutput->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
 }
 
 void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
@@ -544,9 +542,6 @@ void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
   }
 }
 
-/**
- * Handles saving of workspace
- */
 void CalculatePaalmanPings::saveClicked() {
 
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
@@ -554,13 +549,10 @@ void CalculatePaalmanPings::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/**
- * Handles mantid plotting of workspace
- */
 void CalculatePaalmanPings::plotClicked() {
+  setPlotResultIsPlotting(true);
 
   QString plotType = m_uiForm.cbPlotOutput->currentText();
-
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
 
     if (plotType == "Both" || plotType == "Wavelength")
@@ -569,7 +561,10 @@ void CalculatePaalmanPings::plotClicked() {
     if (plotType == "Both" || plotType == "Angle")
       plotTimeBin(QString::fromStdString(m_pythonExportWsName));
   }
+  setPlotResultIsPlotting(false);
 }
+
+void CalculatePaalmanPings::runClicked() { runTab(); }
 
 /**
  * Handle changing of the sample density unit
@@ -593,6 +588,35 @@ void CalculatePaalmanPings::changeCanDensityUnit(int index) {
   } else {
     m_uiForm.spCanDensity->setSuffix(" /A3");
   }
+}
+
+void CalculatePaalmanPings::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void CalculatePaalmanPings::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotOutput->setEnabled(enabled);
+}
+
+void CalculatePaalmanPings::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void CalculatePaalmanPings::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
+void CalculatePaalmanPings::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void CalculatePaalmanPings::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

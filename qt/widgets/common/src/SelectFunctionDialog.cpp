@@ -22,7 +22,6 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
-#include <QRegExp>
 #include <QVBoxLayout>
 
 /**

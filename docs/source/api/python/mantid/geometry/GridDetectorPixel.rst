@@ -2,7 +2,7 @@
  GridDetectorPixel
 ==========================
 
-This a python binding to the C++ class Mantid::Geometry::GridDetectorPixel.
+This is a Python binding to the C++ class Mantid::Geometry::GridDetectorPixel.
 
 *bases:* :py:obj:`mantid.geometry.Detector`
 

@@ -7,6 +7,7 @@
 #ifndef OPENGLERROR_H_
 #define OPENGLERROR_H_
 
+#include <ostream>
 #include <stdexcept>
 #include <string>
 

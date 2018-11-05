@@ -2,7 +2,7 @@
  InstrumentInfo
 ================
 
-This a python binding to the C++ class Mantid::Kernel::InstrumentInfo.
+This is a Python binding to the C++ class Mantid::Kernel::InstrumentInfo.
 
 
 .. module:`mantid.kernel`

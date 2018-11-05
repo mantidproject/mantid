@@ -27,7 +27,6 @@
 
 #include "MantidParallel/Communicator.h"
 
-#include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
 
 #include <MantidKernel/StringTokenizer.h>
