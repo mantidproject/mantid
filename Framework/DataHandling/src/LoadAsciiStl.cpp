@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadAsciiStl::isAsciiSTL(std::string filename) const {
+bool LoadAsciiStl::isAsciiSTL(std::string filename) {
   std::ifstream file(filename.c_str());
   if (!file) {
     // if the file cannot be read then it is not a valid asciiStl File
