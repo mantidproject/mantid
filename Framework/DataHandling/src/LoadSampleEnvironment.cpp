@@ -83,9 +83,9 @@ void LoadSampleEnvironment::exec() {
 
   auto asciiStlReader = LoadAsciiStl(filename);
   auto binaryStlReader = LoadBinaryStl(filename);
-  if (binaryStlReader.isBinarySTL()) {
+  if (binaryStlReader.isBinarySTL(filename)) {
     environmentMesh = binaryStlReader.readStl();
-  } else if (asciiStlReader.isAsciiSTL()) {
+  } else if (asciiStlReader.isAsciiSTL(filename)) {
     environmentMesh = asciiStlReader.readStl();
   } else {
     throw Kernel::Exception::ParseError(

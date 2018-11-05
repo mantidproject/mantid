@@ -17,7 +17,7 @@ class DLLExport LoadAsciiStl : LoadStl {
 public:
   LoadAsciiStl(std::string filename) : LoadStl(filename) {}
   std::unique_ptr<Geometry::MeshObject> readStl() override;
-  bool isAsciiSTL() const;
+  bool isAsciiSTL(std::string filename) const;
 
 private:
   int m_lineNumber = 0;

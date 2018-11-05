@@ -54,7 +54,7 @@ public:
     std::string path =
         FileFinder::Instance().getFullPath("invalid_vertexBin.stl");
     auto loader = LoadBinaryStl(path);
-    TS_ASSERT(!(loader.isBinarySTL()));
+    TS_ASSERT(!(loader.isBinarySTL(path)));
   }
   // check that isBinaryStl returns false if the file contains an incomplete
   // triangle
@@ -62,13 +62,13 @@ public:
     std::string path =
         FileFinder::Instance().getFullPath("invalid_triangleBin.stl");
     auto loader = LoadBinaryStl(path);
-    TS_ASSERT(!(loader.isBinarySTL()));
+    TS_ASSERT(!(loader.isBinarySTL(path)));
   }
 
   void test_fail_ascii_stl() {
     std::string path = FileFinder::Instance().getFullPath("cube.stl");
     auto loader = LoadBinaryStl(path);
-    TS_ASSERT(!(loader.isBinarySTL()));
+    TS_ASSERT(!(loader.isBinarySTL(path)));
   }
 };
 

@@ -203,9 +203,9 @@ void LoadSampleShape::exec() {
   } else /* stl */ {
     auto asciiStlReader = LoadAsciiStl(filename);
     auto binaryStlReader = LoadBinaryStl(filename);
-    if (binaryStlReader.isBinarySTL()) {
+    if (binaryStlReader.isBinarySTL(filename)) {
       shape = binaryStlReader.readStl();
-    } else if (asciiStlReader.isAsciiSTL()) {
+    } else if (asciiStlReader.isAsciiSTL(filename)) {
       shape = asciiStlReader.readStl();
     } else {
       throw Kernel::Exception::ParseError(

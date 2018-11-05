@@ -16,8 +16,8 @@
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadBinaryStl::isBinarySTL() {
-  Poco::File stlFile = Poco::File(m_filename);
+bool LoadBinaryStl::isBinarySTL(std::string filename) {
+  Poco::File stlFile = Poco::File(filename);
   if (!stlFile.exists()) {
     // if the file cannot be read then it is not a valid binary Stl File
     return false;
@@ -29,7 +29,7 @@ bool LoadBinaryStl::isBinarySTL() {
     return false;
   }
   uint32_t numberTrianglesLong;
-  std::ifstream myFile(m_filename.c_str(), std::ios::in | std::ios::binary);
+  std::ifstream myFile(filename.c_str(), std::ios::in | std::ios::binary);
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
   numberTrianglesLong = getNumberTriangles(streamReader);
   myFile.close();

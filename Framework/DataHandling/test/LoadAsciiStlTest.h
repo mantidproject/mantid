@@ -72,13 +72,13 @@ public:
   void test_return_false_on_binary_stl() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
     auto Loader = LoadAsciiStl(path);
-    TS_ASSERT(!(Loader.isAsciiSTL()));
+    TS_ASSERT(!(Loader.isAsciiSTL(path)));
   }
 
   void test_return_false_on_invalid_solid() {
     std::string path = FileFinder::Instance().getFullPath("invalid_solid.stl");
     auto Loader = LoadAsciiStl(path);
-    TS_ASSERT(!(Loader.isAsciiSTL()));
+    TS_ASSERT(!(Loader.isAsciiSTL(path)));
   }
 };
 
