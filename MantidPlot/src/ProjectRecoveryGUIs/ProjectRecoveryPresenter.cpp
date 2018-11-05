@@ -44,8 +44,8 @@ ProjectRecoveryPresenter::~ProjectRecoveryPresenter() {
 
 bool ProjectRecoveryPresenter::startRecoveryView() {
   try {
-    m_openView = RecoveryView;
     m_recView = new ProjectRecoveryView(m_mainWindow, this);
+    m_openView = RecoveryView;
     m_recView->exec();
   } catch (...) {
     return true;
@@ -65,8 +65,8 @@ bool ProjectRecoveryPresenter::startRecoveryView() {
 
 bool ProjectRecoveryPresenter::startRecoveryFailure() {
   try {
-    m_openView = FailureView;
     m_failureView = new RecoveryFailureView(m_mainWindow, this);
+    m_openView = FailureView;
     m_failureView->exec();
   } catch (...) {
     return true;
@@ -182,4 +182,9 @@ void ProjectRecoveryPresenter::changeStartMantidToCancelLabel() {
   }
 }
 
-void ProjectRecoveryPresenter::fillAllRows() { m_model->fillRows(); }
+void ProjectRecoveryPresenter::fillAllRows() {
+  // Only allow this to run once, first run will have value RecoveryView
+  if (m_openView == RecoveryView) {
+    m_model->fillRows();
+  }
+}
