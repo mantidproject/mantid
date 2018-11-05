@@ -315,12 +315,10 @@ public:
     inputFile = loaderLOKI.getPropertyValue("Filename");
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 loaderLOKI.getPropertyValue("Filename"));
+    TS_ASSERT_THROWS_NOTHING(result = loaderLOKI.getPropertyValue("Filename"));
     TS_ASSERT(!result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING(result =
-                                 loaderLOKI.getPropertyValue("Workspace"));
+    TS_ASSERT_THROWS_NOTHING(result = loaderLOKI.getPropertyValue("Workspace"));
     TS_ASSERT(!result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loaderLOKI.execute());
@@ -330,7 +328,8 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr outputWs;
     TS_ASSERT_THROWS_NOTHING(
-        outputWs = loaderLOKI.getProperty("Workspace"));
+        outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            wsName));
 
     auto &componentInfo = outputWs->componentInfo();
     auto &detectorInfo = outputWs->detectorInfo();
@@ -339,7 +338,6 @@ public:
 
     TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0])
     TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1])
-
   }
 
   void testExecHRP2() {

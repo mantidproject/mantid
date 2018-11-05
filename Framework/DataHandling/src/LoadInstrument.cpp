@@ -211,8 +211,6 @@ void LoadInstrument::IDFInstrumentLoader() {
 
 void LoadInstrument::NexusInstrumentLoader() {
   checkAndRetrieveInstrumentFilename();
-  m_filename = ExperimentInfo::getInstrumentFilename(
-      m_instName, m_workspace->getWorkspaceStartDate());
   Instrument_const_sptr instrument =
       NexusGeometry::NexusGeometryParser::createInstrument(m_filename);
   m_workspace->setInstrument(instrument);
