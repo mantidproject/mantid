@@ -217,10 +217,6 @@ Stitch1D::getOverlap(const double intersectionMin,
   }
   g_log.information("StartOverlap: " + std::to_string(interSectionMin));
   g_log.information("EndOverlap: " + std::to_string(interSectionMax));
-  if (interSectionMin > interSectionMax) {
-    g_log.error("EndOverlap is smaller than StartOverlap");
-    throw std::runtime_error("EndOverlap is smaller than StartOverlap");
-  }
   return std::make_pair(interSectionMin, interSectionMax);
 }
 
@@ -514,10 +510,8 @@ void Stitch1D::exec() {
   MatrixWorkspace_sptr rhs = rhsWS->clone();
   if (lhsWS->isHistogramData()) {
     if (startOverlap > endOverlap) {
-      std::string message = boost::str(
-          boost::format("StartOverlap (%0.9f) > EndOverlap (%0.9f).") %
-          startOverlap % endOverlap);
-      throw std::runtime_error(message);
+      g_log.error("EndOverlap is smaller than StartOverlap");
+      throw std::runtime_error("EndOverlap is smaller than StartOverlap");
     }
     MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
     const double xMin = params.front();
