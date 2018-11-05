@@ -11,6 +11,7 @@
 #include "IndirectSpectrumSelectionView.h"
 
 #include "../General/UserInputValidator.h"
+#include "DllConfig.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -24,7 +25,8 @@ namespace IDA {
 
 /** IndirectSpectrumSelectionPresenter
  */
-class DLLExport IndirectSpectrumSelectionPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionPresenter
+    : public QObject {
   Q_OBJECT
 public:
   IndirectSpectrumSelectionPresenter(IndirectFittingModel *model,

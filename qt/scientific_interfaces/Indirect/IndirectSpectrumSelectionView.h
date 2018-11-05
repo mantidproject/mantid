@@ -10,7 +10,7 @@
 #include "ui_IndirectSpectrumSelector.h"
 
 #include "../General/UserInputValidator.h"
-
+#include "DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -22,9 +22,8 @@ namespace IDA {
 
 enum class SpectrumSelectionMode { RANGE, STRING };
 
-/** IndirectSpectrumSelectionView
- */
-class DLLExport IndirectSpectrumSelectionView : public API::MantidWidget {
+class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionView
+    : public API::MantidWidget {
   Q_OBJECT
 public:
   IndirectSpectrumSelectionView(QWidget *parent = nullptr);
