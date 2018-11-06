@@ -508,8 +508,8 @@ void Stitch1D::exec() {
       g_log.error("EndOverlap is smaller than StartOverlap");
       throw std::runtime_error("EndOverlap is smaller than StartOverlap");
     } else {
-    startOverlap = overlap.second;
-    endOverlap = overlap.first;
+      startOverlap = overlap.second;
+      endOverlap = overlap.first;
     }
   }
   const bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
