@@ -151,9 +151,6 @@ public:
                             const bool entireRange) const override;
   EventWorkspace &operator=(const EventWorkspace &other) = delete;
 
-  /// Returns true if the workspace contains has common X bins
-  bool isCommonBins() const override;
-
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   EventWorkspace(const EventWorkspace &other);

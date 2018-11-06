@@ -963,47 +963,67 @@ bool MatrixWorkspace::isHistogramData() const {
  *  @return whether the workspace contains common X bins
  */
 bool MatrixWorkspace::isCommonBins() const {
-  if (!m_isCommonBinsFlagSet) {
-    m_isCommonBinsFlag = true;
+  if (m_isCommonBinsFlagSet) {
+    return m_isCommonBinsFlag;
+  }
 
-    const size_t numHist = getNumberHistograms();
-    // there being only one or zero histograms is accepted as not being an error
-    if (numHist > 1) {
-      const size_t numBins = x(0).size();
-      for (size_t i = 1; i < numHist; ++i) {
-        if (x(i).size() != numBins) {
+  m_isCommonBinsFlag = true;
+  const size_t numHist = this->getNumberHistograms();
+  // there being only one or zero histograms is accepted as not being an error
+  if (numHist <= 1) {
+    m_isCommonBinsFlagSet = true;
+    return m_isCommonBinsFlag;
+  }
+
+  // First check if the x-axis shares a common ptr.
+  const HistogramData::HistogramX *first = &x(0);
+  for (size_t i = 1; i < numHist; ++i) {
+    if (&x(i) != first) {
+      m_isCommonBinsFlag = false;
+      break;
+    }
+  }
+
+  // If true, we may return here.
+  if (m_isCommonBinsFlag) {
+    m_isCommonBinsFlagSet = true;
+    return m_isCommonBinsFlag;
+  }
+
+  m_isCommonBinsFlag = true;
+  // Check that that size of each histogram is identical.
+  const size_t numBins = x(0).size();
+  for (size_t i = 1; i < numHist; ++i) {
+    if (x(i).size() != numBins) {
+      m_isCommonBinsFlag = false;
+      break;
+    }
+  }
+
+  // Check that the values of each histogram are identical.
+  if (m_isCommonBinsFlag) {
+    const size_t numBins = x(0).size();
+    const size_t lastSpec = numHist - 1;
+    for (size_t i = 0; i < lastSpec; ++i) {
+      const auto &xi = x(i);
+      const auto &xip1 = x(i + 1);
+      for (size_t j = 0; j < numBins; ++j) {
+        const double first = xi[j];
+        const double next = xip1[j];
+        if (std::abs(first - next) / std::abs(first + next) > 1.0E-9) {
+          m_isCommonBinsFlag = false;
+          break;
+        }
+        // handle Nan's and inf's
+        if ((std::isinf(first) != std::isinf(next)) ||
+            (std::isnan(first) != std::isnan(next))) {
           m_isCommonBinsFlag = false;
           break;
         }
       }
-
-      // there being only one or zero histograms is accepted as not being an
-      // error
-      if (m_isCommonBinsFlag) {
-        const size_t numBins = x(0).size();
-        const size_t lastSpec = numHist - 1;
-        for (size_t i = 0; i < lastSpec; ++i) {
-          const auto &xi = x(i);
-          const auto &xip1 = x(i + 1);
-          for (size_t j = 0; j < numBins; ++j) {
-            const double first = xi[j];
-            const double next = xip1[j];
-            if (std::abs(first - next) / std::abs(first + next) > 1.0E-9) {
-              m_isCommonBinsFlag = false;
-              break;
-            }
-            // handle Nan's and inf's
-            if ((std::isinf(first) != std::isinf(next)) ||
-                (std::isnan(first) != std::isnan(next))) {
-              m_isCommonBinsFlag = false;
-              break;
-            }
-          }
-        }
-      }
     }
-    m_isCommonBinsFlagSet = true;
   }
+  m_isCommonBinsFlagSet = true;
   return m_isCommonBinsFlag;
 }
 

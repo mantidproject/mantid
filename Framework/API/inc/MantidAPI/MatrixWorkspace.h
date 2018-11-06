@@ -585,7 +585,6 @@ private:
   /// A text label for use when plotting spectra
   std::string m_YUnitLabel;
 
-protected:
   /// Flag indicating whether the m_isCommonBinsFlag has been set. False by
   /// default
   mutable bool m_isCommonBinsFlagSet{false};

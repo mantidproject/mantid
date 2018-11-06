@@ -605,30 +605,6 @@ void EventWorkspace::resetAllXToSingleBin() {
   setAllX({tofmin, tofmax});
 }
 
-bool EventWorkspace::isCommonBins() const {
-  if (!m_isCommonBinsFlagSet) {
-    m_isCommonBinsFlag = true;
-    const size_t numHist = this->getNumberHistograms();
-    // there being only one or zero histograms is accepted as not being an error
-    if (numHist > 1) {
-      // First check if the x-axis shares a common cow_ptr.
-      auto first = data[0]->ptrX();
-      for (const auto &el : data) {
-        if (el->ptrX() != first) {
-          m_isCommonBinsFlag = false;
-          break;
-        }
-      }
-      // If false, we need to check more carefully.
-      if (!m_isCommonBinsFlag) {
-        return MatrixWorkspace::isCommonBins();
-      }
-    }
-    m_isCommonBinsFlagSet = true;
-  }
-  return m_isCommonBinsFlag;
-}
-
 /** Task for sorting an event list */
 class EventSortingTask {
 public:
