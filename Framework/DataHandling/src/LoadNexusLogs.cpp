@@ -541,7 +541,7 @@ void LoadNexusLogs::loadSELog(
       }
       logValue = createTimeSeries(file, propName);
       file.closeGroup();
-    } catch (::NeXus::Exception &e) {
+    } catch (std::exception &e) {
       g_log.warning() << "IXseblock entry '" << entry_name
                       << "' gave an error when loading "
                       << "a time series:'" << e.what() << "'. Skipping entry\n";
