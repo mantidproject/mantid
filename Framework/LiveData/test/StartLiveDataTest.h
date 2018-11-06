@@ -38,8 +38,7 @@ public:
   static void destroySuite(StartLiveDataTest *suite) { delete suite; }
 
   StartLiveDataTest()
-      : loadTESTFacility("unit_testing/UnitTestFacilities.xml",
-                         "TEST") {}
+      : loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST") {}
 
   void test_Init() {
     StartLiveData alg;

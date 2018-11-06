@@ -37,8 +37,7 @@ public:
     auto &config = ConfigService::Instance();
     auto baseInstDir = config.getInstrumentDirectory();
     Poco::Path testFile =
-        Poco::Path(baseInstDir)
-            .resolve("unit_testing/UnitTestFacilities.xml");
+        Poco::Path(baseInstDir).resolve("unit_testing/UnitTestFacilities.xml");
     // Load the test facilities file
     config.updateFacilities(testFile.toString());
     config.setFacility("TEST");

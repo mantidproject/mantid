@@ -96,8 +96,7 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
 
     FrameworkManager::Instance().exec(
         "LoadInstrument", 6, "Workspace", "TOPAZ_3007", "Filename",
-        "unit_testing/MINITOPAZ_Definition.xml", "RewriteSpectraMap",
-        "True");
+        "unit_testing/MINITOPAZ_Definition.xml", "RewriteSpectraMap", "True");
 
     // Match the goniometer angles
     WorkspaceCreationHelper::setGoniometer(ws, 86.92, 135.00, -105.66);

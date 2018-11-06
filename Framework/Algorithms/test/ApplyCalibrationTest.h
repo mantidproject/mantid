@@ -105,8 +105,8 @@ public:
     const std::string wsName("ApplyCabrationWs");
     Mantid::DataHandling::LoadEmptyInstrument loader;
     loader.initialize();
-    loader.setPropertyValue(
-        "Filename", "unit_testing/MAPS_Definition_Reduced.xml");
+    loader.setPropertyValue("Filename",
+                            "unit_testing/MAPS_Definition_Reduced.xml");
     loader.setPropertyValue("OutputWorkspace", wsName);
     loader.execute();
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();

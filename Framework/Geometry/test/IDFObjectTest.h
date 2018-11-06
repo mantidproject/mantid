@@ -54,9 +54,8 @@ public:
   }
 
   void testGetParentDirectory() {
-    const Poco::Path expectedDir =
-        Poco::Path(ConfigService::Instance().getInstrumentDirectory() +
-                   "/unit_testing/");
+    const Poco::Path expectedDir = Poco::Path(
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/");
     std::string filename = expectedDir.toString() + "IDF_for_UNIT_TESTING.xml";
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(expectedDir.toString(),
@@ -83,8 +82,8 @@ public:
   void testGetFileNameOnly() {
     const std::string filenameonly = "IDF_for_UNIT_TESTING.xml";
     const std::string filename =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/" + filenameonly;
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/" +
+        filenameonly;
     IDFObject obj(filename);
     TS_ASSERT_EQUALS(filenameonly, obj.getFileNameOnly());
   }

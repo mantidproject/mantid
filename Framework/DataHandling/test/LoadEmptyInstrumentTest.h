@@ -51,8 +51,7 @@ public:
   ScopedFile createIDFFileObject(const std::string &idf_filename,
                                  const std::string &idf_file_contents) {
     const std::string instrument_dir =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/";
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
 
     return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
   }
@@ -720,8 +719,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename",
-                            "unit_testing/DUM_Definition.xml");
+    loader.setPropertyValue("Filename", "unit_testing/DUM_Definition.xml");
     loader.setProperty("MakeEventWorkspace", asEvent);
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyDUMInstrumentTest";
@@ -923,8 +921,8 @@ public:
     AnalysisDataService::Instance().remove(wsName);
 
     loaderEMU2.initialize();
-    loaderEMU2.setPropertyValue(
-        "Filename", "unit_testing/EMU_for_UNIT_TESTING.XML");
+    loaderEMU2.setPropertyValue("Filename",
+                                "unit_testing/EMU_for_UNIT_TESTING.XML");
     wsName = "LoadEmptyInstrumentParamEMU2Test";
     loaderEMU2.setPropertyValue("OutputWorkspace", wsName);
 
@@ -1022,7 +1020,8 @@ public:
   void test_output_workspace_contains_instrument_with_expected_name() {
     LoadEmptyInstrument alg;
     alg.setChild(true);
-    const std::string inputFile = "SMALLFAKE_example_geometry.hdf5";
+    const std::string inputFile =
+        "unit_testing/SMALLFAKE_example_geometry.hdf5";
     alg.initialize();
     alg.setPropertyValue("Filename", inputFile);
     alg.setPropertyValue("OutputWorkspace", "dummy");

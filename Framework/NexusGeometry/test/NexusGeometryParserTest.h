@@ -49,7 +49,7 @@ public:
   static void destroySuite(NexusGeometryParserTest *suite) { delete suite; }
 
   std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
-    H5std_string nexusFilename = "SMALLFAKE_example_geometry.hdf5";
+    H5std_string nexusFilename = "unit_testing/SMALLFAKE_example_geometry.hdf5";
     const auto fullpath = Kernel::ConfigService::Instance().getFullPath(
         nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
 

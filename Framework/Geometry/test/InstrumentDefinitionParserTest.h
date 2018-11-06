@@ -103,8 +103,7 @@ private:
         "version=\"1.0\"><PolyData/></VTKFile>";
 
     const std::string instrument_dir =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/";
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
     std::string vtp_dir = ConfigService::Instance().getVTPFileDirectory();
     if (!put_vtp_next_to_IDF) {
       vtp_dir = ConfigService::Instance().getTempDir();
@@ -119,8 +118,7 @@ private:
   ScopedFile createIDFFileObject(const std::string &idf_filename,
                                  const std::string &idf_file_contents) {
     const std::string instrument_dir =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/";
+        ConfigService::Instance().getInstrumentDirectory() + "/unit_testing/";
 
     return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
   }
@@ -542,9 +540,8 @@ public:
   }
 
   void test_parse_RectangularDetector() {
-    std::string filename =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "/unit_testing/IDF_for_RECTANGULAR_UNIT_TESTING.xml";
+    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
+                           "/unit_testing/IDF_for_RECTANGULAR_UNIT_TESTING.xml";
     std::string xmlText = Strings::loadFile(filename);
     boost::shared_ptr<const Instrument> i;
 
@@ -1054,8 +1051,7 @@ public:
 
   void testLoadingAndParsing() {
     const std::string filename =
-        m_instrumentDirectoryPath +
-        "/unit_testing/IDF_for_UNIT_TESTING.xml";
+        m_instrumentDirectoryPath + "/unit_testing/IDF_for_UNIT_TESTING.xml";
     const std::string xmlText = Strings::loadFile(filename);
 
     boost::shared_ptr<const Instrument> instrument;

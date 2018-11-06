@@ -42,8 +42,7 @@ public:
   static void destroySuite(MonitorLiveDataTest *suite) { delete suite; }
 
   MonitorLiveDataTest()
-      : loadTESTFacility("unit_testing/UnitTestFacilities.xml",
-                         "TEST") {}
+      : loadTESTFacility("unit_testing/UnitTestFacilities.xml", "TEST") {}
 
   void setUp() override {
     // Register algorithms

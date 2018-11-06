@@ -355,9 +355,8 @@ public:
     // the instrument folder and
     // with an extension of its name after the 'Definition' not present in a
     // parameter file.
-    doTestParameterFileSelection(
-        "unit_testing/HRPD_Definition_Test3.xml",
-        "HRPD_Parameters.xml", "S");
+    doTestParameterFileSelection("unit_testing/HRPD_Definition_Test3.xml",
+                                 "HRPD_Parameters.xml", "S");
   }
 
   void testExecHRP4() {
@@ -365,17 +364,15 @@ public:
     // in the same folder and
     // with the same extension ('_Test4') of its name after the 'Definition' or
     // 'Parameter'.
-    doTestParameterFileSelection(
-        "unit_testing/HRPD_Definition_Test4.xml",
-        "unit_testing/HRPD_Parameters_Test4.xml", "T");
+    doTestParameterFileSelection("unit_testing/HRPD_Definition_Test4.xml",
+                                 "unit_testing/HRPD_Parameters_Test4.xml", "T");
   }
 
   void testExecHRP5() {
     // Test Parameter file outside instrument folder is used by an IDF file in
     // the same folder
-    doTestParameterFileSelection(
-        "unit_testing/HRPDTEST_Definition.xml",
-        "unit_testing/HRPDTEST_Parameters.xml", "U");
+    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition.xml",
+                                 "unit_testing/HRPDTEST_Parameters.xml", "U");
   }
 
   void testExecHRP6() {
@@ -385,9 +382,9 @@ public:
     // 'Parameter'
     // even though there is a definition file without an extension in the same
     // folder.
-    doTestParameterFileSelection(
-        "unit_testing/HRPDTEST_Definition_Test6.xml",
-        "unit_testing/HRPDTEST_Parameters_Test6.xml", "V");
+    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition_Test6.xml",
+                                 "unit_testing/HRPDTEST_Parameters_Test6.xml",
+                                 "V");
   }
 
   void testExecHRP7() {
@@ -395,9 +392,8 @@ public:
     // same instrument folder and
     // with an extension of its name after the 'Definition' not present in a
     // parameter file.
-    doTestParameterFileSelection(
-        "unit_testing/HRPDTEST_Definition_Test7.xml",
-        "HRPDTEST_Parameters.xml", "U");
+    doTestParameterFileSelection("unit_testing/HRPDTEST_Definition_Test7.xml",
+                                 "HRPDTEST_Parameters.xml", "U");
   }
 
   void testNeutronicPositions() {
@@ -407,8 +403,7 @@ public:
 
     LoadInstrument loader;
     loader.initialize();
-    loader.setPropertyValue("Filename",
-                            "unit_testing/INDIRECT_Definition.xml");
+    loader.setPropertyValue("Filename", "unit_testing/INDIRECT_Definition.xml");
     MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     loader.setProperty("Workspace", ws);

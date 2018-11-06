@@ -130,7 +130,7 @@ public:
 
   void test_caseless() {
     Poco::Path pattern(base.toString() + "instrument",
-                       "IDFs_for_unit_TESTING/dum_Definition.xml");
+                       "unit_TESTING/dum_Definition.xml");
 
     std::set<std::string> files;
     Glob::glob(pattern, files, Poco::Glob::GLOB_CASELESS);

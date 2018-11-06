@@ -830,8 +830,8 @@ public:
   void test_masking() {
     LoadEmptyInstrument createWorkspace;
     createWorkspace.initialize();
-    createWorkspace.setPropertyValue(
-        "Filename", "unit_testing/IDF_for_UNIT_TESTING.xml");
+    createWorkspace.setPropertyValue("Filename",
+                                     "unit_testing/IDF_for_UNIT_TESTING.xml");
     createWorkspace.setPropertyValue("OutputWorkspace", "testSpace");
     createWorkspace.execute();
     auto ws = boost::dynamic_pointer_cast<Workspace2D>(
