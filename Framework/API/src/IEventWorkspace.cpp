@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
 
@@ -25,7 +31,7 @@ const std::string IEventWorkspace::toString() const {
   }
   return os.str();
 }
-}
+} // namespace API
 
 ///\cond TEMPLATE
 /*
@@ -68,7 +74,7 @@ IPropertyManager::getValue<Mantid::API::IEventWorkspace_const_sptr>(
     throw std::runtime_error(message);
   }
 }
-}
+} // namespace Kernel
 
 // namespace Kernel
 } // namespace Mantid

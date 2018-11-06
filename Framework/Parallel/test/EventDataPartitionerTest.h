@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PARALLEL_EVENTDATAPARTITIONERTEST_H_
 #define MANTID_PARALLEL_EVENTDATAPARTITIONERTEST_H_
 
@@ -14,10 +20,10 @@ namespace detail {
 bool operator==(const Event<double> &a, const Event<double> &b) {
   return a.index == b.index && a.tof == b.tof && a.pulseTime == b.pulseTime;
 }
-}
-}
-}
-}
+} // namespace detail
+} // namespace IO
+} // namespace Parallel
+} // namespace Mantid
 using Event = detail::Event<double>;
 
 class EventDataPartitionerTest : public CxxTest::TestSuite {

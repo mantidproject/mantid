@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDPLOTTINGCMAPSPROVIDER_H_
 #define MDPLOTTINGCMAPSPROVIDER_H_
 
@@ -12,27 +18,6 @@ class QStringList;
   MD color map files
 
   @date 7/1/2015
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
 class MdPlottingCmapsProvider {
@@ -73,7 +58,7 @@ private:
 
   /**
    * Compare the colormap names of the Slice Viewer and the VSI and extract all
-   * indicees of the list of Slice Viewer color maps
+   * indices of the list of Slice Viewer color maps
    * which also exist in the list of the VSI color maps.
    * @param colorMapNamesSliceViewer A list of color maps of the Slice Viewer.
    * @param colorMapNamesVsi A list of color maps for the VSI.

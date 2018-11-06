@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_H_
 #define MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidMDAlgorithms/MDWSDescription.h"
-#include "MantidMDAlgorithms/Integrate3DEvents.h"
-#include "MantidMDAlgorithms/UnitsConversionHelper.h"
-#include "MantidMDAlgorithms/MDTransfInterface.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidMDAlgorithms/Integrate3DEvents.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 namespace Mantid {
 namespace Geometry {

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SetUB.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -143,5 +149,5 @@ void SetUB::exec() {
   this->setProperty("Workspace", ws);
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

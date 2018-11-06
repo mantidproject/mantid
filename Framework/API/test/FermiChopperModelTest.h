@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FERMICHOPPERMODELTEST_H_
 #define FERMICHOPPERMODELTEST_H_
 
@@ -5,8 +11,8 @@
 #include "MantidAPI/Run.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 class FermiChopperModelTest : public CxxTest::TestSuite {
   using FermiChopperModel_sptr =

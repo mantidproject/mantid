@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -24,6 +30,13 @@ std::vector<T, Ts...> repeat(std::vector<T, Ts...> const &vec, std::size_t n) {
   for (; n > 0; --n)
     result.insert(result.end(), vec.begin(), vec.end());
   return result;
+}
+
+template <typename T>
+std::vector<T> getIncrementingSequence(const T &from, std::size_t length) {
+  std::vector<T> sequence(length);
+  std::iota(sequence.begin(), sequence.end(), from);
+  return sequence;
 }
 
 std::vector<std::string> appendSuffix(std::vector<std::string> const &vec,
@@ -80,6 +93,15 @@ std::vector<T> getColumnValues(Column const &column, std::size_t startRow,
   values.reserve(1 + (endRow - startRow));
   extractColumnValues<T>(column, startRow, endRow, std::back_inserter(values));
   return values;
+}
+
+std::vector<double> getNumericColumnValuesOrIndices(Column const &column,
+                                                    std::size_t startRow,
+                                                    std::size_t endRow) {
+  auto const length = startRow > endRow ? 0 : 1 + endRow - startRow;
+  if (column.isNumber())
+    return getColumnValues<double>(column, startRow, endRow);
+  return getIncrementingSequence(0.0, length);
 }
 
 std::string getColumnName(Column_const_sptr column) { return column->name(); }
@@ -256,8 +278,8 @@ void ProcessIndirectFitParameters::exec() {
   auto const startRow = getStartRow();
   auto const endRow = getEndRow(inputWs->rowCount() - 1);
 
-  auto const x =
-      getColumnValues<double>(*inputWs->getColumn(xColumn), startRow, endRow);
+  auto const x = getNumericColumnValuesOrIndices(*inputWs->getColumn(xColumn),
+                                                 startRow, endRow);
   auto const yFilter =
       makeColumnNameFilter(EndsWithOneOf(std::move(parameterNames)));
   auto const eFilter =

@@ -1,24 +1,30 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DownloadFile.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidAPI/FileProperty.h"
 
 #include "Poco/URI.h"
 
-#include "boost/make_shared.hpp"
 #include "boost/algorithm/string/predicate.hpp"
+#include "boost/make_shared.hpp"
 
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace Mantid {
 namespace DataHandling {
 
+using Mantid::API::FileProperty;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::StringListValidator;
-using Mantid::API::FileProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DownloadFile)

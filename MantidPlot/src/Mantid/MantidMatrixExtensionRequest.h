@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDPLOT_MANTIDMATRIXEXTENSIONREQUEST_H
 #define MANTIDPLOT_MANTIDMATRIXEXTENSIONREQUEST_H
 
+#include "IMantidMatrixExtensionHandler.h"
 #include "MantidMatrixModel.h"
 #include "MantidMatrixTabExtension.h"
-#include "IMantidMatrixExtensionHandler.h"
 #include <memory>
 
 class MantidMatrixExtensionRequest {

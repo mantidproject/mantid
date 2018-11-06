@@ -1,25 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_SEQDOMAINSPECTRUMCREATORTEST_H_
 #define MANTID_CURVEFITTING_SEQDOMAINSPECTRUMCREATORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidCurveFitting/SeqDomain.h"
+#include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
-
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

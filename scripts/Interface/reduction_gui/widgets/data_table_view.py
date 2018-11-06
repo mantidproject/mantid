@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 DataTable Widget for data runs.
 """
@@ -29,7 +35,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         def checkAndConvertRow(row):
             assert(len(row) == self.columnCount())
             return list(row)
-        self._tableData = map(checkAndConvertRow, data)
+        self._tableData = list(map(checkAndConvertRow, data))
 
     def _numRows(self):
         """

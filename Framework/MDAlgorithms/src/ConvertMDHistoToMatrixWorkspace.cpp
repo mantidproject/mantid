@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
-#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
@@ -81,7 +87,7 @@ size_t findXAxis(const VMD &start, const VMD &end,
   xAxisLabel = originalWS->getDimension(dimIndex)->getName();
   return dimIndex;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -130,8 +136,8 @@ void ConvertMDHistoToMatrixWorkspace::exec() {
 }
 
 /**
-  * Make 1D MatrixWorkspace
-  */
+ * Make 1D MatrixWorkspace
+ */
 void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
@@ -236,8 +242,8 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
 }
 
 /**
-  * Make 2D MatrixWorkspace
-  */
+ * Make 2D MatrixWorkspace
+ */
 void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   // get the input workspace
   IMDHistoWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
@@ -338,10 +344,10 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
 }
 
 /**
-  * Calculate the stride for a dimension.
-  * @param workspace :: An MD workspace.
-  * @param dim :: A dimension index to calculate the stride for.
-  */
+ * Calculate the stride for a dimension.
+ * @param workspace :: An MD workspace.
+ * @param dim :: A dimension index to calculate the stride for.
+ */
 size_t ConvertMDHistoToMatrixWorkspace::calcStride(
     const API::IMDHistoWorkspace &workspace, size_t dim) const {
   size_t stride = 1;

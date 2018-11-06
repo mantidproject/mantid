@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 
-#include "MantidKernel/Memory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidCrystal/BackgroundStrategy.h"
-#include "MantidCrystal/ICluster.h"
 #include "MantidCrystal/Cluster.h"
 #include "MantidCrystal/ClusterRegister.h"
+#include "MantidCrystal/ICluster.h"
+#include "MantidKernel/Memory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -212,7 +218,7 @@ void memoryCheck(size_t nPoints) {
     throw std::runtime_error(basicMessage);
   }
 }
-}
+} // namespace
 
 /**
  * Constructor

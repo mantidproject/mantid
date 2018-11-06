@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_MERGEMDEWTEST_H_
 #define MANTID_MDEVENTS_MERGEMDEWTEST_H_
 
-#include "MantidMDAlgorithms/MergeMDFiles.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidMDAlgorithms/MergeMDFiles.h"
+#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

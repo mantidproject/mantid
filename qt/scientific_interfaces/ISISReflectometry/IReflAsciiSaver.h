@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLASCIISAVER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLASCIISAVER_H
-#include <vector>
-#include <string>
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include <string>
+#include <vector>
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -55,6 +61,6 @@ public:
                     FileFormatOptions const &inputParameters) const = 0;
   virtual ~IReflAsciiSaver() = default;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_IREFLASCIISAVER_H

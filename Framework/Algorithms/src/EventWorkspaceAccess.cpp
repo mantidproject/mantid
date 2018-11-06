@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EventWorkspaceAccess.h"
 
 namespace Mantid {
@@ -13,5 +19,5 @@ decltype(std::mem_fn(
                  (DataObjects::EventWorkspace::*)(const std::size_t)) &
                 DataObjects::EventWorkspace::getSpectrum);
 ///@endcond
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

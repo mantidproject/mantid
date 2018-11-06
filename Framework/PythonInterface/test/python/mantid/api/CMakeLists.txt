@@ -14,7 +14,6 @@ set ( TEST_PY_FILES
   CompositeFunctionTest.py
   DataProcessorAlgorithmTest.py
   DeprecatedAlgorithmCheckerTest.py
-  DetectorInfoTest.py
   ExperimentInfoTest.py
   FilePropertyTest.py
   FileFinderTest.py

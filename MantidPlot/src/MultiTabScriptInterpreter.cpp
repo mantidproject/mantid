@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------
 // Includes
 //-----------------------------------------------------
@@ -8,24 +14,24 @@
 #include "ScriptFileInterpreter.h"
 #include "ScriptOutputDisplay.h"
 
+#include "MultiTabScriptInterpreter.h"
 #include "ScriptingEnv.h"
 #include "ScriptingLangDialog.h"
-#include "MultiTabScriptInterpreter.h"
 
 #include "MantidQtWidgets/Common/ScriptEditor.h"
 
 // Qt
-#include <QPoint>
 #include <QAction>
+#include <QContextMenuEvent>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QFontDatabase>
+#include <QListWidget>
 #include <QMenu>
 #include <QMessageBox>
-#include <QContextMenuEvent>
-#include <QTabBar>
-#include <QFileInfo>
-#include <QFileDialog>
-#include <QListWidget>
+#include <QPoint>
 #include <QSpinBox>
-#include <QFontDatabase>
+#include <QTabBar>
 
 //***************************************************************************
 //
@@ -197,7 +203,7 @@ void MultiTabScriptInterpreter::closeAllTabs() {
 /**
  *  This method is useful for saving the currently opened script files to
  * project file
-*/
+ */
 QString MultiTabScriptInterpreter::saveToString() {
   int nscripts = 0;
   QString fileNames;
@@ -660,7 +666,7 @@ void MultiTabScriptInterpreter::contextMenuEvent(QContextMenuEvent *event) {
 /**
  * A custom event handler, which in this case monitors for ScriptChangeEvent
  * signals
- * @param event :: The custome event
+ * @param event :: The custom event
  */
 void MultiTabScriptInterpreter::customEvent(QEvent *event) {
   if (!isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT) {
@@ -754,9 +760,9 @@ void MultiTabScriptInterpreter::updateRecentScriptList(
 }
 
 /**
-* This method returns the recent scripts list
-* @returns a list containing the name of the recent scripts.
-*/
+ * This method returns the recent scripts list
+ * @returns a list containing the name of the recent scripts.
+ */
 QStringList MultiTabScriptInterpreter::recentScripts() {
   return m_recentScriptList;
 }

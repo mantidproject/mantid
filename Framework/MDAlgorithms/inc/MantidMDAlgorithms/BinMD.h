@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_BINMD_H_
 #define MANTID_MDALGORITHMS_BINMD_H_
 
@@ -18,7 +24,7 @@ namespace Mantid {
 namespace Geometry {
 // Forward declaration
 class MDImplicitFunction;
-}
+} // namespace Geometry
 namespace MDAlgorithms {
 
 /** Take a MDEventWorkspace and bin it to a dense histogram
@@ -86,7 +92,7 @@ private:
   bool m_accumulate{false};
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_BINMD_H_ */

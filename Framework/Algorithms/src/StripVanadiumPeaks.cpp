@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/StripVanadiumPeaks.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/TableRow.h"
@@ -37,9 +43,10 @@ void StripVanadiumPeaks::init() {
   auto min = boost::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
   // The estimated width of a peak in terms of number of channels
-  declareProperty("PeakWidthPercent", 1.0, min, "The estimated peak width as a "
-                                                "percentage of the d-spacing "
-                                                "of the center of the peak.");
+  declareProperty("PeakWidthPercent", 1.0, min,
+                  "The estimated peak width as a "
+                  "percentage of the d-spacing "
+                  "of the center of the peak.");
 
   declareProperty(
       "AlternativePeakPositions", "",

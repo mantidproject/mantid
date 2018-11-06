@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import AppendSpectra, CloneWorkspace, ElasticWindow, LoadLog, Logarithm, SortXAxis, Transpose
@@ -227,8 +233,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         instr, run_number = getInstrRun(workspace.getName())
 
-        instrument = config.getFacility().instrument(instr)
-        pad_num = instrument.zeroPadding(int(run_number))
+        pad_num = config.getInstrument(instr).zeroPadding(int(run_number))
         zero_padding = '0' * (pad_num - len(run_number))
 
         run_name = instr + zero_padding + run_number

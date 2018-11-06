@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_APPLYDETAILEDBALANCETEST_H_
 #define MANTID_ALGORITHMS_APPLYDETAILEDBALANCETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -62,9 +68,10 @@ public:
     for (std::size_t i = 0; i < 5; ++i) {
       TS_ASSERT_DELTA(
           outws->readY(0)[i],
-          M_PI * (1 - std::exp(-11.604519 *
-                               (inws->readX(0)[i] + inws->readX(0)[i + 1]) /
-                               2. / 300.)) *
+          M_PI *
+              (1 - std::exp(-11.604519 *
+                            (inws->readX(0)[i] + inws->readX(0)[i + 1]) / 2. /
+                            300.)) *
               inws->readY(0)[i],
           1e-8);
     }

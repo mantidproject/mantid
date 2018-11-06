@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADQKKTEST_H_
 #define LOADQKKTEST_H_
 
-#include "MantidDataHandling/LoadQKK.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadQKK.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
-#include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::ConfigServiceImpl;
 using namespace Mantid::API;

@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROPERTYMANAGERTEST_H_
 #define PROPERTYMANAGERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
@@ -48,15 +54,15 @@ Mantid::Kernel::TimeSeriesProperty<bool> *createTestFilter() {
   filter->addValue("2007-11-30T16:17:39", false);
   return filter;
 }
-}
+} // namespace
 
 class PropertyManagerHelper : public PropertyManager {
 public:
   PropertyManagerHelper() : PropertyManager() {}
 
   using PropertyManager::declareProperty;
-  using PropertyManager::setProperty;
   using PropertyManager::getPointerToProperty;
+  using PropertyManager::setProperty;
 };
 
 class PropertyManagerTest : public CxxTest::TestSuite {

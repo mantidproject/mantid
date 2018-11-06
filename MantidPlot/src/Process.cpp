@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "Process.h"
 
 #include <QCoreApplication>
@@ -8,8 +14,8 @@
 #include <QFile>
 #elif defined(Q_OS_WIN)
 #define WIN32_LEAN_AND_MEAN
-#include <Psapi.h>
 #include "MantidQtWidgets/Common/QStringUtils.h"
+#include <Psapi.h>
 #elif defined(Q_OS_MAC)
 #include <cstdlib>
 #include <libproc.h>
@@ -34,20 +40,17 @@ bool isOtherInstance(int64_t otherPID, QString otherExeName) {
 } // namespace
 
 namespace Process {
-
 /**
-  * Returns true is another instance of Mantid is running
-  * on this machine
-  * @return True if another instance is running
-  * @throws std::runtime_error if this cannot be determined
-  */
+ * Returns true is another instance of Mantid is running
+ * on this machine
+ * @return True if another instance is running
+ * @throws std::runtime_error if this cannot be determined
+ */
 #ifdef Q_OS_LINUX
-bool isAnotherInstanceRunning() {
-  // Inspired by psutil._pslinux.Process.exe:
-  // https://github.com/giampaolo/psutil/blob/master/psutil/_pslinux.py
+unsigned int numberOfMantids() {
   QDir procfs{"/proc"};
 
-  bool otherIsRunning(false);
+  int counter = 0;
   const QStringList entries{procfs.entryList(QDir::Dirs)};
   for (const auto &pidStr : entries) {
     bool isDigit(false);
@@ -61,14 +64,13 @@ bool isAnotherInstanceRunning() {
       continue;
 
     if (isOtherInstance(pid, QFileInfo(exe.symLinkTarget()).fileName())) {
-      otherIsRunning = true;
-      break;
+      ++counter;
     }
   }
-  return otherIsRunning;
+  return counter;
 }
 #elif defined(Q_OS_WIN)
-bool isAnotherInstanceRunning() {
+unsigned int numberOfMantids() {
   using MantidQt::API::toQStringInternal;
   // Inspired by psutil.psutil_get_pids at
   // https://github.com/giampaolo/psutil/blob/master/psutil/arch/windows/process_info.c
@@ -92,7 +94,7 @@ bool isAnotherInstanceRunning() {
   // Set the vector back to the appropriate size
   processes.resize(enumReturnSz / sizeof(DWORD));
 
-  bool otherIsRunning(false);
+  int counter = 0;
   wchar_t exe[MAX_PATH];
   for (const auto pid : processes) {
     // system-idle process
@@ -105,15 +107,13 @@ bool isAnotherInstanceRunning() {
     CloseHandle(procHandle);
     if (exeSz > 0 &&
         isOtherInstance(pid, QFileInfo(toQStringInternal(exe)).fileName())) {
-      otherIsRunning = true;
-      break;
+      ++counter;
     }
   }
-  return otherIsRunning;
+  return counter;
 }
-
 #elif defined(Q_OS_MAC)
-bool isAnotherInstanceRunning() {
+unsigned int numberOfMantids() {
   kinfo_proc *processes[] = {nullptr};
   size_t processesLength(0);
   int sysctlQuery[3] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
@@ -133,7 +133,7 @@ bool isAnotherInstanceRunning() {
   void *memory{nullptr};
   while (attempts-- > 0) {
     size_t size = 0;
-    if (sysctl((int *)sysctlQuery, 3, NULL, &size, NULL, 0) == -1) {
+    if (sysctl((int *)sysctlQuery, 3, nullptr, &size, nullptr, 0) == -1) {
       throw std::runtime_error("Unable to retrieve process list");
     }
     const size_t size2 =
@@ -150,7 +150,7 @@ bool isAnotherInstanceRunning() {
     if (memory == nullptr)
       throw std::runtime_error(
           "Unable to allocate memory to retrieve process list");
-    if (sysctl((int *)sysctlQuery, 3, memory, &size, NULL, 0) == -1) {
+    if (sysctl((int *)sysctlQuery, 3, memory, &size, nullptr, 0) == -1) {
       free(memory);
       throw std::runtime_error("Unable to retrieve process list");
     } else {
@@ -163,7 +163,7 @@ bool isAnotherInstanceRunning() {
   kinfo_proc *processListBegin = processes[0];
   kinfo_proc *processIter = processListBegin;
   char exePath[PATH_MAX];
-  auto otherIsRunning = false;
+  int counter = 0;
   for (size_t i = 0; i < processesLength; ++i) {
     const auto pid = processIter->kp_proc.p_pid;
     if (proc_pidpath(pid, exePath, PATH_MAX) <= 0) {
@@ -172,15 +172,14 @@ bool isAnotherInstanceRunning() {
     }
     if (isOtherInstance(pid,
                         QFileInfo(QString::fromAscii(exePath)).fileName())) {
-      otherIsRunning = true;
-      break;
+      ++counter;
     }
-    processIter++;
+    ++processIter;
   }
   free(processListBegin);
 
-  return otherIsRunning;
+  return counter;
 }
 #endif
-
+long long getProcessID() { return QCoreApplication::applicationPid(); }
 } // namespace Process

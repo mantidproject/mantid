@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
@@ -117,9 +123,10 @@ void export_IPeak() {
            "supplied.") // two argument
                         // overload
       .def("setQSampleFrame", setQSampleFrame1,
-           (arg("self"), arg("qsample_frame")), "Set the peak using the peak's "
-                                                "position in reciprocal space, "
-                                                "in the sample frame.")
+           (arg("self"), arg("qsample_frame")),
+           "Set the peak using the peak's "
+           "position in reciprocal space, "
+           "in the sample frame.")
       .def("setQSampleFrame", setQSampleFrame2,
            (arg("self"), arg("qsample_frame"), arg("distance")),
            "Set the peak using the peak's position in reciprocal space, in the "

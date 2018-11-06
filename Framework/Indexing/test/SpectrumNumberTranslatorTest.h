@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_INDEXING_SPECTRUMNUMBERTRANSLATORTEST_H_
 #define MANTID_INDEXING_SPECTRUMNUMBERTRANSLATORTEST_H_
 
@@ -31,10 +37,11 @@ public:
     auto numbers = {2, 1, 4, 5};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     return Kernel::make_unique<SpectrumNumberTranslator>(
-        spectrumNumbers, RoundRobinPartitioner(
-                             ranks, PartitionIndex(0),
-                             Partitioner::MonitorStrategy::CloneOnEachPartition,
-                             std::vector<GlobalSpectrumIndex>{}),
+        spectrumNumbers,
+        RoundRobinPartitioner(
+            ranks, PartitionIndex(0),
+            Partitioner::MonitorStrategy::CloneOnEachPartition,
+            std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(rank));
   }
 
@@ -57,20 +64,22 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
-        spectrumNumbers, RoundRobinPartitioner(
-                             1, PartitionIndex(0),
-                             Partitioner::MonitorStrategy::CloneOnEachPartition,
-                             std::vector<GlobalSpectrumIndex>{}),
+        spectrumNumbers,
+        RoundRobinPartitioner(
+            1, PartitionIndex(0),
+            Partitioner::MonitorStrategy::CloneOnEachPartition,
+            std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0)));
   }
 
   void test_construct_empty() {
     std::vector<SpectrumNumber> spectrumNumbers;
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
-        spectrumNumbers, RoundRobinPartitioner(
-                             1, PartitionIndex(0),
-                             Partitioner::MonitorStrategy::CloneOnEachPartition,
-                             std::vector<GlobalSpectrumIndex>{}),
+        spectrumNumbers,
+        RoundRobinPartitioner(
+            1, PartitionIndex(0),
+            Partitioner::MonitorStrategy::CloneOnEachPartition,
+            std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0)));
   }
 
@@ -79,10 +88,11 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     // This works, but functionality is limited, see tests below.
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
-        spectrumNumbers, RoundRobinPartitioner(
-                             1, PartitionIndex(0),
-                             Partitioner::MonitorStrategy::CloneOnEachPartition,
-                             std::vector<GlobalSpectrumIndex>{}),
+        spectrumNumbers,
+        RoundRobinPartitioner(
+            1, PartitionIndex(0),
+            Partitioner::MonitorStrategy::CloneOnEachPartition,
+            std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0)));
   }
 
@@ -90,10 +100,11 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator parent(
-        spectrumNumbers, RoundRobinPartitioner(
-                             1, PartitionIndex(0),
-                             Partitioner::MonitorStrategy::CloneOnEachPartition,
-                             std::vector<GlobalSpectrumIndex>{}),
+        spectrumNumbers,
+        RoundRobinPartitioner(
+            1, PartitionIndex(0),
+            Partitioner::MonitorStrategy::CloneOnEachPartition,
+            std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0));
 
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(spectrumNumbers, parent));
@@ -111,10 +122,11 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator parent(
-        spectrumNumbers, RoundRobinPartitioner(
-                             1, PartitionIndex(0),
-                             Partitioner::MonitorStrategy::CloneOnEachPartition,
-                             std::vector<GlobalSpectrumIndex>{}),
+        spectrumNumbers,
+        RoundRobinPartitioner(
+            1, PartitionIndex(0),
+            Partitioner::MonitorStrategy::CloneOnEachPartition,
+            std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0));
 
     std::iter_swap(spectrumNumbers.begin(), spectrumNumbers.end() - 1);
@@ -127,10 +139,11 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator parent(
-        spectrumNumbers, RoundRobinPartitioner(
-                             1, PartitionIndex(0),
-                             Partitioner::MonitorStrategy::CloneOnEachPartition,
-                             std::vector<GlobalSpectrumIndex>{}),
+        spectrumNumbers,
+        RoundRobinPartitioner(
+            1, PartitionIndex(0),
+            Partitioner::MonitorStrategy::CloneOnEachPartition,
+            std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0));
 
     spectrumNumbers[1] = 7; // 7 is not in parent.
@@ -142,10 +155,11 @@ public:
     auto numbers = {1, 2, 3, 3};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
-        spectrumNumbers, RoundRobinPartitioner(
-                             1, PartitionIndex(0),
-                             Partitioner::MonitorStrategy::CloneOnEachPartition,
-                             std::vector<GlobalSpectrumIndex>{}),
+        spectrumNumbers,
+        RoundRobinPartitioner(
+            1, PartitionIndex(0),
+            Partitioner::MonitorStrategy::CloneOnEachPartition,
+            std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0));
 
     TS_ASSERT_THROWS_NOTHING(translator.spectrumNumber(0));
@@ -169,10 +183,11 @@ public:
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
-        spectrumNumbers, RoundRobinPartitioner(
-                             1, PartitionIndex(0),
-                             Partitioner::MonitorStrategy::CloneOnEachPartition,
-                             std::vector<GlobalSpectrumIndex>{}),
+        spectrumNumbers,
+        RoundRobinPartitioner(
+            1, PartitionIndex(0),
+            Partitioner::MonitorStrategy::CloneOnEachPartition,
+            std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0));
 
     TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({1}))[0], 0);
@@ -195,10 +210,11 @@ public:
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
-        spectrumNumbers, RoundRobinPartitioner(
-                             1, PartitionIndex(0),
-                             Partitioner::MonitorStrategy::CloneOnEachPartition,
-                             std::vector<GlobalSpectrumIndex>{}),
+        spectrumNumbers,
+        RoundRobinPartitioner(
+            1, PartitionIndex(0),
+            Partitioner::MonitorStrategy::CloneOnEachPartition,
+            std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0));
 
     TS_ASSERT_EQUALS(translator.spectrumNumber(0), 1);

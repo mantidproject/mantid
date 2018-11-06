@@ -1,17 +1,23 @@
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DetermineChunking.h"
-#include "MantidDataHandling/LoadPreNexus.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "LoadRaw/isisraw.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
@@ -26,8 +32,8 @@ namespace mpi = boost::mpi;
 using namespace ::NeXus;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using std::size_t;
 using std::map;
+using std::size_t;
 using std::string;
 using std::vector;
 
@@ -359,5 +365,5 @@ FileType DetermineChunking::getFileType(const string &filename) {
 
   throw std::invalid_argument("Unsupported file type");
 }
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

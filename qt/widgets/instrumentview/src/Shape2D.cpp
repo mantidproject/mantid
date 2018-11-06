@@ -1,16 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/Shape2D.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 
+#include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
-#include <QMouseEvent>
 #include <QWheelEvent>
 
 #include <QLine>
 #include <QMap>
 
 #include <algorithm>
-#include <stdexcept>
 #include <cmath>
+#include <stdexcept>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -21,27 +30,26 @@ const size_t Shape2D::NCommonCP = 4;
 const double Shape2D::sizeCP = 3;
 
 /**
-* Set default border color to red and fill color to default Qt color
-* (==QColor()).
-*/
+ * Set default border color to red and fill color to default Qt color
+ * (==QColor()).
+ */
 Shape2D::Shape2D()
     : m_color(Qt::red), m_fill_color(QColor()), m_scalable(true),
       m_editing(false), m_selected(false), m_visible(true) {}
 
 /**
-* Calls virtual drawShape() method to draw the actial shape.
-* Draws bounding rect and control points if the shape is selected.
-*
-* @param painter :: QPainter used for drawing.
-*/
+ * Calls virtual drawShape() method to draw the actial shape.
+ * Draws bounding rect and control points if the shape is selected.
+ *
+ * @param painter :: QPainter used for drawing.
+ */
 void Shape2D::draw(QPainter &painter) const {
   if (!m_visible)
     return;
-  painter.setPen(m_color);
+  painter.setPen(QPen(m_color, 0));
   this->drawShape(painter);
   if (m_editing || m_selected) {
-    QColor c(255, 255, 255, 100);
-    painter.setPen(c);
+    painter.setPen(QPen(QColor(255, 255, 255, 100), 0));
     painter.drawRect(m_boundingRect.toQRectF());
     size_t np = NCommonCP;
     double rsize = 2;
@@ -57,10 +65,9 @@ void Shape2D::draw(QPainter &painter) const {
       QRectF r(p - QPointF(rsize, rsize), p + QPointF(rsize, rsize));
       painter.save();
       painter.resetTransform();
-      QColor c(255, 255, 255, alpha);
-      painter.fillRect(r, c);
+      painter.fillRect(r, QColor(255, 255, 255, alpha));
       r.adjust(-1, -1, 0, 0);
-      painter.setPen(QColor(0, 0, 0, alpha));
+      painter.setPen(QPen(QColor(0, 0, 0, alpha), 0));
       painter.drawRect(r);
       painter.restore();
     }
@@ -68,17 +75,17 @@ void Shape2D::draw(QPainter &painter) const {
 }
 
 /**
-* Return total number of control points for this shape.
-*/
+ * Return total number of control points for this shape.
+ */
 size_t Shape2D::getNControlPoints() const {
   return NCommonCP + this->getShapeNControlPoints();
 }
 
 /**
-* Return coordinates of i-th control point.
-*
-* @param i :: Index of a control point. 0 <= i < getNControlPoints().
-*/
+ * Return coordinates of i-th control point.
+ *
+ * @param i :: Index of a control point. 0 <= i < getNControlPoints().
+ */
 QPointF Shape2D::getControlPoint(size_t i) const {
   if (i >= getNControlPoints()) {
     throw std::range_error("Control point index is out of range");
@@ -106,19 +113,19 @@ void Shape2D::setControlPoint(size_t i, const QPointF &pos) {
 }
 
 /**
-* Move the shape.
-*
-* @param dp :: The shift vector.
-*/
+ * Move the shape.
+ *
+ * @param dp :: The shift vector.
+ */
 void Shape2D::moveBy(const QPointF &dp) {
   m_boundingRect.translate(dp);
   refit();
 }
 
 /**
-* Adjust the bound of the bounding rect. Calls virtual method refit()
-* to resize the shape in order to fit into the new bounds.
-*/
+ * Adjust the bound of the bounding rect. Calls virtual method refit()
+ * to resize the shape in order to fit into the new bounds.
+ */
 void Shape2D::adjustBoundingRect(double dx1, double dy1, double dx2,
                                  double dy2) {
   double dwidth = dx2 - dx1;
@@ -138,19 +145,19 @@ void Shape2D::adjustBoundingRect(double dx1, double dy1, double dx2,
 }
 
 /**
-* Assign new bounding rect. Calls virtual method refit()
-* to resize the shape in order to fit into the new bounds.
-*/
+ * Assign new bounding rect. Calls virtual method refit()
+ * to resize the shape in order to fit into the new bounds.
+ */
 void Shape2D::setBoundingRect(const RectF &rect) {
   m_boundingRect = rect;
   refit();
 }
 
 /**
-* Check if the shape masks a point.
-*
-* @param p :: Point to check.
-*/
+ * Check if the shape masks a point.
+ *
+ * @param p :: Point to check.
+ */
 bool Shape2D::isMasked(const QPointF &p) const {
   return m_fill_color != QColor() && contains(p);
 }
@@ -160,6 +167,7 @@ bool Shape2D::isMasked(const QPointF &p) const {
  * @return a new shape2D with old state applied
  */
 Shape2D *Shape2D::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectLine("Type"))
@@ -195,6 +203,10 @@ Shape2D *Shape2D::loadFromProject(const std::string &lines) {
   }
 
   return shape;
+#else
+  Q_UNUSED(lines);
+  return nullptr;
+#endif
 }
 
 /**
@@ -225,6 +237,7 @@ Shape2D *Shape2D::loadShape2DFromType(const std::string &type,
  * @return a string representing the state of the shape 2D
  */
 std::string Shape2D::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   bool props[]{m_scalable, m_editing, m_selected, m_visible};
 
@@ -240,6 +253,10 @@ std::string Shape2D::saveToProject() const {
   tsv.writeLine("FillColor") << fillColor;
 
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "InstrumentActor::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 // --- Shape2DEllipse --- //
@@ -353,17 +370,24 @@ void Shape2DEllipse::setPoint(const QString &prop, const QPointF &value) {
  * @return a new shape2D in the shape of a ellipse
  */
 Shape2D *Shape2DEllipse::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
   tsv.selectLine("Parameters");
   double radius1, radius2, x, y;
   tsv >> radius1 >> radius2 >> x >> y;
   return new Shape2DEllipse(QPointF(x, y), radius1, radius2);
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "Shape2DEllipse::loadFromProject not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the shape 2D ellipe to a Mantid project file
  * @return a string representing the state of the shape 2D
  */
 std::string Shape2DEllipse::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   double radius1 = getDouble("radius1");
   double radius2 = getDouble("radius2");
@@ -373,6 +397,10 @@ std::string Shape2DEllipse::saveToProject() const {
   tsv.writeLine("Parameters") << radius1 << radius2 << centre.x(), centre.y();
   tsv.writeRaw(Shape2D::saveToProject());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "Shape2DEllipse::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 // --- Shape2DRectangle --- //
 
@@ -417,6 +445,7 @@ void Shape2DRectangle::addToPath(QPainterPath &path) const {
  * @return a new shape2D in the shape of a rectangle
  */
 Shape2D *Shape2DRectangle::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
   tsv.selectLine("Parameters");
   double x0, y0, x1, y1;
@@ -424,12 +453,18 @@ Shape2D *Shape2DRectangle::loadFromProject(const std::string &lines) {
   QPointF point1(x0, y0);
   QPointF point2(x1, y1);
   return new Shape2DRectangle(point1, point2);
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "Shape2DRectangle::loadFromProject not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the shape 2D rectangle to a Mantid project file
  * @return a string representing the state of the shape 2D
  */
 std::string Shape2DRectangle::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   auto x0 = m_boundingRect.x0();
   auto x1 = m_boundingRect.x1();
@@ -440,6 +475,10 @@ std::string Shape2DRectangle::saveToProject() const {
   tsv.writeLine("Parameters") << x0 << y0 << x1 << y1;
   tsv.writeRaw(Shape2D::saveToProject());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "Shape2DRectangle::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 // --- Shape2DRing --- //
@@ -586,6 +625,7 @@ void Shape2DRing::setColor(const QColor &color) {
  * @return a new shape2D in the shape of a ring
  */
 Shape2D *Shape2DRing::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
   tsv.selectLine("Parameters");
   double xWidth, yWidth;
@@ -597,12 +637,18 @@ Shape2D *Shape2DRing::loadFromProject(const std::string &lines) {
 
   auto baseShape = Shape2D::loadFromProject(baseShapeLines);
   return new Shape2DRing(baseShape, xWidth, yWidth);
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "Shape2DRing::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the shape 2D ring to a Mantid project file
  * @return a string representing the state of the shape 2D
  */
 std::string Shape2DRing::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   auto xWidth = getDouble("xwidth");
   auto yWidth = getDouble("ywidth");
@@ -613,6 +659,10 @@ std::string Shape2DRing::saveToProject() const {
   tsv.writeSection("shape", baseShape->saveToProject());
   tsv.writeRaw(Shape2D::saveToProject());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "Shape2DRing::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -754,6 +804,7 @@ void Shape2DFree::subtractPolygon(const QPolygonF &polygon) {
  * @return a new freefrom shape2D
  */
 Shape2D *Shape2DFree::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
   QPolygonF polygon;
 
@@ -767,12 +818,18 @@ Shape2D *Shape2DFree::loadFromProject(const std::string &lines) {
   }
 
   return new Shape2DFree(polygon);
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "InstrumentActor::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the shape 2D to a Mantid project file
  * @return a string representing the state of the shape 2D
  */
 std::string Shape2DFree::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
 
   tsv.writeLine("Type") << "free";
@@ -782,11 +839,15 @@ std::string Shape2DFree::saveToProject() const {
   }
   tsv.writeRaw(Shape2D::saveToProject());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "InstrumentActor::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 Shape2DFree::Shape2DFree(const QPolygonF &polygon) : m_polygon(polygon) {
   resetBoundingRect();
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

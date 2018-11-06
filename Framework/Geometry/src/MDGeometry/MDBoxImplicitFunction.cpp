@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidKernel/System.h"
@@ -98,8 +104,9 @@ double MDBoxImplicitFunction::volume() const { return m_volume; }
  * @param boxExtents to get fraction for
  * @return fraction 0 to 1
  */
-double MDBoxImplicitFunction::fraction(const std::vector<
-    boost::tuple<Mantid::coord_t, Mantid::coord_t>> &boxExtents) const {
+double MDBoxImplicitFunction::fraction(
+    const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t>>
+        &boxExtents) const {
 
   size_t nd = m_min.size();
   coord_t frac = 1;
@@ -127,5 +134,5 @@ double MDBoxImplicitFunction::fraction(const std::vector<
   return frac;
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include <stdexcept>
 
@@ -12,7 +18,7 @@ namespace {
  * 3D vectors.
  * @param direction : direction marker
  * @return 3D vector
-*/
+ */
 V3D directionToVector(const PointingAlong &direction) {
   V3D result;
   if (direction == X) {
@@ -41,7 +47,7 @@ std::string directionToString(const PointingAlong &direction) {
   }
   return result;
 }
-}
+} // namespace
 
 /**
  * Default constructor. up=Y, beam=Z, thetaSign=Y
@@ -53,7 +59,7 @@ ReferenceFrame::ReferenceFrame() : ReferenceFrame(Y, Z, Y, Right, "source") {}
  * @param alongBeam : axis pointing along the beam
  * @param handedness : Handedness
  * @param origin : origin
-*/
+ */
 ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
                                Handedness handedness, std::string origin)
     : ReferenceFrame(up, alongBeam, up, handedness, std::move(origin)) {}
@@ -65,7 +71,7 @@ ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
  * @param thetaSign : axis defining the sign of 2theta
  * @param handedness : Handedness
  * @param origin : origin
-*/
+ */
 ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
                                PointingAlong thetaSign, Handedness handedness,
                                std::string origin)
@@ -96,17 +102,17 @@ PointingAlong ReferenceFrame::pointingUp() const { return m_up; }
 PointingAlong ReferenceFrame::pointingAlongBeam() const { return m_alongBeam; }
 
 /**
-* Get the axis label for the pointing up direction.
-* @return label for up
-*/
+ * Get the axis label for the pointing up direction.
+ * @return label for up
+ */
 std::string ReferenceFrame::pointingUpAxis() const {
   return directionToString(m_up);
 }
 
 /**
-* Get the axis label for the pointing along direction.
-* @return label for up
-*/
+ * Get the axis label for the pointing along direction.
+ * @return label for up
+ */
 std::string ReferenceFrame::pointingAlongBeamAxis() const {
   return directionToString(m_alongBeam);
 }
@@ -157,20 +163,28 @@ std::string ReferenceFrame::origin() const { return m_origin; }
 Getter for the up instrument direction
 @return up direction.
 */
-const V3D ReferenceFrame::vecPointingUp() const { return m_vecPointingUp; }
+V3D ReferenceFrame::vecPointingUp() const { return m_vecPointingUp; }
 
 /**
 Getter for the direction defining the theta sign
 @return theta sign direction.
 */
-const V3D ReferenceFrame::vecThetaSign() const { return m_vecThetaSign; }
+V3D ReferenceFrame::vecThetaSign() const { return m_vecThetaSign; }
 
 /**
 Getter for the along beam vector.
 @return along beam direction.
 */
-const V3D ReferenceFrame::vecPointingAlongBeam() const {
+V3D ReferenceFrame::vecPointingAlongBeam() const {
   return m_vecPointingAlongBeam;
+}
+
+/**
+Calculate the horizontal vector.
+@return horizontal direction.
+*/
+V3D ReferenceFrame::vecPointingHorizontal() const {
+  return directionToVector(pointingHorizontal());
 }
 
 /**
@@ -187,5 +201,5 @@ bool ReferenceFrame::isVectorPointingAlongBeam(const V3D &v) const {
   return m_vecPointingAlongBeam.scalar_prod(vec) == 1;
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

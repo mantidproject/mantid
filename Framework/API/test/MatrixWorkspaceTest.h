@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
@@ -12,21 +18,21 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/make_cow.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
-#include "MantidTypes/SpectrumDefinition.h"
-#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/make_cow.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidTypes/SpectrumDefinition.h"
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -103,7 +109,7 @@ void run_legacy_setting_spectrum_numbers_with_MPI(
     }
   }
 }
-}
+} // namespace
 
 class MatrixWorkspaceTest : public CxxTest::TestSuite {
 public:
@@ -1557,8 +1563,8 @@ public:
   }
 
   /**
-  * Test declaring an input workspace and retrieving as const_sptr or sptr
-  */
+   * Test declaring an input workspace and retrieving as const_sptr or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     MatrixWorkspace_sptr wsInput = boost::make_shared<WorkspaceTester>();
@@ -1613,8 +1619,9 @@ public:
     ws.setSharedDx(workspaceIndexWithDx[2], dxSpec2);
 
     // Assert
-    auto compareValue =
-        [&values](double data, size_t index) { return data == values[index]; };
+    auto compareValue = [&values](double data, size_t index) {
+      return data == values[index];
+    };
     for (auto &index : workspaceIndexWithDx) {
       TSM_ASSERT("Should have x resolution values", ws.hasDx(index));
       TSM_ASSERT_EQUALS("Should have a length of 3", ws.dataDx(index).size(),
@@ -1647,15 +1654,17 @@ public:
     auto ws2 = makeWorkspaceWithDetectors(1, 1);
     auto &detInfo1 = ws1->mutableDetectorInfo();
     auto &detInfo2 = ws2->mutableDetectorInfo();
+    auto &compInfo1 = ws1->mutableComponentInfo();
+    auto &compInfo2 = ws2->mutableComponentInfo();
+
     detInfo1.setPosition(0, {1, 0, 0});
     detInfo2.setPosition(0, {2, 0, 0});
-    detInfo1.setScanInterval(0, {10, 20});
-    detInfo2.setScanInterval(0, {20, 30});
+    compInfo1.setScanInterval({10, 20});
+    compInfo2.setScanInterval({20, 30});
 
     // Merge
     auto merged = WorkspaceFactory::Instance().create(ws1, 2);
-    auto &detInfo = merged->mutableDetectorInfo();
-    detInfo.merge(detInfo2);
+    merged->mutableComponentInfo().merge(ws2->componentInfo());
 
     // Setting IndexInfo without spectrum definitions will set up a 1:1 mapping
     // such that each spectrum corresponds to 1 time index of a detector.
@@ -2033,6 +2042,11 @@ public:
     TSM_ASSERT_EQUALS(
         "workspace with it's oriented lattice cleared should report false",
         ws->hasOrientedLattice(), false);
+  }
+
+  void test_isGroup() {
+    boost::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
+    TS_ASSERT_EQUALS(ws->isGroup(), false);
   }
 
 private:

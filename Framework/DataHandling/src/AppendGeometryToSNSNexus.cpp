@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/AppendGeometryToSNSNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -204,8 +210,8 @@ void AppendGeometryToSNSNexus::exec() {
                instr_iter != instr_items.end(); ++instr_iter) {
             // Look for NXdetectors
             if (instr_iter->second == "NXdetector") {
-              g_log.debug() << "Detector called '" << instr_iter->first
-                            << "' found.\n";
+              g_log.debug()
+                  << "Detector called '" << instr_iter->first << "' found.\n";
               std::string bankName = instr_iter->first;
               std::vector<Geometry::IDetector_const_sptr> dets;
               ws->getInstrument()->getDetectorsInBank(dets, bankName);
@@ -418,5 +424,5 @@ bool AppendGeometryToSNSNexus::runLoadNexusLogs(
 
   return executionSuccessful;
 }
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

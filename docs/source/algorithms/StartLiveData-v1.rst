@@ -18,7 +18,7 @@ simply calls :ref:`algm-LoadLiveData` at a fixed interval.
 .. note::
 
    For details on the way to specify the data processing steps, see
-   `LoadLiveData <LoadLiveData#Description>`__.
+   :ref:`LoadLiveData <algm-LoadLiveData>`.
 
 Instructions for setting up a "fake" data stream are found `here
 <http://www.mantidproject.org/MBC_Live_Data_Simple_Examples>`__.
@@ -158,7 +158,7 @@ Usage
     # put back the facility
     ConfigService.setFacility(oldFacility)
 
-    #get the ouput workspace
+    #get the output workspace
     wsOut = mtd["wsOut"]
     print("The workspace contains %i events" % wsOut.getNumberEvents())
 
@@ -224,7 +224,7 @@ Output:
     # put back the facility
     ConfigService.setFacility(oldFacility)
 
-    #get the ouput workspace
+    #get the output workspace
     wsOut = mtd["wsOut"]
     print("The workspace contains %i periods" % wsOut.getNumberOfEntries())
     print("Each period   contains %i spectra" % wsOut.getItem(0).getNumberHistograms())

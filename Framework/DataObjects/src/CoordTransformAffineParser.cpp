@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidDataObjects/CoordTransformAffineParser.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/SingleValueParameterParser.h"
 #include "MantidDataObjects/AffineMatrixParameterParser.h"
-#include "MantidAPI/CoordTransform.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
-#include "MantidDataObjects/CoordTransformAffineParser.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
@@ -80,5 +86,5 @@ void CoordTransformAffineParser::setSuccessor(
     CoordTransformAffineParser *other) {
   m_successor = SuccessorType_sptr(other);
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

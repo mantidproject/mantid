@@ -27,22 +27,22 @@
  *                                                                         *
  ***************************************************************************/
 #include "MdiSubWindow.h"
-#include "FloatingWindow.h"
 #include "ApplicationWindow.h"
+#include "FloatingWindow.h"
 #include "Folder.h"
 
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <QApplication>
-#include <QMessageBox>
-#include <QEvent>
 #include <QCloseEvent>
-#include <QString>
 #include <QDateTime>
-#include <QMenu>
-#include <QTextStream>
-#include <QTemporaryFile>
+#include <QEvent>
 #include <QMdiArea>
+#include <QMenu>
+#include <QMessageBox>
+#include <QString>
+#include <QTemporaryFile>
+#include <QTextStream>
 
 #include <fstream>
 #include <string>
@@ -253,10 +253,11 @@ void MdiSubWindow::closeEvent(QCloseEvent *e) {
 
   // If you need to confirm the close, ask the user
   if (d_confirm_close) {
-    result = QMessageBox::information(
-        this, tr("MantidPlot"), tr("Do you want to hide or delete") +
-                                    "<p><b>'" + objectName() + "'</b> ?",
-        tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
+    result =
+        QMessageBox::information(this, tr("MantidPlot"),
+                                 tr("Do you want to hide or delete") +
+                                     "<p><b>'" + objectName() + "'</b> ?",
+                                 tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2);
   }
 
   switch (result) {

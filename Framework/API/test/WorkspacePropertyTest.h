@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WORKSPACEPROPERTYTEST_H_
 #define WORKSPACEPROPERTYTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/WorkspaceProperty.h"
-#include <boost/shared_ptr.hpp>
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include <boost/shared_ptr.hpp>
 
 // Property implementations
-#include "MantidKernel/PropertyWithValue.tcc"
 #include "MantidAPI/WorkspaceProperty.tcc"
+#include "MantidKernel/PropertyWithValue.tcc"
 
 using Mantid::MantidVec;
 using namespace Mantid::Kernel;

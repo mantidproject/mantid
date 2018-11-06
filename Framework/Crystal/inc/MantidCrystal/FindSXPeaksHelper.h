@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_FINDSXPEAKSHELPER_H_
 #define MANTID_CRYSTAL_FINDSXPEAKSHELPER_H_
 
@@ -206,8 +212,8 @@ private:
   std::vector<std::unique_ptr<PeakContainer>>
   getAllPeaks(const HistogramData::HistogramX &x,
               const HistogramData::HistogramY &y, Bound low, Bound high,
-              const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy *
-                  backgroundStrategy) const;
+              const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy
+                  *backgroundStrategy) const;
   PeakList
   convertToSXPeaks(const HistogramData::HistogramX &x,
                    const HistogramData::HistogramY &y,

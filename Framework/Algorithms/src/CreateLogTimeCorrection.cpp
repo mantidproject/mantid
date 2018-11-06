@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateLogTimeCorrection.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -42,7 +48,7 @@ void CreateLogTimeCorrection::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main execution body
-  */
+ */
 void CreateLogTimeCorrection::exec() {
   // 1. Process input
   MatrixWorkspace_sptr dataWS = getProperty("InputWorkspace");
@@ -79,7 +85,7 @@ void CreateLogTimeCorrection::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Get instrument geometry setup including L2 for each detector and L1
-  */
+ */
 void CreateLogTimeCorrection::logGeometryInformation(
     const Geometry::DetectorInfo &detectorInfo) const {
 
@@ -94,8 +100,8 @@ void CreateLogTimeCorrection::logGeometryInformation(
 //----------------------------------------------------------------------------------------------
 /** Calculate the log time correction for each pixel, i.e., correcton from event
  * time at detector
-  * to time at sample
-  */
+ * to time at sample
+ */
 std::vector<double> CreateLogTimeCorrection::calculateCorrections(
     const Geometry::DetectorInfo &detectorInfo) const {
 
@@ -112,7 +118,7 @@ std::vector<double> CreateLogTimeCorrection::calculateCorrections(
 
 //----------------------------------------------------------------------------------------------
 /** Write L2 map and correction map to a TableWorkspace
-  */
+ */
 TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
     const Geometry::DetectorInfo &detectorInfo,
     const std::vector<double> &corrections) const {
@@ -141,7 +147,7 @@ TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
 }
 //----------------------------------------------------------------------------------------------
 /** Write correction map to a text file
-  */
+ */
 void CreateLogTimeCorrection::writeCorrectionToFile(
     const string filename, const Geometry::DetectorInfo &detectorInfo,
     const std::vector<double> &corrections) const {

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/NormaliseByDetector.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -27,7 +33,7 @@ DECLARE_ALGORITHM(NormaliseByDetector)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 NormaliseByDetector::NormaliseByDetector(bool parallelExecution)
     : m_parallelExecution(parallelExecution) {}
 
@@ -49,7 +55,7 @@ const std::string NormaliseByDetector::category() const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void NormaliseByDetector::init() {
   auto compositeValidator = boost::make_shared<CompositeValidator>();
   compositeValidator->add(
@@ -70,10 +76,11 @@ const Geometry::FitParameter NormaliseByDetector::tryParseFunctionParameter(
     Geometry::Parameter_sptr parameter, const Geometry::IDetector &det) {
   if (parameter == nullptr) {
     std::stringstream stream;
-    stream << det.getName() << " and all of it's parent components, have no "
-                               "fitting type parameters. This algorithm "
-                               "cannot be run without fitting parameters. See "
-                               "wiki help for details on setup.";
+    stream << det.getName()
+           << " and all of it's parent components, have no "
+              "fitting type parameters. This algorithm "
+              "cannot be run without fitting parameters. See "
+              "wiki help for details on setup.";
     this->g_log.warning(stream.str());
     throw std::runtime_error(stream.str());
   }
@@ -193,7 +200,7 @@ NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS) {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void NormaliseByDetector::exec() {
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
@@ -212,5 +219,5 @@ void NormaliseByDetector::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

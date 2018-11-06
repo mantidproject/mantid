@@ -1,8 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CLONEWORKSPACETEST_H_
 #define CLONEWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/CloneWorkspace.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidDataHandling/LoadRaw3.h"
@@ -13,8 +21,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -184,7 +190,7 @@ public:
   }
 
   /** Test cloning a TableWorkspace
-  */
+   */
   void test_exec_TableWorkspace() {
     // 1. Create input table workspace
     auto inpWS = boost::make_shared<TableWorkspace>();

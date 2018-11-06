@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST_H_
 #define MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST_H_
 
@@ -8,11 +14,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using MantidQt::API::FindFilesThreadPoolManager;
+using MantidQt::API::FakeFindFilesThread;
+using MantidQt::API::FakeMWRunFiles;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
-using MantidQt::API::FakeMWRunFiles;
-using MantidQt::API::FakeFindFilesThread;
+using MantidQt::API::FindFilesThreadPoolManager;
 
 class FindFilesThreadPoolManagerTest : public CxxTest::TestSuite {
 public:

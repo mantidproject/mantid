@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "UserInputValidator.h"
 #include <QLabel>
 #include <QLineEdit>
@@ -8,7 +14,7 @@
 using namespace MantidQt::MantidWidgets;
 
 namespace // anonymous
-    {
+{
 template <typename T> void sortPair(std::pair<T, T> &pair) {
   if (pair.first > pair.second) {
     T temp = pair.first;

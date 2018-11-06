@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_COMPACTMDTEST_H_
 #define MANTID_MDALGORITHMS_COMPACTMDTEST_H_
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/CompactMD.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidMDAlgorithms/CompactMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using Mantid::MDAlgorithms::CompactMD;
@@ -67,8 +73,8 @@ public:
     alg.execute();
     // output workspace should be cropped so extents ~ [-1,1]
     IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
-                      outputWorkspace->getSignalAt(0), 1);
+    TSM_ASSERT_EQUALS(
+        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(0), 1);
     TSM_ASSERT_EQUALS("Minimum should be cropped to -1: ",
                       outputWorkspace->getDimension(0)->getMinimum(), -1.0);
     TSM_ASSERT_EQUALS("Maximum should be cropped to 1: ",
@@ -129,14 +135,14 @@ public:
     alg.setProperty("OutputWorkspace", "out");
     alg.execute();
     IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
-    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
-                      outputWorkspace->getSignalAt(0), 1);
-    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
-                      outputWorkspace->getSignalAt(2), 1);
-    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
-                      outputWorkspace->getSignalAt(6), 1);
-    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
-                      outputWorkspace->getSignalAt(8), 1);
+    TSM_ASSERT_EQUALS(
+        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(0), 1);
+    TSM_ASSERT_EQUALS(
+        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(2), 1);
+    TSM_ASSERT_EQUALS(
+        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(6), 1);
+    TSM_ASSERT_EQUALS(
+        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(8), 1);
     TSM_ASSERT_EQUALS("Minimum for dim 0 should be consistent: ",
                       outputWorkspace->getDimension(0)->getMinimum(),
                       inWS->getDimension(0)->getMinimum());
@@ -204,8 +210,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     IMDHistoWorkspace_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWorkspace);
-    TSM_ASSERT_EQUALS("Should have a signal of 1.0: ",
-                      outputWorkspace->getSignalAt(0), 1);
+    TSM_ASSERT_EQUALS(
+        "Should have a signal of 1.0: ", outputWorkspace->getSignalAt(0), 1);
     TSM_ASSERT_EQUALS("Minimum should be cut to 1: ",
                       outputWorkspace->getDimension(0)->getMinimum(), -3.0);
     TSM_ASSERT_EQUALS("Maximum should still be 3: ",

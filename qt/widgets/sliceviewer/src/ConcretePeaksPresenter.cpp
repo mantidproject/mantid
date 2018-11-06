@@ -1,20 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/ConcretePeaksPresenter.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
+#include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeakShapeBase.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/V3D.h"
 #include "MantidQtWidgets/SliceViewer/PeakEditMode.h"
 #include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
 #include "MantidQtWidgets/SliceViewer/ZoomableOnDemand.h"
-#include "MantidKernel/V3D.h"
-#include "MantidAPI/MultipleExperimentInfos.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
-#include "MantidDataObjects/PeakShapeBase.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/Sample.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/Logger.h"
-#include <boost/scoped_ptr.hpp>
 #include <boost/regex.hpp>
 
 using namespace Mantid::API;
@@ -27,7 +32,7 @@ namespace SliceViewer {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("PeaksPresenter");
-}
+} // namespace
 
 /**
  * Convert from a SpecialCoordinateSystem enum to a correpsonding enum name.
@@ -90,9 +95,11 @@ void ConcretePeaksPresenter::checkWorkspaceCompatibilities(
             "work-space is determined to be in: ";
       ss << m_transform->getFriendlyName() << " in the PeaksViewer. ";
       ss << "However, the MDWorkspace has properties indicating that it's "
-            "coordinates are in: " << coordinateToString(coordSystMD);
+            "coordinates are in: "
+         << coordinateToString(coordSystMD);
       ss << " To resolve the conflict, the MDWorkspace will be treated as "
-            "though it has coordinates in: " << m_transform->getFriendlyName();
+            "though it has coordinates in: "
+         << m_transform->getFriendlyName();
       g_log.notice(ss.str());
     }
     // If the peaks work-space has been integrated. check cross-work-space
@@ -615,5 +622,5 @@ ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
   }
   return indexes;
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

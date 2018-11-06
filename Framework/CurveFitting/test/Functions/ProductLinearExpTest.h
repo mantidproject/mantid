@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_PRODUCTLINEAREXPTEST_H_
 #define MANTID_CURVEFITTING_PRODUCTLINEAREXPTEST_H_
 
@@ -6,15 +12,15 @@
 #include "MantidCurveFitting/Functions/ProductLinearExp.h"
 
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;

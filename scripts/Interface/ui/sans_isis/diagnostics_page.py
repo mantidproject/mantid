@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
@@ -49,6 +55,7 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         # Q Settings
         self.__generic_settings = GENERIC_SETTINGS
         self.__path_key = "sans_path"
+        self.detector_combo_box.currentIndexChanged.connect(self.combo_box_changed)
 
     def update_simple_line_edit_field(self, line_edit, value):
         gui_element = getattr(self, line_edit)
@@ -103,6 +110,10 @@ class DiagnosticsPage(QtGui.QWidget, ui_diagnostics_page.Ui_DiagnosticsPage):
         self.detector_combo_box.clear()
         for element in detector_list:
             self.detector_combo_box.addItem(element)
+
+    def combo_box_changed(self, index):
+        current_detector_name = self.detector_combo_box.currentText()
+        self.detector_group_box.setTitle(current_detector_name)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Properties

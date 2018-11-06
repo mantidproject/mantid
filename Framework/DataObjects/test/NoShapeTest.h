@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAKSHAPENONETEST_H_
 #define MANTID_DATAOBJECTS_PEAKSHAPENONETEST_H_
 
@@ -10,11 +16,11 @@
 #pragma warning(disable : 4275)
 #endif
 
+#include "MantidDataObjects/NoShape.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 #include <json/json.h>
-#include "MantidDataObjects/NoShape.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
 
 using namespace Mantid::Kernel;
 using Mantid::DataObjects::NoShape;

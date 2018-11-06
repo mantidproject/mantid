@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/CompositeValidator.h"
 #include <sstream>
 #include <unordered_set>
@@ -99,17 +105,17 @@ std::string CompositeValidator::checkAny(const boost::any &value) const {
   // Lambda to check if a validator is valid. If it is not valid then
   // capture its error message to a stream so we can potentially print it out
   // to the user if required.
-  const auto checkIfValid =
-      [&errorStream, &value](const IValidator_sptr validator) {
-        const auto errorMessage = validator->check(value);
-        if (errorMessage.empty()) {
-          return true;
-        } else {
-          // capture error message to possibly later.
-          errorStream << errorMessage << "\n";
-          return false;
-        }
-      };
+  const auto checkIfValid = [&errorStream,
+                             &value](const IValidator_sptr validator) {
+    const auto errorMessage = validator->check(value);
+    if (errorMessage.empty()) {
+      return true;
+    } else {
+      // capture error message to possibly later.
+      errorStream << errorMessage << "\n";
+      return false;
+    }
+  };
 
   const auto valid =
       std::any_of(m_children.begin(), m_children.end(), checkIfValid);
@@ -138,5 +144,5 @@ CompositeValidator::buildErrorMessage(const bool valid,
   }
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

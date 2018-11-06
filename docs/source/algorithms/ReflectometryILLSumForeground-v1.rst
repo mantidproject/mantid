@@ -9,10 +9,7 @@
 Description
 -----------
 
-This algorithm is typically the second step in the reflectometry reduction workflow. It consumes the output of :ref:`ReflectometryILLPreprocess <algm-ReflectometryILLPreprocess>`, producing
-
-* the summed foreground if only *InputWorkspace* is given. This should be used for the direct beam.
-* the reflectivity if both *InputWorkspace* and *DirectForegroundWorkspace* are given. *DirectForegroundWorkspace* should be the output of the above case, i.e. the summed direct foreground.
+This algorithm is typically the second step in the reflectometry reduction workflow. It consumes the output of :ref:`ReflectometryILLPreprocess <algm-ReflectometryILLPreprocess>`, producing a workspace with a single single spectrum.
 
 The reflectivity output of this algorithm can be forwarded to :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>` or, in case of polarization analysis, :ref:`ReflectometryILLPolarizationCor <algm-ReflectometryILLPolarizationCor>`.
 
@@ -20,22 +17,26 @@ The following diagram gives an overview of the algorithm:
 
 .. diagram:: ReflectometryILLSumForeground-v1_wkflw.dot
 
+The algorihtm runs :ref:`ReflectometryBeamStatistics <algm-ReflectometryBeamStatistics>` when processing the reflected beam. This adds some sample log entries to *OutputWorkspace* and *DirectBeamWorkspace*. See the :ref:`algorithm's documentation <algm-ReflectometryBeamStatistics>` for more details.
+
 Summation type
 ##############
 
 The *SummationType* property controls how the foreground pixels are summed.
 
 *SumInLambda*
-    extracts the centre pixel histogram using :ref:`ExtractSingleSpectrum <algm-ExtractSingleSpectrum>` and adds the intensities of the rest of the foreground pixels. Errors are summed in squares. The summed data is subsequently divided by the direct beam.
+    extracts the centre pixel histogram using :ref:`ExtractSingleSpectrum <algm-ExtractSingleSpectrum>` and adds the intensities of the rest of the foreground pixels.
 *SumInQ*
-    sums the pixels using :ref:`ReflectometrySumInQ <algm-ReflectometrySumInQ>`. Before summation, the data is divided by the direct beam.
+    sums the foreground pixels using :ref:`ReflectometrySumInQ <algm-ReflectometrySumInQ>`. Before summation, the data is divided by the direct beam.
+
+The chosen *SummationType* will be added to the sample logs of *OutputWorkspace* under the ``foreground.summation_type`` entry.
 
 Foreground pixels
 #################
 
 If *InputWorkspace* has been processed by :ref:`ReflectometryILLPreprocess <algm-ReflectometryILLPreprocess>`, the foreground information is available in the sample logs under the entries starting with ``foreground.``. By default these are used automatically.
 
-The sample logs can be overriden using the *Foreground* property. It is a list of three integers defining the range and centre pixels as workspace indices: [start, centre, end]. The start and end values are inclusive.
+The sample logs can be overridden using the *Foreground* property. It is a list of three integers defining the range and centre pixels as workspace indices: [start, centre, end]. The start and end values are inclusive.
 
 Usage
 -----
@@ -56,7 +57,7 @@ Usage
        'HighAngleBkgOffset': 10,
        'HighAngleBkgWidth': 50,
    }
-
+   
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
@@ -65,7 +66,7 @@ Usage
    )
    # We need the summed direct beam for the reflectivity
    directFgd = ReflectometryILLSumForeground(direct.OutputWorkspace)
-
+   
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
@@ -75,9 +76,10 @@ Usage
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
+       DirectBeamWorkspace=direct.OutputWorkspace,
        WavelengthRange=[2, 15],
    )
-
+   
    # Reflectivity is a single histogram
    print('Histograms in reflectivity workspace: {}'.format(reflectivity.getNumberHistograms()))
    # The data is still in wavelength
@@ -104,7 +106,7 @@ Output:
        'HighAngleBkgOffset': 10,
        'HighAngleBkgWidth': 50,
    }
-
+   
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
@@ -113,7 +115,7 @@ Output:
    )
    # We need the summed direct beam for the reflectivity
    directFgd = ReflectometryILLSumForeground(direct.OutputWorkspace)
-
+   
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
@@ -123,10 +125,11 @@ Output:
    reflectivity = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
+       DirectBeamWorkspace=direct.OutputWorkspace,
        SummationType='SumInQ',
        WavelengthRange=[0., 14.]
    )
-
+   
    # Reflectivity is a single histogram
    print('Histograms in reflectivity workspace: {}'.format(reflectivity.getNumberHistograms()))
    # The data is still in wavelength

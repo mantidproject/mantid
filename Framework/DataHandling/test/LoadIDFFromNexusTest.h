@@ -1,10 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADINSTRUMENTTESTFROMRAW_H_
 #define LOADINSTRUMENTTESTFROMRAW_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -12,6 +17,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include <Poco/Path.h>
@@ -98,7 +104,7 @@ public:
     const auto &ptrDetMain = detectorInfo.detector(detectorInfo.indexOf(5));
     TS_ASSERT_EQUALS(ptrDetMain.getID(), 5);
     TS_ASSERT_EQUALS(ptrDetMain.getName(), "main-detector-bank(2,0)");
-    TS_ASSERT_EQUALS(ptrDetMain.type(), "RectangularDetectorPixel");
+    TS_ASSERT_EQUALS(ptrDetMain.type(), "GridDetectorPixel");
     TS_ASSERT_DELTA(ptrDetMain.getPos().X(), -0.3035, 0.0001);
     TS_ASSERT_DELTA(ptrDetMain.getPos().Y(), -0.3124, 0.0001);
     TS_ASSERT_DELTA(detectorInfo.l2(detectorInfo.indexOf(5)), 4.1727, 0.0001);

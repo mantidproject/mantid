@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------------------------------
@@ -33,7 +39,7 @@ const char *GAUSSIAN_FWHM = "GaussianFWHM";
 const double SQRTLN2 = std::sqrt(M_LN2);
 const double SQRTPI = std::sqrt(M_PI);
 ///@endcond
-}
+} // namespace
 
 /**
  * Declare the active parameters for the function

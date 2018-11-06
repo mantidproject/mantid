@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflCatalogSearcher.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -43,5 +49,5 @@ ITableWorkspace_sptr ReflCatalogSearcher::search(const std::string &text) {
 
   return results;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

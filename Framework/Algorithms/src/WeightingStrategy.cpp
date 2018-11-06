@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/WeightingStrategy.h"
 #include "MantidKernel/System.h"
 
-#include <stdexcept>
 #include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Algorithms {
@@ -196,5 +202,5 @@ GaussianWeightingnD::calculateGaussian(const double normalisedDistanceSq) {
   return std::exp(-normalisedDistanceSq / m_twiceSigmaSquared);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

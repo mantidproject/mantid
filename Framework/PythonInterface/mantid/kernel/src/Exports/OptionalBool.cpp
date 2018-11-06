@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
-#include "MantidKernel/IPropertyManager.h"
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/make_constructor.hpp>
@@ -83,7 +89,7 @@ public:
     }
   }
 };
-}
+} // namespace
 
 void export_OptionalBool() {
   // V3D class

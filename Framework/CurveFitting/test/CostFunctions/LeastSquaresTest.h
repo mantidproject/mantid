@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CURVEFITTING_LEASTSQUARESTEST_H_
 #define CURVEFITTING_LEASTSQUARESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
-#include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
-#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
-#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/Functions/LinearBackground.h"
-#include "MantidCurveFitting/Functions/Gaussian.h"
-#include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
+#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/LinearBackground.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
 
 #include <gsl/gsl_blas.h>
 #include <sstream>

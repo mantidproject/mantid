@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <algorithm>
 #include <iostream>
 #include <stdexcept>
@@ -11,7 +17,7 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("Column");
-}
+} // namespace
 
 template <> bool Column::isType<bool>() const { return isBool(); }
 

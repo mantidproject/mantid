@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CREATEGROUPINGWORKSPACE_H_
 #define MANTID_ALGORITHMS_CREATEGROUPINGWORKSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,7 +48,7 @@ private:
   void exec() override;
 };
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_CREATEGROUPINGWORKSPACE_H_ */

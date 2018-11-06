@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef VATES_API_MD_LOADING_PRESENTER_TEST_H
 #define VATES_API_MD_LOADING_PRESENTER_TEST_H
 
@@ -7,13 +13,13 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 
-#include <cxxtest/TestSuite.h>
 #include "MockObjects.h"
-#include "vtkPVChangeOfBasisHelper.h"
 #include "vtkMatrix4x4.h"
+#include "vtkPVChangeOfBasisHelper.h"
 #include "vtkUnstructuredGrid.h"
-#include <vector>
+#include <cxxtest/TestSuite.h>
 #include <string>
+#include <vector>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
@@ -46,7 +52,7 @@ public:
     return MOCK_INSTRUMENT_MD_LOADING_PRESENTER;
   }
 };
-}
+} // namespace
 
 class MDLoadingPresenterTest : public CxxTest::TestSuite {
 private:

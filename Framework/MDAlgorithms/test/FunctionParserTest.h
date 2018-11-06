@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TEST_IMPLICIT_FUNCTION_PARSERS_H_
 #define TEST_IMPLICIT_FUNCTION_PARSERS_H_
 
 // Abstract testing base class for function parsers.
 
-#include <boost/scoped_ptr.hpp>
-#include "MantidMDAlgorithms/MDParameterParserDeclarations.h"
-#include "MantidMDAlgorithms/Vector3DParameterParser.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
+#include "MantidMDAlgorithms/MDParameterParserDeclarations.h"
 #include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
+#include "MantidMDAlgorithms/Vector3DParameterParser.h"
+#include <boost/scoped_ptr.hpp>
 
-#include "MantidAPI/ImplicitFunctionParser.h"
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
+#include "MantidAPI/ImplicitFunctionParser.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

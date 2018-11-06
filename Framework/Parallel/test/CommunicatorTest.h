@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PARALLEL_COMMUNICATORTEST_H_
 #define MANTID_PARALLEL_COMMUNICATORTEST_H_
 
@@ -88,7 +94,7 @@ void isend_irecv(const Communicator &comm) {
   TS_ASSERT_THROWS_NOTHING(recv_req.wait());
   TS_ASSERT_EQUALS(result, expected);
 }
-}
+} // namespace
 
 class CommunicatorTest : public CxxTest::TestSuite {
 public:

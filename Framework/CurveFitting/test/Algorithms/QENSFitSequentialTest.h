@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_QENSFITSEQUENTIALTEST_H_
 #define MANTID_ALGORITHMS_QENSFITSEQUENTIALTEST_H_
 
@@ -5,7 +11,6 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidDataHandling/Load.h"
@@ -19,10 +24,10 @@
 using Mantid::CurveFitting::Algorithms::QENSFitSequential;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Mantid::Kernel::make_cow;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::Kernel::make_cow;
 
 class QENSFitSequentialTest : public CxxTest::TestSuite {
 public:

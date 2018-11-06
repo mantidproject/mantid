@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIHELPERTEST_H_
 #define MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIHELPERTEST_H_
 
@@ -5,8 +11,8 @@
 
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
 
-#include <boost/make_shared.hpp>
 #include <Poco/Net/HTTPResponse.h>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::RemoteJobManagers;
 

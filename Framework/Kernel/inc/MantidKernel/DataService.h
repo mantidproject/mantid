@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_DATASERVICE_H_
 #define MANTID_KERNEL_DATASERVICE_H_
 
@@ -5,14 +11,14 @@
 // Includes
 //----------------------------------------------------------------------
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
-#include <Poco/NotificationCenter.h>
-#include <Poco/Notification.h>
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+#include <Poco/Notification.h>
+#include <Poco/NotificationCenter.h>
 
 #include <mutex>
 
@@ -50,27 +56,6 @@ struct CaseInsensitiveCmp {
     This is the primary data service that  the users will interact with either
    through writing scripts or directly
     through the API. It is implemented as a singleton class.
-
-    Copyright &copy; 2008-2013 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename T> class DLLExport DataService {
 private:
@@ -153,11 +138,11 @@ public:
   class AfterReplaceNotification : public DataServiceNotification {
   public:
     /** Constructor.
-      * @param name :: The name of the replaced object
-      *  @param newObj :: The pointer to the new object
-      *  Only new objects are guaranteed to exist when an observer receives the
+     * @param name :: The name of the replaced object
+     *  @param newObj :: The pointer to the new object
+     *  Only new objects are guaranteed to exist when an observer receives the
      * notification.
-    */
+     */
     AfterReplaceNotification(const std::string &name,
                              const boost::shared_ptr<T> newObj)
         : DataServiceNotification(name, newObj) {}
@@ -510,14 +495,9 @@ public:
   }
 
   static bool showingHiddenObjects() {
-    int showingHiddenFlag;
-    const int success = ConfigService::Instance().getValue(
-        "MantidOptions.InvisibleWorkspaces", showingHiddenFlag);
-    if (success == 1 && showingHiddenFlag == 1) {
-      return true;
-    } else {
-      return false;
-    }
+    auto showingHiddenFlag = ConfigService::Instance().getValue<bool>(
+        "MantidOptions.InvisibleWorkspaces");
+    return showingHiddenFlag.get_value_or(false);
   }
 
   /// Sends notifications to observers. Observers can subscribe to

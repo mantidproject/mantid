@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------
 // Includes
 //---------------------------------------
@@ -5,8 +11,8 @@
 #include "MantidQtWidgets/Common/MultifitSetupDialog.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 //---------------------------------------
@@ -67,5 +73,5 @@ void MultifitSetupDialog::cellChanged(int row, int col) {
     }
   }
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

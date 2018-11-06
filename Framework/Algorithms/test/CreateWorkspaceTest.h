@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidKernel/Memory.h"
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
 #include "MantidTestHelpers/ParallelRunner.h"
@@ -49,7 +55,7 @@ void run_create(const Parallel::Communicator &comm,
     TS_ASSERT_EQUALS(ws, nullptr);
   }
 }
-}
+} // namespace
 
 class CreateWorkspaceTest : public CxxTest::TestSuite {
 public:

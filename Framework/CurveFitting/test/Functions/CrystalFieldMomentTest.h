@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CRYSTALFIELDMOMENTTEST_H_
 #define CRYSTALFIELDMOMENTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMoment.h"
 

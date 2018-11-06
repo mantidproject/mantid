@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
 #define MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
 
@@ -63,7 +69,7 @@ using GroupingWorkspace_sptr = boost::shared_ptr<GroupingWorkspace>;
 /// shared pointer to a const GroupingWorkspace
 using GroupingWorkspace_const_sptr = boost::shared_ptr<const GroupingWorkspace>;
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_ */

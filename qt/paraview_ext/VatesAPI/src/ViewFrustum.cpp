@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidKernel/Matrix.h"
-#include <sstream>
-#include <cmath>
 #include <cfloat>
+#include <cmath>
+#include <sstream>
 
 namespace Mantid {
 namespace VATES {
@@ -124,5 +130,5 @@ std::string ViewFrustum::toExtentsAsString() const {
   result.pop_back();
   return result;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

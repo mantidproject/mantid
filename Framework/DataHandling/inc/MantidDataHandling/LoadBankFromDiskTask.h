@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADBANKFROMDISKTASK_H_
 #define MANTID_DATAHANDLING_LOADBANKFROMDISKTASK_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Progress.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
 
@@ -16,27 +22,6 @@ class DefaultEventLoader;
 
 /** This task does the disk IO from loading the NXS file, and so will be on a
   disk IO mutex
-
-  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_DATAHANDLING_DLL LoadBankFromDiskTask : public Kernel::Task {
 
@@ -54,12 +39,13 @@ public:
 
 private:
   void loadPulseTimes(::NeXus::File &file);
-  void loadEventIndex(::NeXus::File &file, std::vector<uint64_t> &event_index);
+  std::vector<uint64_t> loadEventIndex(::NeXus::File &file);
   void prepareEventId(::NeXus::File &file, int64_t &start_event,
-                      int64_t &stop_event, std::vector<uint64_t> &event_index);
-  void loadEventId(::NeXus::File &file);
-  void loadTof(::NeXus::File &file);
-  void loadEventWeights(::NeXus::File &file);
+                      int64_t &stop_event,
+                      const std::vector<uint64_t> &event_index);
+  std::unique_ptr<uint32_t[]> loadEventId(::NeXus::File &file);
+  std::unique_ptr<float[]> loadTof(::NeXus::File &file);
+  std::unique_ptr<float[]> loadEventWeights(::NeXus::File &file);
   int64_t recalculateDataSize(const int64_t &size);
 
   /// Algorithm being run
@@ -82,18 +68,12 @@ private:
   std::vector<int64_t> m_loadStart;
   /// How much to load in the file
   std::vector<int64_t> m_loadSize;
-  /// Event pixel ID data
-  uint32_t *m_event_id;
   /// Minimum pixel ID in this data
   uint32_t m_min_id;
   /// Maximum pixel ID in this data
   uint32_t m_max_id;
-  /// TOF data
-  float *m_event_time_of_flight;
   /// Flag for simulated data
   bool m_have_weight;
-  /// Event weights
-  float *m_event_weight;
   /// Frame period numbers
   const std::vector<int> m_framePeriodNumbers;
 }; // END-DEF-CLASS LoadBankFromDiskTask

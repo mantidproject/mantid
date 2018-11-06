@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FileDescriptor.h"
 
 #include <Poco/File.h>
@@ -69,11 +75,11 @@ bool FileDescriptor::isAscii(std::istream &data, const size_t nbytes) {
 }
 
 /**
-* Check if a file is a text file
-* @param file :: The file pointer
-* @param nbytes The number of bytes of the file to check (Default=256)
-* @returns true if the file an ascii text file, false otherwise
-*/
+ * Check if a file is a text file
+ * @param file :: The file pointer
+ * @param nbytes The number of bytes of the file to check (Default=256)
+ * @returns true if the file an ascii text file, false otherwise
+ */
 bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
   // read the data and reset the seek index back to the beginning
   auto data = new char[nbytes];

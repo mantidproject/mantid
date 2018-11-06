@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExtractMask.h"
-#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/NullValidator.h"
 
 namespace Mantid {
@@ -12,8 +18,8 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractMask)
 
-using Kernel::Direction;
 using Geometry::IDetector_const_sptr;
+using Kernel::Direction;
 using namespace API;
 using namespace Kernel;
 
@@ -90,5 +96,5 @@ void ExtractMask::exec() {
   setProperty("OutputWorkspace", maskWS);
   setProperty("DetectorList", detectorList);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

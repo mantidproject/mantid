@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include <algorithm>
 #include <cmath>
 #include <complex>
-#include <vector>
-#include <algorithm>
-#include <iterator>
 #include <functional>
 #include <gsl/gsl_poly.h>
+#include <iterator>
+#include <vector>
 
-#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Math/PolyBase.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 

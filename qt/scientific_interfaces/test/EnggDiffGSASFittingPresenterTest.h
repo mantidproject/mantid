@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOM_INTERFACES_ENGGDIFFGSASFITTINGPRESENTERTEST_H_
 #define MANTID_CUSTOM_INTERFACES_ENGGDIFFGSASFITTINGPRESENTERTEST_H_
 
@@ -55,7 +61,8 @@ public:
         .WillOnce(Throw(std::runtime_error("Failure reason")));
 
     EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Could not load file", "Failure reason")).Times(1);
+                userWarning("Could not load file", "Failure reason"))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
@@ -72,9 +79,10 @@ public:
     setRefinementParamsExpectations(params);
 
     EXPECT_CALL(*m_mockViewPtr, setEnabled(false)).Times(1);
-    EXPECT_CALL(*m_mockModelPtr,
-                doRefinements(std::vector<GSASIIRefineFitPeaksParameters>(
-                    {params}))).Times(1);
+    EXPECT_CALL(
+        *m_mockModelPtr,
+        doRefinements(std::vector<GSASIIRefineFitPeaksParameters>({params})))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -91,9 +99,10 @@ public:
     setRefinementParamsExpectations(params);
 
     EXPECT_CALL(*m_mockViewPtr, setEnabled(false)).Times(1);
-    EXPECT_CALL(*m_mockModelPtr,
-                doRefinements(std::vector<GSASIIRefineFitPeaksParameters>(
-                    {params}))).Times(1);
+    EXPECT_CALL(
+        *m_mockModelPtr,
+        doRefinements(std::vector<GSASIIRefineFitPeaksParameters>({params})))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -234,8 +243,9 @@ public:
 
     EXPECT_CALL(*m_mockModelPtr,
                 saveRefinementResultsToHDF5(
-                    alg, std::vector<GSASIIRefineFitPeaksOutputProperties>(
-                             {refinementResults}),
+                    alg,
+                    std::vector<GSASIIRefineFitPeaksOutputProperties>(
+                        {refinementResults}),
                     hdfFilename));
     EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
     EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));

@@ -1,30 +1,36 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SAVENEXUSPROCESSEDTEST_H_
 #define SAVENEXUSPROCESSEDTEST_H_
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ScopedWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataHandling/SaveNexusProcessed.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
+#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidGeometry/Instrument.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -32,11 +38,11 @@
 
 #include <nexus/NeXusFile.hpp>
 
-#include <fstream>
 #include <cxxtest/TestSuite.h>
+#include <fstream>
 
-#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

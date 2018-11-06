@@ -2,7 +2,7 @@
  InstrumentValidator
 =====================
 
-This a python binding to the C++ class Mantid::API::InstrumentValidator.
+This is a Python binding to the C++ class Mantid::API::InstrumentValidator.
 
 *bases:* :py:obj:`mantid.api.ExperimentInfoValidator`
 

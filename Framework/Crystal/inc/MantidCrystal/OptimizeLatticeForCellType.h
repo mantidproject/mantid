@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_OptimizeLatticeForCellType_H_
 #define MANTID_CRYSTAL_OptimizeLatticeForCellType_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/System.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -20,27 +26,6 @@ namespace Crystal {
 
  @author Vickie Lynch, SNS
  @date 02/06/2012
-
- Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport OptimizeLatticeForCellType : public API::Algorithm {
 public:
@@ -72,7 +57,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithm
+} // namespace Crystal
 } // namespace Mantid
 
 #endif /*MANTID_CRYSTAL_OptimizeLatticeForCellType_H_*/

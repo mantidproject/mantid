@@ -449,7 +449,7 @@ void PlotDialog::changePlotType(int plotType) {
 }
 
 /**
- * Changes the graph's plot stlye from somewhere other than the plot dialog.
+ * Changes the graph's plot style from somewhere other than the plot dialog.
  *
  * @params plotType :: This is the plot style number. i.e line is 0 and scatter
  *is 1.
@@ -2820,11 +2820,11 @@ void PlotDialog::customVectorsPage(bool angleMag) {
 }
 
 /**
- This slot gets called on clicking slect colormap button
+ This slot gets called on clicking select colormap button
  */
 void PlotDialog::changeColormap(const QString &filename) {
   // loads the settings to get the colormap file name.
-  // as theres is no spectrgram valid pointer here i'm directly using Qsetting
+  // as there's no spectrgram valid pointer here i'm directly using Qsetting
   // instead of Spectrogram::loadSettings()
   // mCurrentColorMap gives the last selected colormap file name
   QSettings settings;
@@ -2836,7 +2836,7 @@ void PlotDialog::changeColormap(const QString &filename) {
   QString fileselection;
   // Use a file dialog if no parameter is passed
   if (filename.isEmpty()) {
-    fileselection = MantidColorMap::loadMapDialog(mCurrentColorMap, this);
+    fileselection = MantidColorMap::chooseColorMap(mCurrentColorMap, this);
     if (fileselection.isEmpty())
       return;
   } else {

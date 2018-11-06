@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -10,6 +16,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/cast.hpp>
 #include <boost/regex.hpp>
@@ -232,15 +239,15 @@ template <typename F>
 void renameWorkspacesInQENSFit(Algorithm *qensFit,
                                IAlgorithm_sptr renameAlgorithm,
                                WorkspaceGroup_sptr outputGroup,
+                               std::string const &outputBaseName,
+                               std::string const &groupSuffix,
                                const F &getNameSuffix) {
-  const auto groupName = qensFit->getPropertyValue("OutputWorkspaceGroup");
-  auto outputBase = groupName.substr(0, groupName.rfind("_Workspaces"));
-
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
   renamerProg.report("Renaming group workspaces...");
 
-  auto getName =
-      [&](std::size_t i) { return outputBase + "_" + getNameSuffix(i); };
+  auto getName = [&](std::size_t i) {
+    return outputBaseName + "_" + getNameSuffix(i);
+  };
 
   auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
     renameWorkspace(renameAlgorithm, workspace, name);
@@ -248,6 +255,7 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
   };
   renameWorkspacesWith(outputGroup, getName, renamer);
 
+  auto const groupName = outputBaseName + groupSuffix;
   if (outputGroup->getName() != groupName)
     renameWorkspace(renameAlgorithm, outputGroup, groupName);
 }
@@ -276,6 +284,23 @@ createGroup(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   for (auto &&workspace : workspaces)
     group->addWorkspace(workspace);
   return group;
+}
+
+WorkspaceGroup_sptr
+runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
+                                   const std::vector<std::size_t> &grouping) {
+  std::vector<MatrixWorkspace_sptr> results;
+  results.reserve(grouping.size() - 1);
+  for (auto i = 0u; i < grouping.size() - 1; ++i) {
+    processingAlgorithm.setProperty("StartRowIndex",
+                                    static_cast<int>(grouping[i]));
+    processingAlgorithm.setProperty("EndRowIndex",
+                                    static_cast<int>(grouping[i + 1]) - 1);
+    processingAlgorithm.setProperty("OutputWorkspace", "__Result");
+    processingAlgorithm.execute();
+    results.push_back(processingAlgorithm.getProperty("OutputWorkspace"));
+  }
+  return createGroup(results);
 }
 } // namespace
 
@@ -344,6 +369,13 @@ void QENSFitSequential::init() {
       "or values using the notation described in the description section of "
       "the help page.");
 
+  std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
+  unitOptions.emplace_back("");
+  declareProperty("ResultXAxisUnit", "MomentumTransfer",
+                  boost::make_shared<StringListValidator>(unitOptions),
+                  "The unit to assign to the X Axis of the result workspace, "
+                  "defaults to MomentumTransfer");
+
   declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output result workspace(s)");
@@ -359,16 +391,19 @@ void QENSFitSequential::init() {
   declareProperty(
       make_unique<FunctionProperty>("Function", Direction::InOut),
       "The fitting function, common for all workspaces in the input.");
-  declareProperty("LogValue", "", "Name of the log value to plot the "
-                                  "parameters against. Default: use spectra "
-                                  "numbers.");
-  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
-                                         "boundary of, the first bin to "
-                                         "include in\n"
-                                         "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
-                                       "of, the last bin the fitting range\n"
-                                       "(default the highest value of x)");
+  declareProperty("LogValue", "",
+                  "Name of the log value to plot the "
+                  "parameters against. Default: use spectra "
+                  "numbers.");
+  declareProperty("StartX", EMPTY_DBL(),
+                  "A value of x in, or on the low x "
+                  "boundary of, the first bin to "
+                  "include in\n"
+                  "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(),
+                  "A value in, or on the high x boundary "
+                  "of, the last bin the fitting range\n"
+                  "(default the highest value of x)");
 
   declareProperty("PassWSIndexToFunction", false,
                   "For each spectrum in Input pass its workspace index to all "
@@ -483,14 +518,17 @@ void QENSFitSequential::exec() {
       getPropertyValue("OutputWorkspace"), resultWs);
 
   if (containsMultipleData(workspaces))
-    renameWorkspaces(groupWs, spectra, inputWorkspaces);
+    renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
+                     inputWorkspaces);
   else
-    renameWorkspaces(groupWs, spectra);
+    renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
   if (doExtractMembers)
     extractMembers(groupWs, workspaces, outputBaseName + "_Members");
+
+  renameGroupWorkspace("__PDF_Workspace", spectra, outputBaseName, "_PDF");
 
   deleteTemporaryWorkspaces(outputBaseName);
 
@@ -606,23 +644,15 @@ std::vector<std::size_t> QENSFitSequential::getDatasetGrouping(
 WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
     ITableWorkspace_sptr parameterWorkspace,
     const std::vector<std::size_t> &grouping) {
+  std::string const xAxisUnit = getProperty("ResultXAxisUnit");
   auto pifp =
-      createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, true);
+      createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, false);
+  pifp->setAlwaysStoreInADS(false);
   pifp->setProperty("InputWorkspace", parameterWorkspace);
   pifp->setProperty("ColumnX", "axis-1");
-  pifp->setProperty("XAxisUnit", "MomentumTransfer");
+  pifp->setProperty("XAxisUnit", xAxisUnit);
   pifp->setProperty("ParameterNames", getFitParameterNames());
-
-  std::vector<MatrixWorkspace_sptr> results;
-  results.reserve(grouping.size() - 1);
-  for (auto i = 0u; i < grouping.size() - 1; ++i) {
-    pifp->setProperty("StartRowIndex", static_cast<int>(grouping[i]));
-    pifp->setProperty("EndRowIndex", static_cast<int>(grouping[i + 1]) - 1);
-    pifp->setProperty("OutputWorkspace", "__Result");
-    pifp->executeAsChildAlg();
-    results.push_back(pifp->getProperty("OutputWorkspace"));
-  }
-  return createGroup(results);
+  return runParameterProcessingWithGrouping(*pifp, grouping);
 }
 
 ITableWorkspace_sptr
@@ -631,20 +661,34 @@ QENSFitSequential::processParameterTable(ITableWorkspace_sptr parameterTable) {
 }
 
 void QENSFitSequential::renameWorkspaces(
-    WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra,
-    const std::vector<MatrixWorkspace_sptr> &inputWorkspaces) {
+    WorkspaceGroup_sptr outputGroup, std::vector<std::string> const &spectra,
+    std::string const &outputBaseName, std::string const &endOfSuffix,
+    std::vector<MatrixWorkspace_sptr> const &inputWorkspaces) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   const auto getNameSuffix = [&](std::size_t i) {
-    return inputWorkspaces[i]->getName() + "_" + spectra[i] + "_Workspace";
+    return inputWorkspaces[i]->getName() + "_" + spectra[i] + endOfSuffix;
   };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
 }
 
 void QENSFitSequential::renameWorkspaces(
-    WorkspaceGroup_sptr outputGroup, const std::vector<std::string> &spectra) {
+    WorkspaceGroup_sptr outputGroup, std::vector<std::string> const &spectra,
+    std::string const &outputBaseName, std::string const &endOfSuffix) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
-  auto getNameSuffix = [&](std::size_t i) { return spectra[i] + "_Workspace"; };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, getNameSuffix);
+  auto getNameSuffix = [&](std::size_t i) { return spectra[i] + endOfSuffix; };
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
+}
+
+void QENSFitSequential::renameGroupWorkspace(
+    std::string const &currentName, std::vector<std::string> const &spectra,
+    std::string const &outputBaseName, std::string const &endOfSuffix) {
+  if (AnalysisDataService::Instance().doesExist(currentName)) {
+    auto const pdfGroup =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(currentName);
+    renameWorkspaces(pdfGroup, spectra, outputBaseName, endOfSuffix);
+  }
 }
 
 ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/ExtractPolarizationEfficiencies.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -138,8 +144,8 @@ void ExtractPolarizationEfficiencies::exec() {
       throw std::runtime_error("Instrument vector parameter \"" + name +
                                "\" is expected to be the same size as \"" +
                                LAMBDA_PARAMETER + "\" but " +
-                               std::to_string(prop.size()) + " != " +
-                               std::to_string(lambda.size()));
+                               std::to_string(prop.size()) +
+                               " != " + std::to_string(lambda.size()));
     }
     auto const errorName = name + "_Errors";
     propValue = instrument->getParameterAsString(errorName);

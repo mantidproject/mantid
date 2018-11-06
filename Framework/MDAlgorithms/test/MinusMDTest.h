@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MINUSMDTEST_H_
 #define MANTID_MDALGORITHMS_MINUSMDTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/MinusMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 
 #include <cxxtest/TestSuite.h>
 

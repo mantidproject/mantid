@@ -1,5 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
+#include <cmath>
 
 namespace Mantid {
 using Kernel::V3D;
@@ -65,8 +73,10 @@ void ShapeInfo::setCone(const V3D &c, const V3D &a, double r, double h) {
 }
 
 bool ShapeInfo::operator==(const ShapeInfo &other) {
-  return m_shape == other.m_shape && m_height == other.m_height &&
-         m_radius == other.m_radius && m_points == other.m_points;
+  return m_shape == other.m_shape &&
+         std::abs(m_height - other.m_height) < Kernel::Tolerance &&
+         std::abs(m_radius - other.m_radius) < Kernel::Tolerance &&
+         m_points == other.m_points;
 }
 
 } // namespace detail

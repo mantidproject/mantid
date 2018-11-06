@@ -1,16 +1,15 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import HFIR_4Circle_Reduction.ui_RefineUbFftDialog as ui_RefineUbFftDialog
-
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
+from qtpy.QtWidgets import (QDialog)  # noqa
 
 
-class RefineUBFFTSetupDialog(QtGui.QDialog):
+class RefineUBFFTSetupDialog(QDialog):
     """A dialog window to get the setup for refining UB matrix by FFT.
 
     """
@@ -30,12 +29,9 @@ class RefineUBFFTSetupDialog(QtGui.QDialog):
         self.ui.lineEdit_maxD.setText('40.0')
         self.ui.lineEdit_tolerance.setText('0.15')
 
-        # connected to event hanlder
-        self.connect(self.ui.buttonBox, QtCore.SIGNAL('accepted()'),
-                     self.do_ok)
-
-        self.connect(self.ui.buttonBox, QtCore.SIGNAL('rejected()'),
-                     self.do_cancel)
+        # connected to event handler
+        self.ui.buttonBox.accepted.connect(self.do_ok)
+        self.ui.buttonBox.rejected.connect(self.do_cancel)
 
         # class variables
         self._minD = 1.0

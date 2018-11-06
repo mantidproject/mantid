@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_WORKSPACEGROUP_H
 #define MANTID_API_WORKSPACEGROUP_H
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <Poco/NObserver.h>
 #include <iterator>
@@ -28,27 +34,6 @@ class Algorithm;
 
     @author Sofia Antony, ISIS, RAL
     @date 12/06/2009
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_API_DLL WorkspaceGroup : public Workspace {
 public:
@@ -67,7 +52,7 @@ public:
   /// Sort the internal data structure according to member name
   void sortMembersByName();
   /// Adds a workspace to the group.
-  void addWorkspace(Workspace_sptr workspace);
+  void addWorkspace(const Workspace_sptr &workspace);
   /// Return the number of entries within the group
   int getNumberOfEntries() const { return static_cast<int>(this->size()); }
   /// Return the size of the group, so it is more like a container
@@ -75,13 +60,14 @@ public:
   /// Return the ith workspace
   Workspace_sptr getItem(const size_t index) const;
   /// Return the workspace by name
-  Workspace_sptr getItem(const std::string wsName) const;
+  Workspace_sptr getItem(const std::string &wsName) const;
   /// Return all workspaces in the group as one call for thread safety
   std::vector<Workspace_sptr> getAllItems() const;
   /// Remove a workspace from the group
   void removeItem(const size_t index);
   /// Remove all names from the group but do not touch the ADS
   void removeAll();
+  bool isGroup() const override { return true; }
   /// This method returns true if the group is empty (no member workspace)
   bool isEmpty() const;
   bool areNamesSimilar() const;

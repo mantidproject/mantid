@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiFitPeaks2D.h"
 
 #include "MantidAPI/Axis.h"
@@ -1208,9 +1214,10 @@ void PoldiFitPeaks2D::init() {
   declareProperty("LinearBackgroundParameter", 0.0,
                   "Initial value of linear background.");
 
-  declareProperty("MaximumIterations", 0, "Maximum number of iterations for "
-                                          "the fit. Use 0 to calculate "
-                                          "2D-spectrum without fitting.");
+  declareProperty("MaximumIterations", 0,
+                  "Maximum number of iterations for "
+                  "the fit. Use 0 to calculate "
+                  "2D-spectrum without fitting.");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),

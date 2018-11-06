@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_FINDPEAKS_H_
 #define MANTID_ALGORITHMS_FINDPEAKS_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 
@@ -15,7 +21,7 @@ namespace HistogramData {
 class Histogram;
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 /** This algorithm searches for peaks in a dataset.
@@ -40,27 +46,6 @@ namespace Algorithms {
 
     @author Russell Taylor, Tessella Support Services plc
     @date 25/11/2008
-
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport FindPeaks : public API::ParallelAlgorithm {
@@ -207,12 +192,13 @@ private:
   std::unique_ptr<API::Progress> m_progress = nullptr;
 
   // Properties saved in the algo.
-  API::MatrixWorkspace_sptr m_dataWS;    ///<workspace to check for peaks
-  int m_inputPeakFWHM;                   ///<holder for the requested peak FWHM
-  Indexing::SpectrumIndexSet m_indexSet; ///<list of workspace indicies to check
-  bool m_highBackground; ///<flag for find relatively weak peak in high
+  API::MatrixWorkspace_sptr m_dataWS;    ///< workspace to check for peaks
+  int m_inputPeakFWHM;                   ///< holder for the requested peak FWHM
+  Indexing::SpectrumIndexSet m_indexSet; ///< list of workspace indicies to
+                                         ///< check
+  bool m_highBackground; ///< flag for find relatively weak peak in high
   /// background
-  bool m_rawPeaksTable; ///<flag for whether the output is the raw peak
+  bool m_rawPeaksTable; ///< flag for whether the output is the raw peak
   /// parameters or effective (centre, width, height)
   std::size_t
       m_numTableParams; //<Number of parameters in the output table workspace

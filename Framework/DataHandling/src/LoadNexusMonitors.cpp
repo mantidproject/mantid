@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNexusMonitors.h"
 
 #include "MantidAPI/Algorithm.h"
@@ -5,8 +11,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceGroup;
+using Mantid::API::Workspace_sptr;
 
 namespace Mantid {
 namespace DataHandling {
@@ -73,5 +79,5 @@ void LoadNexusMonitors::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
-} // end DataHandling
-} // end Mantid
+} // namespace DataHandling
+} // namespace Mantid

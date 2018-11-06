@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTCYLINDER__
 #define MANTID_TESTCYLINDER__
 
+#include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <ostream>
-#include <vector>
-#include <algorithm>
 #include <sstream>
+#include <vector>
 
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid;
 using namespace Geometry;

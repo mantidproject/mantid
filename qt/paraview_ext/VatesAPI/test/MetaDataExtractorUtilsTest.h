@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef METADATAEXTRACTORUTILS_TEST_H
 #define METADATAEXTRACTORUTILS_TEST_H
 
@@ -9,16 +15,16 @@
 
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 
+#include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MockObjects.h"
 
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "boost/pointer_cast.hpp"
 
 using namespace Mantid::VATES;

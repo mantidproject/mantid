@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 namespace Mantid {
@@ -13,7 +19,7 @@ namespace {
 size_t MAXIMUM_DEPTH = 100;
 /// static logger object
 Kernel::Logger g_log("WorkspaceGroup");
-}
+} // namespace
 
 WorkspaceGroup::WorkspaceGroup(const Parallel::StorageMode storageMode)
     : Workspace(storageMode),
@@ -103,7 +109,7 @@ void WorkspaceGroup::sortMembersByName() {
  * @param workspace :: A shared pointer to a workspace to add. If the workspace
  * already exists give a warning.
  */
-void WorkspaceGroup::addWorkspace(Workspace_sptr workspace) {
+void WorkspaceGroup::addWorkspace(const Workspace_sptr &workspace) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   // check it's not there already
   auto it = std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
@@ -111,7 +117,6 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace) {
     m_workspaces.push_back(workspace);
   } else {
     g_log.warning() << "Workspace already exists in a WorkspaceGroup\n";
-    ;
   }
 }
 
@@ -157,6 +162,7 @@ void WorkspaceGroup::reportMembers(std::set<Workspace_sptr> &memberList) const {
 std::vector<std::string> WorkspaceGroup::getNames() const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   std::vector<std::string> out;
+  out.reserve(m_workspaces.size());
   for (const auto &workspace : m_workspaces) {
     out.push_back(workspace->getName());
   }
@@ -185,11 +191,12 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
  * @throws an out_of_range error if the workspace's name not contained in the
  * group's list of workspace names
  */
-Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const {
+Workspace_sptr WorkspaceGroup::getItem(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
-    if (workspace->getName() == wsName)
+    if (workspace->getName() == wsName) {
       return workspace;
+    }
   }
   throw std::out_of_range("Workspace " + wsName +
                           " not contained in the group");
@@ -469,9 +476,8 @@ size_t WorkspaceGroup::getMemorySize() const {
   for (auto workspace : m_workspaces) {
     // If the workspace is a group
     if (workspace->getMemorySize() == 0) {
-      total = total +
-              boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)
-                  ->getMemorySize();
+      total = total + boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)
+                          ->getMemorySize();
       continue;
     }
     total = total + workspace->getMemorySize();

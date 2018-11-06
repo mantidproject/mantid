@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/LegacyQwt/ColorBarWidget.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
-#include "MantidQtWidgets/LegacyQwt/PowerScaleEngine.h"
 #include "MantidQtWidgets/Common/QScienceSpinBox.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/LegacyQwt/PowerScaleEngine.h"
 #include <QKeyEvent>
 #include <QToolTip>
 #include <qwt_scale_engine.h>
@@ -27,7 +33,7 @@ ColorBarWidget::ColorBarWidget(QWidget *parent) : QWidget(parent) {
   ui.cmbScaleType->addItem(tr("linear"));
   ui.cmbScaleType->addItem(tr("logarithmic"));
   ui.cmbScaleType->addItem(tr("power"));
-  m_colorMap.changeScaleType(GraphOptions::Linear);
+  m_colorMap.changeScaleType(MantidColorMap::ScaleType::Linear);
   ui.dspnN->setMinimum(-100.0);
   ui.dspnN->setEnabled(false);
 
@@ -96,14 +102,14 @@ void ColorBarWidget::setRenderMode(bool rendering) {
 }
 
 /** Change which CheckBoxes are displayed in the widget
-*
-*	Available choices:
-*	 ADD_AUTOSCALE_CURRENT_SLICE
-*	 ADD_AUTOSCALE_ON_LOAD
-*	 ADD_AUTOSCALE_BOTH
-*	 ADD_AUTOSCALE_NONE
-* @param strategy :: select which checkboxes are shown
-*/
+ *
+ *	Available choices:
+ *	 ADD_AUTOSCALE_CURRENT_SLICE
+ *	 ADD_AUTOSCALE_ON_LOAD
+ *	 ADD_AUTOSCALE_BOTH
+ *	 ADD_AUTOSCALE_NONE
+ * @param strategy :: select which checkboxes are shown
+ */
 void ColorBarWidget::setCheckBoxMode(CheckboxStrategy strategy) {
   switch (strategy) {
   case ADD_AUTOSCALE_CURRENT_SLICE:
@@ -290,7 +296,7 @@ void ColorBarWidget::changedScaleType(int type) {
   // Record if log scale option is selected
   m_log = (type == 1);
 
-  m_colorMap.changeScaleType(GraphOptions::ScaleType(type));
+  m_colorMap.changeScaleType(MantidColorMap::ScaleType(type));
   ui.valMin->setLogSteps(m_log);
   ui.valMax->setLogSteps(m_log);
   setSpinBoxesSteps();
@@ -357,14 +363,14 @@ void ColorBarWidget::updateColorMap() {
   // Show the scale on the right
   double minValue = m_min;
   double maxValue = m_max;
-  GraphOptions::ScaleType type = m_colorMap.getScaleType();
-  if (type == GraphOptions::Linear) {
+  MantidColorMap::ScaleType type = m_colorMap.getScaleType();
+  if (type == MantidColorMap::ScaleType::Linear) {
     QwtLinearScaleEngine linScaler;
     m_colorBar->setScaleDiv(
         linScaler.transformation(),
         linScaler.divideScale(minValue, maxValue, maxMajorSteps, 5));
     m_colorBar->setColorMap(QwtDoubleInterval(minValue, maxValue), m_colorMap);
-  } else if (type == GraphOptions::Power) {
+  } else if (type == MantidColorMap::ScaleType::Power) {
     PowerScaleEngine powScaler;
     m_colorBar->setScaleDiv(
         powScaler.transformation(),
@@ -486,5 +492,5 @@ std::string ColorBarWidget::saveToProject() const {
 
 ColorBarWidget::~ColorBarWidget() {}
 
-} // namespace MantidQt
 } // namespace MantidWidgets
+} // namespace MantidQt

@@ -48,7 +48,7 @@ Changelog :
 
 06-07-06	* read size of matrix	
 06-02-06	* replaced arrays with vectors and char* with strings
-06-01-06	* fixed convertion of 4.1 projects
+06-01-06	* fixed conversion of 4.1 projects
 05-30-06	* read matrix tables (testing)
 05-29-06	* read column type if names are not matching (seems to be ok)
 05-26-06	* compare only 11 chars of col label in header section

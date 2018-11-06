@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * PeakHKLErrors.cpp
  *
  *  Created on: Jan 26, 2013
  *      Author: ruth
  */
+#include "MantidCrystal/PeakHKLErrors.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidAPI/ParamFunction.h"
-#include "MantidCrystal/PeakHKLErrors.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::DataObjects;
@@ -20,8 +26,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Units;
 using Mantid::Geometry::CompAssembly;
-using Mantid::Geometry::IObjComponent_const_sptr;
 using Mantid::Geometry::IComponent_const_sptr;
+using Mantid::Geometry::IObjComponent_const_sptr;
 using Mantid::Geometry::IPeak;
 
 namespace Mantid {
@@ -30,7 +36,7 @@ namespace Crystal {
 namespace {
 /// static logger
 Kernel::Logger g_log("PeakHKLErrors");
-}
+} // namespace
 
 DECLARE_FUNCTION(PeakHKLErrors)
 
@@ -300,16 +306,16 @@ Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta,
 }
 
 /**
-  *  Returns the derivative of the matrix corresponding to a rotation of
-  *theta(degrees) around axis
-  *  with respect to the angle or rotation in degrees.
-  *
-  *  @param theta   the angle of rotation in degrees
-  *  @param  axis   either x,y,z, or X,Y, or Z.
-  *
-  *  @return The derivative of the matrix that corresponds to this action with
-  *respect to degree rotation.
-  */
+ *  Returns the derivative of the matrix corresponding to a rotation of
+ *theta(degrees) around axis
+ *  with respect to the angle or rotation in degrees.
+ *
+ *  @param theta   the angle of rotation in degrees
+ *  @param  axis   either x,y,z, or X,Y, or Z.
+ *
+ *  @return The derivative of the matrix that corresponds to this action with
+ *respect to degree rotation.
+ */
 Matrix<double> PeakHKLErrors::DerivRotationMatrixAboutRegAxis(double theta,
                                                               char axis) {
   int cint = toupper(axis);
@@ -656,5 +662,5 @@ Peak PeakHKLErrors::createNewPeak(const Geometry::IPeak &peak_old,
   //!!!peak.setDetectorID(ID);
   return peak;
 }
-}
-}
+} // namespace Crystal
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PolarizationEfficiencyCor.h"
 
 #include "MantidAPI/ADSValidator.h"
@@ -9,8 +15,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
-
-#include "MantidAPI/WorkspaceFactory.h"
 
 #include <Eigen/Dense>
 #include <boost/math/special_functions/pow.hpp>

@@ -1,36 +1,42 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_PRECOMPILED_HEADER_H_
 #define MANTID_API_PRECOMPILED_HEADER_H_
 
 // Mantid
-#include "MantidKernel/System.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/DynamicFactory.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DynamicFactory.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 
 // STL
-#include <vector>
-#include <map>
-#include <string>
-#include <set>
-#include <cmath>
 #include <cfloat>
+#include <cmath>
 #include <cstddef>
+#include <map>
+#include <set>
+#include <string>
 #include <utility>
+#include <vector>
 
 // Boost
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 
 // Poco
-#include <Poco/XML/XML.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/XML/XML.h>
 
 #endif // MANTID_API_PRECOMPILED_HEADER_H_

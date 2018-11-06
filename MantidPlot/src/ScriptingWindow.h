@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SCRIPTINGWINDOW_H_
 #define SCRIPTINGWINDOW_H_
 
@@ -7,8 +13,8 @@
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "Script.h"
 
-#include <boost/optional.hpp>
 #include <QMainWindow>
+#include <boost/optional.hpp>
 
 //----------------------------------------------------------
 // Forward declarations
@@ -25,7 +31,7 @@ class QShowEvent;
 class QHideEvent;
 
 /** @class ScriptingWindow
-    This class displays a seperate window for editing and executing scripts
+    This class displays a separate window for editing and executing scripts
 */
 class ScriptingWindow : public QMainWindow {
   /// Qt macro

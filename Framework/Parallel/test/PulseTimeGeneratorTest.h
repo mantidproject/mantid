@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PARALLEL_PULSETIMEGENERATORTEST_H_
 #define MANTID_PARALLEL_PULSETIMEGENERATORTEST_H_
 
@@ -9,8 +15,8 @@
 
 using PulseTimeGenerator =
     Mantid::Parallel::IO::PulseTimeGenerator<int32_t, int32_t>;
-using Mantid::Parallel::IO::detail::scaleFromUnit;
 using Mantid::Parallel::IO::detail::IntOrFloat64Bit;
+using Mantid::Parallel::IO::detail::scaleFromUnit;
 
 class PulseTimeGeneratorTest : public CxxTest::TestSuite {
 public:

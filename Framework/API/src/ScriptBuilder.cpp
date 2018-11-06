@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -12,8 +18,8 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHistory.h"
 
-#include <boost/range/algorithm/remove_if.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/range/algorithm/remove_if.hpp>
 #include <boost/utility.hpp>
 #include <set>
 
@@ -31,10 +37,11 @@ const std::string COMMENT_ALG = "Comment";
 
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
                              std::string versionSpecificity,
-                             bool appendTimestamp)
+                             bool appendTimestamp,
+                             std::vector<std::string> ignoreTheseAlgs)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(versionSpecificity),
-      m_timestampCommands(appendTimestamp) {}
+      m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs) {}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -86,14 +93,24 @@ void ScriptBuilder::writeHistoryToStream(
       os << "\n";
     }
   } else {
-    // create the string for this algorithm
-    os << buildAlgorithmString(*algHistory);
-    if (m_timestampCommands) {
-      os << " # " << algHistory->executionDate().toISO8601String();
+    // create the string for this algorithm if not found to be in the ignore
+    // list
+    if (!(std::find(m_algsToIgnore.begin(), m_algsToIgnore.end(),
+                    algHistory->name()) != m_algsToIgnore.end())) {
+      createStringForAlg(os, algHistory);
     }
-
-    os << "\n";
   }
+}
+
+void ScriptBuilder::createStringForAlg(
+    std::ostringstream &os,
+    boost::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory) {
+  os << buildAlgorithmString(*algHistory);
+  if (m_timestampCommands) {
+    os << " # " << algHistory->executionDate().toISO8601String();
+  }
+
+  os << "\n";
 }
 
 /**
@@ -247,8 +264,11 @@ const std::string ScriptBuilder::buildPropertyString(
     if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(),
              propHistory.type()) != nonWorkspaceTypes.end() &&
         propHistory.direction() == Direction::Output) {
-      g_log.debug() << "Ignoring property " << propHistory.name() << " of type "
-                    << propHistory.type() << '\n';
+      // If algs are to be ignored (Common use case is project recovery) ignore
+      if (m_algsToIgnore.size() == 0) {
+        g_log.debug() << "Ignoring property " << propHistory.name()
+                      << " of type " << propHistory.type() << '\n';
+      }
       // Handle numerical properties
     } else if (propHistory.type() == "number") {
       prop = propHistory.name() + "=" + propHistory.value();

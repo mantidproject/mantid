@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <vtkUnstructuredGrid.h>
 
 namespace Mantid {
@@ -47,7 +53,8 @@ bool MDEWInMemoryLoadingPresenter::canReadFile() const {
     bCanReadIt = false;
   } else if (nullptr ==
              boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
-                 m_repository->fetchWorkspace(m_wsName)).get()) {
+                 m_repository->fetchWorkspace(m_wsName))
+                 .get()) {
     // The workspace can be found, but is not an IMDEventWorkspace.
     bCanReadIt = false;
   } else {
@@ -129,5 +136,5 @@ std::string MDEWInMemoryLoadingPresenter::getWorkspaceTypeName() {
 int MDEWInMemoryLoadingPresenter::getSpecialCoordinates() {
   return m_specialCoords;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

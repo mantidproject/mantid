@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -87,8 +93,8 @@ void MonitorLiveData::doClone(const std::string &originalName,
         if (newMonitorWS) // If there was a monitor workspace, set it back on
                           // the result
         {
-          ads.retrieveWS<MatrixWorkspace>(newName)
-              ->setMonitorWorkspace(newMonitorWS);
+          ads.retrieveWS<MatrixWorkspace>(newName)->setMonitorWorkspace(
+              newMonitorWS);
         }
       } else {
         std::cout << "Not cloning\n";
@@ -227,8 +233,9 @@ void MonitorLiveData::exec() {
     seconds = DateAndTime::secondsFromDuration(now - lastTime);
     if (seconds > UpdateEvery)
       g_log.warning() << "Cannot process live data as quickly as requested: "
-                         "requested every " << UpdateEvery
-                      << " seconds but it takes " << seconds << " seconds!\n";
+                         "requested every "
+                      << UpdateEvery << " seconds but it takes " << seconds
+                      << " seconds!\n";
   } // loop until aborted
 
   // Set the outputs (only applicable when RunTransitionBehavior is "Stop")

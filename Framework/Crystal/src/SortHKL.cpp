@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCrystal/SortHKL.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidCrystal/SortHKL.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Utils.h"
 
 #include <cmath>
@@ -403,5 +409,5 @@ void SortHKL::sortOutputPeaksByHKL(IPeaksWorkspace_sptr outputPeaksWorkspace) {
   outputPeaksWorkspace->sort(criteria);
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

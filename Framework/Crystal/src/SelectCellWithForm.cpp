@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SelectCellWithForm.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Crystal/ScalarUtils.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/ScalarUtils.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -179,5 +185,5 @@ void SelectCellWithForm::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

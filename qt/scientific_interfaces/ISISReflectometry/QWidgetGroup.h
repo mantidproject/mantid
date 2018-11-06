@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ISISREFLECTOMETRY_QWIDGETGROUP_H
 #define MANTID_ISISREFLECTOMETRY_QWIDGETGROUP_H
-#include <cstddef>
-#include <array>
 #include <QWidget>
+#include <array>
+#include <cstddef>
 namespace MantidQt {
 namespace CustomInterfaces {
 template <std::size_t N> class QWidgetGroup {
@@ -30,6 +36,6 @@ QWidgetGroup<sizeof...(Ts)> makeQWidgetGroup(Ts... widgets) {
   return QWidgetGroup<sizeof...(Ts)>(
       std::array<QWidget *, sizeof...(Ts)>({{widgets...}}));
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_QWIDGETGROUP_H

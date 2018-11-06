@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTWIDGETS_POSTPROCESSINGSTEP
 #define MANTIDQTWIDGETS_POSTPROCESSINGSTEP
 #include "MantidAPI/AlgorithmManager.h"
@@ -37,7 +43,7 @@ private:
   void ensureRowSizeMatchesColumnCount(const WhiteList &columns,
                                        const QStringList &row);
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTWIDGETS_POSTPROCESSINGSTEP

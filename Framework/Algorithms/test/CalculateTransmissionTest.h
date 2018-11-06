@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CALCULATETRANSMISSIONTEST_H_
 #define CALCULATETRANSMISSIONTEST_H_
 
@@ -360,8 +366,9 @@ public:
 
       for (unsigned int i = 0; i < fitted_y.size(); ++i) {
         x = fitted_x[i]; //(fitted_x[i] + fitted_x[i+1])* 0.5;
-        TS_ASSERT_DELTA(fitted_y[i], 26.6936 - 9.31494 * x + 1.11532 * x * x -
-                                         0.044502 * x * x * x,
+        TS_ASSERT_DELTA(fitted_y[i],
+                        26.6936 - 9.31494 * x + 1.11532 * x * x -
+                            0.044502 * x * x * x,
                         0.01);
       }
     }
@@ -403,8 +410,9 @@ public:
 
       for (unsigned int i = 0; i < fitted_y.size(); ++i) {
         x = (fitted_x[i] + fitted_x[i + 1]) * 0.5;
-        TS_ASSERT_DELTA(fitted_y[i], 26.6936 - 9.31494 * x + 1.11532 * x * x -
-                                         0.044502 * x * x * x,
+        TS_ASSERT_DELTA(fitted_y[i],
+                        26.6936 - 9.31494 * x + 1.11532 * x * x -
+                            0.044502 * x * x * x,
                         0.01);
       }
     }

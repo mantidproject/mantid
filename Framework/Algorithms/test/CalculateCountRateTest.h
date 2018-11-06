@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CALC_COUNTRATE_TEST_H_
 #define MANTID_ALGORITHMS_CALC_COUNTRATE_TEST_H_
 
@@ -5,10 +11,10 @@
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidAlgorithms/CalculateCountRate.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAlgorithms/CalculateCountRate.h"
 #include "MantidHistogramData/HistogramX.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

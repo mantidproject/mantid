@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/BinaryOperations.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -18,40 +24,40 @@ void export_BinaryOperations() {
   using namespace boost::python;
 
   // Typedefs the various function types
-  using binary_fn_md_md = IMDWorkspace_sptr (
-      *)(const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
-         const std::string &, bool, bool);
-  using binary_fn_md_gp = WorkspaceGroup_sptr (
-      *)(const IMDWorkspace_sptr, const WorkspaceGroup_sptr,
-         const std::string &, const std::string &, bool, bool);
-  using binary_fn_gp_md = WorkspaceGroup_sptr (
-      *)(const WorkspaceGroup_sptr, const IMDWorkspace_sptr,
-         const std::string &, const std::string &, bool, bool);
-  using binary_fn_gp_gp = WorkspaceGroup_sptr (
-      *)(const WorkspaceGroup_sptr, const WorkspaceGroup_sptr,
-         const std::string &, const std::string &, bool, bool);
+  using binary_fn_md_md = IMDWorkspace_sptr (*)(
+      const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
+      const std::string &, bool, bool);
+  using binary_fn_md_gp = WorkspaceGroup_sptr (*)(
+      const IMDWorkspace_sptr, const WorkspaceGroup_sptr, const std::string &,
+      const std::string &, bool, bool);
+  using binary_fn_gp_md = WorkspaceGroup_sptr (*)(
+      const WorkspaceGroup_sptr, const IMDWorkspace_sptr, const std::string &,
+      const std::string &, bool, bool);
+  using binary_fn_gp_gp = WorkspaceGroup_sptr (*)(
+      const WorkspaceGroup_sptr, const WorkspaceGroup_sptr, const std::string &,
+      const std::string &, bool, bool);
 
-  using binary_fn_mh_mh = IMDHistoWorkspace_sptr (
-      *)(const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
-         const std::string &, const std::string &, bool, bool);
+  using binary_fn_mh_mh = IMDHistoWorkspace_sptr (*)(
+      const IMDHistoWorkspace_sptr, const IMDHistoWorkspace_sptr,
+      const std::string &, const std::string &, bool, bool);
 
-  using binary_fn_md_db = IMDWorkspace_sptr (
-      *)(const IMDWorkspace_sptr, double, const std::string &,
-         const std::string &, bool, bool);
-  using binary_fn_mh_db = IMDHistoWorkspace_sptr (
-      *)(const IMDHistoWorkspace_sptr, double, const std::string &,
-         const std::string &, bool, bool);
-  using binary_fn_gp_db = WorkspaceGroup_sptr (
-      *)(const WorkspaceGroup_sptr, double, const std::string &,
-         const std::string &, bool, bool);
+  using binary_fn_md_db = IMDWorkspace_sptr (*)(
+      const IMDWorkspace_sptr, double, const std::string &, const std::string &,
+      bool, bool);
+  using binary_fn_mh_db = IMDHistoWorkspace_sptr (*)(
+      const IMDHistoWorkspace_sptr, double, const std::string &,
+      const std::string &, bool, bool);
+  using binary_fn_gp_db = WorkspaceGroup_sptr (*)(
+      const WorkspaceGroup_sptr, double, const std::string &,
+      const std::string &, bool, bool);
 
   // Always a return a Workspace_sptr
   using ReturnWorkspaceSptr = return_value_policy<AsType<Workspace_sptr>>;
 
   // Binary operations that return a workspace
-  using boost::python::def;
   using Mantid::PythonInterface::performBinaryOp;
   using Mantid::PythonInterface::performBinaryOpWithDouble;
+  using boost::python::def;
 
   def("performBinaryOp", (binary_fn_md_md)&performBinaryOp,
       ReturnWorkspaceSptr());
@@ -138,19 +144,19 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
 }
 
 /**
-* Perform the given binary operation on a workspace and a double.
-* Generic to MDWorkspaces.
-* Called by python overloads for _binary_op (see api_exports.cpp)
-*
-* @param inputWS :: The input workspace
-* @param value :: The input value
-* @param op :: The operation
-* @param name :: The output name
-* @param inplace :: If true, then the lhs argument is replaced by the result of
-*the operation.
-* @param reverse :: If true then the double is the lhs argument
-* @return A shared pointer to the result workspace
-*/
+ * Perform the given binary operation on a workspace and a double.
+ * Generic to MDWorkspaces.
+ * Called by python overloads for _binary_op (see api_exports.cpp)
+ *
+ * @param inputWS :: The input workspace
+ * @param value :: The input value
+ * @param op :: The operation
+ * @param name :: The output name
+ * @param inplace :: If true, then the lhs argument is replaced by the result of
+ *the operation.
+ * @param reverse :: If true then the double is the lhs argument
+ * @return A shared pointer to the result workspace
+ */
 template <typename LHSType, typename ResultType>
 ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
                                      const std::string &op,
@@ -239,5 +245,5 @@ template WorkspaceGroup_sptr
 performBinaryOpWithDouble(const WorkspaceGroup_sptr, const double,
                           const std::string &op, const std::string &, bool,
                           bool);
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FILTERBADPULSESTEST_H_
 #define FILTERBADPULSESTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAlgorithms/FilterBadPulses.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/FilterBadPulses.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -15,8 +21,8 @@
 
 namespace Mantid {
 namespace PythonInterface {
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_sptr;
 
 // ----------------------------------------------------------------------------------------------------------
 namespace {
@@ -74,7 +80,7 @@ PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
   }
   return nparray;
 }
-}
+} // namespace
 
 // -------------------------------------- Cloned
 // arrays---------------------------------------------------
@@ -116,5 +122,5 @@ PyObject *cloneDx(MatrixWorkspace &self) {
   return reinterpret_cast<PyObject *>(
       cloneArray(self, DxValues, 0, self.getNumberHistograms()));
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

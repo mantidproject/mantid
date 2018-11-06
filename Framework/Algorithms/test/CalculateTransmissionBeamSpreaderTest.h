@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CALCULATETRANSMISSIONBEAMSPREADERTEST_H_
 #define CALCULATETRANSMISSIONBEAMSPREADERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 
 using namespace Mantid::API;

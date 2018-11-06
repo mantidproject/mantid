@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_DIFFRACTIONEVENTCALIBRATEDETECTORSTEST_H_
 #define MANTID_ALGORITHMS_DIFFRACTIONEVENTCALIBRATEDETECTORSTEST_H_
 
@@ -5,9 +11,9 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <Poco/File.h>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

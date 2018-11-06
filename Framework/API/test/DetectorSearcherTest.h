@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_DETECTORSEARCHERTEST_H_
 #define MANTID_API_DETECTORSEARCHERTEST_H_
 
 #include "MantidAPI/DetectorSearcher.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>

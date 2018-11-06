@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init, too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
@@ -369,7 +375,7 @@ class JumpCETest(JumpFitFunctionTestBase):
     def __init__(self):
         JumpFitFunctionTestBase.__init__(self)
 
-        self._function = 'name=ChudleyElliot,Tau=3.31,L=1.42'
+        self._function = 'name=ChudleyElliot,Tau=1.42,L=2.42'
         self.tolerance = 5e-3
 
     def get_reference_files(self):

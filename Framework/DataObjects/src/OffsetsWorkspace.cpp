@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -18,8 +24,8 @@ DECLARE_WORKSPACE(OffsetsWorkspace)
 OffsetsWorkspace::OffsetsWorkspace(Geometry::Instrument_const_sptr inst)
     : SpecialWorkspace2D(inst) {}
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 /// @cond TEMPLATE
 

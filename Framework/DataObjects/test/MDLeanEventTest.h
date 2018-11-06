@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_MDLEANEVENTTEST_H_
 #define MANTID_DATAOBJECTS_MDLEANEVENTTEST_H_
 
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidDataObjects/MDLeanEvent.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_array.hpp>

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -20,7 +26,6 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 #include <fstream> // used to get ifstream
 #include <sstream>
 
@@ -221,7 +226,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
   std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>>
       dMap;
   std::map<std::string,
-           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>> sMap;
+           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>>
+      sMap;
   kind l_kind(LoadLog::empty);
   bool isNumeric(false);
 

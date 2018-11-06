@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/MoveInstrumentComponent.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
+#include "MantidGeometry/Instrument/GridDetectorPixel.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -31,9 +38,10 @@ void MoveInstrumentComponent::init() {
                   "The name of the component to move. Component names are "
                   "defined in the instrument definition files. A pathname "
                   "delited by '/' may be used for non-unique name.");
-  declareProperty("DetectorID", -1, "The ID of the detector to move. If both "
-                                    "the component name and the detector ID "
-                                    "are set the latter will be used.");
+  declareProperty("DetectorID", -1,
+                  "The ID of the detector to move. If both "
+                  "the component name and the detector ID "
+                  "are set the latter will be used.");
   declareProperty("X", 0.0, "The x-part of the new location vector.");
   declareProperty("Y", 0.0, "The y-part of the new location vector.");
   declareProperty("Z", 0.0, "The z-part of the new location vector.");
@@ -105,10 +113,14 @@ void MoveInstrumentComponent::exec() {
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  if (dynamic_cast<const Geometry::RectangularDetectorPixel *>(comp.get())) {
+  const auto &componentInfo =
+      inputW ? inputW->componentInfo() : inputP->componentInfo();
+  auto compIndex = componentInfo.indexOf(comp->getComponentID());
+  if (ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo,
+                                                      compIndex)) {
     // DetectorInfo makes changing positions possible but we keep the old
-    // behavior of ignoring position changes for RectangularDetectorPixel.
-    g_log.warning("Component is a RectangularDetectorPixel, moving is not "
+    // behavior of ignoring position changes for Structured banks.
+    g_log.warning("Component is fixed within a structured bank, moving is not "
                   "possible, doing nothing.");
     return;
   }

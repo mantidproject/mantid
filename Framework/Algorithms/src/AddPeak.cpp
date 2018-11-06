@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AddPeak.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::PhysicalConstants;
 
@@ -126,5 +132,5 @@ void AddPeak::exec() {
   // peaksWS->modified();
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

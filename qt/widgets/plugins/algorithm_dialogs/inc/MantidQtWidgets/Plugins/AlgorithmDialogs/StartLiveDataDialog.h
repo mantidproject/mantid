@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMDIALOGS_STARTLIVEDATADIALOG_H_
 #define MANTIDQTCUSTOMDIALOGS_STARTLIVEDATADIALOG_H_
 
 //----------------------
 // Includes
 //----------------------
-#include "ui_StartLiveDataDialog.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/WidgetScrollbarDecorator.h"
+#include "ui_StartLiveDataDialog.h"
 
 namespace MantidQt {
 namespace CustomDialogs {
@@ -69,7 +75,7 @@ private:
   /// Constant used for custom listener connection setups
   static const QString CUSTOM_CONNECTION;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMDIALOGS_STARTLIVEDATADIALOG_H_

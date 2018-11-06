@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SINGLECRYSTALDIFFRACTIONHELPER_H_
 #define SINGLECRYSTALDIFFRACTIONHELPER_H_
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NearestNeighbours.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <tuple>
 #include <random>
+#include <tuple>
 
 namespace Mantid {
 namespace SingleCrystalDiffractionTestHelper {
@@ -103,7 +109,7 @@ private:
   /// Random generator for making events
   std::mt19937 m_generator;
 };
-}
-}
+} // namespace SingleCrystalDiffractionTestHelper
+} // namespace Mantid
 
 #endif

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
@@ -41,7 +47,9 @@ def _attenuate_workspace(output_file_paths, attenuated_ws, attenuation_filepath)
 def _focus_mode_all(output_file_paths, processed_spectra, attenuation_filepath):
     summed_spectra_name = output_file_paths["output_name"] + "_mods1-9"
     summed_spectra = mantid.MergeRuns(InputWorkspaces=processed_spectra[:9], OutputWorkspace=summed_spectra_name)
+    xList = summed_spectra.readX(0)
 
+    summed_spectra = mantid.CropWorkspace(InputWorkspace=summed_spectra, XMin=xList[1], Xmax=xList[-2])
     summed_spectra = mantid.Scale(InputWorkspace=summed_spectra, Factor=0.111111111111111,
                                   OutputWorkspace=summed_spectra_name)
     if attenuation_filepath:
@@ -80,6 +88,9 @@ def _focus_mode_groups(output_file_paths, calibrated_spectra):
     workspaces_4_to_9_name = output_file_paths["output_name"] + "_mods4-9"
     workspaces_4_to_9 = mantid.MergeRuns(InputWorkspaces=calibrated_spectra[3:9],
                                          OutputWorkspace=workspaces_4_to_9_name)
+    xList = workspaces_4_to_9.readX(0)
+
+    workspaces_4_to_9 = mantid.CropWorkspace(InputWorkspace=workspaces_4_to_9 , XMin=xList[1], Xmax=xList[-2])
     workspaces_4_to_9 = mantid.Scale(InputWorkspace=workspaces_4_to_9, Factor=0.5,
                                      OutputWorkspace=workspaces_4_to_9_name)
     to_save.append(workspaces_4_to_9)
@@ -133,6 +144,9 @@ def _focus_mode_mods(output_file_paths, calibrated_spectra):
 
 def _focus_mode_trans(output_file_paths, attenuation_filepath, calibrated_spectra):
     summed_ws = mantid.MergeRuns(InputWorkspaces=calibrated_spectra[:9])
+    xList = summed_ws.readX(0)
+
+    summed_ws = mantid.CropWorkspace(InputWorkspace=summed_ws, XMin=xList[1], Xmax=xList[-2])
     summed_ws = mantid.Scale(InputWorkspace=summed_ws, Factor=0.111111111111111)
 
     if attenuation_filepath:
@@ -173,6 +187,9 @@ def _sum_groups_of_three_ws(calibrated_spectra, output_file_names):
         ws_name = output_file_names["output_name"] + "_mods{}-{}".format(i * 3 + 1, (i + 1) * 3)
         summed_spectra = mantid.MergeRuns(InputWorkspaces=calibrated_spectra[i * 3: (i + 1) * 3],
                                           OutputWorkspace=ws_name)
+        xList = summed_spectra.readX(0)
+
+        summed_spectra = mantid.CropWorkspace(InputWorkspace=summed_spectra, XMin=xList[1], Xmax=xList[-2])
         scaled = mantid.Scale(InputWorkspace=summed_spectra, Factor=1./3, OutputWorkspace=ws_name)
         output_list.append(scaled)
 

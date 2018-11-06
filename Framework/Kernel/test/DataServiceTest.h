@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_DATASERVICETEST_H_
 #define MANTID_KERNEL_DATASERVICETEST_H_
 
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <cxxtest/TestSuite.h>
 #include <Poco/NObserver.h>
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
-#include <sstream>
 #include <mutex>
+#include <sstream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -78,15 +84,17 @@ public:
     svc.notificationCenter.removeObserver(observer);
   }
 
-  void handlePreDeleteNotification(const Poco::AutoPtr<
-      FakeDataService::PreDeleteNotification> &notification) {
+  void handlePreDeleteNotification(
+      const Poco::AutoPtr<FakeDataService::PreDeleteNotification>
+          &notification) {
     TS_ASSERT_EQUALS(notification->objectName(), "one");
     TS_ASSERT_EQUALS(*notification->object(), 1);
     ++notificationFlag;
   }
 
-  void handlePostDeleteNotification(const Poco::AutoPtr<
-      FakeDataService::PostDeleteNotification> &notification) {
+  void handlePostDeleteNotification(
+      const Poco::AutoPtr<FakeDataService::PostDeleteNotification>
+          &notification) {
     TS_ASSERT_EQUALS(notification->objectName(), "one");
     ++notificationFlag;
   }

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -7,20 +13,20 @@
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ConfigService.h"
 
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
-#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 
+using Mantid::Geometry::InstrumentDefinitionParser;
+using Poco::XML::AutoPtr;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::AutoPtr;
-using Mantid::Geometry::InstrumentDefinitionParser;
 
 namespace Mantid {
 namespace DataHandling {

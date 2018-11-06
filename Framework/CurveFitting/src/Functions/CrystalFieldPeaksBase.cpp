@@ -1,10 +1,16 @@
-#include "MantidCurveFitting/Functions/CrystalElectricField.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
+#include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidKernel/Exception.h"
 
+#include <cctype>
 #include <functional>
 #include <map>
-#include <cctype>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -13,19 +19,10 @@ namespace Functions {
 namespace {
 
 // Maps ion name to its int code.
-const std::map<std::string, int> ION_2_NRE{{"Ce", 1},
-                                           {"Pr", 2},
-                                           {"Nd", 3},
-                                           {"Pm", 4},
-                                           {"Sm", 5},
-                                           {"Eu", 6},
-                                           {"Gd", 7},
-                                           {"Tb", 8},
-                                           {"Dy", 9},
-                                           {"Ho", 10},
-                                           {"Er", 11},
-                                           {"Tm", 12},
-                                           {"Yb", 13}};
+const std::map<std::string, int> ION_2_NRE{
+    {"Ce", 1},  {"Pr", 2},  {"Nd", 3}, {"Pm", 4}, {"Sm", 5},
+    {"Eu", 6},  {"Gd", 7},  {"Tb", 8}, {"Dy", 9}, {"Ho", 10},
+    {"Er", 11}, {"Tm", 12}, {"Yb", 13}};
 
 const bool REAL_PARAM_PART = true;
 const bool IMAG_PARAM_PART = false;
@@ -436,8 +433,8 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
 
   calculateEigensystem(en, wf, ham, hz, nre, bmol, bext, bkq);
   // MaxPeakCount is a read-only "mutable" attribute.
-  const_cast<CrystalFieldPeaksBase *>(this)
-      ->setAttributeValue("MaxPeakCount", static_cast<int>(en.size()));
+  const_cast<CrystalFieldPeaksBase *>(this)->setAttributeValue(
+      "MaxPeakCount", static_cast<int>(en.size()));
 }
 
 /// Perform a castom action when an attribute is set.

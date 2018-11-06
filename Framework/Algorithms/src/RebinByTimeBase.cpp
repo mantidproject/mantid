@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RebinByTimeBase.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
@@ -6,8 +12,8 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/make_shared.hpp>
 

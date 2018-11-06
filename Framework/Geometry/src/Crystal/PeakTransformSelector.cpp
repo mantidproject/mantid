@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PeakTransformSelector.h"
 #include <stdexcept>
 
@@ -81,7 +87,8 @@ PeakTransformSelector::makeChoice(const std::string labelX,
   if (!found) {
     std::stringstream ss;
     ss << "PeakTransformSelector could not find a suitable transform for "
-          "labelX " << labelX << " labelY " << labelY;
+          "labelX "
+       << labelX << " labelY " << labelY;
     throw std::invalid_argument(ss.str());
   }
   return selected;
@@ -104,5 +111,5 @@ bool PeakTransformSelector::hasFactoryForTransform(
   }
   return hasFactoryForTransform;
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

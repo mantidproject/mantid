@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDFADDWORKSPACEDIALOG_H_
 #define MDFADDWORKSPACEDIALOG_H_
 
-#include <QDialog>
 #include "ui_MDFAddWorkspaceDialog.h"
+#include <QDialog>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace MDF {
 
 /**
-  * A dialog for selecting a workspace from the ADS.
-  */
+ * A dialog for selecting a workspace from the ADS.
+ */
 class AddWorkspaceDialog : public QDialog {
   Q_OBJECT
 public:
@@ -33,8 +39,8 @@ private:
   Ui::MDFAddWorkspaceDialog m_uiForm;
 };
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /*MDFADDWORKSPACEDIALOG_H_*/

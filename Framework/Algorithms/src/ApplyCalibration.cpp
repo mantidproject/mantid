@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ApplyCalibration.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -26,11 +32,11 @@ void ApplyCalibration::init() {
 }
 
 /** Executes the algorithm. Moving detectors of input workspace to positions
-*indicated in table workspace
-*
-*  @throw FileError Thrown if unable to get instrument from workspace,
-*                   table workspace is incompatible with instrument
-*/
+ *indicated in table workspace
+ *
+ *  @throw FileError Thrown if unable to get instrument from workspace,
+ *                   table workspace is incompatible with instrument
+ */
 void ApplyCalibration::exec() {
   // Get pointers to the workspace, parameter map and table
   API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 Containing a set of classes used for finding (calculating and refining) UB matrix
 """
@@ -8,10 +14,10 @@ from . import ui_AddUBPeaksDialog
 from . import ui_UBSelectPeaksDialog
 from . import guiutility
 
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QDialog, QFileDialog)  # noqa
 
 
-class AddScansForUBDialog(QtGui.QDialog):
+class AddScansForUBDialog(QDialog):
     """
     Dialog class to add scans to UB scans' table for calculating and
     """
@@ -30,19 +36,13 @@ class AddScansForUBDialog(QtGui.QDialog):
         # initialize widgets
         self.ui.checkBox_loadHKLfromFile.setChecked(True)
 
-        # define event handling
-        self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_find_peak)
-        self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
-                     self.do_add_single_scan)
+        self.ui.pushButton_findPeak.clicked.connect(self.do_find_peak)
+        self.ui.pushButton_addPeakToCalUB.clicked.connect(self.do_add_single_scan)
 
-        self.connect(self.ui.pushButton_loadScans, QtCore.SIGNAL('clicked()'),
-                     self.do_load_scans)
-        self.connect(self.ui.pushButton_addScans, QtCore.SIGNAL('clicked()'),
-                     self.do_add_scans)
+        self.ui.pushButton_loadScans.clicked.connect(self.do_load_scans)
+        self.ui.pushButton_addScans.clicked.connect(self.do_add_scans)
 
-        self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
+        self.ui.pushButton_quit.clicked.connect(self.do_quit)
 
         return
 
@@ -130,7 +130,7 @@ class AddScansForUBDialog(QtGui.QDialog):
         return
 
 
-class SelectUBMatrixScansDialog(QtGui.QDialog):
+class SelectUBMatrixScansDialog(QDialog):
     """
     Dialog to select scans for processing UB matrix
     """
@@ -147,15 +147,10 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
         self.ui.setupUi(self)
 
         # define event handling methods
-        self.connect(self.ui.pushButton_selectScans, QtCore.SIGNAL('clicked()'),
-                     self.do_select_scans)
-        self.connect(self.ui.pushButton_revertCurrentSelection, QtCore.SIGNAL('clicked()'),
-                     self.do_revert_selection)
-        self.connect(self.ui.pushButton_exportSelectedScans, QtCore.SIGNAL('clicked()'),
-                     self.do_export_selected_scans)
-
-        self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
+        self.ui.pushButton_selectScans.clicked.connect(self.do_select_scans)
+        self.ui.pushButton_revertCurrentSelection.clicked.connect(self.do_revert_selection)
+        self.ui.pushButton_exportSelectedScans.clicked.connect(self.do_export_selected_scans)
+        self.ui.pushButton_quit.clicked.connect(self.do_quit)
 
         return
 
@@ -187,7 +182,7 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
 
         # get the output file name
         file_filter = 'Text Files (*.dat);;All Files (*.*)'
-        file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'File to export selected scans',
+        file_name = str(QFileDialog.getSaveFileName(self, 'File to export selected scans',
                         self._myParent.working_directory, file_filter))
 
         # write file

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
@@ -450,5 +456,5 @@ void BinMD::exec() {
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTOBJCOMPNENT__
 #define MANTID_TESTOBJCOMPNENT__
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Exception.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/Timer.h"
 

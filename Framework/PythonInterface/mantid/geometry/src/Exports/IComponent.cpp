@@ -1,10 +1,16 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Quat.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
 
 using Mantid::Geometry::IComponent;
@@ -27,7 +33,7 @@ namespace {
 double getDistance(IComponent &self, IComponent &other) {
   return self.getDistance(other);
 }
-}
+} // namespace
 
 void export_IComponent() {
   register_ptr_to_python<boost::shared_ptr<IComponent>>();

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import os
 import re
 import subprocess
@@ -24,7 +30,7 @@ def cache_subtree(cache, root, path):
             # This line contains the date that the subsequent files were last modified
             current_date_str = line
 
-        # Only take the first (most recent) appearence of each file
+        # Only take the first (most recent) appearance of each file
         elif filename_regex.match(line) and line not in cache:
             # This line contains a file that was modified on the last mentioned date
             cache[line] = current_date_str

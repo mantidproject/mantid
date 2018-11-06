@@ -28,23 +28,22 @@
  *                                                                         *
  ***************************************************************************/
 #include "ErrDialog.h"
-#include "Table.h"
 #include "ApplicationWindow.h"
+#include "Table.h"
 
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QGridLayout>
-#include <QList>
-#include <QLabel>
-#include <QComboBox>
-#include <QRadioButton>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QGroupBox>
 #include <QButtonGroup>
-#include <QList>
-#include <QWidget>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QList>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QVBoxLayout>
+#include <QWidget>
 
 ErrDialog::ErrDialog(ApplicationWindow *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {
@@ -200,8 +199,9 @@ void ErrDialog::add() {
     direction = 1;
 
   if (columnBox->isChecked())
-    emit options(nameLabel->currentText(), tableNamesBox->currentText() + "_" +
-                                               colNamesBox->currentText(),
+    emit options(nameLabel->currentText(),
+                 tableNamesBox->currentText() + "_" +
+                     colNamesBox->currentText(),
                  direction);
   else {
     int type;

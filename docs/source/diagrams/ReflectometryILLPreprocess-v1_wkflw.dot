@@ -8,7 +8,7 @@ digraph ReflectometryILLPreprocess {
     beamCentre        [label="BeamCentre"]
     braggAngle        [label="BraggAngle"]
     run               [label="Run"]
-    inputBeamPosition [label="BeamPositionWorkspace\n(from direct)"]
+    inputBeamPosition [label="DirectBeamPositionWorkspace"]
     inputWorkspace    [label="InputWorkspace"]
     fgHWidth          [label="ForegroundHalfWidth"]
     outBeamPos        [label="OutputBeamPositionWorkspace"]

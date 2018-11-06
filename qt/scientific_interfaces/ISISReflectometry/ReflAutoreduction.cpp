@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflAutoreduction.h"
 #include "IReflMainWindowPresenter.h"
 #include "IReflRunsTabView.h"
@@ -73,5 +79,5 @@ bool ReflAutoreduction::pause(int group) {
 /** Stop autoreduction on any group for which it is running
  */
 void ReflAutoreduction::stop() { m_running = false; }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

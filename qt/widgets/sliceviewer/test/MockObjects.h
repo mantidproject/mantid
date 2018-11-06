@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SLICE_VIEWER_MOCKOBJECTS_H_
 #define SLICE_VIEWER_MOCKOBJECTS_H_
 
@@ -25,7 +31,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace {
 /*------------------------------------------------------------
@@ -195,8 +201,8 @@ public:
   MOCK_CONST_METHOD1(getX, coord_t(size_t ind));
   MOCK_METHOD3(setRange, void(size_t nBins, coord_t min, coord_t max));
 };
-}
+} // namespace
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif

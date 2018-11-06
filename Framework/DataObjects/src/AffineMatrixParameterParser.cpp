@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/AffineMatrixParameterParser.h"
 #include <boost/algorithm/string.hpp>
 
@@ -74,5 +80,5 @@ void AffineMatrixParameterParser::setSuccessorParser(
   throw std::runtime_error(
       "Cannot set a successor parser on a AffineMatrixParameterParser");
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

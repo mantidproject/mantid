@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MDBOX_H_
 #define MDBOX_H_
 
-#include "MantidKernel/ThreadScheduler.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/System.h"
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDDimensionStats.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/ThreadScheduler.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -48,13 +54,13 @@ public:
         const size_t boxID = UNDEF_SIZET);
 
   MDBox(Mantid::API::BoxController_sptr &splitter, const uint32_t depth,
-        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-            extentsVector,
+        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+            &extentsVector,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
   MDBox(Mantid::API::BoxController *const splitter, const uint32_t depth,
-        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-            extentsVector,
+        const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+            &extentsVector,
         const size_t nBoxEvents = UNDEF_SIZET,
         const size_t boxID = UNDEF_SIZET);
 

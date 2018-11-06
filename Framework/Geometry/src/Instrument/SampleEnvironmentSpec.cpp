@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
 #include "MantidKernel/make_unique.h"
 
@@ -43,7 +49,7 @@ SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
 }
 
 /**
-* Adds a can definition to the known list
+ * Adds a can definition to the known list
  * @param can A pointer to a Container object
  * @throws std::invalid::argument if the id is empty
  */

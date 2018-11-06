@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -37,7 +43,7 @@ const double WAVELENGTH_TO_VELOCITY =
     1.0E10 * PhysicalConstants::h / PhysicalConstants::NeutronMass;
 /// This is an absurd number for even ultra cold neutrons
 const double WAVELENGTH_MAX = 1000.;
-}
+} // namespace
 
 const std::string EstimateResolutionDiffraction::name() const {
   return "EstimateResolutionDiffraction";
@@ -92,7 +98,7 @@ void EstimateResolutionDiffraction::init() {
 }
 
 /**
-  */
+ */
 void EstimateResolutionDiffraction::exec() {
   processAlgProperties();
 
@@ -128,7 +134,7 @@ void EstimateResolutionDiffraction::exec() {
 }
 
 /**
-  */
+ */
 void EstimateResolutionDiffraction::processAlgProperties() {
   m_inputWS = getProperty("InputWorkspace");
   m_divergenceWS = getProperty("DivergenceWorkspace");
@@ -164,7 +170,7 @@ double EstimateResolutionDiffraction::getWavelength() {
 }
 
 /**
-  */
+ */
 void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   double centrewavelength = getWavelength();
   g_log.notice() << "Centre wavelength = " << centrewavelength << " Angstrom\n";
@@ -178,7 +184,7 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
 }
 
 /**
-  */
+ */
 void EstimateResolutionDiffraction::estimateDetectorResolution() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const auto l1 = spectrumInfo.l1();

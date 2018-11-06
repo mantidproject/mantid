@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/Math/ChebyshevPolyFit.h"
 #include "MantidKernel/Math/Distributions/ChebyshevPolynomial.h"
-#include <gsl/gsl_multifit.h>
 #include <cassert>
+#include <gsl/gsl_multifit.h>
 
 namespace Mantid {
 namespace Kernel {

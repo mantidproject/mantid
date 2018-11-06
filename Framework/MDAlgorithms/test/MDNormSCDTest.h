@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_MDNORMSCDTEST_H_
 #define MANTID_MDALGORITHMS_MDNORMSCDTEST_H_
 
@@ -5,7 +11,6 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/MDNormSCD.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

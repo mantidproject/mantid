@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "IndirectLoadILL.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "IndirectLoadILL.h"
 
 #include <QFileInfo>
 #include <QStringList>
@@ -107,8 +113,9 @@ void IndirectLoadILL::run() {
     pyInput += "from IndirectNeutron import " + pyFunc + "\n";
     pyInput += pyFunc + "('" + instrument + "','" + filename + "','" +
                analyser + "','" + reflection + "'," + rejectZero + "," +
-               useMap + ",'" + mapPath + "'"
-                                         ",'" +
+               useMap + ",'" + mapPath +
+               "'"
+               ",'" +
                plot + "'," + save + ")";
   }
   runPythonScript(pyInput);

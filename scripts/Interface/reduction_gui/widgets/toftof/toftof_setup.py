@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable = too-many-instance-attributes, too-many-branches, too-many-public-methods
 #pylint: disable = W0622
 """
@@ -336,7 +342,7 @@ class TOFTOFSetupWidget(BaseWidget):
         elem = TOFTOFScriptElement()
 
         def line_text(lineEdit):
-            return lineEdit.text().strip()
+            return str(lineEdit.text()).strip()
 
         def is_checked(checkBox):
             return checkBox.isChecked() and checkBox.isEnabled()

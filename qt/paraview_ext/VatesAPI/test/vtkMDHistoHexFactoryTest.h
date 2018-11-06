@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 #define VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 
-#include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include "MockObjects.h"
+#include "vtkSmartPointer.h"
+#include "vtkStructuredGrid.h"
+#include "vtkUnsignedCharArray.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
-#include "vtkStructuredGrid.h"
-#include "vtkUnsignedCharArray.h"
-#include "vtkSmartPointer.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

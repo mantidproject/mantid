@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_REMOTEALGORITHMS_SIMPLEJSONTEST_H_
 #define MANTID_REMOTEALGORITHMS_SIMPLEJSONTEST_H_
 
@@ -158,8 +164,9 @@ public:
 
     const std::string l2JsonStr = R"({"v1": "[1, a, 3]",")" + errName +
                                   "\":\"" + errVal + "\", \"" + versName +
-                                  "\": \"" + versVal + "\" }"
-                                                       "\"}";
+                                  "\": \"" + versVal +
+                                  "\" }"
+                                  "\"}";
     std::istringstream inputL2(l2JsonStr);
 
     TS_ASSERT_THROWS_NOTHING(initFromStream(ol, inputL2));
@@ -175,8 +182,9 @@ public:
     const std::string l3JsonStr = "{ \"" + impName + "\": \"" + impVal +
                                   R"(", "v1": "[1, a, longer str, a4]",")" +
                                   errName + "\":\"" + errVal + "\", \"" +
-                                  versName + "\": \"" + versVal + "\" }"
-                                                                  "\"}";
+                                  versName + "\": \"" + versVal +
+                                  "\" }"
+                                  "\"}";
     std::istringstream inputL3(l3JsonStr);
 
     TS_ASSERT_THROWS_NOTHING(initFromStream(ol, inputL3));

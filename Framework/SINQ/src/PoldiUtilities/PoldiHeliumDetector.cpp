@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 
 #include "MantidGeometry/IComponent.h"
@@ -109,5 +115,5 @@ void PoldiHeliumDetector::initializeCalibratedParameters(
   m_phiCenter = phi(m_calibratedCenterTwoTheta);
   m_phiStart = m_phiCenter - m_totalOpeningAngle / 2.0;
 }
-}
-}
+} // namespace Poldi
+} // namespace Mantid

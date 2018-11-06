@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
-#include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
-#include "MantidVatesAPI/ProgressAction.h"
 
 using namespace Mantid::DataObjects;
 
@@ -85,5 +91,5 @@ vtkMDHistoHex4DFactory<TimeMapper>::~vtkMDHistoHex4DFactory() {}
 
 template class vtkMDHistoHex4DFactory<TimeToTimeStep>;
 template class vtkMDHistoHex4DFactory<TimeStepToTimeStep>;
-}
-}
+} // namespace VATES
+} // namespace Mantid

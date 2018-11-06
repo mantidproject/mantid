@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/Quantification/Models/QCoordinate.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -8,14 +14,14 @@ namespace MDAlgorithms {
 DECLARE_FOREGROUNDMODEL(QCoordinate)
 
 namespace // anonymous
-    {
+{
 /// N attrs
 const unsigned int NATTS = 1;
 /// Attribute names
 const char *ATTR_NAMES[NATTS] = {"Coord"};
 /// 2 \pi
 const double TWO_PI = 2. * M_PI;
-}
+} // namespace
 
 QCoordinate::QCoordinate() : ForegroundModel(), m_coord(0) {}
 
@@ -142,5 +148,5 @@ QCoordinate::scatteringIntensity(const API::ExperimentInfo &exptSetup,
     throw std::invalid_argument("Logical error. Invalid coord type " +
                                 std::to_string(m_coord));
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

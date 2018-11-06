@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CRYSTALFIELDMULTISPECTRUMTEST_H_
 #define CRYSTALFIELDMULTISPECTRUMTEST_H_
 
@@ -331,9 +337,9 @@ public:
     std::vector<double> x[2] = {{0.0, 50.0}, {0.0, 50.0}};
     std::vector<double> y[2] = {{1.0, 2.0}, {3.0, 4.0}};
     auto checkW = [&x, &y](size_t i, double c) {
-      return y[i].front() +
-             (y[i].back() - y[i].front()) / (x[i].back() - x[i].front()) *
-                 (c - x[i].front());
+      return y[i].front() + (y[i].back() - y[i].front()) /
+                                (x[i].back() - x[i].front()) *
+                                (c - x[i].front());
     };
     fun.setAttributeValue("FWHMX0", x[0]);
     fun.setAttributeValue("FWHMY0", y[0]);

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SAVEPARAMETERFILETEST_H_
 #define SAVEPARAMETERFILETEST_H_
 
@@ -5,7 +11,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -16,6 +21,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
@@ -39,10 +45,11 @@ public:
     setParam("nickel-holder", "testString1", "hello world");
     setParam("nickel-holder", "testString2", "unchanged");
     setParamByDetID(1301, "testDouble", 2.17);
-    setFitParam("nickel-holder", "A", ", BackToBackExponential , S ,  ,  ,  ,  "
-                                      ", "
-                                      "sqrt(188.149*centre^4+6520.945*centre^2)"
-                                      " , dSpacing , TOF , linear ; TOF ; TOF");
+    setFitParam("nickel-holder", "A",
+                ", BackToBackExponential , S ,  ,  ,  ,  "
+                ", "
+                "sqrt(188.149*centre^4+6520.945*centre^2)"
+                " , dSpacing , TOF , linear ; TOF ; TOF");
 
     // Create a temporary blank file for us to test with
     ScopedFileHelper::ScopedFile paramFile("", "__params.xml");

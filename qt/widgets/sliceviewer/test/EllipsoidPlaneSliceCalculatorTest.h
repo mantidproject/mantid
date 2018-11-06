@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SLICE_VIEWER_ELLIPSOID_PLANE_SLICE_CALCULATOR_TEST_H_
 #define SLICE_VIEWER_ELLIPSOID_PLANE_SLICE_CALCULATOR_TEST_H_
 
@@ -28,7 +34,7 @@ bool isAngleEitherValueOr180DegreesRoated(double expectedAngle,
          Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle + M_PI) ||
          Mantid::SliceViewer::almost_equal(expectedAngle, actualAngle - M_PI);
 }
-}
+} // namespace
 
 class EllipsoidPlaneSliceCalculatorTest : public CxxTest::TestSuite {
 public:
@@ -50,8 +56,8 @@ public:
 
     // Assert
 
-    std::vector<std::pair<int, int>> indices = {
-        {0, 1}, {0, 2}, {1, 0}, {1, 2}, {2, 0}, {2, 1}};
+    std::vector<std::pair<int, int>> indices = {{0, 1}, {0, 2}, {1, 0},
+                                                {1, 2}, {2, 0}, {2, 1}};
 
     for (const auto &index : indices) {
       TSM_ASSERT("Non-diagonal element should be zero",

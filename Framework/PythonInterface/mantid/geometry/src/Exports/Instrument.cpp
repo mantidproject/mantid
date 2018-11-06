@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
@@ -34,11 +40,12 @@ void export_Instrument() {
            (arg("self"), arg("cname")),
            "Returns the named :class:`~mantid.geometry.Component`")
 
-      .def("getDetector", (boost::shared_ptr<IDetector>(
-                              Instrument::*)(const detid_t &) const) &
-                              Instrument::getDetector,
-           (arg("self"), arg("detector_id")),
-           "Returns the :class:`~mantid.geometry.Detector` with the given ID")
+      .def(
+          "getDetector",
+          (boost::shared_ptr<IDetector>(Instrument::*)(const detid_t &) const) &
+              Instrument::getDetector,
+          (arg("self"), arg("detector_id")),
+          "Returns the :class:`~mantid.geometry.Detector` with the given ID")
 
       .def("getReferenceFrame",
            (boost::shared_ptr<const ReferenceFrame>(Instrument::*)()) &

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GeneralisedSecondDifference.h"
 
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/HistoWorkspace.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <numeric>
 #include <sstream>
@@ -171,5 +177,5 @@ void GeneralisedSecondDifference::computePrefactors() {
                  VectorHelper::Squares<double>());
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

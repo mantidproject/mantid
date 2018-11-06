@@ -1,14 +1,20 @@
-#include <QApplication>
-#include <QSplashScreen>
-#include <QMessageBox>
-#include <QDir>
-#include <QThread>
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
-#include "qmainwindow.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include "qmainwindow.h"
+#include <QApplication>
+#include <QDir>
+#include <QMessageBox>
+#include <QSplashScreen>
+#include <QThread>
 
 /** Demo application for quickly testing the SliceViewerWindow GUI.
  *

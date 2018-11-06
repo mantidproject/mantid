@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 
-#include "ui_Iqt.h"
 #include "IndirectDataAnalysisTab.h"
+#include "ui_Iqt.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -14,10 +20,21 @@ public:
   Iqt(QWidget *parent = nullptr);
 
 private:
-  void setup() override;
   void run() override;
+  void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+
+  bool isErrorsEnabled();
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setTiledPlotEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+  void setTiledPlotIsPlotting(bool plotting);
 
 private slots:
   void algorithmComplete(bool error);
@@ -26,11 +43,12 @@ private slots:
   void updateRS(QtProperty *prop, double val);
   void updatePropertyValues(QtProperty *prop, double val);
   void updateDisplayedBinParameters();
+  void runClicked();
   void saveClicked();
   void plotClicked();
+  void errorsClicked();
   void plotTiled();
 
-private:
 private:
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;

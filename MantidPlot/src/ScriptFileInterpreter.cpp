@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ScriptFileInterpreter.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 #include "ScriptOutputDisplay.h"
 #include "ScriptingEnv.h"
-#include "MantidQtWidgets/Common/ScriptEditor.h"
 #include <QAction>
 #include <QFileInfo>
 #include <QFontDatabase>

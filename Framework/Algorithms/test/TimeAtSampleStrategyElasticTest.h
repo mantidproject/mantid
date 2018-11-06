@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYELASTICTEST_H_
 #define MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYELASTICTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/TimeAtSampleStrategy.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::Geometry;
@@ -79,11 +85,10 @@ public:
 
     const double ratio = correction.factor;
 
-    TSM_ASSERT_EQUALS(
-        "L1/L1m",
-        std::abs(L1 /
-                 beamDir.scalar_prod(source->getPos() - monitor->getPos())),
-        ratio);
+    TSM_ASSERT_EQUALS("L1/L1m",
+                      std::abs(L1 / beamDir.scalar_prod(source->getPos() -
+                                                        monitor->getPos())),
+                      ratio);
   }
 };
 

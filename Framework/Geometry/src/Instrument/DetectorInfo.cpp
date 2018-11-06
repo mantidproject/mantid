@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -10,7 +17,6 @@
 
 namespace Mantid {
 namespace Geometry {
-
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument
@@ -83,16 +89,8 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 /// instrument.
 size_t DetectorInfo::size() const { return m_detectorIDs->size(); }
 
-/// Returns the size of DetectorInfo taking into account scanning, i.e., the sum
-/// of the number of scan points for every detector in the instrument.
-size_t DetectorInfo::scanSize() const { return m_detectorInfo->scanSize(); }
-
 /// Returns true if the beamline has scanning detectors.
 bool DetectorInfo::isScanning() const { return m_detectorInfo->isScanning(); }
-
-/// Returns true if the beamline has scanning detectors and they have all the
-/// same scan intervals.
-bool DetectorInfo::isSyncScan() const { return m_detectorInfo->isSyncScan(); }
 
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
@@ -321,52 +319,24 @@ const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
 }
 
 /// Returns the scan count of the detector with given detector index.
-size_t DetectorInfo::scanCount(const size_t index) const {
-  return m_detectorInfo->scanCount(index);
-}
+size_t DetectorInfo::scanCount() const { return m_detectorInfo->scanCount(); }
 
 /** Returns the scan interval of the detector with given index.
  *
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
-std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
-DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
-  const auto &interval = m_detectorInfo->scanInterval(index);
-  return {interval.first, interval.second};
+const std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+DetectorInfo::scanIntervals() const {
+  const auto &intervals = m_detectorInfo->scanIntervals();
+  return {intervals.begin(), intervals.end()};
 }
 
-/** Set the scan interval of the detector with given detector index.
- *
- * The interval start and end values would typically correspond to nanoseconds
- * since 1990, as in Types::Core::DateAndTime. Note that it is currently not
- *possible
- * to modify scan intervals for a DetectorInfo with time-dependent detectors,
- * i.e., time intervals must be set with this method before merging individual
- * scans. */
-void DetectorInfo::setScanInterval(
-    const size_t index, const std::pair<Types::Core::DateAndTime,
-                                        Types::Core::DateAndTime> &interval) {
-  m_detectorInfo->setScanInterval(index, {interval.first.totalNanoseconds(),
-                                          interval.second.totalNanoseconds()});
+const DetectorInfoConstIt DetectorInfo::cbegin() const {
+  return DetectorInfoConstIt(*this, 0);
 }
 
-/** Set the scan interval for all detectors.
- *
- * Prefer this over setting intervals for individual detectors since it enables
- * internal performance optimization. See also overload for other details. */
-void DetectorInfo::setScanInterval(const std::pair<
-    Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {
-  m_detectorInfo->setScanInterval(
-      {interval.first.totalNanoseconds(), interval.second.totalNanoseconds()});
-}
-
-/** Merges the contents of other into this.
- *
- * Scan intervals in both other and this must be set. Intervals must be
- * identical or non-overlapping. If they are identical all other parameters (for
- * that index) must match. */
-void DetectorInfo::merge(const DetectorInfo &other) {
-  m_detectorInfo->merge(*other.m_detectorInfo);
+const DetectorInfoConstIt DetectorInfo::cend() const {
+  return DetectorInfoConstIt(*this, size());
 }
 
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
@@ -386,6 +356,12 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
   static_cast<void>(getDetector(index));
   return m_lastDetector[thread];
 }
+
+// Begin method for iterator
+DetectorInfoIt DetectorInfo::begin() { return DetectorInfoIt(*this, 0); }
+
+// End method for iterator
+DetectorInfoIt DetectorInfo::end() { return DetectorInfoIt(*this, size()); }
 
 } // namespace Geometry
 } // namespace Mantid

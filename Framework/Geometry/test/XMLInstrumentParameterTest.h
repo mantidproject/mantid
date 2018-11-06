@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_XMLLOGFILETEST_H_
 #define MANTID_GEOMETRY_XMLLOGFILETEST_H_
 
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;

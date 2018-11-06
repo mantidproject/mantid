@@ -1,7 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef OPTIMIZECRYSTALPLACEMENTTEST_H_
 #define OPTIMIZECRYSTALPLACEMENTTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
@@ -9,13 +14,14 @@
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
-using Mantid::Crystal::PeakHKLErrors;
 using Mantid::Crystal::OptimizeCrystalPlacement;
+using Mantid::Crystal::PeakHKLErrors;
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
 using Mantid::Geometry::Goniometer;
@@ -59,7 +65,7 @@ runOptimizePlacement(const PeaksWorkspace_sptr &peaksWS,
   ads.remove(fitTableName);
   return std::make_pair(modifiedPeaksWS, fitInfoWS);
 }
-}
+} // namespace
 
 class OptimizeCrystalPlacementTest : public CxxTest::TestSuite {
 

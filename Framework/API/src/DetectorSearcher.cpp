@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/DetectorSearcher.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ConfigService.h"
@@ -5,8 +11,8 @@
 
 #include <tuple>
 
-using Mantid::Kernel::V3D;
 using Mantid::Geometry::InstrumentRayTracer;
+using Mantid::Kernel::V3D;
 using namespace Mantid;
 using namespace Mantid::API;
 

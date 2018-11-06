@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 #include <MantidGeometry/Instrument.h>
 #include <MantidKernel/make_unique.h>
@@ -5,14 +11,14 @@
 #include <MantidQtWidgets/Common/AlgorithmInputHistory.h>
 #include <MantidQtWidgets/Common/FlowLayout.h>
 #include <MantidQtWidgets/Common/InterfaceManager.h>
-#include <MantidQtWidgets/Common/WorkspaceIcons.h>
-#include <MantidQtWidgets/Common/pixmaps.h>
 #include <MantidQtWidgets/Common/LineEditWithClear.h>
 #include <MantidQtWidgets/Common/MantidDisplayBase.h>
 #include <MantidQtWidgets/Common/MantidTreeWidget.h>
 #include <MantidQtWidgets/Common/MantidTreeWidgetItem.h>
+#include <MantidQtWidgets/Common/WorkspaceIcons.h>
 #include <MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h>
 #include <MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <MantidAPI/FileProperty.h>
 #include <MantidAPI/IMDEventWorkspace.h>
@@ -40,7 +46,7 @@ namespace {
 Mantid::Kernel::Logger docklog("MantidDockWidget");
 
 WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
-}
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -50,7 +56,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
     : QWidget(parent), m_mantidDisplayModel(mdb), m_updateCount(0),
       m_treeUpdating(false), m_promptDelete(false),
       m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
-      m_sortDirection(SortDirection::Ascending) {
+      m_sortDirection(SortDirection::Ascending), m_mutex(QMutex::Recursive) {
   setObjectName(
       "exploreMantid"); // this is needed for QMainWindow::restoreState()
   m_saveMenu = new QMenu(this);
@@ -86,9 +92,9 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
 WorkspaceTreeWidget::~WorkspaceTreeWidget() {}
 
 /**
-* Accept a drag drop event and process the data appropriately
-* @param de :: The drag drop event
-*/
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
 void WorkspaceTreeWidget::dropEvent(QDropEvent *de) { m_tree->dropEvent(de); }
 
 void WorkspaceTreeWidget::setupWidgetLayout() {
@@ -165,11 +171,11 @@ void WorkspaceTreeWidget::setupConnections() {
 }
 
 /**
-* Flips the flag indicating whether a tree update is in progress. Actions such
-* as sorting
-* are disabled while an update is in progress.
-* @param state The required state for the flag
-*/
+ * Flips the flag indicating whether a tree update is in progress. Actions such
+ * as sorting
+ * are disabled while an update is in progress.
+ * @param state The required state for the flag
+ */
 void WorkspaceTreeWidget::setTreeUpdating(const bool state) {
   m_treeUpdating = state;
 }
@@ -181,8 +187,8 @@ WorkspacePresenterWN_wptr WorkspaceTreeWidget::getPresenterWeakPtr() {
 }
 
 /** Returns the names of the selected workspaces
-*   in the dock.
-*/
+ *   in the dock.
+ */
 StringList WorkspaceTreeWidget::getSelectedWorkspaceNames() const {
   auto items = m_tree->selectedItems();
   StringList names;
@@ -204,8 +210,8 @@ QStringList WorkspaceTreeWidget::getSelectedWorkspaceNamesAsQList() const {
 }
 
 /** Returns a pointer to the selected workspace (the first if multiple
-*   workspaces selected)
-*/
+ *   workspaces selected)
+ */
 Mantid::API::Workspace_sptr WorkspaceTreeWidget::getSelectedWorkspace() const {
   auto items = m_tree->selectedItems();
   auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
@@ -266,17 +272,18 @@ void WorkspaceTreeWidget::showRenameDialog(const StringList &wsNames) {
 }
 
 /**
-* Save the old and the new name in m_renameMap. This is needed to restore
-* selection
-*   of the renamed workspace (if it was selected before renaming).
-* @param oldName :: Old name of a renamed workspace.
-* @param newName :: New name of a renamed workspace.
-*/
+ * Save the old and the new name in m_renameMap. This is needed to restore
+ * selection
+ *   of the renamed workspace (if it was selected before renaming).
+ * @param oldName :: Old name of a renamed workspace.
+ * @param newName :: New name of a renamed workspace.
+ */
 void WorkspaceTreeWidget::recordWorkspaceRename(const std::string &oldName,
                                                 const std::string &newName) {
   QString qs_oldName = QString::fromStdString(oldName);
   QString qs_newName = QString::fromStdString(newName);
 
+  QMutexLocker renameMapLock(&m_mutex);
   // check if old_name has been recently a new name
   QList<QString> oldNames = m_renameMap.keys(qs_oldName);
   // non-empty list of oldNames become new_name
@@ -566,10 +573,10 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
 }
 
 /**
-* Set tree item's icon based on the ID of the workspace.
-* @param item :: A workspace tree item.
-* @param wsID :: An icon type code.
-*/
+ * Set tree item's icon based on the ID of the workspace.
+ * @param item :: A workspace tree item.
+ * @param wsID :: An icon type code.
+ */
 void WorkspaceTreeWidget::setItemIcon(QTreeWidgetItem *item,
                                       const std::string &wsID) {
   try {
@@ -580,8 +587,8 @@ void WorkspaceTreeWidget::setItemIcon(QTreeWidgetItem *item,
 }
 
 /**
-* Create the action items associated with the dock
-*/
+ * Create the action items associated with the dock
+ */
 void WorkspaceTreeWidget::createWorkspaceMenuActions() {
   m_showData = new QAction(tr("Show Data"), this);
   connect(m_showData, SIGNAL(triggered()), this, SLOT(onClickShowData()));
@@ -685,8 +692,8 @@ void WorkspaceTreeWidget::createWorkspaceMenuActions() {
 }
 
 /**
-* Create actions for sorting.
-*/
+ * Create actions for sorting.
+ */
 void WorkspaceTreeWidget::createSortMenuActions() {
   m_sortCriteria = SortCriteria::ByName;
   m_sortMenu = new QMenu(this);
@@ -742,9 +749,9 @@ void WorkspaceTreeWidget::createSortMenuActions() {
 }
 
 /**
-* When an item is expanded, populate the child data for this item
-* @param item :: The tree item being expanded
-*/
+ * When an item is expanded, populate the child data for this item
+ * @param item :: The tree item being expanded
+ */
 void WorkspaceTreeWidget::populateChildData(QTreeWidgetItem *item) {
   QVariant userData = item->data(0, Qt::UserRole);
   if (userData.isNull())
@@ -790,55 +797,57 @@ void WorkspaceTreeWidget::populateChildData(QTreeWidgetItem *item) {
 }
 
 /**
-* Update the workspace tree to match the current state of the ADS.
-* It is important that the workspace tree is modified only by this method.
-* @param items Items which are currently in the ADS.
-*/
+ * Update the workspace tree to match the current state of the ADS.
+ * It is important that the workspace tree is modified only by this method.
+ * @param items Items which are currently in the ADS.
+ */
 void WorkspaceTreeWidget::updateTree(const TopLevelItems &items) {
   incrementUpdateCount();
   emit signalUpdateTree(items);
 }
 
 /**
-* Clears the tree and re-populates it with the given top level items
-* @param topLevelItems The map of names to workspaces
-* @param expanded Names of items who should expanded after being populated
-*/
+ * Clears the tree and re-populates it with the given top level items
+ * @param topLevelItems The map of names to workspaces
+ * @param expanded Names of items who should expanded after being populated
+ */
 void WorkspaceTreeWidget::populateTopLevel(const TopLevelItems &topLevelItems,
                                            const QStringList &expanded) {
-  // collect names of selected workspaces
-  QList<QTreeWidgetItem *> selected = m_tree->selectedItems();
-  m_selectedNames.clear(); // just in case
-  foreach (QTreeWidgetItem *item, selected) {
-    m_selectedNames << item->text(0);
-  }
+  {
+    QMutexLocker lock(&m_mutex);
+    // collect names of selected workspaces
+    QList<QTreeWidgetItem *> selected = m_tree->selectedItems();
+    m_selectedNames.clear(); // just in case
+    foreach (QTreeWidgetItem *item, selected) {
+      m_selectedNames << item->text(0);
+    }
 
-  // populate the tree from scratch
-  m_tree->clear();
-  auto iend = topLevelItems.end();
-  for (auto it = topLevelItems.begin(); it != iend; ++it) {
-    auto *node = addTreeEntry(*it);
-    QString name = node->text(0);
-    if (expanded.contains(name))
-      node->setExpanded(true);
-    // see if item must be selected
-    if (shouldBeSelected(name))
-      node->setSelected(true);
+    // populate the tree from scratch
+    m_tree->clear();
+    auto iend = topLevelItems.end();
+    for (auto it = topLevelItems.begin(); it != iend; ++it) {
+      auto *node = addTreeEntry(*it);
+      QString name = node->text(0);
+      if (expanded.contains(name))
+        node->setExpanded(true);
+      // see if item must be selected
+      if (shouldBeSelected(name))
+        node->setSelected(true);
+    }
+    m_selectedNames.clear();
+    m_renameMap.clear();
   }
-  m_selectedNames.clear();
-  m_renameMap.clear();
-
   // apply any filtering
   filterWorkspaceTree(m_workspaceFilter->text());
 }
 
 /**
-* Adds a node for the given named item, including a single child ID item to make
-* each node have a expandable button
-* and allowing plotting to work from non-expanded items
-* @param item A name/workspace pair to add.
-* @param parent If not null then add the new items as a child of the given item
-*/
+ * Adds a node for the given named item, including a single child ID item to
+ * make each node have a expandable button and allowing plotting to work from
+ * non-expanded items
+ * @param item A name/workspace pair to add.
+ * @param parent If not null then add the new items as a child of the given item
+ */
 MantidTreeWidgetItem *WorkspaceTreeWidget::addTreeEntry(
     const std::pair<std::string, Mantid::API::Workspace_sptr> &item,
     QTreeWidgetItem *parent) {
@@ -864,10 +873,11 @@ MantidTreeWidgetItem *WorkspaceTreeWidget::addTreeEntry(
 }
 
 /**
-* Check if a workspace should be selected after dock update.
-* @param name :: Name of a workspace to check.
-*/
+ * Check if a workspace should be selected after dock update.
+ * @param name :: Name of a workspace to check.
+ */
 bool WorkspaceTreeWidget::shouldBeSelected(QString name) const {
+  QMutexLocker lock(&m_mutex);
   QStringList renamed = m_renameMap.keys(name);
   if (!renamed.isEmpty()) {
     foreach (QString oldName, renamed) {
@@ -921,10 +931,10 @@ void WorkspaceTreeWidget::treeSelectionChanged() {
 }
 
 /**
-* Add the actions that are appropriate for a MatrixWorkspace
-* @param menu :: The menu to store the items
-* @param matrixWS :: The workspace related to the menu
-*/
+ * Add the actions that are appropriate for a MatrixWorkspace
+ * @param menu :: The menu to store the items
+ * @param matrixWS :: The workspace related to the menu
+ */
 void WorkspaceTreeWidget::addMatrixWorkspaceMenuItems(
     QMenu *menu,
     const Mantid::API::MatrixWorkspace_const_sptr &matrixWS) const {
@@ -973,10 +983,10 @@ void WorkspaceTreeWidget::addMatrixWorkspaceMenuItems(
 }
 
 /**
-* Add the actions that are appropriate for a MDEventWorkspace
-* @param menu :: The menu to store the items
-* @param WS :: The workspace related to the menu
-*/
+ * Add the actions that are appropriate for a MDEventWorkspace
+ * @param menu :: The menu to store the items
+ * @param WS :: The workspace related to the menu
+ */
 void WorkspaceTreeWidget::addMDEventWorkspaceMenuItems(
     QMenu *menu, const Mantid::API::IMDEventWorkspace_const_sptr &WS) const {
   Q_UNUSED(WS);
@@ -1022,9 +1032,9 @@ void WorkspaceTreeWidget::addMDHistoWorkspaceMenuItems(
 }
 
 /** Add the actions that are appropriate for a PeaksWorkspace
-* @param menu :: The menu to store the items
-* @param WS :: The workspace related to the menu
-*/
+ * @param menu :: The menu to store the items
+ * @param WS :: The workspace related to the menu
+ */
 void WorkspaceTreeWidget::addPeaksWorkspaceMenuItems(
     QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr &WS) const {
   Q_UNUSED(WS);
@@ -1035,9 +1045,9 @@ void WorkspaceTreeWidget::addPeaksWorkspaceMenuItems(
 }
 
 /**
-* Add the actions that are appropriate for a WorkspaceGroup
-* @param menu :: The menu to store the items
-*/
+ * Add the actions that are appropriate for a WorkspaceGroup
+ * @param menu :: The menu to store the items
+ */
 void WorkspaceTreeWidget::addWorkspaceGroupMenuItems(QMenu *menu) const {
   m_plotSpec->setEnabled(true);
   menu->addAction(m_plotSpec);
@@ -1053,9 +1063,9 @@ void WorkspaceTreeWidget::addWorkspaceGroupMenuItems(QMenu *menu) const {
 }
 
 /**
-* Add the actions that are appropriate for a MatrixWorkspace
-* @param menu :: The menu to store the items
-*/
+ * Add the actions that are appropriate for a MatrixWorkspace
+ * @param menu :: The menu to store the items
+ */
 void WorkspaceTreeWidget::addTableWorkspaceMenuItems(QMenu *menu) const {
   menu->addAction(m_showData);
   menu->addAction(m_showTransposed);
@@ -1065,10 +1075,10 @@ void WorkspaceTreeWidget::addTableWorkspaceMenuItems(QMenu *menu) const {
 }
 
 /**
-* Add menu for clearing workspace items.
-* @param menu : Parent menu.
-* @param wsName : Name of the selected workspace.
-*/
+ * Add menu for clearing workspace items.
+ * @param menu : Parent menu.
+ * @param wsName : Name of the selected workspace.
+ */
 void WorkspaceTreeWidget::addClearMenuItems(QMenu *menu,
                                             const QString &wsName) {
   QMenu *clearMenu = new QMenu(tr("Clear Options"), this);
@@ -1090,12 +1100,12 @@ bool WorkspaceTreeWidget::hasUBMatrix(const std::string &wsName) {
 }
 
 /**
-* Adds an algorithm to the save menu.
-*
-* @param algorithmString Algorithm string in format ALGO_NAME.VERSION or
-* ALGO_NAME
-* @param menuEntryName Text to be shown in menu
-*/
+ * Adds an algorithm to the save menu.
+ *
+ * @param algorithmString Algorithm string in format ALGO_NAME.VERSION or
+ * ALGO_NAME
+ * @param menuEntryName Text to be shown in menu
+ */
 void WorkspaceTreeWidget::addSaveMenuOption(QString algorithmString,
                                             QString menuEntryName) {
   // Default to algo string if no entry name given
@@ -1115,9 +1125,9 @@ void WorkspaceTreeWidget::addSaveMenuOption(QString algorithmString,
 }
 
 /**
-* Filter workspaces based on the string provided
-* @param text : the string to filter on.
-*/
+ * Filter workspaces based on the string provided
+ * @param text : the string to filter on.
+ */
 void WorkspaceTreeWidget::filterWorkspaceTree(const QString &text) {
   m_filteredText = text.toStdString();
   m_presenter->notifyFromView(ViewNotifiable::Flag::FilterWorkspaces);
@@ -1362,8 +1372,8 @@ void WorkspaceTreeWidget::onClickSaveToProgram(const QString &name) {
 }
 
 /**
-* Saves a workspace based on the program the user chooses to save to.
-*/
+ * Saves a workspace based on the program the user chooses to save to.
+ */
 void WorkspaceTreeWidget::saveToProgram() {
   // Create a map for the keys and details to go into
   std::map<std::string, std::string> programKeysAndDetails;
@@ -1470,11 +1480,12 @@ void WorkspaceTreeWidget::saveToProgram() {
                                                                   argumentsV);
         } catch (std::runtime_error &) {
           QMessageBox::information(
-              this, "Error", "User tried to open program from: " +
-                                 QString::fromStdString(expTarget) +
-                                 " There was an error opening the program. "
-                                 "Please check the target and arguments list "
-                                 "to ensure that these are correct");
+              this, "Error",
+              "User tried to open program from: " +
+                  QString::fromStdString(expTarget) +
+                  " There was an error opening the program. "
+                  "Please check the target and arguments list "
+                  "to ensure that these are correct");
         }
       } catch (std::exception &) {
         QMessageBox::information(
@@ -1506,8 +1517,8 @@ void WorkspaceTreeWidget::onClickPlotAdvanced() {
 }
 
 /** Plots one or more spectra from each selected workspace
-* @param type "Simple", "Errors" show error bars, "Advanced" advanced plotting.
-*/
+ * @param type "Simple", "Errors" show error bars, "Advanced" advanced plotting.
+ */
 void WorkspaceTreeWidget::plotSpectrum(std::string type) {
   const bool isAdvanced = type == "Advanced";
   const auto userInput =
@@ -1554,11 +1565,10 @@ void WorkspaceTreeWidget::onClickDrawColorFillPlot() {
 }
 
 /**
-* Draw a color fill plot of the workspaces that are currently selected.
-* NOTE: The drawing of 2D plots is currently intimately linked with MantidMatrix
-* meaning
-* that one of these must be generated first!
-*/
+ * Draw a color fill plot of the workspaces that are currently selected.
+ * NOTE: The drawing of 2D plots is currently intimately linked with
+ * MantidMatrix meaning that one of these must be generated first!
+ */
 void WorkspaceTreeWidget::showColourFillPlot() {
   // Get the selected workspaces
   auto items = m_tree->selectedItems();
@@ -1693,15 +1703,15 @@ void WorkspaceTreeWidget::onClickSaveNexusWorkspace() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
 }
 /**
-* Convert selected TableWorkspace to a MatrixWorkspace.
-*/
+ * Convert selected TableWorkspace to a MatrixWorkspace.
+ */
 void WorkspaceTreeWidget::onClickConvertToMatrixWorkspace() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ConvertToMatrixWorkspace);
 }
 
 /**
-* Convert selected MDHistoWorkspace to a MatrixWorkspace.
-*/
+ * Convert selected MDHistoWorkspace to a MatrixWorkspace.
+ */
 void WorkspaceTreeWidget::onClickConvertMDHistoToMatrixWorkspace() {
   m_presenter->notifyFromView(
       ViewNotifiable::Flag::ConvertMDHistoToMatrixWorkspace);
@@ -1716,19 +1726,19 @@ void WorkspaceTreeWidget::convertMDHistoToMatrixWorkspace() {
 }
 
 /**
-* Handler for the clear the UB matrix event.
-*/
+ * Handler for the clear the UB matrix event.
+ */
 void WorkspaceTreeWidget::onClickClearUB() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ClearUBMatrix);
 }
 
 /**
-* Allows asynchronous execution of algorithms. This method is made
-* available in the view for access by the presenter in order to
-* obviate the dependency on Qt in the Unit tests.
-* @param alg : algorithm to be executed
-* @param wait : determines whether or not a non-gui blocking wait should occur.
-*/
+ * Allows asynchronous execution of algorithms. This method is made
+ * available in the view for access by the presenter in order to
+ * obviate the dependency on Qt in the Unit tests.
+ * @param alg : algorithm to be executed
+ * @param wait : determines whether or not a non-gui blocking wait should occur.
+ */
 bool WorkspaceTreeWidget::executeAlgorithmAsync(
     Mantid::API::IAlgorithm_sptr alg, const bool wait) {
   return m_mantidDisplayModel->executeAlgorithmAsync(alg, wait);

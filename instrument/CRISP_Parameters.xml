@@ -13,11 +13,11 @@
   </parameter>
 
   <parameter name="MonitorIntegralMin">
-    <value val="4.0"/>
+    <value val="2.0"/>
   </parameter>
 
   <parameter name="MonitorIntegralMax">
-   <value val="10.0"/>
+   <value val="6.44"/>
   </parameter>
 
   <parameter name="PointDetectorStart">
@@ -41,7 +41,8 @@
   </parameter>
 
   <parameter name="LambdaMax">
-    <value val="6.5"/>
+    <!--<value val="6.5"/>-->
+	<value val="6.44"/>
   </parameter>
 
  <!-- parameters for efficiency correction -->
@@ -101,14 +102,5 @@
     <value val="0.972762,0.001828,-0.000261,0.0"/>
   </parameter>
 </component-link>
-<component-link name="pointdetector">
-    <!-- Link to log file that stores the z position. This angle can be used to
-    calculate the z position since the distance along the x-axis between
-    the sample and this detector is known (12.113-10.25=1.863). Also theta in the logfile is
-    assumed to in degrees, hence the reason for the pi/180=0.0174533 transformation
-    to radians factor in the eq attribute. -->
-  <parameter name="z">
-      <logfile id="theta" eq="1.863*sin(value*0.0174533)" />
-  </parameter>
-</component-link>
+
 </parameter-file>

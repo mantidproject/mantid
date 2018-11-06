@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef DATAHANDING_ANSTO_H_
 #define DATAHANDING_ANSTO_H_
 
@@ -6,8 +12,8 @@
 //---------------------------------------------------
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidNexus/NexusClasses.h"
 
 #define TarTypeFlag_NormalFile '0'
@@ -256,9 +262,9 @@ public:
                      const void *buffer, size_t size);
 };
 
-} // Tar
-} // ANSTO
-} // DataHandling
-} // Mantid
+} // namespace Tar
+} // namespace ANSTO
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // DATAHANDING_ANSTO_H_

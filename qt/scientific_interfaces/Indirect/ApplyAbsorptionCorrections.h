@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_APPLYABSORPTIONCORRECTIONS_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_APPLYABSORPTIONCORRECTIONS_H_
 
@@ -32,6 +38,7 @@ private slots:
   /// Handles mantid plot and save
   void saveClicked();
   void plotClicked();
+  void runClicked();
   void plotCurrentPreview();
 
 private:
@@ -45,6 +52,13 @@ private:
   void plotInPreview(const QString &curveName,
                      Mantid::API::MatrixWorkspace_sptr &ws,
                      const QColor &curveColor);
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
 
   Ui::ApplyAbsorptionCorrections m_uiForm;
 

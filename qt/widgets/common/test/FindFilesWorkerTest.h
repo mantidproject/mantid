@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_API_FINDFILESWORKERTEST_H_
 #define MANTIDQT_API_FINDFILESWORKERTEST_H_
 
@@ -9,10 +15,10 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <cxxtest/TestSuite.h>
 
+using MantidQt::API::FakeMWRunFiles;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FindFilesWorker;
-using MantidQt::API::FakeMWRunFiles;
 
 class FindFilesWorkerTest : public CxxTest::TestSuite {
 public:

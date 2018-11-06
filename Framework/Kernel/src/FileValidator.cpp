@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Logger.h"
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/make_shared.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {
@@ -11,7 +17,7 @@ namespace Kernel {
 namespace {
 // Initialize the static logger
 Logger g_log("FileValidator");
-}
+} // namespace
 
 /** Constructor
  *  @param extensions :: The permitted file extensions (e.g. .RAW)
