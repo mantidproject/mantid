@@ -36,7 +36,6 @@ from sans.gui_logic.models.diagnostics_page_model import run_integral, create_st
 from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
 from ui.sans_isis.work_handler import WorkHandler
-from sans.common.file_information import SANSFileInformationFactory
 from ui.sans_isis import SANSSaveOtherWindow
 from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
 
