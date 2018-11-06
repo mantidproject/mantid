@@ -20,22 +20,6 @@ class DLLExport Elwin : public IndirectDataAnalysisTab {
 public:
   Elwin(QWidget *parent = nullptr);
 
-private:
-  void run() override;
-  void setup() override;
-  bool validate() override;
-  void loadSettings(const QSettings &settings) override;
-  void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
-                            const QPair<double, double> &range);
-  void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
-
-  void setRunEnabled(bool enabled);
-  void setPlotResultEnabled(bool enabled);
-  void setSaveResultEnabled(bool enabled);
-
-  void setRunIsRunning(bool running);
-  void setPlotResultIsPlotting(bool plotting);
-
 private slots:
   void newInputFiles();
   void newPreviewFileSelected(int index);
@@ -50,6 +34,21 @@ private slots:
   void plotClicked();
 
 private:
+  void run() override;
+  void setup() override;
+  bool validate() override;
+  void loadSettings(const QSettings &settings) override;
+  void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
+                            const QPair<double, double> &range);
+  void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
 };

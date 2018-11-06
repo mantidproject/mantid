@@ -272,10 +272,9 @@ IndirectFitOutput::getResultLocation(IndirectFitData const *fitData,
 }
 
 std::vector<std::string> IndirectFitOutput::getResultParameterNames() const {
-  if (auto resultWorkspace = getLastResultWorkspace()) {
+  if (auto resultWorkspace = getLastResultWorkspace())
     if (auto workspace = getMatrixWorkspaceFromGroup(resultWorkspace, 0))
       return getAxisLabels(workspace, 1);
-  }
   return std::vector<std::string>();
 }
 
@@ -324,11 +323,11 @@ void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
   m_resultGroup = resultGroup;
 }
 
-void IndirectFitOutput::addOutput(
-    Mantid::API::WorkspaceGroup_sptr resultGroup,
-    Mantid::API::ITableWorkspace_sptr parameterTable,
-    Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-    IndirectFitData const *fitData, std::size_t spectrum) {
+void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
+                                  ITableWorkspace_sptr parameterTable,
+                                  WorkspaceGroup_sptr resultWorkspace,
+                                  IndirectFitData const *fitData,
+                                  std::size_t spectrum) {
   TableRowExtractor extractRowFromTable(parameterTable);
   m_parameters[fitData][spectrum] = extractRowFromTable(0);
   m_outputResultLocations[fitData][spectrum] = ResultLocation(resultGroup, 0);
@@ -359,8 +358,8 @@ void IndirectFitOutput::updateParameters(ITableWorkspace_sptr parameterTable,
 }
 
 void IndirectFitOutput::updateFitResultsFromUnstructured(
-    Mantid::API::WorkspaceGroup_sptr resultGroup,
-    const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd) {
+    WorkspaceGroup_sptr resultGroup, const FitDataIterator &fitDataBegin,
+    const FitDataIterator &fitDataEnd) {
   std::unordered_map<MatrixWorkspace *,
                      std::unordered_map<std::size_t, std::size_t>>
       resultIndices;
@@ -376,8 +375,8 @@ void IndirectFitOutput::updateFitResultsFromUnstructured(
 }
 
 void IndirectFitOutput::updateFitResultsFromStructured(
-    Mantid::API::WorkspaceGroup_sptr resultGroup,
-    const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd) {
+    WorkspaceGroup_sptr resultGroup, const FitDataIterator &fitDataBegin,
+    const FitDataIterator &fitDataEnd) {
   auto update = [&](IndirectFitData const *inputData) {
     auto &fitResults = extractOrAddDefault(m_outputResultLocations, inputData);
     return [&](std::size_t index, std::size_t spectrum) {

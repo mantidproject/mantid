@@ -57,6 +57,7 @@ private:
 
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
 
   void setPlotResultIsPlotting(bool plotting);
 
