@@ -23,15 +23,15 @@ class MsdPetersTest(unittest.TestCase):
         input = np.array([[0, 1], [2, 3]])
         expected = np.array([[1., 0.99173554], [0.96774194, 0.93023256]])
         tolerance = 0.000001
-        status, output = check_output("MsdPeters", input, expected, tolerance, Height=1.0, MSD=0.05, Beta=1.0)
+        status, output = check_output("MsdPeters", input, expected, tolerance, Height=1.0, Msd=0.05, Beta=1.0)
 
         if not status:
             self.fail("Computed output " + str(output) + " from input " + str(input) +
                       " is not equal to the expected output: " + str(expected))
 
     def test_use_in_fit(self):
-        workspace = create_test_workspace(create_model("MsdPeters", Height=1.0, MSD=0.05, Beta=1.0), 1000)
-        function_string = create_function_string("MsdPeters", Height=1.0, MSD=0.05, Beta=1.0)
+        workspace = create_test_workspace(create_model("MsdPeters", Height=1.0, Msd=0.05, Beta=1.0), 1000)
+        function_string = create_function_string("MsdPeters", Height=1.0, Msd=0.05, Beta=1.0)
         Fit(Function=function_string, InputWorkspace=workspace, StartX=1.2, EndX=1200)
 
 

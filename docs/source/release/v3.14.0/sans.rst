@@ -28,6 +28,7 @@ Bug fixes
 * Fixed an issue where the run tab was difficult to select.
 * Changed the geometry names from CylinderAxisUP, Cuboid and CylinderAxisAlong to Cylinder, FlatPlate and Disc
 * The GUI now correctly resets to default values when a new user file is loaded.
+* The GUI no longer hangs whilst searching the archive for files.
 * Updated the options and units displayed in wavelength and momentum range combo boxes.
 * Fixed a bug which crashed the beam centre finder if a phi mask was set.
 

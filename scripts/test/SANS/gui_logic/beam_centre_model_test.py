@@ -56,26 +56,16 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual(self.beam_centre_model.scale_2, 1.0)
 
     def test_that_correct_values_are_set_for_LARMOR(self):
-        facility = SANSFacility.ISIS
         file_information = SANSFileInformationMock(run_number=2260, instrument=SANSInstrument.LARMOR)
 
-        data_builder = get_data_builder(facility, file_information)
-        data_builder.set_sample_scatter("LARMOR00002260")
-        data_state = data_builder.build()
-
-        self.beam_centre_model.reset_to_defaults_for_instrument(data_state)
+        self.beam_centre_model.reset_to_defaults_for_instrument(file_information)
 
         self.assertEqual(self.beam_centre_model.scale_1, 1.0)
 
     def test_that_correct_values_are_set_for_LOQ(self):
-        facility = SANSFacility.ISIS
         file_information = SANSFileInformationMock(run_number=74044, instrument=SANSInstrument.LOQ)
 
-        data_builder = get_data_builder(facility, file_information)
-        data_builder.set_sample_scatter("LOQ74044")
-        data_state = data_builder.build()
-
-        self.beam_centre_model.reset_to_defaults_for_instrument(data_state)
+        self.beam_centre_model.reset_to_defaults_for_instrument(file_information)
 
         self.assertEqual(self.beam_centre_model.r_max, 200)
 

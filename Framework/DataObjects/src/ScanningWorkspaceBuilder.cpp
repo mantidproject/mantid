@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
@@ -199,10 +200,12 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
   auto outputWorkspace = create<Workspace2D>(
       m_instrument, m_nDetectors * m_nTimeIndexes, m_histogram);
 
-  auto &outputDetectorInfo = outputWorkspace->mutableDetectorInfo();
-  outputDetectorInfo.setScanInterval(m_timeRanges[0]);
+  auto &outputComponentInfo = outputWorkspace->mutableComponentInfo();
+  outputComponentInfo.setScanInterval(m_timeRanges[0]);
 
-  buildOutputDetectorInfo(outputDetectorInfo);
+  buildOutputComponentInfo(outputComponentInfo);
+
+  auto &outputDetectorInfo = outputWorkspace->mutableDetectorInfo();
 
   if (!m_positions.empty())
     buildPositions(outputDetectorInfo);
@@ -229,14 +232,14 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
   return boost::shared_ptr<MatrixWorkspace>(std::move(outputWorkspace));
 }
 
-void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
-    Geometry::DetectorInfo &outputDetectorInfo) const {
+void ScanningWorkspaceBuilder::buildOutputComponentInfo(
+    Geometry::ComponentInfo &outputComponentInfo) const {
   auto mergeWorkspace =
       create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
-    auto &mergeDetectorInfo = mergeWorkspace->mutableDetectorInfo();
-    mergeDetectorInfo.setScanInterval(m_timeRanges[i]);
-    outputDetectorInfo.merge(mergeDetectorInfo);
+    auto &mergeComponentInfo = mergeWorkspace->mutableComponentInfo();
+    mergeComponentInfo.setScanInterval(m_timeRanges[i]);
+    outputComponentInfo.merge(mergeComponentInfo);
   }
 }
 
@@ -261,7 +264,7 @@ void ScanningWorkspaceBuilder::buildPositions(
 void ScanningWorkspaceBuilder::buildRelativeRotationsForScans(
     Geometry::DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 0; i < outputDetectorInfo.size(); ++i) {
-    for (size_t j = 0; j < outputDetectorInfo.scanCount(i); ++j) {
+    for (size_t j = 0; j < outputDetectorInfo.scanCount(); ++j) {
       if (outputDetectorInfo.isMonitor({i, j}))
         continue;
       auto position = outputDetectorInfo.position({i, j});

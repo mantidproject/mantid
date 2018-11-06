@@ -12,6 +12,10 @@
 #include "MantidQtWidgets/InstrumentView/UCorrectionDialog.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
+
 #include <QAction>
 #include <QActionGroup>
 #include <QCheckBox>
@@ -29,8 +33,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/InstrumentView/BinDialog.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-
-#include "MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h"
 
 #include <limits>
 
@@ -75,7 +77,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   renderControlsLayout->addWidget(axisViewFrame);
   renderControlsLayout->addWidget(displaySettings);
   renderControlsLayout->addWidget(mSaveImage);
-  renderControlsLayout->addWidget(m_colorMapWidget);
+  renderControlsLayout->addWidget(m_colorBarWidget);
   renderControlsLayout->addWidget(m_autoscaling);
 
   // Add GridBank Controls if Grid bank present
@@ -230,14 +232,14 @@ QPushButton *InstrumentWidgetRenderTab::setupDisplaySettings() {
 
 void InstrumentWidgetRenderTab::setupColorMapWidget() {
   // Colormap widget
-  m_colorMapWidget = new DraggableColorBarWidget(0, this);
-  connect(m_colorMapWidget, SIGNAL(scaleTypeChanged(int)), m_instrWidget,
+  m_colorBarWidget = new ColorBar(this);
+  connect(m_colorBarWidget, SIGNAL(scaleTypeChanged(int)), m_instrWidget,
           SLOT(changeScaleType(int)));
-  connect(m_colorMapWidget, SIGNAL(nthPowerChanged(double)), m_instrWidget,
+  connect(m_colorBarWidget, SIGNAL(nthPowerChanged(double)), m_instrWidget,
           SLOT(changeNthPower(double)));
-  connect(m_colorMapWidget, SIGNAL(minValueChanged(double)), m_instrWidget,
+  connect(m_colorBarWidget, SIGNAL(minValueChanged(double)), m_instrWidget,
           SLOT(changeColorMapMinValue(double)));
-  connect(m_colorMapWidget, SIGNAL(maxValueChanged(double)), m_instrWidget,
+  connect(m_colorBarWidget, SIGNAL(maxValueChanged(double)), m_instrWidget,
           SLOT(changeColorMapMaxValue(double)));
 }
 
@@ -467,10 +469,10 @@ void InstrumentWidgetRenderTab::saveSettings(QSettings &settings) const {
  */
 void InstrumentWidgetRenderTab::setMinValue(double value, bool apply) {
   if (!apply)
-    m_colorMapWidget->blockSignals(true);
-  m_colorMapWidget->setMinValue(value);
+    m_colorBarWidget->blockSignals(true);
+  m_colorBarWidget->setMinValue(value);
   if (!apply)
-    m_colorMapWidget->blockSignals(false);
+    m_colorBarWidget->blockSignals(false);
 }
 
 /**
@@ -480,10 +482,10 @@ void InstrumentWidgetRenderTab::setMinValue(double value, bool apply) {
  */
 void InstrumentWidgetRenderTab::setMaxValue(double value, bool apply) {
   if (!apply)
-    m_colorMapWidget->blockSignals(true);
-  m_colorMapWidget->setMaxValue(value);
+    m_colorBarWidget->blockSignals(true);
+  m_colorBarWidget->setMaxValue(value);
   if (!apply)
-    m_colorMapWidget->blockSignals(false);
+    m_colorBarWidget->blockSignals(false);
 }
 
 /**
@@ -495,19 +497,19 @@ void InstrumentWidgetRenderTab::setMaxValue(double value, bool apply) {
 void InstrumentWidgetRenderTab::setRange(double minValue, double maxValue,
                                          bool apply) {
   if (!apply)
-    m_colorMapWidget->blockSignals(true);
-  m_colorMapWidget->setMinValue(minValue);
-  m_colorMapWidget->setMaxValue(maxValue);
+    m_colorBarWidget->blockSignals(true);
+  m_colorBarWidget->setMinValue(minValue);
+  m_colorBarWidget->setMaxValue(maxValue);
   if (!apply)
-    m_colorMapWidget->blockSignals(false);
+    m_colorBarWidget->blockSignals(false);
 }
 
-GraphOptions::ScaleType InstrumentWidgetRenderTab::getScaleType() const {
-  return (GraphOptions::ScaleType)m_colorMapWidget->getScaleType();
+ColorMap::ScaleType InstrumentWidgetRenderTab::getScaleType() const {
+  return (ColorMap::ScaleType)m_colorBarWidget->getScaleType();
 }
 
-void InstrumentWidgetRenderTab::setScaleType(GraphOptions::ScaleType type) {
-  m_colorMapWidget->setScaleType(type);
+void InstrumentWidgetRenderTab::setScaleType(ColorMap::ScaleType type) {
+  m_colorBarWidget->setScaleType(static_cast<int>(type));
 }
 
 void InstrumentWidgetRenderTab::setAxis(const QString &axisNameArg) {
@@ -619,10 +621,11 @@ void InstrumentWidgetRenderTab::setupColorBar(const ColorMap &cmap,
                                               double minValue, double maxValue,
                                               double minPositive,
                                               bool autoscaling) {
-  setMinValue(minValue, false);
-  setMaxValue(maxValue, false);
-  m_colorMapWidget->setMinPositiveValue(minPositive);
-  m_colorMapWidget->setupColorBarScaling(cmap);
+  m_colorBarWidget->blockSignals(true);
+  m_colorBarWidget->setClim(minValue, maxValue);
+  m_colorBarWidget->blockSignals(false);
+  m_colorBarWidget->setMinPositiveValue(minPositive);
+  m_colorBarWidget->setupColorBarScaling(cmap);
   m_autoscaling->blockSignals(true);
   m_autoscaling->setChecked(autoscaling);
   m_autoscaling->blockSignals(false);
@@ -752,11 +755,11 @@ void InstrumentWidgetRenderTab::colorMapChanged() {
 }
 
 void InstrumentWidgetRenderTab::scaleTypeChanged(int type) {
-  setScaleType((GraphOptions::ScaleType)type);
+  setScaleType(static_cast<ColorMap::ScaleType>(type));
 }
 
 void InstrumentWidgetRenderTab::nthPowerChanged(double nth_power) {
-  m_colorMapWidget->setNthPower(nth_power);
+  m_colorBarWidget->setNthPower(nth_power);
 }
 
 /**
@@ -833,6 +836,8 @@ QPointF InstrumentWidgetRenderTab::getUCorrection() const {
  */
 std::string
 MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+
   API::TSVSerialiser tab;
 
   tab.writeLine("AxesView") << mAxisCombo->currentIndex();
@@ -853,12 +858,15 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
   tab.writeLine("ShowRelativeIntensity");
   tab << surface->getShowPeakRelativeIntensityFlag();
 
-  const auto colorMap = m_colorMapWidget->saveToProject();
+  const auto colorMap = m_colorBarWidget->saveToProject();
   tab.writeSection("colormap", colorMap);
 
   API::TSVSerialiser tsv;
   tsv.writeSection("rendertab", tab.outputLines());
   return tsv.outputLines();
+#else
+  return "";
+#endif
 }
 
 /**
@@ -866,6 +874,7 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
  * @param lines :: lines defining the state of the render tab
  */
 void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("rendertab"))
@@ -930,8 +939,13 @@ void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
   if (tab.selectSection("colormap")) {
     std::string colorMapLines;
     tab >> colorMapLines;
-    m_colorMapWidget->loadFromProject(colorMapLines);
+    m_colorBarWidget->loadFromProject(colorMapLines);
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "InstrumentActor::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 } // namespace MantidWidgets
