@@ -42,12 +42,6 @@
        </item>
        <item>
         <widget class="QFrame" name="frame">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <property name="spacing">
            <number>0</number>
@@ -122,12 +116,43 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_8">
              <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>Plot Output:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbPlotType">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>100</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>All</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="pbPlot">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Plot Result</string>
+                <string>Plot</string>
                </property>
                <property name="checked">
                 <bool>false</bool>

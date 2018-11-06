@@ -2,7 +2,7 @@
  std_vector_str
 ================
 
-This a python binding to the C++ class Mantid::Kernel::std_vector_str.
+This is a Python binding to the C++ class Mantid::Kernel::std_vector_str.
 
 
 .. module:`mantid.kernel`

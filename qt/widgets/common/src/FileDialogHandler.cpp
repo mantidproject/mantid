@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
@@ -6,35 +12,24 @@
 #include <sstream>
 
 namespace { // anonymous namespace
-const boost::regex FILE_EXT_REG_EXP{R"(^.+\s+\((\S+)\)$)"};
 const QString ALL_FILES("All Files (*)");
 
 QString getExtensionFromFilter(const QString &selectedFilter) {
-  // empty returns empty
-  if (selectedFilter.isEmpty()) {
-    return QString("");
-  }
-
+  QString extension;
   // search for single extension
+  static const boost::regex FILE_EXT_REG_EXP{R"(\*\.[[:word:]]+)"};
   boost::smatch result;
-  if (boost::regex_search(selectedFilter.toStdString(), result,
-                          FILE_EXT_REG_EXP) &&
-      result.size() == 2) {
+  const auto filter = selectedFilter.toStdString();
+  if (boost::regex_search(filter, result, FILE_EXT_REG_EXP)) {
     // clang fails to cast result[1] to std::string.
-    std::string output = result[1];
-    auto extension = QString::fromStdString(output);
+    const std::string output = result.str(0);
+    extension = QString::fromStdString(output);
     if (extension.startsWith("*"))
-      return extension.remove(0, 1);
-    else
-      return extension;
-  } else {
-    // failure to match suggests multi-extension filter
-    std::stringstream msg;
-    msg << "Failed to determine single extension from \""
-        << selectedFilter.toStdString() << "\"";
-    throw std::runtime_error(msg.str());
+      extension.remove(0, 1);
   }
+  return extension;
 }
+
 } // anonymous namespace
 
 namespace MantidQt {
@@ -43,28 +38,6 @@ namespace FileDialogHandler {
 /**
     Contains modifications to Qt functions where problems have been found
     on certain operating systems
-
-    Copyright &copy; 2009-2010 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-    @date 17/09/2010
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 QString getSaveFileName(QWidget *parent,
                         const Mantid::Kernel::Property *baseProp,
@@ -76,10 +49,9 @@ QString getSaveFileName(QWidget *parent,
   QString selectedFilter;
 
   // create the file browser
-  QString filename = QFileDialog::getSaveFileName(
+  const QString filename = QFileDialog::getSaveFileName(
       parent, caption, AlgorithmInputHistory::Instance().getPreviousDirectory(),
       filter, &selectedFilter, options);
-
   return addExtension(filename, selectedFilter);
 }
 
@@ -107,22 +79,22 @@ QString getFilter(const Mantid::Kernel::Property *baseProp) {
   // multiple file version
   const auto *multiProp =
       dynamic_cast<const Mantid::API::MultipleFileProperty *>(baseProp);
-  if (bool(multiProp))
+  if (multiProp)
     return getFilter(multiProp->getExts());
 
   // regular file version
   const auto *singleProp =
       dynamic_cast<const Mantid::API::FileProperty *>(baseProp);
   // The allowed values in this context are file extensions
-  if (bool(singleProp))
+  if (singleProp)
     return getFilter(singleProp->allowedValues());
 
   // otherwise only the all files exists
   return ALL_FILES;
 }
 
-/** For file dialogs. Have each filter on a separate line with the default as
- * the first.
+/** For file dialogs. Have each filter on a separate line with Data Files
+ * as the first and All Files as the last
  *
  * @param exts :: vector of extensions
  * @return a string that filters files by extenstions

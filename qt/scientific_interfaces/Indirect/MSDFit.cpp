@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MSDFit.h"
 #include "../General/UserInputValidator.h"
 
@@ -58,11 +64,13 @@ void MSDFit::updateModelFitTypeString() {
   m_msdFittingModel->setFitType(selectedFitType().toStdString());
 }
 
-void MSDFit::updatePlotOptions() {}
+void MSDFit::updatePlotOptions() {
+  IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
+}
 
 void MSDFit::plotClicked() {
   setPlotResultIsPlotting(true);
-  IndirectFitAnalysisTab::plotResult("All");
+  IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
   setPlotResultIsPlotting(false);
 }
 
@@ -79,6 +87,7 @@ void MSDFit::setRunEnabled(bool enabled) {
 
 void MSDFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
+  m_uiForm->cbPlotType->setEnabled(enabled);
 }
 
 void MSDFit::setFitSingleSpectrumEnabled(bool enabled) {
@@ -89,15 +98,21 @@ void MSDFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
 
+void MSDFit::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
+}
+
 void MSDFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setFitSingleSpectrumEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void MSDFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotResultEnabled(!plotting);
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
 }
 
 void MSDFit::runClicked() { runTab(); }

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_STRETCH_H_
 #define MANTIDQTCUSTOMINTERFACES_STRETCH_H_
 
@@ -31,13 +37,24 @@ private slots:
   void handleSampleInputReady(const QString &filename);
   /// Save the workspaces produces from the algorithm
   void saveWorkspaces();
-  /// Plot the workspaces specified by the interface
+
+  void runClicked();
   void plotWorkspaces();
   void algorithmComplete(const bool &error);
   void plotCurrentPreview();
   void previewSpecChanged(int value);
 
 private:
+  void displayMessageAndRun(std::string const &saveDirectory);
+  int displaySaveDirectoryMessage();
+
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+
   /// Current preview spectrum
   int m_previewSpec;
   // The ui form
