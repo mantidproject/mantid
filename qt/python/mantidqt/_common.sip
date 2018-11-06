@@ -265,5 +265,6 @@ class FitPropertyBrowser : public QDockWidget {
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 %End
 public:
-    FitPropertyBrowser(QWidget *parent = nullptr, QObject *mantidui = nullptr);
+    FitPropertyBrowser(QWidget *parent = nullptr);
+    void init();
 };
