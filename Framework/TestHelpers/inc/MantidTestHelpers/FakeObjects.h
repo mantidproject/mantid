@@ -199,7 +199,7 @@ protected:
     throw std::runtime_error(
         "Cloning of AxeslessWorkspaceTester is not implemented.");
   }
-
+public:
   bool isCommonBins() const override {
     if (!m_isCommonBinsFlagSet) {
       m_isCommonBinsFlag = true;
@@ -208,9 +208,9 @@ protected:
       // error
       if (numHist > 1) {
         // First check if the x-axis shares a common cow_ptr.
-        auto first = data[0]->ptrX();
-        for (const auto &st : data) {
-          if (st->ptrX() != first) {
+        auto first = m_vec[0].ptrX();
+        for (const auto &st : m_vec) {
+          if (st.ptrX() != first) {
             m_isCommonBinsFlag = false;
             break;
           }

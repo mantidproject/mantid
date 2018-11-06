@@ -92,7 +92,7 @@ public:
   Mantid::Types::Core::DateAndTime
   getTimeAtSampleMax(double tofOffset = 0) const override;
 
-  double getEventMatrixWorkXMin() const;
+  double getEventXMin() const;
   double getEventXMax() const;
   void getEventXMinMax(double &xmin, double &xmax) const;
 
