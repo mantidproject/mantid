@@ -32,7 +32,7 @@ class ISIS1DMerger(Merger):
 
     def calculate_scaled_hab_output(self, shift, scale, sample_count_secondary, sample_norm_secondary,
                                     can_count_secondary, can_norm_secondary):
-        scaled_norm_front = mantid_api.Scale(InputWorkspace=sample_norm_secondary, Factor=scale, Operation='Multiply',
+        scaled_norm_front = mantid_api.Scale(InputWorkspace=sample_norm_secondary, Factor=1.0/scale, Operation='Multiply',
                                              StoreInADS=False)
         shifted_norm_front = mantid_api.Scale(InputWorkspace=sample_norm_secondary, Factor=shift, Operation='Multiply',
                                               StoreInADS=False)
@@ -41,7 +41,7 @@ class ISIS1DMerger(Merger):
         hab_sample = mantid_api.Divide(LHSWorkspace=numerator, RHSWorkspace=scaled_norm_front, StoreInADS=False)
 
         if can_count_secondary is not None and can_norm_secondary is not None:
-            scaled_norm_front_can = mantid_api.Scale(InputWorkspace=can_norm_secondary, Factor=scale,
+            scaled_norm_front_can = mantid_api.Scale(InputWorkspace=can_norm_secondary, Factor=1.0/scale,
                                                      Operation='Multiply', StoreInADS=False)
             hab_can = mantid_api.Divide(LHSWorkspace=can_count_secondary, RHSWorkspace=scaled_norm_front_can,
                                         StoreInADS=False)
