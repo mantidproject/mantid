@@ -189,8 +189,8 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
 }
 
 /** Limits of the overlapping region
- @param intesectionMin :: The minimum possible value
- @param intesectionMax :: The maximum possible value
+ @param intersectionMin :: The minimum possible value
+ @param intersectionMax :: The maximum possible value
  @return std::pair containing the start and end values
  */
 std::pair<double, double>
@@ -224,7 +224,7 @@ Stitch1D::getOverlap(const double intersectionMin,
  @param lhsWS :: The left hand side input workspace
  @param rhsWS :: The right hand side input workspace
  @param scaleRHS :: Scale the right hand side workspace
- @return a vector<double> contianing the rebinning parameters
+ @return a vector<double> containing the rebinning parameters
  */
 std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
                                              MatrixWorkspace_const_sptr &rhsWS,
@@ -503,16 +503,20 @@ void Stitch1D::exec() {
       getOverlap(intersectionMin, intersectionMax);
   double startOverlap = overlap.first;
   double endOverlap = overlap.second;
-
+  if (startOverlap > endOverlap) {
+    if (lhsWS->isHistogramData()) {
+      g_log.error("EndOverlap is smaller than StartOverlap");
+      throw std::runtime_error("EndOverlap is smaller than StartOverlap");
+    } else {
+      startOverlap = overlap.second;
+      endOverlap = overlap.first;
+    }
+  }
   const bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
 
   MatrixWorkspace_sptr lhs = lhsWS->clone();
   MatrixWorkspace_sptr rhs = rhsWS->clone();
   if (lhsWS->isHistogramData()) {
-    if (startOverlap > endOverlap) {
-      g_log.error("EndOverlap is smaller than StartOverlap");
-      throw std::runtime_error("EndOverlap is smaller than StartOverlap");
-    }
     MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
     const double xMin = params.front();
     const double xMax = params.back();

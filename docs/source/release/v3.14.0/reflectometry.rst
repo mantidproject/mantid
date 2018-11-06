@@ -40,6 +40,8 @@ Bug fixes
 - A bug has been fixed on the Settings tab where the IncludePartialBins check box had been hidden by a misplaced text entry box.
 - :ref:`algm-ReflectometryReductionOneAuto` No longer sums all of a transmission run's workspaces and instead will use the first run only
 - In :ref:`algm-ReflectometryReductionOneAuto` an issue where if you gave only one of either MomentumTransferMax or MomentumTransferMin were specified it would be ignored, this has been fixed.
+- Handling of group workspaces in algorithm :ref:`algm-Stitch1D` containing single workspaces when scaling by period and using :literal:`ScaleFactorFromPeriod`, i.e. :literal:`UseManualScaleFactors` is true, :literal:`ManualScaleFactors` remains empty.
+- Algorithm :ref:`algm-Stitch1D` takes correct user input of `EndOverlap` values into account.
 
 Liquids Reflectometer
 ---------------------

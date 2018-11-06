@@ -402,7 +402,7 @@ public:
     auto stitched = boost::dynamic_pointer_cast<MatrixWorkspace>(outws);
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
-    for (size_t i = 0; i<25; ++i) {
+    for (size_t i = 0; i < 25; ++i) {
       TS_ASSERT_DELTA(stitched->y(0)[i], 1., 1.e-9)
       TS_ASSERT_DELTA(stitched->y(1)[i], 2., 1.e-9)
     }
@@ -410,7 +410,8 @@ public:
     TS_ASSERT_DELTA(stitched->e(0)[9], 0.7791937228, 1.e-9)
     TS_ASSERT_DELTA(stitched->e(1)[0], std::sqrt(2), 1.e-9)
     TS_ASSERT_DELTA(stitched->e(1)[9], 1.1098231015, 1.e-9)
-    for (size_t i = 16; i<25; ++i) {// end overlap is 1.8, all values from 1.6 are constant
+    for (size_t i = 16; i < 25;
+         ++i) { // end overlap is 1.8, all values from 1.6 are constant
       TS_ASSERT_DELTA(stitched->e(0)[i], 1.6966991128, 1.e-9)
       TS_ASSERT_DELTA(stitched->e(1)[i], 2.5310766891, 1.e-9)
     }
@@ -418,7 +419,7 @@ public:
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     TS_ASSERT_EQUALS(scales.size(), 2)
     TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001)
-    TS_ASSERT_DELTA(scales.back(), 2./3., 1.e-9)
+    TS_ASSERT_DELTA(scales.back(), 2. / 3., 1.e-9)
 
     // Check workspaces in ADS
     auto wsInADS = AnalysisDataService::Instance().getObjectNames();
@@ -620,7 +621,7 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
     // First spectrum, Y values
-    for (size_t i=0; i<25; ++i) {
+    for (size_t i = 0; i < 25; ++i) {
       TS_ASSERT_DELTA(stitched->y(0)[i], 1., 1.e-9)
       TS_ASSERT_DELTA(stitched->y(1)[i], 2, 1.e-9)
     }
@@ -630,7 +631,7 @@ public:
     // Second spectrum, E values
     TS_ASSERT_DELTA(stitched->e(1)[0], 1.41421, 0.00001)
     TS_ASSERT_DELTA(stitched->e(1)[9], 1.10982, 0.00001)
-    for (size_t i=16; i<25; ++i) {
+    for (size_t i = 16; i < 25; ++i) { // after end overlap -> constant values
       TS_ASSERT_DELTA(stitched->e(0)[16], 1.6966991128, 1.e-9)
       TS_ASSERT_DELTA(stitched->e(1)[16], 2.5310766891, 1.e-9)
     }
@@ -639,7 +640,7 @@ public:
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
     TS_ASSERT_EQUALS(scales.size(), 2)
     TS_ASSERT_DELTA(scales.front(), 0.9090, 0.0001)
-    TS_ASSERT_DELTA(scales.back(), 0.6666, 0.0001)
+    TS_ASSERT_DELTA(scales.back(), 2. / 3., 1.e-9)
 
     // Check workspaces in ADS
     auto wsInADS = AnalysisDataService::Instance().getObjectNames();
@@ -1026,7 +1027,7 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
     // First spectrum, Y values
-    for (size_t i = 0; i<25; ++i) {
+    for (size_t i = 0; i < 25; ++i) {
       TS_ASSERT_DELTA(stitched->y(0)[i], 1.5, 1.e-0)
     }
     // Second spectrum, Y values
@@ -1091,7 +1092,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("UseManualScaleFactors", "1"))
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("ScaleFactorFromPeriod", 2))
     TS_ASSERT_THROWS_NOTHING(alg0.setProperty("OutputWorkspace", "outws"))
-    TS_ASSERT_THROWS(alg0.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg0.execute(), std::runtime_error)
     TS_ASSERT(!alg0.isExecuted())
 
     // Will produce a group outws containing a single workspace named
@@ -1127,36 +1128,37 @@ public:
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(stitched->blocksize(), 25)
     // First spectrum, Y values
-    for (size_t i=0; i<25; ++i) {
+    for (size_t i = 0; i < 25; ++i) {
       TS_ASSERT_DELTA(stitched->y(0)[i], 1., 1.e-9)
     }
     // Second spectrum, Y values
     TS_ASSERT_DELTA(stitched->y(1)[0], 2., 1.e-9)
     TS_ASSERT_DELTA(stitched->y(1)[9], 1.9513274332, 1.e-9)
     TS_ASSERT_DELTA(stitched->y(1)[16], 1.7612903221, 1.e-9)
-    for (size_t i=17; i<25; ++i) {// end overlap is 1.9, all values from 1.7 are constant
-      TS_ASSERT_DELTA(stitched->y(1)[i], 5./3., 1.e-9)
+    for (size_t i = 17; i < 25;
+         ++i) { // end overlap is 1.9, all values from 1.7 are constant
+      TS_ASSERT_DELTA(stitched->y(1)[i], 5. / 3., 1.e-9)
     }
     // First spectrum, E values
     TS_ASSERT_DELTA(stitched->e(0)[0], 1., 1.e-9)
     TS_ASSERT_DELTA(stitched->e(0)[9], 0.6900655597, 1.e-9)
     TS_ASSERT_DELTA(stitched->e(0)[16], 0.6201736723, 1.e-9)
-    for (size_t i=17; i<25; ++i) {
+    for (size_t i = 17; i < 25; ++i) {
       TS_ASSERT_DELTA(stitched->e(0)[i], 0.8164965803, 1.e-9)
     }
     // Second spectrum, E values
     TS_ASSERT_DELTA(stitched->e(1)[0], std::sqrt(2), 1.e-9)
     TS_ASSERT_DELTA(stitched->e(1)[9], 0.9639520420, 1.e-9)
     TS_ASSERT_DELTA(stitched->e(1)[16], 0.8230548911, 1.e-9)
-    for (size_t i=17; i<25; ++i) {
+    for (size_t i = 17; i < 25; ++i) {
       TS_ASSERT_DELTA(stitched->e(1)[i], 1.0540925531, 1.e-9)
     }
 
     // Test out scale factors
     std::vector<double> scales = alg.getProperty("OutScaleFactors");
-    TS_ASSERT_EQUALS(scales.size(), 2);
+    TS_ASSERT_EQUALS(scales.size(), 2)
     TS_ASSERT_DELTA(scales[0], 0.9090909098, 1.e-9)
-    TS_ASSERT_DELTA(scales[1], 2./3., 1.e-9)
+    TS_ASSERT_DELTA(scales[1], 2. / 3., 1.e-9)
     // Check workspaces in ADS
     auto wsInADS = AnalysisDataService::Instance().getObjectNames();
     // In ADS: group1, group2, group3, ws1, ws3, ws5
