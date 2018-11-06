@@ -32,7 +32,6 @@ class MessageDialog(QDialog):
         ui_path = "messagebox.ui"
         self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
-
         # define operation
         self.ui.pushButton_close.clicked.connect(self.do_quit)
 

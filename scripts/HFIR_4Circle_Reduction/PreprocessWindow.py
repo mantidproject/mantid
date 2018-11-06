@@ -84,6 +84,7 @@ class ScanPreProcessWindow(QMainWindow):
         tableView_scanProcessState_layout.addWidget(self.ui.tableView_scanProcessState)
 
         return
+
     @property
     def controller(self):
         """
