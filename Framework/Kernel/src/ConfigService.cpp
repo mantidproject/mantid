@@ -2020,11 +2020,11 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
   }
 
   Kernel::ConfigServiceImpl &configService = Kernel::ConfigService::Instance();
-  std::vector<std::string> directoryNames =
-        configService.getDataSearchDirs();
+  std::vector<std::string> directoryNames = configService.getDataSearchDirs();
   std::vector<std::string> instrDirectories =
-        configService.getInstrumentDirectories();
-  directoryNames.insert( directoryNames.end(), instrDirectories.begin(), instrDirectories.end() );
+      configService.getInstrumentDirectories();
+  directoryNames.insert(directoryNames.end(), instrDirectories.begin(),
+                        instrDirectories.end());
   for (const auto &searchPath : directoryNames) {
     g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
 // On windows globbing is not working properly with network drives
