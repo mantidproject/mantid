@@ -30,7 +30,7 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
         self.help_button.clicked.connect(self._on_help_button_clicked)
         self.cancel_button.pressed.connect(self.on_cancel_clicked)
         self.directory_lineEdit.textChanged.connect(self.on_directory_changed)
-        self.NxCanSAS_checkBox.setChecked(True)
+        self.nxcansas_checkBox.setChecked(True)
         self.ads_widget = MantidQt.MantidWidgets.WorkspaceTreeWidgetSimple(True, self)
         self.ads_widget.refreshWorkspaces()
         self.ads_widget.installEventFilter(self)
@@ -69,14 +69,6 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
         for subscriber in self.subscribers:
             subscriber.on_item_selection_changed()
 
-    def populate_workspace_list(self, workspace_list):
-        pass
-        # for workspace in workspace_list:
-        #     self.workspace_listWidget.addItem(workspace)
-
-    def update_workspace_list(self):
-        pass
-
     def get_selected_workspaces(self):
         return [str(x) for x in self.ads_widget.getSelectedWorkspaceNames()]
 
@@ -84,7 +76,7 @@ class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog
         save_types = []
         if self.RKH_checkBox.isChecked():
             save_types.append(SaveType.RKH)
-        if self.NxCanSAS_checkBox.isChecked():
+        if self.nxcansas_checkBox.isChecked():
             save_types.append(SaveType.NXcanSAS)
         if self.CanSAS_checkBox.isChecked():
             save_types.append(SaveType.CanSAS)

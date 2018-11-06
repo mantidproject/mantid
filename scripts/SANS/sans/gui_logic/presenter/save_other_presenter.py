@@ -24,7 +24,6 @@ class SaveOtherPresenter():
             self._view = view
             self._view.subscribe(self)
             self._view.current_directory = self.current_directory
-            self._view.populate_workspace_list(self.workspace_list)
 
     def on_file_name_changed(self, file_name):
         self.filename = file_name
