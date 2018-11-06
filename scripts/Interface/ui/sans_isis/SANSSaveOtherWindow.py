@@ -10,7 +10,7 @@ from sans.common.enums import SaveType
 from mantidqtpython import MantidQt
 
 try:
-    from mantidplot import *
+    from mantidplot import pymantidplot
     canMantidPlot = True
 except ImportError:
     canMantidPlot = False
