@@ -40,7 +40,8 @@ Bug fixes
 #########
 
 - Fixed the error propagation in :math:`Q` grouping in :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`
-- Handling of group workspaces containing single workspaces when scaling by period and using :literal:`ScaleFactorFromPeriod`, i.e. :literal:`UseManualScaleFactors` is true, :literal:`ManualScaleFactors` remains empty.
+- Handling of group workspaces in algorithm :ref:`algm-Stitch1D` containing single workspaces when scaling by period and using :literal:`ScaleFactorFromPeriod`, i.e. :literal:`UseManualScaleFactors` is true, :literal:`ManualScaleFactors` remains empty.
+- Algorithm :ref:`algm-Stitch1D` takes correct user input of `EndOverlap` values into account.
 
 Liquids Reflectometer
 ---------------------
