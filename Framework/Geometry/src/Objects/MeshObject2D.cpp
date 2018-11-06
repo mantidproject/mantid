@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/MeshObject2D.h"
-#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Material.h"
