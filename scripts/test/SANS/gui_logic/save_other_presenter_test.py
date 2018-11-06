@@ -61,7 +61,7 @@ class SaveOtherPresenterTest(unittest.TestCase):
     def test_get_filenames_returns_full_path_list_for_multi_selection(self):
         self.presenter.on_directory_changed('base_dir/')
         returned_list = self.presenter.get_filenames(['workspace_1', 'workspace_2'], 'filename_to_save')
-        expected_list = ['base_dir/workspace_1', 'base_dir/workspace_2']
+        expected_list = ['base_dir/workspace_1_filename_to_save', 'base_dir/workspace_2_filename_to_save']
 
         self.assertEqual(expected_list, returned_list)
 
