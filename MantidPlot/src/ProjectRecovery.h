@@ -7,6 +7,7 @@
 #ifndef PROJECT_RECOVERY_H_
 #define PROJECT_RECOVERY_H_
 
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <Poco/NObserver.h>
