@@ -73,7 +73,7 @@ public:
     auto &config = Kernel::ConfigService::Instance();
     Poco::Path testFile =
         Poco::Path(config.getInstrumentDirectory())
-            .resolve("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml");
+            .resolve("unit_testing/UnitTestFacilities.xml");
     // Load the test facilities file
     config.updateFacilities(testFile.toString());
   }

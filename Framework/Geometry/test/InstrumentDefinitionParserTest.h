@@ -104,7 +104,7 @@ private:
 
     const std::string instrument_dir =
         ConfigService::Instance().getInstrumentDirectory() +
-        "/IDFs_for_UNIT_TESTING/";
+        "/unit_testing/";
     std::string vtp_dir = ConfigService::Instance().getVTPFileDirectory();
     if (!put_vtp_next_to_IDF) {
       vtp_dir = ConfigService::Instance().getTempDir();
@@ -120,7 +120,7 @@ private:
                                  const std::string &idf_file_contents) {
     const std::string instrument_dir =
         ConfigService::Instance().getInstrumentDirectory() +
-        "/IDFs_for_UNIT_TESTING/";
+        "/unit_testing/";
 
     return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
   }
@@ -137,7 +137,7 @@ public:
 
   void test_extract_ref_info() {
     std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
+                           "/unit_testing/IDF_for_UNIT_TESTING.xml";
     std::string xmlText = Strings::loadFile(filename);
     boost::shared_ptr<const Instrument> i;
 
@@ -158,7 +158,7 @@ public:
 
   void test_extract_ref_info_theta_sign() {
     std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING6.xml";
+                           "/unit_testing/IDF_for_UNIT_TESTING6.xml";
     std::string xmlText = Strings::loadFile(filename);
     boost::shared_ptr<const Instrument> i;
 
@@ -179,7 +179,7 @@ public:
   {
     std::string filenameNoExt =
         ConfigService::Instance().getInstrumentDirectory() +
-        "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING";
+        "/unit_testing/IDF_for_UNIT_TESTING";
     std::string filename = filenameNoExt + ".xml";
     std::string xmlText = Strings::loadFile(filename);
     boost::shared_ptr<const Instrument> i;
@@ -482,7 +482,7 @@ public:
                                           // Definition File
   {
     std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml";
+                           "/unit_testing/IDF_for_UNIT_TESTING2.xml";
     std::string xmlText = Strings::loadFile(filename);
     boost::shared_ptr<const Instrument> i;
 
@@ -544,7 +544,7 @@ public:
   void test_parse_RectangularDetector() {
     std::string filename =
         ConfigService::Instance().getInstrumentDirectory() +
-        "/IDFs_for_UNIT_TESTING/IDF_for_RECTANGULAR_UNIT_TESTING.xml";
+        "/unit_testing/IDF_for_RECTANGULAR_UNIT_TESTING.xml";
     std::string xmlText = Strings::loadFile(filename);
     boost::shared_ptr<const Instrument> i;
 
@@ -597,7 +597,7 @@ public:
   // testing through Loading IDF_for_UNIT_TESTING5.xml method adjust()
   void testAdjust() {
     std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING5.xml";
+                           "/unit_testing/IDF_for_UNIT_TESTING5.xml";
     std::string xmlText = Strings::loadFile(filename);
     boost::shared_ptr<const Instrument> i;
 
@@ -874,7 +874,7 @@ public:
                                      detid_t numDetectors,
                                      bool rethrow = false) {
     std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/IDFs_for_UNIT_TESTING/IDF_for_locations_test.xml";
+                           "/unit_testing/IDF_for_locations_test.xml";
 
     std::string contents = Strings::loadFile(filename);
 
@@ -1055,7 +1055,7 @@ public:
   void testLoadingAndParsing() {
     const std::string filename =
         m_instrumentDirectoryPath +
-        "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
+        "/unit_testing/IDF_for_UNIT_TESTING.xml";
     const std::string xmlText = Strings::loadFile(filename);
 
     boost::shared_ptr<const Instrument> instrument;

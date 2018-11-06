@@ -52,7 +52,7 @@ public:
                                  const std::string &idf_file_contents) {
     const std::string instrument_dir =
         ConfigService::Instance().getInstrumentDirectory() +
-        "/IDFs_for_UNIT_TESTING/";
+        "/unit_testing/";
 
     return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
   }
@@ -155,7 +155,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+                            "unit_testing/IDF_for_UNIT_TESTING2.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -443,7 +443,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING4.xml");
+                            "unit_testing/IDF_for_UNIT_TESTING4.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -721,7 +721,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+                            "unit_testing/DUM_Definition.xml");
     loader.setProperty("MakeEventWorkspace", asEvent);
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyDUMInstrumentTest";
@@ -924,7 +924,7 @@ public:
 
     loaderEMU2.initialize();
     loaderEMU2.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/EMU_for_UNIT_TESTING.XML");
+        "Filename", "unit_testing/EMU_for_UNIT_TESTING.XML");
     wsName = "LoadEmptyInstrumentParamEMU2Test";
     loaderEMU2.setPropertyValue("OutputWorkspace", wsName);
 

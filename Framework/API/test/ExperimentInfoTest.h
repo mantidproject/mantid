@@ -573,7 +573,7 @@ public:
   void testHelper_ValidDateOverlap() {
     const std::string instDir =
         ConfigService::Instance().getInstrumentDirectory();
-    const std::string testDir = instDir + "IDFs_for_UNIT_TESTING";
+    const std::string testDir = instDir + "unit_testing";
     ConfigService::Instance().setString("instrumentDefinition.directory",
                                         testDir);
     ExperimentInfo helper;

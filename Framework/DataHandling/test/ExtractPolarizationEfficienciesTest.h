@@ -399,14 +399,14 @@ public:
     LoadInstrument loader;
     loader.initialize();
     loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/REFL_Definition.xml");
+                            "unit_testing/REFL_Definition.xml");
     loader.setProperty("Workspace", workspace);
     loader.setProperty("RewriteSpectraMap", OptionalBool(true));
     loader.execute();
     LoadParameterFile paramLoader;
     paramLoader.initialize();
     paramLoader.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/REFL_Parameters_Fredrikze.xml");
+        "Filename", "unit_testing/REFL_Parameters_Fredrikze.xml");
     paramLoader.setProperty("Workspace", workspace);
     paramLoader.execute();
 

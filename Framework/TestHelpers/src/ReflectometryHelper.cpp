@@ -65,7 +65,7 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
   LoadInstrument instrumentLoader;
   instrumentLoader.initialize();
   instrumentLoader.setPropertyValue(
-      "Filename", "IDFs_for_UNIT_TESTING/REFL_Definition.xml");
+      "Filename", "unit_testing/REFL_Definition.xml");
   instrumentLoader.setProperty("Workspace", workspace);
   instrumentLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
   instrumentLoader.execute();
@@ -74,7 +74,7 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
     LoadParameterFile paramLoader;
     paramLoader.initialize();
     paramLoader.setPropertyValue("Filename",
-                                 "IDFs_for_UNIT_TESTING/REFL_Parameters_" +
+                                 "unit_testing/REFL_Parameters_" +
                                      paramsType + ".xml");
     paramLoader.setProperty("Workspace", workspace);
     paramLoader.execute();

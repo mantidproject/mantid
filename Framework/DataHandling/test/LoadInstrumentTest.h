@@ -346,7 +346,7 @@ public:
   void testExecHRP2() {
     // Test Parameter file in instrument folder is used by an IDF file not in
     // the instrument folder
-    doTestParameterFileSelection("IDFs_for_UNIT_TESTING/HRPD_Definition.xml",
+    doTestParameterFileSelection("unit_testing/HRPD_Definition.xml",
                                  "HRPD_Parameters.xml", "S");
   }
 
@@ -356,7 +356,7 @@ public:
     // with an extension of its name after the 'Definition' not present in a
     // parameter file.
     doTestParameterFileSelection(
-        "IDFs_for_UNIT_TESTING/HRPD_Definition_Test3.xml",
+        "unit_testing/HRPD_Definition_Test3.xml",
         "HRPD_Parameters.xml", "S");
   }
 
@@ -366,16 +366,16 @@ public:
     // with the same extension ('_Test4') of its name after the 'Definition' or
     // 'Parameter'.
     doTestParameterFileSelection(
-        "IDFs_for_UNIT_TESTING/HRPD_Definition_Test4.xml",
-        "IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml", "T");
+        "unit_testing/HRPD_Definition_Test4.xml",
+        "unit_testing/HRPD_Parameters_Test4.xml", "T");
   }
 
   void testExecHRP5() {
     // Test Parameter file outside instrument folder is used by an IDF file in
     // the same folder
     doTestParameterFileSelection(
-        "IDFs_for_UNIT_TESTING/HRPDTEST_Definition.xml",
-        "IDFs_for_UNIT_TESTING/HRPDTEST_Parameters.xml", "U");
+        "unit_testing/HRPDTEST_Definition.xml",
+        "unit_testing/HRPDTEST_Parameters.xml", "U");
   }
 
   void testExecHRP6() {
@@ -386,8 +386,8 @@ public:
     // even though there is a definition file without an extension in the same
     // folder.
     doTestParameterFileSelection(
-        "IDFs_for_UNIT_TESTING/HRPDTEST_Definition_Test6.xml",
-        "IDFs_for_UNIT_TESTING/HRPDTEST_Parameters_Test6.xml", "V");
+        "unit_testing/HRPDTEST_Definition_Test6.xml",
+        "unit_testing/HRPDTEST_Parameters_Test6.xml", "V");
   }
 
   void testExecHRP7() {
@@ -396,7 +396,7 @@ public:
     // with an extension of its name after the 'Definition' not present in a
     // parameter file.
     doTestParameterFileSelection(
-        "IDFs_for_UNIT_TESTING/HRPDTEST_Definition_Test7.xml",
+        "unit_testing/HRPDTEST_Definition_Test7.xml",
         "HRPDTEST_Parameters.xml", "U");
   }
 
@@ -408,7 +408,7 @@ public:
     LoadInstrument loader;
     loader.initialize();
     loader.setPropertyValue("Filename",
-                            "IDFs_for_UNIT_TESTING/INDIRECT_Definition.xml");
+                            "unit_testing/INDIRECT_Definition.xml");
     MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     loader.setProperty("Workspace", ws);
@@ -689,7 +689,7 @@ private:
     const auto &paramMap = output->constInstrumentParameters();
 
     // It's "X0" in parameter file
-    // IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml
+    // unit_testing/HRPD_Parameters_Test4.xml
     Parameter_sptr param = paramMap.getRecursive(&(*comp), par, "fitting");
     TS_ASSERT(param);
     if (param != nullptr) {

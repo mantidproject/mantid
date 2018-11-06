@@ -54,7 +54,7 @@ class ConfigServiceTest(unittest.TestCase):
 
     def test_update_and_set_facility(self):
         self.assertFalse("TEST" in config.getFacilityNames())
-        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"IDFs_for_UNIT_TESTING/UnitTestFacilities.xml"))
+        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"unit_testing/UnitTestFacilities.xml"))
         ConfigService.setFacility("TEST")
         self.assertEquals(config.getFacility().name(), "TEST")
         self.assertRaises(RuntimeError, config.getFacility, "SNS")

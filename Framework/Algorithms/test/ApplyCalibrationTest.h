@@ -106,7 +106,7 @@ public:
     Mantid::DataHandling::LoadEmptyInstrument loader;
     loader.initialize();
     loader.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/MAPS_Definition_Reduced.xml");
+        "Filename", "unit_testing/MAPS_Definition_Reduced.xml");
     loader.setPropertyValue("OutputWorkspace", wsName);
     loader.execute();
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();

@@ -831,7 +831,7 @@ public:
     LoadEmptyInstrument createWorkspace;
     createWorkspace.initialize();
     createWorkspace.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml");
+        "Filename", "unit_testing/IDF_for_UNIT_TESTING.xml");
     createWorkspace.setPropertyValue("OutputWorkspace", "testSpace");
     createWorkspace.execute();
     auto ws = boost::dynamic_pointer_cast<Workspace2D>(

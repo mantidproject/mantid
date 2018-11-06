@@ -452,7 +452,7 @@ public:
     groupAlg.setPropertyValue("InputWorkspace", outputSpace + "_1");
     groupAlg.setPropertyValue("OutputWorkspace", "boevs");
     groupAlg.setPropertyValue(
-        "MapFile", "IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping.xml");
+        "MapFile", "unit_testing/MUSR_Detector_Grouping.xml");
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute());
     TS_ASSERT(groupAlg.isExecuted());
 
@@ -498,7 +498,7 @@ public:
     groupAlg.setPropertyValue("OutputWorkspace", "boevs");
     groupAlg.setPropertyValue(
         "MapFile",
-        "IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping_dublicate.xml");
+        "unit_testing/MUSR_Detector_Grouping_dublicate.xml");
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute());
     TS_ASSERT(groupAlg.isExecuted());
 
@@ -544,7 +544,7 @@ public:
     groupAlg.setPropertyValue("OutputWorkspace", "boevs");
     groupAlg.setPropertyValue(
         "MapFile",
-        "IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping_dublicate2.xml");
+        "unit_testing/MUSR_Detector_Grouping_dublicate2.xml");
     TS_ASSERT_THROWS_NOTHING(groupAlg.execute());
     TS_ASSERT(groupAlg.isExecuted());
 

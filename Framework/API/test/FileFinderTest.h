@@ -411,7 +411,7 @@ public:
     Poco::File fileOn2(pathOn2);
 
     std::string pathOn3 = FileFinder::Instance().getFullPath(
-        "IDFs_for_UNIT_TESTING/IDF_for_UNiT_TESTiNG.xMl");
+        "unit_testing/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn3(pathOn3);
 
     std::string pathOn4 = FileFinder::Instance().getFullPath("CSp78173.Raw");
