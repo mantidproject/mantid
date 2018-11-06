@@ -65,7 +65,7 @@ void addColorsToTopAndBottomTextures(
 }
 
 void upload2DTexture(const std::pair<size_t, size_t> &textSizes,
-                     GLuint &textureID, std::vector<char> &texture) {
+                     GLuint &textureID, const std::vector<char> &texture) {
   auto w = textSizes.first;
   auto h = textSizes.second;
 
@@ -118,6 +118,18 @@ BankTextureBuilder::BankTextureBuilder(
     break;
   default:
     break;
+  }
+}
+
+BankTextureBuilder::~BankTextureBuilder() {
+  for (size_t i = 0; i < m_colorTextureIDs.size(); ++i) {
+    auto &colTextureID = m_colorTextureIDs[i];
+    auto &pickTextureID = m_pickTextureIDs[i];
+
+    if (colTextureID > 0)
+      glDeleteTextures(1, &colTextureID);
+    if (pickTextureID > 0)
+      glDeleteTextures(1, &pickTextureID);
   }
 }
 
@@ -204,7 +216,7 @@ void BankTextureBuilder::buildTubeBankTextures(
   texture.resize(children.size() * 3);
 
   for (size_t i = 0; i < children.size(); ++i) {
-    auto col = colors[children[i]];
+    const auto &col = colors[children[i]];
     auto pos = i * 3;
     texture[pos] = static_cast<unsigned char>(col.red());
     texture[pos + 1] = static_cast<unsigned char>(col.green());
