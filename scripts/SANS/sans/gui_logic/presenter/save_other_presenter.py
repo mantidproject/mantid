@@ -57,6 +57,9 @@ class SaveOtherPresenter():
     def show(self):
         self._view.show()
 
+    def set_parent(self, parent):
+        self._view.setParent(parent)
+
     def get_filenames(self, selected_workspaces, filename):
         if filename and len(selected_workspaces) == 1:
             return [os.path.join(self.current_directory, filename)]

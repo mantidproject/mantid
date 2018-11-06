@@ -46,6 +46,7 @@ from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.work_handler import WorkHandler
+from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 
 DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
@@ -1955,3 +1956,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.data_processor_table.hideColumn(15)
         self.data_processor_table.hideColumn(16)
         self.data_processor_table.hideColumn(17)
+
+    def closeEvent(self, event):
+        for child in self.children():
+            if isinstance(child, SANSSaveOtherDialog):
+                child.done(0)
+        super(QtGui.QMainWindow, self).closeEvent(event)

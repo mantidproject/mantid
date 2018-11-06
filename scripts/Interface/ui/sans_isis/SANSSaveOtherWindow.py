@@ -17,8 +17,8 @@ except ImportError:
 
 
 class SANSSaveOtherDialog(QtGui.QDialog, ui_save_other_dialog.Ui_SaveOtherDialog):
-    def __init__(self):
-        super(QtGui.QDialog, self).__init__()
+    def __init__(self, parent_widget=None):
+        super(QtGui.QDialog, self).__init__(parent=parent_widget)
         self.subscribers = []
         self.setup_view()
 

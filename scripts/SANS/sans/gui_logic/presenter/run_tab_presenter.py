@@ -527,7 +527,8 @@ class RunTabPresenter(object):
 
     def on_save_other(self):
         self.save_other_presenter = SaveOtherPresenter(parent_presenter=self)
-        self.save_other_presenter.set_view(SANSSaveOtherWindow.SANSSaveOtherDialog())
+        save_other_view = SANSSaveOtherWindow.SANSSaveOtherDialog(self._view)
+        self.save_other_presenter.set_view(save_other_view)
         self.save_other_presenter.show()
 
     # def _validate_rows(self):
