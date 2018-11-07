@@ -40,9 +40,10 @@ if ( ENABLE_WORKBENCH )
 
   # Setup dependency chain
   add_dependencies ( mantidqt
+    mantidqt_resources
     mantidqt_commonqt4
     mantidqt_commonqt5
-    mantidqt_resources
+    mantidqt_instrumentviewqt5
   )
 
   if ( MSVC )

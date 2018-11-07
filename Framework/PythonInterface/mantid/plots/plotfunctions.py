@@ -357,6 +357,42 @@ def pcolormesh(axes, workspace, *args, **kwargs):
 
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
+def imshow(axes, workspace, *args, **kwargs):
+    '''
+    Essentially the same as :meth:`matplotlib.axes.Axes.pcolormesh`.
+
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the matrix workspace is a histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
+    :param axisaligned: ``False`` (default). If ``True``, or if the workspace has a variable
+                        number of bins, the polygons will be aligned with the axes
+    '''
+    _setLabels2D(axes, workspace)
+    if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        x, y, z = get_md_data2d_bin_bounds(workspace, normalization)
+    else:
+        (uneven_bins, kwargs) = get_data_uneven_flag(workspace, **kwargs)
+        (distribution, kwargs) = get_distribution(workspace, **kwargs)
+        if uneven_bins:
+            raise Exception('Variable number of bins is not supported by imshow.')
+        else:
+            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
+
+    diffs = numpy.diff(x, axis=1)
+    x_spacing_equal = numpy.alltrue(diffs == diffs[0])
+    diffs = numpy.diff(y, axis=0)
+    y_spacing_equal = numpy.alltrue(diffs == diffs[0])
+    if not x_spacing_equal or not y_spacing_equal:
+        raise Exception('Unevenly spaced bins are not supported by imshow')
+    kwargs['extent'] = [x[0,0],x[0,-1],y[0,0],y[-1,0]]
+    return axes.imshow(z, *args, **kwargs)
 
 def tripcolor(axes, workspace, *args, **kwargs):
     '''

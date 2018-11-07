@@ -173,6 +173,7 @@ void SaveIsawPeaks::exec() {
 
     infile.close();
     out.open(filename.c_str(), std::ios::app);
+    appendPeakNumb = appendPeakNumb + 1;
   } else {
     out.open(filename.c_str());
 
@@ -341,8 +342,8 @@ void SaveIsawPeaks::exec() {
 
           // Sequence (run) number
           if (renumber) {
-            sequenceNumber++;
             out << "3" << std::setw(7) << sequenceNumber;
+            sequenceNumber++;
           } else {
             out << "3" << std::setw(7) << p.getPeakNumber() + appendPeakNumb;
           }

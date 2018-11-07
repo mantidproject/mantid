@@ -7,6 +7,7 @@
 #ifndef PROJECT_RECOVERY_H_
 #define PROJECT_RECOVERY_H_
 
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <Poco/NObserver.h>
@@ -77,9 +78,6 @@ private:
   /// Captures the current object in the background thread
   std::thread createBackgroundThread();
 
-  /// Triggers when the config key is updated to a new value
-  void configKeyChanged(Mantid::Kernel::ConfigValChangeNotification_ptr notif);
-
   /// Creates a recovery script based on all .py scripts in a folder
   void compileRecoveryScript(const Poco::Path &inputFolder,
                              const Poco::Path &outputFile);
@@ -128,10 +126,6 @@ private:
 
   /// Atomic to detect when the thread should fire or exit
   std::condition_variable m_threadNotifier;
-
-  /// Config observer to monitor the key
-  Poco::NObserver<ProjectRecovery, Mantid::Kernel::ConfigValChangeNotification>
-      m_configKeyObserver;
 
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;

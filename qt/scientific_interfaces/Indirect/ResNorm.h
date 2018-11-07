@@ -41,11 +41,19 @@ private slots:
   /// Slot to handle the preview spectrum being changed
   void previewSpecChanged(int value);
   /// Slots to handle plot and save
+  void runClicked();
   void saveClicked();
   void plotClicked();
   void plotCurrentPreview();
 
 private:
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form

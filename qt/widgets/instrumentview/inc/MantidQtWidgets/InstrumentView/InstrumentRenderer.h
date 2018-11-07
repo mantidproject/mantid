@@ -13,9 +13,10 @@
 
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/InstrumentView/ColorMap.h"
 #include <QString>
 #include <map>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,7 +31,6 @@ private:
   mutable bool m_useDisplayList[2];
   mutable std::vector<detail::BankTextureBuilder> m_textures;
   mutable std::map<size_t, size_t> m_reverseTextureIndexMap;
-  std::vector<double> m_specIntegrs;
   ColorMap m_colorMap;
   bool m_isUsingLayers;
   size_t m_layer;
@@ -45,7 +45,7 @@ public:
 
   void reset();
 
-  void changeScaleType(int type);
+  void changeScaleType(ColorMap::ScaleType type);
 
   void changeNthPower(double nth_power);
 
