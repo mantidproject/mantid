@@ -480,7 +480,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
                 OutputWorkspace=ws_name,
                 DataX=list(v['x' + suffix]),
                 DataY=list(v['y' + suffix + '_fit']),
-                UnitX="Q")
+                UnitX="MomentumTransfer")
             mtd[ws_name].setDx(0,v['dx' + suffix])  # add x error
             out_ws_list.append(ws_name)
 
@@ -523,7 +523,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
             OutputWorkspace=out_ws_name,
             DataX=list(x),
             DataY=list(y),
-            UnitX="Q")
+            UnitX="MomentumTransfer")
 
         mtd[out_ws_name].setDx(0,dx)  # add x error
 
