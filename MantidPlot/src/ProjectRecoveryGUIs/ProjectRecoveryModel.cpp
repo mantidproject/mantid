@@ -168,7 +168,8 @@ void ProjectRecoveryModel::fillRows() {
 
   // Get the number of checkpoints from ConfigService
   int numberOfCheckpoints = getNumberOfCheckpoints();
-  for (auto i = paths.size(); i < static_cast<unsigned int>(numberOfCheckpoints); ++i) {
+  for (auto i = paths.size();
+       i < static_cast<unsigned int>(numberOfCheckpoints); ++i) {
     std::vector<std::string> newVector = {"", "", ""};
     m_rows.emplace_back(std::move(newVector));
   }
@@ -217,11 +218,12 @@ std::string ProjectRecoveryModel::decideLastCheckpoint() {
                                             1);
 }
 
-int ProjectRecoveryModel::getNumberOfCheckpoints(){
+int ProjectRecoveryModel::getNumberOfCheckpoints() {
   int numberOfCheckpoints;
   try {
-    numberOfCheckpoints = std::stoi(Mantid::Kernel::ConfigService::Instance().getString(
-        "projectRecovery.numberOfCheckpoints"));
+    numberOfCheckpoints =
+        std::stoi(Mantid::Kernel::ConfigService::Instance().getString(
+            "projectRecovery.numberOfCheckpoints"));
   } catch (...) {
     // Fail silently and set to 5
     numberOfCheckpoints = 5;
