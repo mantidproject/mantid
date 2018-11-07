@@ -360,8 +360,10 @@ void ConjoinXRuns::exec() {
   SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
       *first, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
       sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
-      sampleLogsFailTolerances);
-
+      sampleLogsFailTolerances, "conjoin_sample_logs_sum",
+      "conjoin_sample_logs_time_series", "conjoin_sample_logs_list",
+      "conjoin_sample_logs_warn", "conjoin_sample_logs_warn_tolerances",
+      "conjoin_sample_logs_fail", "conjoin_sample_logs_fail_tolerances");
   auto it = m_inputWS.begin();
 
   // Temporary workspace to carry the merged sample logs

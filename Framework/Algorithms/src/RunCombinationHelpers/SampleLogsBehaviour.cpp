@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -31,20 +32,10 @@ std::string generateDifferenceMessage(const std::string &item,
   return stringstream.str();
 }
 } // namespace
-const std::string SampleLogsBehaviour::SUM_MERGE = "sample_logs_sum";
-const std::string SampleLogsBehaviour::TIME_SERIES_MERGE =
-    "sample_logs_time_series";
-const std::string SampleLogsBehaviour::LIST_MERGE = "sample_logs_list";
-const std::string SampleLogsBehaviour::WARN_MERGE = "sample_logs_warn";
-const std::string SampleLogsBehaviour::FAIL_MERGE = "sample_logs_fail";
-const std::string SampleLogsBehaviour::WARN_MERGE_TOLERANCES =
-    "sample_logs_warn_tolerances";
-const std::string SampleLogsBehaviour::FAIL_MERGE_TOLERANCES =
-    "sample_logs_fail_tolerances";
 
 // Names and docs from the properties allowing to override the default (IPF
 // controlled) merging behaviour.
-// These are common between e.g. MergeRuns and JoinWorkspaces.
+// These are common between e.g. MergeRuns and ConjoinXRuns.
 const std::string SampleLogsBehaviour::TIME_SERIES_PROP =
     "SampleLogsTimeSeries";
 const std::string SampleLogsBehaviour::TIME_SERIES_DOC =
@@ -108,6 +99,15 @@ const std::string SampleLogsBehaviour::SUM_DOC =
  * throwing an error when different on merging
  * @param sampleLogsFailTolerances a string with a single value or comma
  * separated list of values for the error tolerances
+ * @param sum_merge parameter name in IPF of logs to be summed
+ * @param fail_merge parameter name in IPF of logs which must be identical
+ * @param time_series_merge parameter name in IPF of logs for the time series
+ *merge
+ * @param list_merge parameter name in IPF of logs to be listed
+ * @param warn_merge parameter name in IPF of logs which log a warning if
+ *different
+ * @param warn_merge_tolerances parameter name in IPF of warning tolerances
+ * @param fail_merge_tolerances parameter name in IPF of failure tolerances
  * @return An instance of SampleLogsBehaviour initialised with the merge types
  * from the IPF and parent algorithm
  */
@@ -117,8 +117,14 @@ SampleLogsBehaviour::SampleLogsBehaviour(
     const std::string &sampleLogsWarn,
     const std::string &sampleLogsWarnTolerances,
     const std::string &sampleLogsFail,
-    const std::string &sampleLogsFailTolerances)
-    : m_logger(logger) {
+    const std::string &sampleLogsFailTolerances, const std::string &sum_merge,
+    const std::string &time_series_merge, const std::string &list_merge,
+    const std::string &warn_merge, const std::string &warn_merge_tolerances,
+    const std::string &fail_merge, const std::string &fail_merge_tolerances)
+    : SUM_MERGE(sum_merge), TIME_SERIES_MERGE(time_series_merge),
+      LIST_MERGE(list_merge), WARN_MERGE(warn_merge),
+      WARN_MERGE_TOLERANCES(warn_merge_tolerances), FAIL_MERGE(fail_merge),
+      FAIL_MERGE_TOLERANCES(fail_merge_tolerances), m_logger(logger) {
   setSampleMap(m_logMap, MergeLogType::Sum, sampleLogsSum, ws, "");
   setSampleMap(m_logMap, MergeLogType::TimeSeries, sampleLogsTimeSeries, ws,
                "");
@@ -442,8 +448,8 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
 
     Property *addeeWSProperty = addeeWS.getLog(logName);
 
-    double addeeWSNumericValue = 0;
-    double outWSNumericValue = 0;
+    double addeeWSNumericValue = 0.;
+    double outWSNumericValue = 0.;
 
     try {
       addeeWSNumericValue = addeeWS.getLogAsSingleValue(logName);

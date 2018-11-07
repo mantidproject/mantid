@@ -8,7 +8,9 @@
 #define MANTID_ALGORITHMS_MERGERUNS_SAMPLELOGSBEHAVIOUR_H_
 
 #include "MantidAlgorithms/DllConfig.h"
-#include <MantidAPI/MatrixWorkspace.h>
+#include <MantidAPI/MatrixWorkspace_fwd.h>
+#include <MantidKernel/Logger.h>
+#include <MantidKernel/Property.h>
 
 namespace Mantid {
 namespace Algorithms {
@@ -21,13 +23,13 @@ class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
   enum class MergeLogType { Sum, TimeSeries, List, Warn, Fail };
 
-  static const std::string SUM_MERGE;
-  static const std::string TIME_SERIES_MERGE;
-  static const std::string LIST_MERGE;
-  static const std::string WARN_MERGE;
-  static const std::string FAIL_MERGE;
-  static const std::string WARN_MERGE_TOLERANCES;
-  static const std::string FAIL_MERGE_TOLERANCES;
+  const std::string SUM_MERGE;
+  const std::string TIME_SERIES_MERGE;
+  const std::string LIST_MERGE;
+  const std::string WARN_MERGE;
+  const std::string WARN_MERGE_TOLERANCES;
+  const std::string FAIL_MERGE;
+  const std::string FAIL_MERGE_TOLERANCES;
 
   // the names and docs of the override properties
   static const std::string TIME_SERIES_PROP;
@@ -51,14 +53,22 @@ public:
     bool isNumeric;
   };
 
-  SampleLogsBehaviour(API::MatrixWorkspace &ws, Kernel::Logger &logger,
-                      const std::string &sampleLogsSum = "",
-                      const std::string &sampleLogsTimeSeries = "",
-                      const std::string &sampleLogsList = "",
-                      const std::string &sampleLogsWarn = "",
-                      const std::string &sampleLogsWarnTolerances = "",
-                      const std::string &sampleLogsFail = "",
-                      const std::string &sampleLogsFailTolerances = "");
+  SampleLogsBehaviour(
+      API::MatrixWorkspace &ws, Kernel::Logger &logger,
+      const std::string &sampleLogsSum = "",
+      const std::string &sampleLogsTimeSeries = "",
+      const std::string &sampleLogsList = "",
+      const std::string &sampleLogsWarn = "",
+      const std::string &sampleLogsWarnTolerances = "",
+      const std::string &sampleLogsFail = "",
+      const std::string &sampleLogsFailTolerances = "",
+      const std::string &sum_merge = "sample_logs_sum",
+      const std::string &time_series_merge = "sample_logs_time_series",
+      const std::string &list_merge = "sample_logs_list",
+      const std::string &warn_merge = "sample_logs_warn",
+      const std::string &warn_merge_tolerances = "sample_logs_warn_tolerances",
+      const std::string &fail_merge = "sample_logs_fail",
+      const std::string &fail_merge_tolerances = "sample_logs_fail_tolerances");
 
   /// Create and update sample logs according to instrument parameters
   void mergeSampleLogs(API::MatrixWorkspace &addeeWS,
