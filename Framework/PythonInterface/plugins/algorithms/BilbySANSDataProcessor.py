@@ -1,8 +1,5 @@
-# attenuators
-
 import numpy as np
-
-from mantid.api import MatrixWorkspaceProperty, IEventWorkspaceProperty, PropertyMode, WorkspaceUnitValidator
+from mantid.api import MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory
 from mantid.api import AnalysisDataService, AlgorithmManager
 from mantid.kernel import Direction, FloatArrayProperty, FloatBoundedValidator, FloatArrayMandatoryValidator, Logger
@@ -19,7 +16,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         return "Workflow\\SANS"
 
     def seeAlso(self):
-        return ["Q1D","TOFSANSResolutionByPixel", "SANSWideAngleCorrection"]
+        return ["Q1D", "TOFSANSResolutionByPixel", "SANSWideAngleCorrection"]
 
     def name(self):
         return "BilbySANSDataProcessor"
@@ -181,7 +178,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
         if ws_samMsk:
             isinstance(ws_samMsk, IMaskWorkspace)
-                       
+
         if ws_blk:
             if not ws_blk.isHistogramData():
                 inputs["BlockedBeamWorkspace"] = "has to be a histogram"
@@ -214,19 +211,20 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
         if ws_tranMsk:
             isinstance(ws_tranMsk, IMaskWorkspace)
-              
+
         if scale <= 0.0:
             inputs["ScalingFactor"] = "has to be greater than zero"
 
         if thickness <= 0.0:
             inputs["SampleThickness"] = "has to be greater than zero"
-        return inputs  # - CHECK -why need it? I would believe it is optional
 
         if radiuscut < 0.0:
             inputs["radiuscut"] = "has to be equal or greater than zero"
 
         if wavecut < 0.0:
             inputs["wavecut"] = "has to be equal or greater than zero"
+
+        return inputs
 
     def PyExec(self):
         self.sanslog.warning(
@@ -280,13 +278,13 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
             ws_tranSam = self._convert_units(ws_tranSam, "Wavelength")
             ws_tranEmp = self._convert_units(ws_tranEmp, "Wavelength")
 
-        # -- Transmission -- 
+        # -- Transmission --
         # Intuitively one would think rebin for NVS data is not needed, but it does;
         # not perfect match in binning leads to error like "not matching intervals for calculate_transmission"
 
         ws_sam = self._rebin(ws_sam, binning_wavelength, preserveevents=False)
         ws_tranSam = self._rebin(ws_tranSam, binning_wavelength_transm, preserveevents=False)
-        
+
         ws_tranEmp = self._rebin(ws_tranEmp, binning_wavelength_transm, preserveevents=False)
 
         ws_tranroi = self._mask_to_roi(ws_tranMsk)
@@ -313,7 +311,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
             ws_blk_scaling = self._single_valued_ws(ws_sam_time / ws_blk_time)
 
-            # remove estimated blk counts from sample workspace        
+            # remove estimated blk counts from sample workspace
             self._apply_mask(ws_blk, ws_samMsk)  # masking blocked beam the same way as sample data
             if time_mode:
                 ws_blk = self._convert_units(ws_blk, "Wavelength")
@@ -325,7 +323,8 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         # sensitivity
         pixeladj = ws_sen
 
-        ws_tran = self._emp_shape_adjustment(ws_tran, ws_emp)  # swap arrays; ws_emp is always be shorter or equal to ws_tran
+        ws_tran = self._emp_shape_adjustment(ws_tran,
+                                             ws_emp)  # swap arrays; ws_emp is always be shorter or equal to ws_tran
         wavelengthadj = self._multiply(ws_emp, ws_tran)
 
         # calculate the wide angle correction for sample transmission
@@ -342,9 +341,10 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         ws_emp_time = self._get_frame_count(ws_emp)
         ws_sam_time = self._get_frame_count(ws_sam)
         scale_full = scale * (ws_emp_time / ws_sam_time)
-        # extra multiplier is needed because measured transmission is ~5% lower; we need to divide result by lower number, hence need to lowering the final result, i.e. divide by 1.05        
-        f = self._single_valued_ws(scale_full / (thickness*1.05))
-        
+        # extra multiplier is needed because measured transmission is ~5% lower;
+        # we need to divide result by lower number, hence need to lowering the final result, i.e. divide by 1.05
+        f = self._single_valued_ws(scale_full / (thickness * 1.05))
+
         if reduce_2d:
             q_max = binning_q[2]
             q_delta = binning_q[1]
@@ -368,12 +368,12 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
                 sampleapertureradius = float(ws_sam.run().getProperty("source_aperture").value) / 2.0
                 if sampleapertureradius > 40.0:
                     sampleapertureradius = 6.25
-                    print "sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken"                    
+                    print "sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken"
             else:
                 sampleapertureradius = 6.25  # radius in mm
-                print "sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken"                    
+                print "sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken"
 
-            # creating empty array for SigmaModerator
+                # creating empty array for SigmaModerator
             # SigmaModerator is a mandatory parameter for ISIS, but not needed for the reactor facility
             number_of_bins = 10
             number_of_spectra = 1
@@ -397,7 +397,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
             qresolution = self._tofsansresolutionbypixel(ws_sam, deltar, sampleapertureradius, sourceapertureradius,
                                                          sigmamoderator, real_l1, account_for_gravity, extralength)
 
-            # Call Q1D, now with resolution         
+            # Call Q1D, now with resolution
             q1d = self._q1d(ws_sam, binning_q, pixeladj, wavelengthadj, wavepixeladj, account_for_gravity,
                             solid_angle_weighting, radiuscut, wavecut, extralength, qresolution)
 
