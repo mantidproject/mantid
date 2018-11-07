@@ -151,7 +151,8 @@ void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
     const auto endTime = run.endTime();
 
     // First check if it is valid to add a additional log entry
-    if (!tsLog || tsLog->size() == 0 || endTime <= tsLog->lastTime())
+    if (!tsLog || tsLog->size() == 0 || endTime <= tsLog->lastTime() ||
+        prop->name() == "proton_charge")
       return;
 
     tsLog->addValue(endTime, tsLog->lastValue());

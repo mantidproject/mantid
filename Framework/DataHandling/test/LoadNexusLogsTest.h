@@ -120,7 +120,7 @@ public:
         dynamic_cast<TimeSeriesProperty<double> *>(
             run.getLogData("proton_charge"));
     TS_ASSERT(dlog);
-    TS_ASSERT_EQUALS(dlog->size(), 173);
+    TS_ASSERT_EQUALS(dlog->size(), 172);
   }
 
   void test_File_With_Bad_Property() {
