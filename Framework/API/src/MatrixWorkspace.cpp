@@ -1008,13 +1008,13 @@ bool MatrixWorkspace::isCommonBins() const {
       for (size_t j = 0; j < numBins; ++j) {
         const double a = xi[j];
         const double b = xip1[j];
-	// Check for NaN and infinity before comparing for equality
+        // Check for NaN and infinity before comparing for equality
         if (std::isfinite(a) && std::isfinite(b)) {
           if (std::abs(a - b) > EPSILON) {
             m_isCommonBinsFlag = false;
             break;
           }
-	// Otherwise we check that both are NaN or both are infinity   
+          // Otherwise we check that both are NaN or both are infinity
         } else if ((std::isnan(a) != std::isnan(b)) ||
                    (std::isinf(a) != std::isinf(b))) {
           m_isCommonBinsFlag = false;
