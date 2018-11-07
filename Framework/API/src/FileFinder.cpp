@@ -120,8 +120,12 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
   } catch (std::exception &) {
   }
 
-  const std::vector<std::string> &searchPaths =
-      Kernel::ConfigService::Instance().getDataSearchDirs();
+  Kernel::ConfigServiceImpl &configService = Kernel::ConfigService::Instance();
+  std::vector<std::string> searchPaths = configService.getDataSearchDirs();
+  std::vector<std::string> instrumentPaths =
+      configService.getInstrumentDirectories();
+  searchPaths.insert(searchPaths.end(), instrumentPaths.begin(),
+                        instrumentPaths.end());
   for (const auto &searchPath : searchPaths) {
     g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
 // On windows globbing is note working properly with network drives

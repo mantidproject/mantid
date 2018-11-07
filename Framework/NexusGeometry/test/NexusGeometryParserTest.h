@@ -11,7 +11,6 @@
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -19,6 +18,7 @@
 #include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include <H5Cpp.h>
 #include <chrono>
@@ -52,8 +52,8 @@ public:
 
   std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
     H5std_string nexusFilename = "unit_testing/SMALLFAKE_example_geometry.hdf5";
-    const auto fullpath = API::FileFinder::Instance().getFullPath(
-        nexusFilename, true);
+    const auto fullpath =
+        API::FileFinder::Instance().getFullPath(nexusFilename, true);
 
     return NexusGeometryParser::createInstrument(fullpath);
   }
@@ -217,8 +217,8 @@ public:
         "WISH_Definition_10Panels.hdf5", true);
     m_sans2dHDF5DefinitionPath = API::FileFinder::Instance().getFullPath(
         "SANS2D_Definition_Tubes.hdf5", true);
-    m_lokiHDF5DefinitionPath = API::FileFinder::Instance().getFullPath(
-        "LOKI_Definition.hdf5", true);
+    m_lokiHDF5DefinitionPath =
+        API::FileFinder::Instance().getFullPath("LOKI_Definition.hdf5", true);
   }
   static void destroySuite(NexusGeometryParserTestPerformance *suite) {
     delete suite;
