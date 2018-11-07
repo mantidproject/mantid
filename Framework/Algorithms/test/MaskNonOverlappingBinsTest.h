@@ -123,7 +123,8 @@ private:
         makeWorkspace(HistogramData::BinEdges{-1.1, -0.1, 0.9, 1.8});
     API::MatrixWorkspace_sptr comparisonWS =
         makeWorkspace(std::forward<BinEdges>(comparisonBinEdges));
-    std::array<std::string, 3> raggedOptions{{"Check", "Ragged", "Common Bins"}};
+    std::array<std::string, 3> raggedOptions{
+        {"Check", "Ragged", "Common Bins"}};
     for (auto const &raggedness : raggedOptions) {
       Algorithms::MaskNonOverlappingBins alg;
       alg.setChild(true);
@@ -137,8 +138,7 @@ private:
           alg.setProperty("ComparisonWorkspace", comparisonWS))
       TS_ASSERT_THROWS_NOTHING(
           alg.setProperty("MaskPartiallyOverlapping", maskPartial))
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("RaggedInputs", raggedness))
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("RaggedInputs", raggedness))
       TS_ASSERT_THROWS_NOTHING(alg.execute())
       TS_ASSERT(alg.isExecuted())
       API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -185,8 +185,7 @@ public:
     m_alg.setProperty("MaskPartiallyOverlapping", true);
   }
 
-  void test_default() {
-    TS_ASSERT_THROWS_NOTHING(m_alg.execute())}
+  void test_default() { TS_ASSERT_THROWS_NOTHING(m_alg.execute()) }
 
   void test_nonragged() {
     m_alg.setProperty("CheckSortedX", false);
