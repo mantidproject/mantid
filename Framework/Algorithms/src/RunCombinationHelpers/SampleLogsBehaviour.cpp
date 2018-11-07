@@ -102,10 +102,10 @@ const std::string SampleLogsBehaviour::SUM_DOC =
  * @param sum_merge parameter name in IPF of logs to be summed
  * @param fail_merge parameter name in IPF of logs which must be identical
  * @param time_series_merge parameter name in IPF of logs for the time series
- *merge
+ * merge
  * @param list_merge parameter name in IPF of logs to be listed
  * @param warn_merge parameter name in IPF of logs which log a warning if
- *different
+ * different
  * @param warn_merge_tolerances parameter name in IPF of warning tolerances
  * @param fail_merge_tolerances parameter name in IPF of failure tolerances
  * @return An instance of SampleLogsBehaviour initialised with the merge types

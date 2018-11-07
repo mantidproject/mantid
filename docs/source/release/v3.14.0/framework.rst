@@ -47,6 +47,7 @@ Improvements
 ############
 
 - :ref:`AppendSpectra <algm-AppendSpectra>` can append now multiple times the same event workspace.
+- :ref:`ConjoinXRuns <algm-ConjoinXRuns>` can merge sample logs according to the parameter file, if all parameter names have the suffix ``conjoin_``. This enables merging workspaces with :ref:`MergeRuns <algm-MergeRuns>` and joining workspaces with :ref:`ConjoinXRuns <algm-ConjoinXRuns>` (used for point data in :ref:`Stitch1D <algm-Stitch1D-v3>`) with different parameters.
 - :ref:`CropToComponent <algm-CropToComponent>` now supports also scanning workspaces.
 - :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>` will produce histogram data, and will not split the counts between bins by default.
 - :ref:`SumSpectra <algm-SumSpectra>` has an additional option, ``MultiplyBySpectra``, which controls whether or not the output spectra are multiplied by the number of bins. This property should be set to ``False`` for summing spectra as PDFgetN does.
