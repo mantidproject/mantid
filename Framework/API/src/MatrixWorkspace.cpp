@@ -33,7 +33,6 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
-
 #include <functional>
 #include <numeric>
 
@@ -49,6 +48,7 @@ using Kernel::V3D;
 namespace {
 /// static logger
 Kernel::Logger g_log("MatrixWorkspace");
+constexpr const double EPSILON{1.0e-9};
 } // namespace
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
@@ -966,12 +966,11 @@ bool MatrixWorkspace::isCommonBins() const {
   if (m_isCommonBinsFlagSet) {
     return m_isCommonBinsFlag;
   }
-
+  m_isCommonBinsFlagSet = true;
   m_isCommonBinsFlag = true;
   const size_t numHist = this->getNumberHistograms();
   // there being only one or zero histograms is accepted as not being an error
   if (numHist <= 1) {
-    m_isCommonBinsFlagSet = true;
     return m_isCommonBinsFlag;
   }
 
@@ -986,7 +985,6 @@ bool MatrixWorkspace::isCommonBins() const {
 
   // If true, we may return here.
   if (m_isCommonBinsFlag) {
-    m_isCommonBinsFlagSet = true;
     return m_isCommonBinsFlag;
   }
 
@@ -1008,22 +1006,23 @@ bool MatrixWorkspace::isCommonBins() const {
       const auto &xi = x(i);
       const auto &xip1 = x(i + 1);
       for (size_t j = 0; j < numBins; ++j) {
-        const double first = xi[j];
-        const double next = xip1[j];
-        if (std::abs(first - next) / std::abs(first + next) > 1.0E-9) {
-          m_isCommonBinsFlag = false;
-          break;
-        }
-        // handle Nan's and inf's
-        if ((std::isinf(first) != std::isinf(next)) ||
-            (std::isnan(first) != std::isnan(next))) {
+        const double a = xi[j];
+        const double b = xip1[j];
+	// Check for NaN and infinity before comparing for equality
+        if (std::isfinite(a) && std::isfinite(b)) {
+          if (std::abs(a - b) > EPSILON) {
+            m_isCommonBinsFlag = false;
+            break;
+          }
+	// Otherwise we check that both are NaN or both are infinity   
+        } else if ((std::isnan(a) != std::isnan(b)) ||
+                   (std::isinf(a) != std::isinf(b))) {
           m_isCommonBinsFlag = false;
           break;
         }
       }
     }
   }
-  m_isCommonBinsFlagSet = true;
   return m_isCommonBinsFlag;
 }
 
