@@ -9,7 +9,7 @@ from mantid.kernel import Direction, FloatArrayProperty, FloatBoundedValidator, 
 from mantid.api import IMaskWorkspace
 
 
-class SANSDataProcessor(DataProcessorAlgorithm):
+class BilbySANSDataProcessor(DataProcessorAlgorithm):
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
 
@@ -580,4 +580,4 @@ class SANSDataProcessor(DataProcessorAlgorithm):
 
 
 # register algorithm
-AlgorithmFactory.subscribe(SANSDataProcessor)
+AlgorithmFactory.subscribe(BilbySANSDataProcessor)
