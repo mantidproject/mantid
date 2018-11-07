@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Unit.h"
 
@@ -18,9 +19,15 @@ std::string const CHECK_SORTING{"CheckSortedX"};
 std::string const COMPARISON_WS{"ComparisonWorkspace"};
 std::string const INPUT_WS{"InputWorkspace"};
 std::string const MASK_PARTIAL{"MaskPartiallyOverlapping"};
-std::string const NONRAGGED{"SameXAcrossHistograms"};
 std::string const OUTPUT_WS{"OutputWorkspace"};
+std::string const RAGGEDNESS{"RaggedInputs"};
 } // namespace Prop
+/// Constants for the RaggedInputs property.
+namespace Raggedness {
+std::string const CHECK{"Check"};
+std::string const RAGGED{"Ragged"};
+std::string const NONRAGGED{"Common Bins"};
+} // namespace Raggedness
 
 /// Return true if X data is sorted in ascending order.
 bool isXSorted(Mantid::API::MatrixWorkspace const &ws) {
@@ -126,9 +133,13 @@ void MaskNonOverlappingBins::init() {
                   "A workspace to compare the InputWorkspace's binning to.");
   declareProperty(Prop::MASK_PARTIAL, false,
                   "If true, mask also bins that overlap only partially.");
-  declareProperty(
-      Prop::NONRAGGED, false,
-      "If true, the algorithm expects the same X data across all histograms.");
+  std::vector<std::string> const options{Raggedness::CHECK, Raggedness::RAGGED,
+                                         Raggedness::NONRAGGED};
+  auto raggednessOptions =
+      boost::make_shared<Kernel::ListValidator<std::string>>(options);
+  declareProperty(Prop::RAGGEDNESS, Raggedness::CHECK, raggednessOptions,
+                  "Choose whether the input workspaces have common bins, are "
+                  "ragged, or if the algorithm should check.");
   declareProperty(
       Prop::CHECK_SORTING, true,
       "If true, the algorithm ensures that both workspaces have X sorted in "
@@ -175,8 +186,7 @@ void MaskNonOverlappingBins::exec() {
   API::MatrixWorkspace_const_sptr comparisonWS =
       getProperty(Prop::COMPARISON_WS);
   checkXSorting(*inputWS, *comparisonWS);
-  bool const sameX = getProperty(Prop::NONRAGGED);
-  if (sameX) {
+  if (isCommonBins(*inputWS, *comparisonWS)) {
     processNonRagged(*inputWS, *comparisonWS, *outputWS);
   } else {
     processRagged(*inputWS, *comparisonWS, *outputWS);
@@ -196,6 +206,18 @@ void MaskNonOverlappingBins::checkXSorting(
     if (!isXSorted(comparisonWS)) {
       throw std::invalid_argument(Prop::COMPARISON_WS + " has unsorted X.");
     }
+  }
+}
+
+/// Return true if the workspaces should be considered as having common bins.
+bool MaskNonOverlappingBins::isCommonBins(
+    API::MatrixWorkspace const &inputWS,
+    API::MatrixWorkspace const &comparisonWS) {
+  std::string const choice = getProperty(Prop::RAGGEDNESS);
+  if (choice == Raggedness::CHECK) {
+    return inputWS.isCommonBins() && comparisonWS.isCommonBins();
+  } else {
+    return choice == Raggedness::NONRAGGED;
   }
 }
 

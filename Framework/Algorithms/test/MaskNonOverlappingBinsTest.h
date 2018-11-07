@@ -123,8 +123,8 @@ private:
         makeWorkspace(HistogramData::BinEdges{-1.1, -0.1, 0.9, 1.8});
     API::MatrixWorkspace_sptr comparisonWS =
         makeWorkspace(std::forward<BinEdges>(comparisonBinEdges));
-    std::array<bool, 2> raggedOptions{{true, false}};
-    for (auto const isRagged : raggedOptions) {
+    std::array<std::string, 3> raggedOptions{{"Check", "Ragged", "Common Bins"}};
+    for (auto const &raggedness : raggedOptions) {
       Algorithms::MaskNonOverlappingBins alg;
       alg.setChild(true);
       alg.setRethrows(true);
@@ -138,7 +138,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(
           alg.setProperty("MaskPartiallyOverlapping", maskPartial))
       TS_ASSERT_THROWS_NOTHING(
-          alg.setProperty("SameXAcrossHistograms", !isRagged))
+          alg.setProperty("RaggedInputs", raggedness))
       TS_ASSERT_THROWS_NOTHING(alg.execute())
       TS_ASSERT(alg.isExecuted())
       API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
@@ -172,7 +172,7 @@ public:
     m_ws = DataObjects::create<DataObjects::Workspace2D>(
         10000, HistogramData::Histogram(edges, counts));
     edges =
-        HistogramData::BinEdges(200, HistogramData::LinearGenerator(100., 2.3));
+        HistogramData::BinEdges(200, HistogramData::LinearGenerator(-10., 2.3));
     counts = HistogramData::Counts(edges.size() - 1, 2);
     m_compWS = DataObjects::create<DataObjects::Workspace2D>(
         10000, HistogramData::Histogram(edges, counts));
@@ -185,9 +185,20 @@ public:
     m_alg.setProperty("MaskPartiallyOverlapping", true);
   }
 
-  void tearDown() override {}
+  void test_default() {
+    TS_ASSERT_THROWS_NOTHING(m_alg.execute())}
 
-  void test_performance() { TS_ASSERT_THROWS_NOTHING(m_alg.execute()) }
+  void test_nonragged() {
+    m_alg.setProperty("CheckSortedX", false);
+    m_alg.setProperty("RaggedInputs", "Common Bins");
+    TS_ASSERT_THROWS_NOTHING(m_alg.execute())
+  }
+
+  void test_ragged() {
+    m_alg.setProperty("CheckSortedX", false);
+    m_alg.setProperty("RaggedInputs", "Ragged");
+    TS_ASSERT_THROWS_NOTHING(m_alg.execute())
+  }
 
 private:
   API::MatrixWorkspace_sptr m_ws;

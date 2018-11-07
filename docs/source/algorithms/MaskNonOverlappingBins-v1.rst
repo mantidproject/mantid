@@ -17,10 +17,10 @@ The algorithm currently applies the default masking weight to the bins which doe
 Optimizations
 #############
 
-Some small optimizations are possible via ``CheckSortedX`` and ``SameXAcrossHistograms``. Make sure the input workspaces fill the expectations before using these properties!
+Some small optimizations are possible via ``CheckSortedX`` and ``RaggedInputs``. Make sure the input workspaces fill the expectations before using these properties!
 
 - If there is no doubt that X data in ``InputWorkspace`` and ``ComparisonWorkspace`` is sorted, the checking for ascending X can be skipped by setting ``CheckSortedX`` to ``False``.
-- If both ``InputWorkspace`` and ``ComparisonWorkspace`` are *not* :ref:`ragged workspaces <Ragged_Workspace>`, i.e. they have the same X across all histograms, ``SameXAcrossHistograms`` can be set to ``True``.
+- If ``RaggedInputs`` is set to ``'Check'`` (the default), the algorithm will check if both ``InputWorkspace`` and ``ComparisonWorkspace`` are :ref:`ragged workspaces <Ragged_Workspace>` and choose the processing method accordingly. The test can be skipped by setting ``RaggedInputs`` to ``'Ragged'`` or ``'Common Bins'`` which forces a specific processing method.
 
 Usage
 -----
