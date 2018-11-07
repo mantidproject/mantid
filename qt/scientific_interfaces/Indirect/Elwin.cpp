@@ -256,8 +256,9 @@ void Elwin::unGroupInput(bool error) {
       ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
       ungroupAlg->execute();
     }
-    setPlotResultEnabled(true);
-    setSaveResultEnabled(true);
+  } else {
+    setPlotResultEnabled(false);
+    setSaveResultEnabled(false);
   }
 }
 
@@ -529,16 +530,20 @@ void Elwin::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
+void Elwin::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
 void Elwin::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void Elwin::setPlotResultIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotResultEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 void Elwin::runClicked() { runTab(); }

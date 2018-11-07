@@ -11,8 +11,9 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 namespace Mantid {
 namespace Algorithms {
@@ -69,7 +70,7 @@ void CreateTransmissionWorkspace2::init() {
                       "ProcessingInstructions", "",
                       boost::make_shared<MandatoryValidator<std::string>>(),
                       Direction::Input),
-                  "Grouping pattern on workspace indexes to yield only "
+                  "Grouping pattern on spectrum numbers to yield only "
                   "the detectors of interest. See GroupDetectors for details.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
@@ -123,12 +124,16 @@ void CreateTransmissionWorkspace2::exec() {
   MatrixWorkspace_sptr outWS;
 
   MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
+  convertProcessingInstructions(firstTransWS);
+
   firstTransWS = normalizeDetectorsByMonitors(firstTransWS);
   firstTransWS = cropWavelength(firstTransWS);
 
   MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
   if (secondTransWS) {
     storeTransitionRun(1, firstTransWS);
+
+    convertProcessingInstructions(secondTransWS);
 
     secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
     secondTransWS = cropWavelength(secondTransWS);

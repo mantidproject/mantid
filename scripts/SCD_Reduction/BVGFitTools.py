@@ -38,7 +38,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
                     n_events, peak=peak, box=box, qMask=qMask, calc_pp_lambda=True, padeCoefficients=padeCoefficients,
                     neigh_length_m=neigh_length_m, pp_lambda=None, pplmin_frac=pplmin_frac,
                     pplmax_frac=pplmax_frac, mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                    peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
+                    peakMaskSize=peakMaskSize, iccFitDict=iccFitDict, fitPenalty=fitPenalty)
         YTOF, fICC, x_lims = fitTOFCoordinate(
                     box, peak, padeCoefficients, dtSpread=dtSpread, qMask=qMask, bgPolyOrder=bgPolyOrder, zBG=zBG,
                     plotResults=plotResults, pp_lambda=pp_lambda, neigh_length_m=neigh_length_m, pplmin_frac=pplmin_frac,
@@ -58,7 +58,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
         fICC['KConv'] = fICCParams[11]
         goodIDX, _ = ICCFT.getBGRemovedIndices(
             n_events, pp_lambda=pp_lambda, qMask=qMask, peakMaskSize=peakMaskSize,
-            iccFitDict=iccFitDict)
+            iccFitDict=iccFitDict, fitPenalty=fitPenalty)
         chiSqTOF = fICCParams[4] #Last entry
 
         # Get the 3D TOF component, YTOF
@@ -304,8 +304,7 @@ def fitTOFCoordinate(box, peak, padeCoefficients, dtSpread=0.03, minFracPixels=0
                                 neigh_length_m=neigh_length_m, zBG=zBG, pp_lambda=pp_lambda,
                                 pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                 mindtBinWidth=mindtBinWidth, maxdtBinWidth=maxdtBinWidth,
-                                peakMaskSize=peakMaskSize,
-                                iccFitDict=iccFitDict)
+                                peakMaskSize=peakMaskSize, iccFitDict=iccFitDict, fitPenalty=fitPenalty)
 
     fitResults, fICC = ICCFT.doICCFit(tofWS, energy, flightPath,
                                       padeCoefficients, fitOrder=bgPolyOrder, constraintScheme=1,

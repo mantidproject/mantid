@@ -87,11 +87,15 @@ class DetectorInfoTest(unittest.TestCase):
     	workspace = CreateWorkspace(DataX=dataX, DataY=dataY)
     	info = workspace.detectorInfo()
     	self.assertEquals(info.size(), 0)
+    
+    def test_detectorIds(self):
+        info = self._ws.detectorInfo()
+        ids = info.detectorIDs()
+        # Should be read-only
+        self.assertFalse(ids.flags.writeable)
+        for a, b in zip(ids, [1,2]):
+            self.assertEquals(a,b)
 
-    """
-    The following test cases test for returned objects to do with position
-    and rotation.
-    """
 
     def test_position(self):
         """ Test that the detector's position is returned. """
@@ -129,6 +133,15 @@ class DetectorInfoTest(unittest.TestCase):
         # nothing should be masked 
         for item in info:
             self.assertFalse(item.isMasked)
+    
+    def test_iterator_for_masked(self):
+        info = self._ws.detectorInfo()
+        it = iter(info)
+        item = next(it)
+        item.setMasked(True)
+        self.assertTrue(item.isMasked)
+        item.setMasked(False)
+        self.assertFalse(item.isMasked)
 
     def test_iteration_for_position(self):
         info = self._ws.detectorInfo()
