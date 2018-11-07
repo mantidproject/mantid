@@ -5,13 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator, WorkspaceGroupProperty, \
     PropertyMode, MatrixWorkspace, NumericAxis
 from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, StringListValidator, \
     IntBoundedValidator, FloatBoundedValidator, PropertyCriterion, LogicOperator
 from mantid.simpleapi import *
 from MildnerCarpenter import *
+import numpy as np
 
 
 class SANSILLIntegration(PythonAlgorithm):
@@ -73,12 +73,19 @@ class SANSILLIntegration(PythonAlgorithm):
                              validator=StringListValidator(['MildnerCarpenter', 'None']),
                              doc='Choose to calculate the Q resolution.')
 
+        self.declareProperty('ResolutionBasedBinning', False, 'Whether or not to use default binning based on 2*sigma of resolution.')
+        self.setPropertySettings('ResolutionBasedBinning',
+                                 EnabledWhenProperty('CalculateResolution', PropertyCriterion.IsNotEqualTo, 'None'))
+
         output_iq = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'I(Q)')
         output_iphiq = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'I(Phi,Q)')
         output_iqxy = EnabledWhenProperty('OutputType', PropertyCriterion.IsEqualTo, 'I(Qx,Qy)')
 
         self.declareProperty(FloatArrayProperty('OutputBinning'), doc='The Q binning of the output')
         self.setPropertySettings('OutputBinning', EnabledWhenProperty(output_iq, output_iphiq, LogicOperator.Or))
+
+        self.declareProperty('NPixelDivision', 1, IntBoundedValidator(lower=1), 'Number of subpixels to split the pixel (NxN)')
+        self.setPropertySettings('NPixelDivision', EnabledWhenProperty(output_iq, output_iphiq, LogicOperator.Or))
 
         self.declareProperty(name='NumberOfWedges', defaultValue=0, validator=IntBoundedValidator(lower=0),
                              doc='Number of wedges to integrate separately.')
@@ -104,6 +111,7 @@ class SANSILLIntegration(PythonAlgorithm):
         self.setPropertySettings('AsymmetricWedges', iq_with_wedges)
 
         self.setPropertyGroup('OutputBinning', 'I(Q) Options')
+        self.setPropertyGroup('NPixelDivision', 'I(Q) Options')
         self.setPropertyGroup('NumberOfWedges', 'I(Q) Options')
         self.setPropertyGroup('WedgeWorkspace', 'I(Q) Options')
         self.setPropertyGroup('WedgeAngle', 'I(Q) Options')
@@ -137,29 +145,56 @@ class SANSILLIntegration(PythonAlgorithm):
             self._integrate_iqxy()
         self.setProperty('OutputWorkspace', self._output_ws)
 
-    def _get_iq_binning(self, q_min, q_max):
+    def _get_iq_binning(self, q_min, q_max, pixel_height, wavelength, l2):
+        """
+        Returns the OutputBinning string to be used in Q1DWeighted
+        """
+        if q_min < 0. or q_min >= q_max:
+            raise ValueError('qmin must be positive and smaller than qmax. '
+                             'Given qmin={0:.2f}, qmax={0:.2f}.'.format(qmin, qmax))
         q_binning = []
         binning = self.getProperty('OutputBinning').value
+        use_resolution = self.getProperty('ResolutionBasedBinning').value
         if len(binning) == 0:
-            if self._resolution == 'None':
-                q_binning = [q_min, -0.1, q_max]
-            elif self._resolution == 'MildnerCarpenter':
+            if use_resolution:
                 q_binning = self._mildner_carpenter_q_binning(q_min, q_max)
+            else:
+                q_binning = self._pixel_q_binning(q_min, q_max, pixel_height, wavelength, l2)
         elif len(binning) == 1:
             q_binning = [q_min, binning[0], q_max]
         elif len(binning) == 2:
-            if self._resolution == 'None':
-                q_binning = [binning[0], -0.1, binning[1]]
-            elif self._resolution == 'MildnerCarpenter':
+            if use_resolution:
                 q_binning = self._mildner_carpenter_q_binning(binning[0], binning[1])
+            else:
+                q_binning = self._pixel_q_binning(binning[0], binning[1], pixel_height, wavelength, l2)
         else:
             q_binning = binning
         return q_binning
 
+    def _pixel_q_binning(self, q_min, q_max, pixel_height, wavelength, l2):
+        """
+        Returns q binning based on the height of a single pixel within the range of q_min and q_max
+        """
+        bins = []
+        q = 0.
+        pixels = 1
+        while (q < q_max):
+            two_theta = np.arctan(pixel_height * pixels / l2)
+            q = 4 * np.pi * np.sin(two_theta / 2) / wavelength
+            bins.append(q)
+            pixels += 1
+        q_bin_edges = np.array(bins[:-1])
+        q_bin_edges = q_bin_edges[np.where(q_bin_edges > q_min)]
+        q_bin_widths = np.diff(q_bin_edges)
+        q_binning = np.empty(2 * q_bin_edges.size - 1)
+        q_binning[0::2] = q_bin_edges
+        q_binning[1::2] = q_bin_widths
+        return q_binning
+
     def _mildner_carpenter_q_binning(self, qmin, qmax):
-        if qmin < 0. or qmin >= qmax:
-            raise ValueError('qmin must be positive and smaller than qmax. '
-                             'Given qmin={0:.2f}, qmax={0:.2f}.'.format(qmin, qmax))
+        """
+        Returns q binning such that at each q, bin width is almost 2*sigma
+        """
         q = qmin
         result = [qmin]
         while q < qmax:
@@ -170,7 +205,9 @@ class SANSILLIntegration(PythonAlgorithm):
         return result
 
     def _setup_mildner_carpenter(self):
-
+        """
+        Sets up the mildner carpenter formula based on acquisition type and beam parameters
+        """
         run = mtd[self._input_ws].getRun()
         wavelength = run.getLogData('wavelength').value
         l1 = run.getLogData('collimation.sourceDistance').value
@@ -211,27 +248,39 @@ class SANSILLIntegration(PythonAlgorithm):
                 self._deltaQ = MonochromaticScalarQCylindric(wavelength, delta_wavelength, r1, r2, x3, y3, l1, l2)
 
     def _integrate_iqxy(self):
+        """
+        Calls Qxy
+        """
         max_qxy = self.getProperty('MaxQxy').value
         delta_q = self.getProperty('DeltaQ').value
         log_binning = self.getProperty('IQxQyLogBinning').value
         Qxy(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws, MaxQxy=max_qxy, DeltaQ=delta_q, IQxQyLogBinning=log_binning)
 
     def _integrate_iq(self):
+        """
+        Produces I(Q) or I(Phi,Q) using Q1DWeighted
+        """
         if self._resolution == 'MildnerCarpenter':
             self._setup_mildner_carpenter()
         run = mtd[self._input_ws].getRun()
         q_min = run.getLogData('qmin').value
         q_max = run.getLogData('qmax').value
         self.log().information('Using qmin={0:.2f}, qmax={1:.2f}'.format(q_min, q_max))
-        q_binning = self._get_iq_binning(q_min, q_max)
+        pixel_height = run.getLogData('pixel_height').value
+        wavelength = run.getLogData('wavelength').value
+        l2 = run.getLogData('l2').value
+        q_binning = self._get_iq_binning(q_min, q_max, pixel_height, wavelength, l2)
         n_wedges = self.getProperty('NumberOfWedges').value
+        pixel_division = self.getProperty('NPixelDivision').value
         if self._output_type == 'I(Q)':
             wedge_ws = self.getPropertyValue('WedgeWorkspace')
             wedge_angle = self.getProperty('WedgeAngle').value
             wedge_offset = self.getProperty('WedgeOffset').value
             asymm_wedges = self.getProperty('AsymmetricWedges').value
-            Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws, NumberOfWedges=n_wedges, OutputBinning=q_binning,
-                        WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, WedgeOffset=wedge_offset, AsymmetricWedges=asymm_wedges)
+            Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws,
+                        NumberOfWedges=n_wedges, OutputBinning=q_binning,
+                        WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,
+                        AsymmetricWedges=asymm_wedges, NPixelDivision=pixel_division)
             if self._resolution == 'MildnerCarpenter':
                 x = mtd[self._output_ws].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
@@ -250,7 +299,8 @@ class SANSILLIntegration(PythonAlgorithm):
             for i in range(n_wedges):
                 azimuth_axis.setValue(i, i * wedge_angle)
             Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=iq_ws, NumberOfWedges=n_wedges,
-                        OutputBinning=q_binning, WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, AsymmetricWedges=True)
+                        NPixelDivision=pixel_division, OutputBinning=q_binning, WedgeWorkspace=wedge_ws,
+                        WedgeAngle=wedge_angle, AsymmetricWedges=True)
             DeleteWorkspace(iq_ws)
             ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=self._output_ws)
             mtd[self._output_ws].replaceAxis(1, azimuth_axis)
