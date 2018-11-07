@@ -89,7 +89,7 @@ New
 
 - :class:`mantid.api.SpectrumInfo` allows the user to access information about the spectra being used in a beamline. ``SpectrumInfo`` has also been given an iterator to allow users to write more Pythonic loops rather than normal index based loops. In addition to this ``SpectrumDefinition`` objects can also be accessed via a :class:`mantid.api.SpectrumInfo` object. The ``SpectrumDefinition`` object can be used to obtain information about the spectrum to detector mapping and provides a definition of what a spectrum comprises, i.e. indices of all detectors that contribute to the data stored in the spectrum.
 
-- :class:`mantid.kernel.Temperature` allows the user to access a new unit called Temperature which has units of Kelvin.
+- Added new :ref:`unit <Unit Factory>` called ``Temperature`` which has units of Kelvin.
 
 Improvements
 ############
