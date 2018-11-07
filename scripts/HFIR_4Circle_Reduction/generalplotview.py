@@ -1,7 +1,7 @@
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 from HFIR_4Circle_Reduction.integratedpeakview import GeneralPurposedPlotView
 import os
-from PyQt4.QtGui import QMainWindow, QFileDialog
+from qtpy.QtWidgets import QMainWindow, QFileDialog
 from mantid.kernel import Logger
 try:
     from mantidqt.utils.qt import load_ui
