@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 Test the SNS inelatic reduction scripts.
@@ -169,7 +175,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         flag_spe=False                                                  #flag to generate an spe file
         flag_nxspe=True                                                 #flag to generate an nxspe file
         do_powder=True                                                  #group detectors by angle
-        anglemin=0.				                                        #minumum angle
+        anglemin=0.				                                        #minimum angle
         anglemax=70.				                                    #maximum angle
         anglestep=1.				                                    #angle step - this can be fine tuned for pixel arc over detectors
 

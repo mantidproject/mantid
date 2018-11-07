@@ -41,6 +41,7 @@ set ( TEST_PY_FILES
   MSDFitTest.py
   OSIRISDiffractionReductionTest.py
   PowderDiffILLReductionTest.py
+  PowderDiffILLDetScanReductionTest.py
   ReflectometryILLConvertToQTest.py
   ReflectometryILLPolarizationCorTest.py
   ReflectometryILLPreprocessTest.py
@@ -48,6 +49,7 @@ set ( TEST_PY_FILES
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py
+  SANSILLReductionTest.py
   SANSMaskTest.py
   SANSStitchTest.py
   SavePlot1DTest.py

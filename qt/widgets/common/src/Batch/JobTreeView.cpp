@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
@@ -343,6 +349,15 @@ void JobTreeView::removeRowAt(RowLocation const &location) {
     }
   }
   m_adaptedMainModel.removeRowFrom(indexToRemove);
+}
+
+void JobTreeView::removeAllRows() {
+  appendChildRowOf({});
+  auto firstChild = std::vector<int>{0};
+  while (!isOnlyChildOfRoot(firstChild)) {
+    removeRowAt(firstChild);
+  }
+  clearSelection();
 }
 
 RowLocation JobTreeView::insertChildRowOf(RowLocation const &parent,

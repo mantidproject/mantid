@@ -1355,7 +1355,7 @@ void Graph::setAxisScale(int axis, double start, double end, int scaleType,
               start = sp->getMinPositiveValue();
             }
             sp->mutableColorMap().changeScaleType(
-                (GraphOptions::ScaleType)type);
+                (MantidColorMap::ScaleType)type);
             sp->mutableColorMap().setNthPower(sc_engine->nthPower());
             rightAxis->setColorMap(QwtDoubleInterval(start, end),
                                    sp->getColorMap());
@@ -2644,7 +2644,7 @@ bool Graph::addCurves(Table *w, const QStringList &names, int style,
         // If X column is given - use it
         xColName = xColNameGiven;
       else
-        // Otherise, use associated one
+        // Otherwise, use associated one
         xColName = w->colName(w->colX(colIndex));
 
       if (xColName.isEmpty() || yColName.isEmpty())
@@ -4732,12 +4732,14 @@ Spectrogram *Graph::plotSpectrogram(Spectrogram *d_spectrogram,
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ImageMode, false);
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
   } else if (type == GraphOptions::ColorMap) {
-    d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
+    d_spectrogram->mutableColorMap().changeScaleType(
+        MantidColorMap::ScaleType::Linear);
     d_spectrogram->setDefaultColorMap();
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
   } else if (type == GraphOptions::ColorMapContour) {
-    d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
+    d_spectrogram->mutableColorMap().changeScaleType(
+        MantidColorMap::ScaleType::Linear);
     d_spectrogram->setDefaultColorMap();
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
     d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);

@@ -2,7 +2,7 @@
  Atom
 ======
 
-This a python binding to the C++ class Mantid::PhysicalConstants::Atom.
+This is a Python binding to the C++ class Mantid::PhysicalConstants::Atom.
 
 
 .. module:`mantid.kernel`

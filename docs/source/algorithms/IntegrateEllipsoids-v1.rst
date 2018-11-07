@@ -25,7 +25,7 @@ from :ref:`algm-IntegratePeaksMD` in several critical ways.
 
 -  This algorithm works directly with raw or weighted events
    while :ref:`algm-IntegratePeaksMD` uses **MDEvents** from
-   `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_.
+   :ref:`MDEventWorkspace <MDWorkspace>`.
 -  This algorithm uses 3D ellipsoidal regions with aspect ratios that
    are adapted to the set of events that are near the peak center, while
    :ref:`algm-IntegratePeaksMD` uses spherical regions.
@@ -219,7 +219,7 @@ Usage
 **Example - IntegrateEllipsoids:**
 
 User should provide their own event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
-file is availible in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
+file is available in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
 
 .. .. testcode:: exIntegrateEllipsoids
 .. The code itself works but disabled from doc tests as takes too long to complete.

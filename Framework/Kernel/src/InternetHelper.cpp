@@ -1,8 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MantidVersion.h"
 
 // Poco
 #include <Poco/Net/AcceptCertificateHandler.h>
@@ -135,7 +142,9 @@ void InternetHelper::createRequest(Poco::URI &uri) {
     m_request->setContentType(m_contentType);
   }
 
-  m_request->set("User-Agent", "MANTID");
+  m_request->set("User-Agent",
+                 // Use standard User-Agent format as per MDN documentation.
+                 std::string("Mantid/") + MantidVersion::version());
   if (m_method == "POST") {
     // HTTP states that the 'Content-Length' header should not be included
     // if the 'Transfer-Encoding' header is set. UNKNOWN_CONTENT_LENGTH

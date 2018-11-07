@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 
@@ -27,23 +33,33 @@ class DLLExport IqtFit : public IndirectFitAnalysisTab {
 public:
   IqtFit(QWidget *parent = nullptr);
 
-private:
-  void setupFitTab() override;
-
-protected:
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
-
 protected slots:
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   void updatePlotOptions() override;
   void fitFunctionChanged();
   void customBoolUpdated(const QString &key, bool value);
   void plotResult();
+  void runClicked();
+
+protected:
+  bool shouldEnablePlotResult() override { return true; };
+
+  void setPlotResultEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
+
+  void setRunIsRunning(bool running) override;
 
 private:
   void setConstrainIntensitiesEnabled(bool enabled);
   std::string fitTypeString() const;
+
+  void setupFitTab() override;
+
+  void setRunEnabled(bool enabled);
+  void setFitSingleSpectrumEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+
+  void setPlotResultIsPlotting(bool plotting);
 
   IqtFitModel *m_iqtFittingModel;
   std::unique_ptr<Ui::IqtFit> m_uiForm;

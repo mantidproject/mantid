@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
@@ -182,7 +188,7 @@ class CrystalField(object):
 
         if 'ResolutionModel' in kwargs and 'FWHM' in kwargs:
             msg = 'Both ''ResolutionModel'' and ''FWHM'' specified but can only accept one width option.'
-            msg += ' Prefering to use ResolutionModel, and ignoring FWHM.'
+            msg += ' Preferring to use ResolutionModel, and ignoring FWHM.'
             kwargs.pop('FWHM')
             warnings.warn(msg, SyntaxWarning)
 

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import SANSadd2
 from ui.sans_isis.work_handler import WorkHandler
 
@@ -14,7 +20,7 @@ class RunSummation(object):
             pass
 
     def __call__(self, run_selection, settings, base_file_name):
-        self._work_handler.process(RunSummation.Listener(), self.run, run_selection, settings, base_file_name)
+        self._work_handler.process(RunSummation.Listener(), self.run, 0, run_selection, settings, base_file_name)
 
     def run(self, run_selection, settings, base_file_name):
         run_selection = self._run_selection_as_path_list(run_selection)

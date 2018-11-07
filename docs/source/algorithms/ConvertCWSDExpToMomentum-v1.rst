@@ -18,7 +18,7 @@ In this algorithm's name, ConvertCWSDToMomentum, *CW* stands for constant wave
 
 This algorithm takes ??? as inputs.
 
-Futhermore, the unit of the output matrix workspace can be converted to 
+Furthermore, the unit of the output matrix workspace can be converted to 
 momentum transfer (Q).
 
 
@@ -37,7 +37,7 @@ Outline of algorithm
 
  * From each row, (1) file name and (2) starting detector ID are read in.  
  * Detector position in (virtual) instrument of MDEventWorkspace is compared with the position in MatrixWorkspace 
- * Momentum is calcualted by goniometry values
+ * Momentum is calculated by goniometry values
 
 
 Input Workspaces

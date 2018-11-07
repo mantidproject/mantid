@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 The aim of this file is to change the way in which we pass settings around
 between reduction steps.  The benefits to this new method are as follows:
@@ -73,7 +79,7 @@ REDUCTION_SETTINGS_OBJ_NAME = "ISISSANSReductionSettings"
 def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
     """
     Returns the PropertyManager object with the given name.  This could be used
-    to store settings used by the reduction, or to seperately store some
+    to store settings used by the reduction, or to separately store some
     temporary or backup settings.  If a PropertyManager object does not exist,
     then one is created.
 
