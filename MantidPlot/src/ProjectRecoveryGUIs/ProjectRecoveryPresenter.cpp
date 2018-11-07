@@ -155,5 +155,5 @@ void ProjectRecoveryPresenter::fillAllRows() {
 }
 
 int ProjectRecoveryPresenter::getNumberOfCheckpoints() {
-  return m_model->getNumberOfCheckpoints();
+  return ProjectRecoveryModel::getNumberOfCheckpoints();
 }

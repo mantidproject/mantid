@@ -9,9 +9,6 @@
 #include "MantidKernel/UsageService.h"
 #include "Script.h"
 #include "ScriptingWindow.h"
-#include "ui_RecoveryFailure.h"
-#include <boost/smart_ptr/make_shared.hpp>
-#include <memory>
 
 RecoveryFailureView::RecoveryFailureView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)

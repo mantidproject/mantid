@@ -27,12 +27,12 @@ std::string findNumberOfWorkspacesInDirectory(const Poco::Path &path) {
   // -1 of that value.
   return std::to_string(files.size() - 1);
 }
-void replaceSpaceWithTInString(std::string &string) {
+void replaceSpaceWithT(std::string &string) {
   const auto stringSpacePos = string.find(" ");
   if (stringSpacePos != std::string::npos)
     string.replace(stringSpacePos, 1, "T");
 }
-void sortPathsByLastModified(std::vector<Poco::Path> &paths) {
+void sortByLastModified(std::vector<Poco::Path> &paths) {
   std::sort(paths.begin(), paths.end(), [](const auto &a, const auto &b) {
     Poco::File a1(a);
     Poco::File b1(b); // Last modified is first!
@@ -55,7 +55,7 @@ const std::vector<std::string> &ProjectRecoveryModel::getRow(const int i) {
 
 std::vector<std::string>
 ProjectRecoveryModel::getRow(std::string checkpointName) {
-  replaceSpaceWithTInString(checkpointName);
+  replaceSpaceWithT(checkpointName);
   for (auto c : m_rows) {
     if (c[0] == checkpointName) {
       return c;
@@ -84,7 +84,7 @@ void ProjectRecoveryModel::recoverSelectedCheckpoint(std::string &selected) {
   Mantid::API::AnalysisDataService::Instance().clear();
 
   // Recovery given the checkpoint selected here
-  replaceSpaceWithTInString(selected);
+  replaceSpaceWithT(selected);
   Poco::Path checkpoint(m_projRec->getRecoveryFolderLoadPR());
   checkpoint.append(selected);
   Poco::Path output(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
@@ -107,7 +107,7 @@ void ProjectRecoveryModel::openSelectedInEditor(std::string &selected) {
   Mantid::API::AnalysisDataService::Instance().clear();
 
   // Open editor for this checkpoint
-  replaceSpaceWithTInString(selected);
+  replaceSpaceWithT(selected);
   auto beforeCheckpoint = m_projRec->getRecoveryFolderLoadPR();
   Poco::Path checkpoint(beforeCheckpoint);
   checkpoint.append(selected);
@@ -141,7 +141,7 @@ void ProjectRecoveryModel::fillRow(const Poco::Path &path,
 void ProjectRecoveryModel::fillFirstRow() {
   auto paths = m_projRec->getListOfFoldersInDirectoryPR(
       m_projRec->getRecoveryFolderLoadPR());
-  sortPathsByLastModified(paths);
+  sortByLastModified(paths);
 
   // Grab the first path as that is the one that should be loaded
   const auto path = paths.front();
@@ -153,7 +153,7 @@ void ProjectRecoveryModel::fillFirstRow() {
 void ProjectRecoveryModel::fillRows() {
   auto paths = m_projRec->getListOfFoldersInDirectoryPR(
       m_projRec->getRecoveryFolderLoadPR());
-  sortPathsByLastModified(paths);
+  sortByLastModified(paths);
 
   // Sort the rows first string of the vector lists
   for (const auto &c : paths) {

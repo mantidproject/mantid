@@ -7,13 +7,8 @@
 #include "ProjectRecoveryView.h"
 #include "ApplicationWindow.h"
 #include "MantidKernel/UsageService.h"
-#include "MultiTabScriptInterpreter.h"
 #include "Script.h"
-#include "ScriptFileInterpreter.h"
 #include "ScriptingWindow.h"
-#include "ui_ProjectRecoveryWidget.h"
-#include <boost/smart_ptr/make_shared.hpp>
-#include <memory>
 
 ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)

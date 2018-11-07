@@ -16,6 +16,7 @@ class ProjectRecovery;
 }
 class ProjectRecoveryPresenter;
 class ProjectRecoveryModel {
+
 public:
   ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery,
                        ProjectRecoveryPresenter *presenter);
@@ -28,7 +29,7 @@ public:
   bool hasRecoveryStarted() const { return m_recoveryRunning; }
   std::string decideLastCheckpoint();
   void fillRows();
-  int getNumberOfCheckpoints();
+  static int getNumberOfCheckpoints();
 
 private:
   void fillFirstRow();

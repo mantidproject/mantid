@@ -22,7 +22,6 @@ class RecoveryFailureView;
 class ProjectRecoveryPresenter {
 public:
   enum OpenView { RecoveryView, FailureView };
-  // Interestingly this nullptr should never be used
   ProjectRecoveryPresenter(MantidQt::ProjectRecovery *projectRecovery,
                            ApplicationWindow *parentWindow);
   ProjectRecoveryPresenter(const ProjectRecoveryPresenter &obj);
@@ -42,7 +41,7 @@ public:
   void changeStartMantidToCancelLabel();
   void fillAllRows();
   void setUpProgressBar(const int barMax);
-  int getNumberOfCheckpoints();
+  static int getNumberOfCheckpoints();
 
 private:
   friend class ProjectRecoveryView;
