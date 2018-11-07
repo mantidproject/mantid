@@ -33,7 +33,7 @@
   </component>
   <type name="sample-position" is="SamplePos"/>
 
-  <!--  ressonance monitor pixel with events -->
+  <!--MONITORS-->
   <idlist idname="Downstream_monitor">
     <id val="-2"/>
   </idlist>
@@ -47,7 +47,6 @@
    </component>
   </type>
 
-  <!--MONITORS-->
   <idlist idname="monitors">
     <id val="-1"/>
   </idlist>
@@ -60,8 +59,7 @@
     </component>
   </type>
 
-<!--  detector components -->
-
+  <!--DETECTORS-->
   <component type="East">
     <location >
       <parameter name="roty">

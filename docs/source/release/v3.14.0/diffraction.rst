@@ -13,6 +13,7 @@ Diffraction Changes
 Improvements
 ############
 
+- SNAP instrument geometry updated to include downstream monitor.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will not flip the even-numbered tubes when using the calibrated data, since they are flipped already in the nexus files.
 - :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` will scale the counts by 1M, when normalisation to monitor is requested, and it will also offer to enable/disable the tube alignment, and offer tube by tube reduction.
 - :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` now offers to use the raw or calibrated data blocks in the nexus files.
