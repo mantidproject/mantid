@@ -18,127 +18,139 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
     def category(self):
         return "Workflow\\SANS"
 
+    def seeAlso(self):
+        return ["Q1D","TOFSANSResolutionByPixel", "SANSWideAngleCorrection"]
+
     def name(self):
-        return "SANSDataProcessor"
+        return "BilbySANSDataProcessor"
 
     def summary(self):
-        return ""
+        return "BILBY SANS data reduction. Converts a workspace in wavelength into a 1D or 2D workspace of" \
+               " momentum transfer, assuming elastic scattering."
 
     def PyInit(self):
         # input
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Mandatory),
-                             doc='workspace of sample or background data')
+                             doc='Particle counts as a function of wavelength')
 
         self.declareProperty(MatrixWorkspaceProperty('InputMaskingWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='used to remove unwanted detectors regarding the data reduction')
+                             doc='Mask for the scattering data')
 
         # blocked beam, beam shape and detector corrections
         self.declareProperty(MatrixWorkspaceProperty('BlockedBeamWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='workspace of blocked beam data')
+                             doc='Blocked beam scattering')
 
         self.declareProperty(MatrixWorkspaceProperty('EmptyBeamSpectrumShapeWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Mandatory,
                                                      validator=WorkspaceUnitValidator("Wavelength")),
-                             doc='also known as direct-beam spectrum shape')
+                             doc='Empty beam transmission, where only a given wavelength slice is considered')
 
         self.declareProperty(MatrixWorkspaceProperty('SensitivityCorrectionMatrix', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='workspace of scaling factors for each detector pixel')
+                             doc='Detector sensitivity calibration data set')
 
         self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Mandatory),
-                             doc='workspace of sample or background transmission data')
+                             doc='Sample transmission workspace')
 
         self.declareProperty(MatrixWorkspaceProperty('TransmissionEmptyBeamWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Mandatory),
-                             doc='workspace of empty beam transmission data')
+                             doc='Empty beam transmission workspace')
 
         self.declareProperty(MatrixWorkspaceProperty('TransmissionMaskingWorkspace', '',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Mandatory),
-                             doc='used to remove unwanted detectors regarding the transmission calculation')
+                             doc='Mask for the transmission data')
 
         self.declareProperty(name='fitmethod',
-                             defaultValue='log', doc='fit method for transmission')
+                             defaultValue='log', doc='Function to use to fit transmission; can be Linear,'
+                                                     ' Log, Polynomial (first letter shall be capital)')
 
         self.declareProperty(name='polynomialorder',
                              defaultValue='3',
-                             doc='polynomial order for transmission; taken into account only for Polynomial fits,'
-                                 'but ignored for all the rest')
+                             doc='Used only for Polynomial function, but needed as an input parameter anyway')
 
         self.declareProperty(name='scalingfactor',
                              defaultValue=1.0,
                              validator=FloatBoundedValidator(lower=0.0),
-                             doc='final scaling factor (also includes attenuation scaling factors)')
+                             doc='Attenuating factor')
 
         self.declareProperty(name='samplethickness',
                              defaultValue=1.0,
                              validator=FloatBoundedValidator(lower=0.0),
-                             doc='thickness of sample')
+                             doc='Thickness of sample')
 
         self.declareProperty(FloatArrayProperty('binningwavelength',
                                                 direction=Direction.Input,
                                                 validator=FloatArrayMandatoryValidator()),
-                             doc='used for the binning of the input workspace')
+                             doc='Wavelength boundaries for reduction: a comma separated list of first bin boundary,'
+                                 ' width, last bin boundary')
 
         self.declareProperty(FloatArrayProperty('binningwavelengthtransm',
                                                 direction=Direction.Input,
                                                 validator=FloatArrayMandatoryValidator()),
-                             doc='used for the binning of the transmission input workspace')
+                             doc='Wavelengths boundaries for transmission binning: a comma separated list of first bin'
+                                 ' boundary, width, last bin')
 
         self.declareProperty(FloatArrayProperty('binningq',
                                                 direction=Direction.Input,
                                                 validator=FloatArrayMandatoryValidator()),
-                             doc='used for the binning of the resulting Q workspace')
+                             doc='Output Q-boundaries: a comma separated list of first bin boundary,'
+                                 ' width, last bin boundary')
 
         self.declareProperty(name='timemode',
                              defaultValue=True,
-                             doc='wether the mode is time-of-flight or monochromatic')
+                             doc='If data collected in ToF or monochromatic mode')
 
         self.declareProperty(name='accountforgravity',
                              defaultValue=True,
-                             doc='whether to correct for the effects of gravity')
+                             doc='Whether to correct for the effects of gravity')
 
         self.declareProperty(name='solidangleweighting',
                              defaultValue=True,
-                             doc='if true, pixels will be weighted by their solid angle')
+                             doc='If True, pixels will be weighted by their solid angle')
 
         self.declareProperty(name='radiuscut',
                              defaultValue=1.0,
                              validator=FloatBoundedValidator(lower=0.0),
-                             doc='To increase resolution some wavelengths are excluded within this distance from '
-                                 'the beam center (mm)')
+                             doc='To increase resolution some wavelengths are excluded within this distance from the'
+                                 ' beam center (mm). Note that RadiusCut and WaveCut both need to be larger than 0 to'
+                                 ' affect the effective cutoff. See the algorithm description for a detailed'
+                                 ' explanation of the cutoff.')
 
         self.declareProperty(name='wavecut',
                              defaultValue=1.0,
                              validator=FloatBoundedValidator(lower=0.0),
-                             doc='To increase resolution by starting to remove some wavelengths below thisfreshold '
-                                 '(angstrom)')
+                             doc='To increase resolution by starting to remove some wavelengths below this threshold'
+                                 ' (angstrom). Note that WaveCut and RadiusCut both need to be larger than 0 to affect'
+                                 ' on the effective cutoff. See the algorithm description for a detailed explanation'
+                                 ' of the cutoff.')
 
         self.declareProperty(name='wideanglecorrection',
                              defaultValue=True,
-                             doc='if true, the wide angle correction for transmissions will be applied')
+                             doc='If true, the wide angle correction for transmissions will be applied')
 
         self.declareProperty(name='reduce_2d',
                              defaultValue=False,
-                             doc='if true, 2D data reduction will be performed')
+                             doc='If true, 2D data reduction will be performed')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
-                             doc='result from Q1D or Qxy algorithm')
+                             doc='Name of the workspace that contains the result of the calculation. '
+                                 'Created automatically.')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceTransmission_Fit', '', direction=Direction.Output),
                              # This works only when transmission is True. Problems starts when it is not...
-                             doc='transmission_fit')
+                             doc='Counts vs wavelength, fit for the sample transmission')
 
     def validateInputs(self):
         inputs = dict()
