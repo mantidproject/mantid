@@ -26,6 +26,8 @@ If specified the script is imported and run after the widget is created.
 """
 from __future__ import absolute_import, print_function
 
+import inspect
+import six
 import sys
 import traceback
 
@@ -57,7 +59,40 @@ def create_widget(widget_path):
     return widget_generator()
 
 
-def open_in_window(widget_name, script):
+class ScriptRunner(object):
+
+    def __init__(self, script, w, close_on_finish):
+        self.widget = w
+        self.close_on_finish = close_on_finish
+        self.script_iter = iter(run_script(script, w))
+        self.parent_iter = None
+        self.pause_timer = QTimer()
+        self.pause_timer.setSingleShot(True)
+
+    def __call__(self):
+        if not self.pause_timer.isActive():
+            try:
+                # Run test script until the next 'yield'
+                pause_sec = self.script_iter.next()
+                if pause_sec is not None:
+                    if inspect.isgenerator(pause_sec):
+                        self.parent_iter = self.script_iter
+                        self.script_iter = pause_sec
+                    else:
+                        # Start non-blocking pause in seconds
+                        self.pause_timer.start(int(pause_sec * 1000))
+            except StopIteration:
+                if self.parent_iter is not None:
+                    self.script_iter = self.parent_iter
+                    self.parent_iter = None
+                elif self.close_on_finish:
+                    self.widget.close()
+            except:
+                self.widget.close()
+                traceback.print_exc()
+
+
+def open_in_window(widget_name, script, attach_debugger=True, pause=0, close_on_finish=False):
     """
     Displays a widget in a window.
     :param widget_name:  A qualified name of a widget, ie mantidqt.mywidget.MyWidget
@@ -73,48 +108,43 @@ def open_in_window(widget_name, script):
         If the test yields an integer it is interpreted as the number of seconds to wait
         until the next step.
     """
-    raw_input('Please attach the Debugger now if required. Press any key to continue')
+    if attach_debugger:
+        raw_input('Please attach the Debugger now if required. Press any key to continue')
     setup_library_paths()
     app = QApplication([""])
-    w = create_widget(widget_name)
-    w.setWindowTitle(widget_name)
+    if isinstance(widget_name, six.string_types):
+        w = create_widget(widget_name)
+        w.setWindowTitle(widget_name)
+    else:
+        w = widget_name()
+        w.setWindowTitle('Widget to test')
     w.show()
 
     if script is not None:
         try:
-            # If script is a generator script_iter allows non-blocking
-            # test execution
-            script_iter = iter(run_script(script, w))
-            pause_timer = QTimer()
-            pause_timer.setSingleShot(True)
-
-            def idle():
-                if not pause_timer.isActive():
-                    try:
-                        # Run test script until the next 'yield'
-                        pause_sec = script_iter.next()
-                        if pause_sec is not None:
-                            # Start non-blocking pause in seconds
-                            pause_timer.start(int(pause_sec * 1000))
-                    except StopIteration:
-                        pass
-                    except:
-                        traceback.print_exc()
+            idle = ScriptRunner(script, w, close_on_finish)
             timer = QTimer()
+            if pause != 0:
+                timer.setInterval(pause * 1000)
             # Zero-timeout timer runs idle() between Qt events
             timer.timeout.connect(idle)
             timer.start()
         except:
             pass
 
-    sys.exit(app.exec_())
+    return app.exec_()
 
 
 def run_script(script_name, widget):
-    module_name, fun_name = split_qualified_name(script_name)
-    m = __import__(module_name, fromlist=[fun_name])
-    fun = getattr(m, fun_name)
+    if isinstance(script_name, six.string_types):
+        module_name, fun_name = split_qualified_name(script_name)
+        m = __import__(module_name, fromlist=[fun_name])
+        fun = getattr(m, fun_name)
+    else:
+        fun = script_name
     try:
+        if inspect.isclass(fun):
+            fun = fun()
         return fun(widget)
     except:
         traceback.print_exc()
@@ -131,4 +161,4 @@ if __name__ == "__main__":
                                          " The name must contain the python module where the function is defined,"
                                          " eg somepackage.somemodule.test_my_widget")
     args = parser.parse_args()
-    open_in_window(args.widget, args.script)
+    sys.exit(open_in_window(args.widget, args.script))
