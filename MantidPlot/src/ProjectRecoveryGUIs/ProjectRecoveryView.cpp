@@ -13,24 +13,23 @@
 #include "ScriptingWindow.h"
 #include "ui_ProjectRecoveryWidget.h"
 #include <boost/smart_ptr/make_shared.hpp>
+#include <memory>
 
 ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QDialog(parent), ui(new Ui::ProjectRecoveryWidget),
+    : QDialog(parent), ui(std::make_unique<Ui::ProjectRecoveryWidget>()),
       m_presenter(presenter) {
   ui->setupUi(this);
   ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->progressBar->setMinimum(0);
   // Set the table information
-  addDataToTable(ui);
+  addDataToTable();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Interface", "ProjectRecoveryWindow", true);
 }
 
-ProjectRecoveryView::~ProjectRecoveryView() { delete ui; }
-
-void ProjectRecoveryView::addDataToTable(Ui::ProjectRecoveryWidget *ui) {
+void ProjectRecoveryView::addDataToTable() {
   const QStringList row = m_presenter->getRow(0);
   ui->tableWidget->setItem(0, 0, new QTableWidgetItem(row[0]));
   ui->tableWidget->setItem(0, 1, new QTableWidgetItem(row[1]));

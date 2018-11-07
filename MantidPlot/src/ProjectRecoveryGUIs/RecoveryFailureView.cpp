@@ -11,24 +11,24 @@
 #include "ScriptingWindow.h"
 #include "ui_RecoveryFailure.h"
 #include <boost/smart_ptr/make_shared.hpp>
+#include <memory>
 
 RecoveryFailureView::RecoveryFailureView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QDialog(parent), ui(new Ui::RecoveryFailure), m_presenter(presenter) {
+    : QDialog(parent), ui(std::make_unique<Ui::RecoveryFailure>()),
+      m_presenter(presenter) {
   ui->setupUi(this);
   ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
   // Make sure the UI has all the data it needs to display
   m_presenter->fillAllRows();
   // Set the table information
-  addDataToTable(ui);
+  addDataToTable();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Interface", "ProjectRecoveryFailureWindow", true);
 }
 
-RecoveryFailureView::~RecoveryFailureView() { delete ui; }
-
-void RecoveryFailureView::addDataToTable(Ui::RecoveryFailure *ui) {
+void RecoveryFailureView::addDataToTable() {
   // This table's size was generated for 5 which is the default but will take
   // more or less than 5, but won't look as neat
   const auto numberOfRows = m_presenter->getNumberOfCheckpoints();
