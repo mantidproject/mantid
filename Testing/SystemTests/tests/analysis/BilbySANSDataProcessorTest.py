@@ -2,8 +2,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-from mantid import *
-import os
 import BilbyCustomFunctions_Reduction
 from mantid.simpleapi import *
 
@@ -116,26 +114,7 @@ class BilbySANSDataProcessorTest(stresstesting.MantidStressTest):
         wav_delta = 0.0  # set the value, needed for the "wavelengh_slices" function
 
         # If needed to reduce 2D - this option is a defining one for the overall reduction
-        reduce_2D_input = current_reduction_settings[0]["reduce_2D"].lower()
-        reduce_2D = BilbyCustomFunctions_Reduction.string_boolean(reduce_2D_input)
-        if reduce_2D:
-            print(
-                "2D reduction is performing. Q interval and number of points are taking into account; Q-binning intervals are ignored.")
-            try:
-                # for 2D Q-binning is not intuitive, hence only number of points is needed
-                number_data_points_2D = float(current_reduction_settings[0][
-                                                  "2D_number_data_points"])
-            except:
-                raise ValueError("Number of points shall be given")
 
-            plot_2D = current_reduction_settings[0]["plot_2D"].lower()
-            plot_2D = BilbyCustomFunctions_Reduction.string_boolean(plot_2D)
-            binning_q[1] = (
-                               binning_q[0] + binning_q[
-                                   2]) / number_data_points_2D  # To replace deltaQ from the input file
-
-            ######################################
-            # Calling function to read given csv file
         parameters = BilbyCustomFunctions_Reduction.FilesListReduce(csv_files_to_reduce_list)
         files_to_reduce = BilbyCustomFunctions_Reduction.FilesToReduce(parameters, index_files_to_reduce)
         if len(files_to_reduce) == 0:
@@ -145,57 +124,21 @@ class BilbySANSDataProcessorTest(stresstesting.MantidStressTest):
         for current_file in files_to_reduce:
             sam_file = current_file["Sample"] + '.tar'
 
-            StartTime = current_file["StartTime"]
-            EndTime = current_file["EndTime"]
-            # Errors: if trying to reduce time slice larger than the total time of the measurement:
-            # Error message & Stop - to add
+            ws_sam = LoadBBY(sam_file)
+            time_range = ''
 
-            if ((not StartTime) and (EndTime)) or ((StartTime) and (not EndTime)):
-                raise ValueError("Check StartTime and EndTime values; either both or none shall be intered.")
-
-            if (not StartTime) and (not EndTime):
-                ws_sam = LoadBBY(sam_file)
-                time_range = ''
-            elif (float(StartTime)) > (float(EndTime)):
-                raise ValueError("Check StartTime and EndTime values; EndTime cannot be smaller than StartTime.")
-            else:
-                ws_sam = LoadBBY(sam_file)  # test loader: to check if given StartTime and EndTime are reasonable
-                Real_EndTime_max = float(ws_sam.run().getProperty('bm_counts').value)
-                if (float(EndTime) > Real_EndTime_max * 1.1):
-                    raise ValueError(
-                        'EndTime value is wrong, it is more than 10%% larger than the data collection time: %7.2f' % Real_EndTime_max)
-                ws_sam = LoadBBY(sam_file, FilterByTimeStart=StartTime,
-                                 FilterByTimeStop=EndTime)  # now to load file within requested time slice if values are feasible
-                time_range = '_' + StartTime + '_' + EndTime
-
-            # To read the mode value: True - ToF; False - NVS; this will define some steps inside SANSDataProcessor
-            try:
-                external_mode = (ws_sam.run().getProperty("is_tof").value)
-            except:
-                external_mode = True  # This is needed for old files, where the ToF/mono mode value has not been recorded
-
-            if (
-                    not external_mode):  # Internal frame source has been used during data collection; it is not always NVS only, one can have both, NVS and choppers running for this mode
-                print("Internal frame source. Binning range is taken from the sample scattering data.")
-                binning_wavelength_ini = (ws_sam.readX(0)[0], ws_sam.readX(0)[ws_sam.blocksize()] - ws_sam.readX(0)[0],
-                                          ws_sam.readX(0)[ws_sam.blocksize()])
-                binning_wavelength_transmission = binning_wavelength_ini
-                if wavelength_intervals:
-                    wavelength_intervals = False
-                    print("NVS: monochromatic mode")
-                    print(
-                        "There is no sense to reduce monochromatic data on multiple wavelength; \"wavelength_intervals\" value changed to False.")
-            else:  # important for the case when NVS data is being analysed first, ie to be able to come back to the whole range & wavelength slices, if needed
-                binning_wavelength_ini = binning_wavelength_ini_original
-                binning_wavelength_transmission = binning_wavelength_transmission_original
-                wavelength_intervals = wavelength_intervals_original
-                if wavelength_intervals:
-                    wav_delta = float(
-                        current_reduction_settings[0]["wav_delta"])  # no need to read if the previous is false
+            # important for the case when NVS data is being analysed first, ie to be able to come back to the whole
+            #  range & wavelength slices, if needed
+            binning_wavelength_ini = binning_wavelength_ini_original
+            binning_wavelength_transmission = binning_wavelength_transmission_original
+            wavelength_intervals = wavelength_intervals_original
+            if wavelength_intervals:
+                wav_delta = float(
+                    current_reduction_settings[0]["wav_delta"])  # no need to read if the previous is false
 
             # empty beam scattering in transmission mode
             ws_emp_file = current_file["T_EmptyBeam"] + '.tar'
-            ws_emp = LoadBBY(ws_emp_file)  # Note that this is of course a transmission measurement - shall be long
+            LoadBBY(ws_emp_file, OutputWorkspace='ws_emp')  # Note that this is of course a transmission measurement - shall be long
 
             # transmission workspaces and masks
             transm_file = current_file["T_Sample"] + '.tar'
@@ -211,7 +154,6 @@ class BilbySANSDataProcessorTest(stresstesting.MantidStressTest):
             att_pos = float(ws_tranSam.run().getProperty("att_pos").value)
 
             scale = BilbyCustomFunctions_Reduction.AttenuationCorrection(att_pos, data_before_May_2016)
-            print("scale, aka attenuation factor {}".format(scale))
 
             thickness = current_file["thickness [cm]"]
 
@@ -235,9 +177,8 @@ class BilbySANSDataProcessorTest(stresstesting.MantidStressTest):
             ws_sen = None
 
             # empty beam normalisation
-            ws_emp = MaskDetectors("ws_emp",
-                                   MaskedWorkspace=ws_tranMsk)  # does not have to be ws_tranMsk, can be a specific mask
-            ws_emp = ConvertUnits("ws_emp", Target="Wavelength")
+            MaskDetectors("ws_emp", MaskedWorkspace=ws_tranMsk)
+            ConvertUnits("ws_emp", Target="Wavelength", OutputWorkspace='ws_emp')
 
             # wavelenth intervals: building  binning_wavelength list
             binning_wavelength, n = BilbyCustomFunctions_Reduction.wavelengh_slices(wavelength_intervals,
@@ -255,39 +196,34 @@ class BilbySANSDataProcessorTest(stresstesting.MantidStressTest):
                 ws_emp_partial = Rebin("ws_emp", Params=binning_wavelength[i])
                 ws_emp_partial = SumSpectra(ws_emp_partial, IncludeMonitors=False)
 
-                if reduce_2D:
-                    base_output_name = sam_file[0:10] + '_2D_' + str(binning_wavelength[i][0]) + '_' + str(
-                        binning_wavelength[i][
-                            2]) + time_range + suffix  # A core of output name; made from the name of the input sample
-                else:
-                    base_output_name = sam_file[0:10] + '_1D_' + str(round(binning_wavelength[i][0], 3)) + '_' + str(
-                        round(binning_wavelength[i][2],
-                              3)) + time_range + suffix  # A core of output name; made from the name of the input sample
+                base_output_name = sam_file[0:10] + '_1D_' + str(round(binning_wavelength[i][0], 3)) + '_' + str(
+                    round(binning_wavelength[i][2],
+                          3)) + time_range + suffix  # A core of output name; made from the name of the input sample
 
                 # needed here, otherwise BilbySANSDataProcessor replaced it with "transmission_fit" string
                 transmission_fit = transmission_fit_ini
 
                 output_workspace, transmission_fit = BilbySANSDataProcessor(InputWorkspace=ws_sam,
-                                                                            InputMaskingWorkspace=ws_samMsk, \
+                                                                            InputMaskingWorkspace=ws_samMsk,
                                                                             BlockedBeamWorkspace=ws_blk,
                                                                             EmptyBeamSpectrumShapeWorkspace=ws_emp_partial,
-                                                                            SensitivityCorrectionMatrix=ws_sen, \
+                                                                            SensitivityCorrectionMatrix=ws_sen,
                                                                             TransmissionWorkspace=ws_tranSam,
                                                                             TransmissionEmptyBeamWorkspace=ws_tranEmp,
-                                                                            TransmissionMaskingWorkspace=ws_tranMsk, \
+                                                                            TransmissionMaskingWorkspace=ws_tranMsk,
                                                                             ScalingFactor=scale,
-                                                                            SampleThickness=thickness, \
+                                                                            SampleThickness=thickness,
                                                                             FitMethod=transmission_fit,
-                                                                            PolynomialOrder=PolynomialOrder, \
+                                                                            PolynomialOrder=PolynomialOrder,
                                                                             BinningWavelength=binning_wavelength[i],
                                                                             BinningWavelengthTransm=binning_wavelength_transmission,
-                                                                            BinningQ=binning_q, \
-                                                                            TimeMode=external_mode,
+                                                                            BinningQ=binning_q,
+                                                                            TimeMode=True,
                                                                             AccountForGravity=account_for_gravity,
-                                                                            SolidAngleWeighting=solid_angle_weighting, \
-                                                                            RadiusCut=RadiusCut, WaveCut=WaveCut, \
-                                                                            WideAngleCorrection=wide_angle_correction, \
-                                                                            Reduce_2D=reduce_2D, \
+                                                                            SolidAngleWeighting=solid_angle_weighting,
+                                                                            RadiusCut=RadiusCut, WaveCut=WaveCut,
+                                                                            WideAngleCorrection=wide_angle_correction,
+                                                                            Reduce_2D=False,
                                                                             OutputWorkspace=base_output_name)
 
                 BilbyCustomFunctions_Reduction.strip_NaNs(output_workspace, base_output_name)
