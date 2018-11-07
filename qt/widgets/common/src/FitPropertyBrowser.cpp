@@ -160,8 +160,10 @@ void FitPropertyBrowser::init() {
   /* Create function group */
   QtProperty *functionsGroup = m_groupManager->addProperty("Functions");
 
-  connect(this, SIGNAL(xRangeChanged(double, double)), m_mantidui,
-          SLOT(x_range_from_picker(double, double)));
+  if (m_mantidui) {
+    connect(this, SIGNAL(xRangeChanged(double, double)), m_mantidui,
+            SLOT(x_range_from_picker(double, double)));
+  }
   /* Create input - output properties */
   QtProperty *settingsGroup = m_groupManager->addProperty("Settings");
   m_startX = addDoubleProperty("StartX");
@@ -340,6 +342,7 @@ void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
  */
 void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QPushButton *btnFit = createFitMenuButton(w);
+  btnFit->setObjectName("button_Fit");
   // to be able to change windows title from tread
   connect(this, SIGNAL(changeWindowTitle(const QString &)), this,
           SLOT(setWindowTitle(const QString &)));
@@ -375,14 +378,18 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QGridLayout *buttonsLayout = new QGridLayout();
 
   QPushButton *btnDisplay = new QPushButton("Display");
+  btnDisplay->setObjectName("button_Display");
   QMenu *displayMenu = new QMenu(this);
+  displayMenu->setObjectName("menu_Display");
   m_displayActionPlotGuess = new QAction("Plot Guess", this);
   m_displayActionPlotGuess->setEnabled(false);
   m_displayActionQuality = new QAction("Quality", this);
+  m_displayActionQuality->setObjectName("action_Quality");
   m_displayActionQuality->setCheckable(true);
   m_displayActionQuality->setChecked(true);
   m_displayActionClearAll = new QAction("Clear fit curves", this);
   QSignalMapper *displayMapper = new QSignalMapper(this);
+  displayMapper->setObjectName("mapper_Display");
 
   displayMapper->setMapping(m_displayActionPlotGuess, "PlotGuess");
   displayMapper->setMapping(m_displayActionQuality, "Quality");
@@ -401,6 +408,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   btnDisplay->setMenu(displayMenu);
 
   QPushButton *btnSetup = new QPushButton("Setup");
+  btnSetup->setObjectName("button_Setup");
   QMenu *setupMenu = new QMenu(this);
 
   m_setupActionCustomSetup = new QAction("Custom Setup", this);
