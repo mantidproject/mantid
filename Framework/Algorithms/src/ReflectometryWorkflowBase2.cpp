@@ -555,7 +555,7 @@ void ReflectometryWorkflowBase2::populateMonitorProperties(
       this, "StartOverlap", instrument, "TransRunStartOverlap");
   if (startOverlap.is_initialized())
     alg->setProperty("StartOverlap", startOverlap.get());
-    
+
   const auto endOverlap = checkForOptionalInstrumentDefault<double>(
       this, "EndOverlap", instrument, "TransRunEndOverlap");
   if (endOverlap.is_initialized())
