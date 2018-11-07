@@ -17,12 +17,12 @@
 
 ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QDialog(parent), ui(std::make_unique<Ui::ProjectRecoveryWidget>()),
+    : QDialog(parent), m_ui(std::make_unique<Ui::ProjectRecoveryWidget>()),
       m_presenter(presenter) {
-  ui->setupUi(this);
-  ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-  ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-  ui->progressBar->setMinimum(0);
+  m_ui->setupUi(this);
+  m_ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+  m_ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+  m_ui->progressBar->setMinimum(0);
   // Set the table information
   addDataToTable();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
@@ -31,8 +31,8 @@ ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
 
 void ProjectRecoveryView::addDataToTable() {
   const QStringList row = m_presenter->getRow(0);
-  ui->tableWidget->setItem(0, 0, new QTableWidgetItem(row[0]));
-  ui->tableWidget->setItem(0, 1, new QTableWidgetItem(row[1]));
+  m_ui->tableWidget->setItem(0, 0, new QTableWidgetItem(row[0]));
+  m_ui->tableWidget->setItem(0, 1, new QTableWidgetItem(row[1]));
 }
 
 void ProjectRecoveryView::onClickLastCheckpoint() {
@@ -65,12 +65,12 @@ void ProjectRecoveryView::reject() {
 
 void ProjectRecoveryView::updateProgressBar(int newValue, bool err) {
   if (!err) {
-    ui->progressBar->setValue(newValue);
+    m_ui->progressBar->setValue(newValue);
   }
 }
 
 void ProjectRecoveryView::setProgressBarMaximum(int newValue) {
-  ui->progressBar->setMaximum(newValue);
+  m_ui->progressBar->setMaximum(newValue);
 }
 
 void ProjectRecoveryView::connectProgressBar() {
@@ -88,5 +88,5 @@ void ProjectRecoveryView::emitAbortScript() {
 }
 
 void ProjectRecoveryView::changeStartMantidButton(const QString &string) {
-  ui->startmantidButton->setText(string);
+  m_ui->startmantidButton->setText(string);
 }

@@ -39,7 +39,7 @@ private slots:
 private:
   void addDataToTable();
 
-  std::unique_ptr<Ui::ProjectRecoveryWidget> ui;
+  std::unique_ptr<Ui::ProjectRecoveryWidget> m_ui;
   ProjectRecoveryPresenter *m_presenter;
 };
 

@@ -15,12 +15,12 @@
 
 RecoveryFailureView::RecoveryFailureView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QDialog(parent), ui(std::make_unique<Ui::RecoveryFailure>()),
+    : QDialog(parent), m_ui(std::make_unique<Ui::RecoveryFailure>()),
       m_presenter(presenter) {
-  ui->setupUi(this);
-  ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-  ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-  // Make sure the UI has all the data it needs to display
+  m_ui->setupUi(this);
+  m_ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+  m_ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+  // Make sure the ui has all the data it needs to display
   m_presenter->fillAllRows();
   // Set the table information
   addDataToTable();
@@ -35,7 +35,7 @@ void RecoveryFailureView::addDataToTable() {
   for (auto i = 0; i < numberOfRows; ++i) {
     const auto row = m_presenter->getRow(i);
     for (auto j = 0; j < row.size(); ++j) {
-      ui->tableWidget->setItem(i, j, new QTableWidgetItem(row[j]));
+      m_ui->tableWidget->setItem(i, j, new QTableWidgetItem(row[j]));
     }
   }
 }
@@ -49,7 +49,7 @@ void RecoveryFailureView::onClickLastCheckpoint() {
 
 void RecoveryFailureView::onClickSelectedCheckpoint() {
   // Recover Selected
-  QList<QTableWidgetItem *> selectedRows = ui->tableWidget->selectedItems();
+  QList<QTableWidgetItem *> selectedRows = m_ui->tableWidget->selectedItems();
   if (selectedRows.size() > 0) {
     const QString text = selectedRows[0]->text();
     if (text.toStdString().empty()) {
@@ -64,7 +64,7 @@ void RecoveryFailureView::onClickSelectedCheckpoint() {
 
 void RecoveryFailureView::onClickOpenSelectedInScriptWindow() {
   // Open checkpoint in script window
-  QList<QTableWidgetItem *> selectedRows = ui->tableWidget->selectedItems();
+  QList<QTableWidgetItem *> selectedRows = m_ui->tableWidget->selectedItems();
   if (selectedRows.size() > 0) {
     const QString text = selectedRows[0]->text();
     if (text.toStdString().empty()) {
@@ -94,12 +94,12 @@ void RecoveryFailureView::reject() {
 void RecoveryFailureView::updateProgressBar(const int newValue,
                                             const bool err) {
   if (!err) {
-    ui->progressBar->setValue(newValue);
+    m_ui->progressBar->setValue(newValue);
   }
 }
 
 void RecoveryFailureView::setProgressBarMaximum(const int newValue) {
-  ui->progressBar->setMaximum(newValue);
+  m_ui->progressBar->setMaximum(newValue);
 }
 
 void RecoveryFailureView::connectProgressBar() {
@@ -117,5 +117,5 @@ void RecoveryFailureView::emitAbortScript() {
 }
 
 void RecoveryFailureView::changeStartMantidButton(const QString &string) {
-  ui->pushButton_3->setText(string);
+  m_ui->pushButton_3->setText(string);
 }
