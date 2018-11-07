@@ -24,7 +24,7 @@ public:
   ~RecoveryFailureView();
   void reject() override;
 
-  void setProgressBarMaximum(int newValue);
+  void setProgressBarMaximum(const int newValue);
   void connectProgressBar();
   void emitAbortScript();
   void changeStartMantidButton(const QString &string);
@@ -33,7 +33,7 @@ signals:
   void abortProjectRecoveryScript();
 
 public slots:
-  void updateProgressBar(int newValue, bool err);
+  void updateProgressBar(const int newValue, const bool err);
 
 private slots:
   void onClickLastCheckpoint();

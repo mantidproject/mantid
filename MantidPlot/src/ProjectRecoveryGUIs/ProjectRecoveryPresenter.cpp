@@ -16,35 +16,13 @@
 
 ProjectRecoveryPresenter::ProjectRecoveryPresenter(
     MantidQt::ProjectRecovery *projectRecovery, ApplicationWindow *parentWindow)
-    : m_mainWindow(parentWindow) {
-  m_recView = nullptr;
-  m_failureView = nullptr;
-  m_model = new ProjectRecoveryModel(projectRecovery, this);
-  m_openView = RecoveryView;
-  m_startMantidNormallyCalled = false;
-}
-
-ProjectRecoveryPresenter::ProjectRecoveryPresenter(
-    const ProjectRecoveryPresenter &obj) {
-  /// Copy constructor can only copy the Model
-  m_recView = obj.m_recView;
-  m_failureView = obj.m_failureView;
-  m_model = new ProjectRecoveryModel(nullptr, this);
-  *m_model = *obj.m_model;
-  m_mainWindow = obj.m_mainWindow;
-  m_openView = obj.m_openView;
-  m_startMantidNormallyCalled = obj.m_startMantidNormallyCalled;
-}
-
-ProjectRecoveryPresenter::~ProjectRecoveryPresenter() {
-  delete m_recView;
-  delete m_failureView;
-  delete m_model;
-}
+    : m_mainWindow(parentWindow), m_recView(nullptr), m_failureView(nullptr),
+      m_model(std::make_unique<ProjectRecoveryModel>(projectRecovery, this)),
+      m_openView(RecoveryView), m_startMantidNormallyCalled(false) {}
 
 bool ProjectRecoveryPresenter::startRecoveryView() {
   try {
-    m_recView = new ProjectRecoveryView(m_mainWindow, this);
+    m_recView = std::make_unique<ProjectRecoveryView>(m_mainWindow, this);
     m_openView = RecoveryView;
     m_recView->exec();
   } catch (...) {
@@ -65,7 +43,7 @@ bool ProjectRecoveryPresenter::startRecoveryView() {
 
 bool ProjectRecoveryPresenter::startRecoveryFailure() {
   try {
-    m_failureView = new RecoveryFailureView(m_mainWindow, this);
+    m_failureView = std::make_unique<RecoveryFailureView>(m_mainWindow, this);
     m_openView = FailureView;
     m_failureView->exec();
   } catch (...) {
@@ -85,9 +63,9 @@ bool ProjectRecoveryPresenter::startRecoveryFailure() {
 }
 
 QStringList ProjectRecoveryPresenter::getRow(int i) {
-  auto vec = m_model->getRow(i);
+  const auto &vec = m_model->getRow(i);
   QStringList returnVal;
-  for (auto i = 0; i < 3; ++i) {
+  for (auto i = 0u; i < vec.size(); ++i) {
     QString newString = QString::fromStdString(vec[i]);
     returnVal << newString;
   }
@@ -113,14 +91,15 @@ void ProjectRecoveryPresenter::startMantidNormally() {
   m_model->startMantidNormally();
 }
 
-void ProjectRecoveryPresenter::recoverSelectedCheckpoint(QString &selected) {
+void ProjectRecoveryPresenter::recoverSelectedCheckpoint(
+    const QString &selected) {
   if (m_model->hasRecoveryStarted())
     return;
   auto checkpointToRecover = selected.toStdString();
   m_model->recoverSelectedCheckpoint(checkpointToRecover);
 }
 
-void ProjectRecoveryPresenter::openSelectedInEditor(QString &selected) {
+void ProjectRecoveryPresenter::openSelectedInEditor(const QString &selected) {
   if (m_model->hasRecoveryStarted())
     return;
   auto checkpointToRecover = selected.toStdString();
@@ -136,21 +115,7 @@ void ProjectRecoveryPresenter::closeView() {
   }
 }
 
-ProjectRecoveryPresenter &ProjectRecoveryPresenter::
-operator=(const ProjectRecoveryPresenter &obj) {
-  if (&obj != this) {
-    m_recView = obj.m_recView;
-    m_failureView = obj.m_failureView;
-    m_model = new ProjectRecoveryModel(nullptr, this);
-    *m_model = *obj.m_model;
-    m_mainWindow = obj.m_mainWindow;
-    m_openView = obj.m_openView;
-    m_startMantidNormallyCalled = obj.m_startMantidNormallyCalled;
-  }
-  return *this;
-}
-
-void ProjectRecoveryPresenter::setUpProgressBar(int barMax) {
+void ProjectRecoveryPresenter::setUpProgressBar(const int barMax) {
   if (m_openView == RecoveryView && m_recView) {
     m_recView->setProgressBarMaximum(barMax);
   } else if (m_failureView) {
@@ -187,4 +152,8 @@ void ProjectRecoveryPresenter::fillAllRows() {
   if (m_openView == RecoveryView) {
     m_model->fillRows();
   }
+}
+
+int ProjectRecoveryPresenter::getNumberOfCheckpoints() {
+  return m_model->getNumberOfCheckpoints();
 }

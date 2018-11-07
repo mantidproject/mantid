@@ -10,6 +10,8 @@
 #include "Folder.h"
 #include "Process.h"
 #include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
+#include "ProjectRecoveryGUIs/ProjectRecoveryView.h"
+#include "ProjectRecoveryGUIs/RecoveryFailureView.h"
 #include "ProjectSerialiser.h"
 #include "ScriptingWindow.h"
 
@@ -497,7 +499,7 @@ void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
 
   // Get length of recovery script
   std::ifstream fileCount(historyDest.toString());
-  int lineLength =
+  const int lineLength =
       static_cast<int>(std::count(std::istreambuf_iterator<char>(fileCount),
                                   std::istreambuf_iterator<char>(), '\n'));
   fileCount.close();

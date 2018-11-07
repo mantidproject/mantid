@@ -31,7 +31,7 @@ ProjectRecoveryView::ProjectRecoveryView(QWidget *parent,
 ProjectRecoveryView::~ProjectRecoveryView() { delete ui; }
 
 void ProjectRecoveryView::addDataToTable(Ui::ProjectRecoveryWidget *ui) {
-  QStringList row = m_presenter->getRow(0);
+  const QStringList row = m_presenter->getRow(0);
   ui->tableWidget->setItem(0, 0, new QTableWidgetItem(row[0]));
   ui->tableWidget->setItem(0, 1, new QTableWidgetItem(row[1]));
 }

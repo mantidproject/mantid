@@ -16793,7 +16793,7 @@ bool ApplicationWindow::loadProjectRecovery(std::string sourceFile,
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
   // File version is not applicable to project recovery - so set to 0
-  auto fileVersion = projectWriter.load(sourceFile, 0);
+  const auto loadSuccess = projectWriter.load(sourceFile, 0);
 
   // Handle the removal of old checkpoints and start project saving again
   Poco::Path deletePath(recoveryFolder);
@@ -16802,7 +16802,7 @@ bool ApplicationWindow::loadProjectRecovery(std::string sourceFile,
   m_projectRecovery.clearAllCheckpoints(deletePath);
   m_projectRecovery.startProjectSaving();
 
-  return fileVersion;
+  return loadSuccess;
 }
 
 /**
