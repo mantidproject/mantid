@@ -48,6 +48,18 @@ To make the Bilby data reduction working, follow the steps listed below:
 * Run the reducer, Execute -> Execute All in the Menu
    * All output 1D files will be saved in the folder you define in the mantid_reduction_settings_example.csv
 
+.. testcode:: BilbyReductionExample
+
+    from BilbyReductionScript import run_bilby_reduction
+    output_workspace, transmission_fit = run_bilby_reduction('mantid_reduction_settings_example.csv', '0', '0', 'shift_assembled.csv', False)
+    integrated_output = Integration(output_workspace)
+    print(integrated_output.dataY(0).round(6)[0])
+
+.. testoutput::  BilbyReductionExample
+
+   scale, aka attenuation factor 0.0029
+   1.607662
+
 References
 ----------
 

@@ -7,8 +7,10 @@
 import csv
 import math
 from itertools import product
+import sys
+from mantid.simpleapi import *
 
-mtd.importAll()
+# mtd.importAll()
 
 
 #######################################################################################
