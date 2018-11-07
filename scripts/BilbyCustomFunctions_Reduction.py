@@ -1,5 +1,9 @@
-from mantid.api import *
-from mantid.simpleapi import *
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +from mantid.simpleapi import *
 import csv
 import math
 from itertools import product
