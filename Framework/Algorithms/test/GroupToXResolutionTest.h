@@ -17,6 +17,7 @@
 #include <boost/math/special_functions/pow.hpp>
 
 using namespace Mantid;
+using boost::math::pow;
 
 class GroupToXResolutionTest : public CxxTest::TestSuite {
 public:
@@ -62,7 +63,6 @@ public:
   }
 
   void test_two_points_get_averaged() {
-    using boost::math::pow;
     HistogramData::Points Xs{0.2, 0.6};
     HistogramData::Counts Ys{1.5, 2.5};
     HistogramData::CountStandardDeviations Es{2., 3.};
@@ -139,7 +139,6 @@ public:
   }
 
   void test_four_points_grouped_into_two() {
-    using boost::math::pow;
     HistogramData::Points Xs{0.2, 0.6, 5.1, 5.7};
     HistogramData::Counts Ys{1.5, 2.5, -2.5, -1.5};
     HistogramData::CountStandardDeviations Es{2., 3., 2.5, 1.5};

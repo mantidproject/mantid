@@ -18,9 +18,9 @@
 
 namespace {
 namespace Prop {
-const std::string FRACTION{"FractionOfDx"};
-const std::string INPUT_WS{"InputWorkspace"};
-const std::string OUTPUT_WS{"OutputWorkspace"};
+std::string const FRACTION{"FractionOfDx"};
+std::string const INPUT_WS{"InputWorkspace"};
+std::string const OUTPUT_WS{"OutputWorkspace"};
 } // namespace Prop
 constexpr double FWHM_GAUSSIAN_EQUIVALENT{0.68};
 } // namespace
@@ -105,8 +105,7 @@ void GroupToXResolution::exec() {
   while (true) {
     auto const Dx = inDxs[pointIndex];
     if (Dx <= 0.) {
-      throw std::out_of_range(
-          "Nonpositive DX value encountered in the workspace.");
+      throw std::out_of_range("Nonpositive DX value in the workspace.");
     }
     auto const width = groupingFraction * Dx;
     auto const end = inXs[pointIndex] + width;
@@ -131,10 +130,13 @@ void GroupToXResolution::exec() {
       outYs.emplace_back(ySum / static_cast<double>(pickSize));
       outEs.emplace_back(std::sqrt(eSquaredSum) /
                          static_cast<double>(pickSize));
-      auto const groupedXWidth = *(endXIterator - 1) - *beginXIterator;
+      auto const groupedXWidth = *std::prev(endXIterator) - *beginXIterator;
       outDxs.emplace_back(
           std::sqrt(pow<2>(inDxs[pointIndex]) +
                     pow<2>(FWHM_GAUSSIAN_EQUIVALENT * groupedXWidth)));
+    } else {
+      throw std::out_of_range(
+          "Failed to group. Is the X data sorted in ascending order?");
     }
     begin = end;
     if (begin > inXs.back()) {
