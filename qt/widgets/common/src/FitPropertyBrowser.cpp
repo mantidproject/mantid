@@ -425,10 +425,13 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QPushButton *btnSetup = new QPushButton("Setup");
   btnSetup->setObjectName("button_Setup");
   QMenu *setupMenu = new QMenu(this);
+  setupMenu->setObjectName("menu_Setup");
 
   m_setupActionCustomSetup = new QAction("Custom Setup", this);
   QAction *setupActionManageSetup = new QAction("Manage Setup", this);
+  setupActionManageSetup->setObjectName("action_ManageSetup");
   QAction *setupActionFindPeaks = new QAction("Find Peaks", this);
+  setupActionFindPeaks ->setObjectName("action_FindPeaks");
   QAction *setupActionClearFit = new QAction("Clear Model", this);
 
   QMenu *setupSubMenuCustom = new QMenu(this);
