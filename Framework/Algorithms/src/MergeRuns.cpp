@@ -371,7 +371,7 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
     outWS = this->rebinInput(outWS, *rebinParams);
   }
   Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-      *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
+      outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
       sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
       sampleLogsFailTolerances);
 
@@ -393,21 +393,21 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
     // Add the current workspace to the total
     // Update the sample logs
     try {
-      sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
-      sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
+      sampleLogsBehaviour.mergeSampleLogs(*it, outWS);
+      sampleLogsBehaviour.removeSampleLogsFromWorkspace(addee);
       if (isScanning)
         outWS = buildScanningOutputWorkspace(outWS, addee);
       else
         outWS = outWS + addee;
-      sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
-      sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
+      sampleLogsBehaviour.setUpdatedSampleLogs(outWS);
+      sampleLogsBehaviour.readdSampleLogToWorkspace(addee);
     } catch (std::invalid_argument &e) {
       if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
         g_log.error()
             << "Could not merge run: " << it->get()->getName() << ". Reason: \""
             << e.what()
             << "\". MergeRuns will continue but this run will be skipped.\n";
-        sampleLogsBehaviour.resetSampleLogs(*outWS);
+        sampleLogsBehaviour.resetSampleLogs(outWS);
       } else {
         throw std::invalid_argument(e);
       }

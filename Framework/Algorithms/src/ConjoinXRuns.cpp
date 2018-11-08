@@ -358,7 +358,7 @@ void ConjoinXRuns::exec() {
 
   auto first = m_inputWS.front();
   SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-      *first, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
+      first, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
       sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
       sampleLogsFailTolerances, "conjoin_sample_logs_sum",
       "conjoin_sample_logs_time_series", "conjoin_sample_logs_list",
@@ -371,21 +371,21 @@ void ConjoinXRuns::exec() {
   // the correct size to be the output, since the size is unknown
   // at this point. We can check only later which ones are going
   // to be skipped, to compute the size of the output respectively.
-  MatrixWorkspace_uptr temp = first->clone();
+  MatrixWorkspace_sptr temp = first->clone();
 
   size_t outBlockSize = (*it)->blocksize();
   // First sequentially merge the sample logs
   for (++it; it != m_inputWS.end(); ++it) {
     // attempt to merge the sample logs
     try {
-      sampleLogsBehaviour.mergeSampleLogs(**it, *temp);
-      sampleLogsBehaviour.setUpdatedSampleLogs(*temp);
+      sampleLogsBehaviour.mergeSampleLogs(*it, temp);
+      sampleLogsBehaviour.setUpdatedSampleLogs(temp);
       outBlockSize += (*it)->blocksize();
     } catch (std::invalid_argument &e) {
       if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
         g_log.error() << "Could not join workspace: " << (*it)->getName()
                       << ". Reason: \"" << e.what() << "\". Skipping.\n";
-        sampleLogsBehaviour.resetSampleLogs(*temp);
+        sampleLogsBehaviour.resetSampleLogs(temp);
         // remove the skipped one from the list
         m_inputWS.erase(it);
         --it;
