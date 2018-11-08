@@ -14,7 +14,22 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("Stretch");
+
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
 }
+
+WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -151,12 +166,6 @@ void Stretch::run() {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
-
-  // Set the name of the result workspace for Python export
-  QString contourName =
-      QString::fromStdString(sampleName).left(sampleName.length() - 4) +
-      "_Stretch_Contour";
-  m_pythonExportWsName = contourName.toStdString();
 }
 
 /**
@@ -171,7 +180,20 @@ void Stretch::algorithmComplete(const bool &error) {
     setPlotResultEnabled(false);
     setPlotContourEnabled(false);
     setSaveResultEnabled(false);
+  } else {
+    if (doesExistInADS(m_contourWorkspaceName))
+      populateContourWorkspaceComboBox();
+    else
+      setPlotContourEnabled(false);
   }
+}
+
+void Stretch::populateContourWorkspaceComboBox() {
+  m_uiForm.cbPlotContour->clear();
+  auto const contourGroup = getADSWorkspaceGroup(m_contourWorkspaceName);
+  auto const contourNames = contourGroup->getNames();
+  for (auto const &name : contourNames)
+    m_uiForm.cbPlotContour->addItem(QString::fromStdString(name));
 }
 
 /**
@@ -237,8 +259,7 @@ int Stretch::displaySaveDirectoryMessage() {
 void Stretch::plotWorkspaces() {
   setPlotResultIsPlotting(true);
   WorkspaceGroup_sptr fitWorkspace;
-  fitWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      m_fitWorkspaceName);
+  fitWorkspace = getADSWorkspaceGroup(m_fitWorkspaceName);
 
   auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
   auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
@@ -261,8 +282,9 @@ void Stretch::plotWorkspaces() {
 void Stretch::plotContourClicked() {
   setPlotContourIsPlotting(true);
 
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
-    plot2D(QString::fromStdString(m_pythonExportWsName));
+  auto const workspaceName = m_uiForm.cbPlotContour->currentText();
+  if (checkADSForPlotSaveWorkspace(workspaceName.toStdString(), true))
+    plot2D(workspaceName);
 
   setPlotContourIsPlotting(false);
 }
@@ -299,8 +321,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
 
   // set the max spectrum
   MatrixWorkspace_const_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          filename.toStdString());
+      getADSMatrixWorkspace(filename.toStdString());
   const int spectra = static_cast<int>(sampleWs->getNumberHistograms());
   m_uiForm.spPreviewSpectrum->setMaximum(spectra - 1);
 }
@@ -379,6 +400,7 @@ void Stretch::setPlotResultEnabled(bool enabled) {
 
 void Stretch::setPlotContourEnabled(bool enabled) {
   m_uiForm.pbPlotContour->setEnabled(enabled);
+  m_uiForm.cbPlotContour->setEnabled(enabled);
 }
 
 void Stretch::setSaveResultEnabled(bool enabled) {

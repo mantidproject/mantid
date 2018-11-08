@@ -46,6 +46,7 @@ private slots:
   void previewSpecChanged(int value);
 
 private:
+  void populateContourWorkspaceComboBox();
   void displayMessageAndRun(std::string const &saveDirectory);
   int displaySaveDirectoryMessage();
 
