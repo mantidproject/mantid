@@ -10,12 +10,16 @@
 #include "Folder.h"
 #include "Process.h"
 #include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
+#include "ProjectRecoveryGUIs/ProjectRecoveryView.h"
+#include "ProjectRecoveryGUIs/RecoveryFailureView.h"
 #include "ProjectSerialiser.h"
 #include "ScriptingWindow.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -242,6 +246,24 @@ Poco::File addLockFile(const Poco::Path &lockFilePath) {
   return lockFile;
 }
 
+/**
+ * Checks the passed parameter and if it is an empty group then it returns true.
+ *
+ * @param ws :: check this workspace to see if it's an empty group
+ * @return true :: bool when it is an empty group
+ * @return false :: bool when it is not an empty group
+ */
+bool checkIfEmptyGroup(const Mantid::API::Workspace_sptr &ws) {
+  if (auto groupWS =
+          boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+    if (groupWS->isEmpty()) {
+      g_log.debug("Empty group was present when recovery ran so was removed");
+      return true;
+    }
+  }
+  return false;
+}
+
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
 
 const std::string SAVING_TIME_KEY = "projectRecovery.secondsBetween";
@@ -453,6 +475,8 @@ bool ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
     throw std::runtime_error("Could not get handle to scripting window");
   }
 
+  m_recoveryGui->connectProgressBarToRecoveryView();
+
   // Ensure the window repaints so it doesn't appear frozen before exec
   scriptWindow->executeCurrentTab(Script::ExecutionMode::Serialised);
   if (scriptWindow->getSynchronousErrorFlag()) {
@@ -469,29 +493,16 @@ bool ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
 
   auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
 
-  bool loadCompleted = false;
   if (!QMetaObject::invokeMethod(
-          m_windowPtr, "loadProjectRecovery", Qt::DirectConnection,
-          Q_RETURN_ARG(bool, loadCompleted),
-          Q_ARG(const std::string, projectFile.toString()))) {
+          m_windowPtr, "loadProjectRecovery", Qt::QueuedConnection,
+          Q_ARG(const std::string, projectFile.toString()),
+          Q_ARG(const std::string, recoveryFolder.toString()))) {
     throw std::runtime_error("Project Recovery: Failed to load project "
                              "windows - Qt binding failed");
   }
+  g_log.notice("Project Recovery workspace loading finished");
 
-  if (!loadCompleted) {
-    g_log.warning("Loading failed to recovery everything completely");
-    // This has failed so terminate the thread
-    return loadCompleted;
-  }
-  g_log.notice("Project Recovery finished");
-
-  // Restart project recovery when the async part finishes
-  Poco::Path deletePath = recoveryFolder;
-  deletePath.setFileName("");
-  clearAllCheckpoints(deletePath);
-  startProjectSaving();
-
-  return loadCompleted;
+  return true;
 }
 
 /**
@@ -505,6 +516,16 @@ bool ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
 void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
                                    const Poco::Path &historyDest) {
   compileRecoveryScript(inputFolder, historyDest);
+
+  // Get length of recovery script
+  std::ifstream fileCount(historyDest.toString());
+  const int lineLength =
+      static_cast<int>(std::count(std::istreambuf_iterator<char>(fileCount),
+                                  std::istreambuf_iterator<char>(), '\n'));
+  fileCount.close();
+
+  // Update Progress bar
+  m_recoveryGui->setUpProgressBar(lineLength);
 
   // Force application window to create the script window first
   const bool forceVisible = true;
@@ -595,8 +616,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
 
   // Hold a copy to the shared pointers so they do not get deleted under us
-  std::vector<boost::shared_ptr<Mantid::API::Workspace>> wsHandles =
-      ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
+  auto wsHandles = ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
 
   if (wsHandles.empty()) {
     return;
@@ -612,6 +632,11 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   alg->setLogging(false);
 
   for (auto i = 0u; i < wsHandles.size(); ++i) {
+    // Check if workspace is an empty worksapce group and remove it if it is as
+    // well as skip
+    if (checkIfEmptyGroup(wsHandles[i]))
+      continue;
+
     std::string filename = std::to_string(i) + ".py";
 
     Poco::Path destFilename = historyDestFolder;

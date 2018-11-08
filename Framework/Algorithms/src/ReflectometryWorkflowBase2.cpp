@@ -6,10 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -22,6 +24,20 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+
+namespace {
+int convertStringNumToInt(const std::string &string) {
+  try {
+    auto returnValue = std::stoi(string.c_str());
+    return returnValue;
+  } catch (std::invalid_argument &) {
+    throw std::runtime_error("Invalid argument for processing instructions");
+  } catch (std::out_of_range &) {
+    throw std::runtime_error(
+        "Out of range value given for processing instructions");
+  }
+}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -121,18 +137,17 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
 
   initStitchProperties();
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
-                                                       true, Direction::Input),
-                  "Enforces spectrum number checking prior to normalization by "
-                  "transmission workspace. Applies to input workspace and "
-                  "transmission workspace.");
+  declareProperty(
+      make_unique<PropertyWithValue<std::string>>(
+          "TransmissionProcessingInstructions", "", Direction::Input),
+      "These processing instructions will be passed to the transmission "
+      "workspace algorithm");
 
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
   setPropertyGroup("Params", "Transmission");
   setPropertyGroup("StartOverlap", "Transmission");
   setPropertyGroup("EndOverlap", "Transmission");
-  setPropertyGroup("StrictSpectrumChecking", "Transmission");
 }
 
 /** Initialize properties used for stitching transmission runs
@@ -399,17 +414,22 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
     wavelengthMin = getProperty("WavelengthMin");
     wavelengthMax = getProperty("WavelengthMax");
   }
+  try {
+    auto cropWorkspaceAlg = createChildAlgorithm("CropWorkspace");
+    cropWorkspaceAlg->initialize();
+    cropWorkspaceAlg->setProperty("InputWorkspace", inputWS);
+    cropWorkspaceAlg->setProperty("XMin", wavelengthMin);
+    cropWorkspaceAlg->setProperty("XMax", wavelengthMax);
+    cropWorkspaceAlg->execute();
+    MatrixWorkspace_sptr outputWS =
+        cropWorkspaceAlg->getProperty("OutputWorkspace");
 
-  auto cropWorkspaceAlg = createChildAlgorithm("CropWorkspace");
-  cropWorkspaceAlg->initialize();
-  cropWorkspaceAlg->setProperty("InputWorkspace", inputWS);
-  cropWorkspaceAlg->setProperty("XMin", wavelengthMin);
-  cropWorkspaceAlg->setProperty("XMax", wavelengthMax);
-  cropWorkspaceAlg->execute();
-  MatrixWorkspace_sptr outputWS =
-      cropWorkspaceAlg->getProperty("OutputWorkspace");
-
-  return outputWS;
+    return outputWS;
+  } catch (std::out_of_range &e) {
+    throw std::runtime_error("The processing instruction(s) are likely out of "
+                             "bounds on the workspace, actual error: " +
+                             std::string(e.what()));
+  }
 }
 
 /** Process an input workspace in TOF according to specified processing commands
@@ -421,12 +441,10 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
                                            const bool convert) {
-
-  const std::string processingCommands =
-      getPropertyValue("ProcessingInstructions");
   auto groupAlg = createChildAlgorithm("GroupDetectors");
   groupAlg->initialize();
-  groupAlg->setProperty("GroupingPattern", processingCommands);
+  groupAlg->setProperty("GroupingPattern",
+                        m_processingInstructionsWorkspaceIndex);
   groupAlg->setProperty("InputWorkspace", inputWS);
   groupAlg->execute();
   MatrixWorkspace_sptr detectorWS = groupAlg->getProperty("OutputWorkspace");
@@ -564,22 +582,13 @@ void ReflectometryWorkflowBase2::populateMonitorProperties(
     alg->setProperty("MonitorIntegrationWavelengthMax", integrationMax.get());
 }
 
-/** Set processing instructions
- *
- * @param alg :: ReflectometryReductionOne algorithm
+/** Finding processing instructions from the parameters file
  * @param instrument :: the instrument attached to the workspace
  * @param inputWS :: the input workspace
  * @return :: processing instructions as a string
  */
-std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
-    IAlgorithm_sptr alg, Instrument_const_sptr instrument,
-    MatrixWorkspace_sptr inputWS) const {
-
-  if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
-    const std::string instructions = getProperty("ProcessingInstructions");
-    alg->setProperty("ProcessingInstructions", instructions);
-    return instructions;
-  }
+std::string ReflectometryWorkflowBase2::findProcessingInstructions(
+    Instrument_const_sptr instrument, MatrixWorkspace_sptr inputWS) const {
 
   const std::string analysisMode = getProperty("AnalysisMode");
 
@@ -601,7 +610,6 @@ std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
     auto instructions = std::to_string(detStart);
     if (detStart != detStop)
       instructions += ":" + std::to_string(detStop);
-    alg->setProperty("ProcessingInstructions", instructions);
     return instructions;
   }
 
@@ -616,7 +624,6 @@ std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
 
     auto instructions = std::to_string(static_cast<int>(multiStart[0])) + ":" +
                         std::to_string(inputWS->getNumberHistograms() - 1);
-    alg->setProperty("ProcessingInstructions", instructions);
     return instructions;
   }
 }
@@ -691,5 +698,88 @@ ReflectometryWorkflowBase2::getRunNumber(MatrixWorkspace const &ws) const {
   return "";
 }
 
+std::string
+ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndices(
+    const std::string &instructions, MatrixWorkspace_const_sptr ws) const {
+  std::string converted = "";
+  std::string currentNumber = "";
+  std::string ignoreThese = "-,:+";
+  for (auto i = 0u; i < instructions.size(); ++i) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
+        ignoreThese.end()) {
+      // Found a spacer so add currentNumber to converted followed by separator
+      converted.append(convertToWorkspaceIndex(currentNumber, ws));
+      converted.push_back(instructions[i]);
+      currentNumber = "";
+    } else {
+      currentNumber.push_back(instructions[i]);
+    }
+  }
+  // Add currentNumber onto converted
+  converted.append(convertToWorkspaceIndex(currentNumber, ws));
+  return converted;
+}
+
+std::string ReflectometryWorkflowBase2::convertToWorkspaceIndex(
+    const std::string &spectrumNumber, MatrixWorkspace_const_sptr ws) const {
+  auto specNum = convertStringNumToInt(spectrumNumber);
+  std::string wsIdx = std::to_string(
+      ws->getIndexFromSpectrumNumber(static_cast<specnum_t>(specNum)));
+  return wsIdx;
+}
+
+std::string
+ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
+    const std::string &instructions,
+    Mantid::API::MatrixWorkspace_const_sptr ws) const {
+  std::string converted = "";
+  std::string currentNumber = "";
+  std::string ignoreThese = "-,:+";
+  for (auto i = 0u; i < instructions.size(); ++i) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) !=
+        ignoreThese.end()) {
+      // Found a spacer so add currentNumber to converted after seperator
+      converted.append(convertToSpectrumNumber(currentNumber, ws));
+      converted.push_back(instructions[i]);
+      currentNumber = "";
+    } else {
+      currentNumber.push_back(instructions[i]);
+    }
+  }
+  // Add currentNumber onto converted
+  converted.append(convertToSpectrumNumber(currentNumber, ws));
+  return converted;
+}
+std::string ReflectometryWorkflowBase2::convertToSpectrumNumber(
+    const std::string &workspaceIndex,
+    Mantid::API::MatrixWorkspace_const_sptr ws) const {
+  auto wsIndx = convertStringNumToInt(workspaceIndex);
+  std::string specId = std::to_string(
+      static_cast<int32_t>(ws->indexInfo().spectrumNumber(wsIndx)));
+  return specId;
+}
+
+void ReflectometryWorkflowBase2::convertProcessingInstructions(
+    Instrument_const_sptr instrument, MatrixWorkspace_sptr inputWS) {
+  m_processingInstructions = getPropertyValue("ProcessingInstructions");
+  if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
+    m_processingInstructionsWorkspaceIndex =
+        convertProcessingInstructionsToWorkspaceIndices(
+            m_processingInstructions, inputWS);
+  } else {
+    m_processingInstructionsWorkspaceIndex =
+        findProcessingInstructions(instrument, inputWS);
+    m_processingInstructions = convertProcessingInstructionsToSpectrumNumbers(
+        m_processingInstructionsWorkspaceIndex, inputWS);
+  }
+}
+
+void ReflectometryWorkflowBase2::convertProcessingInstructions(
+    MatrixWorkspace_sptr inputWS) {
+  m_processingInstructions = getPropertyValue("ProcessingInstructions");
+  m_processingInstructionsWorkspaceIndex =
+      convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions,
+                                                      inputWS);
+}
 } // namespace Algorithms
 } // namespace Mantid

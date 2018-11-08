@@ -43,6 +43,7 @@ Requires: PyQt4-devel
 Requires: python-qt5-devel
 Requires: python-QtPy
 Requires: python2-QtAwesome
+Requires: python-requests
 Requires: python-devel
 Requires: python-setuptools
 Requires: python-ipython >= 1.1
@@ -105,6 +106,7 @@ Requires: python3-matplotlib
 Requires: python3-PyYAML
 Requires: python3-mock
 %{?fedora:Requires: python3-psutil}
+%{?fedora:Requires: python3-requests}
 Requires: boost-python3-devel
 %endif
 

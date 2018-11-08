@@ -11,40 +11,30 @@
 #include "ProjectRecoveryView.h"
 #include "RecoveryFailureView.h"
 
+#include <QDialog>
 #include <memory>
 
 ProjectRecoveryPresenter::ProjectRecoveryPresenter(
     MantidQt::ProjectRecovery *projectRecovery, ApplicationWindow *parentWindow)
-    : m_mainWindow(parentWindow) {
-  m_recView = nullptr;
-  m_failureView = nullptr;
-  m_model = new ProjectRecoveryModel(projectRecovery, this);
-}
-
-ProjectRecoveryPresenter::ProjectRecoveryPresenter(
-    const ProjectRecoveryPresenter &obj) {
-  /// Copy constructor can only copy the Model
-  m_recView = obj.m_recView;
-  m_failureView = obj.m_failureView;
-  m_model = new ProjectRecoveryModel(nullptr, this);
-  *m_model = *obj.m_model;
-  m_mainWindow = obj.m_mainWindow;
-}
-
-ProjectRecoveryPresenter::~ProjectRecoveryPresenter() {
-  delete m_recView;
-  delete m_failureView;
-  delete m_model;
-}
+    : m_mainWindow(parentWindow), m_recView(nullptr), m_failureView(nullptr),
+      m_model(std::make_unique<ProjectRecoveryModel>(projectRecovery, this)),
+      m_openView(RecoveryView), m_startMantidNormallyCalled(false) {}
 
 bool ProjectRecoveryPresenter::startRecoveryView() {
   try {
-    m_recView = new ProjectRecoveryView(m_mainWindow, this);
+    m_recView = std::make_unique<ProjectRecoveryView>(m_mainWindow, this);
+    m_openView = RecoveryView;
     m_recView->exec();
   } catch (...) {
     return true;
   }
 
+  // If start mantid normally was called we want to cancel
+  if (m_startMantidNormallyCalled) {
+    return false;
+  }
+
+  // If run has failed and recovery is not running
   if (m_model->getFailedRun()) {
     return true;
   }
@@ -53,12 +43,19 @@ bool ProjectRecoveryPresenter::startRecoveryView() {
 
 bool ProjectRecoveryPresenter::startRecoveryFailure() {
   try {
-    m_failureView = new RecoveryFailureView(m_mainWindow, this);
+    m_failureView = std::make_unique<RecoveryFailureView>(m_mainWindow, this);
+    m_openView = FailureView;
     m_failureView->exec();
   } catch (...) {
     return true;
   }
 
+  // If start mantid normally was called we want to cancel
+  if (m_startMantidNormallyCalled) {
+    return false;
+  }
+
+  // If run has failed and recovery is not running
   if (m_model->getFailedRun()) {
     return true;
   }
@@ -66,33 +63,47 @@ bool ProjectRecoveryPresenter::startRecoveryFailure() {
 }
 
 QStringList ProjectRecoveryPresenter::getRow(int i) {
-  auto vec = m_model->getRow(i);
+  const auto &vec = m_model->getRow(i);
   QStringList returnVal;
-  for (auto i = 0; i < 3; ++i) {
+  for (auto i = 0u; i < vec.size(); ++i) {
     QString newString = QString::fromStdString(vec[i]);
     returnVal << newString;
   }
   return returnVal;
 }
 
-void ProjectRecoveryPresenter::recoverLast() { m_model->recoverLast(); }
+void ProjectRecoveryPresenter::recoverLast() {
+  if (m_model->hasRecoveryStarted())
+    return;
+  auto checkpointToRecover = m_model->decideLastCheckpoint();
+  m_model->recoverSelectedCheckpoint(checkpointToRecover);
+}
 
 void ProjectRecoveryPresenter::openLastInEditor() {
-  m_model->openLastInEditor();
+  if (m_model->hasRecoveryStarted())
+    return;
+  auto checkpointToRecover = m_model->decideLastCheckpoint();
+  m_model->openSelectedInEditor(checkpointToRecover);
 }
 
 void ProjectRecoveryPresenter::startMantidNormally() {
+  m_startMantidNormallyCalled = true;
   m_model->startMantidNormally();
 }
 
-void ProjectRecoveryPresenter::recoverSelectedCheckpoint(QString &selected) {
-  std::string stdString = selected.toStdString();
-  m_model->recoverSelectedCheckpoint(stdString);
+void ProjectRecoveryPresenter::recoverSelectedCheckpoint(
+    const QString &selected) {
+  if (m_model->hasRecoveryStarted())
+    return;
+  auto checkpointToRecover = selected.toStdString();
+  m_model->recoverSelectedCheckpoint(checkpointToRecover);
 }
 
-void ProjectRecoveryPresenter::openSelectedInEditor(QString &selected) {
-  std::string stdString = selected.toStdString();
-  m_model->openSelectedInEditor(stdString);
+void ProjectRecoveryPresenter::openSelectedInEditor(const QString &selected) {
+  if (m_model->hasRecoveryStarted())
+    return;
+  auto checkpointToRecover = selected.toStdString();
+  m_model->openSelectedInEditor(checkpointToRecover);
 }
 
 void ProjectRecoveryPresenter::closeView() {
@@ -104,14 +115,45 @@ void ProjectRecoveryPresenter::closeView() {
   }
 }
 
-ProjectRecoveryPresenter &ProjectRecoveryPresenter::
-operator=(const ProjectRecoveryPresenter &obj) {
-  if (&obj != this) {
-    m_recView = obj.m_recView;
-    m_failureView = obj.m_failureView;
-    m_model = new ProjectRecoveryModel(nullptr, this);
-    *m_model = *obj.m_model;
-    m_mainWindow = obj.m_mainWindow;
+void ProjectRecoveryPresenter::setUpProgressBar(const int barMax) {
+  if (m_openView == RecoveryView && m_recView) {
+    m_recView->setProgressBarMaximum(barMax);
+  } else if (m_failureView) {
+    m_failureView->setProgressBarMaximum(barMax);
   }
-  return *this;
+}
+
+void ProjectRecoveryPresenter::connectProgressBarToRecoveryView() {
+  if (m_openView == RecoveryView) {
+    m_recView->connectProgressBar();
+  } else {
+    m_failureView->connectProgressBar();
+  }
+}
+
+void ProjectRecoveryPresenter::emitAbortScript() {
+  if (m_openView == RecoveryView) {
+    m_recView->emitAbortScript();
+  } else {
+    m_failureView->emitAbortScript();
+  }
+}
+
+void ProjectRecoveryPresenter::changeStartMantidToCancelLabel() {
+  if (m_openView == RecoveryView) {
+    m_recView->changeStartMantidButton("Cancel Recovery");
+  } else {
+    m_failureView->changeStartMantidButton("Cancel Recovery");
+  }
+}
+
+void ProjectRecoveryPresenter::fillAllRows() {
+  // Only allow this to run once, first run will have value RecoveryView
+  if (m_openView == RecoveryView) {
+    m_model->fillRows();
+  }
+}
+
+int ProjectRecoveryPresenter::getNumberOfCheckpoints() {
+  return ProjectRecoveryModel::getNumberOfCheckpoints();
 }

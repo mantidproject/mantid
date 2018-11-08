@@ -5,45 +5,36 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RecoveryFailureView.h"
-#include "ui_RecoveryFailure.h"
-
+#include "ApplicationWindow.h"
 #include "MantidKernel/UsageService.h"
+#include "Script.h"
+#include "ScriptingWindow.h"
 
 RecoveryFailureView::RecoveryFailureView(QWidget *parent,
                                          ProjectRecoveryPresenter *presenter)
-    : QDialog(parent), ui(new Ui::RecoveryFailure), m_presenter(presenter) {
-  ui->setupUi(this);
-  ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-  ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    : QDialog(parent), m_ui(std::make_unique<Ui::RecoveryFailure>()),
+      m_presenter(presenter) {
+  m_ui->setupUi(this);
+  m_ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+  m_ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+  // Make sure the ui has all the data it needs to display
+  m_presenter->fillAllRows();
   // Set the table information
-  addDataToTable(ui);
+  addDataToTable();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Interface", "ProjectRecoveryFailureWindow", true);
 }
 
-RecoveryFailureView::~RecoveryFailureView() { delete ui; }
-
-void RecoveryFailureView::addDataToTable(Ui::RecoveryFailure *ui) {
-  QStringList row = m_presenter->getRow(0);
-  ui->tableWidget->setItem(0, 0, new QTableWidgetItem(row[0]));
-  ui->tableWidget->setItem(0, 1, new QTableWidgetItem(row[1]));
-  ui->tableWidget->setItem(0, 2, new QTableWidgetItem(row[2]));
-  row = m_presenter->getRow(1);
-  ui->tableWidget->setItem(1, 0, new QTableWidgetItem(row[0]));
-  ui->tableWidget->setItem(1, 1, new QTableWidgetItem(row[1]));
-  ui->tableWidget->setItem(1, 2, new QTableWidgetItem(row[2]));
-  row = m_presenter->getRow(2);
-  ui->tableWidget->setItem(2, 0, new QTableWidgetItem(row[0]));
-  ui->tableWidget->setItem(2, 1, new QTableWidgetItem(row[1]));
-  ui->tableWidget->setItem(2, 2, new QTableWidgetItem(row[2]));
-  row = m_presenter->getRow(3);
-  ui->tableWidget->setItem(3, 0, new QTableWidgetItem(row[0]));
-  ui->tableWidget->setItem(3, 1, new QTableWidgetItem(row[1]));
-  ui->tableWidget->setItem(3, 2, new QTableWidgetItem(row[2]));
-  row = m_presenter->getRow(4);
-  ui->tableWidget->setItem(4, 0, new QTableWidgetItem(row[0]));
-  ui->tableWidget->setItem(4, 1, new QTableWidgetItem(row[1]));
-  ui->tableWidget->setItem(4, 2, new QTableWidgetItem(row[2]));
+void RecoveryFailureView::addDataToTable() {
+  // This table's size was generated for 5 which is the default but will take
+  // more or less than 5, but won't look as neat
+  const auto numberOfRows = m_presenter->getNumberOfCheckpoints();
+  for (auto i = 0; i < numberOfRows; ++i) {
+    const auto row = m_presenter->getRow(i);
+    for (auto j = 0; j < row.size(); ++j) {
+      m_ui->tableWidget->setItem(i, j, new QTableWidgetItem(row[j]));
+    }
+  }
 }
 
 void RecoveryFailureView::onClickLastCheckpoint() {
@@ -55,10 +46,10 @@ void RecoveryFailureView::onClickLastCheckpoint() {
 
 void RecoveryFailureView::onClickSelectedCheckpoint() {
   // Recover Selected
-  QList<QTableWidgetItem *> selectedRows = ui->tableWidget->selectedItems();
+  QList<QTableWidgetItem *> selectedRows = m_ui->tableWidget->selectedItems();
   if (selectedRows.size() > 0) {
-    QString text = selectedRows[0]->text();
-    if (text.toStdString() == "") {
+    const QString text = selectedRows[0]->text();
+    if (text.toStdString().empty()) {
       return;
     }
     m_presenter->recoverSelectedCheckpoint(text);
@@ -70,10 +61,10 @@ void RecoveryFailureView::onClickSelectedCheckpoint() {
 
 void RecoveryFailureView::onClickOpenSelectedInScriptWindow() {
   // Open checkpoint in script window
-  QList<QTableWidgetItem *> selectedRows = ui->tableWidget->selectedItems();
+  QList<QTableWidgetItem *> selectedRows = m_ui->tableWidget->selectedItems();
   if (selectedRows.size() > 0) {
-    QString text = selectedRows[0]->text();
-    if (text.toStdString() == "") {
+    const QString text = selectedRows[0]->text();
+    if (text.toStdString().empty()) {
       return;
     }
     m_presenter->openSelectedInEditor(text);
@@ -95,4 +86,33 @@ void RecoveryFailureView::reject() {
   m_presenter->startMantidNormally();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "ProjectRecoveryFailureWindow->StartMantidNormally", false);
+}
+
+void RecoveryFailureView::updateProgressBar(const int newValue,
+                                            const bool err) {
+  if (!err) {
+    m_ui->progressBar->setValue(newValue);
+  }
+}
+
+void RecoveryFailureView::setProgressBarMaximum(const int newValue) {
+  m_ui->progressBar->setMaximum(newValue);
+}
+
+void RecoveryFailureView::connectProgressBar() {
+  connect(&m_presenter->m_mainWindow->getScriptWindowHandle()
+               ->getCurrentScriptRunner(),
+          SIGNAL(currentLineChanged(int, bool)), this,
+          SLOT(updateProgressBar(int, bool)));
+}
+
+void RecoveryFailureView::emitAbortScript() {
+  connect(this, SIGNAL(abortProjectRecoveryScript()),
+          m_presenter->m_mainWindow->getScriptWindowHandle(),
+          SLOT(abortCurrent()));
+  emit(abortProjectRecoveryScript());
+}
+
+void RecoveryFailureView::changeStartMantidButton(const QString &string) {
+  m_ui->pushButton_3->setText(string);
 }

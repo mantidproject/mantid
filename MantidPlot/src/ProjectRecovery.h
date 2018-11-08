@@ -7,6 +7,7 @@
 #ifndef PROJECT_RECOVERY_H_
 #define PROJECT_RECOVERY_H_
 
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
 
@@ -85,10 +86,14 @@ public:
   void openInEditor(const Poco::Path &inputFolder,
                     const Poco::Path &historyDest);
 
+  /// Remove checkpoints if it has lock file
+  void removeLockedCheckpoints();
+
   /// Looks at the recovery checkpoints and repairs some faults
   void repairCheckpointDirectory();
 
 private:
+  friend class RecoveryThread;
   /// Captures the current object in the background thread
   std::thread createBackgroundThread();
 

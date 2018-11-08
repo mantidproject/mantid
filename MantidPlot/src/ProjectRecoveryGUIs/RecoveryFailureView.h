@@ -8,12 +8,10 @@
 #define RECOVERYFAILUREVIEW_H
 
 #include "ProjectRecoveryPresenter.h"
+#include "ui_RecoveryFailure.h"
 #include <QDialog>
 #include <QWidget>
-
-namespace Ui {
-class RecoveryFailure;
-}
+#include <memory>
 
 class RecoveryFailureView : public QDialog {
   Q_OBJECT
@@ -21,8 +19,18 @@ class RecoveryFailureView : public QDialog {
 public:
   explicit RecoveryFailureView(QWidget *parent = 0,
                                ProjectRecoveryPresenter *presenter = nullptr);
-  ~RecoveryFailureView();
   void reject() override;
+
+  void setProgressBarMaximum(const int newValue);
+  void connectProgressBar();
+  void emitAbortScript();
+  void changeStartMantidButton(const QString &string);
+
+signals:
+  void abortProjectRecoveryScript();
+
+public slots:
+  void updateProgressBar(const int newValue, const bool err);
 
 private slots:
   void onClickLastCheckpoint();
@@ -31,9 +39,9 @@ private slots:
   void onClickStartMantidNormally();
 
 private:
-  void addDataToTable(Ui::RecoveryFailure *ui);
+  void addDataToTable();
 
-  Ui::RecoveryFailure *ui;
+  std::unique_ptr<Ui::RecoveryFailure> m_ui;
   ProjectRecoveryPresenter *m_presenter;
 };
 

@@ -8,12 +8,10 @@
 #define PROJECTRECOVERYVIEW_H
 
 #include "ProjectRecoveryPresenter.h"
+#include "ui_ProjectRecoveryWidget.h"
 #include <QDialog>
 #include <QWidget>
-
-namespace Ui {
-class ProjectRecoveryWidget;
-}
+#include <memory>
 
 class ProjectRecoveryView : public QDialog {
   Q_OBJECT
@@ -21,8 +19,17 @@ class ProjectRecoveryView : public QDialog {
 public:
   explicit ProjectRecoveryView(QWidget *parent = 0,
                                ProjectRecoveryPresenter *presenter = nullptr);
-  ~ProjectRecoveryView();
   void reject() override;
+  void setProgressBarMaximum(int newValue);
+  void connectProgressBar();
+  void emitAbortScript();
+  void changeStartMantidButton(const QString &string);
+
+signals:
+  void abortProjectRecoveryScript();
+
+public slots:
+  void updateProgressBar(int newValue, bool err);
 
 private slots:
   void onClickLastCheckpoint();
@@ -30,8 +37,9 @@ private slots:
   void onClickStartMantidNormally();
 
 private:
-  void addDataToTable(Ui::ProjectRecoveryWidget *ui);
-  Ui::ProjectRecoveryWidget *ui;
+  void addDataToTable();
+
+  std::unique_ptr<Ui::ProjectRecoveryWidget> m_ui;
   ProjectRecoveryPresenter *m_presenter;
 };
 

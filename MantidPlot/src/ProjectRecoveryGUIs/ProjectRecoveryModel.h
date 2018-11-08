@@ -16,19 +16,24 @@ class ProjectRecovery;
 }
 class ProjectRecoveryPresenter;
 class ProjectRecoveryModel {
+
 public:
   ProjectRecoveryModel(MantidQt::ProjectRecovery *projectRecovery,
                        ProjectRecoveryPresenter *presenter);
-  std::vector<std::string> getRow(int i);
-  void recoverLast();
-  void openLastInEditor();
+  const std::vector<std::string> &getRow(const int i);
+  std::vector<std::string> getRow(std::string checkpointName);
   void startMantidNormally();
   void recoverSelectedCheckpoint(std::string &selected);
   void openSelectedInEditor(std::string &selected);
   bool getFailedRun() const;
+  bool hasRecoveryStarted() const { return m_recoveryRunning; }
+  std::string decideLastCheckpoint();
+  void fillRows();
+  static int getNumberOfCheckpoints();
 
 private:
-  void fillRows();
+  void fillFirstRow();
+  void fillRow(const Poco::Path &path, const std::string &checkpointName);
   void updateCheckpointTried(const std::string &checkpointName);
   bool checkRecoverWasASuccess(const std::string &projectFile);
   void createThreadAndManage(const Poco::Path &checkpoint);
@@ -36,6 +41,7 @@ private:
   MantidQt::ProjectRecovery *m_projRec;
   ProjectRecoveryPresenter *m_presenter;
   bool m_failedRun;
+  bool m_recoveryRunning;
 };
 
 #endif // PROJECTRECOVERYMODEL_H

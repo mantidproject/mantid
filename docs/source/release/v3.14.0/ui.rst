@@ -33,6 +33,7 @@ New
     :align: right
     :figwidth: 70%
 
+
 Changes
 #######
 - Project Recovery will no longer save groups, this fixes an issue where it would cause crashes if you deleted a workspace from a group.
@@ -47,6 +48,9 @@ Changes
     :align: right
     :figwidth: 70%
 
+- Project Recovery will now output less unhelpful logging information into the results log
+
+
 Bugfixes
 ########
 - Workspaces with a '#' in their name will no longer cause issues in the loading of a recovered project
@@ -54,6 +58,7 @@ Bugfixes
 - Project Recovery will now run normally when you select no or the recovery fails when recovering from a ungraceful exit.
 - When autosaving or saving a recovery checkpoint with the Instrument View open the results log would be filled with excess logging and no longer does this.
 - Fixed an issue where Project Recovery would start regardless of the config options
+- If an empty group workspace is present in the ADS it will no longer crash the save thread of project recovery and instead will delete it from the ADS and ignore it.
 
 MantidPlot
 ----------

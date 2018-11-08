@@ -9,7 +9,7 @@
 
 bool RecoveryThread::getFailedRun() { return m_failedRunInThread; }
 
-void RecoveryThread::setCheckpoint(Poco::Path checkpoint) {
+void RecoveryThread::setCheckpoint(const Poco::Path &checkpoint) {
   m_checkpoint = checkpoint;
 }
 

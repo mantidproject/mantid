@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>465</width>
-    <height>156</height>
+    <width>484</width>
+    <height>194</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,7 +63,7 @@
      </column>
      <column>
       <property name="text">
-       <string>Lines in Recovery Script</string>
+       <string>Workspaces to recover</string>
       </property>
      </column>
     </widget>
@@ -127,6 +127,13 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
