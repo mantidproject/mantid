@@ -261,6 +261,16 @@ public:
     TS_ASSERT(pclog->getStatistics().duration < 3e9);
   }
 
+  void test_no_crash_on_2D_array_of_values_on_load() {
+    auto testWS = createTestWorkspace();
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "larmor_array_time_series_mock.nxs");
+    TS_ASSERT_THROWS_NOTHING(loader.execute())
+  }
+
 private:
   API::MatrixWorkspace_sptr createTestWorkspace() {
     return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
