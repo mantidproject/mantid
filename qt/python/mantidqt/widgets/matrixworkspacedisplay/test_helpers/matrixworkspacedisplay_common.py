@@ -102,6 +102,8 @@ class MockSpectrum:
 
 
 class MockWorkspace:
+    TEST_NAME = "THISISAtestWORKSPACE"
+
     @staticmethod
     def _return_MockSpectrumInfo():
         return MockSpectrumInfo()
