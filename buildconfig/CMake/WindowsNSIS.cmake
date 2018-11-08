@@ -12,7 +12,7 @@ set( CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}" )
 set( CPACK_NSIS_INSTALL_ROOT "C:")
 
 set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "MantidPlot_Icon_32offset" )
-set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "workbench_32px" )
+set( WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME "mantid_workbench" )
 set( WINDOWS_NSIS_MANTIDNOTEBOOK_ICON_NAME "mantid_notebook")
 
 # Choose the proper suffix for the build.
