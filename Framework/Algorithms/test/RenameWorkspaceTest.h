@@ -163,7 +163,6 @@ public:
     // Test history for the group is passed properly
     auto item1History = item1->history();
     TS_ASSERT_EQUALS(item1History.size(), 1)
-    TS_ASSERT_EQUALS(item1History.size(), 1)
     TS_ASSERT_EQUALS(item1History, item2->history())
     // Test that the history has only got the original group command and not
     // child commands
