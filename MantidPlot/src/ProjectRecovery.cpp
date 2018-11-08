@@ -9,6 +9,9 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 #include "Process.h"
+#include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
+#include "ProjectRecoveryGUIs/ProjectRecoveryView.h"
+#include "ProjectRecoveryGUIs/RecoveryFailureView.h"
 #include "ProjectSerialiser.h"
 #include "ScriptingWindow.h"
 
@@ -287,50 +290,25 @@ namespace MantidQt {
  */
 ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
     : m_backgroundSavingThread(), m_stopBackgroundThread(true),
-      m_windowPtr(windowHandle) {}
+      m_windowPtr(windowHandle), m_recoveryGui(nullptr) {}
 
 /// Destructor which also stops any background threads currently in progress
-ProjectRecovery::~ProjectRecovery() { stopProjectSaving(); }
+ProjectRecovery::~ProjectRecovery() {
+  stopProjectSaving();
+  delete m_recoveryGui;
+}
 
 void ProjectRecovery::attemptRecovery() {
-  QString recoveryMsg = QObject::tr(
-      "Mantid did not close correctly and a recovery"
-      " checkpoint has been found. Would you like to attempt recovery?");
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "ProjectRecovery->AttemptRecovery", true);
 
-  int userChoice = QMessageBox::information(
-      m_windowPtr, QObject::tr("Project Recovery"), recoveryMsg,
-      QObject::tr("Yes"), QObject::tr("No"),
-      QObject::tr("Only open script in editor"), 0, 1);
+  m_recoveryGui = new ProjectRecoveryPresenter(this, m_windowPtr);
+  bool failed = m_recoveryGui->startRecoveryView();
 
-  if (userChoice == 1) {
-    // User selected no
-    clearAllUnusedCheckpoints();
-    this->startProjectSaving();
-    return;
-  }
-
-  auto beforeRecoveryFolder = getRecoveryFolderLoad();
-  auto checkpointPaths = getRecoveryFolderCheckpoints(beforeRecoveryFolder);
-  auto mostRecentCheckpoint = checkpointPaths.back();
-
-  auto destFilename =
-      Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
-  destFilename.append("ordered_recovery.py");
-
-  if (userChoice == 0) {
-    // We have to spin up a new thread so the GUI can continue painting whilst
-    // we exec
-    openInEditor(mostRecentCheckpoint, destFilename);
-    std::thread recoveryThread(
-        [=] { loadRecoveryCheckpoint(mostRecentCheckpoint); });
-    recoveryThread.detach();
-  } else if (userChoice == 2) {
-    openInEditor(mostRecentCheckpoint, destFilename);
-    // Restart project recovery as we stay synchronous
-    clearAllCheckpoints(beforeRecoveryFolder);
-    startProjectSaving();
-  } else {
-    throw std::runtime_error("Unknown choice in ProjectRecovery");
+  if (failed) {
+    while (failed) {
+      failed = m_recoveryGui->startRecoveryFailure();
+    }
   }
 }
 
@@ -347,17 +325,6 @@ bool ProjectRecovery::checkForRecovery() const noexcept {
   } catch (...) {
     g_log.warning("Project Recovery: Caught exception whilst attempting to "
                   "check for existing recovery");
-    return false;
-  }
-}
-
-bool ProjectRecovery::clearAllCheckpoints() const noexcept {
-  try {
-    deleteExistingCheckpoints(0);
-    return true;
-  } catch (...) {
-    g_log.warning("Project Recovery: Caught exception whilst attempting to "
-                  "clear existing checkpoints.");
     return false;
   }
 }
@@ -502,11 +469,13 @@ void ProjectRecovery::stopProjectSaving() {
  *
  * @param recoveryFolder : The checkpoint folder
  */
-void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
+bool ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
   if (!scriptWindow) {
     throw std::runtime_error("Could not get handle to scripting window");
   }
+
+  m_recoveryGui->connectProgressBarToRecoveryView();
 
   // Ensure the window repaints so it doesn't appear frozen before exec
   scriptWindow->executeCurrentTab(Script::ExecutionMode::Serialised);
@@ -517,34 +486,24 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
     // exception
     g_log.error("Project recovery script did not finish. Your work has been "
                 "partially recovered.");
-    this->startProjectSaving();
-    return;
+    // This has failed so terminate the thread
+    return false;
   }
   g_log.notice("Re-opening GUIs");
 
   auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
 
-  bool loadCompleted = false;
   if (!QMetaObject::invokeMethod(
-          m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
-          Q_RETURN_ARG(bool, loadCompleted),
-          Q_ARG(const std::string, projectFile.toString()))) {
-    this->startProjectSaving();
+          m_windowPtr, "loadProjectRecovery", Qt::QueuedConnection,
+          Q_ARG(const std::string, projectFile.toString()),
+          Q_ARG(const std::string, recoveryFolder.toString()))) {
     throw std::runtime_error("Project Recovery: Failed to load project "
                              "windows - Qt binding failed");
   }
+  g_log.notice("Project Recovery workspace loading finished");
 
-  if (!loadCompleted) {
-    g_log.warning("Loading failed to recovery everything completely");
-    this->startProjectSaving();
-    return;
-  }
-  g_log.notice("Project Recovery finished");
-
-  // Restart project recovery when the async part finishes
-  clearAllCheckpoints(Poco::Path(recoveryFolder).popDirectory());
-  startProjectSaving();
-} // namespace MantidQt
+  return true;
+}
 
 /**
  * Compiles the project recovery script from a given checkpoint
@@ -557,6 +516,16 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
 void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
                                    const Poco::Path &historyDest) {
   compileRecoveryScript(inputFolder, historyDest);
+
+  // Get length of recovery script
+  std::ifstream fileCount(historyDest.toString());
+  const int lineLength =
+      static_cast<int>(std::count(std::istreambuf_iterator<char>(fileCount),
+                                  std::istreambuf_iterator<char>(), '\n'));
+  fileCount.close();
+
+  // Update Progress bar
+  m_recoveryGui->setUpProgressBar(lineLength);
 
   // Force application window to create the script window first
   const bool forceVisible = true;
@@ -780,4 +749,22 @@ void ProjectRecovery::saveAll(bool autoSave) {
 std::string ProjectRecovery::getRecoveryFolderOutputPR() {
   return getRecoveryFolderOutput();
 }
+std::vector<Poco::Path> ProjectRecovery::getListOfFoldersInDirectoryPR(
+    const std::string &recoveryFolderPath) {
+  return getListOfFoldersInDirectory(recoveryFolderPath);
+}
+
+std::string ProjectRecovery::getRecoveryFolderCheckPR() {
+  return getRecoveryFolderCheck();
+}
+
+std::string ProjectRecovery::getRecoveryFolderLoadPR() {
+  return getRecoveryFolderLoad();
+}
+
+std::vector<Poco::Path> ProjectRecovery::getRecoveryFolderCheckpointsPR(
+    const std::string &recoveryFolderPath) {
+  return getRecoveryFolderCheckpoints(recoveryFolderPath);
+}
+
 } // namespace MantidQt
