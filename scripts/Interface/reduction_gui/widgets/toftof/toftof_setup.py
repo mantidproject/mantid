@@ -97,7 +97,10 @@ class TOFTOFSetupWidget(BaseWidget):
         """
             Pop up a directory dialog box.
         """
-        dirname = str(QFileDialog.getExistingDirectory(self, "Select Directory", default_dir, QFileDialog.DontUseNativeDialog))
+        dirname = QFileDialog.getExistingDirectory(self, "Select Directory", default_dir,
+                                                   QFileDialog.DontUseNativeDialog)
+        if isinstance(dirname, tuple):
+            dirname = dirname[0]
 
         return dirname
 

@@ -250,9 +250,12 @@ class SANSInstrumentWidget(BaseWidget):
                                                             os.path.expanduser('~'),
                                                             QFileDialog.ShowDirsOnly
                                                             | QFileDialog.DontResolveSymlinks)
-        if output_dir:
-            self._summary.output_dir_edit.setText(output_dir)
-            self._settings.emit_key_value("OUTPUT_DIR", output_dir)
+        if not output_dir:
+            return
+        if isinstance(output_dir, tuple):
+            output_dir = output_dir[0]
+        self._summary.output_dir_edit.setText(output_dir)
+        self._settings.emit_key_value("OUTPUT_DIR", output_dir)
 
     def _tof_clicked(self, is_checked):
         self._summary.low_tof_edit.setEnabled(not is_checked)

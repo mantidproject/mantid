@@ -14,7 +14,7 @@ import sys
 import os
 import traceback
 from gui_helper import get_qapplication
-from qtpy.QtWidgets import (QAction, QApplication, QDialog, QFileDialog, QMainWindow, QMessageBox)  # noqa
+from qtpy.QtWidgets import (QAction, QDialog, QFileDialog, QMainWindow, QMessageBox)  # noqa
 from qtpy.QtCore import (QFile, QFileInfo, QSettings)  # noqa
 from mantid.kernel import Logger
 
@@ -474,13 +474,16 @@ class ReductionGUI(QMainWindow):
         """
             File chooser for loading UI parameters
         """
-        fname_qstr = QFileDialog.getOpenFileName(self, "Reduction settings - Choose a settings file",
-                                                       self._last_directory,
-                                                       "Settings files (*.xml)")
-        fname = str(QFileInfo(fname_qstr).filePath())
+        fname = QFileDialog.getOpenFileName(self, "Reduction settings - Choose a settings file",
+                                            self._last_directory,
+                                            "Settings files (*.xml)")
+        fname = str(QFileInfo(fname).filePath())
+        if isinstance(fname, tuple):
+            fname = fname[0]
+        fname = str(fname)
         if fname:
             # Store the location of the loaded file
-            self._last_directory = str(QFileInfo(fname_qstr).path())
+            self._last_directory = str(QFileInfo(fname).path())
             self.open_file(fname)
 
     def _save(self):
@@ -511,10 +514,12 @@ class ReductionGUI(QMainWindow):
         else:
             fname = self._instrument + '_'
 
-        fname_qstr = QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
-                                                       self._last_directory + '/' + fname,
-                                                       "Settings files (*.xml)")
-        fname = str(QFileInfo(fname_qstr).filePath())
+        fname = QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
+                                            self._last_directory + '/' + fname,
+                                            "Settings files (*.xml)")
+        if isinstance(fname, tuple):
+            fname = fname[0]
+        fname = str(QFileInfo(fname).filePath())
         if len(fname)>0:
             if not fname.endswith('.xml'):
                 fname += ".xml"
@@ -523,7 +528,7 @@ class ReductionGUI(QMainWindow):
             self._recent_files.insert(0,fname)
             while len(self._recent_files) > 10:
                 self._recent_files.pop()
-            self._last_directory = str(QFileInfo(fname_qstr).path())
+            self._last_directory = QFileInfo(fname).path()
             self._filename = fname
             self._save()
 
@@ -540,9 +545,12 @@ class ReductionGUI(QMainWindow):
             (root, ext) = os.path.splitext(self._filename)
             fname = root
 
-        fname = unicode(QFileDialog.getSaveFileName(self, "Mantid Python script - Save script",
-                                                          self._last_export_directory,
-                                                          "Python script (*.py)"))
+        fname = QFileDialog.getSaveFileName(self, "Mantid Python script - Save script",
+                                            self._last_export_directory,
+                                            "Python script (*.py)")
+        if isinstance(fname, tuple):
+            fname = fname[0]
+        fname = str(fname)
 
         if len(fname)>0:
             if not fname.endswith('.py'):

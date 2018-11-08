@@ -124,7 +124,9 @@ class BaseWidget(QWidget):
             @param title: string to use as title
             @param multi: multiselection is enabled if True
         """
-        dirname = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        dirname = QFileDialog.getExistingDirectory(self, "Select Directory")
+        if isinstance(dirname, tuple):
+            dirname = dirname[0]
 
         return dirname
 
@@ -139,27 +141,22 @@ class BaseWidget(QWidget):
             data_type = self._data_type
         if title is None:
             title = "Data file - Choose a data file"
+
+        flist = QFileDialog.getOpenFileNames(self, title,
+                                             self._settings.data_path,
+                                             data_type)
+        if not flist:
+            return None
+
         if multi:
-            qflist = QFileDialog.getOpenFileNames(self, title,
-                                                  self._settings.data_path,
-                                                  data_type)
-            if len(qflist)>0:
-                flist = []
-                for i in range(len(qflist)):
-                    flist.append(str(QFileInfo(qflist[i]).filePath()))
-                # Store the location of the loaded file
-                self._settings.data_path = str(QFileInfo(qflist[i]).path())
-                return flist
-            else:
-                return None
+            flist = [QFileInfo(item).filePath() for item in flist]
+            self._settings.data_path = flist[-1]
         else:
-            fname = QFileInfo(QFileDialog.getOpenFileName(self, title,
-                                                          self._settings.data_path,
-                                                          data_type)).filePath()
-            if fname:
-                # Store the location of the loaded file
-                self._settings.data_path = str(QFileInfo(fname).path())
-            return str(fname)
+            if isinstance(flist, tuple):
+                flist = flist[0]
+            flist = QFileInfo(flist).filePath()
+            self._settings.data_path = flist
+        return flist
 
     def data_save_dialog(self, data_type=None, title=None):
         """
@@ -171,10 +168,12 @@ class BaseWidget(QWidget):
             data_type = self._data_type
         if title is None:
             title = "Save file - Set a location and name"
-        fname = QFileInfo(QFileDialog.getSaveFileName(self, title,
-                                                      self._settings.data_path,
-                                                      data_type)).filePath()
-        return str(fname)
+        fname = QFileDialog.getSaveFileName(self, title,
+                                            self._settings.data_path,
+                                            data_type)
+        if isinstance(fname, tuple):
+            fname = fname[0]
+        return QFileInfo(fname).filePath()
 
     @process_file_parameter
     def show_instrument(self, file_name=None, workspace=None, tab=-1, reload=False, mask=None, data_proxy=None):

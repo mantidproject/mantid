@@ -164,8 +164,11 @@ class SampleSetupWidget(BaseWidget):
                                                           os.path.expanduser('~'),
                                                           QFileDialog.ShowDirsOnly
                                                           | QFileDialog.DontResolveSymlinks)
-        if save_dir:
-            self._content.savedir_edit.setText(save_dir)
+        if not save_dir:
+            return
+        if isinstance(save_dir, tuple):
+            save_dir = save_dir[0]
+        self._content.savedir_edit.setText(save_dir)
 
     def set_state(self, state):
         """

@@ -180,13 +180,16 @@ class SANSCatalogWidget(BaseWidget):
         self._content.data_set_table.resizeColumnsToContents()
 
     def _browse_directory(self):
-        dir = QFileDialog.getExistingDirectory(self, "Open Directory",
-                                                     self._settings.data_path)
-        if dir:
-                # Store the location of the loaded file
-            self._settings.data_path = str(dir)
-            self._content.directory_edit.setText(dir)
-            self._update_content()
+        direc = QFileDialog.getExistingDirectory(self, "Open Directory",
+                                                 self._settings.data_path)
+        if not direc:
+            return
+        if isinstance(direc, tuple):
+            direc = direc[0]
+        # Store the location of the loaded file
+        self._settings.data_path = str(direc)
+        self._content.directory_edit.setText(direc)
+        self._update_content()
 
     def set_state(self, state):
         """
