@@ -15,13 +15,11 @@ class TestModalTester(unittest.TestCase):
 
             def __init__(self):
                 super(MyTest, self).__init__()
-                self.button_display = None
 
             def call(self):
-                self.start_dialog()
+                yield self.start_dialog()
                 m = self.get_menu('menu_Display')
                 action = self.get_action('action_Quality')
-                yield self.wait_for('button_display')
                 test.assertTrue(m.isVisible())
                 test.assertTrue(action.isChecked())
                 self.trigger_action('action_Quality')
@@ -30,10 +28,9 @@ class TestModalTester(unittest.TestCase):
                 test.assertFalse(action.isChecked())
 
             def start_dialog(self):
-                self.button_display = self.get_button('button_Display')
-                self.button_display.click()
+                self.click_button('button_Display')
 
-        MyTest.run(FitPropertyBrowser, pause=0.)
+        MyTest().run(FitPropertyBrowser, pause=0.)
 
 
 if __name__ == '__main__':
