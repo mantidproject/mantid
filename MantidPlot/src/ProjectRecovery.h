@@ -86,9 +86,6 @@ public:
   void openInEditor(const Poco::Path &inputFolder,
                     const Poco::Path &historyDest);
 
-  /// Remove checkpoints if it has lock file
-  void removeLockedCheckpoints();
-
   /// Looks at the recovery checkpoints and repairs some faults
   void repairCheckpointDirectory();
 
