@@ -14,6 +14,7 @@ if sys.version_info.major < 3:
 else:
     from unittest import mock
 
+
 class ErrorReportServerTests(stresstesting.MantidStressTest):
     def setUp(self):
         mock_view = mock.MagicMock()
