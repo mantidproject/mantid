@@ -7,15 +7,21 @@
 import os
 import time
 import csv
-from PyQt4 import QtGui, QtCore
-import ui_preprocess_window
 import reduce4circleControl
 import guiutility as gui_util
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 import NTableWidget
+from qtpy.QtWidgets import (QFileDialog, QMainWindow)  # noqa
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 
 
-class ScanPreProcessWindow(QtGui.QMainWindow):
+class ScanPreProcessWindow(QMainWindow):
     """
     Main window class to pre-process scans
     """
@@ -42,8 +48,9 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self._outputDir = None
 
         # define UI
-        self.ui = ui_preprocess_window.Ui_PreprocessWindow()
-        self.ui.setupUi(self)
+        ui_path = "preprocess_window.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
+        self._promote_widgets()
 
         # initialize the widgets
         self.enable_calibration_settings(False)
@@ -62,16 +69,19 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self.ui.tableView_scanProcessState.resizeColumnsToContents()
 
         # define event handling
-        self.connect(self.ui.pushButton_browseOutputDir, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_output_dir)
-        self.connect(self.ui.pushButton_preProcessScan, QtCore.SIGNAL('clicked()'),
-                     self.do_start_pre_process)
-        self.connect(self.ui.pushButton_changeSettings, QtCore.SIGNAL('clicked()'),
-                     self.do_change_calibration_settings)
-        self.connect(self.ui.pushButton_fixSettings, QtCore.SIGNAL('clicked()'),
-                     self.do_fix_calibration_settings)
-        self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
-                     self.do_quit)
+        self.ui.pushButton_browseOutputDir.clicked.connect(self.do_browse_output_dir)
+        self.ui.pushButton_preProcessScan.clicked.connect(self.do_start_pre_process)
+        self.ui.pushButton_changeSettings.clicked.connect(self.do_change_calibration_settings)
+        self.ui.pushButton_fixSettings.clicked.connect(self.do_fix_calibration_settings)
+        self.ui.actionExit.triggered.connect(self.do_quit)
+
+        return
+
+    def _promote_widgets(self):
+        tableView_scanProcessState_layout = QVBoxLayout()
+        self.ui.frame_tableView_scanProcessState.setLayout(tableView_scanProcessState_layout)
+        self.ui.tableView_scanProcessState = ScanPreProcessStatusTable(self)
+        tableView_scanProcessState_layout.addWidget(self.ui.tableView_scanProcessState)
 
         return
 
@@ -100,12 +110,9 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         default_dir = os.path.join('/HFIR/HB3A/Exp{0}/shared/'.format(exp_number))
 
         # get output directory
-        output_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
-                                                                'Outputs for pre-processed scans',
-                                                                default_dir))
+        output_dir = str(QFileDialog.getExistingDirectory(self, 'Outputs for pre-processed scans', default_dir))
         if output_dir is None or len(output_dir) == 0:
             return
-
         self.ui.lineEdit_outputDir.setText(output_dir)
 
         return
@@ -474,10 +481,10 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
     """
     Extended table widget for scans to process
     """
-    TableSetup = [('Scan', 'int'),
-                  ('Status', 'str'),
-                  ('File', 'str'),
-                  ('Note', 'str')]
+    Table_Setup = [('Scan', 'int'),
+                   ('Status', 'str'),
+                   ('File', 'str'),
+                   ('Note', 'str')]
 
     def __init__(self, parent):
         """

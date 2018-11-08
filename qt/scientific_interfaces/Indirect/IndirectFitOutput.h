@@ -9,6 +9,7 @@
 
 #include "IndirectFitData.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -49,7 +50,7 @@ using FitDataIterator =
     IndirectFitOutput - Stores the output of a QENS fit and provides
     convenient access to the output parameters.
 */
-class IndirectFitOutput {
+class MANTIDQT_INDIRECT_DLL IndirectFitOutput {
 public:
   IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,

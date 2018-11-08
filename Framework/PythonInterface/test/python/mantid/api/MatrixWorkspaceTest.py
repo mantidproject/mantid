@@ -417,6 +417,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEquals(specInfo.isMasked(0), False)
         self.assertEquals(specInfo.isMasked(1), False)
 
+    def test_isCommonBins(self):
+        self.assertTrue(self._test_ws.isCommonBins())
+
 if __name__ == '__main__':
     unittest.main()
     #Testing particular test from Mantid

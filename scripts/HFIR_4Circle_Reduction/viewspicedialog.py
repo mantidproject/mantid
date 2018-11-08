@@ -5,12 +5,16 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from . import ui_SpiceViewerDialog
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from qtpy.QtWidgets import (QDialog)  # noqa
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
-class ViewSpiceDialog(QtGui.QDialog):
+class ViewSpiceDialog(QDialog):
     """Dialog to view SPICE """
     def __init__(self, parent):
         """Initialization
@@ -20,12 +24,11 @@ class ViewSpiceDialog(QtGui.QDialog):
         super(ViewSpiceDialog, self).__init__()
 
         # define UI
-        self.ui = ui_SpiceViewerDialog.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = "SpiceViewerDialog.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # define event handlers
-        self.connect(self.ui.pushButton_close, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
+        self.ui.pushButton_close.clicked.connect(self.do_quit)
 
         return
 
@@ -53,8 +56,6 @@ class ViewSpiceDialog(QtGui.QDialog):
         :param plain_text:
         :return:
         """
-        assert isinstance(plain_text, str) or isinstance(plain_text, QtCore.QString), \
-            'Type of plain text is not supported.'
-        self.ui.textBrowser_spice.setText(plain_text)
+        self.ui.textBrowser_spice.setText('{}'.format(plain_text))
 
         return

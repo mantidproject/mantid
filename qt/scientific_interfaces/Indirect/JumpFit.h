@@ -39,10 +39,16 @@ protected:
 
   void setRunIsRunning(bool running) override;
 
+private slots:
+  void updateParameterFitTypes();
+
 private:
+  void addEISFFunctionsToFitTypeComboBox();
+  void addWidthFunctionsToFitTypeComboBox();
+
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);
-
+  void setButtonsEnabled(bool enabled);
   void setPlotResultIsPlotting(bool plotting);
 
   JumpFitModel *m_jumpFittingModel;

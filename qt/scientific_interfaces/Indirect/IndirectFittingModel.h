@@ -73,7 +73,7 @@ public:
   void setStartX(double startX, std::size_t dataIndex, std::size_t spectrum);
   void setEndX(double endX, std::size_t dataIndex, std::size_t spectrum);
   void setExcludeRegion(const std::string &exclude, std::size_t dataIndex,
-                        std::size_t index);
+                        std::size_t spectrum);
 
   void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
@@ -133,6 +133,8 @@ protected:
   void removeFittingData(std::size_t index);
 
 private:
+  void removeWorkspaceFromFittingData(std::size_t const &index);
+
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function,
                       const std::string &input,

@@ -37,7 +37,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QSettings, QPoint, QSize)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -131,6 +131,7 @@ class MainWindow(QMainWindow):
         self.editor_menu = None
         self.view_menu = None
         self.view_menu_actions = None
+        self.interfaces_menu = None
 
         # Allow splash screen text to be overridden in set_splash
         self.splash = SPLASH
@@ -200,6 +201,7 @@ class MainWindow(QMainWindow):
         self.file_menu = self.menuBar().addMenu("&File")
         self.editor_menu = self.menuBar().addMenu("&Editor")
         self.view_menu = self.menuBar().addMenu("&View")
+        self.interfaces_menu = self.menuBar().addMenu('&Interfaces')
 
     def create_actions(self):
         # --- general application menu options --
@@ -247,6 +249,52 @@ class MainWindow(QMainWindow):
         # Link to menus
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
+
+    def launchCustomGUI(self, script):
+        exec(open(script).read(), globals())
+
+    def populateAfterMantidImport(self):
+        from mantid.kernel import ConfigService, logger
+        # TODO ConfigService should accept unicode strings https://github.com/mantidproject/mantid/pull/23826
+        interface_dir = ConfigService[str('mantidqt.python_interfaces_directory')]
+        items = ConfigService[str('mantidqt.python_interfaces')].split()
+
+        # list of custom interfaces that are not qt4/qt5 compatible
+        GUI_BLACKLIST = ['DGS_Reduction.py',
+                         'MSlice.py',
+                         'ORNL_SANS.py',
+                         'ISIS_Reflectometry_Old.py',
+                         'Powder_Diffraction_Reduction.py',
+                         'HFIR_4Circle_Reduction.py',
+                         'ISIS_SANS_v2_experimental.py',
+                         'Frequency_Domain_Analysis.py',
+                         'Elemental_Analysis.py']
+
+        # detect the python interfaces
+        interfaces = {}
+        for item in items:
+            key, scriptname = item.split('/')
+            if not os.path.exists(os.path.join(interface_dir, scriptname)):
+                logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
+                continue
+            if scriptname in GUI_BLACKLIST:
+                logger.information('Not adding gui "{}"'.format(scriptname))
+                continue
+            temp = interfaces.get(key, [])
+            temp.append(scriptname)
+            interfaces[key] = temp
+
+        # add the interfaces to the menu
+        keys = list(interfaces.keys())
+        keys.sort()
+        for key in keys:
+            submenu = self.interfaces_menu.addMenu(key)
+            names = interfaces[key]
+            names.sort()
+            for name in names:
+                action = submenu.addAction(name.replace('.py', '').replace('_', ' '))
+                script = os.path.join(interface_dir, name)
+                action.triggered.connect(lambda checked, script=script: self.launchCustomGUI(script))
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
@@ -334,6 +382,10 @@ class MainWindow(QMainWindow):
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  # noqa
             plt.close('all')
+
+            app = QApplication.instance()
+            if app is not None:
+                app.closeAllWindows()
 
             event.accept()
         else:
@@ -453,14 +505,16 @@ def start_workbench(app, command_line_options):
     # start mantid
     main_window.set_splash('Preloading mantid')
     importlib.import_module('mantid')
+    main_window.populateAfterMantidImport()
     main_window.show()
 
     if main_window.splash:
         main_window.splash.hide()
 
-    if command_line_options.exe_script is not None:
-        main_window.editor.open_file_in_new_tab(command_line_options.exe_script)
-        main_window.editor.execute_current()  # TODO use the result as an exit code
+    if command_line_options.script is not None:
+        main_window.editor.open_file_in_new_tab(command_line_options.script)
+        if command_line_options.execute:
+            main_window.editor.execute_current()  # TODO use the result as an exit code
 
         if command_line_options.quit:
             main_window.close()
@@ -485,9 +539,10 @@ def main():
 
     # setup command line arguments
     parser = argparse.ArgumentParser(description='Mantid Workbench')
-    parser.add_argument('-x', '--execute', metavar='SCRIPT', dest='exe_script',
+    parser.add_argument('script', nargs='?')
+    parser.add_argument('-x', '--execute', action='store_true',
                         help='execute the script file given as argument')
-    parser.add_argument('-q', '--quit', dest='quit', action='store_true',
+    parser.add_argument('-q', '--quit', action='store_true',
                         help='execute the script file with \'-x\' given as argument and then exit')
     # TODO -a or --about: show about dialog and exit
     # TODO -d or --default-settings: start MantidPlot with the default settings
@@ -511,13 +566,13 @@ def main():
     # TODO handle options that don't require starting the workbench e.g. --help --version
 
     # fix/validate arguments
-    if options.exe_script is not None:
+    if options.script is not None:
         # convert into absolute path
-        options.exe_script = os.path.abspath(os.path.expanduser(options.exe_script))
-        if not os.path.exists(options.exe_script):
+        options.script = os.path.abspath(os.path.expanduser(options.script))
+        if not os.path.exists(options.script):
             # TODO should be logged
-            print('script "{}" does not exist'.format(options.exe_script))
-            options.exe_script = None
+            print('script "{}" does not exist'.format(options.script))
+            options.script = None
 
     app = initialize()
     # the default sys check interval leads to long lags

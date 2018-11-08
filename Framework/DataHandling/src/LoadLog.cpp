@@ -26,7 +26,6 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 #include <fstream> // used to get ifstream
 #include <sstream>
 
