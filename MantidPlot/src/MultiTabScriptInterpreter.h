@@ -50,7 +50,7 @@ public:
   ~MultiTabScriptInterpreter() override;
 
   /// Current interpreter
-  ScriptFileInterpreter *currentInterpreter();
+  ScriptFileInterpreter *currentInterpreter() { return m_current; };
   /// Interpreter at given index
   ScriptFileInterpreter *interpreterAt(int index);
 
