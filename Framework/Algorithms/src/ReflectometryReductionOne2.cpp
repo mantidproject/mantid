@@ -159,9 +159,6 @@ void ReflectometryReductionOne2::init() {
 
   // Init properties for monitors
   initMonitorProperties();
-  // Normalization by integrated monitors
-  declareProperty("NormalizeByIntegratedMonitors", true,
-                  "Normalize by dividing by the integrated monitors.");
 
   // Init properties for transmission normalization
   initTransmissionProperties();
@@ -535,6 +532,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setPropertyValue("MonitorIntegrationWavelengthMax",
                           getPropertyValue("MonitorIntegrationWavelengthMax"));
     alg->setProperty("ProcessingInstructions", transmissionCommands);
+    alg->setProperty("NormalizeByIntegratedMonitors",
+                     getPropertyValue("NormalizeByIntegratedMonitors"));
     alg->setPropertyValue("Debug", getPropertyValue("Debug"));
     alg->execute();
     transmissionWS = alg->getProperty("OutputWorkspace");

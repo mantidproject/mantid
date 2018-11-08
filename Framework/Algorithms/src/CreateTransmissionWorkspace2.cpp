@@ -181,16 +181,12 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
   }
 
   // Normalization by integrated monitors
-  // Only if both MonitorIntegrationWavelengthMin and
-  // MonitorIntegrationWavelengthMax are have been given
+  // Only if defined by property
+  const bool normalizeByIntegratedMonitors =
+      getProperty("NormalizeByIntegratedMonitors");
 
-  Property *intMinProperty = getProperty("MonitorIntegrationWavelengthMin");
-  Property *intMaxProperty = getProperty("MonitorIntegrationWavelengthMax");
-  const bool integratedMonitors =
-      !(intMinProperty->isDefault() || intMaxProperty->isDefault());
-
-  auto monitorWS = makeMonitorWS(IvsTOF, integratedMonitors);
-  if (!integratedMonitors)
+  auto monitorWS = makeMonitorWS(IvsTOF, normalizeByIntegratedMonitors);
+  if (!normalizeByIntegratedMonitors)
     detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
 
   return divide(detectorWS, monitorWS);
