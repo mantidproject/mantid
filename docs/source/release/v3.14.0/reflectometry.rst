@@ -68,7 +68,7 @@ Improved
 Bug fixes
 #########
 
-
+- The SaveASCII tab from the interface was unable to save in some places on Windows and that has now been fixed.
 
 Algorithms
 ----------
@@ -83,7 +83,10 @@ Improved
 ########
 
 - :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
+- :ref:`algm-ReflectometryReductionOne`, :ref:`algm-ReflectometryReductionOneAuto`, :ref:`algm-CreateTransmissionWorkspace` and :ref:`algm-CreateTransmissionWorkspaceAuto` now use spectrum numbers for their processing instructions instead of workspace indcies
+- :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` Now take a parameter to pass processing instructions to the transmission workspace algorithms and no longer accept strict spectrum checking
 - Common naming of slit component name and size properties across algorithms.
+- :ref:`algm-SpecularReflectionPositionCorrect` is now compatible with the reflectometers at ILL.
 
 Bug fixes
 #########
