@@ -11,13 +11,13 @@ Description
 
 Algorithm creates a workspace with detector sensitivity correction coefficients using the given Vanadium workspace. The correction coefficients are calculated as follows.
 
-#. Load the peak centre and sigma from the *EPPTable*. These values are used to calculate sum :math:`S_i` as
+1. Load the peak centre and sigma from the *EPPTable*. These values are used to calculate sum :math:`S_i` as
 
    :math:`S_i = \sum_{x = x_C - 3\,\mathrm{fwhm}}^{x_C + 3\,\mathrm{fwhm}} Y_i(x)`
 
    where :math:`x_C` is the peak centre position and :math:`Y_i(x)` is the corresponding to :math:`x` :math:`Y` value for i-th detector.
 
-#. (If *EnableDWF* is true) Calculate the Debye-Waller factor according to Sears and Shelley *Acta Cryst. A* **47**, 441 (1991):
+2. (If *EnableDWF* is true) Calculate the Debye-Waller factor according to [#SEARS]_:
 
    :math:`D_i = \exp\left[-B_i\cdot\left(\frac{4\pi\sin\theta_i}{\lambda}\right)^2\right]`
 
@@ -31,9 +31,9 @@ Algorithm creates a workspace with detector sensitivity correction coefficients 
 
 .. warning::
 
-    If no temperature is available, or is set to an invalid value, :math:`T` = 293K will be taken for the Debye-Waller factor calculation. The algorithm will produce a warning in this case.
+    If no temperature is available, or is set to an invalid value, :math:`T` = 293K will be taken for the Debye-Waller factor calculation. The algorithm will log a warning in this case.
 
-#. (If *EnableDWF* is true)Finally, the correction coefficients :math:`K_i` are calculated as
+3. (If *EnableDWF* is true) Finally, the correction coefficients :math:`K_i` are calculated as
 
    :math:`K_i = \frac{S_i}{D_i}`
 
@@ -87,6 +87,12 @@ Output:
     Spectrum 4 of the output workspace is filled with:  6895.0
     Spectrum 4 of the input workspace is filled with:  1.0
     Spectrum 4 of the corrected workspace is filled with:  0.00015
+
+References
+----------
+
+.. [#SEARS] Sears, V. F. and Shelley, S. A., *Acta Cryst. A* **47** 441 (1991)
+          `doi: 10.1107/S0108767391002441 <http://dx.doi.org/10.1107/S0108767391002441>`_
 
 .. categories::
 

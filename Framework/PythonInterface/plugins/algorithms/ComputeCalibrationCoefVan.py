@@ -111,7 +111,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             self.log().warning("No Temperature given and the 'temperature' " +
                                "sample log is not present in " +
                                self.vanaws.name() +
-                               ". T = 293K is assumed for Debye-Waller factor.")
+                               ". T = {}K is assumed for Debye-Waller factor.".format(self.defaultT))
             return self.defaultT
         try:
             temperature = run.getProperty(temperatureLogName)
@@ -122,7 +122,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             return temperature
         except ValueError as err:
             self.log().warning("Error of getting temperature from the " +
-                               "sample log " + err + ". T = 293K is assumed " +
+                               "sample log " + err + ". T = {}K is assumed ".format(self.defaultT) +
                                "for Debye-Waller factor.")
             return self.defaultT
 
