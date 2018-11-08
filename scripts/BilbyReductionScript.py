@@ -287,7 +287,7 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
                                                                         SolidAngleWeighting=solid_angle_weighting,
                                                                         RadiusCut=RadiusCut, WaveCut=WaveCut,
                                                                         WideAngleCorrection=wide_angle_correction,
-                                                                        Reduce_2D=reduce_2D,
+                                                                        Reduce2D=reduce_2D,
                                                                         OutputWorkspace=base_output_name)
 
             if not reduce_2D:

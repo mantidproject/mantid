@@ -77,55 +77,55 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Mandatory),
                              doc='Mask for the transmission data')
 
-        self.declareProperty(name='fitmethod',
+        self.declareProperty(name='FitMethod',
                              defaultValue='log', doc='Function to use to fit transmission; can be Linear,'
                                                      ' Log, Polynomial (first letter shall be capital)')
 
-        self.declareProperty(name='polynomialorder',
+        self.declareProperty(name='PolynomialOrder',
                              defaultValue='3',
                              doc='Used only for Polynomial function, but needed as an input parameter anyway')
 
-        self.declareProperty(name='scalingfactor',
+        self.declareProperty(name='ScalingFactor',
                              defaultValue=1.0,
                              validator=FloatBoundedValidator(lower=0.0),
                              doc='Attenuating factor')
 
-        self.declareProperty(name='samplethickness',
+        self.declareProperty(name='SampleThickness',
                              defaultValue=1.0,
                              validator=FloatBoundedValidator(lower=0.0),
                              doc='Thickness of sample')
 
-        self.declareProperty(FloatArrayProperty('binningwavelength',
+        self.declareProperty(FloatArrayProperty('BinningWavelength',
                                                 direction=Direction.Input,
                                                 validator=FloatArrayMandatoryValidator()),
                              doc='Wavelength boundaries for reduction: a comma separated list of first bin boundary,'
                                  ' width, last bin boundary')
 
-        self.declareProperty(FloatArrayProperty('binningwavelengthtransm',
+        self.declareProperty(FloatArrayProperty('BinningWavelengthTransm',
                                                 direction=Direction.Input,
                                                 validator=FloatArrayMandatoryValidator()),
                              doc='Wavelengths boundaries for transmission binning: a comma separated list of first bin'
                                  ' boundary, width, last bin')
 
-        self.declareProperty(FloatArrayProperty('binningq',
+        self.declareProperty(FloatArrayProperty('BinningQ',
                                                 direction=Direction.Input,
                                                 validator=FloatArrayMandatoryValidator()),
                              doc='Output Q-boundaries: a comma separated list of first bin boundary,'
                                  ' width, last bin boundary')
 
-        self.declareProperty(name='timemode',
+        self.declareProperty(name='Timemode',
                              defaultValue=True,
                              doc='If data collected in ToF or monochromatic mode')
 
-        self.declareProperty(name='accountforgravity',
+        self.declareProperty(name='AccountForGravity',
                              defaultValue=True,
                              doc='Whether to correct for the effects of gravity')
 
-        self.declareProperty(name='solidangleweighting',
+        self.declareProperty(name='SolidAngleWeighting',
                              defaultValue=True,
                              doc='If True, pixels will be weighted by their solid angle')
 
-        self.declareProperty(name='radiuscut',
+        self.declareProperty(name='RadiusCut',
                              defaultValue=1.0,
                              validator=FloatBoundedValidator(lower=0.0),
                              doc='To increase resolution some wavelengths are excluded within this distance from the'
@@ -133,7 +133,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
                                  ' affect the effective cutoff. See the algorithm description for a detailed'
                                  ' explanation of the cutoff.')
 
-        self.declareProperty(name='wavecut',
+        self.declareProperty(name='WaveCut',
                              defaultValue=1.0,
                              validator=FloatBoundedValidator(lower=0.0),
                              doc='To increase resolution by starting to remove some wavelengths below this threshold'
@@ -141,11 +141,11 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
                                  ' on the effective cutoff. See the algorithm description for a detailed explanation'
                                  ' of the cutoff.')
 
-        self.declareProperty(name='wideanglecorrection',
+        self.declareProperty(name='WideAngleCorrection',
                              defaultValue=True,
                              doc='If true, the wide angle correction for transmissions will be applied')
 
-        self.declareProperty(name='reduce_2d',
+        self.declareProperty(name='Reduce2D',
                              defaultValue=False,
                              doc='If true, 2D data reduction will be performed')
 
@@ -270,7 +270,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         account_for_gravity = self.getProperty("AccountForGravity").value
         solid_angle_weighting = self.getProperty("SolidAngleWeighting").value
         wide_angle_correction = self.getProperty("WideAngleCorrection").value
-        reduce_2d = self.getProperty("reduce_2D").value
+        reduce_2d = self.getProperty("Reduce2D").value
 
         # -- Masking --
         if ws_samMsk:
