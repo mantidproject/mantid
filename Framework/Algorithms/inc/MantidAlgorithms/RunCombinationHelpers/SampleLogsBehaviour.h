@@ -23,6 +23,7 @@ class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
   enum class MergeLogType { Sum, TimeSeries, List, Warn, Fail };
 
+  // names of parameters in IPF
   const std::string SUM_MERGE;
   const std::string TIME_SERIES_MERGE;
   const std::string LIST_MERGE;
