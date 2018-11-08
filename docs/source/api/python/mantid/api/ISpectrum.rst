@@ -2,7 +2,7 @@
  ISpectrum
 ===========
 
-This a python binding to the C++ class Mantid::API::ISpectrum.
+This is a Python binding to the C++ class Mantid::API::ISpectrum.
 
 
 .. module:`mantid.api`

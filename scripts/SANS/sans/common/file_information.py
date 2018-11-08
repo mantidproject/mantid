@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ The elements of this module coordinate file access and information extraction from files."""
 
 # pylint: disable=too-few-public-methods, invalid-name
@@ -96,6 +102,8 @@ def find_sans_file(file_name):
                     "the relevant paths are added and the correct instrument is selected."
     try:
         full_path = find_full_file_path(file_name)
+        if not full_path and not file_name.endswith('.nxs'):
+            full_path = find_full_file_path(file_name + '.nxs')
         if not full_path:
             # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
             #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
@@ -118,7 +126,7 @@ def get_extension_for_file_type(file_info):
     Get the extension for a specific file type.
 
     :param file_info: a SANSFileInformation object.
-    :return: the extension a stirng. This can be either nxs or raw.
+    :return: the extension a string. This can be either nxs or raw.
     """
     if file_info.get_type() is FileType.ISISNexus or file_info.get_type() is FileType.ISISNexusAdded:
         extension = NXS_EXTENSION
@@ -324,7 +332,7 @@ def get_number_of_periods_for_isis_nexus(file_name):
 
 def get_instrument_name_for_isis_nexus(file_name):
     """
-    Instrument inforamtion is
+    Instrument information is
     file|
         |--mantid_workspace_1/raw_data_1|
                                         |--instrument|

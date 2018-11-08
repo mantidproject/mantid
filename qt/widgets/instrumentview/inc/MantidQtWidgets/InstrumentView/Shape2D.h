@@ -1,7 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDPLOT_SHAPE2D_H_
 #define MANTIDPLOT_SHAPE2D_H_
 
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "RectF.h"
 
 #include <QColor>

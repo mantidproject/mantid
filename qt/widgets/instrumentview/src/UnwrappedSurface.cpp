@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -11,6 +17,9 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 
 #include <QApplication>
 #include <QMenu>
@@ -649,6 +658,7 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
  * @param lines :: lines from the project file to load state from
  */
 void UnwrappedSurface::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   ProjectionSurface::loadFromProject(lines);
   API::TSVSerialiser tsv(lines);
 
@@ -673,6 +683,11 @@ void UnwrappedSurface::loadFromProject(const std::string &lines) {
         setPeaksWorkspace(ws);
     }
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "UnwrappedSurface::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 /**
@@ -700,6 +715,7 @@ UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
  * @return a string representing the state of the surface
  */
 std::string UnwrappedSurface::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv;
   tsv.writeRaw(ProjectionSurface::saveToProject());
 
@@ -713,6 +729,10 @@ std::string UnwrappedSurface::saveToProject() const {
   }
 
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "UnwrappedSurface::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
 } // namespace MantidWidgets

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------
 // Includes
 //-------------------------------------------
@@ -183,7 +189,7 @@ void ScriptingWindow::showEvent(QShowEvent *event) {
 }
 
 /**
- * Open a script directly. This is here for backwards compatability with the old
+ * Open a script directly. This is here for backwards compatibility with the old
  * ScriptWindow
  * class
  * @param filename :: The file name
@@ -898,4 +904,8 @@ Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
     return Script::Asynchronous;
   else
     return Script::Serialised;
+}
+
+const Script &ScriptingWindow::getCurrentScriptRunner() {
+  return m_manager->currentInterpreter()->getRunner();
 }

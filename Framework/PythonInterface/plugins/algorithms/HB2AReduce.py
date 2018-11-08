@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty, FileProperty,
                         FileAction, MultipleFileProperty)
@@ -25,7 +31,7 @@ class HB2AReduce(PythonAlgorithm):
         return 'Diffraction\\Reduction'
 
     def seeAlso(self):
-        return [ "" ]
+        return []
 
     def name(self):
         return 'HB2AReduce'
@@ -133,6 +139,14 @@ class HB2AReduce(PythonAlgorithm):
         twotheta = data['2theta']
         monitor = data['monitor']
 
+        # Remove points with zero monitor count
+        monitor_mask = np.nonzero(monitor)[0]
+        if len(monitor_mask) == 0:
+            raise RuntimeError("{} has all zero monitor counts".format(filename))
+        monitor = monitor[monitor_mask]
+        counts = counts[:, monitor_mask]
+        twotheta = twotheta[monitor_mask]
+
         # Get either vcorr file or vanadium data
         vanadium_count, vanadium_monitor, vcorr = self.get_vanadium(detector_mask,
                                                                     data['m1'][0], data['colltrans'][0],
@@ -150,7 +164,7 @@ class HB2AReduce(PythonAlgorithm):
             x = twotheta+self._gaps[:, np.newaxis][detector_mask]
             UnitX='Degrees'
         else:
-            x = np.tile(data[def_x], (44,1))[detector_mask]
+            x = np.tile(data[def_x], (44,1))[detector_mask][:, monitor_mask]
             UnitX=def_x
 
         if self.getProperty("IndividualDetectors").value:
@@ -235,12 +249,14 @@ class HB2AReduce(PythonAlgorithm):
 
     def process(self, counts, scale, monitor, vanadium_count=None, vanadium_monitor=None, vcorr=None):
         """Reduce data not binning"""
+        old_settings = np.seterr(all='ignore') # otherwise it will complain about divide by zero
         if vcorr is not None:
             y = counts/vcorr[:, np.newaxis]/monitor
             e = np.sqrt(counts)/vcorr[:, np.newaxis]/monitor
         else:
             y = counts/vanadium_count[:, np.newaxis]*vanadium_monitor/monitor
             e = np.sqrt(1/counts + 1/vanadium_count[:, np.newaxis] + 1/vanadium_monitor + 1/monitor)*y
+        np.seterr(**old_settings)
         return np.nan_to_num(y*scale), np.nan_to_num(e*scale)
 
     def process_binned(self, counts, x, scale, monitor, vanadium_count=None, vanadium_monitor=None, vcorr=None):
@@ -249,16 +265,15 @@ class HB2AReduce(PythonAlgorithm):
         bins = np.arange(x.min(), x.max()+binWidth, binWidth) # calculate bin boundaries
         inds = np.digitize(x, bins) # get bin indices
 
-        # because np.broadcast_to is not in numpy 1.7.1 we use stride_tricks
         if vcorr is not None:
-            vcorr=np.lib.stride_tricks.as_strided(vcorr, shape=counts.shape, strides=(vcorr.strides[0],0))
+            vcorr = np.tile(vcorr, (counts.shape[1], 1)).T
             vcorr_binned = np.bincount(inds, weights=vcorr.ravel(), minlength=len(bins))
         else:
-            vanadium_count=np.lib.stride_tricks.as_strided(vanadium_count, shape=counts.shape, strides=(vanadium_count.strides[0],0))
+            vanadium_count = np.tile(vanadium_count, (counts.shape[1], 1)).T
             vanadium_binned = np.bincount(inds, weights=vanadium_count.ravel(), minlength=len(bins))
             vanadium_monitor_binned = np.bincount(inds, minlength=len(bins))*vanadium_monitor
 
-        monitor=np.lib.stride_tricks.as_strided(monitor, shape=counts.shape, strides=(monitor.strides[0],0))
+        monitor = np.tile(monitor, (counts.shape[0], 1))
 
         counts_binned = np.bincount(inds, weights=counts.ravel(), minlength=len(bins))
         monitor_binned = np.bincount(inds, weights=monitor.ravel(), minlength=len(bins))
@@ -273,6 +288,7 @@ class HB2AReduce(PythonAlgorithm):
             e = (np.sqrt(1/counts_binned + 1/vanadium_binned + 1/vanadium_monitor + 1/monitor_binned)[1:])*y
         np.seterr(**old_settings)
         x = bins
+
         return x, np.nan_to_num(y*scale), np.nan_to_num(e*scale)
 
     def add_metadata(self, ws, metadata, data):

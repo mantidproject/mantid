@@ -16,9 +16,9 @@ the instrument definition.
 
 It also looks to see if it contains a separate instrument parameter map. 
 If yes this is loaded. If no, the algorithm will
-attempt to load on paramter file on your disk from your instrument folder
+attempt to load on parameter file on your disk from your instrument folder
 with the name INST_Parameters.xml. 
-This may be overriden by a parameter correction file, which can be 
+This may be overridden by a parameter correction file, which can be 
 used to correct out of date embedded parameters.
 
 A parameter correction file contains a list of parameter files,

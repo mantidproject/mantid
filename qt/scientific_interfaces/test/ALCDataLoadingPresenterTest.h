@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ALCDATALOADINGTEST_H_
 #define MANTID_CUSTOMINTERFACES_ALCDATALOADINGTEST_H_
 
@@ -357,14 +363,14 @@ public:
     EXPECT_CALL(
         *m_view,
         setDataCurve(
-            AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1398.090, 1E-3),
-                  QwtDataX(1, 1360.200, 1E-3), QwtDataX(2, 1364.520, 1E-3),
-                  QwtDataY(0, 0.15004, 1E-5), QwtDataY(1, 0.14289, 1E-5),
-                  QwtDataY(2, 0.12837, 1E-5)),
+            AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1360.200, 1E-3),
+                  QwtDataX(1, 1364.520, 1E-3), QwtDataX(2, 1398.090, 1E-3),
+                  QwtDataY(0, 0.14289, 1E-5), QwtDataY(1, 0.12837, 1E-5),
+                  QwtDataY(2, 0.15004, 1E-5)),
             AllOf(Property(&std::vector<double>::size, 3),
-                  VectorValue(0, 1.285E-3, 1E-6),
-                  VectorValue(1, 1.284E-3, 1E-6),
-                  VectorValue(2, 1.280E-3, 1E-6))));
+                  VectorValue(0, 1.284E-3, 1E-6),
+                  VectorValue(1, 1.280E-3, 1E-6),
+                  VectorValue(2, 1.285E-3, 1E-6))));
     m_view->requestLoading();
   }
 

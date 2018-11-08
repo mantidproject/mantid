@@ -12,7 +12,7 @@ Project Recovery test
 *Preparation*
 
 - Before running these tests, set project recovery to run every 2 seconds. The instructions for this
-  are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`_.
+  are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`__.
 - Get the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
 - `TOPAZ_3132_event.nxs` - availabe in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target. It should be in ``ExternalData/Testing/Data/SystemTest/``
 - The files `INTER000*` are in the ISIS sample data
@@ -24,9 +24,9 @@ Project Recovery test
 
 --------------
 
-1. Simple tests and Muon-esque workflow
+1. Simple tests
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Open MantidPlot 
 - Right-click in the Results Log and set `Log level` to `Debug`
 - The Results Log should be printing `Nothing to save`
 - Run the following command to create a simple workspace:
@@ -75,12 +75,12 @@ Project Recovery test
 
 2. Testing many workspaces
 
-- Open up MantidPlot, ensure that it is the only instance running
+- Open up MantidPlot
 - Run the following script:
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
+   testing_directory=<path-to-test>   # <path-to-test> is the location of a directory for saving workspaces for comparison later
    CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='0Rebinned')
    for i in range(100):
        RenameWorkspace(InputWorkspace='%sRebinned'%str(i), OutputWorkspace='%sRebinned'%str(i+1))
@@ -106,7 +106,7 @@ Project Recovery test
 
 3. Testing workspaces of different types
 
-- Open up MantidPlot, ensure that only one instance is running
+- Open up MantidPlot
 - Run the following script:
 
 .. code-block:: python
@@ -161,33 +161,6 @@ Project Recovery test
 
 --------
 
-4. Multiple instances of Mantid
-
-- Open up MantidPlot, ensure that only one instance is running
-- Right-click in the Results Log and set `Log level` to `Debug`
-- The Results Log should be printing `Nothing to save`
-- Run the following script:
-
-.. code-block:: python
-
-  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace')
-
-- The Results Log should now be printing `Project Recovery: Saving started` and `Project Recovery: Saving finished` on alternate lines
-- Now start a second instance of Mantid - note on OSX this has to be done from the command line, as OSX will not allow two instances of an executable to be run using the `open` command
-- Set `Log level` to `Debug`
-- Watch the `Results log` for 30 seconds (or longer than your interval for project recovery saving, see the `Preparation` section)
-- No message about saving should be printed
-- Now, crash the first instance of Mantid with `Segfault` from the algorithm window
-- Start a new instance of Mantid
-- This should also have no messages about saving
-- Close both instances of Mantid gracefully
-- Start a new instance of Mantid
-- You should be presented with the Project Recovery dialog
-- Choose `Yes`
-- This should repopulate your workspace window
-
---------
-
 4. Recovering plots and windows
 
 - Open MantidPlot - make sure no other instances of MantidPlot are running
@@ -211,27 +184,21 @@ Project Recovery test
 
 5. Test multiple instances of Mantid running
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
-- Run the script:
+- Launch 2 instances of mantid
+- Run the script on the first instance:
 
 .. code-block:: python
 
-  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace1')
+  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='Instance 1')
 
-- Make sure that Log level is set to `Debug` in the results log
-- Open a second instance of Mantid
-- In the results log it should say ``Another MantidPlot process is running. Project recovery is disabled.`` 
-- Run the script:
+- Run this script on the other instance:
 
 .. code-block:: python
 
-  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace2')
+  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='Instance 2')
 
 - Crash the first instance of Mantid with `Segfault`; choose `Do not share information` in the error dialog
 - Do not exit the second instance of Mantid
-- Restart Mantid
-- In the results log it should say ``Another MantidPlot process is running. Project recovery is disabled.`` 
-- Close both instances of Mantid
 - Restart Mantid
 - You should be presented with a dialog offering to attempt a recovery - choose `Yes`
 - `NewWorkspace1` should appear in the workspace dialog
@@ -240,7 +207,7 @@ Project Recovery test
 
 6. Opening script only
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Open MantidPlot
 - Run the second script from test 1
 - In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
 - Choose `Plot All`
@@ -255,14 +222,14 @@ Project Recovery test
 
 7. Not attempting recovery
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Open MantidPlot
 - Run the second script from test 1
 - In the workspace window right-click the ``Sequential3`` workspace and choose `Plot spectrum`
 - Choose `Plot All`
 - Crash Mantid with `Segfault` from the algorithm window
 - Reopen Mantid
 - You should be presented with the Project Recovery dialog
-- Choose `No`
+- Choose `Start mantid normally`
 - Mantid should open as normal
 - With the Results Log in debug level you should see the project saver starting up again
 
@@ -270,7 +237,7 @@ Project Recovery test
 
 8. Check old history is purged
 
-- Open MantidPlot - make sure no other instances of MantidPlot are running
+- Open MantidPlot
 
 .. code-block:: python
 
@@ -278,8 +245,10 @@ Project Recovery test
   RenameWorkspace(InputWorkspace='NewWorkspace', OutputWorkspace='Rename2')  
 
 - Save the workspace as a `.nxs` file
-- Delete the workspace
+- Close Mantid normally
+- Re-open Mantid
 - Re-open the workspace from the saved `.nxs` file
+- Wait for saving
 - Crash Mantid with `Segfault` from the algorithm window
 - Reopen Mantid
 - Choose `Only open in script editor`

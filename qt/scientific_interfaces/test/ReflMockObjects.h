@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 #define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
@@ -77,6 +83,8 @@ public:
   MOCK_CONST_METHOD0(getTransferMethod, std::string());
   MOCK_CONST_METHOD0(getAlgorithmRunner,
                      boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
+  MOCK_CONST_METHOD0(getMonitorAlgorithmRunner,
+                     boost::shared_ptr<MantidQt::API::AlgorithmRunner>());
   MOCK_CONST_METHOD0(getSelectedGroup, int());
   MOCK_METHOD1(setTransferMethods, void(const std::set<std::string> &));
   MOCK_METHOD0(setTableCommandsProxy, void());
@@ -92,9 +100,15 @@ public:
   MOCK_METHOD1(setTransferMethodComboEnabled, void(bool));
   MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
   MOCK_METHOD1(setSearchButtonEnabled, void(bool));
+  MOCK_METHOD1(setStartMonitorButtonEnabled, void(bool));
+  MOCK_METHOD1(setStopMonitorButtonEnabled, void(bool));
   MOCK_METHOD1(startTimer, void(const int));
   MOCK_METHOD0(stopTimer, void());
   MOCK_METHOD0(startIcatSearch, void());
+  MOCK_METHOD0(startMonitor, void());
+  MOCK_METHOD0(stopMonitor, void());
+  MOCK_METHOD0(updateMonitorRunning, void());
+  MOCK_METHOD0(updateMonitorStopped, void());
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};

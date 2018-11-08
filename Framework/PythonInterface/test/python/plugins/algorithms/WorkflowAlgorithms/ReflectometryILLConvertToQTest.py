@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -27,12 +33,10 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         mtd.add('reflWS', reflWS)
         illhelpers.refl_create_beam_position_ws('reflBeamPosWS', reflWS, 1.5, 128)
         reflWS = illhelpers.refl_preprocess('reflWS', reflWS, 'reflBeamPosWS')
-        fgdWS = illhelpers.refl_sum_foreground('fgdWS', 'SumInLambda', reflWS, dirFgdWS)
+        fgdWS = illhelpers.refl_sum_foreground('fgdWS', 'SumInLambda', reflWS, dirFgdWS, dirWS)
         args = {
             'InputWorkspace': fgdWS,
             'OutputWorkspace': 'inQ',
-            'ReflectedBeamWorkspace': reflWS,
-            'DirectBeamWorkspace': dirWS,
             'DirectForegroundWorkspace': dirFgdWS,
             'GroupingQFraction': 0.2,
             'rethrow': True,
@@ -59,12 +63,11 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         mtd.add('reflWS', reflWS)
         illhelpers.refl_create_beam_position_ws('reflBeamPosWS', reflWS, 1.5, 128)
         reflWS = illhelpers.refl_preprocess('reflWS', reflWS, 'reflBeamPosWS')
-        fgdWS = illhelpers.refl_sum_foreground('fgdWS', 'SumInQ', reflWS, dirFgdWS)
+        fgdWS = illhelpers.refl_sum_foreground('fgdWS', 'SumInQ', reflWS, dirFgdWS, dirWS)
         args = {
             'InputWorkspace': fgdWS,
             'OutputWorkspace': 'inQ',
-            'ReflectedBeamWorkspace': reflWS,
-            'DirectBeamWorkspace': dirWS,
+            'DirectForegroundWorkspace': dirFgdWS,
             'GroupingQFraction': 0.2,
             'rethrow': True,
             'child': True

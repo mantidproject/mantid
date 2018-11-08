@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 
 # File: ReduceSCD_Parallel.py
@@ -22,14 +28,14 @@
 
 #
 # _v1: December 3rd 2013. Mads Joergensen
-# This version now includes the posibility to use the 1D cylindrical integration method
-# and the posibility to load a UB matrix which will be used for integration of the individual
+# This version now includes the possibility to use the 1D cylindrical integration method
+# and the possibility to load a UB matrix which will be used for integration of the individual
 # runs and to index the combined file (Code from Xiapoing).
 #
 
 #
 # _v2: December 3rd 2013. Mads Joergensen
-# Adds the posibility to optimize the loaded UB for each run for a better peak prediction
+# Adds the possibility to optimize the loaded UB for each run for a better peak prediction
 # It is also possible to find the common UB by using lattice parameters of the first
 # run or the loaded matirix instead of the default FFT method
 #
@@ -225,7 +231,7 @@ if not use_cylindrical_integration:
 
 #
 # Load the combined file and re-index all of the peaks together.
-# Save them back to the combined Niggli file (Or selcted UB file if in use...)
+# Save them back to the combined Niggli file (Or selected UB file if in use...)
 #
     if output_nexus:
         peaks_ws = Load( Filename=niggli_integrate_file )

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
@@ -41,6 +47,20 @@ using namespace Geometry;
 namespace {
 /// static logger
 Kernel::Logger g_log("IFunction");
+
+/// Struct that helps sort ties in correct order of application.
+struct TieNode {
+  // Index of the tied parameter
+  size_t left;
+  // Indices of parameters on the right-hand-side of the expression
+  std::vector<size_t> right;
+  // This tie must be applied before the other if the RHS of the other
+  // contains this (left) parameter.
+  bool operator<(TieNode const &other) const {
+    return std::find(other.right.begin(), other.right.end(), left) !=
+           other.right.end();
+  }
+};
 } // namespace
 
 /**
@@ -252,12 +272,24 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   }
 }
 
+bool IFunction::hasOrderedTies() const { return !m_orderedTies.empty(); }
+
+void IFunction::applyOrderedTies() {
+  for (auto &&tie : m_orderedTies) {
+    tie->eval();
+  }
+}
+
 /**
  * Apply the ties.
  */
 void IFunction::applyTies() {
-  for (auto &m_tie : m_ties) {
-    m_tie->eval();
+  if (hasOrderedTies()) {
+    applyOrderedTies();
+  } else {
+    for (auto &tie : m_ties) {
+      tie->eval();
+    }
   }
 }
 
@@ -367,6 +399,25 @@ void IFunction::removeConstraint(const std::string &parName) {
   }
 }
 
+/** Set a constraint penalty
+ * @param parName :: The name of a constraint
+ * @param c :: The penalty
+ */
+void IFunction::setConstraintPenaltyFactor(const std::string &parName,
+                                           const double &c) {
+  size_t iPar = parameterIndex(parName);
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
+    if (iPar == (**it).getLocalIndex()) {
+      (**it).setPenaltyFactor(c);
+      return;
+    }
+  }
+  g_log.warning()
+      << parName
+      << " does not have constraint so setConstraintPenaltyFactor failed"
+      << "\n";
+}
+
 /// Remove all constraints.
 void IFunction::clearConstraints() { m_constraints.clear(); }
 
@@ -464,10 +515,32 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
   Expression list;
   list.parse(str);
   list.toList();
-  for (const auto &expr : list) {
-    auto c = std::unique_ptr<IConstraint>(
-        ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
-    this->addConstraint(std::move(c));
+  for (auto it = list.begin(); it != list.end(); ++it) {
+    auto expr = (*it);
+    if (expr.terms()[0].str().compare("penalty") == 0) {
+      continue;
+    }
+    if ((it + 1) != list.end()) {
+      auto next_expr = *(it + 1);
+      if (next_expr.terms()[0].str().compare("penalty") == 0) {
+        auto c = std::unique_ptr<IConstraint>(
+            ConstraintFactory::Instance().createInitialized(this, expr,
+                                                            isDefault));
+        double penalty_factor = std::stof(next_expr.terms()[1].str(), NULL);
+        c->setPenaltyFactor(penalty_factor);
+        this->addConstraint(std::move(c));
+      } else {
+        auto c = std::unique_ptr<IConstraint>(
+            ConstraintFactory::Instance().createInitialized(this, expr,
+                                                            isDefault));
+        this->addConstraint(std::move(c));
+      }
+    } else {
+      auto c = std::unique_ptr<IConstraint>(
+          ConstraintFactory::Instance().createInitialized(this, expr,
+                                                          isDefault));
+      this->addConstraint(std::move(c));
+    }
   }
 }
 
@@ -1461,6 +1534,59 @@ size_t IFunction::getNumberDomains() const { return 1; }
 std::vector<IFunction_sptr> IFunction::createEquivalentFunctions() const {
   return std::vector<IFunction_sptr>(
       1, FunctionFactory::Instance().createInitialized(asString()));
+}
+
+/// Put all ties in order in which they will be applied correctly.
+void IFunction::sortTies() {
+  m_orderedTies.clear();
+  std::list<TieNode> orderedTieNodes;
+  for (size_t i = 0; i < nParams(); ++i) {
+    auto const tie = getTie(i);
+    if (!tie) {
+      continue;
+    }
+    TieNode newNode;
+    newNode.left = getParameterIndex(*tie);
+    auto const rhsParameters = tie->getRHSParameters();
+    newNode.right.reserve(rhsParameters.size());
+    for (auto &&p : rhsParameters) {
+      newNode.right.emplace_back(this->getParameterIndex(p));
+    }
+    if (newNode < newNode) {
+      throw std::runtime_error("Parameter is tied to itself: " +
+                               tie->asString(this));
+    }
+    bool before(false), after(false);
+    size_t indexBefore(0), indexAfter(0);
+    for (auto &&node : orderedTieNodes) {
+      if (newNode < node) {
+        before = true;
+        indexBefore = node.left;
+      }
+      if (node < newNode) {
+        after = true;
+        indexAfter = node.left;
+      }
+    }
+    if (before) {
+      if (after) {
+        std::string message =
+            "Circular dependency in ties:\n" + tie->asString(this) + '\n';
+        message += getTie(indexBefore)->asString(this);
+        if (indexAfter != indexBefore) {
+          message += '\n' + getTie(indexAfter)->asString(this);
+        }
+        throw std::runtime_error(message);
+      }
+      orderedTieNodes.push_front(newNode);
+    } else {
+      orderedTieNodes.push_back(newNode);
+    }
+  }
+  for (auto &&node : orderedTieNodes) {
+    auto const tie = getTie(node.left);
+    m_orderedTies.emplace_back(tie);
+  }
 }
 
 } // namespace API

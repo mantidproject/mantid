@@ -10,7 +10,7 @@ Run
 
 What the Run object
 -------------------
-    
+
 A Run holds data related to the properties of the experimental run, e.g.
 good proton charge, total frames etc. It also holds all of the sample
 log files as sets of time-series data. Currently used properties within
@@ -45,7 +45,7 @@ Run Properties
   ws = Load("MAR11060")
 
 .. testcode:: RunPropertiestest
-  
+
   from mantid.kernel import DateAndTime
   run = ws.getRun()
 
@@ -56,7 +56,7 @@ Run Properties
   # Get the start and end time of a run
   print(run.startTime())
   print(run.endTime())
-   
+
   # Get the total good proton charge
   print(run.getProtonCharge())
 
@@ -64,8 +64,8 @@ Run Properties
   :hide:
   :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
 
-  2015-01-27T11:00:00 
-  2015-01-27T11:57:51 
+  2015-01-27T11:00:00
+  2015-01-27T11:57:51
   121...
 
 Accessing Properties
@@ -80,7 +80,7 @@ Listing all properties
 
   run = ws.getRun()
 
-  # Get a list of the property names 
+  # Get a list of the property names
   print(run.keys())
 
   # Loop over all of the Properties
@@ -94,7 +94,7 @@ Listing all properties
   ['run_header', ... 'run_title']
   run_header MAR 11060                      Vanadium white beam      23-JUN-2005  10:18:46    121.5
   ...
-  run_title Vanadium white beam                              jaws=50x50 nim=50 dsc=0        
+  run_title Vanadium white beam                              jaws=50x50 nim=50 dsc=0
 
 Getting a specific property
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -105,7 +105,7 @@ Getting a specific property
 
   run = ws.getRun()
 
-  # Check a propetry exists
+  # Check if property exists
   print("Is runstart present: {0}".format(("run_start" in run.keys())))
   # or
   print("Is runstart present: {0}".format(run.hasProperty("run_start")))
@@ -125,9 +125,9 @@ Getting a specific property
   Property value: 2010-01-01T00:00:00
 
 The Gonioneter
-############## 
+##############
 
-If the instrument conatains a Goniometer it can be accessed from the run object.
+If the instrument contains a Goniometer it can be accessed from the run object.
 
 .. testcode:: GetGoniometertest
 
@@ -180,6 +180,8 @@ ISIS (not including ISIS Muon data)
 -  **mon\_sum2** - Monitor sum 2
 -  **mon\_sum3** - Monitor sum 3
 -  **rb\_proposal** - The proposal number
+
+.. _RunInfoOnISISMuonData:
 
 ISIS Muon data
 ##############

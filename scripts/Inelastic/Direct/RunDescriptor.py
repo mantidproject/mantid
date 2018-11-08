@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #pylint: disable=attribute-defined-outside-init
@@ -934,7 +940,7 @@ class RunDescriptor(PropDescriptor):
                 mon_list = [monitors_ID]
         else:
             mon_list = self._holder.get_used_monitors_list()
-        # Check if all requested spectra are indeed availible
+        # Check if all requested spectra are indeed available
         for monID in mon_list:
             if monID in combined_spec_list:
                 continue

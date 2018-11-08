@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MantidQtWidgets/Common/ProjectSavePresenter.h"
 #include "MantidQtWidgets/Common/WindowIcons.h"
@@ -231,7 +237,7 @@ void ProjectSaveView::workspaceItemChanged(QTreeWidgetItem *item, int column) {
  * then only a subset of the workspaces/windows will be passed to the project
  * serialiser.
  *
- * @param checked :: unused arguement
+ * @param checked :: unused argument
  */
 void ProjectSaveView::save(bool checked) {
   UNUSED_ARG(checked);

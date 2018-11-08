@@ -58,7 +58,7 @@ The ``relativePosition`` method takes in an integer ``index`` parameter which co
 The return value is a ``V3D`` object which denotes a point in 3D space.
 
 The ``setRotation()`` method takes in a ``Quat`` object which defines a rotation. The rotation is applied to the component. 
-Retriving the rotation after setting it may not always give the same ``Quat`` object back - i.e. the values could be changed.
+Retrieving the rotation after setting it may not always give the same ``Quat`` object back - i.e. the values could be changed.
 
 The ``hasParent()`` method takes an integer ``index`` parameter which corresponds to a component.
 The return value is ``True`` if the component has a parent component or ``False`` otherwise.

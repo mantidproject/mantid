@@ -2,7 +2,7 @@
  IValidator
 ============
 
-This a python binding to the C++ class Mantid::Kernel::IValidator.
+This is a Python binding to the C++ class Mantid::Kernel::IValidator.
 
 
 .. module:`mantid.kernel`

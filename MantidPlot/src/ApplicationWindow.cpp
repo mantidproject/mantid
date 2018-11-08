@@ -91,7 +91,6 @@
 #include "PlotWizard.h"
 #include "PolynomFitDialog.h"
 #include "PolynomialFit.h"
-#include "Process.h"
 #include "ProjectRecovery.h"
 #include "ProjectSerialiser.h"
 #include "QwtErrorPlotCurve.h"
@@ -182,7 +181,8 @@
 #include <gsl/gsl_sort.h>
 
 #include <boost/regex.hpp>
-#include <boost/scoped_ptr.hpp>
+
+#include <Poco/Path.h>
 
 // Mantid
 #include "Mantid/FirstTimeSetup.h"
@@ -3130,7 +3130,7 @@ Table *ApplicationWindow::newHiddenTable(const QString &name,
   return w;
 }
 
-/* Perfom initialization on a Table?
+/* Perform initialization on a Table?
  * @param w :: table that was created
  * @param caption :: title to set
  */
@@ -4404,7 +4404,7 @@ void ApplicationWindow::open() {
       QString pn = fi.absoluteFilePath();
       if (fn == pn) {
         QMessageBox::warning(
-            this, tr("MantidPlot - File openning error"), // Mantid
+            this, tr("MantidPlot - File opening error"), // Mantid
             tr("The file: <b>%1</b> is the current file!").arg(fn));
         return;
       }
@@ -4421,7 +4421,7 @@ void ApplicationWindow::open() {
         fn.endsWith(".mantid~", Qt::CaseInsensitive)) {
       if (!fi.exists()) {
         QMessageBox::critical(this,
-                              tr("MantidPlot - File openning error"), // Mantid
+                              tr("MantidPlot - File opening error"), // Mantid
                               tr("The file: <b>%1</b> doesn't exist!").arg(fn));
         return;
       }
@@ -4440,7 +4440,7 @@ void ApplicationWindow::open() {
       }
     } else {
       QMessageBox::critical(
-          this, tr("MantidPlot - File openning error"), // Mantid
+          this, tr("MantidPlot - File opening error"), // Mantid
           tr("The file: <b>%1</b> is not a MantidPlot or Origin project file!")
               .arg(fn));
       return;
@@ -5276,7 +5276,7 @@ void ApplicationWindow::readSettings() {
     settings.endGroup();
   }
 
-  // Mantid - Remember which interfaces the user explicitely removed
+  // Mantid - Remember which interfaces the user explicitly removed
   // from the Interfaces menu
   removed_interfaces = settings.value("RemovedInterfaces").toStringList();
 
@@ -5652,7 +5652,7 @@ void ApplicationWindow::saveSettings() {
     settings.endGroup();
   }
 
-  // Mantid - Remember which interfaces the user explicitely removed
+  // Mantid - Remember which interfaces the user explicitly removed
   // from the Interfaces menu
   settings.setValue("RemovedInterfaces", removed_interfaces);
 
@@ -9187,7 +9187,7 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
  * @param window :: the window to add
  */
 void ApplicationWindow::addSerialisableWindow(QObject *window) {
-  // Here we must store the window as a QObject to avoid multiple inheritence
+  // Here we must store the window as a QObject to avoid multiple inheritance
   // issues with Qt and the IProjectSerialisable class as well as being able
   // to respond to the destroyed signal
   // We can still check here that the window conforms to the interface and
@@ -9196,8 +9196,8 @@ void ApplicationWindow::addSerialisableWindow(QObject *window) {
     return;
 
   m_serialisableWindows.push_back(window);
-  // Note that destoryed is emitted directly before the QObject itself
-  // is destoryed. This means the destructor of the specific window type
+  // Note that destroyed is emitted directly before the QObject itself
+  // is destroyed. This means the destructor of the specific window type
   // will have already been called.
   connect(window, SIGNAL(destroyed(QObject *)), this,
           SLOT(removeSerialisableWindow(QObject *)));
@@ -9814,7 +9814,8 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     // Stop background saving thread, so it doesn't try to use a destroyed
     // resource
     m_projectRecovery.stopProjectSaving();
-    m_projectRecovery.clearAllCheckpoints();
+    m_projectRecovery.clearAllCheckpoints(
+        Poco::Path(m_projectRecovery.getRecoveryFolderOutputPR()));
   }
 
   // Close the remaining MDI windows. The Python API is required to be active
@@ -11583,7 +11584,7 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   }
 }
 
-/** Fixes the colour pallete so that the hints are readable.
+/** Fixes the colour palette so that the hints are readable.
 
   On Linux Fedora 26+ and Ubuntu 14.4+ the palette colour for
   ToolTipBase has no effect on the colour of tooltips, but does change
@@ -11591,7 +11592,7 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   colour for ToolTipText on the other hand affects all three of
   these.
 
-  The default pallete shows light text on a pale background which, although
+  The default palette shows light text on a pale background which, although
   not affecting tooltips, makes LineEdit hints and 'What's This' boxes
   difficuilt if not impossible to read.
 
@@ -13850,7 +13851,7 @@ void ApplicationWindow::showBugTracker() {
 
 /*
 @param arg: command argument
-@return TRUE if argument suggests execution and quiting
+@return TRUE if argument suggests execution and quitting
 */
 bool ApplicationWindow::shouldExecuteAndQuit(const QString &arg) {
   return arg.endsWith("--execandquit") || arg.endsWith("-xq");
@@ -15943,7 +15944,7 @@ void ApplicationWindow::tileMdiWindows() {
   shakeViewport();
   // QMdiArea::tileSubWindows() aranges the windows and enables automatic
   // tiling after subsequent resizing of the mdi area until a window is moved
-  // or resized separatly. Unfortunately Graph behaves badly during this. The
+  // or resized separately. Unfortunately Graph behaves badly during this. The
   // following code disables automatic tiling.
   auto winList = d_workspace->subWindowList();
   if (!winList.isEmpty()) {
@@ -16025,8 +16026,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer *w) {
     btnPointer->setChecked(true);
 }
 /**  save workspace data in nexus format
- *   @param wsName :: name of the ouput file.
- *   @param fileName :: name of the ouput file.
+ *   @param wsName :: name of the output file.
+ *   @param fileName :: name of the output file.
  */
 void ApplicationWindow::savedatainNexusFormat(const std::string &wsName,
                                               const std::string &fileName) {
@@ -16294,7 +16295,7 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const {
     // Get window which was added last
     FloatingWindow *lastWindow = m_floatingWindows.last();
 
-    if (lastWindow->isVisible()) { // If it is still visibile - can't use it's
+    if (lastWindow->isVisible()) { // If it is still visible - can't use it's
                                    // location, so need to find a new one
 
       QPoint diff = lastWindow->pos() - lastPoint;
@@ -16665,20 +16666,13 @@ void ApplicationWindow::onAboutToStart() {
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
 
-  // Kick off project recovery iff we are able to determine if we are the only
-  // instance currently running
-  try {
-    if (!Process::isAnotherInstanceRunning()) {
-      g_log.debug("Starting project autosaving.");
-      checkForProjectRecovery();
-    } else {
-      g_log.debug("Another MantidPlot process is running. Project recovery is "
-                  "disabled.");
-    }
-  } catch (std::runtime_error &exc) {
-    g_log.warning("Unable to determine if other MantidPlot processes are "
-                  "running. Project recovery is disabled. Error msg: " +
-                  std::string(exc.what()));
+  // Kick off project recovery
+  if (Mantid::Kernel::ConfigService::Instance().getString(
+          "projectRecovery.enabled") == "true") {
+    g_log.debug("Starting project autosaving.");
+    checkForProjectRecovery();
+  } else {
+    g_log.debug("Project Recovery is disabled.");
   }
 }
 
@@ -16789,11 +16783,26 @@ bool ApplicationWindow::isOfType(const QObject *obj,
  * @param sourceFile The full path to the .project file
  * @return True is loading was successful, false otherwise
  */
-bool ApplicationWindow::loadProjectRecovery(std::string sourceFile) {
+bool ApplicationWindow::loadProjectRecovery(std::string sourceFile,
+                                            std::string recoveryFolder) {
+  // Wait on this thread until scriptWindow is finished (Should be a seperate
+  // thread)
+  do {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  } while (scriptingWindow->isExecuting());
   const bool isRecovery = true;
   ProjectSerialiser projectWriter(this, isRecovery);
   // File version is not applicable to project recovery - so set to 0
-  return projectWriter.load(sourceFile, 0);
+  const auto loadSuccess = projectWriter.load(sourceFile, 0);
+
+  // Handle the removal of old checkpoints and start project saving again
+  Poco::Path deletePath(recoveryFolder);
+  deletePath.setFileName("");
+  deletePath.popDirectory();
+  m_projectRecovery.clearAllCheckpoints(deletePath);
+  m_projectRecovery.startProjectSaving();
+
+  return loadSuccess;
 }
 
 /**
@@ -16816,6 +16825,12 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
  */
 void ApplicationWindow::checkForProjectRecovery() {
   m_projectRecoveryRunOnStart = true;
+
+  m_projectRecovery.removeOlderCheckpoints();
+
+  // Mantid crashed during writing to this checkpoint so remove it
+  m_projectRecovery.removeLockedCheckpoints();
+
   if (!m_projectRecovery.checkForRecovery()) {
     m_projectRecovery.startProjectSaving();
     return;
@@ -16835,7 +16850,10 @@ void ApplicationWindow::checkForProjectRecovery() {
                              "OK");
 
     // Restart project recovery manually
-    m_projectRecovery.clearAllCheckpoints();
     m_projectRecovery.startProjectSaving();
   }
+}
+
+void ApplicationWindow::saveRecoveryCheckpoint() {
+  m_projectRecovery.saveAll(false);
 }

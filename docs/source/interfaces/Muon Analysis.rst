@@ -17,7 +17,7 @@ accessed from the main menu of MantidPlot, in *Interfaces → Muon → Muon Anal
 datasets, please visit `Muon - Downloads <http://www.isis.stfc.ac.uk/groups/muons/downloads/downloads4612.html>`_.#
 
 If the :ref:`Frequency_Domain_Analysis-ref` interfaces is opened it will import all of the data available for the current run in Muon Analysis.
-This will include any custom groupings/pairs. 
+This will include any custom groupings/pairs.
 
 Home
 ----
@@ -40,9 +40,8 @@ Instrument
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **1** | **Instrument**           | Selection of instrument that the experiments were run on.                               |
-|       |                          | It is an advantage if an Instrument Definition File (                                   |
-|       |                          | `IDF <http://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html>`_)  |
-|       |                          | is available for the instrument selection.                                              |
+|       |                          | It is an advantage if an Instrument Definition File                                     |
+|       |                          | (:ref:`IDF <InstrumentDefinitionFile>`) is available for the instrument selection.      |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **2** | **Time Zero**            | Time zero value (:math:`\mu s`). Any bins before that time will be discarded.           |
 |       |                          | If *From datafile* is checked, the value stored in the loaded Muon data file is used.   |
@@ -132,7 +131,7 @@ Plot Data
 |       |                          | - **AsymmetryCalc** For pairs- the result of                                            |
 |       |                          |   :ref:`AsymmetryCalc <algm-AsymmetryCalc>` for the pair groups.                        |
 |       |                          |   For groups- the result of :ref:`RemoveExpDecay <algm-RemoveExpDecay>` applied         |
-|       |                          |   to the group.                                                                         |       
+|       |                          |   to the group.                                                                         |
 |       |                          |                                                                                         |
 |       |                          | - **Counts** *(groups only)*. Pure counts of the selected group.                        |
 |       |                          |                                                                                         |
@@ -150,8 +149,7 @@ Run Information etc.
    :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **1** | **Run Information**      | Information about the loaded run.                                                       |
-|       |                          | See `Run <http://docs.mantidproject.org/nightly/concepts/Run.html#isis-muon-data>`_     |
+| **1** | **Run Information**      | Information about the loaded run. See :ref:`Run <RunInfoOnISISMuonData>`                |
 |       |                          | for the list of parameters which are looked up in the data files.                       |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **2** | **Connected plot**       | The name of the workspace produced for the last plot, i.e. "connected" to the interface.|
@@ -268,8 +266,8 @@ Data Analysis
 
 This tab is designed for the user to make a fit against the data just plotted.
 Since Mantid 3.8 (upgraded in 3.10), this tab has been enhanced to include fits of multiple datasets at once.
-Since Mantid 3.10 a Transverse field (TF) Asymmetry mode has been added and from Mantid 3.11 it is also available in 
-multiple fitting mode. 
+Since Mantid 3.10 a Transverse field (TF) Asymmetry mode has been added and from Mantid 3.11 it is also available in
+multiple fitting mode.
 
 Default: multiple fitting disabled
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -290,11 +288,11 @@ The intention is that this mode could be useful for users who are accustomed to 
 TF asymmetry enabled
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-The TF asymmetry mode can be enabled by checking the "TF Asymmetry" checkbox in the Settings table of the data analysis tab. Leaving the tab will deactivate 
+The TF asymmetry mode can be enabled by checking the "TF Asymmetry" checkbox in the Settings table of the data analysis tab. Leaving the tab will deactivate
 TF asymmetry.
 When TF Asymmetry is activated the user's function is updated by using :ref:`ConvertFitFunctionForMuonTFAsymmetry <algm-ConvertFitFunctionForMuonTFAsymmetry>`
 and populates the function browser. The ties and constraints are not preserved. The plot will also update. Running a fit will then use :ref:`CalculaterMuonAsymmetry <algm-CalculateMuonAsymmetry>`. This willupdate the normalized data.
-It is adviced that when using this feature to have no binning. 
+It is advised that when using this feature to have no binning.
 
 When the user deactivates the  "TF Asymmetry" checkbox the user function is returned with updated values.
 
@@ -321,7 +319,7 @@ The function browser has three columns - property, value and global.
 The values shown are those of the currently selected/plotted dataset.
 The global column contains a checkbox for each function parameter which, when checked, sets this parameter to be shared between all fits.
 
-Parameters can be fixed, tied and constrained by right-clicking. 
+Parameters can be fixed, tied and constrained by right-clicking.
 In addition, just as in the general multi dataset fitting interface, when highlighting a non-global function parameter, a small button will appear next to its value.
 This button will open the "Edit local parameter values" dialog, which offers greater control of function parameters for each dataset.
 
@@ -346,15 +344,15 @@ Data Table
 ^^^^^^^^^^
 
 The data table allows the user to modify the selected data for the fitting. This includes the start and end times, which can also
-be updated by dragging the blue dashed lines in the plot. The "Groups/Pairs to fit" box provides a drop-down menu with three options (all groups, all pairs and custom). 
-Selecting custom will produce a pop-up box with tick boxes for each of the available groups and pairs. If a user wants to update the custom selection the 
-Groups/Pairs button can be pressed from the ReselectData_ section at the bottom ofthe tab (this is only enabled if a custom selection is set). Underneath displays the
-"Selected Groups". 
+be updated by dragging the blue dashed lines in the plot. The "Groups/Pairs to fit" box provides a drop-down menu with three options (all groups, all pairs and custom).
+Selecting custom will produce a pop-up box with tick boxes for each of the available groups and pairs. If a user wants to update the custom selection the
+Groups/Pairs button can be pressed from the ReselectData_ section at the bottom of the tab (this is only enabled if a custom selection is set). Underneath displays the
+"Selected Groups".
 
 The next row is the "Periods to fit" option, which is only displayed for multiple period data. This will automatically be populated with
-each of the periods (e.g. 1,2,3) and a custom option. Selecting custom will produce a pop-up with checkboxes for all of the periods. Selecting custom will also enable the 
+each of the periods (e.g. 1,2,3) and a custom option. Selecting custom will produce a pop-up with checkboxes for all of the periods. Selecting custom will also enable the
 "Periods" button in the ReselectData_ section
-and pressing this button will allow the user to alter their custom selection. 
+and pressing this button will allow the user to alter their custom selection.
 
 Examples/Use cases
 """"""""""""""""""
@@ -402,12 +400,12 @@ Reselect data
 
 .. _ReselectData:
 
-At the bottom of the tab is the "Reselect Data" section. This includes three buttons "Groups/Pairs", "Periods" and "Combine Periods". The "Groups/Pairs" and "Periods" 
-buttons are only when the relevant options in the data table are set to custom. Pressing the button will produce a pop-up that will allow the user to modify their selection. 
+At the bottom of the tab is the "Reselect Data" section. This includes three buttons "Groups/Pairs", "Periods" and "Combine Periods". The "Groups/Pairs" and "Periods"
+buttons are only when the relevant options in the data table are set to custom. Pressing the button will produce a pop-up that will allow the user to modify their selection.
 
-The "Combine Periods" button is only enabled if multiple periods are available. Pressing the button will generate a pop-up with two boxes. The top one is for adding periods 
-(as a comma seperated list or with "+") and the bottom box is for subtraction (as a comma sepearted list). Everything in the top and bottom boxes are summed seperatley 
-and the results are then used in the subtraction. 
+The "Combine Periods" button is only enabled if multiple periods are available. Pressing the button will generate a pop-up with two boxes. The top one is for adding periods
+(as a comma separated list or with "+") and the bottom box is for subtraction (as a comma sepearted list). Everything in the top and bottom boxes are summed seperatley
+and the results are then used in the subtraction.
 
 .. image::  ../images/MuonAnalysisCombinePeriods.png
    :align: right
@@ -427,14 +425,14 @@ The dialog can be opened from the Fit menu in *Fit* → *Sequential Fit*.
 
 +-------+-----------------------+---------------------------------------------------------------------------+
 | **1** | **Runs**              | A list of run data files to fit. Two types of input are accepted:         |
-|       |                       |                                                                           | 
+|       |                       |                                                                           |
 |       |                       | - List of files on the disk separated by comma. These can be specified    |
 |       |                       |   using the *Browse* button.                                              |
-|       |                       |                                                                           | 
+|       |                       |                                                                           |
 |       |                       | - Run numbers separated by comma. Specific files will then be searched    |
 |       |                       |   in the archive for the instrument selected on the interface. Ranges     |
 |       |                       |   are allowed, e.g. "15189-15199".                                        |
-|       |                       |                                                                           | 
+|       |                       |                                                                           |
 +-------+-----------------------+---------------------------------------------------------------------------+
 | **2** | **Label**             | Text label to use for the sequential fit. It is used to find the results  |
 |       |                       | on the ResultsTable_  tab. The resulting workspace group and the          |
@@ -452,7 +450,7 @@ The dialog can be opened from the Fit menu in *Fit* → *Sequential Fit*.
 |       |                       | values of all the parameters.                                             |
 +-------+-----------------------+---------------------------------------------------------------------------+
 
-After the options have been set and the *Start* button has been pressed, the dialog goes through **every** 
+After the options have been set and the *Start* button has been pressed, the dialog goes through **every**
 data file and does the following:
 
 1. Loads the file
@@ -641,7 +639,7 @@ General
 |       |                             |                                                                     |
 |       |                             |   NOTE: This can can cause speed and stability problems once the    |
 |       |                             |   number of graphs managed by Mantidplot passes a few hundred       |
-|       |                             |   which can hapen if you run Mantid for a few days on an            |
+|       |                             |   which can happen if you run Mantid for a few days on an           |
 |       |                             |   experiment. For long term stability we suggest you select         |
 |       |                             |   **Use previous window**.                                          |
 |       |                             |                                                                     |
@@ -677,6 +675,6 @@ Feedback & Comments
 
 If you have any questions or comments about this interface or this help page, please
 contact the `Mantid team <http://www.mantidproject.org/Contact>`__ or the
-`Muon group <http://www.isis.stfc.ac.uk/groups/muons/muons3385.html>`__. 
+`Muon group <http://www.isis.stfc.ac.uk/groups/muons/muons3385.html>`__.
 
 .. categories:: Interfaces Muon

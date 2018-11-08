@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
@@ -314,7 +320,7 @@ class RunSetupWidget(BaseWidget):
         return s
 
     def _calfile_browse(self):
-        """ Event handing for browsing calibrtion file
+        """ Event handing for browsing calibration file
         """
         fname = self.data_browse_dialog(data_type="*.h5;;*.cal;;*.hd5;;*.hdf;;*")
         if fname:
@@ -323,7 +329,7 @@ class RunSetupWidget(BaseWidget):
         return
 
     def _charfile_browse(self):
-        """ Event handing for browsing calibrtion file
+        """ Event handing for browsing calibration file
         """
         fname = self.data_browse_dialog("*.txt;;*", multi=True)
         if fname:
@@ -439,7 +445,7 @@ class RunSetupWidget(BaseWidget):
         return True, '', intliststring
 
     def _overrideemptyrun_clicked(self):
-        """ Handling event if overriding emptry run
+        """ Handling event if overriding empty run
         """
         if self._content.override_emptyrun_checkBox.isChecked() is True:
             self._content.emptyrun_edit.setEnabled(True)
@@ -451,7 +457,7 @@ class RunSetupWidget(BaseWidget):
         return
 
     def _overridevanrun_clicked(self):
-        """ Handling event if overriding emptry run
+        """ Handling event if overriding empty run
         """
         if self._content.override_vanrun_checkBox.isChecked() is True:
             self._content.vanrun_edit.setEnabled(True)
@@ -463,7 +469,7 @@ class RunSetupWidget(BaseWidget):
         return
 
     def _overridevanbkgdrun_clicked(self):
-        """ Handling event if overriding emptry run
+        """ Handling event if overriding empty run
         """
         if self._content.override_vanbkgdrun_checkBox.isChecked() is True:
             self._content.vanbkgdrun_edit.setEnabled(True)

@@ -145,7 +145,7 @@ Output:
         Target='Theta'
     )
 
-    # Lets assing NaNs to the lower left and upper right corners
+    # Lets assign NaNs to the lower left and upper right corners
     # of the workspace.
     for iVert in range(wsInTheta.getNumberHistograms()):
         for iHor in range(wsInTheta.blocksize()):
