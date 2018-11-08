@@ -49,6 +49,7 @@ Bugfixes
   message is now displayed.
 - The Probability Density Functions (PDF) workspaces for the FABADA minimiser in ConvFit no longer overwrite each other. 
   Various other improvements in the display of the FABADA PDF's have also been finished.
+- The expression for the Fit type Yi in MSDFit was incorrect and has now been corrected.
 
 
 Data Corrections Interface
@@ -77,3 +78,13 @@ Improvements
 - The Run button has been moved to be above the output options. The run button, save button and plotting options 
   are now disabled while a tab is running or plotting.  
 - It is now possible to choose which spectrum to Plot Output for in the S(Q,w) Tab.
+
+
+Bayes Interface
+---------------
+
+Improvements
+############
+
+- The Run button is now above the output options.
+- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.

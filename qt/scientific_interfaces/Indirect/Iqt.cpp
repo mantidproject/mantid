@@ -187,10 +187,10 @@ void Iqt::run() {
  */
 void Iqt::algorithmComplete(bool error) {
   setRunIsRunning(false);
-  if (!error) {
-    setPlotResultEnabled(true);
-    setTiledPlotEnabled(true);
-    setSaveResultEnabled(true);
+  if (error) {
+    setPlotResultEnabled(false);
+    setTiledPlotEnabled(false);
+    setSaveResultEnabled(false);
   }
 }
 /**
@@ -478,22 +478,26 @@ void Iqt::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
+void Iqt::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setTiledPlotEnabled(enabled);
+}
+
 void Iqt::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
-  setTiledPlotEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void Iqt::setPlotResultIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotResultEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 void Iqt::setTiledPlotIsPlotting(bool plotting) {
   m_uiForm.pbTile->setText(plotting ? "Plotting..." : "Tiled Plot");
-  setTiledPlotEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 void Iqt::runClicked() { runTab(); }

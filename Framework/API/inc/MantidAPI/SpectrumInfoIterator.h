@@ -8,7 +8,6 @@
 #define MANTID_API_SPECTRUMINFOITERATOR_H_
 
 #include "MantidAPI/SpectrumInfoItem.h"
-
 #include <boost/iterator/iterator_facade.hpp>
 
 using Mantid::API::SpectrumInfoItem;
@@ -28,7 +27,7 @@ iterator.
 */
 
 template <typename T>
-class MANTID_API_DLL SpectrumInfoIterator
+class SpectrumInfoIterator
     : public boost::iterator_facade<SpectrumInfoIterator<T>,
                                     SpectrumInfoItem<T> &,
                                     boost::random_access_traversal_tag> {

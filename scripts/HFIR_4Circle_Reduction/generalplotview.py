@@ -1,7 +1,14 @@
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
-import HFIR_4Circle_Reduction.ui_general1dviewer as ui_general1dviewer
+from HFIR_4Circle_Reduction.integratedpeakview import GeneralPurposedPlotView
 import os
-from PyQt4.QtGui import QMainWindow, QFileDialog
+from qtpy.QtWidgets import QMainWindow, QFileDialog
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 
 
 class GeneralPlotWindow(QMainWindow):
@@ -16,8 +23,9 @@ class GeneralPlotWindow(QMainWindow):
         super(GeneralPlotWindow, self).__init__(parent)
 
         # set up UI
-        self.ui = ui_general1dviewer.Ui_MainWindow()
-        self.ui.setupUi(self)
+        ui_path = "general1dviewer.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
+        self._promote_widgets()
 
         # set up the event handling
         self.ui.pushButton_exportPlot2File.clicked.connect(self.do_export_plot)
@@ -26,6 +34,14 @@ class GeneralPlotWindow(QMainWindow):
 
         # class variables
         self._work_dir = os.getcwd()
+
+        return
+
+    def _promote_widgets(self):
+        graphicsView_plotView_layout = QVBoxLayout()
+        self.ui.frame_graphicsView_plotView.setLayout(graphicsView_plotView_layout)
+        self.ui.graphicsView_plotView = GeneralPurposedPlotView(self)
+        graphicsView_plotView_layout.addWidget(self.ui.graphicsView_plotView)
 
         return
 
