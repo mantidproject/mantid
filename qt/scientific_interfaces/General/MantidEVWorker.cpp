@@ -263,27 +263,27 @@ bool MantidEVWorker::loadAndConvertToMD(
  *  @return true if the file was loaded and MD workspace was
  *          successfully created.
  */
-bool MantidEVWorker::convertToHKL(
-    const std::string &ev_ws_name,
-    const std::string &md_ws_name, const double minQ,
-    const double maxQ) {
+bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name,
+                                  const std::string &md_ws_name,
+                                  const double minQ, const double maxQ) {
   try {
     IAlgorithm_sptr alg;
-  const auto &ADS = AnalysisDataService::Instance();
-      Mantid::API::MatrixWorkspace_sptr ev_ws =
-          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+    const auto &ADS = AnalysisDataService::Instance();
+    Mantid::API::MatrixWorkspace_sptr ev_ws =
+        ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
     double Q = maxQ;
-    if (minQ != Mantid::EMPTY_DBL()){
+    if (minQ != Mantid::EMPTY_DBL()) {
       Q = std::max(Q, -minQ);
     }
     Mantid::Geometry::OrientedLattice o_lattice =
         ev_ws->mutableSample().getOrientedLattice();
-    V3D h = o_lattice.hklFromQ(V3D(Q,0,0));
-    V3D k = o_lattice.hklFromQ(V3D(0,Q,0));
-    V3D l = o_lattice.hklFromQ(V3D(0,0,Q));
+    V3D h = o_lattice.hklFromQ(V3D(Q, 0, 0));
+    V3D k = o_lattice.hklFromQ(V3D(0, Q, 0));
+    V3D l = o_lattice.hklFromQ(V3D(0, 0, Q));
 
     std::ostringstream min_str;
-    min_str << -std::abs(h[0]) << "," << -std::abs(k[1]) << "," << -std::abs(l[2]);
+    min_str << -std::abs(h[0]) << "," << -std::abs(k[1]) << ","
+            << -std::abs(l[2]);
 
     std::ostringstream max_str;
     max_str << std::abs(h[0]) << "," << std::abs(k[1]) << "," << std::abs(l[2]);

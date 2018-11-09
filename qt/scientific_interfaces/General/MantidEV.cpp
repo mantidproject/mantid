@@ -312,8 +312,8 @@ void MantidEV::initLayout() {
   QObject::connect(m_uiForm.SelectCellOfType_rbtn, SIGNAL(toggled(bool)), this,
                    SLOT(setEnabledSetCellTypeParams_slot(bool)));
 
-  QObject::connect(m_uiForm.CreateHKLWorkspace_ckbx, SIGNAL(clicked(bool)), this,
-                   SLOT(setEnabledCreateHKLWorkspaceParams_slot(bool)));
+  QObject::connect(m_uiForm.CreateHKLWorkspace_ckbx, SIGNAL(clicked(bool)),
+                   this, SLOT(setEnabledCreateHKLWorkspaceParams_slot(bool)));
 
   QObject::connect(m_uiForm.SelectCellWithForm_rbtn, SIGNAL(toggled(bool)),
                    this, SLOT(setEnabledSetCellFormParams_slot(bool)));
@@ -1004,7 +1004,7 @@ void MantidEV::chooseCell_slot() {
     worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
   }
 
-  if (create_hkl_workspace) { // Try to create the HKL md_workspace. 
+  if (create_hkl_workspace) { // Try to create the HKL md_workspace.
     double minQ;
     getDouble(m_uiForm.MinMagQ_ledt, minQ);
 
