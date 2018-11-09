@@ -133,7 +133,7 @@ datetime
 
 -  Example usage:
 
-.. code:: python
+.. testcode:: datetime1
 
    import datetime as dt
    format = '%Y-%m-%dT%H:%M:%S'
@@ -147,6 +147,16 @@ datetime
    t2 = dt.datetime.now()
    diff = t2 - t1
    print('How many days difference? ' + str(diff.days))
+
+Gives the output:
+
+.. testoutput:: datetime2
+
+    Day 12
+    Month 10
+    Minute 45
+    Second 52
+    How many days difference? 3679
 
 os.path
 ~~~~~~~
@@ -234,7 +244,7 @@ Numpy Functions
    -  shape: A tuple containing the length in each dimension
    -  size: The total number of elements
 
-.. code:: python
+.. testcode:: numpy1
 
    import numpy
 
@@ -243,6 +253,14 @@ Numpy Functions
    print(x.shape) # Prints (3L, 3L)
    print(x.size) # Prints 9
 
+Gives the output:
+
+.. testcode:: numpy1
+
+    2
+    (3, 3)
+    9
+
 -  Can be used just like Python lists
 
    -  x[1] will access the second element
@@ -250,12 +268,18 @@ Numpy Functions
 
 -  Arithmetic operations apply element wise
 
-.. code:: python
+.. testcode:: numpy2
 
    a = numpy.array( [20,30,40,50] ) 
    b = numpy.arange( 4 ) 
    c = a-b 
-   #c => array([20, 29, 38, 47])
+   print(c)
+
+Gives the output:
+
+.. testoutput:: numpy2
+
+    array([20, 29, 38, 47])
 
 Built-in Methods
 ~~~~~~~~~~~~~~~~
