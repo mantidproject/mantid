@@ -59,7 +59,7 @@ class DeltaPDF3DTest(unittest.TestCase):
 
     def test_3D(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH',OutputWorkspace='fft',
-                   RemoveReflections=False,CropSphere=False,Convolution=False)
+                   Method='None',CropSphere=False,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(113490), 33958.0) # [0,0,0]
         self.assertAlmostEqual(fft.signalAt(113496), 23671.27596343) # [1,0,0]
@@ -70,7 +70,7 @@ class DeltaPDF3DTest(unittest.TestCase):
 
     def test_3D_RemoveReflections(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH',OutputWorkspace='fft',IntermediateWorkspace='int',
-                   RemoveReflections=True,Size=0.4,CropSphere=False,Convolution=False)
+                   Method='Punch and fill',Size=0.4,CropSphere=False,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(113490), 4320.0) # [0,0,0]
         self.assertAlmostEqual(fft.signalAt(113496), -3899.411112565) # [1,0,0]
@@ -78,7 +78,7 @@ class DeltaPDF3DTest(unittest.TestCase):
 
     def test_3D_CropSphere(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH',OutputWorkspace='fft',IntermediateWorkspace='int',
-                   RemoveReflections=True,Size=0.4,CropSphere=True,SphereMax=3,Convolution=False)
+                   Method='Punch and fill',Size=0.4,CropSphere=True,SphereMax=3,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(113490), 2510.0) # [0,0,0]
         self.assertAlmostEqual(fft.signalAt(113496), -2274.141590160) # [1,0,0]
@@ -86,7 +86,7 @@ class DeltaPDF3DTest(unittest.TestCase):
 
     def test_2D(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',
-                   RemoveReflections=False,CropSphere=False,Convolution=False)
+                   Method='None',CropSphere=False,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(1860), 5224.0) # [0,0,0]
         self.assertAlmostEqual(fft.signalAt(1866), 3545.6265676) # [1,0,0]
@@ -100,7 +100,7 @@ class DeltaPDF3DTest(unittest.TestCase):
 
     def test_2D_RemoveReflections(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',IntermediateWorkspace='int',
-                   RemoveReflections=True,Size=0.4,CropSphere=False,Convolution=False)
+                   Method='Punch and fill',Size=0.4,CropSphere=False,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(1860), 720.0) # [0,0,0]
         self.assertAlmostEqual(fft.signalAt(1866), -649.90185209) # [1,0,0]
@@ -108,7 +108,7 @@ class DeltaPDF3DTest(unittest.TestCase):
 
     def test_2D_CropSphere(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',IntermediateWorkspace='int',
-                   RemoveReflections=True,Size=0.4,CropSphere=True,SphereMax=3,Convolution=False)
+                   Method='Punch and fill',Size=0.4,CropSphere=True,SphereMax=3,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(1860), 622.0) # [0,0,0]
         self.assertAlmostEqual(fft.signalAt(1866), -562.30106845) # [1,0,0]
@@ -116,7 +116,7 @@ class DeltaPDF3DTest(unittest.TestCase):
 
     def test_2D_RemoveReflections_sphere(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',IntermediateWorkspace='int',
-                   RemoveReflections=True,Shape='sphere',Size=0.3,CropSphere=False,Convolution=False)
+                   Method='Punch and fill',Shape='sphere',Size=0.3,CropSphere=False,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(1860), 720.0) # [0,0,0]
         self.assertAlmostEqual(fft.signalAt(1866), -649.90185209) # [1,0,0]
@@ -124,7 +124,7 @@ class DeltaPDF3DTest(unittest.TestCase):
 
     def test_2D_RemoveReflections_sphere_CropSphere(self):
         DeltaPDF3D(InputWorkspace='DeltaPDF3DTest_MDH_2',OutputWorkspace='fft',IntermediateWorkspace='int',
-                   RemoveReflections=True,Shape='sphere',Size=0.3,CropSphere=True,SphereMax=3,Convolution=False)
+                   Method='Punch and fill',Shape='sphere',Size=0.3,CropSphere=True,SphereMax=3,Convolution=False,WindowFunction='None')
         fft=mtd['fft']
         self.assertAlmostEqual(fft.signalAt(1860), 622.0) # [0,0,0]
         self.assertAlmostEqual(fft.signalAt(1866), -562.30106845) # [1,0,0]
