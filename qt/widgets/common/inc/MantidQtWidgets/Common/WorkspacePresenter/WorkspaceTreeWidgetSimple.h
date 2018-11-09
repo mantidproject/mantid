@@ -49,6 +49,7 @@ signals:
   void plotColorfillClicked(const QStringList &workspaceNames);
   void sampleLogsClicked(const QStringList &workspaceName);
   void showInstrumentClicked(const QStringList &workspaceNames);
+  void showDataClicked(const QStringList &workspaceNames);
 
 private slots:
   void onPlotSpectrumClicked();
@@ -58,11 +59,12 @@ private slots:
   void onPlotColorfillClicked();
   void onSampleLogsClicked();
   void onShowInstrumentClicked();
+  void onShowDataClicked();
 
 private:
   QAction *m_plotSpectrum, *m_overplotSpectrum, *m_plotSpectrumWithErrs,
       *m_overplotSpectrumWithErrs, *m_plotColorfill, *m_sampleLogs,
-      *m_showInstrument;
+      *m_showInstrument, *m_showData;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

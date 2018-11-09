@@ -33,7 +33,8 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
           new QAction("overplot spectrum with errors...", this)),
       m_plotColorfill(new QAction("colorfill", this)),
       m_sampleLogs(new QAction("Sample Logs", this)),
-      m_showInstrument(new QAction("Show Instrument", this)) {
+      m_showInstrument(new QAction("Show Instrument", this)),
+      m_showData(new QAction("Show Data", this)) {
   // connections
   connect(m_plotSpectrum, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumClicked()));
@@ -48,6 +49,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
   connect(m_sampleLogs, SIGNAL(triggered()), this, SLOT(onSampleLogsClicked()));
   connect(m_showInstrument, SIGNAL(triggered()), this,
           SLOT(onShowInstrumentClicked()));
+  connect(m_showData, SIGNAL(triggered()), this, SLOT(onShowDataClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -88,6 +90,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       plotSubMenu->addAction(m_plotColorfill);
       menu->addMenu(plotSubMenu);
       menu->addSeparator();
+      menu->addAction(m_showData);
       menu->addAction(m_showInstrument);
       menu->addSeparator();
     }
@@ -129,6 +132,9 @@ void WorkspaceTreeWidgetSimple::onSampleLogsClicked() {
 
 void WorkspaceTreeWidgetSimple::onShowInstrumentClicked() {
   emit showInstrumentClicked(getSelectedWorkspaceNamesAsQList());
+}
+void WorkspaceTreeWidgetSimple::onShowDataClicked() {
+  emit showDataClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

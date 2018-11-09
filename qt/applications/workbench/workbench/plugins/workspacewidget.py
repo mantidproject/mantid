@@ -10,10 +10,11 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
-import functools
+from functools import partial
 
 # third-party library imports
 from mantid.api import AnalysisDataService
+from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
@@ -21,7 +22,7 @@ from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names
+from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names, plt
 
 
 class WorkspaceWidget(PluginWidget):
@@ -39,16 +40,17 @@ class WorkspaceWidget(PluginWidget):
         self.setLayout(layout)
 
         # behaviour
-        self.workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                           errors=False, overplot=False))
-        self.workspacewidget.overplotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                               errors=False, overplot=True))
-        self.workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                                     errors=True, overplot=False))
-        self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                                         errors=True, overplot=True))
+        self.workspacewidget.plotSpectrumClicked.connect(partial(self._do_plot_spectrum,
+                                                                 errors=False, overplot=False))
+        self.workspacewidget.overplotSpectrumClicked.connect(partial(self._do_plot_spectrum,
+                                                                     errors=False, overplot=True))
+        self.workspacewidget.plotSpectrumWithErrorsClicked.connect(partial(self._do_plot_spectrum,
+                                                                           errors=True, overplot=False))
+        self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(partial(self._do_plot_spectrum,
+                                                                               errors=True, overplot=True))
         self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
         self.workspacewidget.sampleLogsClicked.connect(self._do_sample_logs)
+        self.workspacewidget.showDataClicked.connect(self._do_show_data)
         self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
 
     # ----------------- Plugin API --------------------
@@ -113,4 +115,11 @@ class WorkspaceWidget(PluginWidget):
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             presenter = InstrumentViewPresenter(ws, parent=self)
+            presenter.view.show()
+
+    def _do_show_data(self, names):
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            # plt injects the plotting library in the presenter
+            # this is done so that the plotting library is mockable in testing
+            presenter = MatrixWorkspaceDisplay(ws, plt=plt, parent=self)
             presenter.view.show()
