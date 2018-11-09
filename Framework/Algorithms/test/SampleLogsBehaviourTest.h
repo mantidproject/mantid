@@ -134,9 +134,9 @@ public:
     const std::string A = ws->run().getLogData("A")->value();
     const std::string B = ws->run().getLogData("B")->value();
     const std::string C = ws->run().getLogData("C")->value();
-    // B summed according to user name and A and B summed according to IPF
+    // B summed according to user name and A and C summed according to IPF
     TS_ASSERT_EQUALS(A, "5.2999999999999998")
-    TS_ASSERT_EQUALS(B, "1.5600000000000001")
+    TS_ASSERT_EQUALS(B, "3.1200000000000001")
     TS_ASSERT_EQUALS(C, "17.100000000000001")
   }
 
