@@ -1,70 +1,94 @@
 from __future__ import print_function
 
 from mantidqt.utils.qt.test.run_test_app import open_in_window
-from qtpy.QtWidgets import QPushButton, QMenu, QAction
+from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication
 from qtpy.QtCore import QObject, Signal, Qt, QMetaObject
+
+
+def _make_caller(method_name):
+    def caller(self):
+        # setattr(self, _make_finished_name(method_name), False)
+        self.start.emit(method_name)
+
+    return caller
+
+
+def _make_finished_checker(method_name):
+    finished_name = _make_finished_name(method_name)
+
+    def checker(self):
+        var = getattr(self, finished_name)
+        while not var:
+            yield
+            var = getattr(self, finished_name)
+
+    return checker
+
+
+def _make_slot_name(method):
+    return '_{}_slot___'.format(method)
+
+
+def _make_slot(method_name, method):
+    def slot(self):
+        method(self)
+        setattr(self, _make_finished_name(method_name), True)
+        return getattr(self, make_finished_checker_name(method_name))()
+
+    return slot
+
+
+def _make_finished_name(method):
+    return '_{}_finished___'.format(method)
+
+
+def make_finished_checker_name(method):
+    return '_is_{}_finished___'.format(method)
 
 
 class modals(object):
     def __init__(self, *methods):
         self.methods = methods
 
-    @staticmethod
-    def _make_caller(method_name):
-        def caller(self):
-            setattr(self, modals._make_finished_name(method_name), False)
-            self.start.emit(method_name)
-        return caller
-
-    @staticmethod
-    def _make_finished_checker(method_name):
-        finished_name = modals._make_finished_name(method_name)
-
-        def checker(self):
-            var = getattr(self, finished_name)
-            while not var:
-                yield
-                var = getattr(self, finished_name)
-        return checker
-
-    @staticmethod
-    def _make_slot_name(method):
-        return '_{}_slot___'.format(method)
-
-    @staticmethod
-    def _make_slot(method_name, method):
-        def slot(self):
-            method(self)
-            print('FINISHING', modals._make_finished_name(method_name))
-            setattr(self, modals._make_finished_name(method_name), True)
-            return getattr(self, modals.make_finished_checker_name(method_name))()
-        return slot
-
-    @staticmethod
-    def _make_finished_name(method):
-        return '_{}_finished___'.format(method)
-
-    @staticmethod
-    def make_finished_checker_name(method):
-        return '_is_{}_finished___'.format(method)
-
     def __call__(self, cls):
 
         cls._modal_methods = self.methods
         for method_name in self.methods:
             method = getattr(cls, method_name)
-            method_slot_name = self._make_slot_name(method_name)
-            setattr(cls, method_name, self._make_caller(method_slot_name))
-            setattr(cls, method_slot_name, self._make_slot(method_name, method))
-            setattr(cls, self._make_finished_name(method_name), False)
-            setattr(cls, self.make_finished_checker_name(method_name), self._make_finished_checker(method_name))
-
-        if not hasattr(cls, 'call'):
-            def call(self):
-                pass
-            setattr(cls, 'call', call)
+            method_slot_name = _make_slot_name(method_name)
+            setattr(cls, method_name, _make_caller(method_slot_name))
+            setattr(cls, method_slot_name, _make_slot(method_name, method))
+            setattr(cls, _make_finished_name(method_name), False)
+            setattr(cls, make_finished_checker_name(method_name), _make_finished_checker(method_name))
 
         return cls
+
+
+def make_modals(cls):
+
+    if not hasattr(cls, '_modal_methods'):
+        cls._modal_methods = []
+    cls_vars = [name for name in vars(cls)]
+    for method_name in cls_vars:
+        caller = getattr(cls, method_name)
+        if hasattr(caller, 'method'):
+            method = caller.method
+            setattr(cls, caller.method_slot_name, _make_slot(method_name, method))
+            setattr(cls, _make_finished_name(method_name), False)
+            setattr(cls, make_finished_checker_name(method_name), _make_finished_checker(method_name))
+            cls._modal_methods.append(method_name)
+    return cls
+
+
+def modal(method):
+
+    method_name = method.__name__
+    method_slot_name = _make_slot_name(method_name)
+    caller = _make_caller(method_slot_name)
+    caller.method = method
+    caller.method_name = method_name
+    caller.method_slot_name = method_slot_name
+    return caller
 
 
 class GuiTestBase(QObject, object):
@@ -79,7 +103,10 @@ class GuiTestBase(QObject, object):
 
     def __call__(self, w):
         self.widget = w
-        return getattr(self, self.call_method)()
+        if hasattr(self, self.call_method):
+            return getattr(self, self.call_method)()
+        if self.call_method != 'call':
+            raise RuntimeError("Test class has no method {}".format(self.call_method))
 
     def modal_slot_caller(self, method):
         getattr(self, method)()
@@ -111,6 +138,9 @@ class GuiTestBase(QObject, object):
             raise RuntimeError("Widget doesn't have children of type {0} with name {1}.".format(child_class.__name__,
                                                                                                 name))
         return children[0]
+
+    def get_active_modal_widget(self):
+        return QApplication.activeModalWidget()
 
     def get_menu(self, name):
         return self.get_child(QMenu, name)
