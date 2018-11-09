@@ -43,7 +43,7 @@ Special Characters
 -  An asterisk ``*`` specifies that the character preceding it can
    appear zero or more times, e.g,
 
-.. code:: python
+.. code:: 
 
    regex: 'a*b'
    test: 'b'         # Matches as there are no occurrences of 'a'
@@ -55,7 +55,7 @@ Special Characters
 -  A range of characters, or a "character class" is defined using square
    brackets ``[]``, e.g.
 
-.. code:: python
+.. code:: 
 
    regex: '[a-z]'
    test: 'm' # Matches as it is a lower case letter
@@ -64,7 +64,7 @@ Special Characters
 
 -  Several ranges can be specified such that they are all checked, e.g.
 
-.. code:: python
+.. code:: 
 
    regex: '[a-z,A-Z,0-9]'
    test: 'm'  # Matches!
@@ -75,7 +75,7 @@ Special Characters
 -  Combining ranges and the asterisk allows us to specify any number of
    alphanumeric characters!, e.g.
 
-.. code:: python
+.. code:: 
 
    regex: '[a-z,A-Z,0-9]*'
    test: 'mm'    # Matches
@@ -83,7 +83,7 @@ Special Characters
 
 -  To specify an exact number of characters use braces ``{}``, e.g.
 
-.. code:: python
+.. code:: 
 
    regex: 'a{2}'
    test: 'abab'  # Fails as there is not two consecutive a's in the string
@@ -104,9 +104,14 @@ Regular Expressions in Python
    allows strings to be tested against regular expressions with a few
    lines of code. Reference: http://docs.python.org/2/library/re.html
 
+-  The ``compile`` function also takes another optional argument
+   controlling the matching process, all of which are documented at the
+   above location. Here we pass the ``RE.IGNORECASE`` option meaning
+   that a case-insensitive match is performed.
+
 -  Example:
 
-.. code:: python
+.. testcode:: regex1
 
    import re
 
@@ -118,19 +123,21 @@ Regular Expressions in Python
    # End of function definition
 
    checker = re.compile('[a-z]')
-   checkForMatch(checker, 'a')  # Prints "String matches!"
-   checkForMatch(checker, '9')  # Prints "String does not contain a match"
-
--  The ``compile`` function also takes another optional argument
-   controlling the matching process, all of which are documented at the
-   above location. Here we pass the ``RE.IGNORECASE`` option meaning
-   that a case-insensitive match is performed, e.g.
-
-.. code:: python
+   checkForMatch(checker, 'a')  
+   checkForMatch(checker, '9') 
 
    checker = re.compile('[a-z]', re.IGNORECASE)
-   checkForMatch(checker, 'a')  # Prints "String matches!"
-   checkForMatch(checker, 'A')  # Also prints "String matches!"
+   checkForMatch(checker, 'a')  
+   checkForMatch(checker, 'A') 
+
+Gives the output:
+
+.. testoutput:: regex1
+
+    String matches!
+    String does not contain a match
+    String matches!
+    String matches!
 
 -  Below we provide a more complex example of using regular expressions
    and a place where they would actually be used in a practical sense.
@@ -181,9 +188,5 @@ word 'OK!' or the test is considered a failure.
 
 -  The loop keeps track of test crashes and failures by using regular
    expressions to match the required text within each line of the file
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|Pattern_Matching_With_Regular_Expressions|Introduction_To_Python|Putting_It_all_Together}}
 
 `Category:Tested Examples <Category:Tested_Examples>`__
