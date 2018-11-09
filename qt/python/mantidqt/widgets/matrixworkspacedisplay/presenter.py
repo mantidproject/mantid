@@ -133,8 +133,8 @@ class MatrixWorkspaceDisplay(object):
             if plot_errors:
                 # keep the error bars the same color as the plot
                 color = plot[0].get_color()
-                # to turn on caps add capsize=3
-                ax.errorbar(self.model._ws, '|', ecolor=color, wkspIndex=workspace_index, axis=axis, label=None)
+                ax.errorbar(self.model._ws, '|', ecolor=color, wkspIndex=workspace_index, axis=axis, label=None,
+                            capsize=3)
         ax.legend()
         fig.show()
 
