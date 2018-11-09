@@ -290,12 +290,18 @@ bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name,
     double kmax = 0;
     double lmax = 0;
     for (int i = 0; i < 8; i++) {
-      if(hkl[i][0] < hmin) hmin = hkl[i][0];
-      if(hkl[i][1] < kmin) kmin = hkl[i][1];
-      if(hkl[i][2] < lmin) lmin = hkl[i][2];
-      if(hkl[i][0] > hmax) hmax = hkl[i][0];
-      if(hkl[i][1] > kmax) kmax = hkl[i][1];
-      if(hkl[i][2] > lmax) lmax = hkl[i][2];
+      if (hkl[i][0] < hmin)
+        hmin = hkl[i][0];
+      if (hkl[i][1] < kmin)
+        kmin = hkl[i][1];
+      if (hkl[i][2] < lmin)
+        lmin = hkl[i][2];
+      if (hkl[i][0] > hmax)
+        hmax = hkl[i][0];
+      if (hkl[i][1] > kmax)
+        kmax = hkl[i][1];
+      if (hkl[i][2] > lmax)
+        lmax = hkl[i][2];
     }
 
     std::ostringstream min_str;
