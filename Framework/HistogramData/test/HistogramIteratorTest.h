@@ -104,6 +104,16 @@ public:
     TS_ASSERT_EQUALS(std::distance(begin, end), 2);
   }
 
+  void test_iterate_over_histogram_x_errors() {
+    Histogram hist(Points{1.1, 1.2, 1.3}, Counts{5, 4, 6});
+    hist.setPointStandardDeviations(PointStandardDeviations{0.1, 0.3, 0.5});
+    const auto dX = hist.dataDx();
+    TS_ASSERT(std::equal(hist.begin(), hist.end(), dX.begin(),
+                         [](const HistogramItem &item, const double &dx) {
+                           return item.centerError() == dx;
+                         }));
+  }
+
   void test_iterate_over_histogram_counts() {
     Counts expectedCounts{2, 3, 4};
     Histogram hist(Points{1.1, 1.2, 1.4}, expectedCounts);

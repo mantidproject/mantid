@@ -1,10 +1,18 @@
 #pylint: disable=C0103
 from __future__ import (absolute_import, division, print_function)
-import HFIR_4Circle_Reduction.ui_SinglePtIntegrationWindow as window_ui
+from HFIR_4Circle_Reduction.hfctables import SinglePtIntegrationTable
+from HFIR_4Circle_Reduction.integratedpeakview import SinglePtIntegrationView
 import HFIR_4Circle_Reduction.guiutility as guiutility
 import os
 from qtpy.QtWidgets import (QMainWindow, QFileDialog)  # noqa
 from qtpy.QtCore import Signal as pyqtSignal
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 
 
 class IntegrateSinglePtIntensityWindow(QMainWindow):
@@ -31,8 +39,9 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.scanIntegratedSignal.connect(self._parent_window.process_single_pt_scan_intensity)
 
         # init UI
-        self.ui = window_ui.Ui_MainWindow()
-        self.ui.setupUi(self)
+        ui_path = "SinglePtIntegrationWindow.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
+        self._promote_widgets()
 
         # initialize widgets
         self.ui.tableView_summary.setup()
@@ -70,6 +79,19 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         # other things to do
         self.do_refresh_roi()
+
+        return
+
+    def _promote_widgets(self):
+        graphicsView_integration1DView_layout = QVBoxLayout()
+        self.ui.frame_graphicsView_integration1DView.setLayout(graphicsView_integration1DView_layout)
+        self.ui.graphicsView_integration1DView = SinglePtIntegrationView(self)
+        graphicsView_integration1DView_layout.addWidget(self.ui.graphicsView_integration1DView)
+
+        tableView_summary_layout = QVBoxLayout()
+        self.ui.frame_tableView_summary.setLayout(tableView_summary_layout)
+        self.ui.tableView_summary = SinglePtIntegrationTable(self)
+        tableView_summary_layout.addWidget(self.ui.tableView_summary)
 
         return
 

@@ -82,7 +82,7 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialisation method.
  */
 void LoadEventNexus::init() {
-  const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
+  const std::vector<std::string> exts{".nxs.h5", ".nxs", "_event.nxs"};
   this->declareProperty(
       Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
                                         exts),
