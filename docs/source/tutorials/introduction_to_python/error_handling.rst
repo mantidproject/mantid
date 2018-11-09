@@ -37,7 +37,6 @@ Error Handling
 
 .. testoutput:: tryExcept1
 
-   # Output
    1
    2
    3
