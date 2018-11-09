@@ -57,6 +57,11 @@ class SANSWLNormCorrection(PythonAlgorithm):
         )
 
         self.declareProperty(
+            "ConfigurationFileRelativePath", False, direction=Direction.Input,
+            doc=("If true the ConfigurationFile in the INI file will have"
+                 " a relative path rather then absolute."))
+
+        self.declareProperty(
             WorkspaceGroupProperty(
                 "InputWorkspaces",
                 "",
@@ -91,15 +96,13 @@ class SANSWLNormCorrection(PythonAlgorithm):
         self.declareProperty(
             name='DiscardBeginGlobal',
             defaultValue=0,
-            doc=
-            'Discard n points from the beginning of every dataset for the global I(q)'
+            doc='Discard n points from the beginning of every dataset for the global I(q)'
         )
 
         self.declareProperty(
             name='DiscardEndGlobal',
             defaultValue=0,
-            doc=
-            'Discard n points from the end of every dataset for the global I(q).'
+            doc='Discard n points from the end of every dataset for the global I(q).'
         )
 
         self.declareProperty(
@@ -123,7 +126,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
         )
 
         self.declareProperty(
-            FileProperty("OutputDirectory", "", action=FileAction.OptionalDirectory),
+            FileProperty("OutputDirectory", "",
+                         action=FileAction.OptionalDirectory),
             "Optional output directory if OutputDirectory exists in the Property Manager."
         )
 
@@ -135,9 +139,10 @@ class SANSWLNormCorrection(PythonAlgorithm):
         '''
         self.parser = None
         if os.path.exists(config_file):
-            logger.information("Using configuration file: {}.".format(config_file))
+            logger.information(
+                "Using configuration file: {}.".format(config_file))
             self.parser = ConfigParser()
-            self.parser.optionxform = lambda option: option # case sensitive
+            self.parser.optionxform = lambda option: option  # case sensitive
             self.parser.read(config_file)
 
     def validateInputs(self):
@@ -151,12 +156,14 @@ class SANSWLNormCorrection(PythonAlgorithm):
         if self.parser:
             props = self.getProperties()
             for p in props:
-                logger.debug("Validating input properties: {} :: {}".format(p.name, p.value))
+                logger.debug(
+                    "Validating input properties: {} :: {}".format(p.name, p.value))
                 if p.isDefault and self.parser.has_option('DEFAULT', p.name):
                     logger.information("Setting property {} with the file value {}".format(
                         p.name, self.parser.get('DEFAULT', p.name)
                     ))
-                    self.setProperty(p.name, self.parser.get('DEFAULT', p.name))
+                    self.setProperty(
+                        p.name, self.parser.get('DEFAULT', p.name))
 
         issues = dict()
 
@@ -189,7 +196,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
 
         logger.debug("Issues so far {}".format(issues))
         try:
-            pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
+            pm = PropertyManagerDataService.retrieve(
+                ReductionSingleton().property_manager)
         except Exception:
             pm = []
 
@@ -233,7 +241,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
         if len(output_directory) > 0:
             self.output_directory = output_directory
         else:
-            pm = PropertyManagerDataService.retrieve(ReductionSingleton().property_manager)
+            pm = PropertyManagerDataService.retrieve(
+                ReductionSingleton().property_manager)
             self.output_directory = pm["OutputDirectory"].value
 
     def _ws_to_dict(self):
@@ -320,7 +329,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
             start_pos = int(
                 round(self.discard_begin_global * (self.wl_max / v['wl_max'])))
 
-            # discard aditional points
+            # discard additional points
             if self.discard_end_global > 0:
                 x_trimmed = x_trimmed[start_pos:-self.discard_end_global]
                 dx_trimmed = dx_trimmed[start_pos:-self.discard_end_global]
@@ -476,12 +485,16 @@ class SANSWLNormCorrection(PythonAlgorithm):
         out_ws_list = []
         for k, v in self.data.items():
             ws_name = k + suffix + "_fit"
+            logger.debug("Creating workspace {} (suffix = {})".format(ws_name, suffix))
+
             CreateWorkspace(
                 OutputWorkspace=ws_name,
                 DataX=list(v['x' + suffix]),
                 DataY=list(v['y' + suffix + '_fit']),
+                # Error Propagation: Error multiplied by K
+                DataE=[e * v['k'] for e in v['e' + suffix]], 
                 UnitX="MomentumTransfer")
-            mtd[ws_name].setDx(0,v['dx' + suffix])  # add x error
+            mtd[ws_name].setDx(0, v['dx' + suffix])  # add x error
             out_ws_list.append(ws_name)
 
         GroupWorkspaces(
@@ -511,11 +524,16 @@ class SANSWLNormCorrection(PythonAlgorithm):
         dx = np.unique(dx)
 
         y = np.array([])
+        e = np.array([])
         for xi in x:
             yi = np.array([])
+            ei = np.array([])
             for _, v in self.data.items():
                 yi = np.append(yi, v['y_trimmed_fit'][v['x_trimmed'] == xi])
+                ei = np.append(ei, v['e_trimmed'][v['x_trimmed'] == xi])
             y = np.append(y, np.average(yi))
+            # Error propagation of the mean
+            e = np.append(e, np.sqrt(np.sum(ei**2))/len(ei))
 
         out_ws_name = self.output_prefix + "_trimmed_fit_averaged"
 
@@ -523,9 +541,10 @@ class SANSWLNormCorrection(PythonAlgorithm):
             OutputWorkspace=out_ws_name,
             DataX=list(x),
             DataY=list(y),
+            DataE=list(e),
             UnitX="MomentumTransfer")
 
-        mtd[out_ws_name].setDx(0,dx)  # add x error
+        mtd[out_ws_name].setDx(0, dx)  # add x error
 
     def _create_table_ws(self):
         '''
@@ -565,7 +584,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
         '''
         if self.parser is None:
             self.parser = ConfigParser()
-            self.parser.optionxform = lambda option: option # case sensitive
+            self.parser.optionxform = lambda option: option  # case sensitive
         # Get all the algorithm properties in the file
         props = self.getProperties()
         for p in props:
@@ -578,13 +597,16 @@ class SANSWLNormCorrection(PythonAlgorithm):
                         ",".join(str(e) for e in ws_table.column("B") if e != 0))
 
         conf_file_new_name = self.output_prefix + "_config.ini"
-        conf_file_new_path = os.path.join(self.output_directory, conf_file_new_name)
+        conf_file_new_path = os.path.join(
+            self.output_directory, conf_file_new_name)
 
         logger.notice("New conf file saved as: {}".format(conf_file_new_path))
-        
+
         # Write ConfigurationFile as relative path
-        self.parser.set('DEFAULT', 'ConfigurationFile',
-                        os.path.relpath(self.getProperty('ConfigurationFile').value))
+        if self.getProperty('ConfigurationFileRelativePath').value:
+            self.parser.set(
+                'DEFAULT', 'ConfigurationFile',
+                os.path.relpath(self.getProperty('ConfigurationFile').value))
 
         with open(conf_file_new_path, 'w') as f:
             self.parser.write(f)
@@ -595,7 +617,8 @@ class SANSWLNormCorrection(PythonAlgorithm):
         '''
 
         ws_table_file_name = self.output_prefix + "_table.csv"
-        ws_table_file_path = os.path.join(self.output_directory, ws_table_file_name)
+        ws_table_file_path = os.path.join(
+            self.output_directory, ws_table_file_name)
 
         logger.notice("WS Table saved as: {}".format(ws_table_file_path))
 
@@ -603,7 +626,7 @@ class SANSWLNormCorrection(PythonAlgorithm):
             dict_writer = csv.DictWriter(f, ws_table.keys())
             dict_writer.writeheader()
             dict_writer.writerows(
-                [ ws_table.row(i) for i in range(ws_table.rowCount())]
+                [ws_table.row(i) for i in range(ws_table.rowCount())]
             )
 
     def PyExec(self):
