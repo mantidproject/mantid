@@ -23,6 +23,3 @@ Exercise 4
    -  Update the dictionary with another 5 name/values and reprint the
       table, making sure you understand the ordering within the map
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|Working_With_Functions:_Return_Values|Introduction_To_Python|Working_With_Files}}

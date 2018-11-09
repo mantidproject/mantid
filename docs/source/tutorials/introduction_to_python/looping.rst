@@ -171,8 +171,4 @@ gives the output
 -  The ``while`` loop also supports the else syntax in the same manner
    as the ``for`` loop
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|Control_Structures|Introduction To Python|Basic_Python_Exercises_1-2}}
-
 `Category:Tested Examples <Category:Tested_Examples>`__
