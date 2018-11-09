@@ -150,7 +150,7 @@ datetime
 
 Gives the output:
 
-.. testoutput:: datetime2
+.. testoutput:: datetime1
 
     Day 12
     Month 10
@@ -255,7 +255,7 @@ Numpy Functions
 
 Gives the output:
 
-.. testcode:: numpy1
+.. testoutput:: numpy1
 
     2
     (3, 3)
@@ -270,7 +270,8 @@ Gives the output:
 
 .. testcode:: numpy2
 
-   a = numpy.array( [20,30,40,50] ) 
+   import numpy
+   a = numpy.array( [20, 30, 40, 50] ) 
    b = numpy.arange( 4 ) 
    c = a-b 
    print(c)

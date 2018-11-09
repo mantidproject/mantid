@@ -30,7 +30,7 @@ Function arguments
    perform some action based upon their value(s). Arguments are
    specified within the braces after the function name,
 
-.. code:: python
+.. testcode:: function1
 
    def printSquare(n, verbose):
        if verbose == True:
@@ -43,6 +43,14 @@ Function arguments
    printSquare(2, True)  # Produces long string
    printSquare(3, False) # Produces short string
    printSquare(3,5)      # Produces error message
+
+Gives the output:
+
+.. testoutput:: function1
+
+     The square of 2 is: 4
+     9
+     Invalid verbose argument passed
 
 where we have combined functions and control structures to do something
 more useful.
@@ -61,15 +69,15 @@ more useful.
 
 .. code:: python
 
-   def foo(A,B,C,D,E):
+   def foo(A, B, C, D, E):
        # ... Do something
        return
     
-   foo(1,2,3,4,5)      # Correct, no names given
-   foo(1,2,3,D=4,E=5)  # Correct as the first 3 get assigned to the first
+   foo(1, 2, 3, 4, 5)      # Correct, no names given
+   foo(1, 2, 3, D=4, E=5)  # Correct as the first 3 get assigned to the first
                        # 3 of the function and then the last two are 
                        # specified by name
-   foo(C=3,1, 2,4,5)   # Incorrect and will fail as a name has been
+   foo(C=3, 1, 2, 4, 5)   # Incorrect and will fail as a name has been
                        # specified first but then Python doesn't know
                        # where to assign the rest
 
@@ -83,19 +91,32 @@ Default Arguments
 -  In some situations extra function parameters maybe required for extra
    functionality but a user may want a certain default value to be
    specified so that the majority of the time the function call can be
-   executed without specifying the parameter, e.g.
+   executed without specifying the parameter,where the second argument is 
+   now optional and will be assigned the given value if the function is 
+   called without it.
 
-.. code:: python
+.. testcode:: function2
 
    def printSquare(n, verbose = False):
-       # definition same as above
+        
+       if verbose == True:
+           print( 'The square of ' + str(n) + ' is: ' + str(n*n))
+       elif verbose == False:
+           print(str(n*n))
+       else:
+           print('Invalid verbose argument passed')
        return
 
    printSquare(2)                               # Produces short message
    printSquare(2, verbose = True)  # Produces long message
 
-where the second argument is now optional and will be assigned the given
-value if the function is called without it.
+Gives the output:
+
+.. testoutput:: function2
+
+    4
+    The square of 2 is: 4
+
 
 Return Values
 =============
@@ -104,7 +125,7 @@ Return Values
    return a value to the caller. In Python this is achieved with the
    ``return`` statement.
 
-.. code:: python
+.. testcode:: function3
 
    def square(n):
        return n*n
@@ -113,26 +134,38 @@ Return Values
    # or print it as before
    print(square(2))
 
+Gives the output:
+
+.. testoutput:: function3
+
+    4
+
 -  Python also has the ability to return multiple values from a function
    call, something missing from many other languages. In this case the
    return values should be a comma-separated list of values and Python
    then constructs a *tuple* and returns this to the caller, e.g.
 
-.. code:: python
+.. testcode:: function4
 
    def square(x,y):
        return x*x, y*y
 
    t = square(2,3)
-   print(t)  # Produces (4,9)
+   print(t)  
    # Now access the tuple with usual operations
+
+Gives the output:
+
+.. testoutput:: function4
+
+    (4, 9)
 
 -  An alternate syntax when dealing with multiple return values is to
    have Python "unwrap" the tuple into the variables directly by
    specifying the same number of variables on the left-hand side of the
    assignment as there are returned from the function, e.g.
 
-.. code:: python
+.. testcode:: function5
 
    def square(x,y):
        return x*x, y*y
@@ -142,8 +175,11 @@ Return Values
    print(ysq)  # Prints 9  
    # Tuple has vanished!
 
-.. raw:: mediawiki
+Gives the output:
 
-   {{SlideNavigationLinks|Working_With_Functions|Introduction_To_Python|Basic_Python_Exercises_3-4}}
+.. testoutput:: function5
+
+    4
+    9
 
 `Category:Tested Examples <Category:Tested_Examples>`__
