@@ -280,7 +280,7 @@ Gives the output:
 
 .. testoutput:: numpy2
 
-    array([20, 29, 38, 47])
+    [20 29 38 47]
 
 Built-in Methods
 ~~~~~~~~~~~~~~~~
