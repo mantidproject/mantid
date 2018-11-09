@@ -48,18 +48,21 @@ Dictionaries
    each key/value pair should be specified using ``key:value`` syntax
    and then each separated with a comma, e.g.
 
-.. code:: python
+-  Accessing a value is done by using square brackets where the argument
+   is the key, e.g.
+
+ .. testcode:: dict1
 
    empty_dict = {}      # Empty dictionary
    my_lookup = {'a' : 1, 'b' : 2} # A dictionary with two keys, each
                                   # mapped to the respective value
+   print(my_lookup['b'])  
 
--  Accessing a value is done by using square brackets where the argument
-   is the key, e.g.
+Gives the output:
 
-.. code:: python
+.. testoutput:: dict1
 
-   print(my_lookup['b'])  # prints  2
+    2
 
 -  Trying to retrieve a key that does not exist results in a *KeyError*
    and the program will halt,
@@ -71,16 +74,22 @@ Dictionaries
 -  Unlike tuples, dictionaries can be updated with new values, simply
    use the square brackets on the left-hand side of a assignment
 
-.. code:: python
-
-   empty_dict['a'] = 1
-
 -  This syntax can also be used to replace a value that is already in
    the dictionary since every key has to be unique,
 
-.. code:: python
+.. testcode:: dict2
 
+   empty_dict = {}      # Empty dictionary
+   my_lookup = {'a' : 1, 'b' : 2} # A dictionary with two keys
+   empty_dict['a'] = 1
    my_lookup['b'] = 3   # Replaces the value that was referenced by the key 'b' with the new value 3
+   print(empty_dict['a'], my_lookup['b'])
+
+Gives the output:
+
+.. testoutput:: dict2
+
+    1 3
 
 -  To remove a key/value from the dictionary, use the ``del`` command
 
@@ -108,19 +117,23 @@ Sets
 -  To create a set simply pass a list or tuple to the ``set()``
    function,
 
-.. code:: python
-
-   values = set([1,1,3])
-   print(values)  # prints 'set('[1,3])'
-
 -  Changing elements in a set is accomplished with the ``add()`` or
    ``remove()`` functions,
 
-.. code:: python
+.. testcode:: sets1
 
+   values = set([1,1,3])
+   print(values) 
    values.add(4)
    values.remove(1)
-   print(values)  #  prints 'set('[3,4])'
+   print(values) 
+
+Gives the output:
+
+.. testoutput:: sets1
+
+    {1, 3}
+    {3, 4}
 
 -  As with dictionaries, sets are unordered so it is not possible to
    access a set with a square bracket operators and they do not support
@@ -141,12 +154,21 @@ Common Operations
 
 -  Examples:
 
-.. code:: python
+.. testcode:: operations1
 
    s = [1,2,3,4,5,6]      # Also works with all other sequence types 
-   print(len(s))  # prints 6
+   print(len(s)) 
     
    test = 3 in s
-   print(test)    # prints True
+   print(test)   
    test = 7 not in s
-   print(test)    # prints True
+   print(test)  
+
+Gives the output:
+
+.. testoutput:: operations1
+
+    6
+    True
+    True
+
