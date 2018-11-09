@@ -581,6 +581,10 @@ class SANSWLNormCorrection(PythonAlgorithm):
         conf_file_new_path = os.path.join(self.output_directory, conf_file_new_name)
 
         logger.notice("New conf file saved as: {}".format(conf_file_new_path))
+        
+        # Write ConfigurationFile as relative path
+        self.parser.set('DEFAULT', 'ConfigurationFile',
+                        os.path.relpath(self.getProperty('ConfigurationFile').value))
 
         with open(conf_file_new_path, 'w') as f:
             self.parser.write(f)
