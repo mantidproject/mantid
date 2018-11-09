@@ -248,6 +248,79 @@ bool MantidEVWorker::loadAndConvertToMD(
 }
 
 /**
+ *  Take the specified EventWorkspace
+ *  and convert it to the specified MD workspace.
+ *
+ *  @param ev_ws_name       Name of the event workspace to create
+ *  @param md_ws_name       Name of the MD workspace to create
+ *  @param minQ             The smallest value of any component
+ *                          of Q to include.
+ *  @param maxQ             The largest absolute value of any component
+ *                          of Q to include. When ConvertToMD is called,
+ *  @param do_lorentz_corr  Set true to do the Lorentz correction when
+ *                          converting to reciprocal space.
+ *
+ *  @return true if the file was loaded and MD workspace was
+ *          successfully created.
+ */
+bool MantidEVWorker::convertToHKL(
+    const std::string &ev_ws_name,
+    const std::string &md_ws_name, const double minQ,
+    const double maxQ) {
+  try {
+    IAlgorithm_sptr alg;
+  const auto &ADS = AnalysisDataService::Instance();
+      Mantid::API::MatrixWorkspace_sptr ev_ws =
+          ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+    Mantid::Geometry::OrientedLattice o_lattice =
+        ev_ws->mutableSample().getOrientedLattice();
+    V3D h = o_lattice.hklFromQ(V3D(maxQ,0,0));
+    V3D k = o_lattice.hklFromQ(V3D(0,maxQ,0));
+    V3D l = o_lattice.hklFromQ(V3D(0,0,maxQ));
+
+    std::ostringstream min_str;
+    if (minQ != Mantid::EMPTY_DBL()){
+      V3D minh = o_lattice.hklFromQ(V3D(minQ,0,0));
+      V3D mink = o_lattice.hklFromQ(V3D(0,minQ,0));
+      V3D minl = o_lattice.hklFromQ(V3D(0,0,minQ));
+      min_str << minh[0] << "," << mink[1] << "," << minl[2];
+    }
+    else {
+      min_str << -h[0] << "," << -k[1] << "," << -l[2];
+    }
+
+    std::ostringstream max_str;
+    max_str << h[0] << "," << k[1] << "," << l[2];
+
+    alg = AlgorithmManager::Instance().create("ConvertToMD");
+    alg->setProperty("InputWorkspace", ev_ws_name);
+    alg->setProperty("OutputWorkspace", md_ws_name + "_HKL");
+    alg->setProperty("OverwriteExisting", true);
+    alg->setProperty("QDimensions", "Q3D");
+    alg->setProperty("dEAnalysisMode", "Elastic");
+    alg->setProperty("QConversionScales", "HKL");
+    alg->setProperty("Q3DFrames", "HKL");
+    alg->setProperty("LorentzCorrection", true);
+    alg->setProperty("MinValues", min_str.str());
+    alg->setProperty("MaxValues", max_str.str());
+    alg->setProperty("SplitInto", "2");
+    alg->setProperty("SplitThreshold", "50");
+    alg->setProperty("MaxRecursionDepth", "13");
+    alg->setProperty("MinRecursionDepth", "7");
+
+    if (!alg->execute())
+      return false;
+  } catch (std::exception &e) {
+    g_log.error() << "Error:" << e.what() << '\n';
+    return false;
+  } catch (...) {
+    g_log.error() << "Error: Could Not load file and convert to MD\n";
+    return false;
+  }
+  return true;
+}
+
+/**
  *  Find peaks in the specified MD workspace and save them in the
  *  specified peaks workspace.
  *
