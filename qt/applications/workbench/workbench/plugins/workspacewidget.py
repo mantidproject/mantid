@@ -22,7 +22,7 @@ from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names, plt
+from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names, plot
 
 
 class WorkspaceWidget(PluginWidget):
@@ -121,5 +121,6 @@ class WorkspaceWidget(PluginWidget):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             # plt injects the plotting library in the presenter
             # this is done so that the plotting library is mockable in testing
-            presenter = MatrixWorkspaceDisplay(ws, plt=plt, parent=self)
+
+            presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=self)
             presenter.view.show()

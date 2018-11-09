@@ -10,7 +10,6 @@
 from __future__ import absolute_import, division, print_function
 
 from mantid.plots import MantidAxes
-
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
 
@@ -21,14 +20,14 @@ class MatrixWorkspaceDisplay(object):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     NUM_SELECTED_FOR_CONFIRMATION = 10
 
-    def __init__(self, ws, plt=None, parent=None, model=None, view=None):
+    def __init__(self, ws, plot=None, parent=None, model=None, view=None):
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
         self.view = view if view else MatrixWorkspaceDisplayView(self,
                                                                  parent,
                                                                  self.model.get_name())
 
-        self.plt = plt
+        self.plot = plot
         self.setup_tables()
         self.view.set_context_menu_actions(self.view.table_y, self.model._ws.readY)
         self.view.set_context_menu_actions(self.view.table_x, self.model._ws.readX)
@@ -110,8 +109,8 @@ class MatrixWorkspaceDisplay(object):
         self.view.copy_to_clipboard(data)
         self.show_successful_copy_toast()
 
-    def _do_action_plot(self, table, axis, get_label, get_index, plot_errors=False):
-        if self.plt is None:
+    def _do_action_plot(self, table, axis, get_index, plot_errors=False):
+        if self.plot is None:
             raise ValueError("Trying to do a plot, but no plotting class dependency was injected in the constructor")
         selection_model = table.selectionModel()
         if not selection_model.hasSelection():
@@ -122,34 +121,21 @@ class MatrixWorkspaceDisplay(object):
                 self.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(len(selected))):
             return
 
-        fig, ax = self.plt.subplots(subplot_kw={'projection': 'mantid'})
-        for index in selected:
-            workspace_index = get_index(index)
+        plot_kwargs = {"capsize": 3} if plot_errors else {}
+        plot_kwargs["axis"] = axis
 
-            plot = ax.plot(self.model._ws,
-                           label=get_label(workspace_index),
-                           wkspIndex=workspace_index,
-                           axis=axis)
-            if plot_errors:
-                # keep the error bars the same color as the plot
-                color = plot[0].get_color()
-                ax.errorbar(self.model._ws, '|', ecolor=color, wkspIndex=workspace_index, axis=axis, label=None,
-                            capsize=3)
-        ax.legend()
-        fig.show()
+        ws_list = [self.model._ws]
+        self.plot(ws_list, wksp_indices=[get_index(index) for index in selected], errors=plot_errors,
+                       plot_kwargs=plot_kwargs)
 
     def action_plot_spectrum(self, table):
-        self._do_action_plot(table, MantidAxes.SPECTRUM, self.model.get_spectrum_plot_label,
-                             lambda index: index.row())
+        self._do_action_plot(table, MantidAxes.SPECTRUM, lambda index: index.row())
 
     def action_plot_spectrum_with_errors(self, table):
-        self._do_action_plot(table, MantidAxes.SPECTRUM, self.model.get_spectrum_plot_label,
-                             lambda index: index.row(), plot_errors=True)
+        self._do_action_plot(table, MantidAxes.SPECTRUM, lambda index: index.row(), plot_errors=True)
 
     def action_plot_bin(self, table):
-        self._do_action_plot(table, MantidAxes.BIN, self.model.get_bin_plot_label,
-                             lambda index: index.column())
+        self._do_action_plot(table, MantidAxes.BIN, lambda index: index.column())
 
     def action_plot_bin_with_errors(self, table):
-        self._do_action_plot(table, MantidAxes.BIN, self.model.get_bin_plot_label,
-                             lambda index: index.column(), plot_errors=True)
+        self._do_action_plot(table, MantidAxes.BIN, lambda index: index.column(), plot_errors=True)
