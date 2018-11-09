@@ -257,9 +257,6 @@ bool MantidEVWorker::loadAndConvertToMD(
  *                          of Q to include.
  *  @param maxQ             The largest absolute value of any component
  *                          of Q to include. When ConvertToMD is called,
- *  @param do_lorentz_corr  Set true to do the Lorentz correction when
- *                          converting to reciprocal space.
- *
  *  @return true if the file was loaded and MD workspace was
  *          successfully created.
  */
