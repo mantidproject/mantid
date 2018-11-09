@@ -370,10 +370,50 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_plot.mock_fig.show)
 
     def test_action_plot_bin_with_errors(self):
-        self.skipTest("Not implemented")
+        mock_plot, mock_table, mock_view, presenter = self.action_plot_common_setup()
+        mock_selected_cols = self.setup_mock_selection(mock_table, num_selected_cols=3)
+        mock_view.ask_confirmation = Mock()
+
+        presenter.action_plot_bin_with_errors(mock_table)
+
+        self.action_plot_with_errors_common_checks(mock_view, mock_table, mock_plot, mock_selected_cols)
+
+        mock_table.mock_selection_model.selectedColumns.assert_called_once_with()
+        presenter.model.get_bin_plot_label.assert_has_calls([call(0), call(1)])
+
+        self.assertNotCalled(presenter.model.get_spectrum_plot_label)
+        self.assertNotCalled(mock_table.mock_selection_model.selectedRows)
+
+    def action_plot_with_errors_common_checks(self, mock_view, mock_table, mock_plot, mock_selected):
+        mock_table.selectionModel.assert_called_once_with()
+        mock_table.mock_selection_model.hasSelection.assert_called_once_with()
+
+        # Confirmation should not have been asked for as the length is less than required
+        self.assertNotCalled(mock_view.ask_confirmation)
+        mock_plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
+
+        # no calls to the spectrum label should have been made
+        # plot must be called the same number of times as selected indices
+        self.assertEqual(len(mock_selected), mock_plot.mock_ax.plot.call_count)
+        self.assertEqual(len(mock_selected), mock_plot.mock_ax.errorbar.call_count)
+
+        mock_plot.mock_ax.legend.assert_called_once_with()
+        mock_plot.mock_fig.show.assert_called_once_with()
 
     def test_action_plot_spectrum_with_errors(self):
-        self.skipTest("Not implemented")
+        mock_plot, mock_table, mock_view, presenter = self.action_plot_common_setup()
+        mock_selected_rows = self.setup_mock_selection(mock_table, 3)
+
+        mock_view.ask_confirmation = Mock()
+        presenter.action_plot_spectrum_with_errors(mock_table)
+
+        self.action_plot_with_errors_common_checks(mock_view, mock_table, mock_plot, mock_selected_rows)
+
+        mock_table.mock_selection_model.selectedRows.assert_called_once_with()
+        presenter.model.get_spectrum_plot_label.assert_has_calls([call(0), call(1)])
+
+        self.assertNotCalled(presenter.model.get_bin_plot_label)
+        self.assertNotCalled(mock_table.mock_selection_model.selectedColumns)
 
 
 if __name__ == '__main__':

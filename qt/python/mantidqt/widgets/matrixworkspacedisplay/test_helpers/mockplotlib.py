@@ -11,7 +11,7 @@ class MockPlot:
 class MockPlotLibAx:
     def __init__(self):
         self.mock_plot = MockPlot()
-        self.plot = Mock(return_value=self.mock_plot)
+        self.plot = Mock(return_value=[self.mock_plot])
         self.errorbar = Mock()
         self.legend = Mock()
 
