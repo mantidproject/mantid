@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import ErrorReporter, UsageService, ConfigService
 from mantid.kernel import Logger
-from ErrorReporter.retrieve_recovery_files import RetrieveRecoveryFiles
+from ErrorReporter.retrieve_recovery_files import zip_recovery_directory, remove_recovery_file
 import requests
 
 
@@ -30,14 +30,16 @@ class ErrorReporterPresenter(object):
         return status
 
     def share_all_information(self, continue_working, name, email, text_box):
+        import pydevd
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         uptime = UsageService.getUpTime()
-        zip_recovery_file, file_hash = RetrieveRecoveryFiles.zip_recovery_directory()
+        zip_recovery_file, file_hash = zip_recovery_directory()
         status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=name, email=email, file_hash=file_hash
                                              , text_box=text_box)
         self.error_log.notice("Sent complete information")
         if status == 201:
             self._upload_recovery_file(zip_recovery_file=zip_recovery_file)
-        RetrieveRecoveryFiles.remove_recovery_file(zip_recovery_file)
+        # remove_recovery_file(zip_recovery_file)
         self._handle_exit(continue_working)
         return status
 
