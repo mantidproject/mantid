@@ -116,8 +116,4 @@ gives the output
  
    Something went wrong but I don't know what
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|Sequence_Data_Types:_Common_Operations|Introduction_To_Python|Working_With_Functions}}
-
 `Category:Tested Examples <Category:Tested_Examples>`__

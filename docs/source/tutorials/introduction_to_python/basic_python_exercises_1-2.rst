@@ -27,6 +27,3 @@ Exercise 2
    -  Extend the program to also print the ratio of successive numbers
       of the sequence.
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|Control_Structures:_Looping|Introduction To Python|Sequence_Data_Types:_Tuples}}
