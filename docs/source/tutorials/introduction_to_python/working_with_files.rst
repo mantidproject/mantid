@@ -124,8 +124,4 @@ Writing
 
    # Produces a file with the numbers on 2 separate lines
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|Getting_to_know_Python|Introduction_To_Python|Using_Modules}}
-
 `Category:Tested Examples <Category:Tested_Examples>`__
