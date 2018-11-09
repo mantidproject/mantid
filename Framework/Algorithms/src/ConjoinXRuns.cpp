@@ -333,20 +333,26 @@ void ConjoinXRuns::exec() {
       getProperty(INPUT_WORKSPACE_PROPERTY);
   m_logEntry = getPropertyValue(SAMPLE_LOG_X_AXIS_PROPERTY);
 
-  const std::string sampleLogsSum = getProperty(SampleLogsBehaviour::SUM_PROP);
-  const std::string sampleLogsTimeSeries =
-      getProperty(SampleLogsBehaviour::TIME_SERIES_PROP);
-  const std::string sampleLogsList =
-      getProperty(SampleLogsBehaviour::LIST_PROP);
-  const std::string sampleLogsWarn =
-      getProperty(SampleLogsBehaviour::WARN_PROP);
-  const std::string sampleLogsWarnTolerances =
-      getProperty(SampleLogsBehaviour::WARN_TOL_PROP);
-  const std::string sampleLogsFail =
-      getProperty(SampleLogsBehaviour::FAIL_PROP);
-  const std::string sampleLogsFailTolerances =
-      getProperty(SampleLogsBehaviour::FAIL_TOL_PROP);
+  SampleLogsBehaviour::SampleLogNames logEntries = {};
+  logEntries.sampleLogsSum = getPropertyValue(SampleLogsBehaviour::SUM_PROP);
+  logEntries.sampleLogsTimeSeries =
+      getPropertyValue(SampleLogsBehaviour::TIME_SERIES_PROP);
+  logEntries.sampleLogsList = getPropertyValue(SampleLogsBehaviour::LIST_PROP);
+  logEntries.sampleLogsWarn = getPropertyValue(SampleLogsBehaviour::WARN_PROP);
+  logEntries.sampleLogsWarnTolerances =
+      getPropertyValue(SampleLogsBehaviour::WARN_TOL_PROP);
+  logEntries.sampleLogsFail = getPropertyValue(SampleLogsBehaviour::FAIL_PROP);
+  logEntries.sampleLogsFailTolerances =
+      getPropertyValue(SampleLogsBehaviour::FAIL_TOL_PROP);
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
+  SampleLogsBehaviour::ParameterName parName = {};
+  parName.SUM_MERGE = "conjoin_sample_logs_sum";
+  parName.TIME_SERIES_MERGE = "conjoin_sample_logs_time_series";
+  parName.LIST_MERGE = "conjoin_sample_logs_list";
+  parName.WARN_MERGE = "conjoin_sample_logs_warn";
+  parName.WARN_MERGE_TOLERANCES = "conjoin_sample_logs_warn_tolerances";
+  parName.FAIL_MERGE = "conjoin_sample_logs_fail";
+  parName.FAIL_MERGE_TOLERANCES = "conjoin_sample_logs_fail_tolerances";
 
   m_inputWS.clear();
 
@@ -357,13 +363,8 @@ void ConjoinXRuns::exec() {
   }
 
   auto first = m_inputWS.front();
-  SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-      first, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
-      sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
-      sampleLogsFailTolerances, "conjoin_sample_logs_sum",
-      "conjoin_sample_logs_time_series", "conjoin_sample_logs_list",
-      "conjoin_sample_logs_warn", "conjoin_sample_logs_warn_tolerances",
-      "conjoin_sample_logs_fail", "conjoin_sample_logs_fail_tolerances");
+  SampleLogsBehaviour sampleLogsBehaviour =
+      SampleLogsBehaviour(first, g_log, logEntries, parName);
   auto it = m_inputWS.begin();
 
   // Temporary workspace to carry the merged sample logs

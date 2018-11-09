@@ -344,19 +344,17 @@ void MergeRuns::execEvent() {
 }
 
 void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
-  const std::string sampleLogsSum = getProperty(SampleLogsBehaviour::SUM_PROP);
-  const std::string sampleLogsTimeSeries =
-      getProperty(SampleLogsBehaviour::TIME_SERIES_PROP);
-  const std::string sampleLogsList =
-      getProperty(SampleLogsBehaviour::LIST_PROP);
-  const std::string sampleLogsWarn =
-      getProperty(SampleLogsBehaviour::WARN_PROP);
-  const std::string sampleLogsWarnTolerances =
-      getProperty(SampleLogsBehaviour::WARN_TOL_PROP);
-  const std::string sampleLogsFail =
-      getProperty(SampleLogsBehaviour::FAIL_PROP);
-  const std::string sampleLogsFailTolerances =
-      getProperty(SampleLogsBehaviour::FAIL_TOL_PROP);
+  SampleLogsBehaviour::SampleLogNames logEntries = {};
+  logEntries.sampleLogsSum = getPropertyValue(SampleLogsBehaviour::SUM_PROP);
+  logEntries.sampleLogsTimeSeries =
+      getPropertyValue(SampleLogsBehaviour::TIME_SERIES_PROP);
+  logEntries.sampleLogsList = getPropertyValue(SampleLogsBehaviour::LIST_PROP);
+  logEntries.sampleLogsWarn = getPropertyValue(SampleLogsBehaviour::WARN_PROP);
+  logEntries.sampleLogsWarnTolerances =
+      getPropertyValue(SampleLogsBehaviour::WARN_TOL_PROP);
+  logEntries.sampleLogsFail = getPropertyValue(SampleLogsBehaviour::FAIL_PROP);
+  logEntries.sampleLogsFailTolerances =
+      getPropertyValue(SampleLogsBehaviour::FAIL_TOL_PROP);
 
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
 
@@ -370,10 +368,8 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
   if (rebinParams) {
     outWS = this->rebinInput(outWS, *rebinParams);
   }
-  Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-      outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
-      sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
-      sampleLogsFailTolerances);
+  Algorithms::SampleLogsBehaviour sampleLogsBehaviour =
+      SampleLogsBehaviour(outWS, g_log, logEntries);
 
   auto isScanning = outWS->detectorInfo().isScanning();
 

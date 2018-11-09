@@ -23,14 +23,16 @@ class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
   enum class MergeLogType { Sum, TimeSeries, List, Warn, Fail };
 
-  // names of parameters in IPF
-  const std::string SUM_MERGE;
-  const std::string TIME_SERIES_MERGE;
-  const std::string LIST_MERGE;
-  const std::string WARN_MERGE;
-  const std::string WARN_MERGE_TOLERANCES;
-  const std::string FAIL_MERGE;
-  const std::string FAIL_MERGE_TOLERANCES;
+  // names of parameters in IPF containing names of sample log entries as values
+  struct ParameterName {
+    std::string SUM_MERGE;
+    std::string TIME_SERIES_MERGE;
+    std::string LIST_MERGE;
+    std::string WARN_MERGE;
+    std::string WARN_MERGE_TOLERANCES;
+    std::string FAIL_MERGE;
+    std::string FAIL_MERGE_TOLERANCES;
+  } parameterNames;
 
   // the names and docs of the override properties
   static const std::string TIME_SERIES_PROP;
@@ -54,22 +56,25 @@ public:
     bool isNumeric;
   };
 
-  SampleLogsBehaviour(
-      API::MatrixWorkspace_sptr ws, Kernel::Logger &logger,
-      const std::string &sampleLogsSum = "",
-      const std::string &sampleLogsTimeSeries = "",
-      const std::string &sampleLogsList = "",
-      const std::string &sampleLogsWarn = "",
-      const std::string &sampleLogsWarnTolerances = "",
-      const std::string &sampleLogsFail = "",
-      const std::string &sampleLogsFailTolerances = "",
-      const std::string &sum_merge = "sample_logs_sum",
-      const std::string &time_series_merge = "sample_logs_time_series",
-      const std::string &list_merge = "sample_logs_list",
-      const std::string &warn_merge = "sample_logs_warn",
-      const std::string &warn_merge_tolerances = "sample_logs_warn_tolerances",
-      const std::string &fail_merge = "sample_logs_fail",
-      const std::string &fail_merge_tolerances = "sample_logs_fail_tolerances");
+  // override sample log entries for specific merge type
+  struct SampleLogNames {
+    std::string sampleLogsSum;
+    std::string sampleLogsTimeSeries;
+    std::string sampleLogsList;
+    std::string sampleLogsWarn;
+    std::string sampleLogsWarnTolerances;
+    std::string sampleLogsFail;
+    std::string sampleLogsFailTolerances;
+  };
+
+  SampleLogsBehaviour(API::MatrixWorkspace_sptr ws, Kernel::Logger &logger,
+                      const SampleLogNames &logEntries = {"", "", "", "", "",
+                                                          "", ""},
+                      const ParameterName &parName = {
+                          "sample_logs_sum", "sample_logs_time_series",
+                          "sample_logs_list", "sample_logs_warn",
+                          "sample_logs_warn_tolerances", "sample_logs_fail",
+                          "sample_logs_fail_tolerances"});
 
   /// Create and update sample logs according to instrument parameters
   void mergeSampleLogs(API::MatrixWorkspace_sptr addeeWS,

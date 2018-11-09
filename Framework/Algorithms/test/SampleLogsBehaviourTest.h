@@ -51,7 +51,7 @@ public:
     const std::string A = ws->run().getLogData("A")->value();
     const std::string B = ws->run().getLogData("B")->value();
     const std::string C = ws->run().getLogData("C")->value();
-    // B summed accprding to IPF
+    // B summed according to IPF
     TS_ASSERT_EQUALS(A, "2.6499999999999999")
     TS_ASSERT_EQUALS(B, "3.1200000000000001")
     TS_ASSERT_EQUALS(C, "8.5500000000000007")
@@ -73,7 +73,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("Workspace", ws))
     TS_ASSERT_THROWS_NOTHING(addIPF.execute())
     TS_ASSERT(addIPF.isExecuted())
-    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, "A");
+    SampleLogsBehaviour::SampleLogNames sampleLogNames;
+    sampleLogNames.sampleLogsSum = "A";
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, sampleLogNames);
     TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws));
     const std::string A = ws->run().getLogData("A")->value();
     const std::string B = ws->run().getLogData("B")->value();
@@ -100,8 +102,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("Workspace", ws))
     TS_ASSERT_THROWS_NOTHING(addIPF.execute())
     TS_ASSERT(addIPF.isExecuted())
-    SampleLogsBehaviour sbh = SampleLogsBehaviour(
-        ws, log, "", "", "", "", "", "", "", "conjoin_sample_logs_sum");
+    SampleLogsBehaviour::SampleLogNames sampleLogNames;
+    SampleLogsBehaviour::ParameterName parameterNames;
+    parameterNames.SUM_MERGE = "conjoin_sample_logs_sum";
+    SampleLogsBehaviour sbh =
+        SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
     sbh.mergeSampleLogs(ws, ws);
     const std::string A = ws->run().getLogData("A")->value();
     const std::string B = ws->run().getLogData("B")->value();
@@ -128,8 +133,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("Workspace", ws))
     TS_ASSERT_THROWS_NOTHING(addIPF.execute())
     TS_ASSERT(addIPF.isExecuted())
-    SampleLogsBehaviour sbh = SampleLogsBehaviour(
-        ws, log, "B", "", "", "", "", "", "", "conjoin_sample_logs_sum");
+    SampleLogsBehaviour::SampleLogNames sampleLogNames;
+    sampleLogNames.sampleLogsSum = "B";
+    SampleLogsBehaviour::ParameterName parameterNames;
+    parameterNames.SUM_MERGE = "conjoin_sample_logs_sum";
+    SampleLogsBehaviour sbh =
+        SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
     sbh.mergeSampleLogs(ws, ws);
     const std::string A = ws->run().getLogData("A")->value();
     const std::string B = ws->run().getLogData("B")->value();

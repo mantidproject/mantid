@@ -85,54 +85,25 @@ const std::string SampleLogsBehaviour::SUM_DOC =
  *
  * @param ws the base workspace that the other workspaces are merged into
  * @param logger the logger from the parent algorithm
- * @param sampleLogsSum a string with a comma separated list of the logs to be
- *summed
- * @param sampleLogsTimeSeries a string with a comma separated list of the logs
- * for the time series merge
- * @param sampleLogsList a string with a comma separated list of the logs for a
- * list merge
- * @param sampleLogsWarn a string with a comma separated list of the logs for
- * warning when different on merging
- * @param sampleLogsWarnTolerances a string with a single value or comma
- * separated list of values for the warning tolerances
- * @param sampleLogsFail a string with a comma separated list of the logs for
- * throwing an error when different on merging
- * @param sampleLogsFailTolerances a string with a single value or comma
- * separated list of values for the error tolerances
- * @param sum_merge parameter name in IPF of logs to be summed
- * @param fail_merge parameter name in IPF of logs which must be identical
- * @param time_series_merge parameter name in IPF of logs for the time series
- * merge
- * @param list_merge parameter name in IPF of logs to be listed
- * @param warn_merge parameter name in IPF of logs which log a warning if
- * different
- * @param warn_merge_tolerances parameter name in IPF of warning tolerances
- * @param fail_merge_tolerances parameter name in IPF of failure tolerances
- * @return An instance of SampleLogsBehaviour initialised with the merge types
- * from the IPF and parent algorithm
+ * @param logEntries the sample log names to merge given by the user which
+ * override names given by IPF parameters
+ * @param parName the parameter names which specify the sample log sames to
+ * merge given be the IPF
  */
-SampleLogsBehaviour::SampleLogsBehaviour(
-    MatrixWorkspace_sptr ws, Logger &logger, const std::string &sampleLogsSum,
-    const std::string &sampleLogsTimeSeries, const std::string &sampleLogsList,
-    const std::string &sampleLogsWarn,
-    const std::string &sampleLogsWarnTolerances,
-    const std::string &sampleLogsFail,
-    const std::string &sampleLogsFailTolerances, const std::string &sum_merge,
-    const std::string &time_series_merge, const std::string &list_merge,
-    const std::string &warn_merge, const std::string &warn_merge_tolerances,
-    const std::string &fail_merge, const std::string &fail_merge_tolerances)
-    : SUM_MERGE(sum_merge), TIME_SERIES_MERGE(time_series_merge),
-      LIST_MERGE(list_merge), WARN_MERGE(warn_merge),
-      WARN_MERGE_TOLERANCES(warn_merge_tolerances), FAIL_MERGE(fail_merge),
-      FAIL_MERGE_TOLERANCES(fail_merge_tolerances), m_logger(logger) {
-  setSampleMap(m_logMap, MergeLogType::Sum, sampleLogsSum, *ws, "");
-  setSampleMap(m_logMap, MergeLogType::TimeSeries, sampleLogsTimeSeries, *ws,
+SampleLogsBehaviour::SampleLogsBehaviour(MatrixWorkspace_sptr ws,
+                                         Logger &logger,
+                                         const SampleLogNames &logEntries,
+                                         const ParameterName &parName)
+    : parameterNames(parName), m_logger(logger) {
+  setSampleMap(m_logMap, MergeLogType::Sum, logEntries.sampleLogsSum, *ws, "");
+  setSampleMap(m_logMap, MergeLogType::TimeSeries,
+               logEntries.sampleLogsTimeSeries, *ws, "");
+  setSampleMap(m_logMap, MergeLogType::List, logEntries.sampleLogsList, *ws,
                "");
-  setSampleMap(m_logMap, MergeLogType::List, sampleLogsList, *ws, "");
-  setSampleMap(m_logMap, MergeLogType::Warn, sampleLogsWarn, *ws,
-               sampleLogsWarnTolerances);
-  setSampleMap(m_logMap, MergeLogType::Fail, sampleLogsFail, *ws,
-               sampleLogsFailTolerances);
+  setSampleMap(m_logMap, MergeLogType::Warn, logEntries.sampleLogsWarn, *ws,
+               logEntries.sampleLogsWarnTolerances);
+  setSampleMap(m_logMap, MergeLogType::Fail, logEntries.sampleLogsFail, *ws,
+               logEntries.sampleLogsFailTolerances);
 
   SampleLogsMap instrumentMap;
   this->createSampleLogsMapsFromInstrumentParams(instrumentMap, *ws);
@@ -152,24 +123,28 @@ SampleLogsBehaviour::SampleLogsBehaviour(
 void SampleLogsBehaviour::createSampleLogsMapsFromInstrumentParams(
     SampleLogsMap &map, MatrixWorkspace &ws) {
   std::string params =
-      ws.getInstrument()->getParameterAsString(SUM_MERGE, false);
+      ws.getInstrument()->getParameterAsString(parameterNames.SUM_MERGE, false);
   setSampleMap(map, MergeLogType::Sum, params, ws, "", true);
 
-  params = ws.getInstrument()->getParameterAsString(TIME_SERIES_MERGE, false);
+  params = ws.getInstrument()->getParameterAsString(
+      parameterNames.TIME_SERIES_MERGE, false);
   setSampleMap(map, MergeLogType::TimeSeries, params, ws, "", true);
 
-  params = ws.getInstrument()->getParameterAsString(LIST_MERGE, false);
+  params = ws.getInstrument()->getParameterAsString(parameterNames.LIST_MERGE,
+                                                    false);
   setSampleMap(map, MergeLogType::List, params, ws, "", true);
 
-  params = ws.getInstrument()->getParameterAsString(WARN_MERGE, false);
+  params = ws.getInstrument()->getParameterAsString(parameterNames.WARN_MERGE,
+                                                    false);
   std::string paramsTolerances;
-  paramsTolerances =
-      ws.getInstrument()->getParameterAsString(WARN_MERGE_TOLERANCES, false);
+  paramsTolerances = ws.getInstrument()->getParameterAsString(
+      parameterNames.WARN_MERGE_TOLERANCES, false);
   setSampleMap(map, MergeLogType::Warn, params, ws, paramsTolerances, true);
 
-  params = ws.getInstrument()->getParameterAsString(FAIL_MERGE, false);
-  paramsTolerances =
-      ws.getInstrument()->getParameterAsString(FAIL_MERGE_TOLERANCES, false);
+  params = ws.getInstrument()->getParameterAsString(parameterNames.FAIL_MERGE,
+                                                    false);
+  paramsTolerances = ws.getInstrument()->getParameterAsString(
+      parameterNames.FAIL_MERGE_TOLERANCES, false);
   setSampleMap(map, MergeLogType::Fail, params, ws, paramsTolerances, true);
 }
 
