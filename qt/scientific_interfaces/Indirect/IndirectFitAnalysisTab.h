@@ -194,6 +194,7 @@ protected slots:
   getWorkspaceIndexAttribute();
   void updateAttributeValues(
       Mantid::API::IFunction_sptr fitFunction,
+      std::vector<std::string> const &attributeNames,
       std::unordered_map<std::string, Mantid::API::IFunction::Attribute> const
           &attributes);
   void updateFitBrowserAttributeValues();

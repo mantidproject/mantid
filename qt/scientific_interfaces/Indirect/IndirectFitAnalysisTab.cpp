@@ -43,9 +43,8 @@ void updateParameters(
 }
 
 void updateAttributes(
-    IFunction_sptr function,
+    IFunction_sptr function, std::vector<std::string> const &attributeNames,
     std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
-  auto const attributeNames = function->getAttributeNames();
   for (auto i = 0u; i < function->nAttributes(); ++i) {
     auto const value = attributes.find(attributeNames[i]);
     if (value != attributes.end())
@@ -180,10 +179,16 @@ void IndirectFitAnalysisTab::connectSpectrumAndPlotPresenters() {
 }
 
 void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(setBrowserWorkspaceIndex(std::size_t)));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
           this, SLOT(setBrowserWorkspace(std::size_t)));
   connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
           SLOT(setBrowserWorkspaceIndex(std::size_t)));
+  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
+          SLOT(updateWorkspaceIndexValue()));
+  connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
+          this, SLOT(updateWorkspaceIndexValue()));
   connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
           SLOT(updateWorkspaceIndexValue()));
 
@@ -720,11 +725,15 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
 }
 
 void IndirectFitAnalysisTab::updateWorkspaceIndexValue() {
-  auto fitFunction = m_fitPropertyBrowser->getFittingFunction();
-  auto const attributeNames = fitFunction->getAttributeNames();
-  if (std::find(attributeNames.begin(), attributeNames.end(),
-                "WorkspaceIndex") != attributeNames.end())
-    updateAttributeValues(fitFunction, getWorkspaceIndexAttribute());
+  for (auto i = 0; i < m_fitPropertyBrowser->count(); ++i) {
+    auto function = m_fitPropertyBrowser->getFunctionAtIndex(i);
+    auto const attributeNames = function->getAttributeNames();
+    // if (std::find(attributeNames.begin(), attributeNames.end(),
+    //              "WorkspaceIndex") != attributeNames.end())
+    if (!attributeNames.empty())
+      updateAttributeValues(function, attributeNames,
+                            getWorkspaceIndexAttribute());
+  }
 }
 
 std::unordered_map<std::string, IFunction::Attribute>
@@ -736,10 +745,10 @@ IndirectFitAnalysisTab::getWorkspaceIndexAttribute() {
 }
 
 void IndirectFitAnalysisTab::updateAttributeValues(
-    IFunction_sptr fitFunction,
+    IFunction_sptr fitFunction, std::vector<std::string> const &attributeNames,
     std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
   try {
-    updateAttributes(fitFunction, attributes);
+    updateAttributes(fitFunction, attributeNames, attributes);
     updateFitBrowserAttributeValues();
   } catch (const std::out_of_range &) {
   }

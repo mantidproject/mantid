@@ -119,6 +119,9 @@ public:
 
   /// Return the fitting function
   Mantid::API::IFunction_sptr getFittingFunction() const;
+  /// Return a function at a specific index in the composite function
+  Mantid::API::IFunction_sptr
+  getFunctionAtIndex(std::size_t const &index) const;
 
   /// Get the default function type
   std::string defaultFunctionType() const;

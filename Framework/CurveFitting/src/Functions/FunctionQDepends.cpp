@@ -70,14 +70,11 @@ void FunctionQDepends::setAttribute(const std::string &attName,
                                     const Attr &attValue) {
   // Q value is tied to WorkspaceIndex if we have a list of Q values
   if (attName == "WorkspaceIndex") {
-    auto const index = attValue.type() == "double"
-                           ? static_cast<int>(attValue.asDouble())
-                           : attValue.asInt();
-    auto const workspaceIndex = static_cast<std::size_t>(index);
-    if (!m_vQ.empty() && workspaceIndex < m_vQ.size()) {
+    size_t wi{static_cast<size_t>(
+        attValue.asInt())}; // ah!, the "joys" of C++ strong typing.
+    if (!m_vQ.empty() && wi < m_vQ.size()) {
       Mantid::API::IFunction::setAttribute(attName, attValue);
-      Mantid::API::IFunction::setAttribute("Q",
-                                           Attribute(m_vQ.at(workspaceIndex)));
+      Mantid::API::IFunction::setAttribute("Q", Attribute(m_vQ.at(wi)));
     }
   }
   // Q can be manually changed by user only if list of Q values is empty
