@@ -7,35 +7,15 @@
 #ifndef MANTID_ALGORITHMS_SAMPLELOGSBEHAVIOURTEST_H_
 #define MANTID_ALGORITHMS_SAMPLELOGSBEHAVIOURTEST_H_
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
+#include "MantidDataHandling/LoadParameterFile.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
-
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
-#include "MantidAlgorithms/GroupWorkspaces.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidHistogramData/HistogramDx.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_cow.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
-#include "MantidDataHandling/LoadParameterFile.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-
-using Mantid::Algorithms::CreateSampleWorkspace;
-using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::Algorithms::SampleLogsBehaviour;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
-using namespace Mantid::DataObjects;
-using namespace Mantid::HistogramData;
-using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace WorkspaceCreationHelper;
 
@@ -54,25 +34,53 @@ public:
     // Using default values of the constructor
     Logger log("testLog");
     MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(
-        3, 3, true, false, true, "INSTRUMENT");
+        3, 3, true, false, true, m_instrName);
     // Add sample logs
     ws->mutableRun().addLogData(new PropertyWithValue<double>("A", 2.65));
     ws->mutableRun().addLogData(new PropertyWithValue<double>("B", 1.56));
     ws->mutableRun().addLogData(new PropertyWithValue<double>("C", 8.55));
     // Load test parameter file
-    LoadParameterFile paramLoader;
-    paramLoader.initialize();
-    paramLoader.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/SampleLogsBehaviour_Parameters.xml");
-    paramLoader.setProperty("Workspace", ws);
-    paramLoader.execute();
+    LoadParameterFile addIPF;
+    TS_ASSERT_THROWS_NOTHING(addIPF.initialize());
+    TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("ParameterXML", m_parameterXML))
+    TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("Workspace", ws))
+    TS_ASSERT_THROWS_NOTHING(addIPF.execute())
+    TS_ASSERT(addIPF.isExecuted())
     SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log);
-    sbh.mergeSampleLogs(ws, ws);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws));
     const std::string A = ws->run().getLogData("A")->value();
     const std::string B = ws->run().getLogData("B")->value();
     const std::string C = ws->run().getLogData("C")->value();
+    // B summed accprding to IPF
     TS_ASSERT_EQUALS(A, "2.6499999999999999")
-    TS_ASSERT_EQUALS(B, "1.5600000000000001")
+    TS_ASSERT_EQUALS(B, "3.1200000000000001")
+    TS_ASSERT_EQUALS(C, "8.5500000000000007")
+  }
+
+  void testMergeRunsUserNames() {
+    // Using default values of the constructor
+    Logger log("testLog");
+    MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(
+        3, 3, true, false, true, m_instrName);
+    // Add sample logs
+    ws->mutableRun().addLogData(new PropertyWithValue<double>("A", 2.65));
+    ws->mutableRun().addLogData(new PropertyWithValue<double>("B", 1.56));
+    ws->mutableRun().addLogData(new PropertyWithValue<double>("C", 8.55));
+    // Load test parameter file
+    LoadParameterFile addIPF;
+    TS_ASSERT_THROWS_NOTHING(addIPF.initialize());
+    TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("ParameterXML", m_parameterXML))
+    TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("Workspace", ws))
+    TS_ASSERT_THROWS_NOTHING(addIPF.execute())
+    TS_ASSERT(addIPF.isExecuted())
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, "A");
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws));
+    const std::string A = ws->run().getLogData("A")->value();
+    const std::string B = ws->run().getLogData("B")->value();
+    const std::string C = ws->run().getLogData("C")->value();
+    // A summed according to user name and B summed according to IPF
+    TS_ASSERT_EQUALS(A, "5.2999999999999998")
+    TS_ASSERT_EQUALS(B, "3.1200000000000001")
     TS_ASSERT_EQUALS(C, "8.5500000000000007")
   }
 
@@ -80,33 +88,77 @@ public:
     // Using suffix conjoin_ + default value names for constructing
     Logger log("testLog");
     MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(
-        3, 3, true, false, true, "INSTRUMENT");
+        3, 3, true, false, true, m_instrName);
     // Add sample logs
     ws->mutableRun().addLogData(new PropertyWithValue<double>("A", 2.65));
     ws->mutableRun().addLogData(new PropertyWithValue<double>("B", 1.56));
     ws->mutableRun().addLogData(new PropertyWithValue<double>("C", 8.55));
     // Load test parameter file
-    LoadParameterFile paramLoader;
-    paramLoader.initialize();
-    paramLoader.setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/SampleLogsBehaviour_Parameters.xml");
-    paramLoader.setProperty("Workspace", ws);
-    paramLoader.execute();
+    LoadParameterFile addIPF;
+    TS_ASSERT_THROWS_NOTHING(addIPF.initialize())
+    TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("ParameterXML", m_parameterXML))
+    TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("Workspace", ws))
+    TS_ASSERT_THROWS_NOTHING(addIPF.execute())
+    TS_ASSERT(addIPF.isExecuted())
     SampleLogsBehaviour sbh = SampleLogsBehaviour(
-        ws, log, "", "", "", "", "", "", "", "conjoin_sample_logs_sum",
-        "conjoin_sample_logs_time_series", "conjoin_sample_logs_list",
-        "conjoin_sample_logs_warn", "conjoin_sample_logs_warn_tolerances",
-        "conjoin_sample_logs_fail", "conjoin_sample_logs_fail_tolerances");
+        ws, log, "", "", "", "", "", "", "", "conjoin_sample_logs_sum");
     sbh.mergeSampleLogs(ws, ws);
     const std::string A = ws->run().getLogData("A")->value();
     const std::string B = ws->run().getLogData("B")->value();
     const std::string C = ws->run().getLogData("C")->value();
-    TS_ASSERT_EQUALS(A, "2.6499999999999999")
+    // A and C summed according to IPF
+    TS_ASSERT_EQUALS(A, "5.2999999999999998")
     TS_ASSERT_EQUALS(B, "1.5600000000000001")
-    TS_ASSERT_EQUALS(C, "8.5500000000000007")
+    TS_ASSERT_EQUALS(C, "17.100000000000001")
+  }
+
+  void testConjoinXRunsUserNames() {
+    // Using suffix conjoin_ + default value names for constructing
+    Logger log("testLog");
+    MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(
+        3, 3, true, false, true, m_instrName);
+    // Add sample logs
+    ws->mutableRun().addLogData(new PropertyWithValue<double>("A", 2.65));
+    ws->mutableRun().addLogData(new PropertyWithValue<double>("B", 1.56));
+    ws->mutableRun().addLogData(new PropertyWithValue<double>("C", 8.55));
+    // Load test parameter file
+    LoadParameterFile addIPF;
+    TS_ASSERT_THROWS_NOTHING(addIPF.initialize())
+    TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("ParameterXML", m_parameterXML))
+    TS_ASSERT_THROWS_NOTHING(addIPF.setProperty("Workspace", ws))
+    TS_ASSERT_THROWS_NOTHING(addIPF.execute())
+    TS_ASSERT(addIPF.isExecuted())
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(
+        ws, log, "B", "", "", "", "", "", "", "conjoin_sample_logs_sum");
+    sbh.mergeSampleLogs(ws, ws);
+    const std::string A = ws->run().getLogData("A")->value();
+    const std::string B = ws->run().getLogData("B")->value();
+    const std::string C = ws->run().getLogData("C")->value();
+    // B summed according to user name and A and B summed according to IPF
+    TS_ASSERT_EQUALS(A, "5.2999999999999998")
+    TS_ASSERT_EQUALS(B, "1.5600000000000001")
+    TS_ASSERT_EQUALS(C, "17.100000000000001")
   }
 
 private:
+  // Test instrument name
+  const std::string m_instrName = "INSTR";
+  // Define parameter XML string
+  std::string m_parameterXML =
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+      "<parameter-file instrument=\"INSTR\" valid-from=\"2018-11-07 "
+      "12:00:00\">"
+      "  <component-link name=\"INSTR\">"
+      "    <!-- For MergeRuns.-->"
+      "    <parameter name=\"sample_logs_sum\" type=\"string\">"
+      "	<value val=\"B\" />"
+      "    </parameter>"
+      "    <!-- For ConjoinXRuns. -->"
+      "    <parameter name=\"conjoin_sample_logs_sum\" type=\"string\">"
+      "       <value val=\"A, C\" />"
+      "    </parameter>"
+      "  </component-link>"
+      "</parameter-file>";
 };
 
 #endif /* MANTID_ALGORITHMS_SAMPLELOGSBEHAVIOURTEST_H_ */
