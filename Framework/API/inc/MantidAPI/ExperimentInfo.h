@@ -44,6 +44,7 @@ class Run;
 class Sample;
 class SpectrumInfo;
 
+/// Enumerate the different options for instrument file type: IDF or Nexus
 enum class FileType { Idf, Nexus, Both };
 
 /** This class is shared by a few Workspace types

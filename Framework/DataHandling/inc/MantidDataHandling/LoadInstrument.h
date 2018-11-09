@@ -80,9 +80,9 @@ public:
     return "DataHandling\\Instrument";
   }
   /// Load instrument from IDF XML file
-  void IDFInstrumentLoader();
+  void idfInstrumentLoader();
   /// Load instrument from Nexus file
-  void NexusInstrumentLoader();
+  void nexusInstrumentLoader();
   /// Retrieve file name if undefined
   void checkAndRetrieveInstrumentFilename(const API::FileType &filetype);
 

@@ -108,9 +108,9 @@ void LoadInstrument::exec() {
   // Nexus loader can also take in an instrument name. Possibly by adding
   // a "FileType" property to the LoadInstrument algorithm.
   if (LoadGeometry::isIDF(m_filename, m_instName))
-    IDFInstrumentLoader();
+    idfInstrumentLoader();
   else if (LoadGeometry::isNexus(m_filename))
-    NexusInstrumentLoader();
+    nexusInstrumentLoader();
   else
     throw Kernel::Exception::FileError("Instrument input cannot be read",
                                        m_filename);
@@ -126,7 +126,7 @@ void LoadInstrument::exec() {
 }
 
 /// Load instrument from IDF XML file
-void LoadInstrument::IDFInstrumentLoader() {
+void LoadInstrument::idfInstrumentLoader() {
 
   // We will parse the XML using the InstrumentDefinitionParser
   InstrumentDefinitionParser parser;
@@ -211,7 +211,7 @@ void LoadInstrument::IDFInstrumentLoader() {
   }
 }
 
-void LoadInstrument::NexusInstrumentLoader() {
+void LoadInstrument::nexusInstrumentLoader() {
   checkAndRetrieveInstrumentFilename(FileType::Nexus);
   Instrument_const_sptr instrument =
       NexusGeometry::NexusGeometryParser::createInstrument(m_filename);
