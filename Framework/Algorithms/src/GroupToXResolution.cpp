@@ -63,10 +63,10 @@ void GroupToXResolution::init() {
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       Prop::OUTPUT_WS, "", Kernel::Direction::Output),
                   "The grouped workspace.");
-  auto betweenZeroAndOne =
-      boost::make_shared<Kernel::BoundedValidator<double>>(0., 1.);
-  betweenZeroAndOne->setLowerExclusive(true);
-  declareProperty(Prop::FRACTION, 0.2, betweenZeroAndOne,
+  auto positive = boost::make_shared<Kernel::BoundedValidator<double>>();
+  positive->setLower(0.);
+  positive->setLowerExclusive(true);
+  declareProperty(Prop::FRACTION, 0.2, positive,
                   "A fraction of Dx to group the points to.");
 }
 
