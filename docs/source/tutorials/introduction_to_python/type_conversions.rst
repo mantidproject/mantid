@@ -50,7 +50,6 @@ Printing
 
 .. code:: python
 
-
    x = 5
    y = 6
    # Python 2
@@ -62,23 +61,31 @@ Printing
 -  As above printing other types is then simple with the ``str()``
    function:
 
-.. code:: python
+.. testcode:: types1
 
    x = 'The meaning of life is ... '
    answer = 42
    print(x + str(answer))
 
+Gives the output:
+
+.. testoutput:: types1
+
+    The meaning of life is ... 42
+
 -  If you want to avoid wrapping variables in str, you can use the
    format statement to insert values into a template string:
 
-.. code:: python
+.. testcode:: types2
 
    answer = 42
    print('The meaning of life is ... {}'.format(answer))
 
-.. raw:: mediawiki
+Gives the output:
 
-   {{SlideNavigationLinks|Basic_Language_Principles|Introduction_To_Python|Converting_Between_Types}}
+.. testoutput:: types2
+
+    The meaning of life is ... 42
 
 Converting Between Types
 ========================
@@ -98,15 +105,22 @@ Converting Between Types
    ask Python to use floating point numbers instead of integers. This
    can be achieved in two ways:
 
-.. code:: python
+.. testcode:: types3
 
    x = 1.0/2.0
-   print(x)    # Prints 0.5 
+   print(x)    
 
    # or using the float function float() 
    x = 1
    y = 2
-   print(float(x)/float(y))   # Prints 0.5 also
+   print(float(x)/float(y))   
+
+Gives the output:
+
+.. testoutput:: types3
+
+    0.5
+    0.5
 
 -  The type conversion functions for the 4 basic types are:
 
@@ -126,10 +140,6 @@ Converting Between Types
 
 -  If a type cannot be converted then a 'ValueError' occurs (see error
    handling section).
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|Type_Conversions|Introduction_To_Python|Sequence_Data_Types}}
 
 `Category:Tested Examples <Category:Tested_Examples>`__ `Category:Tested
 Examples <Category:Tested_Examples>`__

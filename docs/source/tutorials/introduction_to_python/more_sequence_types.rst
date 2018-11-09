@@ -89,7 +89,7 @@ Gives the output:
 
 .. testoutput:: dict2
 
-    1 3
+    (1, 3)
 
 -  To remove a key/value from the dictionary, use the ``del`` command
 
@@ -132,8 +132,8 @@ Gives the output:
 
 .. testoutput:: sets1
 
-    {1, 3}
-    {3, 4}
+    set([1, 3])
+    set([3, 4])
 
 -  As with dictionaries, sets are unordered so it is not possible to
    access a set with a square bracket operators and they do not support
