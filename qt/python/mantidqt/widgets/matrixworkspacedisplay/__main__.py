@@ -7,6 +7,9 @@
 #  This file is part of the mantid workbench.
 #
 #
+
+# To Run target this package with PyCharm, and __main__ will be executed
+
 import os
 
 from qtpy.QtWidgets import QApplication
