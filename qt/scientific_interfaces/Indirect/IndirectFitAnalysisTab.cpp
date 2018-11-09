@@ -728,8 +728,6 @@ void IndirectFitAnalysisTab::updateWorkspaceIndexValue() {
   for (auto i = 0; i < m_fitPropertyBrowser->count(); ++i) {
     auto function = m_fitPropertyBrowser->getFunctionAtIndex(i);
     auto const attributeNames = function->getAttributeNames();
-    // if (std::find(attributeNames.begin(), attributeNames.end(),
-    //              "WorkspaceIndex") != attributeNames.end())
     if (!attributeNames.empty())
       updateAttributeValues(function, attributeNames,
                             getWorkspaceIndexAttribute());

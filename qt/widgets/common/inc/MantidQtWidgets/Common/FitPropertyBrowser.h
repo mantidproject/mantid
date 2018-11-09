@@ -15,7 +15,6 @@
 #include <QHash>
 #include <QList>
 #include <QMap>
-#include <unordered_map>
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
