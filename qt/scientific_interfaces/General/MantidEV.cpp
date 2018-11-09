@@ -1040,7 +1040,8 @@ void MantidEV::changeHKL_slot() {
   std::string row_2_str = m_uiForm.HKL_tran_row_2_ledt->text().toStdString();
   std::string row_3_str = m_uiForm.HKL_tran_row_3_ledt->text().toStdString();
 
-  bool changed = worker->changeHKL(peaks_ws_name, row_1_str, row_2_str, row_3_str);
+  bool changed =
+      worker->changeHKL(peaks_ws_name, row_1_str, row_2_str, row_3_str);
   if (!changed) {
     errorMessage("Failed to Change the Miller Indicies and UB");
   }
