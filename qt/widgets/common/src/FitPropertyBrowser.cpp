@@ -1910,6 +1910,13 @@ void FitPropertyBrowser::updateParameters() {
 }
 
 /**
+ * Update the function attributes specified
+ */
+void FitPropertyBrowser::updateAttributes() {
+  getHandler()->updateAttributes();
+}
+
+/**
  * Slot. Removes all functions.
  */
 void FitPropertyBrowser::clear() {

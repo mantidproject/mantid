@@ -15,6 +15,7 @@
 #include <QHash>
 #include <QList>
 #include <QMap>
+#include <unordered_map>
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -98,6 +99,8 @@ public:
   boost::shared_ptr<const Mantid::API::IFunction> theFunction() const;
   /// Update the function parameters
   void updateParameters();
+  /// Update the function attributes
+  void updateAttributes();
   /// Get function parameter values
   QList<double> getParameterValues() const;
   /// Get function parameter names

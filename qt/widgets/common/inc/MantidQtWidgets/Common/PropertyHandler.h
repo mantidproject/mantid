@@ -118,6 +118,21 @@ public:
   bool setAttribute(QtProperty *prop, bool resetProperties = true);
 
   /**
+   * Set function's attribute
+   * @param attName :: The name of the attribute
+   * @param attValue :: The new attribute value
+   */
+  void setAttribute(QString const &attName,
+                    Mantid::API::IFunction::Attribute const &attValue);
+
+  /**
+   * Set function's integer attribute
+   * @param attName :: The name of the attribute
+   * @param attValue :: The new attribute value
+   */
+  void setAttribute(QString const &attName, int const &attValue);
+
+  /**
    * Set function's double attribute
    * @param attName :: The name of the attribute
    * @param attValue :: The new attribute value
@@ -137,6 +152,9 @@ public:
 
   /// Sync all parameter values with the manager
   void updateParameters();
+
+  /// Sync all parameter values with the manager
+  void updateAttributes();
 
   /// Set all parameter error values in the manager
   void updateErrors();
@@ -252,6 +270,12 @@ private:
 
   /// Applies given function to all the parameter properties recursively
   void applyToAllParameters(void (PropertyHandler::*func)(QtProperty *));
+
+  /// Sync function attribute value with the manager
+  void updateAttribute(QtProperty *prop);
+
+  /// Applies given function to all the attribute properties recursively
+  void applyToAllAttributes(void (PropertyHandler::*func)(QtProperty *));
 
   friend class CreateAttributeProperty;
 };

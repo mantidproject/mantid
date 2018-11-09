@@ -189,10 +189,18 @@ protected slots:
   void singleFit(std::size_t dataIndex, std::size_t spectrum);
   void executeFit();
 
-  void updateFitBrowserParameterValues();
+  void updateWorkspaceIndexValue();
+  std::unordered_map<std::string, Mantid::API::IFunction::Attribute>
+  getWorkspaceIndexAttribute();
+  void updateAttributeValues(
+      Mantid::API::IFunction_sptr fitFunction,
+      std::unordered_map<std::string, Mantid::API::IFunction::Attribute> const
+          &attributes);
+  void updateFitBrowserAttributeValues();
   void updateParameterValues();
   void updateParameterValues(
       const std::unordered_map<std::string, ParameterValue> &parameters);
+  void updateFitBrowserParameterValues();
 
   virtual void updatePlotOptions() = 0;
 

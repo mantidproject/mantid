@@ -31,9 +31,9 @@ using namespace MantidQt::CustomInterfaces::IDA;
 
 void updateParameters(
     IFunction_sptr function,
-    const std::unordered_map<std::string, ParameterValue> &parameters) {
+    std::unordered_map<std::string, ParameterValue> const &parameters) {
   for (auto i = 0u; i < function->nParams(); ++i) {
-    auto value = parameters.find(function->parameterName(i));
+    auto const value = parameters.find(function->parameterName(i));
     if (value != parameters.end()) {
       function->setParameter(i, value->second.value);
       if (value->second.error)
@@ -41,6 +41,18 @@ void updateParameters(
     }
   }
 }
+
+void updateAttributes(
+    IFunction_sptr function,
+    std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
+  auto const attributeNames = function->getAttributeNames();
+  for (auto i = 0u; i < function->nAttributes(); ++i) {
+    auto const value = attributes.find(attributeNames[i]);
+    if (value != attributes.end())
+      function->setAttribute(attributeNames[i], value->second);
+  }
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -172,6 +184,8 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
           this, SLOT(setBrowserWorkspace(std::size_t)));
   connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
           SLOT(setBrowserWorkspaceIndex(std::size_t)));
+  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+          SLOT(updateWorkspaceIndexValue()));
 
   connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)),
           m_plotPresenter.get(), SLOT(setStartX(double)));
@@ -705,9 +719,35 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
              SLOT(fitAlgorithmComplete(bool)));
 }
 
-void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
+void IndirectFitAnalysisTab::updateWorkspaceIndexValue() {
+  auto fitFunction = m_fitPropertyBrowser->getFittingFunction();
+  auto const attributeNames = fitFunction->getAttributeNames();
+  if (std::find(attributeNames.begin(), attributeNames.end(),
+                "WorkspaceIndex") != attributeNames.end())
+    updateAttributeValues(fitFunction, getWorkspaceIndexAttribute());
+}
+
+std::unordered_map<std::string, IFunction::Attribute>
+IndirectFitAnalysisTab::getWorkspaceIndexAttribute() {
+  std::unordered_map<std::string, IFunction::Attribute> attributes;
+  attributes["WorkspaceIndex"] =
+      IFunction::Attribute(m_fitPropertyBrowser->workspaceIndex());
+  return attributes;
+}
+
+void IndirectFitAnalysisTab::updateAttributeValues(
+    IFunction_sptr fitFunction,
+    std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
+  try {
+    updateAttributes(fitFunction, attributes);
+    updateFitBrowserAttributeValues();
+  } catch (const std::out_of_range &) {
+  }
+}
+
+void IndirectFitAnalysisTab::updateFitBrowserAttributeValues() {
   MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
-  m_fitPropertyBrowser->updateParameters();
+  m_fitPropertyBrowser->updateAttributes();
 }
 
 /**
@@ -729,8 +769,7 @@ void IndirectFitAnalysisTab::updateParameterValues(
     auto fitFunction = m_fitPropertyBrowser->getFittingFunction();
     updateParameters(fitFunction, parameters);
 
-    MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
-    m_fitPropertyBrowser->updateParameters();
+    updateFitBrowserParameterValues();
 
     if (m_fittingModel->isPreviouslyFit(getSelectedDataIndex(),
                                         getSelectedSpectrum()))
@@ -739,6 +778,11 @@ void IndirectFitAnalysisTab::updateParameterValues(
       m_fitPropertyBrowser->clearErrors();
   } catch (const std::out_of_range &) {
   }
+}
+
+void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
+  m_fitPropertyBrowser->updateParameters();
 }
 
 /*

@@ -797,6 +797,41 @@ bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
   return false;
 }
 
+void PropertyHandler::setAttribute(
+    QString const &attName, Mantid::API::IFunction::Attribute const &attValue) {
+  auto const type = attValue.type();
+  if (type == "double")
+    setAttribute(attName, attValue.asDouble());
+  else if (type == "int")
+    setAttribute(attName, attValue.asInt());
+}
+
+void PropertyHandler::setAttribute(QString const &attName,
+                                   int const &attValue) {
+  if (m_fun->hasAttribute(attName.toStdString())) {
+    try {
+      m_fun->setAttribute(attName.toStdString(),
+                          Mantid::API::IFunction::Attribute(attValue));
+      m_browser->compositeFunction()->checkFunction();
+      foreach (QtProperty *prop, m_attributes) {
+        if (prop->propertyName() == attName) {
+          // re-insert the attribute and parameter properties as they may
+          // depend on the value of the attribute being set
+          initAttributes();
+          initParameters();
+        }
+      }
+    } catch (...) {
+    }
+  }
+  if (cfun()) {
+    for (size_t i = 0; i < cfun()->nFunctions(); ++i) {
+      PropertyHandler *h = getHandler(i);
+      h->setAttribute(attName, attValue);
+    }
+  }
+}
+
 void PropertyHandler::setAttribute(const QString &attName,
                                    const double &attValue) {
   if (m_fun->hasAttribute(attName.toStdString())) {
@@ -860,6 +895,36 @@ void PropertyHandler::setVectorAttribute(QtProperty *prop) {
 }
 
 /**
+ * Applies the given function to all the attribute properties recursively,
+ * within this context.
+ * @param func :: Function to apply
+ */
+void PropertyHandler::applyToAllAttributes(
+    void (PropertyHandler::*func)(QtProperty *)) {
+  for (int i = 0; i < m_attributes.size(); ++i) {
+    QtProperty *attribute = m_attributes[i];
+    (this->*(func))(attribute);
+  }
+
+  if (m_cf)
+    for (std::size_t i = 0u; i < m_cf->nFunctions(); ++i)
+      getHandler(i)->applyToAllAttributes(func);
+}
+
+void PropertyHandler::updateAttributes() {
+  applyToAllAttributes(&PropertyHandler::updateAttribute);
+}
+
+/**
+ * @param attribute :: An attribute of the function
+ */
+void PropertyHandler::updateAttribute(QtProperty *attribute) {
+  auto const attributeValue =
+      function()->getAttribute(attribute->propertyName().toStdString());
+  setAttribute(attribute->propertyName(), attributeValue);
+}
+
+/**
  * Applies given function to all the parameter properties recursively, within
  * this context.
  * @param func :: Function to apply
@@ -894,7 +959,7 @@ void PropertyHandler::clearErrors() {
  * @param prop :: Property of the parameter
  */
 void PropertyHandler::updateParameter(QtProperty *prop) {
-  double parValue =
+  double const parValue =
       function()->getParameter(prop->propertyName().toStdString());
   m_browser->m_parameterManager->setValue(prop, parValue);
 }
