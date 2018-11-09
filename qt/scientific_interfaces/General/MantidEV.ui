@@ -2496,10 +2496,10 @@
             <item>
              <widget class="QCheckBox" name="CreateHKLWorkspace_ckbx">
               <property name="toolTip">
-               <string>Convert the event workspace after cell is chosen into a HKL MD Workspace.</string>
+               <string>Convert the event workspace after cell is chosen into an MD HKL Workspace.</string>
               </property>
               <property name="text">
-               <string>Create HKL MD Workspace</string>
+               <string>Create MD HKL Workspace</string>
               </property>
              </widget>
             </item>

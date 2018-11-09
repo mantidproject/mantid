@@ -1040,7 +1040,8 @@ void MantidEV::changeHKL_slot() {
   std::string row_2_str = m_uiForm.HKL_tran_row_2_ledt->text().toStdString();
   std::string row_3_str = m_uiForm.HKL_tran_row_3_ledt->text().toStdString();
 
-  if (!worker->changeHKL(peaks_ws_name, row_1_str, row_2_str, row_3_str)) {
+  bool changed = worker->changeHKL(peaks_ws_name, row_1_str, row_2_str, row_3_str);
+  if (!changed) {
     errorMessage("Failed to Change the Miller Indicies and UB");
   }
 
@@ -1053,7 +1054,7 @@ void MantidEV::changeHKL_slot() {
   worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
 
   bool create_hkl_workspace = m_uiForm.CreateHKLWorkspace_ckbx->isChecked();
-  if (create_hkl_workspace) { // Redo the HKL md_workspace
+  if (create_hkl_workspace && changed) { // Redo the HKL md_workspace
     double minQ;
     getDouble(m_uiForm.MinMagQ_ledt, minQ);
 
