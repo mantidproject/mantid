@@ -77,19 +77,13 @@ Gives the output:
 -  This syntax can also be used to replace a value that is already in
    the dictionary since every key has to be unique,
 
-.. testcode:: dict2
+.. code:: python
 
    empty_dict = {}      # Empty dictionary
    my_lookup = {'a' : 1, 'b' : 2} # A dictionary with two keys
    empty_dict['a'] = 1
    my_lookup['b'] = 3   # Replaces the value that was referenced by the key 'b' with the new value 3
    print(empty_dict['a'], my_lookup['b'])
-
-Gives the output:
-
-.. testoutput:: dict2
-
-    (1, 3)
 
 -  To remove a key/value from the dictionary, use the ``del`` command
 
@@ -120,7 +114,7 @@ Sets
 -  Changing elements in a set is accomplished with the ``add()`` or
    ``remove()`` functions,
 
-.. testcode:: sets1
+.. code:: python
 
    values = set([1,1,3])
    print(values) 
@@ -130,7 +124,7 @@ Sets
 
 Gives the output:
 
-.. testoutput:: sets1
+.. code:: python
 
     set([1, 3])
     set([3, 4])
