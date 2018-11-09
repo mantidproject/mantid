@@ -36,6 +36,8 @@ from qtpy.QtWidgets import QApplication
 
 from mantidqt.utils.qt.plugins import setup_library_paths
 
+app = None
+
 
 def split_qualified_name(qualified_name):
     parts = qualified_name.split('.')
@@ -70,6 +72,7 @@ class ScriptRunner(object):
         self.pause_timer.setSingleShot(True)
 
     def __call__(self):
+        global app
         if not self.pause_timer.isActive():
             try:
                 # Run test script until the next 'yield'
@@ -87,6 +90,7 @@ class ScriptRunner(object):
                     self.parent_iter = None
                 elif self.close_on_finish:
                     self.widget.close()
+                    app.quit()
             except:
                 self.widget.close()
                 traceback.print_exc()
@@ -108,10 +112,12 @@ def open_in_window(widget_name, script, attach_debugger=True, pause=0, close_on_
         If the test yields an integer it is interpreted as the number of seconds to wait
         until the next step.
     """
+    global app
     if attach_debugger:
         raw_input('Please attach the Debugger now if required. Press any key to continue')
     setup_library_paths()
-    app = QApplication([""])
+    if app is None:
+        app = QApplication([""])
     if isinstance(widget_name, six.string_types):
         w = create_widget(widget_name)
         w.setWindowTitle(widget_name)
