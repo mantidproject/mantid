@@ -87,7 +87,7 @@ public:
   }
 
   void testConjoinXRunsIPFNames() {
-    // Using suffix conjoin_ + default value names for constructing
+    // Using prefix conjoin_ + default value names for constructing
     Logger log("testLog");
     MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(
         3, 3, true, false, true, m_instrName);
@@ -118,7 +118,7 @@ public:
   }
 
   void testConjoinXRunsUserNames() {
-    // Using suffix conjoin_ + default value names for constructing
+    // Using prefix conjoin_ + default value names for constructing
     Logger log("testLog");
     MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(
         3, 3, true, false, true, m_instrName);
