@@ -274,16 +274,35 @@ bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name,
     }
     Mantid::Geometry::OrientedLattice o_lattice =
         ev_ws->mutableSample().getOrientedLattice();
-    V3D h = o_lattice.hklFromQ(V3D(Q, 0, 0));
-    V3D k = o_lattice.hklFromQ(V3D(0, Q, 0));
-    V3D l = o_lattice.hklFromQ(V3D(0, 0, Q));
+    std::vector<V3D> hkl;
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, Q, -Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, -Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, -Q, -Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, -Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, Q, -Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, -Q, -Q)));
+    double hmin = 0;
+    double kmin = 0;
+    double lmin = 0;
+    double hmax = 0;
+    double kmax = 0;
+    double lmax = 0;
+    for (int i = 0; i < 8; i++) {
+      if(hkl[i][0] < hmin) hmin = hkl[i][0];
+      if(hkl[i][1] < kmin) kmin = hkl[i][1];
+      if(hkl[i][2] < lmin) lmin = hkl[i][2];
+      if(hkl[i][0] > hmax) hmax = hkl[i][0];
+      if(hkl[i][1] > kmax) kmax = hkl[i][1];
+      if(hkl[i][2] > lmax) lmax = hkl[i][2];
+    }
 
     std::ostringstream min_str;
-    min_str << -std::abs(h[0]) << "," << -std::abs(k[1]) << ","
-            << -std::abs(l[2]);
+    min_str << hmin << "," << kmin << "," << lmin;
 
     std::ostringstream max_str;
-    max_str << std::abs(h[0]) << "," << std::abs(k[1]) << "," << std::abs(l[2]);
+    max_str << hmax << "," << kmax << "," << lmax;
 
     alg = AlgorithmManager::Instance().create("ConvertToMD");
     alg->setProperty("InputWorkspace", ev_ws_name);

@@ -1051,6 +1051,17 @@ void MantidEV::changeHKL_slot() {
   std::string event_ws_name =
       m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
   worker->copyLattice(peaks_ws_name, md_ws_name, event_ws_name);
+
+  bool create_hkl_workspace = m_uiForm.CreateHKLWorkspace_ckbx->isChecked();
+  if (create_hkl_workspace) { // Redo the HKL md_workspace
+    double minQ;
+    getDouble(m_uiForm.MinMagQ_ledt, minQ);
+
+    double maxQ;
+    getDouble(m_uiForm.MaxMagQ_ledt, maxQ);
+
+    worker->convertToHKL(event_ws_name, md_ws_name, minQ, maxQ);
+  }
 }
 
 /**
