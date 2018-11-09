@@ -485,14 +485,15 @@ class SANSWLNormCorrection(PythonAlgorithm):
         out_ws_list = []
         for k, v in self.data.items():
             ws_name = k + suffix + "_fit"
-            logger.debug("Creating workspace {} (suffix = {})".format(ws_name, suffix))
+            logger.debug(
+                "Creating workspace {} (suffix = {})".format(ws_name, suffix))
 
             CreateWorkspace(
                 OutputWorkspace=ws_name,
                 DataX=list(v['x' + suffix]),
                 DataY=list(v['y' + suffix + '_fit']),
                 # Error Propagation: Error multiplied by K
-                DataE=[e * v['k'] for e in v['e' + suffix]], 
+                DataE=[e * v['k'] for e in v['e' + suffix]],
                 UnitX="MomentumTransfer")
             mtd[ws_name].setDx(0, v['dx' + suffix])  # add x error
             out_ws_list.append(ws_name)
