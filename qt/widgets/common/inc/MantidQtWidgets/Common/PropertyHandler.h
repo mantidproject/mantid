@@ -126,18 +126,12 @@ public:
                     Mantid::API::IFunction::Attribute const &attValue);
 
   /**
-   * Set function's integer attribute
+   * Set function's attribute
    * @param attName :: The name of the attribute
    * @param attValue :: The new attribute value
    */
-  void setAttribute(QString const &attName, int const &attValue);
-
-  /**
-   * Set function's double attribute
-   * @param attName :: The name of the attribute
-   * @param attValue :: The new attribute value
-   */
-  void setAttribute(const QString &attName, const double &attValue);
+  template <typename AttributeType>
+  void setAttribute(QString const &attName, AttributeType const &attValue);
 
   /**
    * Set function's attribute of any type.

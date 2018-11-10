@@ -66,6 +66,8 @@ public:
   std::vector<std::string> getFitParameterNames() const;
   virtual Mantid::API::IFunction_sptr getFittingFunction() const;
 
+  virtual std::vector<std::string> getSpectrumDependentAttributes() const = 0;
+
   void setFittingData(PrivateFittingData &&fittingData);
   void setSpectra(const std::string &spectra, std::size_t dataIndex);
   void setSpectra(Spectra &&spectra, std::size_t dataIndex);

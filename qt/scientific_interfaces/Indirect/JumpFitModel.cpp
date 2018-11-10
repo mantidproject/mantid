@@ -286,6 +286,10 @@ bool JumpFitModel::isMultiFit() const {
   return !allWorkspacesEqual(getWorkspace(0));
 }
 
+std::vector<std::string> JumpFitModel::getSpectrumDependentAttributes() const {
+  return std::vector<std::string>();
+}
+
 std::vector<std::string> JumpFitModel::getWidths(std::size_t dataIndex) const {
   const auto parameters = findJumpFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end())

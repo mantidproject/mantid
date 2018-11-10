@@ -484,6 +484,12 @@ CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   return function;
 }
 
+std::vector<std::string> ConvFitModel::getSpectrumDependentAttributes() const {
+  /// Q value also depends on spectrum but is automatically updated when
+  /// the WorkspaceIndex is changed
+  return std::vector<std::string>{ "WorkspaceIndex" };
+}
+
 void ConvFitModel::setFitFunction(IFunction_sptr function) {
   auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
   m_backgroundIndex = getFirstInCategory(composite, "Background");

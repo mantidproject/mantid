@@ -799,41 +799,18 @@ bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
 
 void PropertyHandler::setAttribute(
     QString const &attName, Mantid::API::IFunction::Attribute const &attValue) {
-  auto const type = attValue.type();
-  if (type == "double")
-    setAttribute(attName, attValue.asDouble());
-  else if (type == "int")
-    setAttribute(attName, attValue.asInt());
+  auto const attributeType = attValue.type();
+  if (attributeType == "int")
+	  setAttribute(attName, attValue.asInt());
+  else if (attributeType == "double")
+	  setAttribute(attName, attValue.asDouble());
+  else if (attributeType == "std::string")
+	  setAttribute(attName, QString::fromStdString(attValue.asString()));
 }
 
+template <typename AttributeType>
 void PropertyHandler::setAttribute(QString const &attName,
-                                   int const &attValue) {
-  if (m_fun->hasAttribute(attName.toStdString())) {
-    try {
-      m_fun->setAttribute(attName.toStdString(),
-                          Mantid::API::IFunction::Attribute(attValue));
-      m_browser->compositeFunction()->checkFunction();
-      foreach (QtProperty *prop, m_attributes) {
-        if (prop->propertyName() == attName) {
-          // re-insert the attribute and parameter properties as they may
-          // depend on the value of the attribute being set
-          initAttributes();
-          initParameters();
-        }
-      }
-    } catch (...) {
-    }
-  }
-  if (cfun()) {
-    for (size_t i = 0; i < cfun()->nFunctions(); ++i) {
-      PropertyHandler *h = getHandler(i);
-      h->setAttribute(attName, attValue);
-    }
-  }
-}
-
-void PropertyHandler::setAttribute(const QString &attName,
-                                   const double &attValue) {
+	                               AttributeType const &attValue) {
   if (m_fun->hasAttribute(attName.toStdString())) {
     try {
       m_fun->setAttribute(attName.toStdString(),
