@@ -598,15 +598,15 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
         Mantid::API::AnalysisDataService::Instance().retrieve(outName));
     Mantid::API::AnalysisDataService::Instance().remove(outName);
 
-    const auto &X = ws->x(0);
-    const auto &Y = ws->y(0);
-    x.assign(X.begin(), X.end());
-    y.assign(Y.begin(), Y.end());
+    const auto &commonX = ws->points(0);
+    const auto &firstY = ws->y(0);
+    x.assign(commonX.begin(), commonX.end());
+    y.assign(firstY.begin(), firstY.end());
 
     // add the spectra
     for (size_t i = 0; i < nSpec; ++i) {
-      const auto &Y = ws->y(i);
-      std::transform(y.begin(), y.end(), Y.begin(), y.begin(),
+      const auto &specY = ws->y(i);
+      std::transform(y.begin(), y.end(), specY.begin(), y.begin(),
                      std::plus<double>());
     }
   } catch (std::invalid_argument &) {
