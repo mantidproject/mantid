@@ -8,6 +8,7 @@
 #define MANTID_DATAHANDLING_LOADGEOMETRY_H_
 
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -21,6 +22,7 @@ namespace LoadGeometry {
 
 bool isIDF(const std::string &filename, const std::string &instrumentname);
 bool isNexus(const std::string &filename);
+const std::vector<std::string> validExtensions();
 
 } // namespace LoadGeometry
 

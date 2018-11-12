@@ -61,10 +61,9 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
-  const std::vector<std::string> extensions{".xml", ".nxs", ".hdf5"};
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                extensions),
+                                LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Files can also be .hdf5 or "

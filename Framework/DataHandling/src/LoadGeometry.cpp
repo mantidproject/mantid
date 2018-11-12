@@ -11,6 +11,7 @@
 namespace Mantid {
 namespace DataHandling {
 
+/// Determine if the Geometry file type is IDF
 bool LoadGeometry::isIDF(const std::string &filename,
                          const std::string &instrumentname) {
   if (!filename.empty()) {
@@ -20,6 +21,7 @@ bool LoadGeometry::isIDF(const std::string &filename,
   return !instrumentname.empty();
 }
 
+/// Determine if the Geometry file type is Nexus
 bool LoadGeometry::isNexus(const std::string &filename) {
   if (!filename.empty() &&
       !Mantid::Kernel::FileDescriptor(filename).isAscii(filename)) {
@@ -29,6 +31,11 @@ bool LoadGeometry::isNexus(const std::string &filename) {
             descriptor.classTypeExists("NXoff_geometry"));
   }
   return false;
+}
+
+/// List allowed file extensions for geometry
+const std::vector<std::string> LoadGeometry::validExtensions() {
+  return {".xml", ".nxs", ".hdf5"};
 }
 
 } // namespace DataHandling

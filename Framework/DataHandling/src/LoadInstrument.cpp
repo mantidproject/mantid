@@ -49,10 +49,9 @@ void LoadInstrument::init() {
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace to load the instrument definition "
                   "into. Any existing instrument will be replaced.");
-  const std::vector<std::string> extensions{".xml", ".nxs", ".hdf5"};
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
-                                extensions),
+                                LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Files can also be .hdf5 or "
@@ -98,35 +97,36 @@ void LoadInstrument::init() {
  */
 void LoadInstrument::exec() {
   // Get the input workspace
-  m_workspace = getProperty("Workspace");
-  m_filename = getPropertyValue("Filename");
-  m_instName = getPropertyValue("InstrumentName");
+  boost::shared_ptr<API::MatrixWorkspace> ws = getProperty("Workspace");
+  std::string filename = getPropertyValue("Filename");
+  std::string instname = getPropertyValue("InstrumentName");
 
   // Decide whether to use Nexus or IDF loading
   // Note: for now, if only the instrument name is provided, the IDF loader will
   // be used by default. This should be updated in the future, so that the
   // Nexus loader can also take in an instrument name. Possibly by adding
   // a "FileType" property to the LoadInstrument algorithm.
-  if (LoadGeometry::isIDF(m_filename, m_instName))
-    idfInstrumentLoader();
-  else if (LoadGeometry::isNexus(m_filename))
-    nexusInstrumentLoader();
+  if (LoadGeometry::isIDF(filename, instname))
+    idfInstrumentLoader(ws, filename, instname);
+  else if (LoadGeometry::isNexus(filename))
+    nexusInstrumentLoader(ws, filename, instname);
   else
     throw Kernel::Exception::FileError("Instrument input cannot be read",
-                                       m_filename);
+                                       filename);
 
   // Set the monitors output property
-  setProperty("MonitorList", (m_workspace->getInstrument())->getMonitors());
+  setProperty("MonitorList", (ws->getInstrument())->getMonitors());
 
   // Rebuild the spectra map for this workspace so that it matches the
   // instrument, if required
   const OptionalBool RewriteSpectraMap = getProperty("RewriteSpectraMap");
   if (RewriteSpectraMap == OptionalBool::True)
-    m_workspace->rebuildSpectraMapping();
+    ws->rebuildSpectraMapping();
 }
 
 /// Load instrument from IDF XML file
-void LoadInstrument::idfInstrumentLoader() {
+void LoadInstrument::idfInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace>& ws,
+  std::string filename, std::string instname) {
 
   // We will parse the XML using the InstrumentDefinitionParser
   InstrumentDefinitionParser parser;
@@ -137,20 +137,20 @@ void LoadInstrument::idfInstrumentLoader() {
     // We need the instrument name to be set as well because, for whatever
     // reason,
     //   this isn't pulled out of the XML.
-    if (m_instName.empty())
+    if (instname.empty())
       throw std::runtime_error("The InstrumentName property must be set when "
                                "using the InstrumentXML property.");
     // If the Filename property is not set, set it to the same as the instrument
     // name
-    if (m_filename.empty())
-      m_filename = m_instName;
+    if (filename.empty())
+      filename = instname;
 
     // Initialize the parser. Avoid copying the xmltext out of the property
     // here.
     const PropertyWithValue<std::string> *xml =
         dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML);
     if (xml) {
-      parser = InstrumentDefinitionParser(m_filename, m_instName, *xml);
+      parser = InstrumentDefinitionParser(filename, instname, *xml);
     } else {
       throw std::invalid_argument("The instrument XML passed cannot be "
                                   "casted to a standard string.");
@@ -158,17 +158,17 @@ void LoadInstrument::idfInstrumentLoader() {
   }
   // otherwise we need either Filename or InstrumentName to be set
   else {
-    checkAndRetrieveInstrumentFilename(FileType::Idf);
+    filename = checkAndRetrieveInstrumentFilename(ws, filename, instname, FileType::Idf);
     // Remove the path from the filename for use with the InstrumentDataService
-    const std::string::size_type stripPath = m_filename.find_last_of("\\/");
+    const std::string::size_type stripPath = filename.find_last_of("\\/");
     std::string instrumentFile =
-        m_filename.substr(stripPath + 1, m_filename.size());
+        filename.substr(stripPath + 1, filename.size());
     // Strip off "_Definition.xml"
-    m_instName = instrumentFile.substr(0, instrumentFile.find("_Def"));
+    instname = instrumentFile.substr(0, instrumentFile.find("_Def"));
 
     // Initialize the parser with the the XML text loaded from the IDF file
-    parser = InstrumentDefinitionParser(m_filename, m_instName,
-                                        Strings::loadFile(m_filename));
+    parser = InstrumentDefinitionParser(filename, instname,
+                                        Strings::loadFile(filename));
   }
 
   // Find the mangled instrument name that includes the modified date
@@ -198,62 +198,71 @@ void LoadInstrument::idfInstrumentLoader() {
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
-    m_workspace->setInstrument(instrument);
+    ws->setInstrument(instrument);
 
     // populate parameter map of workspace
-    m_workspace->populateInstrumentParameters();
+    ws->populateInstrumentParameters();
 
     // LoadParameterFile modifies the base instrument stored in the IDS so this
     // must also be protected by the lock until LoadParameterFile is fixed.
     // check if default parameter file is also present, unless loading from
-    if (!m_filename.empty())
-      runLoadParameterFile();
+    if (!filename.empty())
+      runLoadParameterFile(ws, filename);
   }
 }
 
-void LoadInstrument::nexusInstrumentLoader() {
-  checkAndRetrieveInstrumentFilename(FileType::Nexus);
+void LoadInstrument::nexusInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace>& ws,
+std::string filename, std::string instname) {
+  filename = checkAndRetrieveInstrumentFilename(ws, filename, instname, FileType::Nexus);
   Instrument_const_sptr instrument =
-      NexusGeometry::NexusGeometryParser::createInstrument(m_filename);
-  m_workspace->setInstrument(instrument);
-  m_workspace->populateInstrumentParameters();
+      NexusGeometry::NexusGeometryParser::createInstrument(filename);
+  ws->setInstrument(instrument);
+  ws->populateInstrumentParameters();
 }
 
 /// Get the file name from the instrument name if it is not defined
-void LoadInstrument::checkAndRetrieveInstrumentFilename(
+std::string LoadInstrument::checkAndRetrieveInstrumentFilename(
+    boost::shared_ptr<API::MatrixWorkspace>& ws,
+    std::string filename, std::string instname,
     const FileType &filetype) {
   // Retrieve the filename from the properties
-  if (m_filename.empty()) {
+  std::string instrumentfname;
+  if (filename.empty()) {
     // look to see if an Instrument name provided in which case create
     // filename on the fly
-    if (m_instName.empty()) {
+    if (instname.empty()) {
       g_log.error("Either the InstrumentName or Filename property of "
                   "LoadInstrument most be specified");
       throw Kernel::Exception::FileError(
           "Either the InstrumentName or Filename property of LoadInstrument "
-          "most be specified to load an IDF",
-          m_filename);
+          "must be specified to load an instrument",
+          filename);
     } else {
-      m_filename = ExperimentInfo::getInstrumentFilename(
-          m_instName, m_workspace->getWorkspaceStartDate(), filetype);
+      instrumentfname = ExperimentInfo::getInstrumentFilename(
+          instname, ws->getWorkspaceStartDate(), filetype);
+      setPropertyValue("Filename",instrumentfname);
     }
+  } else {
+    instrumentfname = filename;
   }
-  if (m_filename.empty()) {
+  if (instrumentfname.empty()) {
     throw Exception::NotFoundError(
-        "Unable to find an Instrument Definition File for", m_instName);
+        "Unable to find an Instrument Definition File for", instname);
   }
+  return instrumentfname;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
-void LoadInstrument::runLoadParameterFile() {
+void LoadInstrument::runLoadParameterFile(boost::shared_ptr<API::MatrixWorkspace>& ws,
+std::string filename) {
   g_log.debug("Loading the parameter definition...");
 
   // First search for XML parameter file in same folder as IDF file
-  const std::string::size_type dir_end = m_filename.find_last_of("\\/");
+  const std::string::size_type dir_end = filename.find_last_of("\\/");
   std::string directoryName =
-      m_filename.substr(0, dir_end + 1); // include final '/'.
-  std::string fullPathParamIDF = getFullPathParamIDF(directoryName);
+      filename.substr(0, dir_end + 1); // include final '/'.
+  std::string fullPathParamIDF = getFullPathParamIDF(directoryName, filename);
 
   if (fullPathParamIDF.empty()) {
     // Not found, so search the other places were it may occur
@@ -265,7 +274,7 @@ void LoadInstrument::runLoadParameterFile() {
     for (const auto &directoryName : directoryNames) {
       // This will iterate around the directories from user ->etc ->install, and
       // find the first beat file
-      fullPathParamIDF = getFullPathParamIDF(directoryName);
+      fullPathParamIDF = getFullPathParamIDF(directoryName, filename);
       // stop when you find the first one
       if (!fullPathParamIDF.empty())
         break;
@@ -281,7 +290,7 @@ void LoadInstrument::runLoadParameterFile() {
       // manually
       Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
       loadParamAlg->setProperty("Filename", fullPathParamIDF);
-      loadParamAlg->setProperty("Workspace", m_workspace);
+      loadParamAlg->setProperty("Workspace", ws);
       loadParamAlg->execute();
       g_log.debug("Parameters loaded successfully.");
     } catch (std::invalid_argument &e) {
@@ -302,11 +311,11 @@ void LoadInstrument::runLoadParameterFile() {
 /// Search the directory for the Parameter IDF file and return full path name if
 /// found, else return "".
 //  directoryName must include a final '/'.
-std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
+std::string LoadInstrument::getFullPathParamIDF(std::string directoryName, std::string filename) {
   Poco::Path directoryPath(directoryName);
   directoryPath.makeDirectory();
   // Remove the path from the filename
-  Poco::Path filePath(m_filename);
+  Poco::Path filePath(filename);
   const std::string &instrumentFile = filePath.getFileName();
 
   // First check whether there is a parameter file whose name is the same as the

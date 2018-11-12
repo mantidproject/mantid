@@ -80,31 +80,26 @@ public:
     return "DataHandling\\Instrument";
   }
   /// Load instrument from IDF XML file
-  void idfInstrumentLoader();
+  void idfInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace>& ws,
+    std::string filename, std::string instname);
   /// Load instrument from Nexus file
-  void nexusInstrumentLoader();
+  void nexusInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace>& ws,
+    std::string filename, std::string instname);
   /// Retrieve file name if undefined
-  void checkAndRetrieveInstrumentFilename(const API::FileType &filetype);
+  std::string checkAndRetrieveInstrumentFilename(boost::shared_ptr<API::MatrixWorkspace>& ws,
+    std::string filename, std::string instname, const API::FileType &filetype);
 
 private:
   void init() override;
   void exec() override;
 
   /// Run the Child Algorithm LoadParameters
-  void runLoadParameterFile();
+  void runLoadParameterFile(boost::shared_ptr<API::MatrixWorkspace>& ws,
+  std::string filename);
 
   /// Search directory for Parameter file, return full path name if found, else
   /// "".
-  std::string getFullPathParamIDF(std::string directoryName);
-
-  /// The name and path of the input file
-  std::string m_filename;
-
-  /// Everything can reference the workspace if it needs to
-  boost::shared_ptr<API::MatrixWorkspace> m_workspace;
-
-  /// Name of the instrument
-  std::string m_instName;
+  std::string getFullPathParamIDF(std::string directoryName, std::string filename);
 
   /// Mutex to avoid simultaneous access
   static std::recursive_mutex m_mutex;
