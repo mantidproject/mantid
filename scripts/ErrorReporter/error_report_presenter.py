@@ -37,7 +37,7 @@ class ErrorReporterPresenter(object):
         self.error_log.notice("Sent complete information")
         if status == 201:
             self._upload_recovery_file(zip_recovery_file=zip_recovery_file)
-        # remove_recovery_file(zip_recovery_file)
+        remove_recovery_file(zip_recovery_file)
         self._handle_exit(continue_working)
         return status
 
