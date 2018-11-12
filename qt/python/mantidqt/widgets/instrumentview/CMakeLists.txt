@@ -27,6 +27,6 @@ mtd_add_sip_module (
   INSTALL_DIR
     ${LIB_DIR}/mantidqt/widgets/instrumentview
   LINUX_INSTALL_RPATH
-    "\$ORIGIN/.."
+    "\$ORIGIN/../../.."
   FOLDER Qt5
 )

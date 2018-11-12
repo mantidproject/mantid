@@ -41,11 +41,13 @@ New Algorithms
 
 - :ref:`CalculateDynamicRange <algm-CalculateDynamicRange>` will calculate the Q range of a SANS workspace.
 - :ref:`MatchSpectra <algm-MatchSpectra>` is an algorithm that calculates factors to match all spectra to a reference spectrum.
+- :ref:`MaskBinsIf <algm-MaskBinsIf>` is an algorithm to mask bins according to criteria specified as a muparser expression.
 
 Improvements
 ############
 
 - :ref:`AppendSpectra <algm-AppendSpectra>` can append now multiple times the same event workspace.
+- :ref:`ConjoinXRuns <algm-ConjoinXRuns>` can merge sample logs according to the parameter file independently from :ref:`MergeRuns <algm-MergeRuns>`. All parameter names must have the prefix ``conjoin_`` appended by the corresponding default parameter names (which are used by :ref:`MergeRuns <algm-MergeRuns>`).
 - :ref:`CropToComponent <algm-CropToComponent>` now supports also scanning workspaces.
 - :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>` will produce histogram data, and will not split the counts between bins by default.
 - :ref:`SumSpectra <algm-SumSpectra>` has an additional option, ``MultiplyBySpectra``, which controls whether or not the output spectra are multiplied by the number of bins. This property should be set to ``False`` for summing spectra as PDFgetN does.

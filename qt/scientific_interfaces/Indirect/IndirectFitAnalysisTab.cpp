@@ -224,6 +224,8 @@ void IndirectFitAnalysisTab::connectDataAndSpectrumPresenters() {
 void IndirectFitAnalysisTab::connectDataAndFitBrowserPresenters() {
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
           SLOT(updateBrowserFittingRange()));
+  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this,
+          SLOT(setBrowserWorkspace()));
   connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)), this,
           SLOT(setDataTableStartX(double)));
   connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)), this,
@@ -369,6 +371,14 @@ void IndirectFitAnalysisTab::updateBrowserFittingRange() {
                                                      getSelectedSpectrum());
   setBrowserStartX(range.first);
   setBrowserEndX(range.second);
+}
+
+void IndirectFitAnalysisTab::setBrowserWorkspace() {
+  if (m_fittingModel->numberOfWorkspaces() != 0) {
+    auto const name =
+        m_fittingModel->getWorkspace(getSelectedDataIndex())->getName();
+    m_fitPropertyBrowser->setWorkspaceName(QString::fromStdString(name));
+  }
 }
 
 void IndirectFitAnalysisTab::setBrowserWorkspace(std::size_t dataIndex) {

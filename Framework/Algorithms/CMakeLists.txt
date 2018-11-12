@@ -179,6 +179,7 @@ set ( SRC_FILES
 	src/MagFormFactorCorrection.cpp
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
+	src/MaskBinsIf.cpp
 	src/MaskDetectorsIf.cpp
 	src/MaskInstrument.cpp
 	src/MatrixWorkspaceAccess.cpp
@@ -513,6 +514,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MagFormFactorCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
+	inc/MantidAlgorithms/MaskBinsIf.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
 	inc/MantidAlgorithms/MaskInstrument.h
 	inc/MantidAlgorithms/MatrixWorkspaceAccess.h
@@ -842,6 +844,7 @@ set ( TEST_FILES
 	HyspecScharpfCorrectionTest.h
 	IQTransformTest.h
 	IdentifyNoisyDetectorsTest.h
+	IndirectFitDataCreationHelperTest.h
 	IntegrateByComponentTest.h
 	IntegrateEPPTest.h
 	IntegrationTest.h
@@ -855,6 +858,7 @@ set ( TEST_FILES
 	MCInteractionVolumeTest.h
 	MagFormFactorCorrectionTest.h
 	MaskBinsFromTableTest.h
+	MaskBinsIfTest.h
 	MaskBinsTest.h
 	MaskDetectorsIfTest.h
 	MaskInstrumentTest.h
@@ -934,6 +938,7 @@ set ( TEST_FILES
 	ResizeRectangularDetectorTest.h
 	RingProfileTest.h
 	RunCombinationHelperTest.h
+	SampleLogsBehaviourTest.h
 	SANSCollimationLengthEstimatorTest.h
 	SassenaFFTTest.h
 	ScaleTest.h

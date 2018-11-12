@@ -13,8 +13,10 @@
 #include "ScriptingWindow.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -55,10 +57,6 @@ Mantid::Kernel::Logger g_log("ProjectRecovery");
 template <typename T>
 boost::optional<T> getConfigValue(const std::string &key) {
   return Mantid::Kernel::ConfigService::Instance().getValue<T>(key);
-}
-
-boost::optional<bool> getConfigBool(const std::string &key) {
-  return Mantid::Kernel::ConfigService::Instance().getValue<bool>(key);
 }
 
 /// Returns a string to the folder it should output to
@@ -245,16 +243,29 @@ Poco::File addLockFile(const Poco::Path &lockFilePath) {
   return lockFile;
 }
 
+/**
+ * Checks the passed parameter and if it is an empty group then it returns true.
+ *
+ * @param ws :: check this workspace to see if it's an empty group
+ * @return true :: bool when it is an empty group
+ * @return false :: bool when it is not an empty group
+ */
+bool checkIfEmptyGroup(const Mantid::API::Workspace_sptr &ws) {
+  if (auto groupWS =
+          boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+    if (groupWS->isEmpty()) {
+      g_log.debug("Empty group was present when recovery ran so was removed");
+      return true;
+    }
+  }
+  return false;
+}
+
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
 
-// Config keys
-const std::string SAVING_ENABLED_CONFIG_KEY = "projectRecovery.enabled";
 const std::string SAVING_TIME_KEY = "projectRecovery.secondsBetween";
 const std::string NO_OF_CHECKPOINTS_KEY = "projectRecovery.numberOfCheckpoints";
 
-// Config values
-bool SAVING_ENABLED =
-    getConfigBool(SAVING_ENABLED_CONFIG_KEY).get_value_or(false);
 const int SAVING_TIME =
     getConfigValue<int>(SAVING_TIME_KEY).get_value_or(60); // Seconds
 const int NO_OF_CHECKPOINTS =
@@ -276,7 +287,6 @@ namespace MantidQt {
  */
 ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
     : m_backgroundSavingThread(), m_stopBackgroundThread(true),
-      m_configKeyObserver(*this, &ProjectRecovery::configKeyChanged),
       m_windowPtr(windowHandle) {}
 
 /// Destructor which also stops any background threads currently in progress
@@ -381,22 +391,6 @@ std::thread ProjectRecovery::createBackgroundThread() {
   return std::thread([this] { projectSavingThreadWrapper(); });
 }
 
-/// Callback for POCO when a config change had fired for the enabled key
-void ProjectRecovery::configKeyChanged(
-    Mantid::Kernel::ConfigValChangeNotification_ptr notif) {
-  if (notif->key() != (SAVING_ENABLED_CONFIG_KEY)) {
-    return;
-  }
-
-  if (notif->curValue() == "True") {
-    SAVING_ENABLED = true;
-    startProjectSaving();
-  } else {
-    SAVING_ENABLED = false;
-    stopProjectSaving();
-  }
-}
-
 void ProjectRecovery::compileRecoveryScript(const Poco::Path &inputFolder,
                                             const Poco::Path &outputFile) {
   const std::string algName = "OrderWorkspaceHistory";
@@ -476,10 +470,6 @@ void ProjectRecovery::startProjectSaving() {
   // Close the existing thread first
   stopProjectSaving();
 
-  if (!SAVING_ENABLED) {
-    return;
-  }
-
   // Spin up a new thread
   {
     std::lock_guard<std::mutex> lock(m_notifierMutex);
@@ -492,6 +482,7 @@ void ProjectRecovery::startProjectSaving() {
 /// Stops any existing background threads which are running
 void ProjectRecovery::stopProjectSaving() {
   {
+
     std::lock_guard<std::mutex> lock(m_notifierMutex);
     m_stopBackgroundThread = true;
     m_threadNotifier.notify_all();
@@ -656,8 +647,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
 
   // Hold a copy to the shared pointers so they do not get deleted under us
-  std::vector<boost::shared_ptr<Mantid::API::Workspace>> wsHandles =
-      ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
+  auto wsHandles = ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
 
   if (wsHandles.empty()) {
     return;
@@ -673,6 +663,11 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   alg->setLogging(false);
 
   for (auto i = 0u; i < wsHandles.size(); ++i) {
+    // Check if workspace is an empty worksapce group and remove it if it is as
+    // well as skip
+    if (checkIfEmptyGroup(wsHandles[i]))
+      continue;
+
     std::string filename = std::to_string(i) + ".py";
 
     Poco::Path destFilename = historyDestFolder;

@@ -370,7 +370,9 @@ void export_MatrixWorkspace() {
            "some subsequent algorithms may expect it to be "
            "monitor workspace later.")
       .def("clearMonitorWorkspace", &clearMonitorWorkspace, args("self"),
-           "Forget about monitor workspace, attached to the current workspace");
+           "Forget about monitor workspace, attached to the current workspace")
+      .def("isCommonBins", &MatrixWorkspace::isCommonBins,
+           "Returns true if the workspace has common X bins.");
 
   RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }
