@@ -23,7 +23,7 @@ from __future__ import (absolute_import, division, print_function)
 from matplotlib import pyplot as plt
 import numpy as np
 import itertools as itt
-import UBMatrixGenerator as UBMG
+#import UBMatrixGenerator as UBMG
 import scipy.optimize as sp
 
 __author__ = 'cip'
@@ -937,35 +937,36 @@ def FitTrans():
         print('*intensity multipliers fixed*')
 
     # Get Input Files...
-    peaks_file = str(input('Name of file containing diamond peaks: '))
+    run_number_UB = str(raw_input('Name of run from which UB matrices were generated: '))
+    #peaks_file = str(input('Name of file containing diamond peaks: '))
 
     run_number = str(input('Input run number for transmission data: '))
 
     # Build input filenames
-    # fullfilename_ub1 = str(run_number) + 'UB1.dat' # unused variable
-    # fullfilename_ub2 = str(run_number) + 'UB2.dat' # unused variable
-    fullfilename_trans = 'transNorm' + str(run_number) + '.dat'
+    fullfilename_ub1 = str(run_number_UB) + 'UB1.dat' # unused variable
+    fullfilename_ub2 = str(run_number_UB) + 'UB2.dat' # unused variable
+    fullfilename_trans = str(run_number) + 'trns.csv'
 
     # get both UB's
-    UB1, UB2 = UBMG.UBMatrixGen(peaks_file)
+    #UB1, UB2 = UBMG.UBMatrixGen(peaks_file)
 
     # [filename pathname ~] = ...
     #     uigetfile('*.dat','Choose UB matrix for upstream diamond:');
     # fullfilename = [pathname filename];
     # fullfilename_ub1 = 'snap13108UB1.dat'
-    # UB1, remainder = getISAWub(fullfilename_ub1)
+    UB1, remainder = getISAWub(fullfilename_ub1)
 
     # [filename pathname ~] = ...
     #     uigetfile('*.dat','Choose UB matrix for downstream diamond:');
     # fullfilename = [pathname filename];
     # fullfilename_ub2 = 'snap13108UB2.dat'
-    # UB2, remainder = getISAWub(fullfilename_ub2)
+    UB2, remainder = getISAWub(fullfilename_ub2)
 
     # get transmission data...
     # [filename,pathname,~] = ...
     #     uigetfile('*.csv','Choose transmission datafile:');
     # fullfilename = [pathname filename];
-    fullfilename_trans = 'transNorm13148.csv'
+    #fullfilename_trans = 'transNorm13148.csv'
     TOF, yin, ein = getMANTIDdat_keepbinning(fullfilename_trans)
 
     print(('Starting refinement for: ' + fullfilename_trans))
