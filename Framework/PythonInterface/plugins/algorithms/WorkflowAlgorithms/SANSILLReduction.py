@@ -246,6 +246,20 @@ class SANSILLReduction(PythonAlgorithm):
     def _check_processed_flag(ws, value):
         return ws.getRun().getLogData('ProcessedAs').value == value
 
+    @staticmethod
+    def _parallax_correction(ws):
+        formula = ws.getInstrument().getStringParameter('parallax')[0]
+        import numpy as np
+        l2 = ws.getRun().getLogData('L2').value
+        n_spectra = ws.getNumberHistograms()
+        p = np.empty(n_spectra)
+        for i in range(n_spectra):
+            d = ws.getDetector(i).getPos()
+            p[i] = np.arctan(d[0]/l2)
+        parallax_ws = ws.getName() + '_parallax'
+        parallax_ws = CreateWorkspace(NSpec=n_spectra, DataY=eval(formula), DataX=ws.extractX(), ParentWorkspace=ws, StoreInADS=False)
+        Divide(LHSWorkspace=ws, RHSWorkspace=parallax_ws, OutputWorkspace=ws.getName())
+
     def PyExec(self): # noqa: C901
 
         process = self.getPropertyValue('ProcessAs')
@@ -311,6 +325,11 @@ class SANSILLReduction(PythonAlgorithm):
                             DeleteWorkspace(masked_ws)
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
+                        # parallax (gondola) effect
+                        if mtd[ws].getInstrument().hasParameter('parallax'):
+                            # for the moment it's only D22 that has this
+                            self.log().information('Performing parallax correction')
+                            self._parallax_correction(mtd[ws])
                         if process == 'Reference':
                             sensitivity_out = self.getPropertyValue('SensitivityOutputWorkspace')
                             if sensitivity_out:
