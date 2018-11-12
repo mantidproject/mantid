@@ -51,6 +51,8 @@ signals:
   void showInstrumentClicked(const QStringList &workspaceNames);
   void showDataClicked(const QStringList &workspaceNames);
 
+  void workspaceDoubleClicked(const QString &workspaceName);
+
 private slots:
   void onPlotSpectrumClicked();
   void onOverplotSpectrumClicked();

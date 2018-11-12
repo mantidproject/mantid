@@ -35,7 +35,12 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
       m_sampleLogs(new QAction("Sample Logs", this)),
       m_showInstrument(new QAction("Show Instrument", this)),
       m_showData(new QAction("Show Data", this)) {
-  // connections
+
+  // Replace the double click action on the MantidTreeWidget
+  m_tree->m_doubleClickAction = [&](QString wsName) {
+    emit workspaceDoubleClicked(wsName);
+  };
+
   connect(m_plotSpectrum, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumClicked()));
   connect(m_overplotSpectrum, SIGNAL(triggered()), this,

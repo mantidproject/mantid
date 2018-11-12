@@ -53,6 +53,8 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.showDataClicked.connect(self._do_show_data)
         self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
 
+        self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
+
     # ----------------- Plugin API --------------------
 
     def register_plugin(self):
@@ -124,3 +126,6 @@ class WorkspaceWidget(PluginWidget):
 
             presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=self)
             presenter.view.show()
+
+    def _action_double_click_workspace(self, name):
+        self._do_show_data([name])
