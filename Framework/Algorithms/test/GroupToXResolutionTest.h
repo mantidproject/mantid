@@ -13,6 +13,8 @@
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/QuadraticGenerator.h"
 
 #include <boost/math/special_functions/pow.hpp>
 
@@ -179,6 +181,60 @@ public:
     TS_ASSERT_EQUALS(outputWS->dx(0).back(),
                      std::sqrt(pow<2>(2.) + pow<2>(0.68 * (5.7 - 5.1))))
   }
+};
+
+class GroupToXResolutionTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static GroupToXResolutionTestPerformance *createSuite() {
+    return new GroupToXResolutionTestPerformance();
+  }
+  static void destroySuite(GroupToXResolutionTestPerformance *suite) {
+    delete suite;
+  }
+
+  GroupToXResolutionTestPerformance() : m_alg() {
+    m_alg.setRethrows(true);
+    m_alg.setChild(true);
+    m_alg.initialize();
+  }
+
+  void setUp() override {
+    constexpr double xZeroth{0.};
+    constexpr double xFirst{0.};
+    constexpr double xSecond{0.4};
+    constexpr size_t n{10000};
+    HistogramData::Points Xs(
+        n, HistogramData::QuadraticGenerator(xZeroth, xFirst, xSecond));
+    HistogramData::Counts Ys(n, 1.3);
+    HistogramData::CountStandardDeviations Es(n, 1.1);
+    HistogramData::Histogram h(Xs, Ys, Es);
+    API::MatrixWorkspace_sptr inputWS =
+        DataObjects::create<DataObjects::Workspace2D>(1, std::move(h));
+    // Construct DX such that in the beginning, we group multiple points
+    // and after a crossover, no grouping happens.
+    constexpr double initialGroupSize{10.};
+    constexpr double crossover{0.8 * n};
+    constexpr double dxZeroth{2. * initialGroupSize * xSecond};
+    constexpr double dxFirst{(2. * crossover - 2. * initialGroupSize + 1.) /
+                             crossover * xSecond};
+    auto Dxs = Kernel::make_cow<HistogramData::HistogramDx>(
+        n, HistogramData::LinearGenerator(dxZeroth, dxFirst));
+    inputWS->setSharedDx(0, std::move(Dxs));
+    m_alg.setProperty("InputWorkspace", inputWS);
+    m_alg.setProperty("OutputWorkspace", "_out");
+    m_alg.setProperty("FractionOfDx", 1.);
+  }
+
+  void test_performance() {
+    for (int i = 0; i < 5000; ++i) {
+      TS_ASSERT_THROWS_NOTHING(m_alg.execute())
+    }
+  }
+
+private:
+  Algorithms::GroupToXResolution m_alg;
 };
 
 #endif /* MANTID_ALGORITHMS_GROUPTOXRESOLUTIONTEST_H_ */
