@@ -145,9 +145,14 @@ std::vector<int> orderProcessIDs(std::vector<Poco::Path> paths) {
               // Last modified is first!
               return a1.getLastModified() > b1.getLastModified();
             });
-
   for (auto c : paths) {
-    returnValues.emplace_back(std::stoi(c.directory(c.depth() - 1)));
+    try {
+      returnValues.emplace_back(std::stoi(c.directory(c.depth() - 1)));
+    } catch (std::invalid_argument &e) {
+      // The folder or file here is not a number (So shouldn't exist) so delete
+      // it recursively
+      Poco::File(c).remove(true);
+    }
   }
   return returnValues;
 }
@@ -794,6 +799,12 @@ void ProjectRecovery::repairCheckpointDirectory() {
                 "mantid has been unable to successfully handle repair so "
                 "checkpoints may be invalid");
   }
+
+  if (vectorToDelete.size() > 0) {
+    g_log.information("Project Recovery: A repair of the checkpoint directory "
+                      "has been perfomed");
+  }
+
   bool recurse = true;
   for (auto c : vectorToDelete) {
     Poco::File(c).remove(recurse);
