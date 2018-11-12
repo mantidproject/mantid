@@ -14,6 +14,8 @@ This algorithm integrates the workspace given in *InputWorkspace* using the :ref
 .. note::
     At the moment, the integration range is fixed to :math:`\pm` 3 * FWHM (:math:`2\sqrt{2 \ln 2}`) times the 'Sigma' column in *EPPWorkspace*).
 
+The algorithm will also mask detectors for which the integral is zero. This is to prevent vanadium normalization later in the reduction from injecting infinities in the final :math:`S(Q,\omega)`.
+
 Input workspaces
 ################
 

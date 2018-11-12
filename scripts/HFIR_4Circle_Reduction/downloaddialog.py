@@ -1,21 +1,26 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 ##########
 # Dialog to set up HTTP data downloading server and download HB3A data to local
 ##########
 import os
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from qtpy.QtWidgets import (QDialog, QFileDialog, QMessageBox)  # noqa
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
-from HFIR_4Circle_Reduction import ui_httpserversetup as ui_http
 
-
+import qtpy  # noqa
+from mantid.kernel import Logger
 try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
-class DataDownloadDialog(QtGui.QDialog):
+class DataDownloadDialog(QDialog):
     """ dialog for set up HTTP server and download files to local computer
     This feature will be valid until SNS disables the HTTP server for HFIR data
     """
@@ -27,29 +32,22 @@ class DataDownloadDialog(QtGui.QDialog):
         super(DataDownloadDialog, self).__init__(parent)
 
         # set up UI
-        self.ui = ui_http.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = "httpserversetup.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # initialize widgets
         self._init_widgets()
 
         # define event handing
-        self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
-                     self.do_test_url)
+        self.ui.pushButton_testURLs.clicked.connect(self.do_test_url)
 
-        self.connect(self.ui.pushButton_downloadExpData, QtCore.SIGNAL('clicked()'),
-                     self.do_download_spice_data)
+        self.ui.pushButton_downloadExpData.clicked.connect(self.do_download_spice_data)
 
-        self.connect(self.ui.pushButton_ListScans, QtCore.SIGNAL('clicked()'),
-                     self.do_list_scans)
+        self.ui.pushButton_ListScans.clicked.connect(self.do_list_scans)
 
-        self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.do_change_data_access_mode)
+        self.ui.comboBox_mode.currentIndexChanged.connect(self.do_change_data_access_mode)
 
-        # self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
-        #              self.do_setup_dir_default)
-        self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_local_cache_dir)
+        self.ui.pushButton_browseLocalCache.clicked.connect(self.do_browse_local_cache_dir)
 
         # Set the URL red as it is better not check at this stage. Leave it to user
         self.ui.lineEdit_url.setStyleSheet("color: black;")
@@ -80,9 +78,7 @@ class DataDownloadDialog(QtGui.QDialog):
         """ Browse local cache directory
         :return:
         """
-        local_cache_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
-                                                                     'Get Local Cache Directory',
-                                                                     self._homeSrcDir))
+        local_cache_dir = str(QFileDialog.getExistingDirectory(self, 'Get Local Cache Directory', self._homeSrcDir))
 
         # Set local directory to control
         status, error_message = self._myControl.set_local_data_dir(local_cache_dir)
@@ -212,7 +208,7 @@ class DataDownloadDialog(QtGui.QDialog):
         """
         assert isinstance(message, str), 'Input message %s must a string but not %s.' \
                                          '' % (str(message), type(message))
-        QtGui.QMessageBox.information(self, '4-circle Data Reduction', message)
+        QMessageBox.information(self, '4-circle Data Reduction', message)
 
         return
 

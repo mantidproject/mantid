@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 Functionality for unpacking mantid objects for plotting with matplotlib.
 """
@@ -70,7 +63,7 @@ class MantidAxes(Axes):
 
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.plot`.
         '''
-        if mantid.plots.helperfunctions.validate_args(*args):
+        if mantid.plots.helperfunctions.validate_args(*args, **kwargs):
             mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
             return mantid.plots.plotfunctions.plot(self, *args, **kwargs)
         else:
@@ -80,19 +73,19 @@ class MantidAxes(Axes):
         '''
         If the **mantid** projection is chosen, it can be
         used the same as :py:meth:`matplotlib.axes.Axes.scatter` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace` 
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-        
+
             import matplotlib.pyplot as plt
             from mantid import plots
-            
+
             ...
-            
+
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
             ax.scatter(workspace,'rs',specNum=1) #for workspaces
             ax.scatter(x,y,'bo')                 #for arrays
             fig.show()
-        
+
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.scatter`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
@@ -105,19 +98,19 @@ class MantidAxes(Axes):
         '''
         If the **mantid** projection is chosen, it can be
         used the same as :py:meth:`matplotlib.axes.Axes.errorbar` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace` 
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-        
+
             import matplotlib.pyplot as plt
             from mantid import plots
-            
+
             ...
-            
+
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
             ax.errorbar(workspace,'rs',specNum=1) #for workspaces
             ax.errorbar(x,y,yerr,'bo')            #for arrays
             fig.show()
-        
+
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.errorbar`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
@@ -130,19 +123,19 @@ class MantidAxes(Axes):
         '''
         If the **mantid** projection is chosen, it can be
         used the same as :py:meth:`matplotlib.axes.Axes.pcolor` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace` 
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-        
+
             import matplotlib.pyplot as plt
             from mantid import plots
-            
+
             ...
-            
+
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
             ax.pcolor(workspace) #for workspaces
             ax.pcolor(x,y,C)     #for arrays
             fig.show()
-        
+
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.pcolor`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
@@ -155,19 +148,19 @@ class MantidAxes(Axes):
         '''
         If the **mantid** projection is chosen, it can be
         used the same as :py:meth:`matplotlib.axes.Axes.pcolorfast` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace` 
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-        
+
             import matplotlib.pyplot as plt
             from mantid import plots
-            
+
             ...
-            
+
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
             ax.pcolorfast(workspace) #for workspaces
             ax.pcolorfast(x,y,C)     #for arrays
             fig.show()
-        
+
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.pcolorfast`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
@@ -180,19 +173,19 @@ class MantidAxes(Axes):
         '''
         If the **mantid** projection is chosen, it can be
         used the same as :py:meth:`matplotlib.axes.Axes.pcolormesh` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace` 
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-        
+
             import matplotlib.pyplot as plt
             from mantid import plots
-            
+
             ...
-            
+
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
             ax.pcolormesh(workspace) #for workspaces
             ax.pcolormesh(x,y,C)     #for arrays
             fig.show()
-        
+
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.pcolormesh`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
@@ -201,23 +194,48 @@ class MantidAxes(Axes):
         else:
             return Axes.pcolormesh(self, *args, **kwargs)
 
+    def imshow(self, *args, **kwargs):
+        '''
+        If the **mantid** projection is chosen, it can be
+        used the same as :py:meth:`matplotlib.axes.Axes.imshow` for arrays,
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
+        or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
+
+            import matplotlib.pyplot as plt
+            from mantid import plots
+
+            ...
+
+            fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+            ax.imshow(workspace) #for workspaces
+            ax.imshow(C)     #for arrays
+            fig.show()
+
+        For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.imshow`
+        '''
+        if mantid.plots.helperfunctions.validate_args(*args):
+            mantid.kernel.logger.debug('using mantid.plots.plotfunctions')
+            return mantid.plots.plotfunctions.imshow(self, *args, **kwargs)
+        else:
+            return Axes.imshow(self, *args, **kwargs)
+
     def contour(self, *args, **kwargs):
         '''
         If the **mantid** projection is chosen, it can be
         used the same as :py:meth:`matplotlib.axes.Axes.contour` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace` 
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-        
+
             import matplotlib.pyplot as plt
             from mantid import plots
-            
+
             ...
-            
+
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
             ax.contour(workspace) #for workspaces
             ax.contour(x,y,z)     #for arrays
             fig.show()
-        
+
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.contour`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
@@ -230,19 +248,19 @@ class MantidAxes(Axes):
         '''
         If the **mantid** projection is chosen, it can be
         used the same as :py:meth:`matplotlib.axes.Axes.contourf` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace` 
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-        
+
             import matplotlib.pyplot as plt
             from mantid import plots
-            
+
             ...
-            
+
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
             ax.contourf(workspace) #for workspaces
             ax.contourf(x,y,z)     #for arrays
             fig.show()
-        
+
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.contourf`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
@@ -255,19 +273,19 @@ class MantidAxes(Axes):
         '''
         If the **mantid** projection is chosen, it can be
         used the same as :py:meth:`matplotlib.axes.Axes.tripcolor` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace` 
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-        
+
             import matplotlib.pyplot as plt
             from mantid import plots
-            
+
             ...
-            
+
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
             ax.tripcolor(workspace) #for workspaces
             ax.tripcolor(x,y,C)     #for arrays
             fig.show()
-        
+
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.tripcolor`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
@@ -280,19 +298,19 @@ class MantidAxes(Axes):
         '''
         If the **mantid** projection is chosen, it can be
         used the same as :py:meth:`matplotlib.axes.Axes.tricontour` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace` 
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-        
+
             import matplotlib.pyplot as plt
             from mantid import plots
-            
+
             ...
-            
+
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
             ax.tricontour(workspace) #for workspaces
             ax.tricontour(x,y,z)     #for arrays
             fig.show()
-        
+
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.tricontour`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):
@@ -305,19 +323,19 @@ class MantidAxes(Axes):
         '''
         If the **mantid** projection is chosen, it can be
         used the same as :py:meth:`matplotlib.axes.Axes.tricontourf` for arrays,
-        or it can be used to plot :class:`mantid.api.MatrixWorkspace` 
+        or it can be used to plot :class:`mantid.api.MatrixWorkspace`
         or :class:`mantid.api.IMDHistoWorkspace`. You can have something like::
-        
+
             import matplotlib.pyplot as plt
             from mantid import plots
-            
+
             ...
-            
+
             fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
             ax.tricontourf(workspace) #for workspaces
             ax.tricontourf(x,y,z)     #for arrays
             fig.show()
-        
+
         For keywords related to workspaces, see :func:`mantid.plots.plotfunctions.tricontourf`
         '''
         if mantid.plots.helperfunctions.validate_args(*args):

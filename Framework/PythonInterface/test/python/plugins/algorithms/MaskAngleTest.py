@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -11,7 +17,7 @@ class MaskAngleTest(unittest.TestCase):
     def testMaskAngle(self):
         w=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
         AnalysisDataService.add('w',w)
-        masklist = MaskAngle(w,10,20)
+        masklist = MaskAngle(w,MinAngle=10,MaxAngle=20)
         detInfo = w.detectorInfo()
         for i in arange(w.getNumberHistograms()):
             if (i<9) or (i>18):

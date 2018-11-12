@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFit.h"
 
 #include "../General/UserInputValidator.h"
@@ -146,15 +152,21 @@ void IqtFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
 
+void IqtFit::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
+}
+
 void IqtFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setFitSingleSpectrumEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void IqtFit::setPlotResultIsPlotting(bool plotting) {
   m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setPlotResultEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 void IqtFit::runClicked() { runTab(); }

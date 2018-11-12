@@ -106,7 +106,7 @@ include ( PrecompiledHeaderCommands )
 # CXXTEST_ADD_TEST (public macro to add unit tests)
 #=============================================================
 macro(CXXTEST_ADD_TEST _cxxtest_testname)
-    # output directory
+  # output directory
     set (_cxxtest_output_dir ${CMAKE_CURRENT_BINARY_DIR})
     if (CXXTEST_OUTPUT_DIR)
       set (_cxxtest_output_dir ${CXXTEST_OUTPUT_DIR})

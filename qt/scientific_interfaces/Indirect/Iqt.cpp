@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "Iqt.h"
 #include "../General/UserInputValidator.h"
 
@@ -181,10 +187,10 @@ void Iqt::run() {
  */
 void Iqt::algorithmComplete(bool error) {
   setRunIsRunning(false);
-  if (!error) {
-    setPlotResultEnabled(true);
-    setTiledPlotEnabled(true);
-    setSaveResultEnabled(true);
+  if (error) {
+    setPlotResultEnabled(false);
+    setTiledPlotEnabled(false);
+    setSaveResultEnabled(false);
   }
 }
 /**
@@ -472,19 +478,26 @@ void Iqt::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
+void Iqt::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setTiledPlotEnabled(enabled);
+}
+
 void Iqt::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void Iqt::setPlotResultIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotResultEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 void Iqt::setTiledPlotIsPlotting(bool plotting) {
   m_uiForm.pbTile->setText(plotting ? "Plotting..." : "Tiled Plot");
-  setTiledPlotEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 void Iqt::runClicked() { runTab(); }
