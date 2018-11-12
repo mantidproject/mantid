@@ -148,7 +148,7 @@ std::vector<int> orderProcessIDs(std::vector<Poco::Path> paths) {
   for (auto c : paths) {
     try {
       returnValues.emplace_back(std::stoi(c.directory(c.depth() - 1)));
-    } catch (std::invalid_argument &e) {
+    } catch (std::invalid_argument) {
       // The folder or file here is not a number (So shouldn't exist) so delete
       // it recursively
       Poco::File(c).remove(true);
@@ -721,7 +721,7 @@ std::vector<std::string>
 ProjectRecovery::findOlderCheckpoints(const std::string &recoverFolder,
                                       const std::vector<int> &possiblePids) {
   // Currently set to a month in microseconds
-  const int64_t timeToDeleteAfter = 2592000000000;
+  const Poco::Timestamp::TimeDiff timeToDeleteAfter(2592000000000);
   std::vector<std::string> folderPaths;
   for (auto i = 0u; i < possiblePids.size(); ++i) {
     std::string folder = recoverFolder;
@@ -800,14 +800,14 @@ void ProjectRecovery::repairCheckpointDirectory() {
                 "checkpoints may be invalid");
   }
 
+  for (auto c : vectorToDelete) {
+    // Remove c recursively
+    Poco::File(c).remove(true);
+  }
+
   if (vectorToDelete.size() > 0) {
     g_log.information("Project Recovery: A repair of the checkpoint directory "
                       "has been perfomed");
-  }
-
-  bool recurse = true;
-  for (auto c : vectorToDelete) {
-    Poco::File(c).remove(recurse);
   }
 
   // Handle removing empty checkpoint folders
