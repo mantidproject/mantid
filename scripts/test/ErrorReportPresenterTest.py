@@ -85,10 +85,10 @@ class ErrorReportPresenterTest(unittest.TestCase):
         text_box = 'Details about error'
         continue_working = False
         share = 0
-        self.error_report_presenter._send_report_to_server = mock.MagicMock()
+        self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
         self.error_report_presenter._upload_recovery_file = mock.MagicMock()
         self.error_report_presenter._handle_exit = mock.MagicMock()
-
+        
         self.error_report_presenter.error_handler(continue_working, share, name, email, text_box)
 
         self.error_report_presenter._send_report_to_server.called_once_with(share_identifiable=True, name=name, email=email,
