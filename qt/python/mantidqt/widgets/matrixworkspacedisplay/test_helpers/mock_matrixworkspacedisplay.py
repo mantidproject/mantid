@@ -9,8 +9,6 @@
 #
 from mock import Mock
 
-from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockQModelIndex
-
 
 class MockQTableHeader(object):
     def __init__(self):

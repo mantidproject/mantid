@@ -55,7 +55,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
 
     def test_invalid_model_type(self):
         ws = MockWorkspace()
-        with self.assertRaises(AssertionError) as cm:
+        with self.assertRaises(AssertionError):
             MatrixWorkspaceTableViewModel(ws, "My Model Type")
 
     def test_data_display_role(self):

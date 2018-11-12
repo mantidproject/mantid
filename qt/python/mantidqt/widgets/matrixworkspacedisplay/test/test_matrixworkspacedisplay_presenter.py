@@ -22,13 +22,12 @@ from mantidqt.widgets.matrixworkspacedisplay.test_helpers.mock_matrixworkspacedi
 
 class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
     def assertNotCalled(self, mock):
-        # TODO move this into a helper class, extend mock, or extend TestCase
         self.assertEqual(0, mock.call_count)
 
     def test_setup_table(self):
         ws = MockWorkspace()
         view = MockMatrixWorkspaceDisplayView()
-        presenter = MatrixWorkspaceDisplay(ws, view=view)
+        MatrixWorkspaceDisplay(ws, view=view)
         self.assertEqual(3, view.set_context_menu_actions.call_count)
         self.assertEqual(1, view.set_model.call_count)
 
