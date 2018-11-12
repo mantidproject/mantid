@@ -14,6 +14,12 @@ from mantid.api import AlgorithmFactory, CommonBinsValidator, HistogramValidator
 from mantid.simpleapi import *
 
 
+class UnitError(ValueError):
+    def __init__(self):
+        super(ValueError, self).__init__('Input workspace must be in (Q,E) [momentum and energy transfer]'
+                                         + ' or (2theta, E) [scattering angle and energy transfer.]')
+
+
 def cut1D(dos2d, qqgrid, spectrum_binning, dosebin):
     if qqgrid.shape[1] > 1:
         dSpectrum = spectrum_binning[1] - spectrum_binning[0]
@@ -33,6 +39,8 @@ def evaluateEbin(Emin, Emax, Ei, strn):
         out = [eval(estr, None, {'Emax':Emax, 'Emin':Emin, 'Ei':Ei}) for estr in splits]
     except NameError:
         raise ValueError("Malformed EnergyBinning. Only the variables 'Emin', 'Emax' or 'Ei' are allowed.")
+    except:
+        raise SyntaxError('Syntax error in EnergyBinning')
     return out
 
 
@@ -44,6 +52,8 @@ def evaluateQRange(Qmin, Qmax, strn):
         out = [eval(qstr, None, {'Qmin':Qmin, 'Qmax':Qmax}) for qstr in splits]
     except NameError:
         raise ValueError("Malformed QSumRange. Only the variables 'Qmin' and 'Qmax' are allowed.")
+    except:
+        raise SyntaxError('Syntax error in QSumRange.')
     return out
 
 
@@ -52,9 +62,11 @@ def evaluateTwoThetaRange(Twothetamin, Twothetamax, strn):
     if len(splits) != 2:
         raise ValueError('TwoThetaSumRange must be a comma separated string with two values.')
     try:
-        out = [eval(qstr, None, {'Twothetamin':Twothetamin, 'Twothetamax':Twothetamax}) for qstr in splits]
+        out = [eval(tstr, None, {'Twothetamin':Twothetamin, 'Twothetamax':Twothetamax}) for tstr in splits]
     except NameError:
         raise ValueError("Malformed TwoThetaSumRange. Only the variables 'Twothetamin' and 'Twothetamax' are allowed.")
+    except:
+        raise SyntaxError('Syntax error in TwoThetaSumRange.')
     return out
 
 
@@ -93,18 +105,13 @@ def scaleUnits(dos1d, cm, input_en_in_meV, mev2cm):
     return dos1d
 
 
-def unitError():
-    raise ValueError('Input workspace must be in (Q,E) [momentum and energy transfer]'
-                     + ' or (2theta, E) [scattering angle and energy transfer.]')
-
-
 def usingQ(spectrum_unit):
     if spectrum_unit == 'MomentumTransfer':
         using_q = True
     elif spectrum_unit == 'Degrees':
         using_q = False
     else:
-        unitError()
+        raise UnitError()
     return using_q
 
 
@@ -196,7 +203,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
                 energy_axis_index = 1
                 spectrum_axis_index = 0
             else:
-                unitError()
+                raise UnitError()
         using_q = usingQ(spectrum_unit)
 
         eBins = inws.getAxis(energy_axis_index).extractValues()
