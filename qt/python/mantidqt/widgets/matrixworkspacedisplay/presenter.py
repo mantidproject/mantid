@@ -86,7 +86,7 @@ class MatrixWorkspaceDisplay(object):
         for i in range(num_rows):
             # Appends ONE value from each COLUMN, this is because the final string is being built vertically
             # the noqa disables a 'data' variable redefined warning
-            all_string_rows.append(" ".join([data[i] for data in column_data])) # noqa: F812
+            all_string_rows.append(" ".join([data[i] for data in column_data]))  # noqa: F812
 
         # Finally all rows are joined together with a new line at the end of each row
         final_string = "\n".join(all_string_rows)
