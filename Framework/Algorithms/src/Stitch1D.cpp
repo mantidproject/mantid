@@ -46,12 +46,6 @@ bool isNonzero(double i) { return (0 != i); }
 namespace Mantid {
 namespace Algorithms {
 
-/** Range tolerance
- * This is required for machine precision reasons. Used to adjust StartOverlap
- *and EndOverlap so that they are
- * inclusive of bin boundaries if they are sitting ontop of the bin boundaries.
- */
-const double Stitch1D::range_tolerance = 1e-9;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Stitch1D)
 
@@ -185,78 +179,52 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
       issues["RHSWorkspace"] = "Workspace " + rhs->getName() +
                                " is not compatible: " + compatible + "\n";
   }
+  if (!isDefault("StartOverlap") && !isDefault("EndOverlap")) {
+    double startOverlap = this->getProperty("StartOverlap");
+    double endOverlap = this->getProperty("EndOverlap");
+    if (endOverlap < startOverlap)
+      issues["StartOverlap"] = "Must be smaller than EndOverlap";
+  }
   return issues;
 }
 
-/** Gets the start of the overlapping region
- @param intesectionMin :: The minimum possible value for the overlapping region
- to inhabit
- @param intesectionMax :: The maximum possible value for the overlapping region
- to inhabit
- @return a double contianing the start of the overlapping region
+/** Limits of the overlapping region
+ @param intersectionMin :: The minimum possible value
+ @param intersectionMax :: The maximum possible value
+ @return std::pair containing the start and end values
  */
-double Stitch1D::getStartOverlap(const double intesectionMin,
-                                 const double intesectionMax) const {
-  Property *startOverlapProp = this->getProperty("StartOverlap");
-  double startOverlapVal = this->getProperty("StartOverlap");
-  startOverlapVal -= this->range_tolerance;
-  const bool startOverlapBeyondRange =
-      (startOverlapVal < intesectionMin) || (startOverlapVal > intesectionMax);
-  if (startOverlapProp->isDefault() || startOverlapBeyondRange) {
-    if (!startOverlapProp->isDefault() && startOverlapBeyondRange) {
-      char message[200];
-      std::sprintf(message,
-                   "StartOverlap is outside range at %0.4f, Min is "
-                   "%0.4f, Max is %0.4f . Forced to be: %0.4f",
-                   startOverlapVal, intesectionMin, intesectionMax,
-                   intesectionMin);
-      g_log.warning(std::string(message));
-    }
-    startOverlapVal = intesectionMin;
-    std::stringstream buffer;
-    buffer << "StartOverlap calculated to be: " << startOverlapVal;
-    g_log.information(buffer.str());
+std::pair<double, double>
+Stitch1D::getOverlap(const double intersectionMin,
+                     const double intersectionMax) const {
+  double interSectionMin = this->getProperty("StartOverlap");
+  double interSectionMax = this->getProperty("EndOverlap");
+  /* Range tolerance is 1.e-9
+   * This is required for machine precision reasons. Used to adjust StartOverlap
+   * and EndOverlap so that they are inclusive of bin boundaries if they are
+   * sitting ontop of the bin boundaries.
+   */
+  if (isDefault("StartOverlap"))
+    interSectionMin = intersectionMin;
+  if (isDefault("EndOverlap"))
+    interSectionMax = intersectionMax;
+  if ((intersectionMin - 1.e-9) > interSectionMin) {
+    g_log.warning("StartOverlap outside range, re-determine");
+    interSectionMin = intersectionMin;
   }
-  return startOverlapVal;
-}
-
-/** Gets the end of the overlapping region
- @param intesectionMin :: The minimum possible value for the overlapping region
- to inhabit
- @param intesectionMax :: The maximum possible value for the overlapping region
- to inhabit
- @return a double contianing the end of the overlapping region
- */
-double Stitch1D::getEndOverlap(const double intesectionMin,
-                               const double intesectionMax) const {
-  Property *endOverlapProp = this->getProperty("EndOverlap");
-  double endOverlapVal = this->getProperty("EndOverlap");
-  endOverlapVal += this->range_tolerance;
-  const bool endOverlapBeyondRange =
-      (endOverlapVal < intesectionMin) || (endOverlapVal > intesectionMax);
-  if (endOverlapProp->isDefault() || endOverlapBeyondRange) {
-    if (!endOverlapProp->isDefault() && endOverlapBeyondRange) {
-      char message[200];
-      std::sprintf(message,
-                   "EndOverlap is outside range at %0.4f, Min is "
-                   "%0.4f, Max is %0.4f . Forced to be: %0.4f",
-                   endOverlapVal, intesectionMin, intesectionMax,
-                   intesectionMax);
-      g_log.warning(std::string(message));
-    }
-    endOverlapVal = intesectionMax;
-    std::stringstream buffer;
-    buffer << "EndOverlap calculated to be: " << endOverlapVal;
-    g_log.information(buffer.str());
+  if ((intersectionMax + 1.e-9) < interSectionMax) {
+    g_log.warning("EndOverlap outside range, re-determine");
+    interSectionMax = intersectionMax;
   }
-  return endOverlapVal;
+  g_log.information("StartOverlap: " + std::to_string(interSectionMin));
+  g_log.information("EndOverlap: " + std::to_string(interSectionMax));
+  return std::make_pair(interSectionMin, interSectionMax);
 }
 
 /** Gets the rebinning parameters and calculates any missing values
  @param lhsWS :: The left hand side input workspace
  @param rhsWS :: The right hand side input workspace
  @param scaleRHS :: Scale the right hand side workspace
- @return a vector<double> contianing the rebinning parameters
+ @return a vector<double> containing the rebinning parameters
  */
 std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
                                              MatrixWorkspace_const_sptr &rhsWS,
@@ -508,7 +476,7 @@ void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
   if (m_scaleFactor < 1e-2 || m_scaleFactor > 1e2 ||
       std::isnan(m_scaleFactor)) {
     std::stringstream messageBuffer;
-    messageBuffer << "Stitch1D calculated scale factor is: " << m_scaleFactor
+    messageBuffer << "Calculated scale factor is: " << m_scaleFactor
                   << ". Check that in both input workspaces the integrated "
                      "overlap region is non-zero.";
     g_log.warning(messageBuffer.str());
@@ -531,16 +499,19 @@ void Stitch1D::exec() {
 
   const double intersectionMin = intesectionXRegion.get<0>();
   const double intersectionMax = intesectionXRegion.get<1>();
-  double startOverlap = getStartOverlap(intersectionMin, intersectionMax);
-  double endOverlap = getEndOverlap(intersectionMin, intersectionMax);
+  std::pair<double, double> overlap =
+      getOverlap(intersectionMin, intersectionMax);
+  double startOverlap = overlap.first;
+  double endOverlap = overlap.second;
   if (startOverlap > endOverlap) {
-    std::string message = boost::str(
-        boost::format("Stitch1D cannot have a StartOverlap > EndOverlap. "
-                      "StartOverlap: %0.9f, EndOverlap: %0.9f") %
-        startOverlap % endOverlap);
-    throw std::runtime_error(message);
+    if (lhsWS->isHistogramData()) {
+      g_log.error("EndOverlap is smaller than StartOverlap");
+      throw std::runtime_error("EndOverlap is smaller than StartOverlap");
+    } else {
+      startOverlap = overlap.second;
+      endOverlap = overlap.first;
+    }
   }
-
   const bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
 
   MatrixWorkspace_sptr lhs = lhsWS->clone();
@@ -558,15 +529,14 @@ void Stitch1D::exec() {
 
     if (startOverlap < xMin) {
       std::string message = boost::str(
-          boost::format(
-              "Stitch1D StartOverlap is outside the available X range. "
-              "StartOverlap: %10.9f, X min: %10.9f") %
+          boost::format("StartOverlap is outside the available X range. "
+                        "StartOverlap: %10.9f, X min: %10.9f") %
           startOverlap % xMin);
       throw std::runtime_error(message);
     }
     if (endOverlap > xMax) {
       std::string message = boost::str(
-          boost::format("Stitch1D EndOverlap is outside the available X range. "
+          boost::format("EndOverlap is outside the available X range. "
                         "EndOverlap: %10.9f, X max: %10.9f") %
           endOverlap % xMax);
       throw std::runtime_error(message);
@@ -619,7 +589,7 @@ void Stitch1D::exec() {
     if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2)) {
       overlapave = weightedMean(overlap1, overlap2);
     } else {
-      g_log.information("Using un-weighted mean for Stitch1D overlap mean");
+      g_log.information("Using un-weighted mean scaling for overlap mean");
       MatrixWorkspace_sptr sum = overlap1 + overlap2;
       MatrixWorkspace_sptr denominator = singleValueWS(2.0);
       overlapave = sum / denominator;

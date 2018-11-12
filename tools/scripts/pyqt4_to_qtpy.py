@@ -71,18 +71,36 @@ def convert_signal_connect(cmd, linenum):
 
     return '{0}{1}.{2}.connect({3})\n'.format(whitespace, widget_name, signal_call, handler_method)
 
-QT4_TO_QTPY_FIXES = {'QtCore.QFileInfo': ('qtpy.QtCore', 'QFileInfo,'),
+QT4_TO_QTPY_FIXES = {'QtCore.QEventLoop': ('qtpy.QtCore', 'QEventLoop'),
+                     'QtCore.QFileInfo': ('qtpy.QtCore', 'QFileInfo'),
                      'QtCore.QRegExp': ('qtpy.QtCore', 'QRegExp'),
                      'QtCore.QSettings': ('qtpy.QtCore', 'QSettings'),
+                     'QtGui.QAction': ('qtpy.QtWidgets', 'QAction'),
                      'QtGui.QButtonGroup': ('qtpy.QtWidgets', 'QButtonGroup'),
+                     'QtGui.QCheckBox': ('qtpy.QtWidgets', 'QCheckBox'),
+                     'QtGui.QComboBox': ('qtpy.QtWidgets', 'QComboBox'),
                      'QtGui.QDialog': ('qtpy.QtWidgets', 'QDialog'),
                      'QtGui.QDoubleValidator': ('qtpy.QtGui', 'QDoubleValidator'),
                      'QtGui.QFileDialog': ('qtpy.QtWidgets', 'QFileDialog'),
                      'QtGui.QFrame': ('qtpy.QtWidgets', 'QFrame'),
+                     'QtGui.QGridLayout': ('qtpy.QtWidgets', 'QGridLayout'),
                      'QtGui.QGroupBox': ('qtpy.QtWidgets', 'QGroupBox'),
+                     'QtGui.QHBoxLayout': ('qtpy.QtWidgets', 'QHBoxLayout'),
                      'QtGui.QIntValidator': ('qtpy.QtGui', 'QIntValidator'),
+                     'QtGui.QMenu': ('qtpy.QtWidgets', 'QMenu'),
+                     'QtGui.QLabel': ('qtpy.QtWidgets', 'QLabel'),
+                     'QtGui.QLineEdit': ('qtpy.QtWidgets', 'QLineEdit'),
+                     'QtGui.QMainWindow': ('qtpy.QtWidgets', 'QMainWindow'),
                      'QtGui.QMessageBox': ('qtpy.QtWidgets', 'QMessageBox'),
-                     'QtGui.QRegExpValidator': ('qtpy.QtGui', 'QRegExpValidator')}
+                     'QtGui.QPushButton': ('qtpy.QtWidgets', 'QPushButton'),
+                     'QtGui.QRegExpValidator': ('qtpy.QtGui', 'QRegExpValidator'),
+                     'QtGui.QSizePolicy': ('qtpy.QtWidgets', 'QSizePolicy'),
+                     'QtGui.QSpacerItem': ('qtpy.QtWidgets', 'QSpacerItem'),
+                     'QtGui.QTabWidget': ('qtpy.QtWidgets', 'QTabWidget'),
+                     'QtGui.QTextEdit': ('qtpy.QtWidgets', 'QTextEdit'),
+                     'QtGui.QVBoxLayout': ('qtpy.QtWidgets', 'QVBoxLayout'),
+                     'QtGui.QWidget': ('qtpy.QtWidgets', 'QWidget'),
+                     }
 
 
 def convertToQtPy(command, linenum):

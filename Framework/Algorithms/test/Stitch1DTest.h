@@ -385,6 +385,38 @@ public:
     TS_ASSERT(!stitched->hasDx(0));
   }
 
+  void test_point_data_workspaces_no_overlap() {
+    // exchanges the workspaces from test_point_data_workspaces
+    const auto &x1 = Points(3, LinearGenerator(1., 1.));
+    const auto &y1 = Counts(3, LinearGenerator(1., 1.));
+    Workspace2D_sptr ws1 = boost::make_shared<Workspace2D>();
+    Mantid::HistogramData::Histogram histogram1(x1, y1);
+    ws1->initialize(1, histogram1);
+    const auto &x2 = Points(3, LinearGenerator(4., 1.));
+    const auto &y2 = Counts(3, LinearGenerator(5., 1.));
+    Mantid::HistogramData::Histogram histogram2(x2, y2);
+    Workspace2D_sptr ws2 = boost::make_shared<Workspace2D>();
+    ws2->initialize(1, histogram2);
+    Stitch1D alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("LHSWorkspace", ws2);
+    alg.setProperty("RHSWorkspace", ws1);
+    alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    double scaleFactor = alg.getProperty("OutScaleFactor");
+    TS_ASSERT_EQUALS(scaleFactor, 2.2);
+    MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
+    const std::vector<double> x_values{1., 2., 3., 4., 5., 6.};
+    TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
+    const std::vector<double> y_values{
+        1. * scaleFactor, 2. * scaleFactor, 3. * scaleFactor, 5., 6., 7.};
+    TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
+    TS_ASSERT(!stitched->hasDx(0));
+  }
+
   void test_histogram_data_input_workspaces_not_modified() {
     auto ws1 = make_arbitrary_histogram_ws();
     auto ws3 = make_arbitrary_histogram_ws();

@@ -64,6 +64,11 @@ workflow with a manual scale factor specified by the user.
 
 The algorithm workflow for point data is as follows:
 
+#. While user provided values of :literal:`StartOverlap` and :literal:`EndOverlap` are validated,
+   those values will be determined automatically if not provided. :literal:`StartOverlap` will be the
+   first x value of the :literal:`RHSWorkspace` and :literal:`EndOverlap` will be the last x value of
+   the :literal:`LHSWorkspace`. These values will be exchanged if the determined :literal:`StartOverlap`
+   is greater than the :literal:`EndOverlap`.
 #. If :literal:`UseManualScaleFactor` was set to false, both workspaces will be integrated
    according to the integration range defined by :literal:`StartOverlap` and :literal:`EndOverlap`.
    Note that the integration is performed without special values, as those have been masked out

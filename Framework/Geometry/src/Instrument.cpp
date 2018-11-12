@@ -1410,7 +1410,6 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   auto compInfo = componentInfo.cloneWithoutDetectorInfo();
   auto detInfo = Kernel::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
-  detInfo->m_detectorInfo->setComponentInfo(compInfo->m_componentInfo.get());
   const auto parInstrument = ParComponentFactory::createInstrument(
       boost::shared_ptr<const Instrument>(this, NoDeleting()),
       boost::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
