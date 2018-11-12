@@ -125,8 +125,9 @@ void LoadInstrument::exec() {
 }
 
 /// Load instrument from IDF XML file
-void LoadInstrument::idfInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace>& ws,
-  std::string filename, std::string instname) {
+void LoadInstrument::idfInstrumentLoader(
+    boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
+    std::string instname) {
 
   // We will parse the XML using the InstrumentDefinitionParser
   InstrumentDefinitionParser parser;
@@ -158,7 +159,8 @@ void LoadInstrument::idfInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace>
   }
   // otherwise we need either Filename or InstrumentName to be set
   else {
-    filename = checkAndRetrieveInstrumentFilename(ws, filename, instname, FileType::Idf);
+    filename = checkAndRetrieveInstrumentFilename(ws, filename, instname,
+                                                  FileType::Idf);
     // Remove the path from the filename for use with the InstrumentDataService
     const std::string::size_type stripPath = filename.find_last_of("\\/");
     std::string instrumentFile =
@@ -211,9 +213,11 @@ void LoadInstrument::idfInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace>
   }
 }
 
-void LoadInstrument::nexusInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace>& ws,
-std::string filename, std::string instname) {
-  filename = checkAndRetrieveInstrumentFilename(ws, filename, instname, FileType::Nexus);
+void LoadInstrument::nexusInstrumentLoader(
+    boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
+    std::string instname) {
+  filename = checkAndRetrieveInstrumentFilename(ws, filename, instname,
+                                                FileType::Nexus);
   Instrument_const_sptr instrument =
       NexusGeometry::NexusGeometryParser::createInstrument(filename);
   ws->setInstrument(instrument);
@@ -222,9 +226,8 @@ std::string filename, std::string instname) {
 
 /// Get the file name from the instrument name if it is not defined
 std::string LoadInstrument::checkAndRetrieveInstrumentFilename(
-    boost::shared_ptr<API::MatrixWorkspace>& ws,
-    std::string filename, std::string instname,
-    const FileType &filetype) {
+    boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
+    std::string instname, const FileType &filetype) {
   // Retrieve the filename from the properties
   std::string instrumentfname;
   if (filename.empty()) {
@@ -240,7 +243,7 @@ std::string LoadInstrument::checkAndRetrieveInstrumentFilename(
     } else {
       instrumentfname = ExperimentInfo::getInstrumentFilename(
           instname, ws->getWorkspaceStartDate(), filetype);
-      setPropertyValue("Filename",instrumentfname);
+      setPropertyValue("Filename", instrumentfname);
     }
   } else {
     instrumentfname = filename;
@@ -254,8 +257,8 @@ std::string LoadInstrument::checkAndRetrieveInstrumentFilename(
 
 //-----------------------------------------------------------------------------------------------------------------------
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
-void LoadInstrument::runLoadParameterFile(boost::shared_ptr<API::MatrixWorkspace>& ws,
-std::string filename) {
+void LoadInstrument::runLoadParameterFile(
+    boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename) {
   g_log.debug("Loading the parameter definition...");
 
   // First search for XML parameter file in same folder as IDF file
@@ -311,7 +314,8 @@ std::string filename) {
 /// Search the directory for the Parameter IDF file and return full path name if
 /// found, else return "".
 //  directoryName must include a final '/'.
-std::string LoadInstrument::getFullPathParamIDF(std::string directoryName, std::string filename) {
+std::string LoadInstrument::getFullPathParamIDF(std::string directoryName,
+                                                std::string filename) {
   Poco::Path directoryPath(directoryName);
   directoryPath.makeDirectory();
   // Remove the path from the filename

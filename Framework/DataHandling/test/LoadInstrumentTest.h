@@ -54,7 +54,8 @@ public:
     // create a workspace with some sample data
     int histogramNumber = 2584;
     int timechannels = 100;
-    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(histogramNumber, HistogramData::Points(timechannels,timechannels));
+    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(
+        histogramNumber, HistogramData::Points(timechannels, timechannels));
 
     Points timeChannelsVec(timechannels, LinearGenerator(0.0, 100.0));
     // loop to create data
@@ -173,7 +174,8 @@ public:
     loaderSLS.setChild(true);
 
     // create a workspace with some sample data
-    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
     const std::string instrFilename = "SANDALS_Definition.xml";
     loaderSLS.setPropertyValue("Filename", instrFilename);
@@ -225,7 +227,8 @@ public:
     loaderNIMROD.setChild(true);
 
     // create a workspace with some sample data
-    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
     const std::string instrFilename = "NIM_Definition.xml";
     loaderNIMROD.setPropertyValue("Filename", instrFilename);
@@ -258,7 +261,8 @@ public:
     loaderMARI.setChild(true);
 
     // create a workspace with some sample data
-    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
     const std::string instrName = "MARI";
     loaderMARI.setPropertyValue("InstrumentName", instrName);
@@ -285,7 +289,7 @@ public:
     TS_ASSERT_EQUALS(ptrDet1.getID(), 1);
     TS_ASSERT_DELTA(ptrDet1.getPos().X(), 0.0000, 0.0001);
     TS_ASSERT_DELTA(ptrDet1.getPos().Y(), 0.0000, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1.getPos().Z(),-4.7390, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1.getPos().Z(), -4.7390, 0.0001);
 
     const auto &ptrDet2 = detectorInfo.detector(detectorInfo.indexOf(4816));
     TS_ASSERT_EQUALS(ptrDet2.getName(), "tall He3 element");
@@ -305,7 +309,8 @@ public:
     // prevents us from then setting `loaderLOKI.setProperty("Workspace", ws)`
     // because the `unique_ptr` will not allow itself to be copied into the
     // `shared_ptr` as a l-value reference.
-    MatrixWorkspace_sptr ws = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
     nexusLoader.setPropertyValue("Filename", filename);
     nexusLoader.setProperty("Workspace", ws);
     nexusLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -338,7 +343,8 @@ public:
 
   /// Test the Nexus geometry loader from WISH file
   void testExecNexusWISH() {
-    MatrixWorkspace_sptr outputWs = doLoadNexus("WISH_Definition_10Panels.hdf5");
+    MatrixWorkspace_sptr outputWs =
+        doLoadNexus("WISH_Definition_10Panels.hdf5");
     auto &componentInfo = outputWs->componentInfo();
     auto &detectorInfo = outputWs->detectorInfo();
     TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "WISH");
@@ -582,10 +588,12 @@ public:
     LoadInstrument instLoader;
     instLoader.initialize();
     instLoader.setChild(true);
-    MatrixWorkspace_sptr ws = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
     instLoader.setProperty("Workspace", ws);
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    TS_ASSERT_THROWS_EQUALS( instLoader.execute(), Kernel::Exception::FileError &e,
+    TS_ASSERT_THROWS_EQUALS(
+        instLoader.execute(), Kernel::Exception::FileError & e,
         std::string(e.what()), "Instrument input cannot be read in ");
     TS_ASSERT(!instLoader.isExecuted());
     TS_ASSERT_EQUALS(instLoader.getPropertyValue("Filename"), "");
@@ -594,12 +602,14 @@ public:
   void test_failure_if_Filename_not_found() {
     LoadInstrument instLoader;
     instLoader.initialize();
-    MatrixWorkspace_sptr ws = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
     instLoader.setProperty("Workspace", ws);
     instLoader.setPropertyValue("Filename", "Nonsense");
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    TS_ASSERT_THROWS_EQUALS( instLoader.execute(), std::invalid_argument &e,
-        std::string(e.what()), "FileDescriptor() - File 'Nonsense' does not exist");
+    TS_ASSERT_THROWS_EQUALS(
+        instLoader.execute(), std::invalid_argument & e, std::string(e.what()),
+        "FileDescriptor() - File 'Nonsense' does not exist");
     TS_ASSERT(!instLoader.isExecuted());
     TS_ASSERT_EQUALS(instLoader.getPropertyValue("Filename"), "Nonsense");
   }
@@ -607,7 +617,8 @@ public:
   void test_if_Workspace_not_set() {
     LoadInstrument instLoader;
     instLoader.initialize();
-    instLoader.setPropertyValue("Filename", "unit_testing/SMALLFAKE_example_geometry.hdf5");
+    instLoader.setPropertyValue("Filename",
+                                "unit_testing/SMALLFAKE_example_geometry.hdf5");
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
     instLoader.execute();
     TS_ASSERT(instLoader.isExecuted());
@@ -704,7 +715,8 @@ private:
     loader.setChild(true);
 
     // create a workspace with some sample data
-    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
     // load IDF
     loader.setPropertyValue("Filename", filename);
@@ -737,7 +749,6 @@ private:
       TS_FAIL("Did not select " + paramFilename + " for " + filename);
     }
   }
-
 };
 
 class LoadInstrumentTestPerformance : public CxxTest::TestSuite {
