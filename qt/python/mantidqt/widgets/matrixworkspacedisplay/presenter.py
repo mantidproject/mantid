@@ -85,7 +85,8 @@ class MatrixWorkspaceDisplay(object):
         all_string_rows = []
         for i in range(num_rows):
             # Appends ONE value from each COLUMN, this is because the final string is being built vertically
-            all_string_rows.append(" ".join([data[i] for data in column_data]))
+            # the noqa disables a 'data' variable redefined warning
+            all_string_rows.append(" ".join([data[i] for data in column_data])) # noqa: F812
 
         # Finally all rows are joined together with a new line at the end of each row
         final_string = "\n".join(all_string_rows)
@@ -126,7 +127,7 @@ class MatrixWorkspaceDisplay(object):
 
         ws_list = [self.model._ws]
         self.plot(ws_list, wksp_indices=[get_index(index) for index in selected], errors=plot_errors,
-                       plot_kwargs=plot_kwargs)
+                  plot_kwargs=plot_kwargs)
 
     def action_plot_spectrum(self, table):
         self._do_action_plot(table, MantidAxes.SPECTRUM, lambda index: index.row())
