@@ -80,21 +80,26 @@ Follow these steps to narrow down the root of potential errors:
 
 Running other Mantid widgets in PyCharm
 ---------------------------------------
-The widgets in ``mantidqt/widgets`` can be run independently of the Workbench. They still need the relevant PATHs available - to load the ``mantid` and ``mantidqt`` libraries.
-The easiest way to do this is to set the script path to the widget's script that can start it, but leave the working directory to point at `<Mantid Build Directory>/bin/Debug` or `<Mantid Build Directory>/bin/Release`
+The widgets in ``mantidqt/widgets`` can be run independently of the Workbench. They still need the relevant PATHs available - to load the ``mantid``, ``mantidqt``, and various other libraries.
 
-For example to run the MatrixWorkspaceDisplay, copy your default configuration (on the right of the ``-``).
-Set the Script Path to ``<Mantid Source Dir>/qt/python/mantidqt/widgets/matrixworkspaceviewer/run.py``.
-Leave the working directory to ``<Mantid Build Dir>/bin/Debug``.
-Running the configration should start the MatrixWorkspaceDisplay.
+The easiest way to do this is to set the script path to the widget's startup script, but leave the working directory to point at ``<Mantid Build Directory>/bin/Debug`` or ``<Mantid Build Directory>/bin/Release``
+
+For example to run the MatrixWorkspaceDisplay:
+
+1. Copy your default configuration (the copy icon on the top left of the configuration window).
+2. Set the Script Path to ``<Mantid Source Dir>/qt/python/mantidqt/widgets/matrixworkspaceviewer``. This package has a ``__main__.py`` file which makes it runnable.
+3. You might have to CHANGE back the working directory to ``<Mantid Build Dir>/bin/Debug``.
+4. Click OK, then running the configration should start the MatrixWorkspaceDisplay.
 
 Remote Debugging with PyCharm
 -----------------------------
-This approach can be used to more easily debug unit tests. However, as the required package ``pydevd`` is not shipped with Mantid, we need to point Python to it manually in our script.
-This can be done by appending a directory that contains the installed ``pydevd`` package on the PYTHONPATH. The following code does so at runtime::
+
+This requires a PyCharm Professional license for the Remote Debugging feature.
+
+This approach can be used to debug unit tests. However, as the required package ``pydevd`` is not shipped with Mantid, we need to manually add it at runtime. This can be done by appending a directory that contains the installed ``pydevd`` package on the ``PYTHONPATH``. The following code does so at runtime::
 
     PYTHON_ROOT="<Change this to point to a Python installation that has pydevd installed>"
-    PYTHON_ROOT="c:\\users\\qbr77747\\apps\\miniconda3"
+    PYTHON_ROOT="c:/users/qbr77747/apps/miniconda3"
     import os
     import sys
     sys.path.append(os.path.join(PYTHON_ROOT, "lib/site-packages"))
@@ -102,3 +107,6 @@ This can be done by appending a directory that contains the installed ``pydevd``
     pydevd.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True)
 
 
+A Remote Debugging configration needs to be setup to use the ``44444`` port (can be changed, but it needs to be reflected in the code), and running before the tests are run!
+
+The ``pydevd`` package does not have to be installed on Python 2. As of 12/11/2018 installing ``pydevd`` on a separate installation with Python 3.7, and adding the code above successfully connects.
