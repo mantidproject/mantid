@@ -426,7 +426,7 @@ QGroupBox::title {
                         <string>Memor&amp;y</string>
                        </property>
                        <property name="checked">
-                        <bool>false</bool>
+                        <bool>true</bool>
                        </property>
                       </widget>
                      </item>
@@ -442,6 +442,9 @@ QGroupBox::title {
                      </item>
                      <item>
                       <widget class="QRadioButton" name="output_mode_both_radio_button">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
                        <property name="toolTip">
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save locations for the output of batch reductions are: Memory (RAM), File (Hard disk), Both (RAM and Hard disk).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
@@ -449,7 +452,7 @@ QGroupBox::title {
                         <string>Both</string>
                        </property>
                        <property name="checked">
-                        <bool>true</bool>
+                        <bool>false</bool>
                        </property>
                       </widget>
                      </item>
