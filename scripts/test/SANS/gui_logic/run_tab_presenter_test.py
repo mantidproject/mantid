@@ -782,7 +782,8 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.notify_progress(0, [0.0], [1.0])
 
         self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
-        self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, 'scale=[1.0], shift=[0.0]')
+        self.assertEqual(presenter._table_model.get_table_entry(0).options_column_model.get_options_string(),
+                         'MergeScale=1.0, MergeShift=0.0')
 
         self.assertEqual(presenter.progress, 1)
         self.assertEqual(presenter._view.progress_bar_value, 1)
