@@ -153,7 +153,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
                              doc='Name of the workspace that contains the result of the calculation. '
                                  'Created automatically.')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceTransmission_Fit', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceTransmissionFit', '', direction=Direction.Output),
                              # This works only when transmission is True. Problems starts when it is not...
                              doc='Counts vs wavelength, fit for the sample transmission')
 
