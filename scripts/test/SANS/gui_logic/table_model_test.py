@@ -138,12 +138,15 @@ class TableModelTest(unittest.TestCase):
     def test_that_OptionsColumnModel_get_permissable_properties_returns_correct_properties(self):
         permissable_properties = OptionsColumnModel._get_permissible_properties()
 
-        self.assertEqual(permissable_properties, {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str})
+        self.assertEqual(permissable_properties, {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str,
+                                                  "MergeScale": float, "MergeShift": float})
 
     def test_that_OptionsColumnModel_get_hint_strategy(self):
         hint_strategy = OptionsColumnModel.get_hint_strategy()
         expected_hint_strategy = BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
                                   "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
+                                  "MergeScale": 'The scale applied to the HAB when mergeing',
+                                  "MergeShift": 'The shift applied to the HAB when mergeing',
                                   "EventSlices": 'The event slices to reduce.'
                                   ' The format is the same as for the event slices'
                                   ' box in settings, however if a comma separated list is given '
@@ -197,6 +200,15 @@ class TableModelTest(unittest.TestCase):
 
         self.assertEqual(table_index_model.row_state, RowState.Error)
         self.assertEqual(table_index_model.tool_tip, tool_tip)
+
+    def test_serialise_options_dict_correctly(self):
+        options_column_model = OptionsColumnModel('EventSlices=1-6,5-9,4:5:89 , WavelengthMax=78 , WavelengthMin=9')
+        options_column_model.set_option('MergeScale', 1.5)
+
+        options_string = options_column_model.get_options_string()
+
+        self.assertEqual(options_string, 'MergeScale=1.5, EventSlices=1-6,5-9,4:5:89,'
+                                         ' WavelengthMin=9.0, WavelengthMax=78.0')
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
