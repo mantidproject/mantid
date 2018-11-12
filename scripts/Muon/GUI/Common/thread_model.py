@@ -10,7 +10,6 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal as Signal
 from PyQt4.QtCore import pyqtSlot
 from Muon.GUI.Common import message_box
-import time
 
 
 class WorkerSignals(QtCore.QObject):
