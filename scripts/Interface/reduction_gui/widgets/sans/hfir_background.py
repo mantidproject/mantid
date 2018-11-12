@@ -124,7 +124,7 @@ class BackgroundWidget(BaseWidget):
             self._content.trans_dark_current_edit.hide()
             self._content.trans_dark_current_button.hide()
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._content.background_plot_button.hide()
             self._content.trans_dark_current_plot_button.hide()
 

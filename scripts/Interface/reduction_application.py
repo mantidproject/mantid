@@ -19,15 +19,12 @@ from qtpy.QtCore import (QFile, QFileInfo, QSettings)  # noqa
 from mantid.kernel import Logger
 
 # Check whether Mantid is available
-IS_IN_MANTIDPLOT = False
+CAN_REDUCE = False
 try:
-    import mantidplot  # noqa
-    IS_IN_MANTIDPLOT = True
+    CAN_REDUCE = True
     from mantid.kernel import ConfigService
 except ImportError:
     pass
-
-
 try:
     from mantidqt.utils.qt import load_ui  # noqa
 except ImportError:
@@ -37,24 +34,21 @@ except ImportError:
 if six.PY3:
     unicode = str
 
-REDUCTION_WARNING = False
-WARNING_MESSAGE = ""
+STARTUP_WARNING = ""
 
-if IS_IN_MANTIDPLOT:
+if CAN_REDUCE:
     try:
         import reduction  # noqa
         if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
-            REDUCTION_WARNING = True
             home_dir = os.path.expanduser('~')
             if os.path.abspath(reduction.__file__).startswith(home_dir):
-                WARNING_MESSAGE = "The following file is in your home area, please delete it and restart Mantid:\n\n"
+                STARTUP_WARNING = "The following file is in your home area, please delete it and restart Mantid:\n\n"
             else:
-                WARNING_MESSAGE = "If the following file is in your home area, please delete it and restart Mantid:\n\n"
-            WARNING_MESSAGE += os.path.abspath(reduction.__file__)
+                STARTUP_WARNING = "If the following file is in your home area, please delete it and restart Mantid:\n\n"
+            STARTUP_WARNING += os.path.abspath(reduction.__file__)
     except:
-        REDUCTION_WARNING = True
-        WARNING_MESSAGE = "Please contact the Mantid team with the following message:\n\n\n"
-        WARNING_MESSAGE += unicode(traceback.format_exc())
+        STARTUP_WARNING = "Please contact the Mantid team with the following message:\n\n\n"
+        STARTUP_WARNING += unicode(traceback.format_exc())
 
 from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT  # noqa
 from reduction_gui.settings.application_settings import GeneralSettings  # noqa
@@ -65,9 +59,9 @@ class ReductionGUI(QMainWindow):
         QMainWindow.__init__(self)
         self.ui = load_ui(__file__, 'ui/reduction_main.ui', baseinstance=self)
 
-        if REDUCTION_WARNING:
+        if STARTUP_WARNING:
             message = "The reduction application has problems starting:\n\n"
-            message += WARNING_MESSAGE
+            message += STARTUP_WARNING
             QMessageBox.warning(self, "WARNING", message)
 
         # Application settings
@@ -105,8 +99,7 @@ class ReductionGUI(QMainWindow):
         self._number_of_nodes = 1
         self._cores_per_node = 16
         self._compute_resources = ['Fermi']
-        if IS_IN_MANTIDPLOT \
-                and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
+        if CAN_REDUCE and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
             self._compute_resources = ConfigService.Instance().getFacility().computeResources()
 
         # Internal flag for clearing all settings and restarting the application
@@ -116,7 +109,7 @@ class ReductionGUI(QMainWindow):
         self.general_settings = GeneralSettings(settings)
 
         # Event connections
-        if not IS_IN_MANTIDPLOT:
+        if not CAN_REDUCE:
             self.reduce_button.hide()
         self.export_button.clicked.connect(self._export)
         self.reduce_button.clicked.connect(self.reduce_clicked)

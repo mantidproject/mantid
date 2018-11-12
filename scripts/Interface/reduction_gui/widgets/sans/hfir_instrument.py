@@ -20,14 +20,8 @@ except ImportError:
     from mantid.kernel import Logger
     Logger("SANSInstrumentWidget").information('Using legacy ui importer')
     from mantidplot import load_ui
-
-IS_IN_MANTIDPLOT = False
-try:
-    import mantidplot # noqa
-    IS_IN_MANTIDPLOT = True
-except ImportError:
-    pass
-
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import ExtractMask
 if six.PY3:
     unicode = str
 
@@ -193,7 +187,7 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.mask_side_front_radio.hide()
             self._summary.mask_side_back_radio.hide()
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
 
@@ -529,12 +523,9 @@ class SANSInstrumentWidget(BaseWidget):
         m.use_mask_file = self._summary.mask_check.isChecked()
         m.mask_file = unicode(self._summary.mask_edit.text())
         m.detector_ids = self._masked_detectors
-        if self._in_mantidplot:
-            from mantid.api import AnalysisDataService
-            import mantid.simpleapi as api
-            if AnalysisDataService.doesExist(self.mask_ws):
-                _, masked_detectors = api.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
-                m.detector_ids = [int(i) for i in masked_detectors]
+        if AnalysisDataService.doesExist(self.mask_ws):
+            _, masked_detectors = ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
+            m.detector_ids = [int(i) for i in masked_detectors]
 
         self._settings.emit_key_value("DARK_CURRENT", str(self._summary.dark_file_edit.text()))
         return m

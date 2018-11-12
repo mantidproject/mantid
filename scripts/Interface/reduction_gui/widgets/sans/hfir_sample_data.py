@@ -61,7 +61,7 @@ class DirectBeam(BaseWidget):
         self._content.sample_plot.clicked.connect(self._sample_plot_clicked)
         self._content.direct_plot.clicked.connect(self._direct_plot_clicked)
 
-        if not self._in_mantidplot:
+        if not self._has_instrumentview:
             self._content.sample_plot.hide()
             self._content.direct_plot.hide()
 
@@ -145,7 +145,7 @@ class BeamSpreader(BaseWidget):
         self._content.direct_scatt_plot.clicked.connect(self._direct_scatt_plot_clicked)
         self._content.direct_spread_plot.clicked.connect(self._direct_spread_plot_clicked)
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._content.sample_scatt_plot.hide()
             self._content.sample_spread_plot.hide()
             self._content.direct_scatt_plot.hide()
@@ -262,7 +262,7 @@ class SampleDataWidget(BaseWidget):
         self._content.data_file_plot_button.clicked.connect(self._data_file_plot)
         self._content.dark_current_plot_button.clicked.connect(self._dark_plot_clicked)
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._content.dark_current_plot_button.hide()
             self._content.data_file_plot_button.hide()
 

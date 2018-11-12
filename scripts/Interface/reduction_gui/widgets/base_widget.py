@@ -12,12 +12,12 @@ import os
 import types
 from reduction_gui.settings.application_settings import GeneralSettings
 
-IS_IN_MANTIDPLOT = False
+HAS_INSTRUMENT_VIEW = False
 try:
     import mantidplot
     from mantid.api import AnalysisDataService
     import mantid.simpleapi as api
-    IS_IN_MANTIDPLOT = True
+    HAS_INSTRUMENT_VIEW = True
 except:
     pass
 
@@ -72,7 +72,7 @@ class BaseWidget(QWidget):
         self._data_set_viewed = ''
 
         self._data_proxy = data_proxy
-        self._in_mantidplot = IS_IN_MANTIDPLOT and self._data_proxy is not None
+        self._has_instrument_view = HAS_INSTRUMENT_VIEW and self._data_proxy is not None
 
         self._is_running = True
 
@@ -213,7 +213,7 @@ class BaseWidget(QWidget):
             return False
 
         # Sanity check
-        if not IS_IN_MANTIDPLOT:
+        if not HAS_INSTRUMENT_VIEW:
             return
 
         # Set up workspace name

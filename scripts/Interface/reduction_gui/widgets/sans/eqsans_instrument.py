@@ -20,7 +20,8 @@ except ImportError:
     from mantid.kernel import Logger
     Logger("SANSInstrumentWidget").information('Using legacy ui importer')
     from mantidplot import load_ui
-
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import ExtractMask
 if six.PY3:
     unicode = str
 
@@ -203,7 +204,7 @@ class SANSInstrumentWidget(BaseWidget):
 
         # We need the EQSANS data proxy for a quick load of a file for masking purposes, but
         # we don't want to show the plot button. Turn this off for the moment.
-        if True or not self._in_mantidplot:
+        if True or not self._has_instrument_view:
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
 
@@ -483,12 +484,9 @@ class SANSInstrumentWidget(BaseWidget):
         m.use_mask_file = self._summary.mask_check.isChecked()
         m.mask_file = unicode(self._summary.mask_edit.text())
         m.detector_ids = self._masked_detectors
-        if self._in_mantidplot:
-            from mantid.api import AnalysisDataService
-            import mantid.simpleapi as api
-            if AnalysisDataService.doesExist(self.mask_ws):
-                ws, masked_detectors = api.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
-                m.detector_ids = [int(i) for i in masked_detectors]
+        if AnalysisDataService.doesExist(self.mask_ws):
+            ws, masked_detectors = ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
+            m.detector_ids = [int(i) for i in masked_detectors]
 
         # Resolution parameters
         m.compute_resolution = self._summary.resolution_chk.isChecked()

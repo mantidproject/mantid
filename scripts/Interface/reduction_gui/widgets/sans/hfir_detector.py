@@ -19,11 +19,10 @@ except ImportError:
     from mantid.kernel import Logger
     Logger("DetectorWidget").information('Using legacy ui importer')
     from mantidplot import load_ui
-
+from mantid.api import AnalysisDataService
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
-    from mantid.api import AnalysisDataService
+    from mantidplot import runPythonScript
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -111,7 +110,7 @@ class DetectorWidget(BaseWidget):
         self._content.create_sensitivity_button.clicked.connect(self._create_sensitivity)
         self._patch_checked()
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._content.sensitivity_plot_button.hide()
             self._content.sensitivity_dark_plot_button.hide()
             self._content.data_file_plot_button.hide()
@@ -149,7 +148,7 @@ class DetectorWidget(BaseWidget):
         self._content.create_sensitivity_button.setEnabled(enabled)
 
     def _draw_patch(self):
-        if IS_IN_MANTIDPLOT:
+        if self._has_instrument_view:
             self.show_instrument(self._content.sensitivity_file_edit.text,
                                  workspace=self.patch_ws, tab=2, reload=True, data_proxy=None)
 
@@ -167,7 +166,7 @@ class DetectorWidget(BaseWidget):
                 script += "                   ReductionProperties='%s',\n" % reduction_table_ws
                 script += "                   OutputWorkspace='sensitivity',\n"
                 script += "                   PatchWorkspace='%s')\n" % patch_ws
-                mantidplot.runPythonScript(script, True)
+                runPythonScript(script, True)  # this is the function from mantidplot
             except:
                 print("Could not compute sensitivity")
                 print(sys.exc_info()[1])
