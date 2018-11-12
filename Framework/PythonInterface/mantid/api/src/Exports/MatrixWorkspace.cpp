@@ -26,7 +26,6 @@
 #include <boost/python/implicit.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
