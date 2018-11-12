@@ -470,14 +470,15 @@ class ReductionGUI(QMainWindow):
         fname = QFileDialog.getOpenFileName(self, "Reduction settings - Choose a settings file",
                                             self._last_directory,
                                             "Settings files (*.xml)")
-        fname = str(QFileInfo(fname).filePath())
+        if not fname:
+            return
+
         if isinstance(fname, tuple):
             fname = fname[0]
-        fname = str(fname)
-        if fname:
-            # Store the location of the loaded file
-            self._last_directory = str(QFileInfo(fname).path())
-            self.open_file(fname)
+        fname = str(QFileInfo(fname).filePath())
+        # Store the location of the loaded file
+        self._last_directory = str(QFileInfo(fname).path())
+        self.open_file(fname)
 
     def _save(self):
         """
@@ -510,20 +511,22 @@ class ReductionGUI(QMainWindow):
         fname = QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
                                             self._last_directory + '/' + fname,
                                             "Settings files (*.xml)")
+        if not fname:
+            return
+
         if isinstance(fname, tuple):
             fname = fname[0]
         fname = str(QFileInfo(fname).filePath())
-        if len(fname)>0:
-            if not fname.endswith('.xml'):
-                fname += ".xml"
-            if fname in self._recent_files:
-                self._recent_files.remove(fname)
-            self._recent_files.insert(0,fname)
-            while len(self._recent_files) > 10:
-                self._recent_files.pop()
-            self._last_directory = QFileInfo(fname).path()
-            self._filename = fname
-            self._save()
+        if not fname.endswith('.xml'):
+            fname += ".xml"
+        if fname in self._recent_files:
+            self._recent_files.remove(fname)
+        self._recent_files.insert(0,fname)
+        while len(self._recent_files) > 10:
+            self._recent_files.pop()
+        self._last_directory = QFileInfo(fname).path()
+        self._filename = fname
+        self._save()
 
     def _export(self):
         """
@@ -533,28 +536,24 @@ class ReductionGUI(QMainWindow):
         if self._interface is None:
             return
 
-        fname = '.'
-        if self._filename is not None:
-            (root, ext) = os.path.splitext(self._filename)
-            fname = root
-
         fname = QFileDialog.getSaveFileName(self, "Mantid Python script - Save script",
                                             self._last_export_directory,
                                             "Python script (*.py)")
+        if not fname:
+            return
+
         if isinstance(fname, tuple):
             fname = fname[0]
         fname = str(fname)
-
-        if len(fname)>0:
-            if not fname.endswith('.py'):
-                fname += ".py"
-            (folder, file_name) = os.path.split(fname)
-            self._last_export_directory = folder
-            script = self._interface.export(fname)
-            if script is not None:
-                self.statusBar().showMessage("Saved as %s" % fname)
-            else:
-                self.statusBar().showMessage("Could not save file")
+        if not fname.endswith('.py'):
+            fname += ".py"
+        (folder, file_name) = os.path.split(fname)
+        self._last_export_directory = folder
+        script = self._interface.export(fname)
+        if script is not None:
+            self.statusBar().showMessage("Saved as %s" % fname)
+        else:
+            self.statusBar().showMessage("Could not save file")
 
 #--------------------------------------------------------------------------------------------------------
 
