@@ -10,6 +10,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/System.h"
+#include "MantidDataObjects/Peak.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -48,6 +49,7 @@ private:
   void exec() override;
   void logLattice(Geometry::OrientedLattice &o_lattice, int &ModDim);
   int getModulationDimension(Kernel::V3D &mnp);
+  bool isPeakIndexed(DataObjects::Peak &peak);
 };
 
 } // namespace Crystal

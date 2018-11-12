@@ -326,6 +326,10 @@ public:
   double angle(const V3D &) const;
   /// Direction angles
   V3D directionAngles(bool inDegrees = true) const;
+  /// Maximum absolute integer value
+  int maxCoeff();
+  /// Absolute value
+  V3D absoluteValue() const;
 
   // Make 2 vectors into 3 orthogonal vectors
   static std::vector<V3D> makeVectorsOrthogonal(std::vector<V3D> &vectors);

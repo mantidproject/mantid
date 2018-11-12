@@ -568,5 +568,28 @@ V3D V3D::directionAngles(bool inDegrees) const {
              conversionFactor * acos(z / divisor));
 }
 
+/**
+  Vector maximum absolute integer value
+  @return maxCoeff()
+*/
+int V3D::maxCoeff() {
+  int MaxOrder = 0;
+    if (abs(static_cast<int>(x)) > MaxOrder)
+      MaxOrder = abs(static_cast<int>(x));
+    if (abs(static_cast<int>(y)) > MaxOrder)
+      MaxOrder = abs(static_cast<int>(y));
+    if (abs(static_cast<int>(z)) > MaxOrder)
+      MaxOrder = abs(static_cast<int>(z));
+    return MaxOrder;
+}
+
+/**
+  Calculates the absolute value. 
+  @return The absolute value
+*/
+V3D V3D::absoluteValue() const {
+  return V3D(fabs(x), fabs(y), fabs(z));
+}
+
 } // Namespace Kernel
 } // Namespace Mantid

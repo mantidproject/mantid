@@ -22,6 +22,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
+const int MIN_INDEXED_PEAKS = 3;
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingIndexedPeaks::init() {
@@ -68,13 +69,9 @@ void FindUBUsingIndexedPeaks::exec() {
     run_numbers.insert(peak.getRunNumber());
     V3D hkl(peak.getIntHKL()); // ##### KEEP
     V3D mnp(peak.getIntMNP());
-
-    if (abs(static_cast<int>(mnp[0])) > MaxOrder)
-      MaxOrder = abs(static_cast<int>(mnp[0]));
-    if (abs(static_cast<int>(mnp[1])) > MaxOrder)
-      MaxOrder = abs(static_cast<int>(mnp[1]));
-    if (abs(static_cast<int>(mnp[2])) > MaxOrder)
-      MaxOrder = abs(static_cast<int>(mnp[2]));
+    int maxOrder = mnp.maxCoeff();
+    if (maxOrder > MaxOrder)
+      MaxOrder = maxOrder;
 
     if (mnp[0] != 0 && ModDim == 0)
       ModDim = 1;
@@ -85,18 +82,17 @@ void FindUBUsingIndexedPeaks::exec() {
     if (mnp[0] * mnp[1] != 0 || mnp[1] * mnp[2] != 0 || mnp[2] * mnp[0] != 0)
       CrossTerm = true;
 
-    if (IndexingUtils::ValidIndex(hkl, 1.0) ||
-        IndexingUtils::ValidIndex(mnp, 1.0)) // use tolerance == 1 to
-                                             // just check for (0,0,0,0,0,0)
+    if (isPeakIndexed(peak))
     {
       q_vectors.push_back(peak.getQSampleFrame());
-      hkl_vectors.emplace_back(hkl[0], hkl[1], hkl[2]);
-      mnp_vectors.emplace_back(mnp[0], mnp[1], mnp[2]);
+      hkl_vectors.push_back(hkl);
+      mnp_vectors.push_back(mnp);
       indexed_count++;
     }
   }
 
-  if (indexed_count < 3) {
+  //too few indexed peaks to work with
+  if (indexed_count < MIN_INDEXED_PEAKS) {
     throw std::runtime_error(
         "At least three linearly independent indexed peaks are needed.");
   }
@@ -118,7 +114,7 @@ void FindUBUsingIndexedPeaks::exec() {
   {                    // from the full list of peaks, and
     q_vectors.clear(); // save the UB in the sample
     q_vectors.reserve(n_peaks);
-    for (Peak peak : peaks) {
+    for (auto & peak : peaks) {
       q_vectors.push_back(peak.getQSampleFrame());
     }
 
@@ -136,10 +132,7 @@ void FindUBUsingIndexedPeaks::exec() {
 
         for (Peak peak : peaks)
           if (peak.getRunNumber() == run) {
-            V3D hkl(peak.getIntHKL()); // ##### KEEP
-            V3D mnp(peak.getIntMNP());
-            if (IndexingUtils::ValidIndex(hkl, 1.0) ||
-                IndexingUtils::ValidIndex(mnp, 1.0))
+            if (isPeakIndexed(peak))
               run_indexed++;
           }
 
@@ -155,11 +148,10 @@ void FindUBUsingIndexedPeaks::exec() {
           if (peak.getRunNumber() == run) {
             V3D hkl(peak.getIntHKL()); // ##### KEEP
             V3D mnp(peak.getIntMNP());
-            if (IndexingUtils::ValidIndex(hkl, 1.0) ||
-                IndexingUtils::ValidIndex(mnp, 1.0)) {
+            if (isPeakIndexed(peak)) {
               run_q_vectors.push_back(peak.getQSampleFrame());
-              run_hkl_vectors.emplace_back(hkl[0], hkl[1], hkl[2]);
-              run_mnp_vectors.emplace_back(mnp[0], mnp[1], mnp[2]);
+              run_hkl_vectors.push_back(hkl);
+              run_mnp_vectors.push_back(mnp);
             }
           }
         }
@@ -192,7 +184,7 @@ void FindUBUsingIndexedPeaks::exec() {
               if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
                 sate_indexed++;
                 V3D errhkl = fhkl - run_hkl_vectors[i];
-                errhkl = V3D(fabs(errhkl[0]), fabs(errhkl[1]), fabs(errhkl[2]));
+                errhkl = errhkl.absoluteValue();
                 errorHKL1 += errhkl;
               }
             } else if (run_mnp_vectors[i][1] != 0) {
@@ -200,7 +192,7 @@ void FindUBUsingIndexedPeaks::exec() {
               if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
                 sate_indexed++;
                 V3D errhkl = fhkl - run_hkl_vectors[i];
-                errhkl = V3D(fabs(errhkl[0]), fabs(errhkl[1]), fabs(errhkl[2]));
+                errhkl = errhkl.absoluteValue();
                 errorHKL2 += errhkl;
               }
             } else if (run_mnp_vectors[i][2] != 0) {
@@ -208,17 +200,46 @@ void FindUBUsingIndexedPeaks::exec() {
               if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
                 sate_indexed++;
                 V3D errhkl = fhkl - run_hkl_vectors[i];
-                errhkl = V3D(fabs(errhkl[0]), fabs(errhkl[1]), fabs(errhkl[2]));
+                errhkl = errhkl.absoluteValue();
                 errorHKL3 += errhkl;
               }
             }
           }
         } else {
-          V3D err_sigq =
-              V3D(sigq[0], sigq[1], sigq[2]) * static_cast<double>(num_indexed);
-          errorHKL1 += err_sigq;
-          errorHKL2 += err_sigq;
-          errorHKL3 += err_sigq;
+          double average_error = 0.;
+          IndexingUtils::CalculateMillerIndices(
+              UB, run_q_vectors, 1.0, run_fhkl_vectors, average_error);
+          for (size_t i = 0; i < run_indexed; i++) {
+            if (IndexingUtils::ValidIndex(run_fhkl_vectors[i], tolerance))
+              continue;
+
+            V3D fhkl(run_fhkl_vectors[i]);
+            if (run_mnp_vectors[i][0] != 0) {
+              fhkl -= run_lattice.getModVec(1) * run_mnp_vectors[i][0];
+              if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
+                sate_indexed++;
+                V3D errhkl = fhkl - run_hkl_vectors[i];
+                errhkl = errhkl.absoluteValue();
+                errorHKL1 += errhkl;
+              }
+            } if (run_mnp_vectors[i][1] != 0) {
+              fhkl -= run_lattice.getModVec(2) * run_mnp_vectors[i][1];
+              if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
+                sate_indexed++;
+                V3D errhkl = fhkl - run_hkl_vectors[i];
+                errhkl = errhkl.absoluteValue();
+                errorHKL2 += errhkl;
+              }
+            } if (run_mnp_vectors[i][2] != 0) {
+              fhkl -= run_lattice.getModVec(3) * run_mnp_vectors[i][2];
+              if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
+                sate_indexed++;
+                V3D errhkl = fhkl - run_hkl_vectors[i];
+                errhkl = errhkl.absoluteValue();
+                errorHKL3 += errhkl;
+              }
+            }
+          }
         }
       }
     }
@@ -263,6 +284,12 @@ void FindUBUsingIndexedPeaks::logLattice(OrientedLattice &o_lattice,
     g_log.notice() << "Modulation Vector " << i
                    << " error: " << o_lattice.getVecErr(i) << "\n";
   }
+}
+bool FindUBUsingIndexedPeaks::isPeakIndexed(Peak &peak) {
+            V3D hkl(peak.getIntHKL()); // ##### KEEP
+            V3D mnp(peak.getIntMNP());
+            return (IndexingUtils::ValidIndex(hkl, 1.0) ||
+                IndexingUtils::ValidIndex(mnp, 1.0));
 }
 } // namespace Crystal
 } // namespace Mantid
