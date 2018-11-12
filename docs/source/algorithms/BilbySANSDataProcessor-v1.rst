@@ -28,37 +28,33 @@ The unit of the output workspace is 1/cm. Absolute scale calibration done relati
 Usage
 -----
 
-See https://github.com/hortica/Mantid_Bilby page to download a set of the test input data.
+See https://github.com/hortica/Mantid_Bilby/tree/master/example_data_reduction_settings page to download a set of the test input data.
 
 Please note, currently we do not have a User Interface, so we are working with csv lists.
 
-To make the Bilby data reduction working, follow the steps listed below:
+The steps to make the Bilby data reduction work are listed below:
 
-* Two csv files, similar to (input_csv_example.csv and mantid_reduction_settings_example.csv) shall be created during the experiment; the names can be different, the format (especially the top line in each) must stay the same
-* Download Mantid, install it; don't open it before the next step will be completed;
-   + For the Mac users, note to Click on the Mantid.app with the control key and select package contents; after that it will be come obvious where the *.py files should go
-* Download scripts from reduction_scripts_const
-* Two following scripts can be saved everywhere, but important thing is that the folder shall be on the path (added to “Mantid User Directories”)
-   * BilbyCustomFunctions_Reduction.py
-   * shift_assembled.csv
-* Add the folder with your *.tar files AND two csv files (input_csv_example.csv and mantid_reduction_settings_example.csv) on the path (added to “Mantid User Directories”)
+* Two csv files, similar to (input_csv_example.csv and mantid_reduction_settings_example.csv) should be created during the experiment; the names can be different, the format (especially the top line in each) must stay the same
+* Download Mantid from http://download.mantidproject.org/
+* Add the folder with your *.tar files AND  the two csv files (input_csv_example.csv and mantid_reduction_settings_example.csv) to the path (added to “Mantid User Directories”)
    * To keep it simple, one can put tar and csv files in one folder, but you can add as many folders on the paths as you want
 * Open the Script menu in Mantid: press “View”, and then “Script window”; alternalively just press F3
-* Open the reducer script reducer_example.py (in the “Python Window” open file, just “Ctrl-O” or File -> Open), update lines 15-27 accordingly
+* The script below shows an example script to run the Bilby reduction the reduction_settings_file options should be changed to the correct .csv file file and save_files set to true.
 * Run the reducer, Execute -> Execute All in the Menu
    * All output 1D files will be saved in the folder you define in the mantid_reduction_settings_example.csv
 
 .. testcode:: BilbyReductionExample
 
     from BilbyReductionScript import run_bilby_reduction
-    output_workspace, transmission_fit = run_bilby_reduction('mantid_reduction_settings_example.csv', '0', '0', 'shift_assembled.csv', False)
-    integrated_output = Integration(output_workspace)
-    print(integrated_output.dataY(0).round(6)[0])
+    output_workspace, transmission_fit = run_bilby_reduction(reduction_settings_file='mantid_reduction_settings_example.csv',
+                                                             reduction_settings_index='0',
+                                                             file_index='0',
+                                                             tube_shift_correction_file='shift_assembled.csv',
+                                                             save_files=False)
 
 .. testoutput::  BilbyReductionExample
 
    scale, aka attenuation factor 0.0029
-   1.607662
 
 References
 ----------
