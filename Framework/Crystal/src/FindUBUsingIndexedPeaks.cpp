@@ -56,8 +56,9 @@ void FindUBUsingIndexedPeaks::exec() {
   int ModDim = 0;
   int MaxOrder = 0;
   bool CrossTerm = false;
-  V3D errorHKL1, errorHKL2, errorHKL3;
+  std::vector<V3D> errorHKL;
 
+  errorHKL.reserve(3);
   q_vectors.reserve(n_peaks);
   hkl_vectors.reserve(n_peaks);
   mnp_vectors.reserve(n_peaks);
@@ -170,7 +171,6 @@ void FindUBUsingIndexedPeaks::exec() {
                              rsigabc[4], rsigabc[5]);
         g_log.notice() << run_lattice << "\n";
 
-        if (!CrossTerm) {
           double average_error = 0.;
           IndexingUtils::CalculateMillerIndices(
               UB, run_q_vectors, 1.0, run_fhkl_vectors, average_error);
@@ -179,66 +179,16 @@ void FindUBUsingIndexedPeaks::exec() {
               continue;
 
             V3D fhkl(run_fhkl_vectors[i]);
-            if (run_mnp_vectors[i][0] != 0) {
-              fhkl -= run_lattice.getModVec(1) * run_mnp_vectors[i][0];
+          for (int j = 0; j < 3; j++) {
+            if (run_mnp_vectors[i][j] != 0) {
+              fhkl -= run_lattice.getModVec(j+1) * run_mnp_vectors[i][j];
               if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
                 sate_indexed++;
                 V3D errhkl = fhkl - run_hkl_vectors[i];
                 errhkl = errhkl.absoluteValue();
-                errorHKL1 += errhkl;
+                errorHKL[j] += errhkl;
               }
-            } else if (run_mnp_vectors[i][1] != 0) {
-              fhkl -= run_lattice.getModVec(2) * run_mnp_vectors[i][1];
-              if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
-                sate_indexed++;
-                V3D errhkl = fhkl - run_hkl_vectors[i];
-                errhkl = errhkl.absoluteValue();
-                errorHKL2 += errhkl;
-              }
-            } else if (run_mnp_vectors[i][2] != 0) {
-              fhkl -= run_lattice.getModVec(3) * run_mnp_vectors[i][2];
-              if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
-                sate_indexed++;
-                V3D errhkl = fhkl - run_hkl_vectors[i];
-                errhkl = errhkl.absoluteValue();
-                errorHKL3 += errhkl;
-              }
-            }
-          }
-        } else {
-          double average_error = 0.;
-          IndexingUtils::CalculateMillerIndices(
-              UB, run_q_vectors, 1.0, run_fhkl_vectors, average_error);
-          for (size_t i = 0; i < run_indexed; i++) {
-            if (IndexingUtils::ValidIndex(run_fhkl_vectors[i], tolerance))
-              continue;
-
-            V3D fhkl(run_fhkl_vectors[i]);
-            if (run_mnp_vectors[i][0] != 0) {
-              fhkl -= run_lattice.getModVec(1) * run_mnp_vectors[i][0];
-              if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
-                sate_indexed++;
-                V3D errhkl = fhkl - run_hkl_vectors[i];
-                errhkl = errhkl.absoluteValue();
-                errorHKL1 += errhkl;
-              }
-            } if (run_mnp_vectors[i][1] != 0) {
-              fhkl -= run_lattice.getModVec(2) * run_mnp_vectors[i][1];
-              if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
-                sate_indexed++;
-                V3D errhkl = fhkl - run_hkl_vectors[i];
-                errhkl = errhkl.absoluteValue();
-                errorHKL2 += errhkl;
-              }
-            } if (run_mnp_vectors[i][2] != 0) {
-              fhkl -= run_lattice.getModVec(3) * run_mnp_vectors[i][2];
-              if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
-                sate_indexed++;
-                V3D errhkl = fhkl - run_hkl_vectors[i];
-                errhkl = errhkl.absoluteValue();
-                errorHKL3 += errhkl;
-              }
-            }
+            } 
           }
         }
       }
@@ -258,11 +208,11 @@ void FindUBUsingIndexedPeaks::exec() {
                        sigabc[5]);
     double ind_count_inv = 1. / static_cast<double>(indexed_count);
     o_lattice.setErrorModHKL(
-        errorHKL1[0] * ind_count_inv, errorHKL1[1] * ind_count_inv,
-        errorHKL1[2] * ind_count_inv, errorHKL2[0] * ind_count_inv,
-        errorHKL2[1] * ind_count_inv, errorHKL2[2] * ind_count_inv,
-        errorHKL3[0] * ind_count_inv, errorHKL3[1] * ind_count_inv,
-        errorHKL3[2] * ind_count_inv);
+        errorHKL[0][0] * ind_count_inv, errorHKL[1][0] * ind_count_inv,
+        errorHKL[2][0] * ind_count_inv, errorHKL[0][1] * ind_count_inv,
+        errorHKL[1][1] * ind_count_inv, errorHKL[2][1] * ind_count_inv,
+        errorHKL[0][2] * ind_count_inv, errorHKL[1][2] * ind_count_inv,
+        errorHKL[2][2] * ind_count_inv);
 
     o_lattice.setMaxOrder(MaxOrder);
     o_lattice.setCrossTerm(CrossTerm);
