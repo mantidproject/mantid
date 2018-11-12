@@ -2888,9 +2888,9 @@ int IndexingUtils::GetModulationVectors(const DblMatrix &UB,
   o_lattice.setUB(UB);
   o_lattice.setModUB(ModUB);
 
-  ModVec1 = o_lattice.getModVec(1);
-  ModVec2 = o_lattice.getModVec(2);
-  ModVec3 = o_lattice.getModVec(3);
+  ModVec1 = o_lattice.getModVec(0);
+  ModVec2 = o_lattice.getModVec(1);
+  ModVec3 = o_lattice.getModVec(2);
 
   int ModDim = 0;
   if (o_lattice.getdh(1) != 0.0 || o_lattice.getdk(1) != 0.0 ||

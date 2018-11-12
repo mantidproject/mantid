@@ -126,7 +126,7 @@ void SaveIsawUB::exec() {
 
     int ModDim = 0;
     for (int i = 0; i < 3; i++) {
-      if (lattice.getModVec(i + 1) == V3D(0, 0, 0))
+      if (lattice.getModVec(i) == V3D(0, 0, 0))
         continue;
       else
         ModDim++;

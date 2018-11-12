@@ -572,42 +572,42 @@ const Kernel::DblMatrix &UnitCell::getModHKL() const { return ModHKL; }
  @return dh :: dh of modulation vector
  */
 
-double UnitCell::getdh(int j) const { return ModHKL[0][j - 1]; }
+double UnitCell::getdh(int j) const { return ModHKL[0][j]; }
 
 /** Get modulation vectors for satellites
  @param j       index of vector to get
  @return ModVec :: modulation vector
  */
 
-double UnitCell::getdk(int j) const { return ModHKL[1][j - 1]; }
+double UnitCell::getdk(int j) const { return ModHKL[1][j]; }
 
 /** Get modulation vectors for satellites
  @param j       index of vector to get
  @return ModVec :: modulation vector
  */
 
-double UnitCell::getdl(int j) const { return ModHKL[2][j - 1]; }
+double UnitCell::getdl(int j) const { return ModHKL[2][j]; }
 
 /** Get error of modulation vectors for satellites
  @param j       index of vector to get
  @return ModVecErr :: error of modulation vector
  */
 
-double UnitCell::getdherr(int j) const { return errorModHKL[0][j - 1]; }
+double UnitCell::getdherr(int j) const { return errorModHKL[0][j]; }
 
 /** Get error of modulation vectors for satellites
  @param j       index of vector to get
  @return ModVecErr :: error of modulation vector
  */
 
-double UnitCell::getdkerr(int j) const { return errorModHKL[1][j - 1]; }
+double UnitCell::getdkerr(int j) const { return errorModHKL[1][j]; }
 
 /** Get error  of modulation vectors for satellites
  @param j       index of vector to get
  @return ModVecErr :: error of modulation vector
  */
 
-double UnitCell::getdlerr(int j) const { return errorModHKL[2][j - 1]; }
+double UnitCell::getdlerr(int j) const { return errorModHKL[2][j]; }
 
 /** Get max order
  @return MaxOrder :: maximum order

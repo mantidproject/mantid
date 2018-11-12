@@ -56,9 +56,8 @@ void FindUBUsingIndexedPeaks::exec() {
   int ModDim = 0;
   int MaxOrder = 0;
   bool CrossTerm = false;
-  std::vector<V3D> errorHKL;
+  DblMatrix errorHKL(3, 3);
 
-  errorHKL.reserve(3);
   q_vectors.reserve(n_peaks);
   hkl_vectors.reserve(n_peaks);
   mnp_vectors.reserve(n_peaks);
@@ -181,12 +180,12 @@ void FindUBUsingIndexedPeaks::exec() {
             V3D fhkl(run_fhkl_vectors[i]);
           for (int j = 0; j < 3; j++) {
             if (run_mnp_vectors[i][j] != 0) {
-              fhkl -= run_lattice.getModVec(j+1) * run_mnp_vectors[i][j];
+              fhkl -= run_lattice.getModVec(j) * run_mnp_vectors[i][j];
               if (IndexingUtils::ValidIndex(fhkl, satetolerance)) {
                 sate_indexed++;
                 V3D errhkl = fhkl - run_hkl_vectors[i];
                 errhkl = errhkl.absoluteValue();
-                errorHKL[j] += errhkl;
+          for (int k = 0; k < 3; k++)  errorHKL[k][j] += errhkl[k];
               }
             } 
           }
@@ -207,12 +206,8 @@ void FindUBUsingIndexedPeaks::exec() {
     o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
                        sigabc[5]);
     double ind_count_inv = 1. / static_cast<double>(indexed_count);
-    o_lattice.setErrorModHKL(
-        errorHKL[0][0] * ind_count_inv, errorHKL[1][0] * ind_count_inv,
-        errorHKL[2][0] * ind_count_inv, errorHKL[0][1] * ind_count_inv,
-        errorHKL[1][1] * ind_count_inv, errorHKL[2][1] * ind_count_inv,
-        errorHKL[0][2] * ind_count_inv, errorHKL[1][2] * ind_count_inv,
-        errorHKL[2][2] * ind_count_inv);
+    errorHKL *= ind_count_inv;
+    o_lattice.setErrorModHKL(errorHKL);
 
     o_lattice.setMaxOrder(MaxOrder);
     o_lattice.setCrossTerm(CrossTerm);
@@ -228,7 +223,7 @@ void FindUBUsingIndexedPeaks::logLattice(OrientedLattice &o_lattice,
   // Show the modified lattice parameters
   g_log.notice() << o_lattice << "\n";
   g_log.notice() << "Modulation Dimension is: " << ModDim << "\n";
-  for (int i = 1; i < ModDim + 1; i++) {
+  for (int i = 0; i < ModDim; i++) {
     g_log.notice() << "Modulation Vector " << i << ": "
                    << o_lattice.getModVec(i) << "\n";
     g_log.notice() << "Modulation Vector " << i

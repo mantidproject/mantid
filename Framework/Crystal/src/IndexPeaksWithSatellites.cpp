@@ -125,9 +125,9 @@ void IndexPeaksWithSatellites::exec() {
   OrientedLattice o_lattice = sample.getOrientedLattice();
 
   if (getProperty("GetModVectorsFromUB")) {
-    offsets1 = o_lattice.getModVec(1);
-    offsets2 = o_lattice.getModVec(2);
-    offsets3 = o_lattice.getModVec(3);
+    offsets1 = o_lattice.getModVec(0);
+    offsets2 = o_lattice.getModVec(1);
+    offsets3 = o_lattice.getModVec(2);
     if (maxOrder == 0)
       maxOrder = o_lattice.getMaxOrder();
     CT = o_lattice.getCrossTerm();

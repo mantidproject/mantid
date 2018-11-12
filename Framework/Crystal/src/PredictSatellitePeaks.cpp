@@ -154,9 +154,9 @@ void PredictSatellitePeaks::exec() {
   OrientedLattice lattice = sample.getOrientedLattice();
 
   if (getProperty("GetModVectorsFromUB")) {
-    offsets1 = lattice.getModVec(1);
-    offsets2 = lattice.getModVec(2);
-    offsets3 = lattice.getModVec(3);
+    offsets1 = lattice.getModVec(0);
+    offsets2 = lattice.getModVec(1);
+    offsets3 = lattice.getModVec(2);
     if (maxOrder == 0)
       maxOrder = lattice.getMaxOrder();
   }
@@ -258,9 +258,9 @@ void PredictSatellitePeaks::exec_peaks() {
   OrientedLattice lattice = sample.getOrientedLattice();
 
   if (getProperty("GetModVectorsFromUB")) {
-    offsets1 = lattice.getModVec(1);
-    offsets2 = lattice.getModVec(2);
-    offsets3 = lattice.getModVec(3);
+    offsets1 = lattice.getModVec(0);
+    offsets2 = lattice.getModVec(1);
+    offsets3 = lattice.getModVec(2);
     if (maxOrder == 0)
       maxOrder = lattice.getMaxOrder();
   }
