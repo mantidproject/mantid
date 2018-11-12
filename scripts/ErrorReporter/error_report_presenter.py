@@ -30,8 +30,6 @@ class ErrorReporterPresenter(object):
         return status
 
     def share_all_information(self, continue_working, name, email, text_box):
-        import pydevd
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         uptime = UsageService.getUpTime()
         zip_recovery_file, file_hash = zip_recovery_directory()
         status = self._send_report_to_server(share_identifiable=True, uptime=uptime, name=name, email=email, file_hash=file_hash
