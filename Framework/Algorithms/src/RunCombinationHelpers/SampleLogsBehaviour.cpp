@@ -266,7 +266,7 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
 }
 
 /**
- * Creates a vector of tolernaces with the same size as the number of sample
+ * Creates a vector of tolerances with the same size as the number of sample
  * logs for the merge type. If the number of names and tolerances is the same
  * the vector is filled with the tolerances for each name. If no tolerances were
  * specified all tolerances are set to -1, and if one tolerance is given all
@@ -359,7 +359,6 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
 
     returnProp.reset(ws.getLog(item)->clone());
   }
-
   return returnProp;
 }
 
@@ -382,7 +381,6 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForList(
     ws.mutableRun().addProperty(item, value, true);
     returnProp.reset(ws.getLog(item)->clone());
   }
-
   return returnProp;
 }
 
@@ -422,6 +420,7 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace_sptr addeeWS,
     std::string logName = item.first.first;
 
     Property *addeeWSProperty = addeeWS->getLog(logName);
+    const std::string logUnit = addeeWS->getLog(logName)->units();
 
     double addeeWSNumericValue = 0.;
     double outWSNumericValue = 0.;
@@ -459,6 +458,8 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace_sptr addeeWS,
                                addeeWSNumericValue, outWSNumericValue, logName);
       break;
     }
+
+    outWS->getLog(logName)->setUnits(logUnit);
   }
 }
 
