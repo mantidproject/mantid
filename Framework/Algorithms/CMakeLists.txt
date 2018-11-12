@@ -160,6 +160,7 @@ set ( SRC_FILES
 	src/GetQsInQENSData.cpp
 	src/GetTimeSeriesLogInformation.cpp
 	src/GravitySANSHelper.cpp
+	src/GroupToXResolution.cpp
 	src/GroupWorkspaces.cpp
 	src/HRPDSlabCanAbsorption.cpp
 	src/He3TubeEfficiency.cpp
@@ -494,6 +495,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GetQsInQENSData.h
 	inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
+	inc/MantidAlgorithms/GroupToXResolution.h
 	inc/MantidAlgorithms/GroupWorkspaces.h
 	inc/MantidAlgorithms/HRPDSlabCanAbsorption.h
 	inc/MantidAlgorithms/He3TubeEfficiency.h
@@ -701,7 +703,7 @@ set ( TEST_FILES
 	CalculateCarpenterSampleCorrectionTest.h
 	CalculateCountRateTest.h
 	CalculateDIFCTest.h
- 	CalculateDynamicRangeTest.h
+	CalculateDynamicRangeTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateIqtTest.h
@@ -835,6 +837,7 @@ set ( TEST_FILES
 	GetEiV1Test.h
 	GetQsInQENSDataTest.h
 	GetTimeSeriesLogInformationTest.h
+	GroupToXResolutionTest.h
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
 	He3TubeEfficiencyTest.h
