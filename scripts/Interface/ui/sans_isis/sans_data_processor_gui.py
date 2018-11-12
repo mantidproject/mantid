@@ -418,6 +418,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.user_file_line_edit.setDisabled(True)
         self.batch_line_edit.setDisabled(True)
 
+        #
+
     def _processed_clicked(self):
         """
         Process runs
@@ -540,6 +542,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def get_batch_file_path(self):
         return str(self.batch_line_edit.text())
+
+    def set_out_file_directory(self, out_file_directory):
+        self.output_directory_location.setText("{}".format(out_file_directory))
 
     def _on_load_pixel_adjustment_det_1(self):
         load_file(self.pixel_adjustment_det_1_line_edit, "*.*", self.__generic_settings,

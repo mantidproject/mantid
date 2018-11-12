@@ -217,6 +217,20 @@ QGroupBox::title {
                 </property>
                </widget>
               </item>
+              <item row="3" column="1">
+               <widget class="QLabel" name="output_directory_label">
+                <property name="text">
+                 <string>Save Directory: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="4">
+               <widget class="QLabel" name="output_directory_location">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
