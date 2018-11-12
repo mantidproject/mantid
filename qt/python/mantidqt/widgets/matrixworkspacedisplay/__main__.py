@@ -10,7 +10,6 @@
 
 # To Run - target this package with PyCharm, and __main__ will be executed
 
-import os
 import matplotlib
 matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt # noqa: F402
