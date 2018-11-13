@@ -9,7 +9,7 @@ Data reduction for single-crystal neutron diffraction on (3+d) dimension modulat
 
 Modulated Structures cannot be described by only three hkl indices, so additional dimensions must be added to
 standard reduction of Bragg reflections for these structures.
-More explanation can be found in `Acta Crystallographica Section B About modulated structures<https://publcif.iucr.org/cifmoldb/mscif/>`_.
+More explanation can be found in `Acta Crystallographica Section B About modulated structures <https://publcif.iucr.org/cifmoldb/mscif/>`_.
 
 The general procedure for reducing data collected on a modulated
 structure should be as follows:
