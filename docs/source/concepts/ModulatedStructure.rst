@@ -7,8 +7,9 @@ Modulated Structure
 Data reduction for single-crystal neutron diffraction on (3+d) dimension modulated structure with Mantid
 --------------------------------------------------------------------------------------------------------
 
-by Shiyun Jin
--------------
+Modulated Structures cannot be described by only three hkl indices, so additional dimensions must be added to
+standard reduction of Bragg reflections for these structures.
+More explanation can be found in `Acta Crystallographica Section B About modulated structures<https://publcif.iucr.org/cifmoldb/mscif/>`_.
 
 The general procedure for reducing data collected on a modulated
 structure should be as follows:
@@ -71,7 +72,7 @@ added to the OrientedLattice class:
    \text{MV}_{3i} \\
    \end{pmatrix}
 
-In other words, the coordinates of Modulation Vector i (i=1,2,3) in Q
+In other words, the coordinates of Modulation Vector i (i=0,1,2) in Q
 space is (:math:`\text{MV}_{1i}`, :math:`\text{MV}_{2i}`,
 :math:`\text{MV}_{3i}`). If the structure is not modulated, ModUB=0.
 Correspondingly, new members ModHKL and errorModHKL are added to
@@ -103,23 +104,22 @@ or
 
 .. math:: ModHKL = \text{UB}^{- 1} \times ModUB
 
-New functions setModUB is added to OrientedLattice class, and setModHKL,
-getModHKL, setModerr1, setModerr2, setModerr3, setModVec1, setModVec2,
-setModVec3, getModerr(i), getModVec(i), getdh(i), getdherr(i), getdk(i),
-getdkerr(i), getdl(i), getdlerr(i) are added to UnitCell class. Value
+ModUB is added to OrientedLattice class and ModHKL and ModVec
+are added to UnitCell class. Value
 for ModHKL in UnitCell is set when the function setModUB is used in
 OrientedLattice.
 
-A python script is in developemnt for step 4, which provides a visual aid for
+A python script is in development for step 4, which provides a visual aid for
 identifying the satellite peaks. It also find clusters of peaks by
 binning the number of peaks in the collapsed HKL space into specified
 sized boxes. The resulting clusters of peaks together with the visual
 aid should be adequate for the user to identify modulation vectors in
-step 5.
+step 5. See figure
 
-figure:: ../images/Satellite.png
+.. figure:: ../images/Satellite.png
+      :alt: Satellite.png
 
-For step 6, algorithm IndexPeakswithSatellites is created, parallel to
+For step 6, algorithm :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` is created, parallel to
 the algorithm IndexPeaks for regular crystal structures. The inputs for
 this algorithm include the PeaksWorkspace to be indexed, tolerance for
 main and satellite reflections respectively, up to 3 modulation vectors,
@@ -143,19 +143,16 @@ Indices of the peaks will be stored as IntHKL and IntMNP in the Peak
 class. Functions like setIntHKL, setIntMNP, getIntHKL, and getIntMNP can
 be used to write and read the indices from a peak.
 
-For step 7, new algorithm FindUBUsingIndexedPeakswithSatellites is made.
-This function use the indexed peaks from step 6 (including both main and
-satellite peaks) to calculate the UB and ModUB. Functions
-
-double Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB, vector<V3D>
-&hkl_vectors, vector<V3D> &mnp_vectors, const int &ModDim, const
-vector<V3D> &q_vectors, vector<double> &sigabc, vector<double> &sigq);
-
-double Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB, vector<V3D>
-&hkl_vectors, vector<V3D> &mnp_vectors, const int &ModDim, const
-vector<V3D> &q_vectors);
-
-are added to IndexingUtils parallel to Optimize_UB. Other than ModUB and
+For step 7, algorithm :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>` is updated.
+This algorithm uses the indexed peaks from step 6 (including both main and
+satellite peaks) to calculate the UB and ModUB. Function, Optimize_6dUB, is
+is added to IndexingUtils to Optimize_UB. Optimize_6dUB calculates the 6-dimensional matrix that most
+nearly maps the specified hkl_vectors and mnp_vectors to the specified
+q_vectors.  The calculated UB minimizes the sum squared differences between
+UB|ModUB*(h,k,l,m,n,p) and the corresponding (qx,qy,qz) for all of the
+specified hklmnp and Q vectors. The sum of the squares of the residual errors
+is returned.  This method is used to optimize the UB matrix and ModUB matrix
+once an initial indexing has been found. Other than ModUB and
 the list of mnp vectors as additional arguments for the function, a
 const int ModDim is also added to describe the modulation dimension of
 the indexed peaks list. In the case of modulation dimension equals
