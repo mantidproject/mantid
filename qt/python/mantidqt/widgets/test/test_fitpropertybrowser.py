@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import unittest
 
-from qtpy.QtWidgets import QMessageBox
+from qtpy.QtWidgets import QMessageBox, QApplication
 from qtpy.QtCore import Qt, QMetaObject
 
 from mantidqt.utils.qt.test.test_window import GuiTestBase
@@ -39,7 +39,7 @@ class TestFitPropertyBrowser(GuiTestBase):
 
     def set_function_string_linear(self):
         self.set_function_string('name=LinearBackground')
-        return 0.1
+        return self.wait_for_true(lambda: self.widget.sizeOfFunctionsGroup() == 3)
 
     def set_function_string(self, text):
         box = self.get_active_modal_widget()
@@ -73,6 +73,25 @@ class TestFitPropertyBrowser(GuiTestBase):
         yield self.set_function_string_linear()
         a = self.widget.getFittingFunction()
         self.test.assertEqual(a, 'name=LinearBackground,A0=0,A1=0')
+        self.test.assertEqual(self.widget.sizeOfFunctionsGroup(), 3)
+
+    def test_copy_to_clipboard(self):
+        self.widget.loadFunction('name=LinearBackground,A0=0,A1=0')
+        yield self.start_setup_menu()
+        yield self.start_manage_setup()
+        QApplication.clipboard().clear()
+        self.trigger_action('action_CopyToClipboard')
+        yield self.wait_for_true(lambda: QApplication.clipboard().text() != '')
+        self.test.assertEqual(QApplication.clipboard().text(), 'name=LinearBackground,A0=0,A1=0')
+
+    def test_clear_model(self):
+        self.widget.loadFunction('name=LinearBackground,A0=0,A1=0')
+        self.test.assertEqual(self.widget.sizeOfFunctionsGroup(), 3)
+        yield self.start_setup_menu()
+        yield self.start_manage_setup()
+        self.trigger_action('action_ClearModel')
+        yield self.wait_for_true(lambda: self.widget.sizeOfFunctionsGroup() == 2)
+        self.test.assertEqual(self.widget.sizeOfFunctionsGroup(), 2)
 
 
 class TestModalTester(unittest.TestCase):
@@ -85,6 +104,12 @@ class TestModalTester(unittest.TestCase):
 
     def test_load_from_string_lb(self):
         TestFitPropertyBrowser(self).run(FitPropertyBrowser, 'test_load_from_string_lb', pause=0.)
+
+    def test_copy_to_clipboard(self):
+        TestFitPropertyBrowser(self).run(FitPropertyBrowser, 'test_copy_to_clipboard', pause=0.)
+
+    def test_clear_model(self):
+        TestFitPropertyBrowser(self).run(FitPropertyBrowser, 'test_clear_model', pause=0.)
 
 
 if __name__ == '__main__':

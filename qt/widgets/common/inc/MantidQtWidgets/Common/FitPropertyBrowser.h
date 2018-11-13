@@ -103,6 +103,8 @@ public:
   /// Get function parameter names
   QStringList getParameterNames() const;
 
+  /// Load function
+  void loadFunction(const QString &funcString);
   /// Create a new function
   PropertyHandler *addFunction(const std::string &fnName);
 
@@ -254,6 +256,10 @@ public:
   /// Allow or disallow sequential fits (depending on whether other conditions
   /// are met)
   void allowSequentialFits(bool allow) override;
+
+  // Methods intended for testing only
+
+  int sizeOfFunctionsGroup() const;
 public slots:
   virtual void fit();
   virtual void sequentialFit();
@@ -505,8 +511,7 @@ protected:
 private:
   ///
   QPushButton *createFitMenuButton(QWidget *w);
-  /// load and save function
-  void loadFunction(const QString &funcString);
+  /// save function
   void saveFunction(const QString &fnName);
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr) const;

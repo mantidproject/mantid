@@ -273,4 +273,6 @@ public:
     auto f = sipCpp->getFittingFunction();
     sipRes = FROM_CSTRING(f->asString().c_str());
 %End
+    int sizeOfFunctionsGroup() const;
+    void loadFunction(QString funStr);
 };
