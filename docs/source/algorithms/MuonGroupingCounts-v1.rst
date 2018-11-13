@@ -9,23 +9,23 @@
 Description
 -----------
 
-When interacting with the :ref:`Muon_Analysis-ref` interface, operations such as detector grouping, group and pair asymmetry are performed on data. This algorithm performs a "grouping counts" operation, in other words it sums the counts associated to a given sequence of detector IDs.
+When interacting with the :ref:`Muon_Analysis-ref` interface, operations such as detector grouping, group asymmetry and pair asymmetry are performed on data. This algorithm performs a "grouping counts" operation, in other words it sums the counts associated to a given sequence of detector IDs.
 
 This algorithm is part of a set of four; with :ref:`algm-MuonPreProcess` being run first; and the output being fed into this one. This allows the replication of the workflow used by the muon analysis interface to produce group data. 
 
 Analysis
 ########
 
-A workspace has one or more *spectra* contained within it; each spectra has a unique detector ID. Assuming the y-values represent counts; a *detector grouping* operation causes the counts to be summed across the given set of detector IDs which are supplied to the **Grouping** argument (for example `1,2,3,4,5` and `1-5`).
+A workspace has one or more *spectra* contained within it; for muon data each spectra has a unique detector ID. Assuming the y-values represent counts; a *detector grouping* operation causes the counts to be summed across the given set of detector IDs which are supplied to the **Grouping** argument (for example `1,2,3,4,5` and `1-5`).
 
-The **InputWorkspace** must be a *WorkspaceGroup*, where each workspace within the group represents a single period. Thus, single period data is just a *workspaceGroup* with a single workspace within it.
+The **InputWorkspace** must be a *WorkspaceGroup*, where each workspace within the workspace-group represents a single period. Thus, single period data is just a *workspaceGroup* with a single workspace within it.
 
-The group must be given a name via **GroupName** which can consist of letters, numbers and underscores. 
+The detector-group must be given a name via **GroupName** which can consist of letters, numbers and underscores. 
 
 #. Valid names : "fwd", "fwd2", "fwd_2", "1234"
 #. Invalid names : "", "fwd!", "fwd "
 
-The group name does not affect the data; however the name is used in the muon interface when automatically generating workspace names from group data.
+The detector-group name does not affect the data; however the name is used in the muon interface when automatically generating workspace names from detector-group data.
 
 Multi period data 
 #################
