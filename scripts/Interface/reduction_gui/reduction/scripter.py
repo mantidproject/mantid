@@ -20,18 +20,17 @@ try:
 except (ImportError, ImportWarning):
     HAS_MANTID = False
 
+HAS_ASYNC = False
+HAS_MANTIDPLOT = True
 try:
     import mantidplot
-
-    HAS_MANTIDPLOT = True
 except(ImportError, ImportWarning):
     HAS_MANTIDPLOT = False
-
-try:
-    from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-    HAS_ASYNC = True
-except(ImportError, ImportWarning):
-    HAS_ASYNC = False
+    try:
+        from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+        HAS_ASYNC = True
+    except(ImportError, ImportWarning):
+        pass
 
 import xml.dom.minidom
 import sys
