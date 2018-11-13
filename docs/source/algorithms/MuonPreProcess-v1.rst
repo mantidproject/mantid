@@ -25,7 +25,7 @@ As indicated in the input variable names to this algorithm; there are four disti
 
 The **InputWorkspace** can be a single workspace object, and multi period data is supported by supplying a *WorkspaceGroup* as the input workspace, where each workspace within the group represents a single period.
 
-The **OutputWorkspace** is always a *Workspace Group*; for single period data the group only contains a single workspace. The reason for this is so that the muon algorithms **TODO : Fill in** can expect a consistent input between single and multi period data, and where single period data is just a limiting case of multi period data.
+The **OutputWorkspace** is always a *Workspace Group*; for single period data the group only contains a single workspace. The reason for this is so that the muon algorithms MuonGroupingCounts, MuonGroupingAsymmetry and MuonPairingAsymmetry can expect a consistent input between single and multi period data, and where single period data is just a limiting case of multi period data.
 
 The four operations listed above correspond to a run of :ref:`algm-ApplyDeadTimeCorr`, :ref:`algm-ChangeBinOffset`, :ref:`algm-CropWorkspace` and :ref:`algm-Rebin` respectively; and so the documentation of these algorithms can be consulted for more detailed discussion of precisely how the operations are applied.
 
