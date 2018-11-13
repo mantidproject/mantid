@@ -182,6 +182,11 @@ MatrixWorkspace_sptr MuonPreProcess::correctWorkspace(MatrixWorkspace_sptr ws) {
   ws = applyCropping(ws, xMin, xMax);
   ws = applyRebinning(ws, rebinParams);
 
+  if (deadTimes == nullptr && offset == EMPTY_DBL()
+  && (xMin == EMPTY_DBL() || xMax == EMPTY_DBL()) && rebinParams.empty()){
+    ws = cloneWorkspace(ws);
+  }
+
   return ws;
 }
 
@@ -242,6 +247,15 @@ MuonPreProcess::applyRebinning(MatrixWorkspace_sptr ws,
     return ws;
   }
 }
+
+MatrixWorkspace_sptr MuonPreProcess::cloneWorkspace(MatrixWorkspace_sptr ws) {
+  IAlgorithm_sptr cloneWorkspace = this->createChildAlgorithm("CloneWorkspace");
+  cloneWorkspace->setProperty("InputWorkspace", ws);
+  cloneWorkspace->execute();
+  Workspace_sptr wsClone = cloneWorkspace->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(wsClone);
+}
+
 
 void MuonPreProcess::addPreProcessSampleLogs(WorkspaceGroup_sptr group) {
   const std::string numPeriods = std::to_string(group->getNumberOfEntries());

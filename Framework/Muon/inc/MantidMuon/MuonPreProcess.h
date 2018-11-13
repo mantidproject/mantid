@@ -30,7 +30,8 @@ public:
            "data. Sample logs are modified to record the input parameters.";
   }
   const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess"};
+    return {"MuonProcess", "ApplyDeadTimeCorr", "ChangeBinOffset",
+     "CropWorkspace", "Rebin"};
   }
 
 private:
@@ -52,6 +53,8 @@ private:
 
   MatrixWorkspace_sptr applyRebinning(MatrixWorkspace_sptr ws,
                                       const std::vector<double> &rebinArgs);
+
+  MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr ws);
 
   /// Add the correction inputs into the logs
   void addPreProcessSampleLogs(WorkspaceGroup_sptr group);
