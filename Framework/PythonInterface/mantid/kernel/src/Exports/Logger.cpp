@@ -30,30 +30,6 @@ boost::shared_ptr<Logger> getLogger(const std::string &name) {
 boost::shared_ptr<Logger> create(const std::string &name) {
   return boost::make_shared<Logger>(name);
 }
-
-// void fatal(Logger *self, const boost::python::object &message) {
-//  self->fatal(Converters::pyObjToStr(message));
-//}
-
-// void error(Logger *self, const boost::python::object &message) {
-//  self->error(Converters::pyObjToStr(message));
-//}
-
-// void warning(Logger *self, const boost::python::object &message) {
-//  self->warning(Converters::pyObjToStr(message));
-//}
-
-// void notice(Logger *self, const boost::python::object &message) {
-//  self->notice(Converters::pyObjToStr(message));
-//}
-
-// void information(Logger *self, const boost::python::object &message) {
-//  self->information(Converters::pyObjToStr(message));
-//}
-
-// void debug(Logger *self, const boost::python::object &message) {
-//  self->debug(Converters::pyObjToStr(message));
-//}
 } // namespace
 
 void export_Logger() {
