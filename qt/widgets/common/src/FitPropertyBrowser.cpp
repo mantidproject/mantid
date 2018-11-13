@@ -434,6 +434,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QAction *setupActionFindPeaks = new QAction("Find Peaks", this);
   setupActionFindPeaks ->setObjectName("action_FindPeaks");
   QAction *setupActionClearFit = new QAction("Clear Model", this);
+  setupActionClearFit->setObjectName("action_ClearModel");
 
   QMenu *setupSubMenuCustom = new QMenu(this);
   m_setupActionCustomSetup->setMenu(setupSubMenuCustom);
@@ -444,6 +445,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QAction *setupActionSave = new QAction("Save Setup", this);
   m_setupActionRemove = new QAction("Remove Setup", this);
   QAction *setupActionCopyToClipboard = new QAction("Copy To Clipboard", this);
+  setupActionCopyToClipboard->setObjectName("action_CopyToClipboard");
   QAction *setupActionLoadFromString = new QAction("Load From String", this);
   setupActionLoadFromString->setObjectName("action_LoadFromString");
   QSignalMapper *setupManageMapper = new QSignalMapper(this);
@@ -3300,5 +3302,11 @@ void FitPropertyBrowser::modifyFitMenu(QAction *fitAction, bool enabled) {
     m_fitMenu->removeAction(fitAction);
   }
 }
+
+int MantidQt::MantidWidgets::FitPropertyBrowser::sizeOfFunctionsGroup() const
+{
+  return m_functionsGroup->children().size();
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

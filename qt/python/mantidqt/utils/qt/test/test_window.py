@@ -29,9 +29,16 @@ class GuiTestBase(QObject, object):
         while not fun():
             yield
 
-    def run(self, window_class, method='call', pause=0, close_on_finish=True):
+    def wait_for_modal(self):
+        return self.wait_for_true(self.get_active_modal_widget)
+
+    def wait_for_popup(self):
+        return self.wait_for_true(self.get_active_popup_widget)
+
+    def run(self, window_class, method='call', pause=0, close_on_finish=True, attach_debugger=False):
         self.call_method = method
-        open_in_window(window_class, self, attach_debugger=False, pause=pause, close_on_finish=close_on_finish)
+        open_in_window(window_class, self, attach_debugger=attach_debugger, pause=pause,
+                       close_on_finish=close_on_finish)
 
     def get_child(self, child_class, name):
         children = self.widget.findChildren(child_class, name)
@@ -47,12 +54,6 @@ class GuiTestBase(QObject, object):
     @staticmethod
     def get_active_popup_widget():
         return QApplication.activePopupWidget()
-
-    def wait_for_modal(self):
-        return self.wait_for_true(self.get_active_modal_widget)
-
-    def wait_for_popup(self):
-        return self.wait_for_true(self.get_active_popup_widget)
 
     def get_menu(self, name):
         return self.get_child(QMenu, name)
