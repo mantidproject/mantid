@@ -35,8 +35,8 @@ public:
   void testMergeRunsIPFNames() {
     // Using default values of the constructor
     Logger log("testLog");
-    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
-    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    auto ws = createWorkspace(2.6, 1.5, 8.5);
+    auto base = createWorkspace(4.5, 3.2, 7.9);
     testUnitsTestWorkspace(ws);
     testUnitsTestWorkspace(base);
     SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log);
@@ -54,8 +54,8 @@ public:
   void testMergeRunsUserNames() {
     // Using default values of the constructor
     Logger log("testLog");
-    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
-    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    auto ws = createWorkspace(2.6, 1.5, 8.5);
+    auto base = createWorkspace(4.5, 3.2, 7.9);
     testUnitsTestWorkspace(ws);
     testUnitsTestWorkspace(base);
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
@@ -76,8 +76,8 @@ public:
   void testConjoinXRunsIPFNames() {
     // Using prefix conjoin_ + default value names for constructing
     Logger log("testLog");
-    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
-    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    auto ws = createWorkspace(2.6, 1.5, 8.5);
+    auto base = createWorkspace(4.5, 3.2, 7.9);
     testUnitsTestWorkspace(ws);
     testUnitsTestWorkspace(base);
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
@@ -100,8 +100,8 @@ public:
   void testConjoinXRunsUserNames() {
     // Using prefix conjoin_ + default value names for constructing
     Logger log("testLog");
-    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
-    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    auto ws = createWorkspace(2.6, 1.5, 8.5);
+    auto base = createWorkspace(4.5, 3.2, 7.9);
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsSum = "B";
     SampleLogsBehaviour::ParameterName parameterNames;
@@ -123,8 +123,8 @@ public:
   void test_sum_unit() {
     // Using default values of the constructor
     Logger log("testLog");
-    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
-    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    auto ws = createWorkspace(2.6, 1.5, 8.5);
+    auto base = createWorkspace(4.5, 3.2, 7.9);
     TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
     TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit")
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
@@ -139,40 +139,40 @@ public:
   void test_list_unit() {
     // Using default values of the constructor
     Logger log("testLog");
-    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
-    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    auto ws = createWorkspace(2.6, 1.5, 8.5);
+    auto base = createWorkspace(4.5, 3.2, 7.9);
     TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
     TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit")
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsList = "A";
     SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, sampleLogNames);
-    TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit") //
-    TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit")
     TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
     // A units must not have changed:
-    TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit") //
-    TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit") //
+    TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
+    TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit")
   }
 
   void test_time_series_unit() {
     // Using default values of the constructor
     Logger log("testLog");
-    auto ws = createWorkspace(2.65, 1.56, 8.55, 5.5, 6.6, 7.7);
-    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
-    TS_ASSERT_EQUALS(ws->getLog("D")->units(), "D_unit")
-    TS_ASSERT_EQUALS(base->getLog("D")->units(), "D_unit")
+    auto ws = createWorkspace(2.65, 1.56, 8.55, "2018-11-30T16:17:01");
+    auto base = createWorkspace(4.5, 3.2, 7.9, "2018-11-30T16:17:03");
+    TS_ASSERT_EQUALS(ws->getLog("B")->units(), "B_unit")
+    TS_ASSERT_EQUALS(base->getLog("B")->units(), "B_unit")
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
-    sampleLogNames.sampleLogsTimeSeries = "D";
+    sampleLogNames.sampleLogsTimeSeries = "B";
     SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log, sampleLogNames);
     TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
-    // D units must not have changed:
-    TS_ASSERT_EQUALS(ws->getLog("D")->units(), "D_unit")
-    TS_ASSERT_EQUALS(base->getLog("D")->units(), "D_unit")
+    const std::string B = base->run().getLogData("B")->value();
+    TS_ASSERT_EQUALS(B,
+                     "2018-Nov-30 16:17:01  1.56\n2018-Nov-30 16:17:03  3.2\n")
+    // B units must not have changed:
+    TS_ASSERT_EQUALS(ws->getLog("B")->units(), "B_unit")
+    TS_ASSERT_EQUALS(base->getLog("B")->units(), "B_unit")
   }
 
-  MatrixWorkspace_sptr createWorkspace(double A, double B,
-                                       double C, double TSD1,
-                                       double TSD2, double TSD3) {
+  MatrixWorkspace_sptr createWorkspace(double A, double B, double C,
+                                       const std::string &time = "") {
     MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(
         3, 3, true, false, true, m_instrName);
     // Add sample logs
@@ -182,20 +182,16 @@ public:
         ws->mutableRun().addLogData(new PropertyWithValue<double>("B", B)))
     TS_ASSERT_THROWS_NOTHING(
         ws->mutableRun().addLogData(new PropertyWithValue<double>("C", C)))
-    TimeSeriesProperty<double> *time_series_log =
-        new TimeSeriesProperty<double>("D");
-    TS_ASSERT_THROWS_NOTHING(
-        time_series_log->addValue("2018-11-30T16:17:01", TSD1))
-    TS_ASSERT_THROWS_NOTHING(
-        time_series_log->addValue("2018-11-30T16:17:02", TSD2))
-    TS_ASSERT_THROWS_NOTHING(
-        time_series_log->addValue("2018-11-30T16:17:03", TSD3))
-    TS_ASSERT_THROWS_NOTHING(ws->mutableRun().addProperty(time_series_log))
+    if (!time.empty()) {
+      // add start times
+      Property *tprop = new Mantid::Kernel::PropertyWithValue<std::string>(
+          "start_time", time);
+      ws->mutableRun().addLogData(tprop);
+    }
     // Add units to the sample logs
     TS_ASSERT_THROWS_NOTHING(ws->getLog("A")->setUnits("A_unit"))
     TS_ASSERT_THROWS_NOTHING(ws->getLog("B")->setUnits("B_unit"))
     TS_ASSERT_THROWS_NOTHING(ws->getLog("C")->setUnits("C_unit"))
-    TS_ASSERT_THROWS_NOTHING(ws->getLog("D")->setUnits("D_unit"))
     testUnitsTestWorkspace(ws);
     // Load test parameter file
     LoadParameterFile addIPF;
@@ -212,7 +208,6 @@ public:
     TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
     TS_ASSERT_EQUALS(ws->getLog("B")->units(), "B_unit")
     TS_ASSERT_EQUALS(ws->getLog("C")->units(), "C_unit")
-    TS_ASSERT_EQUALS(ws->getLog("D")->units(), "D_unit")
   }
 
 private:

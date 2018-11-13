@@ -341,7 +341,7 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
 std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
     const std::string &item, const double value, MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
-
+  const std::string unit = ws.getLog(item)->units();
   try {
     // See if property exists as a TimeSeriesLog already - merging an output of
     // MergeRuns
@@ -358,7 +358,7 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
 
     returnProp.reset(ws.getLog(item)->clone());
   }
-
+  ws.getLog(item)->setUnits(unit); // we lost the unit of the workspace
   return returnProp;
 }
 

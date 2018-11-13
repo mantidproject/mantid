@@ -332,19 +332,19 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
             "cncs1");)
     log = dynamic_cast<TimeSeriesProperty<double> *>(
-        output->mutableRun().getProperty("proton_charge"));
+        output->run().getProperty("proton_charge"));
     log1 = log->realSize();
     nev1 = output->getNumberEvents();
-    pc1 = output->mutableRun().getProtonCharge();
+    pc1 = output->run().getProtonCharge();
 
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
             "cncs2");)
     log = dynamic_cast<TimeSeriesProperty<double> *>(
-        output->mutableRun().getProperty("proton_charge"));
+        output->run().getProperty("proton_charge"));
     log2 = log->realSize();
     nev2 = output->getNumberEvents();
-    pc2 = output->mutableRun().getProtonCharge();
+    pc2 = output->run().getProtonCharge();
 
     TS_ASSERT_THROWS_NOTHING(
         output =
@@ -355,10 +355,10 @@ public:
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 51200);
 
     log = dynamic_cast<TimeSeriesProperty<double> *>(
-        output->mutableRun().getProperty("proton_charge"));
+        output->run().getProperty("proton_charge"));
     logTot = log->realSize();
     nevTot = output->getNumberEvents();
-    pcTot = output->mutableRun().getProtonCharge();
+    pcTot = output->run().getProtonCharge();
 
     // Total # of log entries
     TS_ASSERT_EQUALS(logTot, log1 + log2);
@@ -1026,10 +1026,10 @@ public:
     TS_ASSERT_EQUALS(output->y(0).front(), 2.0 * filesMerged);
 
     if (mergeType.compare("sample_logs_time_series") == 0) {
-      prop = output->mutableRun().getTimeSeriesProperty<double>(propertyName);
+      prop = output->run().getTimeSeriesProperty<double>(propertyName);
       TS_ASSERT_EQUALS(prop->value(), result);
     } else {
-      prop = output->mutableRun().getLogData(propertyName);
+      prop = output->run().getLogData(propertyName);
       TS_ASSERT_EQUALS(prop->value(), result);
     }
 
