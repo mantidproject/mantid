@@ -56,14 +56,8 @@ set ( TEST_PY_FILES
       test/ReductionWrapperTest.py
       test/ReflectometryQuickAuxiliaryTest.py
       test/RunDescriptorTest.py
-      test/SANSBatchModeTest.py
-      test/SANSCentreFinderTest.py
-      test/SANSCommandInterfaceTest.py
       test/SANSDarkRunCorrectionTest.py
-      test/SansIsisGuiSettings.py
       test/SANSIsisInstrumentTest.py
-      test/SANSReducerTest.py
-      test/SANSReductionStepsUserFileTest.py
       test/SANSUserFileParserTest.py
       test/SANSUtilityTest.py
       test/SettingsTest.py
@@ -72,6 +66,16 @@ set ( TEST_PY_FILES
       test/VesuvioFittingTest.py
       test/VesuvioProfileTest.py
       )
+
+# these are gui tests that currently only work in pyqt4
+set ( TEST_PYQT4_FILES
+      test/SANSBatchModeTest.py
+      test/SANSCentreFinderTest.py
+      test/SANSCommandInterfaceTest.py
+      test/SansIsisGuiSettings.py
+      test/SANSReducerTest.py
+      test/SANSReductionStepsUserFileTest.py
+)
 
 # Additional tests
 add_subdirectory(test/directtools)
@@ -83,6 +87,10 @@ add_subdirectory(test/TOFTOF)
 # python unit tests
 if (PYUNITTEST_FOUND)
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.scripts ${TEST_PY_FILES} )
+
+  set ( PYUNITTEST_QT_API pyqt ) # force to use qt4
+  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.scriptsQt4 ${TEST_PYQT4_FILES} )
+  unset ( PYUNITTEST_QT_API )
 endif ()
 
 # Ensure we don't get stale pyc files around
