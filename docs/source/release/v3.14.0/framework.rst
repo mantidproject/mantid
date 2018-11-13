@@ -79,6 +79,7 @@ New
 ###
 
 - New python validator type: :class:`~mantid.geometry.OrientedLattice` checks whether a workspace has an oriented lattice object attached.
+- The windows python bundle now includes numpy=1.15.4, scipy=1.1.0, matplotlib=2.2.3, pip=18.1
 - We have been making major performance improvements to geometry access in Mantid over the last few releases. We are now exposing these features via Python to give our users direct access to the same benefits as part of their scripts. The newly exposed objects are now available via workspaces and include:
 
  * :class:`mantid.geometry.ComponentInfo`
