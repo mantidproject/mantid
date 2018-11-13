@@ -110,12 +110,14 @@ getdkerr(i), getdl(i), getdlerr(i) are added to UnitCell class. Value
 for ModHKL in UnitCell is set when the function setModUB is used in
 OrientedLattice.
 
-A python script is created for step 4, which provides a visual aid for
+A python script is in developemnt for step 4, which provides a visual aid for
 identifying the satellite peaks. It also find clusters of peaks by
 binning the number of peaks in the collapsed HKL space into specified
 sized boxes. The resulting clusters of peaks together with the visual
 aid should be adequate for the user to identify modulation vectors in
 step 5.
+
+figure:: ../images/Satellite.png
 
 For step 6, algorithm IndexPeakswithSatellites is created, parallel to
 the algorithm IndexPeaks for regular crystal structures. The inputs for
