@@ -394,12 +394,8 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_on_save_dir_changed_calls_set_out_file_directory(self):
         batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_3,
                                                                                               is_multi_period=False)
-
-        # When Config "defaultsave.directory" is changed, presenter._view.set_out_file_directory
-        # should be called
         config["defaultsave.directory"] = "test/path"
         presenter._view.set_out_file_directory.assert_called_with("test/path")
-
 
     def test_table_model_is_initialised_upon_presenter_creation(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
