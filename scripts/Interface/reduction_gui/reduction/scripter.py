@@ -27,6 +27,12 @@ try:
 except(ImportError, ImportWarning):
     HAS_MANTIDPLOT = False
 
+try:
+    from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+    HAS_ASYNC = True
+except(ImportError, ImportWarning):
+    HAS_ASYNC = False
+
 import xml.dom.minidom
 import sys
 import time
@@ -291,6 +297,31 @@ class BaseScriptElement(object):
             text_re = re.compile('((?:^)|(?:</[^<>\\s].*?>)|(?:<[^<>\\s].*?>)|(?:<[^<>\\s].*?/>))\\s*\n+', re.DOTALL)
             output_str += text_re.sub('\\g<1>\n', prettierxml)
         return output_str
+
+
+# Disable warning about the use of exec, which we knowingly use to
+# execute generated code.
+# pylint: disable=W0122
+def execute_script(script):
+    """
+    Executes the given script code.
+
+    If MantidPlot is available it calls back to MantidPlot
+    to ensure the code is executed asynchronously, if not
+    then a simple exec call is used
+
+    @param script :: A chunk of code to execute
+    """
+    if HAS_ASYNC:
+        Logger('scripter').warning('USING PythonCodeExecution')
+        executioner = PythonCodeExecution()
+        executioner.execute_async(script)
+    elif HAS_MANTIDPLOT:
+        Logger('scripter').information('using runPythonScript')
+        mantidplot.runPythonScript(script, True)  # TODO this option should get removed
+    else:
+        Logger('scripter').warning('directly using "exec"')
+        exec(script)  # shouldn't do this
 
 
 class BaseReductionScripter(object):
@@ -600,27 +631,21 @@ class BaseReductionScripter(object):
                 submit_cmd += "TransactionID=id, "
                 submit_cmd += "PythonScript=\"\"\"%s\"\"\", " % script
                 submit_cmd += "ScriptName='%s')" % script_name
-                mantidplot.runPythonScript(submit_cmd, True)
+                self.execute_script(submit_cmd)
         else:
             Logger("scripter").error("Mantid is unavailable to submit a reduction job")
 
-# Disable warning about the use of exec, which we knowingly use to
-# execute generated code.
-# pylint: disable=W0122
     def execute_script(self, script):
         """
-            Executes the given script code.
+        Executes the given script code.
 
-            If MantidPlot is available it calls back to MantidPlot
-            to ensure the code is executed asynchronously, if not
-            then a simple exec call is used
+        If MantidPlot is available it calls back to MantidPlot
+        to ensure the code is executed asynchronously, if not
+        then a simple exec call is used
 
-            @param script :: A chunk of code to execute
+        @param script :: A chunk of code to execute
         """
-        if HAS_MANTIDPLOT:
-            mantidplot.runPythonScript(script, True)
-        else:
-            exec(script)
+        execute_script(script)
 
     def reset(self):
         """

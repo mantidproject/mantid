@@ -25,6 +25,7 @@ try:
     canMantidPlot = True
 except ImportError:
     canMantidPlot = False
+from reduction_gui.reduction.scripter import execute_script
 
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
@@ -1918,7 +1919,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         """
         Re-emits 'runPytonScript' signal
         """
-        mantidplot.runPythonScript(text, True)
+        execute_script(text)
 
     def hide_period_columns(self):
         self.multi_period_check_box.setChecked(False)

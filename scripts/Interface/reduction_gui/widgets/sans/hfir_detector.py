@@ -20,12 +20,7 @@ except ImportError:
     Logger("DetectorWidget").information('Using legacy ui importer')
     from mantidplot import load_ui
 from mantid.api import AnalysisDataService
-IS_IN_MANTIDPLOT = False
-try:
-    from mantidplot import runPythonScript
-    IS_IN_MANTIDPLOT = True
-except:
-    pass
+from reduction_gui.reduction.scripter import execute_script
 
 if six.PY3:
     unicode = str
@@ -153,23 +148,23 @@ class DetectorWidget(BaseWidget):
                                  workspace=self.patch_ws, tab=2, reload=True, data_proxy=None)
 
     def _create_sensitivity(self):
-        if IS_IN_MANTIDPLOT and self.options_callback is not None:
-            # Get patch information
-            patch_ws = ""
-            if AnalysisDataService.doesExist(self.patch_ws):
-                patch_ws = self.patch_ws
+        # Get patch information
+        patch_ws = ""
+        if AnalysisDataService.doesExist(self.patch_ws):
+            patch_ws = self.patch_ws
 
-            try:
-                reduction_table_ws = self.options_callback()
-                filename = self._content.sensitivity_file_edit.text()
-                script  = "ComputeSensitivity(Filename='%s',\n" % filename
-                script += "                   ReductionProperties='%s',\n" % reduction_table_ws
-                script += "                   OutputWorkspace='sensitivity',\n"
-                script += "                   PatchWorkspace='%s')\n" % patch_ws
-                runPythonScript(script, True)  # this is the function from mantidplot
-            except:
-                print("Could not compute sensitivity")
-                print(sys.exc_info()[1])
+        try:
+            reduction_table_ws = self.options_callback()
+            filename = self._content.sensitivity_file_edit.text()
+            script  = "ComputeSensitivity(Filename='%s',\n" % filename
+            script += "                   ReductionProperties='%s',\n" % reduction_table_ws
+            script += "                   OutputWorkspace='sensitivity',\n"
+            script += "                   PatchWorkspace='%s')\n" % patch_ws
+
+            execute_script(script)
+        except:
+            print("Could not compute sensitivity")
+            print(sys.exc_info()[1])
 
     def _sensitivity_plot_clicked(self):
         self.show_instrument(file_name=self._content.sensitivity_file_edit.text)

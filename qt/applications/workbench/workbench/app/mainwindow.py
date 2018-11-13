@@ -43,7 +43,7 @@ from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
-from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
