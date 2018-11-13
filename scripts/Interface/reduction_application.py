@@ -413,9 +413,10 @@ class ReductionGUI(QMainWindow):
         if file_path is None:
             action = self.sender()
             if isinstance(action, QAction):
-                file_path = unicode(action.data())
+                file_path = action.data()
 
         # don't try to load if the file doesn't exist
+        file_path = str(file_path)
         if not os.path.exists(file_path):
             return
 
