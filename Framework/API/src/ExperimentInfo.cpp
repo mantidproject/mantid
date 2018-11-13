@@ -981,7 +981,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   const DateAndTime d(date);
 
   // Now search through directories for either xml or hdf5/nxs file
-  const boost::regex instfile_regex(instrumentName +
+  const boost::regex instfile_regex(instrument +
                                         "_Definition.*\\.(xml|nxs|hdf5)",
                                     boost::regex_constants::icase);
   DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
