@@ -318,6 +318,9 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (s.length() < 1)
     throw std::runtime_error("Empty peak line encountered.");
 
+  /// If line starts with 3, it contains Bragg peaks
+  /// If line starts with 9, it contains Bragg peaks and satellites
+  /// with extra columns for mnp
   if (s != "3" && s != "9")
     throw std::runtime_error("Empty peak line encountered.");
 
@@ -332,18 +335,6 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
     mod[0] = qSign * std::stoi(getWord(in, false), nullptr);
     mod[1] = qSign * std::stoi(getWord(in, false), nullptr);
     mod[2] = qSign * std::stoi(getWord(in, false), nullptr);
-    /*
-    auto deltaH =
-    mod[0] * m_offset1[0] + mod[1] * m_offset2[0] + mod[2] * m_offset3[0];
-    auto deltaK =
-    mod[0] * m_offset1[1] + mod[1] * m_offset2[1] + mod[2] * m_offset3[1];
-    auto deltaL =
-    mod[0] * m_offset1[2] + mod[1] * m_offset2[2] + mod[2] * m_offset3[2];
-
-    h += deltaH;
-    k += deltaK;
-    l += deltaL;
-    */
   }
 
   col = std::stod(getWord(in, false), nullptr);

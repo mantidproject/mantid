@@ -167,9 +167,7 @@ void IndexPeaksWithSatellites::exec() {
 
     for (size_t i = 0; i < n_peaks; i++) {
       peaks[i].setHKL(miller_indices[i]);
-      peaks[i].setIntHKL(V3D(round(miller_indices[i][0]),
-                             round(miller_indices[i][1]),
-                             round(miller_indices[i][2])));
+      peaks[i].setIntHKL(miller_indices[i]);
       peaks[i].setIntMNP(V3D(0, 0, 0));
     }
   } else {
@@ -179,29 +177,17 @@ void IndexPeaksWithSatellites::exec() {
     double satetolerance = this->getProperty("ToleranceForSatellite");
 
     // get list of run numbers in this peaks workspace
-    std::vector<int> run_numbers;
-    for (size_t i = 0; i < n_peaks; i++) {
-      int run = peaks[i].getRunNumber();
-      bool found = false;
-      size_t k = 0;
-      while (k < run_numbers.size() && !found) {
-        if (run == run_numbers[k])
-          found = true;
-        else
-          k++;
-      }
-      if (!found)
-        run_numbers.push_back(run);
-    }
+    std::unordered_set<int> run_numbers;
+    transform(peaks.begin(), peaks.end(), std::inserter(run_numbers, run_numbers.begin()), 
+            [] (const auto& peak) { return peak.getRunNumber(); });
 
     // index the peaks for each run separately, using a UB matrix optimized for
     // that run
 
-    for (size_t run_index = 0; run_index < run_numbers.size(); run_index++) {
+    for (int run : run_numbers) {
       std::vector<V3D> miller_indices;
       std::vector<V3D> q_vectors;
 
-      int run = run_numbers[run_index];
       for (size_t i = 0; i < n_peaks; i++) {
         if (peaks[i].getRunNumber() == run)
           q_vectors.push_back(peaks[i].getQSampleFrame());
@@ -279,10 +265,7 @@ void IndexPeaksWithSatellites::exec() {
         for (size_t i = 0; i < n_peaks; i++) {
           if (peaks[i].getRunNumber() == run) {
             peaks[i].setHKL(miller_indices[miller_index_counter]);
-            peaks[i].setIntHKL(
-                V3D(round(miller_indices[miller_index_counter][0]),
-                    round(miller_indices[miller_index_counter][1]),
-                    round(miller_indices[miller_index_counter][2])));
+            peaks[i].setIntHKL(miller_indices[miller_index_counter]);
             peaks[i].setIntMNP(V3D(0, 0, 0));
             miller_index_counter++;
           }
@@ -345,10 +328,7 @@ void IndexPeaksWithSatellites::exec() {
                     peaks[i].setIntMNP(V3D(order, 0, 0));
                     suc_indexed = true;
                     sate_indexed++;
-                    h_error = fabs(round(hkl1[0]) - hkl1[0]);
-                    k_error = fabs(round(hkl1[1]) - hkl1[1]);
-                    l_error = fabs(round(hkl1[2]) - hkl1[2]);
-                    sate_error += h_error + k_error + l_error;
+                    sate_error += hkl1.hklError();
                   }
                 }
               }
@@ -365,10 +345,7 @@ void IndexPeaksWithSatellites::exec() {
                     peaks[i].setIntMNP(V3D(0, order, 0));
                     suc_indexed = true;
                     sate_indexed++;
-                    h_error = fabs(round(hkl1[0]) - hkl1[0]);
-                    k_error = fabs(round(hkl1[1]) - hkl1[1]);
-                    l_error = fabs(round(hkl1[2]) - hkl1[2]);
-                    sate_error += h_error + k_error + l_error;
+                    sate_error += hkl1.hklError();
                   }
                 }
               }
@@ -385,10 +362,7 @@ void IndexPeaksWithSatellites::exec() {
                     peaks[i].setIntMNP(V3D(0, 0, order));
                     suc_indexed = true;
                     sate_indexed++;
-                    h_error = fabs(round(hkl1[0]) - hkl1[0]);
-                    k_error = fabs(round(hkl1[1]) - hkl1[1]);
-                    l_error = fabs(round(hkl1[2]) - hkl1[2]);
-                    sate_error += h_error + k_error + l_error;
+                    sate_error += hkl1.hklError();
                   }
                 }
               }
@@ -406,10 +380,7 @@ void IndexPeaksWithSatellites::exec() {
                     peaks[i].setIntMNP(V3D(order, 0, 0));
                     suc_indexed = true;
                     sate_indexed++;
-                    h_error = fabs(round(hkl1[0]) - hkl1[0]);
-                    k_error = fabs(round(hkl1[1]) - hkl1[1]);
-                    l_error = fabs(round(hkl1[2]) - hkl1[2]);
-                    sate_error += h_error + k_error + l_error;
+                    sate_error += hkl1.hklError();
                   }
                 }
               }
@@ -427,10 +398,7 @@ void IndexPeaksWithSatellites::exec() {
                       peaks[i].setIntMNP(V3D(m, n, 0));
                       suc_indexed = true;
                       sate_indexed++;
-                      h_error = fabs(round(hkl1[0]) - hkl1[0]);
-                      k_error = fabs(round(hkl1[1]) - hkl1[1]);
-                      l_error = fabs(round(hkl1[2]) - hkl1[2]);
-                      sate_error += h_error + k_error + l_error;
+                      sate_error += hkl1.hklError();
                     }
                   }
               }
@@ -452,10 +420,7 @@ void IndexPeaksWithSatellites::exec() {
                         peaks[i].setIntMNP(V3D(m, n, p));
                         suc_indexed = true;
                         sate_indexed++;
-                        h_error = fabs(round(hkl1[0]) - hkl1[0]);
-                        k_error = fabs(round(hkl1[1]) - hkl1[1]);
-                        l_error = fabs(round(hkl1[2]) - hkl1[2]);
-                        sate_error += h_error + k_error + l_error;
+                        sate_error += hkl1.hklError();
                       }
                     }
               }
