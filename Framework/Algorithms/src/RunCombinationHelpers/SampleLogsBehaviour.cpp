@@ -374,14 +374,14 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForList(
     const std::string &item, const std::string &value, MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
 
+  const std::string unit = ws.getLog(item)->units();
   // See if property exists already - merging an output of the calling algorithm
   returnProp.reset(ws.getLog(item)->clone());
-
   if (returnProp->type() != "string") {
     ws.mutableRun().addProperty(item, value, true);
     returnProp.reset(ws.getLog(item)->clone());
   }
-
+  ws.getLog(item)->setUnits(unit); // we lost the unit of the workspace
   return returnProp;
 }
 

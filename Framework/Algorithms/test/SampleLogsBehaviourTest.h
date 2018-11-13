@@ -35,135 +35,161 @@ public:
   void testMergeRunsIPFNames() {
     // Using default values of the constructor
     Logger log("testLog");
-    auto ws = createTestingWorkspace();
-    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log);
-    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws));
-    const std::string A = ws->run().getLogData("A")->value();
-    const std::string B = ws->run().getLogData("B")->value();
-    const std::string C = ws->run().getLogData("C")->value();
-    // A listed and B summed according to IPF
-    TS_ASSERT_EQUALS(A, "2.6499999999999999, 2.6499999999999999")
-    TS_ASSERT_EQUALS(B, "3.1200000000000001")
-    TS_ASSERT_EQUALS(C, "8.5500000000000007")
+    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
+    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
     testUnitsTestWorkspace(ws);
+    testUnitsTestWorkspace(base);
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
+    const std::string A = base->run().getLogData("A")->value();
+    const std::string B = base->run().getLogData("B")->value();
+    const std::string C = base->run().getLogData("C")->value();
+    // A listed and B summed according to IPF
+    TS_ASSERT_EQUALS(A, "2.6000000000000001, 4.5")
+    TS_ASSERT_EQUALS(B, "4.7000000000000002")
+    TS_ASSERT_EQUALS(C, "7.9000000000000004")
+    testUnitsTestWorkspace(base);
   }
 
   void testMergeRunsUserNames() {
     // Using default values of the constructor
     Logger log("testLog");
-    auto ws = createTestingWorkspace();
+    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
+    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    testUnitsTestWorkspace(ws);
+    testUnitsTestWorkspace(base);
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsSum = "A";
-    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, sampleLogNames);
-    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws));
-    const std::string A = ws->run().getLogData("A")->value();
-    const std::string B = ws->run().getLogData("B")->value();
-    const std::string C = ws->run().getLogData("C")->value();
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log, sampleLogNames);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
+    const std::string A = base->run().getLogData("A")->value();
+    const std::string B = base->run().getLogData("B")->value();
+    const std::string C = base->run().getLogData("C")->value();
     // A summed according to user name and B summed according to IPF
-    TS_ASSERT_EQUALS(A, "5.2999999999999998")
-    TS_ASSERT_EQUALS(B, "3.1200000000000001")
-    TS_ASSERT_EQUALS(C, "8.5500000000000007")
+    TS_ASSERT_EQUALS(A, "7.0999999999999996")
+    TS_ASSERT_EQUALS(B, "4.7000000000000002")
+    TS_ASSERT_EQUALS(C, "7.9000000000000004")
     testUnitsTestWorkspace(ws);
+    testUnitsTestWorkspace(base);
   }
 
   void testConjoinXRunsIPFNames() {
     // Using prefix conjoin_ + default value names for constructing
     Logger log("testLog");
-    auto ws = createTestingWorkspace();
+    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
+    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    testUnitsTestWorkspace(ws);
+    testUnitsTestWorkspace(base);
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     SampleLogsBehaviour::ParameterName parameterNames;
     parameterNames.SUM_MERGE = "conjoin_sample_logs_sum";
     SampleLogsBehaviour sbh =
-        SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
-    sbh.mergeSampleLogs(ws, ws);
-    const std::string A = ws->run().getLogData("A")->value();
-    const std::string B = ws->run().getLogData("B")->value();
-    const std::string C = ws->run().getLogData("C")->value();
+        SampleLogsBehaviour(base, log, sampleLogNames, parameterNames);
+    sbh.mergeSampleLogs(ws, base);
+    const std::string A = base->run().getLogData("A")->value();
+    const std::string B = base->run().getLogData("B")->value();
+    const std::string C = base->run().getLogData("C")->value();
     // A and C summed according to IPF
-    TS_ASSERT_EQUALS(A, "5.2999999999999998")
-    TS_ASSERT_EQUALS(B, "1.5600000000000001")
-    TS_ASSERT_EQUALS(C, "17.100000000000001")
+    TS_ASSERT_EQUALS(A, "7.0999999999999996")
+    TS_ASSERT_EQUALS(B, "3.2000000000000002")
+    TS_ASSERT_EQUALS(C, "16.399999999999999")
     testUnitsTestWorkspace(ws);
+    testUnitsTestWorkspace(base);
   }
 
   void testConjoinXRunsUserNames() {
     // Using prefix conjoin_ + default value names for constructing
     Logger log("testLog");
-    auto ws = createTestingWorkspace();
+    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
+    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsSum = "B";
     SampleLogsBehaviour::ParameterName parameterNames;
     parameterNames.SUM_MERGE = "conjoin_sample_logs_sum";
     SampleLogsBehaviour sbh =
-        SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
-    sbh.mergeSampleLogs(ws, ws);
-    const std::string A = ws->run().getLogData("A")->value();
-    const std::string B = ws->run().getLogData("B")->value();
-    const std::string C = ws->run().getLogData("C")->value();
+        SampleLogsBehaviour(base, log, sampleLogNames, parameterNames);
+    sbh.mergeSampleLogs(ws, base);
+    const std::string A = base->run().getLogData("A")->value();
+    const std::string B = base->run().getLogData("B")->value();
+    const std::string C = base->run().getLogData("C")->value();
     // B summed according to user name and A and C summed according to IPF
-    TS_ASSERT_EQUALS(A, "5.2999999999999998")
-    TS_ASSERT_EQUALS(B, "3.1200000000000001")
-    TS_ASSERT_EQUALS(C, "17.100000000000001")
+    TS_ASSERT_EQUALS(A, "7.0999999999999996")
+    TS_ASSERT_EQUALS(B, "4.7000000000000002")
+    TS_ASSERT_EQUALS(C, "16.399999999999999")
+    testUnitsTestWorkspace(base);
     testUnitsTestWorkspace(ws);
   }
 
   void test_sum_unit() {
     // Using default values of the constructor
     Logger log("testLog");
-    auto ws1 = createTestingWorkspace();
-    auto ws2 = createTestingWorkspace();
+    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
+    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
+    TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit")
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsSum = "A";
-    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws1, log, sampleLogNames);
-    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws1, ws2));
-    // All units must not have changed:
-    testUnitsTestWorkspace(ws1);
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, sampleLogNames);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
+    // A units must not have changed:
+    TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
+    TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit")
   }
 
   void test_list_unit() {
     // Using default values of the constructor
     Logger log("testLog");
-    auto ws1 = createTestingWorkspace();
-    auto ws2 = createTestingWorkspace();
+    auto ws = createWorkspace(2.6, 1.5, 8.5, 5.5, 6.6, 7.7);
+    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
+    TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit")
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsList = "A";
-    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws1, log, sampleLogNames);
-    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws1, ws2));
-    // All units must not have changed:
-    testUnitsTestWorkspace(ws1);
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, sampleLogNames);
+    TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit") //
+    TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit")
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
+    // A units must not have changed:
+    TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit") //
+    TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit") //
   }
 
   void test_time_series_unit() {
     // Using default values of the constructor
     Logger log("testLog");
-    auto ws1 = createTestingWorkspace();
-    auto ws2 = createTestingWorkspace();
+    auto ws = createWorkspace(2.65, 1.56, 8.55, 5.5, 6.6, 7.7);
+    auto base = createWorkspace(4.5, 3.2, 7.9, 5.6, 6.7, 7.8);
+    TS_ASSERT_EQUALS(ws->getLog("D")->units(), "D_unit")
+    TS_ASSERT_EQUALS(base->getLog("D")->units(), "D_unit")
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsTimeSeries = "D";
-    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws1, log, sampleLogNames);
-    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws1, ws2));
-    // All units must not have changed:
-    testUnitsTestWorkspace(ws1);
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(base, log, sampleLogNames);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, base));
+    // D units must not have changed:
+    TS_ASSERT_EQUALS(ws->getLog("D")->units(), "D_unit")
+    TS_ASSERT_EQUALS(base->getLog("D")->units(), "D_unit")
   }
 
-  MatrixWorkspace_sptr createTestingWorkspace() {
+  MatrixWorkspace_sptr createWorkspace(double A, double B,
+                                       double C, double TSD1,
+                                       double TSD2, double TSD3) {
     MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(
         3, 3, true, false, true, m_instrName);
     // Add sample logs
     TS_ASSERT_THROWS_NOTHING(
-        ws->mutableRun().addLogData(new PropertyWithValue<double>("A", 2.65)))
+        ws->mutableRun().addLogData(new PropertyWithValue<double>("A", A)))
     TS_ASSERT_THROWS_NOTHING(
-        ws->mutableRun().addLogData(new PropertyWithValue<double>("B", 1.56)))
+        ws->mutableRun().addLogData(new PropertyWithValue<double>("B", B)))
     TS_ASSERT_THROWS_NOTHING(
-        ws->mutableRun().addLogData(new PropertyWithValue<double>("C", 8.55)))
+        ws->mutableRun().addLogData(new PropertyWithValue<double>("C", C)))
     TimeSeriesProperty<double> *time_series_log =
         new TimeSeriesProperty<double>("D");
     TS_ASSERT_THROWS_NOTHING(
-        time_series_log->addValue("2018-11-30T16:17:01", 5.5))
+        time_series_log->addValue("2018-11-30T16:17:01", TSD1))
     TS_ASSERT_THROWS_NOTHING(
-        time_series_log->addValue("2018-11-30T16:17:02", 6.6))
+        time_series_log->addValue("2018-11-30T16:17:02", TSD2))
     TS_ASSERT_THROWS_NOTHING(
-        time_series_log->addValue("2018-11-30T16:17:03", 7.7))
+        time_series_log->addValue("2018-11-30T16:17:03", TSD3))
     TS_ASSERT_THROWS_NOTHING(ws->mutableRun().addProperty(time_series_log))
     // Add units to the sample logs
     TS_ASSERT_THROWS_NOTHING(ws->getLog("A")->setUnits("A_unit"))
