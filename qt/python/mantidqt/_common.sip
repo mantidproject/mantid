@@ -1,5 +1,6 @@
 %ModuleCode
 #include "MantidQtWidgets/Common/Message.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
 %End
@@ -265,6 +266,11 @@ class FitPropertyBrowser : public QDockWidget {
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 %End
 public:
-    FitPropertyBrowser(QWidget *parent = nullptr);
+    FitPropertyBrowser(QWidget *parent = nullptr, QObject *mantidui = nullptr);
     void init();
+    SIP_PYOBJECT getFittingFunction() const;
+%MethodCode
+    auto f = sipCpp->getFittingFunction();
+    sipRes = FROM_CSTRING(f->asString().c_str());
+%End
 };

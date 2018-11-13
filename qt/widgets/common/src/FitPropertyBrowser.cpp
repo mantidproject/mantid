@@ -390,6 +390,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
           SLOT(vectorSizeChanged(QtProperty *)));
 
   QVBoxLayout *layout = new QVBoxLayout(w);
+  layout->setObjectName("vlayout");
   QGridLayout *buttonsLayout = new QGridLayout();
 
   QPushButton *btnDisplay = new QPushButton("Display");
@@ -444,6 +445,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   m_setupActionRemove = new QAction("Remove Setup", this);
   QAction *setupActionCopyToClipboard = new QAction("Copy To Clipboard", this);
   QAction *setupActionLoadFromString = new QAction("Load From String", this);
+  setupActionLoadFromString->setObjectName("action_LoadFromString");
   QSignalMapper *setupManageMapper = new QSignalMapper(this);
   setupManageMapper->setMapping(setupActionSave, "SaveSetup");
   setupManageMapper->setMapping(setupActionCopyToClipboard, "CopyToClipboard");
@@ -496,6 +498,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
   layout->addWidget(m_browser);
+  m_browser->setObjectName("tree_browser");
 
   setWidget(w);
 

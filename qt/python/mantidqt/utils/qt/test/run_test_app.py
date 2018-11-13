@@ -36,7 +36,7 @@ from qtpy.QtWidgets import QApplication
 
 from mantidqt.utils.qt.plugins import setup_library_paths
 
-app = None
+app = QApplication.instance()
 
 
 def split_qualified_name(qualified_name):
@@ -91,6 +91,7 @@ class ScriptRunner(object):
                 elif self.close_on_finish:
                     self.widget.close()
                     app.quit()
+                    app = None
             except:
                 self.widget.close()
                 traceback.print_exc()

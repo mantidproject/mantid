@@ -39,6 +39,7 @@ class TestFitPropertyBrowser(GuiTestBase):
 
     def set_function_string_linear(self):
         self.set_function_string('name=LinearBackground')
+        return 0.1
 
     def set_function_string(self, text):
         box = self.get_active_modal_widget()
@@ -70,6 +71,8 @@ class TestFitPropertyBrowser(GuiTestBase):
         yield self.start_manage_setup()
         yield self.start_load_from_string()
         yield self.set_function_string_linear()
+        a = self.widget.getFittingFunction()
+        self.test.assertEqual(a, 'name=LinearBackground,A0=0,A1=0')
 
 
 class TestModalTester(unittest.TestCase):
