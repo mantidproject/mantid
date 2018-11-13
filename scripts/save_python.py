@@ -16,6 +16,3 @@ def getWidgetIfOpen(name):
         if widget.accessibleName() == name:
             return widget
     return None
-
-
-

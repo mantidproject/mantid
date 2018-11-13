@@ -20,6 +20,8 @@ from save_python import getWidgetIfOpen
 Name = "Muon_Analysis_2"
 
 muonGUI = None
+
+
 class MuonAnalysis2Gui(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
@@ -95,6 +97,7 @@ def main():
         muon = QtGui.QWidget()
         QtGui.QMessageBox.warning(muon, Name, str(error))
         return muon
+
 
 def saveToProject():
     print("waaa")
