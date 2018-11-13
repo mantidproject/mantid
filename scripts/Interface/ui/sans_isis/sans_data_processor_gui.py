@@ -996,7 +996,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     @merge_scale.setter
     def merge_scale(self, value):
-        pass
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_scale_line_edit", value=value)
 
     @property
     def merge_shift(self):
@@ -1004,7 +1005,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     @merge_shift.setter
     def merge_shift(self, value):
-        pass
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_shift_line_edit", value=value)
 
     @property
     def merge_scale_fit(self):
