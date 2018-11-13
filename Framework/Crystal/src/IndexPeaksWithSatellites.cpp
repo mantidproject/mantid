@@ -483,13 +483,6 @@ void IndexPeaksWithSatellites::exec() {
                          << tolerance << ", " << sate_indexed
                          << " Satellite Peaks are indexed with tolerance of "
                          << satetolerance << '\n';
-
-          //                            g_log.notice() << "Average error in
-          //                            h,k,l for indexed main peaks =  "
-          //                            << main_error << '\n';
-          //                            g_log.notice() << "Average error in
-          //                            h,k,l for indexed satellite peaks =  "
-          //                            << sate_error << '\n';
         }
       }
     }

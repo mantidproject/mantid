@@ -591,5 +591,13 @@ V3D V3D::absoluteValue() const {
   return V3D(fabs(x), fabs(y), fabs(z));
 }
 
+/**
+  Calculates the error of the HKL to compare with tolerance
+  @return The error
+*/
+double V3D::hklError() const {
+  return fabs(x - std::round(x)) + fabs(y - std::round(y)) + fabs(z - std::round(z));
+}
+
 } // Namespace Kernel
 } // Namespace Mantid

@@ -12,8 +12,8 @@ namespace Crystal {
    associated
     with the specified PeaksWorkspace, to index the peaks in the workspace.
 
-    @author Dennis Mikkelson
-    @date   2011-08-17
+    @author Shiyun Jin
+    @date   2018-08-17
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory &
                      NScD Oak Ridge National Laboratory

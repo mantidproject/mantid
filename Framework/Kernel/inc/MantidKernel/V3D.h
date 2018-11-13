@@ -330,6 +330,8 @@ public:
   int maxCoeff();
   /// Absolute value
   V3D absoluteValue() const;
+  /// Calculates the error in hkl
+  double hklError() const;
 
   // Make 2 vectors into 3 orthogonal vectors
   static std::vector<V3D> makeVectorsOrthogonal(std::vector<V3D> &vectors);
