@@ -183,8 +183,9 @@ public:
 
     std::vector<int> detectors = {6, 7, 8, 9, 10};
     auto alg = setUpAlgorithmWithGroupNameAndDetectors(ws, "group1", detectors);
+    alg->setRethrows(true);
 
-    alg->execute();
+    TS_ASSERT_THROWS_ANYTHING(alg->execute());
     TS_ASSERT(!alg->isExecuted());
   }
 

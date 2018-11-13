@@ -27,7 +27,7 @@ public:
            "in Muon data.";
   }
   const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess"};
+    return {"MuonProcess", "Minus", "Plus"};
   }
 
   /// Perform validation of inputs to the algorithm

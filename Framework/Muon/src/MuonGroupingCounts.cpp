@@ -28,8 +28,8 @@ bool checkPeriodInWorkspaceGroup(const int &period,
   return period <= workspace->getNumberOfEntries();
 }
 
-bool is_alnum_underscore(char c) {
-  return (isalpha(c) || isdigit(c) || (c == '_'));
+bool is_alphanumeric_or_underscore(char character) {
+  return (isalpha(character) || isdigit(character) || (character == '_'));
 }
 
 MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
@@ -41,7 +41,7 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
       workspace->getIndicesFromDetectorIDs(detectorIDs);
 
   if (wsIndices.size() != detectorIDs.size())
-    throw std::invalid_argument("Some of the detector IDs were not found");
+    throw std::invalid_argument("Requested a detector outside of range (wsIndicies.size() > detectorIDs.size)");
 
   outputWS->getSpectrum(0).clearDetectorIDs();
   outputWS->setSharedX(0, workspace->sharedX(wsIndices.front()));
@@ -118,7 +118,7 @@ std::map<std::string, std::string> MuonGroupingCounts::validateInputs() {
   }
 
   if (!std::all_of(std::begin(groupName), std::end(groupName),
-                   is_alnum_underscore)) {
+                   is_alphanumeric_or_underscore)) {
     errors["GroupName"] =
         "The group name must contain alphnumeric characters and _ only.";
   }
