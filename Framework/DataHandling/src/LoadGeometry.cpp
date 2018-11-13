@@ -12,13 +12,12 @@ namespace Mantid {
 namespace DataHandling {
 
 /// Determine if the Geometry file type is IDF
-bool LoadGeometry::isIDF(const std::string &filename,
-                         const std::string &instrumentname) {
+bool LoadGeometry::isIDF(const std::string &filename) {
   if (!filename.empty()) {
     Mantid::Kernel::FileDescriptor descriptor(filename);
     return ((descriptor.isAscii() && descriptor.extension() == ".xml"));
   }
-  return !instrumentname.empty();
+  return false;
 }
 
 /// Determine if the Geometry file type is Nexus

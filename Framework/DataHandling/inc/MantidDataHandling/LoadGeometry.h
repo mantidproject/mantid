@@ -20,7 +20,7 @@ Common methods for LoadInstrument.cpp and LoadEmptyInstrument.cpp
 */
 namespace LoadGeometry {
 
-bool isIDF(const std::string &filename, const std::string &instrumentname);
+bool isIDF(const std::string &filename);
 bool isNexus(const std::string &filename);
 const std::vector<std::string> validExtensions();
 

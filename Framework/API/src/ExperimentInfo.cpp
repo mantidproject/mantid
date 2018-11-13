@@ -69,33 +69,6 @@ namespace {
 /// static logger object
 Kernel::Logger g_log("ExperimentInfo");
 
-std::string findNexus(const std::string &instrumentName,
-                      const std::vector<std::string> &directoryNames) {
-
-  const boost::regex nexus_regex(instrumentName + "_Definition.*\\.(nxs|hdf5)");
-  Poco::DirectoryIterator end_iter;
-  for (const auto &directoryName : directoryNames) {
-    // This will iterate around the directories from user ->etc ->install, and
-    // find the first beat file
-    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
-         ++dir_itr) {
-
-      const auto &filePath = dir_itr.path();
-      if (!filePath.isFile())
-        continue;
-
-      const std::string &l_filenamePart = filePath.getFileName();
-
-      if (boost::regex_match(l_filenamePart, nexus_regex)) {
-        /*Note that date intervals are not considered. The first file found
-         * matching the pattern is taken. We would have to decide how start-end
-         * dates are taken from the NexusFiles*/
-        return filePath.toString();
-      }
-    }
-  }
-  return std::string{};
-}
 // used to terminate SAX process
 class DummyException {
 public:
@@ -126,69 +99,6 @@ class myContentHandler : public Poco::XML::ContentHandler {
   void skippedEntity(const XMLString &) override {}
   void startPrefixMapping(const XMLString &, const XMLString &) override {}
 };
-
-std::string findIDF(const std::string &instrumentName,
-                    const std::vector<std::string> &directoryNames,
-                    const DateAndTime &date) {
-  const boost::regex idf_regex(instrumentName + "_Definition.*\\.xml",
-                               boost::regex_constants::icase);
-  DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
-                                              // recently starting IDF, if none
-                                              // match
-  DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
-                                                      // the most recently
-  bool foundGoodFile =
-      false; // True if we have found a matching file (valid at the given date)
-  Poco::DirectoryIterator end_iter;
-  std::string mostRecentIDF;
-  for (const auto &directoryName : directoryNames) {
-    // This will iterate around the directories from user ->etc ->install, and
-    // find the first beat file
-    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
-         ++dir_itr) {
-
-      const auto &filePath = dir_itr.path();
-      if (!filePath.isFile())
-        continue;
-
-      const std::string &l_filenamePart = filePath.getFileName();
-
-      if (regex_match(l_filenamePart, idf_regex)) {
-        const auto &pathName = filePath.toString();
-        g_log.debug() << "Found file: '" << pathName << "'\n";
-        std::string validFrom, validTo;
-        ExperimentInfo::getValidFromTo(pathName, validFrom, validTo);
-        g_log.debug() << "File '" << pathName << " valid dates: from '"
-                      << validFrom << "' to '" << validTo << "'\n";
-        DateAndTime from(validFrom);
-        // Use a default valid-to date if none was found.
-        DateAndTime to;
-        if (validTo.length() > 0)
-          to.setFromISO8601(validTo);
-        else
-          to.setFromISO8601("2100-01-01T00:00:00");
-
-        if (from <= date && date <= to) {
-          if (from > refDateGoodFile) { // We'd found a matching file more
-                                        // recently starting than any other
-                                        // matching file found
-            foundGoodFile = true;
-            refDateGoodFile = from;
-            mostRecentIDF = pathName;
-          }
-        }
-        if (!foundGoodFile && (from > refDate)) { // Use most recently starting
-                                                  // file, in case we don't find
-                                                  // a matching file.
-          refDate = from;
-          mostRecentIDF = pathName;
-        }
-      }
-    }
-  }
-  g_log.debug() << "IDF selected is " << mostRecentIDF << '\n';
-  return mostRecentIDF;
-}
 
 } // namespace
 
@@ -1025,39 +935,41 @@ void ExperimentInfo::getValidFromTo(const std::string &IDFfilename,
   }
 }
 
-/** A given instrument may have multiple IDFs associated with it. This method
- *return an identifier which identify a given IDF for a given instrument.
- * An IDF filename is required to be of the form IDFname + _Definition +
- *Identifier + .xml, the identifier then is the part of a filename that
- *identifies the IDF valid at a given date.
+/** A given instrument may have multiple definition files associated with it.
+ *This method returns a file name which identifies a given instrument definition
+ *for a given instrument.
+ *The instrument geometry can be loaded from either a ".xml" file (old-style
+ *IDF) or a ".hdf5/.nxs" file (new-style nexus).
+ *The filename is required to be of the form InstrumentName + _Definition +
+ *Identifier + extension. The identifier then is the part of a filename that
+ *identifies the instrument definition valid at a given date.
  *
- *  If several IDF files are valid at the given date the file with the most
- *recent from date is selected. If no such files are found the file with the
- *latest from date is selected.
+ *  If several instrument files files are valid at the given date the file with
+ *the most recent from date is selected. If no such files are found the file
+ *with the latest from date is selected.
  *
  *  If no file is found for the given instrument, an empty string is returned.
  *
  *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
  *  @param date :: ISO 8601 date
- *  @return full path of IDF
+ *  @return full path of instrument geometry file
  *
  * @throws Exception::NotFoundError If no valid instrument definition filename
  *is found
  */
 std::string
 ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
-                                      const std::string &date,
-                                      const FileType &filetype) {
+                                      const std::string &date) {
   if (date.empty()) {
     // Just use the current date
     g_log.debug() << "No date specified, using current date and time.\n";
     const std::string now =
         Types::Core::DateAndTime::getCurrentTime().toISO8601String();
     // Recursively call this method, but with both parameters.
-    return ExperimentInfo::getInstrumentFilename(instrumentName, now, filetype);
+    return ExperimentInfo::getInstrumentFilename(instrumentName, now);
   }
 
-  g_log.debug() << "Looking for instrument XML file for " << instrumentName
+  g_log.debug() << "Looking for instrument file for " << instrumentName
                 << " that is valid on '" << date << "'\n";
   // Lookup the instrument (long) name
   std::string instrument(
@@ -1068,13 +980,70 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
       Kernel::ConfigService::Instance().getInstrumentDirectories();
   const DateAndTime d(date);
 
-  if (filetype == FileType::Idf || filetype == FileType::Both)
-    return findIDF(instrument, directoryNames,
-                   d); // store most recently starting matching IDF if
-                       // found, else most recently starting IDF.
-  else if (filetype == FileType::Nexus || filetype == FileType::Both)
-    return findNexus(instrument, directoryNames);
-  return std::string{};
+  // Now search through directories for either xml or hdf5/nxs file
+  const boost::regex instfile_regex(instrumentName +
+                                        "_Definition.*\\.(xml|nxs|hdf5)",
+                                    boost::regex_constants::icase);
+  DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
+                                              // recently starting IDF, if none
+                                              // match
+  DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
+                                                      // the most recently
+  bool foundGoodFile =
+      false; // True if we have found a matching file (valid at the given date)
+  Poco::DirectoryIterator end_iter;
+  std::string mostRecentInstFile;
+  for (const auto &directoryName : directoryNames) {
+    // This will iterate around the directories from user ->etc ->install, and
+    // find the first beat file
+    for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
+         ++dir_itr) {
+
+      const auto &filePath = dir_itr.path();
+      if (!filePath.isFile())
+        continue;
+
+      const std::string &l_filenamePart = filePath.getFileName();
+
+      if (regex_match(l_filenamePart, instfile_regex)) {
+        const auto &pathName = filePath.toString();
+        g_log.debug() << "Found file: '" << pathName << "'\n";
+        std::string validFrom, validTo;
+        ExperimentInfo::getValidFromTo(pathName, validFrom, validTo);
+        g_log.debug() << "File '" << pathName << " valid dates: from '"
+                      << validFrom << "' to '" << validTo << "'\n";
+
+        // Use default valid "from" and "to" dates if none were found.
+        DateAndTime to, from;
+        if (validFrom.length() > 0)
+          from.setFromISO8601(validFrom);
+        else
+          from = refDate;
+        if (validTo.length() > 0)
+          to.setFromISO8601(validTo);
+        else
+          to.setFromISO8601("2100-01-01T00:00:00");
+
+        if (from <= d && d <= to) {
+          if (from > refDateGoodFile) { // We'd found a matching file more
+                                        // recently starting than any other
+                                        // matching file found
+            foundGoodFile = true;
+            refDateGoodFile = from;
+            mostRecentInstFile = pathName;
+          }
+        }
+        if (!foundGoodFile && (from >= refDate)) { // Use most recently starting
+                                                   // file, in case we don't
+                                                   // find a matching file.
+          refDate = from;
+          mostRecentInstFile = pathName;
+        }
+      }
+    }
+  }
+  g_log.debug() << "Instrument file selected is " << mostRecentInstFile << '\n';
+  return mostRecentInstFile;
 }
 
 /** Return a const reference to the DetectorInfo object.

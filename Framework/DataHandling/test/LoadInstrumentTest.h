@@ -355,10 +355,27 @@ public:
     TS_ASSERT_THROWS(detectorInfo.indexOf(778245), std::out_of_range);
   }
 
-  void testNexusLOKI() {
-    MatrixWorkspace_sptr outputWs = doLoadNexus("LOKI_Definition.hdf5");
-    auto &componentInfo = outputWs->componentInfo();
-    auto &detectorInfo = outputWs->detectorInfo();
+  /// Test the Nexus geometry loader from LOKI name
+  void testExecNexusLOKIFromInstrName() {
+    LoadInstrument loaderLOKI;
+    loaderLOKI.initialize();
+    loaderLOKI.setChild(true);
+    // Create a workspace
+    MatrixWorkspace_sptr ws =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+    loaderLOKI.setPropertyValue("InstrumentName", "LOKI");
+    loaderLOKI.setProperty("Workspace", ws);
+    loaderLOKI.setProperty("RewriteSpectraMap", OptionalBool(true));
+    loaderLOKI.execute();
+    TS_ASSERT(loaderLOKI.isExecuted());
+
+    std::string result = loaderLOKI.getPropertyValue("Filename");
+    const std::string::size_type stripPath = result.find_last_of("\\/");
+    result = result.substr(stripPath + 1, result.size());
+    TS_ASSERT_EQUALS(result, "LOKI_Definition.hdf5");
+
+    auto &componentInfo = ws->componentInfo();
+    auto &detectorInfo = ws->detectorInfo();
     TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "LOKI");
     TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
     TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0]);
@@ -594,7 +611,9 @@ public:
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
     TS_ASSERT_THROWS_EQUALS(
         instLoader.execute(), Kernel::Exception::FileError & e,
-        std::string(e.what()), "Instrument input cannot be read in ");
+        std::string(e.what()),
+        "Either the InstrumentName or Filename property of LoadInstrument "
+        "must be specified to load an instrument in ");
     TS_ASSERT(!instLoader.isExecuted());
     TS_ASSERT_EQUALS(instLoader.getPropertyValue("Filename"), "");
   }

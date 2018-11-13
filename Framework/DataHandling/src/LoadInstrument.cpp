@@ -11,7 +11,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/LoadGeometry.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -101,18 +100,83 @@ void LoadInstrument::exec() {
   std::string filename = getPropertyValue("Filename");
   std::string instname = getPropertyValue("InstrumentName");
 
-  // Decide whether to use Nexus or IDF loading
-  // Note: for now, if only the instrument name is provided, the IDF loader will
-  // be used by default. This should be updated in the future, so that the
-  // Nexus loader can also take in an instrument name. Possibly by adding
-  // a "FileType" property to the LoadInstrument algorithm.
-  if (LoadGeometry::isIDF(filename, instname))
-    idfInstrumentLoader(ws, filename, instname);
-  else if (LoadGeometry::isNexus(filename))
-    nexusInstrumentLoader(ws, filename, instname);
-  else
-    throw Kernel::Exception::FileError("Instrument input cannot be read",
-                                       filename);
+  // For IDF files, we will parse the XML using the InstrumentDefinitionParser
+  InstrumentDefinitionParser parser;
+
+  // If instrumentXML is not default (i.e. it has been defined), then use that
+  // Note: this is part of the IDF loader
+  const Property *const InstrumentXML = getProperty("InstrumentXML");
+  if (!InstrumentXML->isDefault()) {
+    // We need the instrument name to be set as well because, for whatever
+    // reason, this isn't pulled out of the XML.
+    if (instname.empty())
+      throw std::runtime_error("The InstrumentName property must be set when "
+                               "using the InstrumentXML property.");
+    // If the Filename property is not set, set it to the same as the instrument
+    // name
+    if (filename.empty())
+      filename = instname;
+    // Initialize the parser. Avoid copying the xmltext out of the property
+    // here.
+    const PropertyWithValue<std::string> *xml =
+        dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML);
+    if (xml) {
+      parser = InstrumentDefinitionParser(filename, instname, *xml);
+    } else {
+      throw std::invalid_argument("The instrument XML passed cannot be "
+                                  "casted to a standard string.");
+    }
+    idfInstrumentLoader(ws, filename, parser);
+
+  } else {
+    // This part of the loader searches through the instrument directories for
+    // a valid IDF or Nexus geometry file
+
+    // The first step is to define a valid filename
+
+    // If the filename is empty, try to find a file from the instrument name
+    if (filename.empty()) {
+      // look to see if an Instrument name provided in which case create
+      // filename on the fly
+      if (instname.empty()) {
+        g_log.error("Either the InstrumentName or Filename property of "
+                    "LoadInstrument most be specified");
+        throw Kernel::Exception::FileError(
+            "Either the InstrumentName or Filename property of LoadInstrument "
+            "must be specified to load an instrument",
+            filename);
+      } else {
+        filename = ExperimentInfo::getInstrumentFilename(
+            instname, ws->getWorkspaceStartDate());
+        setPropertyValue("Filename", filename);
+      }
+    }
+    if (filename.empty()) {
+      throw Exception::NotFoundError(
+          "Unable to find an Instrument File for instrument: ", instname);
+    }
+
+    // Now that we have a file name, decide whether to use Nexus or IDF loading
+    if (LoadGeometry::isIDF(filename)) {
+      // Remove the path from the filename for use with the
+      // InstrumentDataService
+      const std::string::size_type stripPath = filename.find_last_of("\\/");
+      std::string instrumentFile =
+          filename.substr(stripPath + 1, filename.size());
+      // Strip off "_Definition.xml"
+      instname = instrumentFile.substr(0, instrumentFile.find("_Def"));
+      // Initialize the parser with the the XML text loaded from the IDF file
+      parser = InstrumentDefinitionParser(filename, instname,
+                                          Strings::loadFile(filename));
+      // And finally call the common part of the IDF loader
+      idfInstrumentLoader(ws, filename, parser);
+    } else if (LoadGeometry::isNexus(filename)) {
+      nexusInstrumentLoader(ws, filename);
+    } else {
+      throw Kernel::Exception::FileError(
+          "Now valid loader found for instrument file ", filename);
+    }
+  }
 
   // Set the monitors output property
   setProperty("MonitorList", (ws->getInstrument())->getMonitors());
@@ -127,51 +191,7 @@ void LoadInstrument::exec() {
 /// Load instrument from IDF XML file
 void LoadInstrument::idfInstrumentLoader(
     boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
-    std::string instname) {
-
-  // We will parse the XML using the InstrumentDefinitionParser
-  InstrumentDefinitionParser parser;
-
-  // If the XML is passed in via the InstrumentXML property, use that.
-  const Property *const InstrumentXML = getProperty("InstrumentXML");
-  if (!InstrumentXML->isDefault()) {
-    // We need the instrument name to be set as well because, for whatever
-    // reason,
-    //   this isn't pulled out of the XML.
-    if (instname.empty())
-      throw std::runtime_error("The InstrumentName property must be set when "
-                               "using the InstrumentXML property.");
-    // If the Filename property is not set, set it to the same as the instrument
-    // name
-    if (filename.empty())
-      filename = instname;
-
-    // Initialize the parser. Avoid copying the xmltext out of the property
-    // here.
-    const PropertyWithValue<std::string> *xml =
-        dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML);
-    if (xml) {
-      parser = InstrumentDefinitionParser(filename, instname, *xml);
-    } else {
-      throw std::invalid_argument("The instrument XML passed cannot be "
-                                  "casted to a standard string.");
-    }
-  }
-  // otherwise we need either Filename or InstrumentName to be set
-  else {
-    filename = checkAndRetrieveInstrumentFilename(ws, filename, instname,
-                                                  FileType::Idf);
-    // Remove the path from the filename for use with the InstrumentDataService
-    const std::string::size_type stripPath = filename.find_last_of("\\/");
-    std::string instrumentFile =
-        filename.substr(stripPath + 1, filename.size());
-    // Strip off "_Definition.xml"
-    instname = instrumentFile.substr(0, instrumentFile.find("_Def"));
-
-    // Initialize the parser with the the XML text loaded from the IDF file
-    parser = InstrumentDefinitionParser(filename, instname,
-                                        Strings::loadFile(filename));
-  }
+    InstrumentDefinitionParser &parser) {
 
   // Find the mangled instrument name that includes the modified date
   std::string instrumentNameMangled = parser.getMangledName();
@@ -213,46 +233,13 @@ void LoadInstrument::idfInstrumentLoader(
   }
 }
 
+/// Load instrument from Nexus file
 void LoadInstrument::nexusInstrumentLoader(
-    boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
-    std::string instname) {
-  filename = checkAndRetrieveInstrumentFilename(ws, filename, instname,
-                                                FileType::Nexus);
+    boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename) {
   Instrument_const_sptr instrument =
       NexusGeometry::NexusGeometryParser::createInstrument(filename);
   ws->setInstrument(instrument);
   ws->populateInstrumentParameters();
-}
-
-/// Get the file name from the instrument name if it is not defined
-std::string LoadInstrument::checkAndRetrieveInstrumentFilename(
-    boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
-    std::string instname, const FileType &filetype) {
-  // Retrieve the filename from the properties
-  std::string instrumentfname;
-  if (filename.empty()) {
-    // look to see if an Instrument name provided in which case create
-    // filename on the fly
-    if (instname.empty()) {
-      g_log.error("Either the InstrumentName or Filename property of "
-                  "LoadInstrument most be specified");
-      throw Kernel::Exception::FileError(
-          "Either the InstrumentName or Filename property of LoadInstrument "
-          "must be specified to load an instrument",
-          filename);
-    } else {
-      instrumentfname = ExperimentInfo::getInstrumentFilename(
-          instname, ws->getWorkspaceStartDate(), filetype);
-      setPropertyValue("Filename", instrumentfname);
-    }
-  } else {
-    instrumentfname = filename;
-  }
-  if (instrumentfname.empty()) {
-    throw Exception::NotFoundError(
-        "Unable to find an Instrument Definition File for", instname);
-  }
-  return instrumentfname;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------

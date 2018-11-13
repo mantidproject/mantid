@@ -9,6 +9,7 @@
 
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 #include <mutex>
 
@@ -81,14 +82,11 @@ public:
   }
   /// Load instrument from IDF XML file
   void idfInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace> &ws,
-                           std::string filename, std::string instname);
+                           std::string filename,
+                           Geometry::InstrumentDefinitionParser &parser);
   /// Load instrument from Nexus file
   void nexusInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace> &ws,
-                             std::string filename, std::string instname);
-  /// Retrieve file name if undefined
-  std::string checkAndRetrieveInstrumentFilename(
-      boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
-      std::string instname, const API::FileType &filetype);
+                             std::string filename);
 
 private:
   void init() override;

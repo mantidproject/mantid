@@ -601,8 +601,7 @@ public:
     ConfigService::Instance().setInstrumentDirectories(instrumentDirectories);
     const std::string instrumentName = "LOKI";
     ExperimentInfo info;
-    const auto path =
-        info.getInstrumentFilename(instrumentName, "", FileType::Nexus);
+    const auto path = info.getInstrumentFilename(instrumentName, "");
     TS_ASSERT(!path.empty());
     TS_ASSERT(
         boost::regex_match(path, boost::regex(".*LOKI_Definition\\.hdf5$")));
