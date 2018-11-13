@@ -19,7 +19,7 @@ Analysis
 As indicated in the input variable names to this algorithm; there are four distinct operations applied to the input data. In order of application these are;
 
 #. Apply dead time correction through the **DeadTimeTable** input.
-#. Apply a time offset to the time axis through the **TimeOffset** input, which may be positive or negative.
+#. Apply a time offset to the time axis through the **TimeOffset** input, which may be positive or negative. This time offset is directly added to all times within the workspace.
 #. Apply a cropping to the upper (lower) ends of the time axis via the **TimeMax** (**TimeMin**) input.
 #. Finally, apply a rebinning via **RebinArgs**, using the same syntax as in :ref:`algm-Rebin`.
 
