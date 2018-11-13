@@ -17,7 +17,7 @@ from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 from Muon.GUI.Common.muon_context.muon_context import *  # MuonContext
 from save_python import getWidgetIfOpen
 
-Name = "Muon Analysis 2"
+Name = "Muon_Analysis_2"
 
 muonGUI = None
 class MuonAnalysis2Gui(QtGui.QMainWindow):
@@ -63,7 +63,9 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
     # cancel algs if window is closed
     def closeEvent(self, event):
         self.dockWidget.closeEvent(event)
-        self = None
+        global muonGUI
+        muonGUI.deleteLater()
+        muonGUI = None
 
 
 def qapp():
@@ -95,6 +97,7 @@ def main():
         return muon
 
 def saveToProject():
+    print("waaa")
     widget = getWidgetIfOpen(Name)
     if widget is None:
         return ""
