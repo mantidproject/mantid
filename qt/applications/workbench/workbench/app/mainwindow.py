@@ -43,6 +43,7 @@ from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
+from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -250,12 +251,9 @@ class MainWindow(QMainWindow):
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
 
-    def launchCustomGUI(self, script):
-        try:
-            exec(open(script).read(), globals())
-        except RuntimeError as e:
-            print('RuntimeError', type(e))
-            print(e)
+    def launchCustomGUI(self, filename):
+        executioner = PythonCodeExecution()
+        executioner.execute(open(filename).read(), filename)
 
     def populateAfterMantidImport(self):
         from mantid.kernel import ConfigService, logger
