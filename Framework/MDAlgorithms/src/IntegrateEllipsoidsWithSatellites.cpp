@@ -485,10 +485,7 @@ void IntegrateEllipsoidsWithSatellites::exec() {
       // modulus of Q
       double lenQpeak = 0.0;
       if (adaptiveQMultiplier != 0.0) {
-        for (size_t d = 0; d < 3; d++) {
-          lenQpeak += peak_q[d] * peak_q[d];
-        }
-        lenQpeak = std::sqrt(lenQpeak);
+        lenQpeak = peak_q.norm();
       }
 
       double adaptiveRadius = adaptiveQMultiplier * lenQpeak + peak_radius;

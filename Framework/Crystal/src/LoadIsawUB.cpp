@@ -47,28 +47,12 @@ void LoadIsawUB::init() {
 /** Execute the algorithm.
  */
 void LoadIsawUB::exec() {
-  // In and Out workspace.
-  Workspace_sptr ws1 = getProperty("InputWorkspace");
-
-  ExperimentInfo_sptr ws;
-  MultipleExperimentInfos_sptr MDWS =
-      boost::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
-  if (MDWS != nullptr) {
-    ws = MDWS->getExperimentInfo(0);
-  } else {
-    ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
-  }
-  if (!ws)
-    throw std::invalid_argument("Must specify either a MatrixWorkspace or a "
-                                "PeaksWorkspace or a MDWorkspace.");
-
   std::string Filename = getProperty("Filename");
 
   // Open the file
   std::ifstream in(Filename.c_str());
 
   Kernel::DblMatrix ub(3, 3);
-  Kernel::DblMatrix modub(3, 3);
   std::string s;
   double val;
 
@@ -85,11 +69,17 @@ void LoadIsawUB::exec() {
     readToEndOfLine(in, true);
   }
 
-  s = getWord(in, true);
-
+  readModulatedUB(in, ub);
+}
+void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
   int ModDim = 0;
+  Kernel::DblMatrix modub(3, 3);
+  Kernel::DblMatrix ModVecErr(3, 3);
   int maxorder = 0;
   bool crossterm = false;
+  std::string s;
+  double val;
+  s = getWord(in, true);
   if (!convert(s, val)) {
     readToEndOfLine(in, true);
     for (size_t row = 0; row < 3; row++) {
@@ -118,7 +108,6 @@ void LoadIsawUB::exec() {
     latVal = val;
   }
 
-  double ModVecErr[3][3] = {{0}};
   if (ModDim > 0) {
     readToEndOfLine(in, true);
     readToEndOfLine(in, true);
@@ -126,13 +115,13 @@ void LoadIsawUB::exec() {
       readToEndOfLine(in, true);
       for (int j = 0; j < 4; j++)
         s = getWord(in, true);
-      for (double &Mod : ModVecErr[i]) {
+      for (int j = 0; j < 3; j++) {
         s = getWord(in, true);
         if (!convert(s, val))
           throw std::runtime_error(
               "The string '" + s +
               "' in the file was not understood as a number.");
-        Mod = val;
+        ModVecErr[i][j] = val;
       }
       readToEndOfLine(in, true);
     }
@@ -153,7 +142,6 @@ void LoadIsawUB::exec() {
                                "' in the file was not understood as a number.");
     crossterm = valBool;
   }
-
   // Adjust the UB by transposing
   ub = ub.Transpose();
   modub = modub.Transpose();
@@ -186,6 +174,21 @@ void LoadIsawUB::exec() {
   U = U2;
   const bool checkU = getProperty("CheckUMatrix");
   latt->setU(U, !checkU);
+
+  // In and Out workspace.
+  Workspace_sptr ws1 = getProperty("InputWorkspace");
+
+  ExperimentInfo_sptr ws;
+  MultipleExperimentInfos_sptr MDWS =
+      boost::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
+  if (MDWS != nullptr) {
+    ws = MDWS->getExperimentInfo(0);
+  } else {
+    ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
+  }
+  if (!ws)
+    throw std::invalid_argument("Must specify either a MatrixWorkspace or a "
+                                "PeaksWorkspace or a MDWorkspace.");
 
   // Save it into the workspace
   ws->mutableSample().setOrientedLattice(latt);

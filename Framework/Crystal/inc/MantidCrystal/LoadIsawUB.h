@@ -9,6 +9,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -45,6 +46,8 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+  /// load the modulation UB
+  void readModulatedUB(std::ifstream &in, Kernel::DblMatrix &ub);
 };
 
 } // namespace Crystal

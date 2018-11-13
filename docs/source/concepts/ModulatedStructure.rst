@@ -178,7 +178,11 @@ three:
    n_{i} \\
    p_{i} \\
    \end{matrix} \\
-   \end{pmatrix}\backslash n}{\begin{pmatrix}
+   \end{pmatrix}}
+
+.. math::
+
+   {\begin{pmatrix}
    x_{i} \\
    y_{i} \\
    z_{i} \\

@@ -349,7 +349,7 @@ void PredictSatellitePeaks::predictOffsets(
         goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
 
     // Check if Q is non-physical
-    if (Qs[2] * m_qConventionFactor <= 0)
+    if (Qs.Z() * m_qConventionFactor <= 0)
       continue;
 
     auto peak(Peaks->createPeak(Qs, 1));
@@ -423,7 +423,7 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
             goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
 
         // Check if Q is non-physical
-        if (Qs[2] <= 0)
+        if (Qs.Z() <= 0)
           continue;
 
         auto peak(Peaks->createPeak(Qs, 1));
