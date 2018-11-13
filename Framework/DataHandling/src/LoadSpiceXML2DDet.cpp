@@ -329,6 +329,7 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
   return return_true;
 }
 
+//----------------------------------------------------------------------------------------------
 /** Main execution
  * @brief LoadSpiceXML2DDet::exec
  */
@@ -476,7 +477,7 @@ LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
   return vecspicenode;
 }
 
-//-----
+//----------------------------------------------------------------------------------------------
 /// parse binary integer file
 std::vector<unsigned int>
 LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
@@ -486,10 +487,12 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
   begin = infile.tellg();
   infile.seekg(0, ios::end);
   end = infile.tellg();
-  cout << "size is: " << (end - begin) << " bytes.\n";
+  g_log.information() << "File size is: " << (end - begin) << " bytes.\n";
 
-  size_t num_dets = static_cast<size_t>(end - begin) / sizeof(unsigned int);
-  cout << "size is: " << num_dets << " bytes.\n";
+  size_t num_unsigned_int = static_cast<size_t>(end - begin) / sizeof(unsigned int);
+  size_t num_dets = num_unsigned_int - 2;
+  g_log.information() << "File contains " << num_unsigned_int << " unsigned integers and thus "
+                      << num_dets << " detectors.\n";
 
   // define output vector
   std::vector<unsigned int> vec_counts(num_dets);
@@ -500,30 +503,36 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
   // char buffer[sizeof(int)];
   unsigned int buffer;
   unsigned int total_counts(0);
-  //  int *counts = new int[num_int];
+
+  // read detector size (row and column)
+  infile.read((char *)&buffer, sizeof(buffer));
+  size_t num_rows = static_cast<size_t>(buffer);
+  infile.read((char *)&buffer, sizeof(buffer));
+  size_t num_cols = static_cast<size_t>(buffer);
+
+
   for (size_t i = 0; i < num_dets; ++i) {
     // infile.read(buffer, sizeof(int));
     infile.read((char *)&buffer, sizeof(buffer));
     vec_counts[i] = buffer;
-    if (i < 10 || i > num_dets - 10)
-      g_log.notice() << i << "\t " << vec_counts[i] << "\n";
     total_counts += buffer;
-    //    if (counts[i] > max_count)
-    //      max_count = counts[i];
   }
 
-  std::cout << "total counts = " << total_counts << "\n";
+  g_log.information() << "For detector " << num_rows << " x " << num_cols
+                      << ", total counts = " << total_counts << "\n";
 
   return vec_counts;
 }
 
-//-----
+//----------------------------------------------------------------------------------------------
 MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
     const std::vector<unsigned int> &vec_counts) {
   // Create matrix workspace
   size_t numspec = vec_counts.size();
   MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
+
+  g_log.information("Workspace created");
 
   // set up value
   for (size_t i = 0; i < numspec; ++i) {
