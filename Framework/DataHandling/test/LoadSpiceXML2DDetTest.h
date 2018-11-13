@@ -692,7 +692,7 @@ public:
     loader.initialize();
 
     // set up properties
-    const std::string filename("LaB6_10kev_35deg.bin.bin");
+    const std::string filename("LaB6_10kev_35deg.bin");
     TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
     TS_ASSERT_THROWS_NOTHING(
         loader.setProperty("OutputWorkspace", "Exp0335_S0038F"));
