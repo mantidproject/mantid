@@ -30,7 +30,6 @@ if sphinx_version > "1.6":
 extensions = [
      # we use pngmath over mathjax so that the the offline help isn't reliant on
      # anything external and we don't need to include the large mathjax package
-    'sphinx.ext.pngmath',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.doctest',
@@ -39,6 +38,10 @@ extensions = [
     'mantiddoc.doctest',
     'matplotlib.sphinxext.plot_directive'
 ]
+if sphinx_version > "1.8":
+    extensions.append('sphinx.ext.imgmath')
+else:
+    extensions.append('sphinx.ext.pngmath')
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
