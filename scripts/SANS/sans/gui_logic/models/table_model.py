@@ -224,6 +224,9 @@ class TableModel(object):
         file_information = file_information_factory.create_sans_file_information(entry.sample_scatter)
         self.update_thickness_from_file_information(entry.id, file_information)
 
+    def set_option(self, row, key, value):
+        self._table_entries[row].options_column_model.set_option(key, value)
+
     def __eq__(self, other):
         return self.equal_dicts(self.__dict__, other.__dict__, ['work_handler'])
 
@@ -272,6 +275,7 @@ class TableIndexModel(object):
         self.options_column_model = options_column_string
 
         self.row_state = RowState.Unprocessed
+
         self.tool_tip = ''
         self.file_information = None
         self.file_finding = False
@@ -331,17 +335,23 @@ class OptionsColumnModel(object):
     def get_options(self):
         return self._options
 
+    def set_option(self, key, value):
+        self._options.update({key: value})
+
     def get_options_string(self):
-        return self._options_column_string
+        return self._serialise_options_dict()
 
     @staticmethod
     def _get_permissible_properties():
-        return {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str}
+        return {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str, "MergeScale": float,
+                "MergeShift": float}
 
     @staticmethod
     def get_hint_strategy():
         return BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
                                   "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
+                                  "MergeScale": 'The scale applied to the HAB when mergeing',
+                                  "MergeShift": 'The shift applied to the HAB when mergeing',
                                   "EventSlices": 'The event slices to reduce.'
                                   ' The format is the same as for the event slices'
                                   ' box in settings, however if a comma separated list is given '
@@ -377,6 +387,15 @@ class OptionsColumnModel(object):
             parsed.update({key:value})
 
         return parsed
+
+    def _serialise_options_dict(self):
+        options_string = ''
+        for key, value in self._options.items():
+            if options_string:
+                options_string += ', {}={}'.format(key, value)
+            else:
+                options_string = '{}={}'.format(key, value)
+        return options_string
 
     @staticmethod
     def _get_options(options_column_string):

@@ -10,8 +10,14 @@
 import os
 from qtpy.QtWidgets import (QDialog, QFileDialog, QMessageBox)  # noqa
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
-from HFIR_4Circle_Reduction import ui_httpserversetup as ui_http
+
 import qtpy  # noqa
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
 class DataDownloadDialog(QDialog):
@@ -26,8 +32,8 @@ class DataDownloadDialog(QDialog):
         super(DataDownloadDialog, self).__init__(parent)
 
         # set up UI
-        self.ui = ui_http.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = "httpserversetup.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # initialize widgets
         self._init_widgets()

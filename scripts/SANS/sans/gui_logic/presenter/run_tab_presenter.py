@@ -44,7 +44,8 @@ except (Exception, Warning):
     # this should happen when this is called from outside Mantidplot and only then,
     # the result is that attempting to plot will raise an exception
 
-row_state_to_colour_mapping = {RowState.Unprocessed:'#FFFFFF', RowState.Processed:'#d0f4d0', RowState.Error:'#accbff'}
+row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
+                               RowState.Error: '#accbff'}
 
 
 class RunTabPresenter(object):
@@ -131,7 +132,8 @@ class RunTabPresenter(object):
         self.set_view(view)
         self._processing = False
         self.work_handler = WorkHandler()
-        self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.on_processing_finished, self.on_processing_error)
+        self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.on_processing_finished,
+                                                       self.on_processing_error)
 
         # File information for the first input
         self._file_information = None
@@ -149,7 +151,8 @@ class RunTabPresenter(object):
         self._table_model.subscribe_to_model_changes(self._beam_centre_presenter)
 
         # Workspace Diagnostic page presenter
-        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, create_state, self._facility)
+        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, create_state,
+                                                                        self._facility)
 
     def _default_gui_setup(self):
         """
@@ -220,7 +223,9 @@ class RunTabPresenter(object):
             self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view.instrument)
 
             self._view.setup_layout()
-            self._view.set_hinting_line_edit_for_column(15, self._table_model.get_options_hint_strategy())
+            self._view.set_hinting_line_edit_for_column(
+                self._table_model.column_name_converter.index('options_column_model'),
+                self._table_model.get_options_hint_strategy())
 
     def on_user_file_load(self):
         """
@@ -289,10 +294,11 @@ class RunTabPresenter(object):
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
-    def _add_row_to_table_model(self,row, index):
+    def _add_row_to_table_model(self, row, index):
         """
         Adds a row to the table
         """
+
         def get_string_entry(_tag, _row):
             _element = ""
             if _tag in _row:
@@ -320,7 +326,8 @@ class RunTabPresenter(object):
         user_file = get_string_entry(BatchReductionEntry.UserFile, row)
 
         row_entry = [sample_scatter, sample_scatter_period, sample_transmission, sample_transmission_period,
-                     sample_direct, sample_direct_period, can_scatter, can_scatter_period, can_transmission, can_transmission_period,
+                     sample_direct, sample_direct_period, can_scatter, can_scatter_period, can_transmission,
+                     can_transmission_period,
                      can_direct, can_direct_period,
                      output_name, user_file, '', '']
 
@@ -390,7 +397,7 @@ class RunTabPresenter(object):
             output_mode = self._view.output_mode
 
             # Check if results should be plotted
-            plot_results =  self._view.plot_results
+            plot_results = self._view.plot_results
 
             # Get the name of the graph to output to
             output_graph = self.output_graph
@@ -398,7 +405,7 @@ class RunTabPresenter(object):
             self.progress = 0
             setattr(self._view, 'progress_bar_value', self.progress)
             setattr(self._view, 'progress_bar_maximum', len(states))
-            self.batch_process_runner.process_states(states,use_optimizations, output_mode, plot_results, output_graph)
+            self.batch_process_runner.process_states(states, use_optimizations, output_mode, plot_results, output_graph)
 
         except Exception as e:
             self._view.enable_buttons()
@@ -414,10 +421,13 @@ class RunTabPresenter(object):
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
 
-    def notify_progress(self, row):
+    def notify_progress(self, row, out_shift_factors, out_scale_factors):
         self.increment_progress()
-        message = ''
-        self._table_model.set_row_to_processed(row, message)
+        if out_scale_factors and out_shift_factors:
+            self._table_model.set_option(row, 'MergeScale', round(out_scale_factors[0], 3))
+            self._table_model.set_option(row, 'MergeShift', round(out_shift_factors[0], 3))
+
+        self._table_model.set_row_to_processed(row, '')
 
     def on_processing_finished(self, result):
         self._view.enable_buttons()
@@ -600,7 +610,6 @@ class RunTabPresenter(object):
         self._set_on_view("zero_error_free")
         self._set_on_view("save_types")
         self._set_on_view("compatibility_mode")
-
         self._set_on_view("merge_scale")
         self._set_on_view("merge_shift")
         self._set_on_view("merge_scale_fit")
@@ -763,12 +772,14 @@ class RunTabPresenter(object):
 
     def _set_on_view(self, attribute_name):
         attribute = getattr(self._state_model, attribute_name)
-        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
+        if attribute or isinstance(attribute,
+                                   bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(self._view, attribute_name, attribute)
 
     def _set_on_view_with_view(self, attribute_name, view):
         attribute = getattr(self._state_model, attribute_name)
-        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
+        if attribute or isinstance(attribute,
+                                   bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(view, attribute_name, attribute)
 
     def _get_state_model_with_view_update(self):
@@ -929,7 +940,7 @@ class RunTabPresenter(object):
             if q_1d_min and q_1d_max and q_1d_step and q_1d_step_type:
                 q_1d_rebin_string = str(q_1d_min) + ","
                 q_1d_step_type_factor = -1. if q_1d_step_type is RangeStepType.Log else 1.
-                q_1d_rebin_string += str(q_1d_step_type_factor*q_1d_step) + ","
+                q_1d_rebin_string += str(q_1d_step_type_factor * q_1d_step) + ","
                 q_1d_rebin_string += str(q_1d_max)
                 state_model.q_1d_rebin_string = q_1d_rebin_string
 

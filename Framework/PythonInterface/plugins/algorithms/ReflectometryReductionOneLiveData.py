@@ -46,7 +46,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
             'NormalizeByIntegratedMonitors', 'FirstTransmissionRun',
             'SecondTransmissionRun', 'Params', 'StartOverlap', 'EndOverlap',
-            'StrictSpectrumChecking', 'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
+            'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
             'PolarizationAnalysis', 'Pp', 'Ap', 'Rho', 'Alpha', 'Debug', 'OutputWorkspace']
         self.copyProperties('ReflectometryReductionOneAuto', self._child_properties)

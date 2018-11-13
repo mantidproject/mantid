@@ -339,7 +339,7 @@ system_python_extras = "/System/Library/Frameworks/Python.framework/Versions/2.7
 pip_site_packages = "/Library/Python/2.7/site-packages"
 directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
                "certifi","tornado","markupsafe","matplotlib","mpl_toolkits", "jinja2","jsonschema","functools32",
-               "ptyprocess","CifFile","yaml"]
+               "ptyprocess","CifFile","yaml","requests"]
 directories.each do |directory|
   module_dir = "#{pip_site_packages}/#{directory}"
   if !File.exist?(module_dir)
