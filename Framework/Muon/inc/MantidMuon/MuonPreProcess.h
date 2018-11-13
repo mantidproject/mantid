@@ -31,7 +31,7 @@ public:
   }
   const std::vector<std::string> seeAlso() const override {
     return {"MuonProcess", "ApplyDeadTimeCorr", "ChangeBinOffset",
-     "CropWorkspace", "Rebin"};
+            "CropWorkspace", "Rebin"};
   }
 
 private:
