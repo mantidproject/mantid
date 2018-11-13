@@ -84,11 +84,11 @@ MAIN_APP = qapplication()
 from workbench.app.resources import qCleanupResources  # noqa
 atexit.register(qCleanupResources)
 
-SPLASH = QSplashScreen(QPixmap(':/images/MantidSplashScreen.png'),
+SPLASH = QSplashScreen(QPixmap(':/images/MantidSplashScreen_4k.jpg'),
                        Qt.WindowStaysOnTopHint)
 SPLASH.show()
-SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft |
-                   Qt.AlignAbsolute, QColor(Qt.black))
+SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
+                   | Qt.AlignAbsolute, QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
