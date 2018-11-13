@@ -84,14 +84,18 @@ MAIN_APP = qapplication()
 from workbench.app.resources import qCleanupResources  # noqa
 
 atexit.register(qCleanupResources)
-width = QApplication.desktop().availableGeometry().width()
 
-if width > 2048:
-    SPLASH = QSplashScreen(QPixmap(':/images/MantidSplashScreen_4k.jpg'),
-                           Qt.WindowStaysOnTopHint)
-else:
-    SPLASH = QSplashScreen(QPixmap(':/images/MantidSplashScreen.png'),
-                           Qt.WindowStaysOnTopHint)
+
+def _get_splash_image_name():
+    width = QApplication.desktop().availableGeometry().width()
+    if width > 2048:
+        return ':/images/MantidSplashScreen_4k.jpg'
+    else:
+        return ':/images/MantidSplashScreen.png'
+
+
+SPLASH = QSplashScreen(QPixmap(_get_splash_image_name()),
+                       Qt.WindowStaysOnTopHint)
 SPLASH.show()
 SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
                    | Qt.AlignAbsolute, QColor(Qt.black))
