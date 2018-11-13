@@ -41,7 +41,8 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
       workspace->getIndicesFromDetectorIDs(detectorIDs);
 
   if (wsIndices.size() != detectorIDs.size())
-    throw std::invalid_argument("Requested a detector outside of range (wsIndicies.size() > detectorIDs.size)");
+    throw std::invalid_argument("Requested a detector outside of range "
+                                "(wsIndicies.size() > detectorIDs.size)");
 
   outputWS->getSpectrum(0).clearDetectorIDs();
   outputWS->setSharedX(0, workspace->sharedX(wsIndices.front()));
