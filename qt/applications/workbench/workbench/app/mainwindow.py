@@ -38,7 +38,7 @@ requirements.check_qt()
 # Qt
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
-from qtpy.QtGui import (QColor, QPixmap)  # noqa
+from qtpy.QtGui import (QColor, QPixmap, QGuiApplication)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
@@ -87,7 +87,9 @@ atexit.register(qCleanupResources)
 
 
 def _get_splash_image_name():
-    width = QApplication.desktop().availableGeometry().width()
+    # gets the width of the screen where the main window was initialised
+    width = QGuiApplication.primaryScreen().size().width()
+
     if width > 2048:
         return ':/images/MantidSplashScreen_4k.jpg'
     else:
