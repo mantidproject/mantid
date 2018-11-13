@@ -114,7 +114,7 @@ private:
                          const std::vector<std::string> &tolerances);
 
   void updateSumProperty(double addeeWSNumber, double outWSNumber,
-                         API::MatrixWorkspace_sptr &outWS,
+                         API::MatrixWorkspace &outWS,
                          const std::string &name);
   void updateTimeSeriesProperty(API::MatrixWorkspace &addeeWS,
                                 API::MatrixWorkspace &outWS,
