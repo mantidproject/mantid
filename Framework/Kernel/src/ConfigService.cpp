@@ -2009,7 +2009,7 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
   // If this is already a full path, nothing to do
   if (Poco::Path(fName).isAbsolute())
     return fName;
-   // First try the path relative to the current directory. Can throw in some
+  // First try the path relative to the current directory. Can throw in some
   // circumstances with extensions that have wild cards
   try {
     Poco::File fullPath(Poco::Path().resolve(fName));
