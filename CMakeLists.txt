@@ -310,6 +310,7 @@ if ( ENABLE_CPACK )
                                        "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
                                        "sip >= 4.18,"
                                        "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
+                                       "python-requests,"
                                        "scipy,"
                                        "hdf,hdf5,jsoncpp >= 0.7.0" )
       if (ENABLE_MANTIDPLOT)
@@ -388,6 +389,7 @@ if ( ENABLE_CPACK )
       if ( PYTHON_VERSION_MAJOR EQUAL 3 )
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
                                            "python3-numpy,"
+                                           "python3-requests,"
                                            "python3-sip,"
                                            "python3-six,"
                                            "python3-matplotlib,"
@@ -406,6 +408,7 @@ if ( ENABLE_CPACK )
       else() # python 2
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-h5py,"
                                            "python-numpy,"
+                                           "python-requests,"
                                            "python-sip,"
                                            "python-six,"
                                            "python-matplotlib,"

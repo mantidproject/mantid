@@ -119,7 +119,7 @@ if EXIST %BUILD_DIR% (
 set PACKAGE_OPTS=
 if "%BUILDPKG%" == "yes" (
   :: If package name is provided on the Jenkins job, use the custom package name
-  :: otherwise determine the correct suffix based on the branch, the else 
+  :: otherwise determine the correct suffix based on the branch, the else
   :: captures pull requests and they have suffix unstable
   if not "%PACKAGE_SUFFIX%" == "" (
     echo Using PACKAGE_SUFFIX=%PACKAGE_SUFFIX% from job parameter
@@ -165,7 +165,7 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set VATES_OPT_VAL=ON
 )
 
-call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERSION% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DPACKAGE_WORKBENCH=OFF -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
+call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERSION% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DPACKAGE_WORKBENCH=ON -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
 
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 

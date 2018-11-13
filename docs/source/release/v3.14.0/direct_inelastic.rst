@@ -22,6 +22,13 @@ Improvements
 ############
 
 - :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>` now masks zero counting detectors from the integral.
+- Changes to :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`:
+
+  - It is now possible to turn off the Debye-Waller correction
+  - The temperature sample log entry can be given in an instrument parameter ``temperature_sample_log``.
+  - The temperature sample log can now be a time series.
+
+- :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` now supports computation from :math:`S(2\theta,E)` workspace.
 
 Bugfixes
 ########
