@@ -22,6 +22,8 @@ import mantid.kernel, mantid.api
 # ====================================================
 # Validation
 # ====================================================
+
+
 def validate_args(*args, **kwargs):
     return len(args) > 0 and (isinstance(args[0], EventWorkspace) or
                               isinstance(args[0], Workspace2D) or
@@ -81,7 +83,7 @@ def _dim2array(d):
     return numpy.linspace(dmin, dmax, d.getNBins() + 1)
 
 
-def get_wksp_index_dist_and_label(workspace, axis=0, **kwargs):
+def get_wksp_index_dist_and_label(workspace, axis=1, **kwargs):
     """
     Get workspace index, whether the workspace is a distribution,
     and label for the spectrum
@@ -132,7 +134,7 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     # convert the spectrum number to a workspace index and vice versa
     if spectrum_number is not None:
         workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
-    elif axis != 0:  # Do not try to get the Spectrum number if we are traversing a bin's indices
+    elif axis == 1:  # Do not try to get the Spectrum number if we are traversing a bin's indices
         spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
 
     return workspace_index, spectrum_number, kwargs
