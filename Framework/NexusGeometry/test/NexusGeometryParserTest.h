@@ -9,7 +9,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FileFinder.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -17,10 +16,12 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include <H5Cpp.h>
+#include <Poco/Glob.h>
 #include <chrono>
 #include <string>
 
@@ -52,8 +53,8 @@ public:
 
   std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
     H5std_string nexusFilename = "unit_testing/SMALLFAKE_example_geometry.hdf5";
-    const auto fullpath =
-        API::FileFinder::Instance().getFullPath(nexusFilename, true);
+    const auto fullpath = Kernel::ConfigService::Instance().getFullPath(
+        nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
 
     return NexusGeometryParser::createInstrument(fullpath);
   }
@@ -213,12 +214,12 @@ public:
   }
 
   NexusGeometryParserTestPerformance() {
-    m_wishHDF5DefinitionPath = API::FileFinder::Instance().getFullPath(
-        "WISH_Definition_10Panels.hdf5", true);
-    m_sans2dHDF5DefinitionPath = API::FileFinder::Instance().getFullPath(
-        "SANS2D_Definition_Tubes.hdf5", true);
-    m_lokiHDF5DefinitionPath =
-        API::FileFinder::Instance().getFullPath("LOKI_Definition.hdf5", true);
+    m_wishHDF5DefinitionPath = Kernel::ConfigService::Instance().getFullPath(
+        "WISH_Definition_10Panels.hdf5", true, Poco::Glob::GLOB_DEFAULT);
+    m_sans2dHDF5DefinitionPath = Kernel::ConfigService::Instance().getFullPath(
+        "SANS2D_Definition_Tubes.hdf5", true, Poco::Glob::GLOB_DEFAULT);
+    m_lokiHDF5DefinitionPath = Kernel::ConfigService::Instance().getFullPath(
+        "LOKI_Definition.hdf5", true, Poco::Glob::GLOB_DEFAULT);
   }
   static void destroySuite(NexusGeometryParserTestPerformance *suite) {
     delete suite;

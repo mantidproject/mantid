@@ -57,6 +57,8 @@ public:
   /// Is the script running
   virtual bool isExecuting() const;
 
+  const Script &getRunner() const { return *m_runner.data(); }
+
 public slots:
   /// Save to the currently stored name
   virtual void saveToCurrentFile();
