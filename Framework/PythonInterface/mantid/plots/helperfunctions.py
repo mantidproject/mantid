@@ -13,7 +13,8 @@ import numpy
 import datetime
 from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
 from mantid.api import MultipleExperimentInfos
-import mantid.kernel, mantid.api
+import mantid.kernel
+import mantid.api
 
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
@@ -91,7 +92,6 @@ def get_wksp_index_dist_and_label(workspace, axis=1, **kwargs):
     :param workspace: a Workspace2D or an EventWorkspace
     :param axis: The axis on which we're operating
     :param kwargs: Keyword arguments passed to the plot function, passed by reference as it is mutated
-    :rtype (int, bool, dict)
     """
     # get the special arguments out of kwargs
     workspace_index, spectrum_number, kwargs = _get_wksp_index_and_spec_num(workspace, axis, **kwargs)
@@ -114,7 +114,6 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     Get the workspace index and the spectrum number from the kwargs provided
     :param workspace: a Workspace2D or an EventWorkspace
     :param kwargs: Dict of keyword arguments, passed by reference as it is mutated
-    :rtype (int, int, dict)
     :return The workspace index and the spectrum number
     """
     spectrum_number = kwargs.pop('specNum', None)
