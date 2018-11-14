@@ -432,7 +432,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   QAction *setupActionManageSetup = new QAction("Manage Setup", this);
   setupActionManageSetup->setObjectName("action_ManageSetup");
   QAction *setupActionFindPeaks = new QAction("Find Peaks", this);
-  setupActionFindPeaks ->setObjectName("action_FindPeaks");
+  setupActionFindPeaks->setObjectName("action_FindPeaks");
   QAction *setupActionClearFit = new QAction("Clear Model", this);
   setupActionClearFit->setObjectName("action_ClearModel");
 
@@ -3303,8 +3303,7 @@ void FitPropertyBrowser::modifyFitMenu(QAction *fitAction, bool enabled) {
   }
 }
 
-int MantidQt::MantidWidgets::FitPropertyBrowser::sizeOfFunctionsGroup() const
-{
+int MantidQt::MantidWidgets::FitPropertyBrowser::sizeOfFunctionsGroup() const {
   return m_functionsGroup->children().size();
 }
 
