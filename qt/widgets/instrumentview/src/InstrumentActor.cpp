@@ -600,14 +600,14 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
 
     const auto &commonX = ws->points(0);
     const auto &firstY = ws->y(0);
-    x.assign(commonX.begin(), commonX.end());
-    y.assign(firstY.begin(), firstY.end());
+    x.assign(std::cbegin(commonX), std::cend(commonX));
+    y.assign(std::cbegin(firstY), std::cend(firstY));
 
     // add the spectra
     for (size_t i = 0; i < nSpec; ++i) {
       const auto &specY = ws->y(i);
-      std::transform(y.begin(), y.end(), specY.begin(), y.begin(),
-                     std::plus<double>());
+      std::transform(std::cbegin(y), std::cend(y), std::cbegin(specY),
+                     std::begin(y), std::plus<double>());
     }
   } catch (std::invalid_argument &) {
     // wrong Params for any reason
