@@ -1,5 +1,4 @@
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from qtpy.QtWidgets import QMessageBox, QApplication
@@ -12,7 +11,7 @@ from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 class TestFitPropertyBrowser(GuiTestBase):
 
     def __init__(self, test):
-        super(TestFitPropertyBrowser, self).__init__()
+        super(TestFitPropertyBrowser, self).__init__(FitPropertyBrowser)
         self.test = test
 
     def start_setup_menu(self):
@@ -97,19 +96,19 @@ class TestFitPropertyBrowser(GuiTestBase):
 class TestModalTester(unittest.TestCase):
 
     def test_find_peaks_no_workspace(self):
-        TestFitPropertyBrowser(self).run(FitPropertyBrowser, 'test_find_peaks_no_workspace', pause=0.)
+        TestFitPropertyBrowser(self).run('test_find_peaks_no_workspace', pause=0.)
 
     def test_load_from_string_blah(self):
-        TestFitPropertyBrowser(self).run(FitPropertyBrowser, 'test_load_from_string_blah', pause=0.)
+        TestFitPropertyBrowser(self).run('test_load_from_string_blah', pause=0.)
 
     def test_load_from_string_lb(self):
-        TestFitPropertyBrowser(self).run(FitPropertyBrowser, 'test_load_from_string_lb', pause=0.)
+        TestFitPropertyBrowser(self).run('test_load_from_string_lb', pause=0.)
 
     def test_copy_to_clipboard(self):
-        TestFitPropertyBrowser(self).run(FitPropertyBrowser, 'test_copy_to_clipboard', pause=0.)
+        TestFitPropertyBrowser(self).run('test_copy_to_clipboard', pause=0.)
 
     def test_clear_model(self):
-        TestFitPropertyBrowser(self).run(FitPropertyBrowser, 'test_clear_model', pause=0.)
+        TestFitPropertyBrowser(self).run('test_clear_model', pause=0.)
 
 
 if __name__ == '__main__':
