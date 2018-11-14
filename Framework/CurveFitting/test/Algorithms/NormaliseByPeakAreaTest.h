@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_NORMALISEBYPEAKAREATEST_H_
 #define MANTID_CURVEFITTING_NORMALISEBYPEAKAREATEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/NormaliseByPeakArea.h"
 #include "../Functions/ComptonProfileTestHelpers.h"
+#include "MantidCurveFitting/Algorithms/NormaliseByPeakArea.h"
 
 using Mantid::CurveFitting::Algorithms::NormaliseByPeakArea;
 
@@ -27,7 +33,7 @@ Mantid::API::IAlgorithm_sptr createAlgorithm() {
   alg->setPropertyValue("SymmetrisedWorkspace", "__UNUSED__");
   return alg;
 }
-}
+} // namespace
 
 class NormaliseByPeakAreaTest : public CxxTest::TestSuite {
 public:

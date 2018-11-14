@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ISISRAW2_H
 #define ISISRAW2_H
 
@@ -16,9 +22,9 @@ public:
   bool readData(FILE *file, int i);
   void clear();
 
-  int ndes; ///<ndes
+  int ndes; ///< ndes
 private:
-  char *outbuff; ///<output buffer
+  char *outbuff; ///< output buffer
   int m_bufferSize;
 };
 

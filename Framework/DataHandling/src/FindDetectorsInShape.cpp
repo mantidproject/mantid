@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/FindDetectorsInShape.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

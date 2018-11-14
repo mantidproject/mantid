@@ -156,8 +156,8 @@ public:
     QLabel *widgetLabel; // label substitute showing the current value if there
                          // is no widget
     QToolButton *button; // expandable button for items with children
-    QWidget *
-        container; // container which is expanded when the button is clicked
+    QWidget
+        *container; // container which is expanded when the button is clicked
     QGridLayout *layout; // layout in container
     WidgetItem *parent;
     QList<WidgetItem *> children;

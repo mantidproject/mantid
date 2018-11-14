@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FFTDerivative.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -95,11 +101,11 @@ void FFTDerivative::execComplexFFT() {
     size_t m2 = transWS->y(0).size() / 2;
     double dx = copyWS->x(0)[m2];
 
-    outWS->mutableX(spec)
-        .assign(transWS->x(0).cbegin() + m2, transWS->x(0).cend());
+    outWS->mutableX(spec).assign(transWS->x(0).cbegin() + m2,
+                                 transWS->x(0).cend());
     outWS->mutableX(spec) += dx;
-    outWS->mutableY(spec)
-        .assign(transWS->y(0).cbegin() + m2, transWS->y(0).cend());
+    outWS->mutableY(spec).assign(transWS->y(0).cbegin() + m2,
+                                 transWS->y(0).cend());
 
     progress.report();
   }
@@ -144,7 +150,7 @@ void FFTDerivative::symmetriseSpectrum(const HistogramData::Histogram &in,
  * @param nu :: complete real X of input histogram
  * @param &re :: complete real Y  of input histogram
  * @param &im :: complete imaginary Y of input histogram
-*/
+ */
 void FFTDerivative::multiplyTransform(HistogramX &nu, HistogramY &re,
                                       HistogramY &im) {
   int dn = getProperty("Order");
@@ -184,5 +190,5 @@ void FFTDerivative::multiplyTransform(HistogramX &nu, HistogramY &re,
   }
 }
 
-} // Algorithms
-} // Mandid
+} // namespace Algorithms
+} // namespace Mantid

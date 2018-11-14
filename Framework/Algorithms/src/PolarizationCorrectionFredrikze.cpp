@@ -1,8 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
@@ -222,16 +227,16 @@ PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
   const auto alpha = this->getEfficiencyWorkspace(cAlphaLabel);
   const auto ap = this->getEfficiencyWorkspace(cApLabel);
 
-  const auto A0 = (Iaa * pp * ap) + (ap * Ipa * rho * pp) +
-                  (ap * Iap * alpha * pp) + (Ipp * ap * alpha * rho * pp);
-  const auto A1 = pp * Iaa;
-  const auto A2 = pp * Iap;
-  const auto A3 = ap * Iaa;
-  const auto A4 = ap * Ipa;
-  const auto A5 = ap * alpha * Ipp;
-  const auto A6 = ap * alpha * Iap;
-  const auto A7 = pp * rho * Ipp;
-  const auto A8 = pp * rho * Ipa;
+  const auto A0 = (Iaa * pp * ap) + (Ipa * ap * rho * pp) +
+                  (Iap * ap * alpha * pp) + (Ipp * ap * alpha * rho * pp);
+  const auto A1 = Iaa * pp;
+  const auto A2 = Iap * pp;
+  const auto A3 = Iaa * ap;
+  const auto A4 = Ipa * ap;
+  const auto A5 = Ipp * ap * alpha;
+  const auto A6 = Iap * ap * alpha;
+  const auto A7 = Ipp * pp * rho;
+  const auto A8 = Ipa * pp * rho;
 
   const auto D = pp * ap * (rho + alpha + 1.0 + (rho * alpha));
 

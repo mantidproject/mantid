@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitDataPresenter.h"
 #include "ConvFitAddWorkspaceDialog.h"
 #include "ConvFitDataTablePresenter.h"
@@ -11,8 +17,9 @@ namespace IDA {
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
                                            IndirectFitDataView *view)
     : IndirectFitDataPresenter(
-          model, view, Mantid::Kernel::make_unique<ConvFitDataTablePresenter>(
-                           model, view->getDataTable())),
+          model, view,
+          Mantid::Kernel::make_unique<ConvFitDataTablePresenter>(
+              model, view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
 

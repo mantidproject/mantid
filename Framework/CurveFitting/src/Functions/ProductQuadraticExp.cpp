@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ProductQuadraticExp.h"
-#include "MantidCurveFitting/Functions/ExpDecay.h"
-#include "MantidCurveFitting/Functions/Quadratic.h"
-#include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/Functions/ExpDecay.h"
+#include "MantidCurveFitting/Functions/ProductFunction.h"
+#include "MantidCurveFitting/Functions/Quadratic.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -14,7 +20,7 @@ DECLARE_FUNCTION(ProductQuadraticExp)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 ProductQuadraticExp::ProductQuadraticExp() {
   declareParameter("A0", 0.0, "Coefficient for constant term");
   declareParameter("A1", 0.0, "Coefficient for linear term");

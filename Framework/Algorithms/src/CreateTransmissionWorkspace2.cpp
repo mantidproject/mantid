@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateTransmissionWorkspace2.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -17,7 +23,7 @@ DECLARE_ALGORITHM(CreateTransmissionWorkspace2)
 namespace {
 // Prefix for names of intermediate transmission workspaces in lambda
 std::string const TRANS_LAM_PREFIX("TRANS_LAM_");
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -92,8 +98,8 @@ void CreateTransmissionWorkspace2::init() {
 }
 
 /** Validate inputs
-* @return :: error message to show
-*/
+ * @return :: error message to show
+ */
 std::map<std::string, std::string>
 CreateTransmissionWorkspace2::validateInputs() {
 
@@ -145,10 +151,10 @@ void CreateTransmissionWorkspace2::exec() {
 }
 
 /** Normalize detectors by monitors
-* @param IvsTOF :: a workspace in TOF that contains spectra for both
-* monitors and detectors
-* @return :: the normalized workspace in Wavelength
-*/
+ * @param IvsTOF :: a workspace in TOF that contains spectra for both
+ * monitors and detectors
+ * @return :: the normalized workspace in Wavelength
+ */
 MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
     const MatrixWorkspace_sptr IvsTOF) {
 

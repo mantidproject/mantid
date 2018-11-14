@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MaxEnt/MaxentCalculator.h"
 #include <cmath>
 
@@ -5,12 +11,12 @@ namespace Mantid {
 namespace Algorithms {
 
 /**
-* Constructor
-* @param entropy : pointer to MaxentEntropy object defining the entropy formula
-* to use
-* @param transform : pointer to MaxentTransform object defining how to transform
-* from data space to image space and vice-versa
-*/
+ * Constructor
+ * @param entropy : pointer to MaxentEntropy object defining the entropy formula
+ * to use
+ * @param transform : pointer to MaxentTransform object defining how to
+ * transform from data space to image space and vice-versa
+ */
 MaxentCalculator::MaxentCalculator(MaxentEntropy_sptr entropy,
                                    MaxentTransform_sptr transform)
     : m_data(), m_errors(), m_image(), m_dataCalc(), m_background(1.0),
@@ -18,10 +24,10 @@ MaxentCalculator::MaxentCalculator(MaxentEntropy_sptr entropy,
       m_entropy(entropy), m_transform(transform) {}
 
 /**
-* Calculates the gradient of chi-square using the experimental data, calculated
-* data and errors
-* @return : The gradient of chi-square as a vector
-*/
+ * Calculates the gradient of chi-square using the experimental data, calculated
+ * data and errors
+ * @return : The gradient of chi-square as a vector
+ */
 std::vector<double> MaxentCalculator::calculateChiGrad() const {
 
   // Calculates the gradient of Chi
@@ -56,9 +62,9 @@ std::vector<double> MaxentCalculator::calculateChiGrad() const {
 }
 
 /**
-* Returns the reconstructed (calculated) data
-* @return : The reconstructed data as a vector
-*/
+ * Returns the reconstructed (calculated) data
+ * @return : The reconstructed data as a vector
+ */
 std::vector<double> MaxentCalculator::getReconstructedData() const {
 
   if (m_dataCalc.empty()) {
@@ -69,9 +75,9 @@ std::vector<double> MaxentCalculator::getReconstructedData() const {
 }
 
 /**
-* Returns the (reconstructed) image
-* @return : The image as a vector
-*/
+ * Returns the (reconstructed) image
+ * @return : The image as a vector
+ */
 std::vector<double> MaxentCalculator::getImage() const {
 
   if (m_image.empty()) {
@@ -82,9 +88,9 @@ std::vector<double> MaxentCalculator::getImage() const {
 }
 
 /**
-* Returns the search directions (in image space)
-* @return : The search directions
-*/
+ * Returns the search directions (in image space)
+ * @return : The search directions
+ */
 std::vector<std::vector<double>> MaxentCalculator::getSearchDirections() const {
 
   if (m_directionsIm.empty()) {
@@ -94,9 +100,9 @@ std::vector<std::vector<double>> MaxentCalculator::getSearchDirections() const {
 }
 
 /**
-* Returns the quadratic coefficients
-* @return : The quadratic coefficients
-*/
+ * Returns the quadratic coefficients
+ * @return : The quadratic coefficients
+ */
 QuadraticCoefficients MaxentCalculator::getQuadraticCoefficients() const {
 
   if (!m_coeffs.c1.size().first) {
@@ -107,10 +113,10 @@ QuadraticCoefficients MaxentCalculator::getQuadraticCoefficients() const {
 }
 
 /**
-* Returns the angle between the gradient of chi-square and the gradient of the
-* entropy (calculated and initialized in calculateQuadraticCoefficients())
-* @return : The angle
-*/
+ * Returns the angle between the gradient of chi-square and the gradient of the
+ * entropy (calculated and initialized in calculateQuadraticCoefficients())
+ * @return : The angle
+ */
 double MaxentCalculator::getAngle() const {
 
   if (m_angle == -1) {
@@ -120,9 +126,9 @@ double MaxentCalculator::getAngle() const {
 }
 
 /**
-* Returns chi-square
-* @return : Chi-square
-*/
+ * Returns chi-square
+ * @return : Chi-square
+ */
 double MaxentCalculator::getChisq() {
 
   if (m_chisq == -1.) {
@@ -142,19 +148,22 @@ MaxentCalculator::calculateImage(const std::vector<double> &data) const {
 }
 
 /**
-* Performs an iteration and calculates everything: search directions (SB. 21),
-* quadratic coefficients (SB. 22), angle between the gradient of chi-square and
-* the gradient of the entropy, and chi-sqr
-* @param data : [input] The experimental data as a vector (real or complex)
-* @param errors : [input] The experimental errors as a vector (real or complex)
-* @param image : [input] The image as a vector (real or complex)
-* @param background : [input] The background
-*/
+ * Performs an iteration and calculates everything: search directions (SB. 21),
+ * quadratic coefficients (SB. 22), angle between the gradient of chi-square and
+ * the gradient of the entropy, and chi-sqr
+ * @param data : [input] The experimental data as a vector (real or complex)
+ * @param errors : [input] The experimental errors as a vector (real or complex)
+ * @param image : [input] The image as a vector (real or complex)
+ * @param background : [input] The background
+ * @param linearAdjustments: [input] Optional linear adjustments (complex)
+ * @param constAdjustments: [input] Optional constant adjustments (complex)
+ */
 void MaxentCalculator::iterate(const std::vector<double> &data,
                                const std::vector<double> &errors,
                                const std::vector<double> &image,
-                               double background) {
-
+                               double background,
+                               const std::vector<double> &linearAdjustments,
+                               const std::vector<double> &constAdjustments) {
   // Some checks
   if (data.empty() || errors.empty() || (data.size() != errors.size())) {
     throw std::invalid_argument(
@@ -177,6 +186,31 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   // Set to -1, these will be calculated later
   m_angle = -1.;
   m_chisq = -1.;
+
+  // adjust calculated data, if required
+  if (!linearAdjustments.empty()) {
+    if (linearAdjustments.size() < m_dataCalc.size()) {
+      throw std::invalid_argument(
+          "Cannot adjust calculated data: too few linear adjustments");
+    }
+    for (size_t j = 0; j < m_dataCalc.size() / 2; ++j) {
+      double yr = m_dataCalc[2 * j];
+      double yi = m_dataCalc[2 * j + 1];
+      m_dataCalc[2 * j] =
+          yr * linearAdjustments[2 * j] - yi * linearAdjustments[2 * j + 1];
+      m_dataCalc[2 * j + 1] =
+          yi * linearAdjustments[2 * j] + yr * linearAdjustments[2 * j + 1];
+    }
+  }
+  if (!constAdjustments.empty()) {
+    if (constAdjustments.size() < m_dataCalc.size()) {
+      throw std::invalid_argument(
+          "Cannot adjust calculated data: too few constant adjustments");
+    }
+    for (size_t i = 0; i < m_dataCalc.size(); ++i) {
+      m_dataCalc[i] += constAdjustments[i];
+    }
+  }
 
   // Two search directions
   const size_t dim = 2;
@@ -299,8 +333,8 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
 }
 
 /**
-* Calculates chi-square
-*/
+ * Calculates chi-square
+ */
 void MaxentCalculator::calculateChisq() {
   if (m_data.empty() || m_errors.empty() || m_dataCalc.empty()) {
     throw std::runtime_error("Cannot calculate chi-square");

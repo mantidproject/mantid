@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SofQCommon.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -16,7 +22,7 @@ namespace Algorithms {
  *energy property (Ei) attached to it as the run log
  *@param hostAlgorithm :: the pointer to SofQ algorithm hosting the base class.
  *This algorithm expects to have EMode and EFixed properties attached to it.
-*/
+ */
 void SofQCommon::initCachedValues(const API::MatrixWorkspace &workspace,
                                   API::Algorithm *const hostAlgorithm) {
   // Retrieve the emode & efixed properties
@@ -232,5 +238,5 @@ SofQCommon::qBinHintsIndirect(const API::MatrixWorkspace &ws, const double minE,
   }
   return std::make_pair(minQ, maxQ);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

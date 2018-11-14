@@ -13,7 +13,7 @@ This algorithm can
 
 | ``1. add an Instrument to a Workspace without any real instrument associated with, or``
 | ``2. replace a Workspace's Instrument with a new Instrument, or``
-| ``3. edit all detectors' parameters of the instrument associated with a Workspace (partial instrument editing is not supported). ``
+| ``3. edit all detectors' parameters of the instrument associated with a Workspace (partial instrument editing is not supported).``
 
 Requirements on input properties
 --------------------------------

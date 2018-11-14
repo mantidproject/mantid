@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SORTTABLEWORKSPACETEST_H_
 #define MANTID_DATAHANDLING_SORTTABLEWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/SortTableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/SortTableWorkspace.h"
 #include "MantidDataObjects/TableColumn.h"
 
 using Mantid::DataHandling::SortTableWorkspace;
@@ -88,11 +94,14 @@ public:
       return;
 
     auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(
-                      *outws->getColumn("x")).data();
+                      *outws->getColumn("x"))
+                      .data();
     auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(
-                      *outws->getColumn("y")).data();
+                      *outws->getColumn("y"))
+                      .data();
     auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(
-                      *outws->getColumn("z")).data();
+                      *outws->getColumn("z"))
+                      .data();
 
     TS_ASSERT_EQUALS(data1[0], 1);
     TS_ASSERT_EQUALS(data1[1], 1);
@@ -189,11 +198,14 @@ public:
       return;
 
     auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(
-                      *outws->getColumn("x")).data();
+                      *outws->getColumn("x"))
+                      .data();
     auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(
-                      *outws->getColumn("y")).data();
+                      *outws->getColumn("y"))
+                      .data();
     auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(
-                      *outws->getColumn("z")).data();
+                      *outws->getColumn("z"))
+                      .data();
 
     TS_ASSERT_EQUALS(data1[0], 1);
     TS_ASSERT_EQUALS(data1[1], 1);
@@ -287,11 +299,14 @@ public:
       return;
 
     auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(
-                      *outws->getColumn("x")).data();
+                      *outws->getColumn("x"))
+                      .data();
     auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(
-                      *outws->getColumn("y")).data();
+                      *outws->getColumn("y"))
+                      .data();
     auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(
-                      *outws->getColumn("z")).data();
+                      *outws->getColumn("z"))
+                      .data();
 
     TS_ASSERT_EQUALS(data1[0], 1);
     TS_ASSERT_EQUALS(data1[1], 1);
@@ -388,11 +403,14 @@ public:
       return;
 
     auto &data1 = static_cast<Mantid::DataObjects::TableColumn<int> &>(
-                      *outws->getColumn("x")).data();
+                      *outws->getColumn("x"))
+                      .data();
     auto &data2 = static_cast<Mantid::DataObjects::TableColumn<std::string> &>(
-                      *outws->getColumn("y")).data();
+                      *outws->getColumn("y"))
+                      .data();
     auto &data3 = static_cast<Mantid::DataObjects::TableColumn<double> &>(
-                      *outws->getColumn("z")).data();
+                      *outws->getColumn("z"))
+                      .data();
 
     TS_ASSERT_EQUALS(data1[0], 3);
     TS_ASSERT_EQUALS(data1[1], 3);

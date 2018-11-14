@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CREATESAMPLESHAPETEST_H_
 #define CREATESAMPLESHAPETEST_H_
 
@@ -6,10 +12,10 @@
 //---------------------------------------
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/CreateSampleShape.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/CreateSampleShape.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

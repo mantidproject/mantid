@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateUserDefinedBackground.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -16,10 +22,10 @@ const std::string CreateUserDefinedBackground::AUTODISTRIBUTIONKEY =
     "graph1d.autodistribution";
 
 using Mantid::API::WorkspaceProperty;
-using Mantid::Kernel::Direction;
-using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
+using Mantid::HistogramData::Histogram;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateUserDefinedBackground)
@@ -170,9 +176,9 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
     histogram.setFrequencies(yBackground);
     histogram.setFrequencyStandardDeviations(eBackground);
   } else {
-    if (data->isHistogramData() &&
-        "On" ==
-            Kernel::ConfigService::Instance().getString(AUTODISTRIBUTIONKEY)) {
+    if (data->isHistogramData() && Kernel::ConfigService::Instance()
+                                       .getValue<bool>(AUTODISTRIBUTIONKEY)
+                                       .get_value_or(false)) {
       // Background data is actually frequencies, we put it into temporary to
       // benefit from automatic conversion in setCounts(), etc.
       histogram.setCounts(Frequencies(yBackground), xBinEdges);

@@ -1,5 +1,10 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "StepScan.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -10,6 +15,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include <QFileInfo>
 #include <QUrl>
 
@@ -69,10 +75,11 @@ void StepScan::initLayout() {
           SLOT(launchInstrumentWindow()));
 
   connect(m_uiForm.mWRunFiles, SIGNAL(filesFound()), SLOT(loadFile()));
-  connect(this, SIGNAL(logsAvailable(
-                    const Mantid::API::MatrixWorkspace_const_sptr &)),
-          SLOT(fillPlotVarCombobox(
-              const Mantid::API::MatrixWorkspace_const_sptr &)));
+  connect(
+      this,
+      SIGNAL(logsAvailable(const Mantid::API::MatrixWorkspace_const_sptr &)),
+      SLOT(fillPlotVarCombobox(
+          const Mantid::API::MatrixWorkspace_const_sptr &)));
 
   connect(m_uiForm.helpButton, SIGNAL(clicked()), SLOT(helpClicked()));
   connect(m_uiForm.startButton, SIGNAL(clicked()), SLOT(runStepScanAlg()));
@@ -167,10 +174,11 @@ void StepScan::startLiveListenerComplete(bool error) {
     setupOptionControls();
 
     addReplaceObserverOnce();
-    connect(this, SIGNAL(logsUpdated(
-                      const Mantid::API::MatrixWorkspace_const_sptr &)),
-            SLOT(expandPlotVarCombobox(
-                const Mantid::API::MatrixWorkspace_const_sptr &)));
+    connect(
+        this,
+        SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
+        SLOT(expandPlotVarCombobox(
+            const Mantid::API::MatrixWorkspace_const_sptr &)));
   } else {
     QMessageBox::critical(this, "StartLiveData failed",
                           "Unable to start live data collection");
@@ -270,7 +278,7 @@ public:
 private:
   StepScan *const the_gui;
 };
-}
+} // namespace
 
 bool StepScan::mergeRuns() {
   ScopedStatusText _merging(this->m_uiForm.statusText, "Merging runs...");
@@ -665,20 +673,24 @@ void StepScan::plotCurve() {
     yAxisTitle += " / " + normalization;
 
   // Has to be done via python
-  std::string pyCode = "g = graph('" + title + "')\n"
-                                               "if g is None:\n"
-                                               "    g = plotSpectrum('" +
-                       m_plotWSName + "',0,True,type=Layer.Scatter)\n"
-                                      "    l = g.activeLayer()\n"
-                                      "    l.legend().hide()\n"
-                                      "    l.removeTitle()\n"
-                                      "    setWindowName(g,'" +
-                       title + "')\n"
-                               "    g.setWindowLabel('Step Scan')\n"
-                               "l = g.activeLayer()\n"
-                               "l.setAxisTitle(Layer.Bottom,'" +
-                       xAxisTitle + "')\n"
-                                    "l.setAxisTitle(Layer.Left,'" +
+  std::string pyCode = "g = graph('" + title +
+                       "')\n"
+                       "if g is None:\n"
+                       "    g = plotSpectrum('" +
+                       m_plotWSName +
+                       "',0,True,type=Layer.Scatter)\n"
+                       "    l = g.activeLayer()\n"
+                       "    l.legend().hide()\n"
+                       "    l.removeTitle()\n"
+                       "    setWindowName(g,'" +
+                       title +
+                       "')\n"
+                       "    g.setWindowLabel('Step Scan')\n"
+                       "l = g.activeLayer()\n"
+                       "l.setAxisTitle(Layer.Bottom,'" +
+                       xAxisTitle +
+                       "')\n"
+                       "l.setAxisTitle(Layer.Left,'" +
                        yAxisTitle + "')";
 
   runPythonCode(QString::fromStdString(pyCode));

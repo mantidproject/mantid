@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 import os
@@ -25,6 +31,7 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
                          TOFRange=[10008, 35000], TOFSteps=200,
                          SignalPeakPixelRange=[150, 160],
                          SignalBackgroundPixelRange=[147, 163],
+                         LowResolutionPixelRange=[94, 160],
                          ScalingFactorFile=self.cfg_file)
 
     def validate(self):

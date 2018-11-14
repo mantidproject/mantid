@@ -25,7 +25,7 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   # Environment
   if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set ( _python_path ${PYTHON_XMLRUNNER_DIR};${_test_src_dir};$ENV{PYTHONPATH} )
-    # cmake list separator and Windows environment seprator are the same so escape the cmake one
+    # cmake list separator and Windows environment separator are the same so escape the cmake one
     string ( REPLACE ";" "\\;" _python_path "${_python_path}" )
   else()
     set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:$ENV{PYTHONPATH} )
@@ -34,6 +34,9 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   list ( APPEND _test_environment "PYTHONPATH=${_python_path}" )
   if ( PYUNITTEST_QT_API )
     list ( APPEND _test_environment "QT_API=${PYUNITTEST_QT_API}" )
+  endif()
+  if ( PYUNITTEST_TESTRUNNER_IMPORT_MANTID )
+    list ( APPEND _test_environment "TESTRUNNER_IMPORT_MANTID=1" )
   endif()
 
   # Add all of the individual tests so that they can be run in parallel
@@ -49,6 +52,10 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
                            WORKING_DIRECTORY ${_working_dir}
                            ENVIRONMENT "${_test_environment}"
                            TIMEOUT ${TESTING_TIMEOUT} )
+    if ( PYUNITTEST_RUN_SERIAL )
+      set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
+                             RUN_SERIAL 1 )
+    endif ()
   endforeach ( part ${ARGN} )
 endfunction ()
 

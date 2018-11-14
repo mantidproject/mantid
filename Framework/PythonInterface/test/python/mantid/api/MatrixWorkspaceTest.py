@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, print_function)
 
 import unittest
@@ -410,6 +416,9 @@ class MatrixWorkspaceTest(unittest.TestCase):
         specInfo = self._test_ws.spectrumInfo()
         self.assertEquals(specInfo.isMasked(0), False)
         self.assertEquals(specInfo.isMasked(1), False)
+
+    def test_isCommonBins(self):
+        self.assertTrue(self._test_ws.isCommonBins())
 
 if __name__ == '__main__':
     unittest.main()

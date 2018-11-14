@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
@@ -14,15 +20,11 @@
 #endif
 
 #include "MantidKernel/WarningSuppressions.h"
-GCC_DIAG_OFF(conversion)
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 #include <BRepPrimAPI_MakeSphere.hxx>
-GCC_DIAG_ON(conversion)
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 #endif
 
 namespace Mantid {
@@ -237,15 +239,15 @@ Object of write is to output a MCNPX plane info
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
 }
 /**
-* Calculates the bounding box for the sphere and returns the bounding box
-* values.
-* @param xmax :: input and output for the bounding box X axis max value
-* @param ymax :: input and output for the bounding box Y axis max value
-* @param zmax :: input and output for the bounding box Z axis max value
-* @param xmin :: input and output for the bounding box X axis min value
-* @param ymin :: input and output for the bounding box Y axis min value
-* @param zmin :: input and output for the bounding box Z axis min value
-*/
+ * Calculates the bounding box for the sphere and returns the bounding box
+ * values.
+ * @param xmax :: input and output for the bounding box X axis max value
+ * @param ymax :: input and output for the bounding box Y axis max value
+ * @param zmax :: input and output for the bounding box Z axis max value
+ * @param xmin :: input and output for the bounding box X axis min value
+ * @param ymin :: input and output for the bounding box Y axis min value
+ * @param zmin :: input and output for the bounding box Z axis min value
+ */
 void Sphere::getBoundingBox(double &xmax, double &ymax, double &zmax,
                             double &xmin, double &ymin, double &zmin) {
   xmax = Centre[0] + Radius;

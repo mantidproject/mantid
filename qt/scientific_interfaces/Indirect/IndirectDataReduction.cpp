@@ -1,8 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------
 // Includes
 //----------------------
 #include "IndirectDataReduction.h"
 
+#include "ILLEnergyTransfer.h"
+#include "ISISCalibration.h"
+#include "ISISDiagnostics.h"
+#include "ISISEnergyTransfer.h"
+#include "IndirectMoments.h"
+#include "IndirectSqw.h"
+#include "IndirectSymmetrise.h"
+#include "IndirectTransmission.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -12,14 +26,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
-#include "IndirectMoments.h"
-#include "IndirectSqw.h"
-#include "IndirectSymmetrise.h"
-#include "IndirectTransmission.h"
-#include "ISISCalibration.h"
-#include "ISISDiagnostics.h"
-#include "ISISEnergyTransfer.h"
-#include "ILLEnergyTransfer.h"
 
 #include <QDir>
 #include <QMessageBox>
@@ -29,7 +35,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectDataReduction)
 }
-}
+} // namespace MantidQt
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectDataReduction");
@@ -89,25 +95,14 @@ void IndirectDataReduction::exportTabPython() {
 }
 
 /**
- * This is the function called when the "Run" button is clicked. It will call
- * the relevent function
- * in the subclass.
- */
-void IndirectDataReduction::runClicked() {
-  QString tabName =
-      m_uiForm.twIDRTabs->tabText(m_uiForm.twIDRTabs->currentIndex());
-  m_tabs[tabName].second->runTab();
-}
-
-/**
  * Sets up Qt UI file and connects signals, slots.
  */
 void IndirectDataReduction::initLayout() {
   m_uiForm.setupUi(this);
 
-  // Do not allow running until setup  and instrument laoding are done
-  updateRunButton(false, "Loading UI",
-                  "Initialising user interface components...");
+  // Do not allow running until setup  and instrument loading are done
+  emitUpdateRunButton(false, "disable", "Loading UI...",
+                      "Initialising user interface components...");
 
   // Create the tabs
   addTab<ISISEnergyTransfer>("ISIS Energy Transfer");
@@ -124,22 +119,21 @@ void IndirectDataReduction::initLayout() {
   // Connect the Python export buton
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
-  // Connect the "Run" button
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   // Connect the "Manage User Directories" Button
   connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
 
   // Reset the Run button state when the tab is changed
   connect(m_uiForm.twIDRTabs, SIGNAL(currentChanged(int)), this,
-          SLOT(updateRunButton()));
+          SLOT(emitUpdateRunButton()));
 
   // Handle instrument configuration changes
   connect(m_uiForm.iicInstrumentConfiguration,
           SIGNAL(instrumentConfigurationUpdated(
               const QString &, const QString &, const QString &)),
-          this, SLOT(instrumentSetupChanged(const QString &, const QString &,
-                                            const QString &)));
+          this,
+          SLOT(instrumentSetupChanged(const QString &, const QString &,
+                                      const QString &)));
 
   // Update the instrument configuration across the UI
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
@@ -261,9 +255,12 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
 
   // List of values to get from IPF
   std::vector<std::string> ipfElements{
-      "analysis-type", "spectra-min", "spectra-max", "Efixed", "peak-start",
-      "peak-end", "back-start", "back-end", "rebin-default",
-      "cm-1-convert-choice", "save-nexus-choice", "save-ascii-choice",
+      "analysis-type",      "spectra-min",
+      "spectra-max",        "Efixed",
+      "peak-start",         "peak-end",
+      "back-start",         "back-end",
+      "rebin-default",      "cm-1-convert-choice",
+      "save-nexus-choice",  "save-ascii-choice",
       "fold-frames-choice", "resolution"};
 
   // In the IRIS IPF there is no fmica component
@@ -540,9 +537,8 @@ void IndirectDataReduction::showMessageBox(const QString &message) {
  * @param message Message shown on the button
  * @param tooltip Tooltip shown when hovering over button
  */
-void IndirectDataReduction::updateRunButton(bool enabled, QString message,
-                                            QString tooltip) {
-  m_uiForm.pbRun->setEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
+void IndirectDataReduction::emitUpdateRunButton(
+    bool enabled, std::string const &enableOutputButtons, QString message,
+    QString tooltip) {
+  emit updateRunButton(enabled, enableOutputButtons, message, tooltip);
 }

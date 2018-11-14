@@ -1,36 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef RECTANGULAR_DETECTOR_TEST_H
 #define RECTANGULAR_DETECTOR_TEST_H
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <string>
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/Quat.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class RectangularDetectorTest : public CxxTest::TestSuite {
 public:
-  void testEmptyConstructor() {
-    RectangularDetector q;
-    TS_ASSERT_EQUALS(q.nelements(), 0);
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
-
-    TS_ASSERT_EQUALS(q.getName(), "");
-    TS_ASSERT(!q.getParent());
-    TS_ASSERT_EQUALS(q.getRelativePos(), V3D(0, 0, 0));
-    TS_ASSERT_EQUALS(q.getRelativeRot(), Quat(1, 0, 0, 0));
-    // as there is no parent GetPos should equal getRelativePos
-    TS_ASSERT_EQUALS(q.getRelativePos(), q.getPos());
-  }
-
   void testNameValueConstructor() {
     RectangularDetector q("Name");
     TS_ASSERT_EQUALS(q.nelements(), 0);
@@ -108,7 +101,7 @@ public:
   }
 
   /** Test on a rectangular detector that will be
-   * repeated on an un-moved pRectangularDetectorPixelarametrized version.
+   * repeated on an un-moved pGridDetectorPixelarametrized version.
    */
   void do_test_on(RectangularDetector *det) {
     TS_ASSERT_EQUALS(det->xpixels(), 100);
@@ -226,9 +219,6 @@ public:
     TS_ASSERT_EQUALS(pos, V3D((-50 + 1) * 12., (-100 + 1) * 23., 0.));
 
     // Check some positions
-    std::cout << parDet->getAtXY(0, 0)->getPos() << '\n';
-    std::cout << parDet->getAtXY(1, 0)->getPos() << '\n';
-    std::cout << parDet->getAtXY(1, 1)->getPos() << '\n';
     TS_ASSERT_EQUALS(parDet->getAtXY(0, 0)->getPos(),
                      V3D(1000 - (50) * 12., 2000 - (100 * 23.), 3000.));
     TS_ASSERT_EQUALS(parDet->getAtXY(1, 0)->getPos(),

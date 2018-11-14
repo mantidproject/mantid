@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataPresenter.h"
 #include "IndirectAddWorkspaceDialog.h"
 
@@ -10,8 +16,9 @@ namespace IDA {
 IndirectFitDataPresenter::IndirectFitDataPresenter(IndirectFittingModel *model,
                                                    IndirectFitDataView *view)
     : IndirectFitDataPresenter(
-          model, view, Mantid::Kernel::make_unique<IndirectDataTablePresenter>(
-                           model, view->getDataTable())) {}
+          model, view,
+          Mantid::Kernel::make_unique<IndirectDataTablePresenter>(
+              model, view->getDataTable())) {}
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(
     IndirectFittingModel *model, IndirectFitDataView *view,
@@ -53,8 +60,9 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
   connect(m_tablePresenter.get(),
           SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
                                       std::size_t)),
-          this, SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
-                                            std::size_t)));
+          this,
+          SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
+                                      std::size_t)));
 }
 
 IndirectFitDataView const *IndirectFitDataPresenter::getView() const {

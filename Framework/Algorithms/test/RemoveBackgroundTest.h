@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef REMOVE_BACKGROUD_TEST_H_
 #define REMOVE_BACKGROUD_TEST_H_
 
@@ -6,10 +12,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 
-#include "MantidAlgorithms/RemoveBackground.h"
-#include "MantidAlgorithms/Rebin.h"
-#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CalculateFlatBackground.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAlgorithms/Rebin.h"
+#include "MantidAlgorithms/RemoveBackground.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 using namespace Mantid;

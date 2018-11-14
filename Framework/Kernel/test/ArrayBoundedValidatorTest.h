@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef ARRAYBOUNDEDVALIDATORTEST_H_
 #define ARRAYBOUNDEDVALIDATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include <cxxtest/TestSuite.h>
 #include <string>
 #include <vector>
 

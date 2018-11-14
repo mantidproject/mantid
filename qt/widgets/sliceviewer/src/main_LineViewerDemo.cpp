@@ -1,31 +1,37 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <QApplication>
-#include <QSplashScreen>
-#include <QMessageBox>
 #include <QDir>
+#include <QMessageBox>
+#include <QSplashScreen>
 #include <QThread>
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
-#include "qmainwindow.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidQtSliceViewer/LineViewer.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/VMD.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidQtSliceViewer/LineViewer.h"
+#include "qmainwindow.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 ;
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
-using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
-using MantidQt::SliceViewer::LineViewer;
+using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Kernel::VMD;
+using MantidQt::SliceViewer::LineViewer;
 
 /** Demo application for quickly testing the LineViewer GUI.
  *

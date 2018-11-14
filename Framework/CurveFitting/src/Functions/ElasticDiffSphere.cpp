@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
 #include "MantidCurveFitting/Functions/ElasticDiffSphere.h"
@@ -32,7 +38,7 @@ ElasticDiffSphere::ElasticDiffSphere() {
   // parameter "Height" declared in parent DeltaFunction constructor
   // declareParameter("Height", 1.0);
   declareParameter("Radius", 2.0, "Sphere radius");
-  declareAttribute("Q", API::IFunction::Attribute(1.0));
+  FunctionQDepends::declareAttributes();
 }
 
 /**

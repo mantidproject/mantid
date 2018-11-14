@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
-#include <vtkDataSet.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Element.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <vtkDataSet.h>
 
 namespace Mantid {
 namespace VATES {
@@ -56,5 +62,5 @@ std::string vtkDataSetToWsLocation::execute() {
 
 /// Destructor
 vtkDataSetToWsLocation::~vtkDataSetToWsLocation() {}
-}
-}
+} // namespace VATES
+} // namespace Mantid

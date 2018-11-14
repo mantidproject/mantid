@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_INDEXING_INDEXSET_H_
 #define MANTID_INDEXING_INDEXSET_H_
 
@@ -19,27 +25,6 @@ namespace detail {
 
   @author Simon Heybrock
   @date 2017
-
-  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class T> class IndexSet {
 public:
@@ -122,8 +107,7 @@ template <class T> IndexSet<T>::IndexSet() : m_size(0) {}
 
 /// Constructor for a set covering the full range from 0 to fullRange-1.
 template <class T>
-IndexSet<T>::IndexSet(size_t fullRange)
-    : m_size(fullRange) {}
+IndexSet<T>::IndexSet(size_t fullRange) : m_size(fullRange) {}
 
 /// Constructor for a set covering the range from min to max. Range is verified
 /// at construction time.

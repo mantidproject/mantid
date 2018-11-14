@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -11,9 +17,9 @@
 #include "MantidKernel/Logger.h"
 
 #include <boost/lexical_cast.hpp>
+#include <cmath>
 #include <gsl/gsl_blas.h>
 #include <iostream>
-#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -22,7 +28,7 @@ namespace FuncMinimisers {
 namespace {
 /// static logger
 Kernel::Logger g_log("DampedGaussNewtonMinimizer");
-}
+} // namespace
 
 DECLARE_FUNCMINIMIZER(DampedGaussNewtonMinimizer, Damped GaussNewton)
 

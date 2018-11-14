@@ -1,5 +1,11 @@
-#include <iostream>
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <iomanip>
+#include <iostream>
 // includes for workspace handling
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -63,8 +69,8 @@ std::pair<double, double> WorkspaceRecord::getErange() {
  * @brief Constructor
  */
 SliceSelector::SliceSelector(QWidget *parent)
-    : QMainWindow(parent), m_pickerLine{nullptr}, m_loadedWorkspace(),
-      m_selectedWorkspaceIndex{0} {
+    : QMainWindow(parent), m_pickerLine{nullptr},
+      m_loadedWorkspace(), m_selectedWorkspaceIndex{0} {
   this->observePreDelete(true); // Subscribe to notifications
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Feature", "DynamicPDF->SliceSelector", false);
@@ -325,6 +331,6 @@ bool SliceSelector::isWorkspaceValid() {
   }
   return true;
 }
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

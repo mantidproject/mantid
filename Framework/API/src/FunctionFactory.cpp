@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/Expression.h"
-#include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/Expression.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/LibraryManager.h"
 #include <MantidKernel/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
@@ -266,10 +272,28 @@ void FunctionFactoryImpl::inputError(const std::string &str) const {
 void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
                                          const Expression &expr) const {
   if (expr.name() == ",") {
-    for (const auto &constraint : expr) {
-      addConstraint(fun, constraint);
+    for (auto it = expr.begin(); it != expr.end(); ++it) {
+      // If this is a penalty term, we used it on the previous iteration
+      // so we move on to the next term.
+      auto constraint = (*it);
+      std::string constraint_term = constraint.terms()[0].str();
+      if (constraint_term.compare("penalty") == 0) {
+        continue;
+      }
+
+      if ((it + 1) != expr.end()) {
+        auto next_constraint = *(it + 1);
+        std::string next_term = next_constraint.terms()[0].str();
+        if (next_term.compare("penalty") == 0) {
+          addConstraint(fun, constraint, next_constraint);
+        } else {
+          addConstraint(fun, constraint);
+        }
+      } else {
+        addConstraint(fun, constraint);
+      }
     }
-  } else {
+  } else { // There was a single constraint given, cannot contain a penalty
     addConstraint(fun, expr);
   }
 }
@@ -279,10 +303,28 @@ void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
  * @param fun :: The function
  * @param expr :: The constraint expression.
  */
-void FunctionFactoryImpl::addConstraint(IFunction_sptr fun,
+void FunctionFactoryImpl::addConstraint(boost::shared_ptr<IFunction> fun,
                                         const Expression &expr) const {
   auto c = std::unique_ptr<IConstraint>(
       ConstraintFactory::Instance().createInitialized(fun.get(), expr));
+  c->setPenaltyFactor(c->getDefaultPenaltyFactor());
+  fun->addConstraint(std::move(c));
+}
+
+/**
+ * Add a constraint to the function with non-default penalty
+ * @param fun :: The function
+ * @param constraint_expr :: The constraint expression.
+ * @param penalty_expr :: The penalty expression.
+ */
+void FunctionFactoryImpl::addConstraint(boost::shared_ptr<IFunction> fun,
+                                        const Expression &constraint_expr,
+                                        const Expression &penalty_expr) const {
+  auto c = std::unique_ptr<IConstraint>(
+      ConstraintFactory::Instance().createInitialized(fun.get(),
+                                                      constraint_expr));
+  double penalty_factor = std::stof(penalty_expr.terms()[1].str(), NULL);
+  c->setPenaltyFactor(penalty_factor);
   fun->addConstraint(std::move(c));
 }
 

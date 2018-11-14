@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODELTEST_H
 #define MANTID_MANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODELTEST_H
 
@@ -12,8 +18,13 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 
 class QTwoLevelTreeModelTest : public CxxTest::TestSuite {
-
 public:
+  // This means the constructor isn't called when running other tests
+  static QTwoLevelTreeModelTest *createSuite() {
+    return new QTwoLevelTreeModelTest();
+  }
+  static void destroySuite(QTwoLevelTreeModelTest *suite) { delete suite; }
+
   // Constructor (initializes whitelist)
   QTwoLevelTreeModelTest() {
     m_whitelist.addElement("Column1", "Property1", "Description1");

@@ -111,6 +111,7 @@ set ( SRC_FILES
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/NumericAxisValidator.cpp
+        src/OrientedLatticeValidator.cpp
 	src/ParallelAlgorithm.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
@@ -310,6 +311,7 @@ set ( INC_FILES
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/NumericAxisValidator.h
+	inc/MantidAPI/OrientedLatticeValidator.h
 	inc/MantidAPI/ParallelAlgorithm.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
@@ -354,6 +356,8 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceProperty.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
+	inc/MantidAPI/SpectrumInfoIterator.h
+	inc/MantidAPI/SpectrumInfoItem.h
 )
 
 set ( TEST_FILES
@@ -435,6 +439,7 @@ set ( TEST_FILES
 	NotebookWriterTest.h
 	NumericAxisTest.h
 	NumericAxisValidatorTest.h
+	OrientedLatticeValidatorTest.h
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
 	ParameterTieTest.h
@@ -486,9 +491,10 @@ if(UNITY_BUILD)
   enable_unity_build(API SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
-# Have to link to winsock library on Windows
+# Have to link to winsock and bcrypt library on Windows
 if ( WIN32 )
   set ( WINSOCK ws2_32 )
+  set ( BCRYPT bcrypt )
 endif ()
 
 # Add a precompiled header where they are supported
@@ -508,7 +514,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
+target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} ${BCRYPT})
 
 # Add the unit tests directory
 add_subdirectory ( test )

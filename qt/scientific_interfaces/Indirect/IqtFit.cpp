@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFit.h"
 
 #include "../General/UserInputValidator.h"
@@ -62,6 +68,7 @@ void IqtFit::setupFitTab() {
   // Set available background options
   setBackgroundOptions({"None", "FlatBackground"});
 
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotResult()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
 
@@ -95,7 +102,8 @@ void IqtFit::customBoolUpdated(const QString &key, bool value) {
   if (key == "Constrain Intensities") {
     if (m_iqtFittingModel->setConstrainIntensities(value))
       updateTies();
-  }
+  } else if (key == "Make Beta Global")
+    m_iqtFittingModel->setBetaIsGlobal(value);
 }
 
 std::string IqtFit::fitTypeString() const {
@@ -115,15 +123,6 @@ void IqtFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
-void IqtFit::setPlotResultEnabled(bool enabled) {
-  m_uiForm->pbPlot->setEnabled(enabled);
-  m_uiForm->cbPlotType->setEnabled(enabled);
-}
-
-void IqtFit::setSaveResultEnabled(bool enabled) {
-  m_uiForm->pbSave->setEnabled(enabled);
-}
-
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   fitAlgorithm->setProperty("ExtractMembers",
                             boolSettingValue("ExtractMembers"));
@@ -131,8 +130,46 @@ void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
 }
 
 void IqtFit::plotResult() {
+  setPlotResultIsPlotting(true);
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
+  setPlotResultIsPlotting(false);
 }
+
+void IqtFit::setRunEnabled(bool enabled) {
+  m_uiForm->pbRun->setEnabled(enabled);
+}
+
+void IqtFit::setPlotResultEnabled(bool enabled) {
+  m_uiForm->pbPlot->setEnabled(enabled);
+  m_uiForm->cbPlotType->setEnabled(enabled);
+}
+
+void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
+}
+
+void IqtFit::setSaveResultEnabled(bool enabled) {
+  m_uiForm->pbSave->setEnabled(enabled);
+}
+
+void IqtFit::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
+}
+
+void IqtFit::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void IqtFit::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
+}
+
+void IqtFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

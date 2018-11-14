@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidICat/ICat4/ICat4Catalog.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/CatalogFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -18,7 +24,7 @@ using Types::Core::DateAndTime;
 namespace {
 /// static logger
 Logger g_log("ICat4Catalog");
-}
+} // namespace
 
 DECLARE_CATALOG(ICat4Catalog)
 
@@ -948,5 +954,5 @@ bool ICat4Catalog::isAccessAllowed(ns1__accessType accessType, T &bean) {
     throwErrorMessage(icat);
   return false;
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

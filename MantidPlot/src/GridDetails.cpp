@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------
 // Includes
 //--------------------------
@@ -6,27 +12,27 @@
 #include "ApplicationWindow.h"
 #include <qwt_scale_widget.h>
 //#include <qwt_plot.h>
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include "Plot.h"
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
-#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
-#include <QWidget>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QLabel>
-#include <QGridLayout>
 #include <ColorBox.h>
 #include <Grid.h>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QGridLayout>
+#include <QLabel>
+#include <QWidget>
 
 /** The constructor for a single set of widgets containing parameters for a
-* sigle direction of gridlines.
-*  @param app :: the containing application window
-*  @param graph :: the graph the dialog is settign the options for
-*  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
-*  @param parent :: the QWidget that acts as this widget's parent in the
-* hierachy
-*/
+ * single direction of gridlines.
+ *  @param app :: the containing application window
+ *  @param graph :: the graph the dialog is settign the options for
+ *  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
+ *  @param parent :: the QWidget that acts as this widget's parent in the
+ * hierarchy
+ */
 GridDetails::GridDetails(ApplicationWindow *app, Graph *graph, int alignment,
                          QWidget *parent)
     : QWidget(parent) {
@@ -123,8 +129,8 @@ GridDetails::~GridDetails() {}
 
 /** Initialisation method. Sets up all widgets and variables not done in the
  * constructor.
-*
-*/
+ *
+ */
 void GridDetails::initWidgets() {
   if (m_initialised) {
     return;
@@ -202,14 +208,14 @@ void GridDetails::initWidgets() {
   }
 }
 
-/** Sets the modifed flag to true so that the changes may be applied.
-*
-*/
+/** Sets the modified flag to true so that the changes may be applied.
+ *
+ */
 void GridDetails::setModified() { m_modified = true; }
 
-/** Applies the grid paremeters to the graphs
+/** Applies the grid parameters to the graphs
 *
-@param grid :: the gird to apply this formatting to
+@param grid :: the grid to apply this formatting to
 @bool antialias :: apply antialias to this formatting or not
 @bool multirun :: this will run multiple times for this dialog, and forces even
 if no modified
@@ -253,8 +259,8 @@ void GridDetails::apply(Grid *grid, bool antialias, bool multirun) {
 
 /** Enables or disables widgets corresponding to the current value of the
  * majorGridEnabled check box.
-*
-*/
+ *
+ */
 void GridDetails::majorGridEnabled(bool on) {
   m_cmbTypeMajor->setEnabled(on);
   m_cboxColorMajor->setEnabled(on);
@@ -263,8 +269,8 @@ void GridDetails::majorGridEnabled(bool on) {
 
 /** Enables or disables widgets corresponding to the current value of the
  * minorGridEnabled check box.
-*
-*/
+ *
+ */
 void GridDetails::minorGridEnabled(bool on) {
   m_cmbTypeMinor->setEnabled(on);
   m_cboxColorMinor->setEnabled(on);

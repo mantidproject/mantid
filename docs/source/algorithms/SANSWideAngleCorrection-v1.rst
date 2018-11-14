@@ -60,7 +60,7 @@ Error Propagation
 
 The error propagation follows this formula:
 
-`` ``\ :math:`OutputWorkspace_{error} = \frac{T_{0E} ^A - 1}{A\ln(T_0E)}`
+:math:`OutputWorkspace_{error} = \frac{T_{0E} ^A - 1}{A\ln(T_0E)}`
 
 Which means, that we do not consider the error in the definition of the
 :math:`2\theta` (the parameter A)

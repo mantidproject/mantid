@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/DgsPreprocessData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
@@ -6,12 +12,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
@@ -151,5 +157,5 @@ void DgsPreprocessData::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Mantid
 } // namespace WorkflowAlgorithms
+} // namespace Mantid

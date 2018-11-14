@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROPERTY_HANDLER_H
 #define PROPERTY_HANDLER_H
 
-#include "MantidAPI/IFunction.h"
 #include "DllOption.h"
+#include "MantidAPI/IFunction.h"
 
 /* Forward declarations */
 namespace Mantid {
 namespace API {
 class IPeakFunction;
 class CompositeFunction;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 // class FunctionCurve;
 // class PlotCurve;
@@ -19,10 +25,10 @@ class QtBrowserItem;
 class QtProperty;
 
 /* Qt includes */
-#include <QString>
 #include <QList>
 #include <QMap>
 #include <QObject>
+#include <QString>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -250,7 +256,7 @@ private:
   friend class CreateAttributeProperty;
 };
 
-} // MantidQt
-} // API
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* PROPERTY_HANDLER_H */

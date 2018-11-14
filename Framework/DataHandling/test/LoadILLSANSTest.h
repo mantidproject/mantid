@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADILLSANSTEST_H_
 #define MANTID_DATAHANDLING_LOADILLSANSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadILLSANS.h"
 #include "MantidGeometry/IComponent.h"
@@ -13,15 +19,15 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Unit.h"
 
-using Mantid::DataHandling::LoadILLSANS;
+using Mantid::API::AnalysisDataService;
 using Mantid::API::Axis;
 using Mantid::API::MatrixWorkspace_const_sptr;
-using Mantid::API::AnalysisDataService;
-using Mantid::Kernel::ConfigService;
-using Mantid::Kernel::V3D;
-using Mantid::Kernel::Unit;
+using Mantid::DataHandling::LoadILLSANS;
 using Mantid::Geometry::IComponent_const_sptr;
 using Mantid::Geometry::Instrument;
+using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::Unit;
+using Mantid::Kernel::V3D;
 
 class LoadILLSANSTest : public CxxTest::TestSuite {
 public:

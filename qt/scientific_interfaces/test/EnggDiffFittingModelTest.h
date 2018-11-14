@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGMODELTEST_H_
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGMODELTEST_H_
 
@@ -35,8 +41,9 @@ public:
 inline void
 EnggDiffFittingModelAddWSExposed::addWorkspace(const RunLabel &runLabel,
                                                API::MatrixWorkspace_sptr ws) {
-  addFocusedWorkspace(runLabel, ws, std::to_string(runLabel.runNumber) + "_" +
-                                        std::to_string(runLabel.bank));
+  addFocusedWorkspace(runLabel, ws,
+                      std::to_string(runLabel.runNumber) + "_" +
+                          std::to_string(runLabel.bank));
 }
 
 inline void EnggDiffFittingModelAddWSExposed::addFitParams(
@@ -62,9 +69,23 @@ API::ITableWorkspace_sptr createFitParamsTable() {
   const size_t numRows = 4;
   auto table = API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   const std::array<std::string, numColumns> headings({{
-      "dSpacing[Y]", "A0[Y]", "A0_Err[yEr]", "A1[Y]", "A1_Err[yEr]", "X0[Y]",
-      "X0_Err[yEr]", "A[Y]", "A_Err[yEr]", "B[Y]", "B_Err[yEr]", "S[Y]",
-      "S_Err[yEr]", "I[Y]", "I_Err[yEr]", "Chi[Y]", }});
+      "dSpacing[Y]",
+      "A0[Y]",
+      "A0_Err[yEr]",
+      "A1[Y]",
+      "A1_Err[yEr]",
+      "X0[Y]",
+      "X0_Err[yEr]",
+      "A[Y]",
+      "A_Err[yEr]",
+      "B[Y]",
+      "B_Err[yEr]",
+      "S[Y]",
+      "S_Err[yEr]",
+      "I[Y]",
+      "I_Err[yEr]",
+      "Chi[Y]",
+  }});
 
   for (const auto &columnHeading : headings) {
     table->addColumn("double", columnHeading);

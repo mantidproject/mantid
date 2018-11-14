@@ -364,7 +364,7 @@
           <widget class="QWidget" name="pageParamFile">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QLabel" name="label">
+             <widget class="QLabel" name="parametersLabel">
               <property name="text">
                <string>Use parameters from the instrument parameter file</string>
               </property>
@@ -403,7 +403,7 @@
          </widget>
         </item>
         <item row="2" column="2">
-         <widget class="QLabel" name="stitchLabel">
+         <widget class="QLabel" name="includePartialBinsLabel">
           <property name="text">
            <string>IncludePartialBins</string>
           </property>
@@ -433,14 +433,14 @@
          </widget>
         </item>
         <item row="7" column="0">
-         <widget class="QLabel" name="stitchLabel_2">
+         <widget class="QLabel" name="stitchLabel">
           <property name="text">
            <string>Stitch1DMany</string>
           </property>
          </widget>
         </item>
         <item row="0" column="2">
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="debugLabel">
           <property name="text">
            <string>Debug</string>
           </property>

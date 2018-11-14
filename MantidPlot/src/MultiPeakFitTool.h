@@ -29,8 +29,8 @@
 #ifndef MULTI_PEAK_FIT_TOOL
 #define MULTI_PEAK_FIT_TOOL
 
-#include "PlotToolInterface.h"
 #include "MultiPeakFit.h"
+#include "PlotToolInterface.h"
 #include <QObject>
 
 class DataPickerTool;
@@ -61,8 +61,8 @@ public:
 signals:
   /** Emitted whenever a new message should be presented to the user.
    *
-   * You don't have to connect to this signal if you alreay specified a reciever
-   *during initialization.
+   * You don't have to connect to this signal if you already specified a
+   *receiver during initialization.
    */
   void statusText(const QString &);
 protected slots:

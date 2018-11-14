@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <cmath>
-#include <vector>
-#include <set>
-#include <map>
-#include <stack>
-#include <sstream>
-#include <algorithm>
 #include <iterator>
+#include <map>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <vector>
 
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Math/MapSupport.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 
@@ -321,6 +327,6 @@ int Algebra::logicalEqual(const Algebra &A) const
   return F.logicalEqual(A.F);
 }
 
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid

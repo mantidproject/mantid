@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDIPEAKSEARCHTEST_H_
 #define MANTID_SINQ_POLDIPEAKSEARCHTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/UnitFactory.h"
 #include "MantidSINQ/PoldiPeakSearch.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
-#include "MantidKernel/UnitFactory.h"
 
 using Mantid::Poldi::PoldiPeakSearch;
 using namespace Mantid::Poldi;

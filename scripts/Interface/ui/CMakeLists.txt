@@ -9,8 +9,6 @@ add_subdirectory(batchwidget)
 add_subdirectory(poldi)
 
 SET(UI_FILES
-cluster_details_dialog.ui
-cluster_status.ui
 data_catalog.ui
 hfir_output.ui
 instrument_dialog.ui

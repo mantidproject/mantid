@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAKCOLUMN_H_
 #define MANTID_DATAOBJECTS_PEAKCOLUMN_H_
 
@@ -87,7 +93,7 @@ private:
   void setPeakHKLOrRunNumber(const size_t index, const double val);
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_PEAKCOLUMN_H_ */

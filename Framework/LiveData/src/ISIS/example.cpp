@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "Poco/Net/ServerSocket.h"
+#include "Poco/Net/StreamSocket.h"
 #include "Poco/Net/TCPServer.h"
 #include "Poco/Net/TCPServerConnection.h"
 #include "Poco/Net/TCPServerConnectionFactory.h"
 #include "Poco/Net/TCPServerParams.h"
-#include "Poco/Net/StreamSocket.h"
-#include "Poco/Net/ServerSocket.h"
 
 #include "MantidLiveData/ISIS/TCPEventStreamDefs.h"
 
@@ -85,5 +91,5 @@ int liveData(const std::string &host) {
   s.close();
   return 0;
 }
-}
-}
+} // namespace LiveData
+} // namespace Mantid

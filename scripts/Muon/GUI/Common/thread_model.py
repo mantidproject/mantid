@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4.QtCore import QThread
@@ -6,7 +12,6 @@ from Muon.GUI.Common import message_box
 
 
 class ThreadModel(QThread):
-
     """
     A wrapper to allow threading with
     the MaxEnt models.
@@ -58,7 +63,7 @@ class ThreadModel(QThread):
         self.finished.connect(endSlot)
         self.exceptionSignal.connect(message_box.warning)
 
-    def threadWrapperTearDown(self, startSlot, endSlot):
+    def threadWrapperTearDown(self,startSlot,endSlot):
         self.started.disconnect(startSlot)
         self.finished.disconnect(endSlot)
         self.exceptionSignal.disconnect(message_box.warning)

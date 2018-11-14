@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_DETECTORGROUP_H_
 #define MANTID_GEOMETRY_DETECTORGROUP_H_
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -19,27 +25,6 @@ a simple average of its constituents.
 
 @author Russell Taylor, Tessella Support Services plc
 @date 08/04/2008
-
-Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL DetectorGroup : public virtual IDetector {
 public:
@@ -94,63 +79,63 @@ public:
   std::string getParameterType(const std::string &name,
                                bool recursive = true) const override;
   /**
-  * Get a parameter defined as a double
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a double
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<double> getNumberParameter(const std::string &pname,
                                          bool recursive = true) const override;
   /**
-  * Get a parameter defined as a Kernel::V3D
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a Kernel::V3D
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<Kernel::V3D>
   getPositionParameter(const std::string &pname,
                        bool recursive = true) const override;
   /**
-  * Get a parameter defined as a Kernel::Quaternion
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a Kernel::Quaternion
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<Kernel::Quat>
   getRotationParameter(const std::string &pname,
                        bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as a string
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as a string
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<std::string>
   getStringParameter(const std::string &pname,
                      bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as an integer
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as an integer
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<int> getIntParameter(const std::string &pname,
                                    bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as an integer
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of size 0 as this is not a parameterized component
-  */
+   * Get a parameter defined as an integer
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of size 0 as this is not a parameterized component
+   */
   std::vector<bool> getBoolParameter(const std::string &pname,
                                      bool recursive = true) const override;
 
@@ -194,9 +179,9 @@ protected:
   /// The collection of grouped detectors
   DetCollection m_detectors;
   /** the parameter describes the topology of the detector's group namely if
-  * detectors form a box or a ring.
-  *  the topology is undefined on construction and calculated on first request
-  */
+   * detectors form a box or a ring.
+   *  the topology is undefined on construction and calculated on first request
+   */
   mutable det_topology group_topology;
   /// group centre is the geometrical centre of the detectors group calculated
   /// when the calculate group topology is invoked

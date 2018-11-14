@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RecordPythonScript.h"
 #include "MantidAPI/FileProperty.h"
 
@@ -23,7 +29,7 @@ RecordPythonScript::RecordPythonScript()
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void RecordPythonScript::init() {
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
@@ -33,7 +39,7 @@ void RecordPythonScript::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void RecordPythonScript::exec() {
   observeStarting();
   // Keep going until you get cancelled

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/EqualToMD.h"
 #include "MantidKernel/System.h"
 
@@ -43,5 +49,5 @@ void EqualToMD::execHistoScalar(
   out->equalTo(scalar->y(0)[0], tolerance);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

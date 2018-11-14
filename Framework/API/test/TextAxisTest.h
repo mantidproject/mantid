@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TEXTAXISTEST_H_
 #define TEXTAXISTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/TextAxis.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;

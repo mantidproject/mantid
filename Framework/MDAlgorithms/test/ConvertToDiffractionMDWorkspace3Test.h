@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACETEST2_H_
 #define MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACETEST2_H_
 
@@ -9,8 +15,8 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <limits>
 #include <cxxtest/TestSuite.h>
+#include <limits>
 
 using namespace Mantid;
 using namespace Mantid::API;

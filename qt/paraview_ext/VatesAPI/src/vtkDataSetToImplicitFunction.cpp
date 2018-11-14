@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
-#include "MantidVatesAPI/FieldDataToMetadata.h"
-#include "MantidVatesAPI/VatesXMLDefinitions.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidVatesAPI/FieldDataToMetadata.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include <vtkDataSet.h>
 
 namespace Mantid {
@@ -37,8 +43,8 @@ Execution method to run the extraction.
 @return implicit function if one could be found, or a NullImplicitFunction.
 */
 Mantid::Geometry::MDImplicitFunction *vtkDataSetToImplicitFunction::execute() {
-  using Mantid::Geometry::NullImplicitFunction;
   using Mantid::Geometry::MDGeometryXMLDefinitions;
+  using Mantid::Geometry::NullImplicitFunction;
   std::unique_ptr<Mantid::Geometry::MDImplicitFunction> function =
       Mantid::Kernel::make_unique<NullImplicitFunction>();
 
@@ -64,5 +70,5 @@ Mantid::Geometry::MDImplicitFunction *vtkDataSetToImplicitFunction::execute() {
 
 /// Destructor.
 vtkDataSetToImplicitFunction::~vtkDataSetToImplicitFunction() = default;
-}
-}
+} // namespace VATES
+} // namespace Mantid

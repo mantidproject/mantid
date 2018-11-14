@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "AlgorithmDockWidget.h"
 #include "MantidUI.h"
 #include <iomanip>
 
 //-------------------- AlgorithmDockWidget ----------------------//
 /** Create a QDockWidget containing:
-* The AlgorithmSelectorWidget
-* The progress bar and Details button
-*/
+ * The AlgorithmSelectorWidget
+ * The progress bar and Details button
+ */
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
     : QDockWidget(w), m_progressBar(nullptr), m_algID(), m_mantidUI(mui) {
   setWindowTitle(tr("Algorithms"));

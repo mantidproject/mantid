@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_WORKSPACESELECTOR_H_
 #define MANTIDQTMANTIDWIDGETS_WORKSPACESELECTOR_H_
 
 #include "DllOption.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include <QComboBox>
 #include <QStringList>
-#include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -14,7 +20,7 @@ namespace Mantid {
 namespace API {
 class Algorithm;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -37,35 +43,14 @@ input to the workspaces first input WorkspaceProperty
 
 @author Michael Whitty
 @date 23/02/2011
-
-Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON WorkspaceSelector : public QComboBox {
   Q_OBJECT
 
-  Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE
-                 setWorkspaceTypes)
-  Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE
-                 showHiddenWorkspaces)
+  Q_PROPERTY(
+      QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
+  Q_PROPERTY(
+      bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
   Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
   Q_PROPERTY(bool Optional READ isOptional WRITE setOptional)
   Q_PROPERTY(QStringList Suffix READ getSuffixes WRITE setSuffixes)
@@ -120,7 +105,8 @@ private:
   Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceAddNotification>
       m_addObserver;
   Poco::NObserver<WorkspaceSelector,
-                  Mantid::API::WorkspacePostDeleteNotification> m_remObserver;
+                  Mantid::API::WorkspacePostDeleteNotification>
+      m_remObserver;
   Poco::NObserver<WorkspaceSelector, Mantid::API::ClearADSNotification>
       m_clearObserver;
   Poco::NObserver<WorkspaceSelector, Mantid::API::WorkspaceRenameNotification>
@@ -146,7 +132,7 @@ private:
   // Algorithm to validate against
   boost::shared_ptr<Mantid::API::Algorithm> m_algorithm;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_INSTRUMENTSELECTOR_H_

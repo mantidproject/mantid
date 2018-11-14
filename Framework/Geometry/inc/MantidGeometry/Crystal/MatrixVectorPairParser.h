@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_MATRIXVECTORPAIRPARSER_H_
 #define MANTID_GEOMETRY_MATRIXVECTORPAIRPARSER_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/MatrixVectorPair.h"
 #include "MantidGeometry/Crystal/V3R.h"
+#include "MantidGeometry/DllConfig.h"
 
 #include "MantidKernel/Exception.h"
+#include <boost/spirit/include/qi.hpp>
 #include <functional>
 #include <map>
-#include <boost/spirit/include/qi.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -169,27 +175,6 @@ using boost::spirit::qi::rule;
 
       @author Michael Wedel, ESS
       @date 02/11/2015
-
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename Iterator>
 class MatrixVectorPairParser
@@ -203,37 +188,39 @@ public:
     namespace qi = boost::spirit::qi;
 
     using qi::int_;
-    using qi::uint_;
     using qi::lit;
+    using qi::uint_;
 
     /* MSVC currently has some problems using std::bind in connection
      * with boost::spirit in some circumstances, but they can be circumvented
      * using lambda-expressions as a sort of call proxy. For consistency,
      * all semantic parse actions are formulated like that.
      */
-    auto positiveSignAction =
-        [&builder](unused_type, unused_type, unused_type) {
-          builder.setCurrentSignPositive();
+    auto positiveSignAction = [&builder](unused_type, unused_type,
+                                         unused_type) {
+      builder.setCurrentSignPositive();
+    };
+
+    auto negativeSignAction = [&builder](unused_type, unused_type,
+                                         unused_type) {
+      builder.setCurrentSignNegative();
+    };
+
+    auto currentFactorAction =
+        [&builder](const ParsedRationalNumber &rationalNumberComponents,
+                   unused_type, unused_type) {
+          builder.setCurrentFactor(rationalNumberComponents);
         };
 
-    auto negativeSignAction =
-        [&builder](unused_type, unused_type, unused_type) {
-          builder.setCurrentSignNegative();
-        };
+    auto currentDirectionAction = [&builder](const std::string &s, unused_type,
+                                             unused_type) {
+      builder.setCurrentDirection(s);
+    };
 
-    auto currentFactorAction = [&builder](
-        const ParsedRationalNumber &rationalNumberComponents, unused_type,
-        unused_type) { builder.setCurrentFactor(rationalNumberComponents); };
-
-    auto currentDirectionAction =
-        [&builder](const std::string &s, unused_type, unused_type) {
-          builder.setCurrentDirection(s);
-        };
-
-    auto addCurrentStateToResultAction =
-        [&builder](unused_type, unused_type, unused_type) {
-          builder.addCurrentStateToResult();
-        };
+    auto addCurrentStateToResultAction = [&builder](unused_type, unused_type,
+                                                    unused_type) {
+      builder.addCurrentStateToResult();
+    };
 
     auto advanceRowAction = [&builder](unused_type, unused_type, unused_type) {
       builder.advanceRow();

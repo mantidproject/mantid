@@ -30,10 +30,10 @@
 #ifndef IMAGEDIALOG_H
 #define IMAGEDIALOG_H
 
-#include <QDialog>
-#include <QSpinBox>
 #include <QCheckBox>
+#include <QDialog>
 #include <QPushButton>
+#include <QSpinBox>
 
 //! Image geometry dialog
 class ImageDialog : public QDialog {

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TESTHISTOGRAM1D_
 #define TESTHISTOGRAM1D_
 
-#include <vector>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <vector>
 
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/make_unique.h"
 
 using namespace Mantid;

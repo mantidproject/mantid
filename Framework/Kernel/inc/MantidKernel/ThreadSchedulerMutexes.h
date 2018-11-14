@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_THREADSCHEDULERMUTEXES_H_
 #define MANTID_KERNEL_THREADSCHEDULERMUTEXES_H_
 
@@ -124,8 +130,8 @@ public:
     return std::accumulate(
         m_supermap.cbegin(), m_supermap.cend(), size_t{0},
         [](size_t total,
-           const std::pair<boost::shared_ptr<std::mutex>, InnerMap> &
-               mutexedMap) { return total + mutexedMap.second.size(); });
+           const std::pair<boost::shared_ptr<std::mutex>, InnerMap>
+               &mutexedMap) { return total + mutexedMap.second.size(); });
   }
 
   //-------------------------------------------------------------------------------
@@ -134,8 +140,8 @@ public:
     std::lock_guard<std::mutex> lock(m_queueLock);
     auto mapWithTasks = std::find_if_not(
         m_supermap.cbegin(), m_supermap.cend(),
-        [](const std::pair<boost::shared_ptr<std::mutex>, InnerMap> &
-               mutexedMap) { return mutexedMap.second.empty(); });
+        [](const std::pair<boost::shared_ptr<std::mutex>, InnerMap>
+               &mutexedMap) { return mutexedMap.second.empty(); });
     return mapWithTasks == m_supermap.cend();
   }
 
@@ -169,7 +175,7 @@ protected:
   std::set<boost::shared_ptr<std::mutex>> m_mutexes;
 };
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_THREADSCHEDULERMUTEXES_H_ */

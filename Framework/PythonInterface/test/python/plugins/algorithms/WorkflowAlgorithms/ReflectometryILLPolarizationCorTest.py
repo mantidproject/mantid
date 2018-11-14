@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -18,7 +24,7 @@ class ReflectometryILLPolarizationCorTest(unittest.TestCase):
         mtd.add('ws', ws)
         illhelpers.refl_create_beam_position_ws('beamPosWS', ws, 0., 128)
         ws = illhelpers.refl_preprocess('ws', ws, 'beamPosWS')
-        ws = illhelpers.refl_sum_in_lambda('ws', ws)
+        ws = illhelpers.refl_sum_foreground('ws', 'SumInLambda', ws)
         args = {
             'InputWorkspaces': 'ws',
             'OutputWorkspace': 'corrected',

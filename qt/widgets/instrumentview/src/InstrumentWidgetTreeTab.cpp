@@ -1,12 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#endif
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 
-#include <QVBoxLayout>
 #include <QMessageBox>
+#include <QVBoxLayout>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -28,12 +36,12 @@ void InstrumentWidgetTreeTab::initSurface() {
 }
 
 /**
-        * Find an instrument component by its name. This is used from the
-        * scripting API and errors (component not found) are shown as a
-        * message box in the GUI.
-        *
-        * @param name :: Name of an instrument component.
-        */
+ * Find an instrument component by its name. This is used from the
+ * scripting API and errors (component not found) are shown as a
+ * message box in the GUI.
+ *
+ * @param name :: Name of an instrument component.
+ */
 void InstrumentWidgetTreeTab::selectComponentByName(const QString &name) {
   QModelIndex component = m_instrumentTree->findComponentByName(name);
   if (!component.isValid()) {
@@ -52,8 +60,8 @@ void InstrumentWidgetTreeTab::selectComponentByName(const QString &name) {
 }
 
 /**
-        * Update surface when tab becomes visible.
-        */
+ * Update surface when tab becomes visible.
+ */
 void InstrumentWidgetTreeTab::showEvent(QShowEvent *) {
   getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
 }
@@ -62,6 +70,7 @@ void InstrumentWidgetTreeTab::showEvent(QShowEvent *) {
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetTreeTab::loadFromProject(const std::string &lines) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("treetab"))
@@ -85,12 +94,18 @@ void InstrumentWidgetTreeTab::loadFromProject(const std::string &lines) {
       m_instrumentTree->setExpanded(index, true);
     }
   }
+#else
+  Q_UNUSED(lines);
+  throw std::runtime_error(
+      "InstrumentWidgetTreeTab::loadFromProject() not implemented for Qt >= 5");
+#endif
 }
 
 /** Save the state of the tree tab to a Mantid project file
  * @return a string representing the state of the tree tab
  */
 std::string InstrumentWidgetTreeTab::saveToProject() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   API::TSVSerialiser tsv, tab;
 
   auto index = m_instrumentTree->currentIndex();
@@ -110,7 +125,11 @@ std::string InstrumentWidgetTreeTab::saveToProject() const {
 
   tsv.writeSection("treetab", tab.outputLines());
   return tsv.outputLines();
+#else
+  throw std::runtime_error(
+      "InstrumentWidgetTreeTab::saveToProject() not implemented for Qt >= 5");
+#endif
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

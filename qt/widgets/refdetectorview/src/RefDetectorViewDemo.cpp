@@ -1,11 +1,16 @@
-
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 
 #include <QApplication>
 #include <QMainWindow>
 
-#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 #include "MantidQtWidgets/RefDetectorView/RefImageView.h"
 #include "MantidQtWidgets/SpectrumViewer/ArrayDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
 using namespace MantidQt;
 using namespace RefDetectorViewer;

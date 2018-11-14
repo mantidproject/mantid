@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/RemoteJobManager.h"
-#include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
 
 #include <Poco/Base64Encoder.h>
-#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/HTTPCookie.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
-#include <Poco/Net/HTTPCookie.h>
+#include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/NameValueCollection.h>
 #include <Poco/URI.h>
 

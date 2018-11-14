@@ -1,19 +1,25 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ManageCustomMenus.h"
 #include "../ApplicationWindow.h"
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#include "MantidKernel/ConfigService.h"
 
 #include <QtGui>
 
 using MantidQt::API::MantidDesktopServices;
 
 /**
-* Constructor for object. Performs initial setup and calls subsequent setup
-* functions.
-* @param parent :: pointer to the main MantidPlot ApplicationWindow object
-*/
+ * Constructor for object. Performs initial setup and calls subsequent setup
+ * functions.
+ * @param parent :: pointer to the main MantidPlot ApplicationWindow object
+ */
 ManageCustomMenus::ManageCustomMenus(QWidget *parent)
     : QDialog(parent), m_scriptsTree(nullptr), m_menusTree(nullptr) {
   m_uiForm.setupUi(this);
@@ -21,9 +27,9 @@ ManageCustomMenus::ManageCustomMenus(QWidget *parent)
   initLayout();
 }
 /**
-* Makes signal/slot connections and small changes to interface which QtDesigner
-* does not give access to.
-*/
+ * Makes signal/slot connections and small changes to interface which QtDesigner
+ * does not give access to.
+ */
 void ManageCustomMenus::initLayout() {
   m_scriptsTree = m_uiForm.twScripts;
   m_menusTree = m_uiForm.twMenus;
@@ -46,8 +52,8 @@ void ManageCustomMenus::initLayout() {
   populateMenuTree();
 }
 /**
-* Populates the m_menusTree to reflect the currently set custom menus.
-*/
+ * Populates the m_menusTree to reflect the currently set custom menus.
+ */
 void ManageCustomMenus::populateMenuTree() {
   m_menusTree->clear();
   m_widgetMap.clear();
@@ -77,25 +83,25 @@ void ManageCustomMenus::populateMenuTree() {
 }
 
 /**
-* Returns a list of pointers to the selected items in the Scripts and Custom
-* Interfaces trees.
-* @return list of selected items
-*/
+ * Returns a list of pointers to the selected items in the Scripts and Custom
+ * Interfaces trees.
+ * @return list of selected items
+ */
 QList<QTreeWidgetItem *> ManageCustomMenus::getCurrentSelection() {
   QList<QTreeWidgetItem *> result = m_scriptsTree->selectedItems();
   return result;
 }
 /**
-* Returns pointer to currently selected menu item.
-* @return pointer to currently selected menu item
-*/
+ * Returns pointer to currently selected menu item.
+ * @return pointer to currently selected menu item
+ */
 QTreeWidgetItem *ManageCustomMenus::getCurrentMenuSelection() {
   QTreeWidgetItem *result = m_menusTree->currentItem();
   return result;
 }
 /**
-* Handles adding a script to the scripts tree, through a FileDialog.
-*/
+ * Handles adding a script to the scripts tree, through a FileDialog.
+ */
 void ManageCustomMenus::addScriptClicked() {
   QString scriptsDir = QString::fromStdString(
       Mantid::Kernel::ConfigService::Instance().getString(
@@ -108,8 +114,9 @@ void ManageCustomMenus::addScriptClicked() {
     for (QStringList::const_iterator itr = scriptFiles.constBegin();
          itr != itEnd; ++itr) {
       QString suggestedName = QFileInfo(*itr).baseName();
-      if (!m_scriptsTree->findItems(suggestedName, Qt::MatchFixedString |
-                                                       Qt::MatchCaseSensitive)
+      if (!m_scriptsTree
+               ->findItems(suggestedName,
+                           Qt::MatchFixedString | Qt::MatchCaseSensitive)
                .isEmpty())
         continue;
 
@@ -123,8 +130,8 @@ void ManageCustomMenus::addScriptClicked() {
   }
 }
 /**
-* Handles removing selected scripts from the m_scriptsTree window.
-*/
+ * Handles removing selected scripts from the m_scriptsTree window.
+ */
 void ManageCustomMenus::remScriptClicked() {
   if (m_scriptsTree->selectedItems().isEmpty()) {
     QMessageBox::information(
@@ -137,9 +144,9 @@ void ManageCustomMenus::remScriptClicked() {
   }
 }
 /**
-* Adds item (script or custom interface) to custom menu. Removes added scripts
-* from the scripts tree.
-*/
+ * Adds item (script or custom interface) to custom menu. Removes added scripts
+ * from the scripts tree.
+ */
 void ManageCustomMenus::addItemClicked() {
   QList<QTreeWidgetItem *> selection = getCurrentSelection();
   QTreeWidgetItem *menu = getCurrentMenuSelection();
@@ -180,14 +187,15 @@ void ManageCustomMenus::addItemClicked() {
   }
 }
 /**
-* Removes item from custom menu, or custom menu itself if selected.
-*/
+ * Removes item from custom menu, or custom menu itself if selected.
+ */
 void ManageCustomMenus::remItemClicked() {
   QTreeWidgetItem *item = getCurrentMenuSelection();
   if (item == nullptr) {
-    QMessageBox::information(this, "MantidPlot", "No item selected - please "
-                                                 "select a script or menu in "
-                                                 "the right-hand list.");
+    QMessageBox::information(this, "MantidPlot",
+                             "No item selected - please "
+                             "select a script or menu in "
+                             "the right-hand list.");
   } else {
     if (item->parent() != nullptr) {
       // Delete menu sub-item
@@ -202,15 +210,16 @@ void ManageCustomMenus::remItemClicked() {
   }
 }
 /**
-* Adds new top-level menu to the interface.
-*/
+ * Adds new top-level menu to the interface.
+ */
 void ManageCustomMenus::addMenuClicked() {
   bool ok(false);
-  QString name = QInputDialog::getText(this, "Create a Menu", "Menu name:",
-                                       QLineEdit::Normal, "", &ok);
+  QString name = QInputDialog::getText(
+      this, "Create a Menu", "Menu name:", QLineEdit::Normal, "", &ok);
   if (ok) {
-    if (m_menusTree->findItems(name, Qt::MatchFixedString |
-                                         Qt::MatchCaseSensitive).isEmpty()) {
+    if (m_menusTree
+            ->findItems(name, Qt::MatchFixedString | Qt::MatchCaseSensitive)
+            .isEmpty()) {
       if (!name.isEmpty()) {
         m_appWindow->addUserMenu(name);
         populateMenuTree();
@@ -222,8 +231,8 @@ void ManageCustomMenus::addMenuClicked() {
   }
 }
 /**
-* Opens web browser to wiki page for this dialog.
-*/
+ * Opens web browser to wiki page for this dialog.
+ */
 void ManageCustomMenus::helpClicked() {
   QUrl helpUrl("http://www.mantidproject.org/ManageCustomMenus");
   MantidDesktopServices::openUrl(helpUrl);

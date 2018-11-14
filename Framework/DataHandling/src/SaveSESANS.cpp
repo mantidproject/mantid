@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveSESANS.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -162,7 +168,7 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile,
  * @param outfile ofstream to the output file
  * @param name The name of the attribute being written
  * @param value The attribute's value
-*/
+ */
 void SaveSESANS::writeHeader(std::ofstream &outfile, const std::string &name,
                              const std::string &value) {
   outfile << std::setfill(' ') << std::setw(MAX_HDR_LENGTH) << std::left << name

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
 #include "DPDFDisplayControl.h"
 // Mantid Headers from the same project
 #include "DPDFInputDataControl.h"
 // Mantid headers from other projects
-#include "MantidQtWidgets/LegacyQwt/DisplayCurveFit.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
+#include "MantidQtWidgets/LegacyQwt/DisplayCurveFit.h"
 // 3rd party library headers
 // System #includes
 #include <iostream>
@@ -37,8 +43,8 @@ DisplayControl::DisplayControl(
     InputDataControl *inputDataControl,
     MantidQt::MantidWidgets::DisplayCurveFit *displayModelFit)
     : m_inputDataControl{inputDataControl}, m_displayModelFit{displayModelFit},
-      m_fitRangeSelector{nullptr}, m_dataShown(),
-      m_dataShownName{"__DPDFDataShown"} {
+      m_fitRangeSelector{nullptr},
+      m_dataShown(), m_dataShownName{"__DPDFDataShown"} {
   // nothing in the body
 }
 
@@ -176,6 +182,6 @@ void DisplayControl::updateModelEvaluationDisplay(
   m_displayModelFit->addSpectrum(curveType::fit, modelWorkspace, 1);
   m_displayModelFit->addSpectrum(curveType::residuals, modelWorkspace, 2);
 }
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

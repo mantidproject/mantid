@@ -1,14 +1,20 @@
-#include "MantidKernel/OptionalBool.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidDataHandling/CreateChunkingFromInstrument.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/CreateChunkingFromInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 
 // clang-format off
@@ -49,7 +55,7 @@ const string PARAM_MAX_RECURSE("MaxRecursionDepth");
 const string PARAM_OUT_WKSP("OutputWorkspace");
 /// Maximum number of banks to look for
 const string PARAM_MAX_BANK_NUM("MaxBankNumber");
-}
+} // namespace
 
 /// Algorithm's name for identification. @see Algorithm::name
 const string CreateChunkingFromInstrument::name() const {

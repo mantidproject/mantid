@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MCABSORPTIONSTRATEGYTEST_H_
 #define MANTID_ALGORITHMS_MCABSORPTIONSTRATEGYTEST_H_
 
@@ -5,8 +11,8 @@
 
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MonteCarloTesting.h"
 
@@ -87,7 +93,7 @@ private:
   class MockBeamProfile final : public Mantid::Algorithms::IBeamProfile {
   public:
     using Mantid::Algorithms::IBeamProfile::Ray;
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(generatePoint,
                        Ray(Mantid::Kernel::PseudoRandomNumberGenerator &));
     MOCK_CONST_METHOD2(generatePoint,
@@ -95,7 +101,7 @@ private:
                            const Mantid::Geometry::BoundingBox &));
     MOCK_CONST_METHOD1(defineActiveRegion, Mantid::Geometry::BoundingBox(
                                                const Mantid::API::Sample &));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

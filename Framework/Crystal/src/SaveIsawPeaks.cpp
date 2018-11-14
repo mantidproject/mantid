@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
-#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <fstream>
 #include <Poco/File.h>
 #include <boost/algorithm/string/trim.hpp>
+#include <fstream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -32,8 +38,9 @@ void SaveIsawPeaks::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "An input PeaksWorkspace with an instrument.");
 
-  declareProperty("AppendFile", false, "Append to file if true.\n"
-                                       "If false, new file (default).");
+  declareProperty("AppendFile", false,
+                  "Append to file if true.\n"
+                  "If false, new file (default).");
 
   const std::vector<std::string> exts{".peaks", ".integrate"};
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
@@ -44,6 +51,10 @@ void SaveIsawPeaks::init() {
       make_unique<WorkspaceProperty<Workspace2D>>(
           "ProfileWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An optional Workspace2D of profiles from integrating cylinder.");
+
+  declareProperty("RenumberPeaks", false,
+                  "If true, sequential peak numbers\n"
+                  "If false, keep original numbering (default).");
 }
 
 /** Execute the algorithm.
@@ -120,7 +131,7 @@ void SaveIsawPeaks::exec() {
     throw std::runtime_error(
         "No instrument in PeaksWorkspace. Cannot save peaks file.");
 
-  if (bankPart != "bank" && bankPart != "WISH" && bankPart != "?") {
+  if (bankPart != "bank" && bankPart != "WISHpanel" && bankPart != "?") {
     std::ostringstream mess;
     mess << "Detector module of type " << bankPart
          << " not supported in ISAWPeaks. Cannot save peaks file";
@@ -135,13 +146,34 @@ void SaveIsawPeaks::exec() {
 
   std::ofstream out;
   bool append = getProperty("AppendFile");
+  bool renumber = getProperty("RenumberPeaks");
 
   // do not append if file does not exist
   if (!Poco::File(filename.c_str()).exists())
     append = false;
 
+  int appendPeakNumb = 0;
   if (append) {
+    std::ifstream infile(filename.c_str());
+    std::string line;
+    while (!infile.eof()) // To get you all the lines.
+    {
+      getline(infile, line); // Saves the line in STRING.
+      if (infile.eof())
+        break;
+      std::stringstream ss(line);
+      double three;
+      ss >> three;
+      if (three == 3) {
+        int peakNumber;
+        ss >> peakNumber;
+        appendPeakNumb = std::max(peakNumber, appendPeakNumb);
+      }
+    }
+
+    infile.close();
     out.open(filename.c_str(), std::ios::app);
+    appendPeakNumb = appendPeakNumb + 1;
   } else {
     out.open(filename.c_str());
 
@@ -261,12 +293,10 @@ void SaveIsawPeaks::exec() {
   // =========================================
 
   // Go in order of run numbers
-  int maxPeakNumb = 0;
-  int appendPeakNumb = 0;
+  int sequenceNumber = appendPeakNumb;
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
     // Start of a new run
-    appendPeakNumb += maxPeakNumb;
     int run = runMap_it->first;
     bankMap_t &bankMap = runMap_it->second;
 
@@ -311,8 +341,12 @@ void SaveIsawPeaks::exec() {
           Peak &p = peaks[wi];
 
           // Sequence (run) number
-          maxPeakNumb = std::max(maxPeakNumb, p.getPeakNumber());
-          out << "3" << std::setw(7) << p.getPeakNumber() + appendPeakNumb;
+          if (renumber) {
+            out << "3" << std::setw(7) << sequenceNumber;
+            sequenceNumber++;
+          } else {
+            out << "3" << std::setw(7) << p.getPeakNumber() + appendPeakNumb;
+          }
 
           // HKL's are flipped by -1 because of the internal Q convention
           // unless Crystallography convention
@@ -502,5 +536,5 @@ void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

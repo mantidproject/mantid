@@ -1,14 +1,20 @@
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/MatrixWorkspace.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveIsawDetCal.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/ExperimentInfo.h"
 
 #include <Poco/File.h>
 #include <boost/algorithm/string/trim.hpp>
@@ -17,8 +23,8 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using std::string;
 using Mantid::Types::Core::DateAndTime;
+using std::string;
 
 namespace Mantid {
 namespace DataHandling {
@@ -41,8 +47,9 @@ void SaveIsawDetCal::init() {
   declareProperty(
       make_unique<ArrayProperty<string>>("BankNames", Direction::Input),
       "Optional: Only select the specified banks");
-  declareProperty("AppendFile", false, "Append to file if true.\n"
-                                       "If false, new file (default).");
+  declareProperty("AppendFile", false,
+                  "Append to file if true.\n"
+                  "If false, new file (default).");
 }
 
 /** Execute the algorithm.
@@ -294,5 +301,5 @@ void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     ysize = first->getDistance(*last);
   }
 }
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

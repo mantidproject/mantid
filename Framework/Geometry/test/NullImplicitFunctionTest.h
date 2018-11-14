@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef NULL_IMPLICIT_FUNCTION_TEST_H_
 #define NULL_IMPLICIT_FUNCTION_TEST_H_
 
+#include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 
 using namespace Mantid::Geometry;
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
@@ -44,7 +50,7 @@ void load(const Communicator &comm, const std::string &filename,
   load(readDataType(group, bankNames, "event_time_offset"), comm, group,
        bankNames, bankOffsets, std::move(eventLists));
 }
-}
+} // namespace EventLoader
 
 } // namespace IO
 } // namespace Parallel

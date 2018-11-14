@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_USERCATALOGINFOTEST_H_
 #define MANTID_KERNEL_USERCATALOGINFOTEST_H_
 
@@ -18,8 +24,8 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe;
   return out;
 }
-}
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+} // namespace boost
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 using namespace Mantid::Kernel;
 class MockCatalogConfigService : public CatalogConfigService {
 public:
@@ -37,7 +43,7 @@ public:
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
   MOCK_CONST_METHOD0(clone, ICatalogInfo *());
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 // Adaptee
 struct UserType {
   std::string getString(const std::string &) const { return "my_value"; }

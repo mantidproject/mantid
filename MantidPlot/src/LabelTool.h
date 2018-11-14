@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LABEL_TOOL_H
 #define LABEL_TOOL_H
 
 #include "PlotToolInterface.h"
-#include <qwt_polygon.h>
 #include <QObject>
 #include <QSet>
 #include <QString>
 #include <QVector>
+#include <qwt_polygon.h>
 
 class MantidMatrixCurve;
 

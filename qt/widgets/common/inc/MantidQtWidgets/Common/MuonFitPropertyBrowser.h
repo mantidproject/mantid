@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MUONFITPROPERTYBROWSER_H_
 #define MUONFITPROPERTYBROWSER_H_
 
@@ -32,8 +38,8 @@ namespace API {
 class IFitFunction;
 class IPeakFunction;
 class CompositeFunction;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -243,7 +249,7 @@ private:
 };
 
 std::map<std::string, double> readMultipleNormalization();
-} // MantidQt
-} // API
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MUONFITPROPERTYBROWSER_H_*/

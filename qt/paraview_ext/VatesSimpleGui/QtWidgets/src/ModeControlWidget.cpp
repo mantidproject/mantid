@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
 
-#include <map>
 #include <algorithm>
+#include <map>
 
 namespace Mantid {
 namespace Vates {
@@ -11,7 +17,7 @@ namespace SimpleGui {
 namespace {
 /// Static logger
 Kernel::Logger g_log("MdControlWidget");
-}
+} // namespace
 
 ModeControlWidget::ModeControlWidget(QWidget *parent) : QWidget(parent) {
   this->ui.setupUi(this);
@@ -177,6 +183,6 @@ ModeControlWidget::getViewFromString(const QString &view) {
   }
 }
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

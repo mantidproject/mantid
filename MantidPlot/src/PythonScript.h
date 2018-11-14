@@ -1,24 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
   File                 : PythonScript.h
   Project              : QtiPlot
 --------------------------------------------------------------------
-  Copyright            : (C) 2006 by Knut Franke
-  Email (use @ for *)  : knut.franke*gmx.de
-  Description          : Execute Python code from within QtiPlot
-
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *  This program is free software; you can redistribute it and/or modify   *
- *  it under the terms of the GNU General Public License as published by   *
- *  the Free Software Foundation; either version 2 of the License, or      *
- *  (at your option) any later version.                                    *
- *                                                                         *
- *  This program is distributed in the hope that it will be useful,        *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- *  GNU General Public License for more details.                           *
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the Free Software           *
@@ -29,15 +18,12 @@
 #ifndef PYTHON_SCRIPT_H
 #define PYTHON_SCRIPT_H
 
-// Python headers have to go first!
-#include "MantidQtWidgets/Common/PythonSystemHeader.h"
-#include "MantidQtWidgets/Common/PythonThreading.h"
-
-#include "Script.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "Script.h"
 
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
 
 class ScriptingEnv;
 class PythonScripting;
@@ -125,14 +111,14 @@ private:
     }
 
     void appendPath(const QString &path) {
-      ScopedPythonGIL lock;
+      Mantid::PythonInterface::GlobalInterpreterLock lock;
       QString code = "if r'%1' not in sys.path:\n"
                      "    sys.path.append(r'%1')";
       code = code.arg(path);
       PyRun_SimpleString(code.toAscii().constData());
     }
     void removePath(const QString &path) {
-      ScopedPythonGIL lock;
+      Mantid::PythonInterface::GlobalInterpreterLock lock;
       QString code = "if r'%1' in sys.path:\n"
                      "    sys.path.remove(r'%1')";
       code = code.arg(path);
@@ -144,7 +130,6 @@ private:
   };
 
   inline PythonScripting *interp() const { return m_interp; }
-  PythonGIL &gil() const;
   void initialize(const QString &name, QObject *context);
   void beginStdoutRedirect();
   void endStdoutRedirect();
@@ -165,7 +150,7 @@ private:
   //        mantidplot.runPythonScript('test=CreateSampleWorkspace()', True)
   //
   // To circumvent this we must release the GIL on the main thread
-  // before starting the async thread and then reaquire it when that thread
+  // before starting the async thread and then reacquire it when that thread
   // has finished and the main thread must keep executing. These methods
   // are used for this purpose and are NOT used by the general executeAsync
   // methods where the GILState API functions can cope and there is no
@@ -208,7 +193,7 @@ private:
   PythonPathHolder m_pathHolder;
   /// This must only be used by the recursiveAsync* methods
   /// as they need to store state between calls.
-  PythonGIL m_recursiveAsyncGIL;
+  PyGILState_STATE m_recursiveAsyncGIL;
 };
 
 #endif

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/Expression.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/Logger.h"
 #include <boost/lexical_cast.hpp>
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -16,23 +22,23 @@ namespace Constraints {
 namespace {
 /// static logger
 Kernel::Logger g_log("BoundaryConstraint");
-}
+} // namespace
 
 DECLARE_CONSTRAINT(BoundaryConstraint)
 
 // using namespace Kernel;
 using namespace API;
-
 /// Default constructor
 BoundaryConstraint::BoundaryConstraint()
-    : API::IConstraint(), m_penaltyFactor(1000.0), m_hasLowerBound(false),
-      m_hasUpperBound(false), m_lowerBound(DBL_MAX), m_upperBound(-DBL_MAX) {}
+    : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()),
+      m_hasLowerBound(false), m_hasUpperBound(false), m_lowerBound(DBL_MAX),
+      m_upperBound(-DBL_MAX) {}
 
 /// Constructor with no boundary arguments
 /// @param paramName :: The parameter name
 BoundaryConstraint::BoundaryConstraint(const std::string &paramName)
-    : API::IConstraint(), m_penaltyFactor(1000.0), m_hasLowerBound(false),
-      m_hasUpperBound(false) {
+    : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()),
+      m_hasLowerBound(false), m_hasUpperBound(false) {
   UNUSED_ARG(paramName);
 }
 
@@ -49,16 +55,17 @@ BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
                                        const std::string paramName,
                                        const double lowerBound,
                                        const double upperBound, bool isDefault)
-    : m_penaltyFactor(1000.0), m_hasLowerBound(true), m_hasUpperBound(true),
-      m_lowerBound(lowerBound), m_upperBound(upperBound) {
+    : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true),
+      m_hasUpperBound(true), m_lowerBound(lowerBound),
+      m_upperBound(upperBound) {
   reset(fun, fun->parameterIndex(paramName), isDefault);
 }
 
 BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
                                        const std::string paramName,
                                        const double lowerBound, bool isDefault)
-    : m_penaltyFactor(1000.0), m_hasLowerBound(true), m_hasUpperBound(false),
-      m_lowerBound(lowerBound), m_upperBound(-DBL_MAX) {
+    : m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(true),
+      m_hasUpperBound(false), m_lowerBound(lowerBound), m_upperBound(-DBL_MAX) {
   reset(fun, fun->parameterIndex(paramName), isDefault);
 }
 
@@ -254,6 +261,9 @@ std::string BoundaryConstraint::asString() const {
   ostr << parameterName();
   if (m_hasUpperBound) {
     ostr << '<' << m_upperBound;
+  }
+  if (m_penaltyFactor != getDefaultPenaltyFactor()) {
+    ostr << ",penalty=" << m_penaltyFactor;
   }
   return ostr.str();
 }

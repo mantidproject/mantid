@@ -115,8 +115,8 @@ class EXPORT_OPT_MANTIDQT_COMMON QtTreePropertyBrowser
                  setAlternatingRowColors)
   Q_PROPERTY(bool headerVisible READ isHeaderVisible WRITE setHeaderVisible)
   Q_PROPERTY(ResizeMode resizeMode READ resizeMode WRITE setResizeMode)
-  Q_PROPERTY(int splitterPosition READ splitterPosition WRITE
-                 setSplitterPosition)
+  Q_PROPERTY(
+      int splitterPosition READ splitterPosition WRITE setSplitterPosition)
   Q_PROPERTY(bool propertiesWithoutValueMarked READ propertiesWithoutValueMarked
                  WRITE setPropertiesWithoutValueMarked)
 public:

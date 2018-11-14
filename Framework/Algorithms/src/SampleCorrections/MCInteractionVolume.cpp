@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -25,7 +31,7 @@ double attenuation(double rho, double sigma, double length) {
   using std::exp;
   return exp(-100 * rho * sigma * length);
 }
-}
+} // namespace
 
 /**
  * Construct the volume encompassing the sample + any environment kit. The

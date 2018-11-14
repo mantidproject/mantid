@@ -181,7 +181,8 @@ void Filter::setColor(const QString &colorName) {
         dynamic_cast<ApplicationWindow *>(parent()),
         tr("MantidPlot - Color Name Error"),
         tr("The color name '%1' is not valid, a default color (red) will be "
-           "used instead!").arg(colorName));
+           "used instead!")
+            .arg(colorName));
     d_curveColorIndex = 1;
     return;
   }

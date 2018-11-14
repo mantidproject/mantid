@@ -90,7 +90,7 @@ Usage
 
    output_file = os.path.join(config["defaultsave.directory"], "GEM61785.gda")
    SaveGDA(InputWorkspace=input_group,
-           Filename=output_file,
+           OutputFilename=output_file,
 	   GSASParamFile="GEM_PF1_PROFILE.IPF",
            # Assign spectra 1, 2 and 3 to bank 2 in calib file, and spectrum 4 to bank 3
 	   GroupingScheme=[2, 2, 2, 3])
@@ -118,3 +118,7 @@ Output:
        40507    232   49   40546    181   44   40586    171   43   40626    206   47
        40666    246   50   40706    161   40   40746    126   37   40786    124   37
        40826    131   40   40866    221   48   40906    157   40   40946    169   41
+
+.. categories::
+
+.. sourcelink::

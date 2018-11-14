@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpecularReflectionCalculateTheta2.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <cmath>
 
@@ -15,7 +21,7 @@ namespace {
 const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
 const std::string lineDetectorAnalysis = "LineDetectorAnalysis";
 const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {

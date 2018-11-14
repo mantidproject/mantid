@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/RawCountValidator.h"
@@ -378,10 +384,10 @@ void NormaliseToMonitor::checkProperties(
   Property *monID = getProperty("MonitorID");
   // Is the monitor spectrum within the main input workspace
   const bool inWS = !monSpec->isDefault();
-  m_syncScanInput = inputWorkspace->detectorInfo().isSyncScan();
+  m_scanInput = inputWorkspace->detectorInfo().isScanning();
   // Or is it in a separate workspace
   bool sepWS{monWS};
-  if (m_syncScanInput && sepWS)
+  if (m_scanInput && sepWS)
     throw std::runtime_error("Can not currently use a separate monitor "
                              "workspace with a detector scan input workspace.");
   // or monitor ID
@@ -428,7 +434,7 @@ void NormaliseToMonitor::checkProperties(
                   "monitor - the instrument is not fully specified.\n "
                   "Continuing with normalization regardless.");
     g_log.warning() << "Error was: " << e.what() << "\n";
-    if (m_syncScanInput)
+    if (m_scanInput)
       throw std::runtime_error("Can not continue, spectrum can not be obtained "
                                "for monitor workspace, but the input workspace "
                                "has a detector scan.");
@@ -464,15 +470,15 @@ MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
       throw std::runtime_error(
           "Can not find spectra, corresponding to the requested monitor ID");
     }
-    if (indexList.size() > 1 && !m_syncScanInput) {
+    if (indexList.size() > 1 && !m_scanInput) {
       throw std::runtime_error("More then one spectrum corresponds to the "
                                "requested monitor ID. This is unexpected in a "
                                "non-scanning workspace.");
     }
     m_workspaceIndexes = indexList;
   } else { // monitor spectrum is specified.
-    if (m_syncScanInput)
-      throw std::runtime_error("For a sync-scan input workspace the monitor ID "
+    if (m_scanInput)
+      throw std::runtime_error("For a scanning input workspace the monitor ID "
                                "must be provided. Normalisation can not be "
                                "performed to a spectrum.");
     const SpectraAxis *axis =
@@ -629,7 +635,7 @@ void NormaliseToMonitor::performHistogramDivision(
     prog.report("Performing normalisation");
 
     size_t timeIndex = 0;
-    if (m_syncScanInput)
+    if (m_scanInput)
       timeIndex = specInfo.spectrumDefinition(workspaceIndex)[0].second;
 
     const auto newYFactor =
@@ -694,7 +700,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     auto monY = m_monitor->counts(workspaceIndex);
     auto monE = m_monitor->countStandardDeviations(workspaceIndex);
     size_t timeIndex = 0;
-    if (m_syncScanInput)
+    if (m_scanInput)
       timeIndex = monitorSpecInfo.spectrumDefinition(workspaceIndex)[0].second;
     // Calculate the overall normalization just the once if bins are all
     // matching
@@ -816,5 +822,5 @@ void NormaliseToMonitor::normalisationFactor(const BinEdges &X, Counts &Y,
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

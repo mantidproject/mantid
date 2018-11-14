@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/Polynomial.h"
 #include "MantidAPI/FunctionFactory.h"
 #include <boost/lexical_cast.hpp>
@@ -62,7 +68,7 @@ void Polynomial::functionDeriv1D(API::Jacobian *out, const double *xValues,
 //----------------------------------------------------------------------------------------------
 /** Get Attribute names
  * @return A list of attribute names (identical to Polynomial)
-*/
+ */
 std::vector<std::string> Polynomial::getAttributeNames() const { return {"n"}; }
 
 //----------------------------------------------------------------------------------------------
@@ -122,7 +128,7 @@ void Polynomial::setAttribute(const std::string &attName,
 
 //----------------------------------------------------------------------------------------------
 /** Check if attribute attName exists
-  */
+ */
 bool Polynomial::hasAttribute(const std::string &attName) const {
   return attName == "n";
 }

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------
 // Includes
 //-------------------------------------------
 #include "ScriptingWindow.h"
 #include "ApplicationWindow.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/Common/DropEventHelper.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "ScriptingEnv.h"
@@ -43,7 +49,7 @@ namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("ScriptingWindow");
-}
+} // namespace
 
 //-------------------------------------------
 // Public member functions
@@ -183,7 +189,7 @@ void ScriptingWindow::showEvent(QShowEvent *event) {
 }
 
 /**
- * Open a script directly. This is here for backwards compatability with the old
+ * Open a script directly. This is here for backwards compatibility with the old
  * ScriptWindow
  * class
  * @param filename :: The file name
@@ -199,7 +205,8 @@ void ScriptingWindow::open(const QString &filename, bool newtab) {
  * @param mode :: The execution type
  * */
 void ScriptingWindow::executeCurrentTab(const Script::ExecutionMode mode) {
-  m_manager->executeAll(mode);
+  // Async will always return true before executing
+  m_failureFlag = !m_manager->executeAll(mode);
 }
 
 //-------------------------------------------
@@ -437,12 +444,12 @@ void ScriptingWindow::showPythonHelp() {
 }
 
 /**
-  * Calls MultiTabScriptInterpreter to save the currently opened
-  * script file names to a string.
-  *
-  * @param app :: the current application window instance
-  * @return script file names in the matid project format
-  */
+ * Calls MultiTabScriptInterpreter to save the currently opened
+ * script file names to a string.
+ *
+ * @param app :: the current application window instance
+ * @return script file names in the matid project format
+ */
 std::string ScriptingWindow::saveToProject(ApplicationWindow *app) {
   (void)app; // suppress unused variable warnings
   return m_manager->saveToString().toStdString();

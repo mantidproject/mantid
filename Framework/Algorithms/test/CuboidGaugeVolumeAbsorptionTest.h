@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CuboidGaugeVolumeAbsorptionTEST_H_
 #define CuboidGaugeVolumeAbsorptionTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CuboidGaugeVolumeAbsorption.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/CuboidGaugeVolumeAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

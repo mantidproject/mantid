@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MuonAnalysisOptionTab.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MuonAnalysisHelper.h"
 
 #include <QLineEdit>
@@ -29,7 +35,7 @@ const QString MuonAnalysisOptionTab::VARIABLE_REBIN_DEFAULT("0.032");
 namespace {
 /// static logger instance
 Logger g_log("MuonAnalysis");
-}
+} // namespace
 
 MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm,
                                              const QString &settingsGroup)
@@ -141,16 +147,16 @@ void MuonAnalysisOptionTab::initLayout() {
 }
 
 /**
-* Muon Analysis Settings help.
-*/
+ * Muon Analysis Settings help.
+ */
 void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
       nullptr, QString("Muon Analysis"), QString("settings"));
 }
 
 /*
-* Muon Analysis Rebin help (located in settings section).
-*/
+ * Muon Analysis Rebin help (located in settings section).
+ */
 void MuonAnalysisOptionTab::rebinHelpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
       nullptr, QString("Muon Analysis"), QString("data-binning"));
@@ -398,6 +404,6 @@ Muon::MultiFitState MuonAnalysisOptionTab::getMultiFitState() const {
     return Muon::MultiFitState::Disabled;
   }
 }
-}
-}
-}
+} // namespace Muon
+} // namespace CustomInterfaces
+} // namespace MantidQt

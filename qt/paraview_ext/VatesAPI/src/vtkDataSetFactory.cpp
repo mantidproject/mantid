@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include <stdexcept>
@@ -58,5 +64,5 @@ vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws,
 
 // What we call the scalar array bearing the signal values in the vtk data set.
 const std::string vtkDataSetFactory::ScalarName = "signal";
-}
-}
+} // namespace VATES
+} // namespace Mantid

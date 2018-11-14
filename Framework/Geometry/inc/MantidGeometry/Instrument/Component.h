@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_Component_H_
 #define MANTID_GEOMETRY_Component_H_
 
@@ -14,8 +20,8 @@ namespace Poco {
 namespace XML {
 class Attributes;
 class XMLWriter;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace Geometry {
@@ -32,27 +38,6 @@ parameters, e.g. position, orientation. Implements IComponent.
 
 @author Roman Tolchenov, Tessella Support Services plc
 @date 4/12/2008
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL Component : public virtual IComponent {
 public:
@@ -161,38 +146,38 @@ public:
                     bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as a double
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as a double
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<double> getNumberParameter(const std::string &pname,
                                          bool recursive = true) const override {
     return getParameter<double>(pname, recursive);
   }
 
   /**
-  * Get a parameter defined as an int
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as an int
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<int> getIntParameter(const std::string &pname,
                                    bool recursive = true) const override {
     return getParameter<int>(pname, recursive);
   }
 
   /**
-  * Get a parameter's type -- this is HACK until Python can export property
-  * regardless of the property type
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns std::string describing parameter type or empty string if the type
-  * is not found
-  */
+   * Get a parameter's type -- this is HACK until Python can export property
+   * regardless of the property type
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns std::string describing parameter type or empty string if the type
+   * is not found
+   */
   std::string getParameterType(const std::string &pname,
                                bool recursive = true) const override {
     Parameter_sptr param = Parameter_sptr(); // Null shared pointer
@@ -222,24 +207,24 @@ public:
   /**Set components description. Works for parameterized components only */
   void setDescription(const std::string &descr);
   /**
-  * Get a parameter defined as a bool
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as a bool
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<bool> getBoolParameter(const std::string &pname,
                                      bool recursive = true) const override {
     return getParameter<bool>(pname, recursive);
   }
 
   /**
-  * Get a parameter defined as a Kernel::V3D
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as a Kernel::V3D
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<Kernel::V3D>
   getPositionParameter(const std::string &pname,
                        bool recursive = true) const override {
@@ -247,12 +232,12 @@ public:
   }
 
   /**
-  * Get a parameter defined as a Kernel::Quaternion
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as a Kernel::Quaternion
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<Kernel::Quat>
   getRotationParameter(const std::string &pname,
                        bool recursive = true) const override {
@@ -260,12 +245,12 @@ public:
   }
 
   /**
-  * Get a parameter defined as a string
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as a string
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<std::string>
   getStringParameter(const std::string &pname,
                      bool recursive = true) const override {
@@ -323,13 +308,13 @@ protected:
   Kernel::Quat m_rot;
 
   /**
-  *  Get a parameter from the parameter map
-  * @param p_name :: The name of the parameter
-  * @param recursive :: If true then the lookup will walk up the tree if this
-  * component does not have parameter
-  * @return A list of size 0 or 1 containing the parameter value or
-  * nothing if it does not exist
-  */
+   *  Get a parameter from the parameter map
+   * @param p_name :: The name of the parameter
+   * @param recursive :: If true then the lookup will walk up the tree if this
+   * component does not have parameter
+   * @return A list of size 0 or 1 containing the parameter value or
+   * nothing if it does not exist
+   */
   template <class TYPE>
   std::vector<TYPE> getParameter(const std::string &p_name,
                                  bool recursive) const {

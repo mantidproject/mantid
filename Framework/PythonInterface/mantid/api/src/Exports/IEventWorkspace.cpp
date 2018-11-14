@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
@@ -23,7 +29,7 @@ IEventList &deprecatedGetEventList(IEventWorkspace &self, const size_t index) {
              "'getEventList' is deprecated, use 'getSpectrum' instead.");
   return self.getSpectrum(index);
 }
-}
+} // namespace
 
 /**
  * Python exports of the Mantid::API::IEventWorkspace class.

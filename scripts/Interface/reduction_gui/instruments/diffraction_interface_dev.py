@@ -1,9 +1,14 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.diffraction.diffraction_run_setup import RunSetupWidget
 from reduction_gui.widgets.diffraction.diffraction_adv_setup import AdvancedSetupWidget
 from reduction_gui.widgets.diffraction.diffraction_filter_setup import FilterSetupWidget
-from reduction_gui.widgets.cluster_status import RemoteJobsWidget
 
 from reduction_gui.reduction.diffraction.diffraction_reduction_script import DiffractionReductionScripter
 
@@ -34,13 +39,4 @@ class DiffractionInterface(InstrumentInterface):
         # Tab 3: Event filters setup
         self.attach(FilterSetupWidget(settings = self._settings, data_type = self.data_type))
 
-        # Remote jobs status
-        if self.remote_resources_available():
-            self.attach(RemoteJobsWidget(settings = self._settings))
         return
-
-    def is_cluster_enabled(self):
-        """
-            Returns true if the instrument is compatible with remote submission
-        """
-        return True

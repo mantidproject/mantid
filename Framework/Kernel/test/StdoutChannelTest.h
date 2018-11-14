@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_STDOUTCHANNELTEST_H_
 #define MANTID_STDOUTCHANNELTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/StdoutChannel.h"
+#include <Poco/AutoPtr.h>
 #include <Poco/Logger.h>
 #include <Poco/NullChannel.h>
-#include <Poco/AutoPtr.h>
 
 using namespace Mantid::Kernel;
 

@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Parameter.h"
-#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/V3D.h"

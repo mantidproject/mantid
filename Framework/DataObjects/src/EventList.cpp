@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
+#include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Exception.h"
@@ -85,7 +91,7 @@ public:
     return (tAtSample1 < tAtSample2);
   }
 };
-}
+} // namespace
 //==========================================================================
 /// --------------------- TofEvent Comparators
 /// ----------------------------------
@@ -433,7 +439,7 @@ operator+=(const std::vector<WeightedEvent> &more_events) {
   case TOF:
     // Need to switch to weighted
     this->switchTo(WEIGHTED);
-  // Fall through to the insertion!
+    // Fall through to the insertion!
 
   case WEIGHTED:
     // Append the two lists
@@ -471,7 +477,7 @@ operator+=(const std::vector<WeightedEventNoTime> &more_events) {
   case WEIGHTED:
     // Need to switch to weighted with no time
     this->switchTo(WEIGHTED_NOTIME);
-  // Fall through to the insertion!
+    // Fall through to the insertion!
 
   case WEIGHTED_NOTIME:
     // Simple appending of the two lists
@@ -567,7 +573,7 @@ EventList &EventList::operator-=(const EventList &more_events) {
   switch (this->getEventType()) {
   case TOF:
     this->switchTo(WEIGHTED);
-  // Fall through
+    // Fall through
 
   case WEIGHTED:
     switch (more_events.getEventType()) {
@@ -2155,19 +2161,19 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
 }
 
 /** With respect to PulseTime fill a histogram given equal histogram
-*   bins.
-* Number of bins is equal to number of elements in vector Y.
-* Appends values to existing Y values.
-*
-* @param xMin :: Minimal Pulse time (in nanoseconds,
-*                i.e. DateTime->totalNanoseconds()) value to include
-*                in binning.
-* @param xMax :: Maximal Pulse time value to constrain binning by (include the
-*                times smaller than right boundary, excluding equal)
-* @param Y :: The generated counts histogram
-* @param TOF_min -- min TOF to include in histogram.
-* @param TOF_max -- max TOF to constrain values included in histogram.
-*/
+ *   bins.
+ * Number of bins is equal to number of elements in vector Y.
+ * Appends values to existing Y values.
+ *
+ * @param xMin :: Minimal Pulse time (in nanoseconds,
+ *                i.e. DateTime->totalNanoseconds()) value to include
+ *                in binning.
+ * @param xMax :: Maximal Pulse time value to constrain binning by (include the
+ *                times smaller than right boundary, excluding equal)
+ * @param Y :: The generated counts histogram
+ * @param TOF_min -- min TOF to include in histogram.
+ * @param TOF_max -- max TOF to constrain values included in histogram.
+ */
 void EventList::generateCountsHistogramPulseTime(const double &xMin,
                                                  const double &xMax,
                                                  MantidVec &Y,
@@ -2332,15 +2338,15 @@ void EventList::generateErrorsHistogram(const MantidVec &Y,
                  static_cast<double (*)(double)>(sqrt));
 
 } //----------------------------------------------------------------------------------
-  /** Integrate the events between a range of X values, or all events.
-   *
-   * @param events :: reference to a vector of events to change.
-   * @param minX :: minimum X bin to use in integrating.
-   * @param maxX :: maximum X bin to use in integrating.
-   * @param entireRange :: set to true to use the entire range. minX and maxX are
-   *then ignored!
-   * @return the integrated number of events.
-   */
+/** Integrate the events between a range of X values, or all events.
+ *
+ * @param events :: reference to a vector of events to change.
+ * @param minX :: minimum X bin to use in integrating.
+ * @param maxX :: maximum X bin to use in integrating.
+ * @param entireRange :: set to true to use the entire range. minX and maxX are
+ *then ignored!
+ * @return the integrated number of events.
+ */
 template <class T>
 double EventList::integrateHelper(std::vector<T> &events, const double minX,
                                   const double maxX, const bool entireRange) {
@@ -3330,7 +3336,7 @@ void EventList::multiply(const double value, const double error) {
   case TOF:
     // Switch to weights if needed.
     this->switchTo(WEIGHTED);
-  // Fall through
+    // Fall through
 
   case WEIGHTED:
     multiplyHelper(this->weightedEvents, value, error);
@@ -3449,7 +3455,7 @@ void EventList::multiply(const MantidVec &X, const MantidVec &Y,
   case TOF:
     // Switch to weights if needed.
     this->switchTo(WEIGHTED);
-  // Fall through
+    // Fall through
 
   case WEIGHTED:
     // Sorting by tof is necessary for the algorithm
@@ -3586,7 +3592,7 @@ void EventList::divide(const MantidVec &X, const MantidVec &Y,
   case TOF:
     // Switch to weights if needed.
     this->switchTo(WEIGHTED);
-  // Fall through
+    // Fall through
 
   case WEIGHTED:
     // Sorting by tof is necessary for the algorithm
@@ -4783,5 +4789,5 @@ void EventList::checkIsYAndEWritable() const {
                            "generated automatically based on the events");
 }
 
-} /// namespace DataObjects
-} /// namespace Mantid
+} // namespace DataObjects
+} // namespace Mantid

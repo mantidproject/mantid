@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -12,6 +18,8 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHistory.h"
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/range/algorithm/remove_if.hpp>
 #include <boost/utility.hpp>
 #include <set>
 
@@ -29,10 +37,11 @@ const std::string COMMENT_ALG = "Comment";
 
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
                              std::string versionSpecificity,
-                             bool appendTimestamp)
+                             bool appendTimestamp,
+                             std::vector<std::string> ignoreTheseAlgs)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(versionSpecificity),
-      m_timestampCommands(appendTimestamp) {}
+      m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs) {}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -84,14 +93,24 @@ void ScriptBuilder::writeHistoryToStream(
       os << "\n";
     }
   } else {
-    // create the string for this algorithm
-    os << buildAlgorithmString(algHistory);
-    if (m_timestampCommands) {
-      os << " # " << algHistory->executionDate().toISO8601String();
+    // create the string for this algorithm if not found to be in the ignore
+    // list
+    if (!(std::find(m_algsToIgnore.begin(), m_algsToIgnore.end(),
+                    algHistory->name()) != m_algsToIgnore.end())) {
+      createStringForAlg(os, algHistory);
     }
-
-    os << "\n";
   }
+}
+
+void ScriptBuilder::createStringForAlg(
+    std::ostringstream &os,
+    boost::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory) {
+  os << buildAlgorithmString(*algHistory);
+  if (m_timestampCommands) {
+    os << " # " << algHistory->executionDate().toISO8601String();
+  }
+
+  os << "\n";
 }
 
 /**
@@ -125,11 +144,11 @@ void ScriptBuilder::buildChildren(
  * @returns std::string to run this algorithm
  */
 const std::string
-ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
+ScriptBuilder::buildCommentString(const AlgorithmHistory &algHistory) {
   std::ostringstream comment;
-  const std::string name = algHistory->name();
+  const std::string name = algHistory.name();
   if (name == COMMENT_ALG) {
-    auto props = algHistory->getProperties();
+    auto props = algHistory.getProperties();
     for (auto &prop : props) {
       if (prop->name() == "Note") {
         comment << "# " << prop->value();
@@ -146,20 +165,20 @@ ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
  * @returns std::string to run this algorithm
  */
 const std::string
-ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
+ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &algHistory) {
   std::ostringstream properties;
-  const std::string name = algHistory->name();
+  const std::string name = algHistory.name();
   std::string prop;
 
   if (name == COMMENT_ALG)
     return buildCommentString(algHistory);
 
-  auto props = algHistory->getProperties();
+  auto props = algHistory.getProperties();
 
   try {
     // create a fresh version of the algorithm - unmanaged
-    IAlgorithm_sptr algFresh = AlgorithmManager::Instance().createUnmanaged(
-        name, algHistory->version());
+    auto algFresh = AlgorithmManager::Instance().createUnmanaged(
+        name, algHistory.version());
     algFresh->initialize();
 
     const auto &propsFresh = algFresh->getProperties();
@@ -182,11 +201,11 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
 
   } catch (std::exception &) {
     g_log.error() << "Could not create a fresh version of " << name
-                  << " version " << algHistory->version() << "\n";
+                  << " version " << algHistory.version() << "\n";
   }
 
   for (auto &propIter : props) {
-    prop = buildPropertyString(propIter);
+    prop = buildPropertyString(*propIter);
     if (prop.length() > 0) {
       properties << prop << ", ";
     }
@@ -194,25 +213,20 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
 
   // Three cases, we can either specify the version of every algorithm...
   if (m_versionSpecificity == "all") {
-    properties << "Version=" << algHistory->version() << ", ";
+    properties << "Version=" << algHistory.version() << ", ";
   } else if (m_versionSpecificity == "old") {
     //...or only specify algorithm versions when they're not the newest version
-    bool oldVersion = false;
+    const auto &algName = algHistory.name();
+    auto &algFactory = API::AlgorithmFactory::Instance();
+    int latestVersion = 0;
 
-    std::vector<AlgorithmDescriptor> descriptors =
-        AlgorithmFactory::Instance().getDescriptors();
-    for (auto &descriptor : descriptors) {
-      // If a newer version of this algorithm exists, then this must be an old
-      // version.
-      if (descriptor.name == algHistory->name() &&
-          descriptor.version > algHistory->version()) {
-        oldVersion = true;
-        break;
-      }
+    if (algFactory.exists(algName)) { // Check the alg still exists in Mantid
+      latestVersion = AlgorithmFactory::Instance().highestVersion(algName);
     }
-
-    if (oldVersion) {
-      properties << "Version=" << algHistory->version() << ", ";
+    // If a newer version of this algorithm exists, then this must be an old
+    // version.
+    if (latestVersion > algHistory.version()) {
+      properties << "Version=" << algHistory.version() << ", ";
     }
   }
   // Third case is we never specify the version, so do nothing.
@@ -224,7 +238,10 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     propStr.erase(propStr.size() - 1);
   }
 
-  return name + "(" + propStr + ")";
+  std::string historyEntry = name + "(" + propStr + ")";
+  historyEntry.erase(boost::remove_if(historyEntry, boost::is_any_of("\n\r")),
+                     historyEntry.end());
+  return historyEntry;
 }
 
 /**
@@ -233,8 +250,8 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
  * @param propHistory :: reference to a property history object
  * @returns std::string for this property
  */
-const std::string
-ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
+const std::string ScriptBuilder::buildPropertyString(
+    const Mantid::Kernel::PropertyHistory &propHistory) {
   using Mantid::Kernel::Direction;
 
   // Create a vector of all non workspace property type names
@@ -242,28 +259,31 @@ ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
 
   std::string prop;
   // No need to specify value for default properties
-  if (!propHistory->isDefault()) {
+  if (!propHistory.isDefault()) {
     // Do not give values to output properties other than workspace properties
     if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(),
-             propHistory->type()) != nonWorkspaceTypes.end() &&
-        propHistory->direction() == Direction::Output) {
-      g_log.debug() << "Ignoring property " << propHistory->name()
-                    << " of type " << propHistory->type() << '\n';
+             propHistory.type()) != nonWorkspaceTypes.end() &&
+        propHistory.direction() == Direction::Output) {
+      // If algs are to be ignored (Common use case is project recovery) ignore
+      if (m_algsToIgnore.size() == 0) {
+        g_log.debug() << "Ignoring property " << propHistory.name()
+                      << " of type " << propHistory.type() << '\n';
+      }
       // Handle numerical properties
-    } else if (propHistory->type() == "number") {
-      prop = propHistory->name() + "=" + propHistory->value();
+    } else if (propHistory.type() == "number") {
+      prop = propHistory.name() + "=" + propHistory.value();
       // Handle boolean properties
-    } else if (propHistory->type() == "boolean") {
-      std::string value = (propHistory->value() == "1" ? "True" : "False");
-      prop = propHistory->name() + "=" + value;
+    } else if (propHistory.type() == "boolean") {
+      std::string value = (propHistory.value() == "1" ? "True" : "False");
+      prop = propHistory.name() + "=" + value;
       // Handle all other property types
     } else {
       std::string opener = "='";
-      if (propHistory->value().find('\\') != std::string::npos) {
+      if (propHistory.value().find('\\') != std::string::npos) {
         opener = "=r'";
       }
 
-      prop = propHistory->name() + opener + propHistory->value() + "'";
+      prop = propHistory.name() + opener + propHistory.value() + "'";
     }
   }
 

@@ -1,5 +1,11 @@
-#include "MantidAPI/Run.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/NormaliseByCurrent.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/LogFilter.h"
@@ -132,5 +138,5 @@ void NormaliseByCurrent::exec() {
   outputWS->setYUnitLabel("Counts per microAmp.hour");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

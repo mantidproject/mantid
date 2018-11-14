@@ -21,7 +21,7 @@ Mantid Property Keys
 The code is configured using he following Mantid.Property, or Mantid.User.Property keys.
 
 UpdateInstrumentDefinitions.OnStartup = 1
-   This controls wether this algorithm is run on startup of Mantid.  1 = Run on startup, 0 = don't.
+   This controls whether this algorithm is run on startup of Mantid.  1 = Run on startup, 0 = don't.
 
 UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/mantid/contents/instrument
    This stores the url used to access the contents of the Mantid Instrument Definition Repository.
@@ -41,7 +41,7 @@ Internet Connection Failed - cannot update instrument definitions.
    The connection to the instrument Repository failed.  This could be down to your network connection, proxy settings (we use the system proxy settings).  More details will be logged as another message at information level.
 
 Instrument Definition Update: The Github API rate limit has been reached, try again after 19-Feb-2015 11:23:34
-   There is a limit of how many calls we are allowed to make to Github per hour.  Try again after the time specified.  If this keeps occuring let the developement team know.
+   There is a limit of how many calls we are allowed to make to Github per hour.  Try again after the time specified.  If this keeps occurring let the development team know.
 
 The details
 ###########
@@ -58,7 +58,7 @@ The instrument files within Mantid can be accessed in three locations.
 When running the algorithm the processing takes the following steps.
 
 1. The description of the contents of the Instrument Repo is downloaded and stored in a file github.json to the Appdata Dir.
-2. A file of the desription of xml files in  Appdata Dir and Install Dir are updated or created and saved into AppData Dir as install.json and appdata.json.
+2. A file of the description of xml files in  Appdata Dir and Install Dir are updated or created and saved into AppData Dir as install.json and appdata.json.
 3. The contents of all 3 are inspected and new or updated files (based on the git checksum) are added to a download list.
 4. The list of files are downloaded to the Appdata Dir.
 5. :ref:`algm-LoadInstrument` will load files in Appdata Dir in preference to those in the Install Dir if both are valid.

@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_VARIANCEVECTOROF_H_
 #define MANTID_HISTOGRAMDATA_VARIANCEVECTOROF_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VectorOf.h"
 #include "MantidHistogramData/Iterable.h"
+#include "MantidHistogramData/VectorOf.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -26,27 +32,6 @@ namespace detail {
 
   @author Simon Heybrock
   @date 2016
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class T, class CowType, class Sigmas>
 class VarianceVectorOf : public VectorOf<T, CowType>, public Iterable<T> {
@@ -59,17 +44,17 @@ public:
   // the using declaration above, so we need them here explicitly.
   VarianceVectorOf(const VarianceVectorOf &) = default;
   VarianceVectorOf(VarianceVectorOf &&) = default;
-  VarianceVectorOf &operator=(const VarianceVectorOf &)& = default;
-  VarianceVectorOf &operator=(VarianceVectorOf &&)& = default;
+  VarianceVectorOf &operator=(const VarianceVectorOf &) & = default;
+  VarianceVectorOf &operator=(VarianceVectorOf &&) & = default;
 
   /// Copy construct from sigmas, taking the square of each sigma value.
   VarianceVectorOf(const Sigmas &sigmas);
   /// Move construct from sigmas, taking the square of each sigma value.
   VarianceVectorOf(Sigmas &&sigmas);
   /// Copy assignment from sigmas, taking the square of each sigma value.
-  VarianceVectorOf &operator=(const Sigmas &sigmas) & ;
+  VarianceVectorOf &operator=(const Sigmas &sigmas) &;
   /// Move assignment from sigmas, taking the square of each sigma value.
-  VarianceVectorOf &operator=(Sigmas &&sigmas) & ;
+  VarianceVectorOf &operator=(Sigmas &&sigmas) &;
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so

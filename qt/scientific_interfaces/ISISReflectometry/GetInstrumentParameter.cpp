@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "GetInstrumentParameter.h"
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -63,5 +69,5 @@ std::string const &InstrumentParameterTypeMissmatch::expectedType() const {
 std::string const &InstrumentParameterTypeMissmatch::originalMessage() const {
   return m_originalMessage;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

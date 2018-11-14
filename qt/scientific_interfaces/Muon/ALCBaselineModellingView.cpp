@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCBaselineModellingView.h"
 
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 
 #include <boost/scoped_array.hpp>
 
-#include <QMessageBox>
 #include <QMenu>
+#include <QMessageBox>
 #include <QSignalMapper>
 
 #include <qwt_symbol.h>

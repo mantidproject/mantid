@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef GENERALISEDSECONDDIFFERENCETEST_H_
 #define GENERALISEDSECONDDIFFERENCETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "../../DataObjects/test/EventWorkspaceTest.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include <MantidDataObjects/EventWorkspace.h>
-#include "../../DataObjects/test/EventWorkspaceTest.h"
 #include <MantidAlgorithms/GeneralisedSecondDifference.h>
+#include <MantidDataObjects/EventWorkspace.h>
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;

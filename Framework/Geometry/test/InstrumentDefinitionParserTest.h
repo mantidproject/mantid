@@ -1,6 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 #define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -12,8 +20,8 @@
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include <cxxtest/TestSuite.h>
 
-#include <gmock/gmock.h>
 #include <boost/algorithm/string/replace.hpp>
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -22,7 +30,7 @@ using namespace testing;
 using ScopedFileHelper::ScopedFile;
 
 class InstrumentDefinitionParserTest : public CxxTest::TestSuite {
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   /// Mock Type to act as IDF files.
   class MockIDFObject : public Mantid::Geometry::IDFObject {
@@ -40,7 +48,7 @@ private:
     MOCK_CONST_METHOD0(exists, bool());
     MOCK_CONST_METHOD0(getParentDirectory, const Poco::Path());
   };
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
   /**
   Helper type to pass around related IDF environment information in a
   collection.
@@ -1031,9 +1039,22 @@ public:
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InstrumentDefinitionParserTestPerformance *createSuite() {
+    return new InstrumentDefinitionParserTestPerformance();
+  }
+  static void destroySuite(InstrumentDefinitionParserTestPerformance *suite) {
+    delete suite;
+  }
+
+  InstrumentDefinitionParserTestPerformance()
+      : m_instrumentDirectoryPath(
+            ConfigService::Instance().getInstrumentDirectory()) {}
+
   void testLoadingAndParsing() {
     const std::string filename =
-        ConfigService::Instance().getInstrumentDirectory() +
+        m_instrumentDirectoryPath +
         "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
     const std::string xmlText = Strings::loadFile(filename);
 
@@ -1046,6 +1067,35 @@ public:
     if (!vtpFilename.empty()) {
       Poco::File(vtpFilename).remove();
     }
+  }
+
+  void test_load_wish() {
+    const auto definition =
+        m_instrumentDirectoryPath + "/WISH_Definition_10Panels.xml";
+    std::string contents = Strings::loadFile(definition);
+    InstrumentDefinitionParser parser(definition, "dummy", contents);
+    auto wishInstrument = parser.parseXML(nullptr);
+    TS_ASSERT_EQUALS(extractDetectorInfo(*wishInstrument)->size(),
+                     778245); // Sanity check
+  }
+
+  void test_load_sans2d() {
+    const auto definition =
+        m_instrumentDirectoryPath + "/SANS2D_Definition_Tubes.xml";
+    std::string contents = Strings::loadFile(definition);
+    InstrumentDefinitionParser parser(definition, "dummy", contents);
+    auto sansInstrument = parser.parseXML(nullptr);
+    TS_ASSERT_EQUALS(extractDetectorInfo(*sansInstrument)->size(),
+                     122888); // Sanity check
+  }
+
+private:
+  const std::string m_instrumentDirectoryPath;
+
+  std::unique_ptr<Geometry::DetectorInfo>
+  extractDetectorInfo(const Mantid::Geometry::Instrument &instrument) {
+    Geometry::ParameterMap pmap;
+    return std::move(std::get<1>(instrument.makeBeamline(pmap)));
   }
 };
 

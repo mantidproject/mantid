@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDPEAKSTEST_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDPEAKSTEST_H_
 
@@ -10,9 +16,9 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
+#include "MantidCurveFitting/FortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidCurveFitting/FortranDefs.h"
 
 using Mantid::CurveFitting::Functions::CrystalFieldPeaks;
 using namespace Mantid::CurveFitting::Algorithms;

@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef FINDCENTEROFMASSPOSITIONTEST2_H_
 #define FINDCENTEROFMASSPOSITIONTEST2_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/FindCenterOfMassPosition2.h"
-#include "MantidDataHandling/LoadSpice2D.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAlgorithms/FindCenterOfMassPosition2.h"
+#include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/UnitFactory.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 

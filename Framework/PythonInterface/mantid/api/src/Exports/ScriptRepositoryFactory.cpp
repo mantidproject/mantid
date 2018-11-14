@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 
-using Mantid::API::ScriptRepositoryFactoryImpl;
 using Mantid::API::ScriptRepositoryFactory;
+using Mantid::API::ScriptRepositoryFactoryImpl;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(ScriptRepositoryFactoryImpl)
@@ -16,7 +22,7 @@ namespace {
 //------------------------------------------------------------------------------------------------------
 
 ///@endcond
-}
+} // namespace
 
 void export_ScriptRepositoryFactory() {
   class_<ScriptRepositoryFactoryImpl, boost::noncopyable>(

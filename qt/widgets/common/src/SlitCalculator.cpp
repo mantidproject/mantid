@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidKernel/Strings.h"
 
 #include <cmath>
 
@@ -120,5 +126,5 @@ void SlitCalculator::on_recalculate_triggered() {
   ui.slit1Text->setText(QString::number(s1, 'f', 3));
   ui.slit2Text->setText(QString::number(s2, 'f', 3));
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

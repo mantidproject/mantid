@@ -1,6 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATA_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATA_H_
 
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -8,6 +15,8 @@
 #include <boost/variant.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/weak_ptr.hpp>
+
+#include <cctype>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -31,7 +40,11 @@ std::vector<T> vectorFromString(const std::string &listString) {
 template <typename T> class DiscontinuousSpectra {
 public:
   explicit DiscontinuousSpectra(const std::string &str)
-      : m_str(str), m_vec(vectorFromString<T>(str)) {}
+      : m_str(str), m_vec(vectorFromString<T>(str)) {
+    m_str.erase(std::remove_if(m_str.begin(), m_str.end(),
+                               static_cast<int (*)(int)>(std::isspace)),
+                m_str.end());
+  }
   DiscontinuousSpectra(const DiscontinuousSpectra &vec)
       : m_str(vec.m_str), m_vec(vec.m_vec) {}
   DiscontinuousSpectra(DiscontinuousSpectra &&vec)
@@ -59,6 +72,9 @@ public:
   }
   typename std::vector<T>::const_iterator end() const { return m_vec.end(); }
   const T &operator[](std::size_t index) const { return m_vec[index]; }
+  bool operator==(DiscontinuousSpectra<std::size_t> const &spec) const {
+    return this->getString() == spec.getString();
+  }
 
 private:
   std::string m_str;
@@ -124,29 +140,8 @@ private:
    IndirectFitData - Stores the data to be fit; workspace, spectra,
    fitting range and exclude regions. Provides methods for accessing
    and applying the fitting data.
-
-   Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-   This file is part of Mantid.
-
-   Mantid is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   Mantid is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-   File change history is stored at: <https://github.com/mantidproject/mantid>.
-   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IndirectFitData {
+class MANTIDQT_INDIRECT_DLL IndirectFitData {
 public:
   IndirectFitData(Mantid::API::MatrixWorkspace_sptr workspace,
                   const Spectra &spectra);
@@ -163,7 +158,7 @@ public:
   bool zeroSpectra() const;
   std::pair<double, double> getRange(std::size_t spectrum) const;
   std::string getExcludeRegion(std::size_t spectrum) const;
-  IndirectFitData &combine(const IndirectFitData &fitData);
+  IndirectFitData &combine(IndirectFitData const &fitData);
 
   std::vector<double> excludeRegionsVector(std::size_t spectrum) const;
 
@@ -177,16 +172,16 @@ public:
         ApplyEnumeratedSpectra<F>(std::forward<F>(functor), start), m_spectra);
   }
 
-  void setSpectra(const std::string &spectra);
+  void setSpectra(std::string const &spectra);
   void setSpectra(Spectra &&spectra);
-  void setSpectra(const Spectra &spectra);
-  void setStartX(double startX, std::size_t index);
-  void setEndX(double endX, std::size_t spectrum);
-  void setExcludeRegionString(const std::string &excludeRegion,
-                              std::size_t spectrum);
+  void setSpectra(Spectra const &spectra);
+  void setStartX(double const &startX, std::size_t const &index);
+  void setEndX(double const &endX, std::size_t const &spectrum);
+  void setExcludeRegionString(std::string const &excludeRegion,
+                              std::size_t const &spectrum);
 
 private:
-  void validateSpectra(const Spectra &spectra);
+  void validateSpectra(Spectra const &spectra);
 
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   Spectra m_spectra;

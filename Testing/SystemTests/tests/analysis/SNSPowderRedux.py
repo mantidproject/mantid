@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
@@ -236,16 +242,16 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
         # prepare for validation
         LoadGSS(Filename="PG3_9829.gsa", OutputWorkspace="PG3_9829")
         LoadGSS(Filename=self.ref_files[0], OutputWorkspace="PG3_9829_golden")
-        #LoadGSS("PG3_9830.gsa", "PG3_9830") # can only validate one workspace
-        #LoadGSS(self.ref_file[1], "PG3_9830_golden")
+        LoadGSS(Filename="PG3_9830.gsa", OutputWorkspace="PG3_9830")
+        LoadGSS(Filename=self.ref_files[1], OutputWorkspace="PG3_9830_golden")
 
     def validateMethod(self):
         self.tolerance = 1.0e-2
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        return ('PG3_9829','PG3_9829_golden')
-        #return ('PG3_9830','PG3_9830_golden') # can only validate one workspace
+        # these are an ordered pair
+        return ('PG3_9829','PG3_9829_golden', 'PG3_9830','PG3_9830_golden')
 
 
 class SumFilesTest(stresstesting.MantidStressTest):

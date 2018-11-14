@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -213,11 +219,11 @@ Plus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
 
 //---------------------------------------------------------------------------------------------
 /** Adds the integrated proton currents, proton charges, of the two input
-*  workspaces together
-*  @param lhs :: one of the workspace samples to be summed
-*  @param rhs :: the other workspace sample to be summed
-*  @param ans :: the sample in the output workspace
-*/
+ *  workspaces together
+ *  @param lhs :: one of the workspace samples to be summed
+ *  @param rhs :: the other workspace sample to be summed
+ *  @param ans :: the sample in the output workspace
+ */
 void Plus::operateOnRun(const Run &lhs, const Run &rhs, Run &ans) const {
   // The addition operator of Run will add the proton charges, append logs, etc.
   // If ans=lhs or ans=rhs then we need to be careful in which order we do this
@@ -235,5 +241,5 @@ void Plus::operateOnRun(const Run &lhs, const Run &rhs, Run &ans) const {
     ans += rhs;
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

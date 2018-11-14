@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADNEXUSLOGSTEST_H_
 #define LOADNEXUSLOGSTEST_H_
 
-#include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -18,8 +24,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"
+#include <cxxtest/TestSuite.h>
 
 class LoadNexusLogsTest : public CxxTest::TestSuite {
 public:

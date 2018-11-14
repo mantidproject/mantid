@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDMATRIX_H
 #define MANTIDMATRIX_H
 
@@ -45,12 +51,12 @@ class UpdateDAEThread;
 class ProjectData;
 
 /**
-* Find the minimum and maximum Y values in a matrix workspace.
-*
-* @param ws :: A matrix workspace.
-* @param miny :: Variable to receive the minimum value.
-* @param maxy :: Variable to receive the maximum value.
-*/
+ * Find the minimum and maximum Y values in a matrix workspace.
+ *
+ * @param ws :: A matrix workspace.
+ * @param miny :: Variable to receive the minimum value.
+ * @param maxy :: Variable to receive the maximum value.
+ */
 void findYRange(Mantid::API::MatrixWorkspace_const_sptr ws, double &miny,
                 double &maxy);
 
@@ -59,27 +65,6 @@ workspaces.
 It has separate tabs for displaying spectrum values, bin boundaries, and errors.
 
 @author Roman Tolchenov, Tessella Support Services plc
-
-Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 */
 class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver {
@@ -326,7 +311,7 @@ private:
   /// Update the existing extensions
   void updateExtensions(Mantid::API::MatrixWorkspace_sptr ws);
 
-  /// ExtensioRequest handleer
+  /// ExtensioRequest handler
   MantidMatrixExtensionRequest m_extensionRequest;
 
   friend class MantidMatrixFunction;

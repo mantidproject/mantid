@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 
 #include <QDesktopServices>
@@ -9,7 +15,7 @@
 namespace {
 // String name of LD_PRELOAD environment variable
 constexpr const char *LDPRELOAD_ENV = "LD_PRELOAD";
-}
+} // namespace
 #endif
 
 #include <iostream>
@@ -70,5 +76,5 @@ void MantidDesktopServices::setUrlHandler(const QString &scheme,
 void MantidDesktopServices::unsetUrlHandler(const QString &scheme) {
   QDesktopServices::unsetUrlHandler(scheme);
 }
-}
-}
+} // namespace API
+} // namespace MantidQt

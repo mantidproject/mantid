@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -14,16 +20,16 @@ namespace FuncMinimisers {
 namespace {
 /// static logger
 Kernel::Logger g_log("SimplexMinimizer");
-}
+} // namespace
 
 DECLARE_FUNCMINIMIZER(SimplexMinimizer, Simplex)
 
 /** Calculating cost function
-*
-* @param x :: Input function arguments
-* @param params :: Pointer to a SimplexMinimizer
-* @return Value of the cost function
-*/
+ *
+ * @param x :: Input function arguments
+ * @param params :: Pointer to a SimplexMinimizer
+ * @return Value of the cost function
+ */
 double SimplexMinimizer::fun(const gsl_vector *x, void *params) {
   SimplexMinimizer &minimizer = *static_cast<SimplexMinimizer *>(params);
   // update function parameters

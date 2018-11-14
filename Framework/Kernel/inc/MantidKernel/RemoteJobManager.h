@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef REMOTEJOBMANAGER_H
 #define REMOTEJOBMANAGER_H
 
+#include <iosfwd>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
-#include <iosfwd>
 
 #include <Poco/Net/HTTPResponse.h>
 
@@ -20,8 +26,8 @@ class HTTPCookie;
 class NameValueCollection;
 class HTTPClientSession;
 class HTTPRequest;
-}
-}
+} // namespace Net
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {
@@ -90,10 +96,10 @@ private:
   std::vector<Poco::Net::HTTPCookie> m_cookies;
   Poco::Net::NameValueCollection getCookies();
 
-  Poco::Net::HTTPClientSession *
-      m_session; // Pointer to session object for all our HTTP requests
-                 // (Has to be a pointer because we allocate and delete
-                 // it multiple times)
+  Poco::Net::HTTPClientSession
+      *m_session; // Pointer to session object for all our HTTP requests
+                  // (Has to be a pointer because we allocate and delete
+                  // it multiple times)
   Poco::Net::HTTPResponse
       m_response; // Response object for all of our HTTP requests
 

@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidAPI/JointDomain.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 
 #include <sstream>
@@ -156,5 +162,5 @@ boost::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
   return outWS;
 }
 
-} // namespace Algorithm
+} // namespace CurveFitting
 } // namespace Mantid

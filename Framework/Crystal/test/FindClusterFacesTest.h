@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_FINDCLUSTERFACESTEST_H_
 #define MANTID_CRYSTAL_FINDCLUSTERFACESTEST_H_
 
@@ -10,9 +16,9 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidKernel/UnitLabelTypes.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -104,7 +110,7 @@ ITableWorkspace_sptr doExecuteWithFilter(IMDHistoWorkspace_sptr &inWS,
   ITableWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
   return outWS;
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests

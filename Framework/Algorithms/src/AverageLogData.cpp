@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AverageLogData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -43,9 +49,10 @@ void AverageLogData::init() {
                   "An input workspace that contains a Sample log property, and "
                   "a proton charge property.");
   declareProperty("LogName", "", "Name of the log to be averaged");
-  declareProperty("FixZero", true, "If true, the proton charge and the log "
-                                   "value time series are assumed to start at "
-                                   "the same moment.");
+  declareProperty("FixZero", true,
+                  "If true, the proton charge and the log "
+                  "value time series are assumed to start at "
+                  "the same moment.");
   declareProperty("Average", EMPTY_DBL(), "", Direction::Output);
   declareProperty("Error", EMPTY_DBL(), "", Direction::Output);
 }

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_ESTIMATEFITPARAMETERSTEST_H_
 #define MANTID_CURVEFITTING_ESTIMATEFITPARAMETERSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/EstimateFitParameters.h"
-#include "MantidCurveFitting/Algorithms/CalculateCostFunction.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidCurveFitting/Algorithms/CalculateCostFunction.h"
+#include "MantidCurveFitting/Algorithms/EstimateFitParameters.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

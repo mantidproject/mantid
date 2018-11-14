@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -5,8 +11,8 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 // WorkspaceProperty implementation
 #include "MantidAPI/WorkspaceProperty.tcc"

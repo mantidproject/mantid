@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <stdexcept>
 
-#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/BoxInfo.h"
+#include "MantidVatesAPI/ColorScaleGuard.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidVatesAPI/ColorScaleGuard.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidVatesAPI/BoxInfo.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 
 #include <QVTKWidget.h>
 #include <pqActiveObjects.h>
@@ -42,8 +48,8 @@
 
 #include <QHBoxLayout>
 #include <QPointer>
-#include <QThread>
 #include <QSet>
+#include <QThread>
 
 #include <typeinfo>
 
@@ -268,9 +274,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep() {
   return qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
-// clang-format off
-GCC_DIAG_OFF(strict-aliasing)
-// clang-format on
+GNU_DIAG_OFF("strict-aliasing")
 /**
  * This function creates a ParaView source from a given plugin name and
  * workspace name. This is used in the plugin mode of the simple interface.
@@ -679,8 +683,9 @@ pqPipelineSource *ViewBase::hasWorkspace(const QString &name) {
   QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
   foreach (pqPipelineSource *source, sources) {
-    QString wsName(vtkSMPropertyHelper(source->getProxy(), "WorkspaceName",
-                                       true).GetAsString());
+    QString wsName(
+        vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true)
+            .GetAsString());
     if (!wsName.isEmpty()) {
       if (wsName == name) {
         return source;
@@ -704,8 +709,9 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName) {
       smModel->findItems<pqPipelineSource *>(server);
   bool hasWsType = false;
   foreach (pqPipelineSource *source, sources) {
-    QString wsType(vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName",
-                                       true).GetAsString());
+    QString wsType(
+        vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName", true)
+            .GetAsString());
 
     if (wsType.isEmpty()) {
       wsType = source->getSMName();

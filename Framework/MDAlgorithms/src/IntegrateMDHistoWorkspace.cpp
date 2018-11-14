@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateMDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -7,18 +13,17 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Progress.h"
 
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 #include <algorithm>
+#include <cmath>
 #include <map>
 #include <utility>
-#include <cmath>
 
 #include <boost/make_shared.hpp>
-#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -172,7 +177,7 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   numberOfBins =
       std::lround((pMax - pMin) / width); // round up to a whole number of bins.
 }
-}
+} // namespace
 
 /**
  * Create the output workspace in the right shape.
@@ -240,8 +245,8 @@ void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateMDHistoWorkspace)

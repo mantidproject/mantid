@@ -1,4 +1,11 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/dict.hpp>
@@ -67,7 +74,7 @@ int getV3DLength(V3D &self) {
   UNUSED_ARG(self);
   return 3;
 }
-}
+} // namespace
 
 class V3DPickleSuite : public boost::python::pickle_suite {
 public:
@@ -88,6 +95,7 @@ public:
 
 void export_V3D() {
   // V3D class
+  GNU_DIAG_OFF("self-assign-overloaded")
   class_<V3D>("V3D", init<>("Construct a V3D at the origin"))
       .def_pickle(V3DPickleSuite())
       .def(init<double, double, double>(
@@ -124,7 +132,7 @@ void export_V3D() {
            "Calculates the length of the vector")
       .def("norm2", &V3D::norm2, arg("self"),
            "Calculates the squared length of the vector")
-      .def("__add__", &V3D::operator+, (arg("left"), arg("right")))
+      .def("__add__", &V3D::operator+,(arg("left"), arg("right")))
       .def("__iadd__", &V3D::operator+=, return_self<>(),
            (arg("self"), arg("other")))
       .def("__sub__",
@@ -166,4 +174,5 @@ void export_V3D() {
            "Calculate direction angles from direction cosines")
       .def("directionAngles", &directionAnglesDefault, arg("self"),
            "Calculate direction angles from direction cosines");
+  GNU_DIAG_ON("self-assign-overloaded")
 }

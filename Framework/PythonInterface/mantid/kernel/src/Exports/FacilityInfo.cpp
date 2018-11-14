@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FacilityInfo.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -45,9 +51,10 @@ void export_FacilityInfo() {
            arg("self"), return_value_policy<copy_const_reference>(),
            "Returns a list of instruments of this facility as defined in the "
            "Facilities.xml file")
-      .def("instruments", (std::vector<InstrumentInfo>(
-                              FacilityInfo::*)(const std::string &) const) &
-                              FacilityInfo::instruments,
+      .def("instruments",
+           (std::vector<InstrumentInfo>(FacilityInfo::*)(const std::string &)
+                const) &
+               FacilityInfo::instruments,
            (arg("self"), arg("technique")),
            "Returns a list of instruments of given technique")
       .def("instrument", &FacilityInfo::instrument,

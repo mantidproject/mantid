@@ -18,6 +18,6 @@ edit (useful for tables).
 
 Care should be taken before using a line edit as it can give a user
 too much freedom. If you know that the input is an integer then a
-`spin box <AddSpinBox.html>`_ is better. If there is a finite list of
-possible options then a `combo box <AddComboBox.html>`_ would be a
+:ref:`spin box <AddSpinBox>` is better. If there is a finite list of
+possible options then a :ref:`combo box <AddComboBox>` would be a
 better choice.

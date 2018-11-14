@@ -1,23 +1,29 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef IMD_NODE_H_
 #define IMD_NODE_H_
 
-#include <algorithm>
-#include <string>
-#include <memory>
-#include <vector>
-#include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/VMD.h"
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
 class ISaveable;
 class ThreadScheduler;
-}
+} // namespace Kernel
 
 namespace Geometry {
 template <typename T> class MDDimensionExtents;
 class MDImplicitFunction;
-}
+} // namespace Geometry
 
 namespace API {
 
@@ -29,28 +35,6 @@ class IMDNode {
   /** This is an interface to MDBox or MDGridBox of an MDWorkspace
 
       @date 01/03/2013
-
-      Copyright &copy; 2009-2013 ISIS Rutherford Appleton Laboratory, NScD Oak
-     Ridge National Laboratory & European Spallation Source
-
-      This file is part of Mantid.
-
-      Mantid is free software; you can redistribute it and/or modify
-      it under the terms of the GNU General Public License as published by
-      the Free Software Foundation; either version 3 of the License, or
-      (at your option) any later version.
-
-      Mantid is distributed in the hope that it will be useful,
-      but WITHOUT ANY WARRANTY; without even the implied warranty of
-      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-      GNU General Public License for more details.
-
-      You should have received a copy of the GNU General Public License
-      along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-      File change history is stored at:
-     <https://github.com/mantidproject/mantid>.
-      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
 public:
@@ -194,19 +178,19 @@ public:
   // -------------------------------------------------------------------------------------------
 
   /** Sphere (peak) integration
-  * The CoordTransform object could be used for more complex shapes, e.g.
-  *"lentil" integration, as long
-  * as it reduces the dimensions to a single value.
-  *
-  * @param radiusTransform :: nd-to-1 coordinate transformation that converts
-  *from these
-  *        dimensions to the distance (squared) from the center of the sphere.
-  * @param radiusSquared :: radius^2 below which to integrate
-  * @param signal [out] :: set to the integrated signal
-  * @param errorSquared [out] :: set to the integrated squared error.
-  * @param innerRadiusSquared :: radius^2 of inner background
-  * @param useOnePercentBackgroundCorrection :: if one percent correction should
-  *be applied to background.
+   * The CoordTransform object could be used for more complex shapes, e.g.
+   *"lentil" integration, as long
+   * as it reduces the dimensions to a single value.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts
+   *from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radiusSquared :: radius^2 below which to integrate
+   * @param signal [out] :: set to the integrated signal
+   * @param errorSquared [out] :: set to the integrated squared error.
+   * @param innerRadiusSquared :: radius^2 of inner background
+   * @param useOnePercentBackgroundCorrection :: if one percent correction
+   *should be applied to background.
    */
   virtual void integrateSphere(
       Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
@@ -214,16 +198,16 @@ public:
       const coord_t innerRadiusSquared = 0.0,
       const bool useOnePercentBackgroundCorrection = true) const = 0;
   /** Find the centroid of all events contained within by doing a weighted
-  *average
-  * of their coordinates.
-  *
-  * @param radiusTransform :: nd-to-1 coordinate transformation that converts
-  *from these
-  *        dimensions to the distance (squared) from the center of the sphere.
-  * @param radiusSquared :: radius^2 below which to integrate
-  * @param[out] centroid :: array of size [nd]; its centroid will be added
-  * @param[out] signal :: set to the integrated signal
-  */
+   *average
+   * of their coordinates.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts
+   *from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radiusSquared :: radius^2 below which to integrate
+   * @param[out] centroid :: array of size [nd]; its centroid will be added
+   * @param[out] signal :: set to the integrated signal
+   */
   virtual void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
                               const coord_t radiusSquared, coord_t *centroid,
                               signal_t &signal) const = 0;
@@ -239,7 +223,7 @@ public:
    * @param signal [out] :: set to the integrated signal
    * @param errorSquared [out] :: set to the integrated squared error.
    * @param signal_fit [out] :: array of values for the fit.
-    */
+   */
   virtual void integrateCylinder(Mantid::API::CoordTransform &radiusTransform,
                                  const coord_t radius, const coord_t length,
                                  signal_t &signal, signal_t &errorSquared,
@@ -323,7 +307,7 @@ public:
     std::sort(boxes.begin(), boxes.end(), CompareFilePosition);
   }
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

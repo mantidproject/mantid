@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeakClusterProjection.h"
 
-#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/Crystal//PeakTransformHKL.h"
 #include "MantidGeometry/Crystal//PeakTransformQLab.h"
 #include "MantidGeometry/Crystal//PeakTransformQSample.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -55,7 +61,7 @@ void validate(IMDWorkspace const *const mdWS) {
         "Need to have 3 or more dimension in the workspace.");
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {

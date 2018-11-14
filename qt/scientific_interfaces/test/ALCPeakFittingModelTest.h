@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ALCPEAKFITTINGMODELTEST_H_
 #define MANTID_CUSTOMINTERFACES_ALCPEAKFITTINGMODELTEST_H_
 
@@ -15,9 +21,9 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 class ALCPeakFittingModelTest : public CxxTest::TestSuite {
   ALCPeakFittingModel *m_model;

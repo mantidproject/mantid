@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef NDRandomNumberGeneratorTEST_H_
 #define NDRandomNumberGeneratorTEST_H_
 
@@ -5,7 +11,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/scoped_ptr.hpp>
 #include <gmock/gmock.h>
 
 class NDRandomNumberGeneratorTest : public CxxTest::TestSuite {
@@ -17,12 +22,12 @@ private:
   public:
     Mock3DRandomNumberGenerator()
         : Mantid::Kernel::NDRandomNumberGenerator(3) {}
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD0(generateNextPoint, void());
     MOCK_METHOD0(restart, void());
     MOCK_METHOD0(save, void());
     MOCK_METHOD0(restore, void());
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 
 public:

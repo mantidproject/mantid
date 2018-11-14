@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDUI_H
 #define MANTIDUI_H
 
@@ -56,14 +62,14 @@ namespace MantidWidgets {
 class FitPropertyBrowser;
 class WorkspaceTreeWidget;
 class Message;
-}
+} // namespace MantidWidgets
 namespace SliceViewer {
 class SliceViewerWindow;
 }
 namespace SpectrumView {
 class SpectrumView;
 }
-}
+} // namespace MantidQt
 namespace Ui {
 class SequentialFitDialog;
 }
@@ -72,7 +78,7 @@ namespace Mantid {
 namespace API {
 class AlgorithmObserver;
 }
-}
+} // namespace Mantid
 
 /**
 MantidUI is the extension of QtiPlot's ApplicationWindow which deals with Mantid
@@ -80,27 +86,6 @@ framework.
 
 @author Roman Tolchenov, Tessella Support Services plc
 @date 02/07/2008
-
-Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 /// Required by Qt to use Mantid::API::Workspace_sptr as a parameter type in
@@ -373,11 +358,12 @@ public slots:
   void renameWorkspace(QStringList = QStringList()) override;
 
   /**
-  * Set the currently used fit property browser. Is needed because e.g. Muon
-  * Analysis is using its
-  * own fit browser.
-  * @param newBrowser The browser to be used. If is null, is set to default one.
-  */
+   * Set the currently used fit property browser. Is needed because e.g. Muon
+   * Analysis is using its
+   * own fit browser.
+   * @param newBrowser The browser to be used. If is null, is set to default
+   * one.
+   */
   void setFitFunctionBrowser(
       MantidQt::MantidWidgets::FitPropertyBrowser *newBrowser);
 
@@ -578,7 +564,7 @@ public:
 #endif
 
 private slots:
-  // respond to the global Mantid properties being modifed
+  // respond to the global Mantid properties being modified
   void configModified();
 
   // slot for file open dialogs created from the main app menu, or the
@@ -648,11 +634,11 @@ private:
 
   ApplicationWindow *m_appWindow; // QtiPlot main ApplicationWindow
   QDockWidget *m_workspaceDockWidget;
-  MantidQt::MantidWidgets::WorkspaceTreeWidget *
-      m_exploreMantid; // Widget for manipulating workspaces
+  MantidQt::MantidWidgets::WorkspaceTreeWidget
+      *m_exploreMantid; // Widget for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms; // Dock window for using algorithms
-  RemoteClusterDockWidget *
-      m_exploreRemoteTasks; // Dock window for using remote tasks
+  RemoteClusterDockWidget
+      *m_exploreRemoteTasks; // Dock window for using remote tasks
   /// Current fit property browser being used
   MantidQt::MantidWidgets::FitPropertyBrowser *m_fitFunction;
   /// Default fit property browser (the one docked on the left)
@@ -695,8 +681,8 @@ private:
   // ones
   // must be closed as well.
   std::unordered_multimap<MdiSubWindow *, MdiSubWindow *> m_mdiDependency;
-  QMdiSubWindow *
-      m_vatesSubWindow; ///< Holder for the Vates interface sub-window
+  QMdiSubWindow
+      *m_vatesSubWindow; ///< Holder for the Vates interface sub-window
 
   // prevents some repeated code realtating to log names
   void formatLogName(QString &label, const QString &wsName);

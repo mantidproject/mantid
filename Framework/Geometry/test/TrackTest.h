@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTTRACK__
 #define MANTID_TESTTRACK__
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Geometry;

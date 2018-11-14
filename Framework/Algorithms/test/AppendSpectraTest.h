@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_APPENDSPECTRATEST_H_
 #define MANTID_ALGORITHMS_APPENDSPECTRATEST_H_
 
@@ -178,7 +184,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  void doTest(bool event, bool combineLogs = false) {
+  void doTest(bool event, bool combineLogs = false, int number = 1) {
     MatrixWorkspace_sptr ws1, ws2, out;
     int numBins = 20;
 
@@ -212,6 +218,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace1", ws1Name));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace2", ws2Name));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", ws1Name));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Number", number));
     if (combineLogs)
       alg.setProperty("MergeLogs", true);
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
@@ -224,7 +231,7 @@ public:
     if (!out)
       return;
 
-    TS_ASSERT_EQUALS(out->getNumberHistograms(), 15);
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 10 + 5 * number);
     TS_ASSERT_EQUALS(out->blocksize(), numBins);
 
     for (size_t wi = 0; wi < out->getNumberHistograms(); wi++) {
@@ -245,6 +252,8 @@ public:
   }
 
   void test_events() { doTest(true); }
+
+  void test_number_events() { doTest(true, true, 3); }
 
   void test_2D() { doTest(false); }
 
@@ -423,7 +432,7 @@ private:
     TS_ASSERT(appendSpectra->isExecuted());
   }
   /** Creates a 2D workspace with 5 histograms
-  */
+   */
   void createWorkspaceWithAxisAndLabel(const std::string outputName,
                                        const std::string &axisType,
                                        const std::string axisValue) {

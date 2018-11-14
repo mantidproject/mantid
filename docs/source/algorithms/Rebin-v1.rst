@@ -28,7 +28,7 @@ specified.
 
 In both cases, where a new bin only partially overlaps one or more input 
 bins, the new counts are calculated as the sum of the old bins weighted 
-by the fractional overlaping widths of the new bin over the old bin:
+by the fractional overlapping widths of the new bin over the old bin:
 
 .. math:: Y^{\mathrm{new}} = \sum_i Y^{\mathrm{old}}_i F_i
 .. math:: E^{\mathrm{new}} = \sqrt{\sum_i (E^{\mathrm{old}}_i)^2 F_i}
@@ -49,7 +49,7 @@ Example Rebin param strings
 For EventWorkspaces
 ###################
 
-If the input is an `EventWorkspace <www.mantidproject.org/EventWorkspace>`__ and the "Preserve
+If the input is an :ref:`EventWorkspace <EventWorkspace>` and the "Preserve
 Events" property is True, the rebinning is performed in place, and only
 the X axes of the workspace are set. The actual Y histogram data will
 only be requested as needed, for example, when plotting or displaying

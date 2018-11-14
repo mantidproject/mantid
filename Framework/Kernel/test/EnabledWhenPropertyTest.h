@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_ENABLEDWHENPROPERTYTEST_H_
 #define MANTID_KERNEL_ENABLEDWHENPROPERTYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerOwner.h"
-#include "MantidKernel/Property.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

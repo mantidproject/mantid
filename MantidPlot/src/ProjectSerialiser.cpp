@@ -1,3 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+// clang-format off
+#include "PythonScripting.h"
+// clang-format on
+
 #include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
 #include "Folder.h"
@@ -15,6 +25,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
@@ -32,6 +43,7 @@
 #include <vector>
 
 using namespace Mantid::API;
+namespace Python = Mantid::PythonInterface;
 using namespace MantidQt::API;
 using Mantid::Kernel::Logger;
 
@@ -50,6 +62,54 @@ std::vector<std::string> splitByDelim(const std::string &s, const char delim) {
   return foundWsNames;
 }
 
+/**
+ * @brief Call a named attribute on a named Python module
+ * @param moduleName The name of the module
+ * @param attrName The name of the attribute
+ * @param arg A single argument for the function call (can be nullptr)
+ * @return A new reference PyObject that results from the call
+ * @throws std::runtime_error if any Python operation fails
+ */
+PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName,
+                               PyObject *arg) {
+  auto throwIfPythonError = [](auto result) {
+    if (!PyErr_Occurred())
+      return result;
+    PyObject *exception(nullptr), *value(nullptr), *traceback(nullptr);
+    PyErr_Fetch(&exception, &value, &traceback);
+    PyErr_Clear();
+    auto pyMsg = PyObject_Str(value);
+    std::ostringstream msg;
+    msg << TO_CSTRING(pyMsg);
+    Py_DecRef(pyMsg);
+    if (traceback) {
+      const auto lineno(
+          reinterpret_cast<PyTracebackObject *>(traceback)->tb_lineno);
+      msg << " at line " + std::to_string(lineno);
+      Py_DECREF(traceback);
+    }
+    Py_XDECREF(value);
+    Py_XDECREF(exception);
+    throw std::runtime_error(msg.str());
+  };
+  PyObject *launcher(nullptr), *moduleAttr(nullptr), *callResult(nullptr);
+  try {
+    launcher = throwIfPythonError(
+        PyImport_ImportModule(const_cast<char *>(moduleName)));
+    moduleAttr = throwIfPythonError(
+        PyObject_GetAttrString(launcher, const_cast<char *>(attrName)));
+    callResult = throwIfPythonError(PyObject_CallObject(moduleAttr, arg));
+    Py_XDECREF(moduleAttr);
+    Py_XDECREF(launcher);
+    return callResult;
+  } catch (std::runtime_error &) {
+    Py_XDECREF(callResult);
+    Py_XDECREF(moduleAttr);
+    Py_XDECREF(launcher);
+    throw;
+  }
+}
+
 /// static logger
 Logger g_log("ProjectSerialiser");
 
@@ -57,11 +117,35 @@ Logger g_log("ProjectSerialiser");
 const std::string ALL_WS = "";
 const std::string ALL_GROUP_NAMES = "__all_groups";
 
+// Name of the section tags
+constexpr auto PY_INTERFACE_SECTION = "pythoninterface";
+
+// A list of python interfaces to be saved. This should be the name
+// of the launcher script containing the def main() function.
+// WARNING: The module here should be importable without any side effects,
+// i.e. it should finish with
+//
+// if __name__ == '__main__':
+//     ...
+//     w = MainWindow()
+//     w.show()
+//
+QStringList SERIALISABLE_PY_INTERFACES;
+
 } // namespace
 
 // This C function is defined in the third party C lib minigzip.c
 extern "C" {
 void file_compress(const char *file, const char *mode);
+}
+
+/**
+ * @brief ProjectSerialiser::serialisablePythonInterfaces
+ * @return A list of python interfaces that are known to be serisable. This
+ * returns the names of the startup file
+ */
+QStringList ProjectSerialiser::serialisablePythonInterfaces() {
+  return SERIALISABLE_PY_INTERFACES;
 }
 
 // We assume any caller which do not explicitly mention the recovery flag
@@ -84,9 +168,11 @@ ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder,
 bool ProjectSerialiser::save(const QString &projectName,
                              const std::vector<std::string> &wsNames,
                              const std::vector<std::string> &windowNames,
+                             const std::vector<std::string> &interfaces,
                              bool compress) {
   m_windowNames = windowNames;
   m_workspaceNames = wsNames;
+  m_interfacesNames = interfaces;
   window->projectname = projectName;
   QFileInfo fileInfo(projectName);
   window->workingDir = fileInfo.absoluteDir().absolutePath();
@@ -132,8 +218,9 @@ bool ProjectSerialiser::save(const QString &projectName, bool compress,
  * @param fileVersion :: project file version used
  * @param isTopLevel :: whether this function is being called on a top level
  * 		folder. (Default True)
+ * @return True is loading was successful, otherwise false
  */
-void ProjectSerialiser::load(std::string filepath, const int fileVersion,
+bool ProjectSerialiser::load(std::string filepath, const int fileVersion,
                              const bool isTopLevel) {
   // We have to accept std::string to maintain Python compatibility
   auto qfilePath = QString::fromStdString(filepath);
@@ -204,6 +291,8 @@ void ProjectSerialiser::load(std::string filepath, const int fileVersion,
 
   g_log.notice() << "Finished Loading Project: "
                  << window->projectname.toStdString() << "\n";
+
+  return true;
 }
 
 /**
@@ -225,7 +314,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
   // If this is the top level folder of the project, we'll need to load the
   // workspaces before anything else.
   // If were recovering projects the workspaces should already be loaded
-  if (isTopLevel && !m_projectRecovery) {
+  if (isTopLevel) {
     loadWorkspaces(tsv);
   }
 
@@ -234,6 +323,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
   loadLogData(tsv);
   loadScriptWindow(tsv, fileVersion);
   loadAdditionalWindows(lines, fileVersion);
+  loadPythonInterfaces(lines);
 
   // Deal with subfolders last.
   loadSubFolders(tsv, fileVersion);
@@ -278,8 +368,11 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
     std::unordered_set<std::string> allWsNames(parsedNames.at(ALL_WS).begin(),
                                                parsedNames.at(ALL_WS).end());
 
-    allWsNames.insert(parsedNames.at(ALL_GROUP_NAMES).begin(),
-                      parsedNames.at(ALL_GROUP_NAMES).end());
+    if (parsedNames.find(ALL_GROUP_NAMES) != parsedNames.cend()) {
+      // Add group names to the list of accepted names
+      allWsNames.insert(parsedNames.at(ALL_GROUP_NAMES).begin(),
+                        parsedNames.at(ALL_GROUP_NAMES).end());
+    }
 
     const auto loadedWs = adsInstance.getObjectNames();
     for (const std::string &adsWsName : loadedWs) {
@@ -302,7 +395,7 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
 void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
                                     const int fileVersion) {
   auto keys = WindowFactory::Instance().getKeys();
-  // Work around for graph-table dependance. Graph3D's currently rely on
+  // Work around for graph-table dependence. Graph3D's currently rely on
   // looking up tables. These must be loaded before the graphs, so work around
   // by loading in reverse alphabetical order.
   std::reverse(keys.begin(), keys.end());
@@ -391,8 +484,10 @@ bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
                   projectName.toStdString());
     } else {
       QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-                         window->tr("The file: <br><b>%1</b> is opened in "
-                                    "read-only mode").arg(projectName));
+                         window
+                             ->tr("The file: <br><b>%1</b> is opened in "
+                                  "read-only mode")
+                             .arg(projectName));
     }
     return false;
   }
@@ -426,6 +521,7 @@ QString ProjectSerialiser::serialiseProjectState(Folder *folder) {
   }
 
   text += saveAdditionalWindows();
+  text += savePythonInterfaces();
 
   // Finally, recursively save folders
   if (folder) {
@@ -628,6 +724,62 @@ QString ProjectSerialiser::saveAdditionalWindows() {
 }
 
 /**
+ * @brief Save the current state of all of the active Python interfaces
+ * to the project
+ * @return A string representing the state
+ */
+QString ProjectSerialiser::savePythonInterfaces() {
+  QString pythonInterfacesState;
+  for (const auto &interfaceLauncher : m_interfacesNames) {
+    try {
+      pythonInterfacesState +=
+          savePythonInterface(QString::fromStdString(interfaceLauncher));
+    } catch (std::runtime_error &exc) {
+      g_log.warning() << "Error saving " << interfaceLauncher
+                      << " to project: " << exc.what() << "\n";
+    }
+  }
+  return pythonInterfacesState;
+}
+
+/**
+ * @brief Save the current state of the Python interface. This calls the
+ * interface to have it return its state as a string and wraps the string
+ * with the metadata:
+ * <pythoninterface>
+ * InterfaceLauncherModuleName
+ * ... # state from interface
+ * </pythoninterface>
+ * @param launcherModuleName The name of the module responsible for launching
+ * the window. The string should not be empty
+ * @return A string representing the state
+ */
+QString
+ProjectSerialiser::savePythonInterface(const QString &launcherModuleName) {
+  assert(!launcherModuleName.isEmpty());
+  Python::GlobalInterpreterLock gil;
+  auto state = callPythonModuleAttr(launcherModuleName.toLatin1().data(),
+                                    "saveToProject", nullptr);
+  if (!STR_CHECK(state)) {
+    Py_XDECREF(state);
+    throw std::runtime_error("saveToProject() did not return a string.");
+  }
+  QString serialised;
+  serialised.append("<")
+      .append(PY_INTERFACE_SECTION)
+      .append(">\n")
+      .append(launcherModuleName)
+      .append("\n")
+      .append(TO_CSTRING(state))
+      .append("\n")
+      .append("</")
+      .append(PY_INTERFACE_SECTION)
+      .append(">\n");
+  Py_DECREF(state);
+  return serialised;
+}
+
+/**
  * Check if the project can be backed up.
  *
  * If files cannot be backed up then the user will be queried
@@ -650,9 +802,10 @@ bool ProjectSerialiser::canBackupProjectFiles(QFile *fileHandle,
         fileHandle->close();
       int choice = QMessageBox::warning(
           window, window->tr("MantidPlot - File backup error"), // Mantid
-          window->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
-                     "you ignore "
-                     "this, you run the risk of <b>data loss</b>.")
+          window
+              ->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
+                   "you ignore "
+                   "this, you run the risk of <b>data loss</b>.")
               .arg(projectName)
               .arg(projectName + "~"),
           QMessageBox::Retry | QMessageBox::Default,
@@ -899,6 +1052,56 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
 }
 
 /**
+ * @brief Load any Python interfaces saved in the project.
+ */
+void ProjectSerialiser::loadPythonInterfaces(const std::string &lines) {
+  TSVSerialiser parser(lines);
+  for (auto &section : parser.sections(PY_INTERFACE_SECTION)) {
+    // The first line of the section is the launcher module name.
+    const auto indexOfEOL = section.find_first_of("\n");
+    // drops EOL char
+    std::string launcherModuleName = section.substr(0, indexOfEOL);
+    section = section.substr(indexOfEOL + 1);
+    try {
+      loadPythonInterface(launcherModuleName, section);
+    } catch (std::runtime_error &exc) {
+      g_log.warning() << "Error loading Python interface " << launcherModuleName
+                      << " from project: " << exc.what() << "\n";
+    }
+  }
+}
+
+/**
+ * @brief Load a single Python interface
+ * @param launcherModuleName The name of the module containing the interface
+ * entry point
+ * @param pySection The serialised state from the project file
+ * @throws std::runtime_error if loading fails for some reason
+ */
+void ProjectSerialiser::loadPythonInterface(
+    const std::string &launcherModuleName, const std::string &pySection) {
+  // sanity check that this an interface we know how to save
+  if (!SERIALISABLE_PY_INTERFACES.contains(
+          QString::fromStdString(launcherModuleName))) {
+    throw std::runtime_error("Interface not whitelisted as saveable.");
+  }
+
+  Python::GlobalInterpreterLock gil;
+  PyObject *fnArg = Py_BuildValue("(s)", pySection.c_str());
+  PyObject *result(nullptr);
+  try {
+    result = callPythonModuleAttr(launcherModuleName.c_str(), "loadFromProject",
+                                  fnArg);
+  } catch (std::runtime_error &) {
+    Py_DECREF(fnArg);
+    Py_XDECREF(result);
+    throw;
+  }
+  Py_DECREF(fnArg);
+  Py_XDECREF(result);
+}
+
+/**
  * Create a new QMdiSubWindow which will become the parent of the Vates
  * window.
  *
@@ -932,8 +1135,8 @@ MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
   // The first element is removed since it says "WorkspaceNames"
   unparsedWorkspaces.erase(unparsedWorkspaces.begin());
 
+  const char groupWorkspaceChar = ',';
   for (const auto &workspaceName : unparsedWorkspaces) {
-    const char groupWorkspaceChar = ',';
 
     if (workspaceName.find(groupWorkspaceChar) == std::string::npos) {
       // Normal workspace

@@ -39,7 +39,7 @@ Foreground is a set of pixels intensities of which will be summed in :ref:`Refle
 
 Background, on the other hand, is a set of pixels which are be used for fitting a constant or linear background by :ref:`CalculatePolynomialBackground <algm-CalculatePolynomialBackground>`.
 
-The foreground pixels are defined by the foreground centre and *ForegroundHalfWidth* property. In normal use cases, the foreground center (workspace index) is taken from the fitting in :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`. This can be overriden by giving the pixel as *BeamCentre*. Fractional values are rounded to nearest integer. The full process of deciding the foreground centre is as follows:
+The foreground pixels are defined by the foreground centre and *ForegroundHalfWidth* property. In normal use cases, the foreground center (workspace index) is taken from the fitting in :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`. This can be overridden by giving the pixel as *BeamCentre*. Fractional values are rounded to nearest integer. The full process of deciding the foreground centre is as follows:
 
 * If *Run* is given then data is loaded using :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`:
     * If *BeamCentre* is set, it is passed over to :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`.
@@ -89,6 +89,11 @@ The following figure exemplifies the foreground and background for the D17 instr
    ax2 = ax.twinx()
    ax2.set_ylim(ymin=theta0, ymax=theta1)
    ax2.set_ylabel('Angle (degrees)')
+
+InputWorkspace
+##############
+
+The *InputWorkspace* and *BeamPositionWorkspace* can be used instead of *Run* if the data is already loaded into Mantid for example using :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`. This option exists mainly for testing purposes.
 
 Usage
 -----

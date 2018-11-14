@@ -1,10 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef HE3TUBEEFFICIENCYTEST_H_
 #define HE3TUBEEFFICIENCYTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/He3TubeEfficiency.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -22,8 +27,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace std;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 namespace He3TubeEffeciencyHelper {
 void createWorkspace2DInADS(const std::string inputWS) {
@@ -69,7 +74,7 @@ void createEventWorkspaceInADS(const std::string inputEvWS) {
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
   loader.execute();
 }
-}
+} // namespace He3TubeEffeciencyHelper
 class He3TubeEfficiencyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

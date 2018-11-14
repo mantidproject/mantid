@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef GETDETECTOROFFSETSTEST_H_
 #define GETDETECTOROFFSETSTEST_H_
 
-#include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::GetDetectorOffsets;

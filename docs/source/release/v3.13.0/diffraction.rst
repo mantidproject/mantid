@@ -5,15 +5,20 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+:ref:`Release 3.13.0 <v3.13.0>`
 
 Powder Diffraction
 ------------------
 
 New
 ###
+
+.. figure:: ../../images/D2B_calib.png
+    :align: center
+
+    D2B calibration constants generated from PowderDiffILLDetEffCorr
+    :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr-v1>`
+
 
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` is extended to apply vertical and horizontal tube alignment for D2B, based on the IPF.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` is modified to comply with the U-shape convention for tube numbering for D2B.
@@ -40,6 +45,9 @@ Improvements
   - The ``.maud`` calibration file format, for conversion to d-spacing (uses a new algorithm
     :ref:`SaveGEMMAUDParamFile <algm-SaveGEMMAUDParamFile>`
 - :ref:`PDCalibration <algm-PDCalibration>` has major upgrades including making use of :ref:`FitPeaks <algm-FitPeaks>` for the individual peak fitting
+- :ref:`StripPeaks <algm-StripPeaks>` has been adjusted to allow for removing peaks that have only 3 bins across them (decreased from 5 bins)
+- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` had a bug when binning in time-of-flight without using a property manager to specify the time-of-flight range. In other words: characterization files are no longer necessary.
+
 
 Engineering Diffraction
 -----------------------
@@ -70,31 +78,38 @@ Improvements
 
 - The ``.nxs`` file from the Focus tab is now saved in the Focus directory with all the other focus output
 
-:ref:`Release 3.13.0 <v3.13.0>`
-
 Single Crystal Diffraction
 --------------------------
 
 New
 ###
 
+.. figure:: ../../images/LoadWANDSCD.png
+    :align: center
+
+    Integrated output from LoadWANDSCD :ref:`LoadDNSSCD <algm-LoadWANDSCD-v1>`
+
 - New algorithm :ref:`LoadDNSSCD <algm-LoadDNSSCD>` to load multiple single crystal diffraction data files from the DNS instrument into MDEventWorkspace.
-
-- :ref:`SaveLauenorm <algm-SaveLauenorm>` now has input options for crystal system and reflection condition for lscale output instead of trying to determine from lattice parameters.
-
-- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` now accepts MD workspaces as input.
 
 - New algorithms :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>` to load single crystal HB2C data and convert it to either Q-sample or HKL space.
 
 - New algorithm :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` to integrate peaks using 3D profile fitting in reciprocal space.
 
-- New algorithm :ref:`RefineSatellitePeaks <algm-RefineSatellitePeaks>` to predict the location of fractional satellite peaks using a set of nuclear peaks and a set of seed satellite peaks.
+- New algorithm :ref:`FindSatellitePeaks <algm-FindSatellitePeaks>` to predict the location of fractional satellite peaks using a set of nuclear peaks and a set of seed satellite peaks.
+
+- New algorithm :ref:`IndexSatellitePeaks <algm-IndexSatellitePeaks>` to index satellite peaks found using the :ref:`FindSatellitePeaks <algm-FindSatellitePeaks>` algorithm.
+
+- :ref:`SaveLauenorm <algm-SaveLauenorm>` now has input options for crystal system and reflection condition for lscale output instead of trying to determine from lattice parameters.
 
 - New TOPAZ instrument geometry for 2018 run cycle
 
 Improvements
 ############
 
+- :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>` now accepts MD workspaces as input.
+
 - PeaksWorkspace has column added for the unique peak number so peaks can be found after sorting or filtering.
 
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` has option to use a weighted Z score for determining which peaks are outliers and has a new output workspace for plotting intensities of equivalent peaks.
+
+

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Exception.h"
 
@@ -162,18 +168,18 @@ Kernel::V3D OrientedLattice::getvVector() const {
 }
 
 /**  Set the U rotation matrix, to provide the transformation, which translate
-  *an
-  *  arbitrary vector V expressed in RLU (hkl)
-  *  into another coordinate system defined by vectors u and v, expressed in RLU
-  *(hkl)
-  *  Author: Alex Buts
-  *  @param u :: first vector of new coordinate system (in hkl units)
-  *  @param v :: second vector of the new coordinate system
-  *  @return the U matrix calculated
-  *  The transformation from old coordinate system to new coordinate system is
-  *performed by
-  *  the whole UB matrix
-  **/
+ *an
+ *  arbitrary vector V expressed in RLU (hkl)
+ *  into another coordinate system defined by vectors u and v, expressed in RLU
+ *(hkl)
+ *  Author: Alex Buts
+ *  @param u :: first vector of new coordinate system (in hkl units)
+ *  @param v :: second vector of the new coordinate system
+ *  @return the U matrix calculated
+ *  The transformation from old coordinate system to new coordinate system is
+ *performed by
+ *  the whole UB matrix
+ **/
 const DblMatrix &OrientedLattice::setUFromVectors(const V3D &u, const V3D &v) {
   const DblMatrix &BMatrix = this->getB();
   V3D buVec = BMatrix * u;

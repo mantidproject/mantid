@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H
 #define MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H
 
 #include "DllOption.h"
-#include <QObject>
-#include <QRect>
 #include <QColor>
+#include <QObject>
 #include <QPolygonF>
+#include <QRect>
 
 class QMouseEvent;
 class QWheelEvent;
@@ -298,7 +304,7 @@ private:
   QColor m_borderColor, m_fillColor;
   bool m_creating;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H

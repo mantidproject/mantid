@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -105,5 +111,5 @@ int SampleEnvironment::interceptSurfaces(Track &track) const {
 void SampleEnvironment::add(const IObject_const_sptr &component) {
   m_components.emplace_back(component);
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -14,7 +20,7 @@ namespace Geometry {
 namespace {
 /// static logger object
 Kernel::Logger g_log("FitParameter");
-}
+} // namespace
 
 /**
   Get constraint string.
@@ -165,8 +171,8 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
   getline(in, str);
 
   // allow a comma in the final position.
-  tokenizer tokens(str, ",", tokenizer::TOK_TRIM |
-                                 tokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
+  tokenizer tokens(
+      str, ",", tokenizer::TOK_TRIM | tokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
   auto values = tokens.asVector();
 
   if (values.size() < 3) {

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/NRCalculateSlitResolution.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -40,7 +46,7 @@ const std::string NRCalculateSlitResolution::summary() const {
 }
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void NRCalculateSlitResolution::init() {
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::Input,
@@ -64,7 +70,7 @@ void NRCalculateSlitResolution::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void NRCalculateSlitResolution::exec() {
   const MatrixWorkspace_sptr ws = getProperty("Workspace");
   double twoTheta = getProperty("TwoTheta");

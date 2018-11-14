@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_LINEPROFILETEST_H_
 #define MANTID_ALGORITHMS_LINEPROFILETEST_H_
 
@@ -5,12 +11,16 @@
 
 #include "MantidAlgorithms/LineProfile.h"
 
-#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 using Mantid::Algorithms::CompareWorkspaces;
 using Mantid::Algorithms::LineProfile;
@@ -403,7 +413,8 @@ public:
     MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
     auto &oldHistory = inputWS->history();
     auto historyEntry = boost::make_shared<AlgorithmHistory>(
-        "LineProfileTestDummyAlgorithmName", 1);
+        "LineProfileTestDummyAlgorithmName", 1,
+        boost::uuids::to_string(boost::uuids::random_generator()()));
     oldHistory.addHistory(historyEntry);
     const int start = 2;
     const int end = nBins - 2;

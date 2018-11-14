@@ -1,10 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         ITableWorkspaceProperty, PropertyMode, Progress)
-from mantid.kernel import Direction, logger
-import math
+from mantid.kernel import Direction, logger, IntBoundedValidator
+
+DEFAULT_ITERATIONS = 50
+DEFAULT_SEED = 89631139
 
 
 class TransformToIqt(PythonAlgorithm):
@@ -17,6 +25,9 @@ class TransformToIqt(PythonAlgorithm):
     _parameter_table = None
     _output_workspace = None
     _dry_run = None
+    _calculate_errors = None
+    _number_of_iterations = None
+    _seed = None
 
     def category(self):
         return "Workflow\\Inelastic;Workflow\\MIDAS"
@@ -43,6 +54,12 @@ class TransformToIqt(PythonAlgorithm):
                              doc='Decrease total number of spectrum points by this ratio through merging of '
                                  'intensities from neighbouring bins. Default=1')
 
+        self.declareProperty('NumberOfIterations', DEFAULT_ITERATIONS, IntBoundedValidator(lower=1),
+                             doc="Number of randomised simulations for monte-carlo error calculation.")
+
+        self.declareProperty('SeedValue', DEFAULT_SEED, IntBoundedValidator(lower=1),
+                             doc="Seed for pseudo-random number generator in monte-carlo error calculation.")
+
         self.declareProperty(ITableWorkspaceProperty('ParameterWorkspace', '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
@@ -55,6 +72,8 @@ class TransformToIqt(PythonAlgorithm):
 
         self.declareProperty(name='DryRun', defaultValue=False,
                              doc='Only calculate and output the parameters')
+        self.declareProperty('CalculateErrors', defaultValue=True,
+                             doc="Calculate monte-carlo errors.")
 
     def PyExec(self):
         self._setup()
@@ -62,7 +81,7 @@ class TransformToIqt(PythonAlgorithm):
         self._calculate_parameters()
 
         if not self._dry_run:
-            self._transform()
+            self._output_workspace = self._transform()
 
             self._add_logs()
 
@@ -87,11 +106,18 @@ class TransformToIqt(PythonAlgorithm):
 
         self._e_min = self.getProperty('EnergyMin').value
         self._e_max = self.getProperty('EnergyMax').value
-        self._number_points_per_bin = self.getProperty('BinReductionFactor').value
+        self._number_points_per_bin = self.getProperty(
+            'BinReductionFactor').value
 
         self._parameter_table = self.getPropertyValue('ParameterWorkspace')
         if self._parameter_table == '':
-            self._parameter_table = getWSprefix(self._sample) + 'TransformToIqtParameters'
+            self._parameter_table = getWSprefix(
+                self._sample) + 'TransformToIqtParameters'
+
+        self._calculate_errors = self.getProperty("CalculateErrors").value
+        self._number_of_iterations = self.getProperty(
+            "NumberOfIterations").value
+        self._seed = self.getProperty("SeedValue").value
 
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
         if self._output_workspace == '':
@@ -120,8 +146,9 @@ class TransformToIqt(PythonAlgorithm):
         """
         Calculates the TransformToIqt parameters and saves in a table workspace.
         """
-        workflow_prog = Progress(self, start=0.0, end=0.3, nreports=8)
-        workflow_prog.report('Croping Workspace')
+        end_prog = 0.3 if self._calculate_errors else 0.9
+        workflow_prog = Progress(self, start=0.0, end=end_prog, nreports=8)
+        workflow_prog.report('Cropping Workspace')
         CropWorkspace(InputWorkspace=self._sample,
                       OutputWorkspace='__TransformToIqt_sample_cropped',
                       Xmin=self._e_min,
@@ -132,7 +159,7 @@ class TransformToIqt(PythonAlgorithm):
         num_bins = int(number_input_points / self._number_points_per_bin)
         self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
 
-        workflow_prog.report('Attemping to Access IPF')
+        workflow_prog.report('Attempting to Access IPF')
         try:
             workflow_prog.report('Access IPF')
             instrument = mtd[self._sample].getInstrument()
@@ -154,15 +181,19 @@ class TransformToIqt(PythonAlgorithm):
         except (AttributeError, IndexError):
             workflow_prog.report('Resorting to Default')
             resolution = 0.0175
-            logger.warning('Could not get resolution from IPF, using default value: %f' % (resolution))
+            logger.warning(
+                'Could not get resolution from IPF, using default value: %f' %
+                (resolution))
 
         resolution_bins = int(round((2 * resolution) / self._e_width))
 
         if resolution_bins < 5:
-            logger.warning('Resolution curve has <5 points. Results may be unreliable.')
+            logger.warning(
+                'Resolution curve has <5 points. Results may be unreliable.')
 
         workflow_prog.report('Creating Parameter table')
-        param_table = CreateEmptyTableWorkspace(OutputWorkspace=self._parameter_table)
+        param_table = CreateEmptyTableWorkspace(
+            OutputWorkspace=self._parameter_table)
 
         workflow_prog.report('Populating Parameter table')
         param_table.addColumn('int', 'SampleInputBins')
@@ -188,7 +219,7 @@ class TransformToIqt(PythonAlgorithm):
                        ('iqt_resolution_workspace', self._resolution),
                        ('iqt_binning', '%f,%f,%f' % (self._e_min, self._e_width, self._e_max))]
 
-        log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple', startProgress=0.8,
+        log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple', startProgress=0.9,
                                             endProgress=1.0, enableLogging=True)
         log_alg.setProperty('Workspace', self._output_workspace)
         log_alg.setProperty('LogNames', [item[0] for item in sample_logs])
@@ -200,106 +231,44 @@ class TransformToIqt(PythonAlgorithm):
         Run TransformToIqt.
         """
         from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
-        trans_prog = Progress(self, start=0.3, end=0.8, nreports=15)
+
         try:
             CheckAnalysers(self._sample, self._resolution)
         except ValueError:
             # A genuine error the shows that the two runs are incompatible
             raise
-        except:
-            # Checking could not be performed due to incomplete or no instrument
-            logger.warning('Could not check for matching analyser and reflection')
+        except BaseException:
+            # Checking could not be performed due to incomplete or no
+            # instrument
+            logger.warning(
+                'Could not check for matching analyser and reflection')
 
         # Process resolution data
         num_res_hist = CheckHistZero(self._resolution)[0]
         if num_res_hist > 1:
-            CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
+            CheckHistSame(
+                self._sample,
+                'Sample',
+                self._resolution,
+                'Resolution')
 
-        # Float conversion to str differs in precision between python 2 and 3, this gives consistent results
-        rebin_param = '{:.14f},{:.14f},{:.14f}'.format(self._e_min, self._e_width, self._e_max)
-        trans_prog.report('Rebinning Workspace')
-        Rebin(InputWorkspace=self._sample,
-              OutputWorkspace='__sam_data',
-              Params=rebin_param,
-              FullBinsOnly=True)
+        calculateiqt_alg = self.createChildAlgorithm(name='CalculateIqt', startProgress=0.3,
+                                                     endProgress=1.0, enableLogging=True)
+        calculateiqt_alg.setAlwaysStoreInADS(False)
+        args = {"InputWorkspace": self._sample, "OutputWorkspace": "iqt", "ResolutionWorkspace": self._resolution,
+                "EnergyMin": self._e_min, "EnergyMax": self._e_max, "EnergyWidth": self._e_width,
+                "CalculateErrors": self._calculate_errors, "NumberOfIterations": self._number_of_iterations,
+                "SeedValue": self._seed}
+        for key, value in args.items():
+            calculateiqt_alg.setProperty(key, value)
+        calculateiqt_alg.execute()
 
-        # Sample
-        trans_prog.report('Rebinning sample')
-        Rebin(InputWorkspace='__sam_data',
-              OutputWorkspace='__sam_data',
-              Params=rebin_param)
-        trans_prog.report('Integrating Sample')
-        Integration(InputWorkspace='__sam_data',
-                    OutputWorkspace='__sam_int')
-        trans_prog.report('Converting Sample to data points')
-        ConvertToPointData(InputWorkspace='__sam_data',
-                           OutputWorkspace='__sam_data')
-        trans_prog.report('Extracting FFT spectrum for Sample')
-        ExtractFFTSpectrum(InputWorkspace='__sam_data',
-                           OutputWorkspace='__sam_fft',
-                           FFTPart=2)
-        trans_prog.report('Dividing Sample')
-        Divide(LHSWorkspace='__sam_fft',
-               RHSWorkspace='__sam_int',
-               OutputWorkspace='__sam')
-
-        # Resolution
-        trans_prog.report('Rebinnig Resolution')
-        Rebin(InputWorkspace=self._resolution,
-              OutputWorkspace='__res_data',
-              Params=rebin_param)
-        trans_prog.report('Integrating Resolution')
-        Integration(InputWorkspace='__res_data',
-                    OutputWorkspace='__res_int')
-        trans_prog.report('Converting Resolution to data points')
-        ConvertToPointData(InputWorkspace='__res_data',
-                           OutputWorkspace='__res_data')
-        trans_prog.report('Extractig FFT Resolution spectrum')
-        ExtractFFTSpectrum(InputWorkspace='__res_data',
-                           OutputWorkspace='__res_fft',
-                           FFTPart=2)
-        trans_prog.report('Dividing Resolution')
-        Divide(LHSWorkspace='__res_fft',
-               RHSWorkspace='__res_int',
-               OutputWorkspace='__res')
-
-        trans_prog.report('Diving Workspaces')
-        Divide(LHSWorkspace='__sam',
-               RHSWorkspace='__res',
-               OutputWorkspace=self._output_workspace)
-
-        # Cleanup sample workspaces
-        trans_prog.report('Deleting Sample temp')
-        DeleteWorkspace('__sam_data')
-        DeleteWorkspace('__sam_int')
-        DeleteWorkspace('__sam_fft')
-        DeleteWorkspace('__sam')
-
-        # Crop nonsense values off workspace
-        binning = int(math.ceil(mtd[self._output_workspace].blocksize() / 2.0))
-        bin_v = mtd[self._output_workspace].dataX(0)[binning]
-        trans_prog.report('Cropping output')
-        CropWorkspace(InputWorkspace=self._output_workspace,
-                      OutputWorkspace=self._output_workspace,
-                      XMax=bin_v)
-
-        # Replace NaN values in last bin, with zeroes
-        ReplaceSpecialValues(InputWorkspace=self._output_workspace,
-                             OutputWorkspace=self._output_workspace,
-                             InfinityValue=0.0,
-                             BigNumberThreshold=1.0001,
-                             NaNValue=0.0)
+        iqt = calculateiqt_alg.getProperty("OutputWorkspace").value
 
         # Set Y axis unit and label
-        mtd[self._output_workspace].setYUnit('')
-        mtd[self._output_workspace].setYUnitLabel('Intensity')
-
-        trans_prog.report('Deleting Resolution temp')
-        # Clean up resolution workspaces
-        DeleteWorkspace('__res_data')
-        DeleteWorkspace('__res_int')
-        DeleteWorkspace('__res_fft')
-        DeleteWorkspace('__res')
+        iqt.setYUnit('')
+        iqt.setYUnitLabel('Intensity')
+        return iqt
 
 
 # Register algorithm with Mantid

@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 #include <cmath>
 
 namespace MantidQt {
@@ -15,13 +21,13 @@ UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor,
 
 //------------------------------------------------------------------------------
 /** Convert physical position to UV projection
-*
-* @param pos :: position in 3D
-* @param u :: set to U
-* @param v :: set to V
-* @param uscale :: scaling for u direction
-* @param vscale :: scaling for v direction
-*/
+ *
+ * @param pos :: position in 3D
+ * @param u :: set to U
+ * @param v :: set to V
+ * @param uscale :: scaling for u direction
+ * @param vscale :: scaling for v direction
+ */
 void UnwrappedSphere::project(const Mantid::Kernel::V3D &pos, double &u,
                               double &v, double &uscale, double &vscale) const {
   // projection to cylinder axis
@@ -53,5 +59,5 @@ void UnwrappedSphere::rotate(const UnwrappedDetector &udet,
   R = R1 * componentInfo.rotation(udet.detIndex);
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

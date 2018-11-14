@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDGEOMETRY_PEAKTRANSFORMHKL_TEST_H_
 #define MANTIDGEOMETRY_PEAKTRANSFORMHKL_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Crystal/PeakTransformHKL.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -19,7 +25,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe;
   return out;
 }
-}
+} // namespace boost
 
 class PeakTransformHKLTest : public CxxTest::TestSuite {
 public:

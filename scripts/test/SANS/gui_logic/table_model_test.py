@@ -1,11 +1,29 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel)
+from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
+from PyQt4.QtCore import QCoreApplication
+from sans.common.enums import RowState
+try:
+    from unittest import mock
+except:
+    import mock
 
 
 class TableModelTest(unittest.TestCase):
+    def setUp(self):
+        self.thickness_patcher = mock.patch('sans.gui_logic.models.table_model.create_file_information')
+        self.addCleanup(self.thickness_patcher.stop)
+        self.thickness_patcher.start()
+
     def test_user_file_can_be_set(self):
         self._do_test_file_setting(self._user_file_wrapper, "user_file")
 
@@ -14,23 +32,23 @@ class TableModelTest(unittest.TestCase):
 
     def test_that_raises_if_table_index_does_not_exist(self):
         table_model = TableModel()
-        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
-                                               "", "", "", "", "", "",)
+        row_entry = [''] * 16
+        table_index_model = TableIndexModel(*row_entry)
         table_model.add_table_entry(0, table_index_model)
-        self.assertRaises(ValueError, table_model.get_table_entry, 1)
+        self.assertRaises(IndexError, table_model.get_table_entry, 1)
 
     def test_that_can_get_table_index_model_for_valid_index(self):
         table_model = TableModel()
-        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
-                                            "", "", "", "", "", "")
+        row_entry = [''] * 16
+        table_index_model = TableIndexModel(*row_entry)
         table_model.add_table_entry(0, table_index_model)
         returned_model = table_model.get_table_entry(0)
-        self.assertTrue(returned_model.index == 0)
+        self.assertTrue(returned_model.sample_scatter == '')
 
     def test_that_can_set_the_options_column_model(self):
-        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
-                                            "WavelengthMin=1, WavelengthMax=3, NotRegister2=1")
+                                            options_column_string="WavelengthMin=1, WavelengthMax=3, NotRegister2=1")
         options_column_model = table_index_model.options_column_model
         options = options_column_model.get_options()
         self.assertTrue(len(options) == 2)
@@ -38,9 +56,9 @@ class TableModelTest(unittest.TestCase):
         self.assertTrue(options["WavelengthMax"] == 3.)
 
     def test_that_raises_for_missing_equal(self):
-        args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                "WavelengthMin=1, WavelengthMax=3, NotRegister2"]
-        self.assertRaises(ValueError,  TableIndexModel, *args)
+        args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+        kwargs = {'options_column_string': "WavelengthMin=1, WavelengthMax=3, NotRegister2"}
+        self.assertRaises(ValueError,  TableIndexModel, *args, **kwargs)
 
     def test_that_querying_nonexistent_row_index_raises_IndexError_exception(self):
         table_model = TableModel()
@@ -49,19 +67,19 @@ class TableModelTest(unittest.TestCase):
 
     def test_that_can_retrieve_user_file_from_table_index_model(self):
         table_model = TableModel()
-        table_index_model = TableIndexModel(2, "", "", "", "", "", "",
-                                            "", "", "", "", "", "", "", "User_file_name")
+        table_index_model = TableIndexModel('2', "", "", "", "", "", "",
+                                            "", "", "", "", "", "", "User_file_name")
         table_model.add_table_entry(2, table_index_model)
-        user_file = table_model.get_row_user_file(2)
+        user_file = table_model.get_row_user_file(0)
         self.assertEqual(user_file,"User_file_name")
 
     def test_that_can_retrieve_sample_thickness_from_table_index_model(self):
         sample_thickness = '8.0'
         table_model = TableModel()
-        table_index_model = TableIndexModel(2, "", "", "", "", "", "",
+        table_index_model = TableIndexModel("", "", "", "", "", "",
                                             "", "", "", "", "", "", sample_thickness=sample_thickness)
         table_model.add_table_entry(2, table_index_model)
-        row_entry = table_model.get_table_entry(2)
+        row_entry = table_model.get_table_entry(0)
         self.assertEqual(row_entry.sample_thickness, sample_thickness)
 
     def test_that_parse_string_returns_correctly(self):
@@ -74,16 +92,64 @@ class TableModelTest(unittest.TestCase):
 
     def test_get_number_of_rows_returns_number_of_entries(self):
         table_model = TableModel()
-        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "")
         table_model.add_table_entry(0, table_index_model)
-        table_index_model = TableIndexModel(1, "", "", "", "", "", "",
+        table_index_model = TableIndexModel('1', "", "", "", "", "", "",
                                             "", "", "", "", "", "")
         table_model.add_table_entry(1, table_index_model)
 
         number_of_rows = table_model.get_number_of_rows()
 
         self.assertEqual(number_of_rows, 2)
+
+    def test_when_table_is_cleared_is_left_with_one_empty_row(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        table_index_model = TableIndexModel('1', "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(1, table_index_model)
+        empty_row = table_model.create_empty_row()
+        empty_row.id = 2
+
+        table_model.clear_table_entries()
+
+        self.assertEqual(table_model.get_number_of_rows(), 1)
+        self.assertEqual(table_model.get_table_entry(0), empty_row)
+
+    def test_when_last_row_is_removed_table_is_left_with_one_empty_row(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel('0', "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        table_index_model = TableIndexModel('1', "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(1, table_index_model)
+        empty_row = table_model.create_empty_row()
+        empty_row.id = 2
+
+        table_model.remove_table_entries([0, 1])
+
+        self.assertEqual(table_model.get_number_of_rows(), 1)
+        self.assertEqual(table_model.get_table_entry(0), empty_row)
+
+    def test_that_OptionsColumnModel_get_permissable_properties_returns_correct_properties(self):
+        permissable_properties = OptionsColumnModel._get_permissible_properties()
+
+        self.assertEqual(permissable_properties, {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str})
+
+    def test_that_OptionsColumnModel_get_hint_strategy(self):
+        hint_strategy = OptionsColumnModel.get_hint_strategy()
+        expected_hint_strategy = BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
+                                  "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
+                                  "EventSlices": 'The event slices to reduce.'
+                                  ' The format is the same as for the event slices'
+                                  ' box in settings, however if a comma separated list is given '
+                                  'it must be enclosed in quotes'})
+
+        self.assertEqual(expected_hint_strategy, hint_strategy)
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
@@ -94,9 +160,6 @@ class TableModelTest(unittest.TestCase):
         except:  # noqa
             has_raised = True
         self.assertFalse(has_raised)
-
-        # Test raises for non-existent file path
-        self.assertRaises(ValueError, func, "/home/testSDFHSNDFG")
 
         # Test that can be set to valid value
         setattr(table_model, prop, __file__)
@@ -111,6 +174,41 @@ class TableModelTest(unittest.TestCase):
     def _user_file_wrapper(value):
         table_model = TableModel()
         table_model.user_file = value
+
+class TableModelThreadingTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.qApp = QCoreApplication(['test_app'])
+
+    @mock.patch('sans.gui_logic.presenter.create_file_information.SANSFileInformationFactory')
+    def test_that_get_thickness_for_row_handles_errors_correctly(self, file_information_factory_mock):
+        # self.thickness_patcher.stop()
+        file_information_factory_instance = mock.MagicMock()
+        file_information_factory_instance.create_sans_file_information.side_effect = RuntimeError('File Error')
+        file_information_factory_mock.return_value = file_information_factory_instance
+        table_model = TableModel()
+        table_index_model = TableIndexModel("00000", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+
+        table_model.get_thickness_for_rows()
+        table_model.work_handler.wait_for_done()
+        self.qApp.processEvents()
+
+        self.assertEqual(table_index_model.tool_tip, 'File Error')
+        self.assertEqual(table_index_model.row_state, RowState.Error)
+
+    def test_that_get_thickness_for_rows_updates_table_correctly(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel("LOQ74044", "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+
+        table_model.get_thickness_for_rows()
+        table_model.work_handler.wait_for_done()
+        self.qApp.processEvents()
+
+        self.assertEqual(table_index_model.sample_thickness, 1.0)
 
 
 if __name__ == '__main__':

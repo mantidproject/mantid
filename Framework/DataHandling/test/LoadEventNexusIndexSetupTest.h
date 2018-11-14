@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUPTEST_H_
 #define MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUPTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/FakeObjects.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataObjects/WorkspaceCreation.h"

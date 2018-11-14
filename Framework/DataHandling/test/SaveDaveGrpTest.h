@@ -1,21 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_SAVEDAVEGRPTEST_H_
 #define MANTID_DATAHANDLING_SAVEDAVEGRPTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataHandling/SaveDaveGrp.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadDaveGrp.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/algorithm/string.hpp>
 #include <Poco/File.h>
+#include <boost/algorithm/string.hpp>
 
 #include <fstream>
 

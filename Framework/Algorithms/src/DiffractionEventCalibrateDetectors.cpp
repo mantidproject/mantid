@@ -1,5 +1,10 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
-#include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IFunction.h"
@@ -7,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -14,15 +20,15 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/BoundedValidator.h"
 
 #include <Poco/File.h>
 #include <cmath>
-#include <numeric>
 #include <fstream>
+#include <numeric>
 #include <sstream>
 
 namespace Mantid {
@@ -230,7 +236,7 @@ double DiffractionEventCalibrateDetectors::intensity(
 }
 
 /** Initialisation method
-*/
+ */
 void DiffractionEventCalibrateDetectors::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
@@ -269,9 +275,9 @@ void DiffractionEventCalibrateDetectors::init() {
 }
 
 /** Executes the algorithm
-*
-*  @throw runtime_error Thrown if algorithm cannot execute
-*/
+ *
+ *  @throw runtime_error Thrown if algorithm cannot execute
+ */
 void DiffractionEventCalibrateDetectors::exec() {
   // Try to retrieve optional properties
   const int maxIterations = getProperty("MaxIterations");
@@ -578,5 +584,5 @@ void DiffractionEventCalibrateDetectors::exec() {
   outfile.close();
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef TESTWORKSPACESINGLEVALUE_
 #define TESTWORKSPACESINGLEVALUE_
 
-#include <vector>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <vector>
 
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "PropertyManagerHelper.h"
@@ -64,9 +70,9 @@ public:
   }
 
   /**
-  * Test declaring an input WorkspaceSingleValue and retrieving it as const_sptr
-  * or sptr
-  */
+   * Test declaring an input WorkspaceSingleValue and retrieving it as
+   * const_sptr or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     WorkspaceSingleValue_sptr wsInput(new WorkspaceSingleValue());

@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_SORTPEAKSWORKSPACETEST_H_
 #define MANTID_CRYSTAL_SORTPEAKSWORKSPACETEST_H_
 
+#include "MantidCrystal/SortPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <algorithm>
-#include "MantidCrystal/SortPeaksWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
