@@ -425,6 +425,12 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
 
 namespace {
 bool isUsingDefaultBinBoundaries(const EventWorkspace *workspace) {
+  // returning false for empty workspaces tells the caller not to try
+  // to rebin the data. See EventList::getEventXMinMax() for what the
+  // workspace binning will look like with this choice.
+  if (workspace->getNumberEvents() == 0)
+    return false;
+
   // only check first spectrum
   const auto &x = workspace->binEdges(0);
   if (x.size() > 2)

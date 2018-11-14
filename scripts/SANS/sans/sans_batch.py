@@ -30,13 +30,19 @@ class SANSBatchReduction(object):
         """
         self.validate_inputs(states, use_optimizations, output_mode, plot_results, output_graph)
 
-        self._execute(states, use_optimizations, output_mode, plot_results, output_graph)
+        return self._execute(states, use_optimizations, output_mode, plot_results, output_graph)
 
     @staticmethod
     def _execute(states, use_optimizations, output_mode, plot_results, output_graph):
         # Iterate over each state, load the data and perform the reduction
+        out_scale_factors_list = []
+        out_shift_factors_list = []
         for state in states:
-            single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph)
+            out_scale_factors, out_shift_factors = \
+                single_reduction_for_batch(state, use_optimizations, output_mode, plot_results, output_graph)
+            out_shift_factors_list.append(out_shift_factors)
+            out_scale_factors_list.append(out_scale_factors)
+        return out_scale_factors_list, out_shift_factors_list
 
     def validate_inputs(self, states, use_optimizations, output_mode, plot_results, output_graph):
         # We are strict about the types here.

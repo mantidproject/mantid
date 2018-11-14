@@ -38,6 +38,7 @@ Improvements
   data streaming from TOPAZ new Adara data server.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
+- SCD Event Data Reduction Diffraction Interface now has option to create MD HKL workspace.
 
 Bugfixes
 ########
@@ -60,6 +61,8 @@ Improvements
 - Added subtract_empty_instrument flag to Gem that is true by default, setting it to false disables subrtracting the empty.
 - Changed spline coefficient so that the default for long_mode on and long_mode off can be set separately.
 - Focus on Pearl now saves out xye_tof files.
+- :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now sets the same run numbers for all rows when using an ``exp.ini`` file.
+
 
 Bugfixes
 ########
