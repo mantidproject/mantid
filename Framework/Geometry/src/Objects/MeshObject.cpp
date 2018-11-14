@@ -488,9 +488,7 @@ size_t MeshObject::numberOfTriangles() const { return m_triangles.size() / 3; }
 /**
  * get faces
  */
-std::vector<uint32_t> MeshObject::getTriangles() const {
-  return m_triangles;
-}
+std::vector<uint32_t> MeshObject::getTriangles() const { return m_triangles; }
 
 /**
  * get number of points

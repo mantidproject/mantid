@@ -393,10 +393,7 @@ std::vector<double> MeshObject2D::getVertices() const {
   return MeshObjectCommon::getVertices(m_vertices);
 }
 
-std::vector<uint32_t> MeshObject2D::getTriangles() const {
-
-  return m_triangles;
-}
+std::vector<uint32_t> MeshObject2D::getTriangles() const { return m_triangles; }
 
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,
                                  std::vector<Kernel::V3D> &, double &,
