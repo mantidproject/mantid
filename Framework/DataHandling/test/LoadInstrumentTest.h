@@ -621,6 +621,7 @@ public:
   void test_failure_if_Filename_not_found() {
     LoadInstrument instLoader;
     instLoader.initialize();
+    instLoader.setRethrows(true);
     MatrixWorkspace_sptr ws =
         DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
     instLoader.setProperty("Workspace", ws);
