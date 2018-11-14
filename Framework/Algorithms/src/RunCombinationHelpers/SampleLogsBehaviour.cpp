@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -524,7 +525,7 @@ void SampleLogsBehaviour::updateListProperty(MatrixWorkspace &addeeWS,
                                              const std::string &name) {
   const std::string addeeWSVal = addeeWS.getLog(name)->value();
   const std::string outWSVal = outWS.run().getProperty(name)->value();
-  outWS.mutableRun().addProperty(name, addeeWSVal + ", " + outWSVal, true);
+  outWS.mutableRun().addProperty(name, outWSVal + ", " + addeeWSVal, true);
 }
 
 /**
