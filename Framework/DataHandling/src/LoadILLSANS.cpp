@@ -18,6 +18,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/Path.h>
@@ -30,6 +31,7 @@ namespace DataHandling {
 
 namespace {
 static constexpr size_t N_MONITORS = 2;
+static constexpr double D33_VTOF_COEFF = 3956.04;
 }
 
 using namespace Kernel;
@@ -258,7 +260,6 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
       dataUp.dim0() * dataUp.dim1());
 
   g_log.debug("Creating empty workspace...");
-  // TODO : Must put this 2 somewhere else: number of monitors!
   createEmptyWorkspace(numberOfHistograms + N_MONITORS,
                        static_cast<size_t>(dataRear.dim2()));
 
@@ -295,19 +296,53 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
     g_log.debug("Source distance computed, moving moderator to Z=-" +
                 std::to_string(m_sourcePos));
     g_log.debug("Getting wavelength bins from the nexus file...");
-    std::string binPathPrefix(instrumentPath + "/tof/tof_wavelength_detector");
-
-    binningRear =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "1");
-    binningRight =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "2");
-    binningLeft =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "3");
-    binningDown =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "4");
-    binningUp =
-        m_loader.getTimeBinningFromNexusPath(firstEntry, binPathPrefix + "5");
+    bool vtof = true;
+    // try VTOF mode
+    try {
+      NXInt channelWidthSum =
+          firstEntry.openNXInt(m_instrumentName + "/tof/chwidth_sum");
+      NXFloat channelWidthTimes =
+          firstEntry.openNXFloat(m_instrumentName + "/tof/chwidth_times");
+      channelWidthSum.load();
+      channelWidthTimes.load();
+      std::string distancePrefix(instrumentPath +
+                                 "/tof/tof_distance_detector");
+      binningRear = getVariableTimeBinning(firstEntry, distancePrefix + "1",
+                                           channelWidthSum, channelWidthTimes);
+      binningRight = getVariableTimeBinning(firstEntry, distancePrefix + "2",
+                                            channelWidthSum, channelWidthTimes);
+      binningLeft = getVariableTimeBinning(firstEntry, distancePrefix + "3",
+                                           channelWidthSum, channelWidthTimes);
+      binningDown = getVariableTimeBinning(firstEntry, distancePrefix + "4",
+                                           channelWidthSum, channelWidthTimes);
+      binningUp = getVariableTimeBinning(firstEntry, distancePrefix + "5",
+                                         channelWidthSum, channelWidthTimes);
+    } catch (std::runtime_error) {
+      vtof = false;
+    }
+    if (!vtof) {
+      try {
+        // LTOF mode
+        std::string binPathPrefix(instrumentPath +
+                                  "/tof/tof_wavelength_detector");
+        binningRear = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                           binPathPrefix + "1");
+        binningRight = m_loader.getTimeBinningFromNexusPath(
+            firstEntry, binPathPrefix + "2");
+        binningLeft = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                           binPathPrefix + "3");
+        binningDown = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                           binPathPrefix + "4");
+        binningUp = m_loader.getTimeBinningFromNexusPath(firstEntry,
+                                                         binPathPrefix + "5");
+      } catch (std::runtime_error &e) {
+        throw std::runtime_error(
+            "Unable to load the wavelength axes for TOF data " +
+            std::string(e.what()));
+      }
+    }
   }
+
   g_log.debug("Loading the data into the workspace...");
 
   size_t nextIndex =
@@ -704,6 +739,33 @@ void LoadILLSANS::setPixelSize() {
   } else {
     g_log.debug("No pixel size available");
   }
+}
+
+/**
+ * Returns the wavelength axis computed from TOF in VTOF mode
+ * @param entry : opened root nexus entry
+ * @param path : path of the detector distance entry
+ * @param sum : loaded channel width sums
+ * @param times : loaded channel width times
+ * @return binning : wavelength bin boundaries
+ */
+std::vector<double>
+LoadILLSANS::getVariableTimeBinning(const NXEntry &entry,
+                                    const std::string &path, const NXInt &sum,
+                                    const NXFloat &times) const {
+  const int nBins = sum.dim0();
+  std::vector<double> binCenters;
+  binCenters.reserve(nBins);
+  NXFloat distance = entry.openNXFloat(path);
+  distance.load();
+  for (int bin = 0; bin < nBins; ++bin) {
+    binCenters.emplace_back((sum[bin] / 1E+9 - times[bin] / 2. / 1E+6) /
+                            distance[0] * D33_VTOF_COEFF);
+  }
+  std::vector<double> binEdges;
+  binEdges.reserve(nBins + 1);
+  VectorHelper::convertToBinBoundary(binCenters, binEdges);
+  return binEdges;
 }
 
 } // namespace DataHandling

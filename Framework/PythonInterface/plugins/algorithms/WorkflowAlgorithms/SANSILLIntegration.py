@@ -28,7 +28,7 @@ class SANSILLIntegration(PythonAlgorithm):
         return 'Performs SANS integration and resolution calculation based on corrected data.'
 
     def seeAlso(self):
-        return ['Q1DWeighted', 'Qxy', 'SANSILLReduction']
+        return ['SANSILLReduction', 'Q1DWeighted', 'Qxy']
 
     def name(self):
         return 'SANSILLIntegration'
@@ -41,6 +41,10 @@ class SANSILLIntegration(PythonAlgorithm):
             run = self.getProperty('InputWorkspace').value.getRun()
             if not run:
                 issues['InputWorkspace'] = 'The input workspace does not have a run object attached.'
+            else:
+                processed = run.getLogData('ProcessedAs').value
+                if processed != 'Sample':
+                    issues['InputWorkspace'] = 'The input workspace is not processed as sample.'
             instrument = self.getProperty('InputWorkspace').value.getInstrument()
             if not instrument:
                 issues['InputWorkspace'] += 'The input workspace does not have an instrument attached.'
