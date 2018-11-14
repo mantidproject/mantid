@@ -71,7 +71,7 @@ Bugfixes
 - :ref:`Fit <algm-Fit>` now applies the ties in correct order independently on the order they are set. If any circular dependencies are found Fit will give an error.
 - Fixed a rare bug in :ref:`MaskDetectors <algm-MaskDetectors>` where a workspace could become invalidaded in Python if it was a ``MaskWorkspace``.
 - Fixed a crash in :ref:`MaskDetectors <algm-MaskDetectors>` when a non-existent component was given in ``ComponentList``.
-
+- SampleLogs units are present, algorithms :ref:`MergeRuns <algm-MergeRuns>` and :ref:`ConjoinXRuns <algm-ConjoinXRuns>`.
 
 Python
 ------
