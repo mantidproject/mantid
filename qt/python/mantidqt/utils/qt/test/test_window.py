@@ -2,7 +2,7 @@ from __future__ import print_function
 
 from mantidqt.utils.qt.test.run_test_app import open_in_window
 from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication
-from qtpy.QtCore import QObject, Signal, Qt, QMetaObject
+from qtpy.QtCore import QObject, Qt, QMetaObject
 
 
 class GuiTestBase(QObject, object):
