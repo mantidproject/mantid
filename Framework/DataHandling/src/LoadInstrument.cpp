@@ -62,7 +62,8 @@ void LoadInstrument::init() {
       "monitors loaded in to the workspace.");
   declareProperty(
       "InstrumentName", "",
-      "Name of instrument. Can be used instead of Filename to specify an IDF");
+      "Name of instrument. Can be used instead of Filename to specify an"
+      "instrument definition.");
   declareProperty("InstrumentXML", "",
                   "The full XML instrument definition as a string.");
   declareProperty(
