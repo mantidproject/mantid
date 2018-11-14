@@ -15,6 +15,7 @@ from sans.common.enums import (SANSInstrument, ISISReductionMode, SANSFacility, 
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.state.state import State
+from PyQt4.QtCore import QCoreApplication
 
 if sys.version_info.major == 3:
     from unittest import mock
@@ -23,13 +24,15 @@ else:
 
 class GuiCommonTest(unittest.TestCase):
     def setUp(self):
+        self.qApp = QCoreApplication(['test_app'])
         self.table_model = TableModel()
         self.state_gui_model = StateGuiModel({})
         table_index_model_0 = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
         table_index_model_1 = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
         self.table_model.add_table_entry(0, table_index_model_0)
         self.table_model.add_table_entry(1, table_index_model_1)
-        self.table_model.wait_for_done()
+        self.table_model.wait_for_file_finding_done()
+        self.qApp.processEvents()
 
         self.fake_state = mock.MagicMock(spec=State)
         self.gui_state_director_instance = mock.MagicMock()
@@ -55,6 +58,8 @@ class GuiCommonTest(unittest.TestCase):
     def test_skips_empty_rows(self):
         table_index_model = TableIndexModel('', '', '', '', '', '', '', '', '', '', '', '')
         self.table_model.add_table_entry(1, table_index_model)
+        self.table_model.wait_for_file_finding_done()
+        self.qApp.processEvents()
 
         states, errors = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
                                row_index=[0,1, 2])
@@ -68,6 +73,8 @@ class GuiCommonTest(unittest.TestCase):
                                             user_file='MaskLOQData.txt')
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
+        table_model.wait_for_file_finding_done()
+        self.qApp.processEvents()
 
         states, errors = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
                                row_index=[0,1, 2])

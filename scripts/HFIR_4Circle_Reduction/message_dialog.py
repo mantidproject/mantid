@@ -8,9 +8,12 @@
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 from qtpy.QtWidgets import (QDialog)  # noqa
-
-
-from . import ui_messagebox
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
 class MessageDialog(QDialog):
@@ -26,8 +29,8 @@ class MessageDialog(QDialog):
         super(MessageDialog, self).__init__(parent)
 
         # set up UI
-        self.ui = ui_messagebox.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = "messagebox.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # define operation
         self.ui.pushButton_close.clicked.connect(self.do_quit)
