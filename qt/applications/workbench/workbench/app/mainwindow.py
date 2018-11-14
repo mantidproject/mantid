@@ -265,6 +265,7 @@ class MainWindow(QMainWindow):
 
     def launchCustomGUI(self, filename):
         executioner = PythonCodeExecution()
+        executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
         executioner.execute(open(filename).read(), filename)
 
     def populateAfterMantidImport(self):

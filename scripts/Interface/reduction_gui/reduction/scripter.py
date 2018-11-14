@@ -312,15 +312,19 @@ def execute_script(script):
     @param script :: A chunk of code to execute
     """
     if HAS_ASYNC:
-        Logger('scripter').warning('USING PythonCodeExecution')
+        def onError(arg):
+            raise arg.exc_type, arg.exc_type(stuff.exc_value), arg.stack
+
+        Logger('scripter').information('using PythonCodeExecution')
         executioner = PythonCodeExecution()
-        executioner.execute_async(script)
+        executioner.sig_exec_error.connect(onError)
+        executioner.execute_async(script, '<string>')
+
     elif HAS_MANTIDPLOT:
         Logger('scripter').information('using runPythonScript')
         mantidplot.runPythonScript(script, True)  # TODO this option should get removed
     else:
-        Logger('scripter').warning('directly using "exec"')
-        exec(script)  # shouldn't do this
+        raise RuntimeError('Do not have a way to directly execute the script')
 
 
 class BaseReductionScripter(object):
