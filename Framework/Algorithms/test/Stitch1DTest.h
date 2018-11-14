@@ -26,7 +26,6 @@
 
 #include <algorithm>
 #include <boost/make_shared.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <math.h>
 
 using namespace Mantid::API;
@@ -286,7 +285,7 @@ public:
     TS_ASSERT_EQUALS(scaleFactor, 1.); // Default scale factor
   }
 
-  void test_point_data_input_workspace_not_modified() {
+  void test_point_data_input_workspace_not_modified_with() {
     const auto &x1 = HistogramX(3, LinearGenerator(1., 1.));
     const auto &y1 = HistogramY(3, LinearGenerator(1., 1.));
     const auto &e = HistogramE(3, LinearGenerator(7., -1.));
@@ -306,6 +305,8 @@ public:
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(stitched->hasDx(0))
     Mantid::Algorithms::CompareWorkspaces compare;
     compare.initialize();
     compare.setRethrows(true);

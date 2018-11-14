@@ -11,6 +11,9 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <boost/tuple/tuple.hpp>
+#include <functional>
+#include <map>
+#include <string>
 
 namespace Mantid {
 namespace Algorithms {
@@ -45,9 +48,6 @@ private:
   void init() override;
   /// Overwrites Algorithm method.
   void exec() override;
-  /// Get pair of start and end overlap
-  std::pair<double, double> getOverlap(const double intersectionMin,
-                                       const double intersectionMax) const;
 
   /// Get the rebin parameters
   std::vector<double>
@@ -97,6 +97,33 @@ private:
   SpecialTypeIndexes m_infEIndexes;
   SpecialTypeIndexes m_infYIndexes;
   SpecialTypeIndexes m_infDxIndexes;
+
+  /**
+   * @brief A template which returns a boundary value
+   * @param overlapVal A reference value intersection min or max
+   * @param name A property name StartOverlap or EndOverlap
+   * @param compare std::less<double> or std::greater<double>
+   */
+  template <typename Comparator>
+  double overlap(const double overlapVal, const std::string &name,
+                 Comparator const &comp) const {
+    // Overlap Value tolerance is 1.e-9:
+    // This is required for machine precision reasons. Used to adjust overlap
+    // value value to be inclusive of bin boundaries if sitting ontop of the bin
+    // boundaries.
+    // StartOverlap and EndOverlap will be considered separately
+    // For binned data, input validation ensures that final StartOverlap < final
+    // EndOverlap. For point data this is not the case
+    double interSectionVal = this->getProperty(name);
+    if (isDefault(name))
+      interSectionVal = overlapVal;
+    if (comp((overlapVal - 1.e-9), interSectionVal)) {
+      g_log.warning(name + " outside range, re-determine");
+      interSectionVal = overlapVal;
+    }
+    g_log.information(name + ": " + std::to_string(interSectionVal));
+    return interSectionVal;
+  }
 };
 
 } // namespace Algorithms
