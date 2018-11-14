@@ -22,25 +22,25 @@ a Child Algorithm will therefore get this 1:1 map be default. If the
 custom loader is to write its own map then it is advised to set
 ``RewriteSpectraMap`` to false to avoid extra work.
 
-The instrument to load can be specified by either the `InstrumentXML` (IDFs
-only), `Filename` and `InstrumentName` properties (given here in order of
-precedence if more than one is set). At present, if the `InstrumentXML` is
-used the `InstrumentName` property should also be set.
+The instrument to load can be specified by either the ``InstrumentXML`` (IDFs
+only), ``Filename`` and ``InstrumentName`` properties (given here in order of
+precedence if more than one is set). At present, if the ``InstrumentXML`` is
+used the ``InstrumentName`` property should also be set.
 
-The `Filename` can either be an absolute or relative path. In the latter case,
-both the `datasearch.directories` and instrument directories (accessible via
-`getInstrumentDirectories()` and `setInstrumentDirectories()`) are searched for
+The ``Filename`` can either be an absolute or relative path. In the latter case,
+both the ``datasearch.directories`` and instrument directories (accessible via
+``getInstrumentDirectories()`` and ``setInstrumentDirectories()``) are searched for
 the specified file. The filename is required to be of the form
-`InstrumentName + _Definition + Identifier + extension`.
+``InstrumentName + _Definition + Identifier + extension``.
 The identifier then is the part of a filename that identifies the instrument
 definition valid at a given date. If several instrument files files are valid at
 the given date the file with the most recent from date is selected. If no such
 files are found the file with the latest from date is selected.
 
-If only the `InstrumentName` is specified, a filename is built on-the-fly to
-have the form `InstrumentName + _Definition.(xml|hdf5|nxs)`. Short instrument
-names can also be used, such as `seq`; they get translated to long instrument
-names (e.g. `SEQUOIA`) through the `ConfigServiceImp::getInstrument().name()`
+If only the ``InstrumentName`` is specified, a filename is built on-the-fly to
+have the form ``InstrumentName + _Definition.(xml|hdf5|nxs)``. Short instrument
+names can also be used, such as ``seq``; they get translated to long instrument
+names (e.g. ``SEQUOIA``) through the ``ConfigServiceImp::getInstrument().name()``
 method.
 
 Usage
@@ -53,7 +53,7 @@ Usage
    # create sample workspace
    ws1 = CreateSampleWorkspace();
    inst1 = ws1.getInstrument();
-   print("Default workspace has instrument: {0} with {1}    parameters".format(inst1.getName(),len(inst1.getParameterNames())))
+   print("Default workspace has instrument: {0} with {1} parameters".format(inst1.getName(),len(inst1.getParameterNames())))
 
    # load MARI from instrument name
    print("===========================")
