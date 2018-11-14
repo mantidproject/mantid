@@ -38,7 +38,8 @@ bool checkPeriodInWorkspaceGroup(const int &period,
  */
 MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
                                        const int index, const double startX,
-                                       const double endX, const double normalizationIn) {
+                                       const double endX,
+                                       const double normalizationIn) {
   IAlgorithm_sptr asym =
       AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
   asym->setChild(true);
@@ -60,12 +61,10 @@ MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
   return outWS;
 }
 
-Mantid::API::MatrixWorkspace_sptr
-estimateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
-                       const std::vector<int> &summedPeriods,
-                       const std::vector<int> &subtractedPeriods,
-                       int groupIndex, const double startX,
-                       const double endX, const double normalizationIn) {
+Mantid::API::MatrixWorkspace_sptr estimateMuonAsymmetry(
+    WorkspaceGroup_sptr inputWS, const std::vector<int> &summedPeriods,
+    const std::vector<int> &subtractedPeriods, int groupIndex,
+    const double startX, const double endX, const double normalizationIn) {
   MatrixWorkspace_sptr tempWS;
   int numPeriods = inputWS->getNumberOfEntries();
   if (numPeriods > 1) {
@@ -81,8 +80,8 @@ estimateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
 
     if (!subtractedPeriods.empty()) {
       // Remove decay (subtracted periods ws)
-      MatrixWorkspace_sptr asymSubtractedPeriods =
-          estimateAsymmetry(subtractedWS, groupIndex, startX, endX, normalizationIn);
+      MatrixWorkspace_sptr asymSubtractedPeriods = estimateAsymmetry(
+          subtractedWS, groupIndex, startX, endX, normalizationIn);
 
       // Now subtract
       tempWS = Mantid::MuonAlgorithmHelper::subtractWorkspaces(
@@ -92,10 +91,11 @@ estimateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
     }
   } else {
     // Only one period was supplied
-    tempWS = estimateAsymmetry(inputWS->getItem(0), groupIndex, startX,
-                               endX, normalizationIn); // change -1 to m_groupIndex and
-                                      // follow through to store as a
-                                      // table for later.
+    tempWS =
+        estimateAsymmetry(inputWS->getItem(0), groupIndex, startX, endX,
+                          normalizationIn); // change -1 to m_groupIndex and
+                                            // follow through to store as a
+                                            // table for later.
   }
 
   MatrixWorkspace_sptr outWS =
@@ -176,7 +176,8 @@ void MuonGroupingAsymmetry::init() {
                   Direction::Input);
 
   declareProperty("NormalizationIn", 0.0,
-                  "If this value is non-zero then this is used for the normalization, instead of being estimated.",
+                  "If this value is non-zero then this is used for the "
+                  "normalization, instead of being estimated.",
                   Direction::Input);
 
   declareProperty(make_unique<ArrayProperty<int>>(
@@ -208,8 +209,9 @@ std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
     errors["GroupName"] = "Group name must be specified.";
   }
 
-  if (!std::all_of(std::begin(groupName), std::end(groupName),
-                   Mantid::MuonAlgorithmHelper::is_alphanumerical_or_underscore)) {
+  if (!std::all_of(
+          std::begin(groupName), std::end(groupName),
+          Mantid::MuonAlgorithmHelper::is_alphanumerical_or_underscore)) {
     errors["GroupName"] =
         "The group name must contain alphnumeric characters and _ only.";
   }
@@ -294,7 +296,7 @@ void MuonGroupingAsymmetry::exec() {
   WorkspaceGroup_sptr groupedWS = createGroupWorkspace(inputWS);
 
   outWS = estimateMuonAsymmetry(groupedWS, summedPeriods, subtractedPeriods, 0,
-                                 startX, endX, normalizationIn);
+                                startX, endX, normalizationIn);
 
   addGroupingAsymmetrySampleLogs(outWS);
   setProperty("OutputWorkspace", outWS);
