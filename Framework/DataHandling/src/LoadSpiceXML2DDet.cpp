@@ -30,7 +30,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <fstream>
 #include <iostream>
 
 using namespace std;
@@ -489,10 +488,12 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
   end = infile.tellg();
   g_log.information() << "File size is: " << (end - begin) << " bytes.\n";
 
-  size_t num_unsigned_int = static_cast<size_t>(end - begin) / sizeof(unsigned int);
+  size_t num_unsigned_int =
+      static_cast<size_t>(end - begin) / sizeof(unsigned int);
   size_t num_dets = num_unsigned_int - 2;
-  g_log.information() << "File contains " << num_unsigned_int << " unsigned integers and thus "
-                      << num_dets << " detectors.\n";
+  g_log.information() << "File contains " << num_unsigned_int
+                      << " unsigned integers and thus " << num_dets
+                      << " detectors.\n";
 
   // define output vector
   std::vector<unsigned int> vec_counts(num_dets);
@@ -509,7 +510,6 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
   size_t num_rows = static_cast<size_t>(buffer);
   infile.read((char *)&buffer, sizeof(buffer));
   size_t num_cols = static_cast<size_t>(buffer);
-
 
   for (size_t i = 0; i < num_dets; ++i) {
     // infile.read(buffer, sizeof(int));
