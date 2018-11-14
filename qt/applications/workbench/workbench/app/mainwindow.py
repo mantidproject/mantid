@@ -264,12 +264,13 @@ class MainWindow(QMainWindow):
         add_actions(self.view_menu, self.view_menu_actions)
 
     def launchCustomGUI(self, filename):
+        from mantid.kernel import logger  # noqa
         executioner = PythonCodeExecution()
         executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
         executioner.execute(open(filename).read(), filename)
 
     def populateAfterMantidImport(self):
-        from mantid.kernel import ConfigService, logger
+        from mantid.kernel import ConfigService, logger  # noqa
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
         items = ConfigService['mantidqt.python_interfaces'].split()
 

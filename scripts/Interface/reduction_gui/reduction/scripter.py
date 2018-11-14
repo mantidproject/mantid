@@ -313,7 +313,7 @@ def execute_script(script):
     """
     if HAS_ASYNC:
         def onError(arg):
-            raise arg.exc_type, arg.exc_type(stuff.exc_value), arg.stack
+            raise arg.exc_type, arg.exc_type(arg.exc_value), arg.stack
 
         Logger('scripter').information('using PythonCodeExecution')
         executioner = PythonCodeExecution()
