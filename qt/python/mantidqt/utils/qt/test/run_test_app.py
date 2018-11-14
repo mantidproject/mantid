@@ -66,7 +66,8 @@ class ScriptRunner(object):
     def __init__(self, script, w, close_on_finish):
         self.widget = w
         self.close_on_finish = close_on_finish
-        self.script_iter = iter(run_script(script, w))
+        ret = run_script(script, w)
+        self.script_iter = iter(ret) if inspect.isgenerator(ret) else None
         self.parent_iter = None
         self.pause_timer = QTimer()
         self.pause_timer.setSingleShot(True)
@@ -75,6 +76,12 @@ class ScriptRunner(object):
         global app
         if not self.pause_timer.isActive():
             try:
+                if self.script_iter is None:
+                    if self.close_on_finish:
+                        self.widget.close()
+                        app.quit()
+                        app = None
+                    return
                 # Run test script until the next 'yield'
                 pause_sec = self.script_iter.next()
                 if pause_sec is not None:

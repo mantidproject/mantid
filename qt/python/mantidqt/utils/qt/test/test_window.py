@@ -7,8 +7,9 @@ from qtpy.QtCore import QObject, Signal, Qt, QMetaObject
 
 class GuiTestBase(QObject, object):
 
-    def __init__(self):
+    def __init__(self, widget_class):
         super(GuiTestBase, self).__init__()
+        self.widget_class = widget_class
         self.widget = None
         self.call_method = 'call'
 
@@ -35,9 +36,9 @@ class GuiTestBase(QObject, object):
     def wait_for_popup(self):
         return self.wait_for_true(self.get_active_popup_widget)
 
-    def run(self, window_class, method='call', pause=0, close_on_finish=True, attach_debugger=False):
+    def run(self, method='call', pause=0, close_on_finish=True, attach_debugger=False):
         self.call_method = method
-        open_in_window(window_class, self, attach_debugger=attach_debugger, pause=pause,
+        open_in_window(self.widget_class, self, attach_debugger=attach_debugger, pause=pause,
                        close_on_finish=close_on_finish)
 
     def get_child(self, child_class, name):
