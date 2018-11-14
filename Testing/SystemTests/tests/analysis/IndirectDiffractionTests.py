@@ -9,13 +9,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-import stresstesting
+import systemtesting
 import mantid.simpleapi as ms
 from mantid import mtd
 from six import with_metaclass
 
 
-class ISISIndirectDiffractionReduction(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
+class ISISIndirectDiffractionReduction(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
     """
     Base class for tests that use the ISISIndirectDiffractionReduction algorithm.
     """
@@ -105,7 +105,7 @@ class OSIRISDiffspecDiffractionTest(ISISIndirectDiffractionReduction):
 #-------------------------------------------------------------------------------
 
 
-class OSIRISDiffonlyDiffractionTest(stresstesting.MantidStressTest):
+class OSIRISDiffonlyDiffractionTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         ms.OSIRISDiffractionReduction(OutputWorkspace="OsirisDiffractionTest",

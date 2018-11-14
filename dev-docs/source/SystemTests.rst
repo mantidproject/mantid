@@ -28,18 +28,16 @@ repository at
 `mantidproject/mantid <http://github.com/mantidproject/mantid>`__, under
 the ``Testing/SystemTests`` directory.
 
-Like their 'stress' equivalents (`stress testing <Stress_Tests>`__),
-system tests inherit from the stresstesting.MantidStressTest class. The
-methods that need to be overridden are ``runTest(self)``, where the
-python code that runs the test should be placed, and ``validate(self)``,
-which should simply return a pair of strings: the name of the final
-workspace that results from the ``runTest`` method and the name of a
-nexus file that should be saved in the ReferenceResults sub-directory in
-the repository. The test code itself is likely to be the output of a
-*Save History* command, though it can be any python code. In the
-unlikely case of files being used during a system test, implement the
-method ``requiredFiles`` which should return a list of filenames without
-paths. The file to validate against should be included as well. If any
+System tests inherit from the :class:`systemtesting.MantidSystemTest` class. 
+The methods that need to be overridden are ``runTest(self)``, where the python 
+code that runs the test should be placed, and ``validate(self)``, which should 
+simply return a pair of strings: the name of the final workspace that results 
+from the ``runTest`` method and the name of a nexus file that should be saved 
+in the ReferenceResults sub-directory in the repository. The test code itself 
+is likely to be the output of a *Save History* command, though it can be any 
+python code. In the unlikely case of files being used during a system test, 
+implement the method ``requiredFiles`` which should return a list of filenames 
+without paths. The file to validate against should be included as well. If any 
 of those files are missing the test will be marked as skipped.
 
 The tests should be added to the ``Testing/SystemTests/tests/analysis``,
