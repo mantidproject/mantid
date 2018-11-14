@@ -256,13 +256,13 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
 }
 
 /**
-* Get sample environment log data from the flatbuffer and append it to the
-* workspace
-*
-* @param seData : flatbuffer offset of the sample environment log data
-* @param nSEEvents : number of sample environment log values in the flatbuffer
-* @param mutableRunInfo : Log manager containing the existing sample logs
-*/
+ * Get sample environment log data from the flatbuffer and append it to the
+ * workspace
+ *
+ * @param seData : flatbuffer offset of the sample environment log data
+ * @param nSEEvents : number of sample environment log values in the flatbuffer
+ * @param mutableRunInfo : Log manager containing the existing sample logs
+ */
 void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
 
   std::lock_guard<std::mutex> lock(m_mutex);
@@ -383,7 +383,6 @@ void KafkaEventStreamDecoder::initLocalCaches(
   // New caches so LoadLiveData's output workspace needs to be replaced
   m_dataReset = true;
 }
-
 
 } // namespace LiveData
 
