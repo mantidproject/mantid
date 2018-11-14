@@ -29,7 +29,7 @@ public:
            "from Muon data.";
   }
   const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess"};
+    return {"MuonProcess", "MuonPreProcess", "AsymmetryCalc", "AppendSpectra", "Plus", "Minus"};
   }
 
 private:
