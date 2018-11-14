@@ -39,7 +39,10 @@ int countPeriods(Workspace_sptr ws) {
 }
 
 bool checkConsistentPeriods(Workspace_sptr ws1, Workspace_sptr ws2) {
-  if (isMultiPeriod(ws1) && isMultiPeriod(ws2)) {
+  if (isMultiPeriod(ws1)) {
+    if (!isMultiPeriod(ws2)) {
+      return false
+    }
     if (countPeriods(ws1) != countPeriods(ws2)) {
       return false;
     }
@@ -52,10 +55,6 @@ MatrixWorkspace_sptr getWorkspace(WorkspaceGroup_sptr group, const int &index) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
 }
 
-bool is_alnum_underscore(char c) {
-  return (isalpha(c) || isdigit(c) || (c == '_'));
-}
-
 MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
                                     const std::vector<int> &detectorIDs) {
 
@@ -65,7 +64,8 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
       workspace->getIndicesFromDetectorIDs(detectorIDs);
 
   if (wsIndices.size() != detectorIDs.size())
-    throw std::invalid_argument("Some of the detector IDs were not found");
+    throw std::invalid_argument("The number of detectors requested does not equal
+     the number of detectors provided (wsIndices.size() != detectorIDs.size())");
 
   outputWS->getSpectrum(0).clearDetectorIDs();
   outputWS->setSharedX(0, workspace->sharedX(wsIndices.front()));
@@ -125,8 +125,7 @@ void MuonPairingAsymmetry::init() {
       "Alpha parameter used in the asymmetry calculation.", Direction::Input);
 
   declareProperty("SpecifyGroupsManually", false,
-                  "Specify the pair of groups manually using the raw data and "
-                  "various optional parameters.");
+                  "Specify the pair of groups manually");
 
   // Select groups via workspaces
 
@@ -213,7 +212,7 @@ std::map<std::string, std::string> MuonPairingAsymmetry::validateInputs() {
     errors["PairName"] = "Pair name must be specified.";
   }
   if (!std::all_of(std::begin(pairName), std::end(pairName),
-                   is_alnum_underscore)) {
+                   MuonAlgorithmHelper::is_alphanumerical_or_underscore)) {
     errors["PairName"] =
         "The pair name must contain alphnumeric characters and _ only.";
   }
@@ -310,7 +309,7 @@ MatrixWorkspace_sptr MuonPairingAsymmetry::execGroupWorkspaceInput() {
   const double alpha = static_cast<double>(getProperty("Alpha"));
   std::vector<int> summedPeriods = getProperty("SummedPeriods");
   std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
-  return calcAsymmetryWithSummedAndSubtractedPeriods(
+  return calcPairAsymmetryWithSummedAndSubtractedPeriods(
       summedPeriods, subtractedPeriods, groupedPeriods, alpha);
 }
 
@@ -324,12 +323,12 @@ MatrixWorkspace_sptr MuonPairingAsymmetry::execSpecifyGroupsManually() {
   std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
   const double alpha = static_cast<double>(getProperty("Alpha"));
 
-  return calcAsymmetryWithSummedAndSubtractedPeriods(
+  return calcPairAsymmetryWithSummedAndSubtractedPeriods(
       summedPeriods, subtractedPeriods, groupedPeriods, alpha);
 }
 
 MatrixWorkspace_sptr
-MuonPairingAsymmetry::calcAsymmetryWithSummedAndSubtractedPeriods(
+MuonPairingAsymmetry::calcPairAsymmetryWithSummedAndSubtractedPeriods(
     const std::vector<int> &summedPeriods,
     const std::vector<int> &subtractedPeriods,
     WorkspaceGroup_sptr groupedPeriods, const double &alpha) {
@@ -338,14 +337,14 @@ MuonPairingAsymmetry::calcAsymmetryWithSummedAndSubtractedPeriods(
   auto subtractedWS =
       MuonAlgorithmHelper::sumPeriods(groupedPeriods, subtractedPeriods);
 
-  MatrixWorkspace_sptr asymSummedPeriods = asymmetryCalc(summedWS, alpha);
+  MatrixWorkspace_sptr asymSummedPeriods = pairAsymmetryCalc(summedWS, alpha);
 
   if (subtractedPeriods.empty()) {
     return asymSummedPeriods;
   }
 
   MatrixWorkspace_sptr asymSubtractedPeriods =
-      asymmetryCalc(subtractedWS, alpha);
+      pairAsymmetryCalc(subtractedWS, alpha);
 
   return MuonAlgorithmHelper::subtractWorkspaces(asymSummedPeriods,
                                                  asymSubtractedPeriods);
@@ -380,7 +379,7 @@ MuonPairingAsymmetry::createGroupWorkspace(WorkspaceGroup_sptr inputWS) {
  * @returns MatrixWorkspace containing result of the calculation.
  */
 MatrixWorkspace_sptr
-MuonPairingAsymmetry::asymmetryCalc(MatrixWorkspace_sptr inputWS,
+MuonPairingAsymmetry::pairAsymmetryCalc(MatrixWorkspace_sptr inputWS,
                                     const double &alpha) {
   MatrixWorkspace_sptr outWS;
 
@@ -390,7 +389,7 @@ MuonPairingAsymmetry::asymmetryCalc(MatrixWorkspace_sptr inputWS,
   std::vector<int> fwdSpectra = {0};
   std::vector<int> bwdSpectra = {1};
 
-  IAlgorithm_sptr alg = this->createChildAlgorithm("AsymmetryCalc");
+  IAlgorithm_sptr alg = this->createChildAlgorithm("pairAsymmetryCalc");
   alg->setChild(true);
   alg->setProperty("InputWorkspace", inputWS);
   alg->setProperty("ForwardSpectra", fwdSpectra);
@@ -468,9 +467,6 @@ void MuonPairingAsymmetry::validatePeriods(
     }
   }
 }
-
-// Allow WorkspaceGroup property to function correctly.
-bool MuonPairingAsymmetry::checkGroups() { return false; }
 
 } // namespace Muon
 } // namespace Mantid

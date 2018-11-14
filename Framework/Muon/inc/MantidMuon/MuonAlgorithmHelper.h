@@ -117,6 +117,9 @@ DLLExport bool checkValidPair(const std::string &name1,
 
 /// Check whether a group or pair name is valid
 DLLExport bool checkValidGroupPairName(const std::string &name);
+
+DLLExport bool is_alphanumerical_or_underscore(char character);
+
 //
 ///// Saves grouping to the XML file specified
 // DLLExport std::string groupingToXML(const Mantid::API::Grouping &grouping);

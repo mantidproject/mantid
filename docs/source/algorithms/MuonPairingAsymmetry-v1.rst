@@ -22,7 +22,7 @@ With a pair, one may define an asymmetry operation as in :ref:`algm-AsymmetryCal
 
 .. math:: A = \frac{F-\alpha B}{F+\alpha B},
 
-where :math:`F` and :math:`B` are the two groups.
+where :math:`F` and :math:`B` are the forward and backwards groups and alpha is the balance parameter.
 
 The pair must be given a name via **PairName** which can consist of letters, numbers and underscores. 
 
@@ -31,7 +31,7 @@ The pair must be given a name via **PairName** which can consist of letters, num
 
 The pair name does not affect the data; however the name is used in the muon interface when automatically generating workspace names from group data.
 
-Additionally, a value for **Alpha** must be supplied, and which must be non-negative.
+Additionally, a value for **alpha** must be supplied, and which must be non-negative.
 
 There are two options for supplying the group data :
 
@@ -89,6 +89,51 @@ Usage
 Output:
 
 .. testoutput:: SpecifyGroupsManuallySinglePeriod
+
+	X values are : [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    Y values are : [-0.4, -0.286, -0.222, -0.286, -0.4]
+
+**Example - Using MuonPreProcess and Specifying Groups Manually for Multi Period Data**
+
+.. testcode:: SpecifyGroupsManuallyMultiPeriod
+
+    # Create a workspaces with four spectra
+    dataX = [0, 1, 2, 3, 4, 5] * 4
+    dataY = [10, 20, 30, 20, 10] + \
+            [20, 30, 40, 30, 20] + \
+            [30, 40, 50, 40, 30] + \
+            [40, 50, 60, 50, 40]
+    print(dataY)
+    input_workspace = CreateWorkspace(dataX, dataY, NSpec=4)
+    input_workspace_1 = CreateWorkspace(dataX, dataY, NSpec=4)
+    for i in range(4):
+        # set detector IDs to be 1,2,3,4
+        # these do not have to be the same as the spectrum numbers
+        # (the spectrum number are 0,1,2,3 in this case)
+        input_workspace.getSpectrum(i).setDetectorID(i + 1)
+        input_workspace_1.getSpectrum(i).setDetectorID(i + 1)
+
+    # Create multi period data
+    multi_period_data = GroupWorkspaces(input_workspace)
+    multi_period_data.addWorkspace(input_workspace_1)
+
+    pre_processed_workspace = MuonPreProcess(InputWorkspace=input_workspace)
+
+    output_workspace = MuonPairingAsymmetry(InputWorkspace=pre_processed_workspace,
+                                                      PairName="myPair",
+                                                      Alpha=1.0,
+                                                      SpecifyGroupsManually=True,
+                                                      Group1=[1, 2],
+                                                      Group2=[3, 4],
+                                                      SummedPeriods=[1, 2])
+
+    print("X values are : {}".format([round(float(i), 3) for i in output_workspace.readX(0)]))
+    print("Y values are : {}".format([round(float(i), 3) for i in output_workspace.readY(0)]))
+
+
+Output:
+
+.. testoutput:: SpecifyGroupsManuallyMultiPeriod
 
 	X values are : [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
     Y values are : [-0.4, -0.286, -0.222, -0.286, -0.4]
