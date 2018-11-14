@@ -100,10 +100,16 @@ def get_wksp_index_dist_and_label(workspace, axis=MantidAxType.SPECTRUM, **kwarg
     # create a label if it isn't already specified
     if 'label' not in kwargs:
         ws_name = workspace.name()
-        if ws_name:
-            kwargs['label'] = '{0}: spec {1}'.format(ws_name, spectrum_number)
-        else:
-            kwargs['label'] = 'spec {0}'.format(spectrum_number)
+        if axis == MantidAxType.SPECTRUM:
+            if ws_name:
+                kwargs['label'] = '{0}: spec {1}'.format(ws_name, spectrum_number)
+            else:
+                kwargs['label'] = 'spec {0}'.format(spectrum_number)
+        elif axis == MantidAxType.BIN:
+            if ws_name:
+                kwargs['label'] = '{0}: bin {1}'.format(ws_name, workspace_index)
+            else:
+                kwargs['label'] = 'bin {0}'.format(workspace_index)
 
     (distribution, kwargs) = get_distribution(workspace, **kwargs)
 
@@ -137,7 +143,7 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     # convert the spectrum number to a workspace index and vice versa
     if spectrum_number is not None:
         workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
-    elif axis == 1:  # Only get a spectrum number if we're traversing the spectra
+    elif axis == MantidAxType.SPECTRUM:  # Only get a spectrum number if we're traversing the spectra
         spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
 
     return workspace_index, spectrum_number, kwargs

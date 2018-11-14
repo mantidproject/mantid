@@ -13,14 +13,14 @@
 import matplotlib
 
 matplotlib.use('Qt5Agg')
-import matplotlib.pyplot as plt  # noqa: F402
 
 from qtpy.QtWidgets import QApplication  # noqa: F402
 
 from mantid.simpleapi import Load  # noqa: F402
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay  # noqa: F402
+from workbench.plotting.functions import plot
 
 app = QApplication([])
 LOQ74044 = Load("LOQ74044.nxs")
-window = MatrixWorkspaceDisplay(LOQ74044, plt.plot)
+window = MatrixWorkspaceDisplay(LOQ74044, plot)
 app.exec_()

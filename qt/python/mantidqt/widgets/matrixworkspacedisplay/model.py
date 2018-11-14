@@ -33,38 +33,6 @@ class MatrixWorkspaceDisplayModel(object):
     def get_name(self):
         return self._ws.name()
 
-    def get_spectrum_label(self, index):
-        """
-        :type index: int
-        :param index: The index for which the label will be retrieved
-        :return:
-        """
-        return self._ws.getAxis(1).label(index)
-
-    def get_spectrum_plot_label(self, index):
-        """
-        :type index: int
-        :param index: The index for which the plot label will be constructed
-        :return:
-        """
-        return self.SPECTRUM_PLOT_LEGEND_STRING.format(self.get_name(), self.get_spectrum_label(index))
-
-    def get_bin_label(self, index):
-        """
-        :type index: int
-        :param index: The index for which the label will be retrieved
-        :return:
-        """
-        return self._ws.getAxis(0).label(index)
-
-    def get_bin_plot_label(self, index):
-        """
-        :type index: int
-        :param index: The index for which the plot label will be constructed
-        :return:
-        """
-        return self.BIN_PLOT_LEGEND_STRING.format(self.get_name(), self.get_bin_label(index))
-
     def get_item_model(self):
         return MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.x), \
                MatrixWorkspaceTableViewModel(self._ws, MatrixWorkspaceTableViewModelType.y), \
