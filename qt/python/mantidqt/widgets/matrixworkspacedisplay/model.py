@@ -12,6 +12,9 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModel, \
     MatrixWorkspaceTableViewModelType
+from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
+from mantid.api import MatrixWorkspace
+from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockWorkspace
 
 
 class MatrixWorkspaceDisplayModel(object):
@@ -19,6 +22,12 @@ class MatrixWorkspaceDisplayModel(object):
     BIN_PLOT_LEGEND_STRING = '{}-bin-{}'
 
     def __init__(self, ws):
+        if not isinstance(ws, MatrixWorkspace) \
+                and not isinstance(ws, Workspace2D) \
+                and not isinstance(ws, EventWorkspace) \
+                and not isinstance(ws, MockWorkspace):
+            raise ValueError("The workspace type is not supported: {0}".format(type(ws)))
+
         self._ws = ws
 
     def get_name(self):

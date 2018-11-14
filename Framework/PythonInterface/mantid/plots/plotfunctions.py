@@ -16,10 +16,10 @@ from mantid.plots.helperfunctions import *
 import matplotlib.colors
 import matplotlib.dates as mdates
 
-
 # ================================================
 # Private 2D Helper functions
 # ================================================
+from mantid.plots.utility import MantidAxType
 
 
 def _setLabels1D(axes, workspace):
@@ -73,8 +73,9 @@ def plot(axes, workspace, *args, **kwargs):
                       instead of the time difference
     :param ExperimentInfo: for MD Workspaces with multiple :class:`mantid.api.ExperimentInfo` is the
                            ExperimentInfo object from which to extract the log. It's 0 by default
-    :param axis: Specify which axis will be plotted. User axis=0 to plot bins, and axis=1 to plot a spectrum.
-                 The default value is axis=1, plotting spectra by default.
+    :param axis: Specify which axis will be plotted. Use axis=MantidAxType.BIN to plot a bin,
+                  and axis=MantidAxType.SPECTRUM to plot a spectrum.
+                  The default value is axis=1, plotting spectra by default.
 
 
     For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
@@ -96,8 +97,7 @@ def plot(axes, workspace, *args, **kwargs):
         (normalization, kwargs) = get_normalization(workspace, **kwargs)
         (x, y, dy) = get_md_data1d(workspace, normalization)
     else:
-        # default to spectra axis, which is 1
-        axis = kwargs.pop("axis", 1)
+        axis = kwargs.pop("axis", MantidAxType.SPECTRUM)
         workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
         if axis == 0:
             # Overwrite any user specified xlabel
@@ -379,6 +379,7 @@ def pcolormesh(axes, workspace, *args, **kwargs):
 
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
+
 def imshow(axes, workspace, *args, **kwargs):
     '''
     Essentially the same as :meth:`matplotlib.axes.Axes.pcolormesh`.
@@ -413,8 +414,9 @@ def imshow(axes, workspace, *args, **kwargs):
     y_spacing_equal = numpy.alltrue(diffs == diffs[0])
     if not x_spacing_equal or not y_spacing_equal:
         raise Exception('Unevenly spaced bins are not supported by imshow')
-    kwargs['extent'] = [x[0,0],x[0,-1],y[0,0],y[-1,0]]
+    kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
     return axes.imshow(z, *args, **kwargs)
+
 
 def tripcolor(axes, workspace, *args, **kwargs):
     '''

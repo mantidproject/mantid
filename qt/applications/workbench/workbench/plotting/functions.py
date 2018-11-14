@@ -144,7 +144,6 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param plot_kwargs: Arguments that will be passed onto the plot function
     :return: The figure containing the plots
     """
-    # check inputs
     if plot_kwargs is None:
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices)

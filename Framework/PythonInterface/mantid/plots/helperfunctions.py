@@ -15,6 +15,7 @@ from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
 from mantid.api import MultipleExperimentInfos
 import mantid.kernel
 import mantid.api
+from mantid.plots.utility import MantidAxType
 
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality
@@ -84,7 +85,7 @@ def _dim2array(d):
     return numpy.linspace(dmin, dmax, d.getNBins() + 1)
 
 
-def get_wksp_index_dist_and_label(workspace, axis=1, **kwargs):
+def get_wksp_index_dist_and_label(workspace, axis=MantidAxType.SPECTRUM, **kwargs):
     """
     Get workspace index, whether the workspace is a distribution,
     and label for the spectrum
@@ -113,6 +114,9 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     """
     Get the workspace index and the spectrum number from the kwargs provided
     :param workspace: a Workspace2D or an EventWorkspace
+    :param axis: The axis on which the workspace is being traversed,
+                 can be either 0 (horizontal/bins) or 1 (vertical/spectra),
+                 default is 1 (vertical/spectra)
     :param kwargs: Dict of keyword arguments, passed by reference as it is mutated
     :return The workspace index and the spectrum number
     """
@@ -133,7 +137,7 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     # convert the spectrum number to a workspace index and vice versa
     if spectrum_number is not None:
         workspace_index = workspace.getIndexFromSpectrumNumber(int(spectrum_number))
-    elif axis == 1:  # Do not try to get the Spectrum number if we are traversing a bin's indices
+    elif axis == 1:  # Only get a spectrum number if we're traversing the spectra
         spectrum_number = workspace.getSpectrum(workspace_index).getSpectrumNo()
 
     return workspace_index, spectrum_number, kwargs

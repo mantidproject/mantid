@@ -13,6 +13,7 @@ import unittest
 
 from mock import Mock
 
+from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.widgets.matrixworkspacedisplay.model import MatrixWorkspaceDisplayModel
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import \
@@ -40,6 +41,25 @@ class MatrixWorkspaceDisplayModelTest(unittest.TestCase):
         self.assertEqual(x_model.type, MatrixWorkspaceTableViewModelType.x)
         self.assertEqual(y_model.type, MatrixWorkspaceTableViewModelType.y)
         self.assertEqual(e_model.type, MatrixWorkspaceTableViewModelType.e)
+
+    def test_raises_with_unsupported_workspace(self):
+        # ws = MockWorkspace()
+        # expected_name = "TEST_WORKSPACE"
+        # ws.name = Mock(return_value=expected_name)
+        self.assertRaises(ValueError, lambda: MatrixWorkspaceDisplayModel([]))
+        self.assertRaises(ValueError, lambda: MatrixWorkspaceDisplayModel(1))
+        self.assertRaises(ValueError, lambda: MatrixWorkspaceDisplayModel("test_string"))
+
+    def test_no_raise_with_supported_workspace(self):
+        ws = MockWorkspace()
+        expected_name = "TEST_WORKSPACE"
+        ws.name = Mock(return_value=expected_name)
+
+        # no need to assert anything - if the constructor raises the test will fail
+        MatrixWorkspaceDisplayModel(ws)
+
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10)
+        MatrixWorkspaceDisplayModel(ws)
 
 
 if __name__ == '__main__':

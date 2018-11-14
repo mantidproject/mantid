@@ -10,6 +10,7 @@
 from __future__ import absolute_import, division, print_function
 
 from mantid.plots import MantidAxes
+from mantid.plots.utility import MantidAxType
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
 
@@ -117,7 +118,12 @@ class MatrixWorkspaceDisplay(object):
         if not selection_model.hasSelection():
             self.show_no_selection_to_copy_toast()
             return
-        selected = selection_model.selectedRows() if axis == MantidAxes.SPECTRUM else selection_model.selectedColumns()  # type: list
+
+        if axis == MantidAxType.SPECTRUM:
+            selected = selection_model.selectedRows()  # type: list
+        else:
+            selected = selection_model.selectedColumns()  # type: list
+
         if len(selected) > self.NUM_SELECTED_FOR_CONFIRMATION and not self.view.ask_confirmation(
                 self.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(len(selected))):
             return
@@ -130,13 +136,13 @@ class MatrixWorkspaceDisplay(object):
                   plot_kwargs=plot_kwargs)
 
     def action_plot_spectrum(self, table):
-        self._do_action_plot(table, MantidAxes.SPECTRUM, lambda index: index.row())
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row())
 
     def action_plot_spectrum_with_errors(self, table):
-        self._do_action_plot(table, MantidAxes.SPECTRUM, lambda index: index.row(), plot_errors=True)
+        self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=True)
 
     def action_plot_bin(self, table):
-        self._do_action_plot(table, MantidAxes.BIN, lambda index: index.column())
+        self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column())
 
     def action_plot_bin_with_errors(self, table):
-        self._do_action_plot(table, MantidAxes.BIN, lambda index: index.column(), plot_errors=True)
+        self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column(), plot_errors=True)

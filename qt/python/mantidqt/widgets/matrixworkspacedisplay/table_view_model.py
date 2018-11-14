@@ -12,13 +12,13 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtGui
 from qtpy.QtCore import QVariant, Qt, QAbstractTableModel
+from mantidqt.py3compat import Enum
 
 
-def enum(**enums):
-    return type('Enum', (), enums)
-
-
-MatrixWorkspaceTableViewModelType = enum(x='x', y='y', e='e')
+class MatrixWorkspaceTableViewModelType(Enum):
+    x = 'x'
+    y = 'y'
+    e = 'e'
 
 
 class MatrixWorkspaceTableViewModel(QAbstractTableModel):
@@ -64,7 +64,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
 
         self.monitor_color = QtGui.QColor(255, 253, 209)
 
-        self.type = model_type.lower()
+        self.type = model_type
         if self.type == MatrixWorkspaceTableViewModelType.x:
             self.relevant_data = self.ws.readX
         elif self.type == MatrixWorkspaceTableViewModelType.y:
@@ -87,19 +87,26 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             raise NotImplementedError("What do we do here? Handle if the vertical axis does NOT exist")
 
     def _makeHorizontalHeader(self, section, role):
+        """
+
+        :param section: The workspace index or bin number
+        :param role: Qt.DisplayRole - is the label for the header
+                      or Qt.TooltipRole - is the tooltip for the header when moused over
+        :return: The formatted header string
+        """
         # X values get simpler labels
         if self.type == MatrixWorkspaceTableViewModelType.x:
             if role == Qt.DisplayRole:
-                # for display, just the bin number
                 return self.HORIZONTAL_HEADER_DISPLAY_STRING_FOR_X_VALUES.format(section)
             else:
-                # for tooltip index <bin number>
+                # format for the tooltip
                 return self.HORIZONTAL_HEADER_TOOLTIP_STRING_FOR_X_VALUES.format(section)
 
         if not self.ws.isCommonBins():
             if role == Qt.DisplayRole:
                 return self.HORIZONTAL_BINS_VARY_DISPLAY_STRING.format(section)
             else:
+                # format for the tooltip
                 return self.HORIZONTAL_BINS_VARY_TOOLTIP_STRING.format(section)
 
         # for the Y and E values, create a label with the units
@@ -112,7 +119,6 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
 
         unit = self.ws.getAxis(axis_index).getUnit()
         if role == Qt.DisplayRole:
-            # format for the label display
             return self.HORIZONTAL_HEADER_DISPLAY_STRING.format(section, bin_centre_value, unit.symbol().utf8())
         else:
             # format for the tooltip

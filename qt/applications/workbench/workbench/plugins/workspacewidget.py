@@ -121,9 +121,8 @@ class WorkspaceWidget(PluginWidget):
 
     def _do_show_data(self, names):
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
-            # plt injects the plotting library in the presenter
+            # the plot function is being injected in the presenter
             # this is done so that the plotting library is mockable in testing
-
             presenter = MatrixWorkspaceDisplay(ws, plot=plot, parent=self)
             presenter.view.show()
 

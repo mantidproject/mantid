@@ -132,16 +132,6 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self._set_table_model(self.table_y, model_y, MatrixWorkspaceTableViewModelType.y)
         self._set_table_model(self.table_e, model_e, MatrixWorkspaceTableViewModelType.e)
 
-    def not_implemented(self, *args):
-        msg = QMessageBox(self)
-        msg.setIcon(QMessageBox.Information)
-        msg.setWindowTitle("Not Implemented")
-        msg.setText("This action is connected but not implemented.")
-        msg.addButton(QMessageBox.Ok)
-
-        msg.setDefaultButton(QMessageBox.Ok)
-        msg.show()
-
     @staticmethod
     def _set_table_model(table, model, expected_model_type):
         assert model.type == expected_model_type, \
