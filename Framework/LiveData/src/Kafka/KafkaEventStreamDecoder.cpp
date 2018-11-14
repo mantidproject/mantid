@@ -8,16 +8,15 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidLiveData/Exception.h"
+#include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 GNU_DIAG_OFF("conversion")

@@ -19,6 +19,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
+#include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
 
 GNU_DIAG_OFF("conversion")
 #include "private/Schema/df12_det_spec_map_generated.h"
