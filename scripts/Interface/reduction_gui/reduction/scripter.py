@@ -10,6 +10,13 @@
     end produce a Mantid reduction script
 """
 from __future__ import (absolute_import, division, print_function)
+import xml.dom.minidom
+import sys
+import time
+import platform
+import re
+import os
+
 # Check whether Mantid is available
 # Disable unused import warning
 # pylint: disable=W0611
@@ -31,13 +38,6 @@ except(ImportError, ImportWarning):
         HAS_ASYNC = True
     except(ImportError, ImportWarning):
         pass
-
-import xml.dom.minidom
-import sys
-import time
-import platform
-import re
-import os
 
 
 class BaseScriptElement(object):
