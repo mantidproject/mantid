@@ -434,8 +434,7 @@ int64_t IKafkaStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
 }
 
 std::map<int32_t, std::set<int32_t>>
-IKafkaStreamDecoder::buildSpectrumToDetectorMap(const size_t nspectra,
-                                                const int32_t *spec,
+IKafkaStreamDecoder::buildSpectrumToDetectorMap(const int32_t *spec,
                                                 const int32_t *udet,
                                                 uint32_t length) {
   // Order is important here
@@ -450,8 +449,6 @@ IKafkaStreamDecoder::buildSpectrumToDetectorMap(const size_t nspectra,
       spdetMap.insert({specNo, {detId}});
     }
   }
-
-  assert(nspectra == spdetMap.size());
 
   return spdetMap;
 }

@@ -152,8 +152,8 @@ protected:
   void waitForRunEndObservation();
 
   std::map<int32_t, std::set<int32_t>>
-  buildSpectrumToDetectorMap(const size_t nspectra, const int32_t *spec,
-                             const int32_t *udet, uint32_t length);
+  buildSpectrumToDetectorMap(const int32_t *spec, const int32_t *udet,
+                             uint32_t length);
 
   template <typename T>
   boost::shared_ptr<T>

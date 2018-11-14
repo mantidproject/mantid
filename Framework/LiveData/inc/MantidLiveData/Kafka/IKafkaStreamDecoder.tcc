@@ -27,7 +27,8 @@ boost::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
     const std::string &workspaceClassName, size_t nspectra, const int32_t *spec,
     const int32_t *udet, uint32_t length) {
   // Get spectra to detector mapping
-  auto spdetMap = buildSpectrumToDetectorMap(nspectra, spec, udet, length);
+  auto spdetMap = buildSpectrumToDetectorMap(spec, udet, length);
+  assert(spdetMap.size() == nspectra);
 
   // Create histo workspace
   auto buffer =
