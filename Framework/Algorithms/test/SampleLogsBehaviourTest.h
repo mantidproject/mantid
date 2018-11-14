@@ -45,7 +45,7 @@ public:
     const std::string B = base->run().getLogData("B")->value();
     const std::string C = base->run().getLogData("C")->value();
     // A listed and B summed according to IPF
-    TS_ASSERT_EQUALS(A, "2.6000000000000001, 4.5")
+    TS_ASSERT_EQUALS(A, "4.5, 2.6000000000000001")
     TS_ASSERT_EQUALS(B, "4.7000000000000002")
     TS_ASSERT_EQUALS(C, "7.9000000000000004")
     testUnitsTestWorkspace(base);
