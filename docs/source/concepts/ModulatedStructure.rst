@@ -66,13 +66,13 @@ added to the OrientedLattice class:
 
 .. math::
 
-   Modulation\ Vector\ i = \begin{pmatrix}
+   ModulationVector_{i} = \begin{pmatrix}
    \text{MV}_{1i} \\
    \text{MV}_{2i} \\
    \text{MV}_{3i} \\
    \end{pmatrix}
 
-In other words, the coordinates of Modulation Vector i (i=0,1,2) in Q
+In other words, the coordinates of Modulation Vector i (i=1,2,3) in Q
 space is (:math:`\text{MV}_{1i}`, :math:`\text{MV}_{2i}`,
 :math:`\text{MV}_{3i}`). If the structure is not modulated, ModUB=0.
 Correspondingly, new members ModHKL and errorModHKL are added to
