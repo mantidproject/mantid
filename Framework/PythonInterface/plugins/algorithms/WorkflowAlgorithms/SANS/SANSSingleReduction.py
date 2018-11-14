@@ -18,6 +18,7 @@ from sans.common.general_functions import (create_child_algorithm, does_can_work
 from sans.algorithm_detail.single_execution import (run_core_reduction, get_final_output_workspaces,
                                                     get_merge_bundle_for_merge_request, run_optimized_for_can)
 from sans.algorithm_detail.bundles import ReductionSettingBundle
+from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 
 
 class SANSSingleReduction(DistributedDataProcessorAlgorithm):
@@ -180,7 +181,6 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         output_bundles = []
         output_parts_bundles = []
         output_transmission_bundles = []
-
         for reduction_setting_bundle in reduction_setting_bundles:
             progress.report("Running a single reduction ...")
             # We want to make use of optimizations here. If a can workspace has already been reduced with the same can
@@ -195,16 +195,7 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
             output_parts_bundles.append(output_parts_bundle)
             output_transmission_bundles.append(output_transmission_bundle)
 
-        # --------------------------------------------------------------------------------------------------------------
-        # Deal with merging
-        # --------------------------------------------------------------------------------------------------------------
         reduction_mode_vs_output_workspaces = {}
-        # Merge if required with stitching etc.
-        if overall_reduction_mode is ReductionMode.Merged:
-            progress.report("Merging reductions ...")
-            merge_bundle = get_merge_bundle_for_merge_request(output_parts_bundles, self)
-            self.set_shift_and_scale_output(merge_bundle)
-            reduction_mode_vs_output_workspaces.update({ReductionMode.Merged: merge_bundle.merged_workspace})
 
         # --------------------------------------------------------------------------------------------------------------
         # Deal with non-merged
@@ -213,6 +204,18 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
         progress.report("Final clean up...")
         output_workspaces_non_merged = get_final_output_workspaces(output_bundles, self)
         reduction_mode_vs_output_workspaces.update(output_workspaces_non_merged)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # Deal with merging
+        # --------------------------------------------------------------------------------------------------------------
+        # Merge if required with stitching etc.
+        if overall_reduction_mode is ReductionMode.Merged:
+            progress.report("Merging reductions ...")
+            merge_bundle = get_merge_bundle_for_merge_request(output_parts_bundles, self)
+            self.set_shift_and_scale_output(merge_bundle)
+            reduction_mode_vs_output_workspaces.update({ReductionMode.Merged: merge_bundle.merged_workspace})
+            scaled_HAB = strip_end_nans(merge_bundle.scaled_hab_workspace, self)
+            reduction_mode_vs_output_workspaces.update({ISISReductionMode.HAB: scaled_HAB})
 
         # --------------------------------------------------------------------------------------------------------------
         # Set the output workspaces

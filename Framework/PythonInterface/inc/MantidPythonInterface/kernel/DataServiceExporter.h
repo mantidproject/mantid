@@ -8,7 +8,6 @@
 #define MANTID_PYTHONINTERFACE_DATASERVICEEXPORTER_H_
 
 #include "MantidKernel/Exception.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
@@ -94,15 +93,9 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param name The name to assign to this in the service
    * @param item A boost.python wrapped SvcHeldType object
    */
-  static void addItem(SvcType &self, const boost::python::object &name,
+  static void addItem(SvcType &self, const std::string &name,
                       const boost::python::object &item) {
-    std::string namestr;
-    try {
-      namestr = PythonInterface::Converters::pyObjToStr(name);
-    } catch (std::invalid_argument &) {
-      throw std::invalid_argument("Failed to convert name to a string");
-    }
-    self.add(namestr, extractCppValue(item));
+    self.add(name, extractCppValue(item));
   }
 
   /**
@@ -112,15 +105,9 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param name The name to assign to this in the service
    * @param item A boost.python wrapped SvcHeldType object
    */
-  static void addOrReplaceItem(SvcType &self, const boost::python::object &name,
+  static void addOrReplaceItem(SvcType &self, const std::string &name,
                                const boost::python::object &item) {
-    std::string namestr;
-    try {
-      namestr = PythonInterface::Converters::pyObjToStr(name);
-    } catch (std::invalid_argument &) {
-      throw std::invalid_argument("Failed to convert name to a string");
-    }
-    self.addOrReplace(namestr, extractCppValue(item));
+    self.addOrReplace(name, extractCppValue(item));
   }
 
   /**
@@ -153,23 +140,15 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @return A shared_ptr to the named object. If the name does not exist it
    * sets a KeyError error indicator.
    */
-  static WeakPtr retrieveOrKeyError(SvcType &self,
-                                    const boost::python::object &name) {
+  static WeakPtr retrieveOrKeyError(SvcType &self, const std::string &name) {
     using namespace Mantid::Kernel;
-
-    std::string namestr;
-    try {
-      namestr = PythonInterface::Converters::pyObjToStr(name);
-    } catch (std::invalid_argument &) {
-      throw std::invalid_argument("Failed to convert name to a string");
-    }
 
     SvcPtrType item;
     try {
-      item = self.retrieve(namestr);
+      item = self.retrieve(name);
     } catch (Exception::NotFoundError &) {
       // Translate into a Python KeyError
-      std::string err = "'" + namestr + "' does not exist.";
+      std::string err = "'" + name + "' does not exist.";
       PyErr_SetString(PyExc_KeyError, err.c_str());
       throw boost::python::error_already_set();
     }
