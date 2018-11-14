@@ -158,71 +158,37 @@ void SaveIsawUB::exec() {
         << " \n";
 
     out << "\n";
-    if (ModDim == 1) {
+    if (ModDim >= 1) {
+      out << "Max Order:        " << lattice.getMaxOrder() << " \n";
+      out << "Cross Terms:      " << lattice.getCrossTerm() << " \n";
       out << "Modulation Vector 1:   " << setw(12) << setprecision(4)
+          << lattice.getdh(0) << setw(12) << setprecision(4) << lattice.getdk(0)
+          << setw(12) << setprecision(4) << lattice.getdl(0) << " \n";
+
+      out << "Modulation Vector 1 error:   " << setw(6) << setprecision(4)
+          << lattice.getdherr(0) << setw(12) << setprecision(4)
+          << lattice.getdkerr(0) << setw(12) << setprecision(4)
+          << lattice.getdlerr(0) << " \n\n";
+    }
+    if (ModDim >= 2) {
+      out << "Modulation Vector 2:   " << setw(12) << setprecision(4)
           << lattice.getdh(1) << setw(12) << setprecision(4) << lattice.getdk(1)
           << setw(12) << setprecision(4) << lattice.getdl(1) << " \n";
 
-      out << "Modulation Vector 1 error:   " << setw(6) << setprecision(4)
+      out << "Modulation Vector 2 error:   " << setw(6) << setprecision(4)
           << lattice.getdherr(1) << setw(12) << setprecision(4)
           << lattice.getdkerr(1) << setw(12) << setprecision(4)
           << lattice.getdlerr(1) << " \n\n";
-
-      out << "Max Order:        " << lattice.getMaxOrder() << " \n";
-      out << "Cross Terms:      " << lattice.getCrossTerm() << " \n";
     }
-    if (ModDim == 2) {
-      out << "Modulation Vector 1:   " << setw(12) << setprecision(4)
-          << lattice.getdh(1) << setw(12) << setprecision(4) << lattice.getdk(1)
-          << setw(12) << setprecision(4) << lattice.getdl(1) << " \n";
-
-      out << "Modulation Vector 1 error:   " << setw(6) << setprecision(4)
-          << lattice.getdherr(1) << setw(12) << setprecision(4)
-          << lattice.getdkerr(1) << setw(12) << setprecision(4)
-          << lattice.getdlerr(1) << " \n";
-
-      out << "Modulation Vector 2:   " << setw(12) << setprecision(4)
+    if (ModDim == 3) {
+      out << "Modulation Vector 3:   " << setw(12) << setprecision(4)
           << lattice.getdh(2) << setw(12) << setprecision(4) << lattice.getdk(2)
           << setw(12) << setprecision(4) << lattice.getdl(2) << " \n";
 
-      out << "Modulation Vector 2 error:   " << setw(6) << setprecision(4)
+      out << "Modulation Vector 3 error:   " << setw(6) << setprecision(4)
           << lattice.getdherr(2) << setw(12) << setprecision(4)
           << lattice.getdkerr(2) << setw(12) << setprecision(4)
           << lattice.getdlerr(2) << " \n\n";
-
-      out << "Max Order:        " << lattice.getMaxOrder() << " \n";
-      out << "Cross Terms:      " << lattice.getCrossTerm() << " \n";
-    }
-    if (ModDim == 3) {
-      out << "Modulation Vector 1:   " << setw(12) << setprecision(4)
-          << lattice.getdh(1) << setw(12) << setprecision(4) << lattice.getdk(1)
-          << setw(12) << setprecision(4) << lattice.getdl(1) << " \n";
-
-      out << "Modulation Vector 1 error:   " << setw(6) << setprecision(4)
-          << lattice.getdherr(1) << setw(12) << setprecision(4)
-          << lattice.getdkerr(1) << setw(12) << setprecision(4)
-          << lattice.getdlerr(1) << " \n";
-
-      out << "Modulation Vector 2:   " << setw(12) << setprecision(4)
-          << lattice.getdh(2) << setw(12) << setprecision(4) << lattice.getdk(2)
-          << setw(12) << setprecision(4) << lattice.getdl(2) << " \n";
-
-      out << "Modulation Vector 2 error:   " << setw(6) << setprecision(4)
-          << lattice.getdherr(2) << setw(12) << setprecision(4)
-          << lattice.getdkerr(2) << setw(12) << setprecision(4)
-          << lattice.getdlerr(2) << " \n";
-
-      out << "Modulation Vector 2:   " << setw(12) << setprecision(4)
-          << lattice.getdh(3) << setw(12) << setprecision(4) << lattice.getdk(3)
-          << setw(12) << setprecision(4) << lattice.getdl(3) << " \n";
-
-      out << "Modulation Vector 2 error:   " << setw(6) << setprecision(4)
-          << lattice.getdherr(3) << setw(12) << setprecision(4)
-          << lattice.getdkerr(3) << setw(12) << setprecision(4)
-          << lattice.getdlerr(3) << " \n\n";
-
-      out << "Max Order:        " << lattice.getMaxOrder() << " \n";
-      out << "Cross Terms:      " << lattice.getCrossTerm() << " \n";
     }
 
     out << "\n";

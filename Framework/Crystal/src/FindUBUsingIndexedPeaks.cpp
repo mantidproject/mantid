@@ -224,9 +224,9 @@ void FindUBUsingIndexedPeaks::logLattice(OrientedLattice &o_lattice,
   g_log.notice() << o_lattice << "\n";
   g_log.notice() << "Modulation Dimension is: " << ModDim << "\n";
   for (int i = 0; i < ModDim; i++) {
-    g_log.notice() << "Modulation Vector " << i << ": "
+    g_log.notice() << "Modulation Vector " << i+1 << ": "
                    << o_lattice.getModVec(i) << "\n";
-    g_log.notice() << "Modulation Vector " << i
+    g_log.notice() << "Modulation Vector " << i+1
                    << " error: " << o_lattice.getVecErr(i) << "\n";
   }
 }
