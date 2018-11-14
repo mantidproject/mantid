@@ -16,7 +16,7 @@ import os.path
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtGui import QColor, QFontMetrics
-from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
