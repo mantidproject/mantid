@@ -1645,6 +1645,11 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
   if (fitStatus == "success") {
     chi2 = fit->getProperty("OutputChi2overDoF");
     fitfunc = fit->getProperty("Function");
+
+    // TODO - 20181114 - Write a section of codes to verify peak function and background function
+    //                   have error set up same as fitfunc
+    g_log.warning() << "FitFunction (combo) has " << fitfunc->nParams() << " parameters\n";
+
   }
 
   return chi2;
@@ -1699,7 +1704,7 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function,
   fit->setProperty("WorkspaceIndex_1", static_cast<int>(wsindex));
   fit->setProperty("StartX_1", vec_xmin[1]);
   fit->setProperty("EndX_1", vec_xmax[1]);
-  fit->setProperty("MaxIterations", 50);
+  fit->setProperty("MaxIterations", m_fitIterations);
 
   // Execute
   fit->execute();
