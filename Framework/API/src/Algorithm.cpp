@@ -1380,14 +1380,14 @@ bool Algorithm::doCallProcessGroups(
 
       // We need to find the workspaces to add the history to.
       if (outputWorkspaces.size() == 0 && inputWorkspaces.size() == 0) {
-        for (auto ws : m_groupWorkspaces) {
-          outputWorkspaces.emplace_back(ws);
-        }
+        outputWorkspaces.insert(outputWorkspaces.end(),
+                                m_groupWorkspaces.begin(),
+                                m_groupWorkspaces.end());
       } else if (outputWorkspaces.size() == 0) {
         outputWorkspaces = inputWorkspaces;
       }
 
-      for (auto outputWorkspace : outputWorkspaces) {
+      for (const auto &outputWorkspace : outputWorkspaces) {
         auto outputGroupWS =
             boost::dynamic_pointer_cast<WorkspaceGroup>(outputWorkspace);
         if (outputGroupWS) {
