@@ -33,6 +33,8 @@ const std::string RUN_NUMBER_PROPERTY = "run_number";
 const std::string RUN_START_PROPERTY = "run_start";
 /// Logger
 Mantid::Kernel::Logger g_log("KafkaHistoStreamDecoder");
+
+const std::string HISTO_MESSAGE_ID = "hs00";
 } // namespace
 
 namespace Mantid {
@@ -180,9 +182,15 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
         }
       }
 
-      // Data being accumulated before being streamed so no need to store
-      // messages.
-      m_buffer = buffer;
+      // Check if we have a histo message
+      // Most will be event messages so we check for this type first
+      if (flatbuffers::BufferHasIdentifier(
+              reinterpret_cast<const uint8_t *>(buffer.c_str()),
+              HISTO_MESSAGE_ID.c_str())) {
+        // Data being accumulated before being streamed so no need to store
+        // messages.
+        m_buffer = buffer;
+      }
     }
 
     checkRunMessage(buffer, checkOffsets, stopOffsets, reachedEnd);
