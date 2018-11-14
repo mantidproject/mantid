@@ -108,7 +108,7 @@ namespace {
  * @param vertex3 :: Third vertex of triangle
  * @returns true if the specified triangle exists
  */
-bool getTriangle(const size_t index, const std::vector<uint16_t> &triangles,
+bool getTriangle(const size_t index, const std::vector<uint32_t> &triangles,
                  const std::vector<Kernel::V3D> &vertices, Kernel::V3D &vertex1,
                  Kernel::V3D &vertex2, Kernel::V3D &vertex3) {
   bool triangleExists = index < triangles.size() / 3;
@@ -395,7 +395,7 @@ std::vector<double> MeshObject2D::getVertices() const {
 
 std::vector<uint32_t> MeshObject2D::getTriangles() const {
 
-  return MeshObjectCommon::getTriangles_uint32(m_triangles);
+  return m_triangles;
 }
 
 void MeshObject2D::GetObjectGeom(detail::ShapeInfo::GeometryShape &,

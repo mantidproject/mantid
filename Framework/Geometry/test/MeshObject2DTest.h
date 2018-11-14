@@ -224,7 +224,7 @@ public:
         V3D{-halfSideLength, halfSideLength, observerDistance},
         V3D{halfSideLength, halfSideLength, observerDistance},
         V3D{halfSideLength, -halfSideLength, observerDistance}};
-    std::vector<uint16_t> triangles{2, 1, 0, 0, 3, 2};
+    std::vector<uint32_t> triangles{2, 1, 0, 0, 3, 2};
     MeshObject2D mesh(triangles, vertices, Mantid::Kernel::Material{});
     double solidAngle = mesh.solidAngle(V3D{0, 0, 0});
     TS_ASSERT_DELTA(solidAngle, expected, 1e-3);
@@ -249,7 +249,7 @@ public:
         V3D{-halfSideLength, halfSideLength, observerDistance},
         V3D{halfSideLength, halfSideLength, observerDistance},
         V3D{halfSideLength, -halfSideLength, observerDistance}};
-    std::vector<uint16_t> triangles{2, 1, 0, 0, 3, 2};
+    std::vector<uint32_t> triangles{2, 1, 0, 0, 3, 2};
     // Scaling square uniformly (and reducing distance to origin by same
     // factor), yields same angular area 4pi/6
     V3D scaleFactor{0.5, 0.5, 0.5};

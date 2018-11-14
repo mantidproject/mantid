@@ -198,23 +198,6 @@ void checkVertexLimit(size_t nVertices) {
 }
 
 /**
- * Converts triangle indices from unit16 to unit32
- * @param input
- * @return indices as unit32 vector
- */
-std::vector<uint32_t> getTriangles_uint32(const std::vector<uint16_t> &input) {
-  std::vector<uint32_t> faces;
-  size_t nFaceCorners = input.size();
-  if (nFaceCorners > 0) {
-    faces.resize(static_cast<std::size_t>(nFaceCorners));
-    for (size_t i = 0; i < nFaceCorners; ++i) {
-      faces[i] = static_cast<int>(input[i]);
-    }
-  }
-  return faces;
-}
-
-/**
  * Takes input vertices and calculates bounding box. Returns the bounding box.
  *
  * @param vertices :: vertices to create BB from
