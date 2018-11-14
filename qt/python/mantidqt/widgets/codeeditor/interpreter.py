@@ -11,6 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 # std imports
 import sys
+import os.path
 
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
@@ -21,6 +22,7 @@ from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QW
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+from mantidqt.io import open_a_file_dialog
 
 # Status messages
 IDLE_STATUS_MSG = "Status: Idle."
@@ -38,7 +40,10 @@ class EditorIO(object):
         self.editor = editor
 
     def ask_for_filename(self):
-        filename, _ = QFileDialog.getSaveFileName(self.editor, "Choose filename...")
+        filename = open_a_file_dialog(self.editor, ".py", None, "Python Files (*.py)", True, True)
+        if filename is not None and os.path.isdir(filename):
+            # Return None because it is a directory and it's possible to get a directory
+            filename = None
         return filename
 
     def save_if_required(self, confirm=True):
