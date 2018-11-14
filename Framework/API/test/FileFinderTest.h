@@ -407,7 +407,7 @@ public:
     Poco::File fileOn(pathOn);
 
     std::string pathOn2 = FileFinder::Instance().getFullPath(
-        "IDFs_for_UNiT_TESTiNG/IDF_for_UNiT_TESTiNG.xMl");
+        "unit_TeSTinG/IDF_for_UNiT_TESTiNG.xMl");
     Poco::File fileOn2(pathOn2);
 
     std::string pathOn3 = FileFinder::Instance().getFullPath(

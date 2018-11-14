@@ -101,9 +101,6 @@ void LoadInstrument::exec() {
   std::string filename = getPropertyValue("Filename");
   std::string instname = getPropertyValue("InstrumentName");
 
-  // For IDF files, we will parse the XML using the InstrumentDefinitionParser
-  InstrumentDefinitionParser parser;
-
   // If instrumentXML is not default (i.e. it has been defined), then use that
   // Note: this is part of the IDF loader
   const Property *const InstrumentXML = getProperty("InstrumentXML");
@@ -117,17 +114,8 @@ void LoadInstrument::exec() {
     // name
     if (filename.empty())
       filename = instname;
-    // Initialize the parser. Avoid copying the xmltext out of the property
-    // here.
-    const PropertyWithValue<std::string> *xml =
-        dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML);
-    if (xml) {
-      parser = InstrumentDefinitionParser(filename, instname, *xml);
-    } else {
-      throw std::invalid_argument("The instrument XML passed cannot be "
-                                  "casted to a standard string.");
-    }
-    idfInstrumentLoader(ws, filename, parser);
+    // Call IDF loader
+    idfInstrumentLoader(ws, filename, instname, *InstrumentXML);
 
   } else {
     // This part of the loader searches through the instrument directories for
@@ -166,11 +154,8 @@ void LoadInstrument::exec() {
           filename.substr(stripPath + 1, filename.size());
       // Strip off "_Definition.xml"
       instname = instrumentFile.substr(0, instrumentFile.find("_Def"));
-      // Initialize the parser with the the XML text loaded from the IDF file
-      parser = InstrumentDefinitionParser(filename, instname,
-                                          Strings::loadFile(filename));
-      // And finally call the common part of the IDF loader
-      idfInstrumentLoader(ws, filename, parser);
+      // Call theIDF loader  with the the XML text loaded from the IDF file
+      idfInstrumentLoader(ws, filename, instname, Strings::loadFile(filename));
     } else if (LoadGeometry::isNexus(filename)) {
       nexusInstrumentLoader(ws, filename);
     } else {
@@ -192,7 +177,9 @@ void LoadInstrument::exec() {
 /// Load instrument from IDF XML file
 void LoadInstrument::idfInstrumentLoader(
     boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
-    InstrumentDefinitionParser &parser) {
+    std::string instname, std::string &xmlString) {
+
+  auto parser = InstrumentDefinitionParser(filename, instname, xmlString);
 
   // Find the mangled instrument name that includes the modified date
   std::string instrumentNameMangled = parser.getMangledName();

@@ -975,9 +975,9 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   std::string instrument(
       Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
-  // Get the search directory for XML instrument definition files (IDFs)
-  const std::vector<std::string> &directoryNames =
-      Kernel::ConfigService::Instance().getInstrumentDirectories();
+  // Get the instrument and data directories for instrument file search
+  const std::vector<std::string> directoryNames =
+      Kernel::ConfigService::Instance().getInstrumentAndDataDirectories();
   const DateAndTime d(date);
 
   // Now search through directories for either xml or hdf5/nxs file

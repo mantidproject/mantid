@@ -82,8 +82,8 @@ public:
   }
   /// Load instrument from IDF XML file
   void idfInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace> &ws,
-                           std::string filename,
-                           Geometry::InstrumentDefinitionParser &parser);
+                           std::string filename, std::string instname,
+                           std::string &xmlString);
   /// Load instrument from Nexus file
   void nexusInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace> &ws,
                              std::string filename);
