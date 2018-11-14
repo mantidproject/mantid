@@ -37,7 +37,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, QSettings)  # noqa
 from qtpy.QtGui import (QColor, QPixmap, QGuiApplication)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -466,6 +466,9 @@ class MainWindow(QMainWindow):
         for widget in self.widgets:
             if hasattr(widget, 'readSettings'):
                 widget.readSettings(settings)
+
+        # Set the default QSettings write out formatting
+        QSettings.setDefaultFormat(QSettings.IniFormat)
 
     def writeSettings(self, settings):
         settings.set('MainWindow/size', self.size())  # QSize
