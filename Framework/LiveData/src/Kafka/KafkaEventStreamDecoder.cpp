@@ -11,7 +11,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"

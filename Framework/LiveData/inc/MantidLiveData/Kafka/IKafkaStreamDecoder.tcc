@@ -1,6 +1,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.h"
 
 namespace {

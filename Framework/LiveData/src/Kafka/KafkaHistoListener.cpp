@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaHistoListener.h"
-
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
