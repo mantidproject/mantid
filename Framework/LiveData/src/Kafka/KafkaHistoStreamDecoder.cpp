@@ -12,16 +12,25 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
 
 GNU_DIAG_OFF("conversion")
+#include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/hs00_event_histogram_generated.h"
 GNU_DIAG_ON("conversion")
 
+using namespace HistoSchema;
+
 namespace {
+const std::string PROTON_CHARGE_PROPERTY = "proton_charge";
+const std::string RUN_NUMBER_PROPERTY = "run_number";
+const std::string RUN_START_PROPERTY = "run_start";
 /// Logger
 Mantid::Kernel::Logger g_log("KafkaHistoStreamDecoder");
 } // namespace
@@ -35,87 +44,33 @@ namespace LiveData {
 
 /**
  * Constructor
- * @param brokerAddress The physical ipAddress of the broker
+ * @param broker Kafka broker
  * @param histoTopic The name of the topic streaming the histo data
  * @param spDetTopic The name of the topic streaming the spectrum-detector
  * run mapping
  */
 KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
-    const std::string &brokerAddress, const std::string &histoTopic,
-    const std::string &instrumentName)
-    : m_broker(brokerAddress), m_histoTopic(histoTopic),
-      m_instrumentName(instrumentName), m_histoStream(), m_workspace(),
-      m_buffer(), m_thread(), m_interrupt(false), m_capturing(false),
-      m_exception(nullptr) {
-  if (histoTopic.empty())
-    throw std::invalid_argument(
-        "KafkaHistoStreamDecoder::KafkaHistoStreamDecorder "
-        ": histogramTopic cannot be an empty string.");
-  if (instrumentName.empty())
-    throw std::invalid_argument(
-        "KafkaHistoStreamDecoder::KafkaHistoStreamDecorder "
-        ": instrumentName cannot be an empty string.");
-  // Initialize buffer workspace
-  m_workspace = createBufferWorkspace();
-}
+    std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
+    const std::string &runInfoTopic, const std::string &spDetTopic,
+    const std::string &sampleEnvTopic)
+    : IKafkaStreamDecoder(broker, histoTopic, runInfoTopic, spDetTopic,
+                          sampleEnvTopic),
+      m_workspace() {}
 
 /**
  * Destructor.
  * Stops capturing from the stream
  */
-KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() { stopCapture(); }
-
-/**
- * Start capturing from the stream on a separate thread. This is a non-blocking
- * call and will return after the thread has started
- */
-void KafkaHistoStreamDecoder::startCapture(bool) {
-  g_log.debug() << "Starting capture on topic: " << m_histoTopic << "\n";
-  m_histoStream = m_broker.subscribe({m_histoTopic}, SubscribeAtOption::LATEST);
-
-  m_thread = std::thread([this]() { this->captureImpl(); });
-  m_thread.detach();
-}
-
-/**
- * Stop capturing from the stream. This is a blocking call until the capturing
- * function has completed
- */
-void KafkaHistoStreamDecoder::stopCapture() noexcept {
-  g_log.debug() << "Stopping capture\n";
-
-  // This will interrupt the "event" loop
-  m_interrupt = true;
-  // Wait until the function has completed. The background thread will exit
-  // automatically
-  while (m_capturing) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  };
-}
+KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() {}
 
 /**
  * Check if there is data available to extract
  * @return True if data has been accumulated so that extractData()
  * can be called, false otherwise
  */
-bool KafkaHistoStreamDecoder::hasData() const {
-  std::lock_guard<std::mutex> lock(m_buffer_mutex);
+bool KafkaHistoStreamDecoder::hasData() const noexcept {
+  std::lock_guard<std::mutex> lock(m_mutex);
   return !m_buffer.empty();
-}
-
-/**
- * Check for an exception thrown by the background thread and rethrow
- * it if necessary.
- * @return A pointer to the data collected since the last call to this
- * method
- */
-API::Workspace_sptr KafkaHistoStreamDecoder::extractData() {
-  if (m_exception) {
-    throw *m_exception;
-  }
-
-  auto workspace_ptr = extractDataImpl();
-  return workspace_ptr;
 }
 
 // -----------------------------------------------------------------------------
@@ -123,7 +78,7 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractData() {
 // -----------------------------------------------------------------------------
 
 API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
-  std::lock_guard<std::mutex> lock(m_buffer_mutex);
+  std::lock_guard<std::mutex> lock(m_mutex);
 
   if (!m_capturing) {
     throw Exception::NotYet("Local buffers not initialized.");
@@ -170,77 +125,142 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
 }
 
 /**
- * Start decoding data from the streams into the internal buffers.
- * Implementation designed to be entry point for new thread of execution.
- * It catches all thrown exceptions.
- */
-void KafkaHistoStreamDecoder::captureImpl() {
-  m_capturing = true;
-  try {
-    captureImplExcept();
-  } catch (std::exception &exc) {
-    m_exception.reset(new std::runtime_error(exc.what()));
-  } catch (...) {
-    m_exception.reset(new std::runtime_error(
-        "KafkaEventStreamDecoder: Unknown exception type caught."));
-  }
-  m_capturing = false;
-}
-
-/**
  * Exception-throwing variant of captureImpl(). Do not call this directly
  */
 void KafkaHistoStreamDecoder::captureImplExcept() {
   g_log.information("Event capture starting");
 
-  m_interrupt = false;
+  m_interrupt = false; // Allow MonitorLiveData or user to interrupt
+  m_endRun = false;
+  m_runStatusSeen = false; // Flag to ensure MonitorLiveData observes end of run
   std::string buffer;
+  std::string runBuffer;
   int64_t offset;
   int32_t partition;
   std::string topicName;
+  auto runStartStruct = getRunStartMessage(runBuffer);
+  m_spDetStream->consumeMessage(&buffer, offset, partition, topicName);
+  initLocalCaches(buffer, runStartStruct);
+
+  // Keep track of whether we've reached the end of a run
+  std::unordered_map<std::string, std::vector<int64_t>> stopOffsets;
+  std::unordered_map<std::string, std::vector<bool>> reachedEnd;
+  bool checkOffsets = false;
 
   while (!m_interrupt) {
-    // Pull in events
-    m_histoStream->consumeMessage(&buffer, offset, partition, topicName);
-
-    // No events, wait for some to come along...
-    if (buffer.empty()) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    if (m_endRun) {
+      waitForRunEndObservation();
       continue;
+    } else {
+      waitForDataExtraction();
     }
 
-    // Lock so we don't overwrite buffer while workspace is being extracted
     {
-      std::lock_guard<std::mutex> lock(m_buffer_mutex);
+      // Lock so we don't overwrite buffer while workspace is being extracted or
+      // try to access data before it is read.
+      std::lock_guard<std::mutex> lock(m_mutex);
+      // Pull in data
+      m_dataStream->consumeMessage(&buffer, offset, partition, topicName);
+
+      // No events, wait for some to come along...
+      if (buffer.empty()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        m_cbIterationEnd();
+        continue;
+      }
+
+      if (checkOffsets) {
+        checkRunEnd(topicName, checkOffsets, offset, partition, stopOffsets,
+                    reachedEnd);
+        if (offset > stopOffsets[topicName][static_cast<size_t>(partition)]) {
+          // If the offset is beyond the end of the current run, then skip to
+          // the next iteration and don't process the message
+          m_cbIterationEnd();
+          continue;
+        }
+      }
+
+      // Data being accumulated before being streamed so no need to store
+      // messages.
       m_buffer = buffer;
     }
 
+    checkRunMessage(buffer, checkOffsets, stopOffsets, reachedEnd);
+
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    m_cbIterationEnd();
   }
   g_log.debug("Histo capture finished");
 }
 
-DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
-  DataObjects::Workspace2D_sptr workspace;
-
-  try {
-    auto alg = API::AlgorithmManager::Instance().createUnmanaged(
-        "LoadEmptyInstrument");
-    // Do not put the workspace in the ADS
-    alg->setChild(true);
-    alg->initialize();
-    alg->setPropertyValue("InstrumentName", m_instrumentName);
-    // Dummy workspace value "ws" as not placed in ADS
-    alg->setPropertyValue("OutputWorkspace", "ws");
-    alg->execute();
-    workspace = alg->getProperty("OutputWorkspace");
-  } catch (std::exception &exc) {
-    g_log.error() << "Error loading empty instrument '" << m_instrumentName
-                  << "': " << exc.what() << "\n";
-    throw;
+void KafkaHistoStreamDecoder::initLocalCaches(
+    const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
+  if (rawMsgBuffer.empty()) {
+    throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
+                             "Empty message received from spectrum-detector "
+                             "topic. Unable to continue");
+  }
+  auto spDetMsg = GetSpectraDetectorMapping(
+      reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+  auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
+  auto nudet = spDetMsg->detector_id()->size();
+  if (nudet != nspec) {
+    std::ostringstream os;
+    os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
+          "spectra/detector mapping. Expected matched length arrays but "
+          "found nspec="
+       << nspec << ", ndet=" << nudet;
+    throw std::runtime_error(os.str());
   }
 
-  return workspace;
+  m_runNumber = runStartData.runNumber;
+
+  // Create buffer
+  auto histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
+      "Workspace2D", static_cast<size_t>(spDetMsg->n_spectra()),
+      spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+
+  // Load the instrument if possible but continue if we can't
+  auto instName = runStartData.instrumentName;
+  if (!instName.empty())
+    loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer);
+  else
+    g_log.warning(
+        "Empty instrument name received. Continuing without instrument");
+
+  auto &mutableRun = histoBuffer->mutableRun();
+  // Run start. Cache locally for computing frame times
+  // Convert nanoseconds to seconds (and discard the extra precision)
+  auto runStartTime = static_cast<time_t>(runStartData.startTime / 1000000000);
+  m_runStart.set_from_time_t(runStartTime);
+  auto timeString = m_runStart.toISO8601String();
+  // Run number
+  mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
+  mutableRun.addProperty(RUN_NUMBER_PROPERTY,
+                         std::to_string(runStartData.runNumber));
+  // Create the proton charge property
+  mutableRun.addProperty(
+      new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
+
+  // Cache spec->index mapping. We assume it is the same across all periods
+  m_specToIdx = histoBuffer->getSpectrumToWorkspaceIndexMap();
+
+  // Buffers for each period
+  const size_t nperiods = runStartData.nPeriods;
+  if (nperiods > 1) {
+    throw std::runtime_error(
+        "KafkaHistoStreamDecoder - Does not support multi-period data.");
+  }
+  // New caches so LoadLiveData's output workspace needs to be replaced
+  m_dataReset = true;
+
+  m_workspace = histoBuffer;
+}
+
+void KafkaHistoStreamDecoder::sampleDataFromMessage(const std::string &) {
+  throw Kernel::Exception::NotImplementedError("This method will require "
+                                               "implementation when processing "
+                                               "sample environment messages.");
 }
 
 } // namespace LiveData

@@ -39,6 +39,8 @@ public:
   /// Does this listener buffer events (true) or histogram data (false)
   bool buffersEvents() const override { return false; }
 
+  void setAlgorithm(const Mantid::API::IAlgorithm &callingAlgorithm) override;
+
   //----------------------------------------------------------------------
   // Actions
   //----------------------------------------------------------------------
@@ -56,6 +58,7 @@ public:
 
 private:
   std::unique_ptr<KafkaHistoStreamDecoder> m_decoder = nullptr;
+  std::string m_instrumentName;
 };
 
 } // namespace LiveData

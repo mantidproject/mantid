@@ -8,12 +8,9 @@
 #define MANTID_LIVEDATA_ISISKAFKAHISTOSTREAMDECODER_H_
 
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidLiveData/Kafka/IKafkaBroker.h"
+#include "MantidLiveData/Kafka/IKafkaStreamDecoder.h"
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
-#include "MantidLiveData/Kafka/KafkaBroker.h"
-
-#include <atomic>
-#include <mutex>
-#include <thread>
 
 namespace Mantid {
 namespace LiveData {
@@ -24,65 +21,34 @@ namespace LiveData {
   A call to startCapture() starts the process of capturing the stream on a
   separate thread.
 */
-class DLLExport KafkaHistoStreamDecoder {
+class DLLExport KafkaHistoStreamDecoder : public IKafkaStreamDecoder {
 public:
-  KafkaHistoStreamDecoder(const std::string &brokerAddress,
+  KafkaHistoStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                           const std::string &histoTopic,
-                          const std::string &instrumentName);
+                          const std::string &runInfoTopic,
+                          const std::string &spDetTopic,
+                          const std::string &sampleEnvTopic);
   ~KafkaHistoStreamDecoder();
   KafkaHistoStreamDecoder(const KafkaHistoStreamDecoder &) = delete;
   KafkaHistoStreamDecoder &operator=(const KafkaHistoStreamDecoder &) = delete;
 
-public:
-  ///@name Start/stop
-  ///@{
-  void startCapture(bool startNow = true);
-  void stopCapture() noexcept;
-  ///@}
-
-  ///@name Querying
-  ///@{
-  bool isCapturing() const { return m_capturing; }
-  bool hasData() const;
-  int runNumber() const { return 1; }
-  bool hasReachedEndOfRun() { return !m_capturing; }
-  ///@}
-
-  ///@name Modifying
-  ///@{
-  API::Workspace_sptr extractData();
-  ///@}
+  bool hasData() const noexcept override;
+  bool hasReachedEndOfRun() noexcept override { return !m_capturing; }
 
 private:
-  void captureImpl();
-  void captureImplExcept();
-  API::Workspace_sptr extractDataImpl();
+  void captureImplExcept() override;
 
-  DataObjects::Workspace2D_sptr createBufferWorkspace();
+  /// Create the cache workspaces, LoadLiveData extracts data from these
+  void initLocalCaches(const std::string &rawMsgBuffer,
+                       const RunStartStruct &runStartData) override;
 
-  /// Broker to use to subscribe to topics
-  KafkaBroker m_broker;
-  /// Topic name
-  const std::string m_histoTopic;
-  /// Instrument name
-  const std::string m_instrumentName;
-  /// Subscriber for the histo stream
-  std::unique_ptr<IKafkaStreamSubscriber> m_histoStream;
-  /// Workspace used as template for workspaces created when extracting
-  DataObjects::Workspace2D_sptr m_workspace;
-  /// Buffer for latest FlatBuffers message
+  void sampleDataFromMessage(const std::string &buffer) override;
+
+  API::Workspace_sptr extractDataImpl() override;
+
+private:
   std::string m_buffer;
-
-  /// Associated thread running the capture process
-  std::thread m_thread;
-  /// Mutex protecting histo buffers
-  mutable std::mutex m_buffer_mutex;
-  /// Flag indicating if user interruption has been requested
-  std::atomic<bool> m_interrupt;
-  /// Flag indicating that the decoder is capturing
-  std::atomic<bool> m_capturing;
-  /// Exception object indicating there was an error
-  std::unique_ptr<std::runtime_error> m_exception;
+  DataObjects::Workspace2D_sptr m_workspace;
 };
 
 } // namespace LiveData

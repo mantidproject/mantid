@@ -25,14 +25,37 @@ KafkaHistoListener::KafkaHistoListener() {
   declareProperty("InstrumentName", "");
 }
 
+void KafkaHistoListener::setAlgorithm(
+    const Mantid::API::IAlgorithm &callingAlgorithm) {
+  this->updatePropertyValues(callingAlgorithm);
+  // Get the instrument name from StartLiveData so we can sub to correct topics
+  if (callingAlgorithm.existsProperty("Instrument")) {
+    m_instrumentName = callingAlgorithm.getPropertyValue("Instrument");
+  } else {
+    g_log.error("KafkaEventListener requires Instrument property to be set in "
+                "calling algorithm");
+  }
+}
+
 /// @copydoc ILiveListener::connect
 bool KafkaHistoListener::connect(const Poco::Net::SocketAddress &address) {
+  if (m_instrumentName.empty()) {
+    g_log.error(
+        "KafkaHistoListener::connect requires a non-empty instrument name");
+  }
+
   try {
-    std::string instrumentName = getProperty("InstrumentName");
-    const std::string histoTopic(instrumentName +
-                                 KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX);
+    const std::string histoTopic(m_instrumentName +
+                                 KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX),
+        runInfoTopic(m_instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
+        spDetInfoTopic(m_instrumentName +
+                       KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX),
+        sampleEnvTopic(m_instrumentName +
+                       KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX);
+
     m_decoder = Kernel::make_unique<KafkaHistoStreamDecoder>(
-        address.toString(), histoTopic, instrumentName);
+        std::make_shared<KafkaBroker>(address.toString()), histoTopic,
+        runInfoTopic, spDetInfoTopic, sampleEnvTopic);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaHistoListener::connect - Connection Error: "
                   << exc.what() << "\n";

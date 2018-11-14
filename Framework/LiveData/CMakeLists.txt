@@ -56,6 +56,7 @@ find_package ( LibRDKafka 0.11 )
 if ( LIBRDKAFKA_FOUND )
   set ( SRC_FILES
     ${SRC_FILES}
+    src/Kafka/IKafkaStreamDecoder.cpp
     src/Kafka/KafkaEventListener.cpp
     src/Kafka/KafkaEventStreamDecoder.cpp
     src/Kafka/KafkaHistoListener.cpp
@@ -69,6 +70,7 @@ if ( LIBRDKAFKA_FOUND )
     inc/MantidLiveData/Kafka/KafkaEventStreamDecoder.h
     inc/MantidLiveData/Kafka/IKafkaStreamSubscriber.h
     inc/MantidLiveData/Kafka/IKafkaBroker.h
+    inc/MantidLiveData/Kafka/IKafkaStreamDecoder.h
     inc/MantidLiveData/Kafka/KafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaHistoListener.h
     inc/MantidLiveData/Kafka/KafkaHistoStreamDecoder.h
@@ -87,6 +89,7 @@ if ( LIBRDKAFKA_FOUND )
   set ( TEST_FILES
     ${TEST_FILES}
     KafkaEventStreamDecoderTest.h
+    KafkaHistoStreamDecoderTest.h
     KafkaTopicSubscriberTest.h
   )
 endif()
