@@ -24,10 +24,6 @@ using namespace Mantid::Kernel;
 
 namespace {
 
-bool is_alnum_underscore(char c) {
-  return (isalpha(c) || isdigit(c) || (c == '_'));
-}
-
 bool checkPeriodInWorkspaceGroup(const int &period,
                                  WorkspaceGroup_sptr workspace) {
   return period <= workspace->getNumberOfEntries();
@@ -42,7 +38,7 @@ bool checkPeriodInWorkspaceGroup(const int &period,
  */
 MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
                                        const int index, const double startX,
-                                       const double endX) {
+                                       const double endX, const double normalizationIn) {
   IAlgorithm_sptr asym =
       AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
   asym->setChild(true);
@@ -55,7 +51,7 @@ MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
   asym->setProperty("OutputWorkspace", "__NotUsed__");
   asym->setProperty("StartX", startX);
   asym->setProperty("EndX", endX);
-  asym->setProperty("NormalizationIn", 0.0);
+  asym->setProperty("NormalizationIn", normalizationIn);
   asym->setProperty("OutputUnNormData", false);
   asym->setProperty("OutputUnNormWorkspace", "tmp_unNorm");
   asym->execute();
@@ -65,10 +61,11 @@ MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
 }
 
 Mantid::API::MatrixWorkspace_sptr
-calculateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
+estimateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
                        const std::vector<int> &summedPeriods,
                        const std::vector<int> &subtractedPeriods,
-                       int groupIndex, const double startX, const double endX) {
+                       int groupIndex, const double startX,
+                       const double endX, const double normalizationIn) {
   MatrixWorkspace_sptr tempWS;
   int numPeriods = inputWS->getNumberOfEntries();
   if (numPeriods > 1) {
@@ -80,12 +77,12 @@ calculateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
 
     // Remove decay (summed periods ws)
     MatrixWorkspace_sptr asymSummedPeriods =
-        estimateAsymmetry(summedWS, groupIndex, startX, endX);
+        estimateAsymmetry(summedWS, groupIndex, startX, endX, normalizationIn);
 
     if (!subtractedPeriods.empty()) {
       // Remove decay (subtracted periods ws)
       MatrixWorkspace_sptr asymSubtractedPeriods =
-          estimateAsymmetry(subtractedWS, groupIndex, startX, endX);
+          estimateAsymmetry(subtractedWS, groupIndex, startX, endX, normalizationIn);
 
       // Now subtract
       tempWS = Mantid::MuonAlgorithmHelper::subtractWorkspaces(
@@ -96,7 +93,7 @@ calculateMuonAsymmetry(WorkspaceGroup_sptr inputWS,
   } else {
     // Only one period was supplied
     tempWS = estimateAsymmetry(inputWS->getItem(0), groupIndex, startX,
-                               endX); // change -1 to m_groupIndex and
+                               endX, normalizationIn); // change -1 to m_groupIndex and
                                       // follow through to store as a
                                       // table for later.
   }
@@ -169,13 +166,17 @@ void MuonGroupingAsymmetry::init() {
                   "IDs or hyphenated ranges of IDs.");
 
   declareProperty("AsymmetryTimeMin", 0.0,
-                  "Start time for the asymmetry calculation (in micro "
+                  "Start time for the asymmetry estimation (in micro "
                   "seconds). Defaults to the start time of the InputWorkspace.",
                   Direction::Input);
 
   declareProperty("AsymmetryTimeMax", 32.0,
-                  "End time for the asymmetry calculation (in micro seconds). "
+                  "End time for the asymmetry estimation (in micro seconds). "
                   "Defaults to the end time of the InputWorkspace.",
+                  Direction::Input);
+
+  declareProperty("NormalizationIn", 0.0,
+                  "If this value is non-zero then this is used for the normalization, instead of being estimated.",
                   Direction::Input);
 
   declareProperty(make_unique<ArrayProperty<int>>(
@@ -208,7 +209,7 @@ std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
   }
 
   if (!std::all_of(std::begin(groupName), std::end(groupName),
-                   is_alnum_underscore)) {
+                   Mantid::MuonAlgorithmHelper::is_alphanumerical_or_underscore)) {
     errors["GroupName"] =
         "The group name must contain alphnumeric characters and _ only.";
   }
@@ -285,14 +286,15 @@ void MuonGroupingAsymmetry::exec() {
 
   const double startX = getProperty("AsymmetryTimeMin");
   const double endX = getProperty("AsymmetryTimeMax");
+  const double normalizationIn = getProperty("NormalizationIn");
 
   std::vector<int> summedPeriods = getProperty("SummedPeriods");
   std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
 
   WorkspaceGroup_sptr groupedWS = createGroupWorkspace(inputWS);
 
-  outWS = calculateMuonAsymmetry(groupedWS, summedPeriods, subtractedPeriods, 0,
-                                 startX, endX);
+  outWS = estimateMuonAsymmetry(groupedWS, summedPeriods, subtractedPeriods, 0,
+                                 startX, endX, normalizationIn);
 
   addGroupingAsymmetrySampleLogs(outWS);
   setProperty("OutputWorkspace", outWS);

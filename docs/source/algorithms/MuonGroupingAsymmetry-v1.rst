@@ -27,7 +27,7 @@ The group must be given a name via **GroupName** which can consist of letters, n
 
 The group name does not affect the data; however the name is used in the muon interface when automatically generating workspace names from group data.
 
-After the grouping is performed, the analysis described in :ref:`algm-EstimateMuonAsymmetryFromCounts` will be run; effectively estimating the muon decay curve and subtracting it from the grouped data. The range over which the estimate is performed is controlled by the **AsymmetryTimeMin** and **AsymmetryTimeMax** inputs.
+After the grouping is performed, the analysis described in :ref:`algm-EstimateMuonAsymmetryFromCounts` will be run; effectively estimating the muon decay curve and subtracting it from the grouped data and then estimating the asymmetry on the grouped data. The range over which the estimate is performed is controlled by the **AsymmetryTimeMin** and **AsymmetryTimeMax** inputs.
 
 **Note** : The workspaces supplied to the algorithm must have a number of good frames set in their sample logs. The sample log is called "goodfrm" and can be set using;
 
@@ -91,8 +91,8 @@ Output:
                     [40, 50, 60, 50, 40]
     ws1 = CreateWorkspace(dataX, dataY_period1, NSpec=2)
     ws2 = CreateWorkspace(dataX, dataY_period2, NSpec=2)
-    AddSampleLog(Workspace=ws1, LogName='goodfrm', LogText="10")
-    AddSampleLog(Workspace=ws2, LogName='goodfrm', LogText="10")
+    AddSampleLog(Workspace=ws1, LogName='goodfrm', LogText="1")
+    AddSampleLog(Workspace=ws2, LogName='goodfrm', LogText="1")
     for i in range(2):
         # set detector IDs to be 1,2,3,4
         # these do not have to be the same as the spectrum numbers

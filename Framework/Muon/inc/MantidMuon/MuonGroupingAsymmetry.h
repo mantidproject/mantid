@@ -29,7 +29,7 @@ public:
            "grouping in Muon data.";
   }
   const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess"};
+    return {"MuonProcess", "EstimateMuonAsymmetryFromCounts", "Minus", "Plus"};
   }
 
 private:

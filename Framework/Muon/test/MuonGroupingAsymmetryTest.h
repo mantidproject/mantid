@@ -336,6 +336,33 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0002351, 0.00001);
     TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0002460, 0.00001);
   }
+
+  void
+  test_grouping_asymmetry_with_specified_normalization_gives_correct_values() {
+    auto ws = createMultiPeriodAsymmetryData(3, 2, 10, "group_asym");
+    std::vector<int> detectors = {1, 2};
+    auto alg =
+        setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
+
+    std::vector<int> summedPeriods = {3, 2};
+    std::vector<int> subtractedPeriods = {1};
+    alg->setProperty("SummedPeriods", summedPeriods);
+    alg->setProperty("SubtractedPeriods", subtractedPeriods);
+    alg->setProperty("NormalizationIn", 15.0);
+    alg->execute();
+
+    auto wsOut = getOutputWorkspace(alg);
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.39055, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], 0.92922, 0.001);
+
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0000577, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0000604, 0.00001);
+  }
 };
 
 #endif /* MANTID_MUON_MUONGROUPINGASYMMETRYTEST_H_ */
