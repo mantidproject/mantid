@@ -15,7 +15,7 @@ import unittest
 # 3rdparty imports
 
 # local imports
-from mantidqt.utils.async import AsyncTask, blocking_async_task
+from mantidqt.utils.asynchronous import AsyncTask, blocking_async_task
 
 
 class AsyncTaskTest(unittest.TestCase):
@@ -105,7 +105,7 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertTrue(isinstance(recv.task_exc, RuntimeError),
                         msg="Expected RuntimeError, found " + recv.task_exc.__class__.__name__)
         self.assertEqual(2, len(recv.task_exc_stack))
-        # line number of self.target in async.py
+        # line number of self.target in asynchronous.py
         self.assertEqual(93, recv.task_exc_stack[0][1])
         # line number of raise statement above
         self.assertEqual(94, recv.task_exc_stack[1][1])
