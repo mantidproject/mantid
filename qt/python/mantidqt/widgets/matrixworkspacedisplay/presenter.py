@@ -9,7 +9,6 @@
 #
 from __future__ import absolute_import, division, print_function
 
-from mantid.plots import MantidAxes
 from mantid.plots.utility import MantidAxType
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView

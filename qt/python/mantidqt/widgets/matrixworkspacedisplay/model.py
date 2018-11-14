@@ -10,10 +10,10 @@
 #
 from __future__ import (absolute_import, division, print_function)
 
+from mantid.api import MatrixWorkspace
+from mantid.dataobjects import EventWorkspace, Workspace2D
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModel, \
     MatrixWorkspaceTableViewModelType
-from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
-from mantid.api import MatrixWorkspace
 from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockWorkspace
 
 
