@@ -73,9 +73,9 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
 
   auto hist = outputWS->histogram(0);
   for (auto &wsIndex : wsIndices) {
-    hist += workspace->histogram(wsIndex);
-    outputWS->getSpectrum(0).addDetectorIDs(
-        workspace->getSpectrum(wsIndex).getDetectorIDs());
+      hist += workspace->histogram(wsIndex);
+      outputWS->getSpectrum(0).addDetectorIDs(
+          workspace->getSpectrum(wsIndex).getDetectorIDs());
   }
   outputWS->setHistogram(0, hist);
   outputWS->getSpectrum(0).setSpectrumNo(static_cast<int32_t>(1));
@@ -381,7 +381,7 @@ MuonPairingAsymmetry::createGroupWorkspace(WorkspaceGroup_sptr inputWS) {
  */
 MatrixWorkspace_sptr
 MuonPairingAsymmetry::pairAsymmetryCalc(MatrixWorkspace_sptr inputWS,
-                                    const double &alpha) {
+                                        const double &alpha) {
   MatrixWorkspace_sptr outWS;
 
   // Ensure our specified spectra definitely point to the data
