@@ -18,7 +18,7 @@ from qtpy.QtWidgets import QApplication  # noqa: F402
 
 from mantid.simpleapi import Load  # noqa: F402
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay  # noqa: F402
-from workbench.plotting.functions import plot
+from workbench.plotting.functions import plot  # noqa: F402
 
 app = QApplication([])
 LOQ74044 = Load("LOQ74044.nxs")
