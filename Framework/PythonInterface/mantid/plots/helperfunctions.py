@@ -9,12 +9,14 @@
 #
 from __future__ import (absolute_import, division, print_function)
 
-import numpy
 import datetime
-from mantid.dataobjects import EventWorkspace, Workspace2D, MDHistoWorkspace
-from mantid.api import MultipleExperimentInfos
-import mantid.kernel
+
+import numpy
+
 import mantid.api
+import mantid.kernel
+from mantid.api import MultipleExperimentInfos
+from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
 from mantid.plots.utility import MantidAxType
 
 
@@ -121,9 +123,10 @@ def _get_wksp_index_and_spec_num(workspace, axis, **kwargs):
     Get the workspace index and the spectrum number from the kwargs provided
     :param workspace: a Workspace2D or an EventWorkspace
     :param axis: The axis on which the workspace is being traversed,
-                 can be either 0 (horizontal/bins) or 1 (vertical/spectra),
-                 default is 1 (vertical/spectra)
-    :param kwargs: Dict of keyword arguments, passed by reference as it is mutated
+                 can be either MantidAxType.BIN or MantidAxType.SPECTRUM,
+                 default is MantidAxType.SPECTRUM
+    :param kwargs: Dict of keyword arguments that should contain either spectrum number
+                   or workspace index
     :return The workspace index and the spectrum number
     """
     spectrum_number = kwargs.pop('specNum', None)

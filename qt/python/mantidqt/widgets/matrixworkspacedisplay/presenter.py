@@ -39,13 +39,12 @@ class MatrixWorkspaceDisplay(object):
         # unpacks the list of models returned from getItemModel
         self.view.set_model(*self.model.get_item_model())
 
-    def action_copy_spectrum_values(self, table, *args):
+    def action_copy_spectrum_values(self, table):
         """
         Copies the values selected by the user to the system's clipboard
 
         :param table: Table from which the selection will be read
         :param ws_read: The workspace read function, that is used to access the data directly
-        :param args: Additional unused parameters passed from Qt
         """
         selection_model = table.selectionModel()
         if not selection_model.hasSelection():
@@ -70,7 +69,7 @@ class MatrixWorkspaceDisplay(object):
     def show_successful_copy_toast(self):
         self.view.show_mouse_toast(self.COPY_SUCCESSFUL_MESSAGE)
 
-    def action_copy_bin_values(self, table, *args):
+    def action_copy_bin_values(self, table):
         selection_model = table.selectionModel()
         if not selection_model.hasSelection():
             self.show_no_selection_to_copy_toast()
@@ -97,11 +96,10 @@ class MatrixWorkspaceDisplay(object):
         self.view.copy_to_clipboard(final_string)
         self.show_successful_copy_toast()
 
-    def action_copy_cells(self, table, *args):
+    def action_copy_cells(self, table):
         """
         :type table: QTableView
         :param table: The table from which the data will be copied.
-        :param args: Arguments passed by Qt. Not used
         :return:
         """
         selectionModel = table.selectionModel()

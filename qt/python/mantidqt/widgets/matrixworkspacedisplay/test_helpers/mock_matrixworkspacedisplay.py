@@ -9,10 +9,26 @@
 #
 from mock import Mock
 
+from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
+
 
 class MockQTableHeader(object):
     def __init__(self):
         self.addAction = Mock()
+
+
+class MockQSelection:
+    def __init__(self):
+        self.mock_item_range = MockQItemRange()
+        self.first = Mock(return_value=self.mock_item_range)
+
+
+class MockQItemRange(object):
+    def __init__(self):
+        self.top = Mock(return_value=0)
+        self.bottom = Mock(return_value=2)
+        self.left = Mock(return_value=0)
+        self.right = Mock(return_value=2)
 
 
 class MockQSelectionModel:
@@ -21,6 +37,13 @@ class MockQSelectionModel:
         self.selectedRows = None
         self.selectedColumns = None
         self.currentIndex = None
+        self.mock_selection = MockQSelection()
+        self.selection = Mock(return_value=self.mock_selection)
+
+
+class MockQTableViewModel:
+    def __init__(self):
+        self.type = MatrixWorkspaceTableViewModelType.x
 
 
 class MockQTableView:
@@ -32,6 +55,8 @@ class MockQTableView:
         self.horizontalHeader = Mock(return_value=self.mock_horizontalHeader)
         self.verticalHeader = Mock(return_value=self.mock_verticalHeader)
         self.setModel = Mock()
+        self.mock_model = MockQTableViewModel()
+        self.model = Mock(return_value=self.mock_model)
 
         self.mock_selection_model = MockQSelectionModel()
 

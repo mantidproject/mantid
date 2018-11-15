@@ -15,7 +15,7 @@ from mock import Mock
 
 from mantidqt.widgets.matrixworkspacedisplay.presenter import MatrixWorkspaceDisplay
 from mantidqt.widgets.matrixworkspacedisplay.test_helpers.matrixworkspacedisplay_common import MockQModelIndex, \
-    MockQModelIndexSibling, MockWorkspace
+    MockWorkspace
 from mantidqt.widgets.matrixworkspacedisplay.test_helpers.mock_matrixworkspacedisplay import \
     MockMatrixWorkspaceDisplayView, MockQTableView
 
@@ -41,10 +41,12 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         # two rows are selected in different positions
         mock_indexes = [MockQModelIndex(0, 1), MockQModelIndex(3, 1)]
         mock_table.mock_selection_model.selectedRows = Mock(return_value=mock_indexes)
-        mock_read = Mock(return_value=[43, 99])
-        expected_string = "43 99\n43 99"
 
-        presenter.action_copy_spectrum_values(mock_table, mock_read)
+        mock_read = Mock(return_value=[43, 99])
+        presenter._get_ws_read_from_type = Mock(return_value=mock_read)
+        expected_string = "43\t99\n43\t99"
+
+        presenter.action_copy_spectrum_values(mock_table)
 
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
@@ -60,7 +62,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
         mock_table.mock_selection_model.selectedRows = Mock()
 
-        presenter.action_copy_spectrum_values(mock_table, None)
+        presenter.action_copy_spectrum_values(mock_table)
 
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
@@ -81,9 +83,10 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         ws.getNumberHistograms = Mock(return_value=3)
 
         mock_read = Mock(return_value=[83, 11, 33, 70])
-        expected_string = "83 70\n83 70\n83 70"
+        presenter._get_ws_read_from_type = Mock(return_value=mock_read)
+        expected_string = "83\t70\n83\t70\n83\t70"
 
-        presenter.action_copy_bin_values(mock_table, mock_read)
+        presenter.action_copy_bin_values(mock_table)
 
         mock_table.selectionModel.assert_called_once_with()
         view.copy_to_clipboard.assert_called_once_with(expected_string)
@@ -99,7 +102,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
         mock_table.mock_selection_model.selectedColumns = Mock()
 
-        presenter.action_copy_bin_values(mock_table, None)
+        presenter.action_copy_bin_values(mock_table)
 
         mock_table.selectionModel.assert_called_once_with()
         mock_table.mock_selection_model.hasSelection.assert_called_once_with()
@@ -114,13 +117,14 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         mock_table = MockQTableView()
 
         # two columns are selected at different positions
-        mock_table.mock_selection_model.currentIndex = Mock(return_value=MockQModelIndex(0, 2))
-        # change the mock ws to have 3 histograms
-        ws.getNumberHistograms = Mock(return_value=3)
-        presenter.action_copy_cell(mock_table)
+        mock_index = MockQModelIndex(None, None)
+        mock_table.mock_selection_model.currentIndex = Mock(return_value=mock_index)
+
+        presenter.action_copy_cells(mock_table)
 
         mock_table.selectionModel.assert_called_once_with()
-        view.copy_to_clipboard.assert_called_once_with(MockQModelIndexSibling.TEST_SIBLING_DATA)
+        self.assertEqual(1, view.copy_to_clipboard.call_count)
+        self.assertEqual(9, mock_index.sibling.call_count)
         view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
 
     def test_action_copy_cell_no_selection(self):
@@ -128,18 +132,17 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         view = MockMatrixWorkspaceDisplayView()
         presenter = MatrixWorkspaceDisplay(ws, view=view)
         mock_table = MockQTableView()
+        mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
 
-        # two columns are selected at different positions
-        mock_table.mock_selection_model.currentIndex = Mock(return_value=MockQModelIndex(0, 2))
-        # change the mock ws to have 3 histograms
-        ws.getNumberHistograms = Mock(return_value=3)
-        presenter.action_copy_cell(mock_table)
+        presenter.action_copy_cells(mock_table)
 
         mock_table.selectionModel.assert_called_once_with()
-        view.copy_to_clipboard.assert_called_once_with(MockQModelIndexSibling.TEST_SIBLING_DATA)
-        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
+        mock_table.mock_selection_model.hasSelection.assert_called_once_with()
+        view.show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.NO_SELECTION_MESSAGE)
 
-    def action_plot_common_setup(self, table_has_selection=True):
+        self.assertNotCalled(view.copy_to_clipboard)
+
+    def common_setup_action_plot(self, table_has_selection=True):
         mock_ws = MockWorkspace()
         mock_view = MockMatrixWorkspaceDisplayView()
         mock_plotter = Mock()
@@ -177,7 +180,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         return mock_selected
 
     def test_action_plot_spectrum_plot_many_confirmed(self):
-        mock_plot, mock_table, mock_view, presenter = self.action_plot_common_setup()
+        mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot()
         num_selected_rows = MatrixWorkspaceDisplay.NUM_SELECTED_FOR_CONFIRMATION + 1
 
         self.setup_mock_selection(mock_table, num_selected_rows)
@@ -199,7 +202,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(1, mock_plot.call_count)
 
     def test_action_plot_spectrum_plot_many_denied(self):
-        mock_plot, mock_table, mock_view, presenter = self.action_plot_common_setup()
+        mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot()
         num_selected_rows = MatrixWorkspaceDisplay.NUM_SELECTED_FOR_CONFIRMATION + 1
 
         # return value unused as most of the function being tested is not executed
@@ -222,7 +225,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_plot)
 
     def test_action_plot_spectrum_no_selection(self):
-        mock_plot, mock_table, mock_view, presenter = self.action_plot_common_setup(table_has_selection=False)
+        mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot(table_has_selection=False)
 
         mock_table.mock_selection_model.selectedRows = Mock()
         mock_table.mock_selection_model.selectedColumns = Mock()
@@ -238,7 +241,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_plot)
 
     def test_action_plot_bin_plot_many_confirmed(self):
-        mock_plot, mock_table, mock_view, presenter = self.action_plot_common_setup()
+        mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot()
         num_selected_cols = MatrixWorkspaceDisplay.NUM_SELECTED_FOR_CONFIRMATION + 1
         self.setup_mock_selection(mock_table, num_selected_cols=num_selected_cols)
         mock_view.ask_confirmation = Mock(return_value=True)
@@ -255,7 +258,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(1, mock_plot.call_count)
 
     def test_action_plot_bin_plot_many_denied(self):
-        mock_plot, mock_table, mock_view, presenter = self.action_plot_common_setup()
+        mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot()
         num_selected_cols = MatrixWorkspaceDisplay.NUM_SELECTED_FOR_CONFIRMATION + 1
 
         # return value unused as most of the function being tested is not executed
@@ -276,7 +279,7 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertNotCalled(mock_plot)
 
     def test_action_plot_bin_no_selection(self):
-        mock_plot, mock_table, mock_view, presenter = self.action_plot_common_setup(table_has_selection=False)
+        mock_plot, mock_table, mock_view, presenter = self.common_setup_action_plot(table_has_selection=False)
         self.setup_mock_selection(mock_table, num_selected_rows=None, num_selected_cols=None)
 
         presenter.action_plot_bin(mock_table)
