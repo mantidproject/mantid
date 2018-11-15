@@ -10,6 +10,7 @@ from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFilePro
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
 from mantid.simpleapi import *
 from math import fabs
+import numpy as np
 
 
 class SANSILLReduction(PythonAlgorithm):
@@ -153,22 +154,25 @@ class SANSILLReduction(PythonAlgorithm):
             @param radius : the radius of the cylinder [m]
             @return : XML string for the geometry shape
         """
-
         return '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
                '<radius val="{0}"/></infinite-cylinder>'.format(radius)
 
     def _integrate_in_radius(self, ws, radius):
         """
-            Sums the detector counts within the given radius around the beam
+            Sums the detector counts within the given radius around the z axis
             @param ws : the input workspace
             @param radius : the radius [m]
             @returns : the workspace with the summed counts
         """
-
         shapeXML = self._cylinder(radius)
         det_list = FindDetectorsInShape(Workspace=ws, ShapeXML=shapeXML)
         grouped = ws + '_group'
-        GroupDetectors(InputWorkspace=ws, OutputWorkspace=grouped, DetectorList=det_list)
+        n_spectra = mtd[ws].getNumberHistograms()
+        integrated = Integration(InputWorkspace=ws, StoreInADS=False)
+        to_group = CreateWorkspace(DataY=integrated.extractY(), DataE=integrated.extractE(),
+                                   DataX=np.tile(integrated.readX(0), n_spectra), NSpec=n_spectra,
+                                   ParentWorkspace=integrated, StoreInADS=False)
+        GroupDetectors(InputWorkspace=to_group, OutputWorkspace=grouped, DetectorList=det_list)
         return grouped
 
     def _normalise(self, ws):
@@ -176,7 +180,6 @@ class SANSILLReduction(PythonAlgorithm):
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
             @param ws : the input workspace
         """
-
         normalise_by = self.getPropertyValue('NormaliseBy')
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
@@ -204,7 +207,6 @@ class SANSILLReduction(PythonAlgorithm):
             Calculates the beam center's x,y coordinates, and the beam flux
             @param ws : the input [empty beam] workspace
         """
-
         centers = ws + '_centers'
         method = self.getPropertyValue('BeamFinderMethod')
         radius = self.getProperty('BeamRadius').value
@@ -249,7 +251,6 @@ class SANSILLReduction(PythonAlgorithm):
     @staticmethod
     def _parallax_correction(ws):
         formula = ws.getInstrument().getStringParameter('parallax')[0]
-        import numpy as np
         l2 = ws.getRun().getLogData('L2').value
         n_spectra = ws.getNumberHistograms()
         p = np.empty(n_spectra)
@@ -261,7 +262,6 @@ class SANSILLReduction(PythonAlgorithm):
         Divide(LHSWorkspace=ws, RHSWorkspace=parallax_ws, OutputWorkspace=ws.getName())
 
     def PyExec(self): # noqa: C901
-
         process = self.getPropertyValue('ProcessAs')
         ws = '__' + self.getPropertyValue('OutputWorkspace')
         LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
@@ -292,8 +292,16 @@ class SANSILLReduction(PythonAlgorithm):
                     radius = self.getProperty('BeamRadius').value
                     shapeXML = self._cylinder(radius)
                     det_list = FindDetectorsInShape(Workspace=ws, ShapeXML=shapeXML)
-                    CalculateTransmission(SampleRunWorkspace=ws, DirectRunWorkspace=beam_ws,
-                                          TransmissionROI=det_list, OutputWorkspace=ws)
+                    lambdas = mtd[ws].extractX()
+                    min_lambda = np.min(lambdas)
+                    max_lambda = np.max(lambdas)
+                    width_lambda = lambdas[0][1]-lambdas[0][0]
+                    lambda_binning = [min_lambda, width_lambda, max_lambda]
+                    self.log().information('Rebinning for transmission calculation to: '+str(lambda_binning))
+                    Rebin(InputWorkspace=ws, Params=lambda_binning, OutputWorkspace=ws)
+                    beam_rebinned = Rebin(InputWorkspace=beam_ws, Params=lambda_binning, StoreInADS=False)
+                    CalculateTransmission(SampleRunWorkspace=ws, DirectRunWorkspace=beam_rebinned,
+                                          TransmissionROI=det_list, OutputWorkspace=ws, RebinParams=lambda_binning)
                 else:
                     transmission_ws = self.getProperty('TransmissionInputWorkspace').value
                     if transmission_ws:
@@ -369,11 +377,11 @@ class SANSILLReduction(PythonAlgorithm):
                                 Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
                                 ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                                                      NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
-
-        if mtd[ws].getInstrument().getName() == 'D33':
-            CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
-        else:
-            CalculateDynamicRange(Workspace=ws)
+        if process != 'Transmission':
+            if mtd[ws].getInstrument().getName() == 'D33':
+                CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
+            else:
+                CalculateDynamicRange(Workspace=ws)
         mtd[ws].getRun().addProperty('ProcessedAs', process, True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])

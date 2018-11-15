@@ -9,6 +9,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace {
@@ -82,12 +83,12 @@ void CalculateDynamicRange::calculateQMinMax(MatrixWorkspace_sptr workspace,
   PARALLEL_FOR_NO_WSP_CHECK()
   for (const auto index : indices) {
     if (!spectrumInfo.isMonitor(index) && !spectrumInfo.isMasked(index)) {
-      const auto &lambdaBinning = workspace->x(index);
+      const auto &spectrum = workspace->histogram(index);
       const Kernel::V3D detPos = spectrumInfo.position(index);
       double r, theta, phi;
       detPos.getSpherical(r, theta, phi);
-      const double v1 = calculateQ(lambdaBinning.front(), theta);
-      const double v2 = calculateQ(lambdaBinning.back(), theta);
+      const double v1 = calculateQ(spectrum.begin()->center(), theta);
+      const double v2 = calculateQ(std::prev(spectrum.end())->center(), theta);
       PARALLEL_CRITICAL(CalculateDynamicRange) {
         min = std::min(min, std::min(v1, v2));
         max = std::max(max, std::max(v1, v2));

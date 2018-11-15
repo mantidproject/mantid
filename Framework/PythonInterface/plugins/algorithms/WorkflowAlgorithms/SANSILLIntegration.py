@@ -42,9 +42,12 @@ class SANSILLIntegration(PythonAlgorithm):
             if not run:
                 issues['InputWorkspace'] = 'The input workspace does not have a run object attached.'
             else:
-                processed = run.getLogData('ProcessedAs').value
-                if processed != 'Sample':
-                    issues['InputWorkspace'] = 'The input workspace is not processed as sample.'
+                if run.hasProperty('ProcessedAs'):
+                    processed = run.getLogData('ProcessedAs').value
+                    if processed != 'Sample':
+                        issues['InputWorkspace'] = 'The input workspace is not processed as sample.'
+                else:
+                    issues['InputWorkspace'] = 'The input workspace is not processed by SANSILLReduction'
             instrument = self.getProperty('InputWorkspace').value.getInstrument()
             if not instrument:
                 issues['InputWorkspace'] += 'The input workspace does not have an instrument attached.'
@@ -155,7 +158,7 @@ class SANSILLIntegration(PythonAlgorithm):
         """
         if q_min < 0. or q_min >= q_max:
             raise ValueError('qmin must be positive and smaller than qmax. '
-                             'Given qmin={0:.2f}, qmax={0:.2f}.'.format(qmin, qmax))
+                             'Given qmin={0:.2f}, qmax={0:.2f}.'.format(q_min, q_max))
         q_binning = []
         binning = self.getProperty('OutputBinning').value
         use_resolution = self.getProperty('ResolutionBasedBinning').value
@@ -163,17 +166,29 @@ class SANSILLIntegration(PythonAlgorithm):
             if use_resolution:
                 q_binning = self._mildner_carpenter_q_binning(q_min, q_max)
             else:
-                q_binning = self._pixel_q_binning(q_min, q_max, pixel_height, wavelength, l2)
+                if wavelength != 0:
+                    q_binning = self._pixel_q_binning(q_min, q_max, pixel_height, wavelength, l2)
+                else:
+                    q_binning = self._tof_default_q_binning(q_min, q_max)
         elif len(binning) == 1:
             q_binning = [q_min, binning[0], q_max]
         elif len(binning) == 2:
             if use_resolution:
                 q_binning = self._mildner_carpenter_q_binning(binning[0], binning[1])
             else:
-                q_binning = self._pixel_q_binning(binning[0], binning[1], pixel_height, wavelength, l2)
+                if wavelength != 0:
+                    q_binning = self._pixel_q_binning(binning[0], binning[1], pixel_height, wavelength, l2)
+                else:
+                    q_binning = self._tof_default_q_binning(binning[0], binning[1])
         else:
             q_binning = binning
         return q_binning
+
+    def _tof_default_q_binning(self, q_min, q_max):
+        """
+        Returns default q binning for tof mode
+        """
+        return [q_min, -0.2, q_max]
 
     def _pixel_q_binning(self, q_min, q_max, pixel_height, wavelength, l2):
         """
@@ -271,7 +286,9 @@ class SANSILLIntegration(PythonAlgorithm):
         q_max = run.getLogData('qmax').value
         self.log().information('Using qmin={0:.2f}, qmax={1:.2f}'.format(q_min, q_max))
         pixel_height = run.getLogData('pixel_height').value
-        wavelength = run.getLogData('wavelength').value
+        wavelength = 0. # for TOF mode there is no wavelength
+        if run.hasProperty('wavelength'):
+            wavelength = run.getLogData('wavelength').value
         l2 = run.getLogData('l2').value
         q_binning = self._get_iq_binning(q_min, q_max, pixel_height, wavelength, l2)
         n_wedges = self.getProperty('NumberOfWedges').value

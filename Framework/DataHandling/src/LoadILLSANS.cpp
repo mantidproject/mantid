@@ -765,6 +765,11 @@ LoadILLSANS::getVariableTimeBinning(const NXEntry &entry,
   std::vector<double> binEdges;
   binEdges.reserve(nBins + 1);
   VectorHelper::convertToBinBoundary(binCenters, binEdges);
+  // after conversion to bin edges, the first item might get negative,
+  // which is not physical, set to 0
+  if (binEdges[0] < 0.) {
+      binEdges[0] = 0.;
+  }
   return binEdges;
 }
 
