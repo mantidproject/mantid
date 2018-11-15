@@ -4,6 +4,7 @@ import unittest
 from qtpy.QtWidgets import QMessageBox, QApplication
 from qtpy.QtCore import Qt, QMetaObject
 
+from mantid import FrameworkManager
 from mantidqt.utils.qt.test.test_window import GuiTestBase
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 

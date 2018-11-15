@@ -79,8 +79,6 @@ class ScriptRunner(object):
                 if self.script_iter is None:
                     if self.close_on_finish:
                         self.widget.close()
-                        app.quit()
-                        app = None
                     return
                 # Run test script until the next 'yield'
                 pause_sec = self.script_iter.next()
@@ -97,8 +95,6 @@ class ScriptRunner(object):
                     self.parent_iter = None
                 elif self.close_on_finish:
                     self.widget.close()
-                    app.quit()
-                    app = None
             except:
                 self.widget.close()
                 traceback.print_exc()
@@ -123,8 +119,8 @@ def open_in_window(widget_name, script, attach_debugger=True, pause=0, close_on_
     global app
     if attach_debugger:
         raw_input('Please attach the Debugger now if required. Press any key to continue')
-    setup_library_paths()
     if app is None:
+        setup_library_paths()
         app = QApplication([""])
     if isinstance(widget_name, six.string_types):
         w = create_widget(widget_name)
