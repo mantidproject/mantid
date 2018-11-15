@@ -375,8 +375,7 @@
 
 </facility>
 
-
-<facility name="HFIR" FileExtensions=".nxs,.nxs.h5,.dat,.xml">
+<facility name="HFIR" delimiter="_" FileExtensions=".nxs,.nxs.h5,.dat,.xml">
 
    <archive>
       <archiveSearch plugin="ORNLDataSearch" />
