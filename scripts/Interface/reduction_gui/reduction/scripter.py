@@ -301,7 +301,7 @@ class BaseScriptElement(object):
 # Disable warning about the use of exec, which we knowingly use to
 # execute generated code.
 # pylint: disable=W0122
-def execute_script(script):
+def execute_script(script, error_cb=None):
     """
     Executes the given script code.
 
@@ -310,16 +310,19 @@ def execute_script(script):
     then a simple exec call is used
 
     @param script :: A chunk of code to execute
+    @param error_cb :: method to call on error, only registered in workbench
     """
     if HAS_ASYNC:
         def onError(arg):
-            raise arg.exc_value.with_traceback(arg.stack)
+            Logger('scripter').error('Failed to execute script: {}'.format(arg))
 
         Logger('scripter').information('using PythonCodeExecution')
         executioner = PythonCodeExecution()
-        executioner.sig_exec_error.connect(onError)
+        if error_cb is None:
+            executioner.sig_exec_error.connect(onError)
+        else:
+            executioner.sig_exec_error.connect(error_cb)
         executioner.execute_async(script, '<string>')
-
     elif HAS_MANTIDPLOT:
         Logger('scripter').information('using runPythonScript')
         mantidplot.runPythonScript(script, True)  # TODO this option should get removed
@@ -575,7 +578,7 @@ class BaseReductionScripter(object):
                             item.state().update()
                         except (StopIteration, ImportError, NameError, TypeError, ValueError, Warning):
                             pass
-                raise RuntimeError(str(sys.exc_info()[1]))
+                raise  # rethrow the exception
         else:
             raise RuntimeError("Reduction could not be executed: Mantid could not be imported")
 
@@ -634,7 +637,7 @@ class BaseReductionScripter(object):
                 submit_cmd += "TransactionID=id, "
                 submit_cmd += "PythonScript=\"\"\"%s\"\"\", " % script
                 submit_cmd += "ScriptName='%s')" % script_name
-                self.execute_script(submit_cmd)
+                execute_script(submit_cmd)
         else:
             Logger("scripter").error("Mantid is unavailable to submit a reduction job")
 
@@ -648,7 +651,10 @@ class BaseReductionScripter(object):
 
         @param script :: A chunk of code to execute
         """
-        execute_script(script)
+        def onError(arg):
+            Logger('scripter').error('Failed to execute script: {}'.format(arg))
+            raise RuntimeError(str(arg))
+        execute_script(script, onError)
 
     def reset(self):
         """
