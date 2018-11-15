@@ -61,8 +61,6 @@ private:
   MatrixWorkspace_sptr execGroupWorkspaceInput();
 
   void setPairAsymmetrySampleLogs(MatrixWorkspace_sptr workspace);
-  /// Allow WorkspaceGroup property to function correctly.
-  bool checkGroups() override;
 };
 
 } // namespace Muon

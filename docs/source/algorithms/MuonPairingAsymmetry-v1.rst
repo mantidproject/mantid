@@ -65,7 +65,6 @@ Usage
             [20, 30, 40, 30, 20] + \
             [30, 40, 50, 40, 30] + \
             [40, 50, 60, 50, 40]
-    print(dataY)
     input_workspace = CreateWorkspace(dataX, dataY, NSpec=4)
     for i in range(4):
         # set detector IDs to be 1,2,3,4
@@ -90,7 +89,7 @@ Output:
 
 .. testoutput:: SpecifyGroupsManuallySinglePeriod
 
-	X values are : [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    X values are : [0.5, 1.5, 2.5, 3.5, 4.5]
     Y values are : [-0.4, -0.286, -0.222, -0.286, -0.4]
 
 **Example - Using MuonPreProcess and Specifying Groups Manually for Multi Period Data**
@@ -103,7 +102,7 @@ Output:
             [20, 30, 40, 30, 20] + \
             [30, 40, 50, 40, 30] + \
             [40, 50, 60, 50, 40]
-    print(dataY)
+
     input_workspace = CreateWorkspace(dataX, dataY, NSpec=4)
     input_workspace_1 = CreateWorkspace(dataX, dataY, NSpec=4)
     for i in range(4):
@@ -117,7 +116,7 @@ Output:
     multi_period_data = GroupWorkspaces(input_workspace)
     multi_period_data.addWorkspace(input_workspace_1)
 
-    pre_processed_workspace = MuonPreProcess(InputWorkspace=input_workspace)
+    pre_processed_workspace = MuonPreProcess(InputWorkspace=multi_period_data)
 
     output_workspace = MuonPairingAsymmetry(InputWorkspace=pre_processed_workspace,
                                                       PairName="myPair",
@@ -135,7 +134,7 @@ Output:
 
 .. testoutput:: SpecifyGroupsManuallyMultiPeriod
 
-	X values are : [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+	X values are : [0.5, 1.5, 2.5, 3.5, 4.5]
     Y values are : [-0.4, -0.286, -0.222, -0.286, -0.4]
 
 **Example - Using MuonPreProcess, MuonGroupingCounts for Single Period Data**

@@ -390,7 +390,7 @@ MuonPairingAsymmetry::pairAsymmetryCalc(MatrixWorkspace_sptr inputWS,
   std::vector<int> fwdSpectra = {0};
   std::vector<int> bwdSpectra = {1};
 
-  IAlgorithm_sptr alg = this->createChildAlgorithm("pairAsymmetryCalc");
+  IAlgorithm_sptr alg = this->createChildAlgorithm("AsymmetryCalc");
   alg->setChild(true);
   alg->setProperty("InputWorkspace", inputWS);
   alg->setProperty("ForwardSpectra", fwdSpectra);
