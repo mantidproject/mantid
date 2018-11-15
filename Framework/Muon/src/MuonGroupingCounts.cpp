@@ -49,9 +49,9 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
 
   auto hist = outputWS->histogram(0);
   for (auto &wsIndex : wsIndices) {
-    hist += workspace->histogram(wsIndex);
-    outputWS->getSpectrum(0).addDetectorIDs(
-        workspace->getSpectrum(wsIndex).getDetectorIDs());
+      hist += workspace->histogram(wsIndex);
+      outputWS->getSpectrum(0).addDetectorIDs(
+          workspace->getSpectrum(wsIndex).getDetectorIDs());
   }
   outputWS->setHistogram(0, hist);
   outputWS->getSpectrum(0).setSpectrumNo(static_cast<int32_t>(1));
