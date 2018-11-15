@@ -29,10 +29,6 @@ bool checkPeriodInWorkspaceGroup(const int &period,
   return period <= workspace->getNumberOfEntries();
 }
 
-bool is_alphanumeric_or_underscore(char character) {
-  return (isalpha(character) || isdigit(character) || (character == '_'));
-}
-
 MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
                                     const std::vector<int> &detectorIDs) {
 
@@ -125,7 +121,7 @@ std::map<std::string, std::string> MuonGroupingCounts::validateInputs() {
   }
 
   if (!std::all_of(std::begin(groupName), std::end(groupName),
-                   is_alphanumeric_or_underscore)) {
+                   Mantid::MuonAlgorithmHelper::is_alphanumeric_or_underscore)) {
     errors["GroupName"] =
         "The group name must contain alphnumeric characters and _ only.";
   }
