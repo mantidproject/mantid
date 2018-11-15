@@ -8,6 +8,7 @@ import unittest
 
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from mantid.simpleapi import CreateWorkspace
 
 
 class MuonPairTest(unittest.TestCase):
@@ -57,8 +58,11 @@ class MuonPairTest(unittest.TestCase):
     def test_that_can_only_set_workspace_if_MuonWorkspace_object(self):
         pair = MuonPair(pair_name="pair1")
         self.assertIsNone(pair.workspace)
+        dataX = [0, 1, 2, 3, 4, 5]
+        dataY = [10, 20, 30, 20, 10]
+        input_workspace = CreateWorkspace(dataX, dataY)
 
-        pair.workspace = MuonWorkspaceWrapper([1, 2, 3])
+        pair.workspace = MuonWorkspaceWrapper(input_workspace)
         self.assertIsNotNone(pair.workspace)
 
     def test_that_AttributeError_thrown_if_setting_workspace_to_non_MuonWorkspace_object(self):

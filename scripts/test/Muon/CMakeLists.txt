@@ -21,6 +21,8 @@ set ( TEST_PY_FILES
    transformWidget_test.py
    utilities/muon_group_test.py
    utilities/muon_pair_test.py
+   utilities/muon_workspace_wrapper_test.py
+   utilities/muon_workspace_wrapper_directory_test.py
    subplotObject_test.py
 )
 

@@ -7,8 +7,13 @@
 #pylint: disable=C0103
 from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import (QMainWindow)
-from . import ui_OptimizeLattice
 from qtpy.QtCore import Signal as pyqtSignal
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
 
 class OptimizeLatticeWindow(QMainWindow):
@@ -28,8 +33,8 @@ class OptimizeLatticeWindow(QMainWindow):
         # init
         QMainWindow.__init__(self, parent)
 
-        self.ui = ui_OptimizeLattice.Ui_MainWindow()
-        self.ui.setupUi(self)
+        ui_path = "OptimizeLattice.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # initialize widgets
         self.ui.comboBox_unitCellTypes.addItems(['Cubic',

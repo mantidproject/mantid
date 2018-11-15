@@ -8,6 +8,7 @@ import unittest
 
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from mantid.simpleapi import CreateWorkspace
 
 
 class MuonGroupTest(unittest.TestCase):
@@ -41,9 +42,12 @@ class MuonGroupTest(unittest.TestCase):
 
     def test_that_can_set_workspace_if_MuonWorkspace_object(self):
         group = MuonGroup(group_name="group1")
+        dataX = [0, 1, 2, 3, 4, 5]
+        dataY = [10, 20, 30, 20, 10]
+        input_workspace = CreateWorkspace(dataX, dataY)
 
         self.assertIsNone(group.workspace)
-        group.workspace = MuonWorkspaceWrapper([1, 2, 3])
+        group.workspace = MuonWorkspaceWrapper(input_workspace)
         self.assertIsNotNone(group.workspace)
 
     def test_that_AttributeError_thrown_if_setting_workspace_to_non_MuonWorkspace_object(self):

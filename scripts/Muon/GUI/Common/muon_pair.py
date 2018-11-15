@@ -16,7 +16,7 @@ class MuonPair(object):
 
     - The name is set at initialization and after that cannot be changed.
     - The pair has two groups associated to it, and we store only their names.
-    - The "alpha" parameter is stored and modifiable.
+    - The balance parameter is stored and modifiable.
     - The workspace associated to the pair can be set, but must be of type MuonWorkspaceWrapper.
     """
 
@@ -65,7 +65,7 @@ class MuonPair(object):
 
     @property
     def alpha(self):
-        return float("{0:.3f}".format(round(self._alpha, 3)))
+        return float("{}".format(self._alpha))
 
     @alpha.setter
     def alpha(self, new_alpha):
