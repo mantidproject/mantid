@@ -9,15 +9,49 @@
 Description
 -----------
 
-Moves the specified detector component so that the angle between the beam and
-the sample-to-detector vector is :literal:`TwoTheta`. The detector component is moved as a
-block. The rest of the instrument components remain in the original position. The component
-can be shifted vertically (default), or rotated around the sample position.
+Moves the specified detector component to a given angle between the beam and
+the sample-to-detector vector. The detector component is moved as a
+block. The rest of the instrument components remain in original positions. The component
+can be shifted vertically (default), or rotated around the sample position. When rotating
+around the sample, an optional rotation can be applied so that the detector always faces
+the sample.
+
+In the most basic operation, the detector is moved to the angle specified by ``TwoTheta``.
+This case is schematically shown below for rotation around the sample position and
+``DetectorFacesSample`` set to ``True``.
+
+.. figure:: ../images/SpecularReflectionCorrection_figure1.png
+   :alt:  Schematic representation of angle correction when only TwoTheta is given.
+   :scale: 100%
+
+
+If ``LinePosition`` and ``PixelSize`` are also given, the detector will be moved such
+that the angle will be ``TwoTheta`` for the pixel at workspace index ``LinePosition``.
+Note that ``LinePosition`` can be a fractional index making it possible to adjust the
+detector angle to a fitted line position. The figure below illustrates this option.
+
+.. figure:: ../images/SpecularReflectionCorrection_figure2.png
+   :alt: Schematic representation of angle correction when TwoTheta and LinePosition are given.
+   :scale: 100%
+
+The last possible detector position correction is calibration by a separate direct beam
+measurement. The idea is to correct the detector angle by difference between the
+nominal beam axis and the measured direct beam as shown in the figure below. In this mode
+``TwoTheta`` is omitted but ``DirectLinePosition``, ``DirectLineWorkspace`` and ``PixelSize``
+have to be specified. 
+
+.. figure:: ../images/SpecularReflectionCorrection_figure3.png
+   :alt: Schematic representation of angle correction when direct beam reference is used.
+   :scale: 100%
+
+.. note::
+   The line positions can be acquired by using, for instance,
+   :ref:`FindReflectometryLines <algm-FindReflectometryLines>`.
 
 Previous Versions
 -----------------
 
-For version 1 of the algorithm, please see `SpecularReflectionPositionCorrect-v1. <SpecularReflectionPositionCorrect-v1.html>`_
+For version 1 of the algorithm, please see :ref:`SpecularReflectionPositionCorrect-v1. <algm-SpecularReflectionPositionCorrect-v1>`
 
 Usage
 -----
@@ -109,6 +143,81 @@ Output:
    Original position: [26,0,0]
    Vertical shift:    [26,0,0.0513177]
    Rotated:           [25.9996,0,0.0513102]
+
+**Example - Rotate given pixel**
+
+.. testcode:: SpecularReflectionPositionCorrectLinePosition
+
+   import numpy
+   # We'll just use an empty workspace here.
+   ws = LoadEmptyInstrument(InstrumentName='D17')
+   # Get rid of monitors
+   ExtractMonitors(ws, DetectorWorkspace='ws')
+   ws = mtd['ws']
+   line_position = 22.
+   spectrum_info = ws.spectrumInfo()
+   two_theta = numpy.rad2deg(spectrum_info.twoTheta(int(line_position)))
+   print('Pixel {} 2theta'.format(int(line_position)))
+   print('before angle correction: {:.3}'.format(two_theta))
+   ws = SpecularReflectionPositionCorrect(
+       ws,
+       TwoTheta=1.5,
+       DetectorCorrectionType='RotateAroundSample',
+       DetectorComponentName='detector',
+       DetectorFacesSample=True,
+       LinePosition=line_position,
+       PixelSize=0.001195)
+   spectrum_info = ws.spectrumInfo()
+   two_theta = numpy.rad2deg(spectrum_info.twoTheta(int(line_position)))
+   print('after angle correction: {:.3}'.format(two_theta))
+
+Output:
+
+.. testoutput:: SpecularReflectionPositionCorrectLinePosition
+
+   Pixel 22 2theta
+   before angle correction: 2.33
+   after angle correction: 1.5
+
+**Example - Use direct beam for angle calibration**
+
+.. testcode:: SpecularReflectionPositionCorrectDirectBeamCalibration
+
+   import numpy
+   # We'll just use empty workspaces here.
+   reflected = LoadEmptyInstrument(InstrumentName='Figaro')
+   direct = LoadEmptyInstrument(InstrumentName='Figaro')
+   # Get rid of monitors
+   ExtractMonitors(reflected, DetectorWorkspace='reflected')
+   reflected = mtd['reflected']
+   ExtractMonitors(direct, DetectorWorkspace='direct')
+   direct = mtd['direct']
+   line_position = 202.
+   spectrum_info = reflected.spectrumInfo()
+   two_theta = numpy.rad2deg(spectrum_info.twoTheta(int(line_position)))
+   print('Pixel {} 2theta'.format(int(line_position)))
+   print('before angle correction: {:.3}'.format(two_theta))
+   direct_line_position = 130.7  # This could come from some fitting procedure
+   reflected = SpecularReflectionPositionCorrect(
+       reflected,
+       DetectorCorrectionType='RotateAroundSample',
+       DetectorComponentName='detector',
+       DetectorFacesSample=True,
+       PixelSize=0.001195,
+       DirectLineWorkspace=direct,
+       DirectLinePosition=direct_line_position)
+   spectrum_info = reflected.spectrumInfo()
+   two_theta = numpy.rad2deg(spectrum_info.twoTheta(int(line_position)))
+   print('after angle correction: {:.3}'.format(two_theta))
+
+
+Output:
+
+.. testoutput:: SpecularReflectionPositionCorrectDirectBeamCalibration
+
+   Pixel 202 2theta
+   before angle correction: 5.11
+   after angle correction: 4.89
 
 .. categories::
 

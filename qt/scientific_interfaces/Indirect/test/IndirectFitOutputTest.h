@@ -9,6 +9,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
@@ -351,4 +352,4 @@ public:
   }
 };
 
-#endif
+#endif // MANTID_INDIRECTFITOUTPUTTEST_H

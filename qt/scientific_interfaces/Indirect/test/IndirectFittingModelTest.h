@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
@@ -731,4 +732,4 @@ public:
   }
 };
 
-#endif
+#endif // MANTID_INDIRECTFITTINGMODELTEST_H

@@ -220,6 +220,9 @@ void ApplyAbsorptionCorrections::run() {
         m_uiForm.ckRebinContainer->setChecked(true);
       } else {
         m_batchAlgoRunner->clearQueue();
+        setRunIsRunning(false);
+        setPlotResultEnabled(false);
+        setSaveResultEnabled(false);
         g_log.error("Cannot apply absorption corrections "
                     "using a sample and "
                     "container with different binning.");
@@ -279,6 +282,9 @@ void ApplyAbsorptionCorrections::run() {
         break;
       default:
         m_batchAlgoRunner->clearQueue();
+        setRunIsRunning(false);
+        setPlotResultEnabled(false);
+        setSaveResultEnabled(false);
         g_log.error(
             "ApplyAbsorptionCorrections cannot run with corrections that do "
             "not match sample binning.");
@@ -651,18 +657,20 @@ void ApplyAbsorptionCorrections::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
+void ApplyAbsorptionCorrections::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+}
+
 void ApplyAbsorptionCorrections::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setRunEnabled(!running);
-  setPlotResultEnabled(!running);
-  setSaveResultEnabled(!running);
+  setButtonsEnabled(!running);
 }
 
 void ApplyAbsorptionCorrections::setPlotResultIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setPlotResultEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveResultEnabled(!plotting);
+  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

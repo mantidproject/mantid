@@ -19,12 +19,9 @@ set ( TEST_PY_FILES
    PlottingView_test.py
    #thread_model_test.py
    transformWidget_test.py
-   utilities/muon_group_test.py
-   utilities/muon_pair_test.py
-   utilities/thread_model_test.py
+   utilities/load_utils_test.py
    utilities/muon_workspace_wrapper_test.py
    utilities/muon_workspace_wrapper_directory_test.py
-   utilities/load_utils_test.py
    subplotObject_test.py
 )
 

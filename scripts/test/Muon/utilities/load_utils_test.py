@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import Muon.GUI.Common.load_utils as utils
+import Muon.GUI.Common.utilities.load_utils as utils
 import sys
 import os
 from mantid import simpleapi, ConfigService

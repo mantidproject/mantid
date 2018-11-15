@@ -7,12 +7,18 @@
 import os
 import time
 import csv
-import ui_preprocess_window
 import reduce4circleControl
 import guiutility as gui_util
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 import NTableWidget
 from qtpy.QtWidgets import (QFileDialog, QMainWindow)  # noqa
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 
 
 class ScanPreProcessWindow(QMainWindow):
@@ -42,8 +48,9 @@ class ScanPreProcessWindow(QMainWindow):
         self._outputDir = None
 
         # define UI
-        self.ui = ui_preprocess_window.Ui_PreprocessWindow()
-        self.ui.setupUi(self)
+        ui_path = "preprocess_window.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
+        self._promote_widgets()
 
         # initialize the widgets
         self.enable_calibration_settings(False)
@@ -67,6 +74,14 @@ class ScanPreProcessWindow(QMainWindow):
         self.ui.pushButton_changeSettings.clicked.connect(self.do_change_calibration_settings)
         self.ui.pushButton_fixSettings.clicked.connect(self.do_fix_calibration_settings)
         self.ui.actionExit.triggered.connect(self.do_quit)
+
+        return
+
+    def _promote_widgets(self):
+        tableView_scanProcessState_layout = QVBoxLayout()
+        self.ui.frame_tableView_scanProcessState.setLayout(tableView_scanProcessState_layout)
+        self.ui.tableView_scanProcessState = ScanPreProcessStatusTable(self)
+        tableView_scanProcessState_layout.addWidget(self.ui.tableView_scanProcessState)
 
         return
 
@@ -466,10 +481,10 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
     """
     Extended table widget for scans to process
     """
-    TableSetup = [('Scan', 'int'),
-                  ('Status', 'str'),
-                  ('File', 'str'),
-                  ('Note', 'str')]
+    Table_Setup = [('Scan', 'int'),
+                   ('Status', 'str'),
+                   ('File', 'str'),
+                   ('Note', 'str')]
 
     def __init__(self, parent):
         """

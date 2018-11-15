@@ -14,7 +14,7 @@ from mantid.simpleapi import mtd
 from mantid import api
 from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.muon_file_utils as file_utils
-from Muon.GUI.Common.muon_workspace import MuonWorkspace
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class LoadUtils(object):
@@ -131,7 +131,7 @@ def __default_workspace():
         {"Workspace": workspace,
          "RewriteSpectraMap": True,
          "InstrumentName": default_instrument})
-    return MuonWorkspace(workspace)
+    return MuonWorkspaceWrapper(workspace)
 
 
 # Dictionary of (property name):(property value) pairs to put into Load algorithm
@@ -226,13 +226,13 @@ def load_workspace_from_filename(filename,
     if is_workspace_group(workspace):
         # handle multi-period data
         load_result = _get_algorithm_properties(alg, output_properties)
-        load_result["OutputWorkspace"] = [MuonWorkspace(ws) for ws in load_result["OutputWorkspace"]]
+        load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
 
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
-        load_result["OutputWorkspace"] = MuonWorkspace(load_result["OutputWorkspace"])
+        load_result["OutputWorkspace"] = MuonWorkspaceWrapper(load_result["OutputWorkspace"])
         run = int(workspace.getRunNumber())
 
     load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
