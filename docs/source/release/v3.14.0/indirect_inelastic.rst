@@ -84,6 +84,10 @@ Improvements
 Bayes Interface
 ---------------
 
+New Features
+############
+- It is now possible to produce a contour plot from the output on the Stretch Tab.
+
 Improvements
 ############
 
