@@ -15,7 +15,7 @@ namespace DataHandling {
 bool LoadGeometry::isIDF(const std::string &filename) {
   if (!filename.empty()) {
     Mantid::Kernel::FileDescriptor descriptor(filename);
-    return ((descriptor.isAscii() && descriptor.extension() == ".xml"));
+    return descriptor.isXML();
   }
   return false;
 }

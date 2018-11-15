@@ -201,8 +201,6 @@ public:
   const std::vector<std::string> &getInstrumentDirectories() const;
   /// Get instrument search directory
   const std::string getInstrumentDirectory() const;
-  /// Get instrument and data search directories
-  const std::vector<std::string> getInstrumentAndDataDirectories() const;
   /// get the vtp file directory
   const std::string getVTPFileDirectory();
   //@}

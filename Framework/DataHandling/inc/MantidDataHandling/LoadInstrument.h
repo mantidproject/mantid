@@ -81,11 +81,11 @@ public:
     return "DataHandling\\Instrument";
   }
   /// Load instrument from IDF XML file
-  void idfInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace> &ws,
+  void idfInstrumentLoader(const boost::shared_ptr<API::MatrixWorkspace> &ws,
                            std::string filename, std::string instname,
-                           std::string &xmlString);
+                           const std::string &xmlString);
   /// Load instrument from Nexus file
-  void nexusInstrumentLoader(boost::shared_ptr<API::MatrixWorkspace> &ws,
+  void nexusInstrumentLoader(const boost::shared_ptr<API::MatrixWorkspace> &ws,
                              std::string filename);
 
 private:
@@ -93,7 +93,7 @@ private:
   void exec() override;
 
   /// Run the Child Algorithm LoadParameters
-  void runLoadParameterFile(boost::shared_ptr<API::MatrixWorkspace> &ws,
+  void runLoadParameterFile(const boost::shared_ptr<API::MatrixWorkspace> &ws,
                             std::string filename);
 
   /// Search directory for Parameter file, return full path name if found, else

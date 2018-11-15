@@ -115,7 +115,7 @@ void LoadInstrument::exec() {
     if (filename.empty())
       filename = instname;
     // Call IDF loader
-    idfInstrumentLoader(ws, filename, instname, *InstrumentXML);
+    idfInstrumentLoader(ws, filename, instname, InstrumentXML->value());
 
   } else {
     // This part of the loader searches through the instrument directories for
@@ -160,7 +160,7 @@ void LoadInstrument::exec() {
       nexusInstrumentLoader(ws, filename);
     } else {
       throw Kernel::Exception::FileError(
-          "Now valid loader found for instrument file ", filename);
+          "No valid loader found for instrument file ", filename);
     }
   }
 
@@ -176,8 +176,8 @@ void LoadInstrument::exec() {
 
 /// Load instrument from IDF XML file
 void LoadInstrument::idfInstrumentLoader(
-    boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
-    std::string instname, std::string &xmlString) {
+    const boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
+    std::string instname, const std::string &xmlString) {
 
   auto parser = InstrumentDefinitionParser(filename, instname, xmlString);
 
@@ -223,7 +223,7 @@ void LoadInstrument::idfInstrumentLoader(
 
 /// Load instrument from Nexus file
 void LoadInstrument::nexusInstrumentLoader(
-    boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename) {
+    const boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename) {
   Instrument_const_sptr instrument =
       NexusGeometry::NexusGeometryParser::createInstrument(filename);
   ws->setInstrument(instrument);
@@ -233,7 +233,7 @@ void LoadInstrument::nexusInstrumentLoader(
 //-----------------------------------------------------------------------------------------------------------------------
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
 void LoadInstrument::runLoadParameterFile(
-    boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename) {
+    const boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename) {
   g_log.debug("Loading the parameter definition...");
 
   // First search for XML parameter file in same folder as IDF file

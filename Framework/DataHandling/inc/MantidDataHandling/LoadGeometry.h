@@ -20,8 +20,11 @@ Common methods for LoadInstrument.cpp and LoadEmptyInstrument.cpp
 */
 namespace LoadGeometry {
 
+/// Determine if the Geometry file type is IDF
 bool isIDF(const std::string &filename);
+/// Determine if the Geometry file type is Nexus
 bool isNexus(const std::string &filename);
+/// List allowed file extensions for geometry
 const std::vector<std::string> validExtensions();
 
 } // namespace LoadGeometry
