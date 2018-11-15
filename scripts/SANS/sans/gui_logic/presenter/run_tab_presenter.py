@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ The run tab presenter.
 
 This presenter is essentially the brain of the reduction gui. It controls other presenters and is mainly responsible
@@ -9,7 +15,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import copy
 import time
-from mantid.kernel import Logger
+from mantid.kernel import Logger, ConfigService
 from mantid.api import (FileFinder)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
@@ -19,6 +25,7 @@ from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
+from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_instrument_strings_for_gui)
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState)
 from sans.user_file.user_file_reader import UserFileReader
@@ -30,7 +37,6 @@ from sans.gui_logic.models.diagnostics_page_model import run_integral, create_st
 from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
 from ui.sans_isis.work_handler import WorkHandler
-from sans.common.file_information import SANSFileInformationFactory
 
 try:
     import mantidplot
@@ -39,7 +45,8 @@ except (Exception, Warning):
     # this should happen when this is called from outside Mantidplot and only then,
     # the result is that attempting to plot will raise an exception
 
-row_state_to_colour_mapping = {RowState.Unprocessed:'#FFFFFF', RowState.Processed:'#d0f4d0', RowState.Error:'#accbff'}
+row_state_to_colour_mapping = {RowState.Unprocessed: '#FFFFFF', RowState.Processed: '#d0f4d0',
+                               RowState.Error: '#accbff'}
 
 
 class RunTabPresenter(object):
@@ -93,6 +100,9 @@ class RunTabPresenter(object):
         def on_cut_rows(self):
             self._presenter.on_cut_rows_requested()
 
+        def on_sample_geometry_selection(self, show_geometry):
+            self._presenter.on_sample_geometry_view_changed(show_geometry)
+
     class ProcessListener(WorkHandler.WorkListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ProcessListener, self).__init__()
@@ -109,20 +119,22 @@ class RunTabPresenter(object):
         self._facility = facility
         # Logger
         self.sans_logger = Logger("SANS")
-        # Name of grpah to output to
+        # Name of graph to output to
         self.output_graph = 'SANS-Latest'
         self.progress = 0
 
         # Models that are being used by the presenter
         self._state_model = None
         self._table_model = TableModel()
+        self._table_model.subscribe_to_model_changes(self)
 
         # Presenter needs to have a handle on the view since it delegates it
         self._view = None
         self.set_view(view)
         self._processing = False
         self.work_handler = WorkHandler()
-        self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.on_processing_finished, self.on_processing_error)
+        self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.on_processing_finished,
+                                                       self.on_processing_error)
 
         # File information for the first input
         self._file_information = None
@@ -133,12 +145,19 @@ class RunTabPresenter(object):
 
         # Masking table presenter
         self._masking_table_presenter = MaskingTablePresenter(self)
+        self._table_model.subscribe_to_model_changes(self._masking_table_presenter)
 
         # Beam centre presenter
         self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel, SANSCentreFinder)
+        self._table_model.subscribe_to_model_changes(self._beam_centre_presenter)
 
         # Workspace Diagnostic page presenter
-        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, create_state, self._facility)
+        self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, create_state,
+                                                                        self._facility)
+
+        # Check save dir for display
+        self._save_directory_observer = \
+            SaveDirectoryObserver(self._handle_output_directory_changed)
 
     def _default_gui_setup(self):
         """
@@ -167,8 +186,9 @@ class RunTabPresenter(object):
         self._view.sample_shape = sample_shape
 
         # Set the q range
-        self._view.q_1d_step_type = range_step_types
-        self._view.q_xy_step_type = range_step_types
+        self._view.q_1d_step_type = [RangeStepType.to_string(RangeStepType.Lin),
+                                     RangeStepType.to_string(RangeStepType.Log)]
+        self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin)]
 
         # Set the fit options
         fit_types = [FitType.to_string(FitType.Linear),
@@ -176,6 +196,14 @@ class RunTabPresenter(object):
                      FitType.to_string(FitType.Polynomial)]
         self._view.transmission_sample_fit_type = fit_types
         self._view.transmission_can_fit_type = fit_types
+
+    def _handle_output_directory_changed(self, new_directory):
+        """
+        Update the gui to display the new save location for workspaces
+        :param new_directory: string. Current save directory for files
+        :return:
+        """
+        self._view.set_out_file_directory(new_directory)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Table + Actions
@@ -208,7 +236,10 @@ class RunTabPresenter(object):
             self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view.instrument)
 
             self._view.setup_layout()
-            self._view.set_hinting_line_edit_for_column(15, self._table_model.get_options_hint_strategy())
+            self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
+            self._view.set_hinting_line_edit_for_column(
+                self._table_model.column_name_converter.index('options_column_model'),
+                self._table_model.get_options_hint_strategy())
 
     def on_user_file_load(self):
         """
@@ -273,20 +304,15 @@ class RunTabPresenter(object):
             for index, row in enumerate(parsed_rows):
                 self._add_row_to_table_model(row, index)
             self._table_model.remove_table_entries([len(parsed_rows)])
-
-            self.update_view_from_table_model()
-
-            self._beam_centre_presenter.on_update_rows()
-            self._masking_table_presenter.on_update_rows()
-
         except RuntimeError as e:
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
-    def _add_row_to_table_model(self,row, index):
+    def _add_row_to_table_model(self, row, index):
         """
         Adds a row to the table
         """
+
         def get_string_entry(_tag, _row):
             _element = ""
             if _tag in _row:
@@ -311,19 +337,20 @@ class RunTabPresenter(object):
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
         can_direct_period = get_string_period(get_string_entry(BatchReductionEntry.CanDirectPeriod, row))
         output_name = get_string_entry(BatchReductionEntry.Output, row)
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information(sample_scatter)
-        sample_thickness = file_information._thickness
         user_file = get_string_entry(BatchReductionEntry.UserFile, row)
 
         row_entry = [sample_scatter, sample_scatter_period, sample_transmission, sample_transmission_period,
-                     sample_direct, sample_direct_period, can_scatter, can_scatter_period, can_transmission, can_transmission_period,
+                     sample_direct, sample_direct_period, can_scatter, can_scatter_period, can_transmission,
+                     can_transmission_period,
                      can_direct, can_direct_period,
-                     output_name, user_file, sample_thickness, '']
+                     output_name, user_file, '', '']
 
         table_index_model = TableIndexModel(*row_entry)
 
         self._table_model.add_table_entry(index, table_index_model)
+
+    def on_update_rows(self):
+        self.update_view_from_table_model()
 
     def update_view_from_table_model(self):
         self._view.clear_table()
@@ -340,10 +367,6 @@ class RunTabPresenter(object):
 
     def on_data_changed(self, row, column, new_value, old_value):
         self._table_model.update_table_entry(row, column, new_value)
-        self._view.change_row_color(row_state_to_colour_mapping[RowState.Unprocessed], row)
-        self._view.set_row_tooltip('', row)
-        self._beam_centre_presenter.on_update_rows()
-        self._masking_table_presenter.on_update_rows()
 
     def on_instrument_changed(self):
         self._setup_instrument_specific_settings()
@@ -367,7 +390,6 @@ class RunTabPresenter(object):
             selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
             for row in selected_rows:
                 self._table_model.reset_row_state(row)
-            self.update_view_from_table_model()
             states, errors = self.get_states(row_index=selected_rows)
 
             for row, error in errors.items():
@@ -389,7 +411,7 @@ class RunTabPresenter(object):
             output_mode = self._view.output_mode
 
             # Check if results should be plotted
-            plot_results =  self._view.plot_results
+            plot_results = self._view.plot_results
 
             # Get the name of the graph to output to
             output_graph = self.output_graph
@@ -397,7 +419,7 @@ class RunTabPresenter(object):
             self.progress = 0
             setattr(self._view, 'progress_bar_value', self.progress)
             setattr(self._view, 'progress_bar_maximum', len(states))
-            self.batch_process_runner.process_states(states,use_optimizations, output_mode, plot_results, output_graph)
+            self.batch_process_runner.process_states(states, use_optimizations, output_mode, plot_results, output_graph)
 
         except Exception as e:
             self._view.enable_buttons()
@@ -413,11 +435,13 @@ class RunTabPresenter(object):
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
 
-    def notify_progress(self, row):
+    def notify_progress(self, row, out_shift_factors, out_scale_factors):
         self.increment_progress()
-        message = ''
-        self._table_model.set_row_to_processed(row, message)
-        self.update_view_from_table_model()
+        if out_scale_factors and out_shift_factors:
+            self._table_model.set_option(row, 'MergeScale', round(out_scale_factors[0], 3))
+            self._table_model.set_option(row, 'MergeShift', round(out_shift_factors[0], 3))
+
+        self._table_model.set_row_to_processed(row, '')
 
     def on_processing_finished(self, result):
         self._view.enable_buttons()
@@ -426,7 +450,6 @@ class RunTabPresenter(object):
     def on_processing_error(self, row, error_msg):
         self.increment_progress()
         self._table_model.set_row_to_error(row, error_msg)
-        self.update_view_from_table_model()
 
     def increment_progress(self):
         self.progress = self.progress + 1
@@ -441,18 +464,15 @@ class RunTabPresenter(object):
         selected_row = selected_rows[0] + 1 if selected_rows else self._table_model.get_number_of_rows()
         table_entry_row = self._table_model.create_empty_row()
         self._table_model.add_table_entry(selected_row, table_entry_row)
-        self.update_view_from_table_model()
 
     def on_erase_rows(self):
         selected_rows = self._view.get_selected_rows()
-        empty_row = TableModel.create_empty_row()
         for row in selected_rows:
+            empty_row = TableModel.create_empty_row()
             self._table_model.replace_table_entries([row], [empty_row])
-        self.update_view_from_table_model()
 
     def on_rows_removed(self, rows):
         self._table_model.remove_table_entries(rows)
-        self.update_view_from_table_model()
 
     def on_copy_rows_requested(self):
         selected_rows = self._view.get_selected_rows()
@@ -472,10 +492,15 @@ class RunTabPresenter(object):
             selected_rows = selected_rows if selected_rows else [self._table_model.get_number_of_rows()]
             replacement_table_index_models = [TableIndexModel(*x) for x in self._clipboard]
             self._table_model.replace_table_entries(selected_rows, replacement_table_index_models)
-            self.update_view_from_table_model()
 
     def on_manage_directories(self):
         self._view.show_directory_manager()
+
+    def on_sample_geometry_view_changed(self, show_geometry):
+        if show_geometry:
+            self._view.show_geometry()
+        else:
+            self._view.hide_geometry()
 
     def get_row_indices(self):
         """
@@ -599,7 +624,6 @@ class RunTabPresenter(object):
         self._set_on_view("zero_error_free")
         self._set_on_view("save_types")
         self._set_on_view("compatibility_mode")
-
         self._set_on_view("merge_scale")
         self._set_on_view("merge_shift")
         self._set_on_view("merge_scale_fit")
@@ -622,10 +646,6 @@ class RunTabPresenter(object):
         self._set_on_view("wavelength_step")
 
         self._set_on_view("absolute_scale")
-        self._set_on_view("sample_shape")
-        self._set_on_view("sample_height")
-        self._set_on_view("sample_width")
-        self._set_on_view("sample_thickness")
         self._set_on_view("z_offset")
 
         # Adjustment tab
@@ -766,12 +786,14 @@ class RunTabPresenter(object):
 
     def _set_on_view(self, attribute_name):
         attribute = getattr(self._state_model, attribute_name)
-        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
+        if attribute or isinstance(attribute,
+                                   bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(self._view, attribute_name, attribute)
 
     def _set_on_view_with_view(self, attribute_name, view):
         attribute = getattr(self._state_model, attribute_name)
-        if attribute or isinstance(attribute, bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
+        if attribute or isinstance(attribute,
+                                   bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
             setattr(view, attribute_name, attribute)
 
     def _get_state_model_with_view_update(self):
@@ -813,10 +835,6 @@ class RunTabPresenter(object):
         self._set_on_state_model("wavelength_range", state_model)
 
         self._set_on_state_model("absolute_scale", state_model)
-        self._set_on_state_model("sample_shape", state_model)
-        self._set_on_state_model("sample_height", state_model)
-        self._set_on_state_model("sample_width", state_model)
-        self._set_on_state_model("sample_thickness", state_model)
         self._set_on_state_model("z_offset", state_model)
 
         # Adjustment tab
@@ -936,7 +954,7 @@ class RunTabPresenter(object):
             if q_1d_min and q_1d_max and q_1d_step and q_1d_step_type:
                 q_1d_rebin_string = str(q_1d_min) + ","
                 q_1d_step_type_factor = -1. if q_1d_step_type is RangeStepType.Log else 1.
-                q_1d_rebin_string += str(q_1d_step_type_factor*q_1d_step) + ","
+                q_1d_rebin_string += str(q_1d_step_type_factor * q_1d_step) + ","
                 q_1d_rebin_string += str(q_1d_max)
                 state_model.q_1d_rebin_string = q_1d_rebin_string
 

@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, division, print_function)
 
 import numpy
@@ -364,6 +357,42 @@ def pcolormesh(axes, workspace, *args, **kwargs):
 
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
+def imshow(axes, workspace, *args, **kwargs):
+    '''
+    Essentially the same as :meth:`matplotlib.axes.Axes.pcolormesh`.
+
+    :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
+    :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
+                      to extract the data from
+    :param distribution: ``None`` (default) asks the workspace. ``False`` means
+                         divide by bin width. ``True`` means do not divide by bin width.
+                         Applies only when the the matrix workspace is a histogram.
+    :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
+                          the value from displayNormalizationHisto. It checks only if
+                          the normalization is mantid.api.MDNormalization.NumEventsNormalization
+    :param axisaligned: ``False`` (default). If ``True``, or if the workspace has a variable
+                        number of bins, the polygons will be aligned with the axes
+    '''
+    _setLabels2D(axes, workspace)
+    if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        x, y, z = get_md_data2d_bin_bounds(workspace, normalization)
+    else:
+        (uneven_bins, kwargs) = get_data_uneven_flag(workspace, **kwargs)
+        (distribution, kwargs) = get_distribution(workspace, **kwargs)
+        if uneven_bins:
+            raise Exception('Variable number of bins is not supported by imshow.')
+        else:
+            (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
+
+    diffs = numpy.diff(x, axis=1)
+    x_spacing_equal = numpy.alltrue(diffs == diffs[0])
+    diffs = numpy.diff(y, axis=0)
+    y_spacing_equal = numpy.alltrue(diffs == diffs[0])
+    if not x_spacing_equal or not y_spacing_equal:
+        raise Exception('Unevenly spaced bins are not supported by imshow')
+    kwargs['extent'] = [x[0,0],x[0,-1],y[0,0],y[-1,0]]
+    return axes.imshow(z, *args, **kwargs)
 
 def tripcolor(axes, workspace, *args, **kwargs):
     '''

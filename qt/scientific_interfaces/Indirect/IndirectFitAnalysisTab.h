@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 
@@ -68,6 +74,7 @@ public:
   void addComboBoxFunctionGroup(
       const QString &groupName,
       const std::vector<Mantid::API::IFunction_sptr> &functions);
+  void clearFitTypeComboBox();
 
   void setBackgroundOptions(const QStringList &backgrounds);
 
@@ -151,6 +158,7 @@ signals:
   void functionChanged();
   void parameterChanged(const Mantid::API::IFunction *);
   void customBoolChanged(const QString &key, bool value);
+  void updateFitTypes();
 
 protected slots:
 
@@ -163,6 +171,7 @@ protected slots:
   void setBrowserStartX(double startX);
   void setBrowserEndX(double endX);
   void updateBrowserFittingRange();
+  void setBrowserWorkspace();
   void setBrowserWorkspace(std::size_t dataIndex);
   void setBrowserWorkspaceIndex(std::size_t spectrum);
   void tableStartXChanged(double startX, std::size_t dataIndex,
@@ -189,6 +198,9 @@ protected slots:
 
   void updateResultOptions();
   void saveResult();
+
+private slots:
+  void emitUpdateFitTypes();
 
 private:
   /// Overidden by child class.

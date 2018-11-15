@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
@@ -535,7 +541,7 @@ void LoadNexusLogs::loadSELog(
       }
       logValue = createTimeSeries(file, propName);
       file.closeGroup();
-    } catch (::NeXus::Exception &e) {
+    } catch (std::exception &e) {
       g_log.warning() << "IXseblock entry '" << entry_name
                       << "' gave an error when loading "
                       << "a time series:'" << e.what() << "'. Skipping entry\n";

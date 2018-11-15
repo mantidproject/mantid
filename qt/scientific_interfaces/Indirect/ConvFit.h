@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 
@@ -40,7 +46,7 @@ private:
 
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);
-
+  void setButtonsEnabled(bool enabled);
   void setPlotResultIsPlotting(bool plotting);
 
   std::string fitTypeString() const;

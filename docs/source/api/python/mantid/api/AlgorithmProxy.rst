@@ -2,7 +2,7 @@
  AlgorithmProxy
 ================
 
-This a python binding to the C++ class Mantid::API::AlgorithmProxy.
+This is a Python binding to the C++ class Mantid::API::AlgorithmProxy.
 
 *bases:* :py:obj:`mantid.api.IAlgorithm`
 

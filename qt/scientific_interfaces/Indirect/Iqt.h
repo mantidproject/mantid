@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 
@@ -25,7 +31,7 @@ private:
   void setPlotResultEnabled(bool enabled);
   void setTiledPlotEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
-
+  void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
   void setTiledPlotIsPlotting(bool plotting);

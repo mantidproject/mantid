@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 #
-#    Copyright (C) 2017 mantidproject
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
 # system imports
@@ -21,6 +14,8 @@ import functools
 
 # third-party library imports
 from mantid.api import AnalysisDataService
+from mantidqt.widgets.samplelogs.presenter import SampleLogs
+from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
@@ -53,6 +48,8 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
                                                                                          errors=True, overplot=True))
         self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
+        self.workspacewidget.sampleLogsClicked.connect(self._do_sample_logs)
+        self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
 
     # ----------------- Plugin API --------------------
 
@@ -62,7 +59,10 @@ class WorkspaceWidget(PluginWidget):
     def get_plugin_title(self):
         return "Workspaces"
 
-    def read_user_settings(self, _):
+    def readSettings(self, _):
+        pass
+
+    def writeSettings(self, _):
         pass
 
     # ----------------- Behaviour --------------------
@@ -95,3 +95,22 @@ class WorkspaceWidget(PluginWidget):
         except BaseException:
             import traceback
             traceback.print_exc()
+
+    def _do_sample_logs(self, names):
+        """
+        Show the sample log window for the given workspaces
+
+        :param names: A list of workspace names
+        """
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            SampleLogs(ws=ws, parent=self)
+
+    def _do_show_instrument(self, names):
+        """
+        Show an instrument widget for the given workspaces
+
+        :param names: A list of workspace names
+        """
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            presenter = InstrumentViewPresenter(ws, parent=self)
+            presenter.view.show()
