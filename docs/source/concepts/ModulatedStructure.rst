@@ -107,7 +107,16 @@ or
 ModUB is added to OrientedLattice class and ModHKL and ModVec
 are added to UnitCell class. Value
 for ModHKL in UnitCell is set when the function setModUB is used in
-OrientedLattice.
+OrientedLattice. Some of the values can be set from python.
+
+.. code-block:: python
+
+    sampleWs = CreateSampleWorkspace()
+    pws = CreatePeaksWorkspace(InstrumentWorkspace=sampleWs,NumberOfPeaks=1)
+    peak = pws.getPeak(0)
+    testVector = V3D(0.9,0,0.2)
+    peak.setIntMNP(testVector)
+    print (peak.getIntMNP() == V3D(1,0,0))
 
 A python script is in development for step 4, which provides a visual aid for
 identifying the satellite peaks. It also find clusters of peaks by

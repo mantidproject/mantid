@@ -948,7 +948,10 @@ void Peak::setPeakNumber(int m_peakNumber) {
 // -------------------------------------------------------------------------------------
 /** Sets the modulated peak structure number
  * @param MNP :: modulated peak structure value   */
-void Peak::setIntMNP(V3D MNP) { m_IntMNP = MNP; }
+void Peak::setIntMNP(V3D MNP) {
+  m_IntMNP = V3D(boost::math::iround(MNP[0]), boost::math::iround(MNP[1]),
+                 boost::math::iround(MNP[2]));
+}
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */
