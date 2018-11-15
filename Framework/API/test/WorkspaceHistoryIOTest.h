@@ -15,6 +15,9 @@
 #include "MantidKernel/Property.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "Poco/File.h"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -211,8 +214,10 @@ public:
   void test_SaveNexus() {
     WorkspaceHistory testHistory;
     for (int i = 1; i < 5; i++) {
-      AlgorithmHistory algHist("History" + boost::lexical_cast<std::string>(i),
-                               1, DateAndTime::defaultTime(), -1.0, i);
+      AlgorithmHistory algHist(
+          "History" + boost::lexical_cast<std::string>(i), 1,
+          boost::uuids::to_string(boost::uuids::random_generator()()),
+          DateAndTime::defaultTime(), -1.0, i);
       testHistory.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
     }
 
@@ -248,10 +253,14 @@ public:
 
   void test_SaveNexus_NestedHistory() {
     WorkspaceHistory testHistory;
-    AlgorithmHistory algHist("ParentHistory", 1, DateAndTime::defaultTime(),
-                             -1.0, 0);
-    AlgorithmHistory childHist("ChildHistory", 1, DateAndTime::defaultTime(),
-                               -1.0, 1);
+    AlgorithmHistory algHist(
+        "ParentHistory", 1,
+        boost::uuids::to_string(boost::uuids::random_generator()()),
+        DateAndTime::defaultTime(), -1.0, 0);
+    AlgorithmHistory childHist(
+        "ChildHistory", 1,
+        boost::uuids::to_string(boost::uuids::random_generator()()),
+        DateAndTime::defaultTime(), -1.0, 1);
 
     algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(childHist));
     testHistory.addHistory(boost::make_shared<AlgorithmHistory>(algHist));

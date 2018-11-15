@@ -48,7 +48,7 @@ class TableModelTest(unittest.TestCase):
     def test_that_can_set_the_options_column_model(self):
         table_index_model = TableIndexModel('0', "", "", "", "", "", "",
                                             "", "", "", "", "", "", "", "",
-                                            "WavelengthMin=1, WavelengthMax=3, NotRegister2=1")
+                                            options_column_string="WavelengthMin=1, WavelengthMax=3, NotRegister2=1")
         options_column_model = table_index_model.options_column_model
         options = options_column_model.get_options()
         self.assertTrue(len(options) == 2)
@@ -56,9 +56,9 @@ class TableModelTest(unittest.TestCase):
         self.assertTrue(options["WavelengthMax"] == 3.)
 
     def test_that_raises_for_missing_equal(self):
-        args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-                "WavelengthMin=1, WavelengthMax=3, NotRegister2"]
-        self.assertRaises(ValueError,  TableIndexModel, *args)
+        args = [0, "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+        kwargs = {'options_column_string': "WavelengthMin=1, WavelengthMax=3, NotRegister2"}
+        self.assertRaises(ValueError,  TableIndexModel, *args, **kwargs)
 
     def test_that_querying_nonexistent_row_index_raises_IndexError_exception(self):
         table_model = TableModel()
@@ -138,18 +138,77 @@ class TableModelTest(unittest.TestCase):
     def test_that_OptionsColumnModel_get_permissable_properties_returns_correct_properties(self):
         permissable_properties = OptionsColumnModel._get_permissible_properties()
 
-        self.assertEqual(permissable_properties, {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str})
+        self.assertEqual(permissable_properties, {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str,
+                                                  "MergeScale": float, "MergeShift": float})
 
     def test_that_OptionsColumnModel_get_hint_strategy(self):
         hint_strategy = OptionsColumnModel.get_hint_strategy()
         expected_hint_strategy = BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
                                   "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
+                                  "MergeScale": 'The scale applied to the HAB when mergeing',
+                                  "MergeShift": 'The shift applied to the HAB when mergeing',
                                   "EventSlices": 'The event slices to reduce.'
                                   ' The format is the same as for the event slices'
                                   ' box in settings, however if a comma separated list is given '
                                   'it must be enclosed in quotes'})
 
         self.assertEqual(expected_hint_strategy, hint_strategy)
+
+    def test_that_row_state_is_initially_unprocessed(self):
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+
+        self.assertEqual(table_index_model.row_state, RowState.Unprocessed)
+        self.assertEqual(table_index_model.tool_tip, '')
+
+    def test_that_set_processed_sets_state_to_processed(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        row = 0
+        tool_tip = 'Processesing succesful'
+
+        table_model.set_row_to_processed(row, tool_tip)
+
+        self.assertEqual(table_index_model.row_state, RowState.Processed)
+        self.assertEqual(table_index_model.tool_tip, tool_tip)
+
+    def test_that_reset_row_state_sets_row_to_unproceesed_and_sets_tool_tip_to_empty(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        row = 0
+        tool_tip = 'Processesing succesful'
+        table_model.set_row_to_processed(row, tool_tip)
+
+        table_model.reset_row_state(row)
+
+        self.assertEqual(table_index_model.row_state, RowState.Unprocessed)
+        self.assertEqual(table_index_model.tool_tip, '')
+
+    def test_that_set_row_to_error_sets_row_to_error_and_tool_tip(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        row = 0
+        tool_tip = 'There was an error'
+
+        table_model.set_row_to_error(row, tool_tip)
+
+        self.assertEqual(table_index_model.row_state, RowState.Error)
+        self.assertEqual(table_index_model.tool_tip, tool_tip)
+
+    def test_serialise_options_dict_correctly(self):
+        options_column_model = OptionsColumnModel('EventSlices=1-6,5-9,4:5:89 , WavelengthMax=78 , WavelengthMin=9')
+        options_column_model.set_option('MergeScale', 1.5)
+
+        options_string = options_column_model.get_options_string()
+
+        self.assertEqual(options_string, 'EventSlices=1-6,5-9,4:5:89, MergeScale=1.5,'
+                                         ' WavelengthMax=78.0, WavelengthMin=9.0')
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string

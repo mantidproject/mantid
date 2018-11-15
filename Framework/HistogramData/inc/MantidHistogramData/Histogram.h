@@ -197,8 +197,6 @@ private:
   template <class... T> bool selfAssignmentDx(const T &...) { return false; }
   template <class... T> bool selfAssignmentY(const T &...) { return false; }
   template <class... T> bool selfAssignmentE(const T &...) { return false; }
-  void switchDxToBinEdges();
-  void switchDxToPoints();
 
   XMode m_xMode;
   YMode m_yMode{YMode::Uninitialized};

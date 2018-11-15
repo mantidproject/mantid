@@ -16,6 +16,10 @@ if (POLICY CMP0072)
   cmake_policy (SET CMP0072 OLD)
 endif ()
 
+if (POLICY CMP0074)
+  cmake_policy (SET CMP0074 NEW)
+endif ()
+
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "" )
 
@@ -306,6 +310,7 @@ if ( ENABLE_CPACK )
                                        "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
                                        "sip >= 4.18,"
                                        "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
+                                       "python-requests,"
                                        "scipy,"
                                        "hdf,hdf5,jsoncpp >= 0.7.0" )
       if (ENABLE_MANTIDPLOT)
@@ -367,17 +372,24 @@ if ( ENABLE_CPACK )
                                            "libqscintilla2-12v5,"
                                            "ipython-notebook,"
                                            "libhdf5-cpp-11" )
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqt5scintilla2-12v5" )
+        endif()
       else()  # bionic and newer
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgsl23,"
                                            "liboce-foundation11,liboce-modeling11,"
                                            "libqscintilla2-qt4-13,"
                                            "jupyter-notebook,"
                                            "libhdf5-cpp-100" )
+        if (ENABLE_WORKBENCH)
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13" )
+        endif()
       endif()
 
       if ( PYTHON_VERSION_MAJOR EQUAL 3 )
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
                                            "python3-numpy,"
+                                           "python3-requests,"
                                            "python3-sip,"
                                            "python3-six,"
                                            "python3-matplotlib,"
@@ -391,11 +403,12 @@ if ( ENABLE_CPACK )
           set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt4" )
         endif()
         if (ENABLE_WORKBENCH)
-          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-qt5" )
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-pyqt5" )
         endif()
       else() # python 2
         set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-h5py,"
                                            "python-numpy,"
+                                           "python-requests,"
                                            "python-sip,"
                                            "python-six,"
                                            "python-matplotlib,"
@@ -409,7 +422,7 @@ if ( ENABLE_CPACK )
           set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-qt4" )
         endif()
         if (ENABLE_WORKBENCH)
-          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-qt5" )
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},python-pyqt5" )
         endif()
       endif ()
       # parse list to string required for deb package

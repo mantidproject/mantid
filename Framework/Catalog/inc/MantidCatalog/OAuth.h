@@ -66,6 +66,7 @@ class MANTID_CATALOG_DLL IOAuthTokenStore {
 public:
   virtual void setToken(const boost::optional<OAuthToken> &token) = 0;
   virtual boost::optional<OAuthToken> getToken() = 0;
+  virtual ~IOAuthTokenStore() = default;
 };
 
 class MANTID_CATALOG_DLL ConfigServiceTokenStore : public IOAuthTokenStore {
@@ -73,7 +74,7 @@ public:
   ConfigServiceTokenStore() = default;
   ConfigServiceTokenStore &
   operator=(const ConfigServiceTokenStore &other) = default;
-  ~ConfigServiceTokenStore();
+  ~ConfigServiceTokenStore() override;
 
   void setToken(const boost::optional<OAuthToken> &token) override;
   boost::optional<OAuthToken> getToken() override;
