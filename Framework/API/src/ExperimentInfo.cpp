@@ -975,24 +975,26 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
   std::string instrument(
       Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
-  // Get the instrument and data directories for instrument file search
+  // Get the instrument directories for instrument file search
   const std::vector<std::string> &directoryNames =
       Kernel::ConfigService::Instance().getInstrumentDirectories();
-  const DateAndTime d(date);
 
-  // Now search through directories for either xml or hdf5/nxs file
-  const boost::regex instfile_regex(instrument +
-                                        "_Definition.*\\.(xml|nxs|hdf5)",
-                                    boost::regex_constants::icase);
-  DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
-                                              // recently starting IDF, if none
-                                              // match
-  DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
-                                                      // the most recently
+  const boost::regex regex(instrument + "_Definition.*\\.(xml|nxs|hdf5)",
+                           boost::regex_constants::icase);
+  Poco::DirectoryIterator end_iter;
+  DateAndTime d(date);
   bool foundGoodFile =
       false; // True if we have found a matching file (valid at the given date)
-  Poco::DirectoryIterator end_iter;
-  std::string mostRecentInstFile;
+  std::string mostRecentInstFile; // store most recently starting matching
+                                  // instrument file if found, else most
+                                  // recently starting instrument file.
+  DateAndTime refDate("1900-01-31 23:59:00"); // used to help determine the most
+                                              // recently starting instrument
+                                              // file, if none match
+  DateAndTime refDateGoodFile("1900-01-31 23:59:00"); // used to help determine
+                                                      // the most recently
+                                                      // starting matching
+                                                      // instrument file
   for (const auto &directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first beat file
@@ -1004,12 +1006,11 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
         continue;
 
       const std::string &l_filenamePart = filePath.getFileName();
-
-      if (regex_match(l_filenamePart, instfile_regex)) {
+      if (regex_match(l_filenamePart, regex)) {
         const auto &pathName = filePath.toString();
         g_log.debug() << "Found file: '" << pathName << "'\n";
         std::string validFrom, validTo;
-        ExperimentInfo::getValidFromTo(pathName, validFrom, validTo);
+        getValidFromTo(pathName, validFrom, validTo);
         g_log.debug() << "File '" << pathName << " valid dates: from '"
                       << validFrom << "' to '" << validTo << "'\n";
 
