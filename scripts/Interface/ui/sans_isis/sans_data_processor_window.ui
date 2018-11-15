@@ -217,6 +217,20 @@ QGroupBox::title {
                 </property>
                </widget>
               </item>
+              <item row="3" column="1">
+               <widget class="QLabel" name="output_directory_label">
+                <property name="text">
+                 <string>Save Directory: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="4">
+               <widget class="QLabel" name="output_directory_location">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -351,6 +365,13 @@ QGroupBox::title {
             </item>
             <item>
              <layout class="QGridLayout" name="gridLayout_7">
+              <item row="0" column="2">
+               <widget class="QCheckBox" name="multi_period_check_box">
+                <property name="text">
+                 <string>Multi-period</string>
+                </property>
+               </widget>
+              </item>
               <item row="0" column="3">
                <widget class="QGroupBox" name="reduction_dimensionality_group_box">
                 <property name="maximumSize">
@@ -380,20 +401,7 @@ QGroupBox::title {
                 </layout>
                </widget>
               </item>
-              <item row="0" column="1">
-               <spacer name="horizontalSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="4" rowspan="2">
+              <item row="0" column="4" rowspan="3">
                <widget class="QGroupBox" name="save_group_box">
                 <property name="styleSheet">
                  <string notr="true"/>
@@ -418,7 +426,7 @@ QGroupBox::title {
                         <string>Memor&amp;y</string>
                        </property>
                        <property name="checked">
-                        <bool>false</bool>
+                        <bool>true</bool>
                        </property>
                       </widget>
                      </item>
@@ -434,6 +442,9 @@ QGroupBox::title {
                      </item>
                      <item>
                       <widget class="QRadioButton" name="output_mode_both_radio_button">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
                        <property name="toolTip">
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save locations for the output of batch reductions are: Memory (RAM), File (Hard disk), Both (RAM and Hard disk).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
@@ -441,7 +452,7 @@ QGroupBox::title {
                         <string>Both</string>
                        </property>
                        <property name="checked">
-                        <bool>true</bool>
+                        <bool>false</bool>
                        </property>
                       </widget>
                      </item>
@@ -540,10 +551,23 @@ QGroupBox::title {
                 </layout>
                </widget>
               </item>
-              <item row="0" column="2">
-               <widget class="QCheckBox" name="multi_period_check_box">
+              <item row="0" column="1">
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="1" column="2">
+               <widget class="QCheckBox" name="sample_geometry_checkbox">
                 <property name="text">
-                 <string>Multi-period</string>
+                 <string>Sample Geometry</string>
                 </property>
                </widget>
               </item>
@@ -827,46 +851,6 @@ QGroupBox::title {
                       <layout class="QGridLayout" name="gridLayout_5">
                        <item row="0" column="0">
                         <layout class="QGridLayout" name="gridLayout_4">
-                         <item row="3" column="0">
-                          <widget class="QLabel" name="width_label">
-                           <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The width of the sample. If this input is left empty, then the value stored in the metadata of the file is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                           </property>
-                           <property name="text">
-                            <string>Width [mm]</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="2" column="0">
-                          <widget class="QLabel" name="height_label">
-                           <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The height of the sample. If this input is left empty, then the value stored in the metadata of the file is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                           </property>
-                           <property name="text">
-                            <string>Height [mm]</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="4" column="0">
-                          <widget class="QLabel" name="thickness_label">
-                           <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The thickness of the sample. If this input is left empty, then the value stored in the metadata of the file is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                           </property>
-                           <property name="text">
-                            <string>Thickness [mm]</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="1" column="0">
-                          <widget class="QLabel" name="geometry_label">
-                           <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The geometry of the sample. If this is left at &lt;span style=&quot; font-style:italic;&quot;&gt;Read from file &lt;/span&gt;then the value stored in the metadata of the file is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                           </property>
-                           <property name="text">
-                            <string>Geometry</string>
-                           </property>
-                          </widget>
-                         </item>
                          <item row="0" column="0">
                           <widget class="QLabel" name="absolute_scale_label">
                            <property name="toolTip">
@@ -877,7 +861,14 @@ QGroupBox::title {
                            </property>
                           </widget>
                          </item>
-                         <item row="5" column="0">
+                         <item row="0" column="1">
+                          <widget class="QLineEdit" name="absolute_scale_line_edit">
+                           <property name="toolTip">
+                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The absolute (and unitless) scale factor for the data reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="0">
                           <widget class="QLabel" name="z_offset_label">
                            <property name="toolTip">
                             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The z offset of the sample position.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -887,42 +878,7 @@ QGroupBox::title {
                            </property>
                           </widget>
                          </item>
-                         <item row="0" column="1">
-                          <widget class="QLineEdit" name="absolute_scale_line_edit">
-                           <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The absolute (and unitless) scale factor for the data reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="2" column="1">
-                          <widget class="QLineEdit" name="height_line_edit">
-                           <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The height of the sample. If this input is left empty, then the value stored in the metadata of the file is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="3" column="1">
-                          <widget class="QLineEdit" name="width_line_edit">
-                           <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The width of the sample. If this input is left empty, then the value stored in the metadata of the file is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="4" column="1">
-                          <widget class="QLineEdit" name="thickness_line_edit">
-                           <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The thickness of the sample. If this input is left empty, then the value stored in the metadata of the file is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                           </property>
-                          </widget>
-                         </item>
                          <item row="1" column="1">
-                          <widget class="QComboBox" name="geometry_combo_box">
-                           <property name="toolTip">
-                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The geometry of the sample. If this is left at &lt;span style=&quot; font-style:italic;&quot;&gt;Read from file &lt;/span&gt;then the value stored in the metadata of the file is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                           </property>
-                          </widget>
-                         </item>
-                         <item row="5" column="1">
                           <widget class="QLineEdit" name="z_offset_line_edit">
                            <property name="toolTip">
                             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The z offset of the sample position.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1859,7 +1815,28 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="0">
+                   <item row="0" column="4">
+                    <widget class="QLabel" name="q_step_type_label">
+                     <property name="text">
+                      <string>Step type</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="3">
+                    <widget class="QLabel" name="q_step_label">
+                     <property name="text">
+                      <string>Step [Å^-1]</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="2">
+                    <widget class="QLineEdit" name="q_xy_max_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="0">
                     <widget class="QLabel" name="q_xy_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Momentum transfer settings for 2D reductions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1879,28 +1856,14 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="2">
-                    <widget class="QLineEdit" name="q_1d_max_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <item row="0" column="1">
+                    <widget class="QLabel" name="q_min_label">
+                     <property name="text">
+                      <string>Min [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="3">
-                    <widget class="QLineEdit" name="q_1d_step_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="2">
-                    <widget class="QLineEdit" name="q_xy_max_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="3">
+                   <item row="3" column="3">
                     <widget class="QLineEdit" name="q_xy_step_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1914,10 +1877,24 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="4">
+                   <item row="3" column="4">
                     <widget class="QComboBox" name="q_xy_step_type_combo_box">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step type of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="3">
+                    <widget class="QLineEdit" name="q_1d_step_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="2">
+                    <widget class="QLineEdit" name="q_1d_max_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
@@ -1928,24 +1905,17 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="1">
-                    <widget class="QLabel" name="q_min_label">
+                   <item row="2" column="2">
+                    <widget class="QLabel" name="label_8">
                      <property name="text">
-                      <string>Min [Å^-1]</string>
+                      <string>Max [Å^-1]</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="0" column="3">
-                    <widget class="QLabel" name="q_step_label">
+                   <item row="2" column="3">
+                    <widget class="QLabel" name="label_9">
                      <property name="text">
                       <string>Step [Å^-1]</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="4">
-                    <widget class="QLabel" name="q_step_type_label">
-                     <property name="text">
-                      <string>Step type</string>
                      </property>
                     </widget>
                    </item>
@@ -2273,10 +2243,6 @@ QGroupBox::title {
   <tabstop>event_binning_group_box</tabstop>
   <tabstop>event_binning_line_edit</tabstop>
   <tabstop>absolute_scale_line_edit</tabstop>
-  <tabstop>geometry_combo_box</tabstop>
-  <tabstop>height_line_edit</tabstop>
-  <tabstop>width_line_edit</tabstop>
-  <tabstop>thickness_line_edit</tabstop>
   <tabstop>z_offset_line_edit</tabstop>
   <tabstop>mask_file_input_line_edit</tabstop>
   <tabstop>mask_file_browse_push_button</tabstop>

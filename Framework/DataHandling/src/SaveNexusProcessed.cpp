@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // SaveNexusProcessed
 // @author Ronald Fowler, based on SaveNexus
 #include "MantidDataHandling/SaveNexusProcessed.h"
@@ -15,7 +21,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <Poco/File.h>
-#include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;

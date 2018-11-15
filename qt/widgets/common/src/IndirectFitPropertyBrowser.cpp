@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -703,6 +709,14 @@ void IndirectFitPropertyBrowser::addComboBoxFunctionGroup(
                     << groupName;
   m_enumManager->setEnumNames(m_functionsInComboBox, groupNames);
   addCustomFunctionGroup(groupName, functions);
+}
+
+/**
+ * Removes all current Fit Type options from the fit type combo-box in this
+ * property browser.
+ */
+void IndirectFitPropertyBrowser::clearFitTypeComboBox() {
+  m_enumManager->setEnumNames(m_functionsInComboBox, {"None"});
 }
 
 /**

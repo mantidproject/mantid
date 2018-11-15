@@ -2,7 +2,7 @@
  IntArrayBoundedValidator
 ==========================
 
-This a python binding to the C++ class Mantid::Kernel::ArrayBoundedValidator.
+This is a Python binding to the C++ class Mantid::Kernel::ArrayBoundedValidator.
 
 *bases:* :py:obj:`mantid.kernel.IValidator`
 
