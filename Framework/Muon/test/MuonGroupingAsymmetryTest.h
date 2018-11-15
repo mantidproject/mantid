@@ -362,6 +362,10 @@ public:
 
     TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0000577, 0.00001);
     TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0000604, 0.00001);
+
+    std::string norm = wsOut->getLog("analysis_asymmetry_norm")->value();
+
+    TS_ASSERT_EQUALS(norm, "15.000000");
   }
 };
 
