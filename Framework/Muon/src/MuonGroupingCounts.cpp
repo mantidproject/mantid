@@ -15,6 +15,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
+#include <boost/format.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -41,8 +42,9 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
       workspace->getIndicesFromDetectorIDs(detectorIDs);
 
   if (wsIndices.size() != detectorIDs.size())
-    throw std::invalid_argument("Requested a detector outside of range "
-                                "(wsIndicies.size() > detectorIDs.size)");
+    throw std::invalid_argument(boost::format("The number of detectors
+     requested does not equalthe number of detectors provided %1% != %2%")
+      % wsIndices.size() % detectorIDs.size());
 
   outputWS->getSpectrum(0).clearDetectorIDs();
   outputWS->setSharedX(0, workspace->sharedX(wsIndices.front()));
