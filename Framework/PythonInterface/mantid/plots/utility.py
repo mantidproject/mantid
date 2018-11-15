@@ -1,4 +1,4 @@
-from mantidqt.py3compat import Enum
+from mantid.py3compat import Enum
 
 
 class MantidAxType(Enum):

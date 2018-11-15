@@ -10,7 +10,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from mantidqt.py3compat import is_text_string
+from mantid.py3compat import is_text_string
 from posixpath import join as joinsettings
 from qtpy.QtCore import QSettings
 

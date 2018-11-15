@@ -24,7 +24,7 @@ try:
     from matplotlib.cm import viridis as DEFAULT_CMAP
 except ImportError:
     from matplotlib.cm import jet as DEFAULT_CMAP
-from mantidqt.py3compat import is_text_string
+from mantid.py3compat import is_text_string
 from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 from matplotlib.gridspec import GridSpec
 import numpy as np
