@@ -42,7 +42,7 @@ int countPeriods(Workspace_sptr ws) {
 bool checkConsistentPeriods(Workspace_sptr ws1, Workspace_sptr ws2) {
   if (isMultiPeriod(ws1)) {
     if (!isMultiPeriod(ws2)) {
-      return false
+      return false;
     }
     if (countPeriods(ws1) != countPeriods(ws2)) {
       return false;
@@ -65,8 +65,8 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
       workspace->getIndicesFromDetectorIDs(detectorIDs);
 
   if (wsIndices.size() != detectorIDs.size())
-    throw std::invalid_argument(boost::format("The number of detectors requested does not equal
-     the number of detectors provided %1% != %2%") % wsIndices.size() % detectorIDs.size());
+    throw std::invalid_argument(str(boost::format("The number of detectors requested does not equal"
+     "the number of detectors provided %1% != %2%") % wsIndices.size() % detectorIDs.size()));
 
   outputWS->getSpectrum(0).clearDetectorIDs();
   outputWS->setSharedX(0, workspace->sharedX(wsIndices.front()));

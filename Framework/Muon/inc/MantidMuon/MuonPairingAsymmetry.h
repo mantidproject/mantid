@@ -48,9 +48,9 @@ private:
                                      MatrixWorkspace_sptr inputWS2);
 
   /// Perform an asymmetry calculation
-  MatrixWorkspace_sptr asymmetryCalc(MatrixWorkspace_sptr inputWS,
+  MatrixWorkspace_sptr pairAsymmetryCalc(MatrixWorkspace_sptr inputWS,
                                      const double &alpha);
-  MatrixWorkspace_sptr calcAsymmetryWithSummedAndSubtractedPeriods(
+  MatrixWorkspace_sptr calcPairAsymmetryWithSummedAndSubtractedPeriods(
       const std::vector<int> &summedPeriods,
       const std::vector<int> &subtractedPeriods,
       WorkspaceGroup_sptr groupedPeriods, const double &alpha);
