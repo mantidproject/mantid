@@ -10,6 +10,7 @@
 from __future__ import absolute_import, division, print_function
 
 from mantid.plots.utility import MantidAxType
+from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
 
@@ -29,15 +30,16 @@ class MatrixWorkspaceDisplay(object):
 
         self.plot = plot
         self.setup_tables()
-        self.view.set_context_menu_actions(self.view.table_y, self.model._ws.readY)
-        self.view.set_context_menu_actions(self.view.table_x, self.model._ws.readX)
-        self.view.set_context_menu_actions(self.view.table_e, self.model._ws.readE)
+
+        self.view.set_context_menu_actions(self.view.table_y)
+        self.view.set_context_menu_actions(self.view.table_x)
+        self.view.set_context_menu_actions(self.view.table_e)
 
     def setup_tables(self):
         # unpacks the list of models returned from getItemModel
         self.view.set_model(*self.model.get_item_model())
 
-    def action_copy_spectrum_values(self, table, ws_read, *args):
+    def action_copy_spectrum_values(self, table, *args):
         """
         Copies the values selected by the user to the system's clipboard
 
@@ -49,12 +51,13 @@ class MatrixWorkspaceDisplay(object):
         if not selection_model.hasSelection():
             self.show_no_selection_to_copy_toast()
             return
+        ws_read = self._get_ws_read_from_type(table.model().type)
         selected_rows = selection_model.selectedRows()  # type: list
         row_data = []
 
         for index in selected_rows:
             row = index.row()
-            data = " ".join(map(str, ws_read(row)))
+            data = "\t".join(map(str, ws_read(row)))
 
             row_data.append(data)
 
@@ -67,11 +70,12 @@ class MatrixWorkspaceDisplay(object):
     def show_successful_copy_toast(self):
         self.view.show_mouse_toast(self.COPY_SUCCESSFUL_MESSAGE)
 
-    def action_copy_bin_values(self, table, ws_read, *args):
+    def action_copy_bin_values(self, table, *args):
         selection_model = table.selectionModel()
         if not selection_model.hasSelection():
             self.show_no_selection_to_copy_toast()
             return
+        ws_read = self._get_ws_read_from_type(table.model().type)
         selected_columns = selection_model.selectedColumns()  # type: list
 
         # Qt gives back a QModelIndex, we need to extract the column from it
@@ -86,28 +90,44 @@ class MatrixWorkspaceDisplay(object):
         for i in range(num_rows):
             # Appends ONE value from each COLUMN, this is because the final string is being built vertically
             # the noqa disables a 'data' variable redefined warning
-            all_string_rows.append(" ".join([data[i] for data in column_data]))  # noqa: F812
+            all_string_rows.append("\t".join([data[i] for data in column_data]))  # noqa: F812
 
         # Finally all rows are joined together with a new line at the end of each row
         final_string = "\n".join(all_string_rows)
         self.view.copy_to_clipboard(final_string)
         self.show_successful_copy_toast()
 
-    def action_copy_cell(self, table, *args):
+    def action_copy_cells(self, table, *args):
         """
         :type table: QTableView
         :param table: The table from which the data will be copied.
         :param args: Arguments passed by Qt. Not used
         :return:
         """
-        model = table.selectionModel()
-        if not model.hasSelection():
+        selectionModel = table.selectionModel()
+        if not selectionModel.hasSelection():
             self.show_no_selection_to_copy_toast()
             return
 
-        index = model.currentIndex()
-        data = index.sibling(index.row(), index.column()).data()
-        self.view.copy_to_clipboard(data)
+        selection = selectionModel.selection()
+        selectionRange = selection.first()
+
+        top = selectionRange.top()
+        bottom = selectionRange.bottom()
+        left = selectionRange.left()
+        right = selectionRange.right()
+
+        data = []
+        index = selectionModel.currentIndex()
+        for i in range(top, bottom + 1):
+            for j in range(left, right):
+                data.append(index.sibling(i, j).data())
+                data.append("\t")
+            data.append(index.sibling(i, right).data())
+            data.append("\n")
+
+        # strip the string to remove the trailing new line
+        self.view.copy_to_clipboard("".join(data).strip())
         self.show_successful_copy_toast()
 
     def _do_action_plot(self, table, axis, get_index, plot_errors=False):
@@ -145,3 +165,26 @@ class MatrixWorkspaceDisplay(object):
 
     def action_plot_bin_with_errors(self, table):
         self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column(), plot_errors=True)
+
+    def action_keypress_copy(self, table):
+        selectionModel = table.selectionModel()
+        if not selectionModel.hasSelection():
+            self.show_no_selection_to_copy_toast()
+            return
+
+        if len(selectionModel.selectedRows()) > 0:
+            self.action_copy_spectrum_values(table)
+        elif len(selectionModel.selectedColumns()) > 0:
+            self.action_copy_bin_values(table)
+        else:
+            self.action_copy_cells(table)
+
+    def _get_ws_read_from_type(self, type):
+        if type == MatrixWorkspaceTableViewModelType.y:
+            return self.model._ws.readY
+        elif type == MatrixWorkspaceTableViewModelType.x:
+            return self.model._ws.readX
+        elif type == MatrixWorkspaceTableViewModelType.e:
+            return self.model._ws.readE
+        else:
+            raise ValueError("Unknown TableViewModel type {}".format(type))

@@ -15,7 +15,7 @@ from logging import warning
 
 from qtpy import QtGui
 from qtpy.QtCore import QPoint, Qt
-from qtpy.QtGui import QCursor, QFont, QFontMetrics
+from qtpy.QtGui import QCursor, QFont, QFontMetrics, QKeySequence
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QHeaderView, QMessageBox, QTabWidget, QTableView, QToolTip)
 
 import mantidqt.icons
@@ -42,20 +42,27 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.active_tab_index = 0
         self.currentChanged.connect(self.set_scroll_position_on_new_focused_tab)
 
-        self.table_y = QTableView()
-        self.table_y.setSelectionBehavior(QAbstractItemView.SelectItems)
-        self.addTab(self.table_y, "Y values")
+        # local list to keep track of the added tabs
+        self.tabs = []
 
-        self.table_x = QTableView()
-        self.table_x.setSelectionBehavior(QAbstractItemView.SelectItems)
-        self.addTab(self.table_x, "X values")
-
-        self.table_e = QTableView()
-        self.table_e.setSelectionBehavior(QAbstractItemView.SelectItems)
-        self.addTab(self.table_e, "E values")
+        self.table_y = self.add_table("Y values")
+        self.table_x = self.add_table("X values")
+        self.table_e = self.add_table("E values")
 
         self.resize(600, 400)
         self.show()
+
+    def add_table(self, label):
+        tab = QTableView()
+        tab.setSelectionBehavior(QAbstractItemView.SelectItems)
+        self.addTab(tab, label)
+        self.tabs.append(tab)
+        return tab
+
+    def keyPressEvent(self, event):
+        if event.matches(QKeySequence.Copy):
+            self.presenter.action_keypress_copy(self.tabs[self.currentIndex()])
+        super(MatrixWorkspaceDisplayView, self).keyPressEvent(event)
 
     def set_scroll_position_on_new_focused_tab(self, new_tab_index):
         """
@@ -70,7 +77,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         new_tab.verticalScrollBar().setValue(old_tab.verticalScrollBar().value())
         self.active_tab_index = new_tab_index
 
-    def set_context_menu_actions(self, table, ws_read_function):
+    def set_context_menu_actions(self, table):
         """
         Sets up the context menu actions for the table
         :type table: QTableView
@@ -80,7 +87,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         copy_action = QAction(self.COPY_ICON, "Copy", table)
         # sets the first (table) parameter of the copy action callback
         # so that each context menu can copy the data from the correct table
-        decorated_copy_action_with_correct_table = partial(self.presenter.action_copy_cell, table)
+        decorated_copy_action_with_correct_table = partial(self.presenter.action_copy_cells, table)
         copy_action.triggered.connect(decorated_copy_action_with_correct_table)
 
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -91,7 +98,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         horizontalHeader.setSectionResizeMode(QHeaderView.Fixed)
 
         copy_bin_values = QAction(self.COPY_ICON, "Copy", horizontalHeader)
-        copy_bin_values.triggered.connect(partial(self.presenter.action_copy_bin_values, table, ws_read_function))
+        copy_bin_values.triggered.connect(partial(self.presenter.action_copy_bin_values, table))
 
         plot_bin_action = QAction(self.GRAPH_ICON, "Plot bin (values only)", horizontalHeader)
         plot_bin_action.triggered.connect(partial(self.presenter.action_plot_bin, table))
@@ -111,7 +118,7 @@ class MatrixWorkspaceDisplayView(QTabWidget):
 
         copy_spectrum_values = QAction(self.COPY_ICON, "Copy", verticalHeader)
         copy_spectrum_values.triggered.connect(
-            partial(self.presenter.action_copy_spectrum_values, table, ws_read_function))
+            partial(self.presenter.action_copy_spectrum_values, table))
 
         plot_spectrum_action = QAction(self.GRAPH_ICON, "Plot spectrum (values only)", verticalHeader)
         plot_spectrum_action.triggered.connect(partial(self.presenter.action_plot_spectrum, table))
