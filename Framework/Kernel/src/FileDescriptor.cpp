@@ -169,7 +169,8 @@ bool FileDescriptor::isXML() const {
  */
 void FileDescriptor::initialize(const std::string &filename) {
   m_filename = filename;
-  m_extension = Mantid::Kernel::Strings::toLower("." + Poco::Path(filename).getExtension());
+  m_extension = Mantid::Kernel::Strings::toLower(
+      "." + Poco::Path(filename).getExtension());
 
   m_file.open(m_filename.c_str(), std::ios::in | std::ios::binary);
   if (!m_file)

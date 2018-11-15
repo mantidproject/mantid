@@ -120,7 +120,7 @@ MANTID_KERNEL_DLL std::string replaceAll(const std::string &input,
 }
 
 /** Convert all characters in string to lowercase
-*/
+ */
 MANTID_KERNEL_DLL std::string toLower(const std::string &input) {
   std::string output(input);
   std::transform(output.begin(), output.end(), output.begin(), ::tolower);
@@ -128,7 +128,7 @@ MANTID_KERNEL_DLL std::string toLower(const std::string &input) {
 }
 
 /** Convert all characters in string to uppercase
-*/
+ */
 MANTID_KERNEL_DLL std::string toUpper(const std::string &input) {
   std::string output(input);
   std::transform(output.begin(), output.end(), output.begin(), ::toupper);

@@ -310,7 +310,8 @@ public:
   //       DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
   //
   //
-  //   const std::string instrumentXML = Kernel::Strings::loadFile(Kernel::ConfigService::Instance().getFullPath("REFL_Definition.xml"));
+  //   const std::string instrumentXML =
+  //   Kernel::Strings::loadFile(Kernel::ConfigService::Instance().getFullPath("REFL_Definition.xml"));
   //   loaderMARI.setPropertyValue("InstrumentName", instrName);
   //   loaderMARI.setProperty("RewriteSpectraMap", OptionalBool(true));
   //   loaderMARI.setProperty("Workspace", ws2D);
