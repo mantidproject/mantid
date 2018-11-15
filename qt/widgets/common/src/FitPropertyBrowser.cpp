@@ -1348,10 +1348,18 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     }
     emit workspaceIndexChanged(wi);
   } else if (prop->propertyName() == "Workspace Index") {
-    PropertyHandler *h = getHandler()->findHandler(prop);
-    if (!h)
-      return;
-    h->setFunctionWorkspace();
+	PropertyHandler *h = getHandler()->findHandler(prop);
+	if (!h)
+	  return;
+	h->setFunctionWorkspace();
+  } else if (prop->propertyName() == "WorkspaceIndex"){
+	PropertyHandler *h = getHandler()->findHandler(prop);
+	auto const index = prop->valueText().toInt();
+	if (h && index != workspaceIndex()) {
+      h->setAttribute(prop);
+	  setWorkspaceIndex(index);
+	  emit workspaceIndexChanged(index);
+	}
   } else if (prop == m_maxIterations || prop == m_peakRadius) {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");

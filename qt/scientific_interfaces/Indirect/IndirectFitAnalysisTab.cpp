@@ -196,6 +196,8 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
           m_plotPresenter.get(), SLOT(setStartX(double)));
   connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)),
           m_plotPresenter.get(), SLOT(setEndX(double)));
+  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)),
+	      m_plotPresenter.get(), SLOT(setPlotSpectrum(int)));
 
   connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this,
           SLOT(setBrowserStartX(double)));
