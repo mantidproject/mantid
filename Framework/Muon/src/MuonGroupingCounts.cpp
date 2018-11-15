@@ -41,21 +41,23 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
   std::vector<size_t> wsIndices =
       workspace->getIndicesFromDetectorIDs(detectorIDs);
 
-  if (wsIndices.size() != detectorIDs.size()){
-    std::string errorMsg = str(boost::format("The number of detectors"
-     "requested does not equalthe number of detectors provided %1% != %2% ")
-      % wsIndices.size() % detectorIDs.size());
+  if (wsIndices.size() != detectorIDs.size()) {
+    std::string errorMsg =
+        str(boost::format("The number of detectors"
+                          "requested does not equalthe number of detectors "
+                          "provided %1% != %2% ") %
+            wsIndices.size() % detectorIDs.size());
     throw std::invalid_argument(errorMsg);
-    }
+  }
 
   outputWS->getSpectrum(0).clearDetectorIDs();
   outputWS->setSharedX(0, workspace->sharedX(wsIndices.front()));
 
   auto hist = outputWS->histogram(0);
   for (auto &wsIndex : wsIndices) {
-      hist += workspace->histogram(wsIndex);
-      outputWS->getSpectrum(0).addDetectorIDs(
-          workspace->getSpectrum(wsIndex).getDetectorIDs());
+    hist += workspace->histogram(wsIndex);
+    outputWS->getSpectrum(0).addDetectorIDs(
+        workspace->getSpectrum(wsIndex).getDetectorIDs());
   }
   outputWS->setHistogram(0, hist);
   outputWS->getSpectrum(0).setSpectrumNo(static_cast<int32_t>(1));
