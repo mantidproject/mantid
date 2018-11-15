@@ -27,6 +27,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsFactory
     IN_MANTIDQT_FACTORY
   INCLUDE_DIRS
     inc
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${CORE_MANTIDLIBS}
     ${POCO_LIBRARIES}

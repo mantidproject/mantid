@@ -689,6 +689,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     USE_QTWEBKIT
   INCLUDE_DIRS
     inc
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TARGET_LIBRARIES}
   QT4_LINK_LIBS

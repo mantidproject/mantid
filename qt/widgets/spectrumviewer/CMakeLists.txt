@@ -64,6 +64,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSpectrumViewer
   DEFS IN_MANTIDQT_SPECTRUMVIEWER
   INCLUDE_DIRS
    inc
+   ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}

@@ -127,6 +127,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSliceViewer
     inc
     ../../../Framework/DataObjects/inc
     ../../../Framework/Crystal/inc
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     DataObjects
     ${TCMALLOC_LIBRARIES_LINKTIME}

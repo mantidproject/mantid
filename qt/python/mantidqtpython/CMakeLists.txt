@@ -94,6 +94,7 @@ mtd_add_sip_module (
     ${CMAKE_CURRENT_LIST_DIR}
     ${PYTHON_INCLUDE_PATH}
     ../../../Framework/PythonInterface/core/inc
+    ${Boost_INCLUDE_DIRS}
   PYQT_VERSION 4
   LINK_LIBS ${TCMALLOC_LIBRARIES_LINKTIME}
     MantidQtWidgetsCommonQt4

@@ -143,6 +143,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
     IN_MANTIDQT_INSTRUMENTVIEW
   INCLUDE_DIRS
     inc
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
@@ -185,6 +186,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
     IN_MANTIDQT_INSTRUMENTVIEW
   INCLUDE_DIRS
     inc
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
