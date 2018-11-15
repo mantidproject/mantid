@@ -38,7 +38,7 @@ requirements.check_qt()
 # Qt
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
-from qtpy.QtGui import (QColor, QPixmap, QGuiApplication)  # noqa
+from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
@@ -519,6 +519,7 @@ def start_workbench(app, command_line_options):
     importlib.import_module('mantid')
     main_window.populateAfterMantidImport()
     main_window.show()
+    main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
     if main_window.splash:
         main_window.splash.hide()
