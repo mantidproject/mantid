@@ -47,7 +47,7 @@ from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 # Pre-application setup
 plugins.setup_library_paths()
 
-from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
+from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION, set_config_format  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -71,6 +71,9 @@ def qapplication():
         app.setApplicationName(APPNAME)
         # not calling app.setApplicationVersion(mantid.kernel.version_str())
         # because it needs to happen after logging is monkey-patched in
+
+        # Set the config format to IniFormat globally
+        set_config_format(QSettings.IniFormat)
     return app
 
 
@@ -466,9 +469,6 @@ class MainWindow(QMainWindow):
         for widget in self.widgets:
             if hasattr(widget, 'readSettings'):
                 widget.readSettings(settings)
-
-        # Set the default QSettings write out formatting
-        QSettings.setDefaultFormat(QSettings.IniFormat)
 
     def writeSettings(self, settings):
         settings.set('MainWindow/size', self.size())  # QSize
