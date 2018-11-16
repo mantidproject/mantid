@@ -414,7 +414,7 @@ public:
   /// to point-like)
   virtual bool isHistogramData() const;
 
-  /// Returns true if the workspace contains has common X bins
+  /// Returns true if the workspace contains common X bins
   virtual bool isCommonBins() const;
 
   std::string YUnit() const;
@@ -436,6 +436,8 @@ public:
   /// index, weight>
   using MaskList = std::map<size_t, double>;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
+  const std::vector<size_t>
+  maskedBinsIndices(const size_t &workspaceIndex) const;
   void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace

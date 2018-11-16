@@ -77,7 +77,7 @@ public:
         "  <facility name=\"SNS\" delimiter=\"_\" "
         "FileExtensions=\"_event.nxs,.nxs,.dat\">"
         "    <archive>"
-        "      <archiveSearch plugin=\"SNSDataSearch\" />"
+        "      <archiveSearch plugin=\"ORNLDataSearch\" />"
         "    </archive>"
         "    <instrument name=\"SEQUOIA\" shortname=\"SEQ\">"
         "      <technique>Inelastic Spectroscopy</technique>"

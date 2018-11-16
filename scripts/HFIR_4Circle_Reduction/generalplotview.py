@@ -1,7 +1,14 @@
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
-import HFIR_4Circle_Reduction.ui_general1dviewer as ui_general1dviewer
+from HFIR_4Circle_Reduction.integratedpeakview import GeneralPurposedPlotView
 import os
-from PyQt4.QtGui import QMainWindow, QFileDialog
+from qtpy.QtWidgets import QMainWindow, QFileDialog
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 
 
 class GeneralPlotWindow(QMainWindow):
@@ -16,8 +23,9 @@ class GeneralPlotWindow(QMainWindow):
         super(GeneralPlotWindow, self).__init__(parent)
 
         # set up UI
-        self.ui = ui_general1dviewer.Ui_MainWindow()
-        self.ui.setupUi(self)
+        ui_path = "general1dviewer.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
+        self._promote_widgets()
 
         # set up the event handling
         self.ui.pushButton_exportPlot2File.clicked.connect(self.do_export_plot)
@@ -27,7 +35,11 @@ class GeneralPlotWindow(QMainWindow):
         # class variables
         self._work_dir = os.getcwd()
 
-        return
+    def _promote_widgets(self):
+        graphicsView_plotView_layout = QVBoxLayout()
+        self.ui.frame_graphicsView_plotView.setLayout(graphicsView_plotView_layout)
+        self.ui.graphicsView_plotView = GeneralPurposedPlotView(self)
+        graphicsView_plotView_layout.addWidget(self.ui.graphicsView_plotView)
 
     def do_export_plot(self):
         """
@@ -35,15 +47,15 @@ class GeneralPlotWindow(QMainWindow):
         :return:
         """
         # get directory
-        file_name = str(QFileDialog.getSaveFileName(self, caption='File to save the plot',
-                                                    directory=self._work_dir,
-                                                    filter='Data File(*.dat);;All Files(*.*'))
-        if len(file_name) == 0:
+        file_name = QFileDialog.getSaveFileName(self, caption='File to save the plot',
+                                                directory=self._work_dir,
+                                                filter='Data File(*.dat);;All Files(*.*')
+        if not file_name:
             return
+        if isinstance(file_name, tuple):
+            file_name = file_name[0]
 
         self.ui.graphicsView_plotView.save_current_plot(None, file_name)
-
-        return
 
     def do_quit(self):
         """
@@ -52,16 +64,12 @@ class GeneralPlotWindow(QMainWindow):
         """
         self.close()
 
-        return
-
     def menu_reset_window(self):
         """
         reset the window, i.e., plot
         :return:
         """
         self.ui.graphicsView_plotView.reset_plots()
-
-        return
 
     def plot_data(self, vec_x, vec_y, vec_e, x_label, y_label):  # '2theta', 'Gaussian-Sigma')
         """
@@ -74,8 +82,6 @@ class GeneralPlotWindow(QMainWindow):
         :return:
         """
         self.ui.graphicsView_plotView.plot_data(vec_x, vec_y, vec_e, 'No title', x_label, y_label)
-
-        return
 
     def set_working_dir(self, work_dir):
         """
@@ -91,13 +97,9 @@ class GeneralPlotWindow(QMainWindow):
         else:
             self._work_dir = work_dir
 
-        return
-
     def reset_window(self):
         """
         reset the window to the initial state, such that no plot is made on the canvas
         :return:
         """
         self.ui.graphicsView_plotView.reset_plots()
-
-        return
