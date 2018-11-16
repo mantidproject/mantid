@@ -133,6 +133,8 @@ public:
   size_t numberOfTriangles() const;
   std::vector<uint32_t> getTriangles() const;
 
+  void rotate(const Kernel::Matrix<double> &);
+  void translate(Kernel::V3D);
   void updateGeometryHandler();
 
 private:

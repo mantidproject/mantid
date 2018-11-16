@@ -16,6 +16,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 
 #include <Poco/File.h>
@@ -61,6 +62,14 @@ void LoadSampleEnvironment::init() {
 
   // New Can or Add
   declareProperty("Add", false);
+
+  // Vector to translate mesh
+  declareProperty(make_unique<ArrayProperty<double>>("TranslationVector","0,0,0"),"Vector by which to translate the loaded environment");
+
+  // Matrix to rotate mesh
+  declareProperty(make_unique<ArrayProperty<double>>("rotationMatrix1","1,0,0"),"First part of rotation matrix");
+  declareProperty(make_unique<ArrayProperty<double>>("rotationMatrix2","0,1,0"),"Second part of rotation matrix");
+  declareProperty(make_unique<ArrayProperty<double>>("rotationMatrix3","0,0,1"),"Third part of rotation matrix");
 }
 
 void LoadSampleEnvironment::exec() {
@@ -91,6 +100,13 @@ void LoadSampleEnvironment::exec() {
     throw Kernel::Exception::ParseError(
         "Could not read file, did not match either STL Format", filename, 0);
   }
+  const std::vector<double> translationVector = getProperty("TranslationVector");
+  const std::vector<double> checkVector = std::vector<double>(3,0.0);
+  if ((translationVector != checkVector) && translationVector.size() == 3){
+    Kernel::V3D translate = Kernel::V3D(translationVector[0],translationVector[1],translationVector[2]);
+    environmentMesh->translate(translate);
+    
+  }
   std::string name = getProperty("EnvironmentName");
   const bool add = getProperty("Add");
   Sample &sample = outputWS->mutableSample();
@@ -109,7 +125,16 @@ void LoadSampleEnvironment::exec() {
       "Enviroment has: " + std::to_string(environment->nelements()) +
       " elements.";
   sample.setEnvironment(std::move(environment));
-
+  
+  auto translatedVertices = environmentMesh->getVertices();
+    int i = 0;
+    for(double vertex: translatedVertices){
+      i++;
+      g_log.information(std::to_string(vertex));
+      if (i%3==0){
+        g_log.information("\n");
+      }
+    }
   // Set output workspace
 
   setProperty("OutputWorkspace", outputWS);
