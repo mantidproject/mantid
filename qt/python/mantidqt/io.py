@@ -14,15 +14,16 @@ from qtpy.QtCore import QDir
 _LAST_SAVE_DIRECTORY = None
 
 
-def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_filter=None, saving=True, any_file=True):
+def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_filter=None, accept_mode=None,
+                       file_mode=None):
     """
     Open a dialog asking for a file location and name to and return it
     :param parent: QWidget; The parent QWidget of the created dialog
     :param default_suffix: String; The default suffix to be passed
     :param directory: String; Directory to which the dialog will open
     :param file_filter: String; The filter name and file type e.g. "Python files (*.py)"
-    :param any_file: bool; Whether you can select any file or only existing files (Allows selecting non-existant files)
-    :param saving: bool; Whether or not this is a Saving dialog (True) or a loading dialog (False)
+    :param accept_mode: enum AcceptMode; Defines the AcceptMode of the dialog, check QFileDialog Class for details
+    :param file_mode: enum FileMode; Defines the FileMode of the dialog, check QFileDialog Class for details
     :return: String; The filename that was selected, it is possible to return a directory so look out for that.
     """
     global _LAST_SAVE_DIRECTORY
@@ -41,11 +42,11 @@ def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_f
     if default_suffix is not None:
         dialog.setDefaultSuffix(default_suffix)
 
-    if any_file:
-        dialog.setFileMode(QFileDialog.AnyFile)
+    if file_mode is not None:
+        dialog.setFileMode(file_mode)
 
-    if saving:
-        dialog.setAcceptMode(QFileDialog.AcceptSave)
+    if accept_mode is not None:
+        dialog.setAcceptMode(accept_mode)
 
     # Connect the actual filename setter
     dialog.fileSelected.connect(_set_last_save)

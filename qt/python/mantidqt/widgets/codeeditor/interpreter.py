@@ -17,7 +17,7 @@ import traceback
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtGui import QColor, QFontMetrics
-from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QMessageBox, QStatusBar, QVBoxLayout, QWidget, QFileDialog
 
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
@@ -41,9 +41,10 @@ class EditorIO(object):
         self.editor = editor
 
     def ask_for_filename(self):
-        filename = open_a_file_dialog(self.editor, ".py", None, "Python Files (*.py)", True, True)
+        filename = open_a_file_dialog(parent=self.editor, default_suffix=".py", file_filter="Python Files (*.py)",
+                                      accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile)
         if filename is not None and os.path.isdir(filename):
-            # Return None because it is a directory and it's possible to get a directory
+            # Set value to None as, we do not want to be saving a directory, it is possible to receive a directory
             filename = None
         return filename
 
