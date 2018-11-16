@@ -114,7 +114,7 @@ std::string ORNLDataArchive::getArchivePath(
     return NOT_FOUND;
   }
 
-  assert(result.length == 2);
+  assert(result.size() == 3);
   const std::string instrument = toUpperCase(result[1]);
   const std::string run = result[2];
 
