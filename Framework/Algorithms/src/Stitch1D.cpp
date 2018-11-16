@@ -185,17 +185,21 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
     // With regard to x values
     const auto &lhsX = lhs->x(0);
     const auto &rhsX = rhs->x(0);
-    const auto lhsMin = lhsX[0];
-    const auto rhsMin = rhsX[0];
-    const auto lhsMax = lhsX[lhs->size()];
-    const auto rhsMax = rhsX[rhs->size()];
+    const auto lhsMin = lhsX.front();
+    const auto rhsMin = rhsX.front();
+    const auto lhsMax = lhsX.back();
+    const auto rhsMax = rhsX.back();
     // A global view on x values
-    if (std::min(lhsMin, rhsMin) > (startOverlap - 1.e-9))
+    const double minVal = std::min(lhsMin, rhsMin);
+    if (minVal > (startOverlap - 1.e-9))
       issues["StartOverlap"] =
-          "Must be greater or equal than the minimum x value";
-    if (std::max(lhsMax, rhsMax) < (endOverlap + 1.e-9))
+          "Must be greater or equal than the minimum x value (" +
+          std::to_string(minVal) + ")";
+    const double maxVal = std::max(lhsMax, rhsMax);
+    if (maxVal < (endOverlap + 1.e-9))
       issues["EndOverlap"] =
-          "Must be smaller or equal than the maximum x value";
+          "Must be smaller or equal than the maximum x value (" +
+          std::to_string(maxVal) + ")";
     if (rhs->isHistogramData()) {
       // For the current implementation of binned data, lhs and rhs cannot be
       // exchanged:
@@ -220,10 +224,10 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
                                              MatrixWorkspace_const_sptr &rhsWS,
                                              const bool scaleRHS) const {
   const auto &lhsX = lhsWS->x(0);
-  const double minLHSX = lhsX[0];
+  const double minLHSX = lhsX.front();
 
   const auto &rhsX = rhsWS->x(0);
-  const double maxRHSX = rhsX[rhsWS->size()];
+  const double maxRHSX = rhsX.back();
 
   std::vector<double> result;
   if (isDefault("Params")) {
@@ -535,7 +539,6 @@ void Stitch1D::exec() {
     int a2 = boost::tuples::get<1>(startEnd);
     // Mask out everything BUT the overlap region as a new workspace.
     MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, lhs);
-    // Mask out everything BUT the overlap region as a new workspace.
     MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rhs);
     // Mask out everything AFTER the overlap region as a new workspace.
     maskInPlace(a1 + 1, static_cast<int>(lhs->blocksize()), lhs);
