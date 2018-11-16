@@ -33,9 +33,14 @@ class ValidatedTableItem(QtGui.QTableWidgetItem):
         @wraps(func)
         def wrapper(*args, **kw):
             try:
-                if validator(args[1].toString()):
-                #print(type(args[1]))
-                #if validator(args[1]):
+                if isinstance(args[1], unicode):
+                    # within MantidPlot, type is unicode
+                    validator_arg = args[1]
+                else:
+                    # when standalone, type is QtCore.QVariant
+                    validator_arg = args[1].toString()
+
+                if validator(validator_arg):
                     res = func(*args, **kw)
                 else:
                     res = None

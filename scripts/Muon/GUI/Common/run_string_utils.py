@@ -8,7 +8,7 @@ import re
 delimiter = ","
 range_separator = "-"
 run_string_regex = "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"
-max_run_list_size = 100
+max_run_list_size = 1000
 valid_float_regex = "^[0-9]+([.][0-9]*)?$"
 valid_name_regex = "^\w+$"
 valid_alpha_regex = "^[0-9]*[.]?[0-9]+$"
