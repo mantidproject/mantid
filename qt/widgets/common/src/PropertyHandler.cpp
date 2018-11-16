@@ -801,16 +801,16 @@ void PropertyHandler::setAttribute(
     QString const &attName, Mantid::API::IFunction::Attribute const &attValue) {
   auto const attributeType = attValue.type();
   if (attributeType == "int")
-	  setAttribute(attName, attValue.asInt());
+    setAttribute(attName, attValue.asInt());
   else if (attributeType == "double")
-	  setAttribute(attName, attValue.asDouble());
+    setAttribute(attName, attValue.asDouble());
   else if (attributeType == "std::string")
-	  setAttribute(attName, QString::fromStdString(attValue.asString()));
+    setAttribute(attName, QString::fromStdString(attValue.asString()));
 }
 
 template <typename AttributeType>
 void PropertyHandler::setAttribute(QString const &attName,
-	                               AttributeType const &attValue) {
+                                   AttributeType const &attValue) {
   if (m_fun->hasAttribute(attName.toStdString())) {
     try {
       m_fun->setAttribute(attName.toStdString(),

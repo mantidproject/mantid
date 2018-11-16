@@ -197,7 +197,7 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
   connect(m_fitPropertyBrowser, SIGNAL(endXChanged(double)),
           m_plotPresenter.get(), SLOT(setEndX(double)));
   connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)),
-	      m_plotPresenter.get(), SLOT(setPlotSpectrum(int)));
+          m_plotPresenter.get(), SLOT(setPlotSpectrum(int)));
 
   connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this,
           SLOT(setBrowserStartX(double)));
@@ -727,24 +727,24 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
 }
 
 /**
- * Updates the attribute values which are dependent on which spectrum is selected. 
- * They are updated in the function and in the FitPropertyBrowser.
+ * Updates the attribute values which are dependent on which spectrum is
+ * selected. They are updated in the function and in the FitPropertyBrowser.
  */
 void IndirectFitAnalysisTab::updateAttributeValues() {
   auto const attributeNames = m_fittingModel->getSpectrumDependentAttributes();
   if (!attributeNames.empty()) {
     for (auto i = 0; i < m_fitPropertyBrowser->count(); ++i) {
-	  auto function = m_fitPropertyBrowser->getFunctionAtIndex(i);
-	  updateAttributeValues(function, attributeNames);
-	}
+      auto function = m_fitPropertyBrowser->getFunctionAtIndex(i);
+      updateAttributeValues(function, attributeNames);
+    }
   }
 }
 
-void IndirectFitAnalysisTab::updateAttributeValues(IFunction_sptr function, 
-	                                               std::vector<std::string> const &attributeNames) {
+void IndirectFitAnalysisTab::updateAttributeValues(
+    IFunction_sptr function, std::vector<std::string> const &attributeNames) {
   auto const attributes = getAttributes(function, attributeNames);
   if (!attributes.empty())
-	updateAttributeValues(function, attributeNames, attributes);
+    updateAttributeValues(function, attributeNames, attributes);
 }
 
 void IndirectFitAnalysisTab::updateAttributeValues(
@@ -754,7 +754,8 @@ void IndirectFitAnalysisTab::updateAttributeValues(
     updateAttributes(fitFunction, attributeNames, attributes);
     updateFitBrowserAttributeValues();
   } catch (const std::runtime_error &) {
-	showMessageBox("An unexpected error occured:\n The setting of attribute values failed.");
+    showMessageBox("An unexpected error occured:\n The setting of attribute "
+                   "values failed.");
   }
 }
 
@@ -764,13 +765,16 @@ void IndirectFitAnalysisTab::updateFitBrowserAttributeValues() {
 }
 
 std::unordered_map<std::string, IFunction::Attribute>
-IndirectFitAnalysisTab::getAttributes(IFunction_sptr const &function,
-	std::vector<std::string> const &attributeNames) {
+IndirectFitAnalysisTab::getAttributes(
+    IFunction_sptr const &function,
+    std::vector<std::string> const &attributeNames) {
   std::unordered_map<std::string, IFunction::Attribute> attributes;
   for (auto const &name : attributeNames)
     if (function->hasAttribute(name))
-	  attributes[name] = name == "WorkspaceIndex" ? IFunction::Attribute(m_fitPropertyBrowser->workspaceIndex())
-			                                      : function->getAttribute(name);
+      attributes[name] =
+          name == "WorkspaceIndex"
+              ? IFunction::Attribute(m_fitPropertyBrowser->workspaceIndex())
+              : function->getAttribute(name);
   return attributes;
 }
 
@@ -857,7 +861,7 @@ void IndirectFitAnalysisTab::plotAll(
     plotSpectrum(workspace);
   else
     showMessageBox("Plotting the result of a workspace failed:\n\n "
-                           "Workspace result has only one data point");
+                   "Workspace result has only one data point");
 }
 
 void IndirectFitAnalysisTab::plotParameter(
@@ -869,7 +873,7 @@ void IndirectFitAnalysisTab::plotParameter(
     plotSpectrum(workspace, parameterToPlot);
   else
     showMessageBox("Plotting the result of a workspace failed:\n\n "
-                           "Workspace result has only one data point");
+                   "Workspace result has only one data point");
 }
 
 void IndirectFitAnalysisTab::plotSpectrum(

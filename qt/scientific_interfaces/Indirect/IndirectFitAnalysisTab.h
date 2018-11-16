@@ -191,15 +191,16 @@ protected slots:
 
   void updateAttributeValues();
   void updateAttributeValues(Mantid::API::IFunction_sptr function,
-	                         std::vector<std::string> const &attributeNames);
-  void updateAttributeValues(Mantid::API::IFunction_sptr function,
-	                         std::vector<std::string> const &attributeNames,
-	  std::unordered_map<std::string, Mantid::API::IFunction::Attribute> const
-	  &attributes);
+                             std::vector<std::string> const &attributeNames);
+  void updateAttributeValues(
+      Mantid::API::IFunction_sptr function,
+      std::vector<std::string> const &attributeNames,
+      std::unordered_map<std::string, Mantid::API::IFunction::Attribute> const
+          &attributes);
   void updateFitBrowserAttributeValues();
-  std::unordered_map<std::string, Mantid::API::IFunction::Attribute> 
+  std::unordered_map<std::string, Mantid::API::IFunction::Attribute>
   getAttributes(Mantid::API::IFunction_sptr const &function,
-	            std::vector<std::string> const &attributeNames);
+                std::vector<std::string> const &attributeNames);
   void updateParameterValues();
   void updateParameterValues(
       const std::unordered_map<std::string, ParameterValue> &parameters);
