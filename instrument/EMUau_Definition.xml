@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- WARNING: this file was automatically generated and any changes will be lost when it is regenerated. -->
+<!-- see http://www.mantidproject.org/IDF -->
+<instrument
+  xmlns="http://www.mantidproject.org/IDF/1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+  name="EMUau"
+  valid-from="1901-01-01 00:00:00">
+  <!-- DEFAULTS -->
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <indirect-neutronic-positions/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view axis-view="z-"/>
+  </defaults>
+  <!-- SOURCE -->
+  <type name="DopplerDrive" is="Source"/>
+  <component type="DopplerDrive">
+    <location x="0.0" y="0.0" z="-2.035"/>
+  </component>
+  <!-- SAMPLE -->
+  <type name="SampleHolder" is="SamplePos"/>
+  <component type="SampleHolder">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <!-- DIRECT VERTICAL DETECTORS -->
+  <type name="VerticalPixel" is="Detector">
+    <cylinder id="cyl">
+      <centre-of-bottom-base x="0.0" y="-0.00195312" z="0.0"/>
+      <axis x="0.0" y="1.0" z="0.0"/>
+      <radius val="0.00635"/>
+      <height val="0.00390625"/>
+    </cylinder>
+    <algebra val="cyl"/>
+  </type>
+  <type name="VerticalTube" outline="no">
+    <component type="VerticalPixel">
+      <location y="-0.125000000">
+        <neutronic y="-0.125000000"/>
+      </location>
+      <location y="-0.121093750">
+        <neutronic y="-0.121093750"/>
+      </location>
+      <location y="-0.117187500">
+        <neutronic y="-0.117187500"/>
+      </location>
+      <location y="-0.113281250">
+        <neutronic y="-0.113281250"/>
+      </location>
+      <location y="-0.109375000">
+        <neutronic y="-0.109375000"/>
+      </location>
+      <location y="-0.105468750">
+        <neutronic y="-0.105468750"/>
+      </location>
+      <location y="-0.101562500">
+        <neutronic y="-0.101562500"/>
+      </location>
+      <location y="-0.097656250">
+        <neutronic y="-0.097656250"/>
+      </location>
+      <location y="-0.093750000">
+        <neutronic y="-0.093750000"/>
+      </location>
+      <location y="-0.089843750">
+        <neutronic y="-0.089843750"/>
+      </location>
+      <location y="-0.085937500">
+        <neutronic y="-0.085937500"/>
+      </location>
+      <location y="-0.082031250">
+        <neutronic y="-0.082031250"/>
+      </location>
+      <location y="-0.078125000">
+        <neutronic y="-0.078125000"/>
+      </location>
+      <location y="-0.074218750">
+        <neutronic y="-0.074218750"/>
+      </location>
+      <location y="-0.070312500">
+        <neutronic y="-0.070312500"/>
+      </location>
+      <location y="-0.066406250">
+        <neutronic y="-0.066406250"/>
+      </location>
+      <location y="-0.062500000">
+        <neutronic y="-0.062500000"/>
+      </location>
+      <location y="-0.058593750">
+        <neutronic y="-0.058593750"/>
+      </location>
+      <location y="-0.054687500">
+        <neutronic y="-0.054687500"/>
+      </location>
+      <location y="-0.050781250">
+        <neutronic y="-0.050781250"/>
+      </location>
+      <location y="-0.046875000">
+        <neutronic y="-0.046875000"/>
+      </location>
+      <location y="-0.042968750">
+        <neutronic y="-0.042968750"/>
+      </location>
+      <location y="-0.039062500">
+        <neutronic y="-0.039062500"/>
+      </location>
+      <location y="-0.035156250">
+        <neutronic y="-0.035156250"/>
+      </location>
+      <location y="-0.031250000">
+        <neutronic y="-0.031250000"/>
+      </location>
+      <location y="-0.027343750">
+        <neutronic y="-0.027343750"/>
+      </location>
+      <location y="-0.023437500">
+        <neutronic y="-0.023437500"/>
+      </location>
+      <location y="-0.019531250">
+        <neutronic y="-0.019531250"/>
+      </location>
+      <location y="-0.015625000">
+        <neutronic y="-0.015625000"/>
+      </location>
+      <location y="-0.011718750">
+        <neutronic y="-0.011718750"/>
+      </location>
+      <location y="-0.007812500">
+        <neutronic y="-0.007812500"/>
+      </location>
+      <location y="-0.003906250">
+        <neutronic y="-0.003906250"/>
+      </location>
+      <location y="+0.000000000">
+        <neutronic y="+0.000000000"/>
+      </location>
+      <location y="+0.003906250">
+        <neutronic y="+0.003906250"/>
+      </location>
+      <location y="+0.007812500">
+        <neutronic y="+0.007812500"/>
+      </location>
+      <location y="+0.011718750">
+        <neutronic y="+0.011718750"/>
+      </location>
+      <location y="+0.015625000">
+        <neutronic y="+0.015625000"/>
+      </location>
+      <location y="+0.019531250">
+        <neutronic y="+0.019531250"/>
+      </location>
+      <location y="+0.023437500">
+        <neutronic y="+0.023437500"/>
+      </location>
+      <location y="+0.027343750">
+        <neutronic y="+0.027343750"/>
+      </location>
+      <location y="+0.031250000">
+        <neutronic y="+0.031250000"/>
+      </location>
+      <location y="+0.035156250">
+        <neutronic y="+0.035156250"/>
+      </location>
+      <location y="+0.039062500">
+        <neutronic y="+0.039062500"/>
+      </location>
+      <location y="+0.042968750">
+        <neutronic y="+0.042968750"/>
+      </location>
+      <location y="+0.046875000">
+        <neutronic y="+0.046875000"/>
+      </location>
+      <location y="+0.050781250">
+        <neutronic y="+0.050781250"/>
+      </location>
+      <location y="+0.054687500">
+        <neutronic y="+0.054687500"/>
+      </location>
+      <location y="+0.058593750">
+        <neutronic y="+0.058593750"/>
+      </location>
+      <location y="+0.062500000">
+        <neutronic y="+0.062500000"/>
+      </location>
+      <location y="+0.066406250">
+        <neutronic y="+0.066406250"/>
+      </location>
+      <location y="+0.070312500">
+        <neutronic y="+0.070312500"/>
+      </location>
+      <location y="+0.074218750">
+        <neutronic y="+0.074218750"/>
+      </location>
+      <location y="+0.078125000">
+        <neutronic y="+0.078125000"/>
+      </location>
+      <location y="+0.082031250">
+        <neutronic y="+0.082031250"/>
+      </location>
+      <location y="+0.085937500">
+        <neutronic y="+0.085937500"/>
+      </location>
+      <location y="+0.089843750">
+        <neutronic y="+0.089843750"/>
+      </location>
+      <location y="+0.093750000">
+        <neutronic y="+0.093750000"/>
+      </location>
+      <location y="+0.097656250">
+        <neutronic y="+0.097656250"/>
+      </location>
+      <location y="+0.101562500">
+        <neutronic y="+0.101562500"/>
+      </location>
+      <location y="+0.105468750">
+        <neutronic y="+0.105468750"/>
+      </location>
+      <location y="+0.109375000">
+        <neutronic y="+0.109375000"/>
+      </location>
+      <location y="+0.113281250">
+        <neutronic y="+0.113281250"/>
+      </location>
+      <location y="+0.117187500">
+        <neutronic y="+0.117187500"/>
+      </location>
+      <location y="+0.121093750">
+        <neutronic y="+0.121093750"/>
+      </location>
+    </component>
+  </type>
+  <type name="VerticalPanel">
+    <component type="VerticalTube">
+      <location r="+0.150000" t="+164.450000" name="vt_16"/>
+      <location r="+0.167600" t="+160.210000" name="vt_17"/>
+      <location r="+0.150000" t="+155.960000" name="vt_18"/>
+      <location r="+0.167600" t="+151.720000" name="vt_19"/>
+      <location r="+0.150000" t="+147.470000" name="vt_20"/>
+      <location r="+0.167600" t="+143.230000" name="vt_21"/>
+      <location r="+0.150000" t="+138.980000" name="vt_22"/>
+      <location r="+0.167600" t="+134.740000" name="vt_23"/>
+      <location r="+0.150000" t="+130.490000" name="vt_24"/>
+      <location r="+0.167600" t="+126.250000" name="vt_25"/>
+      <location r="+0.150000" t="+122.000000" name="vt_26"/>
+      <location r="+0.167600" t="+117.760000" name="vt_27"/>
+      <location r="+0.150000" t="+113.510000" name="vt_28"/>
+      <location r="+0.167600" t="+109.270000" name="vt_29"/>
+      <location r="+0.150000" t="+105.020000" name="vt_30"/>
+      <location r="+0.167600" t="+100.780000" name="vt_31"/>
+      <location r="+0.150000" t="+96.530000" name="vt_32"/>
+      <location r="+0.167600" t="+92.290000" name="vt_33"/>
+      <location r="+0.150000" t="+88.040000" name="vt_34"/>
+      <location r="+0.167600" t="+83.800000" name="vt_35"/>
+      <location r="+0.150000" t="+79.550000" name="vt_36"/>
+      <location r="+0.167600" t="+75.310000" name="vt_37"/>
+      <location r="+0.150000" t="+71.060000" name="vt_38"/>
+      <location r="+0.167600" t="+66.820000" name="vt_39"/>
+      <location r="+0.150000" t="+62.570000" name="vt_40"/>
+      <location r="+0.167600" t="+58.330000" name="vt_41"/>
+      <location r="+0.150000" t="+54.080000" name="vt_42"/>
+      <location r="+0.167600" t="+49.840000" name="vt_43"/>
+      <location r="+0.150000" t="+45.590000" name="vt_44"/>
+      <location r="+0.167600" t="+41.350000" name="vt_45"/>
+      <location r="+0.150000" t="+37.100000" name="vt_46"/>
+      <location r="+0.167600" t="+32.860000" name="vt_47"/>
+      <location r="+0.150000" t="+28.610000" name="vt_48"/>
+      <location r="+0.167600" t="+24.370000" name="vt_49"/>
+      <location r="+0.150000" t="+20.120000" name="vt_50"/>
+    </component>
+  </type>
+  <component name="DVDetectors" type="VerticalPanel" idlist="direct_vids">
+    <location/>
+  </component>
+  <idlist idname="direct_vids">
+    <id start="4288" end="6527"/>
+  </idlist>
+  <component name="IDVDetectors" type="VerticalPanel" idlist="indirect_vids">
+    <location/>
+  </component>
+  <idlist idname="indirect_vids">
+    <id start="1024" end="3263"/>
+  </idlist>
+  <!-- DIRECT HORIZONTAL DETECTORS -->
+  <type name="HorizontalPixel" is="Detector">
+    <cylinder id="cyl-hz">
+      <centre-of-bottom-base x="0.0" y="-0.00117187" z="0.0"/>
+      <axis x="0.0" y="1.0" z="0.0"/>
+      <radius val="0.00635"/>
+      <height val="0.00234375"/>
+    </cylinder>
+    <algebra val="cyl-hz"/>
+  </type>
+  <type name="HorizontalTube" outline="no">
+    <component type="HorizontalPixel">
+      <location y="-0.075000000">
+        <neutronic y="-0.075000000"/>
+      </location>
+      <location y="-0.072656250">
+        <neutronic y="-0.072656250"/>
+      </location>
+      <location y="-0.070312500">
+        <neutronic y="-0.070312500"/>
+      </location>
+      <location y="-0.067968750">
+        <neutronic y="-0.067968750"/>
+      </location>
+      <location y="-0.065625000">
+        <neutronic y="-0.065625000"/>
+      </location>
+      <location y="-0.063281250">
+        <neutronic y="-0.063281250"/>
+      </location>
+      <location y="-0.060937500">
+        <neutronic y="-0.060937500"/>
+      </location>
+      <location y="-0.058593750">
+        <neutronic y="-0.058593750"/>
+      </location>
+      <location y="-0.056250000">
+        <neutronic y="-0.056250000"/>
+      </location>
+      <location y="-0.053906250">
+        <neutronic y="-0.053906250"/>
+      </location>
+      <location y="-0.051562500">
+        <neutronic y="-0.051562500"/>
+      </location>
+      <location y="-0.049218750">
+        <neutronic y="-0.049218750"/>
+      </location>
+      <location y="-0.046875000">
+        <neutronic y="-0.046875000"/>
+      </location>
+      <location y="-0.044531250">
+        <neutronic y="-0.044531250"/>
+      </location>
+      <location y="-0.042187500">
+        <neutronic y="-0.042187500"/>
+      </location>
+      <location y="-0.039843750">
+        <neutronic y="-0.039843750"/>
+      </location>
+      <location y="-0.037500000">
+        <neutronic y="-0.037500000"/>
+      </location>
+      <location y="-0.035156250">
+        <neutronic y="-0.035156250"/>
+      </location>
+      <location y="-0.032812500">
+        <neutronic y="-0.032812500"/>
+      </location>
+      <location y="-0.030468750">
+        <neutronic y="-0.030468750"/>
+      </location>
+      <location y="-0.028125000">
+        <neutronic y="-0.028125000"/>
+      </location>
+      <location y="-0.025781250">
+        <neutronic y="-0.025781250"/>
+      </location>
+      <location y="-0.023437500">
+        <neutronic y="-0.023437500"/>
+      </location>
+      <location y="-0.021093750">
+        <neutronic y="-0.021093750"/>
+      </location>
+      <location y="-0.018750000">
+        <neutronic y="-0.018750000"/>
+      </location>
+      <location y="-0.016406250">
+        <neutronic y="-0.016406250"/>
+      </location>
+      <location y="-0.014062500">
+        <neutronic y="-0.014062500"/>
+      </location>
+      <location y="-0.011718750">
+        <neutronic y="-0.011718750"/>
+      </location>
+      <location y="-0.009375000">
+        <neutronic y="-0.009375000"/>
+      </location>
+      <location y="-0.007031250">
+        <neutronic y="-0.007031250"/>
+      </location>
+      <location y="-0.004687500">
+        <neutronic y="-0.004687500"/>
+      </location>
+      <location y="-0.002343750">
+        <neutronic y="-0.002343750"/>
+      </location>
+      <location y="+0.000000000">
+        <neutronic y="+0.000000000"/>
+      </location>
+      <location y="+0.002343750">
+        <neutronic y="+0.002343750"/>
+      </location>
+      <location y="+0.004687500">
+        <neutronic y="+0.004687500"/>
+      </location>
+      <location y="+0.007031250">
+        <neutronic y="+0.007031250"/>
+      </location>
+      <location y="+0.009375000">
+        <neutronic y="+0.009375000"/>
+      </location>
+      <location y="+0.011718750">
+        <neutronic y="+0.011718750"/>
+      </location>
+      <location y="+0.014062500">
+        <neutronic y="+0.014062500"/>
+      </location>
+      <location y="+0.016406250">
+        <neutronic y="+0.016406250"/>
+      </location>
+      <location y="+0.018750000">
+        <neutronic y="+0.018750000"/>
+      </location>
+      <location y="+0.021093750">
+        <neutronic y="+0.021093750"/>
+      </location>
+      <location y="+0.023437500">
+        <neutronic y="+0.023437500"/>
+      </location>
+      <location y="+0.025781250">
+        <neutronic y="+0.025781250"/>
+      </location>
+      <location y="+0.028125000">
+        <neutronic y="+0.028125000"/>
+      </location>
+      <location y="+0.030468750">
+        <neutronic y="+0.030468750"/>
+      </location>
+      <location y="+0.032812500">
+        <neutronic y="+0.032812500"/>
+      </location>
+      <location y="+0.035156250">
+        <neutronic y="+0.035156250"/>
+      </location>
+      <location y="+0.037500000">
+        <neutronic y="+0.037500000"/>
+      </location>
+      <location y="+0.039843750">
+        <neutronic y="+0.039843750"/>
+      </location>
+      <location y="+0.042187500">
+        <neutronic y="+0.042187500"/>
+      </location>
+      <location y="+0.044531250">
+        <neutronic y="+0.044531250"/>
+      </location>
+      <location y="+0.046875000">
+        <neutronic y="+0.046875000"/>
+      </location>
+      <location y="+0.049218750">
+        <neutronic y="+0.049218750"/>
+      </location>
+      <location y="+0.051562500">
+        <neutronic y="+0.051562500"/>
+      </location>
+      <location y="+0.053906250">
+        <neutronic y="+0.053906250"/>
+      </location>
+      <location y="+0.056250000">
+        <neutronic y="+0.056250000"/>
+      </location>
+      <location y="+0.058593750">
+        <neutronic y="+0.058593750"/>
+      </location>
+      <location y="+0.060937500">
+        <neutronic y="+0.060937500"/>
+      </location>
+      <location y="+0.063281250">
+        <neutronic y="+0.063281250"/>
+      </location>
+      <location y="+0.065625000">
+        <neutronic y="+0.065625000"/>
+      </location>
+      <location y="+0.067968750">
+        <neutronic y="+0.067968750"/>
+      </location>
+      <location y="+0.070312500">
+        <neutronic y="+0.070312500"/>
+      </location>
+      <location y="+0.072656250">
+        <neutronic y="+0.072656250"/>
+      </location>
+    </component>
+  </type>
+  <type name="HorizontalPanel">
+    <component type="HorizontalTube">
+      <location x="-0.006000" y="+0.011400" z="-0.199600" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_00">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="+0.5*value+0.011400"/>
+        </parameter>   
+      </location>
+      <location x="-0.006000" y="-0.011400" z="-0.199600" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_01">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="-0.5*value-0.011400"/>
+        </parameter>   
+      </location>
+      <location x="-0.003200" y="+0.026300" z="-0.214300" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_02">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="+0.5*value+0.026300"/>
+        </parameter>   
+      </location>
+      <location x="-0.003200" y="-0.026300" z="-0.214300" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_03">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="-0.5*value-0.026300"/>
+        </parameter>   
+      </location>
+      <location x="-0.006000" y="+0.034320" z="-0.199600" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_04">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="+0.5*value+0.034320"/>
+        </parameter>   
+      </location>
+      <location x="-0.006000" y="-0.034320" z="-0.199600" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_05">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="-0.5*value-0.034320"/>
+        </parameter>   
+      </location>
+      <location x="-0.003200" y="+0.049970" z="-0.214300" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_06">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="+0.5*value+0.049970"/>
+        </parameter>   
+      </location>
+      <location x="-0.003200" y="-0.049970" z="-0.214300" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_07">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="-0.5*value-0.049970"/>
+        </parameter>   
+      </location>
+      <location x="-0.006000" y="+0.057240" z="-0.199600" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_08">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="+0.5*value+0.057240"/>
+        </parameter>   
+      </location>
+      <location x="-0.006000" y="-0.057240" z="-0.199600" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_09">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="-0.5*value-0.057240"/>
+        </parameter>   
+      </location>
+      <location x="-0.003200" y="+0.073640" z="-0.214300" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_10">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="+0.5*value+0.073640"/>
+        </parameter>   
+      </location>
+      <location x="-0.003200" y="-0.073640" z="-0.214300" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_11">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="-0.5*value-0.073640"/>
+        </parameter>   
+      </location>
+      <location x="-0.006000" y="+0.080160" z="-0.199600" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_12">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="+0.5*value+0.080160"/>
+        </parameter>   
+      </location>
+      <location x="-0.006000" y="-0.080160" z="-0.199600" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_13">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="-0.5*value-0.080160"/>
+        </parameter>   
+      </location>
+      <location x="-0.003200" y="+0.097310" z="-0.214300" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_14">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="+0.5*value+0.097310"/>
+        </parameter>   
+      </location>
+      <location x="-0.003200" y="-0.097310" z="-0.214300" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="ht_15">
+        <rot val="-10.800000" axis-x="1" axis-y="0" axis-z="0"/>   
+        <parameter name="y">
+          <logfile id="horizontal_tubes_gap" eq="-0.5*value-0.097310"/>
+        </parameter>   
+      </location>
+    </component>
+  </type>
+  <component name="DHDetectors" type="HorizontalPanel" idlist="direct_hids">
+    <location/>
+  </component>
+  <idlist idname="direct_hids">
+    <id start="3264" end="4287"/>
+  </idlist>
+  <component name="IDHDetectors" type="HorizontalPanel" idlist="indirect_hids">
+    <location/>
+  </component>
+  <idlist idname="indirect_hids">
+    <id start="0" end="1023"/>
+  </idlist>
+</instrument>

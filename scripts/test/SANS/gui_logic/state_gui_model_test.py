@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import unittest
 from sans.gui_logic.models.state_gui_model import StateGuiModel
@@ -165,8 +171,8 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_defaults_for_merge_are_empty_and_false(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertTrue(state_gui_model.merge_scale == "")
-        self.assertTrue(state_gui_model.merge_shift == "")
+        self.assertTrue(state_gui_model.merge_scale == "1.0")
+        self.assertTrue(state_gui_model.merge_shift == "0.0")
         self.assertFalse(state_gui_model.merge_scale_fit)
         self.assertFalse(state_gui_model.merge_shift_fit)
         self.assertTrue(state_gui_model.merge_q_range_start == "")

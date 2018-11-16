@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """ The state gui model contains all the reduction information which is not explicitly available in the data table.
 
 This is one of the two models which is used for the data reduction. It contains generally all the settings which
@@ -264,7 +270,7 @@ class StateGuiModel(object):
 
     @property
     def merge_scale(self):
-        return self.get_simple_element(element_id=DetectorId.rescale, default_value="")
+        return self.get_simple_element(element_id=DetectorId.rescale, default_value="1.0")
 
     @merge_scale.setter
     def merge_scale(self, value):
@@ -272,7 +278,7 @@ class StateGuiModel(object):
 
     @property
     def merge_shift(self):
-        return self.get_simple_element(element_id=DetectorId.shift, default_value="")
+        return self.get_simple_element(element_id=DetectorId.shift, default_value="0.0")
 
     @merge_shift.setter
     def merge_shift(self, value):

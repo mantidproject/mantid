@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_LOADLIVEDATATEST_H_
 #define MANTID_LIVEDATA_LOADLIVEDATATEST_H_
 
@@ -289,7 +295,7 @@ public:
     // Accumulated workspace: it was rebinned, but rebinning should be reset
     TS_ASSERT_EQUALS(ws_accum->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws_accum->getNumberEvents(), 200);
-    TS_ASSERT_EQUALS(ws_accum->blocksize(), 1);
+    TS_ASSERT_EQUALS(ws_accum->blocksize(), 40);
 
     // The post-processed workspace was rebinned starting at 40e3
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
