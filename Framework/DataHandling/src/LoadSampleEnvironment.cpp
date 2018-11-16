@@ -64,10 +64,14 @@ void LoadSampleEnvironment::init() {
   declareProperty("Add", false);
 
   // Vector to translate mesh
-  declareProperty(make_unique<ArrayProperty<double>>("TranslationVector","0,0,0"),"Vector by which to translate the loaded environment");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
+      "Vector by which to translate the loaded environment");
 
   // Matrix to rotate mesh
-  declareProperty(make_unique<ArrayProperty<double>>("rotationMatrix","1.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0"),"Rotation Matrix in format x1,x2,x3,y1,y2,y3,z1,z2,z3");
+  declareProperty(make_unique<ArrayProperty<double>>(
+                      "rotationMatrix", "1.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0"),
+                  "Rotation Matrix in format x1,x2,x3,y1,y2,y3,z1,z2,z3");
 }
 
 void LoadSampleEnvironment::exec() {
@@ -119,48 +123,54 @@ void LoadSampleEnvironment::exec() {
       "Enviroment has: " + std::to_string(environment->nelements()) +
       " elements.";
   sample.setEnvironment(std::move(environment));
-  
+
   auto translatedVertices = environmentMesh->getVertices();
-    int i = 0;
-    for(double vertex: translatedVertices){
-      i++;
-      g_log.information(std::to_string(vertex));
-      if (i%3==0){
-        g_log.information("\n");
-      }
+  int i = 0;
+  for (double vertex : translatedVertices) {
+    i++;
+    g_log.information(std::to_string(vertex));
+    if (i % 3 == 0) {
+      g_log.information("\n");
     }
+  }
   // Set output workspace
 
   setProperty("OutputWorkspace", outputWS);
   g_log.debug(debugString);
 }
 
-boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(boost::shared_ptr<MeshObject> environmentMesh){
-  const std::vector<double> translationVector = getProperty("TranslationVector");
-  std::vector<double> checkVector = std::vector<double>(3,0.0);
-  if (translationVector != checkVector){
-    if(translationVector.size() != 3) {
-      throw std::runtime_error("Invalid Translation vector, must have exactly 3 dimensions");
+boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
+    boost::shared_ptr<MeshObject> environmentMesh) {
+  const std::vector<double> translationVector =
+      getProperty("TranslationVector");
+  std::vector<double> checkVector = std::vector<double>(3, 0.0);
+  if (translationVector != checkVector) {
+    if (translationVector.size() != 3) {
+      throw std::runtime_error(
+          "Invalid Translation vector, must have exactly 3 dimensions");
     }
-    Kernel::V3D translate = Kernel::V3D(translationVector[0],translationVector[1],translationVector[2]);
+    Kernel::V3D translate = Kernel::V3D(
+        translationVector[0], translationVector[1], translationVector[2]);
     environmentMesh->translate(translate);
-    
   }
   return environmentMesh;
 }
 
-boost::shared_ptr<MeshObject> LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh){
+boost::shared_ptr<MeshObject>
+LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh) {
   const std::vector<double> rotationMatrix = getProperty("RotationMatrix");
-  double valueList[] = {1.0,0.0,0.0, 0.0,1.0,0.0, 1.0,0.0,0.0};
-  std::vector<double> checkVector1 = std::vector<double>(std::begin(valueList),std::end(valueList));
-  if (rotationMatrix != checkVector1){
-    if(rotationMatrix.size() != 9) {
+  double valueList[] = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0};
+  std::vector<double> checkVector1 =
+      std::vector<double>(std::begin(valueList), std::end(valueList));
+  if (rotationMatrix != checkVector1) {
+    if (rotationMatrix.size() != 9) {
 
-      throw std::runtime_error("Invalid Rotation Matrix, must have exactly 9 values, not: " + std::to_string(rotationMatrix.size()));
+      throw std::runtime_error(
+          "Invalid Rotation Matrix, must have exactly 9 values, not: " +
+          std::to_string(rotationMatrix.size()));
     }
     Kernel::Matrix<double> rotation = Kernel::Matrix<double>(rotationMatrix);
     environmentMesh->rotate(rotation);
-    
   }
   return environmentMesh;
 }

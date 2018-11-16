@@ -66,7 +66,6 @@ public:
     TS_ASSERT(rotatedVertices == vectorToMatch);
   }
 
-
   std::unique_ptr<MeshObject> loadCube(){
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
     auto loader = LoadBinaryStl(path);

@@ -473,18 +473,17 @@ boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
   return m_handler;
 }
 
-void MeshObject::rotate(const Kernel::Matrix<double> & rotationMatrix){
-  for(Kernel::V3D& vertex: m_vertices){
+void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
+  for (Kernel::V3D &vertex : m_vertices) {
     vertex.rotate(rotationMatrix);
   }
 }
 
-void MeshObject::translate(Kernel::V3D translationVector){
-  for(Kernel::V3D& vertex: m_vertices){
+void MeshObject::translate(Kernel::V3D translationVector) {
+  for (Kernel::V3D &vertex : m_vertices) {
     vertex = vertex + translationVector;
   }
 }
-
 
 /**
  * Updates the geometry handler if needed
