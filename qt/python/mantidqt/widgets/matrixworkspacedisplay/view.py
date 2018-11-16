@@ -9,9 +9,7 @@
 #
 from __future__ import (absolute_import, division, print_function)
 
-import sys
 from functools import partial
-from logging import warning
 
 from qtpy import QtGui
 from qtpy.QtCore import QPoint, Qt
