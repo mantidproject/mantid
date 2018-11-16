@@ -19,8 +19,8 @@ GNU_DIAG_OFF("conversion")
 #include "Kafka/private/Schema/df12_det_spec_map_generated.h"
 #include "Kafka/private/Schema/ev42_events_generated.h"
 #include "Kafka/private/Schema/f142_logdata_generated.h"
+#include "Kafka/private/Schema/hs00_event_histogram_generated.h"
 #include "Kafka/private/Schema/is84_isis_events_generated.h"
-#include "kafka/private/Schema/hs00_event_histogram_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <ctime>
