@@ -414,7 +414,7 @@ public:
   /// to point-like)
   virtual bool isHistogramData() const;
 
-  /// Returns true if the workspace contains has common X bins
+  /// Returns true if the workspace contains common X bins
   virtual bool isCommonBins() const;
 
   std::string YUnit() const;

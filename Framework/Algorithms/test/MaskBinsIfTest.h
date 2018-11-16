@@ -72,7 +72,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "__unused_for_child"));
-    const std::string criterion = "y>50 || e>6 || s<5 || i>2 || dx>1.6";
+    const std::string criterion = "y>50 || e>6 || s<5 || dx>1.6";
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Criterion", criterion));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());

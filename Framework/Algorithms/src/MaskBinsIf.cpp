@@ -23,19 +23,17 @@ namespace {
  * @param x : bin center
  * @param dx : bin center error
  * @param s : spectrum axis value
- * @param i : workspace index
  * @param criterion : expression
  * @return muparser
  */
 mu::Parser makeParser(double &y, double &e, double &x, double &dx, double &s,
-                      double &i, const std::string &criterion) {
+                      const std::string &criterion) {
   mu::Parser muParser;
   muParser.DefineVar("y", &y);
   muParser.DefineVar("e", &e);
   muParser.DefineVar("x", &x);
   muParser.DefineVar("dx", &dx);
   muParser.DefineVar("s", &s);
-  muParser.DefineVar("i", &i);
   muParser.SetExpr(criterion);
   return muParser;
 }
@@ -60,7 +58,7 @@ void MaskBinsIf::init() {
   declareProperty("Criterion", "",
                   "Masking criterion as a muparser expression; y: bin count, "
                   "e: bin error, x: bin center, dx: bin center error, s: "
-                  "spectrum axis value, i: workspace index.");
+                  "spectrum axis value.");
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
@@ -71,9 +69,8 @@ void MaskBinsIf::init() {
  */
 std::map<std::string, std::string> MaskBinsIf::validateInputs() {
   std::map<std::string, std::string> issues;
-  double y = 0., e = 0., x = 0., dx = 0., s = 0., i = 0.;
-  mu::Parser parser =
-      makeParser(y, e, x, dx, s, i, getPropertyValue("Criterion"));
+  double y = 0., e = 0., x = 0., dx = 0., s = 0.;
+  mu::Parser parser = makeParser(y, e, x, dx, s, getPropertyValue("Criterion"));
   try {
     parser.Eval();
   } catch (mu::Parser::exception_type &e) {
@@ -96,6 +93,10 @@ void MaskBinsIf::exec() {
   const auto numeric = dynamic_cast<NumericAxis *>(spectrumAxis);
   const auto spectrum = dynamic_cast<SpectraAxis *>(spectrumAxis);
   const bool spectrumOrNumeric = numeric || spectrum;
+  if (!spectrumOrNumeric) {
+    throw std::runtime_error(
+        "Vertical axis must be NumericAxis or SpectraAxis");
+  }
   const int64_t numberHistograms =
       static_cast<int64_t>(outputWorkspace->getNumberHistograms());
   auto progress = make_unique<Progress>(this, 0., 1., numberHistograms);
@@ -103,9 +104,8 @@ void MaskBinsIf::exec() {
   for (int64_t index = 0; index < numberHistograms; ++index) {
     PARALLEL_START_INTERUPT_REGION
     double y, e, x, dx;
-    double i = double(index);
     double s = spectrumOrNumeric ? spectrumAxis->getValue(index) : 0.;
-    mu::Parser parser = makeParser(y, e, x, dx, s, i, criterion);
+    mu::Parser parser = makeParser(y, e, x, dx, s, criterion);
     const auto &spectrum = outputWorkspace->histogram(index);
     const bool hasDx = outputWorkspace->hasDx(index);
     for (auto it = spectrum.begin(); it != spectrum.end(); ++it) {
@@ -115,7 +115,7 @@ void MaskBinsIf::exec() {
       e = it->countStandardDeviation();
       dx = hasDx ? it->centerError() : 0.;
       if (parser.Eval() != 0.) {
-        outputWorkspace->maskBin(index, bin);
+        outputWorkspace->flagMasked(index, bin);
       }
     }
     progress->report();

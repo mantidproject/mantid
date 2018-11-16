@@ -1058,6 +1058,18 @@ double CSGObject::triangleSolidAngle(const V3D &observer) const {
           sneg += sa;
         }
       }
+      /* We assume that objects are opaque to neutrons and that objects define
+       * closed surfaces which are convex. For such objects negative solid angle
+       * equals positive solid angle. This is true providing that the winding
+       * order is defined properly such that the contribution from each triangle
+       * w.r.t the observer gets counted to either the negative or positive
+       * contribution correctly. If that is done correctly then it would only be
+       * necessary to consider the positive contribution to the solid angle.
+       *
+       * The following provides a fix to situations where the winding order is
+       * incorrectly defined. It does not matter if the contribution is positive
+       * or negative since we take the average.
+       */
       return 0.5 * (sangle - sneg);
     }
   }
