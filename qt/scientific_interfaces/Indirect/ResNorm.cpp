@@ -365,23 +365,12 @@ void ResNorm::saveClicked() {
  */
 void ResNorm::plotClicked() {
   setPlotResultIsPlotting(true);
-  WorkspaceGroup_sptr fitWorkspaces =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          m_pythonExportWsName + "_Fit_Workspaces");
 
-  QString fitWsName("");
-
-  if (fitWorkspaces)
-    fitWsName = QString::fromStdString(
-        fitWorkspaces->getItem(m_previewSpec)->getName());
-
-  QString plotOptions(m_uiForm.cbPlot->currentText());
+  QString const plotOptions = m_uiForm.cbPlot->currentText();
   if (plotOptions == "Intensity" || plotOptions == "All")
     plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Intensity");
   if (plotOptions == "Stretch" || plotOptions == "All")
     plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
-  if (plotOptions == "Fit" || plotOptions == "All")
-    plotSpectrum(fitWsName, 0, 1);
 
   setPlotResultIsPlotting(false);
 }
