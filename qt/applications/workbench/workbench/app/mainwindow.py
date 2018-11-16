@@ -12,7 +12,7 @@ Defines the QMainWindow of the application and the main() entry point.
 """
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
-import argparse     # for command line options
+import argparse  # for command line options
 import atexit
 import imp
 import importlib
@@ -38,7 +38,7 @@ requirements.check_qt()
 # Qt
 # -----------------------------------------------------------------------------
 from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
-from qtpy.QtGui import (QColor, QPixmap)  # noqa
+from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
@@ -82,13 +82,25 @@ MAIN_APP = qapplication()
 # -----------------------------------------------------------------------------
 # Importing resources loads the data in
 from workbench.app.resources import qCleanupResources  # noqa
+
 atexit.register(qCleanupResources)
 
-SPLASH = QSplashScreen(QPixmap(':/images/MantidSplashScreen.png'),
+
+def _get_splash_image_name():
+    # gets the width of the screen where the main window was initialised
+    width = QGuiApplication.primaryScreen().size().width()
+
+    if width > 2048:
+        return ':/images/MantidSplashScreen_4k.jpg'
+    else:
+        return ':/images/MantidSplashScreen.png'
+
+
+SPLASH = QSplashScreen(QPixmap(_get_splash_image_name()),
                        Qt.WindowStaysOnTopHint)
 SPLASH.show()
-SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft |
-                   Qt.AlignAbsolute, QColor(Qt.black))
+SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
+                   | Qt.AlignAbsolute, QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -98,13 +110,13 @@ QApplication.processEvents(QEventLoop.AllEvents)
 from mantidqt.utils.qt import add_actions, create_action  # noqa
 from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 
+
 # -----------------------------------------------------------------------------
 # MainWindow
 # -----------------------------------------------------------------------------
 
 
 class MainWindow(QMainWindow):
-
     DOCKOPTIONS = QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks
 
     def __init__(self):
@@ -251,20 +263,24 @@ class MainWindow(QMainWindow):
         add_actions(self.view_menu, self.view_menu_actions)
 
     def launchCustomGUI(self, script):
-        exec(open(script).read(), globals())
+        exec (open(script).read(), globals())
 
     def populateAfterMantidImport(self):
         from mantid.kernel import ConfigService, logger
-        # TODO ConfigService should accept unicode strings
+        # TODO ConfigService should accept unicode strings https://github.com/mantidproject/mantid/pull/23826
         interface_dir = ConfigService[str('mantidqt.python_interfaces_directory')]
         items = ConfigService[str('mantidqt.python_interfaces')].split()
 
-        # list of custom interfaces that have been made qt4/qt5 compatible
-        # TODO need to make *anything* compatible
-        GUI_WHITELIST = ['DGSPlanner.py',
-                         'FilterEvents.py',
-                         'QECoverage.py',
-                         'TofConverter.py']
+        # list of custom interfaces that are not qt4/qt5 compatible
+        GUI_BLACKLIST = ['DGS_Reduction.py',
+                         'MSlice.py',
+                         'ORNL_SANS.py',
+                         'ISIS_Reflectometry_Old.py',
+                         'Powder_Diffraction_Reduction.py',
+                         'HFIR_4Circle_Reduction.py',
+                         'ISIS_SANS_v2_experimental.py',
+                         'Frequency_Domain_Analysis.py',
+                         'Elemental_Analysis.py']
 
         # detect the python interfaces
         interfaces = {}
@@ -273,7 +289,7 @@ class MainWindow(QMainWindow):
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
                 logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
                 continue
-            if scriptname not in GUI_WHITELIST:
+            if scriptname in GUI_BLACKLIST:
                 logger.information('Not adding gui "{}"'.format(scriptname))
                 continue
             temp = interfaces.get(key, [])
@@ -330,12 +346,12 @@ class MainWindow(QMainWindow):
                 # column 2
                 [[logmessages]]
             ],
-            'width-fraction': [0.25,            # column 0 width
-                               0.50,            # column 1 width
-                               0.25],           # column 2 width
-            'height-fraction': [[0.5, 0.5],     # column 0 row heights
-                                [1.0],          # column 1 row heights
-                                [1.0]]          # column 2 row heights
+            'width-fraction': [0.25,  # column 0 width
+                               0.50,  # column 1 width
+                               0.25],  # column 2 width
+            'height-fraction': [[0.5, 0.5],  # column 0 row heights
+                                [1.0],  # column 1 row heights
+                                [1.0]]  # column 2 row heights
         }
 
         with widget_updates_disabled(self):
@@ -347,13 +363,13 @@ class MainWindow(QMainWindow):
                 w.toggle_view(True)
             # split everything on the horizontal
             for i in range(len(widgets) - 1):
-                first, second = widgets[i], widgets[i+1]
+                first, second = widgets[i], widgets[i + 1]
                 self.splitDockWidget(first.dockwidget, second.dockwidget,
                                      Qt.Horizontal)
             # now arrange the rows
             for column in widgets_layout:
                 for i in range(len(column) - 1):
-                    first_row, second_row = column[i], column[i+1]
+                    first_row, second_row = column[i], column[i + 1]
                     self.splitDockWidget(first_row[0].dockwidget,
                                          second_row[0].dockwidget,
                                          Qt.Vertical)
@@ -361,7 +377,7 @@ class MainWindow(QMainWindow):
             for column in widgets_layout:
                 for row in column:
                     for i in range(len(row) - 1):
-                        first, second = row[i], row[i+1]
+                        first, second = row[i], row[i + 1]
                         self.tabifyDockWidget(first.dockwidget, second.dockwidget)
 
                     # Raise front widget per row
@@ -452,8 +468,8 @@ class MainWindow(QMainWindow):
                 widget.readSettings(settings)
 
     def writeSettings(self, settings):
-        settings.set('MainWindow/size', self.size())        # QSize
-        settings.set('MainWindow/position', self.pos())     # QPoint
+        settings.set('MainWindow/size', self.size())  # QSize
+        settings.set('MainWindow/position', self.pos())  # QPoint
         settings.set('MainWindow/state', self.saveState())  # QByteArray
 
         # write out settings for children
@@ -503,6 +519,7 @@ def start_workbench(app, command_line_options):
     importlib.import_module('mantid')
     main_window.populateAfterMantidImport()
     main_window.show()
+    main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
     if main_window.splash:
         main_window.splash.hide()

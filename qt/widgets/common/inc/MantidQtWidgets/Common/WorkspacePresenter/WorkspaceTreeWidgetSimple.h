@@ -42,12 +42,13 @@ public:
   void popupContextMenu() override;
 
 signals:
-  void plotSpectrumClicked(const QStringList &workspaceName);
-  void overplotSpectrumClicked(const QStringList &workspaceName);
-  void plotSpectrumWithErrorsClicked(const QStringList &workspaceName);
-  void overplotSpectrumWithErrorsClicked(const QStringList &workspaceName);
-  void plotColorfillClicked(const QStringList &workspaceName);
+  void plotSpectrumClicked(const QStringList &workspaceNames);
+  void overplotSpectrumClicked(const QStringList &workspaceNames);
+  void plotSpectrumWithErrorsClicked(const QStringList &workspaceNames);
+  void overplotSpectrumWithErrorsClicked(const QStringList &workspaceNames);
+  void plotColorfillClicked(const QStringList &workspaceNames);
   void sampleLogsClicked(const QStringList &workspaceName);
+  void showInstrumentClicked(const QStringList &workspaceNames);
 
 private slots:
   void onPlotSpectrumClicked();
@@ -56,10 +57,12 @@ private slots:
   void onOverplotSpectrumWithErrorsClicked();
   void onPlotColorfillClicked();
   void onSampleLogsClicked();
+  void onShowInstrumentClicked();
 
 private:
   QAction *m_plotSpectrum, *m_overplotSpectrum, *m_plotSpectrumWithErrs,
-      *m_overplotSpectrumWithErrs, *m_plotColorfill, *m_sampleLogs;
+      *m_overplotSpectrumWithErrs, *m_plotColorfill, *m_sampleLogs,
+      *m_showInstrument;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -35,28 +35,35 @@ from HFIR_4Circle_Reduction import PreprocessWindow
 from HFIR_4Circle_Reduction.downloaddialog import DataDownloadDialog
 import HFIR_4Circle_Reduction.refineubfftsetup as refineubfftsetup
 import HFIR_4Circle_Reduction.PeaksIntegrationReport as PeaksIntegrationReport
-
-
+import HFIR_4Circle_Reduction.IntegrateSingePtSubWindow as IntegrateSingePtSubWindow
+import HFIR_4Circle_Reduction.generalplotview as generalplotview
 # import line for the UI python class
-from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
-
-from PyQt4 import QtCore, QtGui
-
-if six.PY3:
-    unicode = str
-
+from HFIR_4Circle_Reduction.hfctables import UBMatrixPeakTable
+from HFIR_4Circle_Reduction.hfctables import UBMatrixTable
+from HFIR_4Circle_Reduction.hfctables import ProcessTableWidget
+from HFIR_4Circle_Reduction.hfctables import ScanSurveyTable
+from HFIR_4Circle_Reduction.integratedpeakview import IntegratedPeakView
+from HFIR_4Circle_Reduction.detector2dview import Detector2DView
+from HFIR_4Circle_Reduction.hfctables import KShiftTableWidget
+from HFIR_4Circle_Reduction.hfctables import MatrixTable
+from mantid.kernel import Logger
+from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog)  # noqa
+from qtpy.QtCore import (QSettings)  # noqa
+from qtpy import QtCore  # noqa
 try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
-
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from qtpy.QtWidgets import (QVBoxLayout)
 try:
     from mantidqtpython import MantidQt
 except ImportError as e:
     NO_SCROLL = True
 else:
     NO_SCROLL = False
+if six.PY3:
+    unicode = str
 
 # define constants
 IndexFromSpice = 'From Spice (pre-defined)'
@@ -64,7 +71,7 @@ IndexFromUB = 'From Calculation By UB'
 MAGNETIC_TOL = 0.2
 
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QMainWindow):
     """ Class of Main Window (top)
     """
     TabPage = {'View Raw Data': 2,
@@ -77,11 +84,12 @@ class MainWindow(QtGui.QMainWindow):
         """ Initialization and set up
         """
         # Base class
-        QtGui.QMainWindow.__init__(self,parent)
+        QMainWindow.__init__(self,parent)
 
         # UI Window (from Qt Designer)
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
+        ui_path = "MainWindow.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
+        self._promote_widgets()
 
         # children windows
         self._my3DWindow = None
@@ -93,6 +101,8 @@ class MainWindow(QtGui.QMainWindow):
         self._preProcessWindow = None
         self._singlePeakIntegrationDialogBuffer = ''
         self._dataDownloadDialog = None
+        self._single_pt_peak_integration_window = None
+        self._general_1d_plot_window = None
 
         # Make UI scrollable
         if NO_SCROLL is False:
@@ -112,231 +122,146 @@ class MainWindow(QtGui.QMainWindow):
 
         # Event handling definitions
         # Top
-        self.connect(self.ui.pushButton_setExp, QtCore.SIGNAL('clicked()'),
-                     self.do_set_experiment)
+        self.ui.pushButton_setExp.clicked.connect(self.do_set_experiment)
 
         # Tab 'Data Access'
-        self.connect(self.ui.pushButton_applySetup, QtCore.SIGNAL('clicked()'),
-                     self.do_apply_setup)
-        self.connect(self.ui.pushButton_browseLocalDataDir, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_local_spice_data)
-        self.connect(self.ui.pushButton_applyCalibratedSampleDistance, QtCore.SIGNAL('clicked()'),
-                     self.do_set_user_detector_distance)
-        self.connect(self.ui.pushButton_applyUserDetCenter, QtCore.SIGNAL('clicked()'),
-                     self.do_set_user_detector_center)
-        self.connect(self.ui.pushButton_applyUserWavelength, QtCore.SIGNAL('clicked()'),
-                     self.do_set_user_wave_length)
-        self.connect(self.ui.pushButton_applyDetectorSize, QtCore.SIGNAL('clicked()'),
-                     self.do_set_detector_size)
+        self.ui.pushButton_applySetup.clicked.connect(self.do_apply_setup)
+        self.ui.pushButton_browseLocalDataDir.clicked.connect(self.do_browse_local_spice_data)
+        self.ui.pushButton_applyCalibratedSampleDistance.clicked.connect(self.do_set_user_detector_distance)
+        self.ui.pushButton_applyUserDetCenter.clicked.connect(self.do_set_user_detector_center)
+        self.ui.pushButton_applyUserWavelength.clicked.connect(self.do_set_user_wave_length)
+        self.ui.pushButton_applyDetectorSize.clicked.connect(self.do_set_detector_size)
 
         # Tab survey
-        self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
-                     self.do_survey)
-        self.connect(self.ui.pushButton_saveSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_save_survey)
-        self.connect(self.ui.pushButton_loadSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_load_survey)
-        self.connect(self.ui.pushButton_viewSurveyPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_view_survey_peak)
-        self.connect(self.ui.pushButton_addPeaksToRefine, QtCore.SIGNAL('clicked()'),
-                     self.do_add_peaks_for_ub)
-        self.connect(self.ui.pushButton_mergeScansSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_merge_scans_survey)
-        self.connect(self.ui.pushButton_selectAllSurveyPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_select_all_survey)
-        self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
-                     self.do_filter_sort_survey_table)
-        self.connect(self.ui.pushButton_clearSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_survey)
-        self.connect(self.ui.pushButton_viewRawSpice, QtCore.SIGNAL('clicked()'),
-                     self.do_show_spice_file)
-
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('editingFinished()'),
-                     self.evt_show_survey)
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('returnPressed()'),
-                     self.evt_show_survey)
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
-                     self.evt_show_survey)
+        self.ui.pushButton_survey.clicked.connect(self.do_survey)
+        self.ui.pushButton_saveSurvey.clicked.connect(self.do_save_survey)
+        self.ui.pushButton_loadSurvey.clicked.connect(self.do_load_survey)
+        self.ui.pushButton_viewSurveyPeak.clicked.connect(self.do_view_survey_peak)
+        self.ui.pushButton_addPeaksToRefine.clicked.connect(self.do_add_peaks_for_ub)
+        self.ui.pushButton_mergeScansSurvey.clicked.connect(self.do_merge_scans_survey)
+        self.ui.pushButton_selectAllSurveyPeaks.clicked.connect(self.do_select_all_survey)
+        self.ui.pushButton_sortInfoTable.clicked.connect(self.do_filter_sort_survey_table)
+        self.ui.pushButton_clearSurvey.clicked.connect(self.do_clear_survey)
+        self.ui.pushButton_viewRawSpice.clicked.connect(self.do_show_spice_file)
 
         # Tab 'View Raw Data'
-        self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
-                     self.do_load_scan_info)
-        self.connect(self.ui.pushButton_plotRawPt, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_pt_raw)
-        self.connect(self.ui.pushButton_prevPtNumber, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_prev_pt_raw)
-        self.connect(self.ui.pushButton_nextPtNumber, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_next_pt_raw)
-        self.connect(self.ui.pushButton_showPtList, QtCore.SIGNAL('clicked()'),
-                     self.show_scan_pt_list)
-        self.connect(self.ui.pushButton_showSPICEinRaw, QtCore.SIGNAL('clicked()'),
-                     self.do_show_spice_file_raw)
-        self.connect(self.ui.pushButton_switchROIMode, QtCore.SIGNAL('clicked()'),
-                     self.do_switch_roi_mode)
-        self.connect(self.ui.pushButton_removeROICanvas, QtCore.SIGNAL('clicked()'),
-                     self.do_del_roi)
-        self.connect(self.ui.pushButton_nextScanNumber, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_next_scan)
-        self.connect(self.ui.pushButton_prevScanNumber, QtCore.SIGNAL('clicked()'),
-                     self.do_plot_prev_scan)
-        self.connect(self.ui.pushButton_maskScanPt, QtCore.SIGNAL('clicked()'),
-                     self.do_mask_pt_2d)
-        self.connect(self.ui.pushButton_integrateROI, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_roi)
-        self.connect(self.ui.pushButton_exportMaskToFile, QtCore.SIGNAL('clicked()'),
-                     self.do_export_mask)
+        self.ui.pushButton_setScanInfo.clicked.connect(self.do_load_scan_info)
+        self.ui.pushButton_plotRawPt.clicked.connect(self.do_plot_pt_raw)
+        self.ui.pushButton_prevPtNumber.clicked.connect(self.do_plot_prev_pt_raw)
+        self.ui.pushButton_nextPtNumber.clicked.connect(self.do_plot_next_pt_raw)
+        self.ui.pushButton_showPtList.clicked.connect(self.show_scan_pt_list)
+        self.ui.pushButton_showSPICEinRaw.clicked.connect(self.do_show_spice_file_raw)
+        self.ui.pushButton_switchROIMode.clicked.connect(self.do_switch_roi_mode)
+        self.ui.pushButton_removeROICanvas.clicked.connect(self.do_del_roi)
+        self.ui.pushButton_nextScanNumber.clicked.connect(self.do_plot_next_scan)
+        self.ui.pushButton_prevScanNumber.clicked.connect(self.do_plot_prev_scan)
+        self.ui.pushButton_maskScanPt.clicked.connect(self.do_mask_pt_2d)
+        self.ui.pushButton_integrateROI.clicked.connect(self.do_integrate_roi)
+        self.ui.pushButton_exportMaskToFile.clicked.connect(self.do_export_mask)
 
         # Tab 'calculate ub matrix'
-        self.connect(self.ui.pushButton_addUBScans, QtCore.SIGNAL('clicked()'),
-                     self.do_add_ub_peaks)
-        # self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
-        #              self.do_add_ub_peak)
-        self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
-                     self.do_cal_ub_matrix)
-        self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
-                     self.do_accept_ub)
-        self.connect(self.ui.pushButton_indexUBPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_index_ub_peaks)
-        self.connect(self.ui.pushButton_deleteUBPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_del_ub_peaks)
-        self.connect(self.ui.pushButton_clearUBPeakTable, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_ub_peaks)
-        self.connect(self.ui.pushButton_resetPeakHKLs, QtCore.SIGNAL('clicked()'),
-                     self.do_reset_ub_peaks_hkl)
-        # self.connect(self.ui.pushButton_selectAllPeaks, QtCore.SIGNAL('clicked()'),
-        #              self.do_select_all_peaks)
-        self.connect(self.ui.pushButton_viewScan3D, QtCore.SIGNAL('clicked()'),
-                     self.do_view_data_3d)
-        self.connect(self.ui.pushButton_plotSelectedData, QtCore.SIGNAL('clicked()'),
-                     self.do_view_data_set_3d)
-        self.connect(self.ui.pushButton_setHKL2Int, QtCore.SIGNAL('clicked()'),
-                     self.do_set_ub_tab_hkl_to_integers)
-        self.connect(self.ui.pushButton_undoSetToInteger, QtCore.SIGNAL('clicked()'),
-                     self.do_undo_ub_tab_hkl_to_integers)
-        self.connect(self.ui.pushButton_clearIndexing, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_all_peaks_index_ub)
+        self.ui.pushButton_addUBScans.clicked.connect(self.do_add_ub_peaks)
+        self.ui.pushButton_calUB.clicked.connect(self.do_cal_ub_matrix)
+        self.ui.pushButton_acceptUB.clicked.connect(self.do_accept_ub)
+        self.ui.pushButton_indexUBPeaks.clicked.connect(self.do_index_ub_peaks)
+        self.ui.pushButton_deleteUBPeak.clicked.connect(self.do_del_ub_peaks)
+        self.ui.pushButton_clearUBPeakTable.clicked.connect(self.do_clear_ub_peaks)
+        self.ui.pushButton_resetPeakHKLs.clicked.connect(self.do_reset_ub_peaks_hkl)
+        self.ui.pushButton_viewScan3D.clicked.connect(self.do_view_data_3d)
+        self.ui.pushButton_plotSelectedData.clicked.connect(self.do_view_data_set_3d)
+        self.ui.pushButton_setHKL2Int.clicked.connect(self.do_set_ub_tab_hkl_to_integers)
+        self.ui.pushButton_undoSetToInteger.clicked.connect(self.do_undo_ub_tab_hkl_to_integers)
+        self.ui.pushButton_clearIndexing.clicked.connect(self.do_clear_all_peaks_index_ub)
 
-        self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub_indexed_peaks)
-        self.connect(self.ui.pushButton_refineUBCalIndex, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub_cal_indexed_peaks)
+        self.ui.pushButton_refineUB.clicked.connect(self.do_refine_ub_indexed_peaks)
+        self.ui.pushButton_refineUBCalIndex.clicked.connect(self.do_refine_ub_cal_indexed_peaks)
 
-        self.connect(self.ui.pushButton_refineUBFFT, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub_fft)
-        self.connect(self.ui.pushButton_findUBLattice, QtCore.SIGNAL('clicked()'),
-                     self.do_refine_ub_lattice)
+        self.ui.pushButton_refineUBFFT.clicked.connect(self.do_refine_ub_fft)
+        self.ui.pushButton_findUBLattice.clicked.connect(self.do_refine_ub_lattice)
 
-        self.connect(self.ui.radioButton_ubAdvancedSelection, QtCore.SIGNAL('toggled(bool)'),
-                     self.do_select_all_peaks)
-        self.connect(self.ui.radioButton_ubSelectAllScans, QtCore.SIGNAL('toggled(bool)'),
-                     self.do_select_all_peaks)
-        self.connect(self.ui.radioButton_ubSelectNoScan, QtCore.SIGNAL('toggled(bool)'),
-                     self.do_select_all_peaks)
+        self.ui.radioButton_ubAdvancedSelection.toggled.connect(self.do_select_all_peaks)
+        self.ui.radioButton_ubSelectAllScans.toggled.connect(self.do_select_all_peaks)
+        self.ui.radioButton_ubSelectNoScan.toggled.connect(self.do_select_all_peaks)
 
         # Tab 'Setup'
-        self.connect(self.ui.pushButton_browseWorkDir, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_working_dir)
-        self.connect(self.ui.comboBox_instrument, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.do_change_instrument_name)
-        self.connect(self.ui.pushButton_browsePreprocessed, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_preprocessed_dir)
+        self.ui.pushButton_browseWorkDir.clicked.connect(self.do_browse_working_dir)
+        self.ui.comboBox_instrument.currentIndexChanged.connect(self.do_change_instrument_name)
+        self.ui.pushButton_browsePreprocessed.clicked.connect(self.do_browse_preprocessed_dir)
 
         # Tab 'UB Matrix'
-        self.connect(self.ui.pushButton_showUB2Edit, QtCore.SIGNAL('clicked()'),
-                     self.do_show_ub_in_box)
-        self.connect(self.ui.pushButton_syncUB, QtCore.SIGNAL('clicked()'),
-                     self.do_sync_ub)
-        self.connect(self.ui.pushButton_saveUB, QtCore.SIGNAL('clicked()'),
-                     self.do_save_ub)
+        self.ui.pushButton_showUB2Edit.clicked.connect(self.do_show_ub_in_box)
+        self.ui.pushButton_syncUB.clicked.connect(self.do_sync_ub)
+        self.ui.pushButton_saveUB.clicked.connect(self.do_save_ub)
 
         # Tab 'Scans Processing'
-        self.connect(self.ui.pushButton_addScanSliceView, QtCore.SIGNAL('clicked()'),
-                     self.do_add_scans_merge)
-        self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
-                     self.do_merge_scans)
-        self.connect(self.ui.pushButton_integratePeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_peaks)
-        self.connect(self.ui.pushButton_setupPeakIntegration, QtCore.SIGNAL('clicked()'),
-                     self.do_switch_tab_peak_int)
-        self.connect(self.ui.pushButton_refreshMerged, QtCore.SIGNAL('clicked()'),
-                     self.do_refresh_merged_scans_table)
-        self.connect(self.ui.pushButton_plotMergedScans, QtCore.SIGNAL('clicked()'),
-                     self.do_view_merged_scans_3d)
-        self.connect(self.ui.pushButton_showUB, QtCore.SIGNAL('clicked()'),
-                     self.do_view_ub)
-        self.connect(self.ui.pushButton_exportPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_export_to_fp)
-        self.connect(self.ui.pushButton_selectAllScans2Merge, QtCore.SIGNAL('clicked()'),
-                     self.do_select_merged_scans)
-        self.connect(self.ui.pushButton_indexMergedScans, QtCore.SIGNAL('clicked()'),
-                     self.do_index_merged_scans_peaks)
-        self.connect(self.ui.pushButton_applyKShift, QtCore.SIGNAL('clicked()'),
-                     self.do_apply_k_shift)
-        self.connect(self.ui.pushButton_clearMergeScanTable, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_merge_table)
-        self.connect(self.ui.pushButton_multipleScans, QtCore.SIGNAL('clicked()'),
-                     self.do_merge_multi_scans)
-        self.connect(self.ui.pushButton_convertMerged2HKL, QtCore.SIGNAL('clicked()'),
-                     self.do_convert_merged_to_hkl)
-        self.connect(self.ui.pushButton_showScanWSInfo, QtCore.SIGNAL('clicked()'),
-                     self.do_show_workspaces)
-        self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
-                     self.do_show_integration_details)
-        self.connect(self.ui.pushButton_toggleIntegrateType, QtCore.SIGNAL('clicked()'),
-                     self.do_toggle_table_integration)
-        self.connect(self.ui.pushButton_exportSelectedPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_export_selected_peaks_to_integrate)
+        self.ui.pushButton_addScanSliceView.clicked.connect(self.do_add_scans_merge)
+        self.ui.pushButton_mergeScans.clicked.connect(self.do_merge_scans)
+        self.ui.pushButton_integratePeaks.clicked.connect(self.do_integrate_peaks)
+        self.ui.pushButton_setupPeakIntegration.clicked.connect(self.do_switch_tab_peak_int)
+        self.ui.pushButton_refreshMerged.clicked.connect(self.do_refresh_merged_scans_table)
+        self.ui.pushButton_plotMergedScans.clicked.connect(self.do_view_merged_scans_3d)
+        self.ui.pushButton_showUB.clicked.connect(self.do_view_ub)
+        self.ui.pushButton_exportPeaks.clicked.connect(self.do_export_to_fp)
+        self.ui.pushButton_selectAllScans2Merge.clicked.connect(self.do_select_merged_scans)
+        self.ui.pushButton_indexMergedScans.clicked.connect(self.do_index_merged_scans_peaks)
+        self.ui.pushButton_applyKShift.clicked.connect(self.do_apply_k_shift)
+        self.ui.pushButton_clearMergeScanTable.clicked.connect(self.do_clear_merge_table)
+        self.ui.pushButton_multipleScans.clicked.connect(self.do_merge_multi_scans)
+        self.ui.pushButton_convertMerged2HKL.clicked.connect(self.do_convert_merged_to_hkl)
+        self.ui.pushButton_showScanWSInfo.clicked.connect(self.do_show_workspaces)
+        self.ui.pushButton_showIntegrateDetails.clicked.connect(self.do_show_integration_details)
+        self.ui.pushButton_toggleIntegrateType.clicked.connect(self.do_toggle_table_integration)
+        self.ui.pushButton_exportSelectedPeaks.clicked.connect(self.do_export_selected_peaks_to_integrate)
 
         # Tab 'Integrate (single) Peaks'
-        self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_single_scan)
-        self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.evt_change_normalization)  # calculate the normalized data again
-        self.connect(self.ui.pushButton_showIntPeakDetails, QtCore.SIGNAL('clicked()'),
-                     self.do_show_single_peak_integration)
-        self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_peak_integration_canvas)
+        self.ui.pushButton_integratePt.clicked.connect(self.do_integrate_single_scan)
+        self.ui.comboBox_ptCountType.currentIndexChanged.connect(self.evt_change_normalization)
+
+        # calculate the normalized data again
+        self.ui.pushButton_showIntPeakDetails.clicked.connect(self.do_show_single_peak_integration)
+        self.ui.pushButton_clearPeakIntFigure.clicked.connect(self.do_clear_peak_integration_canvas)
+
+        self.ui.lineEdit_numSurveyOutput.editingFinished.connect(self.evt_show_survey)
+        self.ui.lineEdit_numSurveyOutput.returnPressed.connect(self.evt_show_survey)
+        self.ui.lineEdit_numSurveyOutput.textEdited.connect(self.evt_show_survey)
+        self.ui.pushButton_exportToMovie.clicked.connect(self.do_export_detector_views_to_movie)
 
         self.ui.comboBox_viewRawDataMasks.currentIndexChanged.connect(self.evt_change_roi)
         self.ui.comboBox_mergePeakNormType.currentIndexChanged.connect(self.evt_change_norm_type)
 
         # Tab k-shift vector
-        self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
-                     self.do_add_k_shift_vector)
+        self.ui.pushButton_addKShift.clicked.connect(self.do_add_k_shift_vector)
 
         # Menu and advanced tab
-        self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
-                     self.menu_quit)
+        self.ui.actionExit.triggered.connect(self.menu_quit)
+        self.ui.actionSave_Session.triggered.connect(self.save_current_session)
+        self.ui.actionLoad_Session.triggered.connect(self.load_session)
+        self.ui.actionLoad_Mask.triggered.connect(self.menu_load_mask)
 
-        self.connect(self.ui.actionSave_Session, QtCore.SIGNAL('triggered()'),
-                     self.save_current_session)
-        self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
-                     self.load_session)
-        self.connect(self.ui.actionLoad_Mask, QtCore.SIGNAL('triggered()'),
-                     self.menu_load_mask)
+        self.ui.actionSave_Project.triggered.connect(self.action_save_project)
+        self.ui.actionOpen_Project.triggered.connect(self.action_load_project)
+        self.ui.actionOpen_Last_Project.triggered.connect(self.action_load_last_project)
 
-        self.connect(self.ui.actionSave_Project, QtCore.SIGNAL('triggered()'),
-                     self.action_save_project)
-        self.connect(self.ui.actionOpen_Project, QtCore.SIGNAL('triggered()'),
-                     self.action_load_project)
-        self.connect(self.ui.actionOpen_Last_Project, QtCore.SIGNAL('triggered()'),
-                     self.action_load_last_project)
+        self.ui.pushButton_loadLastNthProject.clicked.connect(self.do_load_nth_project)
 
-        self.connect(self.ui.pushButton_loadLastNthProject, QtCore.SIGNAL('clicked()'),
-                     self.do_load_nth_project)
+        self.ui.actionPre_Processing.triggered.connect(self.menu_pre_process)
+        self.ui.actionData_Downloading.triggered.connect(self.menu_download_data)
 
-        self.connect(self.ui.actionPre_Processing, QtCore.SIGNAL('triggered()'),
-                     self.menu_pre_process)
+        self.ui.actionSingle_Pt_Integration.triggered.connect(self.menu_integrate_peak_single_pt)
+        self.ui.actionSort_By_2Theta.triggered.connect(self.menu_sort_survey_2theta)
+        self.ui.actionSort_By_Pt.triggered.connect(self.menu_sort_by_pt_number)
 
-        # menu
-        self.connect(self.ui.actionData_Downloading, QtCore.SIGNAL('triggered()'),
-                     self.menu_download_data)
+        # menu action: pop out a general figure plot window
+        self.ui.action2theta_Sigma.triggered.connect(self.menu_pop_2theta_sigma_window)
+        self.ui.actionSave_2theta_Sigma.triggered.connect(self.menu_save_2theta_sigma)
 
         # Validator ... (NEXT)
+        # blabla... ...
 
         # Declaration of class variable
         # IPTS number
         self._iptsNumber = None
+        self._current_exp_number = None
 
         # some configuration
         self._homeSrcDir = os.getcwd()
@@ -365,6 +290,54 @@ class MainWindow(QtGui.QMainWindow):
 
         # mutex interlock
         self._roiComboBoxMutex = False
+
+        return
+
+    def _promote_widgets(self):
+        tableWidget_surveyTable_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_surveyTable.setLayout(tableWidget_surveyTable_layout)
+        self.ui.tableWidget_surveyTable = ScanSurveyTable(self)
+        tableWidget_surveyTable_layout.addWidget(self.ui.tableWidget_surveyTable)
+
+        graphicsView_detector2dPlot_layout = QVBoxLayout()
+        self.ui.frame_graphicsView_detector2dPlot.setLayout(graphicsView_detector2dPlot_layout)
+        self.ui.graphicsView_detector2dPlot = Detector2DView(self)
+        graphicsView_detector2dPlot_layout.addWidget(self.ui.graphicsView_detector2dPlot)
+
+        tableWidget_peaksCalUB_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_peaksCalUB.setLayout(tableWidget_peaksCalUB_layout)
+        self.ui.tableWidget_peaksCalUB = UBMatrixPeakTable(self)
+        tableWidget_peaksCalUB_layout.addWidget(self.ui.tableWidget_peaksCalUB)
+
+        tableWidget_ubMatrix_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_ubMatrix.setLayout(tableWidget_ubMatrix_layout)
+        self.ui.tableWidget_ubMatrix = UBMatrixTable(self)
+        tableWidget_ubMatrix_layout.addWidget(self.ui.tableWidget_ubMatrix)
+
+        tableWidget_ubInUse_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_ubInUse.setLayout(tableWidget_ubInUse_layout)
+        self.ui.tableWidget_ubInUse = UBMatrixTable(self)
+        tableWidget_ubInUse_layout.addWidget(self.ui.tableWidget_ubInUse)
+
+        tableWidget_mergeScans_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_mergeScans.setLayout(tableWidget_mergeScans_layout)
+        self.ui.tableWidget_mergeScans = ProcessTableWidget(self)
+        tableWidget_mergeScans_layout.addWidget(self.ui.tableWidget_mergeScans)
+
+        graphicsView_integratedPeakView_layout = QVBoxLayout()
+        self.ui.frame_graphicsView_integratedPeakView.setLayout(graphicsView_integratedPeakView_layout)
+        self.ui.graphicsView_integratedPeakView = IntegratedPeakView(self)
+        graphicsView_integratedPeakView_layout.addWidget(self.ui.graphicsView_integratedPeakView)
+
+        tableWidget_covariance_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_covariance.setLayout(tableWidget_covariance_layout)
+        self.ui.tableWidget_covariance = MatrixTable(self)
+        tableWidget_covariance_layout.addWidget(self.ui.tableWidget_covariance)
+
+        tableWidget_kShift_layout = QVBoxLayout()
+        self.ui.frame_tableWidget_kShift.setLayout(tableWidget_kShift_layout)
+        self.ui.tableWidget_kShift = KShiftTableWidget(self)
+        tableWidget_kShift_layout.addWidget(self.ui.tableWidget_kShift)
 
         return
 
@@ -400,11 +373,11 @@ class MainWindow(QtGui.QMainWindow):
         # Radio buttons
         self.ui.radioButton_ubFromTab1.setChecked(True)
         # group for the source of UB matrix to import
-        ub_source_group = QtGui.QButtonGroup(self)
+        ub_source_group = QButtonGroup(self)
         ub_source_group.addButton(self.ui.radioButton_ubFromList)
         ub_source_group.addButton(self.ui.radioButton_ubFromTab1)
         # group for the UB matrix's style
-        ub_style_group = QtGui.QButtonGroup(self)
+        ub_style_group = QButtonGroup(self)
         ub_style_group.addButton(self.ui.radioButton_ubMantidStyle)
         ub_style_group.addButton(self.ui.radioButton_ubSpiceStyle)
 
@@ -434,7 +407,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tabWidget.setCurrentIndex(0)
 
         self.ui.radioButton_ubMantidStyle.setChecked(True)
-        self.ui.lineEdit_numSurveyOutput.setText('50')
+        self.ui.lineEdit_numSurveyOutput.setText('')
         self.ui.checkBox_sortDescending.setChecked(False)
         self.ui.radioButton_sortByCounts.setChecked(True)
         self.ui.radioButton_ubSelectNoScan.setChecked(True)
@@ -456,9 +429,11 @@ class MainWindow(QtGui.QMainWindow):
         # background points
         self.ui.lineEdit_backgroundPts.setText('1, 1')
         self.ui.lineEdit_scaleFactor.setText('1.')
+        self.ui.lineEdit_numPt4BackgroundLeft.setText('1')
+        self.ui.lineEdit_numPt4BackgroundRight.setText('1')
 
         # about pre-processed data
-        self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
+        # FIXME self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
 
         # hide and disable some push buttons for future implementation
         self.ui.pushButton_viewScan3D.hide()
@@ -560,7 +535,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # read project file name
-        project_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Specify Project File', os.getcwd()))
+        project_file_name = str(QFileDialog.getSaveFileName(self, 'Specify Project File', os.getcwd()))
         # NEXT ISSUE - consider to allow incremental project saving technique
         if os.path.exists(project_file_name):
             yes = gutil.show_message(self, 'Project file %s does exist. This is supposed to be '
@@ -620,7 +595,7 @@ class MainWindow(QtGui.QMainWindow):
         Load project
         :return:
         """
-        project_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Choose Project File', os.getcwd()))
+        project_file_name = str(QFileDialog.getOpenFileName(self, 'Choose Project File', os.getcwd()))
         if len(project_file_name) == 0:
             # return if cancelled
             return
@@ -741,12 +716,12 @@ class MainWindow(QtGui.QMainWindow):
         # set the button to next mode
         if str(self.ui.pushButton_switchROIMode.text()) == 'Enter ROI-Edit Mode':
             # enter adding ROI mode
-            self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=True)
+            self.ui.graphicsView_detector2dPlot.enter_roi_mode(roi_state=True)
             # rename the button
             self.ui.pushButton_switchROIMode.setText('Quit ROI-Edit Mode')
         else:
             # quit editing ROI mode
-            self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=False)
+            self.ui.graphicsView_detector2dPlot.enter_roi_mode(roi_state=False)
             # rename the button
             self.ui.pushButton_switchROIMode.setText('Enter ROI-Edit Mode')
         # END-IF-ELSE
@@ -946,8 +921,9 @@ class MainWindow(QtGui.QMainWindow):
             # user specifies a non-exist directory. make an error message
             self.pop_one_button_dialog('Pre-processed directory {0} ({1}) does not exist.'
                                        ''.format(pre_process_dir, type(pre_process_dir)))
-            self._myControl.pre_processed_dir = None
+            self._myControl.pre_processed_dir = self._myControl.get_working_directory()
             self.ui.lineEdit_preprocessedDir.setStyleSheet('color: red;')
+            self.ui.lineEdit_preprocessedDir.setText(self._myControl.pre_processed_dir)
         # END-IF
 
         if len(error_message) > 0:
@@ -959,6 +935,7 @@ class MainWindow(QtGui.QMainWindow):
         """ browse the pre-processed merged scans' directory
         :return:
         """
+        print ('Here...2')
         # determine default directory
         exp_number_str = str(self.ui.lineEdit_exp.text())
         default_pp_dir = os.path.join('/HFIR/HB3A/exp{0}/Shared/'.format(exp_number_str))
@@ -966,7 +943,7 @@ class MainWindow(QtGui.QMainWindow):
             default_pp_dir = os.path.expanduser('~')
 
         # use FileDialog to get the directory and set to preprocessedDir
-        pp_dir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Get Directory', default_pp_dir))
+        pp_dir = str(QFileDialog.getExistingDirectory(self, 'Get Directory', default_pp_dir))
         self.ui.lineEdit_preprocessedDir.setText(pp_dir)
 
         return
@@ -974,7 +951,8 @@ class MainWindow(QtGui.QMainWindow):
     def do_browse_local_spice_data(self):
         """ Browse local source SPICE data directory
         """
-        src_spice_dir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Get Directory',
+        print ('Here...1')
+        src_spice_dir = str(QFileDialog.getExistingDirectory(self, 'Get Directory',
                                                                    self._homeSrcDir))
         # Set local data directory to controller
         status, error_message = self._myControl.set_local_data_dir(src_spice_dir)
@@ -992,7 +970,8 @@ class MainWindow(QtGui.QMainWindow):
         Browse and set up working directory
         :return:
         """
-        work_dir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Get Working Directory', self._homeDir))
+        print ('Here...2')
+        work_dir = str(QFileDialog.getExistingDirectory(self, 'Get Working Directory', self._homeDir))
         status, error_message = self._myControl.set_working_directory(work_dir)
         if status is False:
             self.pop_one_button_dialog(error_message)
@@ -1231,14 +1210,58 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # get the output file name
-        roi_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Output mask/ROI file name',
-                                                              self._myControl._workDir,
+        roi_file_name = str(QFileDialog.getSaveFileName(self, 'Output mask/ROI file name',
+                                                              self._myControl.get_working_directory(),
                                                               'XML Files (*.xml);;All Files (*.*)'))
         if len(roi_file_name) == 0:
             return
 
         # save file
         self._myControl.save_roi_to_file(None, None, mask_name, roi_file_name)
+
+        return
+
+    def do_export_detector_views_to_movie(self):
+        """
+        go through all surveyed scans. plot all the measurements from all the scans. record the plot to PNG files,
+        and possibly convert them to movies
+        :return:
+        """
+        scan_list = self.ui.tableWidget_surveyTable.get_scan_numbers(range(self.ui.tableWidget_surveyTable.rowCount()))
+        # roi_name = str(self.ui.comboBox_viewRawDataMasks.currentText())
+        file_name_out = ''
+        for i_scan, scan_number in enumerate(scan_list):
+            # get pt numbers
+            status, pt_number_list = self._myControl.get_pt_numbers(self._current_exp_number, scan_number)
+            # stop this loop if unable to get Pt. numbers
+            if not status:
+                print ('[DB...BAT] Unable to get list of Pt. number from scan {0} due to {1}.'
+                       ''.format(scan_number, pt_number_list))
+                continue
+            # plot
+            for pt_number in pt_number_list:
+                # ROI is set to None because only the ROI rectangular shall appear on the output. But with
+                # a ROI name, the detector is then masked.  It is not the purpose to examine whether all the
+                # peaks are in ROI
+                file_name = self.load_plot_raw_data(self._current_exp_number, scan_number, pt_number, roi_name=None,
+                                                    save=True, remove_workspace=True)
+                file_name_out += file_name + '\n'
+            # END-FOR
+
+            # debug break
+            # if i_scan == 5:
+            #     break
+        # END-FOR
+
+        # write out the file list
+        list_name = os.path.join(self._myControl.get_working_directory(), 'png_exp{0}_list.txt'
+                                                                          ''.format(self._current_exp_number))
+        ofile = open(list_name, 'w')
+        ofile.write(file_name_out)
+        ofile.close()
+
+        message = 'convert -delay 10 -loop 0 @{0} {1}.mpeg'.format(list_name, '[Your Name]')
+        self.pop_one_button_dialog(message)
 
         return
 
@@ -1271,7 +1294,7 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # get the file name
-        fp_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Save to Fullprof File'))
+        fp_name = str(QFileDialog.getSaveFileName(self, 'Save to Fullprof File'))
 
         # return due to cancel
         if len(fp_name) == 0:
@@ -1281,27 +1304,29 @@ class MainWindow(QtGui.QMainWindow):
         exp_number = int(self.ui.lineEdit_exp.text())
         scan_number_list = list()
         for i_row in selected_rows:
-            scan_number_list.append(self.ui.tableWidget_mergeScans.get_scan_number(i_row))
+            # add both ROI and scan number
+            scan_i = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
+            roi_i = self.ui.tableWidget_mergeScans.get_mask(i_row)
+            scan_number_list.append((scan_i, roi_i))
 
         # write
         user_header = str(self.ui.lineEdit_fpHeader.text())
         try:
             export_absorption = self.ui.checkBox_exportAbsorptionToFP.isChecked()
 
-            status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
-                                                                      user_header, export_absorption, fp_name,
-                                                                      self.ui.checkBox_fpHighPrecision.isChecked())
+            file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
+                                                              user_header, export_absorption, fp_name,
+                                                              self.ui.checkBox_fpHighPrecision.isChecked())
             self.ui.plainTextEdit_fpContent.setPlainText(file_content)
-            if status is False:
-                error_msg = file_content
-                if error_msg.startswith('Peak index error'):
-                    error_msg = 'You may forget to index peak\n' + error_msg
-                self.pop_one_button_dialog(error_msg)
         except AssertionError as a_err:
             self.pop_one_button_dialog(str(a_err))
-            return
         except KeyError as key_err:
             self.pop_one_button_dialog(str(key_err))
+        except RuntimeError as run_error:
+            error_msg = str(run_error)
+            if error_msg.count('Peak index error') > 0:
+                error_msg = 'You may forget to index peak\n' + error_msg
+            self.pop_one_button_dialog(error_msg)
 
         return
 
@@ -1319,6 +1344,8 @@ class MainWindow(QtGui.QMainWindow):
             column_name = 'Max Counts'
         elif self.ui.radioButton_sortByTemp.isChecked():
             column_name = 'Sample Temp'
+        elif self.ui.radioButton_sortBy2Theta.isChecked():
+            column_name = '2theta'
         else:
             self.pop_one_button_dialog('No column is selected to sort.')
             return
@@ -1571,10 +1598,10 @@ class MainWindow(QtGui.QMainWindow):
             norm_type = ''
 
         # background Pt.
-        status, num_bg_pt = gutil.parse_integers_editors(self.ui.lineEdit_numPt4Background, allow_blank=False)
-        if not status or num_bg_pt == 0:
-            self.pop_one_button_dialog('Number of Pt number for background must be larger than 0: %s!' % str(num_bg_pt))
-            return
+        # status, num_bg_pt = gutil.parse_integers_editors(self.ui.lineEdit_numPt4Background, allow_blank=False)
+        # if not status or num_bg_pt == 0:
+        #     self.pop_one_button_dialog('Number of Pt number for background must be larger than 0: %s!' % str(num_bg_pt))
+        #     return
 
         # get the merging information: each item should be a tuple as (scan number, pt number list, merged)
         scan_number_list = list()
@@ -1608,7 +1635,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.progressBar_mergeScans.setStatusTip('Hello')
 
         # process background setup
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_numPt4Background,
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_numPt4BackgroundLeft,
                                                         self.ui.lineEdit_numPt4BackgroundRight],
                                                        allow_blank=False)
         if not status:
@@ -1695,7 +1722,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # get the csv file
         file_filter = 'CSV Files (*.csv);;All Files (*)'
-        csv_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Open Exp-Scan Survey File', self._homeDir,
+        csv_file_name = str(QFileDialog.getOpenFileName(self, 'Open Exp-Scan Survey File', self._homeDir,
                                                               file_filter))
         if csv_file_name is None or len(csv_file_name) == 0:
             # return if file selection is cancelled
@@ -1725,7 +1752,7 @@ class MainWindow(QtGui.QMainWindow):
             scan_no = ret_obj[1]
             pt_no = ret_obj[2]
         else:
-            self.pop_one_button_dialog(ret_obj)
+            self.pop_one_button_dialog('Unable to plot detector counts as a 2D image due to '.format(ret_obj))
             return
 
         if self.ui.checkBox_autoMask.isChecked():
@@ -1894,15 +1921,19 @@ class MainWindow(QtGui.QMainWindow):
         # scan_number = par_val_list[1]
 
         # get the user specified name from ...
-        roi_name, ok = QtGui.QInputDialog.getText(self, 'Input Mask Name', 'Enter mask name:')
+        roi_name, ok = QInputDialog.getText(self, 'Input Mask Name', 'Enter mask name:')
 
         # return if cancelled
         if not ok:
             return
         roi_name = str(roi_name)
 
-        # TODO : It is better to warn user if the given ROI is used already
-        pass
+        # check whether this ROI name is used or not. If it is, warn user if the given ROI is used already
+        current_roi_names = [str(self.ui.comboBox_maskNames1.itemText(i))
+                             for i in range(self.ui.comboBox_maskNames1.count())]
+        if roi_name in current_roi_names:
+            self.pop_one_button_dialog('[Warning] ROI name {} is used before.  The previous ROI '
+                                       'will be overwritten by the new defined.'.format(roi_name))
 
         # get current ROI
         ll_corner, ur_corner = self.ui.graphicsView_detector2dPlot.get_roi()
@@ -2196,8 +2227,29 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def process_single_pt_scan_intensity(self, scan_integrate_info_dict):
+        """
+        process integrated single pt scan
+        :param scan_integrate_info_dict:
+        :return:
+        """
+        # check inputs
+        assert isinstance(scan_integrate_info_dict, dict), 'Input scan-pt pairs {0} must be in a dict but not a {1}' \
+                                                           ''.format(scan_integrate_info_dict,
+                                                                     type(scan_integrate_info_dict))
+
+        # get intensities
+        for scan_number in scan_integrate_info_dict:
+            # self._single_pt_scan_intensity_dict: not been defined and used at all!
+            # TODO NOW3 : Check whether the intensity is recorded in the single_measurement already???
+            intensity, roi_name = scan_integrate_info_dict[scan_number]
+            self.ui.tableWidget_mergeScans.add_single_measure_scan(scan_number, intensity, roi_name)
+        # END-FOR
+
+        return
+
     # add slot for UB refinement configuration window's signal to connect to
-    @QtCore.pyqtSlot(int)
+    # @QtCore.pyqtSlot(int)
     def refine_ub_lattice(self, val):
         """
         Refine UB matrix by constraining on lattice type.
@@ -2348,7 +2400,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get file name
         file_filter = 'CSV Files (*.csv);;All Files (*)'
-        out_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Save scan survey result',
+        out_file_name = str(QFileDialog.getSaveFileName(self, 'Save scan survey result',
                                                               self._homeDir, file_filter))
 
         # Save file
@@ -2362,7 +2414,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         # get file name
         file_filter = 'Data Files (*.dat);;All Files (*)'
-        ub_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'ASCII File To Save UB Matrix', self._homeDir,
+        ub_file_name = str(QFileDialog.getSaveFileName(self, 'ASCII File To Save UB Matrix', self._homeDir,
                                                              file_filter))
 
         # early return if user cancels selecting a file name to save
@@ -2423,25 +2475,41 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    # TEST NOW
     def do_select_all_survey(self):
         """
         Select or de-select all rows in survey items
         :return:
         """
         if self._surveyTableFlag:
-            # flag is turned on: select all peaks or all nuclear peaks
-            if self.ui.checkBox_surveySelectNuclearPeaks.isChecked():
-                # only select nuclear peaks
-                num_rows = self.ui.tableWidget_surveyTable.rowCount()
-                for i_row in range(num_rows):
+            # there are cases: select all or select selected few with filters
+            # check whether there is any option
+            if self.ui.checkBox_surveySelectNuclearPeaks.isChecked() or self.ui.checkBox_singlePtScans.isChecked():
+                # deselect all rows for future selection
+                self.ui.tableWidget_surveyTable.select_all_rows(False)
+
+            # go through all rows
+            num_rows = self.ui.tableWidget_surveyTable.rowCount()
+            for i_row in range(num_rows):
+
+                select_line = True
+
+                # filter HKL (nuclear)
+                if self.ui.checkBox_surveySelectNuclearPeaks.isChecked():
+                    # only select nuclear peaks
                     peak_hkl = self.ui.tableWidget_surveyTable.get_hkl(i_row)
-                    if peak_util.is_peak_nuclear(peak_hkl[0], peak_hkl[1], peak_hkl[2]):
-                        self.ui.tableWidget_surveyTable.select_row(i_row, True)
-                    else:
-                        self.ui.tableWidget_surveyTable.select_row(i_row, False)
-            else:
-                # all peaks
-                self.ui.tableWidget_surveyTable.select_all_rows(True)
+                    select_line = peak_util.is_peak_nuclear(peak_hkl[0], peak_hkl[1], peak_hkl[2]) and select_line
+
+                if self.ui.checkBox_singlePtScans.isChecked():
+                    # only select scan with single Pt
+                    scan_number = self.ui.tableWidget_surveyTable.get_scan_numbers([i_row])[0]
+                    status, pt_list = self._myControl.get_pt_numbers(self._current_exp_number, scan_number)
+                    select_line = (status and len(pt_list) == 1) and select_line
+
+                if select_line:
+                    self.ui.tableWidget_surveyTable.select_row(i_row, True)
+            # END-FOR(i_row)
+
         else:
             # de-select all peaks
             self.ui.tableWidget_surveyTable.select_all_rows(False)
@@ -2467,6 +2535,18 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.pushButton_selectAllScans2Merge.setText('Deselect All')
         else:
             self.ui.pushButton_selectAllScans2Merge.setText('Select All')
+
+        return
+
+    def do_set_all_calibration(self):
+        """
+        set up all the calibration parameters
+        :return:
+        """
+        self.do_set_user_detector_center()
+        self.do_set_user_detector_distance()
+        self.do_set_user_wave_length()
+        self.do_set_detector_size()
 
         return
 
@@ -2529,6 +2609,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         # get exp number
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
+
         if status:
             # new experiment number
             exp_number = ret_obj[0]
@@ -2553,11 +2634,57 @@ class MainWindow(QtGui.QMainWindow):
                 # find out the detector type
                 status, ret_obj = self._myControl.find_detector_size(default_data_dir, exp_number)
 
+            # TEST new feature
+            # Check working directory.  If not set or with different exp number, then set to
+            work_dir = str(self.ui.lineEdit_workDir.text()).strip()
+            if work_dir != '':
+                # check whether it contains exp number other than current one
+                if work_dir.lower().count('exp') > 0 and work_dir.count('{0}'.format(exp_number)) == 0:
+                    use_default = True
+                else:
+                    use_default = False
+            else:
+                use_default = False
+            if use_default:
+                # set default to analysis cluster or local
+                work_dir = '/HFIR/HB3A/exp{0}/Shared/'.format(exp_number)
+                # check whether user has writing permission
+                if os.access(work_dir, os.W_OK) is False:
+                    work_dir = os.path.join(os.path.expanduser('~'), 'HB3A/Exp{0}'.format(exp_number))
+                self.ui.lineEdit_workDir.setText(work_dir)
+            # END-IF
+
+            # TEST new feature
+            # Check pre-processing directory.  If not set or with different exp number, then set to
+            pre_process_dir = str(self.ui.lineEdit_preprocessedDir.text()).strip()
+            if pre_process_dir == '':
+                # empty
+                use_default = True
+            elif pre_process_dir.lower().count('exp') > 0 and pre_process_dir.count('{0}'.format(exp_number)) > 0:
+                # doesn't sound right
+                use_default = True
+            else:
+                # other cases
+                use_default = False
+            if use_default:
+                # shared Example: /HFIR/HB3A/exp668/Shared/preprocessed
+                pre_process_dir = '/HFIR/HB3A/exp{0}/Shared/preprocessed'.format(exp_number)
+                # check whether user has writing permission
+                if os.access(pre_process_dir, os.W_OK) is False:
+                    # use local
+                    pre_process_dir = os.path.join(os.path.expanduser('~'),
+                                                   'HB3A/Exp{0}/preprocessed'.format(exp_number))
+                self.ui.lineEdit_preprocessedDir.setText(pre_process_dir)
+            # END-IF
+
         else:
             err_msg = ret_obj
             self.pop_one_button_dialog('Unable to set experiment as %s' % err_msg)
             self.ui.lineEdit_exp.setStyleSheet('color: red')
             return
+
+        # register experiment number
+        self._current_exp_number = exp_number
 
         self.ui.tabWidget.setCurrentIndex(0)
 
@@ -2686,18 +2813,28 @@ class MainWindow(QtGui.QMainWindow):
         hkl_src = str(self.ui.comboBox_indexFrom.currentText())
 
         # loop through all rows
+        message = ''
         num_rows = self.ui.tableWidget_mergeScans.rowCount()
         for row_index in range(num_rows):
             # get scan number
             scan_i = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
-            peak_info_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i)
 
-            # skip non-merged sans
-            if peak_info_i is None:
-                continue
+            integral_type = self.ui.tableWidget_mergeScans.get_integration_type(row_index)
+            is_single_pt = False
+            if integral_type == 'single-pt':
+                roi_name = self.ui.tableWidget_mergeScans.get_roi_name(row_index)
+                peak_info_i = self._myControl.get_single_pt_info(exp_number, scan_number=scan_i, pt_number=1,
+                                                                 roi_name=roi_name)
+                is_single_pt = True
+            else:
+                peak_info_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i)
+                # skip non-merged sans
+                if peak_info_i is None:
+                    message += 'Row {0} Scan {1} is not integrated.\n'.format(row_index, scan_i)
+                    continue
 
             # get or calculate HKL
-            if hkl_src == 'From SPICE':
+            if is_single_pt or hkl_src == 'From SPICE':
                 # get HKL from SPICE (non-user-hkl)
                 hkl_i = peak_info_i.get_hkl(user_hkl=False)
             else:
@@ -2717,12 +2854,13 @@ class MainWindow(QtGui.QMainWindow):
                     error_msg = 'Scan %d: %s' % (scan_i, str(ret_tup))
                     self.ui.tableWidget_mergeScans.set_status(scan_i, error_msg)
                 # END-IF-ELSE(index)
+
+                # set to peak info
+                peak_info_i.set_hkl_np_array(hkl_i)
+
             # END-IF-ELSE (hkl_from_spice)
 
-            # set & show
-            peak_info_i.set_hkl_np_array(hkl_i)
-            # self._myControl.get_peak_info(exp_number, scan_i)
-            # round HKL?
+            # show by rounding HKL?
             if self.ui.checkBox_roundHKL.isChecked():
                 hkl_i = [hb3a_util.round_miller_index(hkl_i[0], 0.2),
                          hb3a_util.round_miller_index(hkl_i[1], 0.2),
@@ -2759,7 +2897,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         file_filter = 'Data Files (*.dat);;Text Files (*.txt);;All Files (*)'
-        file_name = QtGui.QFileDialog.getOpenFileName(self, 'Open UB ASCII File', self._homeDir,
+        file_name = QFileDialog.getOpenFileName(self, 'Open UB ASCII File', self._homeDir,
                                                       file_filter)
         # quit if cancelled
         if file_name is None:
@@ -3014,7 +3152,13 @@ class MainWindow(QtGui.QMainWindow):
         start_scan = ret_obj[0]
         end_scan = ret_obj[1]
 
-        max_number = int(self.ui.lineEdit_numSurveyOutput.text())
+        # maximum number to show on the table
+        max_str = str(self.ui.lineEdit_numSurveyOutput.text())
+        if max_str.isdigit():
+            max_number = int(max_str)
+        else:
+            max_number = end_scan - start_scan + 1
+            self.ui.lineEdit_numSurveyOutput.setText(str(max_number))
 
         # Get value
         status, ret_obj, err_msg = self._myControl.survey(exp_number, start_scan, end_scan)
@@ -3343,11 +3487,21 @@ class MainWindow(QtGui.QMainWindow):
             # do nothing if the table is empty
             return
 
-        max_number = int(self.ui.lineEdit_numSurveyOutput.text())
+        max_number_str = str(self.ui.lineEdit_numSurveyOutput.text()).strip()
+        if max_number_str == '':
+            # empty: select all
+            surveyed_scan_list = self._myControl.get_surveyed_scans()
+            max_number = len(surveyed_scan_list)
+
+        else:
+            # get maximum number and
+            max_number = int(max_number_str)
 
         # ignore the situation that this line edit is cleared
         if max_number <= 0:
             return
+
+        # reset row number
         if max_number != self.ui.tableWidget_surveyTable.rowCount():
             # re-show survey
             self.ui.tableWidget_surveyTable.remove_all_rows()
@@ -3357,7 +3511,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def generate_peaks_integration_report(self):
         """
-        generate a report for all integrated peaks
+        generate a report for all integrated peaks get MergeScan table and related PeakInfo instance
         :return:
         """
         # get experiment number
@@ -3457,7 +3611,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         assert isinstance(message, str), 'Input message %s must a string but not %s.' \
                                          '' % (str(message), type(message))
-        QtGui.QMessageBox.information(self, '4-circle Data Reduction', message)
+        QMessageBox.information(self, '4-circle Data Reduction', message)
 
         return
 
@@ -3532,13 +3686,42 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def menu_integrate_peak_single_pt(self):
+        """ Handle the event to integrate single-pt peak from menu operation
+        The operation includes
+        1. initialize the single-pt scan integration window if it is not initialized
+        2. add the selected scans to the table in single-pt scan integration window
+        3. show the window
+        :return:
+        """
+        if self._single_pt_peak_integration_window is None:
+            self._single_pt_peak_integration_window = IntegrateSingePtSubWindow.IntegrateSinglePtIntensityWindow(self)
+        self._single_pt_peak_integration_window.show()
+
+        # set experiment
+        self._single_pt_peak_integration_window.set_experiment(self._current_exp_number)
+
+        # collect selected Scan/Pt combo
+        scan_pt_tup_list = self.ui.tableWidget_surveyTable.get_selected_scan_pt()
+        # get other information
+        for scan_number, pt_number in scan_pt_tup_list:
+            # check HKL and 2theta
+            h_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '_h')
+            k_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '_k')
+            l_i = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '_l')
+            hkl_str = '{0}, {1}, {2}'.format(h_i, k_i, l_i)
+            two_theta = self._myControl.get_sample_log_value(self._current_exp_number, scan_number, pt_number, '2theta')
+            self._single_pt_peak_integration_window.add_scan(scan_number, pt_number, hkl_str, two_theta)
+
+        return
+
     def menu_load_mask(self):
         """ Load Mask and apply to both workspaces and GUI
         hb3a_clean_ui_21210
         """
         # get the XML file to load
         file_filter = 'XML Files (*.xml);;All Files (*)'
-        mask_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Open Masking File',
+        mask_file_name = str(QFileDialog.getOpenFileName(self, 'Open Masking File',
                                                                self._myControl.get_working_directory(),
                                                                file_filter))
 
@@ -3560,6 +3743,86 @@ class MainWindow(QtGui.QMainWindow):
         # plot ROI on 2D plot
         self.ui.graphicsView_detector2dPlot.remove_roi()
         self.ui.graphicsView_detector2dPlot.set_roi(lower_left_corner, upper_right_corner)
+
+        return
+
+    def menu_pop_2theta_sigma_window(self):
+        """
+        pop out a general figure plot window for 2theta - sigma plot
+        :return:
+        """
+        # create new window or clear existing window
+        if self._general_1d_plot_window is None:
+            self._general_1d_plot_window = generalplotview.GeneralPlotWindow(self)
+            pass
+        else:
+            self._general_1d_plot_window.reset_window()
+        # show
+        self._general_1d_plot_window.show()
+
+        # set up the window
+        try:
+            output_arrays = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel=['sigma', 'scan'])
+            # convert matrix to arrays
+            xye_matrix = output_arrays.transpose()
+            vec_2theta = xye_matrix[0]
+            vec_sigma = xye_matrix[1]
+            vec_sigma_error = xye_matrix[2]
+
+            vec_scan_number = xye_matrix[3]
+            notes = list()
+            for i_scan in range(len(vec_scan_number)):
+                notes.append('{}'.format(int(vec_scan_number[i_scan])))
+
+            # get the latest (cached) vec_x and vec_y
+            self._general_1d_plot_window.plot_data(vec_2theta, vec_sigma, vec_sigma_error, '2theta', 'Gaussian-Sigma',
+                                                   annotation_list=notes)
+        except RuntimeError as run_err:
+            self.pop_one_button_dialog(str(run_err))
+
+        return
+
+    def menu_save_2theta_sigma(self):
+        """
+        save 2theta - sigma - scan number to a csv file
+        :return:
+        """
+        # get file name
+        out_file_name = QFileDialog.getSaveFileName(self, caption='Select a file to save 2theta-Sigma-Scan',
+                                                    directory=self._myControl.get_working_directory(),
+                                                    filter='Data Files (*.dat);;All File (*.*)')
+        out_file_name = str(out_file_name)
+        if len(out_file_name) == 0:
+            # cancelled
+            return
+
+        # construct the table
+        try:
+            output_arrays = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel=['sigma', 'scan'],
+                                                                            with_error=True)
+        except RuntimeError as run_err:
+            self.pop_one_button_dialog(str(run_err))
+            return
+        else:
+            # xye_matrix = output_arrays.transpose()
+            # vec_2theta = xye_matrix[0]
+            # vec_sigma = xye_matrix[1]
+            # vec_sigma_error = xye_matrix[2]
+            # vec_scan_number = xye_matrix[3]
+            pass
+
+        # write to the output file
+        wbuf = '# 2theta\tsigam\terror\tscan number\n'
+        for index in range(output_arrays.shape[0]):
+            # wbuf += '{:.5f}\t{:5f}\t{:5f}\t{}\n'.format(vec_2theta[index], vec_sigma[index], vec_sigma_error[index],
+            #                                             vec_scan_number[index])
+            wbuf += '{:.5f}\t{:5f}\t{:5f}\t{}\n'.format(output_arrays[index][0], output_arrays[index][1],
+                                                        output_arrays[index][2], output_arrays[index][3])
+        # END-FOR
+
+        out_file = open(out_file_name, 'w')
+        out_file.write(wbuf)
+        out_file.close()
 
         return
 
@@ -3615,6 +3878,29 @@ class MainWindow(QtGui.QMainWindow):
                                                               det_sample_distance=det_sample_dist,
                                                               wave_length=wave_length)
         # END-IF
+
+        return
+
+    def menu_sort_survey_2theta(self):
+        """
+        sort survey table by 2theta
+        :return:
+        """
+        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan=0, end_scan=100000,
+                                                        min_counts=0., max_counts=10000000000.,
+                                                        sort_by_column='2theta', sort_order=0)
+
+        return
+
+    # TESTME - recently implemented
+    def menu_sort_by_pt_number(self):
+        """
+        sort survey table by pt number (with the maximum counts in the scan)
+        :return:
+        """
+        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan=0, end_scan=100000,
+                                                        min_counts=0., max_counts=10000000000.,
+                                                        sort_by_column='Max Counts Pt', sort_order=0)
 
         return
 
@@ -3690,7 +3976,7 @@ class MainWindow(QtGui.QMainWindow):
         Save settings (parameter set) upon quitting
         :return:
         """
-        settings = QtCore.QSettings()
+        settings = QSettings()
 
         # directories
         local_spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
@@ -3746,7 +4032,7 @@ class MainWindow(QtGui.QMainWindow):
         Load QSettings from previous saved file
         :return:
         """
-        settings = QtCore.QSettings()
+        settings = QSettings()
 
         # directories
         try:
@@ -3773,6 +4059,10 @@ class MainWindow(QtGui.QMainWindow):
             lattice_gamma = settings.value('gamma')
             self.ui.lineEdit_gamma.setText(str(lattice_gamma))
 
+            # last project
+            last_1_project_path = str(settings.value('last1path'))
+            self.ui.label_last1Path.setText(last_1_project_path)
+
             # calibrated instrument configurations
             user_wave_length = settings.value('wave_length')
             self.ui.lineEdit_userWaveLength.setText(user_wave_length)
@@ -3786,10 +4076,6 @@ class MainWindow(QtGui.QMainWindow):
             det_sample_distance = settings.value('det_sample_distance')
             self.ui.lineEdit_userDetSampleDistance.setText(det_sample_distance)
 
-            # last project
-            last_1_project_path = str(settings.value('last1path'))
-            self.ui.label_last1Path.setText(last_1_project_path)
-
             # survey
             survey_start = str(settings.value('survey_start_scan'))
             self.ui.lineEdit_surveyStartPt.setText(survey_start)
@@ -3797,7 +4083,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_surveyEndPt.setText(survey_stop)
 
         except TypeError as err:
-            self.pop_one_button_dialog(str(err))
+            self.pop_one_button_dialog('Failed to load previous session successfully due to {0}'.format(err))
             return
 
         return
@@ -3858,13 +4144,15 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def load_plot_raw_data(self, exp_no, scan_no, pt_no, roi_name=None):
+    def load_plot_raw_data(self, exp_no, scan_no, pt_no, roi_name=None, save=False, remove_workspace=False):
         """
         Plot raw workspace from XML file for a measurement/pt.
         :param exp_no:
         :param scan_no:
         :param pt_no:
         :param roi_name: string (mask loaded data) or None (do nothing)
+        :param save: flag to save the ROI
+        :param remove_workspace: Flag to remove the raw data workspace
         :return:
         """
         # check inputs
@@ -3889,7 +4177,14 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get data and plot
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
-        self.ui.graphicsView_detector2dPlot.plot_detector_counts(raw_det_data)
+        this_title = 'Exp {} Scan {} Pt {} ROI {}'.format(exp_no, scan_no, pt_no, roi_name)
+        self.ui.graphicsView_detector2dPlot.plot_detector_counts(raw_det_data, title=this_title)
+        if save:
+            image_file = os.path.join(self.working_directory, 'exp{}_scan{}_pt{}_{}.png'
+                                                              ''.format(exp_no, scan_no, pt_no, roi_name))
+            self.ui.graphicsView_detector2dPlot.save_figure(image_file)
+        else:
+            image_file = None
 
         # Information
         info = '%-10s: %d\n%-10s: %d\n%-10s: %d\n' % ('Exp', exp_no,
@@ -3897,7 +4192,10 @@ class MainWindow(QtGui.QMainWindow):
                                                       'Pt', pt_no)
         self.ui.plainTextEdit_rawDataInformation.setPlainText(info)
 
-        return
+        if remove_workspace:
+            self._myControl.remove_pt_xml_workspace(exp_no, scan_no, pt_no)
+
+        return image_file
 
     def update_adding_peaks_status(self, exp_number, scan_number, progress):
         """

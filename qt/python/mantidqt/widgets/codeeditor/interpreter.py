@@ -11,6 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 # std imports
 import sys
+import traceback
 
 # 3rd party imports
 from qtpy.QtCore import QObject, Signal
@@ -172,6 +173,7 @@ class PythonFileInterpreter(QWidget):
 
 class PythonFileInterpreterPresenter(QObject):
     """Presenter part of MVP to control actions on the editor"""
+    MAX_STACKTRACE_LENGTH = 2
 
     def __init__(self, view, model):
         super(PythonFileInterpreterPresenter, self).__init__()
@@ -234,6 +236,7 @@ class PythonFileInterpreterPresenter(QObject):
     def _on_exec_error(self, task_error):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
                                          task_error.stack
+        exc_stack = traceback.extract_tb(exc_stack)[self.MAX_STACKTRACE_LENGTH:]
         if hasattr(exc_value, 'lineno'):
             lineno = exc_value.lineno + self._code_start_offset
         elif exc_stack is not None:
