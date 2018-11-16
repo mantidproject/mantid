@@ -155,9 +155,6 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         :param data: The data that will be copied to the clipboard
         :return:
         """
-        # This function is likely to be OS specific
-        if not sys.platform == "win32":
-            warning("Copying to clipboard has not been tested on UNIX systems.")
         cb = QtGui.QGuiApplication.clipboard()
         cb.setText(data, mode=cb.Clipboard)
 
