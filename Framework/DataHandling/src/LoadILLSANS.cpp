@@ -18,6 +18,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -31,7 +32,6 @@ namespace DataHandling {
 
 namespace {
 static constexpr size_t N_MONITORS = 2;
-static constexpr double D33_VTOF_COEFF = 3956.04;
 }
 
 using namespace Kernel;
@@ -742,7 +742,7 @@ void LoadILLSANS::setPixelSize() {
 }
 
 /**
- * Returns the wavelength axis computed from TOF in VTOF mode
+ * Returns the wavelength axis computed in VTOF mode
  * @param entry : opened root nexus entry
  * @param path : path of the detector distance entry
  * @param sum : loaded channel width sums
@@ -759,8 +759,14 @@ LoadILLSANS::getVariableTimeBinning(const NXEntry &entry,
   NXFloat distance = entry.openNXFloat(path);
   distance.load();
   for (int bin = 0; bin < nBins; ++bin) {
-    binCenters.emplace_back((sum[bin] / 1E+9 - times[bin] / 2. / 1E+6) /
-                            distance[0] * D33_VTOF_COEFF);
+    // sum is in nanoseconds, times is in microseconds
+    const double tof = sum[bin] * 1E-9 - times[bin] * 1E-6 / 2.;
+    // velocity in m/s
+    const double velocity = distance[0] / tof;
+    // wavelength in AA
+    const double lambda = PhysicalConstants::h /
+                          PhysicalConstants::NeutronMass / velocity * 1E+10;
+    binCenters.emplace_back(lambda);
   }
   std::vector<double> binEdges;
   binEdges.reserve(nBins + 1);
@@ -768,7 +774,7 @@ LoadILLSANS::getVariableTimeBinning(const NXEntry &entry,
   // after conversion to bin edges, the first item might get negative,
   // which is not physical, set to 0
   if (binEdges[0] < 0.) {
-      binEdges[0] = 0.;
+    binEdges[0] = 0.;
   }
   return binEdges;
 }

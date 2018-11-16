@@ -28,7 +28,7 @@ class SANSILLIntegration(PythonAlgorithm):
         return 'Performs SANS integration and resolution calculation based on corrected data.'
 
     def seeAlso(self):
-        return ['SANSILLReduction', 'Q1DWeighted', 'Qxy']
+        return ['SANSILLReduction']
 
     def name(self):
         return 'SANSILLIntegration'
@@ -298,6 +298,8 @@ class SANSILLIntegration(PythonAlgorithm):
             wedge_angle = self.getProperty('WedgeAngle').value
             wedge_offset = self.getProperty('WedgeOffset').value
             asymm_wedges = self.getProperty('AsymmetricWedges').value
+            if run.getLogData('tof_mode').value == 'TOF':
+                ConvertToDistribution(Workspace=self._input_ws)
             Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws,
                         NumberOfWedges=n_wedges, OutputBinning=q_binning,
                         WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,

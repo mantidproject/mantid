@@ -16,16 +16,16 @@ import numpy as np
 class SANSILLReduction(PythonAlgorithm):
 
     def category(self):
-        return "ILL\\SANS"
+        return 'ILL\\SANS'
 
     def summary(self):
         return 'Performs SANS data reduction at the ILL.'
 
     def seeAlso(self):
-        return []
+        return ['SANSILLIntegration']
 
     def name(self):
-        return "SANSILLReduction"
+        return 'SANSILLReduction'
 
     def validateInputs(self):
         issues = dict()
@@ -307,10 +307,18 @@ class SANSILLReduction(PythonAlgorithm):
                     if transmission_ws:
                         if not self._check_processed_flag(transmission_ws, 'Transmission'):
                             self.log().warning('Transmission input workspace is not processed as transmission.')
-                        transmission = transmission_ws.readY(0)[0]
-                        transmission_err = transmission_ws.readE(0)[0]
-                        ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
-                                                    TransmissionError=transmission_err, OutputWorkspace=ws)
+                        if transmission_ws.blocksize() == 1:
+                            # monochromatic mode, scalar transmission
+                            transmission = transmission_ws.readY(0)[0]
+                            transmission_err = transmission_ws.readE(0)[0]
+                            ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
+                                                        TransmissionError=transmission_err, OutputWorkspace=ws)
+                        else:
+                            # wavelenght dependent transmission, need to rebin
+                            transmission_rebinned = ws + '_tr_rebinned'
+                            RebinToWorkspace(WorkspaceToRebin=transmission_ws, WorkspaceToMatch=ws, OutputWorkspace=transmission_rebinned)
+                            ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=transmission_rebinned, OutputWorkspace=ws)
+                            DeleteWorkspace(transmission_rebinned)
                     solid_angle = ws + '_sa'
                     SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws)
