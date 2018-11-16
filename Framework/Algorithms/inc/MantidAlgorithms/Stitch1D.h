@@ -118,7 +118,8 @@ private:
     if (isDefault(name))
       interSectionVal = overlapVal;
     if (comp((overlapVal - 1.e-9), interSectionVal)) {
-      g_log.warning(name + " outside range, re-determine");
+      g_log.warning(name + " outside range, will be " +
+                    std::to_string(overlapVal));
       interSectionVal = overlapVal;
     }
     g_log.information(name + ": " + std::to_string(interSectionVal));

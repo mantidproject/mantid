@@ -397,7 +397,7 @@ Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
                               MatrixWorkspace_sptr &workspace) {
   int a1 = static_cast<int>(workspace->binIndexOf(startOverlap));
   int a2 = static_cast<int>(workspace->binIndexOf(endOverlap));
-  if (a1 == a2) {
+  if (a1 == ++a2) {
     throw std::runtime_error("The Params you have provided for binning yield a "
                              "workspace in which start and end overlap appear "
                              "in the same bin. Make binning finer via input "
@@ -527,7 +527,6 @@ void Stitch1D::exec() {
   messageBuffer << "Scale Factor Y is: " << m_scaleFactor
                 << " Scale Factor E is: " << m_errorScaleFactor;
   g_log.notice(messageBuffer.str());
-
   MatrixWorkspace_sptr result;
   if (lhsWS->isHistogramData()) { // If the input workspaces are histograms ...
     boost::tuple<int, int> startEnd =
