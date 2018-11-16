@@ -1100,6 +1100,25 @@ MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
   return it->second;
 }
 
+const std::vector<size_t>
+MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
+  auto it = m_masks.find(workspaceIndex);
+  // Throw if there are no masked bins for this spectrum. The caller should
+  // check first using hasMaskedBins!
+  if (it == m_masks.end()) {
+    throw Kernel::Exception::IndexError(workspaceIndex, 0,
+                                        "MatrixWorkspace::maskedBins");
+  }
+
+  auto maskedBins = it->second;
+  std::vector<size_t> maskedIds;
+  maskedIds.reserve(maskedBins.size());
+  for (auto &mb : maskedBins) {
+    maskedIds.push_back(mb.first);
+  }
+  return maskedIds;
+}
+
 /** Set the list of masked bins for given workspaceIndex. Not thread safe.
  *
  * No data is masked and previous masking for any bin for this workspace index
