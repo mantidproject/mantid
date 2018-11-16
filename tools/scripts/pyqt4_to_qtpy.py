@@ -72,6 +72,7 @@ def convert_signal_connect(cmd, linenum):
     return '{0}{1}.{2}.connect({3})\n'.format(whitespace, widget_name, signal_call, handler_method)
 
 QT4_TO_QTPY_FIXES = {'QtCore.QEventLoop': ('qtpy.QtCore', 'QEventLoop'),
+                     'QtCore.QFile': ('qtpy.QtCore', 'QFile'),
                      'QtCore.QFileInfo': ('qtpy.QtCore', 'QFileInfo'),
                      'QtCore.QRegExp': ('qtpy.QtCore', 'QRegExp'),
                      'QtCore.QSettings': ('qtpy.QtCore', 'QSettings'),
@@ -96,6 +97,7 @@ QT4_TO_QTPY_FIXES = {'QtCore.QEventLoop': ('qtpy.QtCore', 'QEventLoop'),
                      'QtGui.QRegExpValidator': ('qtpy.QtGui', 'QRegExpValidator'),
                      'QtGui.QSizePolicy': ('qtpy.QtWidgets', 'QSizePolicy'),
                      'QtGui.QSpacerItem': ('qtpy.QtWidgets', 'QSpacerItem'),
+                     'QtGui.QTableWidgetItem': ('qtpy.QtWidgets', 'QTableWidgetItem'),
                      'QtGui.QTabWidget': ('qtpy.QtWidgets', 'QTabWidget'),
                      'QtGui.QTextEdit': ('qtpy.QtWidgets', 'QTextEdit'),
                      'QtGui.QVBoxLayout': ('qtpy.QtWidgets', 'QVBoxLayout'),
