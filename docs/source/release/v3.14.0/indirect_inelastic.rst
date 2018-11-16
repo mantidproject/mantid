@@ -49,6 +49,7 @@ Bugfixes
   message is now displayed.
 - The Probability Density Functions (PDF) workspaces for the FABADA minimiser in ConvFit no longer overwrite each other. 
   Various other improvements in the display of the FABADA PDF's have also been finished.
+- A bug where fixed parameters don't remain fixed when using the FABADA minimizer in ConvFit has been corrected.
 - The expression for the Fit type Yi in MSDFit was incorrect and has now been corrected.
 - The x-axis labels in the output plots for MSDFit are now correct.
 
