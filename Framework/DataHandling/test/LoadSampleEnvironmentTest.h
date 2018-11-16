@@ -7,13 +7,12 @@
 #ifndef LOAD_ENVIRONMENTEST_H_
 #define LOAD_ENVIRONMENTEST_H_
 
-
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadSampleEnvironment.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include <cxxtest/TestSuite.h>
@@ -43,30 +42,34 @@ public:
   void testTranslate() {
     LoadSampleEnvironment alg;
     alg.initialize();
-    alg.setProperty("TranslationVector","5,5,15");
+    alg.setProperty("TranslationVector", "5,5,15");
     boost::shared_ptr<MeshObject> environmentMesh = nullptr;
     environmentMesh = loadCube();
     alg.translate(environmentMesh);
     auto translatedVertices = environmentMesh->getVertices();
-    double arrayToMatch[] = {0,0,0,10,10,0,10,0,0,0,10,0,10,0,30,10,10,30,0,10,30,0,0,30};
-    std::vector<double> vectorToMatch = std::vector<double>(std::begin(arrayToMatch),std::end(arrayToMatch));
+    double arrayToMatch[] = {0,  0, 0,  10, 10, 0,  10, 0,  0,  0, 10, 0,
+                             10, 0, 30, 10, 10, 30, 0,  10, 30, 0, 0,  30};
+    std::vector<double> vectorToMatch =
+        std::vector<double>(std::begin(arrayToMatch), std::end(arrayToMatch));
     TS_ASSERT(translatedVertices == vectorToMatch);
   }
 
-  void testRotate(){
+  void testRotate() {
     LoadSampleEnvironment alg;
     alg.initialize();
-    alg.setProperty("rotationMatrix","0,-1,0,1,0,0,0,0,1");
+    alg.setProperty("rotationMatrix", "0,-1,0,1,0,0,0,0,1");
     boost::shared_ptr<MeshObject> environmentMesh = nullptr;
     environmentMesh = loadCube();
     alg.rotate(environmentMesh);
     auto rotatedVertices = environmentMesh->getVertices();
-    double arrayToMatch[] = {5,-5,-15,-5,5,-15,5,5,-15,-5,-5,-15,5,5,15,-5,5,15,-5,-5,15,5,-5,15};
-    std::vector<double> vectorToMatch = std::vector<double>(std::begin(arrayToMatch),std::end(arrayToMatch));
+    double arrayToMatch[] = {5, -5, -15, -5, 5, -15, 5,  5,  -15, -5, -5, -15,
+                             5, 5,  15,  -5, 5, 15,  -5, -5, 15,  5,  -5, 15};
+    std::vector<double> vectorToMatch =
+        std::vector<double>(std::begin(arrayToMatch), std::end(arrayToMatch));
     TS_ASSERT(rotatedVertices == vectorToMatch);
   }
 
-  std::unique_ptr<MeshObject> loadCube(){
+  std::unique_ptr<MeshObject> loadCube() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
     auto loader = LoadBinaryStl(path);
     auto cube = loader.readStl();
