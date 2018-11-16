@@ -42,6 +42,8 @@ Improvements
 - In the I(Q,t) Tab, it is now possible to select which spectrum you want to plot for Plot Spectrum.
 - In the I(Q,t) Tab, it is now possible to select a range of spectra for a Tiled Plot. The interface allows a
   maximum of 18 plots.
+- The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed. 
+  This improvement can be seen in ConvFit when functions which depend on Q value are selected.
 
 Bugfixes
 ########
