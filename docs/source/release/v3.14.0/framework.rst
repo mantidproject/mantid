@@ -29,6 +29,12 @@ Nexus Geometry Loading
 ----------------------
 :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` will now load instrument geometry from hdf5 `NeXus <https://www.nexusformat.org/>`_ format files. Files consistent with the standard following the introduction of `NXoff_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXoff_geometry.html>`_ and `NXcylindrical_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXcylindrical_geometry.html>`_ will be used to build the entire in-memory instrument geometry within Mantid. This IDF-free route is primarily envisioned for the ESS. This marks the completion of the first phase in the feasibility and rollout of support for the new format. Over coming releases we will be expanding our support for the NeXus geometry both across Loading and Saving algorithms. While dependent on the instrument, we are overall seeing significant improvements in instrument load times over loading from equivalent IDF based implementations.
 
+Archive Searching / ONCat
+-------------------------
+
+- For HFIR instruments that write out raw files with run numbers, we have enabled functionality that allows for the searching of file locations by making calls to ONCat.  To use this, make sure that the "Search Data Archive" option is checked in your "Manage User Directories" settings.  The ``FileFinder`` and algorithms such as :ref:`Load <algm-Load>`  will then accept inputs such as "``HB2C_143210``".
+- In the short term, for SNS instruments, the default "out of the box" behaviour will be to continue using ICAT for archive searching.  This can be manually overridden by changing ``<archiveSearch plugin="SNSDataSearch" />`` to ``<archiveSearch plugin="ORNLDataSearch" />`` in your ``Facilities.xml`` file.  Existing functionality should be almost completely unaffected, except that you may find that archive searching is a little quicker and slightly more robust.  ``ORNLDataSearch`` will become the default option at SNS in a future version of Mantid.
+
 Stability
 ---------
 
