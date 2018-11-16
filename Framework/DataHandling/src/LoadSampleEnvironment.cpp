@@ -67,9 +67,7 @@ void LoadSampleEnvironment::init() {
   declareProperty(make_unique<ArrayProperty<double>>("TranslationVector","0,0,0"),"Vector by which to translate the loaded environment");
 
   // Matrix to rotate mesh
-  declareProperty(make_unique<ArrayProperty<double>>("rotationMatrix1","1,0,0"),"First part of rotation matrix");
-  declareProperty(make_unique<ArrayProperty<double>>("rotationMatrix2","0,1,0"),"Second part of rotation matrix");
-  declareProperty(make_unique<ArrayProperty<double>>("rotationMatrix3","0,0,1"),"Third part of rotation matrix");
+  declareProperty(make_unique<ArrayProperty<double>>("rotationMatrix","1.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0"),"Rotation Matrix in format x1,x2,x3,y1,y2,y3,z1,z2,z3");
 }
 
 void LoadSampleEnvironment::exec() {
@@ -100,13 +98,9 @@ void LoadSampleEnvironment::exec() {
     throw Kernel::Exception::ParseError(
         "Could not read file, did not match either STL Format", filename, 0);
   }
-  const std::vector<double> translationVector = getProperty("TranslationVector");
-  const std::vector<double> checkVector = std::vector<double>(3,0.0);
-  if ((translationVector != checkVector) && translationVector.size() == 3){
-    Kernel::V3D translate = Kernel::V3D(translationVector[0],translationVector[1],translationVector[2]);
-    environmentMesh->translate(translate);
-    
-  }
+  environmentMesh = translate(environmentMesh);
+  environmentMesh = rotate(environmentMesh);
+
   std::string name = getProperty("EnvironmentName");
   const bool add = getProperty("Add");
   Sample &sample = outputWS->mutableSample();
@@ -139,6 +133,36 @@ void LoadSampleEnvironment::exec() {
 
   setProperty("OutputWorkspace", outputWS);
   g_log.debug(debugString);
+}
+
+boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(boost::shared_ptr<MeshObject> environmentMesh){
+  const std::vector<double> translationVector = getProperty("TranslationVector");
+  std::vector<double> checkVector = std::vector<double>(3,0.0);
+  if (translationVector != checkVector){
+    if(translationVector.size() != 3) {
+      throw std::runtime_error("Invalid Translation vector, must have exactly 3 dimensions");
+    }
+    Kernel::V3D translate = Kernel::V3D(translationVector[0],translationVector[1],translationVector[2]);
+    environmentMesh->translate(translate);
+    
+  }
+  return environmentMesh;
+}
+
+boost::shared_ptr<MeshObject> LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh){
+  const std::vector<double> rotationMatrix = getProperty("RotationMatrix");
+  double valueList[] = {1.0,0.0,0.0, 0.0,1.0,0.0, 1.0,0.0,0.0};
+  std::vector<double> checkVector1 = std::vector<double>(std::begin(valueList),std::end(valueList));
+  if (rotationMatrix != checkVector1){
+    if(rotationMatrix.size() != 9) {
+
+      throw std::runtime_error("Invalid Rotation Matrix, must have exactly 9 values, not: " + std::to_string(rotationMatrix.size()));
+    }
+    Kernel::Matrix<double> rotation = Kernel::Matrix<double>(rotationMatrix);
+    environmentMesh->rotate(rotation);
+    
+  }
+  return environmentMesh;
 }
 
 } // namespace DataHandling

@@ -8,7 +8,7 @@
 #define DATAHANDLING_LOAD_ENVIRONMENT_H_
 
 #include "MantidAPI/Algorithm.h"
-
+#include "MantidGeometry/Objects/MeshObject.h"
 namespace Mantid {
 namespace DataHandling {
 /**  Load Environment into the sample a workspace
@@ -43,11 +43,14 @@ public:
   const std::string category() const override {
     return "DataHandling\\Instrument";
   }
+  boost::shared_ptr<Geometry::MeshObject> translate(boost::shared_ptr<Geometry::MeshObject> environmentMesh);
+  boost::shared_ptr<Geometry::MeshObject> rotate(boost::shared_ptr<Geometry::MeshObject> environmentMesh);
 
 private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
+  
 };
 
 } // end namespace DataHandling

@@ -43,7 +43,7 @@ class vtkGeometryCacheWriter;
 
 Mesh Object of Triangles assumed to form one or more
 non-intersecting closed surfaces enclosing separate volumes.
-The number of vertices is limited to 2^16 based on index type. For 2D Meshes see
+The number of vertices is limited to 2^32 based on index type. For 2D Meshes see
 Mesh2DObject
 */
 class MANTID_GEOMETRY_DLL MeshObject : public IObject {
