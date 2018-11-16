@@ -253,6 +253,7 @@ public:
     return getSpectrum(index).dx();
   }
   HistogramData::HistogramX &mutableX(const size_t index) & {
+    invalidateCommonBinsFlag();
     return getSpectrum(index).mutableX();
   }
   HistogramData::HistogramDx &mutableDx(const size_t index) & {
