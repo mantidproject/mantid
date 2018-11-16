@@ -48,6 +48,8 @@ public:
   /// Zero the data (Y&E) in this spectrum
   void clearData() override;
 
+  void applyBinWeight(const size_t &binIndex, const double &weight) override;
+
   /// Deprecated, use y() instead. Returns the y data const
   const MantidVec &dataY() const override { return m_histogram.dataY(); }
   /// Deprecated, use e() instead. Returns the error data const

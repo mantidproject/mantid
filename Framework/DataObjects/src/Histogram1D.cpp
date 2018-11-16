@@ -53,6 +53,20 @@ void Histogram1D::clearData() {
   std::fill(eValues.begin(), eValues.end(), 0.0);
 }
 
+/// Moved from MatrixWorkspace. Separate implementations for Hist1D and EventList.
+/// Applies bin weighting for masking workspaces.
+///
+/// @param binIndex ::  The index of the bin in the spectrum
+/// @param weight   ::  How heavily the bin is to be masked. =1 for full
+void Histogram1D::applyBinWeight(const size_t &binIndex, const double &weight) {
+  if (weight != 0.) {
+    double &y = this->mutableY()[binIndex];
+    (std::isnan(y) || std::isinf(y)) ? y = 0. : y *= (1 - weight);
+    double &e = this->mutableE()[binIndex];
+    (std::isnan(e) || std::isinf(e)) ? e = 0. : e *= (1 - weight);
+  }
+}
+
 /// Deprecated, use setSharedX() instead. Sets the x data.
 /// @param X :: vector of X data
 void Histogram1D::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {

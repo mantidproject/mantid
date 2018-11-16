@@ -241,6 +241,8 @@ public:
 
   void addTof(const double offset) override;
 
+  void applyBinWeight(const size_t &binIndex, const double &weight) override;
+
   void addPulsetime(const double seconds) override;
 
   void maskTof(const double tofMin, const double tofMax) override;

@@ -2576,6 +2576,20 @@ void EventList::scaleTof(const double factor) { this->convertTof(factor, 0.0); }
 void EventList::addTof(const double offset) { this->convertTof(1.0, offset); }
 
 // --------------------------------------------------------------------------
+/**
+ * Moved from MatrixWorkspace. Functionality diverges for EventWorkspaces and
+ * Histogram2D (so act differently on EventList and Histogram1D).
+ *
+ * Applies bin weighting for masking workspaces.
+ * No bin weighting required for EventWorkspaces
+ *
+ * @param binIndex ::  The index of the bin in the spectrum
+ * @param weight   ::  How heavily the bin is to be masked. =1 for full
+ */
+void EventList::applyBinWeight(const size_t &binIndex, const double &weight) {
+}
+
+// --------------------------------------------------------------------------
 /** Add an offset to the pulsetime (wall-clock time) of each event in the list.
  *
  * @param events :: reference to a vector of events to change.

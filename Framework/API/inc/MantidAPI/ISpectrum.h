@@ -70,6 +70,8 @@ public:
   virtual size_t getMemorySize() const = 0;
 
   virtual std::pair<double, double> getXDataRange() const;
+
+  virtual void applyBinWeight(const size_t &binIndex, const double &weight) = 0;
   // ---------------------------------------------------------
   void addDetectorID(const detid_t detID);
   void addDetectorIDs(const std::set<detid_t> &detIDs);
