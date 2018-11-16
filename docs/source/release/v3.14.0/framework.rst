@@ -29,6 +29,12 @@ Nexus Geometry Loading
 ----------------------
 :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` will now load instrument geometry from hdf5 `NeXus <https://www.nexusformat.org/>`_ format files. Files consistent with the standard following the introduction of `NXoff_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXoff_geometry.html>`_ and `NXcylindrical_geometry <http://download.nexusformat.org/sphinx/classes/base_classes/NXcylindrical_geometry.html>`_ will be used to build the entire in-memory instrument geometry within Mantid. This IDF-free route is primarily envisioned for the ESS. This marks the completion of the first phase in the feasibility and rollout of support for the new format. Over coming releases we will be expanding our support for the NeXus geometry both across Loading and Saving algorithms. While dependent on the instrument, we are overall seeing significant improvements in instrument load times over loading from equivalent IDF based implementations.
 
+Archive Searching / ONCat
+-------------------------
+
+- For HFIR instruments that write out raw files with run numbers, we have enabled functionality that allows for the searching of file locations by making calls to ONCat.  To use this, make sure that the "Search Data Archive" option is checked in your "Manage User Directories" settings.  The ``FileFinder`` and algorithms such as :ref:`Load <algm-Load>`  will then accept inputs such as "``HB2C_143210``".
+- In the short term, for SNS instruments, the default "out of the box" behaviour will be to continue using ICAT for archive searching.  This can be manually overridden by changing ``<archiveSearch plugin="SNSDataSearch" />`` to ``<archiveSearch plugin="ORNLDataSearch" />`` in your ``Facilities.xml`` file.  Existing functionality should be almost completely unaffected, except that you may find that archive searching is a little quicker and slightly more robust.  ``ORNLDataSearch`` will become the default option at SNS in a future version of Mantid.
+
 Stability
 ---------
 
@@ -72,6 +78,7 @@ Bugfixes
 - :ref:`Fit <algm-Fit>` now applies the ties in correct order independently on the order they are set. If any circular dependencies are found Fit will give an error.
 - Fixed a rare bug in :ref:`MaskDetectors <algm-MaskDetectors>` where a workspace could become invalidaded in Python if it was a ``MaskWorkspace``.
 - Fixed a crash in :ref:`MaskDetectors <algm-MaskDetectors>` when a non-existent component was given in ``ComponentList``.
+- History for algorithms that took groups sometimes would get incorrect history causing history to be incomplete, so now full group history is saved for all items belonging to the group.
 
 
 Python
@@ -82,6 +89,7 @@ New
 
 - All python methods accepting basic strings now also accept unicode strings.
 - New python validator type: :class:`~mantid.geometry.OrientedLattice` checks whether a workspace has an oriented lattice object attached.
+- The windows python bundle now includes numpy=1.15.4, scipy=1.1.0, matplotlib=2.2.3, pip=18.1
 - We have been making major performance improvements to geometry access in Mantid over the last few releases. We are now exposing these features via Python to give our users direct access to the same benefits as part of their scripts. The newly exposed objects are now available via workspaces and include:
 
  * :class:`mantid.geometry.ComponentInfo`

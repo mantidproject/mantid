@@ -13,8 +13,10 @@ import numpy
 import mantid.kernel
 import mantid.api
 from mantid.plots.helperfunctions import *
+import matplotlib
 import matplotlib.colors
 import matplotlib.dates as mdates
+import matplotlib.image as mimage
 
 # ================================================
 # Private 2D Helper functions
@@ -357,9 +359,47 @@ def pcolormesh(axes, workspace, *args, **kwargs):
 
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
+def _imshow(axes, z, cmap=None, norm=None, aspect=None,
+           interpolation=None, alpha=None, vmin=None, vmax=None,
+           origin=None, extent=None, shape=None, filternorm=1,
+           filterrad=4.0, imlim=None, resample=None, url=None, **kwargs):
+    """
+    Copy of imshow in order to replace AxesImage artist with a custom artist.
+
+    Use :meth:`matplotlib.axes.Axes.imshow` documentation for individual arguments.
+    """
+    if norm is not None and not isinstance(norm, mcolors.Normalize):
+        raise ValueError(
+            "'norm' must be an instance of 'mcolors.Normalize'")
+    if aspect is None:
+        aspect = matplotlib.rcParams['image.aspect']
+    axes.set_aspect(aspect)
+    im = mimage.AxesImage(axes, cmap, norm, interpolation, origin, extent,
+                          filternorm=filternorm, filterrad=filterrad,
+                          resample=resample, **kwargs)
+
+    im.set_data(z)
+    im.set_alpha(alpha)
+    if im.get_clip_path() is None:
+        # image does not already have clipping set, clip to axes patch
+        im.set_clip_path(axes.patch)
+    if vmin is not None or vmax is not None:
+        im.set_clim(vmin, vmax)
+    else:
+        im.autoscale_None()
+    im.set_url(url)
+
+    # update ax.dataLim, and, if autoscaling, set viewLim
+    # to tightly fit the image, regardless of dataLim.
+    im.set_extent(im.get_extent())
+
+    axes.add_image(im)
+    return im
+
+
 def imshow(axes, workspace, *args, **kwargs):
     '''
-    Essentially the same as :meth:`matplotlib.axes.Axes.pcolormesh`.
+    Essentially the same as :meth:`matplotlib.axes.Axes.imshow`.
 
     :param axes:      :class:`matplotlib.axes.Axes` object that will do the plotting
     :param workspace: :class:`mantid.api.MatrixWorkspace` or :class:`mantid.api.IMDHistoWorkspace`
@@ -391,8 +431,9 @@ def imshow(axes, workspace, *args, **kwargs):
     y_spacing_equal = numpy.alltrue(diffs == diffs[0])
     if not x_spacing_equal or not y_spacing_equal:
         raise Exception('Unevenly spaced bins are not supported by imshow')
-    kwargs['extent'] = [x[0,0],x[0,-1],y[0,0],y[-1,0]]
-    return axes.imshow(z, *args, **kwargs)
+    if 'extent' not in kwargs:
+        kwargs['extent'] = [x[0,0],x[0,-1],y[0,0],y[-1,0]]
+    return _imshow(axes, z, *args, **kwargs)
 
 def tripcolor(axes, workspace, *args, **kwargs):
     '''
