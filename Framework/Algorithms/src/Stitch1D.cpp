@@ -47,6 +47,11 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Stitch1D)
 
+// Overlap Value tolerance is 1.e-9:
+// This is required for machine precision reasons. Used to adjust overlap
+// value value to be inclusive of bin boundaries if sitting ontop of the bin
+// boundaries.
+
 /** Zero out all y and e data that is not in the region a1 to a2.
  * @param a1 : Zero based bin index (first one)
  * @param a2 : Zero based bin index (last one inclusive)
@@ -493,8 +498,9 @@ void Stitch1D::exec() {
   // At this point, we know already that lhsWS contains the global minimum x
   // value and rhsWS the global maximum x value for binned data
   const MinMaxTuple intesectionXRegion = calculateXIntersection(lhsWS, rhsWS);
-  const double intersectionMin = intesectionXRegion.get<0>();
-  const double intersectionMax = intesectionXRegion.get<1>();
+  const double tol = 1.e-9;
+  const double intersectionMin = intesectionXRegion.get<0>() - tol;
+  const double intersectionMax = intesectionXRegion.get<1>() - tol;
   // We get the correct limits for binned data already
   double startOverlap =
       overlap(intersectionMin, "StartOverlap", std::greater<double>());

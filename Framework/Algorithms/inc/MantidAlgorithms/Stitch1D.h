@@ -106,18 +106,14 @@ private:
    */
   template <typename Comparator>
   double overlap(const double overlapVal, const std::string &name,
-                 Comparator const &comp) const {
-    // Overlap Value tolerance is 1.e-9:
-    // This is required for machine precision reasons. Used to adjust overlap
-    // value value to be inclusive of bin boundaries if sitting ontop of the bin
-    // boundaries.
+                 Comparator const &compare) const {
     // StartOverlap and EndOverlap will be considered separately
     // For binned data, input validation ensures that final StartOverlap < final
     // EndOverlap. For point data this is not the case
     double interSectionVal = this->getProperty(name);
     if (isDefault(name))
       interSectionVal = overlapVal;
-    if (comp((overlapVal - 1.e-9), interSectionVal)) {
+    if (compare(overlapVal, interSectionVal)) {
       g_log.warning(name + " outside range, will be " +
                     std::to_string(overlapVal));
       interSectionVal = overlapVal;
