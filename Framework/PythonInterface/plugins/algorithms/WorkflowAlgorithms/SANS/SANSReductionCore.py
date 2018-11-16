@@ -167,8 +167,7 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)
-        # --------------------------------------------------------------------------------------------------------------
-        workspace = rebin_alg.getProperty("OutputWorkspace").value
+        # --------------------------------------------------------------------------------------------------------------q
         progress.report("Masking ...")
         workspace = self._mask(state_serialized, workspace, component_as_string)
 
