@@ -13,6 +13,7 @@ Diffraction Changes
 Improvements
 ############
 
+- SNAP instrument geometry updated to include downstream monitor.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` will not flip the even-numbered tubes when using the calibrated data, since they are flipped already in the nexus files.
 - :ref:`PowderDiffILLDetScanReduction <algm-PowderDiffILLDetScanReduction>` will scale the counts by 1M, when normalisation to monitor is requested, and it will also offer to enable/disable the tube alignment, and offer tube by tube reduction.
 - :ref:`PowderDiffILLDetEffCorr <algm-PowderDiffILLDetEffCorr>` now offers to use the raw or calibrated data blocks in the nexus files.
@@ -37,6 +38,7 @@ Improvements
   data streaming from TOPAZ new Adara data server.
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
+- SCD Event Data Reduction Diffraction Interface now has option to create MD HKL workspace.
 
 Bugfixes
 ########
@@ -58,7 +60,10 @@ Improvements
 - Added save_all flag to Gem that is set to true by default, setting it to false disables the saving of .NXS files.
 - Added subtract_empty_instrument flag to Gem that is true by default, setting it to false disables subrtracting the empty.
 - Changed spline coefficient so that the default for long_mode on and long_mode off can be set separately.
+- Focus on Pearl now has a focused_bin_widths parameter in pearl_advanced_config.py to allow setting default rebin values.
 - Focus on Pearl now saves out xye_tof files.
+- :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>` now sets the same run numbers for all rows when using an ``exp.ini`` file.
+
 
 Bugfixes
 ########

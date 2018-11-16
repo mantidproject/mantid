@@ -391,6 +391,12 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._masking_table_presenter.on_update_rows.assert_called_with()
         presenter._beam_centre_presenter.on_update_rows.assert_called_with()
 
+    def test_on_save_dir_changed_calls_set_out_file_directory(self):
+        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_3,
+                                                                                              is_multi_period=False)
+        config["defaultsave.directory"] = "test/path"
+        presenter._view.set_out_file_directory.assert_called_with("test/path")
+
     def test_table_model_is_initialised_upon_presenter_creation(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         expected_table_model = TableModel()
@@ -764,7 +770,27 @@ class RunTabPresenterTest(unittest.TestCase):
         test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
                       'test_file', '', '1.0', '']
         presenter.on_row_inserted(0, test_row_0)
-        presenter.notify_progress(0)
+
+        presenter.notify_progress(0, [0.0], [1.0])
+
+        self.assertEqual(presenter.progress, 1)
+        self.assertEqual(presenter._view.progress_bar_value, 1)
+
+    def test_that_notify_progress_updates_state_and_tooltip_of_row_for_scale_and_shift(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                      'test_file', '', '1.0', '']
+        presenter.on_row_inserted(0, test_row_0)
+
+
+        presenter.notify_progress(0, [0.0], [1.0])
+
+        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
+        self.assertEqual(presenter._table_model.get_table_entry(0).options_column_model.get_options_string(),
+                         'MergeScale=1.0, MergeShift=0.0')
+
         self.assertEqual(presenter.progress, 1)
         self.assertEqual(presenter._view.progress_bar_value, 1)
 
@@ -775,7 +801,9 @@ class RunTabPresenterTest(unittest.TestCase):
         test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
                       'test_file', '', '1.0', '']
         presenter.on_row_inserted(0, test_row_0)
-        presenter.notify_progress(0)
+
+        presenter.notify_progress(0, [], [])
+
         self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
         self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, '')
 

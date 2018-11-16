@@ -10,12 +10,13 @@
 from __future__ import absolute_import
 
 # system imports
+import traceback
 import unittest
 
 # 3rdparty imports
 
 # local imports
-from mantidqt.utils.async import AsyncTask, blocking_async_task
+from mantidqt.utils.asynchronous import AsyncTask, blocking_async_task
 
 
 class AsyncTaskTest(unittest.TestCase):
@@ -33,7 +34,7 @@ class AsyncTaskTest(unittest.TestCase):
             self.error_cb_called = True
             self.task_exc_type = task_result.exc_type
             self.task_exc = task_result.exc_value
-            self.task_exc_stack = task_result.stack
+            self.task_exc_stack = traceback.extract_tb(task_result.stack)
 
         def on_finished(self):
             self.finished_cb_called = True
@@ -104,11 +105,12 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, RuntimeError),
                         msg="Expected RuntimeError, found " + recv.task_exc.__class__.__name__)
+
         self.assertEqual(2, len(recv.task_exc_stack))
-        # line number of self.target in async.py
-        self.assertEqual(93, recv.task_exc_stack[0][1])
+        # line number of self.target in asynchronous.py
+        self.assertEqual(90, recv.task_exc_stack[0][1])
         # line number of raise statement above
-        self.assertEqual(94, recv.task_exc_stack[1][1])
+        self.assertEqual(95, recv.task_exc_stack[1][1])
 
     def test_unsuccessful_args_and_kwargs_operation_calls_error_and_finished_callback(self):
         def foo(scale, shift):
@@ -126,7 +128,7 @@ class AsyncTaskTest(unittest.TestCase):
         self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, RuntimeError))
 
-    def test_unsuccessful_operation_with_error_cb_and_stack_chop(self):
+    def test_unsuccessful_operation_with_error_cb(self):
         def foo(scale, shift):
             def bar():
                 raise RuntimeError("Bad operation")
@@ -134,15 +136,15 @@ class AsyncTaskTest(unittest.TestCase):
 
         recv = AsyncTaskTest.Receiver()
         scale, shift = 2, 4
-        t = AsyncTask(foo, args = (scale,), kwargs={'shift': shift}, stack_chop=1,
+        t = AsyncTask(foo, args = (scale,), kwargs={'shift': shift},
                       error_cb=recv.on_error)
         t.start()
         t.join()
         self.assertTrue(recv.error_cb_called)
         self.assertTrue(isinstance(recv.task_exc, RuntimeError))
-        self.assertEqual(2, len(recv.task_exc_stack))
-        self.assertEqual(133, recv.task_exc_stack[0][1])
-        self.assertEqual(132, recv.task_exc_stack[1][1])
+        self.assertEqual(3, len(recv.task_exc_stack))
+        self.assertEqual(135, recv.task_exc_stack[1][1])
+        self.assertEqual(134, recv.task_exc_stack[2][1])
 
     # ---------------------------------------------------------------
     # Failure cases

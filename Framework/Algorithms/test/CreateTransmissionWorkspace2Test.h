@@ -217,6 +217,7 @@ public:
     alg.setProperty("WavelengthMin", 0.0);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("I0MonitorIndex", "0");
+    alg.setProperty("NormalizeByIntegratedMonitors", false);
     alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
     alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
     alg.setPropertyValue("ProcessingInstructions", "2");
@@ -238,7 +239,9 @@ public:
     // I0MonitorIndex: 0
     // MonitorBackgroundWavelengthMin : 0.5
     // MonitorBackgroundWavelengthMax : 3.0
-    // Normalize by integrated monitors : No
+    // MonitorIntegrationWavelengthMin : 1.5
+    // MonitorIntegrationWavelengthMax : 15.0
+    // Normalize by integrated monitors : Yes
 
     // Modify counts in monitor (only for this test)
     // Modify counts only for range that will be fitted
@@ -257,6 +260,7 @@ public:
     alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
     alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
     alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
+    alg.setProperty("NormalizeByIntegratedMonitors", true);
     alg.setPropertyValue("ProcessingInstructions", "2");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
@@ -269,6 +273,47 @@ public:
     // Expected values are 0.1981 = 2.0000 (detectors) / (1.26139*8) (monitors)
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.1981, 0.0001);
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.1981, 0.0001);
+  }
+
+  void test_one_run_NormalizeByIntegratedMonitors_is_false() {
+    // I0MonitorIndex: 0
+    // MonitorBackgroundWavelengthMin : 0.5
+    // MonitorBackgroundWavelengthMax : 3.0
+    // MonitorIntegrationWavelengthMin : 1.5
+    // MonitorIntegrationWavelengthMax : 15.0
+    // Normalize by integrated monitors : No
+
+    // Modify counts in monitor (only for this test)
+    // Modify counts only for range that will be fitted
+    auto inputWS = m_multiDetectorWS;
+    auto &Y = inputWS->mutableY(0);
+    std::fill(Y.begin(), Y.begin() + 2, 1.0);
+
+    CreateTransmissionWorkspace2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("FirstTransmissionRun", inputWS);
+    alg.setProperty("WavelengthMin", 0.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("I0MonitorIndex", "0");
+    alg.setProperty("NormalizeByIntegratedMonitors", false);
+    alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
+    alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
+    alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
+    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 10);
+    TS_ASSERT(outLam->x(0)[0] >= 0.0);
+    TS_ASSERT(outLam->x(0)[7] <= 15.0);
+    // Expected values are 2.4996 = 3.15301 (detectors) / 1.26139 (monitors)
+    TS_ASSERT_DELTA(outLam->y(0)[2], 2.4996, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[4], 2.4996, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 2.4996, 0.0001);
   }
 
   void test_two_transmission_runs() {

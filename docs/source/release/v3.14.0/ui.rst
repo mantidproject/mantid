@@ -59,6 +59,7 @@ Bugfixes
 - Project Recovery will now run normally when you select no or the recovery fails when recovering from a ungraceful exit.
 - When autosaving or saving a recovery checkpoint with the Instrument View open the results log would be filled with excess logging and no longer does this.
 - Fixed an issue where Project Recovery would start regardless of the config options
+- Project recovery will now successfully recover live data, it will however be unable to recover any data that was up at the time, but will start the live data streams again from scratch.
 - If an empty group workspace is present in the ADS it will no longer crash the save thread of project recovery and instead will delete it from the ADS and ignore it.
 
 MantidPlot
