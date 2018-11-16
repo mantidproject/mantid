@@ -81,6 +81,7 @@ set ( INC_FILES
 	DensityOfStates.h
 	Elwin.h
 	IAddWorkspaceDialog.h
+	IIndirectSpectrumSelectionView.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
 	ISISDiagnostics.h

@@ -30,7 +30,7 @@ class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionPresenter
   Q_OBJECT
 public:
   IndirectSpectrumSelectionPresenter(IndirectFittingModel *model,
-                                     IndirectSpectrumSelectionView *view);
+                                     IIndirectSpectrumSelectionView *view);
   ~IndirectSpectrumSelectionPresenter() override;
   UserInputValidator &validate(UserInputValidator &validator);
 
@@ -65,7 +65,7 @@ private:
   UserInputValidator validateMaskBinsString();
 
   IndirectFittingModel *m_model;
-  std::unique_ptr<IndirectSpectrumSelectionView> m_view;
+  std::unique_ptr<IIndirectSpectrumSelectionView> m_view;
   std::size_t m_activeIndex;
   std::size_t m_maskIndex;
   std::string m_spectraError;

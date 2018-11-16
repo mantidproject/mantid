@@ -10,6 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "../General/UserInputValidator.h"
 #include "IndirectSpectrumSelectionPresenter.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -18,13 +19,16 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
 
 namespace {
 
-class MockIndirectSpectrumSelectionView : public IndirectSpectrumSelectionView {
+class MockIndirectSpectrumSelectionView
+    : public IIndirectSpectrumSelectionView {
 public:
+  /// Signals
   void changeSelectedSpectra(std::string const &spectra) {
     emit selectedSpectraChanged(spectra);
   }
@@ -40,21 +44,52 @@ public:
 
   void changeMask(std::string const &mask) { emit maskChanged(mask); }
 
+  /// Public methods
+  MOCK_CONST_METHOD0(selectionMode, SpectrumSelectionMode());
+
   MOCK_CONST_METHOD0(minimumSpectrum, std::size_t());
-  // MOCK_CONST_METHOD0(maximumSpectrum, std::size_t());
+  MOCK_CONST_METHOD0(maximumSpectrum, std::size_t());
 
-  // MOCK_CONST_METHOD0(spectraString, std::string());
-  // MOCK_CONST_METHOD0(maskString, std::string());
+  MOCK_CONST_METHOD0(spectraString, std::string());
+  MOCK_CONST_METHOD0(maskString, std::string());
 
-  // MOCK_METHOD1(displaySpectra, void(std::string const &spectraString));
-  // MOCK_METHOD2(displaySpectra, void(int minimum, int maximum));
+  MOCK_METHOD1(displaySpectra, void(std::string const &spectraString));
+  MOCK_METHOD2(displaySpectra, void(int minimum, int maximum));
 
-  // MOCK_METHOD2(setSpectraRange, void(int minimum, int maximum));
+  MOCK_METHOD2(setSpectraRange, void(int minimum, int maximum));
 
-  // MOCK_METHOD1(setSpectraRegex, void(std::string const &regex));
-  // MOCK_METHOD1(setMaskBinsRegex, void(std::string const &regex));
+  MOCK_METHOD1(setSpectraRegex, void(std::string const &regex));
+  MOCK_METHOD1(setMaskBinsRegex, void(std::string const &regex));
 
-  // MOCK_METHOD0(clear, void());
+  MOCK_CONST_METHOD1(validateSpectraString,
+                     UserInputValidator &(UserInputValidator &uiv));
+  MOCK_CONST_METHOD1(validateMaskBinsString,
+                     UserInputValidator &(UserInputValidator &uiv));
+
+  MOCK_METHOD0(showSpectraErrorLabel, void());
+  MOCK_METHOD0(showMaskBinErrorLabel, void());
+  MOCK_METHOD0(hideSpectraErrorLabel, void());
+  MOCK_METHOD0(hideMaskBinErrorLabel, void());
+
+  MOCK_METHOD1(setMaskSelectionEnabled, void(bool enabled));
+  MOCK_METHOD0(clear, void());
+
+  /// Public slots
+  MOCK_METHOD1(setMinimumSpectrum, void(std::size_t spectrum));
+  MOCK_METHOD1(setMaximumSpectrum, void(std::size_t spectrum));
+  MOCK_METHOD1(setMaskSpectrum, void(std::size_t spectrum));
+
+  MOCK_METHOD1(setSpectraString, void(std::string const &spectraString));
+  MOCK_METHOD1(setMaskString, void(std::string const &maskString));
+  MOCK_METHOD1(setMaskSpectraList,
+               void(std::vector<std::size_t> const &maskString));
+
+  MOCK_METHOD0(hideSpectrumSelector, void());
+  MOCK_METHOD0(showSpectrumSelector, void());
+  MOCK_METHOD0(hideMaskSpectrumSelector, void());
+  MOCK_METHOD0(showMaskSpectrumSelector, void());
+
+  MOCK_METHOD0(clearMaskString, void());
 };
 
 class MockIndirectFittingModel : public IndirectFittingModel {

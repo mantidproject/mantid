@@ -21,7 +21,8 @@ using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::Kernel::Strings;
 
 struct SetViewSpectra : boost::static_visitor<> {
-  explicit SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
+  explicit SetViewSpectra(IIndirectSpectrumSelectionView *view)
+      : m_view(view) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
     m_view->displaySpectra(static_cast<int>(spectra.first),
@@ -33,7 +34,7 @@ struct SetViewSpectra : boost::static_visitor<> {
   }
 
 private:
-  IndirectSpectrumSelectionView *m_view;
+  IIndirectSpectrumSelectionView *m_view;
 };
 
 std::string OR(const std::string &lhs, const std::string &rhs) {
@@ -115,7 +116,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
-    IndirectFittingModel *model, IndirectSpectrumSelectionView *view)
+    IndirectFittingModel *model, IIndirectSpectrumSelectionView *view)
     : QObject(nullptr), m_model(model), m_view(view), m_activeIndex(0),
       m_maskIndex(0) {
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
