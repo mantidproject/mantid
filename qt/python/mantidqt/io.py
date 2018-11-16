@@ -28,6 +28,9 @@ def open_a_file_dialog(parent=None,  default_suffix=None, directory=None, file_f
     """
     global _LAST_SAVE_DIRECTORY
     dialog = QFileDialog(parent)
+
+    # It is the intention to only save the user's last used directory until workbench is restarted similar to other
+    # applications (VSCode, Gedit etc)
     if _LAST_SAVE_DIRECTORY is not None and directory is None:
         dialog.setDirectory(_LAST_SAVE_DIRECTORY)
     elif directory is not None:
