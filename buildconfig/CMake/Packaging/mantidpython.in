@@ -27,6 +27,13 @@ if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
+# Define which qt backend to use
+if [ -n "${QT_API}" ]; then
+    LOCAL_QT_API=${QT_API}
+else
+    LOCAL_QT_API="pyqt" # force to use qt4
+fi
+
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
     set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ $*@WRAPPER_POSTFIX@
@@ -42,7 +49,7 @@ fi
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
     TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
     PYTHONPATH=${LOCAL_PYTHONPATH} \
+    QT_API=${LOCAL_QT_API} \
     LD_LIBRARY_PATH=${LOCAL_LDPATH} \
     PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
     exec "$@"
-#
