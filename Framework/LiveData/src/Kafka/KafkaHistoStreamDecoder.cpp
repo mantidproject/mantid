@@ -191,10 +191,9 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
         // Data being accumulated before being streamed so no need to store
         // messages.
         m_buffer = buffer;
-      }
+      } else
+        checkRunMessage(buffer, checkOffsets, stopOffsets, reachedEnd);
     }
-
-    checkRunMessage(buffer, checkOffsets, stopOffsets, reachedEnd);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     m_cbIterationEnd();

@@ -319,7 +319,7 @@ public:
       fakeReceiveARunStartMessage(message, 1000, "2016-08-31T12:07:42",
                                   "HRPDTEST", 1);
       break;
-    case 1:
+    case 2:
       fakeReceiveARunStopMessage(message, m_stopTime);
       break;
     default:
