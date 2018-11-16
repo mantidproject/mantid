@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef APPLYCALIBRATIONTEST_H_
 #define APPLYCALIBRATIONTEST_H_
 
@@ -17,7 +23,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/V3D.h"
-#include "WorkspaceCreationHelperTest.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;

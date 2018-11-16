@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "Iqt.h"
 #include "../General/UserInputValidator.h"
 
@@ -136,7 +142,7 @@ void Iqt::setup() {
 void Iqt::run() {
   using namespace Mantid::API;
 
-  setRunEnabled(false);
+  setRunIsRunning(true);
 
   updateDisplayedBinParameters();
 
@@ -180,12 +186,12 @@ void Iqt::run() {
  * @param error If the algorithm failed
  */
 void Iqt::algorithmComplete(bool error) {
-  if (error)
-    return;
-  setRunEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.pbSave->setEnabled(true);
-  m_uiForm.pbTile->setEnabled(true);
+  setRunIsRunning(false);
+  if (error) {
+    setPlotResultEnabled(false);
+    setTiledPlotEnabled(false);
+    setSaveResultEnabled(false);
+  }
 }
 /**
  * Handle saving of workspace
@@ -201,7 +207,9 @@ void Iqt::saveClicked() {
  */
 void Iqt::plotClicked() {
   checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  setPlotResultIsPlotting(true);
   plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+  setPlotResultIsPlotting(false);
 }
 
 void Iqt::errorsClicked() {
@@ -211,6 +219,8 @@ void Iqt::errorsClicked() {
 bool Iqt::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
 
 void Iqt::plotTiled() {
+  setTiledPlotIsPlotting(true);
+
   MatrixWorkspace_const_sptr outWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           m_pythonExportWsName);
@@ -262,6 +272,8 @@ void Iqt::plotTiled() {
   }
   pyInput += "])\n";
   runPythonCode(pyInput);
+
+  setTiledPlotIsPlotting(false);
 }
 
 /**
@@ -452,9 +464,40 @@ void Iqt::updateRS(QtProperty *prop, double val) {
     xRangeSelector->setMaximum(val);
 }
 
-void Iqt::setRunEnabled(bool enabled) {
-  m_uiForm.pbRun->setEnabled(enabled);
-  m_uiForm.pbRun->setText(!enabled ? "Running..." : "Run");
+void Iqt::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+
+void Iqt::setPlotResultEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+}
+
+void Iqt::setTiledPlotEnabled(bool enabled) {
+  m_uiForm.pbTile->setEnabled(enabled);
+}
+
+void Iqt::setSaveResultEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+}
+
+void Iqt::setButtonsEnabled(bool enabled) {
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setTiledPlotEnabled(enabled);
+}
+
+void Iqt::setRunIsRunning(bool running) {
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
+}
+
+void Iqt::setPlotResultIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+  setButtonsEnabled(!plotting);
+}
+
+void Iqt::setTiledPlotIsPlotting(bool plotting) {
+  m_uiForm.pbTile->setText(plotting ? "Plotting..." : "Tiled Plot");
+  setButtonsEnabled(!plotting);
 }
 
 void Iqt::runClicked() { runTab(); }

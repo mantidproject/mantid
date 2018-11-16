@@ -37,8 +37,10 @@
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
+	src/LoadAsciiStl.cpp
 	src/LoadBBY.cpp
 	src/LoadBankFromDiskTask.cpp
+	src/LoadBinaryStl.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -48,6 +50,7 @@
 	src/LoadDiffCal.cpp
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
+	src/LoadEMU.cpp
 	src/LoadEventNexus.cpp
 	src/LoadEventNexusIndexSetup.cpp
 	src/LoadEventPreNexus2.cpp
@@ -61,7 +64,7 @@
 	src/LoadILLIndirect2.cpp
 	src/LoadILLPolarizationFactors.cpp
 	src/LoadILLReflectometry.cpp
-        src/LoadILLSANS.cpp
+    	src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadISISPolarizationEfficiencies.cpp
@@ -115,6 +118,7 @@
 	src/LoadSpiceAscii.cpp
 	src/LoadSpiceXML2DDet.cpp
 	src/LoadSwans.cpp
+	src/LoadStl.cpp
 	src/LoadTBL.cpp
 	src/LoadTOFRawNexus.cpp
 	src/LoadVulcanCalFile.cpp
@@ -125,6 +129,7 @@
 	src/ModifyDetectorDotDatFile.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
+	src/ORNLDataArchive.cpp
 	src/PDLoadCharacterizations.cpp
 	src/ParallelEventLoader.cpp
 	src/PatchBBY.cpp
@@ -135,7 +140,7 @@
 	src/RotateInstrumentComponent.cpp
 	src/RotateSource.cpp
 	src/SNSDataArchive.cpp
-        src/SaveANSTOAscii.cpp
+    	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
 	src/SaveBankScatteringAngles.cpp
@@ -157,7 +162,7 @@
 	src/SaveILLCosmosAscii.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
-        src/SaveMask.cpp
+    	src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
@@ -224,11 +229,14 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
 	inc/MantidDataHandling/Load.h
+	inc/MantidDataHandling/LoadANSTOEventFile.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
+	inc/MantidDataHandling/LoadAsciiStl.h
 	inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadBankFromDiskTask.h
+	inc/MantidDataHandling/LoadBinaryStl.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -238,6 +246,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDiffCal.h
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
+	inc/MantidDataHandling/LoadEMU.h
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventNexusIndexSetup.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
@@ -299,6 +308,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
 	inc/MantidDataHandling/LoadSpiceXML2DDet.h
+	inc/MantidDataHandling/LoadStl.h
 	inc/MantidDataHandling/LoadSwans.h
 	inc/MantidDataHandling/LoadTBL.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
@@ -311,6 +321,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NXcanSASDefinitions.h
 	inc/MantidDataHandling/NexusTester.h
+	inc/MantidDataHandling/ORNLDataArchive.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
 	inc/MantidDataHandling/ParallelEventLoader.h
 	inc/MantidDataHandling/PatchBBY.h
@@ -412,7 +423,9 @@ set ( TEST_FILES
 	JoinISISPolarizationEfficienciesTest.h
 	LoadAscii2Test.h
 	LoadAsciiTest.h
+	LoadAsciiStlTest.h
 	LoadBBYTest.h
+	LoadBinaryStlTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
@@ -421,6 +434,7 @@ set ( TEST_FILES
 	LoadDiffCalTest.h
 	LoadDspacemapTest.h
 	LoadEmptyInstrumentTest.h
+	LoadEMUauTest.h
 	LoadEventNexusIndexSetupTest.h
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
@@ -492,6 +506,7 @@ set ( TEST_FILES
 	ModifyDetectorDotDatFileTest.h
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h
+	ORNLDataArchiveTest.h
 	PDLoadCharacterizationsTest.h
 	RawFileInfoTest.h
 	RemoveLogsTest.h
@@ -581,7 +596,7 @@ set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 target_include_directories ( DataHandling PUBLIC inc ../Nexus/inc)
 target_include_directories ( DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
 
-target_link_libraries ( DataHandling LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( DataHandling LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${JSONCPP_LIBRARIES} Catalog )
 
 # Add the unit tests directory
 add_subdirectory ( test )

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import ErrorReporter, UsageService
 from mantid.kernel import Logger
 
@@ -20,7 +26,7 @@ class ErrorReporterPresenter(object):
                 "mantidplot", UsageService.getUpTime(), self._exit_code, False, str(name), str(email), str(textBox))
             status = errorReporter.sendErrorReport()
 
-        if status != 201:
+        if status != 201 and status != -1:
             self._view.display_message_box('Error contacting server','There was an error when sending the report.'
                                            'Please contact mantid-help@mantidproject.org directly',
                                            'http request returned with status {}'.format(status))
@@ -31,6 +37,8 @@ class ErrorReporterPresenter(object):
             self._view.quit()
         else:
             self.error_log.error("Continue working.")
+
+        return status
 
     def show_view(self):
         self._view.show()

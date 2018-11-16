@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 
@@ -18,15 +24,6 @@ class DLLExport ConvFit : public IndirectFitAnalysisTab {
 public:
   ConvFit(QWidget *parent = nullptr);
 
-protected:
-  void setRunEnabled(bool enabled) override;
-  void setPlotResultEnabled(bool enabled) override;
-  void setSaveResultEnabled(bool enabled) override;
-
-private:
-  void setupFitTab() override;
-  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
-
 protected slots:
   void setModelResolution(const QString &resolutionName);
   void runClicked();
@@ -35,7 +32,23 @@ protected slots:
   void updatePlotOptions() override;
   void fitFunctionChanged();
 
+protected:
+  bool shouldEnablePlotResult() override { return true; };
+
+  void setPlotResultEnabled(bool enabled) override;
+  void setSaveResultEnabled(bool enabled) override;
+
+  void setRunIsRunning(bool running) override;
+
 private:
+  void setupFitTab() override;
+  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
+
+  void setRunEnabled(bool enabled);
+  void setFitSingleSpectrumEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setPlotResultIsPlotting(bool plotting);
+
   std::string fitTypeString() const;
 
   std::unique_ptr<Ui::ConvFit> m_uiForm;

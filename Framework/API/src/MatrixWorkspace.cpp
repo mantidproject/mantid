@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/BinEdgeAxis.h"
@@ -1094,6 +1100,25 @@ MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
   return it->second;
 }
 
+const std::vector<size_t>
+MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
+  auto it = m_masks.find(workspaceIndex);
+  // Throw if there are no masked bins for this spectrum. The caller should
+  // check first using hasMaskedBins!
+  if (it == m_masks.end()) {
+    throw Kernel::Exception::IndexError(workspaceIndex, 0,
+                                        "MatrixWorkspace::maskedBins");
+  }
+
+  auto maskedBins = it->second;
+  std::vector<size_t> maskedIds;
+  maskedIds.reserve(maskedBins.size());
+  for (auto &mb : maskedBins) {
+    maskedIds.push_back(mb.first);
+  }
+  return maskedIds;
+}
+
 /** Set the list of masked bins for given workspaceIndex. Not thread safe.
  *
  * No data is masked and previous masking for any bin for this workspace index
@@ -1964,13 +1989,7 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
         std::vector<SpectrumDefinition>(m_indexInfo->size()));
     return;
   }
-  size_t numberOfSpectra{0};
-  if (detInfo.isScanning()) {
-    for (size_t i = 0; i < numberOfDetectors; ++i)
-      numberOfSpectra += detInfo.scanCount(i);
-  } else {
-    numberOfSpectra = numberOfDetectors;
-  }
+  size_t numberOfSpectra = numberOfDetectors * detInfo.scanCount();
   if (numberOfSpectra != m_indexInfo->globalSize())
     throw std::invalid_argument(
         "MatrixWorkspace: IndexInfo does not contain spectrum definitions so "
@@ -1985,7 +2004,7 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
     size_t specIndex = 0;
     size_t globalSpecIndex = 0;
     for (size_t detIndex = 0; detIndex < detInfo.size(); ++detIndex) {
-      for (size_t time = 0; time < detInfo.scanCount(detIndex); ++time) {
+      for (size_t time = 0; time < detInfo.scanCount(); ++time) {
         if (m_indexInfo->isOnThisPartition(
                 Indexing::GlobalSpectrumIndex(globalSpecIndex++)))
           specDefs[specIndex++].add(detIndex, time);
@@ -2014,7 +2033,7 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
       const size_t timeIndex = index.second;
       if (detIndex >= allDetIDs.size()) {
         errorValue = ErrorCode::InvalidDetIndex;
-      } else if (timeIndex >= detInfo.scanCount(detIndex)) {
+      } else if (timeIndex >= detInfo.scanCount()) {
         errorValue = ErrorCode::InvalidTimeIndex;
       } else {
         detIDs.insert(allDetIDs[detIndex]);

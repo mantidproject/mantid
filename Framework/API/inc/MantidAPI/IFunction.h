@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_IFUNCTION_H_
 #define MANTID_API_IFUNCTION_H_
 
@@ -141,27 +147,6 @@ class FunctionHandler;
     @author Roman Tolchenov, Tessella Support Services plc
     @date 16/10/2009
     @date 22/12/2010
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL IFunction {
 public:
@@ -476,6 +461,8 @@ public:
   virtual bool removeTie(size_t i);
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const;
+  /// Put all ties in order in which they will be applied correctly.
+  void sortTies();
   /// Write a parameter tie to a string
   std::string writeTies() const;
   //@}
@@ -490,6 +477,8 @@ public:
   virtual IConstraint *getConstraint(size_t i) const;
   /// Remove a constraint
   virtual void removeConstraint(const std::string &parName);
+  virtual void setConstraintPenaltyFactor(const std::string &parName,
+                                          const double &c);
   /// Write a parameter constraint to a string
   std::string writeConstraints() const;
   /// Remove all constraints.
@@ -593,6 +582,8 @@ protected:
                               const API::IFunction::Attribute &value) const;
   /// Add a new tie. Derived classes must provide storage for ties
   virtual void addTie(std::unique_ptr<ParameterTie> tie);
+  bool hasOrderedTies() const;
+  void applyOrderedTies();
   /// Writes itself into a string
   virtual std::string
   writeToString(const std::string &parentLocalAttributesStr = "") const;
@@ -618,10 +609,12 @@ private:
   boost::shared_ptr<Kernel::Matrix<double>> m_covar;
   /// The chi-squared of the last fit
   double m_chiSquared;
-  /// Holds parameter ties as <parameter index,tie pointer>
+  /// Holds parameter ties
   std::vector<std::unique_ptr<ParameterTie>> m_ties;
   /// Holds the constraints added to function
   std::vector<std::unique_ptr<IConstraint>> m_constraints;
+  /// Ties ordered in order of correct application
+  std::vector<ParameterTie *> m_orderedTies;
 };
 
 /// shared pointer to the function base class

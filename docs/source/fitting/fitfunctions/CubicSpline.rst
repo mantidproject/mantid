@@ -16,13 +16,13 @@ First and second derivatives from the spline can be calculated by using
 the derivative1D function.
 
 A CubicSpline is a polynomial function :math:`f(x)` of order 3, defined between an interval :math:`a \leqslant x \leqslant b`.
-When using CubicSplines for interpolation or for fitting, we essentially chain `BSplines <http://docs.mantidproject.org/nightly/fitfunctions/BSpline.html>`__ 
+When using CubicSplines for interpolation or for fitting, we essentially chain :ref:`BSplines <func-BSpline>` 
 of order 3 together so that each spline passes through the breakpoints in that interval.
 
-A Cubic Spline is a specific case of `BSpline <http://docs.mantidproject.org/nightly/fitfunctions/BSpline.html>`__
+A Cubic Spline is a specific case of :ref:`BSpline <func-BSpline>`
 that only uses polynomials of order 3 to define the spline functions.
 
-Again, as with `BSplines <http://docs.mantidproject.org/nightly/fitfunctions/BSpline.html>`__ , there are certain conditions
+Again, as with :ref:`BSplines <func-BSpline>` , there are certain conditions
 that must be fulfilled at each breakpoint such that the overall Spline is piecewise-smooth.
 
 Example

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_MATRIXWORKSPACE_H_
 #define MANTID_API_MATRIXWORKSPACE_H_
 
@@ -43,27 +49,6 @@ using MantidImage_const_sptr = boost::shared_ptr<const MantidImage>;
 
 @author Laurent C Chapon, ISIS, RAL
 @date 26/09/2007
-
-Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL MatrixWorkspace : public IMDWorkspace,
                                        public ExperimentInfo {
@@ -429,7 +414,7 @@ public:
   /// to point-like)
   virtual bool isHistogramData() const;
 
-  /// Returns true if the workspace contains has common X bins
+  /// Returns true if the workspace contains common X bins
   virtual bool isCommonBins() const;
 
   std::string YUnit() const;
@@ -451,6 +436,8 @@ public:
   /// index, weight>
   using MaskList = std::map<size_t, double>;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
+  const std::vector<size_t>
+  maskedBinsIndices(const size_t &workspaceIndex) const;
   void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace
