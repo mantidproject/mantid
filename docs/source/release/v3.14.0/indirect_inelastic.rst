@@ -47,6 +47,7 @@ Bugfixes
   message is now displayed.
 - The Probability Density Functions (PDF) workspaces for the FABADA minimiser in ConvFit no longer overwrite each other. 
   Various other improvements in the display of the FABADA PDF's have also been finished.
+- Loading a resolution file before a reduced file in ConvFit no longer causes an unexpected error.
 
 
 Data Corrections Interface
