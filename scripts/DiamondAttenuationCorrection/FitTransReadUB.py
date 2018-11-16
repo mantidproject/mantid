@@ -940,7 +940,7 @@ def FitTrans():
     run_number_UB = str(raw_input('Name of run from which UB matrices were generated: '))
     #peaks_file = str(input('Name of file containing diamond peaks: '))
 
-    run_number = str(input('Input run number for transmission data: '))
+    run_number = str(raw_input('Input run number for transmission data: '))
 
     # Build input filenames
     fullfilename_ub1 = str(run_number_UB) + 'UB1.dat' # unused variable
@@ -1072,7 +1072,7 @@ def FitTrans():
     # Either generate, or read variable array from file
     # This is one big array with all the parameters to be refined in it.
 
-    prevf = str(input('Look for pars from a previous run ([y]/n)? '))
+    prevf = str(raw_input('Look for pars from a previous run ([y]/n)? '))
 
     if prevf == 'n':
         x0 = np.hstack((setang1, pkmult1, setang2, pkmult2, sf,
@@ -1211,12 +1211,12 @@ def FitTrans():
         ub[6 + neqv1:7 + neqv1 + neqv2 - 1] = x0[6 +
                                                  neqv1:7 + neqv1 + neqv2 - 1] + 0.01
 
-    prompt = str(input('Enter anything to begin refinement...'))
+    prompt = str(raw_input('Enter anything to begin refinement...'))
     print('Refining...\nMight take quite a long time...')
 
     max_number_iterations = int(
         input('Maximum number of iterations for minimization: '))
-    function_verbose = str(input('Verbose minimization ([y]/n): '))
+    function_verbose = str(raw_input('Verbose minimization ([y]/n): '))
 
     # make dictionary holding constraints for minimization
     # equalities (all must equal 0) and inequalities
@@ -1293,7 +1293,7 @@ def FitTrans():
     plt.ylabel('Transmission')
     plt.show()
 
-    prompt = str(input('output best fit to file ([y]/n): '))
+    prompt = str(raw_input('output best fit to file ([y]/n): '))
     if prompt == 'n':
         print('Ending')
     else:
