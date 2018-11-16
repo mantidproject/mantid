@@ -42,6 +42,10 @@ private:
     (void)spectrum;
     return "";
   };
+
+  std::vector<std::string> getSpectrumDependentAttributes() const override {
+    return std::vector<std::string>();
+  }
 };
 
 std::unique_ptr<DummyModel> getEmptyModel() {
