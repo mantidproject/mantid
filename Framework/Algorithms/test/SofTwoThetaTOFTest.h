@@ -97,8 +97,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", angleStep))
     auto tempXml = boost::filesystem::temp_directory_path();
     tempXml /= boost::filesystem::unique_path("SofTwoThetaTest-%%%%%%%%.xml");
+#if _WIN32
+	auto const wfilename = tempXml.native();
+	std::string const filename{wfilename.cbegin(), wfilename.cend()};
+#else
+	auto const filename{ tempXml.native() };
+#endif
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("GroupingFilename", tempXml.c_str()))
+        alg.setProperty("GroupingFilename", filename))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     auto const xmlExists = boost::filesystem::exists(tempXml);

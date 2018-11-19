@@ -198,8 +198,14 @@ SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_sptr &ws,
     auto tempPath = boost::filesystem::temp_directory_path();
     tempPath /= boost::filesystem::unique_path(
         "detector-grouping-%%%%-%%%%-%%%%-%%%%.xml");
-    filename = tempPath.c_str();
-    generateGrouping->setProperty("GenerateParFile", false);
+#ifdef _WIN32
+	// A dirty way to convert a wstring to string.
+	auto const wfilename = tempPath.native();
+	filename = std::string(wfilename.cbegin(), wfilename.cend());
+#else
+	filename = tempPath.native();
+#endif
+	generateGrouping->setProperty("GenerateParFile", false);
     // Make sure the file gets deleted at scope exit.
     deleteThisLater.name = filename;
   } else {
