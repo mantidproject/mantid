@@ -133,24 +133,25 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         compatibility = state.compatibility
         is_event_workspace = isinstance(workspace, IEventWorkspace)
-        preserve_events = False if (compatibility.use_compatibility_mode and is_event_workspace) else True
+        if is_event_workspace:
+            preserve_events = False if compatibility.use_compatibility_mode else True
 
-        if compatibility.time_rebin_string:
-            rebin_name = "Rebin"
-            rebin_option = {"InputWorkspace": workspace,
-                            "Params": compatibility.time_rebin_string,
-                            "OutputWorkspace": EMPTY_NAME,
-                            "PreserveEvents": preserve_events}
-        else:
-            rebin_name = "RebinToWorkspace"
-            rebin_option = {"WorkspaceToRebin": workspace,
-                            "WorkspaceToMatch": monitor_workspace,
-                            "OutputWorkspace": EMPTY_NAME,
-                            "PreserveEvents": preserve_events}
+            if compatibility.time_rebin_string:
+                rebin_name = "Rebin"
+                rebin_option = {"InputWorkspace": workspace,
+                                "Params": compatibility.time_rebin_string,
+                                "OutputWorkspace": EMPTY_NAME,
+                                "PreserveEvents": preserve_events}
+            else:
+                rebin_name = "RebinToWorkspace"
+                rebin_option = {"WorkspaceToRebin": workspace,
+                                "WorkspaceToMatch": monitor_workspace,
+                                "OutputWorkspace": EMPTY_NAME,
+                                "PreserveEvents": preserve_events}
 
-        rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
-        rebin_alg.execute()
-        workspace = rebin_alg.getProperty("OutputWorkspace").value
+            rebin_alg = create_child_algorithm(self, rebin_name, **rebin_option)
+            rebin_alg.execute()
+            workspace = rebin_alg.getProperty("OutputWorkspace").value
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY END
