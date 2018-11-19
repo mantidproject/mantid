@@ -11,14 +11,11 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 namespace Mantid {
 namespace DataHandling {
-/**  Load Environment into the sample a workspace
+/**  Load Environment into the sample of a workspace, either replacing the current environment, or replacing it, you may also set the material
 
      The following file types are supported
 
        STL file with suffix .stl
-
-
-
  */
 
 class DLLExport LoadSampleEnvironment : public Mantid::API::Algorithm {
