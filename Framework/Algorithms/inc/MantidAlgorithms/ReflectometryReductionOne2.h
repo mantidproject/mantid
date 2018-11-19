@@ -111,7 +111,6 @@ private:
   // Check whether two spectrum maps match
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2);
-                          //firciabaubf
   // Find and cache constants
   void findDetectorGroups();
   void findTheta0();

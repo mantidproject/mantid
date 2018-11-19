@@ -31,6 +31,7 @@ Improved
 - Common naming of slit component name and size properties across algorithms.
 - :ref:`algm-SpecularReflectionPositionCorrect` is now compatible with the reflectometers at ILL.
 - :ref:`algm-CreateTransmissionWorkspace` and :ref:`algm-CreateTransmissionWorkspaceAuto` now use NormalizeByIntegratedMontitors instead of using MonitorIntegrationWavelengthMin and MonitorIntegrationWavelengthMax being defined, to determine how to normalize. 
+- :ref:`algm-ReflectometryReductionOne` now uses :ref:`algm-ReflectometrySumInQ` instead of a locally defined function to achieve the same goal and should appear in workspace history
 
 Bug fixes
 #########
