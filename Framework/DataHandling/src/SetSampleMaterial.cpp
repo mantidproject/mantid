@@ -193,7 +193,7 @@ void SetSampleMaterial::exec() {
     throw std::runtime_error("InputWorkspace does not have a sample object");
   }
 
-  boost::scoped_ptr<Material> material;
+  std::unique_ptr<Material> material;
   MaterialBuilder builder;
 
   // determine the material
@@ -232,7 +232,7 @@ void SetSampleMaterial::exec() {
       getProperty("ScatteringXSection")); // in barns
 
   // create the material
-  material.reset(new Material(builder.build()));
+  material =std::make_unique<Material>(builder.build());
 
   // calculate derived values
   const double bcoh_avg_sq = material->cohScatterLengthSqrd();   // <b>
