@@ -96,6 +96,10 @@ class TestFitPropertyBrowser(GuiTestBase):
 
 class TestModalTester(unittest.TestCase):
 
+    def tearDown(self):
+        import time
+        time.sleep(0.2)
+
     def test_find_peaks_no_workspace(self):
         TestFitPropertyBrowser(self).run('test_find_peaks_no_workspace', pause=0.)
 
