@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Surfaces/LineIntersectVisit.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Exception.h"
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/General.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Strings.h"
 #include <algorithm>
 #include <boost/bind.hpp>
 
@@ -105,6 +111,6 @@ void LineIntersectVisit::procTrack()
                  boost::bind(&Kernel::V3D::distance, ATrack.getOrigin(), _1));
 }
 
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid

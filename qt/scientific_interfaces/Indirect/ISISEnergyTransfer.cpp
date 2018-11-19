@@ -1,13 +1,73 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 
+#include "../General/UserInputValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "../General/UserInputValidator.h"
 
 #include <QFileInfo>
 
+#include <boost/algorithm/string.hpp>
+
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
+
+namespace {
+
+std::string createRangeString(std::size_t from, std::size_t to) {
+  return std::to_string(from) + "-" + std::to_string(to);
+}
+
+std::string createGroupString(std::size_t start, std::size_t size) {
+  return createRangeString(start, start + size - 1);
+}
+
+std::string createGroupingString(std::size_t groupSize,
+                                 std::size_t numberOfGroups) {
+  auto groupingString = createRangeString(0, groupSize - 1);
+  for (auto i = groupSize; i < groupSize * numberOfGroups; i += groupSize)
+    groupingString += "," + createGroupString(i, groupSize);
+  return groupingString;
+}
+
+std::string createDetectorGroupingString(std::size_t groupSize,
+                                         std::size_t numberOfGroups,
+                                         std::size_t numberOfDetectors) {
+  const auto groupingString = createGroupingString(groupSize, numberOfGroups);
+  const auto remainder = numberOfDetectors % numberOfGroups;
+  if (remainder == 0)
+    return groupingString;
+  return groupingString + "," +
+         createRangeString(numberOfDetectors - remainder,
+                           numberOfDetectors - 1);
+}
+
+std::string createDetectorGroupingString(std::size_t numberOfDetectors,
+                                         std::size_t numberOfGroups) {
+  const auto groupSize = numberOfDetectors / numberOfGroups;
+  if (groupSize == 0)
+    return createRangeString(0, numberOfDetectors - 1);
+  return createDetectorGroupingString(groupSize, numberOfGroups,
+                                      numberOfDetectors);
+}
+
+std::vector<std::size_t>
+getCustomGroupingNumbers(std::string const &customString) {
+  std::vector<std::string> customGroupingStrings;
+  std::vector<std::size_t> customGroupingNumbers;
+  // Get the numbers from customString and store them in customGroupingStrings
+  boost::split(customGroupingStrings, customString, boost::is_any_of(" ,-+:"));
+  for (const auto &string : customGroupingStrings)
+    if (!string.empty())
+      customGroupingNumbers.emplace_back(std::stoull(string));
+  return customGroupingNumbers;
+}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -40,15 +100,23 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
-  // Handle plotting and saving
+  // Handle running, plotting and saving
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  connect(this,
+          SIGNAL(updateRunButton(bool, std::string const &, QString const &,
+                                 QString const &)),
+          this,
+          SLOT(updateRunButton(bool, std::string const &, QString const &,
+                               QString const &)));
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
 
   // Add validation to custom detector grouping
-  QRegExp re("([0-9]+[-]?[0-9]*,[ ]?)*[0-9]+[-]?[0-9]*");
+  QRegExp re("([0-9]+[-:+]?[0-9]*,[ ]?)*[0-9]+[-:+]?[0-9]*");
   m_uiForm.leCustomGroups->setValidator(new QRegExpValidator(re, this));
 
   // Validate to remove invalid markers
@@ -189,10 +257,36 @@ bool ISISEnergyTransfer::validate() {
   return uiv.isAllInputValid();
 }
 
-QString ISISEnergyTransfer::validateDetectorGrouping() {
+bool ISISEnergyTransfer::numberInCorrectRange(
+    std::size_t const &spectraNumber) const {
+  QMap<QString, QString> instDetails = getInstrumentDetails();
+  auto spectraMin =
+      static_cast<std::size_t>(instDetails["spectra-min"].toInt());
+  auto spectraMax =
+      static_cast<std::size_t>(instDetails["spectra-max"].toInt());
+  return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
+}
+
+QString ISISEnergyTransfer::checkCustomGroupingNumbersInRange(
+    std::vector<std::size_t> const &customGroupingNumbers) const {
+  for (const auto &number : customGroupingNumbers)
+    if (!numberInCorrectRange(number))
+      return "Please supply a custom grouping within the correct range";
+  return "";
+}
+
+QString ISISEnergyTransfer::validateDetectorGrouping() const {
   if (m_uiForm.cbGroupingOptions->currentText() == "File") {
     if (!m_uiForm.dsMapFile->isValid())
       return "Mapping file is invalid.";
+  } else if (m_uiForm.cbGroupingOptions->currentText() == "Custom") {
+    const std::string customString =
+        m_uiForm.leCustomGroups->text().toStdString();
+    if (customString.empty())
+      return "Please supply a custom grouping for detectors.";
+    else
+      return checkCustomGroupingNumbersInRange(
+          getCustomGroupingNumbers(customString));
   }
   return "";
 }
@@ -271,6 +365,7 @@ void ISISEnergyTransfer::run() {
 
   std::pair<std::string, std::string> grouping =
       createMapFile(m_uiForm.cbGroupingOptions->currentText().toStdString());
+
   reductionAlg->setProperty("GroupingMethod", grouping.first);
 
   if (grouping.first == "File")
@@ -330,6 +425,37 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   m_uiForm.ckSaveSPE->setEnabled(true);
 }
 
+int ISISEnergyTransfer::getGroupingOptionIndex(QString const &option) {
+  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
+    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
+      return i;
+  return 0;
+}
+
+bool ISISEnergyTransfer::isOptionHidden(QString const &option) {
+  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
+    if (m_uiForm.cbGroupingOptions->itemText(i) == option)
+      return false;
+  return true;
+}
+
+void ISISEnergyTransfer::setCurrentGroupingOption(QString const &option) {
+  m_uiForm.cbGroupingOptions->setCurrentIndex(getGroupingOptionIndex(option));
+}
+
+void ISISEnergyTransfer::removeGroupingOption(QString const &option) {
+  m_uiForm.cbGroupingOptions->removeItem(getGroupingOptionIndex(option));
+}
+
+void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
+                                                    QString const &option) {
+  if (includeOption && isOptionHidden(option)) {
+    m_uiForm.cbGroupingOptions->addItem(option);
+    setCurrentGroupingOption(option);
+  } else if (!includeOption && !isOptionHidden(option))
+    removeGroupingOption(option);
+}
+
 /**
  * Called when the instrument has changed, used to update default values.
  */
@@ -343,6 +469,12 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   qens << "IRIS"
        << "OSIRIS";
   m_uiForm.spEfixed->setEnabled(qens.contains(instDetails["instrument"]));
+
+  QStringList allowDefaultGroupingInstruments;
+  allowDefaultGroupingInstruments << "TOSCA";
+  includeExtraGroupingOption(
+      allowDefaultGroupingInstruments.contains(instDetails["instrument"]),
+      "Default");
 
   if (instDetails["spectra-min"].isEmpty() ||
       instDetails["spectra-max"].isEmpty()) {
@@ -453,7 +585,7 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
 
     return std::make_pair("File", groupFile.toStdString());
   } else if (groupType == "Groups")
-    return std::make_pair("Custom", createDetectorGroupingString());
+    return std::make_pair("Custom", getDetectorGroupingString());
   else if (groupType == "Default")
     return std::make_pair("IPF", "");
   else if (groupType == "Custom")
@@ -465,25 +597,12 @@ ISISEnergyTransfer::createMapFile(const std::string &groupType) {
   }
 }
 
-const std::string ISISEnergyTransfer::createDetectorGroupingString() {
-
+std::string ISISEnergyTransfer::getDetectorGroupingString() const {
   const unsigned int nGroups = m_uiForm.spNumberGroups->value();
   const unsigned int nSpectra =
-      m_uiForm.spSpectraMax->value() - m_uiForm.spSpectraMin->value();
-  const unsigned int groupSize = nSpectra / nGroups;
-  auto n = groupSize;
-  std::stringstream groupingString;
-  groupingString << "0-" << std::to_string(n);
-  for (auto i = 1u; i < nGroups; ++i) {
-    groupingString << ", " << std::to_string(n + 1) << "-";
-    n += groupSize;
-    groupingString << std::to_string(n);
-  }
-  if (n != nSpectra) // add remainder as extra group
-    groupingString << ", " << std::to_string(n + 1) << "-"
-                   << std::to_string(nSpectra);
-
-  return groupingString.str();
+      1 + m_uiForm.spSpectraMax->value() - m_uiForm.spSpectraMin->value();
+  return createDetectorGroupingString(static_cast<std::size_t>(nSpectra),
+                                      static_cast<std::size_t>(nGroups));
 }
 
 /**
@@ -571,6 +690,7 @@ void ISISEnergyTransfer::plotRaw() {
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
     MatrixWorkspace_sptr tempWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+
     const double minBack = tempWs->x(0)[0];
     const double maxBack = tempWs->x(0)[tempWs->blocksize()];
 
@@ -674,17 +794,16 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
  * Called when a user starts to type / edit the runs to load.
  */
 void ISISEnergyTransfer::pbRunEditing() {
-  emit updateRunButton(false, "Editing...",
-                       "Run numbers are currently being edited.");
+  updateRunButton(false, "unchanged", "Editing...",
+                  "Run numbers are currently being edited.");
 }
 
 /**
  * Called when the FileFinder starts finding the files.
  */
 void ISISEnergyTransfer::pbRunFinding() {
-  emit updateRunButton(
-      false, "Finding files...",
-      "Searching for data files for the run numbers entered...");
+  updateRunButton(false, "unchanged", "Finding files...",
+                  "Searching for data files for the run numbers entered...");
   m_uiForm.dsRunFiles->setEnabled(false);
 }
 
@@ -692,20 +811,26 @@ void ISISEnergyTransfer::pbRunFinding() {
  * Called when the FileFinder has finished finding the files.
  */
 void ISISEnergyTransfer::pbRunFinished() {
-  if (!m_uiForm.dsRunFiles->isValid()) {
-    emit updateRunButton(
-        false, "Invalid Run(s)",
+  if (!m_uiForm.dsRunFiles->isValid())
+    updateRunButton(
+        false, "unchanged", "Invalid Run(s)",
         "Cannot find data files for some of the run numbers entered.");
-  } else {
-    emit updateRunButton();
-  }
+  else
+    updateRunButton();
 
   m_uiForm.dsRunFiles->setEnabled(true);
 }
+
+/**
+ * Handle when Run is clicked
+ */
+void ISISEnergyTransfer::runClicked() { runTab(); }
+
 /**
  * Handle mantid plotting of workspaces
  */
 void ISISEnergyTransfer::plotClicked() {
+  setPlotIsPlotting(true);
   for (const auto &it : m_outputWorkspaces) {
     if (checkADSForPlotSaveWorkspace(it, true)) {
       const auto plotType = m_uiForm.cbPlotType->currentText();
@@ -716,6 +841,7 @@ void ISISEnergyTransfer::plotClicked() {
       m_pythonRunner.runPythonCode(pyInput);
     }
   }
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -739,5 +865,44 @@ void ISISEnergyTransfer::saveClicked() {
   m_pythonRunner.runPythonCode(pyInput);
 }
 
+void ISISEnergyTransfer::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
+
+void ISISEnergyTransfer::setPlotEnabled(bool enabled) {
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotType->setEnabled(enabled);
+}
+
+void ISISEnergyTransfer::setSaveEnabled(bool enabled) {
+  m_uiForm.pbSave->setEnabled(enabled);
+  m_uiForm.loSaveFormats->setEnabled(enabled);
+}
+
+void ISISEnergyTransfer::setOutputButtonsEnabled(
+    std::string const &enableOutputButtons) {
+  bool enable = enableOutputButtons == "enable" ? true : false;
+  setPlotEnabled(enable);
+  setSaveEnabled(enable);
+}
+
+void ISISEnergyTransfer::updateRunButton(bool enabled,
+                                         std::string const &enableOutputButtons,
+                                         QString const message,
+                                         QString const tooltip) {
+  setRunEnabled(enabled);
+  m_uiForm.pbRun->setText(message);
+  m_uiForm.pbRun->setToolTip(tooltip);
+  if (enableOutputButtons != "unchanged")
+    setOutputButtonsEnabled(enableOutputButtons);
+}
+
+void ISISEnergyTransfer::setPlotIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setPlotEnabled(!plotting);
+  setRunEnabled(!plotting);
+  setSaveEnabled(!plotting);
+}
+
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

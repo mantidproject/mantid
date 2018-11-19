@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
 #define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
 
@@ -20,8 +26,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 class MWView;
 class RangeSelector;
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -86,7 +92,7 @@ private:
   size_t m_selectedWorkspaceIndex;
 
 }; // class SliceSelector
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_

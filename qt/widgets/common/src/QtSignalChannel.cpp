@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/QtSignalChannel.h"
-#include "MantidQtWidgets/Common/Message.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/Message.h"
 
 #include <Poco/Message.h>
 
@@ -49,5 +55,5 @@ void QtSignalChannel::setGlobalLogLevel(int priority) {
   using Mantid::Kernel::Logger;
   Logger::setLevelForAll(priority);
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

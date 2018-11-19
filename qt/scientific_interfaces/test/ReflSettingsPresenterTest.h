@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTERTEST_H
 
@@ -5,9 +11,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "../ISISReflectometry/ReflSettingsPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "../ISISReflectometry/ReflSettingsPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "ReflMockObjects.h"
 #include <boost/algorithm/string.hpp>
@@ -33,7 +39,7 @@ public:
 std::string variantToString(const QVariant &variant) {
   return variant.value<QString>().toStdString();
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional tests

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef VATESAPI_TEST_MOCKOBJECTS_H
 #define VATESAPI_TEST_MOCKOBJECTS_H
 
@@ -16,7 +22,6 @@
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidVatesAPI/Common.h"
-#include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
@@ -69,7 +74,7 @@ public:
   ~FakeIMDDimension() override {}
 };
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 //=================================================================================================
 /// Concrete mocked implementation of IMDWorkspace for testing.
 class MockIMDWorkspace : public Mantid::API::IMDWorkspace {
@@ -178,7 +183,7 @@ public:
   MOCK_METHOD1(eventRaised, void(double));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class FakeProgressAction : public Mantid::VATES::ProgressAction {
   void eventRaised(double) override {}
@@ -189,7 +194,7 @@ Create a field data entry containing (as contents) the argument text.
 @param testData : Text to enter
 @return new vtkFieldData object containing text.
 */
-GCC_UNUSED_FUNCTION vtkFieldData *
+GNU_UNUSED_FUNCTION vtkFieldData *
 createFieldDataWithCharArray(std::string testData) {
   vtkFieldData *fieldData = vtkFieldData::New();
   vtkCharArray *charArray = vtkCharArray::New();
@@ -274,7 +279,7 @@ view.
 view.
 @return full xml as string.
 */
-GCC_UNUSED_FUNCTION std::string
+GNU_UNUSED_FUNCTION std::string
 constructXML(const std::string &xDimensionIdMapping,
              const std::string &yDimensionIdMapping,
              const std::string &zDimensionIdMapping,
@@ -372,7 +377,7 @@ view.
 view.
 @return full xml as string.
 */
-GCC_UNUSED_FUNCTION std::string
+GNU_UNUSED_FUNCTION std::string
 constructXMLForMDEvHelperData(const std::string &xDimensionIdMapping,
                               const std::string &yDimensionIdMapping,
                               const std::string &zDimensionIdMapping,
@@ -403,7 +408,7 @@ Mantid::API::Workspace_sptr createSimple3DWorkspace() {
   return outWs;
 }
 
-GCC_UNUSED_FUNCTION Mantid::API::Workspace_sptr
+GNU_UNUSED_FUNCTION Mantid::API::Workspace_sptr
 get3DWorkspace(bool integratedTDimension, bool sliceMD) {
   using namespace Mantid::API;
   using namespace Mantid::DataObjects;
@@ -442,7 +447,7 @@ get3DWorkspace(bool integratedTDimension, bool sliceMD) {
  * @param fieldName : The requested field data entry
  * @return The value of the requested field data entry
  */
-GCC_UNUSED_FUNCTION std::string getStringFieldDataValue(vtkDataSet *ds,
+GNU_UNUSED_FUNCTION std::string getStringFieldDataValue(vtkDataSet *ds,
                                                         std::string fieldName) {
   vtkAbstractArray *value =
       ds->GetFieldData()->GetAbstractArray(fieldName.c_str());

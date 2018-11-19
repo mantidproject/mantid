@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffFittingModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -476,7 +482,7 @@ std::string stripWSNameFromFilename(const std::string &fullyQualifiedFilename) {
   boost::split(filenameSegments, filename, boost::is_any_of("."));
   return filenameSegments[0];
 }
-}
+} // namespace
 
 void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
   std::vector<std::string> filenames;
@@ -564,10 +570,10 @@ std::string EnggDiffFittingModel::createFunctionString(
       "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
       ",A1=" + boost::lexical_cast<std::string>(A1) +
       ";name=BackToBackExponential,I=" + boost::lexical_cast<std::string>(I) +
-      ",A=" + boost::lexical_cast<std::string>(A) + ",B=" +
-      boost::lexical_cast<std::string>(B) + ",X0=" +
-      boost::lexical_cast<std::string>(X0) + ",S=" +
-      boost::lexical_cast<std::string>(S);
+      ",A=" + boost::lexical_cast<std::string>(A) +
+      ",B=" + boost::lexical_cast<std::string>(B) +
+      ",X0=" + boost::lexical_cast<std::string>(X0) +
+      ",S=" + boost::lexical_cast<std::string>(S);
   return function;
 }
 
@@ -596,4 +602,4 @@ const double EnggDiffFittingModel::DEFAULT_DIFC = 18400.0;
 const double EnggDiffFittingModel::DEFAULT_TZERO = 4.0;
 
 } // namespace CustomInterfaces
-} // namespace MantidQT
+} // namespace MantidQt

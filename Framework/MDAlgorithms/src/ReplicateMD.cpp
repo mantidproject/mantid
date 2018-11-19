@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ReplicateMD.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/Utils.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include <utility>
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Utils.h"
+#include <memory>
 #include <sstream>
 #include <string>
-#include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -124,7 +130,7 @@ size_t linearIndexToLinearIndex(const size_t &nDimsShape,
 
   return targetIndex;
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReplicateMD)

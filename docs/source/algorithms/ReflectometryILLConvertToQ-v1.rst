@@ -15,8 +15,12 @@ The diagram below shows the workflow of this algorithm:
 
 .. diagram:: ReflectometryILLConvertToQ-v1_wkflw.dot
 
+The algorithm expects to find a ``foreground.summation_type`` entry in the *InputWorkspace*'s sample logs containing either ``SumInLambda`` or ``SumInQ``. This entry is automatically added to the workspace by :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>`.
+
 Usage
 -----
+
+.. include:: ../usagedata-note.txt
 
 **Example - nonpolarized reduction**
 
@@ -32,34 +36,37 @@ Usage
        'HighAngleBkgOffset': 10,
        'HighAngleBkgWidth': 50,
    }
-
+   
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
        OutputBeamPositionWorkspace='direct_beam_pos',  # For reflected angle calibration.
        **settings
    )
-   directFgd = ReflectometryILLSumForeground(direct.OutputWorkspace)
-
+   directFgd = ReflectometryILLSumForeground(
+       Inputworkspace=direct.OutputWorkspace,
+       WavelengthRange=[2, 15])
+   
    # Reflected beam
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
        DirectBeamPositionWorkspace='direct_beam_pos',
        **settings
    )
-
+   
    reflectivityLambda = ReflectometryILLSumForeground(
        InputWorkspace=reflected,
        DirectForegroundWorkspace=directFgd,
+       DirectBeamWorkspace=direct.OutputWorkspace,
        WavelengthRange=[2, 15],
    )
    reflectivityQ = ReflectometryILLConvertToQ(
        InputWorkspace=reflectivityLambda,
-       ReflectedBeamWorkspace=reflected,            # Needed for Q resolution
-       DirectBeamWorkspace=direct.OutputWorkspace,  # Needed for Q resolution
+       # The next line is not needed if SumInQ was used in foreground summation
+       DirectForegroundWorkspace=directFgd,         
        GroupingQFraction=0.4
    )
-
+   
    # The data is now in Q
    print('Reflectivity X unit: ' + reflectivityQ.getAxis(0).getUnit().unitID())
    print('Is reflectivityLambda histogram? {}'.format(reflectivityLambda.isHistogramData()))
@@ -102,7 +109,15 @@ Output:
        OutputBeamPositionWorkspace='direct_beam_pos',  # For reflected angle calibration.
        **settings
    )
-   directFgd = ReflectometryILLSumForeground(direct.OutputWorkspace)
+   directFgd = ReflectometryILLSumForeground(
+       InputWorkspace=direct.OutputWorkspace,
+       WavelengthRange=[2, 15]
+   )
+   ReflectometryILLPolarizationCor(
+       InputWorkspaces='directFgd',
+       OutputWorkspace='pol_corrected_direct',  # Name of the group workspace
+       EfficiencyFile='ILL/D17/PolarizationFactors.txt'
+   )
 
    # Reflected beam. Flippers set to '++'
    reflected11 = ReflectometryILLPreprocess(
@@ -113,7 +128,8 @@ Output:
 
    reflectivity11 = ReflectometryILLSumForeground(
        InputWorkspace=reflected11,
-       DirectForegroundWorkspace=directFgd,
+       DirectForegroundWorkspace='pol_corrected_direct_++',
+       DirectBeamWorkspace=direct.OutputWorkspace,
        WavelengthRange=[2, 15]
    )
    # Reload the reflected be. We will fake the '--' flipper settings
@@ -125,7 +141,8 @@ Output:
 
    reflectivity00 = ReflectometryILLSumForeground(
        InputWorkspace=reflected00,
-       DirectForegroundWorkspace=directFgd,
+       DirectForegroundWorkspace='pol_corrected_direct_++',
+       DirectBeamWorkspace=direct.OutputWorkspace,
        WavelengthRange=[2, 15]
    )
    # Overwrite sample logs
@@ -135,7 +152,7 @@ Output:
    logs.addProperty('Flipper1.stateint', 0, replace)
    logs.addProperty('Flipper2.state', '-', replace)
    logs.addProperty('Flipper2.stateint', 0, replace)
-   
+
    # Polarization efficiency correction
    # The algorithm will think that the analyzer was off.
    ReflectometryILLPolarizationCor(
@@ -146,19 +163,17 @@ Output:
    # The polarization corrected workspaces get automatically generated names
    polcorr00 = mtd['pol_corrected_--']
    polcorr11 = mtd['pol_corrected_++']
-   
+
    R00 = ReflectometryILLConvertToQ(
        InputWorkspace=polcorr00,
-       ReflectedBeamWorkspace=reflected00,          # Needed for Q resolution
-       DirectBeamWorkspace=direct.OutputWorkspace,  # Needed for Q resolution
-       Polarized=True,                              # Explicitly state it's polarized
+       # The next line is not needed if SumInQ was used in foreground summation
+       DirectForegroundWorkspace='pol_corrected_direct_++',
        GroupingQFraction=0.4
    )
    R11 = ReflectometryILLConvertToQ(
        InputWorkspace=polcorr11,
-       ReflectedBeamWorkspace=reflected11,          # Needed for Q resolution
-       DirectBeamWorkspace=direct.OutputWorkspace,  # Needed for Q resolution
-       Polarized=True,                              # Explicitly state it's polarized
+       # The next line is not needed if SumInQ was used in foreground summation
+       DirectForegroundWorkspace='pol_corrected_direct_++',
        GroupingQFraction=0.4
    )
 
@@ -173,10 +188,10 @@ Output:
 .. testoutput:: PolarizedEx
 
    X unit in R00: MomentumTransfer
-   Number of points in R00: 259
+   Number of points in R00: 189
    X unit in R11: MomentumTransfer
-   Number of points in R11: 259
-   Size of Q resolution data: 259
+   Number of points in R11: 189
+   Size of Q resolution data: 189
 
 .. categories::
 

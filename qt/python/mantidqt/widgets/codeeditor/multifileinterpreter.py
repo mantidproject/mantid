@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
@@ -70,9 +63,9 @@ class MultiPythonFileInterpreter(QWidget):
         interpreter.sig_editor_modified.connect(self.mark_current_tab_modified)
         interpreter.sig_filename_modified.connect(self.on_filename_modified)
 
-        tab_title, tab_toolip = _tab_title_and_toolip(filename)
+        tab_title, tab_tooltip = _tab_title_and_toolip(filename)
         tab_idx = self._tabs.addTab(interpreter, tab_title)
-        self._tabs.setTabToolTip(tab_idx, tab_toolip)
+        self._tabs.setTabToolTip(tab_idx, tab_tooltip)
         self._tabs.setCurrentIndex(tab_idx)
         return tab_idx
 
@@ -81,21 +74,37 @@ class MultiPythonFileInterpreter(QWidget):
         self.current_editor().abort()
 
     def close_all(self):
-        """Close all tabs"""
+        """
+        Close all tabs
+        :return: True if all tabs are closed, False if cancelled
+        """
         for idx in reversed(range(self.editor_count)):
-            self.close_tab(idx)
+            if not self.close_tab(idx):
+                return False
+
+        return True
 
     def close_tab(self, idx):
-        """Close the tab at the given index."""
+        """
+        Close the tab at the given index.
+        :param idx: The tab index
+        :return: True if tab is to be closed, False if cancelled
+        """
         if idx >= self.editor_count:
-            return
-        editor = self.editor_at(idx)
-        if editor.confirm_close():
+            return True
+        # Make the current tab active so that it is clear what you
+        # are being prompted to save
+        self._tabs.setCurrentIndex(idx)
+        if self.current_editor().confirm_close():
             self._tabs.removeTab(idx)
+        else:
+            return False
 
         # we never want an empty widget
         if self.editor_count == 0:
             self.append_new_editor(content=self.default_content)
+
+        return True
 
     def create_tabwidget(self):
         """Create a new QTabWidget with a button to add new tabs"""

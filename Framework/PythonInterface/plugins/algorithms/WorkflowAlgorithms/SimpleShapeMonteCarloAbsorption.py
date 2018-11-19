@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress)
@@ -83,6 +89,10 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='Interpolation', defaultValue='Linear',
                              validator=StringListValidator(['Linear', 'CSpline']),
                              doc='Type of interpolation')
+
+        self.declareProperty(name='MaxScatterPtAttempts', defaultValue=5000,
+                             validator=IntBoundedValidator(0),
+                             doc='Maximum number of tries made to generate a scattering point')
 
         # -------------------------------------------------------------------------------------------
 
@@ -230,6 +240,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         monte_carlo_alg.setProperty("EventsPerPoint", self._events)
         monte_carlo_alg.setProperty("NumberOfWavelengthPoints", self._number_wavelengths)
         monte_carlo_alg.setProperty("Interpolation", self._interpolation)
+        monte_carlo_alg.setProperty("MaxScatterPtAttempts", self._max_scatter_attempts)
         monte_carlo_alg.execute()
 
         output_ws = monte_carlo_alg.getProperty("OutputWorkspace").value
@@ -265,6 +276,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self._number_wavelengths = self.getProperty('NumberOfWavelengthPoints').value
         self._events = self.getProperty('EventsPerPoint').value
         self._interpolation = self.getProperty('Interpolation').value
+        self._max_scatter_attempts = self.getProperty('MaxScatterPtAttempts').value
 
         # beam options
         self._beam_height = self.getProperty('BeamHeight').value

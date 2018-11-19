@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveNXTomo.h"
 
 #include "MantidAPI/CommonBinsValidator.h"
@@ -87,8 +93,8 @@ void SaveNXTomo::exec() {
 }
 
 /**
-* Run instead of exec when operating on groups
-*/
+ * Run instead of exec when operating on groups
+ */
 bool SaveNXTomo::processGroups() {
   try {
     std::string name = getPropertyValue("InputWorkspaces");

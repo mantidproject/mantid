@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -9,7 +15,6 @@
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-#include "tbb/tbb.h"
 #include "vtkStructuredGrid.h"
 #include "vtkUnsignedCharArray.h"
 #include "vtkUnstructuredGrid.h"
@@ -165,5 +170,5 @@ std::vector<int> MDHWInMemoryLoadingPresenter::getExtents() {
       static_cast<int>(m_cachedVisualHistoWs->getZDimension()->getNBins());
   return extents;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

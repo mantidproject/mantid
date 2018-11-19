@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADRKHTEST_H_
 #define LOADRKHTEST_H_
 
-#include "MantidDataHandling/LoadRKH.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
-#include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::ConfigServiceImpl;
 using namespace Mantid::Kernel;
@@ -306,8 +312,8 @@ private:
   std::string dataFile, tempFile, tempFile2, tempFile3;
 
   /** Create a tiny 2x2 workspace in a tempory file that should
-  *  be deleted
-  */
+   *  be deleted
+   */
   void writeTestFile() {
     std::ofstream file(tempFile.c_str());
 

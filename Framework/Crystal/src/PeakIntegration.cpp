@@ -1,19 +1,25 @@
-#include "MantidAPI/InstrumentValidator.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCrystal/PeakIntegration.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCrystal/PeakIntegration.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <cmath>
 #include <boost/math/special_functions/round.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace Crystal {
@@ -45,10 +51,11 @@ void PeakIntegration::init() {
   declareProperty("IkedaCarpenterTOF", false,
                   "Integrate TOF using IkedaCarpenter fit.\n"
                   "Default is false which is best for corrected data.");
-  declareProperty("MatchingRunNo", true, "Integrate only peaks where run "
-                                         "number of peak matches run number of "
-                                         "sample.\n"
-                                         "Default is true.");
+  declareProperty("MatchingRunNo", true,
+                  "Integrate only peaks where run "
+                  "number of peak matches run number of "
+                  "sample.\n"
+                  "Default is true.");
   declareProperty("NBadEdgePixels", 0, "Number of bad Edge Pixels");
 }
 
@@ -353,8 +360,8 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
   if (wiEntry != pixel_to_wi.end()) {
     size_t wi = wiEntry->second;
     // Set detectorIDs
-    outputW->getSpectrum(idet)
-        .addDetectorIDs(inputW->getSpectrum(wi).getDetectorIDs());
+    outputW->getSpectrum(idet).addDetectorIDs(
+        inputW->getSpectrum(wi).getDetectorIDs());
   }
 
   return TOFmax - 1;

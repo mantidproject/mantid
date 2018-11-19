@@ -1,6 +1,11 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DetectorDiagnostic.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -22,8 +27,8 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DetectorDiagnostic)
 
-using API::MatrixWorkspace_sptr;
 using API::IAlgorithm_sptr;
+using API::MatrixWorkspace_sptr;
 using Geometry::IDetector_const_sptr;
 using std::string;
 using namespace Mantid::DataObjects;
@@ -721,5 +726,5 @@ void DetectorDiagnostic::failProgress(RunTime aborted) {
   advanceProgress(-aborted);
   m_TotalTime -= aborted;
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

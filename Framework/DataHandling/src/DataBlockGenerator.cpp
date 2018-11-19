@@ -1,5 +1,11 @@
-#include "MantidDataHandling/DataBlock.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DataBlockGenerator.h"
+#include "MantidDataHandling/DataBlock.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -77,5 +83,5 @@ void DataBlockGenerator::next() { ++(*this); }
 bool DataBlockGenerator::isDone() { return !m_currentIntervalIndex; }
 
 int64_t DataBlockGenerator::getValue() { return m_currentSpectrum; }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

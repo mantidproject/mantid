@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
 
 namespace MantidQt {
@@ -40,6 +46,6 @@ bool areOnSameRow(QModelIndex const &a, QModelIndex const &b) {
   return a.parent() == b.parent() && a.row() == b.row() &&
          a.model() == b.model();
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

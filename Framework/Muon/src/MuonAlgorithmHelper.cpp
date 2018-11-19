@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -5,7 +11,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
 
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -14,7 +22,6 @@ namespace MuonAlgorithmHelper {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Types::Core::DateAndTime;
 
 /**
  * Return a first period MatrixWorkspace in a run workspace. If the run
@@ -270,6 +277,94 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
 }
 
 /**
+ * Find all the detector IDs contained inside a workspace (either matrix or
+ * group) and return as an ordered set.
+ */
+std::set<Mantid::detid_t>
+getAllDetectorIDsFromWorkspace(Mantid::API::Workspace_sptr ws) {
+
+  std::set<Mantid::detid_t> detectorIDs;
+  if (auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+    detectorIDs = getAllDetectorIDsFromMatrixWorkspace(workspace);
+  } else if (auto workspace = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    detectorIDs = getAllDetectorIDsFromGroupWorkspace(workspace);
+  }
+  return detectorIDs;
+}
+
+/**
+ * Find all the detector IDs contained inside a matrix workspace
+ */
+std::set<Mantid::detid_t>
+getAllDetectorIDsFromMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
+
+  std::set<Mantid::detid_t> detectorIDs;
+  std::set<Mantid::detid_t> spectrumIDs;
+  auto numSpectra = ws->getNumberHistograms();
+  for (size_t i = 0; i < numSpectra; i++) {
+    spectrumIDs = ws->getSpectrum(i).getDetectorIDs();
+    detectorIDs.insert(spectrumIDs.begin(), spectrumIDs.end());
+  }
+  return detectorIDs;
+}
+
+/**
+ * Find all the detector IDs contained inside a group workspace
+ */
+std::set<Mantid::detid_t>
+getAllDetectorIDsFromGroupWorkspace(Mantid::API::WorkspaceGroup_sptr ws) {
+
+  std::set<Mantid::detid_t> detectorIDs;
+  std::set<Mantid::detid_t> detectorIDsSingleWorkspace;
+
+  MatrixWorkspace_sptr matrixWS;
+
+  std::vector<Workspace_sptr> workspaces = ws->getAllItems();
+  for (size_t i = 0; i < workspaces.size(); i++) {
+    matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(workspaces[i]);
+    detectorIDsSingleWorkspace = getAllDetectorIDsFromMatrixWorkspace(matrixWS);
+    detectorIDs.insert(detectorIDsSingleWorkspace.begin(),
+                       detectorIDsSingleWorkspace.end());
+  }
+  return detectorIDs;
+}
+
+/**
+ * Find all the detector IDs contained inside a grouping object and return as a
+ * vector of ints
+ */
+std::vector<int> getAllDetectorIDsFromGroup(const Grouping &grouping) {
+  std::vector<int> groupDetectors;
+  for (auto group : grouping.groups) {
+    std::vector<int> groupDetectorIDs =
+        Mantid::Kernel::Strings::parseRange(group);
+    groupDetectors.insert(groupDetectors.end(), groupDetectorIDs.begin(),
+                          groupDetectorIDs.end());
+  }
+  return groupDetectors;
+}
+
+// Checks if all the detectors in the groups in a Grouping are in the workspace.
+// Workspace can be matrix or group type.
+bool checkGroupDetectorsInWorkspace(const Grouping &grouping,
+                                    Workspace_sptr ws) {
+  std::set<int> detectorIDs = getAllDetectorIDsFromWorkspace(ws);
+  std::vector<int> groupDetectorIDs = getAllDetectorIDsFromGroup(grouping);
+  return checkItemsInSet(groupDetectorIDs, detectorIDs);
+}
+
+// Checks that all of the entries of a vector are contained in a set, returns
+// true/false
+bool checkItemsInSet(const std::vector<int> &items, const std::set<int> &set) {
+  for (const auto item : items) {
+    if (set.find(item) == set.end()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
  * Parse a workspace name into dataset parameters
  * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
  * count:     1             2    3      4    (5)  5/6
@@ -411,6 +506,105 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
   }
 
   return true;
+}
+
+/// Check whether a group or pair name is valid
+bool checkValidGroupPairName(const std::string &name) {
+  if (name.empty()) {
+    return false;
+  }
+  if (!std::all_of(std::begin(name), std::end(name), isalnum)) {
+    return false;
+  }
+  if (name == "Group" || name == "Pair") {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Sums the specified periods of the input workspace group
+ * @param periodsToSum :: [input] List of period indexes (1-based) to be summed
+ * @returns Workspace containing the sum
+ */
+MatrixWorkspace_sptr sumPeriods(const WorkspaceGroup_sptr &inputWS,
+                                const std::vector<int> &periodsToSum) {
+  MatrixWorkspace_sptr outWS;
+  if (!periodsToSum.empty()) {
+    auto LHSWorkspace = inputWS->getItem(periodsToSum[0] - 1);
+    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
+    if (outWS != nullptr && periodsToSum.size() > 1) {
+      int numPeriods = static_cast<int>(periodsToSum.size());
+      for (int i = 1; i < numPeriods; i++) {
+        auto RHSWorkspace = inputWS->getItem(periodsToSum[i] - 1);
+        IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
+        alg->setChild(true);
+        alg->setRethrows(true);
+        alg->setProperty("LHSWorkspace", outWS);
+        alg->setProperty("RHSWorkspace", RHSWorkspace);
+        alg->setProperty("OutputWorkspace", "__NotUsed__");
+        alg->execute();
+        outWS = alg->getProperty("OutputWorkspace");
+      }
+    }
+  }
+  return outWS;
+}
+
+/**
+ * Subtracts one workspace from another: lhs - rhs.
+ * @param lhs :: [input] Workspace on LHS of subtraction
+ * @param rhs :: [input] Workspace on RHS of subtraction
+ * @returns Result of the subtraction
+ */
+MatrixWorkspace_sptr subtractWorkspaces(const MatrixWorkspace_sptr &lhs,
+                                        const MatrixWorkspace_sptr &rhs) {
+  MatrixWorkspace_sptr outWS;
+  if (lhs && rhs) {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Minus");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->setProperty("LHSWorkspace", lhs);
+    alg->setProperty("RHSWorkspace", rhs);
+    alg->setProperty("OutputWorkspace", "__NotUsed__");
+    alg->execute();
+    outWS = alg->getProperty("OutputWorkspace");
+  }
+  return outWS;
+}
+
+/**
+ * Extracts a single spectrum from the given workspace.
+ * @param inputWS :: [input] Workspace to extract spectrum from
+ * @param index :: [input] Index of spectrum to extract
+ * @returns Result of the extraction
+ */
+MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS,
+                                     const int index) {
+  MatrixWorkspace_sptr outWS;
+  if (inputWS) {
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", inputWS);
+    alg->setProperty("WorkspaceIndex", index);
+    alg->setProperty("OutputWorkspace", "__NotUsed__");
+    alg->execute();
+    outWS = alg->getProperty("OutputWorkspace");
+  }
+  return outWS;
+}
+
+void addSampleLog(MatrixWorkspace_sptr workspace, const std::string &logName,
+                  const std::string &logValue) {
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("AddSampleLog");
+  alg->setChild(true);
+  alg->setRethrows(true);
+  alg->setProperty("Workspace", workspace);
+  alg->setProperty("LogName", logName);
+  alg->setProperty("LogText", logValue);
+  alg->execute();
 }
 
 } // namespace MuonAlgorithmHelper

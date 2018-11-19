@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 #define MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 
@@ -38,7 +44,7 @@ public:
   int version() const override { return 1; }
   const std::string summary() const override { return ""; }
 };
-}
+} // namespace
 
 class ISISHistoDataListenerTest : public CxxTest::TestSuite {
 public:

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import sys
@@ -49,13 +55,24 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.thread.threadWrapperSetup = mock.Mock()
         self.thread.threadWrapperTearDown = mock.Mock()
 
-        self.presenter.createThread=mock.Mock(return_value=self.thread)
-        self.presenter.createPhaseThread=mock.Mock(return_value=self.thread)
+    def test_connects(self):
+        assert(self.view.cancelSignal.connect.call_count==1)
+        self.view.cancelSignal.connect.assert_called_with(self.presenter.cancel)
+
+        assert(self.view.maxEntButtonSignal.connect.call_count==1)
+        self.view.maxEntButtonSignal.connect.assert_called_with(self.presenter.handleMaxEntButton)
+
+        assert(self.view.phaseSignal.connect.call_count==1)
+        self.view.phaseSignal.connect.assert_called_with(self.presenter.handlePhase)
 
     def test_button(self):
+        self.presenter.createThread = lambda *args:self.thread
+
         self.presenter.handleMaxEntButton()
         assert(self.view.initMaxEntInput.call_count==1)
         assert(self.thread.start.call_count==1)
+
+        assert(self.thread.threadWrapperSetUp.call_count==1)
 
     def test_dataHasChanged(self):
         self.load.hasDataChanged = mock.MagicMock(return_value=True)

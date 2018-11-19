@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffGSASFittingPresenter.h"
 #include "EnggDiffGSASRefinementMethod.h"
 #include "MantidQtWidgets/LegacyQwt/QwtHelper.h"
@@ -138,8 +144,8 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
     m_view->userError("Invalid run identifier",
                       "Unexpectedly tried to display fit results for invalid "
                       "run, run number = " +
-                          std::to_string(runLabel.runNumber) + ", bank ID = " +
-                          std::to_string(runLabel.bank) +
+                          std::to_string(runLabel.runNumber) +
+                          ", bank ID = " + std::to_string(runLabel.bank) +
                           ". Please contact the development team");
     return;
   }
@@ -157,8 +163,8 @@ void EnggDiffGSASFittingPresenter::doRefinements(
 
 void EnggDiffGSASFittingPresenter::notifyRefinementsComplete(
     Mantid::API::IAlgorithm_sptr alg,
-    const std::vector<GSASIIRefineFitPeaksOutputProperties> &
-        refinementResultSets) {
+    const std::vector<GSASIIRefineFitPeaksOutputProperties>
+        &refinementResultSets) {
   if (!m_viewHasClosed) {
     const auto numRuns = refinementResultSets.size();
 
@@ -288,5 +294,5 @@ void EnggDiffGSASFittingPresenter::processStart() {
 
 void EnggDiffGSASFittingPresenter::processShutDown() { m_viewHasClosed = true; }
 
-} // MantidQt
-} // CustomInterfaces
+} // namespace CustomInterfaces
+} // namespace MantidQt

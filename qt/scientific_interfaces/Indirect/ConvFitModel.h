@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
 
@@ -46,26 +52,26 @@ private:
   IndirectFitOutput
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
-                  Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                   const FitDataIterator &fitDataBegin,
                   const FitDataIterator &fitDataEnd) const override;
   IndirectFitOutput
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
-                  Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                   IndirectFitData *fitData,
                   std::size_t spectrum) const override;
 
   void addOutput(IndirectFitOutput *fitOutput,
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                  const FitDataIterator &fitDataBegin,
                  const FitDataIterator &fitDataEnd) const override;
   void addOutput(IndirectFitOutput *fitOutput,
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                  IndirectFitData *fitData, std::size_t spectrum) const override;
   void addExtendedResolution(std::size_t index);
   void addSampleLogs();

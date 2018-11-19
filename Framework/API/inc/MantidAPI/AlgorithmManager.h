@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_ALGORITHMMANAGER_H_
 #define MANTID_API_ALGORITHMMANAGER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <Poco/NotificationCenter.h>
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/Algorithm.h"
+#include <Poco/NotificationCenter.h>
 
 #include <deque>
 #include <mutex>
@@ -32,27 +38,6 @@ private:
 //----------------------------------------------------------------------------
 /** The AlgorithmManagerImpl class is responsible for controlling algorithm
     instances. It incorporates the algorithm factory and initializes algorithms.
-
-    Copyright &copy; 2007-2013 ISIS Rutherford Appleton Laboratory, NScD Oak
-   Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_API_DLL AlgorithmManagerImpl {
 public:
@@ -112,6 +97,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmManagerImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_API_ALGORITHMMANAGER_H_ */

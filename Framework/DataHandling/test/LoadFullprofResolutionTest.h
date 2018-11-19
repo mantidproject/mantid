@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADFULLPROFRESOLUTIONTEST_H_
 #define MANTID_DATAHANDLING_LOADFULLPROFRESOLUTIONTEST_H_
 
@@ -38,7 +44,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test import from a 1-bank irf file
-    */
+   */
   void test_1BankCase() {
     // 1. Generate file
     string filename("Test1Bank.irf");
@@ -83,7 +89,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test import from a 1-bank irf file
-    */
+   */
   void test_2BankCase() {
     // 1. Generate file
     string filename("Test2Bank.irf");
@@ -226,7 +232,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test import all banks from a 3-bank irf file
-    */
+   */
   void test_Load3BankCase() {
     // Generate file
     string filename("Test3Bank.irf");
@@ -270,8 +276,8 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test import of ALFBE, GAMMA and SIGMA parameters
-  *   and check they are given their expected names.
-  */
+   *   and check they are given their expected names.
+   */
   void test_ags_parameters() {
     // 1. Generate file
     string filename("TestAGS.irf");
@@ -648,9 +654,9 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test that algorithm does not run,
-  *   if neither the OutputTableWorkspace nor Workspace
-  **  property is set.
-  */
+   *   if neither the OutputTableWorkspace nor Workspace
+   **  property is set.
+   */
   void test_no_output() {
     // Generate file
     string filename("TestNoOutput.irf");
@@ -714,7 +720,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test Exception
-    */
+   */
   void test_WrongInputBankCase() {
     // 1. Generate file
     string filename("Test2Bank.irf");
@@ -741,7 +747,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace to a map
-    */
+   */
   void parseTableWorkspace(TableWorkspace_sptr tablews,
                            map<string, double> &parammap) {
     parammap.clear();
@@ -760,7 +766,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace's 2nd bank to a map
-    */
+   */
   void parseTableWorkspace2(TableWorkspace_sptr tablews,
                             map<string, double> &parammap) {
     parammap.clear();
@@ -779,7 +785,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a GEM workspace group with specified number of workspaces.
-    */
+   */
   void load_GEM(size_t numberOfWorkspaces, std::string workspaceName) {
     LoadInstrument loaderGEM;
 
@@ -812,7 +818,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a 1 bank .irf file
-    */
+   */
   void generate1BankIrfFile(string filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
@@ -873,7 +879,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a 2 bank .irf file
-    */
+   */
   void generate2BankIrfFile(string filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
@@ -971,7 +977,7 @@ public:
   }
 
   /** Generate a 3 bank .irf file
-    */
+   */
   void generate3BankIrfFile(string filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
@@ -1110,7 +1116,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a 1 bank .irf file for BackToBackExponential fitting function
-  */
+   */
   void generate1BankIrfBBXFile(string filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
@@ -1162,7 +1168,7 @@ public:
   }
 
   /* Return the number of rows the table must have
-  */
+   */
   int getExpectedNumberOfRows() {
     return 29; // Change this value if you add or remove any rows from the
                // OutputTableWorkspace

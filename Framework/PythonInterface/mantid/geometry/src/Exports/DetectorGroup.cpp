@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -33,7 +39,7 @@ bool isMonitorDeprecated(const DetectorGroup &self) {
   }
   return true;
 }
-}
+} // namespace
 
 void export_DetectorGroup() {
   class_<DetectorGroup, bases<IDetector>, boost::noncopyable>("DetectorGroup",

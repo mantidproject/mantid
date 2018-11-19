@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
@@ -15,28 +21,28 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/regex.hpp>
-#include <boost/shared_array.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <Poco/Path.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Node.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
+#include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
 
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
@@ -45,8 +51,8 @@ using Poco::XML::Element;
 namespace Mantid {
 namespace DataHandling {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 using Types::Core::DateAndTime;
 using namespace Kernel;
 using namespace API;
@@ -761,5 +767,5 @@ void LoadSpice2D::setSansSpiceXmlFormatVersion(
   g_log.debug() << "Sans_spice_xml_format_version == "
                 << m_sansSpiceXmlFormatVersion << "\n";
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

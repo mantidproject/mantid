@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
@@ -12,20 +18,20 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidDataObjects/FakeMD.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/FakeMD.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -39,11 +45,11 @@ namespace Mantid {
 namespace DataObjects {
 
 using namespace Mantid::API;
-using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::Geometry::InstrumentDefinitionParser;
-using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
+using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Types::Core::DateAndTime;
 namespace Strings = Mantid::Kernel::Strings;
 
@@ -367,6 +373,6 @@ void checkAndDeleteFile(std::string filename) {
   }
 }
 
-} // namespace
-}
-}
+} // namespace MDEventsTestHelper
+} // namespace DataObjects
+} // namespace Mantid

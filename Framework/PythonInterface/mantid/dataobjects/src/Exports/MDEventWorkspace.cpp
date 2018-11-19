@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDLeanEvent.h"
@@ -8,8 +14,8 @@
 #include <boost/python/class.hpp>
 
 using Mantid::API::IMDEventWorkspace;
-using Mantid::DataObjects::MDEventWorkspace;
 using Mantid::DataObjects::MDEvent;
+using Mantid::DataObjects::MDEventWorkspace;
 using Mantid::DataObjects::MDLeanEvent;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
@@ -48,7 +54,7 @@ void MDEventWorkspaceExportImpl(const char *className) {
   // register pointers
   RegisterWorkspacePtrToPython<ExportType>();
 }
-}
+} // namespace
 
 void export_MDEventWorkspaces() {
 // The maximum number of dimensions is defined in the MDWorkspaceFactory

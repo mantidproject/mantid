@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -28,11 +34,11 @@
 #include "boost/make_shared.hpp"
 
 using Poco::XML::DOMParser;
+using Poco::XML::DOMWriter;
 using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
-using Poco::XML::DOMWriter;
 
 namespace Mantid {
 namespace Geometry {
@@ -45,7 +51,7 @@ const V3D DEFAULT_AXIS(0, 0, 1);
 
 /// static logger
 Logger g_log("ShapeFactory");
-}
+} // namespace
 
 /** Creates a geometric object directly from a XML shape string
  *
@@ -962,13 +968,13 @@ std::string ShapeFactory::parseHexahedronFromStruct(
 }
 
 /**
-* Get all corners of a hexahedron from an XML element.
-*
-* @param pElem :: XML 'hexahedron' element from instrument definition file.
-* @return All corners of the hexahedron.
-*
-* @throw std::invalid_argument if XML string is invalid.
-*/
+ * Get all corners of a hexahedron from an XML element.
+ *
+ * @param pElem :: XML 'hexahedron' element from instrument definition file.
+ * @return All corners of the hexahedron.
+ *
+ * @throw std::invalid_argument if XML string is invalid.
+ */
 Hexahedron ShapeFactory::parseHexahedron(Poco::XML::Element *pElem) {
   Element *pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
   Element *pElem_lft = getShapeElement(pElem, "left-front-top-point");

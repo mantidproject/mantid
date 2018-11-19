@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_
 
@@ -9,6 +15,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -36,6 +43,16 @@ constexpr double TOF_BIN_WIDTH{70.}; // microseconds
 
 class ReflectometryMomentumTransferTest : public CxxTest::TestSuite {
 public:
+  struct LogValues {
+    const double om_fwhm;
+    const double s2_fwhm;
+    const double s3_fwhm;
+    const double da;
+    LogValues(const double om_fwhm_, const double s2_fwhm_,
+              const double s3_fwhm_, const double da_)
+        : om_fwhm(om_fwhm_), s2_fwhm(s2_fwhm_), s3_fwhm(s3_fwhm_), da(da_) {}
+  };
+
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ReflectometryMomentumTransferTest *createSuite() {
@@ -43,6 +60,34 @@ public:
   }
   static void destroySuite(ReflectometryMomentumTransferTest *suite) {
     delete suite;
+  }
+
+  template <typename LogValues>
+  static API::MatrixWorkspace_sptr make_ws(const double braggAngle,
+                                           const int nBins,
+                                           const LogValues &logValues) {
+    using namespace WorkspaceCreationHelper;
+    constexpr double startX{1000.};
+    const Kernel::V3D sourcePos{0., 0., -L1};
+    const Kernel::V3D &monitorPos = sourcePos;
+    const Kernel::V3D samplePos{
+        0.,
+        0.,
+        0.,
+    };
+    const auto detZ = DET_DIST * std::cos(2 * braggAngle);
+    const auto detY = DET_DIST * std::sin(2 * braggAngle);
+    const Kernel::V3D detectorPos{0., detY, detZ};
+    const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
+    const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
+    auto ws = create2DWorkspaceWithReflectometryInstrument(
+        startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
+        monitorPos, samplePos, detectorPos, nBins, TOF_BIN_WIDTH);
+    ws = extractNonMonitorSpectrum(ws);
+    addSlitSampleLogs(*ws);
+    addBeamStatisticsSampleLogs(*ws, logValues);
+    ws = convertToWavelength(ws);
+    return ws;
   }
 
   ReflectometryMomentumTransferTest() { API::FrameworkManager::Instance(); }
@@ -54,11 +99,14 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_XYEFromInputUnchangedAndMonitorDXSetToZero() {
-    auto inputWS = make_ws(0.5 / 180. * M_PI);
-    API::MatrixWorkspace_sptr directWS = inputWS->clone();
-    auto alg = make_alg(inputWS, directWS, "SumInLambda", false);
-    TS_ASSERT_THROWS_NOTHING(alg->execute();)
+  void test_XYEFromInputUnchanged() {
+    using Geometry::deg2rad;
+    const LogValues logValues(0.1, 0.1, 0.1, 0.1);
+    constexpr int nBins{10};
+    auto inputWS = make_ws(0.5 * deg2rad, nBins, logValues);
+    const std::vector<int> foreground(2, 0);
+    auto alg = make_alg(inputWS, "SumInLambda", foreground);
+    TS_ASSERT_THROWS_NOTHING(alg->execute())
     TS_ASSERT(alg->isExecuted())
 
     API::MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
@@ -67,139 +115,95 @@ public:
     TS_ASSERT_EQUALS(axis->unit()->unitID(), "MomentumTransfer")
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
                      inputWS->getNumberHistograms())
-    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
-      const auto &inXs = inputWS->x(i);
-      const auto &outXs = outputWS->x(i);
-      TS_ASSERT_EQUALS(outXs.size(), inXs.size())
-      TS_ASSERT(outputWS->hasDx(i))
-      if (i == 1) {
-        // Monitor should have Dx = 0
-        TS_ASSERT(outputWS->spectrumInfo().isMonitor(i))
-        const auto &outDx = outputWS->dx(i);
-        for (size_t j = 0; j < outDx.size(); ++j) {
-          TS_ASSERT_EQUALS(outDx[j], 0.)
-        }
-      }
-      const auto &inYs = inputWS->y(i);
-      const auto &outYs = outputWS->y(i);
-      TS_ASSERT_EQUALS(outYs.rawData(), inYs.rawData())
-      const auto &inEs = inputWS->e(i);
-      const auto &outEs = outputWS->e(i);
-      TS_ASSERT_EQUALS(outEs.rawData(), inEs.rawData())
-    }
+    const auto &inXs = inputWS->x(0);
+    const auto &outXs = outputWS->x(0);
+    TS_ASSERT_EQUALS(outXs.size(), inXs.size())
+    TS_ASSERT(outputWS->hasDx(0))
+    const auto &inYs = inputWS->y(0);
+    const auto &outYs = outputWS->y(0);
+    TS_ASSERT_EQUALS(outYs.rawData(), inYs.rawData())
+    const auto &inEs = inputWS->e(0);
+    const auto &outEs = outputWS->e(0);
+    TS_ASSERT_EQUALS(outEs.rawData(), inEs.rawData())
   }
 
-  void test_nonpolarizedSumInLambdaResultsAreValid() {
-    const bool polarized(false);
-    const std::string sumType{"SumInLambda"};
-    sameReflectedAndDirectSlitSizes(polarized, sumType);
-  }
-
-  void test_polarizedSumInLambdaResultsAreValid() {
-    const bool polarized(true);
-    const std::string sumType{"SumInLambda"};
-    sameReflectedAndDirectSlitSizes(polarized, sumType);
-  }
-
-  void test_nonpolarizedSumInQResultsAreValid() {
-    const bool polarized(false);
+  void test_sumInQResultsAreValid() {
+    using Geometry::deg2rad;
     const std::string sumType{"SumInQ"};
-    sameReflectedAndDirectSlitSizes(polarized, sumType);
+    constexpr double s3_fwhm{0.1};
+    constexpr double da{0.1};
+    constexpr double angleBragg{1.5 * deg2rad};
+    const std::vector<int> foreground(2, 0);
+    sameReflectedAndDirectSlitSizes(sumType, angleBragg, foreground,
+                                    sumInQBeamDivergenceDominated(s3_fwhm, da));
+    sameReflectedAndDirectSlitSizes(
+        sumType, angleBragg, foreground,
+        sumInQBentSampleDominateSmallSecondSlitAngularSpread(s3_fwhm, da));
+    sameReflectedAndDirectSlitSizes(
+        sumType, angleBragg, foreground,
+        sumInQBentSampleDominatedLargeSecondSlitAngularSpread(s3_fwhm, da));
+    sameReflectedAndDirectSlitSizes(
+        sumType, angleBragg, foreground,
+        sumInQDetectorResolutionDominated(s3_fwhm, da));
   }
 
-  void test_polarizedSumInQResultsAreValid() {
-    const bool polarized(true);
-    const std::string sumType{"SumInQ"};
-    sameReflectedAndDirectSlitSizes(polarized, sumType);
-  }
-
-  void test_differentReflectedAndDirectSlitSizes() {
-    using namespace boost::math;
-    const bool polarized{false};
+  void test_sumInLambdaAngularResolutionDominatesResultsAreValid() {
+    using Geometry::deg2rad;
     const std::string sumType{"SumInLambda"};
-    auto inputWS = make_ws(0.5 / 180. * M_PI);
-    inputWS->mutableY(0) = 1. / static_cast<double>(inputWS->y(0).size());
-    API::MatrixWorkspace_sptr directWS = inputWS->clone();
-    auto &run = directWS->mutableRun();
-    constexpr bool overwrite{true};
-    const std::string meters{"m"};
-    run.addProperty("slit1.size", 1.5 * SLIT1_SIZE, meters, overwrite);
-    run.addProperty("slit2.size", 1.5 * SLIT2_SIZE, meters, overwrite);
-    auto alg = make_alg(inputWS, directWS, sumType, polarized);
-    TS_ASSERT_THROWS_NOTHING(alg->execute();)
-    TS_ASSERT(alg->isExecuted())
-    API::MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
-    alg = API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
-    alg->initialize();
-    alg->setChild(true);
-    alg->setRethrows(true);
-    alg->setProperty("InputWorkspace", inputWS);
-    alg->setProperty("OutputWorkspace", "unused_for_child");
-    alg->setProperty("Target", "MomentumTransfer");
-    alg->execute();
-    API::MatrixWorkspace_sptr qWS = alg->getProperty("OutputWorkspace");
-    const auto axis = outputWS->getAxis(0);
-    TS_ASSERT_EQUALS(axis->unit()->unitID(), "MomentumTransfer")
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
-                     inputWS->getNumberHistograms())
-    const auto &spectrumInfo = outputWS->spectrumInfo();
-    const auto &dirSpectrumInfo = directWS->spectrumInfo();
-    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
-      const auto &inQs = qWS->points(i);
-      const auto &outPoints = outputWS->points(i);
-      TS_ASSERT_EQUALS(outPoints.size(), inQs.size())
-      TS_ASSERT(outputWS->hasDx(i))
-      if (i != 1) {
-        TS_ASSERT(!outputWS->spectrumInfo().isMonitor(i))
-        const auto &outDx = outputWS->dx(i);
-        TS_ASSERT_EQUALS(outDx.size(), inQs.size())
-        const auto &lambdas = inputWS->points(i);
-        const auto l2 = spectrumInfo.l2(i);
-        const auto dirL2 = dirSpectrumInfo.l2(i);
-        const auto angle_bragg = spectrumInfo.twoTheta(i) / 2.;
-        for (size_t j = 0; j < lambdas.size(); ++j) {
-          const auto lambda = lambdas[j] * 1e-10;
-          const size_t qIndex = inQs.size() - j - 1;
-          const auto q = inQs[qIndex];
-          const auto resE = std::sqrt(pow<2>(err_res(lambda, l2)) +
-                                      pow<2>(width_res(lambda, l2)));
-          const auto detFwhm = det_fwhm(*inputWS, 0, 0);
-          const auto dirDetFwhm = det_fwhm(*directWS, 0, 0);
-          const auto omFwhm =
-              om_fwhm(l2, dirL2, SLIT1_SIZE, SLIT2_SIZE, detFwhm, dirDetFwhm);
-          const auto rayE =
-              err_ray(l2, angle_bragg, sumType, polarized, omFwhm);
-          const auto fractionalResolution =
-              std::sqrt(pow<2>(resE) + pow<2>(rayE));
-          TS_ASSERT_EQUALS(outPoints[qIndex], q)
-          TS_ASSERT_DELTA(outDx[qIndex], q * fractionalResolution, 1e-7)
-        }
-      } else {
-        // Monitor should have Dx = 0
-        TS_ASSERT(outputWS->spectrumInfo().isMonitor(i))
-        const auto &outDx = outputWS->dx(i);
-        for (size_t j = 0; j < outDx.size(); ++j) {
-          TS_ASSERT_EQUALS(outDx[j], 0.)
-        }
-      }
-    }
+    constexpr double om_fwhm{0.001};
+    constexpr double s2_fwhm{0.1};
+    constexpr double s3_fwhm{0.1};
+    constexpr double da{0.001};
+    constexpr double angleBragg{1.23 * deg2rad};
+    const LogValues angularResolutionDominatedLogValues(om_fwhm, s2_fwhm,
+                                                        s3_fwhm, da);
+    std::vector<int> foreground(2);
+    foreground.front() = 0;
+    foreground.back() = 40;
+    TS_ASSERT(
+        err_ray_SumInLambda(angleBragg, angularResolutionDominatedLogValues) <
+        err_ray_temp(foreground, DET_DIST, angleBragg))
+    sameReflectedAndDirectSlitSizes(sumType, angleBragg, foreground,
+                                    angularResolutionDominatedLogValues);
+  }
+
+  void test_sumInLambdaForegroundWidthDominatesResultsAreValid() {
+    using Geometry::deg2rad;
+    const std::string sumType{"SumInLambda"};
+    constexpr double om_fwhm{0.1};
+    constexpr double s2_fwhm{0.1};
+    constexpr double s3_fwhm{0.1};
+    constexpr double da{0.1};
+    constexpr double angleBragg{1.23 * deg2rad};
+    const LogValues foregroundWidthDominatedLogValues(om_fwhm, s2_fwhm, s3_fwhm,
+                                                      da);
+    std::vector<int> foreground(2);
+    foreground.front() = 0;
+    foreground.back() = 10;
+    TS_ASSERT(
+        err_ray_SumInLambda(angleBragg, foregroundWidthDominatedLogValues) >
+        err_ray_temp(foreground, DET_DIST, angleBragg))
+    sameReflectedAndDirectSlitSizes(sumType, angleBragg, foreground,
+                                    foregroundWidthDominatedLogValues);
+  }
+
+  void test_failsGracefullyWhenSlitsNotFound() {
+    constexpr int firstSlit{1};
+    wrongSlitNames(firstSlit);
+    constexpr int secondSlit{2};
+    wrongSlitNames(secondSlit);
   }
 
 private:
-  void sameReflectedAndDirectSlitSizes(const bool polarized,
-                                       const std::string &sumType) {
+  static void sameReflectedAndDirectSlitSizes(
+      const std::string &sumType, const double angleBragg,
+      const std::vector<int> &foreground, const LogValues &logValues) {
     using namespace boost::math;
-    auto inputWS = make_ws(0.5 / 180. * M_PI);
+    constexpr int nBins{10};
+    auto inputWS = make_ws(angleBragg, nBins, logValues);
     inputWS->mutableY(0) = 1. / static_cast<double>(inputWS->y(0).size());
-    API::MatrixWorkspace_sptr directWS = inputWS->clone();
-    auto &run = directWS->mutableRun();
-    constexpr bool overwrite{true};
-    const std::string meters{"m"};
-    run.addProperty("slit1.size", SLIT1_SIZE, meters, overwrite);
-    run.addProperty("slit2.size", SLIT2_SIZE, meters, overwrite);
-    auto alg = make_alg(inputWS, directWS, sumType, polarized);
-    TS_ASSERT_THROWS_NOTHING(alg->execute();)
+    auto alg = make_alg(inputWS, sumType, foreground);
+    TS_ASSERT_THROWS_NOTHING(alg->execute())
     TS_ASSERT(alg->isExecuted())
     API::MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
@@ -217,55 +221,37 @@ private:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
                      inputWS->getNumberHistograms())
     const auto &spectrumInfo = outputWS->spectrumInfo();
-    const auto &dirSpectrumInfo = directWS->spectrumInfo();
-    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
-      const auto &inQs = qWS->points(i);
-      const auto &outPoints = outputWS->points(i);
-      TS_ASSERT_EQUALS(outPoints.size(), inQs.size())
-      TS_ASSERT(outputWS->hasDx(i))
-      if (i != 1) {
-        TS_ASSERT(!outputWS->spectrumInfo().isMonitor(i))
-        const auto &outDx = outputWS->dx(i);
-        TS_ASSERT_EQUALS(outDx.size(), inQs.size())
-        const auto &lambdas = inputWS->points(i);
-        const auto l2 = spectrumInfo.l2(i);
-        const auto dirL2 = dirSpectrumInfo.l2(i);
-        const auto angle_bragg = spectrumInfo.twoTheta(i) / 2.;
-        for (size_t j = 0; j < lambdas.size(); ++j) {
-          const auto lambda = lambdas[j] * 1e-10;
-          const size_t qIndex = inQs.size() - j - 1;
-          const auto q = inQs[qIndex];
-          const auto resE = std::sqrt(pow<2>(err_res(lambda, l2)) +
-                                      pow<2>(width_res(lambda, l2)));
-          const auto detFwhm = det_fwhm(*inputWS, 0, 0);
-          const auto dirDetFwhm = det_fwhm(*directWS, 0, 0);
-          const auto omFwhm =
-              om_fwhm(l2, dirL2, SLIT1_SIZE, SLIT2_SIZE, detFwhm, dirDetFwhm);
-          const auto rayE =
-              err_ray(l2, angle_bragg, sumType, polarized, omFwhm);
-          const auto fractionalResolution =
-              std::sqrt(pow<2>(resE) + pow<2>(rayE));
-          TS_ASSERT_EQUALS(outPoints[qIndex], q)
-          TS_ASSERT_DELTA(outDx[qIndex], q * fractionalResolution, 1e-7)
-        }
-      } else {
-        // Monitor should have Dx = 0
-        TS_ASSERT(outputWS->spectrumInfo().isMonitor(i))
-        const auto &outDx = outputWS->dx(i);
-        for (size_t j = 0; j < outDx.size(); ++j) {
-          TS_ASSERT_EQUALS(outDx[j], 0.)
-        }
-      }
+    const auto &inQs = qWS->points(0);
+    const auto &outPoints = outputWS->points(0);
+    TS_ASSERT_EQUALS(outPoints.size(), inQs.size())
+    TS_ASSERT(outputWS->hasDx(0))
+    TS_ASSERT(!outputWS->spectrumInfo().isMonitor(0))
+    const auto &outDx = outputWS->dx(0);
+    TS_ASSERT_EQUALS(outDx.size(), inQs.size())
+    const auto &lambdas = inputWS->points(0);
+    const auto l2 = spectrumInfo.l2(0);
+    const auto angle_bragg = spectrumInfo.twoTheta(0) / 2.;
+    const auto rayE = err_ray(foreground, l2, angle_bragg, sumType, logValues);
+    for (size_t j = 0; j < lambdas.size(); ++j) {
+      const auto lambda = lambdas[j] * 1e-10;
+      const size_t qIndex = inQs.size() - j - 1;
+      const auto q = inQs[qIndex];
+      const auto resE = std::sqrt(pow<2>(err_res(lambda, l2)) +
+                                  pow<2>(width_res(lambda, l2)));
+      const auto fractionalResolution = std::sqrt(pow<2>(resE) + pow<2>(rayE));
+      TS_ASSERT_EQUALS(outPoints[qIndex], q)
+      TS_ASSERT_DELTA(outDx[qIndex], q * fractionalResolution, 1e-7)
     }
   }
 
-  API::Algorithm_sptr make_alg(API::MatrixWorkspace_sptr inputWS,
-                               API::MatrixWorkspace_sptr directWS,
-                               const std::string &sumType,
-                               const bool polarized) {
-    std::vector<int> foreground(2);
-    foreground.front() = 0;
-    foreground.back() = 0;
+  void wrongSlitNames(const int nonexistentSlit) {
+    using Geometry::deg2rad;
+    const std::string slit1 = nonexistentSlit == 1 ? "non-existent" : "slit1";
+    const std::string slit2 = nonexistentSlit == 2 ? "non-existent" : "slit2";
+    const LogValues logValues(0.1, 0.1, 0.1, 0.1);
+    constexpr int nBins{10};
+    auto inputWS = make_ws(0.5 * deg2rad, nBins, logValues);
+    const std::vector<int> foreground(2, 0);
     auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
     alg->setChild(true);
     alg->setRethrows(true);
@@ -275,13 +261,8 @@ private:
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("ReflectedBeamWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("ReflectedForeground", foreground))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("DirectBeamWorkspace", directWS))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("DirectForeground", foreground))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SummationType", sumType))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Polarized", polarized))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SummationType", "SumInLambda"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("PixelSize", PIXEL_SIZE))
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("DetectorResolution", DET_RESOLUTION))
@@ -291,44 +272,77 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("ChopperRadius", CHOPPER_RADIUS))
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("ChopperpairDistance", CHOPPER_GAP))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Slit1Name", "slit1"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("FirstSlitName", "non-existent"))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("Slit1SizeSampleLog", "slit1.size"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Slit2Name", "slit2"))
+        alg->setProperty("FirstSlitSizeSampleLog", "slit1.size"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitName", slit1))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitSizeSampleLog", slit2))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH))
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e,
+                            e.what(),
+                            std::string("Some invalid Properties found"))
+    TS_ASSERT(!alg->isExecuted())
+  }
+
+  static API::Algorithm_sptr make_alg(API::MatrixWorkspace_sptr inputWS,
+                                      const std::string &sumType,
+                                      const std::vector<int> &foreground) {
+    auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
+    alg->setChild(true);
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg->initialize())
+    TS_ASSERT(alg->isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("Slit2SizeSampleLog", "slit2.size"))
+        alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("ReflectedForeground", foreground))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SummationType", sumType))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("PixelSize", PIXEL_SIZE))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("DetectorResolution", DET_RESOLUTION))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ChopperSpeed", CHOPPER_SPEED))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("ChopperOpening", CHOPPER_OPENING_ANGLE))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ChopperRadius", CHOPPER_RADIUS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("ChopperpairDistance", CHOPPER_GAP))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("FirstSlitName", "slit1"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("FirstSlitSizeSampleLog", "slit1.size"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitName", "slit2"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("SecondSlitSizeSampleLog", "slit2.size"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH))
     return alg;
   }
 
-  API::MatrixWorkspace_sptr make_ws(const double braggAngle) {
-    using namespace WorkspaceCreationHelper;
-    constexpr double startX{1000.};
-    const Kernel::V3D sourcePos{0., 0., -L1};
-    const Kernel::V3D &monitorPos = sourcePos;
-    const Kernel::V3D samplePos{
-        0., 0., 0.,
-    };
-    const auto detZ = DET_DIST * std::cos(2 * braggAngle);
-    const auto detY = DET_DIST * std::sin(2 * braggAngle);
-    const Kernel::V3D detectorPos{0., detY, detZ};
-    const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
-    const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
-    constexpr int nBins{100};
-    auto ws = create2DWorkspaceWithReflectometryInstrument(
-        startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
-        monitorPos, samplePos, detectorPos, nBins, TOF_BIN_WIDTH);
-    // Add slit sizes to sample logs, too.
-    auto &run = ws->mutableRun();
+  static void addBeamStatisticsSampleLogs(API::MatrixWorkspace &ws,
+                                          const LogValues &values) {
+    auto &run = ws.mutableRun();
+    constexpr bool overwrite{true};
+    run.addProperty("beam_stats.incident_angular_spread", values.da, overwrite);
+    run.addProperty("beam_stats.first_slit_angular_spread", values.s2_fwhm,
+                    overwrite);
+    run.addProperty("beam_stats.second_slit_angular_spread", values.s3_fwhm,
+                    overwrite);
+    run.addProperty("beam_stats.sample_waviness", values.om_fwhm, overwrite);
+  }
+
+  static void addSlitSampleLogs(API::MatrixWorkspace &ws) {
+    auto &run = ws.mutableRun();
     constexpr bool overwrite{true};
     const std::string meters{"m"};
     run.addProperty("slit1.size", SLIT1_SIZE, meters, overwrite);
     run.addProperty("slit2.size", SLIT2_SIZE, meters, overwrite);
+  }
+
+  static API::MatrixWorkspace_sptr
+  convertToWavelength(API::MatrixWorkspace_sptr &ws) {
     auto alg =
         API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
     alg->initialize();
     alg->setChild(true);
-    alg->setRethrows(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", "_unused_for_child");
     alg->setProperty("Target", "Wavelength");
@@ -337,85 +351,101 @@ private:
     return alg->getProperty("OutputWorkspace");
   }
 
-  double det_fwhm(const API::MatrixWorkspace &ws, const size_t fgd_first,
-                  const size_t fgd_last) {
-    using namespace boost::math;
-    std::vector<double> angd;
-    const auto &spectrumInfo = ws.spectrumInfo();
-    for (size_t i = fgd_first; i <= fgd_last; ++i) {
-      if (spectrumInfo.isMonitor(i)) {
-        continue;
-      }
-      const auto &ys = ws.y(i);
-      const auto sum = std::accumulate(ys.cbegin(), ys.cend(), 0.0);
-      angd.emplace_back(sum);
-    }
-    const auto temp = [&angd]() {
-      double sum{0.0};
-      for (size_t i = 0; i < angd.size(); ++i) {
-        sum += static_cast<double>(i) * angd[i];
-      }
-      return sum;
-    }();
-    const auto total_angd = std::accumulate(angd.cbegin(), angd.cend(), 0.0);
-    const auto pref = temp / total_angd + static_cast<double>(fgd_first);
-    const auto angd_cen = pref - static_cast<double>(fgd_first);
-    const auto tt = [&angd, &angd_cen]() {
-      double sum{0.0};
-      for (size_t i = 0; i < angd.size(); ++i) {
-        sum += angd[i] * pow<2>(angd_cen - static_cast<double>(i));
-      }
-      return sum;
-    }();
-    return 2. * std::sqrt(2. * std::log(2.)) * PIXEL_SIZE *
-           std::sqrt(tt / total_angd);
+  static API::MatrixWorkspace_sptr
+  extractNonMonitorSpectrum(API::MatrixWorkspace_sptr &ws) {
+    auto alg = API::AlgorithmManager::Instance().createUnmanaged(
+        "ExtractSingleSpectrum");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", "_unused_for_child");
+    alg->setProperty("WorkspaceIndex", 0);
+    alg->execute();
+    return alg->getProperty("OutputWorkspace");
   }
 
-  double err_ray(const double l2, const double angle_bragg,
-                 const std::string &sumType, const bool polarized,
-                 const double om_fwhm) {
+  static const LogValues
+  sumInQBentSampleDominatedLargeSecondSlitAngularSpread(const double s3_fwhm,
+                                                        const double da) {
+    constexpr double om_fwhm{0.1};
+    constexpr double s2_fwhm{2.1 * om_fwhm};
+    return LogValues(om_fwhm, s2_fwhm, s3_fwhm, da);
+  }
+
+  static const LogValues
+  sumInQBentSampleDominateSmallSecondSlitAngularSpread(const double s3_fwhm,
+                                                       const double da) {
+    constexpr double om_fwhm{0.1};
+    constexpr double s2_fwhm{1.9 * om_fwhm};
+    return LogValues(om_fwhm, s2_fwhm, s3_fwhm, da);
+  }
+
+  static const LogValues sumInQBeamDivergenceDominated(const double s3_fwhm,
+                                                       const double da) {
+    constexpr double om_fwhm{-0.1};
+    constexpr double s2_fwhm{1.1 * DET_RESOLUTION / DET_DIST};
+    return LogValues(om_fwhm, s2_fwhm, s3_fwhm, da);
+  }
+
+  static const LogValues sumInQDetectorResolutionDominated(const double s3_fwhm,
+                                                           const double da) {
+    constexpr double om_fwhm{-0.1};
+    constexpr double s2_fwhm{0.9 * DET_RESOLUTION / DET_DIST};
+    return LogValues(om_fwhm, s2_fwhm, s3_fwhm, da);
+  }
+
+  static double err_ray_temp(const std::vector<int> &foreground,
+                             const double l2, const double angle_bragg) {
     using namespace boost::math;
-    const auto interslit = SLIT1_DIST - SLIT2_DIST;
-    const auto da = 0.68 * std::sqrt((pow<2>(SLIT1_SIZE) + pow<2>(SLIT2_SIZE)) /
-                                     pow<2>(interslit));
-    const auto s2_fwhm = (0.68 * SLIT1_SIZE) / interslit;
-    const auto s3_fwhm = (0.68 * SLIT2_SIZE) / (SLIT2_DIST + l2);
-    double err_ray1;
+    const auto width = foreground.back() - foreground.front() + 1;
+    return 0.68 *
+           std::sqrt((pow<2>(width * PIXEL_SIZE) + pow<2>(SLIT2_SIZE)) /
+                     pow<2>(l2)) /
+           angle_bragg;
+  }
+
+  static double err_ray_SumInLambda(const double angle_bragg,
+                                    const LogValues &values) {
+    using namespace boost::math;
+    return std::sqrt(pow<2>(values.da) + pow<2>(values.om_fwhm)) / angle_bragg;
+  }
+
+  static double err_ray(const std::vector<int> &foreground, const double l2,
+                        const double angle_bragg, const std::string &sumType,
+                        const LogValues &values) {
+    using namespace boost::math;
+    double err;
     if (sumType == "SumInQ") {
-      if (om_fwhm > 0) {
-        if (s2_fwhm >= 2 * om_fwhm) {
-          err_ray1 = std::sqrt(pow<2>(DET_RESOLUTION / l2) + pow<2>(s3_fwhm) +
-                               pow<2>(om_fwhm)) /
-                     angle_bragg;
+      if (values.om_fwhm > 0) {
+        if (values.s2_fwhm >= 2 * values.om_fwhm) {
+          err = std::sqrt(pow<2>(DET_RESOLUTION / (SLIT2_DIST + l2)) +
+                          pow<2>(values.s3_fwhm) + pow<2>(values.om_fwhm)) /
+                angle_bragg;
         } else {
-          err_ray1 = std::sqrt(pow<2>(DET_RESOLUTION / (2. * l2)) +
-                               pow<2>(s3_fwhm) + pow<2>(s2_fwhm)) /
-                     angle_bragg;
+          err = std::sqrt(pow<2>(DET_RESOLUTION / (2. * (SLIT2_DIST + l2))) +
+                          pow<2>(values.s3_fwhm) + pow<2>(values.s2_fwhm)) /
+                angle_bragg;
         }
       } else {
-        if (s2_fwhm > DET_RESOLUTION / l2) {
-          err_ray1 = std::sqrt(pow<2>(DET_RESOLUTION / l2) + pow<2>(s3_fwhm)) /
-                     angle_bragg;
+        if (values.s2_fwhm > DET_RESOLUTION / l2) {
+          err = std::sqrt(pow<2>(DET_RESOLUTION / (SLIT2_DIST + l2)) +
+                          pow<2>(values.s3_fwhm)) /
+                angle_bragg;
         } else {
-          err_ray1 =
-              std::sqrt(pow<2>(da) + pow<2>(DET_RESOLUTION / l2)) / angle_bragg;
+          err = std::sqrt(pow<2>(values.da) +
+                          pow<2>(DET_RESOLUTION / (SLIT2_DIST + l2))) /
+                angle_bragg;
         }
       }
     } else {
-      if (polarized) {
-        err_ray1 = std::sqrt(pow<2>(da)) / angle_bragg;
-      } else {
-        err_ray1 = std::sqrt(pow<2>(da) + pow<2>(om_fwhm)) / angle_bragg;
-      }
+      err = err_ray_SumInLambda(angle_bragg, values);
+      const auto temp = err_ray_temp(foreground, l2, angle_bragg);
+      err = std::min(err, temp);
     }
-    const auto err_ray_temp =
-        0.68 *
-        std::sqrt((pow<2>(PIXEL_SIZE) + pow<2>(SLIT2_SIZE)) / pow<2>(l2)) /
-        angle_bragg;
-    return std::min(err_ray1, err_ray_temp);
+    return err;
   }
 
-  double err_res(const double lambda, const double l2) {
+  static double err_res(const double lambda, const double l2) {
     using namespace boost::math;
     const auto tofd = L1 + l2;
     const auto period = 60. / CHOPPER_SPEED;
@@ -430,43 +460,7 @@ private:
            (2 * chop_res + det_res);
   }
 
-  double om_fwhm(const double l2, const double dirl2, const double dirs2w,
-                 const double dirs3w, const double det_fwhm,
-                 const double detdb_fwhm) {
-    using namespace boost::math;
-    const double sdr = SLIT2_DIST + l2;
-    const double ratio = SLIT2_SIZE / SLIT1_SIZE;
-    const double interslit = SLIT1_DIST - SLIT2_DIST;
-    const double vs = sdr + (ratio * interslit) / (1 + ratio);
-    const double da = 0.68 * std::sqrt(pow<2>(SLIT1_SIZE) +
-                                       pow<2>(SLIT2_SIZE) / pow<2>(interslit));
-    const double da_det = std::sqrt(pow<2>(da * vs) + pow<2>(DET_RESOLUTION));
-    double om_fwhm{0};
-    if (std::abs(SLIT1_SIZE - dirs2w) >= 0.00004 ||
-        std::abs(SLIT2_SIZE - dirs3w) >= 0.00004) {
-      if ((det_fwhm - da_det) >= 0.) {
-        if (std::sqrt(pow<2>(det_fwhm) - pow<2>(da_det)) >= PIXEL_SIZE) {
-          om_fwhm = 0.5 * std::sqrt(pow<2>(det_fwhm) - pow<2>(da_det)) / dirl2;
-        } else {
-          om_fwhm = 0;
-        }
-      }
-    } else {
-      if (pow<2>(det_fwhm) - pow<2>(detdb_fwhm) >= 0.) {
-        if (std::sqrt(pow<2>(det_fwhm) - pow<2>(detdb_fwhm)) >= PIXEL_SIZE) {
-          om_fwhm =
-              0.5 * std::sqrt(pow<2>(det_fwhm) - pow<2>(detdb_fwhm)) / dirl2;
-        } else {
-          om_fwhm = 0.;
-        }
-      } else {
-        om_fwhm = 0.;
-      }
-    }
-    return om_fwhm;
-  }
-
-  double width_res(const double lambda, const double l2) {
+  static double width_res(const double lambda, const double l2) {
     using namespace boost::math;
     const auto tofd = L1 + l2;
     const auto period = 60. / CHOPPER_SPEED;
@@ -486,9 +480,12 @@ private:
 class ReflectometryMomentumTransferTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
-    m_reflectedWS = makeWS();
-    m_directWS = m_reflectedWS->clone();
-    m_algorithm = makeAlgorithm(m_reflectedWS, m_directWS);
+    using Geometry::deg2rad;
+    constexpr int nBins{10000};
+    ReflectometryMomentumTransferTest::LogValues logValues(0.1, 0.1, 0.1, 0.1);
+    m_reflectedWS = ReflectometryMomentumTransferTest::make_ws(
+        0.7 * deg2rad, nBins, logValues);
+    m_algorithm = makeAlgorithm(m_reflectedWS);
   }
 
   void test_performance() {
@@ -498,80 +495,32 @@ public:
 
 private:
   static API::IAlgorithm_sptr
-  makeAlgorithm(API::MatrixWorkspace_sptr &reflectedWS,
-                API::MatrixWorkspace_sptr &directWS) {
-    std::vector<int> foreground(2);
-    foreground.front() = 0;
-    foreground.back() = 0;
+  makeAlgorithm(API::MatrixWorkspace_sptr &reflectedWS) {
+    std::vector<int> foreground(2, 0);
     auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
     alg->setChild(true);
     alg->setRethrows(true);
     alg->initialize();
-    alg->isInitialized();
     alg->setProperty("InputWorkspace", reflectedWS);
     alg->setPropertyValue("OutputWorkspace", "_unused_for_child");
-    alg->setProperty("ReflectedBeamWorkspace", reflectedWS);
     alg->setProperty("ReflectedForeground", foreground);
-    alg->setProperty("DirectBeamWorkspace", directWS);
-    alg->setProperty("DirectForeground", foreground);
     alg->setProperty("SummationType", "SumInLambda");
-    alg->setProperty("Polarized", false);
     alg->setProperty("PixelSize", PIXEL_SIZE);
     alg->setProperty("DetectorResolution", DET_RESOLUTION);
     alg->setProperty("ChopperSpeed", CHOPPER_SPEED);
     alg->setProperty("ChopperOpening", CHOPPER_OPENING_ANGLE);
     alg->setProperty("ChopperRadius", CHOPPER_RADIUS);
     alg->setProperty("ChopperpairDistance", CHOPPER_GAP);
-    alg->setProperty("Slit1Name", "slit1");
-    alg->setProperty("Slit1SizeSampleLog", "slit1.size");
-    alg->setProperty("Slit2Name", "slit2");
-    alg->setProperty("Slit2SizeSampleLog", "slit2.size");
+    alg->setProperty("FirstSlitName", "slit1");
+    alg->setProperty("FirstSlitSizeSampleLog", "slit1.size");
+    alg->setProperty("SecondSlitName", "slit2");
+    alg->setProperty("SecondSlitSizeSampleLog", "slit2.size");
     alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH);
     return alg;
   }
 
-  static API::MatrixWorkspace_sptr makeWS() {
-    using namespace WorkspaceCreationHelper;
-    constexpr double startX{1000.};
-    const Kernel::V3D sourcePos{0., 0., -L1};
-    const Kernel::V3D &monitorPos = sourcePos;
-    const Kernel::V3D samplePos{
-        0., 0., 0.,
-    };
-    const double braggAngle{0.7};
-    const auto detZ = DET_DIST * std::cos(2 * braggAngle);
-    const auto detY = DET_DIST * std::sin(2 * braggAngle);
-    const Kernel::V3D detectorPos{0., detY, detZ};
-    const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
-    const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
-    constexpr int nBins{10000};
-    auto ws = create2DWorkspaceWithReflectometryInstrument(
-        startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
-        monitorPos, samplePos, detectorPos, nBins, TOF_BIN_WIDTH);
-    // Add slit sizes to sample logs, too.
-    auto &run = ws->mutableRun();
-    constexpr bool overwrite{true};
-    const std::string meters{"m"};
-    run.addProperty("slit1.size", SLIT1_SIZE, meters, overwrite);
-    run.addProperty("slit2.size", SLIT2_SIZE, meters, overwrite);
-    auto convertUnits =
-        API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
-    convertUnits->initialize();
-    convertUnits->setChild(true);
-    convertUnits->setRethrows(true);
-    convertUnits->setProperty("InputWorkspace", ws);
-    convertUnits->setPropertyValue("OutputWorkspace", "_unused_for_child");
-    convertUnits->setProperty("Target", "Wavelength");
-    convertUnits->setProperty("EMode", "Elastic");
-    convertUnits->execute();
-    API::MatrixWorkspace_sptr outWS =
-        convertUnits->getProperty("OutputWorkspace");
-    return outWS;
-  }
-
 private:
   API::IAlgorithm_sptr m_algorithm;
-  API::MatrixWorkspace_sptr m_directWS;
   API::MatrixWorkspace_sptr m_reflectedWS;
 };
 

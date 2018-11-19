@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -288,5 +294,5 @@ void QwtRasterDataMD::copyFrom(const QwtRasterDataMD &source,
   dest.m_overlayInSlice = source.m_overlayInSlice;
 }
 
-} // namespace
-} // namespace
+} // namespace API
+} // namespace MantidQt

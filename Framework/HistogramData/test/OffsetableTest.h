@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_OFFSETABLETEST_H_
 #define MANTID_HISTOGRAMDATA_OFFSETABLETEST_H_
 
@@ -9,11 +15,11 @@
 #include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/VectorOf.h"
 
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::detail::FixedLengthVector;
 using Mantid::HistogramData::detail::Iterable;
 using Mantid::HistogramData::detail::Offsetable;
 using Mantid::HistogramData::detail::VectorOf;
-using Mantid::HistogramData::HistogramX;
 
 class OffsetableTester : public VectorOf<OffsetableTester, HistogramX>,
                          public Iterable<OffsetableTester>,

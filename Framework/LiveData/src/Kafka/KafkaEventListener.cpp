@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaEventListener.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
@@ -62,7 +68,8 @@ void KafkaEventListener::start(Types::Core::DateAndTime startTime) {
     startNow = false;
   } else if (startTime != 0) {
     g_log.warning() << "KafkaLiveListener does not currently support starting "
-                       "from arbitrary time." << std::endl;
+                       "from arbitrary time."
+                    << std::endl;
   }
   m_decoder->startCapture(startNow);
 }
@@ -97,5 +104,10 @@ API::ILiveListener::RunStatus KafkaEventListener::runStatus() {
 int KafkaEventListener::runNumber() const {
   return (m_decoder ? m_decoder->runNumber() : -1);
 }
+
+/// @copydoc ILiveListener::dataReset
+bool KafkaEventListener::dataReset() {
+  return (m_decoder ? m_decoder->dataReset() : false);
 }
-}
+} // namespace LiveData
+} // namespace Mantid

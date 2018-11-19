@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/python/extract.hpp>
@@ -38,6 +44,6 @@ createPropertyManager(const boost::python::dict &mapping) {
   }
   return pmgr;
 }
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid

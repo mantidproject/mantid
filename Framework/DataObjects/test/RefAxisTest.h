@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------------------------------------------------------------
 // This set of tests has been placed in DataObjects because it really needs to
 // use a real workspace
@@ -8,10 +14,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/RefAxis.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Exception.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

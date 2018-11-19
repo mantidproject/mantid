@@ -31,19 +31,19 @@
 #include "ApplicationWindow.h"
 #include "LegendWidget.h"
 
-#include <QFontDialog>
-#include <QFont>
-#include <QGroupBox>
-#include <QTextEdit>
-#include <QTextCursor>
+#include <QCheckBox>
 #include <QComboBox>
-#include <QLabel>
+#include <QFont>
+#include <QFontDialog>
 #include <QGridLayout>
-#include <QVBoxLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QPushButton>
 #include <QSpinBox>
-#include <QCheckBox>
+#include <QTextCursor>
+#include <QTextEdit>
+#include <QVBoxLayout>
 
 #include <qwt_scale_widget.h>
 
@@ -110,7 +110,7 @@ TextDialog::TextDialog(TextType type, QWidget *parent, Qt::WFlags fl)
   buttonDefault = nullptr;
   boxBackgroundTransparency = nullptr;
   if (textType == TextMarker) { // TODO: Sometime background features for axes
-                                // lables should be implemented
+                                // labels should be implemented
     topLayout->addWidget(new QLabel(tr("Opacity")), 3, 0);
     boxBackgroundTransparency = new QSpinBox();
     boxBackgroundTransparency->setRange(0, 255);

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASIIREFINEFITPEAKSOUTPUTPROPERTIES_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASIIREFINEFITPEAKSOUTPUTPROPERTIES_H_
 
@@ -37,8 +43,8 @@ MANTIDQT_ENGGDIFFRACTION_DLL bool
 operator!=(const GSASIIRefineFitPeaksOutputProperties &lhs,
            const GSASIIRefineFitPeaksOutputProperties &rhs);
 
-} // MantidQt
-} // CustomInterfaces
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 Q_DECLARE_METATYPE(
     MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties)

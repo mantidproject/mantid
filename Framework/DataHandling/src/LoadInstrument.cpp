@@ -1,27 +1,33 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/Exception.h>
-#include <sstream>
 #include <fstream>
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include <sstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -81,12 +87,12 @@ void LoadInstrument::init() {
 
 //------------------------------------------------------------------------------------------------------------------------------
 /** Executes the algorithm. Reading in the file and creating and populating
-*  the output workspace
-*
-*  @throw FileError Thrown if unable to parse XML file
-*  @throw InstrumentDefinitionError Thrown if issues with the content of XML
-*instrument file
-*/
+ *  the output workspace
+ *
+ *  @throw FileError Thrown if unable to parse XML file
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
+ *instrument file
+ */
 void LoadInstrument::exec() {
   // Get the input workspace
   m_workspace = getProperty("Workspace");
@@ -279,9 +285,8 @@ std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
   const std::string::size_type prefix_end(instrumentFile.find(definitionPart));
   const std::string::size_type suffix_start =
       prefix_end + definitionPart.length();
-  // Make prefix and force it to be upper case
+  // Get prefix and leave case sensitive
   std::string prefix = instrumentFile.substr(0, prefix_end);
-  std::transform(prefix.begin(), prefix.end(), prefix.begin(), toupper);
   // Make suffix ensuring it has positive length
   std::string suffix = ".xml";
   if (suffix_start < instrumentFile.length()) {

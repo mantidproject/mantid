@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -19,12 +25,14 @@ OneMinusExponentialCor::OneMinusExponentialCor()
 void OneMinusExponentialCor::defineProperties() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("C", 1.0, mustBePositive, "The positive value by which the "
-                                            "entire exponent calculation is "
-                                            "multiplied (see formula below).");
+  declareProperty("C", 1.0, mustBePositive,
+                  "The positive value by which the "
+                  "entire exponent calculation is "
+                  "multiplied (see formula below).");
 
-  declareProperty("C1", 1.0, "The value by which the entire calculation is "
-                             "multiplied (see formula below).");
+  declareProperty("C1", 1.0,
+                  "The value by which the entire calculation is "
+                  "multiplied (see formula below).");
 
   std::vector<std::string> operations(2);
   operations[0] = "Multiply";

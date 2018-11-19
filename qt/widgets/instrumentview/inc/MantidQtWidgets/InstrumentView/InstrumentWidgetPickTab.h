@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef INSTRUMENTWIDGETPICKTAB_H_
 #define INSTRUMENTWIDGETPICKTAB_H_
 
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
+#include "MantidQtWidgets/InstrumentView/MiniPlot.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -25,37 +31,33 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentActor;
 class CollapsiblePanel;
-class OneCurvePlot;
 class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
 
 /**
-* Implements the Pick tab in InstrumentWidget.
-* Contains a set of tools which allow one to:
-*
-*  - pick a detector or a tube and display the data in it and some info
-*  - add a peak to a peaks workspace and display an overlay of markers
-*  - select and remove peaks
-*
-*/
+ * Implements the Pick tab in InstrumentWidget.
+ * Contains a set of tools which allow one to:
+ *
+ *  - pick a detector or a tube and display the data in it and some info
+ *  - add a peak to a peaks workspace and display an overlay of markers
+ *  - select and remove peaks
+ *
+ */
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetPickTab
     : public InstrumentWidgetTab {
   Q_OBJECT
 public:
   /// Activity type the tab can be in:
-  ///   Single:  select and display info for a single detector when pointed by
-  ///   the mouse
-  ///   Tube:    select and display info for a tube of detectors. The immediate
-  ///   parent
-  ///            of a detector is considered a tube
+  ///   Single: select and display info for a single detector when pointed by
+  ///           the mouse
+  ///   Tube: select and display info for a tube of detectors. The immediate
+  ///         parent of a detector is considered a tube
   ///   AddPeak: Click on a detector and then on the miniplot to add a peak
-  ///   marker and
-  ///            a peak to the attached peaks workspace
+  ///            marker and a peak to the attached peaks workspace
   ///   SelectPeak: click on a peak marker or draw a rubber-band selector to
-  ///   select peak
-  ///               markers. Selected peaks can be deleted by pressing the
-  ///               Delete key.
+  ///               select peak markers. Selected peaks can be deleted by
+  ///               pressing the delete key.
   enum SelectionType {
     Single = 0,
     AddPeak,
@@ -122,7 +124,7 @@ private:
   QColor getShapeBorderColor() const;
 
   /* Pick tab controls */
-  OneCurvePlot *m_plot; ///< Miniplot to display data in the detectors
+  MiniPlot *m_plot;     ///< Miniplot to display data in the detectors
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode
@@ -133,14 +135,14 @@ private:
   QPushButton *m_peakAlign;   ///< Button switching on peak alignment mode
   QPushButton *m_rectangle;   ///< Button switching on drawing a rectangular
   /// selection region
-  QPushButton *
-      m_ellipse; ///< Button switching on drawing a elliptical selection region
+  QPushButton
+      *m_ellipse; ///< Button switching on drawing a elliptical selection region
   QPushButton *m_ring_ellipse; ///< Button switching on drawing a elliptical
   /// ring selection region
   QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular
   /// ring selection region
-  QPushButton *
-      m_free_draw; ///< Button switching on drawing a region of arbitrary shape
+  QPushButton
+      *m_free_draw; ///< Button switching on drawing a region of arbitrary shape
   QPushButton *m_edit; ///< Button switching on edditing the selection region
   bool m_plotSum;
 
@@ -180,9 +182,9 @@ private:
 };
 
 /**
-* Class containing the logic of displaying info on the selected
-* component(s) in the info text widget.
-*/
+ * Class containing the logic of displaying info on the selected
+ * component(s) in the info text widget.
+ */
 class ComponentInfoController : public QObject {
   Q_OBJECT
 public:
@@ -218,8 +220,8 @@ private:
 };
 
 /**
-* Class contining the logic of plotting the data in detectors/tubes.
-*/
+ * Class contining the logic of plotting the data in detectors/tubes.
+ */
 class DetectorPlotController : public QObject {
   Q_OBJECT
 
@@ -234,7 +236,7 @@ public:
   };
 
   DetectorPlotController(InstrumentWidgetPickTab *tab,
-                         InstrumentWidget *instrWidget, OneCurvePlot *plot);
+                         InstrumentWidget *instrWidget, MiniPlot *plot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
   void setPlotData(const std::vector<size_t> &detIndices);
@@ -274,7 +276,7 @@ private:
 
   InstrumentWidgetPickTab *m_tab;
   InstrumentWidget *m_instrWidget;
-  OneCurvePlot *m_plot;
+  MiniPlot *m_plot;
 
   PlotType m_plotType;
   bool m_enabled;
@@ -283,7 +285,7 @@ private:
   size_t m_currentPickID;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*INSTRUMENTWIDGETPICKTAB_H_*/

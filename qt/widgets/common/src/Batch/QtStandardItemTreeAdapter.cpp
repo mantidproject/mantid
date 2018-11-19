@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
-#include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
-#include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "MantidQtWidgets/Common/Batch/CellStandardItem.h"
+#include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
+#include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -102,8 +108,9 @@ std::vector<Cell> QtStandardItemTreeModelAdapter::cellsAtRow(
   cells.reserve(m_model.columnCount());
   enumerateCellsInRow(
       firstCellIndex, m_model.columnCount(),
-      [this, &cells](QModelIndexForMainModel const &cellIndex, int)
-          -> void { cells.emplace_back(cellFromCellIndex(cellIndex)); });
+      [this, &cells](QModelIndexForMainModel const &cellIndex, int) -> void {
+        cells.emplace_back(cellFromCellIndex(cellIndex));
+      });
   return cells;
 }
 
@@ -134,6 +141,6 @@ QStandardItem *modelItemFromIndex(QStandardItemModel &model,
   } else
     return model.invisibleRootItem();
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

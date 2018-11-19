@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAOBJECTS_PEAKNOSHAPEFACTORYTEST_H_
 #define MANTID_DATAOBJECTS_PEAKNOSHAPEFACTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/PeakNoShapeFactory.h"
 #include "MantidDataObjects/NoShape.h"
+#include "MantidDataObjects/PeakNoShapeFactory.h"
 
 using namespace Mantid::DataObjects;
 

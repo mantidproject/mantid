@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/PeaksWorkspaceWidget.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -13,7 +19,7 @@ QColor getSelectedColor() {
   colourDlg.result();
   return colourDlg.getColor();
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -193,7 +199,7 @@ PeaksWorkspaceWidget::~PeaksWorkspaceWidget() {}
 
 /**
  * Handler for changing the foreground colour of an integrated peak.
-*/
+ */
 void PeaksWorkspaceWidget::onForegroundPeakViewColorClicked() {
   auto foregroundColorCross = ui.btnPeakColor->palette().button().color();
   auto foregroundColorSphere =
@@ -207,7 +213,7 @@ void PeaksWorkspaceWidget::onForegroundPeakViewColorClicked() {
 
 /**
  * Handler for changing the background colour of an integrated peak.
-*/
+ */
 void PeaksWorkspaceWidget::onBackgroundPeakViewColorClicked() {
   auto backgroundColorSphere =
       ui.btnBackgroundColorSphere->palette().button().color();
@@ -441,5 +447,5 @@ void PeaksWorkspaceWidget::onForegroundColorEllipsoidClicked() {
   }
 }
 
-} // namespace
-}
+} // namespace SliceViewer
+} // namespace MantidQt

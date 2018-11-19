@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef LOADCANSAS1DTEST_H
 #define LOADCANSAS1DTEST_H
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include <Poco/Path.h>
 
 class LoadCanSAS1dTest : public CxxTest::TestSuite {

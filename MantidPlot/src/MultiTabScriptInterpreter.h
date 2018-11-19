@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SCRIPTMANAGERWIDGET_H_
 #define SCRIPTMANAGERWIDGET_H_
 
 //---------------------------------------------------------
 // Includes
 //---------------------------------------------------------
-#include <QTabWidget>
-#include <QDialog>
-#include "Scripted.h"
 #include "Script.h"
+#include "Scripted.h"
+#include <QDialog>
+#include <QTabWidget>
 
 //---------------------------------------------------------
 // Forward declarations
@@ -33,27 +39,6 @@ class ScriptingWindow;
 
     @author Martyn Gigg, Tessella Support Services plc
     @date 19/08/2009
-
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MultiTabScriptInterpreter : public QTabWidget, Scripted {
   Q_OBJECT
@@ -149,7 +134,7 @@ public slots:
   /** @name Execute members.*/
   //@{
   /// Execute all using the given mode
-  void executeAll(const Script::ExecutionMode mode);
+  bool executeAll(const Script::ExecutionMode mode);
   /// Execute selection using the given mode
   void executeSelection(const Script::ExecutionMode mode);
   /// Abort the current script

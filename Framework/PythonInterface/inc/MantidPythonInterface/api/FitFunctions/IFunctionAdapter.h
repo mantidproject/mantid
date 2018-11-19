@@ -1,32 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PYTHONINTERFACE_IFUNCTIONADAPTER_H_
 #define MANTID_PYTHONINTERFACE_IFUNCTIONADAPTER_H_
-/**
-    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
 
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/IFunction.h"
 
+#include <boost/python/list.hpp>
 #include <boost/python/object.hpp>
 
 namespace Mantid {
@@ -69,7 +55,7 @@ public:
   void setAttribute(const std::string &attName,
                     const API::IFunction::Attribute &attr) override;
   /// Split this function (if needed) into a list of independent functions
-  static boost::python::object createPythonEquivalentFunctions(IFunction &self);
+  static boost::python::list createPythonEquivalentFunctions(IFunction &self);
 
   // Each overload of declareParameter requires a different name as we
   // can't use a function pointer with a virtual base class
@@ -131,7 +117,7 @@ private:
   /// Flag if the derivateive method is overridden (avoids multiple checks)
   bool m_derivOveridden;
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_IFUNCTIONADAPTER_H_ */

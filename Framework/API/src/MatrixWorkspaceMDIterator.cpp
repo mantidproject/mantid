@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -265,7 +271,7 @@ signal_t MatrixWorkspaceMDIterator::getInnerError(size_t /*index*/) const {
  * Getter for the masked state of the workspace.
  * @returns True if the detector/detector-group at the workspace index is
  * masked, or if there is no detector at that index.
-*/
+ */
 bool MatrixWorkspaceMDIterator::getIsMasked() const {
   if (!m_spectrumInfo.hasDetectors(m_workspaceIndex)) {
     return true;
@@ -302,5 +308,5 @@ bool MatrixWorkspaceMDIterator::isWithinBounds(const size_t) const {
       "MatrixWorkspaceMDIterator does not implement isWithinBounds");
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

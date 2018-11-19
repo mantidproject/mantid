@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindClusterFaces.h"
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -27,14 +33,14 @@ using LabelMap = std::map<int, int>;
 using OptionalLabelPeakIndexMap = boost::optional<LabelMap>;
 
 /**
-* Create an optional label set for filtering.
-* @param dimensionality : Dimensionality of the workspace.
-* @param emptyLabelId : Label id corresponding to empty.
-* @param filterWorkspace : Peaks workspace to act as filter.
-* @param clusterImage : Image
-* @return (optional) Map of labels to inspect for to the Peaks Index in the
-* peaks workspace which matches the cluster id.
-*/
+ * Create an optional label set for filtering.
+ * @param dimensionality : Dimensionality of the workspace.
+ * @param emptyLabelId : Label id corresponding to empty.
+ * @param filterWorkspace : Peaks workspace to act as filter.
+ * @param clusterImage : Image
+ * @return (optional) Map of labels to inspect for to the Peaks Index in the
+ * peaks workspace which matches the cluster id.
+ */
 OptionalLabelPeakIndexMap
 createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
                           IPeaksWorkspace_sptr filterWorkspace,
@@ -239,7 +245,7 @@ void executeFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
 
   } while (mdIterator->next());
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {
@@ -263,7 +269,7 @@ const std::string FindClusterFaces::category() const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void FindClusterFaces::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -298,7 +304,7 @@ void FindClusterFaces::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void FindClusterFaces::exec() {
   IMDHistoWorkspace_sptr clusterImage = getProperty("InputWorkspace");
   const int emptyLabelId = 0;
@@ -377,8 +383,8 @@ void FindClusterFaces::exec() {
     truncatedOutput = true;
     std::stringstream buffer;
     buffer << "More faces found than can be reported given the MaximumRows "
-              "limit. Row limit at: " << maxRows
-           << " Total faces available: " << totalFaces;
+              "limit. Row limit at: "
+           << maxRows << " Total faces available: " << totalFaces;
     g_log.warning(buffer.str());
   }
 

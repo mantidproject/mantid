@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 MantidPlot module to gain access to plotting functions etc.
 Requires that the main script be run from within MantidPlot
@@ -57,17 +63,17 @@ def _get_analysis_data_service():
 
 # -------------------------- Wrapped MantidPlot functions -----------------
 
-def runPythonScript(code, async=False, quiet=False, redirect=True):
+def runPythonScript(code, asynchronous=False, quiet=False, redirect=True):
     """
         Redirects the runPythonScript method to the app object
         @param code :: A string of code to execute
-        @param async :: If the true the code is executed in a separate thread
+        @param asynchronous :: If the true the code is executed in a separate thread
         @param quiet :: If true no messages reporting status are issued
         @param redirect :: If true then output is redirected to MantidPlot
     """
-    if async and QtCore.QThread.currentThread() != QtGui.qApp.thread():
-        async = False
-    threadsafe_call(_qti.app.runPythonScript, code, async, quiet, redirect)
+    if asynchronous and QtCore.QThread.currentThread() != QtGui.qApp.thread():
+        asynchronous = False
+    threadsafe_call(_qti.app.runPythonScript, code, asynchronous, quiet, redirect)
 
 
 # Overload for consistency with qtiplot table(..) & matrix(..) commands

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTMANTIDWIDGETS_ABSTRACTDATAPROCESSORTREEMODEL_H_
 #define MANTIDQTMANTIDWIDGETS_ABSTRACTDATAPROCESSORTREEMODEL_H_
 
@@ -18,7 +24,7 @@ constexpr const char *SUCCESS =
     "#d0f4d0"; // processing completed successfully (green)
 constexpr const char *COMPLETE =
     "#f2fcf2"; // complete but no processing was required (pale green)
-}
+} // namespace Colour
 
 class RowData;
 using RowData_sptr = std::shared_ptr<RowData>;
@@ -28,27 +34,6 @@ implementations for processing table data. Full function implementation is
 provided for functions common to all data processing tree models, while
 these subclasses are expected to provide implementation for the remaining
 virtual functions defined here and in QAbstractItemModel.
-
-Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON AbstractTreeModel : public QAbstractItemModel {
   Q_OBJECT
@@ -90,6 +75,6 @@ protected:
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTIDQTMANTIDWIDGETS_ABSTRACTDATAPROCESSORTREEMODEL_H_ */

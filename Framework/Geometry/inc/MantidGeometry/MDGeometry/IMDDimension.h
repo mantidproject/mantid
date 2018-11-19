@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef I_MD_DIMENSION_H
 #define I_MD_DIMENSION_H
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
@@ -18,7 +24,7 @@ namespace Kernel {
 // Forward declarations
 //---------------------------------------------------------------------------
 class UnitLabel;
-}
+} // namespace Kernel
 
 namespace Geometry {
 /** The class describes one dimension of multidimensional dataset representing
@@ -29,27 +35,6 @@ the concrete implementation.
 
     @author Owen Arnold, RAL ISIS
     @date 12/11/2010
-
-    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
 class MANTID_GEOMETRY_DLL IMDDimension {
@@ -125,6 +110,6 @@ using IMDDimension_const_sptr = boost::shared_ptr<const IMDDimension>;
 using VecIMDDimension_const_sptr = std::vector<IMDDimension_const_sptr>;
 /// Vector of shared pointers to IMDDimensions.
 using VecIMDDimension_sptr = std::vector<IMDDimension_sptr>;
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 #endif

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CRYSTAL_DIFFPEAKSWORKSPACESTEST_H_
 #define MANTID_CRYSTAL_DIFFPEAKSWORKSPACESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCrystal/DiffPeaksWorkspaces.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Crystal::DiffPeaksWorkspaces;
 

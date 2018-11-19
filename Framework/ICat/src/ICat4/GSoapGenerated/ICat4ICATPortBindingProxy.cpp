@@ -41,18 +41,18 @@ void ICATPortBindingProxy::ICATPortBindingProxy_init(soap_mode imode,
                                                      soap_mode omode) {
   soap_imode(this, imode);
   soap_omode(this, omode);
-  soap_endpoint = NULL;
+  soap_endpoint = nullptr;
   static const struct Namespace namespaces[] = {
       {"SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/",
-       "http://www.w3.org/*/soap-envelope", NULL},
+       "http://www.w3.org/*/soap-envelope", nullptr},
       {"SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/",
-       "http://www.w3.org/*/soap-encoding", NULL},
+       "http://www.w3.org/*/soap-encoding", nullptr},
       {"xsi", "http://www.w3.org/2001/XMLSchema-instance",
-       "http://www.w3.org/*/XMLSchema-instance", NULL},
+       "http://www.w3.org/*/XMLSchema-instance", nullptr},
       {"xsd", "http://www.w3.org/2001/XMLSchema",
-       "http://www.w3.org/*/XMLSchema", NULL},
-      {"ns1", "http://icatproject.org", NULL, NULL},
-      {NULL, NULL, NULL, NULL}};
+       "http://www.w3.org/*/XMLSchema", nullptr},
+      {"ns1", "http://icatproject.org", nullptr, nullptr},
+      {nullptr, nullptr, nullptr, nullptr}};
   soap_set_namespaces(this, namespaces);
 }
 
@@ -68,7 +68,7 @@ void ICATPortBindingProxy::reset() {
   ICATPortBindingProxy_init(SOAP_IO_DEFAULT, SOAP_IO_DEFAULT);
 }
 
-void ICATPortBindingProxy::soap_noheader() { this->header = NULL; }
+void ICATPortBindingProxy::soap_noheader() { this->header = nullptr; }
 
 const SOAP_ENV__Header *ICATPortBindingProxy::soap_header() {
   return this->header;
@@ -115,11 +115,11 @@ int ICATPortBindingProxy::login(const char *endpoint, const char *soap_action,
   struct __ns1__login soap_tmp___ns1__login;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/loginRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__login.ns1__login_ = ns1__login_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -130,16 +130,17 @@ int ICATPortBindingProxy::login(const char *endpoint, const char *soap_action,
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__login(soap, &soap_tmp___ns1__login, "-ns1:login",
-                              NULL) ||
+                              nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
-      soap_put___ns1__login(soap, &soap_tmp___ns1__login, "-ns1:login", NULL) ||
+      soap_put___ns1__login(soap, &soap_tmp___ns1__login, "-ns1:login",
+                            nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -166,11 +167,11 @@ int ICATPortBindingProxy::getUserName(
   struct __ns1__getUserName soap_tmp___ns1__getUserName;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/getUserNameRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__getUserName.ns1__getUserName_ = ns1__getUserName_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -181,17 +182,17 @@ int ICATPortBindingProxy::getUserName(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__getUserName(soap, &soap_tmp___ns1__getUserName,
-                                    "-ns1:getUserName", NULL) ||
+                                    "-ns1:getUserName", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__getUserName(soap, &soap_tmp___ns1__getUserName,
-                                  "-ns1:getUserName", NULL) ||
+                                  "-ns1:getUserName", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -218,11 +219,11 @@ int ICATPortBindingProxy::get(const char *endpoint, const char *soap_action,
   struct __ns1__get soap_tmp___ns1__get;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/getRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__get.ns1__get_ = ns1__get_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -232,16 +233,16 @@ int ICATPortBindingProxy::get(const char *endpoint, const char *soap_action,
   if (soap->mode & SOAP_IO_LENGTH) {
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
-        soap_put___ns1__get(soap, &soap_tmp___ns1__get, "-ns1:get", NULL) ||
+        soap_put___ns1__get(soap, &soap_tmp___ns1__get, "-ns1:get", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
-      soap_put___ns1__get(soap, &soap_tmp___ns1__get, "-ns1:get", NULL) ||
+      soap_put___ns1__get(soap, &soap_tmp___ns1__get, "-ns1:get", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -268,11 +269,11 @@ int ICATPortBindingProxy::getProperties(
   struct __ns1__getProperties soap_tmp___ns1__getProperties;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/getPropertiesRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__getProperties.ns1__getProperties_ = ns1__getProperties_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -283,17 +284,17 @@ int ICATPortBindingProxy::getProperties(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__getProperties(soap, &soap_tmp___ns1__getProperties,
-                                      "-ns1:getProperties", NULL) ||
+                                      "-ns1:getProperties", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__getProperties(soap, &soap_tmp___ns1__getProperties,
-                                    "-ns1:getProperties", NULL) ||
+                                    "-ns1:getProperties", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -321,11 +322,11 @@ int ICATPortBindingProxy::delete_(const char *endpoint, const char *soap_action,
   struct __ns1__deleteResponse *soap_tmp___ns1__deleteResponse;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/deleteRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__delete.ns1__delete_ = ns1__delete_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -336,17 +337,17 @@ int ICATPortBindingProxy::delete_(const char *endpoint, const char *soap_action,
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__delete(soap, &soap_tmp___ns1__delete, "-ns1:delete",
-                               NULL) ||
+                               nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__delete(soap, &soap_tmp___ns1__delete, "-ns1:delete",
-                             NULL) ||
+                             nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -357,7 +358,7 @@ int ICATPortBindingProxy::delete_(const char *endpoint, const char *soap_action,
       soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
   soap_tmp___ns1__deleteResponse = soap_get___ns1__deleteResponse(
-      soap, NULL, "-ns1:deleteResponse", "ns1:deleteResponse");
+      soap, nullptr, "-ns1:deleteResponse", "ns1:deleteResponse");
   if (!soap_tmp___ns1__deleteResponse || soap->error)
     return soap_recv_fault(soap, 0);
   if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
@@ -377,11 +378,11 @@ int ICATPortBindingProxy::search(const char *endpoint, const char *soap_action,
   struct __ns1__search soap_tmp___ns1__search;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/searchRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__search.ns1__search_ = ns1__search_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -392,17 +393,17 @@ int ICATPortBindingProxy::search(const char *endpoint, const char *soap_action,
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__search(soap, &soap_tmp___ns1__search, "-ns1:search",
-                               NULL) ||
+                               nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__search(soap, &soap_tmp___ns1__search, "-ns1:search",
-                             NULL) ||
+                             nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -429,11 +430,11 @@ int ICATPortBindingProxy::create(const char *endpoint, const char *soap_action,
   struct __ns1__create soap_tmp___ns1__create;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/createRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__create.ns1__create_ = ns1__create_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -444,17 +445,17 @@ int ICATPortBindingProxy::create(const char *endpoint, const char *soap_action,
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__create(soap, &soap_tmp___ns1__create, "-ns1:create",
-                               NULL) ||
+                               nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__create(soap, &soap_tmp___ns1__create, "-ns1:create",
-                             NULL) ||
+                             nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -482,11 +483,11 @@ int ICATPortBindingProxy::update(const char *endpoint, const char *soap_action,
   struct __ns1__updateResponse *soap_tmp___ns1__updateResponse;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/updateRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__update.ns1__update_ = ns1__update_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -497,17 +498,17 @@ int ICATPortBindingProxy::update(const char *endpoint, const char *soap_action,
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__update(soap, &soap_tmp___ns1__update, "-ns1:update",
-                               NULL) ||
+                               nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__update(soap, &soap_tmp___ns1__update, "-ns1:update",
-                             NULL) ||
+                             nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -518,7 +519,7 @@ int ICATPortBindingProxy::update(const char *endpoint, const char *soap_action,
       soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
   soap_tmp___ns1__updateResponse = soap_get___ns1__updateResponse(
-      soap, NULL, "-ns1:updateResponse", "ns1:updateResponse");
+      soap, nullptr, "-ns1:updateResponse", "ns1:updateResponse");
   if (!soap_tmp___ns1__updateResponse || soap->error)
     return soap_recv_fault(soap, 0);
   if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
@@ -539,11 +540,11 @@ int ICATPortBindingProxy::getApiVersion(
   struct __ns1__getApiVersion soap_tmp___ns1__getApiVersion;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/getApiVersionRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__getApiVersion.ns1__getApiVersion_ = ns1__getApiVersion_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -554,17 +555,17 @@ int ICATPortBindingProxy::getApiVersion(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__getApiVersion(soap, &soap_tmp___ns1__getApiVersion,
-                                      "-ns1:getApiVersion", NULL) ||
+                                      "-ns1:getApiVersion", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__getApiVersion(soap, &soap_tmp___ns1__getApiVersion,
-                                    "-ns1:getApiVersion", NULL) ||
+                                    "-ns1:getApiVersion", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -592,11 +593,11 @@ int ICATPortBindingProxy::getEntityNames(
   struct __ns1__getEntityNames soap_tmp___ns1__getEntityNames;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/getEntityNamesRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__getEntityNames.ns1__getEntityNames_ = ns1__getEntityNames_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -607,17 +608,17 @@ int ICATPortBindingProxy::getEntityNames(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__getEntityNames(soap, &soap_tmp___ns1__getEntityNames,
-                                       "-ns1:getEntityNames", NULL) ||
+                                       "-ns1:getEntityNames", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__getEntityNames(soap, &soap_tmp___ns1__getEntityNames,
-                                     "-ns1:getEntityNames", NULL) ||
+                                     "-ns1:getEntityNames", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -645,11 +646,11 @@ int ICATPortBindingProxy::refresh(const char *endpoint, const char *soap_action,
   struct __ns1__refreshResponse *soap_tmp___ns1__refreshResponse;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/refreshRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__refresh.ns1__refresh_ = ns1__refresh_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -660,17 +661,17 @@ int ICATPortBindingProxy::refresh(const char *endpoint, const char *soap_action,
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__refresh(soap, &soap_tmp___ns1__refresh, "-ns1:refresh",
-                                NULL) ||
+                                nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__refresh(soap, &soap_tmp___ns1__refresh, "-ns1:refresh",
-                              NULL) ||
+                              nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -681,7 +682,7 @@ int ICATPortBindingProxy::refresh(const char *endpoint, const char *soap_action,
       soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
   soap_tmp___ns1__refreshResponse = soap_get___ns1__refreshResponse(
-      soap, NULL, "-ns1:refreshResponse", "ns1:refreshResponse");
+      soap, nullptr, "-ns1:refreshResponse", "ns1:refreshResponse");
   if (!soap_tmp___ns1__refreshResponse || soap->error)
     return soap_recv_fault(soap, 0);
   if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
@@ -702,11 +703,11 @@ int ICATPortBindingProxy::dummy(const char *endpoint, const char *soap_action,
   struct __ns1__dummyResponse *soap_tmp___ns1__dummyResponse;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/dummyRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__dummy.ns1__dummy_ = ns1__dummy_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -717,16 +718,17 @@ int ICATPortBindingProxy::dummy(const char *endpoint, const char *soap_action,
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__dummy(soap, &soap_tmp___ns1__dummy, "-ns1:dummy",
-                              NULL) ||
+                              nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
-      soap_put___ns1__dummy(soap, &soap_tmp___ns1__dummy, "-ns1:dummy", NULL) ||
+      soap_put___ns1__dummy(soap, &soap_tmp___ns1__dummy, "-ns1:dummy",
+                            nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -737,7 +739,7 @@ int ICATPortBindingProxy::dummy(const char *endpoint, const char *soap_action,
       soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
   soap_tmp___ns1__dummyResponse = soap_get___ns1__dummyResponse(
-      soap, NULL, "-ns1:dummyResponse", "ns1:dummyResponse");
+      soap, nullptr, "-ns1:dummyResponse", "ns1:dummyResponse");
   if (!soap_tmp___ns1__dummyResponse || soap->error)
     return soap_recv_fault(soap, 0);
   if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
@@ -756,11 +758,11 @@ int ICATPortBindingProxy::logout(const char *endpoint, const char *soap_action,
   struct __ns1__logoutResponse *soap_tmp___ns1__logoutResponse;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/logoutRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__logout.ns1__logout_ = ns1__logout_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -771,17 +773,17 @@ int ICATPortBindingProxy::logout(const char *endpoint, const char *soap_action,
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__logout(soap, &soap_tmp___ns1__logout, "-ns1:logout",
-                               NULL) ||
+                               nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__logout(soap, &soap_tmp___ns1__logout, "-ns1:logout",
-                             NULL) ||
+                             nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -792,7 +794,7 @@ int ICATPortBindingProxy::logout(const char *endpoint, const char *soap_action,
       soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
   soap_tmp___ns1__logoutResponse = soap_get___ns1__logoutResponse(
-      soap, NULL, "-ns1:logoutResponse", "ns1:logoutResponse");
+      soap, nullptr, "-ns1:logoutResponse", "ns1:logoutResponse");
   if (!soap_tmp___ns1__logoutResponse || soap->error)
     return soap_recv_fault(soap, 0);
   if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
@@ -813,11 +815,11 @@ int ICATPortBindingProxy::getRemainingMinutes(
   struct __ns1__getRemainingMinutes soap_tmp___ns1__getRemainingMinutes;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/getRemainingMinutesRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__getRemainingMinutes.ns1__getRemainingMinutes_ =
       ns1__getRemainingMinutes_;
   soap_begin(soap);
@@ -831,18 +833,18 @@ int ICATPortBindingProxy::getRemainingMinutes(
         soap_body_begin_out(soap) ||
         soap_put___ns1__getRemainingMinutes(
             soap, &soap_tmp___ns1__getRemainingMinutes,
-            "-ns1:getRemainingMinutes", NULL) ||
+            "-ns1:getRemainingMinutes", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
-      soap_put___ns1__getRemainingMinutes(soap,
-                                          &soap_tmp___ns1__getRemainingMinutes,
-                                          "-ns1:getRemainingMinutes", NULL) ||
+      soap_put___ns1__getRemainingMinutes(
+          soap, &soap_tmp___ns1__getRemainingMinutes,
+          "-ns1:getRemainingMinutes", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -871,11 +873,11 @@ int ICATPortBindingProxy::searchText(
   struct __ns1__searchText soap_tmp___ns1__searchText;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/searchTextRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__searchText.ns1__searchText_ = ns1__searchText_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -886,17 +888,17 @@ int ICATPortBindingProxy::searchText(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__searchText(soap, &soap_tmp___ns1__searchText,
-                                   "-ns1:searchText", NULL) ||
+                                   "-ns1:searchText", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__searchText(soap, &soap_tmp___ns1__searchText,
-                                 "-ns1:searchText", NULL) ||
+                                 "-ns1:searchText", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -924,11 +926,11 @@ int ICATPortBindingProxy::isAccessAllowed(
   struct __ns1__isAccessAllowed soap_tmp___ns1__isAccessAllowed;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/isAccessAllowedRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__isAccessAllowed.ns1__isAccessAllowed_ = ns1__isAccessAllowed_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -939,17 +941,17 @@ int ICATPortBindingProxy::isAccessAllowed(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__isAccessAllowed(soap, &soap_tmp___ns1__isAccessAllowed,
-                                        "-ns1:isAccessAllowed", NULL) ||
+                                        "-ns1:isAccessAllowed", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__isAccessAllowed(soap, &soap_tmp___ns1__isAccessAllowed,
-                                      "-ns1:isAccessAllowed", NULL) ||
+                                      "-ns1:isAccessAllowed", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -978,11 +980,11 @@ int ICATPortBindingProxy::lucenePopulate(
   struct __ns1__lucenePopulateResponse *soap_tmp___ns1__lucenePopulateResponse;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/lucenePopulateRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__lucenePopulate.ns1__lucenePopulate_ = ns1__lucenePopulate_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -993,17 +995,17 @@ int ICATPortBindingProxy::lucenePopulate(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__lucenePopulate(soap, &soap_tmp___ns1__lucenePopulate,
-                                       "-ns1:lucenePopulate", NULL) ||
+                                       "-ns1:lucenePopulate", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__lucenePopulate(soap, &soap_tmp___ns1__lucenePopulate,
-                                     "-ns1:lucenePopulate", NULL) ||
+                                     "-ns1:lucenePopulate", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -1014,7 +1016,7 @@ int ICATPortBindingProxy::lucenePopulate(
       soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
   soap_tmp___ns1__lucenePopulateResponse =
-      soap_get___ns1__lucenePopulateResponse(soap, NULL,
+      soap_get___ns1__lucenePopulateResponse(soap, nullptr,
                                              "-ns1:lucenePopulateResponse",
                                              "ns1:lucenePopulateResponse");
   if (!soap_tmp___ns1__lucenePopulateResponse || soap->error)
@@ -1038,11 +1040,11 @@ int ICATPortBindingProxy::luceneClear(
   struct __ns1__luceneClearResponse *soap_tmp___ns1__luceneClearResponse;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/luceneClearRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__luceneClear.ns1__luceneClear_ = ns1__luceneClear_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -1053,17 +1055,17 @@ int ICATPortBindingProxy::luceneClear(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__luceneClear(soap, &soap_tmp___ns1__luceneClear,
-                                    "-ns1:luceneClear", NULL) ||
+                                    "-ns1:luceneClear", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__luceneClear(soap, &soap_tmp___ns1__luceneClear,
-                                  "-ns1:luceneClear", NULL) ||
+                                  "-ns1:luceneClear", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -1074,7 +1076,7 @@ int ICATPortBindingProxy::luceneClear(
       soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
   soap_tmp___ns1__luceneClearResponse = soap_get___ns1__luceneClearResponse(
-      soap, NULL, "-ns1:luceneClearResponse", "ns1:luceneClearResponse");
+      soap, nullptr, "-ns1:luceneClearResponse", "ns1:luceneClearResponse");
   if (!soap_tmp___ns1__luceneClearResponse || soap->error)
     return soap_recv_fault(soap, 0);
   if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
@@ -1096,11 +1098,11 @@ int ICATPortBindingProxy::luceneCommit(
   struct __ns1__luceneCommitResponse *soap_tmp___ns1__luceneCommitResponse;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/luceneCommitRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__luceneCommit.ns1__luceneCommit_ = ns1__luceneCommit_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -1111,17 +1113,17 @@ int ICATPortBindingProxy::luceneCommit(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__luceneCommit(soap, &soap_tmp___ns1__luceneCommit,
-                                     "-ns1:luceneCommit", NULL) ||
+                                     "-ns1:luceneCommit", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__luceneCommit(soap, &soap_tmp___ns1__luceneCommit,
-                                   "-ns1:luceneCommit", NULL) ||
+                                   "-ns1:luceneCommit", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -1132,7 +1134,7 @@ int ICATPortBindingProxy::luceneCommit(
       soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
   soap_tmp___ns1__luceneCommitResponse = soap_get___ns1__luceneCommitResponse(
-      soap, NULL, "-ns1:luceneCommitResponse", "ns1:luceneCommitResponse");
+      soap, nullptr, "-ns1:luceneCommitResponse", "ns1:luceneCommitResponse");
   if (!soap_tmp___ns1__luceneCommitResponse || soap->error)
     return soap_recv_fault(soap, 0);
   if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
@@ -1153,11 +1155,11 @@ int ICATPortBindingProxy::luceneSearch(
   struct __ns1__luceneSearch soap_tmp___ns1__luceneSearch;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/luceneSearchRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__luceneSearch.ns1__luceneSearch_ = ns1__luceneSearch_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -1168,17 +1170,17 @@ int ICATPortBindingProxy::luceneSearch(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__luceneSearch(soap, &soap_tmp___ns1__luceneSearch,
-                                     "-ns1:luceneSearch", NULL) ||
+                                     "-ns1:luceneSearch", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__luceneSearch(soap, &soap_tmp___ns1__luceneSearch,
-                                   "-ns1:luceneSearch", NULL) ||
+                                   "-ns1:luceneSearch", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -1206,11 +1208,11 @@ int ICATPortBindingProxy::luceneGetPopulating(
   struct __ns1__luceneGetPopulating soap_tmp___ns1__luceneGetPopulating;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/luceneGetPopulatingRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__luceneGetPopulating.ns1__luceneGetPopulating_ =
       ns1__luceneGetPopulating_;
   soap_begin(soap);
@@ -1224,18 +1226,18 @@ int ICATPortBindingProxy::luceneGetPopulating(
         soap_body_begin_out(soap) ||
         soap_put___ns1__luceneGetPopulating(
             soap, &soap_tmp___ns1__luceneGetPopulating,
-            "-ns1:luceneGetPopulating", NULL) ||
+            "-ns1:luceneGetPopulating", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
-      soap_put___ns1__luceneGetPopulating(soap,
-                                          &soap_tmp___ns1__luceneGetPopulating,
-                                          "-ns1:luceneGetPopulating", NULL) ||
+      soap_put___ns1__luceneGetPopulating(
+          soap, &soap_tmp___ns1__luceneGetPopulating,
+          "-ns1:luceneGetPopulating", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -1264,11 +1266,11 @@ int ICATPortBindingProxy::createMany(
   struct __ns1__createMany soap_tmp___ns1__createMany;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/createManyRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__createMany.ns1__createMany_ = ns1__createMany_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -1279,17 +1281,17 @@ int ICATPortBindingProxy::createMany(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__createMany(soap, &soap_tmp___ns1__createMany,
-                                   "-ns1:createMany", NULL) ||
+                                   "-ns1:createMany", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__createMany(soap, &soap_tmp___ns1__createMany,
-                                 "-ns1:createMany", NULL) ||
+                                 "-ns1:createMany", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -1318,11 +1320,11 @@ int ICATPortBindingProxy::deleteMany(
   struct __ns1__deleteManyResponse *soap_tmp___ns1__deleteManyResponse;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/deleteManyRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__deleteMany.ns1__deleteMany_ = ns1__deleteMany_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -1333,17 +1335,17 @@ int ICATPortBindingProxy::deleteMany(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__deleteMany(soap, &soap_tmp___ns1__deleteMany,
-                                   "-ns1:deleteMany", NULL) ||
+                                   "-ns1:deleteMany", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__deleteMany(soap, &soap_tmp___ns1__deleteMany,
-                                 "-ns1:deleteMany", NULL) ||
+                                 "-ns1:deleteMany", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);
@@ -1354,7 +1356,7 @@ int ICATPortBindingProxy::deleteMany(
       soap_recv_header(soap) || soap_body_begin_in(soap))
     return soap_closesock(soap);
   soap_tmp___ns1__deleteManyResponse = soap_get___ns1__deleteManyResponse(
-      soap, NULL, "-ns1:deleteManyResponse", "ns1:deleteManyResponse");
+      soap, nullptr, "-ns1:deleteManyResponse", "ns1:deleteManyResponse");
   if (!soap_tmp___ns1__deleteManyResponse || soap->error)
     return soap_recv_fault(soap, 0);
   if (soap_body_end_in(soap) || soap_envelope_end_in(soap) ||
@@ -1375,11 +1377,11 @@ int ICATPortBindingProxy::getEntityInfo(
   struct __ns1__getEntityInfo soap_tmp___ns1__getEntityInfo;
   if (endpoint)
     soap_endpoint = endpoint;
-  if (soap_endpoint == NULL)
+  if (soap_endpoint == nullptr)
     soap_endpoint = "https://icatisis.esc.rl.ac.uk:443/ICATService/ICAT";
-  if (soap_action == NULL)
+  if (soap_action == nullptr)
     soap_action = "http://icatproject.org/ICAT/getEntityInfoRequest";
-  soap->encodingStyle = NULL;
+  soap->encodingStyle = nullptr;
   soap_tmp___ns1__getEntityInfo.ns1__getEntityInfo_ = ns1__getEntityInfo_;
   soap_begin(soap);
   soap_serializeheader(soap);
@@ -1390,17 +1392,17 @@ int ICATPortBindingProxy::getEntityInfo(
     if (soap_envelope_begin_out(soap) || soap_putheader(soap) ||
         soap_body_begin_out(soap) ||
         soap_put___ns1__getEntityInfo(soap, &soap_tmp___ns1__getEntityInfo,
-                                      "-ns1:getEntityInfo", NULL) ||
+                                      "-ns1:getEntityInfo", nullptr) ||
         soap_body_end_out(soap) || soap_envelope_end_out(soap))
       return soap->error;
   }
   if (soap_end_count(soap))
     return soap->error;
-  if (soap_connect(soap, soap_url(soap, soap_endpoint, NULL), soap_action) ||
+  if (soap_connect(soap, soap_url(soap, soap_endpoint, nullptr), soap_action) ||
       soap_envelope_begin_out(soap) || soap_putheader(soap) ||
       soap_body_begin_out(soap) ||
       soap_put___ns1__getEntityInfo(soap, &soap_tmp___ns1__getEntityInfo,
-                                    "-ns1:getEntityInfo", NULL) ||
+                                    "-ns1:getEntityInfo", nullptr) ||
       soap_body_end_out(soap) || soap_envelope_end_out(soap) ||
       soap_end_send(soap))
     return soap_closesock(soap);

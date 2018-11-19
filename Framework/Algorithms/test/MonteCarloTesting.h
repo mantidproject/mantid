@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MONTECARLOTESTING_H
 #define MANTID_ALGORITHMS_MONTECARLOTESTING_H
 
@@ -25,7 +31,7 @@ namespace MonteCarloTesting {
 // -----------------------------------------------------------------------------
 class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(nextValue, double());
   MOCK_METHOD2(nextValue, double(double, double));
   MOCK_METHOD2(nextInt, int(int, int));
@@ -36,7 +42,7 @@ public:
   MOCK_METHOD2(setRange, void(const double, const double));
   MOCK_CONST_METHOD0(min, double());
   MOCK_CONST_METHOD0(max, double());
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 // -----------------------------------------------------------------------------
@@ -118,9 +124,9 @@ inline Mantid::API::Sample createSamplePlusContainer() {
 
 inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   using Mantid::API::Sample;
+  using Mantid::Geometry::IObject_sptr;
   using Mantid::Kernel::Material;
   using Mantid::Kernel::V3D;
-  using Mantid::Geometry::IObject_sptr;
   using Mantid::PhysicalConstants::getNeutronAtom;
 
   using namespace Mantid::Geometry;
@@ -148,6 +154,6 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   }
   return testSample;
 }
-}
+} // namespace MonteCarloTesting
 
 #endif // MANTID_ALGORITHMS_MONTECARLOTESTING_H

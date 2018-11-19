@@ -7,7 +7,7 @@
 # is created.
 # The global ENABLE_WORKBENCH option controls if a Qt5 target
 # is created.
-# To limit the Qt version for a specfic library use
+# To limit the Qt version for a specific library use
 # QT_VERSION, e.g.
 #
 # mtd_add_qt_library ( QT_VERSION 5
@@ -35,7 +35,7 @@ endfunction()
 # is created.
 # The global ENABLE_WORKBENCH option controls if a Qt5 target
 # is created.
-# To limit the Qt version for a specfic library use
+# To limit the Qt version for a specific library use
 # QT_VERSION, e.g.
 #
 # mtd_add_qt_executable ( QT_VERSION 5
@@ -51,7 +51,7 @@ function (mtd_add_qt_executable)
       mtd_add_qt_target (EXECUTABLE QT_VERSION ${_ver} ${ARGN})
     endif ()
     if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
-      mtd_add_qt_target (EXCUTABLE QT_VERSION ${_ver} ${ARGN})
+      mtd_add_qt_target (EXECUTABLE QT_VERSION ${_ver} ${ARGN})
     endif ()
   endforeach()
 endfunction()
@@ -62,6 +62,7 @@ endfunction()
 # option: NO_SUFFIX If included, no suffix is added to the target name
 # option: EXCLUDE_FROM_ALL If included, the target is excluded from target ALL
 # keyword: TARGET_NAME The name of the target. The target will have -Qt{QT_VERSION} appended to it.
+# keyword: OUTPUT_NAME An optional filename for the library
 # keyword: QT_VERSION The major version of Qt to build against
 # keyword: SRC .cpp files to include in the target build
 # keyword: QT4_SRC .cpp files to include in a Qt4 build
@@ -92,7 +93,7 @@ endfunction()
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
   set (oneValueArgs
-    TARGET_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR
+    TARGET_NAME OUTPUT_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR
     INSTALL_DIR INSTALL_DIR_BASE PRECOMPILED)
   set (multiValueArgs SRC UI MOC
     NOMOC RES DEFS QT4_DEFS QT5_DEFS INCLUDE_DIRS SYSTEM_INCLUDE_DIRS LINK_LIBS
@@ -137,9 +138,12 @@ function (mtd_add_qt_target)
 
   if (PARSED_NO_SUFFIX)
     set (_target ${PARSED_TARGET_NAME})
+    set (_output_name ${PARSED_OUTPUT_NAME})
   else()
     _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _target
                        ${PARSED_TARGET_NAME})
+    _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _output_name
+                       ${PARSED_OUTPUT_NAME})
   endif()
   _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _mtd_qt_libs
                      ${PARSED_MTD_QT_LINK_LIBS})
@@ -164,6 +168,9 @@ function (mtd_add_qt_target)
   endif()
 
   # Target properties
+  if ( _output_name )
+    set_target_properties ( ${_target} PROPERTIES OUTPUT_NAME ${_output_name} )
+  endif ()
   if (PARSED_OUTPUT_DIR_BASE)
     set ( _output_dir ${PARSED_OUTPUT_DIR_BASE}/qt${PARSED_QT_VERSION} )
     if (PARSED_OUTPUT_SUBDIR)
@@ -214,13 +221,11 @@ function (mtd_add_qt_target)
       _append_qt_suffix (AS_DIR VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _install_dir
                          ${PARSED_INSTALL_DIR_BASE})
     else()
-      set ( _install_dir ${LIB_DIR} )
+      set ( _install_dir "" )
+      message ( FATAL_ERROR "Target: ${_target} is configured to build but has no install destination" )
     endif()
-    # Hack: Only install Qt4 to packages for now...
-    if (${PARSED_QT_VERSION} EQUAL 4)
-      install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
-    endif()
-  endif()
+    mtd_install_qt_library ( ${PARSED_QT_VERSION} ${_target} "${SYSTEM_PACKAGE_TARGET}" ${_install_dir} )
+  endif ()
 
   # Group into folder for VS
   set_target_properties ( ${_target} PROPERTIES FOLDER "Qt${PARSED_QT_VERSION}" )
@@ -234,11 +239,27 @@ function (mtd_add_qt_target)
 
 endfunction()
 
+# Create an install rule for a Qt target
+#  - qt_version The version of Qt targeted
+#  - target The name of the target
+#  - install_target_type The type of target that should be installed. See https://cmake.org/cmake/help/latest/command/install.html?highlight=install
+#  - install_dir A relative directory to install_prefix
+function (mtd_install_qt_library qt_version target install_target_type install_dir )
+    if ( qt_version EQUAL 4 OR (qt_version EQUAL 5 AND ${PACKAGE_WORKBENCH}) )
+      install ( TARGETS ${target} ${install_target_type} DESTINATION ${install_dir} )
+    endif ()
+endfunction ()
+
 function (mtd_add_qt_tests)
   _qt_versions(_qt_vers ${ARGN})
-  # Create targets
+  # Create test executables
   foreach(_ver ${_qt_vers})
-    mtd_add_qt_test_executable (QT_VERSION ${_ver} ${ARGN})
+    if (_ver EQUAL 4 AND ENABLE_MANTIDPLOT)
+      mtd_add_qt_test_executable (QT_VERSION ${_ver} ${ARGN})
+    endif ()
+    if (_ver EQUAL 5 AND ENABLE_WORKBENCH)
+      mtd_add_qt_test_executable (QT_VERSION ${_ver} ${ARGN})
+    endif ()
   endforeach()
 endfunction()
 

@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataReductionTab.h"
 
+#include "IndirectDataReduction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
-#include "IndirectDataReduction.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -37,7 +43,8 @@ void IndirectDataReductionTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
     m_tabRunning = true;
-    emit updateRunButton(false, "Running...", "Running data reduction...");
+    emit updateRunButton(false, "disable", "Running...",
+                         "Running data reduction...");
     run();
   } else {
     g_log.warning("Failed to validate indirect tab input!");
@@ -54,7 +61,8 @@ void IndirectDataReductionTab::tabExecutionComplete(bool error) {
   UNUSED_ARG(error);
   if (m_tabRunning) {
     m_tabRunning = false;
-    emit updateRunButton();
+    auto const enableOutputButtons = error == false ? "enable" : "disable";
+    emit updateRunButton(true, enableOutputButtons);
   }
 }
 
@@ -228,4 +236,4 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

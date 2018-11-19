@@ -1,21 +1,27 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <cmath>
 #include <limits>
 #include <stdexcept>
 
 #include "MantidKernel/Logger.h"
 
-#include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
-#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
-#include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
+#include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
 #include <pqPipelineRepresentation.h>
+#include <pqSMAdaptor.h>
 #include <pqScalarsToColors.h>
 #include <pqServerManagerModel.h>
-#include <pqSMAdaptor.h>
 
 #include "vtk_jsoncpp.h"
 #include <vtkCallbackCommand.h>
@@ -467,6 +473,6 @@ void ColorUpdater::logScaleClickedCallbackFunc(vtkObject *caller,
   csel->onSetLogScale(logState);
 }
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

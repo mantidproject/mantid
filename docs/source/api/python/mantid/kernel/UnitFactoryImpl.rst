@@ -2,7 +2,7 @@
  UnitFactoryImpl
 =================
 
-This a python binding to the C++ class Mantid::Kernel::UnitFactoryImpl.
+This is a Python binding to the C++ class Mantid::Kernel::UnitFactoryImpl.
 
 
 .. module:`mantid.kernel`

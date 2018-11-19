@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_SETUNCERTAINTIESTEST_H_
 #define MANTID_ALGORITHMS_SETUNCERTAINTIESTEST_H_
 
@@ -19,10 +25,10 @@ public:
   }
 
   /**
-    * Create and execute the algorithm in the specified mode.
-  * @param mode The name of the SetError property SetUncertainties
-  * @return The name that the output workspace will be registered as.
-  */
+   * Create and execute the algorithm in the specified mode.
+   * @param mode The name of the SetError property SetUncertainties
+   * @return The name that the output workspace will be registered as.
+   */
   API::MatrixWorkspace_sptr runAlg(const std::string &mode) {
     // random data mostly works
     auto inWksp = WorkspaceCreationHelper::create1DWorkspaceRand(30, true);

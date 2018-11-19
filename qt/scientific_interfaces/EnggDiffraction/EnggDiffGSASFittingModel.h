@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_
 
@@ -51,8 +57,8 @@ public:
 
   void saveRefinementResultsToHDF5(
       const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
-          refinementResultSets,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets,
       const std::string &filename) const override;
 
 protected:
@@ -75,8 +81,8 @@ protected:
 protected slots:
   void processRefinementsComplete(
       Mantid::API::IAlgorithm_sptr alg,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
-          refinementResultSets);
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets);
 
   void processRefinementFailed(const std::string &failureMessage);
 
@@ -123,7 +129,7 @@ private:
   }
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_

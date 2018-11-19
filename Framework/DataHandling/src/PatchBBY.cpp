@@ -1,10 +1,16 @@
-#include "MantidAPI/FileProperty.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/PatchBBY.h"
-#include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 
-#include <Poco/TemporaryFile.h>
 #include <Poco/String.h>
+#include <Poco/TemporaryFile.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -311,5 +317,5 @@ void PatchBBY::exec() {
     throw std::runtime_error("unable to patch");
 }
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid

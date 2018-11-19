@@ -1,7 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -118,5 +124,5 @@ pointer.
 IMDDimension_sptr MDHistoDimensionBuilder::create() {
   return IMDDimension_sptr(createRaw());
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

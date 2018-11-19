@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef QXYTEST_H_
 #define QXYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/Qxy.h"
-#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAlgorithms/Qxy.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

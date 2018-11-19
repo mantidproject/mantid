@@ -27,6 +27,7 @@ Guides
    BuildingWithCMake
    BuildingVATES
    Standards/index
+   Testing/index
    DoxygenSetup
    Python3
 
@@ -38,6 +39,9 @@ Guides
 
 :doc:`Standards <Standards/index>`
    Details of coding and documentation standards for the project. Includes specifics regarding algorithms.
+
+:doc:`Testing <Testing/index>`
+   Details of unscripted and acceptance testing.
 
 :doc:`DoxygenSetup`
    Configure a doxygen build locally.
@@ -104,6 +108,8 @@ Tools
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
+   GettingStartedWithPyCharm
+   Eclipse
 
 :doc:`ToolsOverview`
    Describes ``class_maker``, ``valgrind`` and related tools.
@@ -117,6 +123,12 @@ Tools
 :doc:`VisualStudioBuildImpact`
    Provides a script to reduce the impact of Visual Studio on machine performance.
 
+:doc:`GettingStartedWithPyCharm`
+   Describes how to set up the PyCharm interpreter, and debug python code (Windows/Linux only).
+
+:doc:`Eclipse`
+   Guide to setting up Eclipse on Ubuntu
+
 =======
 Testing
 =======
@@ -127,6 +139,7 @@ Testing
    RunningTheUnitTests
    DebuggingUnitTests
    UnitTestGoodPractice
+   IndividualTicketTesting
    WritingPerformanceTests
    SystemTests
    DataFilesForTesting
@@ -140,6 +153,9 @@ Testing
 
 :doc:`UnitTestGoodPractice`
    Guidance on writing good unit tests.
+
+:doc:`IndividualTicketTesting`
+   What to expect and inspect when reviewing an individual contribution to mantid.
 
 :doc:`WritingPerformanceTests`
    A walk through of how to write a performance test.
@@ -192,6 +208,6 @@ Component Overviews
    MultiThreadingInAlgorithms
    PythonVSCppAlgorithms
    RemoteJobSubmissionAPI
+   Workbench
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation
-

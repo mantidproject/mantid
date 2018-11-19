@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ReflGenericDataProcessorPresenterFactory.h"
 #include "MantidKernel/make_unique.h"
 
@@ -7,8 +13,8 @@ namespace CustomInterfaces {
 using namespace MantidQt::MantidWidgets;
 
 /**
-* Creates a Reflectometry Data Processor Presenter
-*/
+ * Creates a Reflectometry Data Processor Presenter
+ */
 std::unique_ptr<ReflDataProcessorPresenter>
 ReflGenericDataProcessorPresenterFactory::create(int group) {
 
@@ -115,5 +121,5 @@ ReflGenericDataProcessorPresenterFactory::create(int group) {
       whitelist, preprocessMap, processor, postprocessor, group, postprocessMap,
       "LoadNexus");
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

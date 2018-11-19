@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
 This module is a wrapper around a set of instrument parameters (to be read from a YAML file)
 and methods which then call either Chop.py or MulpyRep.py to do the resolution calculations.
@@ -570,7 +576,7 @@ class Moderator(object):
             return np.sqrt(self.getAnalyticWidthSquared(Ei))
 
     def getFlux(self, Ei):
-        """ Returns the white beam flux estimate from either measured data (prefered) or analytical model (backup) """
+        """ Returns the white beam flux estimate from either measured data (preferred) or analytical model (backup) """
         return self.getMeasuredFlux(Ei) if hasattr(self, 'flux_interp') else self.getAnalyticFlux(Ei)
 
     def getAnalyticFlux(self, Ei):
@@ -755,7 +761,7 @@ class Instrument(object):
         Inputs:
             etrans - list of numpy array of energy transfers to calculate for (meV) [default: linspace(0.05Ei, 0.95Ei, 19)]
             ei - incident energy in meV [default: preset energy]
-            omega - chopper frequncy in Hz  [default: preset frequency]
+            omega - chopper frequency in Hz  [default: preset frequency]
 
         Output:
             van - the incoherent (Vanadium) energy FWHM at etrans in meV

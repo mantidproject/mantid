@@ -1,26 +1,32 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_RUNCOMBINATIONHELPERTEST_H_
 #define MANTID_ALGORITHMS_RUNCOMBINATIONHELPERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidHistogramData/HistogramDx.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/HistogramDx.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::RunCombinationHelper;
-using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::Algorithms::CreateSampleWorkspace;
+using Mantid::Algorithms::GroupWorkspaces;
+using Mantid::Algorithms::RunCombinationHelper;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;

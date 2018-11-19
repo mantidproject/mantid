@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * MockObjects.h
  *
@@ -23,7 +29,7 @@ using boost::regex;
 
 namespace {
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /*------------------------------------------------------------
  Mock Peak Transform
@@ -120,6 +126,6 @@ public:
   MOCK_CONST_METHOD0(getDetectorPositionNoCheck, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());
 };
-}
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+} // namespace
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTIDGEOMETRYTEST_MOCKOBJECTS_H_ */

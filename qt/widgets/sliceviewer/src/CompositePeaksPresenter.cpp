@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <stdexcept>
@@ -483,7 +489,7 @@ public:
     return result;
   }
 };
-}
+} // namespace
 
 CompositePeaksPresenter::SubjectContainer::iterator
 CompositePeaksPresenter::getPresenterIteratorFromName(const QString &name) {
@@ -559,7 +565,7 @@ public:
     return candidate.get() == m_toFind;
   }
 };
-}
+} // namespace
 
 /**
  * Zoom to a peak
@@ -714,5 +720,5 @@ bool CompositePeaksPresenter::addPeakAt(double plotCoordsPointX,
   }
   return result;
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

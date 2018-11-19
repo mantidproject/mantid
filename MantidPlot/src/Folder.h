@@ -30,8 +30,8 @@
 #ifndef FOLDER_H
 #define FOLDER_H
 
-#include <QObject>
 #include <QEvent>
+#include <QObject>
 #include <QTreeWidget>
 
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
@@ -134,7 +134,7 @@ private:
   /// Recursively save subwindows and subfolders
   QString saveFolderSubWindows(ApplicationWindow *app, Folder *,
                                int &windowCount);
-  /// Save footer infromation about the folder
+  /// Save footer information about the folder
   QString saveFolderFooter();
 
 public slots:

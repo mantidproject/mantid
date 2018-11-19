@@ -1,17 +1,23 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_CREATELOGPROPERTYTABLETEST_H_
 #define MANTID_ALGORITHMS_CREATELOGPROPERTYTABLETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAlgorithms/CreateLogPropertyTable.h"
 #include "MantidDataHandling/Load.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <string>
 #include <vector>

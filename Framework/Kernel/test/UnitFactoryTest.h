@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef UNITFACTORYTEST_H_
 #define UNITFACTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::Kernel;

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import tempfile
@@ -88,7 +94,6 @@ def create_user_file(user_file_content):
 
 def make_sample_user_file(gravity ='ON'):
     return base_user_file.format(gravity)
-
 
 sample_user_file = make_sample_user_file(gravity ='ON')
 sample_user_file_gravity_OFF = make_sample_user_file(gravity ='OFF')

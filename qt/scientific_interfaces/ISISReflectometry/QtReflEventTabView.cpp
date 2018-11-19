@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "QtReflEventTabView.h"
 #include "QtReflEventView.h"
 #include "ReflEventTabPresenter.h"
@@ -7,8 +13,8 @@ namespace CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param parent :: [input] The parent of this widget
-*/
+ * @param parent :: [input] The parent of this widget
+ */
 QtReflEventTabView::QtReflEventTabView(QWidget *parent) {
 
   UNUSED_ARG(parent);
@@ -17,7 +23,7 @@ QtReflEventTabView::QtReflEventTabView(QWidget *parent) {
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
-*/
+ */
 QtReflEventTabView::~QtReflEventTabView() {}
 
 /**
@@ -40,8 +46,8 @@ void QtReflEventTabView::initLayout() {
 }
 
 /** Returns the presenter managing this view
-* @return :: A pointer to the presenter
-*/
+ * @return :: A pointer to the presenter
+ */
 IReflEventTabPresenter *QtReflEventTabView::getPresenter() const {
 
   return m_presenter.get();

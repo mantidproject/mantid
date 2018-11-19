@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Logger.h"
 
 #include "MantidKernel/ThreadSafeLogStream.h"
@@ -15,7 +21,7 @@ namespace Kernel {
 namespace {
 // We only need a single NullStream object
 Poco::NullOutputStream NULL_STREAM;
-}
+} // namespace
 
 static const std::string PriorityNames_data[] = {
     "NOT_USED",         "PRIO_FATAL",   "PRIO_CRITICAL",
@@ -325,10 +331,10 @@ void Logger::log(const std::string &message, Logger::Priority priority) {
 }
 
 /**
-* Log a given message at a given priority
-* @param priority :: The priority level
-* @return :: the stream
-*/
+ * Log a given message at a given priority
+ * @param priority :: The priority level
+ * @return :: the stream
+ */
 std::ostream &Logger::getLogStream(Logger::Priority priority) {
   if (!m_enabled)
     return NULL_STREAM;

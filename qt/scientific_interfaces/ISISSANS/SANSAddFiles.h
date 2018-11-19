@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_
 #define MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_
 
-#include "ui_SANSRunWindow.h"
-#include "SANSConstants.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "SANSConstants.h"
+#include "ui_SANSRunWindow.h"
 #include <Poco/NObserver.h>
 #include <QString>
 
@@ -98,7 +104,7 @@ private slots:
   /// sets the binning options
   void setBinningOptions(bool enable);
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_

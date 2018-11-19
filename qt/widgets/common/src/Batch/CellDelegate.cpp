@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/CellDelegate.h"
 #include "MantidQtWidgets/Common/Batch/CellStandardItem.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
@@ -37,6 +43,6 @@ void CellDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
   painter->drawRect(option.rect.adjusted(1, 1, -1, -1));
   painter->restore();
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

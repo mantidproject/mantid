@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*
  * PeakHKLErrors.h
  *
@@ -10,14 +16,12 @@
 #include "MantidKernel/System.h"
 
 #include "MantidAPI/IFunction.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -26,26 +30,6 @@ namespace Crystal {
 
   @author Ruth Mikkelson, SNS,ORNL
   @date 01/26/2013
- Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport PeakHKLErrors : public API::ParamFunction,
                                 public API::IFunction1D {
@@ -67,22 +51,22 @@ public:
   void init() override;
 
   /**
-     * Creates a new peak, matching the old peak except for a different
-    *instrument.
-     *
-     * The Time of flightis the same except offset by T0. L0 should be the L0
-    *for the new instrument.
-     * It is added as a parameter in case the instrument will have the initial
-    *flight path adjusted later.
-     *  NOTE: the wavelength is changed.
-     *
-     * @param peak_old - The old peak
-     * @param instrNew -The new instrument
-     * @param T0 :
-     * @param L0 :
-     * @return The new peak with the new instrument( adjusted with the
-    *parameters) and time adjusted.
-     */
+   * Creates a new peak, matching the old peak except for a different
+   *instrument.
+   *
+   * The Time of flightis the same except offset by T0. L0 should be the L0
+   *for the new instrument.
+   * It is added as a parameter in case the instrument will have the initial
+   *flight path adjusted later.
+   *  NOTE: the wavelength is changed.
+   *
+   * @param peak_old - The old peak
+   * @param instrNew -The new instrument
+   * @param T0 :
+   * @param L0 :
+   * @return The new peak with the new instrument( adjusted with the
+   *parameters) and time adjusted.
+   */
   static DataObjects::Peak createNewPeak(const Geometry::IPeak &peak_old,
                                          Geometry::Instrument_sptr instrNew,
                                          double T0, double L0);
@@ -170,7 +154,7 @@ private:
 
   void setUpOptRuns();
 };
-}
-}
+} // namespace Crystal
+} // namespace Mantid
 
 #endif /* PEAKHKLERRORS_H_ */

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -29,7 +35,8 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(
 
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
   m_yTitle = MantidQt::API::PlotAxis((m_dataIsNormalized || m_isDistribution),
-                                     workspace).title();
+                                     workspace)
+                 .title();
 
   // Calculate the min and max values
   calculateYMinAndMax();
@@ -43,7 +50,7 @@ QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copy() const {
 /**
  * @param workspace A new workspace source
  * @return
-*/
+ */
 QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copyWithNewSource(
     const Mantid::API::MatrixWorkspace &workspace) const {
   return new QwtWorkspaceSpectrumData(workspace, m_wsIndex, logScaleY(),

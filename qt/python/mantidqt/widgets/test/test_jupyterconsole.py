@@ -1,19 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 #
-#    Copyright (C) 2017 mantidproject
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import (absolute_import)
 
 # system imports
@@ -26,15 +19,14 @@ from qtpy import QT_VERSION
 
 # local package imports
 from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 
 
 PRE_IPY5_PY3_QT5 = (sys.version_info.major == 3 and IPython.version_info[0] < 5 and int(QT_VERSION[0]) == 5)
 SKIP_REASON = "Segfault within readline for IPython < 5 and Python 3"
 
 
-@requires_qapp
-class InProcessJupyterConsoleTest(unittest.TestCase):
+class InProcessJupyterConsoleTest(GuiTest):
 
     @unittest.skipIf(PRE_IPY5_PY3_QT5, SKIP_REASON)
     def test_construction_raises_no_errors(self):

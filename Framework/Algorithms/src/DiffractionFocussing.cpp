@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DiffractionFocussing.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Unit.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/Unit.h"
 
 #include <fstream>
 #include <limits>
@@ -23,10 +29,10 @@ DiffractionFocussing::DiffractionFocussing()
 }
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace;
 using API::FileProperty;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -259,5 +265,5 @@ DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   return detectorGroups;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

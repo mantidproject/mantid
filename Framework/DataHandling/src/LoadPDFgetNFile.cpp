@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadPDFgetNFile.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -63,7 +69,7 @@ int LoadPDFgetNFile::confidence(Kernel::FileDescriptor &descriptor) const {
 
 //----------------------------------------------------------------------------------------------
 /** Define input
-  */
+ */
 void LoadPDFgetNFile::init() {
   const std::vector<std::string> exts{".sq",  ".sqa",  ".sqb", ".gr",
                                       ".ain", ".braw", ".bsmo"};
@@ -82,7 +88,7 @@ void LoadPDFgetNFile::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main executor
-  */
+ */
 void LoadPDFgetNFile::exec() {
   // 1. Parse input file
   std::string inpfilename = getProperty("Filename");
@@ -97,9 +103,9 @@ void LoadPDFgetNFile::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Parse PDFgetN data file to
-  * 1. a 2D vector for column data
-  * 2. a 1D string vector for column name
-  */
+ * 1. a 2D vector for column data
+ * 2. a 1D string vector for column name
+ */
 void LoadPDFgetNFile::parseDataFile(std::string filename) {
   // 1. Open file
   std::ifstream ifile;
@@ -153,7 +159,7 @@ void LoadPDFgetNFile::parseDataFile(std::string filename) {
 
 //----------------------------------------------------------------------------------------------
 /** Check whether the line starts with some specific character
-  */
+ */
 bool LoadPDFgetNFile::startsWith(const std::string &s,
                                  const std::string &header) const {
   bool answer = true;
@@ -176,7 +182,7 @@ bool LoadPDFgetNFile::startsWith(const std::string &s,
 }
 
 /** Parse column name line staring with \#L
-  */
+ */
 void LoadPDFgetNFile::parseColumnNameLine(std::string line) {
   // 1. Split
   vector<string> terms;
@@ -208,7 +214,7 @@ void LoadPDFgetNFile::parseColumnNameLine(std::string line) {
 }
 
 /** Parse data line
-  */
+ */
 void LoadPDFgetNFile::parseDataLine(string line) {
   // 1. Trim (stripg) and Split
   boost::trim(line);
@@ -331,8 +337,8 @@ void LoadPDFgetNFile::checkSameSize(const std::vector<size_t> &numptsvec,
 }
 
 /** Generate output data workspace
-  * Assumption.  One data set must contain more than 1 element.
-  */
+ * Assumption.  One data set must contain more than 1 element.
+ */
 void LoadPDFgetNFile::generateDataWorkspace() {
   // 0. Check
   if (mData.empty()) {

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_KERNEL_MDUNITFACTORYTEST_H_
 #define MANTID_KERNEL_MDUNITFACTORYTEST_H_
 
@@ -14,7 +20,7 @@ using namespace testing;
 /**
  * Helper Mock MDUnit
  */
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockMDUnit : public MDUnit {
 public:
   MOCK_CONST_METHOD0(getUnitLabel, UnitLabel());
@@ -31,7 +37,7 @@ public:
   MOCK_CONST_METHOD1(createRaw, MDUnit *(const std::string &));
   MOCK_CONST_METHOD1(canInterpret, bool(const std::string &));
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 class MDUnitFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

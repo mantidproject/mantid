@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef PROPERTYHISTORYTEST_H_
 #define PROPERTYHISTORYTEST_H_
 
 #include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyHistory.h"
 
-#include <cxxtest/TestSuite.h>
 #include <boost/lexical_cast.hpp>
+#include <cxxtest/TestSuite.h>
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -75,9 +81,9 @@ public:
   }
 
   /**
-    * Test the isEmptyDefault method returns false if the value of EMPTY_INT is
-    * not the default
-    */
+   * Test the isEmptyDefault method returns false if the value of EMPTY_INT is
+   * not the default
+   */
   void testIsEmptyDefault_NotDefault() {
     PropertyHistory prop("arg",
                          boost::lexical_cast<std::string>(Mantid::EMPTY_INT()),
@@ -86,9 +92,9 @@ public:
   }
 
   /**
-    * Test the isEmptyDefault method returns false if the parameter type is not
-    * "number"
-    */
+   * Test the isEmptyDefault method returns false if the parameter type is not
+   * "number"
+   */
   void testIsEmptyDefault_WrongType() {
     PropertyHistory prop("arg",
                          boost::lexical_cast<std::string>(Mantid::EMPTY_INT()),
@@ -97,8 +103,8 @@ public:
   }
 
   /**
-    * Test the isEmptyDefault method returns false if the value is not EMPTY_XXX
-    */
+   * Test the isEmptyDefault method returns false if the value is not EMPTY_XXX
+   */
   void testIsEmptyDefault_NotEmpty() {
     PropertyHistory prop(
         "arg", boost::lexical_cast<std::string>(Mantid::EMPTY_INT() - 1),

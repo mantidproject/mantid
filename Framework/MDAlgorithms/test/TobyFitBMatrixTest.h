@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_TOBYFITBMATRIXTEST_H_
 #define MANTID_MDALGORITHMS_TOBYFITBMATRIXTEST_H_
 
-#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h"
-#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
-#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
+#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h"
+#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
+#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FermiChopperModel.h"

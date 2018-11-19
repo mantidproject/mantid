@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONSTEST_H_
 #define MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 using Mantid::Algorithms::PDDetermineCharacterizations;

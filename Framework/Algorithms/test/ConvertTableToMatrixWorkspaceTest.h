@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CONVERTTABLETOMATRIXWORKSPACETEST_H_
 #define CONVERTTABLETOMATRIXWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConvertTableToMatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/ConvertTableToMatrixWorkspace.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid;

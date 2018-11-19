@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_FITPEAKSTEST_H_
 #define MANTID_ALGORITHMS_FITPEAKSTEST_H_
 
@@ -8,7 +14,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FitPeaks.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -24,9 +29,9 @@ using namespace Mantid::DataObjects;
 
 using namespace std;
 
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 class FitPeaksTest : public CxxTest::TestSuite {
 private:
@@ -340,7 +345,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test on single peak on partial spectra
-    */
+   */
   void Ntest_singlePeakMultiSpectra() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
@@ -397,7 +402,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
-    */
+   */
   void Ntest_SingleSpectrum3Peaks() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
@@ -630,8 +635,8 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on VULCAN's data including 2 different starting value of peak
    * profiles
-    */
-  void Gtest_multiple_peak_profiles() {
+   */
+  void test_multiple_peak_profiles() {
     // Generate input workspace
     std::string input_ws_name = loadVulcanHighAngleData();
     API::MatrixWorkspace_sptr input_ws =
@@ -736,7 +741,7 @@ public:
    * PeakRange='1.06,1.09',
    * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
    * PeakPositionTolerance=0.02)
-    */
+   */
   void gen_PeakParameters(vector<string> &parnames, vector<double> &parvalues) {
     parnames.clear();
     parvalues.clear();
@@ -927,7 +932,7 @@ public:
   /** Generate a workspace contains peaks with profile as back to back
    * exponenential convoluted
    * by Gaussian
-    */
+   */
   std::string loadVulcanHighAngleData() {
     DataHandling::LoadNexusProcessed loader;
     loader.initialize();

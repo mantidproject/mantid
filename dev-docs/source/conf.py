@@ -3,28 +3,20 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import re
 import os
-from warnings import warn
 
+from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme
 
 
-VERSION_STR_RE = re.compile(r'^\s*return "(\d+\.\d+\.(\d{8}\.\d{4}|\d+))";$')
-
-
-def _version_string_from_cpp(filename):
-    vers_cpp_lines = open(filename, 'r').readlines()
-    version_str = '0.0.0'
-    for line in vers_cpp_lines:
-        match = VERSION_STR_RE.match(line.rstrip())
-        if match is not None:
-            version_str = match.group(1)
-            break
-
-    return version_str
-
 # -- General configuration ------------------------------------------------
+
+if sphinx_version > "1.6":
+    def setup(app):
+        """Called automatically by Sphinx when starting the build process
+        """
+        app.add_stylesheet("custom.css")
+
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -53,20 +45,11 @@ copyright = u'2007-2018, Mantid'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-# This is read from Framework/Kernel/src/MantidVersion.cpp to avoid the requirement of having
-# a built copy of mantid
-version_cpp_path = os.path.relpath(os.path.join('..', '..', 'Framework',
-                                                'Kernel', 'src', 'MantidVersion.cpp'))
-try:
-    version_str = _version_string_from_cpp(version_cpp_path)
-except StandardError as ex:
-    warn("WARNING: Unable to parse version from MantidVersion: {}\nSetting version string to 0.0.0".format(str(ex)))
-    version_str = '0.0.0'
 
 # The short X.Y version.
-version = ".".join(version_str.split(".")[:2])
+version = "master"
 # The full version, including alpha/beta/rc tags.
-release = version_str
+release = version
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -107,9 +90,12 @@ html_static_path = ['_static']
 # directly to the root of the documentation.
 #html_extra_path = []
 
-# If true, SmartyPants will be used to convert quotes and dashes to
+# If true, Smart Quotes will be used to convert quotes and dashes to
 # typographically correct entities.
-html_use_smartypants = True
+if sphinx_version < "1.7":
+    html_use_smartypants = True
+else:
+    smartquotes = True
 
 # Hide the Sphinx usage as we reference it on github instead.
 html_show_sphinx = False

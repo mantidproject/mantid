@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import Load
 from mantid.api import WorkspaceGroup, AlgorithmManager
@@ -575,6 +581,39 @@ def scale_detectors(workspace_name, e_mode='Indirect'):
 # -------------------------------------------------------------------------------
 
 
+def get_group_from_string(grouping_string):
+    if '-' in grouping_string:
+        return list(create_range_from(grouping_string, '-'))
+    elif ':' in grouping_string:
+        return list(create_range_from(grouping_string, ':'))
+    elif '+' in grouping_string:
+        return [int(i) for i in grouping_string.split('+')]
+    else:
+        return [int(grouping_string)]
+
+
+def create_group_from_string(group_detectors, grouping_string):
+    group_detectors.setProperty("WorkspaceIndexList", get_group_from_string(grouping_string))
+    group_detectors.setProperty("OutputWorkspace", "__temp")
+    group_detectors.execute()
+    return group_detectors.getProperty("OutputWorkspace").value
+
+
+def conjoin_workspaces(*workspaces):
+    from mantid.simpleapi import AppendSpectra
+
+    conjoined = workspaces[0]
+    for workspace in workspaces[1:]:
+        conjoined = AppendSpectra(conjoined, workspace, StoreInADS=False)
+    return conjoined
+
+
+def group_on_string(group_detectors, grouping_string):
+    grouping_string.replace(' ', '')
+    groups = [create_group_from_string(group_detectors, group) for group in grouping_string.split(',')]
+    return conjoin_workspaces(*groups)
+
+
 def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
@@ -667,7 +706,10 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
 
     elif grouping_method == 'Custom':
-        group_detectors.setProperty("GroupingPattern", group_string)
+        # Mask detectors if required
+        if len(masked_detectors) > 0:
+            _mask_detectors(workspace, masked_detectors)
+        return group_on_string(group_detectors, group_string)
 
     else:
         raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))
@@ -929,7 +971,7 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
     @param multi_frame_rebin_string Rebin string for multiple frame rebinning
     @param num_bins Max number of bins in input frames
     """
-    from mantid.simpleapi import (Rebin, RebinToWorkspace, SortXAxis)
+    from mantid.simpleapi import (Rebin, SortXAxis)
 
     if rebin_string is not None:
         if multi_frame_rebin_string is not None and num_bins is not None:
@@ -952,9 +994,18 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
     else:
         try:
             # If user does not want to rebin then just ensure uniform binning across spectra
-            RebinToWorkspace(WorkspaceToRebin=workspace_name,
-                             WorkspaceToMatch=workspace_name,
-                             OutputWorkspace=workspace_name)
+            # extract the binning parameters from the first spectrum.
+            # there is probably a better way to calculate the binning parameters, but this
+            # gets the right answer.
+            xaxis = mtd[workspace_name].readX(0)
+            params = []
+            for i, x in enumerate(xaxis):
+                params.append(x)
+                if i < len(xaxis) -1:
+                    params.append(xaxis[i+1] - x) # delta
+            Rebin(InputWorkspace=workspace_name,
+                  OutputWorkspace=workspace_name,
+                  Params=params)
         except RuntimeError:
             logger.warning('Rebinning failed, will try to continue anyway.')
 

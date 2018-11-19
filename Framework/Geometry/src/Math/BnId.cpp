@@ -1,13 +1,19 @@
-#include <fstream>
-#include <cmath>
-#include <vector>
-#include <set>
-#include <map>
-#include <stack>
-#include <sstream>
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <algorithm>
-#include <iterator>
+#include <cmath>
+#include <fstream>
 #include <functional>
+#include <iterator>
+#include <map>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <vector>
 
 #include "MantidGeometry/Math/BnId.h"
 

@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_SINQ_POLDIINDEXKNOWNCOMPOUNDSTEST_H_
 #define MANTID_SINQ_POLDIINDEXKNOWNCOMPOUNDSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidSINQ/PoldiIndexKnownCompounds.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/V3D.h"
+#include "MantidSINQ/PoldiIndexKnownCompounds.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/V3D.h"
 #include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::Poldi;

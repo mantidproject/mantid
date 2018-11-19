@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/PeakViewFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
@@ -61,7 +67,7 @@ std::vector<Mantid::Kernel::V3D> getDirectionsForEllipticalPeak(
   }
   return directions;
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -75,7 +81,7 @@ PeakViewFactory::PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,
                                  colorNumber),
       m_mdWS(mdWS), m_peaksWS(peaksWS),
       m_calculator(std::make_shared<
-          Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>()) {
+                   Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>()) {
   setForegroundAndBackgroundColors(colorNumber);
 }
 
@@ -214,5 +220,5 @@ void PeakViewFactory::getNonOrthogonalInfo(NonOrthogonalAxis &info) {
         API::getMissingHKLDimensionIndex(m_mdWS, info.dimX, info.dimY);
   }
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

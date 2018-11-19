@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import sys
 import argparse
 
@@ -30,9 +36,11 @@ def main():
         return int(command_line_args.exit_code)
     app = QtGui.QApplication(sys.argv)
     form = CrashReportPage(show_continue_terminate=False)
-    ErrorReporterPresenter(form, command_line_args.exit_code)
+    presenter = ErrorReporterPresenter(form, command_line_args.exit_code)
+    presenter.show_view()
     app.exec_()
     return int(command_line_args.exit_code)
+
 
 if __name__ == '__main__':              # if we're running file directly and not importing it
     sys.exit(main())                              # run the main function

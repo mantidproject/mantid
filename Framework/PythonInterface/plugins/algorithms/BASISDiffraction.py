@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-branches
 
 from __future__ import (absolute_import, division, print_function)
@@ -25,6 +31,8 @@ from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion,
                            IntArrayProperty, FloatArrayProperty,
                            FloatArrayLengthValidator)
 
+DEPRECATION_NOTICE = """BASISDiffraction is deprecated (on 2018-08-27).
+Instead, use BASISCrystalDiffraction or BASISPowderReduction."""
 
 _SOLID_ANGLE_WS_ = '/tmp/solid_angle_diff.nxs'
 _FLUX_WS_ = '/tmp/int_flux.nxs'
@@ -101,7 +109,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
 
     @classmethod
     def summary(self):
-        return "Multiple-file BASIS reduction for diffraction detectors."
+        return DEPRECATION_NOTICE
 
     def seeAlso(self):
         return [ "AlignDetectors","DiffractionFocussing","SNSPowderReduction" ]
@@ -218,6 +226,10 @@ class BASISDiffraction(DataProcessorAlgorithm):
             self.setPropertySettings(a_property, crystal_diffraction_enabled)
 
     def PyExec(self):
+
+        # Exit with deprecation notice
+        self.log().error(DEPRECATION_NOTICE)
+
         # Facility and database configuration
         config_new_options = {'default.facility': 'SNS',
                               'default.instrument': 'BASIS',

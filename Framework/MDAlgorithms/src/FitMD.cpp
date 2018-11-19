@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/FitMD.h"
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionDomainMD.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
-#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -348,5 +354,5 @@ size_t FitMD::getDomainSize() const {
   return n;
 }
 
-} // namespace Algorithm
+} // namespace MDAlgorithms
 } // namespace Mantid

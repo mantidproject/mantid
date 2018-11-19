@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -223,9 +229,10 @@ void getParameterNameChanges(
     const CompositeFunction &model, const std::string &prefixPrefix,
     const std::string &prefixSuffix, std::size_t from, std::size_t to,
     std::unordered_map<std::string, std::string> &changes) {
+  size_t di = from > 0 ? 1 : 0;
   for (auto i = from; i < to; ++i) {
     const auto oldPrefix = "f" + std::to_string(i) + ".";
-    const auto functionPrefix = "f" + std::to_string(i) + ".";
+    const auto functionPrefix = "f" + std::to_string(i - di) + ".";
     const auto function = model.getFunction(i);
     auto newPrefix = prefixPrefix + functionPrefix;
 
@@ -240,15 +247,29 @@ std::unordered_map<std::string, std::string> parameterNameChanges(
     const CompositeFunction &model, const std::string &prefixPrefix,
     const std::string &prefixSuffix, std::size_t backgroundIndex) {
   std::unordered_map<std::string, std::string> changes;
-  getParameterNameChanges(model, prefixPrefix, prefixSuffix, 0, backgroundIndex,
-                          changes);
+  auto const nFunctions = model.nFunctions();
+  if (nFunctions > 2) {
+    getParameterNameChanges(model, prefixPrefix, prefixSuffix, 0,
+                            backgroundIndex, changes);
 
-  const auto backgroundPrefix = "f" + std::to_string(backgroundIndex) + ".";
-  getParameterNameChanges(*model.getFunction(backgroundIndex), backgroundPrefix,
-                          "f0.", changes);
+    const auto backgroundPrefix = "f" + std::to_string(backgroundIndex) + ".";
+    getParameterNameChanges(*model.getFunction(backgroundIndex),
+                            backgroundPrefix, "f0.", changes);
 
-  getParameterNameChanges(model, prefixPrefix, prefixSuffix,
-                          backgroundIndex + 1, model.nFunctions(), changes);
+    getParameterNameChanges(model, prefixPrefix, prefixSuffix,
+                            backgroundIndex + 1, model.nFunctions(), changes);
+  } else if (nFunctions == 2) {
+    const auto backgroundPrefix = "f" + std::to_string(backgroundIndex) + ".";
+    getParameterNameChanges(*model.getFunction(backgroundIndex),
+                            backgroundPrefix, "f0.", changes);
+    size_t otherIndex = backgroundIndex == 0 ? 1 : 0;
+    const auto otherPrefix = "f" + std::to_string(otherIndex) + ".";
+    getParameterNameChanges(*model.getFunction(otherIndex), otherPrefix,
+                            prefixPrefix, changes);
+  } else {
+    throw std::runtime_error(
+        "Composite function is expected to have more than 1 member.");
+  }
   return changes;
 }
 
@@ -302,7 +323,7 @@ IAlgorithm_sptr addSampleLogAlgorithm(Workspace_sptr workspace,
 }
 
 struct AddSampleLogRunner {
-  AddSampleLogRunner(MatrixWorkspace_sptr resultWorkspace,
+  AddSampleLogRunner(Workspace_sptr resultWorkspace,
                      WorkspaceGroup_sptr resultGroup)
       : m_resultWorkspace(resultWorkspace), m_resultGroup(resultGroup) {}
 
@@ -313,13 +334,13 @@ struct AddSampleLogRunner {
   }
 
 private:
-  MatrixWorkspace_sptr m_resultWorkspace;
+  Workspace_sptr m_resultWorkspace;
   WorkspaceGroup_sptr m_resultGroup;
 };
 
 std::vector<std::string>
-getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>> &
-             workspaces) {
+getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>>
+             &workspaces) {
   std::vector<std::string> names;
   names.reserve(workspaces.size());
   std::transform(workspaces.begin(), workspaces.end(),
@@ -350,6 +371,12 @@ IFunction_sptr createConvolutionFitModel(IFunction_sptr model,
   if (!(model &&
         AnalysisDataService::Instance().doesExist("__ConvFitResolution0")))
     return model ? model : comp;
+
+  if (auto compModel = boost::dynamic_pointer_cast<CompositeFunction>(model)) {
+    if (compModel->nFunctions() == 1) {
+      model = compModel->getFunction(0);
+    }
+  }
 
   auto conv = boost::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createFunction("Convolution"));
@@ -584,7 +611,7 @@ void ConvFitModel::addSampleLogs() {
 
 IndirectFitOutput ConvFitModel::createFitOutput(
     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    MatrixWorkspace_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
+    WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd) const {
   auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
                                   fitDataBegin, fitDataEnd);
@@ -595,7 +622,7 @@ IndirectFitOutput ConvFitModel::createFitOutput(
 IndirectFitOutput
 ConvFitModel::createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                               Mantid::API::ITableWorkspace_sptr parameterTable,
-                              Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                              Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                               IndirectFitData *fitData,
                               std::size_t spectrum) const {
   auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
@@ -612,7 +639,7 @@ void ConvFitModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
 void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
                              WorkspaceGroup_sptr resultGroup,
                              ITableWorkspace_sptr parameterTable,
-                             MatrixWorkspace_sptr resultWorkspace,
+                             WorkspaceGroup_sptr resultWorkspace,
                              const FitDataIterator &fitDataBegin,
                              const FitDataIterator &fitDataEnd) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
@@ -624,7 +651,7 @@ void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
 void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
                              WorkspaceGroup_sptr resultGroup,
                              ITableWorkspace_sptr parameterTable,
-                             MatrixWorkspace_sptr resultWorkspace,
+                             WorkspaceGroup_sptr resultWorkspace,
                              IndirectFitData *fitData,
                              std::size_t spectrum) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace, fitData,

@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import os
 
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
-from isis_powder.routines import absorb_corrections, common, instrument_settings
+from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping, gem_output
+from isis_powder.routines import absorb_corrections, common, instrument_settings, common_output
 
 
 class Gem(AbstractInst):
@@ -23,15 +29,16 @@ class Gem(AbstractInst):
     # Public API
 
     def focus(self, **kwargs):
-        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
+        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
+
         return self._focus(
             run_number_string=self._inst_settings.run_number, do_van_normalisation=self._inst_settings.do_van_norm,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
-        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
+        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
 
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
@@ -43,6 +50,9 @@ class Gem(AbstractInst):
             exception_msg="The argument containing sample details was not found. Please"
                           " set the following argument: " + kwarg_name)
         self._sample_details = sample_details_obj
+
+    def should_subtract_empty_inst(self):
+        return self._inst_settings.subtract_empty_inst
 
     # Private methods
 
@@ -61,7 +71,6 @@ class Gem(AbstractInst):
 
     def _generate_out_file_paths(self, run_details):
         out_file_names = super(Gem, self)._generate_out_file_paths(run_details)
-
         nxs_filename = out_file_names["nxs_filename"]
         filename_stub = ".".join(nxs_filename.split(".")[:-1])
 
@@ -69,13 +78,17 @@ class Gem(AbstractInst):
             maud_filename = filename_stub + "_MAUD.gem"
             out_file_names["maud_filename"] = maud_filename
 
-        if self._inst_settings.save_angles:
+        if hasattr(self._inst_settings, "texture_mode") and self._inst_settings.texture_mode:
             angles_filename = filename_stub + "_grouping.new"
             out_file_names["angles_filename"] = angles_filename
 
         if self._inst_settings.save_maud_calib:
             maud_calib_filename = filename_stub + ".maud"
             out_file_names["maud_calib_filename"] = maud_calib_filename
+
+        if self._inst_settings.save_gda:
+            gda_filename = filename_stub + ".gda"
+            out_file_names["gda_filename"] = gda_filename
 
         return out_file_names
 
@@ -87,30 +100,47 @@ class Gem(AbstractInst):
         :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
         :return: d-spacing and TOF groups of the processed output workspaces
         """
-        d_spacing_group, tof_group = super(Gem, self)._output_focused_ws(processed_spectra=processed_spectra,
-                                                                         run_details=run_details,
-                                                                         output_mode=output_mode)
+        if self._inst_settings.save_all:
+            d_spacing_group, tof_group = super(Gem, self)._output_focused_ws(processed_spectra=processed_spectra,
+                                                                             run_details=run_details,
+                                                                             output_mode=output_mode)
+        else:
+            d_spacing_group, \
+                tof_group = common_output.split_into_tof_d_spacing_groups(run_details=run_details,
+                                                                          processed_spectra=processed_spectra)
+
+        if self._is_vanadium:
+            return d_spacing_group, tof_group
 
         output_paths = self._generate_out_file_paths(run_details=run_details)
         if "maud_filename" in output_paths:
-            gem_algs.save_maud(d_spacing_group, output_paths["maud_filename"])
+            gem_output.save_maud(d_spacing_group, output_paths["maud_filename"])
 
         if "angles_filename" in output_paths:
-            gem_algs.save_angles(d_spacing_group, output_paths["angles_filename"])
-
-        if "maud_calib_filename" in output_paths:
-            gsas_calib_file_path = os.path.join(self._inst_settings.calibration_dir,
-                                                self._inst_settings.gsas_calib_filename)
-            if not os.path.exists(gsas_calib_file_path):
-                raise RuntimeWarning("Could not save MAUD calibration file, as GSAS calibration file was not found. "
-                                     "It should be present at " + gsas_calib_file_path)
-            else:
-                gem_algs.save_maud_calib(d_spacing_group=d_spacing_group,
-                                         output_path=output_paths["maud_calib_filename"],
-                                         gsas_calib_filename=gsas_calib_file_path,
-                                         grouping_scheme=self._inst_settings.maud_grouping_scheme)
+            gem_output.save_angles(d_spacing_group, output_paths["angles_filename"])
+        self._save_gsas_req_files(d_spacing_group, output_paths)
 
         return d_spacing_group, tof_group
+
+    def _save_gsas_req_files(self, d_spacing_group, output_paths):
+        gsas_calib_file_path = os.path.join(self._inst_settings.calibration_dir,
+                                            self._inst_settings.gsas_calib_filename)
+        raise_warning = False
+        if not os.path.exists(gsas_calib_file_path):
+            raise_warning = True
+        if "maud_calib_filename" in output_paths:
+            gem_output.save_maud_calib(d_spacing_group=d_spacing_group,
+                                       output_path=output_paths["maud_calib_filename"],
+                                       gsas_calib_filename=gsas_calib_file_path,
+                                       grouping_scheme=self._inst_settings.maud_grouping_scheme,
+                                       raise_warning=raise_warning)
+
+        if "gda_filename" in output_paths:
+            gem_output.save_gda(d_spacing_group=d_spacing_group,
+                                output_path=output_paths["gda_filename"],
+                                gsas_calib_filename=gsas_calib_file_path,
+                                grouping_scheme=self._inst_settings.maud_grouping_scheme,
+                                raise_warning=raise_warning)
 
     @staticmethod
     def _generate_input_file_name(run_number):
@@ -149,7 +179,11 @@ class Gem(AbstractInst):
     def _switch_texture_mode_specific_inst_settings(self, mode):
         if mode is None and hasattr(self._inst_settings, "texture_mode"):
             mode = self._inst_settings.texture_mode
-        self._inst_settings.update_attributes(advanced_config=gem_advanced_config.get_mode_specific_variables(mode),
+        save_all = not hasattr(self._inst_settings, "save_all")
+        adv_config_variables = gem_advanced_config.get_mode_specific_variables(mode, save_all)
+        if self.should_subtract_empty_inst() is None:
+            adv_config_variables.update({"subtract_empty_instrument": True})
+        self._inst_settings.update_attributes(advanced_config=adv_config_variables,
                                               suppress_warnings=True)
 
 

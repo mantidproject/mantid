@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTHELPERS_REFLECTOMETRYHELPER_H_
 #define MANTID_TESTHELPERS_REFLECTOMETRYHELPER_H_
 
@@ -35,7 +41,7 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
 void prepareInputGroup(std::string const &name,
                        std::string const &paramsType = "", size_t size = 4,
                        double const startX = 5000.0,
-                       double const endX = 100000.0);
+                       double const endX = 100000.0, size_t const nBins = 10);
 
 // Retrieve wprkspace group with name name, cast its items to MatrixWorkspace
 // and return a vector of those.
@@ -47,6 +53,14 @@ std::vector<MatrixWorkspace_sptr> retrieveOutWS(std::string const &name);
 // original.
 void applyPolarizationEfficiencies(std::string const &name);
 
+MatrixWorkspace_sptr
+createWorkspaceSingle(const double startX = 1, const int nBins = 3,
+                      const double deltaX = 1,
+                      const std::vector<double> &yValues = {1, 2, 3});
+
+MatrixWorkspace_sptr createWorkspaceSingle(const double startX = 1,
+                                           const int nBins = 3,
+                                           const double deltaX = 1);
 } // namespace TestHelpers
 } // namespace Mantid
 

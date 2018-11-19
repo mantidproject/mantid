@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTLOADILL_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTLOADILL_H_
 
-#include "ui_IndirectLoadILL.h"
 #include "IndirectToolsTab.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "ui_IndirectLoadILL.h"
 
 #include <QComboBox>
 #include <QMap>

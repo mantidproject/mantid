@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_
 
@@ -39,8 +45,8 @@ public:
 
   void notifyRefinementsComplete(
       Mantid::API::IAlgorithm_sptr alg,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
-          refinementResultSets) override;
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets) override;
 
   void notifyRefinementSuccessful(
       const Mantid::API::IAlgorithm_sptr successfulAlgorithm,

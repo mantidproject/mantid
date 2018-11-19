@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef RESOLUTIONCONVOLVEDCROSSSECTIONTEST_H_
 #define RESOLUTIONCONVOLVEDCROSSSECTIONTEST_H_
 
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/FunctionValues.h"
 
+#include "MDFittingTestHelpers.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
 #include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MDFittingTestHelpers.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -130,7 +136,7 @@ private:
 
   /**
    * Creates a workspace with 4 dims, 3 boxes and 1 event per box = 81 events
-    * @return A pointer to the object
+   * @return A pointer to the object
    */
   Mantid::API::IMDWorkspace_sptr createTestMDWorkspace() {
     using namespace Mantid::DataObjects;

@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_RESNORM_H_
 #define MANTIDQTCUSTOMINTERFACES_RESNORM_H_
 
-#include "ui_ResNorm.h"
 #include "IndirectBayesTab.h"
+#include "ui_ResNorm.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -35,11 +41,19 @@ private slots:
   /// Slot to handle the preview spectrum being changed
   void previewSpecChanged(int value);
   /// Slots to handle plot and save
+  void runClicked();
   void saveClicked();
   void plotClicked();
   void plotCurrentPreview();
 
 private:
+  void setRunEnabled(bool enabled);
+  void setPlotResultEnabled(bool enabled);
+  void setSaveResultEnabled(bool enabled);
+  void setButtonsEnabled(bool enabled);
+  void setRunIsRunning(bool running);
+  void setPlotResultIsPlotting(bool plotting);
+
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form

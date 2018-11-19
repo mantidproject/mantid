@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h"
 #include <QStringList>
 #include <boost/algorithm/string.hpp>
@@ -65,10 +71,10 @@ std::vector<QString> ProcessingAlgorithmBase::getOutputWsProperties() {
 }
 
 /** Converts a string to a vector of strings. Input string will be split by
-* commas.
-* @param text :: the input string to convert
-* @return :: the string as a vector
-*/
+ * commas.
+ * @param text :: the input string to convert
+ * @return :: the string as a vector
+ */
 std::vector<QString>
 ProcessingAlgorithmBase::convertStringToVector(const QString &text) {
 
@@ -80,9 +86,9 @@ ProcessingAlgorithmBase::convertStringToVector(const QString &text) {
 }
 
 /** Converts a string to a set of strings. Input string will be split by commas.
-* @param text :: the input string to convert
-* @return :: the string as a set
-*/
+ * @param text :: the input string to convert
+ * @return :: the string as a set
+ */
 std::set<QString>
 ProcessingAlgorithmBase::convertStringToSet(const QString &text) {
 
@@ -95,4 +101,4 @@ ProcessingAlgorithmBase::convertStringToSet(const QString &text) {
 }
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt

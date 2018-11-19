@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/QScienceSpinBox.h"
 #include <limits>
 
@@ -233,8 +239,7 @@ bool QScienceSpinBox::isIntermediateValue(const QString &str) const {
   // left > 0, with max < 0 and no '-'
   if ((left >= 0 && max_left < 0 && !str.startsWith(QLatin1Char('-')))
       // left > 0, with min > 0
-      ||
-      (left < 0 && min_left >= 0)) {
+      || (left < 0 && min_left >= 0)) {
     QSBDEBUG("returns false");
     return false;
   }

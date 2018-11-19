@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidIndexing/Extract.h"
 #include "MantidIndexing/Scatter.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
@@ -32,7 +38,7 @@ void setupConsistentSpectrumNumbers(IndexInfo &filtered,
   }
   filtered.setSpectrumNumbers(std::move(spectrumNumbers));
 }
-}
+} // namespace
 
 LoadEventNexusIndexSetup::LoadEventNexusIndexSetup(
     MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
@@ -111,8 +117,8 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
 }
 
 IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
-    const std::pair<std::vector<int32_t>, std::vector<int32_t>> &
-        spectrumDetectorMapping,
+    const std::pair<std::vector<int32_t>, std::vector<int32_t>>
+        &spectrumDetectorMapping,
     const bool monitorsOnly) {
   const auto &spec = spectrumDetectorMapping.first;
   const auto &udet = spectrumDetectorMapping.second;

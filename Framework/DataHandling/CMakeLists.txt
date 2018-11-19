@@ -1,4 +1,4 @@
-set ( SRC_FILES
+﻿set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
 	src/BankPulseTimes.cpp
@@ -37,8 +37,10 @@ set ( SRC_FILES
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
+	src/LoadAsciiStl.cpp
 	src/LoadBBY.cpp
 	src/LoadBankFromDiskTask.cpp
+	src/LoadBinaryStl.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -48,6 +50,7 @@ set ( SRC_FILES
 	src/LoadDiffCal.cpp
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
+	src/LoadEMU.cpp
 	src/LoadEventNexus.cpp
 	src/LoadEventNexusIndexSetup.cpp
 	src/LoadEventPreNexus2.cpp
@@ -61,7 +64,7 @@ set ( SRC_FILES
 	src/LoadILLIndirect2.cpp
 	src/LoadILLPolarizationFactors.cpp
 	src/LoadILLReflectometry.cpp
-	src/LoadILLSANS.cpp
+    	src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadISISPolarizationEfficiencies.cpp
@@ -91,6 +94,7 @@ set ( SRC_FILES
 	src/LoadParameterFile.cpp
 	src/LoadPreNexus.cpp
 	src/LoadPreNexusMonitors.cpp
+	src/LoadPSIMuonBin.cpp
 	src/LoadQKK.cpp
 	src/LoadRKH.cpp
 	src/LoadRaw/byte_rel_comp.cpp
@@ -114,6 +118,7 @@ set ( SRC_FILES
 	src/LoadSpiceAscii.cpp
 	src/LoadSpiceXML2DDet.cpp
 	src/LoadSwans.cpp
+	src/LoadStl.cpp
 	src/LoadTBL.cpp
 	src/LoadTOFRawNexus.cpp
 	src/LoadVulcanCalFile.cpp
@@ -134,7 +139,7 @@ set ( SRC_FILES
 	src/RotateInstrumentComponent.cpp
 	src/RotateSource.cpp
 	src/SNSDataArchive.cpp
-	src/SaveANSTOAscii.cpp
+    	src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
 	src/SaveBankScatteringAngles.cpp
@@ -156,7 +161,7 @@ set ( SRC_FILES
 	src/SaveILLCosmosAscii.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
-	src/SaveMask.cpp
+    	src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
@@ -169,6 +174,7 @@ set ( SRC_FILES
 	src/SavePHX.cpp
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
+        src/SaveReflectometryAscii.cpp
 	src/SaveReflCustomAscii.cpp
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSESANS.cpp
@@ -222,11 +228,14 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
 	inc/MantidDataHandling/Load.h
+	inc/MantidDataHandling/LoadANSTOEventFile.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
+	inc/MantidDataHandling/LoadAsciiStl.h
 	inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadBankFromDiskTask.h
+	inc/MantidDataHandling/LoadBinaryStl.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -236,6 +245,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDiffCal.h
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
+	inc/MantidDataHandling/LoadEMU.h
 	inc/MantidDataHandling/LoadEventNexus.h
 	inc/MantidDataHandling/LoadEventNexusIndexSetup.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
@@ -279,6 +289,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexus.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
+	inc/MantidDataHandling/LoadPSIMuonBin.h
 	inc/MantidDataHandling/LoadQKK.h
 	inc/MantidDataHandling/LoadRKH.h
 	inc/MantidDataHandling/LoadRaw3.h
@@ -296,6 +307,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
 	inc/MantidDataHandling/LoadSpiceXML2DDet.h
+	inc/MantidDataHandling/LoadStl.h
 	inc/MantidDataHandling/LoadSwans.h
 	inc/MantidDataHandling/LoadTBL.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
@@ -353,6 +365,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
+        inc/MantidDataHandling/SaveReflectometryAscii.h
 	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSESANS.h
@@ -408,7 +421,9 @@ set ( TEST_FILES
 	JoinISISPolarizationEfficienciesTest.h
 	LoadAscii2Test.h
 	LoadAsciiTest.h
+	LoadAsciiStlTest.h
 	LoadBBYTest.h
+	LoadBinaryStlTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
@@ -417,6 +432,7 @@ set ( TEST_FILES
 	LoadDiffCalTest.h
 	LoadDspacemapTest.h
 	LoadEmptyInstrumentTest.h
+	LoadEMUauTest.h
 	LoadEventNexusIndexSetupTest.h
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
@@ -457,6 +473,7 @@ set ( TEST_FILES
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
 	LoadPreNexusTest.h
+	LoadPSIMuonBinTest.h
 	LoadQKKTest.h
 	LoadRKHTest.h
 	LoadRaw3Test.h
@@ -527,6 +544,7 @@ set ( TEST_FILES
 	SavePHXTest.h
 	SaveParameterFileTest.h
 	SaveRKHTest.h
+        SaveReflectometryAsciiTest.h
 	SaveReflCustomAsciiTest.h
 	SaveReflThreeColumnAsciiTest.h
 	SaveSESANSTest.h

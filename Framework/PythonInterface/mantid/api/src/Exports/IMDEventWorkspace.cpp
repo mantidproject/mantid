@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
@@ -22,8 +28,9 @@ void export_IMDEventWorkspace() {
            "Returns the number of dimensions in this "
            ":class:`~mantid.api.Workspace`")
 
-      .def("getBoxController", (BoxController_sptr (IMDEventWorkspace::*)()) &
-                                   IMDEventWorkspace::getBoxController,
+      .def("getBoxController",
+           (BoxController_sptr(IMDEventWorkspace::*)()) &
+               IMDEventWorkspace::getBoxController,
            arg("self"),
            "Returns the :class:`~mantid.api.BoxController` used in this "
            ":class:`~mantid.api.Workspace`")

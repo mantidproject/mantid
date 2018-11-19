@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MDFDatasetPlotData.h"
 #include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 
@@ -171,6 +177,6 @@ QwtDoubleRect DatasetPlotData::boundingRect() const {
 /// Toggle the error bars on the data curve.
 void DatasetPlotData::showDataErrorBars(bool on) { m_showDataErrorBars = on; }
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

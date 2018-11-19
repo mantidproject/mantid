@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_INSTRUMENTVALIDATORTEST_H_
 #define MANTID_API_INSTRUMENTVALIDATORTEST_H_
 
@@ -5,8 +11,8 @@
 
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::Kernel;
 using Mantid::API::InstrumentValidator;

@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
 #define SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <boost/make_shared.hpp>
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/NullPeaksPresenter.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MockObjects.h"
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid;

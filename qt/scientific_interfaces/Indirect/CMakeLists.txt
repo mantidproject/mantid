@@ -148,7 +148,6 @@ set ( MOC_FILES
     DensityOfStates.h
     Elwin.h
     ILLEnergyTransfer.h
-    IAddWorkspaceDialog.h
     IndirectAddWorkspaceDialog.h
     IndirectBayes.h
     IndirectBayesTab.h
@@ -268,3 +267,6 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
     "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/"
 
 )
+
+# Testing target
+add_subdirectory ( test )

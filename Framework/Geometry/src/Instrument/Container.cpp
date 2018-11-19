@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Container.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "Poco/DOM/AutoPtr.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
-#include "Poco/DOM/NodeIterator.h"
 #include "Poco/DOM/NodeFilter.h"
+#include "Poco/DOM/NodeIterator.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
 #include <boost/make_shared.hpp>
@@ -42,7 +48,7 @@ void updateTreeValues(Poco::XML::Element *root,
     node = nodeIter.nextNode();
   }
 }
-}
+} // namespace
 
 //------------------------------------------------------------------------------
 // Public methods
@@ -114,8 +120,9 @@ void Container::setSampleShape(const std::string &sampleShapeXML) {
   if (doc->documentElement()->nodeName() != SAMPLEGEOMETRY_TAG) {
     std::ostringstream msg;
     msg << "Can::setSampleShape() - XML definition "
-           "expected to be contained within a <" << SAMPLEGEOMETRY_TAG
-        << "> tag. Found " << doc->documentElement()->nodeName() << "instead.";
+           "expected to be contained within a <"
+        << SAMPLEGEOMETRY_TAG << "> tag. Found "
+        << doc->documentElement()->nodeName() << "instead.";
     throw std::invalid_argument(msg.str());
   }
   m_sampleShapeXML = sampleShapeXML;

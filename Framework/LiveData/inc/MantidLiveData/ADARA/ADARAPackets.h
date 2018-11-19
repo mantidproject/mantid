@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef __ADARA_PACKETS_H
 #define __ADARA_PACKETS_H
 
@@ -559,8 +565,8 @@ public:
 
   const uint32_t *banklist(uint32_t index) const {
     if (index < detBankSetCount()) {
-      return (const uint32_t *)&m_fields[m_sectionOffsets[index] +
-                                         m_name_offset + 2];
+      return (const uint32_t
+                  *)&m_fields[m_sectionOffsets[index] + m_name_offset + 2];
     } else {
       // Shouldn't be asking for this if bankCount() returned 0...!
       return ((const uint32_t *)nullptr);
@@ -591,7 +597,7 @@ public:
   double throttle(uint32_t index) const {
     if (index < detBankSetCount()) {
       return *reinterpret_cast<const double *>(
-                 &m_fields[m_after_banks_offset[index] + 3]);
+          &m_fields[m_after_banks_offset[index] + 3]);
     } else
       return (0.0);
   }
@@ -745,6 +751,6 @@ private:
   friend class Parser;
 };
 
-} /* namespacce ADARA */
+} // namespace ADARA
 
 #endif /* __ADARA_PACKETS_H */

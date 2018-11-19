@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_TRANSPOSEMDTEST_H_
 #define MANTID_MDALGORITHMS_TRANSPOSEMDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidMDAlgorithms/TransposeMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 using Mantid::MDAlgorithms::TransposeMD;
 using namespace Mantid::DataObjects;

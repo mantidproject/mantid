@@ -1,12 +1,18 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef WORKSPACE_OBSERVER_H
 #define WORKSPACE_OBSERVER_H
 
+#include "DllOption.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include <Poco/NObserver.h>
-#include <QObject>
-#include "DllOption.h"
 #include <QMetaType>
+#include <QObject>
 
 Q_DECLARE_METATYPE(std::string)
 Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
@@ -23,19 +29,19 @@ namespace API {
 class WorkspaceObserver;
 
 /**
-* A simple callback class so that we avoid multiple inheritance issues with
-*QObject.
-*
-* This adds an extra level of indirection to the call between a Poco
-*notification handler and the call to the correct WorkspaceObserver handler.
-* It is necessary to do this rather than just call the function directly so that
-*the function call gets executed in the object's thread rather than
-* in the thread that the notification was received in.
-*
-* Multiple inheritance is not used in WorkspaceObserver as their seems to be
-*some problem using it and QObject
-*
-*/
+ * A simple callback class so that we avoid multiple inheritance issues with
+ *QObject.
+ *
+ * This adds an extra level of indirection to the call between a Poco
+ *notification handler and the call to the correct WorkspaceObserver handler.
+ * It is necessary to do this rather than just call the function directly so
+ *that the function call gets executed in the object's thread rather than in the
+ *thread that the notification was received in.
+ *
+ * Multiple inheritance is not used in WorkspaceObserver as their seems to be
+ *some problem using it and QObject
+ *
+ */
 class EXPORT_OPT_MANTIDQT_COMMON ObserverCallback : public QObject {
   Q_OBJECT
 
@@ -87,27 +93,6 @@ Hides Poco::Notification API from the user.
 
 @author Roman Tolchenov, Tessella plc
 @date 18/09/2009
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON WorkspaceObserver {
 
@@ -183,8 +168,8 @@ protected:
   }
 
   /** Handle an ADS clear notification
-  *
-  */
+   *
+   */
   virtual void clearADSHandle() {}
 
 protected:
@@ -258,7 +243,7 @@ private:
       m_rename_observed, m_clr_observed;
 };
 
-} // MantidQt
-} // API
+} // namespace API
+} // namespace MantidQt
 
 #endif

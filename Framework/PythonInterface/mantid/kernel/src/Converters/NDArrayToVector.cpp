@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
+#include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
 
 #include <boost/python/extract.hpp>
@@ -39,7 +45,7 @@ extern template char NDArrayTypeIndex<unsigned int>::typecode;
 extern template char NDArrayTypeIndex<unsigned long>::typecode;
 extern template char NDArrayTypeIndex<unsigned long long>::typecode;
 extern template char NDArrayTypeIndex<double>::typecode;
-}
+} // namespace Converters
 
 namespace {
 
@@ -93,7 +99,7 @@ template <> struct CopyToImpl<std::string> {
  * the object points to numpy array, no checking is performed
  */
 template <typename DestElementType> struct CoerceType {
-  NumPy::NdArray operator()(const NumPy::NdArray &x) {
+  NDArray operator()(const NDArray &x) {
     return x.astype(Converters::NDArrayTypeIndex<DestElementType>::typecode,
                     false);
   }
@@ -104,9 +110,9 @@ template <typename DestElementType> struct CoerceType {
  * to convert the underlying representation
  */
 template <> struct CoerceType<std::string> {
-  object operator()(const NumPy::NdArray &x) { return x; }
+  object operator()(const NDArray &x) { return x; }
 };
-}
+} // namespace
 
 namespace Converters {
 //-------------------------------------------------------------------------
@@ -118,7 +124,7 @@ namespace Converters {
  * @param value :: A boost python object wrapping a numpy.ndarray
  */
 template <typename DestElementType>
-NDArrayToVector<DestElementType>::NDArrayToVector(const NumPy::NdArray &value)
+NDArrayToVector<DestElementType>::NDArrayToVector(const NDArray &value)
     : m_arr(CoerceType<DestElementType>()(value)) {}
 
 /**
@@ -128,8 +134,7 @@ NDArrayToVector<DestElementType>::NDArrayToVector(const NumPy::NdArray &value)
  */
 template <typename DestElementType>
 const typename NDArrayToVector<DestElementType>::TypedVector
-    NDArrayToVector<DestElementType>::
-    operator()() {
+NDArrayToVector<DestElementType>::operator()() {
   std::vector<DestElementType> cvector(
       PyArray_SIZE((PyArrayObject *)m_arr.ptr()));
   copyTo(cvector);
@@ -188,6 +193,6 @@ INSTANTIATE_TOVECTOR(double)
 INSTANTIATE_TOVECTOR(bool)
 INSTANTIATE_TOVECTOR(std::string)
 ///@endcond
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

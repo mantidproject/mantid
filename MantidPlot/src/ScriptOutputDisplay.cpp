@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ScriptOutputDisplay.h"
 #include "TextFileIO.h"
 
@@ -62,9 +68,9 @@ void ScriptOutputDisplay::mouseMoveEvent(QMouseEvent *e) {
 }
 
 /** Mouse move release handler - overridden to prevent middle mouse button
-* clicks from pasting on linux
-* @param e the mouse move event
-*/
+ * clicks from pasting on linux
+ * @param e the mouse move event
+ */
 void ScriptOutputDisplay::mouseReleaseEvent(QMouseEvent *e) {
   this->setReadOnly(true);
   QTextEdit::mousePressEvent(e);

@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpSigma.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/System.h"
 
-#include <gsl/gsl_sf_erf.h>
 #include <cmath>
+#include <gsl/gsl_sf_erf.h>
 
 using namespace std;
 
@@ -23,7 +29,7 @@ DECLARE_FUNCTION(ThermalNeutronBk2BkExpSigma)
 
 //----------------------------------------------------------------------------------------------
 /** Defintion of parameter
-  */
+ */
 void ThermalNeutronBk2BkExpSigma::init() {
   declareParameter("Sig0", 0.0);
   declareParameter("Sig1", 0.0);
@@ -32,7 +38,7 @@ void ThermalNeutronBk2BkExpSigma::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Function 1D
-  */
+ */
 void ThermalNeutronBk2BkExpSigma::function1D(double *out, const double *xValues,
                                              const size_t nData) const {
   double sig0 = getParameter("Sig0");
@@ -49,7 +55,7 @@ void ThermalNeutronBk2BkExpSigma::function1D(double *out, const double *xValues,
 }
 
 /** Derivative: use numerical derivative
-  */
+ */
 void ThermalNeutronBk2BkExpSigma::functionDeriv(const FunctionDomain &domain,
                                                 Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
@@ -57,7 +63,7 @@ void ThermalNeutronBk2BkExpSigma::functionDeriv(const FunctionDomain &domain,
 
 //----------------------------------------------------------------------------------------------
 /** Core function
-  */
+ */
 double ThermalNeutronBk2BkExpSigma::corefunction(double dh, double sig0sq,
                                                  double sig1sq,
                                                  double sig2sq) const {

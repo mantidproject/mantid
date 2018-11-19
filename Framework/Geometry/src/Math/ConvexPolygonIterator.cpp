@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -22,16 +28,16 @@ ConvexPolygon::Iterator::Iterator(const ConvexPolygon &polygon)
 }
 
 /**
-  * @return Dereference the iterator and return the current value
-  */
+ * @return Dereference the iterator and return the current value
+ */
 const Kernel::V2D &ConvexPolygon::Iterator::operator*() const {
   return m_polygon[m_index];
 }
 
 /**
-  * Advance the iterator to the next point. When the iterator points to the
-  * last point the next increment will take it back to the "first" point.
-  */
+ * Advance the iterator to the next point. When the iterator points to the
+ * last point the next increment will take it back to the "first" point.
+ */
 void ConvexPolygon::Iterator::operator++() { m_index = nextIndex(); }
 
 /**

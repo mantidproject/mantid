@@ -1,7 +1,13 @@
-#include "MantidGeometry/Instrument/ComponentInfo.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidCrystal/CalibrationHelpers.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

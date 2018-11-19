@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_TESTTRIPLE__
 #define MANTID_TESTTRIPLE__
 
-#include <cxxtest/TestSuite.h>
+#include "MantidGeometry/Math/Triple.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Math/Triple.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 

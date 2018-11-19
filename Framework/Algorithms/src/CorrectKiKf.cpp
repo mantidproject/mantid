@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CorrectKiKf.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -112,9 +118,9 @@ void CorrectKiKf::exec() {
       else if (spectrumInfo.hasUniqueDetector(i)) {
         getEfixedFromParameterMap(Efi, i, spectrumInfo, pmap);
       } else {
-        g_log.information() << "Workspace Index " << i
-                            << ": cannot find detector"
-                            << "\n";
+        g_log.information()
+            << "Workspace Index " << i << ": cannot find detector"
+            << "\n";
       }
     }
 
@@ -228,9 +234,9 @@ void CorrectKiKf::execEvent() {
       } else if (spectrumInfo.hasUniqueDetector(i)) {
         getEfixedFromParameterMap(Efi, i, spectrumInfo, pmap);
       } else {
-        g_log.information() << "Workspace Index " << i
-                            << ": cannot find detector"
-                            << "\n";
+        g_log.information()
+            << "Workspace Index " << i << ": cannot find detector"
+            << "\n";
       }
     }
 
@@ -245,8 +251,8 @@ void CorrectKiKf::execEvent() {
     case TOF:
       // Switch to weights if needed.
       evlist.switchTo(WEIGHTED);
-    /* no break */
-    // Fall through
+      /* no break */
+      // Fall through
 
     case WEIGHTED:
       correctKiKfEventHelper(evlist.getWeightedEvents(), efixed, emodeStr);
@@ -267,8 +273,9 @@ void CorrectKiKf::execEvent() {
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {
     g_log.information() << "Ef <= 0 or Ei <= 0 for "
                         << inputWS->getNumberEvents() -
-                               outputWS->getNumberEvents() << " events, out of "
-                        << inputWS->getNumberEvents() << '\n';
+                               outputWS->getNumberEvents()
+                        << " events, out of " << inputWS->getNumberEvents()
+                        << '\n';
     if (efixedProp == EMPTY_DBL())
       g_log.information() << "Try to set fixed energy\n";
   }
@@ -319,5 +326,5 @@ void CorrectKiKf::getEfixedFromParameterMap(double &Efi, int64_t i,
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

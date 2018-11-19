@@ -9,7 +9,7 @@ digraph IndirectILLReduction {
     MM_ScaleFactor  [label="0.5"]
   }
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     Save_Red                      [label="Save?"]
     Save_LeftRed                  [label="Save?"]

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RadiusSum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -72,11 +78,13 @@ void RadiusSum::init() {
   const char *normBy = "NormalizeByRadius";
   const char *normOrder = "NormalizationOrder";
 
-  declareProperty(normBy, false, "Divide the sum of each ring by the radius "
-                                 "powered by Normalization Order");
-  declareProperty(normOrder, 1.0, "If 2, the normalization will be divided by "
-                                  "the quadratic value of the ring for each "
-                                  "radius.");
+  declareProperty(normBy, false,
+                  "Divide the sum of each ring by the radius "
+                  "powered by Normalization Order");
+  declareProperty(normOrder, 1.0,
+                  "If 2, the normalization will be divided by "
+                  "the quadratic value of the ring for each "
+                  "radius.");
   setPropertySettings(normOrder, Kernel::make_unique<VisibleWhenProperty>(
                                      normBy, IS_EQUAL_TO, "1"));
 
@@ -508,7 +516,8 @@ void RadiusSum::numBinsIsReasonable() {
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
                     << static_cast<int>((max_radius - min_radius) /
-                                        min_bin_size) << '\n';
+                                        min_bin_size)
+                    << '\n';
 }
 
 double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {

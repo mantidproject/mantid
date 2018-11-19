@@ -1,14 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_
 #define CURVEFITTING_TRUSTREGIONMINIMIZERTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
-#include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
 
 #include <sstream>
 

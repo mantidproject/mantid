@@ -1,18 +1,24 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_
 #define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
-#include "MantidKernel/Material.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::MayersSampleCorrection;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::Algorithms::MayersSampleCorrection;
 
 class MayersSampleCorrectionTest : public CxxTest::TestSuite {
 public:
@@ -106,8 +112,8 @@ private:
   MatrixWorkspace_sptr createTestWorkspaceForCorrection() {
     using ComponentCreationHelper::createCappedCylinder;
     using ComponentCreationHelper::createTestInstrumentCylindrical;
-    using Mantid::Geometry::ObjComponent;
     using Mantid::Geometry::CSGObject;
+    using Mantid::Geometry::ObjComponent;
     using Mantid::Kernel::Material;
     using Mantid::Kernel::V3D;
     using Mantid::PhysicalConstants::getNeutronAtom;
@@ -155,8 +161,8 @@ private:
 
   MatrixWorkspace_sptr createTestWorkspaceWithNoSampleShape() {
     using ComponentCreationHelper::createTestInstrumentCylindrical;
-    using Mantid::Geometry::ObjComponent;
     using Mantid::Geometry::CSGObject;
+    using Mantid::Geometry::ObjComponent;
     using Mantid::Kernel::V3D;
     using WorkspaceCreationHelper::create2DWorkspaceBinned;
 

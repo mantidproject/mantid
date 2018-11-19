@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFitAddWorkspaceDialog.h"
 
 #include <boost/optional.hpp>
@@ -11,7 +17,6 @@ namespace IDA {
 JumpFitAddWorkspaceDialog::JumpFitAddWorkspaceDialog(QWidget *parent)
     : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
-  m_uiForm.dsWorkspace->showWorkspaceGroups(false);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this,
           SLOT(emitWorkspaceChanged(const QString &)));

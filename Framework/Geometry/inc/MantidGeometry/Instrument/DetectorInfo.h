@@ -1,16 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_GEOMETRY_DETECTORINFO_H_
 #define MANTID_GEOMETRY_DETECTORINFO_H_
 
-#include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
-
 #include <boost/shared_ptr.hpp>
-
 #include <mutex>
 #include <unordered_map>
 #include <vector>
+
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 using detid_t = int32_t;
@@ -40,27 +46,6 @@ class Instrument;
 
   @author Simon Heybrock
   @date 2016
-
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_GEOMETRY_DLL DetectorInfo {
 public:
@@ -78,7 +63,6 @@ public:
   size_t size() const;
   size_t scanSize() const;
   bool isScanning() const;
-  bool isSyncScan() const;
 
   bool isMonitor(const size_t index) const;
   bool isMonitor(const std::pair<size_t, size_t> &index) const;
@@ -119,19 +103,18 @@ public:
   /// This will throw an out of range exception if the detector does not exist.
   size_t indexOf(const detid_t id) const { return m_detIDToIndex->at(id); }
 
-  size_t scanCount(const size_t index) const;
-  std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
-  scanInterval(const std::pair<size_t, size_t> &index) const;
-  void setScanInterval(const size_t index,
-                       const std::pair<Types::Core::DateAndTime,
-                                       Types::Core::DateAndTime> &interval);
-  void setScanInterval(const std::pair<Types::Core::DateAndTime,
-                                       Types::Core::DateAndTime> &interval);
-
-  void merge(const DetectorInfo &other);
+  size_t scanCount() const;
+  const std::vector<
+      std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+  scanIntervals() const;
 
   friend class API::SpectrumInfo;
   friend class Instrument;
+
+  DetectorInfoIterator<DetectorInfo> begin();
+  DetectorInfoIterator<DetectorInfo> end();
+  const DetectorInfoIterator<const DetectorInfo> cbegin() const;
+  const DetectorInfoIterator<const DetectorInfo> cend() const;
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
@@ -149,6 +132,9 @@ private:
       m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };
+
+using DetectorInfoIt = DetectorInfoIterator<DetectorInfo>;
+using DetectorInfoConstIt = DetectorInfoIterator<const DetectorInfo>;
 
 } // namespace Geometry
 } // namespace Mantid

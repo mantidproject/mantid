@@ -1,13 +1,19 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MDALGORITHMS_INTEGRATEPEAKSCWSD_H_
 #define MANTID_MDALGORITHMS_INTEGRATEPEAKSCWSD_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidAPI/CompositeFunction.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -109,7 +115,7 @@ private:
   bool m_haveInputPeakWS;
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSCWSD_H_ */

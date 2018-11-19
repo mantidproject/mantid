@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_API_WINDOWICONS_H_
 #define MANTIDQT_API_WINDOWICONS_H_
 
@@ -29,6 +35,6 @@ private:
   /// Internal map instance
   QMap<std::string, std::string> m_idToPixmapName;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 #endif // MANTIDQT_API_WINDOWICONS_H_

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -129,12 +135,12 @@ void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
     m_function_parameters_vector[ipeak][ipar] = 0.;
   }
 }
-}
+} // namespace FitPeaksAlgorithm
 
 //----------------------------------------------------------------------------------------------
 /** Get an index of a value in a sorted vector.  The index should be the item
  * with value nearest to X
-  */
+ */
 size_t findXIndex(const std::vector<double> &vecx, double x) {
   size_t index;
   if (x <= vecx.front()) {
@@ -820,7 +826,8 @@ void FitPeaks::convertParametersNameToIndex() {
       // out-of-range index is thus set to this
       g_log.warning() << "Given peak parameter " << paramName
                       << " is not an allowed parameter of peak "
-                         "function " << m_peakFunction->name() << "\n";
+                         "function "
+                      << m_peakFunction->name() << "\n";
       m_initParamIndexes.push_back(m_peakFunction->nParams() * 10);
     }
   }
@@ -915,7 +922,7 @@ double numberCounts(const Histogram &histogram, const double xmin,
     total += std::fabs(histogram.y()[i]);
   return total;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Fit peaks across one single spectrum
@@ -1159,8 +1166,9 @@ void FitPeaks::processSinglePeakFitResult(
  * fitted parameter
  * table
  */
-void FitPeaks::calculateFittedPeaks(std::vector<
-    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results) {
+void FitPeaks::calculateFittedPeaks(
+    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+        fit_results) {
   // check
   if (!m_fittedParamTable)
     throw std::runtime_error("No parameters");
@@ -1276,7 +1284,7 @@ vector<double> calculateMomentsAboutMean(const Histogram &histogram,
 
   return vector<double>{zeroth, first, second};
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /**  Estimate background: There are two methods that will be tried.
@@ -1636,7 +1644,28 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
   double chi2 = DBL_MAX;
   if (fitStatus == "success") {
     chi2 = fit->getProperty("OutputChi2overDoF");
-    fitfunc = fit->getProperty("Function");
+    // fitfunc = fit->getProperty("Function");
+
+    // TODO - 20181114 - Write a section of codes to verify peak function and background function
+    //                   have error set up same as fitfunc
+    g_log.warning() << "FitFunction (combo) has " << fitfunc->nParams() << " parameters\n";
+
+    size_t peak_num_param = peak_function->nParams();
+    std::vector<std::string> peak_param_names = peak_function->getParameterNames();
+    std::stringstream debugss;
+    debugss << "Peak function parameters\n";
+    for (size_t i = 0; i < peak_num_param; ++i)
+        debugss << peak_param_names[i] << ": " << peak_function->getParameter(i)
+                << "  (" << peak_function->getError(i) << ")\n";
+
+    size_t combo_num_param = fitfunc->nParams();
+    std::vector<std::string> combo_param_names = fitfunc->getParameterNames();
+    debugss << "Combo function parameters\n";
+    for (size_t i = 0; i < combo_num_param; ++i)
+        debugss << combo_param_names[i] << ": " << fitfunc->getParameter(i)
+                << "  (" << fitfunc->getError(i) << ")\n";
+    g_log.warning(debugss.str());
+
   }
 
   return chi2;
@@ -1691,7 +1720,7 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function,
   fit->setProperty("WorkspaceIndex_1", static_cast<int>(wsindex));
   fit->setProperty("StartX_1", vec_xmin[1]);
   fit->setProperty("EndX_1", vec_xmax[1]);
-  fit->setProperty("MaxIterations", 50);
+  fit->setProperty("MaxIterations", m_fitIterations);
 
   // Execute
   fit->execute();
@@ -1879,8 +1908,9 @@ void FitPeaks::generateCalculatedPeaksWS() {
 
 //----------------------------------------------------------------------------------------------
 /// set up output workspaces
-void FitPeaks::processOutputs(std::vector<
-    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_result_vec) {
+void FitPeaks::processOutputs(
+    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+        fit_result_vec) {
   setProperty("OutputWorkspace", m_outputPeakPositionWorkspace);
 
   // optional

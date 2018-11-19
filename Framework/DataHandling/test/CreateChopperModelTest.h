@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_CREATECHOPPERMODELTEST_H_
 #define MANTID_DATAHANDLING_CREATECHOPPERMODELTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/CreateChopperModel.h"
 #include "MantidAPI/FermiChopperModel.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataHandling/CreateChopperModel.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::DataHandling::CreateChopperModel;
 

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -53,7 +59,7 @@ void ConvertToDiffractionMDWorkspace2::init() {
  *
  * @return minVal and maxVal -- two vectors with minimal and maximal values of
  *the momentums in the target workspace.
-*/
+ */
 void ConvertToDiffractionMDWorkspace2::convertExtents(
     const std::vector<double> &Extents, std::vector<double> &minVal,
     std::vector<double> &maxVal) {
@@ -74,5 +80,5 @@ void ConvertToDiffractionMDWorkspace2::convertExtents(
         "You must specify either 2 or 6 extents (min,max).");
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

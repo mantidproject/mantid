@@ -28,26 +28,26 @@
  *                                                                         *
  ***************************************************************************/
 #include "FFTDialog.h"
-#include "Graph.h"
-#include "MyParser.h"
 #include "ApplicationWindow.h"
-#include "MultiLayer.h"
-#include "Table.h"
-#include "Plot.h"
 #include "FFT.h"
+#include "Graph.h"
 #include "Matrix.h"
+#include "MultiLayer.h"
+#include "MyParser.h"
+#include "Plot.h"
+#include "Table.h"
 #include "analysis/fft2D.h"
 
-#include <QRadioButton>
-#include <QGroupBox>
+#include <QApplication>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QLayout>
-#include <QApplication>
+#include <QRadioButton>
 
 FFTDialog::FFTDialog(int type, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), buttonOK(nullptr), buttonCancel(nullptr),

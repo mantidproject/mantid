@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef POLDISOURCESPECTRUMTEST_H
 #define POLDISOURCESPECTRUMTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Interpolation.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
-#include "MantidGeometry/IComponent.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
+#include <cxxtest/TestSuite.h>
 #include <stdexcept>
 
 using namespace Mantid::Poldi;

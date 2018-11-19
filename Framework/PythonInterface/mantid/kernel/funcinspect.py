@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """
     Defines functions that can be used to inspect the properties of a
     function call. For example
@@ -148,7 +154,7 @@ __operator_names = set(['CALL_FUNCTION', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_KW'
                         'INPLACE_MODULO', 'INPLACE_ADD', 'INPLACE_SUBTRACT',
                         'INPLACE_LSHIFT','INPLACE_RSHIFT','INPLACE_AND', 'INPLACE_XOR',
                         'INPLACE_OR', 'COMPARE_OP',
-                        'CALL_FUNCTION_EX'])
+                        'CALL_FUNCTION_EX', 'LOAD_METHOD', 'CALL_METHOD'])
 #--------------------------------------------------------------------------------------
 
 def process_frame(frame):

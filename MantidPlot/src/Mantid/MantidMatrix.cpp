@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMatrix.h"
 #include "../ApplicationWindow.h"
 #include "../Graph3D.h"
@@ -23,8 +29,8 @@
 #include <QScrollBar>
 
 #include <algorithm>
-#include <limits>
 #include <cmath>
+#include <limits>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -41,7 +47,7 @@ Logger g_log("MantidMatrix");
 
 namespace {
 /**
- * Converts an interger value to the corrsponding enum
+ * Converts an integer value to the corrsponding enum
  * @param i: the integer to check
  * @returns the corresponding model type
  */
@@ -83,7 +89,7 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
     return 0;
   }
 }
-}
+} // namespace
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
                            QWidget *parent, const QString &label,
@@ -133,7 +139,7 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
 
   setWidget(m_tabs);
   // for synchronizing the views
-  // index is zero for the defualt view
+  // index is zero for the default view
   m_PrevIndex = 0;
   // install event filter on  these objects
   m_table_viewY->installEventFilter(this);
@@ -183,8 +189,8 @@ bool MantidMatrix::eventFilter(QObject *object, QEvent *e) {
 }
 
 /** Called when switching between tabs
-*  @param index :: The index of the new active tab
-*/
+ *  @param index :: The index of the new active tab
+ */
 void MantidMatrix::viewChanged(int index) {
   // get the previous view and selection model
   QTableView *prevView = (QTableView *)m_tabs->widget(m_PrevIndex);
@@ -375,7 +381,7 @@ int MantidMatrix::columnsWidth(int i) {
 }
 
 /**  Return the pointer to the active table view.
-*/
+ */
 QTableView *MantidMatrix::activeView() {
   auto currentIndex = m_tabs->currentIndex();
   switch (currentIndex) {
@@ -392,7 +398,7 @@ QTableView *MantidMatrix::activeView() {
 }
 
 /**  Returns the pointer to the active model.
-*/
+ */
 MantidMatrixModel *MantidMatrix::activeModel() {
   auto currentIndex = m_tabs->currentIndex();
   switch (currentIndex) {
@@ -410,7 +416,7 @@ MantidMatrixModel *MantidMatrix::activeModel() {
 
 /**  Copies the current selection in the active table view into the system
  * clipboard.
-*/
+ */
 void MantidMatrix::copySelection() {
   QItemSelectionModel *selModel = activeView()->selectionModel();
   QString s = "";
@@ -445,7 +451,7 @@ void MantidMatrix::copySelection() {
 }
 
 /**  Returns minimum and maximum values in the matrix.
-If setRange(...) has not been called it returns the true smalles ang largest
+If setRange(...) has not been called it returns the true smallest and largest
 Y-values in the matrix,
 otherwise the values set with setRange(...) are returned. These are needed in
 plotGraph2D to set
@@ -463,7 +469,7 @@ void MantidMatrix::range(double *min, double *max) {
 }
 
 /**  Sets new minimum and maximum Y-values which can be displayed in a 2D graph
-*/
+ */
 void MantidMatrix::setRange(double min, double max) {
   m_min = min;
   m_max = max;
@@ -473,9 +479,9 @@ void MantidMatrix::setRange(double min, double max) {
 double **MantidMatrix::allocateMatrixData(int rows, int columns) {
   double **data = (double **)malloc(rows * sizeof(double *));
   if (!data) {
-    QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
-                                       tr("Memory Allocation Error"),
-                          tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(
+        nullptr, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+        tr("Not enough memory, operation aborted!"));
     return nullptr;
   }
 
@@ -486,9 +492,9 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
         free(data[j]);
       free(data);
 
-      QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
-                                         tr("Memory Allocation Error"),
-                            tr("Not enough memory, operation aborted!"));
+      QMessageBox::critical(
+          nullptr, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+          tr("Not enough memory, operation aborted!"));
       return nullptr;
     }
   }
@@ -664,15 +670,17 @@ QwtDoubleRect MantidMatrix::boundingRect() {
                                 ? numCols()
                                 : defaultNumberSpectroGramColumns;
       }
-      m_boundingRect = QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
-                                     qMin(y_start, y_end) - 0.5 * dy,
-                                     fabs(x_end - x_start) + dx,
-                                     fabs(y_end - y_start) + dy).normalized();
+      m_boundingRect =
+          QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
+                        qMin(y_start, y_end) - 0.5 * dy,
+                        fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
+              .normalized();
 
     } else {
       m_spectrogramCols = 0;
       m_boundingRect = QwtDoubleRect(0, qMin(y_start, y_end) - 0.5 * dy, 1,
-                                     fabs(y_end - y_start) + dy).normalized();
+                                     fabs(y_end - y_start) + dy)
+                           .normalized();
     }
   } // Define the spectrogram bounding box
   return m_boundingRect;
@@ -826,9 +834,9 @@ const QList<int> &MantidMatrix::getSelectedRows() const {
 }
 
 /**
-* Sets the internal cache of selected rows.
-* @return True if rows are selected, false otherwise
-*/
+ * Sets the internal cache of selected rows.
+ * @return True if rows are selected, false otherwise
+ */
 bool MantidMatrix::setSelectedRows() {
   QTableView *tv = activeView();
   QItemSelectionModel *selModel = tv->selectionModel();
@@ -851,9 +859,9 @@ const QList<int> &MantidMatrix::getSelectedColumns() const {
 }
 
 /**
-* Sets the internal cache of selected columns.
-* @return True if columns are selected, false otherwise
-*/
+ * Sets the internal cache of selected columns.
+ * @return True if columns are selected, false otherwise
+ */
 bool MantidMatrix::setSelectedColumns() {
   QTableView *tv = activeView();
   QItemSelectionModel *selModel = tv->selectionModel();
@@ -1160,7 +1168,7 @@ void MantidMatrix::goToTab(const QString &name) {
 }
 
 /**  returns the workspace name
-*/
+ */
 const std::string &MantidMatrix::getWorkspaceName() { return m_strName; }
 
 void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {

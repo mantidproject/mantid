@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTIONTEST_H_
 #define MANTID_ALGORITHMS_ESTIMATERESOLUTIONDIFFRACTIONTEST_H_
 
@@ -32,7 +38,7 @@ public:
   }
 
   /** Test init
-    */
+   */
   void test_Init() {
     EstimateResolutionDiffraction alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -40,7 +46,7 @@ public:
   }
 
   /** Test POWGEN
-    */
+   */
   void test_EmptyPG3() {
     // Create an empty PG3 workspace
     MatrixWorkspace_sptr ws = createInstrument();
@@ -75,7 +81,7 @@ public:
   }
 
   /** Create an instrument
-    */
+   */
   API::MatrixWorkspace_sptr createInstrument() {
     // Create empty workspace
     LoadEmptyInstrument loader;

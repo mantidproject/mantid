@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LoadSpice2D_H
 #define MANTID_DATAHANDLING_LoadSpice2D_H
 
-#include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/XmlHandler.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/DateAndTime.h"
 #include <map>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {

@@ -1,5 +1,11 @@
-#include "MantidAPI/Axis.h"
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IncreasingAxisValidator.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
@@ -11,11 +17,11 @@ Kernel::IValidator_sptr IncreasingAxisValidator::clone() const {
 }
 
 /**
-  * Checks that X axis is in the right direction.
-  *
-  * @param value The workspace to check
-  * @return "" if is valid, otherwise a user level description of a problem
-  */
+ * Checks that X axis is in the right direction.
+ *
+ * @param value The workspace to check
+ * @return "" if is valid, otherwise a user level description of a problem
+ */
 std::string IncreasingAxisValidator::checkValidity(
     const MatrixWorkspace_sptr &value) const {
   const Axis *xAxis{nullptr};

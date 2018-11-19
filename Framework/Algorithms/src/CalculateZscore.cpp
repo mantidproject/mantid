@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateZscore.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,7 +28,7 @@ DECLARE_ALGORITHM(CalculateZscore)
 
 //----------------------------------------------------------------------------------------------
 /** Define properties
-  */
+ */
 void CalculateZscore::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "Anonymous", Direction::Input),
@@ -39,7 +45,7 @@ void CalculateZscore::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute body
-  */
+ */
 void CalculateZscore::exec() {
   // 1. Get input and validate
   MatrixWorkspace_const_sptr inpWS = getProperty("InputWorkspace");

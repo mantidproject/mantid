@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /* File: ReducedCell.cpp */
 
 #include "MantidGeometry/Crystal/ReducedCell.h"
@@ -682,5 +688,5 @@ std::vector<double> ReducedCell::norm_vals(const ReducedCell &info) const {
  */
 Kernel::DblMatrix ReducedCell::GetTransformation() { return transform; }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

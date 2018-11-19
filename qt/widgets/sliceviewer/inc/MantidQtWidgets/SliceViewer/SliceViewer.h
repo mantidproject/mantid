@@ -1,9 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef SLICEVIEWER_H
 #define SLICEVIEWER_H
 
-#include "MantidQtWidgets/LegacyQwt/ColorBarWidget.h"
-#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
-#include "MantidQtWidgets/LegacyQwt/SafeQwtPlot.h"
 #include "DimensionSliceWidget.h"
 #include "DllOption.h"
 #include "MantidAPI/IMDIterator.h"
@@ -12,21 +15,24 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/VMD.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/SyncedCheckboxes.h"
+#include "MantidQtWidgets/LegacyQwt/ColorBarWidget.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/LegacyQwt/SafeQwtPlot.h"
 #include "MantidQtWidgets/SliceViewer/CoordinateTransform.h"
 #include "MantidQtWidgets/SliceViewer/LineOverlay.h"
 #include "MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h"
 #include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
-#include "MantidQtWidgets/SliceViewer/ZoomablePeaksView.h"
 #include "MantidQtWidgets/SliceViewer/QwtScaleDrawNonOrthogonal.h"
+#include "MantidQtWidgets/SliceViewer/ZoomablePeaksView.h"
 #include "ui_SliceViewer.h"
-#include <qwt_color_map.h>
-#include <qwt_plot_spectrogram.h>
-#include <qwt_plot.h>
-#include <vector>
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include <boost/shared_ptr.hpp>
+#include <qwt_color_map.h>
+#include <qwt_plot.h>
+#include <qwt_plot_spectrogram.h>
+#include <vector>
 
 class QDragEnterEvent;
 class QDropEvent;
@@ -36,7 +42,7 @@ namespace Mantid {
 namespace API {
 class IPeaksWorkspace;
 }
-}
+} // namespace Mantid
 namespace MantidQt {
 namespace SliceViewer {
 

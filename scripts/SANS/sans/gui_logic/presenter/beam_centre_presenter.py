@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import copy
@@ -50,10 +56,10 @@ class BeamCentrePresenter(object):
         self._view.on_update_instrument(instrument)
 
     def on_update_rows(self):
+        file_information = self._parent_presenter._table_model.get_file_information_for_row(0)
+        if file_information:
+            self._beam_centre_model.reset_to_defaults_for_instrument(file_information=file_information)
         self._view.set_options(self._beam_centre_model)
-        state = self._parent_presenter.get_state_for_row(0)
-        if state:
-            self._beam_centre_model.reset_to_defaults_for_instrument(state_data=state.data)
 
     def on_processing_finished_centre_finder(self, result):
         # Enable button
@@ -96,7 +102,7 @@ class BeamCentrePresenter(object):
         listener = BeamCentrePresenter.CentreFinderListener(self)
         state_copy = copy.copy(state)
 
-        self._work_handler.process(listener, self._beam_centre_model.find_beam_centre, state_copy)
+        self._work_handler.process(listener, self._beam_centre_model.find_beam_centre, 0, state_copy)
 
     def _update_beam_model_from_view(self):
         self._beam_centre_model.r_min = self._view.r_min
@@ -116,6 +122,19 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.component = self._view.component
         self._beam_centre_model.update_hab = self._view.update_hab
         self._beam_centre_model.update_lab = self._view.update_lab
+
+    def update_centre_positions(self, state_model):
+        lab_pos_1 = getattr(state_model, 'lab_pos_1')
+        lab_pos_2 = getattr(state_model, 'lab_pos_2')
+
+        hab_pos_1 = getattr(state_model, 'hab_pos_1') if getattr(state_model, 'hab_pos_1') else lab_pos_1
+        hab_pos_2 = getattr(state_model, 'hab_pos_2') if getattr(state_model, 'hab_pos_2') else lab_pos_2
+
+        self._view.lab_pos_1 = lab_pos_1
+        self._view.lab_pos_2 = lab_pos_2
+
+        self._view.hab_pos_1 = hab_pos_1
+        self._view.hab_pos_2 = hab_pos_2
 
     def set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)

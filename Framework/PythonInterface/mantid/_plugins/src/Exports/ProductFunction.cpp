@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 
-using Mantid::CurveFitting::Functions::ProductFunction;
 using Mantid::API::CompositeFunction;
+using Mantid::CurveFitting::Functions::ProductFunction;
 using namespace boost::python;
 
 void export_ProductFunction() {

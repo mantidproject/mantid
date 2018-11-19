@@ -1,20 +1,26 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/BinDialog.h"
 
 ///< Qt Includes
-#include <QString>
-#include <QGroupBox>
-#include <QGridLayout>
 #include <QDoubleValidator>
-#include <QPushButton>
+#include <QGridLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QRadioButton>
+#include <QString>
 
 namespace MantidQt {
 namespace MantidWidgets {
 /**
-*Constructor
-*/
+ *Constructor
+ */
 BinDialog::BinDialog(QWidget *parent) : QDialog(parent) {
   // Set the tile of the window
   setWindowTitle(QString("Select X Range"));
@@ -60,8 +66,8 @@ BinDialog::BinDialog(QWidget *parent) : QDialog(parent) {
 }
 
 /**
-* Destructor
-*/
+ * Destructor
+ */
 BinDialog::~BinDialog() {}
 
 /** Set the values in the GUI. */
@@ -85,11 +91,11 @@ void BinDialog::btnOKClicked() {
 }
 
 /** Called when the mEntireRange checkbox state toggles.
-* Disables the textboxes if the checkbox is on.
-* */
+ * Disables the textboxes if the checkbox is on.
+ * */
 void BinDialog::mEntireRange_toggled(bool on) {
   this->mIntegralMaxValue->setEnabled(!on);
   this->mIntegralMinValue->setEnabled(!on);
 }
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

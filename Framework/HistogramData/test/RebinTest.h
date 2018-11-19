@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_HISTOGRAMDATA_REBINTEST_H_
 #define MANTID_HISTOGRAMDATA_REBINTEST_H_
 
@@ -7,7 +13,6 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/Rebin.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include <algorithm>
 #include <random>

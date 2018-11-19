@@ -1,67 +1,131 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import six
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import mtd, WorkspaceGroup, MatrixWorkspace
+from mantid.api import mtd, WorkspaceGroup, MatrixWorkspace, AnalysisDataService, WorkspaceFactory
+
 
 class WorkspaceGroupTest(unittest.TestCase):
 
-    def test_group_interface(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='First',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        run_algorithm('CreateWorkspace', OutputWorkspace='Second',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        run_algorithm('GroupWorkspaces',InputWorkspaces='First,Second',OutputWorkspace='grouped')
-        grouped = mtd['grouped']
-        self.assertEquals(type(grouped), WorkspaceGroup)
-        self.assertEquals(2, grouped.size())
-        self.assertEquals(2, grouped.getNumberOfEntries())
-        # Matches operator
-        self.assertEquals(len(grouped), grouped.getNumberOfEntries())
-        # Matches length of name list
-        names = grouped.getNames()
-        self.assertEquals(str(names), "['First','Second']")
-        self.assertEquals(len(grouped), len(names))
-        expected = ['First', 'Second']
-        for i in range(len(names)):
-            self.assertEquals(expected[i], names[i])
+    def create_matrix_workspace_in_ADS(self, name):
+        run_algorithm('CreateWorkspace', OutputWorkspace=name,
+                      DataX=[1., 2., 3.], DataY=[2., 3.], DataE=[2., 3.], UnitX='TOF')
 
-        # Clearing the data should leave the handle unusable
+    def create_group_via_GroupWorkspace_algorithm(self):
+        self.create_matrix_workspace_in_ADS("First")
+        self.create_matrix_workspace_in_ADS("Second")
+        run_algorithm('GroupWorkspaces', InputWorkspaces='First,Second', OutputWorkspace='grouped')
+        return mtd["grouped"]
+
+    def tearDown(self):
+        AnalysisDataService.clear()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # TESTS
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def test_WorkspaceGroup_can_be_instantiated(self):
+        ws_group = WorkspaceGroup()
+        self.assertIsNotNone(ws_group)
+        self.assertIsInstance(ws_group, WorkspaceGroup)
+
+    def test_that_instantiated_WorkspaceGroup_is_not_added_to_the_ADS(self):
+        ws_group = WorkspaceGroup()
+
+        self.assertEqual(len(AnalysisDataService.getObjectNames()), 0)
+
+    def test_that_instantiated_WorkspaceGroup_can_be_added_to_the_ADS(self):
+        ws_group = WorkspaceGroup()
+        mtd.add("group1", ws_group)
+
+        self.assertEqual(AnalysisDataService.getObjectNames(), ["group1"])
+        self.assertIsInstance(mtd["group1"], WorkspaceGroup)
+
+    def test_that_can_add_workspaces_to_WorkspaceGroup_when_in_ADS(self):
+        self.create_matrix_workspace_in_ADS("ws1")
+        self.create_matrix_workspace_in_ADS("ws2")
+
+        ws_group = WorkspaceGroup()
+        mtd.add("group1", ws_group)
+
+        ws_group.add("ws1")
+        ws_group.add("ws2")
+
+        self.assertTrue("ws1" in mtd["group1"])
+        self.assertTrue("ws2" in mtd["group1"])
+
+    def test_that_can_add_workspaces_to_WorkspaceGroup_when_not_in_ADS(self):
+        ws1 = WorkspaceFactory.create("Workspace2D", 2, 2, 2)
+        ws2 = WorkspaceFactory.create("Workspace2D", 2, 2, 2)
+
+        ws_group = WorkspaceGroup()
+
+        ws_group.addWorkspace(ws1)
+        ws_group.addWorkspace(ws2)
+
+        self.assertEqual(ws_group.size(), 2)
+
+    def test_that_GroupWorkspaces_algorithm_creates_group_of_the_correct_size(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+
+        self.assertEquals(type(group), WorkspaceGroup)
+        self.assertEquals(2, group.size())
+        self.assertEquals(2, group.getNumberOfEntries())
+
+    def test_that_python__len__method_works_correctly_on_group(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+
+        self.assertEquals(len(group), group.getNumberOfEntries())
+
+    def test_that_getName_method_returns_correct_names(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+        names = group.getNames()
+
+        six.assertCountEqual(self, names, ["First", "Second"])
+
+    def test_that_a_group_is_invalidated_if_ADS_is_cleared_and_RuntimeError_raised(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+
         mtd.clear()
-        try:
-            grouped.getNames()
-            self.fail("WorkspaceGroup handle is still usable after ADS has been cleared, it should be a weak reference and raise an error.")
-        except RuntimeError as exc:
-            self.assertEquals(str(exc), 'Variable invalidated, data has been deleted.')
 
-    def test_group_index_access_returns_correct_workspace(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='First',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        run_algorithm('CreateWorkspace', OutputWorkspace='Second',DataX=[4.,5.,6.], DataY=[4.,5.], DataE=[2.,3.],UnitX='TOF')
-        run_algorithm('CreateWorkspace', OutputWorkspace='Third',DataX=[7.,8.,9.], DataY=[6.,7.], DataE=[2.,3.],UnitX='TOF')
-        run_algorithm('GroupWorkspaces',InputWorkspaces='First,Second,Third',OutputWorkspace='grouped')
-        group = mtd['grouped']
+        with self.assertRaises(RuntimeError):
+            group.getNames()
 
-        self.assertRaises(IndexError, group.__getitem__, 3) # Index out of bounds
-        for i in range(3):
+    def test_that_IndexError_raised_when_attemtping_to_access_an_index_which_doesnt_exist(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+
+        with self.assertRaises(IndexError):
+            group.__getitem__(2)
+
+    def test_that_indexing_the_group_returns_objects_of_the_correct_type(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+
+        for i in range(2):
             member = group[i]
             self.assertTrue(isinstance(member, MatrixWorkspace))
 
-        # Clearing the data should leave the handle unusable
-        member = group[0]
-        mtd.remove("First")
-        try:
-            member.name()
-            self.fail("Handle for item extracted from WorkspaceGroup is still usable after ADS has been cleared, it should be a weak reference and raise an error.")
-        except RuntimeError as exc:
-            self.assertEquals(str(exc), 'Variable invalidated, data has been deleted.')
+    def test_that_sortByName_sorts_names_alphabetically_when_using_getNames(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+        group.sortByName()
+        names = group.getNames()
+
+        self.assertEqual(names[0], "First")
+        self.assertEqual(names[1], "Second")
 
     def test_SimpleAlgorithm_Accepts_Group_Handle(self):
         from mantid.simpleapi import Scale
+        self.create_matrix_workspace_in_ADS("First")
+        self.create_matrix_workspace_in_ADS("Second")
+        run_algorithm('GroupWorkspaces', InputWorkspaces='First,Second', OutputWorkspace='grouped')
+        group = mtd['grouped']
 
-        run_algorithm('CreateWorkspace', OutputWorkspace='First',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        run_algorithm('CreateWorkspace', OutputWorkspace='Second',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        run_algorithm('GroupWorkspaces',InputWorkspaces='First,Second',OutputWorkspace='group')
-        group = mtd['group']
-        self.assertEquals(group.name(), "group")
-        self.assertEquals(type(group), WorkspaceGroup)
         try:
             w = Scale(group, 1.5)
             mtd.remove(str(w))
@@ -70,11 +134,13 @@ class WorkspaceGroupTest(unittest.TestCase):
         mtd.remove(str(group))
 
     def test_complex_binary_operations_with_group_do_not_leave_temporary_workspaces_in_ADS(self):
-        run_algorithm('CreateWorkspace', OutputWorkspace='grouped_1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        run_algorithm('CreateWorkspace', OutputWorkspace='grouped_2',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
-        run_algorithm('GroupWorkspaces',InputWorkspaces='grouped_1,grouped_2',OutputWorkspace='grouped')
+        run_algorithm('CreateWorkspace', OutputWorkspace='grouped_1', DataX=[1., 2., 3.], DataY=[2., 3.],
+                      DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('CreateWorkspace', OutputWorkspace='grouped_2', DataX=[1., 2., 3.], DataY=[2., 3.],
+                      DataE=[2., 3.], UnitX='TOF')
+        run_algorithm('GroupWorkspaces', InputWorkspaces='grouped_1,grouped_2', OutputWorkspace='grouped')
 
-        w1=(mtd['grouped']*0.0)+1.0
+        w1 = (mtd['grouped'] * 0.0) + 1.0
 
         self.assertTrue('w1' in mtd)
         self.assertTrue('grouped' in mtd)
@@ -88,18 +154,6 @@ class WorkspaceGroupTest(unittest.TestCase):
         mtd.remove('grouped')
         mtd.remove('grouped_1')
         mtd.remove('grouped_2')
-
-    def test_sortByName(self):
-        run_algorithm('CreateSingleValuedWorkspace', OutputWorkspace="w1")
-        run_algorithm('CreateSingleValuedWorkspace', OutputWorkspace="w4")
-        run_algorithm('GroupWorkspaces',InputWorkspaces='w4,w1',
-                      OutputWorkspace='group')
-        group = mtd['group']
-        names = ' '.join(list(group.getNames()))
-        self.assertTrue("w4 w1"==names)
-        group.sortByName()
-        names = ' '.join(list(group.getNames()))
-        self.assertTrue("w1 w4"==names)
 
 
 if __name__ == '__main__':

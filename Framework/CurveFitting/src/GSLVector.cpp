@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLVector.h"
 
-#include <gsl/gsl_blas.h>
 #include <algorithm>
 #include <cmath>
+#include <gsl/gsl_blas.h>
 #include <iomanip>
-#include <stdexcept>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 namespace Mantid {
 namespace CurveFitting {

@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/FileEventDataListener.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -16,7 +22,7 @@ DECLARE_LISTENER(FileEventDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("FileEventDataListener");
-}
+} // namespace
 
 /// Constructor
 FileEventDataListener::FileEventDataListener()
@@ -53,11 +59,12 @@ FileEventDataListener::FileEventDataListener()
     }
   }
 
-  if (!ConfigService::Instance().getValue("fileeventdatalistener.chunks",
-                                          m_numChunks)) {
+  auto numChunks =
+      ConfigService::Instance().getValue<int>("fileeventdatalistener.chunks");
+  m_numChunks = numChunks.get_value_or(0);
+  if (!numChunks.is_initialized()) {
     g_log.error("Configuration property fileeventdatalistener.chunks not "
                 "found. The algorithm will fail!");
-    m_numChunks = 0; // Set it to 0 so the algorithm just fails
   }
 
   // Add an integer, incremented for each listener instance, to the temporary

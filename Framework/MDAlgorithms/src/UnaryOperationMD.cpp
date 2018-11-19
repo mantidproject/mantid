@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/UnaryOperationMD.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -110,5 +116,5 @@ void UnaryOperationMD::exec() {
   setProperty("OutputWorkspace", m_out);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

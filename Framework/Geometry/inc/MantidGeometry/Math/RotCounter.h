@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef RotaryCounter_h
 #define RotaryCounter_h
 
@@ -28,7 +34,7 @@ private:
   std::vector<int> RC; ///< rotation list
 
 public:
-  RotaryCounter(const int S, const int N); ///<Size,Max
+  RotaryCounter(const int S, const int N); ///< Size,Max
 
   int operator==(const RotaryCounter &) const;
   int operator<(const RotaryCounter &) const;
@@ -44,7 +50,7 @@ public:
 };
 
 std::ostream &operator<<(std::ostream &, const RotaryCounter &);
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif

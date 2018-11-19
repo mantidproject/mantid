@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDTEST_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDTEST_H_
 
@@ -6,13 +12,13 @@
 #include "MantidCurveFitting/FortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
+using Mantid::CurveFitting::ComplexFortranMatrix;
+using Mantid::CurveFitting::ComplexMatrix;
+using Mantid::CurveFitting::ComplexType;
 using Mantid::CurveFitting::DoubleFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranVector;
-using Mantid::CurveFitting::ComplexFortranMatrix;
-using Mantid::CurveFitting::IntFortranVector;
-using Mantid::CurveFitting::ComplexType;
 using Mantid::CurveFitting::GSLVector;
-using Mantid::CurveFitting::ComplexMatrix;
+using Mantid::CurveFitting::IntFortranVector;
 
 using namespace Mantid::CurveFitting::Functions;
 

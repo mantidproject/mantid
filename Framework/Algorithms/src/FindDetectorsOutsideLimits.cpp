@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -5,8 +11,8 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <fstream>
 #include <cmath>
+#include <fstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -167,5 +173,5 @@ void FindDetectorsOutsideLimits::exec() {
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWS);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

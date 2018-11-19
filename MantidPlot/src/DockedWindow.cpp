@@ -1,6 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "DockedWindow.h"
-#include "MdiSubWindow.h"
 #include "ApplicationWindow.h"
+#include "MdiSubWindow.h"
 
 #include <QApplication>
 #include <QDrag>
@@ -19,8 +25,8 @@ DockedWindow::DockedWindow(ApplicationWindow *appWindow)
 }
 
 /**
-  * Returns the inner MdiSubWindow.
-  */
+ * Returns the inner MdiSubWindow.
+ */
 MdiSubWindow *DockedWindow::mdiSubWindow() const {
   return static_cast<MdiSubWindow *>(widget());
 }

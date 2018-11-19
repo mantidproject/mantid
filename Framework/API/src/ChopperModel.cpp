@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 //
 // Includes
 //
@@ -14,7 +20,7 @@ namespace {
 // Parameter names
 const char *ANGULAR_VEL = "AngularVelocity";
 const char *JITTER = "JitterSigma";
-}
+} // namespace
 
 /// Default constructor required by the factory
 ChopperModel::ChopperModel()
@@ -133,5 +139,5 @@ void ChopperModel::setBaseParameters(
     keyValues.erase(JITTER);
   }
 }
-}
-}
+} // namespace API
+} // namespace Mantid

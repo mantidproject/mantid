@@ -9,69 +9,52 @@ if [ -z "$BUILD_DIR" ]; then
  echo "Setting BUILD_DIR to $BUILD_DIR"
 fi
 
+###############################################################################
+# Set up the build directory
+###############################################################################
 if [ -d $BUILD_DIR ]; then
-  echo "$BUILD_DIR exists"
-else
-  mkdir $BUILD_DIR
-fi
-
-###############################################################################
-# Print out the versions of things we are using
-###############################################################################
-# we use cmake3 on rhel because cmake is too old
-if [ $(command -v cmake3) ]; then
-    CMAKE_EXE=cmake3
-else
-    CMAKE_EXE=cmake
-fi
-${CMAKE_EXE} --version
-
-###############################################################################
-# Generator
-###############################################################################
-if [ "$(command -v ninja)" ]; then
-  CMAKE_GENERATOR="-G Ninja"
-elif [ "$(command -v ninja-build)" ]; then
-  CMAKE_GENERATOR="-G Ninja"
-fi
-##### set up the build directory
-cd $BUILD_DIR
-if [ -e $BUILD_DIR/CMakeCache.txt ]; then
-  ${CMAKE_EXE} .
-else
-  ${CMAKE_EXE} ${CMAKE_GENERATOR} ..
-fi
-
-if [ -d dev-docs/html ]; then
-  echo "Updating existing checkout"
-  cd dev-docs/html
+  echo "$BUILD_DIR exists - updating existing checkout"
+  cd $BUILD_DIR
   git pull --rebase
-  cd -
 else
-  echo "Cloning developer site"
-  git clone git@github.com:mantidproject/developer.git dev-docs/html || exit -1
-  cd dev-docs/html
-  git checkout gh-pages
-  cd -
+  echo "$BUILD_DIR does not exist - cloning developer site"
+  git clone -b gh-pages git@github.com-mantid-builder:mantidproject/developer.git $BUILD_DIR || exit -1
+  cd $BUILD_DIR
 fi
 
-##### build the developer site
-${CMAKE_EXE} --build . --target dev-docs-html
+###############################################################################
+# Setup virtualenv for building the docs
+###############################################################################
+VIRTUAL_ENV=$BUILD_DIR/virtualenv
+if [[ ! -d $VIRTUAL_ENV ]]; then
+    virtualenv --system-site-packages "$VIRTUAL_ENV"
+    source $VIRTUAL_ENV/bin/activate
+    pip install sphinx
+    pip install sphinx_bootstrap_theme
+else
+    source $VIRTUAL_ENV/bin/activate
+fi
+which python
 
-cd dev-docs/html
+###############################################################################
+# Build the developer site
+# -----------------------------------------------------------------------------
+# the wacky long line is what is run from inside "sphinx-build" which is not
+# installed by virtualenv for some reason
+###############################################################################
+SPHINX_VERS=$(python -c "import sphinx;print sphinx.__version__")
+python -c "import sys;from pkg_resources import load_entry_point;sys.exit(load_entry_point('Sphinx==$SPHINX_VERS', 'console_scripts', 'sphinx-build')())" $WORKSPACE/dev-docs/source $BUILD_DIR
 
+###############################################################################
+# Push the results
+###############################################################################
 if [ "builder" == "$USER" ]; then
     echo "Setting username"
     git config user.name mantid-builder
     git config user.email "mantid-buildserver@mantidproject.org"
 fi
 
-##### push the results
-if [ $(git diff --quiet) ]; then
-    echo "Committing new site"
-    git add .
-    git commit -m "Automatic update of developer site"
-    git push
-else
-    echo "Nothing has changed"
-fi
+# commit returns true if nothing happened
+git add .
+git commit -m "Automatic update of developer site" || exit 0
+git push

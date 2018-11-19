@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
@@ -41,7 +47,7 @@ SpaceGroup_sptr createSpaceGroup(SpaceGroupFactoryImpl &self,
   SpaceGroup_const_sptr spaceGroup = self.createSpaceGroup(symbol);
   return boost::const_pointer_cast<SpaceGroup>(spaceGroup);
 }
-}
+} // namespace
 
 void export_SpaceGroupFactory() {
 

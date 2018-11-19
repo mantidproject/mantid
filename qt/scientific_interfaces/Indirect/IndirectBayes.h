@@ -1,15 +1,21 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
 
 //----------------------
 // Includes
 //----------------------
-#include "ui_IndirectBayes.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IndirectBayesTab.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_IndirectBayes.h"
 
-#include <Poco/NObserver.h>
 #include "MantidKernel/ConfigService.h"
+#include <Poco/NObserver.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -19,27 +25,6 @@ interface window and handles the interaction between the child tabs on the
 window.
 
 @author Samuel Jackson, STFC
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport IndirectBayes : public MantidQt::API::UserSubWindow {
@@ -63,8 +48,6 @@ public: // public constructor, destructor and functions
 private slots:
   // Run the appropriate action depending based on the selected tab
 
-  /// Slot for clicking on the run button
-  void runClicked();
   /// Slot for clicking on the hlep button
   void helpClicked();
   /// Slot for clicking on the manage directories button
@@ -89,7 +72,7 @@ private:
   /// Main interface window
   Ui::IndirectBayes m_uiForm;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif

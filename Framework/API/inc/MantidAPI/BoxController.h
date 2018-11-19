@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BOXCONTROLLER_H_
 #define BOXCONTROLLER_H_
 
+#include "MantidAPI/IBoxControllerIO.h"
 #include "MantidKernel/DiskBuffer.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/IBoxControllerIO.h"
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/optional.hpp>

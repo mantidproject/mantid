@@ -1,11 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef USERFUNCTION_H
 #define USERFUNCTION_H
 
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
-#include <qwt3d_function.h>
-#include <QString>
 #include <QObject>
+#include <QString>
+#include <qwt3d_function.h>
 
 /**
  * @brief The Function2D class is the base class for 2D functions to be used

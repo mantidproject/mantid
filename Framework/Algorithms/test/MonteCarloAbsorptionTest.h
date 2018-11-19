@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MONTECARLOABSORPTIONTEST_H_
 #define MONTECARLOABSORPTIONTEST_H_
 
@@ -95,7 +101,7 @@ setUpWS(const TestWorkspaceDescriptor &wsProps) {
             wsProps.beamHeight);
   return space;
 }
-}
+} // namespace
 
 class MonteCarloAbsorptionTest : public CxxTest::TestSuite {
 public:
@@ -104,8 +110,8 @@ public:
   //---------------------------------------------------------------------------
   void test_Workspace_With_Just_Sample_For_Elastic() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {5, 10, Environment::SampleOnly,
-                                       DeltaEMode::Elastic, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        5, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -125,8 +131,8 @@ public:
 
   void test_Workspace_With_Just_Sample_For_Direct() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Direct, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -140,8 +146,8 @@ public:
 
   void test_Workspace_With_Just_Sample_For_Indirect() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Indirect, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Indirect, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -155,8 +161,8 @@ public:
 
   void test_Workspace_With_Sample_And_Container() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SamplePlusContainer,
-                                       DeltaEMode::Elastic, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SamplePlusContainer, DeltaEMode::Elastic, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -170,8 +176,8 @@ public:
 
   void test_Workspace_Beam_Size_Set() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::UserBeamSize,
-                                       DeltaEMode::Elastic, 0.18, 0.15};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::UserBeamSize, DeltaEMode::Elastic, 0.18, 0.15};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -185,8 +191,8 @@ public:
 
   void test_Linear_Interpolation() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Elastic, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
     const int nlambda(5);
     const std::string interpolation("Linear");
     auto outputWS = runAlgorithm(wsProps, nlambda, interpolation);
@@ -201,8 +207,8 @@ public:
 
   void test_CSpline_Interpolation() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Elastic, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
     const int nlambda(5);
     const std::string interpolation("CSpline");
     auto outputWS = runAlgorithm(wsProps, nlambda, interpolation);
@@ -245,8 +251,8 @@ public:
 
   void test_Lower_Limit_for_Number_of_Wavelengths() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Direct, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
     int nlambda{1};
     TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "Linear"),
                      std::runtime_error)
@@ -271,8 +277,8 @@ public:
 
   void test_Sparse_Instrument_For_Elastic() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {5, 10, Environment::SampleOnly,
-                                       DeltaEMode::Elastic, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        5, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
     auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
@@ -291,8 +297,8 @@ public:
 
   void test_Sparse_Instrument_For_Direct() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Direct, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
     auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
@@ -307,8 +313,8 @@ public:
 
   void test_Sparse_Instrument_For_Indirect() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Indirect, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Indirect, -1, -1};
     auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
@@ -385,9 +391,9 @@ public:
   }
 
   MonteCarloAbsorptionTestPerformance() {
-    TestWorkspaceDescriptor wsProps = {10, 700, Environment::SampleOnly,
-                                       Mantid::Kernel::DeltaEMode::Elastic, -1,
-                                       -1};
+    TestWorkspaceDescriptor wsProps = {
+        10, 700, Environment::SampleOnly, Mantid::Kernel::DeltaEMode::Elastic,
+        -1, -1};
 
     inputElastic = setUpWS(wsProps);
 

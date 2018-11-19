@@ -80,7 +80,7 @@ with predicted structure factor very close to 0, which are absent:
     Maximum intensity: 6101.93
     Peaks with relative intensity < 1%: 94
     Number of absences: 16
-    Absent HKLs: [[2,0,-1], [3,0,-1], [4,0,-1], [5,0,-1], [6,0,-3], [6,0,-1], [7,0,-3], [7,0,-1], [8,0,-3], [8,0,-1], [9,-1,0], [9,0,-3], [9,0,-1], [10,0,-5], [10,0,-3], [10,0,-1]]
+    Absent HKLs: [[2,0,-1], [6,0,-3], [10,0,-5], [3,0,-1], [4,0,-1], [5,0,-1], [6,0,-1], [7,0,-3], [7,0,-1], [8,0,-3], [8,0,-1], [9,-1,0], [9,0,-3], [9,0,-1], [10,0,-3], [10,0,-1]]
 
 All absent HKLs have the form H0L with odd L. This fits with the reflection
 conditions given for :math:`Pbca` in the International Tables for Crystallography A.

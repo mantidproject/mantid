@@ -1,8 +1,14 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
@@ -12,9 +18,9 @@
 #include <numpy/arrayobject.h>
 
 using namespace Mantid::API;
+using Mantid::PythonInterface::NDArray;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 namespace Converters = Mantid::PythonInterface::Converters;
-namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IMDHistoWorkspace)
@@ -24,9 +30,9 @@ namespace PythonInterface {
 namespace Converters {
 extern template int NDArrayTypeIndex<float>::typenum;
 extern template int NDArrayTypeIndex<double>::typenum;
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 namespace {
 /**
@@ -115,16 +121,17 @@ PyObject *getNumEventsArrayAsNumpyArray(IMDHistoWorkspace &self) {
  * @param signal :: The new values
  * @param fnLabel :: A message prefix to pass if the sizes are incorrect
  */
-void throwIfSizeIncorrect(IMDHistoWorkspace &self, const NumPy::NdArray &signal,
+void throwIfSizeIncorrect(IMDHistoWorkspace &self, const NDArray &signal,
                           const std::string &fnLabel) {
   auto wsShape = countDimensions(self);
   const size_t ndims = wsShape.size();
   auto arrShape = signal.attr("shape");
   if (ndims != static_cast<size_t>(len(arrShape))) {
     std::ostringstream os;
-    os << fnLabel << ": The number of  dimensions doe not match the current "
-                     "workspace size. Workspace=" << ndims
-       << " array=" << len(arrShape);
+    os << fnLabel
+       << ": The number of  dimensions doe not match the current "
+          "workspace size. Workspace="
+       << ndims << " array=" << len(arrShape);
     throw std::invalid_argument(os.str());
   }
 
@@ -148,8 +155,7 @@ void throwIfSizeIncorrect(IMDHistoWorkspace &self, const NumPy::NdArray &signal,
  * the sizes are not
  * correct
  */
-void setSignalArray(IMDHistoWorkspace &self,
-                    const NumPy::NdArray &signalValues) {
+void setSignalArray(IMDHistoWorkspace &self, const NDArray &signalValues) {
   throwIfSizeIncorrect(self, signalValues, "setSignalArray");
   object rav = signalValues.attr("ravel")("F");
   object flattened = rav.attr("flat");
@@ -167,7 +173,7 @@ void setSignalArray(IMDHistoWorkspace &self,
  * correct
  */
 void setErrorSquaredArray(IMDHistoWorkspace &self,
-                          const NumPy::NdArray &errorSquared) {
+                          const NDArray &errorSquared) {
   throwIfSizeIncorrect(self, errorSquared, "setErrorSquaredArray");
   object rav = errorSquared.attr("ravel")("F");
   object flattened = rav.attr("flat");
@@ -188,7 +194,7 @@ void setSignalAt(IMDHistoWorkspace &self, const size_t index,
 
   self.setSignalAt(index, value);
 }
-}
+} // namespace
 
 void export_IMDHistoWorkspace() {
   // IMDHistoWorkspace class
@@ -234,37 +240,37 @@ void export_IMDHistoWorkspace() {
            "Sets the square of the errors from a numpy array. The sizes must "
            "match the current workspace sizes. A ValueError is thrown if not")
 
-      .def("setTo", &IMDHistoWorkspace::setTo,
-           (arg("self"), arg("signal"), arg("error_squared"),
-            arg("num_events")),
-           "Sets all signals/errors in the workspace to the given values")
+      .def(
+          "setTo", &IMDHistoWorkspace::setTo,
+          (arg("self"), arg("signal"), arg("error_squared"), arg("num_events")),
+          "Sets all signals/errors in the workspace to the given values")
 
       .def("getInverseVolume", &IMDHistoWorkspace::getInverseVolume,
            arg("self"), return_value_policy<return_by_value>(),
            "Return the inverse of volume of EACH cell in the workspace.")
 
       .def("getLinearIndex",
-           (size_t (IMDHistoWorkspace::*)(size_t, size_t) const) &
+           (size_t(IMDHistoWorkspace::*)(size_t, size_t) const) &
                IMDHistoWorkspace::getLinearIndex,
            (arg("self"), arg("index1"), arg("index2")),
            return_value_policy<return_by_value>(),
            "Get the 1D linear index from the 2D array")
 
       .def("getLinearIndex",
-           (size_t (IMDHistoWorkspace::*)(size_t, size_t, size_t) const) &
+           (size_t(IMDHistoWorkspace::*)(size_t, size_t, size_t) const) &
                IMDHistoWorkspace::getLinearIndex,
            (arg("self"), arg("index1"), arg("index2"), arg("index3")),
            return_value_policy<return_by_value>(),
            "Get the 1D linear index from the 3D array")
 
-      .def("getLinearIndex",
-           (size_t (IMDHistoWorkspace::*)(size_t, size_t, size_t, size_t)
-                const) &
-               IMDHistoWorkspace::getLinearIndex,
-           (arg("self"), arg("index1"), arg("index2"), arg("index3"),
-            arg("index4")),
-           return_value_policy<return_by_value>(),
-           "Get the 1D linear index from the 4D array")
+      .def(
+          "getLinearIndex",
+          (size_t(IMDHistoWorkspace::*)(size_t, size_t, size_t, size_t) const) &
+              IMDHistoWorkspace::getLinearIndex,
+          (arg("self"), arg("index1"), arg("index2"), arg("index3"),
+           arg("index4")),
+          return_value_policy<return_by_value>(),
+          "Get the 1D linear index from the 4D array")
 
       .def("getCenter", &IMDHistoWorkspace::getCenter,
            (arg("self"), arg("linear_index")),

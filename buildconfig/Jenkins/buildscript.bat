@@ -45,7 +45,6 @@ if EXIST %WORKSPACE%\external\src\ThirdParty\.git (
   cd %WORKSPACE%
 )
 
-
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
 :: tree, which can be shared by multiple builds.
@@ -59,9 +58,10 @@ if NOT DEFINED MANTID_DATA_STORE (
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check job requirements from the name
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CLEANBUILD=
 set BUILDPKG=
+
 if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
   set CLEANBUILD=yes
   set BUILDPKG=yes
@@ -85,18 +85,23 @@ if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
 :: For a clean build the entire thing is removed to guarantee it is clean. All
 :: other build types are assumed to be incremental and the following items
 :: are removed to ensure stale build objects don't interfere with each other:
+::   - those removed by git clean -fdx --exclude=build
 ::   - build/bin: if libraries are removed from cmake they are not deleted
 ::                   from bin and can cause random failures
 ::   - build/ExternalData/**: data files will change over time and removing
 ::                            the links helps keep it fresh
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set BUILD_DIR=%WORKSPACE%\build
+set BUILD_DIR_REL=build
+set BUILD_DIR=%WORKSPACE%\%BUILD_DIR_REL%
+call %~dp0setupcompiler.bat %BUILD_DIR%
 
 if "!CLEANBUILD!" == "yes" (
+  echo Removing build directory for a clean build
   rmdir /S /Q %BUILD_DIR%
 )
 
 if EXIST %BUILD_DIR% (
+  git clean -fdx --exclude=external --exclude=%BUILD_DIR_REL%
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
   for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
@@ -113,7 +118,19 @@ if EXIST %BUILD_DIR% (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set PACKAGE_OPTS=
 if "%BUILDPKG%" == "yes" (
-  set PACKAGE_OPTS=-DPACKAGE_DOCS=ON -DCPACK_PACKAGE_SUFFIX=
+  :: If package name is provided on the Jenkins job, use the custom package name
+  :: otherwise determine the correct suffix based on the branch, the else 
+  :: captures pull requests and they have suffix unstable
+  if not "%PACKAGE_SUFFIX%" == "" (
+    echo Using PACKAGE_SUFFIX=%PACKAGE_SUFFIX% from job parameter
+  ) else if not "%JOB_NAME%" == "%JOB_NAME:release=%" (
+    set PACKAGE_SUFFIX=
+  ) else if not "%JOB_NAME%" == "%JOB_NAME:master=%" (
+    set PACKAGE_SUFFIX=nightly
+  ) else (
+    set PACKAGE_SUFFIX=unstable
+  )
+  set PACKAGE_OPTS=-DPACKAGE_DOCS=ON -DCPACK_PACKAGE_SUFFIX=!PACKAGE_SUFFIX!
 )
 
 cd %BUILD_DIR%
@@ -131,11 +148,12 @@ set BUILD_CONFIG=
 if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set BUILD_CONFIG=Debug
 ) else (
-if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
-  set BUILD_CONFIG=RelWithDbg
-) else (
+  if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
+    set BUILD_CONFIG=RelWithDbg
+  ) else (
     set BUILD_CONFIG=Release
-    ))
+  )
+)
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
@@ -146,7 +164,9 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
 ) else (
   set VATES_OPT_VAL=ON
 )
-call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERSION% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DUSE_PRECOMPILED_HEADERS=ON -DENABLE_FILE_LOGGING=OFF %PACKAGE_OPTS% ..
+
+call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERSION% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DPACKAGE_WORKBENCH=OFF -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
+
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -166,7 +186,9 @@ del %USERPROPS%
 set CONFIGDIR=%APPDATA%\mantidproject\mantid
 rmdir /S /Q %CONFIGDIR%
 mkdir %CONFIGDIR%
-call cmake.exe -E touch %USERPROPS%
+:: use a fixed number of openmp threads to avoid overloading the system
+echo MultiThreaded.MaxCores=2 > %USERPROPS%
+
 call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
@@ -175,6 +197,7 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 echo Note: not running doc-test target as it currently takes too long
 :: if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
+::   del /Q %USERPROPS%
 ::   call cmake.exe --build . --target StandardTestData
 ::   call cmake.exe --build . --target docs-test
 :: )
@@ -182,15 +205,14 @@ echo Note: not running doc-test target as it currently takes too long
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if required
 :: Disabled while it takes 10 minutes to create & 5-10 mins to archive!
-:: Just create the docs to check they work
+:: If the install kit needs to be built,  create the docs to check they work
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 if "%BUILDPKG%" == "yes" (
   :: Build offline documentation
   msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
   :: Ignore errors as the exit code of msbuild is wrong here.
-  :: It always marks the build as a failure even thought the MantidPlot exit
-  :: code is correct!
+  :: It always marks the build as a failure even though MantidPlot exits correctly
   echo Building package
   cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
 )

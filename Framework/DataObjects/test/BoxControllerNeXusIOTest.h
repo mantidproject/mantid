@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef BOXCONTROLLER_NEXUS_IO_TEST_H
 #define BOXCONTROLLER_NEXUS_IO_TEST_H
 
@@ -68,10 +74,10 @@ public:
   }
 
   void test_CreateOrOpenFile() {
-    using Mantid::coord_t;
     using Mantid::API::FileFinder;
     using Mantid::DataObjects::BoxControllerNeXusIO;
     using Mantid::Kernel::Exception::FileError;
+    using Mantid::coord_t;
 
     BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
@@ -148,7 +154,7 @@ public:
   template <typename FROM, typename TO>
   struct IF // if in/out formats are different we can not read different data
             // format from it
-      {
+  {
   public:
     static void compareReadTheSame(Mantid::API::IBoxControllerIO *pSaver,
                                    const std::vector<FROM> & /*inputData*/,
@@ -161,7 +167,7 @@ public:
   template <typename FROM>
   struct IF<FROM, FROM> // if in/out formats are the same, we can read what was
                         // written earlier
-      {
+  {
   public:
     static void compareReadTheSame(Mantid::API::IBoxControllerIO *pSaver,
                                    const std::vector<FROM> &inputData,
