@@ -34,7 +34,8 @@ public:
     emit selectedSpectraChanged(spectra);
   }
 
-  void selectedSpectraChanged(std::size_t minimum, std::size_t maximum) override {
+  void selectedSpectraChanged(std::size_t minimum,
+                              std::size_t maximum) override {
     emit selectedSpectraChanged(minimum, maximum);
   }
 
@@ -42,9 +43,7 @@ public:
     emit maskSpectrumChanged(spectrum);
   }
 
-  void maskChanged(std::string const &mask) override { 
-	emit maskChanged(mask); 
-  }
+  void maskChanged(std::string const &mask) override { emit maskChanged(mask); }
 
   /// Public methods
   MOCK_CONST_METHOD0(selectionMode, SpectrumSelectionMode());
@@ -95,14 +94,14 @@ public:
   MOCK_CONST_METHOD0(isMultiFit, bool());
   MOCK_CONST_METHOD0(isInvalidFunction, boost::optional<std::string>());
   MOCK_CONST_METHOD0(getFittingFunction, IFunction_sptr());
-  
-  //MOCK_METHOD2(addWorkspace,
+
+  // MOCK_METHOD2(addWorkspace,
   //              void(MatrixWorkspace_sptr workspace, Spectra const
   //              &spectra));
   MOCK_METHOD1(removeWorkspace, void(std::size_t index));
   MOCK_METHOD1(setFitFunction, void(IFunction_sptr function));
   MOCK_METHOD1(addOutput, void(IAlgorithm_sptr fitAlgorithm));
-  
+
   MOCK_CONST_METHOD0(getFittingAlgorithm, IAlgorithm_sptr());
 
 private:
@@ -110,8 +109,8 @@ private:
   std::string simultaneousFitOutputName() const override { return ""; };
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override {
-	UNUSED_ARG(index);
-	UNUSED_ARG(spectrum);
+    UNUSED_ARG(index);
+    UNUSED_ARG(spectrum);
     return "";
   };
 };
@@ -132,9 +131,9 @@ public:
   }
 
   void setUp() override {
-	NiceMock<MockIndirectSpectrumSelectionView> *m_view;
-	NiceMock<MockIndirectFittingModel> *m_model;
-	//IndirectSpectrumSelectionPresenter m_presenter(m_model, m_view);
+    NiceMock<MockIndirectSpectrumSelectionView> *m_view;
+    NiceMock<MockIndirectFittingModel> *m_model;
+    // IndirectSpectrumSelectionPresenter m_presenter(m_model, m_view);
   }
 
   void tearDown() override {
@@ -146,9 +145,7 @@ public:
     delete m_view;
   }
 
-  void test_test() { 
-	EXPECT_CALL(*m_view, maximumSpectrum()).Times(0); 
-  }
+  void test_test() { EXPECT_CALL(*m_view, maximumSpectrum()).Times(0); }
 
 private:
   MockIndirectSpectrumSelectionView *m_view;

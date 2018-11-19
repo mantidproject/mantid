@@ -50,8 +50,8 @@ private:
   std::string simultaneousFitOutputName() const override { return ""; };
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override {
-	UNUSED_ARG(index);
-	UNUSED_ARG(spectrum);
+    UNUSED_ARG(index);
+    UNUSED_ARG(spectrum);
     return "";
   };
 

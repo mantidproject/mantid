@@ -21,8 +21,7 @@ using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::Kernel::Strings;
 
 struct SetViewSpectra : boost::static_visitor<> {
-  explicit SetViewSpectra(IndirectSpectrumSelectionView *view)
-      : m_view(view) {}
+  explicit SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
     m_view->displaySpectra(static_cast<int>(spectra.first),

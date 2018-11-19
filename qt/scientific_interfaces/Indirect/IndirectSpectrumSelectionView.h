@@ -22,7 +22,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionView
-    : public API::MantidWidget, public IIndirectSpectrumSelectionView {
+    : public API::MantidWidget,
+      public IIndirectSpectrumSelectionView {
   Q_OBJECT
 
 public:
@@ -45,10 +46,8 @@ public:
   void setSpectraRegex(const std::string &regex) override;
   void setMaskBinsRegex(const std::string &regex) override;
 
-  UserInputValidator &
-  validateSpectraString(UserInputValidator &uiv) const;
-  UserInputValidator &
-  validateMaskBinsString(UserInputValidator &uiv) const;
+  UserInputValidator &validateSpectraString(UserInputValidator &uiv) const;
+  UserInputValidator &validateMaskBinsString(UserInputValidator &uiv) const;
 
   void showSpectraErrorLabel() override;
   void showMaskBinErrorLabel() override;
