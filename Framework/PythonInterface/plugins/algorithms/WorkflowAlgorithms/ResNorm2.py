@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         WorkspaceGroup, WorkspaceGroupProperty, ITableWorkspaceProperty,
-                        Progress, PropertyMode)
+                        Progress, PropertyMode, AnalysisDataService)
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 
@@ -95,16 +95,19 @@ class ResNorm(PythonAlgorithm):
 
     def PyExec(self):
         res_clone_name = '__' + self._res_ws
-        res_clone_ws= CloneWorkspace(InputWorkspace=self._res_ws, OutputWorkspace=res_clone_name)
+        res_clone_ws = CloneWorkspace(InputWorkspace=self._res_ws, OutputWorkspace=res_clone_name)
 
         if self._create_output:
             self._out_ws_table = self.getPropertyValue('OutputWorkspaceTable')
 
         # Process vanadium workspace
-        van_ws = ConvertSpectrumAxis(InputWorkspace=self._van_ws,
-                                     OutputWorkspace='__ResNorm_vanadium',
-                                     Target='ElasticQ',
-                                     EMode='Indirect')
+        if self._van_ws[-4:] == "_red":
+            van_ws = ConvertSpectrumAxis(InputWorkspace=self._van_ws,
+                                         OutputWorkspace='__ResNorm_vanadium',
+                                         Target='ElasticQ',
+                                         EMode='Indirect')
+        else:
+            van_ws = AnalysisDataService.retrieve(self._van_ws)
 
         num_hist = van_ws.getNumberHistograms()
 

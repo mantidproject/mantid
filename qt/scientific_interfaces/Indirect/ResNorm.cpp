@@ -89,7 +89,7 @@ bool ResNorm::validate() {
     QString const vanName = m_uiForm.dsVanadium->getCurrentDataName();
     int const cutIndex = vanName.lastIndexOf("_");
     QString const vanSuffix = vanName.right(vanName.size() - (cutIndex + 1));
-    if (vanSuffix.compare("red") != 0 || vanSuffix.compare("sqw") != 0)
+    if (vanSuffix.compare("red") != 0 && vanSuffix.compare("sqw") != 0)
       uiv.addErrorMessage("The Vanadium run is not _red or _sqw workspace");
 
     // Check Res and Vanadium are the same Run
