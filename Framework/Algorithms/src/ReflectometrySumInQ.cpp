@@ -30,6 +30,7 @@ const static std::string INPUT_WS{"InputWorkspace"};
 const static std::string IS_FLAT_SAMPLE{"FlatSample"};
 const static std::string OUTPUT_WS{"OutputWorkspace"};
 const static std::string PARTIAL_BINS{"IncludePartialBins"};
+const static std::string THETA_IN{"ThetaIn"};
 } // namespace Prop
 
 /**
@@ -245,8 +246,9 @@ void ReflectometrySumInQ::init() {
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A single histogram workspace containing the result of summation in Q.");
+  // Require either Beam Centre or Theta In but not both
   declareProperty(
-      Prop::BEAM_CENTRE, EMPTY_INT(), mandatoryNonnegativeInt,
+      Prop::BEAM_CENTRE, EMPTY_INT(), nonnegativeInt,
       "Fractional workspace index of the specular reflection centre.");
   declareProperty(Prop::IS_FLAT_SAMPLE, true,
                   "If true, the summation is handled as the standard divergent "
@@ -254,6 +256,10 @@ void ReflectometrySumInQ::init() {
   declareProperty(Prop::PARTIAL_BINS, false,
                   "If true, use the full projected wavelength range possibly "
                   "including partially filled bins.");
+  declareProperty(
+      Prop::THETA_IN, EMPTY_INT(), nonnegativeInt,
+      "Provides the horizon Angle as opposed to the BeamCentre pixel, as at "
+      "ISIS there is no pixel positioned exactly at the scattering angle");
 }
 
 /** Execute the algorithm.
@@ -308,6 +314,18 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
     issues[Prop::BEAM_CENTRE] =
         "Beam centre is not included in InputWorkspaceIndexSet.";
   }
+  const auto beamCentreProperty = getPointerToProperty(Prop::BEAM_CENTRE);
+  const auto thetaInProperty = getPointerToProperty(Prop::THETA_IN);
+  // Neither BeamCentre and ThetaIn can be defined at the same time.
+  if (!beamCentreProperty->isDefault() && !thetaInProperty->isDefault()) {
+    // Both are defined
+    const std::string issueName = Prop::BEAM_CENTRE + " and " + Prop::THETA_IN;
+    issues[issueName] = "These propeties cannot be defined together";
+  } else if (beamCentreProperty->isDefault() && thetaInProperty->isDefault()) {
+    // Neither are defined
+    const std::string issueName = Prop::BEAM_CENTRE + " and " + Prop::THETA_IN;
+    issues[issueName] = "One of these properties must be defined";
+  }
   return issues;
 }
 
@@ -325,7 +343,16 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
 
   // Calculate the number of bins based on the min/max wavelength, using
   // the same bin width as the input workspace
-  const int twoThetaRIdx = getProperty(Prop::BEAM_CENTRE);
+  int twoThetaRIdx;
+  if (getPointerToProperty(Prop::BEAM_CENTRE)->isDefault()) {
+    twoThetaRIdx = getProperty(Prop::BEAM_CENTRE);
+  } else if (getPointerToProperty(Prop::THETA_IN)->isDefault()) {
+    twoThetaRIdx = getProperty(Prop::THETA_IN);
+  } else {
+    throw std::runtime_error("Neither " + Prop::BEAM_CENTRE + " or " +
+                             Prop::THETA_IN +
+                             " are defined but were valid at input time");
+  }
   const auto &edges = detectorWS.binEdges(static_cast<size_t>(twoThetaRIdx));
   const double binWidth =
       (edges.back() - edges.front()) / static_cast<double>(edges.size());
@@ -504,19 +531,35 @@ ReflectometrySumInQ::projectedLambdaRange(const MinMax &wavelengthRange,
  */
 ReflectometrySumInQ::Angles
 ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
+  const auto beamCentreProperty = getPointerToProperty(Prop::BEAM_CENTRE);
+  const auto thetaInProperty = getPointerToProperty(Prop::THETA_IN);
   Angles a;
-  const int beamCentre = getProperty(Prop::BEAM_CENTRE);
-  const double centreTwoTheta =
-      spectrumInfo.twoTheta(static_cast<size_t>(beamCentre));
-  const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
-  if (isFlat) {
-    a.horizon = centreTwoTheta / 2.;
+  // If BeamCentre is defined use that else use ThetaIn
+  if (!beamCentreProperty->isDefault()) {
+    const int beamCentre = getProperty(Prop::BEAM_CENTRE);
+    const double centreTwoTheta =
+        spectrumInfo.twoTheta(static_cast<size_t>(beamCentre));
+    const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
+    if (isFlat) {
+      a.horizon = centreTwoTheta / 2.;
+    } else {
+      a.horizon = 0.;
+    }
+    a.twoTheta = centreTwoTheta;
+    a.delta = a.twoTheta - a.horizon;
+    return a;
+  } else if (!thetaInProperty->isDefault()) {
+    const int thetaIn = getProperty(Prop::THETA_IN);
+    const double twoTheta = spectrumInfo.twoTheta(static_cast<size_t>(thetaIn));
+    a.horizon = thetaIn;
+    a.twoTheta = twoTheta;
+    a.delta = a.twoTheta - a.horizon;
+    return a;
   } else {
-    a.horizon = 0.;
+    throw std::runtime_error("Neither " + Prop::BEAM_CENTRE + " or " +
+                             Prop::THETA_IN +
+                             " are defined but were valid at input time");
   }
-  a.twoTheta = centreTwoTheta;
-  a.delta = a.twoTheta - a.horizon;
-  return a;
 }
 
 /**
