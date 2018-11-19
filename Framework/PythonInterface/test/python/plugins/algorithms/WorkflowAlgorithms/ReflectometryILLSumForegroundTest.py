@@ -195,9 +195,8 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
             'child': True
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        with self.assertRaises(AssertionError) as contextManager:
-            assertRaisesNothing(self, alg.execute)
-        self.assertTrue(contextManager.exception)
+        self.assertRaisesRegexp(RuntimeError, 'Some invalid Properties found', alg.execute)
+        self.assertTrue(alg.isExecuted)
 
     def testNotSummedDirectForegroundRaises(self):
         ws = illhelpers.create_poor_mans_d17_workspace()
@@ -212,9 +211,8 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
             'child': True
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        with self.assertRaises(AssertionError) as contextManager:
-            assertRaisesNothing(self, alg.execute)
-        self.assertTrue(contextManager.exception)
+        self.assertRaisesRegexp(RuntimeError, 'Some invalid Properties found', alg.execute)
+        self.assertTrue(alg.isExecuted)
 
 if __name__ == "__main__":
     unittest.main()
