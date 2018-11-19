@@ -159,46 +159,22 @@ void SetSampleMaterial::exec() {
     throw std::runtime_error("InputWorkspace does not have a sample object");
   }
 
-  std::unique_ptr<Material> material;
-  MaterialBuilder builder;
-
-  // determine the material
+  ReadMaterial reader;
   const std::string chemicalSymbol = getProperty("ChemicalFormula");
-  const int z_number = getProperty("AtomicNumber");
-  const int a_number = getProperty("MassNumber");
-  if (!chemicalSymbol.empty()) {
-    std::cout << "CHEM: " << chemicalSymbol << std::endl;
-    builder.setFormula(chemicalSymbol);
-  } else {
-    builder.setAtomicNumber(z_number);
-    builder.setMassNumber(a_number);
-  }
+  reader.determineMaterial(chemicalSymbol, getProperty("AtomicNumber"), getProperty("MassNumber"));
+  // determine the material
+  
 
   // determine the sample number density
-  double rho_m = getProperty("SampleMassDensity"); // in g/cc
-  if (!isEmpty(rho_m))
-    builder.setMassDensity(rho_m);
   double rho = getProperty("SampleNumberDensity"); // in atoms / Angstroms^3
-  if (isEmpty(rho)) {
-    double zParameter = getProperty("ZParameter"); // number of atoms
-    if (!isEmpty(zParameter)) {
-      builder.setZParameter(zParameter);
-      double unitCellVolume = getProperty("UnitCellVolume");
-      builder.setUnitCellVolume(unitCellVolume);
-    }
-  } else {
-    builder.setNumberDensity(rho);
-  }
+  reader.setNumberDensity(getProperty("SampleMassDensity"), rho, getProperty("ZParameter"), getProperty("UnitCellVolume"));
+
 
   // get the scattering information - this will override table values
-  builder.setCoherentXSection(getProperty("CoherentXSection"));      // in barns
-  builder.setIncoherentXSection(getProperty("IncoherentXSection"));  // in barns
-  builder.setAbsorptionXSection(getProperty("AttenuationXSection")); // in barns
-  builder.setTotalScatterXSection(
-      getProperty("ScatteringXSection")); // in barns
+  reader.setScatteringInfo(getProperty("CoherentXSection"), getProperty("IncoherentXSection"), getProperty("AttenuationXSection"), getProperty("ScatteringXSection"));
 
   // create the material
-  material =std::make_unique<Material>(builder.build());
+  auto material = reader.buildMaterial();
 
   // calculate derived values
   const double bcoh_avg_sq = material->cohScatterLengthSqrd();   // <b>
