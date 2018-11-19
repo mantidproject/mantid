@@ -9,10 +9,6 @@
 
 #include "../General/UserInputValidator.h"
 #include "DllConfig.h"
-#include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
-
-#include <QObject>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -20,14 +16,8 @@ namespace IDA {
 
 enum class SpectrumSelectionMode { RANGE, STRING };
 
-class MANTIDQT_INDIRECT_DLL IIndirectSpectrumSelectionView
-    : public API::MantidWidget {
-  Q_OBJECT
-
+class MANTIDQT_INDIRECT_DLL IIndirectSpectrumSelectionView {
 public:
-  IIndirectSpectrumSelectionView(QWidget *parent = nullptr)
-      : API::MantidWidget(parent){};
-
   virtual SpectrumSelectionMode selectionMode() const = 0;
 
   virtual std::size_t minimumSpectrum() const = 0;
@@ -44,11 +34,6 @@ public:
   virtual void setSpectraRegex(std::string const &regex) = 0;
   virtual void setMaskBinsRegex(std::string const &regex) = 0;
 
-  virtual UserInputValidator &
-  validateSpectraString(UserInputValidator &uiv) const = 0;
-  virtual UserInputValidator &
-  validateMaskBinsString(UserInputValidator &uiv) const = 0;
-
   virtual void showSpectraErrorLabel() = 0;
   virtual void showMaskBinErrorLabel() = 0;
   virtual void hideSpectraErrorLabel() = 0;
@@ -62,10 +47,10 @@ public slots:
   virtual void setMaximumSpectrum(std::size_t spectrum) = 0;
   virtual void setMaskSpectrum(std::size_t spectrum) = 0;
 
-  virtual void setSpectraString(const std::string &spectraString) = 0;
-  virtual void setMaskString(const std::string &maskString) = 0;
+  virtual void setSpectraString(std::string const &spectraString) = 0;
+  virtual void setMaskString(std::string const &maskString) = 0;
   virtual void
-  setMaskSpectraList(const std::vector<std::size_t> &maskSpectra) = 0;
+  setMaskSpectraList(std::vector<std::size_t> const &maskSpectra) = 0;
 
   virtual void hideSpectrumSelector() = 0;
   virtual void showSpectrumSelector() = 0;
@@ -75,10 +60,10 @@ public slots:
   virtual void clearMaskString() = 0;
 
 signals:
-  void selectedSpectraChanged(const std::string &);
-  void selectedSpectraChanged(std::size_t, std::size_t);
-  void maskSpectrumChanged(int);
-  void maskChanged(const std::string &);
+  virtual void selectedSpectraChanged(std::string const &) = 0;
+  virtual void selectedSpectraChanged(std::size_t, std::size_t) = 0;
+  virtual void maskSpectrumChanged(int) = 0;
+  virtual void maskChanged(std::string const &) = 0;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

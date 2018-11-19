@@ -17,8 +17,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectSpectrumSelectionView::IndirectSpectrumSelectionView(QWidget *parent)
-    : IIndirectSpectrumSelectionView(parent),
-      m_selector(new Ui::IndirectSpectrumSelector) {
+    : API::MantidWidget(parent), m_selector(new Ui::IndirectSpectrumSelector) {
   m_selector->setupUi(this);
 
   connect(m_selector->cbMaskSpectrum, SIGNAL(currentIndexChanged(int)), this,

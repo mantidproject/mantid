@@ -11,6 +11,7 @@
 #include <gmock/gmock.h>
 
 #include "../General/UserInputValidator.h"
+#include "IIndirectSpectrumSelectionView.h"
 #include "IndirectSpectrumSelectionPresenter.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -29,20 +30,21 @@ class MockIndirectSpectrumSelectionView
     : public IIndirectSpectrumSelectionView {
 public:
   /// Signals
-  void changeSelectedSpectra(std::string const &spectra) {
+  void selectedSpectraChanged(std::string const &spectra) override {
     emit selectedSpectraChanged(spectra);
   }
 
-  void changeSelectedSpectra(std::size_t const &minimum,
-                             std::size_t const &maximum) {
+  void selectedSpectraChanged(std::size_t minimum, std::size_t maximum) override {
     emit selectedSpectraChanged(minimum, maximum);
   }
 
-  void changeMaskedSpectrum(int const &spectrum) {
+  void maskSpectrumChanged(int spectrum) override {
     emit maskSpectrumChanged(spectrum);
   }
 
-  void changeMask(std::string const &mask) { emit maskChanged(mask); }
+  void maskChanged(std::string const &mask) override { 
+	emit maskChanged(mask); 
+  }
 
   /// Public methods
   MOCK_CONST_METHOD0(selectionMode, SpectrumSelectionMode());
@@ -60,11 +62,6 @@ public:
 
   MOCK_METHOD1(setSpectraRegex, void(std::string const &regex));
   MOCK_METHOD1(setMaskBinsRegex, void(std::string const &regex));
-
-  MOCK_CONST_METHOD1(validateSpectraString,
-                     UserInputValidator &(UserInputValidator &uiv));
-  MOCK_CONST_METHOD1(validateMaskBinsString,
-                     UserInputValidator &(UserInputValidator &uiv));
 
   MOCK_METHOD0(showSpectraErrorLabel, void());
   MOCK_METHOD0(showMaskBinErrorLabel, void());
@@ -93,27 +90,28 @@ public:
 };
 
 class MockIndirectFittingModel : public IndirectFittingModel {
-  // public:
-  //  MOCK_CONST_METHOD0(isMultiFit, bool());
-  //  MOCK_CONST_METHOD0(isInvalidFunction, boost::optional<std::string>());
-  //  MOCK_CONST_METHOD0(getFittingFunction, IFunction_sptr());
-  //
-  //  MOCK_METHOD2(addWorkspace,
-  //               void(MatrixWorkspace_sptr workspace, Spectra const
-  //               &spectra));
-  //  MOCK_METHOD1(removeWorkspace, void(std::size_t index));
-  //  MOCK_METHOD1(setFitFunction, void(IFunction_sptr function));
-  //  MOCK_METHOD1(addOutput, void(IAlgorithm_sptr fitAlgorithm));
-  //
-  //  MOCK_CONST_METHOD0(getFittingAlgorithm, IAlgorithm_sptr());
+public:
+  /// Public methods
+  MOCK_CONST_METHOD0(isMultiFit, bool());
+  MOCK_CONST_METHOD0(isInvalidFunction, boost::optional<std::string>());
+  MOCK_CONST_METHOD0(getFittingFunction, IFunction_sptr());
+  
+  //MOCK_METHOD2(addWorkspace,
+  //              void(MatrixWorkspace_sptr workspace, Spectra const
+  //              &spectra));
+  MOCK_METHOD1(removeWorkspace, void(std::size_t index));
+  MOCK_METHOD1(setFitFunction, void(IFunction_sptr function));
+  MOCK_METHOD1(addOutput, void(IAlgorithm_sptr fitAlgorithm));
+  
+  MOCK_CONST_METHOD0(getFittingAlgorithm, IAlgorithm_sptr());
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override {
-    (void)index;
-    (void)spectrum;
+	UNUSED_ARG(index);
+	UNUSED_ARG(spectrum);
     return "";
   };
 };
@@ -122,7 +120,7 @@ private:
 
 class IndirectSpectrumSelectionPresenterTest : public CxxTest::TestSuite {
 public:
-  /// To make sure everything is initialized
+  /// Needed to make sure everything is initialized
   IndirectSpectrumSelectionPresenterTest() { FrameworkManager::Instance(); }
 
   static IndirectSpectrumSelectionPresenterTest *createSuite() {
@@ -134,29 +132,23 @@ public:
   }
 
   void setUp() override {
-    m_view = new NiceMock<MockIndirectSpectrumSelectionView>();
-    m_model = new NiceMock<MockIndirectFittingModel>();
-    m_presenter = new IndirectSpectrumSelectionPresenter(m_model, m_view);
+	NiceMock<MockIndirectSpectrumSelectionView> *m_view;
+	NiceMock<MockIndirectFittingModel> *m_model;
+	//IndirectSpectrumSelectionPresenter m_presenter(m_model, m_view);
   }
 
-  // void tearDown() override {
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
-  //  TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
+  void tearDown() override {
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
 
-  //  delete m_presenter;
-  //  delete m_model;
-  //  delete m_view;
-  //}
+    delete m_presenter;
+    delete m_model;
+    delete m_view;
+  }
 
-  // void test_initialize() {
-  //  MockIndirectSpectrumSelectionView view;
-  //  MockIndirectFittingModel model;
-  //  IndirectSpectrumSelectionPresenter presenter(&model, &view);
-
-  //  EXPECT_CALL(view, maximumSpectrum()).Times(0);
-  //}
-
-  void test_test() {}
+  void test_test() { 
+	EXPECT_CALL(*m_view, maximumSpectrum()).Times(0); 
+  }
 
 private:
   MockIndirectSpectrumSelectionView *m_view;
