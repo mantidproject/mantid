@@ -13,6 +13,16 @@
 
 using namespace Mantid::API;
 
+namespace {
+
+MatrixWorkspace_sptr
+retrieveADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
@@ -69,45 +79,38 @@ bool ResNorm::validate() {
   UserInputValidator uiv;
   QString errors("");
 
-  const bool vanValid =
+  bool const vanValid =
       uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
-  const bool resValid =
+  bool const resValid =
       uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
   if (vanValid) {
-    // Check vanadium input is _red ws
-    QString vanadiumName = m_uiForm.dsVanadium->getCurrentDataName();
-    int cutIndex = vanadiumName.lastIndexOf("_");
-    QString vanadiumSuffix =
-        vanadiumName.right(vanadiumName.size() - (cutIndex + 1));
-    if (vanadiumSuffix.compare("red") != 0) {
-      uiv.addErrorMessage(
-          "The Vanadium run is not a reduction (_red) workspace");
-    }
+    // Check vanadium input is _red or _sqw workspace
+    QString const vanName = m_uiForm.dsVanadium->getCurrentDataName();
+    int const cutIndex = vanName.lastIndexOf("_");
+    QString const vanSuffix = vanName.right(vanName.size() - (cutIndex + 1));
+    if (vanSuffix.compare("red") != 0 || vanSuffix.compare("sqw") != 0)
+      uiv.addErrorMessage("The Vanadium run is not _red or _sqw workspace");
 
     // Check Res and Vanadium are the same Run
     if (resValid) {
       // Check that Res file is still in ADS if not, load it
-      auto resolutionWs =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              m_uiForm.dsResolution->getCurrentDataName().toStdString());
-      auto vanadiumWs =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              vanadiumName.toStdString());
+      auto const resolutionWs = retrieveADSMatrixWorkspace(
+          m_uiForm.dsResolution->getCurrentDataName().toStdString());
+      auto const vanadiumWs = retrieveADSMatrixWorkspace(vanName.toStdString());
 
-      const int resRun = resolutionWs->getRunNumber();
-      const int vanRun = vanadiumWs->getRunNumber();
+      int const resRun = resolutionWs->getRunNumber();
+      int const vanRun = vanadiumWs->getRunNumber();
 
-      if (resRun != vanRun) {
+      if (resRun != vanRun)
         uiv.addErrorMessage("The provided Vanadium and Resolution do not have "
                             "matching run numbers");
-      }
     }
   }
 
   // check eMin and eMax values
-  const auto eMin = m_dblManager->value(m_properties["EMin"]);
-  const auto eMax = m_dblManager->value(m_properties["EMax"]);
+  auto const eMin = m_dblManager->value(m_properties["EMin"]);
+  auto const eMax = m_dblManager->value(m_properties["EMax"]);
   if (eMin >= eMax)
     errors.append("EMin must be strictly less than EMax.\n");
 
@@ -189,8 +192,7 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
   QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Vanadium");
 
   MatrixWorkspace_sptr vanWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          filename.toStdString());
+      retrieveADSMatrixWorkspace(filename.toStdString());
   m_uiForm.spPreviewSpectrum->setMaximum(
       static_cast<int>(vanWs->getNumberHistograms()) - 1);
 
@@ -291,9 +293,7 @@ void ResNorm::previewSpecChanged(int value) {
     if (fitWorkspaces && fitParams) {
       Column_const_sptr scaleFactors = fitParams->getColumn("Scaling");
       std::string fitWsName(fitWorkspaces->getItem(m_previewSpec)->getName());
-      MatrixWorkspace_const_sptr fitWs =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              fitWsName);
+      MatrixWorkspace_const_sptr fitWs = retrieveADSMatrixWorkspace(fitWsName);
 
       MatrixWorkspace_sptr fit = WorkspaceFactory::Instance().create(fitWs, 1);
       fit->setSharedX(0, fitWs->sharedX(1));
