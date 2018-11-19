@@ -15,11 +15,8 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/MaterialBuilder.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include <boost/scoped_ptr.hpp>
 
-#include <cmath>
 #include <iostream>
 
 using namespace Mantid::PhysicalConstants;

@@ -7,11 +7,10 @@
 #ifndef MANTID_DATAHANDLING_ReadMaterial_H_
 #define MANTID_DATAHANDLING_ReadMaterial_H_
 
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MaterialBuilder.h"
-#include "MantidKernel/NeutronAtom.h"
 
+#include <map>
 namespace Mantid {
 namespace DataHandling {
 

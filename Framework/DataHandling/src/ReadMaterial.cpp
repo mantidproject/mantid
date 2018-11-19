@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/Workspace.h"
+
 #include <iostream>
 
 namespace Mantid {
