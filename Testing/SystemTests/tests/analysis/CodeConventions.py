@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import re
 import mantid
 from mantid.simpleapi import *
@@ -81,7 +81,7 @@ FUNC_BAD_PARAMS = {
     }
 
 
-class Algorithms(stresstesting.MantidStressTest):
+class Algorithms(systemtesting.MantidSystemTest):
 
     def __init__(self):
         super(Algorithms, self).__init__()
@@ -167,7 +167,7 @@ class Algorithms(stresstesting.MantidStressTest):
         return True
 
 
-class FitFunctions(stresstesting.MantidStressTest):
+class FitFunctions(systemtesting.MantidSystemTest):
     def __init__(self):
         super(FitFunctions, self).__init__()
         self.__ranOk = 0

@@ -11,7 +11,7 @@ file-backed MDWorkspaces.
 """
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import os
 from mantid.simpleapi import *
 from mantid.api import *
@@ -21,7 +21,7 @@ from six.moves import range
 ###############################################################################
 
 
-class PlusMDTest(stresstesting.MantidStressTest):
+class PlusMDTest(systemtesting.MantidSystemTest):
 
     _saved_filename = None
     original_binned = None
@@ -140,7 +140,7 @@ class PlusMDTest(stresstesting.MantidStressTest):
 ###############################################################################
 
 
-class MergeMDTest(stresstesting.MantidStressTest):
+class MergeMDTest(systemtesting.MantidSystemTest):
 
     _saved_filenames = []
 
