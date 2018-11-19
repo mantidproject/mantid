@@ -92,9 +92,9 @@ protected:
   void plotMultipleSpectra(const QStringList &workspaceNames,
                            const std::vector<int> &workspaceIndices);
   /// Plot a spectrum plot with a given ws index
-  void plotSpectrum(const QStringList &workspaceNames, int wsIndex = 0);
+  void plotSpectrum(const QStringList &workspaceNames, int spectraIndex = 0);
   /// Plot a spectrum plot of a given workspace
-  void plotSpectrum(const QString &workspaceName, int wsIndex = 0);
+  void plotSpectrum(const QString &workspaceName, int spectraIndex = 0);
 
   /// Plot a spectrum plot with a given spectra range
   void plotSpectrum(const QStringList &workspaceNames, int specStart,
