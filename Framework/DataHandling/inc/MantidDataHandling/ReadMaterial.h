@@ -8,27 +8,35 @@
 #define MANTID_DATAHANDLING_ReadMaterial_H_
 
 #include "MantidAPI/DistributedAlgorithm.h"
-#include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MaterialBuilder.h"
+#include "MantidKernel/NeutronAtom.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 /**
-    This class contains code for interpreting a material input for SetSampleMaterial
+    This class contains code for interpreting a material input for
+   SetSampleMaterial
 */
 class DLLExport ReadMaterial {
 public:
-  static std::map<std::string, std::string> validateInputs(const std::string, const int, const int, const double, const double, const double, const double);
-  void setScatteringInfo(const double, const double, const double, const double);
-  void determineMaterial(const std::string, const int, const int);
-  void setNumberDensity(const double, const double, const double, const double);
+  static std::map<std::string, std::string>
+  validateInputs(const std::string chemicalSymbol, const int z_number,
+                 const int a_number, const double sampleNumberDensity,
+                 const double zParameter, const double unitCellVolume,
+                 const double sampleMassDensity);
+  void determineMaterial(const std::string chemicalSymbol, const int z_number,
+                         const int a_number);
+  void setNumberDensity(const double rho_m, const double rho,
+                        const double zParameter, const double unitCellVolume);
+  void setScatteringInfo(double CoherentXSection, double IncoherentXSection,
+                         double AttenuationXSection, double ScatteringXSection);
   std::unique_ptr<Kernel::Material> buildMaterial();
+
 private:
   Kernel::MaterialBuilder builder;
   static bool isEmpty(const double toCheck);
-
 };
 } // namespace DataHandling
 } // namespace Mantid

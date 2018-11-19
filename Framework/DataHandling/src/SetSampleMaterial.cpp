@@ -5,10 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SetSampleMaterial.h"
-#include "MantidDataHandling/ReadMaterial.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidDataHandling/ReadMaterial.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -112,14 +112,11 @@ void SetSampleMaterial::init() {
 }
 
 std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
-  const std::string chemicalSymbol = getProperty("ChemicalFormula");
-  const int z_number = getProperty("AtomicNumber");
-  const int a_number = getProperty("MassNumber");
-  const double sampleNumberDensity = getProperty("SampleNumberDensity");
-  const double zParameter = getProperty("ZParameter");
-  const double unitCellVolume = getProperty("UnitCellVolume");
-  const double sampleMassDensity = getProperty("SampleMassDensity");
-  auto result = ReadMaterial::validateInputs(chemicalSymbol,z_number,a_number,sampleNumberDensity, zParameter,unitCellVolume,sampleMassDensity);
+  auto result = ReadMaterial::validateInputs(
+      getProperty("ChemicalFormula"), getProperty("AtomicNumber"),
+      getProperty("MassNumber"), getProperty("SampleNumberDensity"),
+      getProperty("ZParameter"), getProperty("UnitCellVolume"),
+      getProperty("SampleMassDensity"));
   return result;
 }
 
@@ -161,17 +158,20 @@ void SetSampleMaterial::exec() {
 
   ReadMaterial reader;
   const std::string chemicalSymbol = getProperty("ChemicalFormula");
-  reader.determineMaterial(chemicalSymbol, getProperty("AtomicNumber"), getProperty("MassNumber"));
+  reader.determineMaterial(chemicalSymbol, getProperty("AtomicNumber"),
+                           getProperty("MassNumber"));
   // determine the material
-  
 
   // determine the sample number density
   double rho = getProperty("SampleNumberDensity"); // in atoms / Angstroms^3
-  reader.setNumberDensity(getProperty("SampleMassDensity"), rho, getProperty("ZParameter"), getProperty("UnitCellVolume"));
-
+  reader.setNumberDensity(getProperty("SampleMassDensity"), rho,
+                          getProperty("ZParameter"),
+                          getProperty("UnitCellVolume"));
 
   // get the scattering information - this will override table values
-  reader.setScatteringInfo(getProperty("CoherentXSection"), getProperty("IncoherentXSection"), getProperty("AttenuationXSection"), getProperty("ScatteringXSection"));
+  reader.setScatteringInfo(
+      getProperty("CoherentXSection"), getProperty("IncoherentXSection"),
+      getProperty("AttenuationXSection"), getProperty("ScatteringXSection"));
 
   // create the material
   auto material = reader.buildMaterial();

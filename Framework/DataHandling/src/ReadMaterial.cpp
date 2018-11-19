@@ -5,17 +5,20 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/ReadMaterial.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
 #include <iostream>
 
 namespace Mantid {
 namespace DataHandling {
 
-std::map<std::string, std::string> ReadMaterial::validateInputs(const std::string chemicalSymbol, const int z_number, const int a_number, const double sampleNumberDensity, const double zParameter, const double unitCellVolume, const double sampleMassDensity){
-    std::map<std::string, std::string> result;
+std::map<std::string, std::string> ReadMaterial::validateInputs(
+    const std::string chemicalSymbol, const int z_number, const int a_number,
+    const double sampleNumberDensity, const double zParameter,
+    const double unitCellVolume, const double sampleMassDensity) {
+  std::map<std::string, std::string> result;
   if (chemicalSymbol.empty()) {
     if (z_number <= 0) {
       result["ChemicalFormula"] = "Need to specify the material";
@@ -51,12 +54,13 @@ std::map<std::string, std::string> ReadMaterial::validateInputs(const std::strin
   return result;
 }
 
-std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial(){
-    return std::make_unique<Kernel::Material>(builder.build());
-    }
+std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial() {
+  return std::make_unique<Kernel::Material>(builder.build());
+}
 
-void ReadMaterial::determineMaterial(const std::string chemicalSymbol, const int z_number, const int a_number){
-    if (!chemicalSymbol.empty()) {
+void ReadMaterial::determineMaterial(const std::string chemicalSymbol,
+                                     const int z_number, const int a_number) {
+  if (!chemicalSymbol.empty()) {
     std::cout << "CHEM: " << chemicalSymbol << std::endl;
     builder.setFormula(chemicalSymbol);
   } else {
@@ -65,7 +69,9 @@ void ReadMaterial::determineMaterial(const std::string chemicalSymbol, const int
   }
 }
 
-void ReadMaterial::setNumberDensity(const double rho_m, const double rho, const double zParameter, const double unitCellVolume){
+void ReadMaterial::setNumberDensity(const double rho_m, const double rho,
+                                    const double zParameter,
+                                    const double unitCellVolume) {
   if (!isEmpty(rho_m))
     builder.setMassDensity(rho_m);
   if (isEmpty(rho)) {
@@ -78,17 +84,18 @@ void ReadMaterial::setNumberDensity(const double rho_m, const double rho, const 
   }
 }
 
-
-void ReadMaterial::setScatteringInfo(double CoherentXSection, double IncoherentXSection, double AttenuationXSection, double ScatteringXSection){
-  builder.setCoherentXSection(CoherentXSection);      // in barns
-  builder.setIncoherentXSection(IncoherentXSection);  // in barns
-  builder.setAbsorptionXSection(AttenuationXSection); // in barns
+void ReadMaterial::setScatteringInfo(double CoherentXSection,
+                                     double IncoherentXSection,
+                                     double AttenuationXSection,
+                                     double ScatteringXSection) {
+  builder.setCoherentXSection(CoherentXSection);       // in barns
+  builder.setIncoherentXSection(IncoherentXSection);   // in barns
+  builder.setAbsorptionXSection(AttenuationXSection);  // in barns
   builder.setTotalScatterXSection(ScatteringXSection); // in barns
 }
-
 
 bool ReadMaterial::isEmpty(const double toCheck) {
   return std::abs((toCheck - EMPTY_DBL()) / (EMPTY_DBL())) < 1e-8;
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
