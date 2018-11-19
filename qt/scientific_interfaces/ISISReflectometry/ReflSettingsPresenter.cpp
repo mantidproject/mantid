@@ -160,6 +160,8 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
   }
 
   if (m_view->instrumentSettingsEnabled()) {
+    setTransmissionOption(options, "NormalizeByIntegratedMonitors",
+                          m_view->getIntMonCheck());
     setTransmissionOption(options, "MonitorIntegrationWavelengthMin",
                           m_view->getMonitorIntegralMin());
     setTransmissionOption(options, "MonitorIntegrationWavelengthMax",

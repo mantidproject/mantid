@@ -191,8 +191,8 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
       // dblVal = 0.;
     }
     theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
-    g_log.warning() << "added property " << propName << " with value " << dblVal
-                    << "\n";
+    g_log.information() << "added property " << propName << " with value "
+                        << dblVal << "\n";
   }
 
   // add unit

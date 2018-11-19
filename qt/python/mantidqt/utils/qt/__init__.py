@@ -77,6 +77,10 @@ def load_ui(caller_filename, ui_relfilename, baseinstance=None):
     return the form class
     """
     filepath = osp.join(osp.dirname(caller_filename), ui_relfilename)
+    if not osp.exists(filepath):
+        raise ImportError('File "{}" does not exist'.format(filepath))
+    if not osp.isfile(filepath):
+        raise ImportError('File "{}" is not a file'.format(filepath))
     if baseinstance is not None:
         return loadUi(filepath, baseinstance=baseinstance)
     else:

@@ -22,6 +22,14 @@ Improvements
 ############
 
 - :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>` now masks zero counting detectors from the integral.
+- Changes to :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`:
+
+  - It is now possible to turn off the Debye-Waller correction
+  - The temperature sample log entry can be given in an instrument parameter ``temperature_sample_log``.
+  - The temperature sample log can now be a time series.
+
+- :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` now supports computation from :math:`S(2\theta,E)` workspace.
+- The upper limit of the empty container scaling factor in :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` has been removed.
 
 Bugfixes
 ########
@@ -46,6 +54,15 @@ Improvements
 - Behavior of the :ref:`LoadDNSLegacy <algm-LoadDNSLegacy>` for TOF data has been changed: the algorithm does not try to guess elastic channel any more, but asks for the user input.
 - :ref:`LoadDNSSCD <algm-LoadDNSSCD>` has been improved to be able to load TOF data.
 - :ref:`MDNormDirectSC <algm-MDNormDirectSC>` now can handle merged MD workspaces.
+
+Python
+------
+
+
+Improved
+########
+
+- The ``directtools`` plotting and utility module has been updated with improved automatic E ranges, cut labels and other visuals. All functions now should also be applicable to non-ILL data as well.
 
 :ref:`Release 3.14.0 <v3.14.0>`
 

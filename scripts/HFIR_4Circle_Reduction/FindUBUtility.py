@@ -9,15 +9,17 @@ Containing a set of classes used for finding (calculating and refining) UB matri
 """
 from __future__ import (absolute_import, division, print_function)
 import os
-
-from . import ui_AddUBPeaksDialog
-from . import ui_UBSelectPeaksDialog
 from . import guiutility
+from qtpy.QtWidgets import (QDialog, QFileDialog)  # noqa
+from mantid.kernel import Logger
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
+    from mantidplot import load_ui
 
-from PyQt4 import QtGui, QtCore
 
-
-class AddScansForUBDialog(QtGui.QDialog):
+class AddScansForUBDialog(QDialog):
     """
     Dialog class to add scans to UB scans' table for calculating and
     """
@@ -30,27 +32,19 @@ class AddScansForUBDialog(QtGui.QDialog):
         self._myParent = parent
 
         # set up UI
-        self.ui = ui_AddUBPeaksDialog.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path =  "AddUBPeaksDialog.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # initialize widgets
         self.ui.checkBox_loadHKLfromFile.setChecked(True)
 
-        # define event handling
-        self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_find_peak)
-        self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
-                     self.do_add_single_scan)
+        self.ui.pushButton_findPeak.clicked.connect(self.do_find_peak)
+        self.ui.pushButton_addPeakToCalUB.clicked.connect(self.do_add_single_scan)
 
-        self.connect(self.ui.pushButton_loadScans, QtCore.SIGNAL('clicked()'),
-                     self.do_load_scans)
-        self.connect(self.ui.pushButton_addScans, QtCore.SIGNAL('clicked()'),
-                     self.do_add_scans)
+        self.ui.pushButton_loadScans.clicked.connect(self.do_load_scans)
+        self.ui.pushButton_addScans.clicked.connect(self.do_add_scans)
 
-        self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
-
-        return
+        self.ui.pushButton_quit.clicked.connect(self.do_quit)
 
     def do_add_scans(self):
         """
@@ -61,8 +55,6 @@ class AddScansForUBDialog(QtGui.QDialog):
         scan_list = guiutility.parse_integer_list(scans_str)
         self._myParent.add_scans_ub_table(scan_list)
 
-        return
-
     def do_add_single_scan(self):
         """
         add single scan to refine UB matrix
@@ -70,8 +62,6 @@ class AddScansForUBDialog(QtGui.QDialog):
         """
         scan_number = int(self.ui.lineEdit_scanNumber.text())
         self._myParent.add_scans_ub_table([scan_number])
-
-        return
 
     def do_find_peak(self):
         """
@@ -106,8 +96,6 @@ class AddScansForUBDialog(QtGui.QDialog):
             self.ui.lineEdit_sampleQz.setText('%.5E' % vec_q[2])
         # END-IF
 
-        return
-
     def do_load_scans(self):
         """
         load an ASCII file containing scan numbers,
@@ -124,8 +112,6 @@ class AddScansForUBDialog(QtGui.QDialog):
 
         self.ui.plainTextEdit_scanList.setPlainText(scans_str)
 
-        return
-
     def do_quit(self):
         """
         quit
@@ -133,10 +119,8 @@ class AddScansForUBDialog(QtGui.QDialog):
         """
         self.close()
 
-        return
 
-
-class SelectUBMatrixScansDialog(QtGui.QDialog):
+class SelectUBMatrixScansDialog(QDialog):
     """
     Dialog to select scans for processing UB matrix
     """
@@ -149,21 +133,14 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
         self._myParent = parent
 
         # set ui
-        self.ui = ui_UBSelectPeaksDialog.Ui_Dialog()
-        self.ui.setupUi(self)
+        ui_path = "UBSelectPeaksDialog.ui"
+        self.ui = load_ui(__file__, ui_path, baseinstance=self)
 
         # define event handling methods
-        self.connect(self.ui.pushButton_selectScans, QtCore.SIGNAL('clicked()'),
-                     self.do_select_scans)
-        self.connect(self.ui.pushButton_revertCurrentSelection, QtCore.SIGNAL('clicked()'),
-                     self.do_revert_selection)
-        self.connect(self.ui.pushButton_exportSelectedScans, QtCore.SIGNAL('clicked()'),
-                     self.do_export_selected_scans)
-
-        self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
-                     self.do_quit)
-
-        return
+        self.ui.pushButton_selectScans.clicked.connect(self.do_select_scans)
+        self.ui.pushButton_revertCurrentSelection.clicked.connect(self.do_revert_selection)
+        self.ui.pushButton_exportSelectedScans.clicked.connect(self.do_export_selected_scans)
+        self.ui.pushButton_quit.clicked.connect(self.do_quit)
 
     def do_quit(self):
         """
@@ -171,8 +148,6 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
         :return:
         """
         self.close()
-
-        return
 
     def do_export_selected_scans(self):
         """
@@ -193,15 +168,17 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
 
         # get the output file name
         file_filter = 'Text Files (*.dat);;All Files (*.*)'
-        file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'File to export selected scans',
-                        self._myParent.working_directory, file_filter))
+        file_name = QFileDialog.getSaveFileName(self, 'File to export selected scans',
+                                                self._myParent.working_directory, file_filter)
+        if not file_name:
+            return
+        if isinstance(file_name, tuple):
+            file_name = file_name[0]
 
         # write file
         out_file = open(file_name, 'w')
         out_file.write(output_str)
         out_file.close()
-
-        return
 
     def do_revert_selection(self):
         """
@@ -209,8 +186,6 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
         :return:
         """
         self._myParent.ub_matrix_processing_table.revert_selection()
-
-        return
 
     def do_select_scans(self):
         """
@@ -248,5 +223,3 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
             # select with filters
             self._myParent.ub_matrix_processing_table.select_scans(**select_args)
         # END-IF-ELSE
-
-        return

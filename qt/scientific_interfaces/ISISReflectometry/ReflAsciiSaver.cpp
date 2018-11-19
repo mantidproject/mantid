@@ -53,7 +53,7 @@ bool ReflAsciiSaver::isValidSaveDirectory(std::string const &path) const {
     try {
       auto pocoPath = Poco::Path().parseDirectory(path);
       auto pocoFile = Poco::File(pocoPath);
-      return pocoFile.exists() && pocoFile.canWrite();
+      return pocoFile.exists();
     } catch (Poco::PathSyntaxException &) {
       return false;
     }

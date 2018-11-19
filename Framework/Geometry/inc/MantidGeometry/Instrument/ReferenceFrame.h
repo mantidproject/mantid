@@ -49,11 +49,13 @@ public:
   /// Destructor
   virtual ~ReferenceFrame() = default;
   /// Convert up axis into a 3D direction
-  const Mantid::Kernel::V3D vecPointingUp() const;
+  Mantid::Kernel::V3D vecPointingUp() const;
   /// Convert along beam axis into a 3D direction
-  const Mantid::Kernel::V3D vecPointingAlongBeam() const;
+  Mantid::Kernel::V3D vecPointingAlongBeam() const;
+  /// Convert along horizontal axis into a 3D direction
+  Mantid::Kernel::V3D vecPointingHorizontal() const;
   /// Convert along the axis defining the 2theta sign
-  const Mantid::Kernel::V3D vecThetaSign() const;
+  Mantid::Kernel::V3D vecThetaSign() const;
   /// Pointing up axis as a string
   std::string pointingUpAxis() const;
   /// Pointing along beam axis as a string

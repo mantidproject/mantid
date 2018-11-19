@@ -8,6 +8,7 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
@@ -1295,7 +1296,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
     const int64_t parentIndex = componentInfo.parent(i);
     const bool makeTransform = parentIndex != oldParentIndex;
-    bool isGridDetectorPixel = false;
+    bool isDetFixedInBank = false;
 
     if (makeTransform) {
       oldParentIndex = parentIndex;
@@ -1312,15 +1313,15 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       const boost::shared_ptr<const IDetector> &baseDet =
           std::get<1>(baseInstr.m_detectorCache[i]);
 
-      isGridDetectorPixel =
-          bool(boost::dynamic_pointer_cast<const GridDetectorPixel>(baseDet));
+      isDetFixedInBank =
+          ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, i);
       if (detectorInfo.isMasked(i)) {
         pmap->forceUnsafeSetMasked(baseDet.get(), true);
       }
 
       if (makeTransform) {
         // Special case: scaling for GridDetectorPixel.
-        if (isGridDetectorPixel) {
+        if (isDetFixedInBank) {
 
           size_t panelIndex = componentInfo.parent(parentIndex);
           const auto panelID = componentInfo.componentID(panelIndex);
@@ -1354,7 +1355,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
-      if (isGridDetectorPixel) {
+      if (isDetFixedInBank) {
         throw std::runtime_error("Cannot create legacy ParameterMap: Position "
                                  "parameters for GridDetectorPixel are "
                                  "not supported");
@@ -1410,7 +1411,6 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   auto compInfo = componentInfo.cloneWithoutDetectorInfo();
   auto detInfo = Kernel::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
-  detInfo->m_detectorInfo->setComponentInfo(compInfo->m_componentInfo.get());
   const auto parInstrument = ParComponentFactory::createInstrument(
       boost::shared_ptr<const Instrument>(this, NoDeleting()),
       boost::shared_ptr<ParameterMap>(&pmap, NoDeleting()));

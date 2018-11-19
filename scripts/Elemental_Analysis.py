@@ -317,7 +317,10 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             checkbox.setChecked(False)
 
     def select_data_file(self):
-        filename = str(QtGui.QFileDialog.getOpenFileName())
+        filename = QtGui.QFileDialog.getOpenFileName()
+        if isinstance(filename, tuple):
+            filename = filename[0]
+        filename = str(filename)
         if filename:
             self.ptable.set_peak_datafile(filename)
         self._clear_lines_after_data_file_selected()

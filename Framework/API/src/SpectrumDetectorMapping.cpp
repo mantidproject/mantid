@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include <exception>
 
 namespace Mantid {
 namespace API {
@@ -14,11 +15,11 @@ namespace API {
  *  @throws std::invalid_argument if a null workspace pointer is passed in
  */
 SpectrumDetectorMapping::SpectrumDetectorMapping(
-    const MatrixWorkspace *const workspace, bool useSpecNoIndex)
+    MatrixWorkspace_const_sptr workspace, const bool useSpecNoIndex)
     : m_indexIsSpecNo(useSpecNoIndex) {
   if (!workspace) {
     throw std::invalid_argument(
-        "SpectrumDetectorMapping: Null workspace pointer passed");
+        "SpectrumDetectorMapping: Null shared workspace pointer passed");
   }
 
   for (size_t i = 0; i < workspace->getNumberHistograms(); ++i) {

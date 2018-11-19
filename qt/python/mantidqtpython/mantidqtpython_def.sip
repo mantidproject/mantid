@@ -207,6 +207,7 @@ bool isValid();
 void setUserInput(const QVariant &);
 void setText(const QString&);
 signals:
+void fileEditingFinished();
 void fileFindingFinished();
 void liveButtonPressed(bool);
 };
@@ -2528,6 +2529,9 @@ public:
   void setColorMapRange(double, double);
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
+  %MethodCode
+    sipCpp->setScaleType(MantidQt::MantidWidgets::ColorMap::ScaleType(a0));
+  %End
   void setViewType(const QString &);
 
 private:
@@ -2546,6 +2550,9 @@ public:
 %Docstring
     Returns the current scale type. 0=Linear, 1=Log10
 %End
+%MethodCode
+  sipRes = static_cast<GraphOptions::ScaleType>(sipCpp->getScaleType());
+%End
 
   void setScaleType(GraphOptions::ScaleType type);
 %Docstring
@@ -2553,6 +2560,9 @@ public:
 
     Args:
         type The new type Options are: GraphOptions.Linear, GraphOptions.Log10
+%End
+%MethodCode
+  sipCpp->setScaleType(MantidQt::MantidWidgets::ColorMap::ScaleType(a0));
 %End
 
   void setAxis(const QString& axisName);

@@ -72,6 +72,10 @@ public:
 signals:
   /// Emitted when the instrument setup is changed
   void newInstrumentConfiguration();
+  /// Emitted to update the state of the Run button
+  void updateRunButton(bool enabled = true,
+                       std::string const &enableOutputButtons = "unchanged",
+                       QString message = "Run", QString tooltip = "");
 
 private slots:
   /// Shows/hides tabs based on facility
@@ -80,16 +84,15 @@ private slots:
   void helpClicked();
   /// Exports the current tab algorithms as a Python script
   void exportTabPython();
-  /// Runs the current tab
-  void runClicked();
   /// Opens the manage directory dialog
   void openDirectoryDialog();
 
   /// Shows a information dialog box
   void showMessageBox(const QString &message);
   /// Updates the state of the Run button
-  void updateRunButton(bool enabled = true, QString message = "Run",
-                       QString tooltip = "");
+  void emitUpdateRunButton(bool enabled = true,
+                           std::string const &enableOutputButtons = "unchanged",
+                           QString message = "Run", QString tooltip = "");
 
   /// Called when the load instrument algorithms complete
   void instrumentLoadingDone(bool error);
