@@ -120,8 +120,9 @@ std::map<std::string, std::string> MuonGroupingCounts::validateInputs() {
     errors["GroupName"] = "Group name must be specified.";
   }
 
-  if (!std::all_of(std::begin(groupName), std::end(groupName),
-                   Mantid::MuonAlgorithmHelper::is_alphanumeric_or_underscore)) {
+  if (!std::all_of(
+          std::begin(groupName), std::end(groupName),
+          Mantid::MuonAlgorithmHelper::is_alphanumeric_or_underscore)) {
     errors["GroupName"] =
         "The group name must contain alphnumeric characters and _ only.";
   }
