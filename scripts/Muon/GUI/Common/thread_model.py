@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal as Signal
 from PyQt4.QtCore import pyqtSlot
-from Muon.GUI.Common import message_box
+from Muon.GUI.Common.message_box import warning
 
 
 class WorkerSignals(QtCore.QObject):
@@ -51,6 +51,7 @@ class ThreadModelWorker(QtCore.QObject):
                 self.signals.error.emit("")
         finally:
             self.signals.finished.emit()
+            QtCore.QThread.currentThread().quit()
 
 
 class ThreadModel(QtGui.QWidget):
@@ -70,7 +71,6 @@ class ThreadModel(QtGui.QWidget):
         self._thread = QtCore.QThread(self)
 
         # callbacks for the .started() and .finished() signals of the worker
-        self._default_exception_callback = lambda message: message_box.warning(message)
         self.start_slot = lambda: 0
         self.end_slot = lambda: 0
         self._exception_callback = self._default_exception_callback
@@ -141,7 +141,6 @@ class ThreadModel(QtGui.QWidget):
             self._exception_callback = self._default_exception_callback
 
     def threadWrapperTearDown(self):
-        self._thread.quit()
         self._thread.wait()
         self._thread = QtCore.QThread(self)
         self._worker.signals.started.disconnect(self.start_slot)
@@ -150,3 +149,6 @@ class ThreadModel(QtGui.QWidget):
         self._worker.signals.error.disconnect(self.warning)
         self.start_slot = lambda: 0
         self.end_slot = lambda: 0
+
+    def _default_exception_callback(self, message):
+        warning(message)
