@@ -38,7 +38,7 @@ MinMaxTuple calculateXIntersection(MatrixWorkspace_const_sptr &lhsWS,
 }
 
 /// Check if a double is not zero and returns a bool indicating success
-bool isNonzero(double i) { return (0 != i); }
+bool isNonzero(double i) { return (0. != i); }
 } // namespace
 
 namespace Mantid {
