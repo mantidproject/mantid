@@ -117,9 +117,7 @@ include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
-include_directories (Catalog/inc)
 add_subdirectory (Catalog)
-set ( MANTIDLIBS ${MANTIDLIBS} Catalog )
 
 add_subdirectory (Nexus)
 add_subdirectory (DataHandling)

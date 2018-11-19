@@ -587,7 +587,7 @@ set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-  set_target_properties(DataHandling PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(DataHandling PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${PLUGINS_DIR}")
 endif ()
 
 # Add to the 'Framework' group in VS
