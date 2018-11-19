@@ -20,16 +20,14 @@ namespace DataHandling {
 */
 class DLLExport ReadMaterial {
 public:
-  ReadMaterial():m_numberDensitySet(false), m_materialDetermined(false) {}
   static std::map<std::string, std::string> validateInputs(const std::string, const int, const int, const double, const double, const double, const double);
   void setScatteringInfo(const double, const double, const double, const double);
   void determineMaterial(const std::string, const int, const int);
   void setNumberDensity(const double, const double, const double, const double);
+  std::unique_ptr<Kernel::Material> buildMaterial();
 private:
   Kernel::MaterialBuilder builder;
-  bool m_numberDensitySet;
-  bool m_materialDetermined;
-  static bool ReadMaterial::isEmpty(const double toCheck);
+  static bool isEmpty(const double toCheck);
 
 };
 } // namespace DataHandling

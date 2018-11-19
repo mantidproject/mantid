@@ -14,6 +14,47 @@
 namespace Mantid {
 namespace DataHandling {
 
+std::map<std::string, std::string> ReadMaterial::validateInputs(const std::string chemicalSymbol, const int z_number, const int a_number, const double sampleNumberDensity, const double zParameter, const double unitCellVolume, const double sampleMassDensity){
+    std::map<std::string, std::string> result;
+  if (chemicalSymbol.empty()) {
+    if (z_number <= 0) {
+      result["ChemicalFormula"] = "Need to specify the material";
+    }
+  } else {
+    if (z_number > 0)
+      result["AtomicNumber"] =
+          "Cannot specify both ChemicalFormula and AtomicNumber";
+  }
+
+  if (a_number > 0 && z_number <= 0)
+    result["AtomicNumber"] = "Specified MassNumber without AtomicNumber";
+
+  if (!isEmpty(zParameter)) {
+    if (isEmpty(unitCellVolume)) {
+      result["UnitCellVolume"] =
+          "UnitCellVolume must be provided with ZParameter";
+    }
+    if (!isEmpty(sampleNumberDensity)) {
+      result["ZParameter"] =
+          "Can not give ZParameter with SampleNumberDensity set";
+    }
+    if (!isEmpty(sampleMassDensity)) {
+      result["SampleMassDensity"] =
+          "Can not give SampleMassDensity with ZParameter set";
+    }
+  } else if (!isEmpty(sampleNumberDensity)) {
+    if (!isEmpty(sampleMassDensity)) {
+      result["SampleMassDensity"] =
+          "Can not give SampleMassDensity with SampleNumberDensity set";
+    }
+  }
+  return result;
+}
+
+std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial(){
+    return std::make_unique<Kernel::Material>(builder.build());
+    }
+
 void ReadMaterial::determineMaterial(const std::string chemicalSymbol, const int z_number, const int a_number){
     if (!chemicalSymbol.empty()) {
     std::cout << "CHEM: " << chemicalSymbol << std::endl;
@@ -22,7 +63,6 @@ void ReadMaterial::determineMaterial(const std::string chemicalSymbol, const int
     builder.setAtomicNumber(z_number);
     builder.setMassNumber(a_number);
   }
-  m_materialDetermined = true;
 }
 
 void ReadMaterial::setNumberDensity(const double rho_m, const double rho, const double zParameter, const double unitCellVolume){
@@ -36,7 +76,6 @@ void ReadMaterial::setNumberDensity(const double rho_m, const double rho, const 
   } else {
     builder.setNumberDensity(rho);
   }
-  m_numberDensitySet = true;
 }
 
 

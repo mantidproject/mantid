@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SetSampleMaterial.h"
+#include "MantidDataHandling/ReadMaterial.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Workspace.h"
@@ -16,7 +17,6 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MaterialBuilder.h"
 #include "MantidKernel/PhysicalConstants.h"
-
 #include <boost/scoped_ptr.hpp>
 
 #include <cmath>
@@ -112,48 +112,14 @@ void SetSampleMaterial::init() {
 }
 
 std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
-  std::map<std::string, std::string> result;
   const std::string chemicalSymbol = getProperty("ChemicalFormula");
   const int z_number = getProperty("AtomicNumber");
   const int a_number = getProperty("MassNumber");
-  if (chemicalSymbol.empty()) {
-    if (z_number <= 0) {
-      result["ChemicalFormula"] = "Need to specify the material";
-    }
-  } else {
-    if (z_number > 0)
-      result["AtomicNumber"] =
-          "Cannot specify both ChemicalFormula and AtomicNumber";
-  }
-
-  if (a_number > 0 && z_number <= 0)
-    result["AtomicNumber"] = "Specified MassNumber without AtomicNumber";
-
   const double sampleNumberDensity = getProperty("SampleNumberDensity");
   const double zParameter = getProperty("ZParameter");
   const double unitCellVolume = getProperty("UnitCellVolume");
   const double sampleMassDensity = getProperty("SampleMassDensity");
-
-  if (!isEmpty(zParameter)) {
-    if (isEmpty(unitCellVolume)) {
-      result["UnitCellVolume"] =
-          "UnitCellVolume must be provided with ZParameter";
-    }
-    if (!isEmpty(sampleNumberDensity)) {
-      result["ZParameter"] =
-          "Can not give ZParameter with SampleNumberDensity set";
-    }
-    if (!isEmpty(sampleMassDensity)) {
-      result["SampleMassDensity"] =
-          "Can not give SampleMassDensity with ZParameter set";
-    }
-  } else if (!isEmpty(sampleNumberDensity)) {
-    if (!isEmpty(sampleMassDensity)) {
-      result["SampleMassDensity"] =
-          "Can not give SampleMassDensity with SampleNumberDensity set";
-    }
-  }
-
+  auto result = ReadMaterial::validateInputs(chemicalSymbol,z_number,a_number,sampleNumberDensity, zParameter,unitCellVolume,sampleMassDensity);
   return result;
 }
 
