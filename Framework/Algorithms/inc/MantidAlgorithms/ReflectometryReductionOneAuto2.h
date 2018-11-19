@@ -41,16 +41,13 @@ private:
   void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions
   std::vector<std::string>
-  getDetectorNames(const std::string &instructions,
-                   Mantid::API::MatrixWorkspace_sptr inputWS);
+  getDetectorNames(Mantid::API::MatrixWorkspace_sptr inputWS);
   /// Correct detector positions vertically
   Mantid::API::MatrixWorkspace_sptr
-  correctDetectorPositions(const std::string &instructions,
-                           Mantid::API::MatrixWorkspace_sptr inputWS,
+  correctDetectorPositions(Mantid::API::MatrixWorkspace_sptr inputWS,
                            const double twoTheta);
   /// Calculate theta
-  double calculateTheta(const std::string &instructions,
-                        Mantid::API::MatrixWorkspace_sptr inputWS);
+  double calculateTheta(Mantid::API::MatrixWorkspace_sptr inputWS);
   /// Rebin and scale a workspace in Q
   Mantid::API::MatrixWorkspace_sptr
   rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS, double theta,

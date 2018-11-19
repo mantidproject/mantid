@@ -23,7 +23,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/V3D.h"
-#include "WorkspaceCreationHelperTest.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;

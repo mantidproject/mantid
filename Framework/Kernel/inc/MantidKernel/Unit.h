@@ -611,7 +611,7 @@ protected:
 };
 
 //=================================================================================================
-/// Degrees that has degrees as unit at "Scattering angle" as title
+/// Degrees that has degrees as unit and "Scattering angle" as title
 class MANTID_KERNEL_DLL Degrees : public Empty {
 public:
   Degrees();
@@ -632,11 +632,31 @@ private:
 };
 
 //=================================================================================================
-
-/// Phi that has degrees as unit at "Phi" as title
+/// Phi that has degrees as unit and "Phi" as title
 class MANTID_KERNEL_DLL Phi : public Degrees {
   const std::string caption() const override { return "Phi"; }
   Unit *clone() const override { return new Phi(*this); }
+};
+
+//=================================================================================================
+/// Temperature in kelvin
+class MANTID_KERNEL_DLL Temperature : public Empty {
+public:
+  Temperature();
+  const std::string unitID() const override; ///< "Temperature"
+  const std::string caption() const override { return "Temperature"; }
+  const UnitLabel label() const override;
+
+  void init() override;
+  Unit *clone() const override;
+
+  double singleToTOF(const double x) const override;
+  double singleFromTOF(const double tof) const override;
+  double conversionTOFMin() const override;
+  double conversionTOFMax() const override;
+
+private:
+  UnitLabel m_label;
 };
 
 //=================================================================================================

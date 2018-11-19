@@ -10,12 +10,12 @@ import os
 import re
 import mantid
 import site
-import stresstesting
+import systemtesting
 import tempfile
 from mantid.simpleapi import GSASIIRefineFitPeaks, Load
 
 
-class _AbstractGSASIIRefineFitPeaksTest(stresstesting.MantidStressTest):
+class _AbstractGSASIIRefineFitPeaksTest(systemtesting.MantidSystemTest):
 
     __metaclass__ = ABCMeta
 
