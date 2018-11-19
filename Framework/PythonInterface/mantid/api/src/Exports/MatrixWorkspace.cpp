@@ -185,6 +185,19 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
              "``getSampleDetails`` is deprecated, use ``getRun`` instead.");
   return self.mutableRun();
 }
+
+/**
+ * @brief maskedBinsIndices This is an anonymous wrapper around the homonym
+ * method of MatrixWorkspace. This takes int as argument and returns a vector of
+ * ints to python, unlike the C++ size_t, since python does not speak unsigned
+ * @param self
+ * @param i : workspace index
+ * @return bin indices of masked bins at the workspace index given
+ */
+std::vector<size_t> maskedBinsIndices(MatrixWorkspace &self, const int i) {
+  return self.maskedBinsIndices(i);
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -248,9 +261,9 @@ void export_MatrixWorkspace() {
       .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
            (arg("self"), arg("workspaceIndex")),
            "Returns true if this spectrum contains any masked bins")
-      .def("maskedBinsIndices", &MatrixWorkspace::maskedBinsIndices,
+      .def("maskedBinsIndices", &maskedBinsIndices,
            (arg("self"), arg("workspaceIndex")),
-           "Returns all the masked bins' IDs in this spectrum. "
+           "Returns all the masked bins' indices at the workspace index. "
            ":class:`~mantid.api.MatrixWorkspace.hasMaskedBins` MUST be called "
            "first to check if any bins are "
            "masked, otherwise an exception will be thrown")

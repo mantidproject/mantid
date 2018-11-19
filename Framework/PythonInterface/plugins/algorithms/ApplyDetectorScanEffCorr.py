@@ -57,12 +57,12 @@ class ApplyDetectorScanEffCorr(PythonAlgorithm):
         output = Multiply(LHSWorkspace=input_ws, RHSWorkspace=to_multiply, OutputWorkspace=self.getPropertyValue("OutputWorkspace"))
         # In the output we should mask the detectors where calibration constant is masked
         det_IDs = ''
-        n_pixels_per_tube = transposed.blocksize()
-        for tube in range(transposed.getNumberHistograms()):
-            if transposed.hasMaskedBins(tube):
-                masked = transposed.maskedBinsIndices()
+        n_pixels_per_tube = eff_ws.getNumberHistograms()
+        for spectrum in range(n_pixels_per_tube):
+            if eff_ws.hasMaskedBins(spectrum):
+                masked = eff_ws.maskedBinsIndices(spectrum)
                 for bin in masked:
-                    det_IDs += str(tube * n_pixels_per_tube + bin + 1) + ','
+                    det_IDs += str(bin * n_pixels_per_tube + spectrum + 1) + ','
         if det_IDs:
             MaskDetectors(Workspace=output, DetectorList=det_IDs[:-1])
         self.setProperty("OutputWorkspace", output)

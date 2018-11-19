@@ -68,23 +68,16 @@ class ApplyDetectorScanEffCorrTest(unittest.TestCase):
                 self.assertEquals(calibrated_ws.readY(det)[bin], input_ws.readY(det)[bin] * to_multiply[det][bin])
 
     def test_masking(self):
-        # we cannot get the masked bins in python, hence we will add non-zero to all bins,
-        # so that after masking what is left as 0 will mean that it was masked
         LoadILLDiffraction(Filename='ILL/D2B/508093.nxs', OutputWorkspace='scan')
         ExtractMonitors(InputWorkspace='scan', DetectorWorkspace='scan')
-        Scale(InputWorkspace='scan', OutputWorkspace='scan', Factor=1., Operation='Add')
         LoadNexusProcessed(Filename='ILL/D2B/test_calib.nxs', OutputWorkspace='calib')
         # this will mask tube #9 pixel #127
         MaskBinsIf(InputWorkspace='calib', OutputWorkspace='calib', Criterion='y>9')
         ApplyDetectorScanEffCorr(InputWorkspace='scan', DetectorEfficiencyWorkspace='calib', OutputWorkspace='scan')
-        y = mtd['scan'].extractY()
-        m = np.argwhere(y == 0.)
-        self.assertEquals(len(m), 25)
         spec = 8*128*25 + 126*25
-        for p in m:
-            self.assertEquals(p[0], spec)
-            self.assertEquals(p[1], 0)
-            spec += 1
+        specInfo = mtd['scan'].spectrumInfo()
+        for wsIndex in range(spec, spec+25):
+            self.assertTrue(specInfo.isMasked(spec))
 
 if __name__ == "__main__":
     unittest.main()
