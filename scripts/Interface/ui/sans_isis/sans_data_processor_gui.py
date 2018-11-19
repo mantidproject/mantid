@@ -15,7 +15,7 @@ from abc import ABCMeta, abstractmethod
 from inspect import isclass
 
 from six import with_metaclass
-from qtpy.QtWidgets import (QListWidget, QMainWindow, QMessageBox)  # noqa
+from qtpy.QtWidgets import (QListWidget, QListWidgetItem, QMainWindow, QMessageBox)  # noqa
 from qtpy.QtCore import (QRegExp, QSettings)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
 
