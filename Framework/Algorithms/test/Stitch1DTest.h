@@ -599,8 +599,7 @@ public:
     }
     // Check that the output X-Values are correct.
     // truncate the input and oputput x values to 6 decimal places to
-    // eliminate
-    // insignificant error
+    // eliminate insignificant error
     auto xCopy = this->x;
     std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
                    roundSix);

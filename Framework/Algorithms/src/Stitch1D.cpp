@@ -144,7 +144,7 @@ void Stitch1D::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
                                            Direction::Input),
-      "Scaling either with respect to LHS workspace or RHS workspace");
+      "If true, the RHSWorkspace will be scaled, if false the LHSWorkspace will be scaled; scaling means multiplied by the scale factor");
   declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
                                                        false, Direction::Input),
                   "True to use a provided value for the scale factor.");

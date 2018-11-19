@@ -13,34 +13,45 @@ Stitches single histogram :ref:`Matrix Workspaces <MatrixWorkspace>`
 together outputting a stitched Matrix Workspace.
 The type of the input workspaces (histogram or point data) determines the stitch procedure.
 The x-error values Dx will always be ignored in case of histogram workspaces.
-Point data workspaces must be consistent, i.e. must have Dx defined or not.
+Point data workspaces must be consistent, i.e. must have Dx defined or not and should have ascending x-values.
+Non overlapping x-values of point data workspaces can be stitched.
 
-Either the right-hand-side or left-hand-side workspace can be chosen to be scaled.
 Users can optionally provide :ref:`algm-Rebin` :literal:`Params`, otherwise they are calculated from the input workspaces.
 Likewise, :literal:`StartOverlap` and :literal:`EndOverlap` are optional. If not provided, then these
 are taken to be the region of X-axis intersection.
 
-The algorithm workflow for histograms is as follows:
+Scale factor (multiplication)
+#############################
+Depending on the property :literal:`UseManualScaleFactor`, the user provided or calculated scaling factor will be multiplied to the :literal:`RHSWorkspace` or :literal:`LHSWorkspace`, if :literal:`ScaleRHSWorkspace` is true or false, respectively.
+The calculation of the scale factor is as following:
+Both workspaces will be integrated according to the integration range defined by :literal:`StartOverlap` and :literal:`EndOverlap`.
+Note that the integration is performed without special values, as those have been masked out
+in the previous step. The scale factor is then calculated as the quotient of the integral of
+the left-hand-side workspace by the integral of the right-hand-side workspace (or the quotient
+of the right-hand-side workspace by the left-hand-side workspace if :literal:`ScaleRHSWorkspace`
+was set to false).
 
+Special values (inf, nan)
+#########################
+Recording special values:
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Before scaling and stitching, special values refer to signal (Y) and error (E) values. These special values are masked out
+as zeroes.
+
+Re-insertion of special values:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The special values are put back in the output workspace. Note that if both the left-hand-side
+workspace and the right-hand-side workspace happen to have a different special value in the same bin, this
+bin will be set to infinite in the output workspace.
+
+The algorithm workflow for histogram data is as follows:
+########################################################
 #. The workspaces are initially rebinned, as prescribed by the rebin :literal:`Params`. Note that
    rebin parameters are determined automatically if not provided. In this case, the step size is
    taken from the step size of the LHS workspace (or from the RHS workspace if :literal:`ScaleRHSWorkspace`
    was set to false) and rebin boundaries are taken from the minimum X value in the LHS workspace
    and the maximum X value in the RHS workspace respectively.
-#. After rebinning, each spectrum is searched for special values. Special values refer to signal
-   (Y) and error (E) values that are either infinite or NaN. These special values are masked out
-   as zeroes and their positions are recorded for later reinsertion.
-#. Next, if :literal:`UseManualScaleFactor` was set to false, both workspaces will be integrated
-   according to the integration range defined by :literal:`StartOverlap` and :literal:`EndOverlap`.
-   Note that the integration is performed without special values, as those have been masked out
-   in the previous step. The scale factor is then calculated as the quotient of the integral of
-   the left-hand-side workspace by the integral of the right-hand-side workspace (or the quotient
-   of the right-hand-side workspace by the left-hand-side workspace if :literal:`ScaleRHSWorkspace`
-   was set to false), and the right-hand-side workspace (left-hand-side if :literal:`ScaleRHSWorkspace`
-   was set to false) is multiplied by the calculated factor.
-#. Alternatively, if :literal:`UseManualScaleFactor` was set to true, the scale factor is applied
-   to the right-hand-side workspace (left-hand-side workspace if :literal:`ScaleRHSWorkspace` was
-   set to false).
+#. Determine the scale factor.
 #. The weighted mean of the two workspaces in range [:literal:`StartOverlap`, :literal:`EndOverlap`]
    is calculated. Note that if both workspaces have zero errors, an un-weighted mean will be
    performed instead.
@@ -51,9 +62,6 @@ The algorithm workflow for histograms is as follows:
    where :literal:`EndX` is the maximum X value specified via :literal:`Params` or calculated
    from the right-hand-side workspace) multiplied by the scale factor.
    Dx values will not be present in the output workspace.
-#. The special values are put back in the output workspace. Note that if both the left-hand-side
-   workspace and the right-hand-side workspace happen to have a different special value in the same bin, this
-   bin will be set to infinite in the output workspace.
 
 Below is a flowchart illustrating the steps in the algorithm (it assumes :literal:`ScaleRHSWorkspace`
 is true). Figure on the left corresponds
@@ -63,25 +71,8 @@ workflow with a manual scale factor specified by the user.
 .. diagram:: Stitch1D-v3.dot
 
 The algorithm workflow for point data is as follows:
-
-#. While user provided values of :literal:`StartOverlap` and :literal:`EndOverlap` are validated,
-   those values will be determined automatically if not provided. :literal:`StartOverlap` will be the
-   first x value of the :literal:`RHSWorkspace` and :literal:`EndOverlap` will be the last x value of
-   the :literal:`LHSWorkspace`. These values will be exchanged if the determined :literal:`StartOverlap`
-   is greater than the :literal:`EndOverlap`.
-#. If :literal:`UseManualScaleFactor` was set to false, both workspaces will be integrated
-   according to the integration range defined by :literal:`StartOverlap` and :literal:`EndOverlap`.
-   Note that the integration is performed without special values, as those have been masked out
-   in the previous step. The scale factor is then calculated as the quotient of the integral of
-   the left-hand-side workspace by the integral of the right-hand-side workspace (or the quotient
-   of the right-hand-side workspace by the left-hand-side workspace if :literal:`ScaleRHSWorkspace`
-   was set to false), and the right-hand-side workspace (left-hand-side if :literal:`ScaleRHSWorkspace`
-   was set to false) is multiplied by the calculated factor.
-#. Alternatively, if :literal:`UseManualScaleFactor` was set to true, the scale factor is applied
-   to the right-hand-side workspace (left-hand-side workspace if :literal:`ScaleRHSWorkspace` was
-   set to false).
-#. The output workspace will be created by joining and sorted to guarantee ascending x values.
-   Dx values will be present in the output workspace.
+####################################################
+#. The output workspace will be created by joining and sorting x values.
 
 Error propagation
 #################
