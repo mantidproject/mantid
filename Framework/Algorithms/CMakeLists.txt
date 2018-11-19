@@ -288,7 +288,6 @@ set ( SRC_FILES
 	src/SofQWCentre.cpp
 	src/SofQWNormalisedPolygon.cpp
 	src/SofQWPolygon.cpp
-	src/SofTwoThetaTOF.cpp
 	src/SolidAngle.cpp
 	src/SortEvents.cpp
 	src/SortXAxis.cpp
@@ -629,7 +628,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SofQWCentre.h
 	inc/MantidAlgorithms/SofQWNormalisedPolygon.h
 	inc/MantidAlgorithms/SofQWPolygon.h
-	inc/MantidAlgorithms/SofTwoThetaTOF.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SortXAxis.h
@@ -959,7 +957,6 @@ set ( TEST_FILES
 	SofQWNormalisedPolygonTest.h
 	SofQWPolygonTest.h
 	SofQWTest.h
-	SofTwoThetaTOFTest.h
 	SolidAngleTest.h
 	SortEventsTest.h
 	SortXAxisTest.h

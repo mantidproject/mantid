@@ -4,19 +4,18 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SOFTWOTHETATOF_H_
-#define MANTID_ALGORITHMS_SOFTWOTHETATOF_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_SOFTWOTHETATOF_H_
+#define MANTID_WORKFLOWALGORITHMS_SOFTWOTHETATOF_H_
 
-#include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/DllConfig.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 
 namespace Mantid {
-namespace Algorithms {
+namespace WorkflowAlgorithms {
 
 /** SofTwoThetaTOF : Convert a S(spectrum number, TOF) workspace to
  * S(twoTheta, TOF) workspace.
  */
-class MANTID_ALGORITHMS_DLL SofTwoThetaTOF : public API::Algorithm {
+class DLLExport SofTwoThetaTOF : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -37,7 +36,7 @@ private:
   API::MatrixWorkspace_sptr rebinToNonRagged(API::MatrixWorkspace_sptr &ws);
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_SOFTWOTHETATOF_H_ */
+#endif /* MANTID_WORKFLOWALGORITHMS_SOFTWOTHETATOF_H_ */

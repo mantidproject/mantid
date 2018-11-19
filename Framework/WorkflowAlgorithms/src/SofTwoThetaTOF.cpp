@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/SofTwoThetaTOF.h"
+#include "MantidWorkflowAlgorithms/SofTwoThetaTOF.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -87,7 +87,7 @@ std::string ensureXMLExtension(std::string const &filename) {
 } // namespace
 
 namespace Mantid {
-namespace Algorithms {
+namespace WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofTwoThetaTOF)
@@ -199,13 +199,13 @@ SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_sptr &ws,
     tempPath /= boost::filesystem::unique_path(
         "detector-grouping-%%%%-%%%%-%%%%-%%%%.xml");
 #ifdef _WIN32
-	// A dirty way to convert a wstring to string.
-	auto const wfilename = tempPath.native();
-	filename = std::string(wfilename.cbegin(), wfilename.cend());
+    // A dirty way to convert a wstring to string.
+    auto const wfilename = tempPath.native();
+    filename = std::string(wfilename.cbegin(), wfilename.cend());
 #else
-	filename = tempPath.native();
+    filename = tempPath.native();
 #endif
-	generateGrouping->setProperty("GenerateParFile", false);
+    generateGrouping->setProperty("GenerateParFile", false);
     // Make sure the file gets deleted at scope exit.
     deleteThisLater.name = filename;
   } else {
@@ -251,5 +251,5 @@ SofTwoThetaTOF::rebinToNonRagged(API::MatrixWorkspace_sptr &ws) {
   return rebin->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid

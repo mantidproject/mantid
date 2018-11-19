@@ -4,14 +4,15 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SOFTWOTHETATOFTEST_H_
-#define MANTID_ALGORITHMS_SOFTWOTHETATOFTEST_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_SOFTWOTHETATOFTEST_H_
+#define MANTID_WORKFLOWALGORITHMS_SOFTWOTHETATOFTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidWorkflowAlgorithms/SofTwoThetaTOF.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAlgorithms/SofTwoThetaTOF.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -30,7 +31,7 @@ public:
   static void destroySuite(SofTwoThetaTOFTest *suite) { delete suite; }
 
   void test_init() {
-    Algorithms::SofTwoThetaTOF alg;
+    WorkflowAlgorithms::SofTwoThetaTOF alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -48,7 +49,7 @@ public:
     auto &paramMap = inputWS->instrumentParameters();
     paramMap.addString(inputWS->getInstrument().get(), "l2",
                        std::to_string(5.));
-    Algorithms::SofTwoThetaTOF alg;
+    WorkflowAlgorithms::SofTwoThetaTOF alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -87,7 +88,7 @@ public:
     auto &paramMap = inputWS->instrumentParameters();
     paramMap.addString(inputWS->getInstrument().get(), "l2",
                        std::to_string(5.));
-    Algorithms::SofTwoThetaTOF alg;
+    WorkflowAlgorithms::SofTwoThetaTOF alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -98,13 +99,12 @@ public:
     auto tempXml = boost::filesystem::temp_directory_path();
     tempXml /= boost::filesystem::unique_path("SofTwoThetaTest-%%%%%%%%.xml");
 #if _WIN32
-	auto const wfilename = tempXml.native();
-	std::string const filename{wfilename.cbegin(), wfilename.cend()};
+    auto const wfilename = tempXml.native();
+    std::string const filename{wfilename.cbegin(), wfilename.cend()};
 #else
-	auto const filename{ tempXml.native() };
+    auto const filename{tempXml.native()};
 #endif
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("GroupingFilename", filename))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingFilename", filename))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     auto const xmlExists = boost::filesystem::exists(tempXml);
@@ -134,7 +134,7 @@ public:
     auto &paramMap = inputWS->instrumentParameters();
     paramMap.addString(inputWS->getInstrument().get(), "l2",
                        std::to_string(5.));
-    Algorithms::SofTwoThetaTOF alg;
+    WorkflowAlgorithms::SofTwoThetaTOF alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -167,4 +167,4 @@ public:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_SOFTWOTHETATOFTEST_H_ */
+#endif /* MANTID_WORKFLOWALGORITHMS_SOFTWOTHETATOFTEST_H_ */
