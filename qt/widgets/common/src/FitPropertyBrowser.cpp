@@ -1926,7 +1926,7 @@ void FitPropertyBrowser::updateParameters() {
 }
 
 /**
- * Update the function attributes specified
+ * Update the function attributes which have changed
  */
 void FitPropertyBrowser::updateAttributes() {
   getHandler()->updateAttributes();

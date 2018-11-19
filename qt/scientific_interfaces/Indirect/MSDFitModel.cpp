@@ -33,7 +33,7 @@ std::string MSDFitModel::singleFitOutputName(std::size_t index,
 }
 
 std::vector<std::string> MSDFitModel::getSpectrumDependentAttributes() const {
-  return std::vector<std::string>();
+  return {};
 }
 
 std::string MSDFitModel::getResultXAxisUnit() const { return "Temperature"; }

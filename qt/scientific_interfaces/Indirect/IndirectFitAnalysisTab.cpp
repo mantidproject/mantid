@@ -740,6 +740,12 @@ void IndirectFitAnalysisTab::updateAttributeValues() {
   }
 }
 
+/**
+ * Updates the attribute values in the function provided and in the fit property
+ * browser.
+ * @param function        The function containing the attributes
+ * @param attributeNames  The attributes to update
+ */
 void IndirectFitAnalysisTab::updateAttributeValues(
     IFunction_sptr function, std::vector<std::string> const &attributeNames) {
   auto const attributes = getAttributes(function, attributeNames);
@@ -759,11 +765,20 @@ void IndirectFitAnalysisTab::updateAttributeValues(
   }
 }
 
+/**
+ * Updates the attribute values in the the fit property browser.
+ */
 void IndirectFitAnalysisTab::updateFitBrowserAttributeValues() {
   MantidQt::API::SignalBlocker<QObject> blocker(m_fitPropertyBrowser);
   m_fitPropertyBrowser->updateAttributes();
 }
 
+/**
+ * Gets the new attribute values to be updated in the function and in the fit
+ * property browser.
+ * @param function        The function containing the attributes
+ * @param attributeNames  The names of the attributes to update
+ */
 std::unordered_map<std::string, IFunction::Attribute>
 IndirectFitAnalysisTab::getAttributes(
     IFunction_sptr const &function,

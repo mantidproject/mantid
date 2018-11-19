@@ -287,7 +287,7 @@ bool JumpFitModel::isMultiFit() const {
 }
 
 std::vector<std::string> JumpFitModel::getSpectrumDependentAttributes() const {
-  return std::vector<std::string>();
+  return {};
 }
 
 std::vector<std::string> JumpFitModel::getWidths(std::size_t dataIndex) const {
@@ -339,8 +339,8 @@ std::string JumpFitModel::singleFitOutputName(std::size_t, std::size_t) const {
 std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string JumpFitModel::constructOutputName() const {
-  auto name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);
-  auto position = name.find("_Result");
+  auto const name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);
+  auto const position = name.find("_Result");
   if (position != std::string::npos)
     return name.substr(0, position) + name.substr(position + 7, name.size());
   return name;

@@ -797,6 +797,11 @@ bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
   return false;
 }
 
+/**
+ * Set function attribute value
+ * @param attName :: The name of the attribute
+ * @param attValue :: The value of the attribute
+ */
 void PropertyHandler::setAttribute(
     QString const &attName, Mantid::API::IFunction::Attribute const &attValue) {
   auto const attributeType = attValue.type();
@@ -808,6 +813,11 @@ void PropertyHandler::setAttribute(
     setAttribute(attName, QString::fromStdString(attValue.asString()));
 }
 
+/**
+ * Sets the function attribute value if it has type double or int
+ * @param attName :: The name of the attribute
+ * @param attValue :: The value of the attribute
+ */
 template <typename AttributeType>
 void PropertyHandler::setAttribute(QString const &attName,
                                    AttributeType const &attValue) {
@@ -828,13 +838,18 @@ void PropertyHandler::setAttribute(QString const &attName,
     }
   }
   if (cfun()) {
-    for (size_t i = 0; i < cfun()->nFunctions(); ++i) {
+    for (auto i = 0u; i < cfun()->nFunctions(); ++i) {
       PropertyHandler *h = getHandler(i);
       h->setAttribute(attName, attValue);
     }
   }
 }
 
+/**
+ * Sets the function attribute value if it has type QString
+ * @param attName :: The name of the attribute
+ * @param attValue :: The value of the attribute
+ */
 void PropertyHandler::setAttribute(const QString &attName,
                                    const QString &attValue) {
   const std::string name = attName.toStdString();
@@ -888,6 +903,10 @@ void PropertyHandler::applyToAllAttributes(
       getHandler(i)->applyToAllAttributes(func);
 }
 
+/**
+ * Updates all string, double and int attributes which have changed in a
+ * function
+ */
 void PropertyHandler::updateAttributes() {
   applyToAllAttributes(&PropertyHandler::updateAttribute);
 }

@@ -118,7 +118,7 @@ public:
   bool setAttribute(QtProperty *prop, bool resetProperties = true);
 
   /**
-   * Set function's attribute
+   * Set function attribute value
    * @param attName :: The name of the attribute
    * @param attValue :: The new attribute value
    */
@@ -126,7 +126,7 @@ public:
                     Mantid::API::IFunction::Attribute const &attValue);
 
   /**
-   * Set function's attribute
+   * Set function's attribute if it has type double or int
    * @param attName :: The name of the attribute
    * @param attValue :: The new attribute value
    */
