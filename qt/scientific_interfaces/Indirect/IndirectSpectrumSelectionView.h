@@ -11,7 +11,6 @@
 
 #include "../General/UserInputValidator.h"
 #include "DllConfig.h"
-#include "IIndirectSpectrumSelectionView.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
@@ -21,63 +20,64 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+enum class SpectrumSelectionMode { RANGE, STRING };
+
 class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionView
-    : public API::MantidWidget,
-      public IIndirectSpectrumSelectionView {
+    : public API::MantidWidget {
   Q_OBJECT
 
 public:
   IndirectSpectrumSelectionView(QWidget *parent = nullptr);
   ~IndirectSpectrumSelectionView() override;
 
-  SpectrumSelectionMode selectionMode() const override;
+  SpectrumSelectionMode selectionMode() const;
 
-  std::size_t minimumSpectrum() const override;
-  std::size_t maximumSpectrum() const override;
+  std::size_t minimumSpectrum() const;
+  std::size_t maximumSpectrum() const;
 
-  std::string spectraString() const override;
-  std::string maskString() const override;
+  std::string spectraString() const;
+  std::string maskString() const;
 
-  void displaySpectra(const std::string &spectraString) override;
-  void displaySpectra(int minimum, int maximum) override;
+  void displaySpectra(const std::string &spectraString);
+  void displaySpectra(int minimum, int maximum);
 
-  void setSpectraRange(int minimum, int maximum) override;
+  void setSpectraRange(int minimum, int maximum);
 
-  void setSpectraRegex(const std::string &regex) override;
-  void setMaskBinsRegex(const std::string &regex) override;
+  void setSpectraRegex(const std::string &regex);
+  void setMaskBinsRegex(const std::string &regex);
 
   UserInputValidator &validateSpectraString(UserInputValidator &uiv) const;
   UserInputValidator &validateMaskBinsString(UserInputValidator &uiv) const;
 
-  void showSpectraErrorLabel() override;
-  void showMaskBinErrorLabel() override;
-  void hideSpectraErrorLabel() override;
-  void hideMaskBinErrorLabel() override;
+  void showSpectraErrorLabel();
+  void showMaskBinErrorLabel();
+  void hideSpectraErrorLabel();
+  void hideMaskBinErrorLabel();
 
-  void setMaskSelectionEnabled(bool enabled) override;
-  void clear() override;
+  void setMaskSelectionEnabled(bool enabled);
+  void clear();
 
 public slots:
-  void setMinimumSpectrum(std::size_t spectrum) override;
-  void setMaximumSpectrum(std::size_t spectrum) override;
-  void setMaskSpectrum(std::size_t spectrum) override;
+  void setMinimumSpectrum(std::size_t spectrum);
+  void setMaximumSpectrum(std::size_t spectrum);
+  void setMaskSpectrum(std::size_t spectrum);
 
-  void setSpectraString(const std::string &spectraString) override;
-  void setMaskString(const std::string &maskString) override;
-  void setMaskSpectraList(const std::vector<std::size_t> &maskSpectra) override;
+  void setSpectraString(const std::string &spectraString);
+  void setMaskString(const std::string &maskString);
+  void setMaskSpectraList(const std::vector<std::size_t> &maskSpectra);
 
-  void hideSpectrumSelector() override;
-  void showSpectrumSelector() override;
-  void hideMaskSpectrumSelector() override;
-  void showMaskSpectrumSelector() override;
+  void hideSpectrumSelector();
+  void showSpectrumSelector();
+  void hideMaskSpectrumSelector();
+  void showMaskSpectrumSelector();
 
-  void clearMaskString() override;
+  void clearMaskString();
 
 signals:
-  void selectedSpectraChanged(const std::string &) override;
-  void selectedSpectraChanged(std::size_t, std::size_t) override;
-  void maskSpectrumChanged(int) override;
-  void maskChanged(const std::string &) override;
+  void selectedSpectraChanged(const std::string &);
+  void selectedSpectraChanged(std::size_t, std::size_t);
+  void maskSpectrumChanged(int);
+  void maskChanged(const std::string &);
 
 private slots:
   void emitMaskChanged();

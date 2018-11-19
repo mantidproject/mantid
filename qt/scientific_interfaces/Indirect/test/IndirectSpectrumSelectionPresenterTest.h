@@ -11,7 +11,6 @@
 #include <gmock/gmock.h>
 
 #include "../General/UserInputValidator.h"
-#include "IIndirectSpectrumSelectionView.h"
 #include "IndirectSpectrumSelectionPresenter.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -26,24 +25,46 @@ using namespace testing;
 
 namespace {
 
-class MockIndirectSpectrumSelectionView
-    : public IIndirectSpectrumSelectionView {
+/**
+ * QApplication
+ *
+ * Uses setUpWorld/tearDownWorld to initialize & finalize
+ * QApplication object
+ */
+class QApplicationHolder : CxxTest::GlobalFixture {
+public:
+  bool setUpWorld() override {
+    int argc(0);
+    char **argv = {};
+    m_app = new QApplication(argc, argv);
+    return true;
+  }
+
+  bool tearDownWorld() override {
+    delete m_app;
+    return true;
+  }
+
+private:
+  QApplication *m_app;
+};
+
+static QApplicationHolder MAIN_QAPPLICATION;
+
+class MockIndirectSpectrumSelectionView : public IndirectSpectrumSelectionView {
 public:
   /// Signals
-  void selectedSpectraChanged(std::string const &spectra) override {
+  void selectedSpectraChanged(std::string const &spectra) {
     emit selectedSpectraChanged(spectra);
   }
 
-  void selectedSpectraChanged(std::size_t minimum,
-                              std::size_t maximum) override {
+  void selectedSpectraChanged(std::size_t minimum, std::size_t maximum) {
     emit selectedSpectraChanged(minimum, maximum);
   }
 
-  void maskSpectrumChanged(int spectrum) override {
-    emit maskSpectrumChanged(spectrum);
-  }
+  void maskSpectrumChanged(int spectrum) { emit maskSpectrumChanged(spectrum); }
 
-  void maskChanged(std::string const &mask) override { emit maskChanged(mask); }
+  void maskChanged(std::string const &mask) { emit maskChanged(mask); }
 
   /// Public methods
   MOCK_CONST_METHOD0(selectionMode, SpectrumSelectionMode());
@@ -61,6 +82,11 @@ public:
 
   MOCK_METHOD1(setSpectraRegex, void(std::string const &regex));
   MOCK_METHOD1(setMaskBinsRegex, void(std::string const &regex));
+
+  MOCK_CONST_METHOD1(validateSpectraString,
+                     UserInputValidator &(UserInputValidator &uiv));
+  MOCK_CONST_METHOD1(validateMaskBinsString,
+                     UserInputValidator &(UserInputValidator &uiv));
 
   MOCK_METHOD0(showSpectraErrorLabel, void());
   MOCK_METHOD0(showMaskBinErrorLabel, void());
@@ -131,9 +157,9 @@ public:
   }
 
   void setUp() override {
-    NiceMock<MockIndirectSpectrumSelectionView> *m_view;
-    NiceMock<MockIndirectFittingModel> *m_model;
-    // IndirectSpectrumSelectionPresenter m_presenter(m_model, m_view);
+    m_view = new NiceMock<MockIndirectSpectrumSelectionView>();
+    m_model = new NiceMock<MockIndirectFittingModel>();
+    m_presenter = new IndirectSpectrumSelectionPresenter(m_model, m_view);
   }
 
   void tearDown() override {
