@@ -1,4 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
+import platform
+import sys
 import unittest
 
 from qtpy.QtWidgets import QMessageBox, QApplication
@@ -7,6 +9,10 @@ from qtpy.QtCore import Qt, QMetaObject
 from mantid import FrameworkManager
 from mantidqt.utils.qt.test.test_window import GuiTestBase
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+
+
+def skip_on_ubuntu():
+    return 'Ubuntu' in platform.platform() and sys.version[0] == '2'
 
 
 class TestFitPropertyBrowser(GuiTestBase):
@@ -94,6 +100,7 @@ class TestFitPropertyBrowser(GuiTestBase):
         self.test.assertEqual(self.widget.sizeOfFunctionsGroup(), 2)
 
 
+@unittest.skipIf(skip_on_ubuntu(), "Popups don't show on ubuntu with python 2. Unskip when switched to xvfb")
 class TestModalTester(unittest.TestCase):
 
     def tearDown(self):
