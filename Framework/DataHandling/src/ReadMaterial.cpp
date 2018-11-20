@@ -83,14 +83,14 @@ void ReadMaterial::setNumberDensity(const double rho_m, const double rho,
   }
 }
 
-void ReadMaterial::setScatteringInfo(double CoherentXSection,
-                                     double IncoherentXSection,
-                                     double AttenuationXSection,
-                                     double ScatteringXSection) {
-  builder.setCoherentXSection(CoherentXSection);       // in barns
-  builder.setIncoherentXSection(IncoherentXSection);   // in barns
-  builder.setAbsorptionXSection(AttenuationXSection);  // in barns
-  builder.setTotalScatterXSection(ScatteringXSection); // in barns
+void ReadMaterial::setScatteringInfo(double coherentXSection,
+                                     double incoherentXSection,
+                                     double attenuationXSection,
+                                     double scatteringXSection) {
+  builder.setCoherentXSection(coherentXSection);       // in barns
+  builder.setIncoherentXSection(incoherentXSection);   // in barns
+  builder.setAbsorptionXSection(attenuationXSection);  // in barns
+  builder.setTotalScatterXSection(scatteringXSection); // in barns
 }
 
 bool ReadMaterial::isEmpty(const double toCheck) {

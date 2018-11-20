@@ -29,8 +29,8 @@ public:
                          const int a_number);
   void setNumberDensity(const double rho_m, const double rho,
                         const double zParameter, const double unitCellVolume);
-  void setScatteringInfo(double CoherentXSection, double IncoherentXSection,
-                         double AttenuationXSection, double ScatteringXSection);
+  void setScatteringInfo(double coherentXSection, double incoherentXSection,
+                         double attenuationXSection, double scatteringXSection);
   std::unique_ptr<Kernel::Material> buildMaterial();
 
 private:
