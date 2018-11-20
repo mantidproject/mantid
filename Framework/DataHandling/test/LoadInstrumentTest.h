@@ -278,8 +278,8 @@ public:
     // Retrieve the instrument from the InstrumentDataService
     Instrument_const_sptr nimrodInst = IDS.getObjects()[0];
     TS_ASSERT_EQUALS(nimrodInst->getName(), "NIM");
-    TS_ASSERT_EQUALS(nimrodInst->getNumberDetectors(),1521);
-    TS_ASSERT_EQUALS((nimrodInst->getDetector(20201001))->getID(),20201001);
+    TS_ASSERT_EQUALS(nimrodInst->getNumberDetectors(), 1521);
+    TS_ASSERT_EQUALS((nimrodInst->getDetector(20201001))->getID(), 20201001);
   }
 
   void testExecMARIFromInstrName() {
@@ -421,9 +421,9 @@ public:
     // Retrieve the instrument from the InstrumentDataService
     Instrument_const_sptr lokiInst = IDS.getObjects()[0];
     TS_ASSERT_EQUALS(lokiInst->getName(), "LOKI");
-    TS_ASSERT_EQUALS(lokiInst->getNumberDetectors(),8000);
-    TS_ASSERT_EQUALS((lokiInst->getDetector(1001))->getID(),1001);
-    TS_ASSERT_EQUALS((lokiInst->getDetector(7777))->getID(),7777);
+    TS_ASSERT_EQUALS(lokiInst->getNumberDetectors(), 8000);
+    TS_ASSERT_EQUALS((lokiInst->getDetector(1001))->getID(), 1001);
+    TS_ASSERT_EQUALS((lokiInst->getDetector(7777))->getID(), 7777);
   }
 
   void testExecHRP2() {

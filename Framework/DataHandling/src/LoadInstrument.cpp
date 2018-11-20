@@ -101,7 +101,7 @@ void LoadInstrument::exec() {
   boost::shared_ptr<API::MatrixWorkspace> ws = getProperty("Workspace");
   std::string filename = getPropertyValue("Filename");
   std::string instname = getPropertyValue("InstrumentName");
-  std::pair <std::string,std::string> loader_type;
+  std::pair<std::string, std::string> loader_type;
 
   // If instrumentXML is not default (i.e. it has been defined), then use that
   // Note: this is part of the IDF loader
@@ -176,16 +176,18 @@ void LoadInstrument::exec() {
 
   // Define a parser if using IDFs
   if (loader_type.second == "xml")
-    parser = InstrumentDefinitionParser(filename, instname, InstrumentXML->value());
+    parser =
+        InstrumentDefinitionParser(filename, instname, InstrumentXML->value());
   else if (loader_type.second == "idffile")
-    parser = InstrumentDefinitionParser(filename, instname, Strings::loadFile(filename));
+    parser = InstrumentDefinitionParser(filename, instname,
+                                        Strings::loadFile(filename));
 
   // Find the mangled instrument name that includes the modified date
   if (loader_type.first == "idf")
     instrumentNameMangled = parser.getMangledName();
   else if (loader_type.first == "nxs")
     instrumentNameMangled =
-      NexusGeometry::NexusGeometryParser::getMangledName(filename, instname);
+        NexusGeometry::NexusGeometryParser::getMangledName(filename, instname);
   else
     throw std::runtime_error("Unknown instrument loader type");
 
@@ -205,14 +207,15 @@ void LoadInstrument::exec() {
         Progress prog(this, 0.0, 1.0, 100);
         instrument = parser.parseXML(&prog);
         // Parse the instrument tree (internally create ComponentInfo and
-        // DetectorInfo). This is an optimization that avoids duplicate parsing of
-        // the instrument tree when loading multiple workspaces with the same
+        // DetectorInfo). This is an optimization that avoids duplicate parsing
+        // of the instrument tree when loading multiple workspaces with the same
         // instrument. As a consequence less time is spent and less memory is
         // used. Note that this is only possible since the tree in `instrument`
         // will not be modified once we add it to the IDS.
         instrument->parseTreeAndCacheBeamline();
       } else {
-        Instrument_const_sptr ins = NexusGeometry::NexusGeometryParser::createInstrument(filename);
+        Instrument_const_sptr ins =
+            NexusGeometry::NexusGeometryParser::createInstrument(filename);
         instrument = boost::const_pointer_cast<Instrument>(ins);
       }
       // Add to data service for later retrieval

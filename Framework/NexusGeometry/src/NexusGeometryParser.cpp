@@ -676,10 +676,11 @@ NexusGeometryParser::createInstrument(const std::string &fileName) {
 
 // Create a unique instrument name from Nexus file
 std::string NexusGeometryParser::getMangledName(const std::string &fileName,
-    const std::string &instName) {
+                                                const std::string &instName) {
   std::string mangledName = instName;
   if (!fileName.empty()) {
-    std::string checksum = Mantid::Kernel::ChecksumHelper::sha1FromFile(fileName, false);
+    std::string checksum =
+        Mantid::Kernel::ChecksumHelper::sha1FromFile(fileName, false);
     mangledName += checksum;
   }
   return mangledName;
