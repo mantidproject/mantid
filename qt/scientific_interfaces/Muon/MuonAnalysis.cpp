@@ -40,8 +40,8 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
-#include <math.h>
 #include <boost/lexical_cast.hpp>
+#include <math.h>
 
 #include <algorithm>
 
@@ -1938,44 +1938,39 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   auto upper = m_uiForm.timeAxisFinishAtInput->text().toDouble();
 
   Workspace_sptr ws_ptr =
-	  AnalysisDataService::Instance().retrieve(wsName.toStdString());
+      AnalysisDataService::Instance().retrieve(wsName.toStdString());
   MatrixWorkspace_sptr matrix_workspace =
-	  boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
   const auto &xData = matrix_workspace->x(0);
 
-  auto lower =
-	  m_uiForm.timeAxisStartAtInput->text().toDouble();
+  auto lower = m_uiForm.timeAxisStartAtInput->text().toDouble();
   if (upper < *min_element(xData.begin(), xData.end())) {
-	  QMessageBox::warning(this, tr("Muon Analysis"),
-		  tr("No data in selected range.\n"
-			  "Setting end time to last time value."),
-		  QMessageBox::Ok, QMessageBox::Ok);
-	  upper = *max_element(xData.begin(), xData.end());
-	  m_uiForm.timeAxisFinishAtInput->setText(QString::number(upper));
-
+    QMessageBox::warning(this, tr("Muon Analysis"),
+                         tr("No data in selected range.\n"
+                            "Setting end time to last time value."),
+                         QMessageBox::Ok, QMessageBox::Ok);
+    upper = *max_element(xData.begin(), xData.end());
+    m_uiForm.timeAxisFinishAtInput->setText(QString::number(upper));
   }
-  params["XAxisMax"] =
-	  QString::number(upper);
+  params["XAxisMax"] = QString::number(upper);
   if (lower > upper) {
-	  QMessageBox::warning(this, tr("Muon Analysis"),
-		  tr("Time max is less than time min.\n"
-			  "Will change time min."),
-		  QMessageBox::Ok, QMessageBox::Ok);
-	  lower = upper - 1.0; // we know it will always be lower
-						   //update UI
-	  m_uiForm.timeAxisStartAtInput->setText(QString::number(lower));
+    QMessageBox::warning(this, tr("Muon Analysis"),
+                         tr("Time max is less than time min.\n"
+                            "Will change time min."),
+                         QMessageBox::Ok, QMessageBox::Ok);
+    lower = upper - 1.0; // we know it will always be lower
+                         // update UI
+    m_uiForm.timeAxisStartAtInput->setText(QString::number(lower));
   }
   if (lower > *max_element(xData.begin(), xData.end())) {
-	  QMessageBox::warning(this, tr("Muon Analysis"),
-		  tr("No data in selected range.\n"
-			  "Setting start time to first time value."),
-		  QMessageBox::Ok, QMessageBox::Ok);
-	  lower = *min_element(xData.begin(), xData.end());
-	  m_uiForm.timeAxisStartAtInput->setText(QString::number(lower));
-
+    QMessageBox::warning(this, tr("Muon Analysis"),
+                         tr("No data in selected range.\n"
+                            "Setting start time to first time value."),
+                         QMessageBox::Ok, QMessageBox::Ok);
+    lower = *min_element(xData.begin(), xData.end());
+    m_uiForm.timeAxisStartAtInput->setText(QString::number(lower));
   }
-  params["XAxisMin"] =
-	  QString::number(lower);
+  params["XAxisMin"] = QString::number(lower);
 
   // If autoscale disabled
   if (params["YAxisAuto"] == "False") {
