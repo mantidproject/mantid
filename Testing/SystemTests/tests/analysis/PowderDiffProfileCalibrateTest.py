@@ -15,12 +15,12 @@
 #
 ########################################################################
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import mantid.simpleapi as api
 from mantid.simpleapi import *
 
 
-class VulcanExamineProfile(stresstesting.MantidStressTest):
+class VulcanExamineProfile(systemtesting.MantidSystemTest):
     irf_file = 'arg_powder.irf'
     dat_file = 'arg_si.dat'
     bkgd_file = 'arg_si_bkgd_polynomial.nxs'
@@ -63,7 +63,7 @@ class VulcanExamineProfile(stresstesting.MantidStressTest):
         return ('Arg_Si_Calculated','Arg_Si_golden')
 
 
-class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
+class VulcanSeqRefineProfileFromScratch(systemtesting.MantidSystemTest):
     """ System test for sequential refinement
     """
     irf_file = 'VULCAN_SNS_1.irf'
@@ -189,7 +189,7 @@ class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
         return ('VULCAN_22946_Calculated', 'VULCAN_22946_Calculated')
 
 
-class VulcanSeqRefineProfileLoadPlus(stresstesting.MantidStressTest):
+class VulcanSeqRefineProfileLoadPlus(systemtesting.MantidSystemTest):
     """ System test for sequential refinement
     """
     seqfile = "VULCAN_Calibrate_Seq.nxs"

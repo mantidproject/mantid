@@ -6,11 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import stresstesting
+import systemtesting
 from mantid.simpleapi import SANSILLReduction, Q1DWeighted, config, mtd
 
 
-class ILL_D11_Test(stresstesting.MantidStressTest):
+class ILL_D11_Test(systemtesting.MantidSystemTest):
 
     def __init__(self):
         super(ILL_D11_Test, self).__init__()

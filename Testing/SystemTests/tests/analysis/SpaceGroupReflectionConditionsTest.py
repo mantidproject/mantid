@@ -6,13 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.geometry import *
 from six import iteritems
 
 
-class SpaceGroupReflectionConditionsTest(stresstesting.MantidStressTest):
+class SpaceGroupReflectionConditionsTest(systemtesting.MantidSystemTest):
     '''
     This test uses PoldiCreatePeaksFromCell to generate lists of reflections for fake crystal structures, one for each
     registered space group and one atom in the general position. The algorithm uses structure factor calculation for
