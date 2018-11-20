@@ -186,6 +186,7 @@ def get_run_from_multi_period_data(workspace_list):
     else:
         return unique_runs[0]
 
+
 def load_dead_time_from_filename(filename):
     """
     From a neXus file, load the dead time ITableWorkspace from it and add to the ADS
