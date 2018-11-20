@@ -26,6 +26,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
+    sig_toggle_fit_triggered = QtCore.Signal()
 
     toolitems = (
         ('Home', 'Reset original view', 'fa.home', 'home', None),
@@ -36,7 +37,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         ('Save', 'Save the figure', 'fa.save', 'save_figure', None),
         ('Print','Print the figure', 'fa.print', 'print_figure', None),
         (None, None, None, None, None),
-        ('Customize', 'Configure plot options', 'fa.cog', 'edit_parameters', None)
+        ('Customize', 'Configure plot options', 'fa.cog', 'edit_parameters', None),
+        (None, None, None, None, None),
+        ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
     )
 
     def _init_toolbar(self):
@@ -78,6 +81,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     def toggle_grid(self):
         self.sig_grid_toggle_triggered.emit()
+
+    def toggle_fit(self):
+        self.sig_toggle_fit_triggered.emit()
 
     def print_figure(self):
         printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)

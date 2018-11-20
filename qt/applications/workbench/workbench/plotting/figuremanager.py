@@ -23,6 +23,7 @@ from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from workbench.plotting.qappthreadcall import QAppThreadCall
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -87,6 +88,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
+            self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
             tbs_height = self.toolbar.sizeHint().height()
         else:
             tbs_height = 0
@@ -99,7 +101,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
+        self.fit_browser = FitPropertyBrowser()
         self.window.setCentralWidget(canvas)
+        self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
+        self.fit_browser.hide()
 
         if matplotlib.is_interactive():
             self.window.show()
@@ -186,6 +191,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         for ax in axes:
             ax.grid()
         canvas.draw_idle()
+
+    def fit_toggle(self):
+        if self.fit_browser.isVisible():
+            self.fit_browser.hide()
+        else:
+            self.fit_browser.show()
 
     def hold(self):
         """
