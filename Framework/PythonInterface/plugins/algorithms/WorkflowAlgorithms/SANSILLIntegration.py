@@ -35,6 +35,8 @@ class SANSILLIntegration(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
+        if self.getProperty('ResolutionBasedBinning').value and self.getPropertyValue('CalculateResolution') == 'None':
+            issues['CalculateResolution'] = 'Please choose a resolution calculation method if resolution based binning is requested.'
         if not isinstance(self.getProperty('InputWorkspace').value, MatrixWorkspace):
             issues['InputWorkspace'] = 'The input must be a MatrixWorkspace'
         else:
@@ -310,8 +312,8 @@ class SANSILLIntegration(PythonAlgorithm):
                 res = self._deltaQ(mid_x)
                 mtd[self._output_ws].setDx(0, res)
                 if n_wedges != 0:
-                    for wedge_ws in mtd[wedge_ws]:
-                        wedge_ws.setDx(0, res)
+                    for wedge in range(n_wedges):
+                        mtd[wedge_ws].getItem(wedge).setDx(0, res)
             if n_wedges != 0:
                 self.setProperty('WedgeWorkspace', mtd[wedge_ws])
         elif self._output_type == 'I(Phi,Q)':
@@ -319,6 +321,7 @@ class SANSILLIntegration(PythonAlgorithm):
             iq_ws = '__iq' + self._input_ws
             wedge_angle = 360./n_wedges
             azimuth_axis = NumericAxis.create(n_wedges)
+            azimuth_axis.setUnit("Degrees")
             for i in range(n_wedges):
                 azimuth_axis.setValue(i, i * wedge_angle)
             Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=iq_ws, NumberOfWedges=n_wedges,
