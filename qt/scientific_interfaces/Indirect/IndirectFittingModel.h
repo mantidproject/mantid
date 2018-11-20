@@ -51,7 +51,7 @@ public:
   Spectra getSpectra(std::size_t index) const;
   std::pair<double, double> getFittingRange(std::size_t dataIndex,
                                             std::size_t spectrum) const;
-  std::string getExcludeRegion(std::size_t dataIndex, std::size_t index) const;
+  virtual std::string getExcludeRegion(std::size_t dataIndex, std::size_t index) const;
   std::string createDisplayName(const std::string &formatString,
                                 const std::string &rangeDelimiter,
                                 std::size_t dataIndex) const;
@@ -84,15 +84,17 @@ public:
   void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
-  virtual void removeWorkspace(std::size_t index);
+  virtual void removeWorkspace(std::size_t index);  
   PrivateFittingData clearWorkspaces();
   void setFittingMode(FittingMode mode);
-  virtual void setFitFunction(Mantid::API::IFunction_sptr function);
+  virtual void
+  setFitFunction(Mantid::API::IFunction_sptr function);
   void setDefaultParameterValue(const std::string &name, double value,
                                 std::size_t dataIndex);
   void addSingleFitOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
                           std::size_t index);
-  virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  virtual void
+  addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   template <typename F>
   void applySpectra(std::size_t index, const F &functor) const;
@@ -108,7 +110,8 @@ public:
                                                     std::size_t spectrum) const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const;
-  virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const;
+  virtual Mantid::API::IAlgorithm_sptr
+  getFittingAlgorithm() const;
   Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex,
                                             std::size_t spectrum) const;
 

@@ -11,14 +11,19 @@
 #include <gmock/gmock.h>
 
 #include "../General/UserInputValidator.h"
+#include "IndirectFitData.h"
+#include "IndirectFittingModel.h"
 #include "IndirectSpectrumSelectionPresenter.h"
-
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
+
+#include <boost/variant.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
@@ -54,21 +59,21 @@ static QApplicationHolder MAIN_QAPPLICATION;
 class MockIndirectSpectrumSelectionView : public IndirectSpectrumSelectionView {
 public:
   /// Signals
-  void selectedSpectraChanged(std::string const &spectra) {
+  void emitSelectedSpectraChanged(std::string const &spectra) {
     emit selectedSpectraChanged(spectra);
   }
 
-  void selectedSpectraChanged(std::size_t minimum, std::size_t maximum) {
+  void emitSelectedSpectraChanged(std::size_t minimum, std::size_t maximum) {
     emit selectedSpectraChanged(minimum, maximum);
   }
 
-  void maskSpectrumChanged(int spectrum) { emit maskSpectrumChanged(spectrum); }
+  void emitMaskSpectrumChanged(int spectrum) {
+    emit maskSpectrumChanged(spectrum);
+  }
 
-  void maskChanged(std::string const &mask) { emit maskChanged(mask); }
+  void emitMaskChanged(std::string const &mask) { emit maskChanged(mask); }
 
   /// Public methods
-  MOCK_CONST_METHOD0(selectionMode, SpectrumSelectionMode());
-
   MOCK_CONST_METHOD0(minimumSpectrum, std::size_t());
   MOCK_CONST_METHOD0(maximumSpectrum, std::size_t());
 
@@ -117,15 +122,65 @@ public:
 class MockIndirectFittingModel : public IndirectFittingModel {
 public:
   /// Public methods
+  // MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(std::size_t index));
+  //// MOCK_CONST_METHOD1(getSpectra, Spectra(std::size_t index));
+  // MOCK_CONST_METHOD2(getFittingRange,
+  //                   std::pair<double, double>(std::size_t dataIndex,
+  //                                             std::size_t spectrum));
+  // MOCK_CONST_METHOD2(getExcludeRegion,
+  //                   std::string(std::size_t dataIndex, std::size_t index));
+  // MOCK_CONST_METHOD3(createDisplayName,
+  //                   std::string(std::string const &formatString,
+  //                               std::string const &rangeDelimiter,
+  //                               std::size_t dataIndex));
+  // MOCK_CONST_METHOD3(createOutputName,
+  //                   std::string(std::string const &formatString,
+  //                               std::string const &rangeDelimiter,
+  //                               std::size_t dataIndex));
   MOCK_CONST_METHOD0(isMultiFit, bool());
+  // MOCK_CONST_METHOD2(isPreviouslyFit,
+  //                   bool(std::size_t dataIndex, std::size_t spectrum));
+  // MOCK_CONST_METHOD1(hasZeroSpectra, bool(std::size_t dataIndex));
   MOCK_CONST_METHOD0(isInvalidFunction, boost::optional<std::string>());
+  // MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
+  // MOCK_CONST_METHOD1(getNumberOfSpectra, std::size_t(std::size_t index));
+  // MOCK_CONST_METHOD0(getFitParameterNames, std::vector<std::string>());
   MOCK_CONST_METHOD0(getFittingFunction, IFunction_sptr());
 
-  // MOCK_METHOD2(addWorkspace,
-  //              void(MatrixWorkspace_sptr workspace, Spectra const
-  //              &spectra));
+  //// MOCK_METHOD1(setFittingData, void(PrivateFittingData &&fittingData));
+  // MOCK_METHOD2(setSpectra,
+  //             void(std::string const &spectra, std::size_t dataIndex));
+  //// MOCK_METHOD2(setSpectra, void(Spectra &&spectra, std::size_t dataIndex));
+  MOCK_METHOD2(setSpectra,
+               void(MantidQt::CustomInterfaces::IDA::Spectra const &spectra,
+                    std::size_t dataIndex));
+  // MOCK_METHOD3(setStartX, void(double startX, std::size_t dataIndex,
+  //                             std::size_t spectrum));
+  // MOCK_METHOD3(setEndX,
+  //             void(double endX, std::size_t dataIndex, std::size_t
+  //             spectrum));
+  // MOCK_METHOD3(setExcludeRegion,
+  //             void(std::string const &exclude, std::size_t dataIndex,
+  //                  std::size_t spectrum));
+
+  // MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
+  // MOCK_METHOD2(addWorkspace, void(std::string const &workspaceName,
+  //                                std::string const &spectra));
+  ///// MOCK_METHOD2(addWorkspace,
+  /////            void(std::string const &workspaceName, Spectra const
+  /////            &spectra));
+  //// MOCK_METHOD2(addWorkspace,
+  ////              void(MatrixWorkspace_sptr workspace, Spectra const
+  ////              &spectra));
   MOCK_METHOD1(removeWorkspace, void(std::size_t index));
+  //// MOCK_METHOD0(clearWorkspaces, PrivateFittingData());
+  // MOCK_METHOD1(setFittingMode, void(FittingMode mode));
   MOCK_METHOD1(setFitFunction, void(IFunction_sptr function));
+  // MOCK_METHOD3(setDefaultParameterValue,
+  //             void(std::string const &name, double value,
+  //                  std::size_t dataIndex));
+  // MOCK_METHOD2(addSingleFitOutput,
+  //             void(IAlgorithm_sptr fitAlgorithm, std::size_t index));
   MOCK_METHOD1(addOutput, void(IAlgorithm_sptr fitAlgorithm));
 
   MOCK_CONST_METHOD0(getFittingAlgorithm, IAlgorithm_sptr());
@@ -160,18 +215,50 @@ public:
     m_view = new NiceMock<MockIndirectSpectrumSelectionView>();
     m_model = new NiceMock<MockIndirectFittingModel>();
     m_presenter = new IndirectSpectrumSelectionPresenter(m_model, m_view);
+
+    SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(10));
+    m_model->addWorkspace("WorkspaceName");
   }
 
   void tearDown() override {
+    AnalysisDataService::Instance().clear();
+
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
 
     delete m_presenter;
     delete m_model;
-    delete m_view;
+    // delete m_view; causes error
   }
 
-  void test_test() { EXPECT_CALL(*m_view, maximumSpectrum()).Times(0); }
+  void test_that_the_presenter_has_been_initialized() {
+    /// Not using m_view and m_present, because they are already initialized
+    /// after setUp()
+    // MockIndirectSpectrumSelectionView view;
+    // TS_ASSERT(view);
+    // MockIndirectFittingModel model;
+    // TS_ASSERT(model);
+    // IndirectSpectrumSelectionPresenter presenter(&model, &view);
+    // TS_ASSERT(presenter);
+  }
+
+  void test_test() {
+    // ON_CALL(*m_view, minimumSpectrum()).WillByDefault(Return(1));
+  }
+
+  void
+  test_that_the_selectedSpectraChanged_signal_will_set_the_spectra_in_the_model() {
+	/// Expectations
+    EXPECT_CALL(*m_view, hideSpectraErrorLabel()).Times(1);
+    // EXPECT_CALL(*m_view, setMaskSelectionEnabled(true)).Times(1);
+    Spectra const spectra = DiscontinuousSpectra<std::size_t>("5");
+
+    EXPECT_CALL(*m_model, setSpectra(spectra, 0)).Times(1);
+	/// Invoke expectations
+    m_view->emitSelectedSpectraChanged("5");
+  }
+
+  void test_next() {}
 
 private:
   MockIndirectSpectrumSelectionView *m_view;
