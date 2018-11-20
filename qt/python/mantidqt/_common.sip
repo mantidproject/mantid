@@ -1,11 +1,14 @@
 %ModuleCode
 #include "MantidQtWidgets/Common/Message.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
 %End
 
 %InitialisationCode
+qRegisterMetaType<std::string>("StdString");
+qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
 %End
 
