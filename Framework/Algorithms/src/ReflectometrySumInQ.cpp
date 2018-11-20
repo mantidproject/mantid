@@ -257,7 +257,7 @@ void ReflectometrySumInQ::init() {
                   "If true, use the full projected wavelength range possibly "
                   "including partially filled bins.");
   declareProperty(
-      Prop::THETA_IN, EMPTY_INT(), nonnegativeInt,
+      Prop::THETA_IN, std::numeric_limits<double>::max(), nonnegativeDouble,
       "Provides the horizon Angle as opposed to the BeamCentre pixel, as at "
       "ISIS there is no pixel positioned exactly at the scattering angle");
 }
@@ -293,39 +293,47 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
     return issues;
   }
 
-  const auto &spectrumInfo = inWS->spectrumInfo();
-  const int beamCentre = getProperty(Prop::BEAM_CENTRE);
-  bool beamCentreFound{false};
-  for (const auto i : indices) {
-    if (spectrumInfo.isMonitor(i)) {
-      issues["InputWorkspaceIndexSet"] = "Index set cannot include monitors.";
-      break;
-    } else if ((i > 0 && spectrumInfo.isMonitor(i - 1)) ||
-               (i < spectrumInfo.size() - 1 && spectrumInfo.isMonitor(i + 1))) {
-      issues["InputWorkspaceIndexSet"] =
-          "A neighbour to any detector in the index set cannot be a monitor";
-      break;
-    }
-    if (i == static_cast<size_t>(beamCentre)) {
-      beamCentreFound = true;
-    }
-  }
-  if (!beamCentreFound) {
-    issues[Prop::BEAM_CENTRE] =
-        "Beam centre is not included in InputWorkspaceIndexSet.";
-  }
   const auto beamCentreProperty = getPointerToProperty(Prop::BEAM_CENTRE);
   const auto thetaInProperty = getPointerToProperty(Prop::THETA_IN);
+
+  const auto &spectrumInfo = inWS->spectrumInfo();
+
+  // BeamCentre can be not set.
+  if (!beamCentreProperty->isDefault()) {
+    const int beamCentre = getProperty(Prop::BEAM_CENTRE);
+    bool beamCentreFound{false};
+    for (const auto i : indices) {
+      if (spectrumInfo.isMonitor(i)) {
+        issues["InputWorkspaceIndexSet"] = "Index set cannot include monitors.";
+        break;
+      } else if ((i > 0 && spectrumInfo.isMonitor(i - 1)) ||
+                 (i < spectrumInfo.size() - 1 &&
+                  spectrumInfo.isMonitor(i + 1))) {
+        issues["InputWorkspaceIndexSet"] =
+            "A neighbour to any detector in the index set cannot be a monitor";
+        break;
+      }
+      if (i == static_cast<size_t>(beamCentre)) {
+        beamCentreFound = true;
+      }
+    }
+    if (!beamCentreFound) {
+      issues[Prop::BEAM_CENTRE] =
+          "Beam centre is not included in InputWorkspaceIndexSet.";
+    }
+  }
+
   // Neither BeamCentre and ThetaIn can be defined at the same time.
   if (!beamCentreProperty->isDefault() && !thetaInProperty->isDefault()) {
     // Both are defined
-    const std::string issueName = Prop::BEAM_CENTRE + " and " + Prop::THETA_IN;
-    issues[issueName] = "These propeties cannot be defined together";
+    issues[Prop::BEAM_CENTRE] = "Defined whilst " + Prop::THETA_IN + " is also defined";
+    issues[Prop::THETA_IN] = "Defined whilst " + Prop::BEAM_CENTRE + " is also defined";
   } else if (beamCentreProperty->isDefault() && thetaInProperty->isDefault()) {
     // Neither are defined
-    const std::string issueName = Prop::BEAM_CENTRE + " and " + Prop::THETA_IN;
-    issues[issueName] = "One of these properties must be defined";
+    // Need to throw here with how issues are handled
+    throw std::runtime_error("Neither BeamCentre or ThetaIn are defined in ReflectometrySumInQ");
   }
+
   return issues;
 }
 
@@ -349,7 +357,7 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
   } else if (getPointerToProperty(Prop::THETA_IN)->isDefault()) {
     twoThetaRIdx = getProperty(Prop::THETA_IN);
   } else {
-    throw std::runtime_error("Neither " + Prop::BEAM_CENTRE + " or " +
+    throw std::runtime_error("SumInQ: Neither " + Prop::BEAM_CENTRE + " or " +
                              Prop::THETA_IN +
                              " are defined but were valid at input time");
   }
@@ -549,14 +557,21 @@ ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
     a.delta = a.twoTheta - a.horizon;
     return a;
   } else if (!thetaInProperty->isDefault()) {
-    const int thetaIn = getProperty(Prop::THETA_IN);
-    const double twoTheta = spectrumInfo.twoTheta(static_cast<size_t>(thetaIn));
+    const double thetaIn = getProperty(Prop::THETA_IN);
+    double twoTheta;
+    try{
+      twoTheta = spectrumInfo.twoTheta(static_cast<size_t>(thetaIn));
+    } catch (std::runtime_error &e){
+      // Occurs when thetaIn is not equal to a monitor
+      g_log.information(std::string(e.what()) + ", this error occurred when getting twoTheta from spectrumInfo");
+      twoTheta = thetaIn;
+    }
     a.horizon = thetaIn;
     a.twoTheta = twoTheta;
     a.delta = a.twoTheta - a.horizon;
     return a;
   } else {
-    throw std::runtime_error("Neither " + Prop::BEAM_CENTRE + " or " +
+    throw std::runtime_error("SumInQ: Neither " + Prop::BEAM_CENTRE + " or " +
                              Prop::THETA_IN +
                              " are defined but were valid at input time");
   }

@@ -869,14 +869,19 @@ void ReflectometryReductionOne2::findIvsLamRange(
  */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
-  auto alg =
-      AlgorithmManager::Instance().createUnmanaged("ReflectometrySumInQ");
-  alg->setProperty("InputWorkspace", detectorWS);
+  // make sure detectorws is in the ADS
+  AnalysisDataService::Instance().addOrReplace("DetectorWS", detectorWS);
+  auto alg = createChildAlgorithm("ReflectometrySumInQ");
+  alg->setProperty("InputWorkspace", "DetectorWS");
+  // Processing instructions use WorkspaceIndex Processing instructions for
+  // optimal performance
+  alg->setProperty("InputWorkspaceIndexType", "WorkspaceIndex");
+  alg->setProperty("InputWorkspaceIndexSet",
+                   m_processingInstructionsWorkspaceIndex);
   alg->setProperty("ThetaIn", theta0());
-  alg->setChild(true);
-
   alg->execute();
 
+  AnalysisDataService::Instance().remove("DetectorWS");
   return alg->getProperty("OutputWorkspace");
 }
 
