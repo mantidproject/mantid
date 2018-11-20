@@ -22,6 +22,9 @@ class QuickEditWidget(object):
     def widget(self):
         return self._presenter.widget
 
+    def connect_autoscale_changed(self,slot):
+        self._presenter.connect_autoscale_changed(slot)
+
     def connect_errors_changed(self,slot):
         self._presenter.connect_errors_changed(slot)
 

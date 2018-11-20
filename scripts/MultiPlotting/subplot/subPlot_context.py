@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from six import iteritems
+from mantid import plots
+from copy import copy
 
 # use this to manage lines and workspaces directly
 
@@ -13,15 +15,43 @@ class subPlotContext(object):
         self._specNum = {}
         self._colours = {}
 
-    def addLine(self, label, lines, ws, specNum=1):
+    # need to add if errors
+    def addLine(self, subplot, ws, specNum=1):
+        #make plot
+        line, = plots.plotfunctions.plot(subplot,ws,specNum=specNum)
+        label = line.get_label()
         # line will be a list - will include error bars
-        self._lines[label] = lines
         self._specNum[label] = specNum
-        self._colours[label] = lines[0].get_color()
         if ws not in self._ws.keys():
             self._ws[ws] = [label]
         else:
             self._ws[ws].append(label)
+        self.lines[label] = [line]
+
+    def change_errors(self,subplot,state):
+         for label in self.lines.keys():
+             self.redraw(subplot,state,label)
+
+    def get_ws(self,label):
+        for ws in self._ws.keys():
+            if label in self._ws[ws]:
+                return ws
+
+    def redraw(self,subplot,with_errors,label):
+        colour = copy(self.lines[label][0].get_color())
+        marker = copy(self.lines[label][0].get_marker())
+        for line in self.lines[label]:
+            line.remove()
+        del self._lines[label]
+        if with_errors:
+           line, cap_lines, bar_lines = plots.plotfunctions.errorbar(subplot,self.get_ws(label),specNum=self.specNum[label],color=colour,marker=marker,label = label)
+           all_lines = [line]
+           all_lines.extend(cap_lines)
+           all_lines.extend(bar_lines)
+           self._lines[label] = all_lines
+        else:
+           line, = plots.plotfunctions.plot(subplot,self.get_ws(label),specNum=self.specNum[label],color=colour,marker=marker,label = label)
+           self._lines[label] = [line]
 
     @property
     def lines(self):

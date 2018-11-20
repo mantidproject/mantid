@@ -25,19 +25,24 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.quickEdit.connect_x_range_changed(self.x_range_changed)
         self.quickEdit.connect_y_range_changed(self.y_range_changed)
         self.quickEdit.connect_errors_changed(self.errors_changed)
+        self.quickEdit.connect_autoscale_changed(self.autoscale_changed)
+
         # add some dummy plot
         self.plots = subPlot("test", self._context)
         self.plots.connect_quick_edit_signal(self.update_quick_edit)
         # add dummy line
-        self.plots.plot("test","first line", self._context.ws)
+        self.plots.plot("test", self._context.ws)
 
         # create GUI layout
         layout.addWidget(self.plots)
         layout.addWidget(self.quickEdit.widget)
         self.setLayout(layout)
 
+    def autoscale_changed(self,state):
+        # get subplot selected....
+        self.plots.set_y_autoscale("test",state)
+
     def errors_changed(self,state):
-        print("waaa ", state)
         # get subplot selected....
         self.plots.change_errors(state, "test")
 
@@ -51,24 +56,4 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.quickEdit.loadFromContext()
 
 
-#    def getPresenter(self):
-#        return self._presenter
 
-#    @property
-#    def widget(self):
-#        return self._presenter.widget
-
-#    def updateLabel(self, message):
-#        self._presenter.updateLabel(message)
-
-    # interact with context
-#    def updateContext(self):
-#        self._presenter.updateContext()
-
- #   def loadFromContext(self, context):
-        # extract relevant info from context via model
- #       model = self._presenter.model
- #       sub_context = model.getSubContext()
- #       # update the view with the subcontext
- #       view = self._presenter.widget
- #       view.loadFromContext(sub_context)

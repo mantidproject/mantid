@@ -9,6 +9,9 @@ class AxisChangerPresenter(object):
     def __init__(self, view):
         self.view = view
 
+    def set_enabled(self,state):
+        self.view.set_enabled(state)
+
     def get_bounds(self):
         return self.view.get_bounds()
 

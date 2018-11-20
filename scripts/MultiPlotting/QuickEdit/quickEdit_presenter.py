@@ -21,6 +21,9 @@ class QuickEditPresenter(object):
     def model(self):
         return self._model
 
+    def connect_autoscale_changed(self,slot):
+        self._view.connect_autoscale_changed(slot)
+
     def connect_errors_changed(self,state):
         self._view.connect_errors_changed(state)
 

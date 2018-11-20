@@ -28,6 +28,10 @@ class AxisChangerView(QtWidgets.QWidget):
         layout.addWidget(self.upper_bound)
         self.setLayout(layout)
 
+    def set_enabled(self,state):
+        self.lower_bound.setDisabled(state)
+        self.upper_bound.setDisabled(state)
+
     def get_bounds(self):
         bounds = [self.lower_bound, self.upper_bound]
         return [float(str(bound.text())) if bound.text()
