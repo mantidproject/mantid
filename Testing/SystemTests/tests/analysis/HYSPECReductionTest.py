@@ -11,10 +11,10 @@ System test for HYSPEC reduction
 
 from mantid.simpleapi import *
 import os
-import stresstesting
+import systemtesting
 
 
-class HYSPECReductionTest(stresstesting.MantidStressTest):
+class HYSPECReductionTest(systemtesting.MantidSystemTest):
     groupingFile = ''
     tolerance=1e-8
 

@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.28
+Version:        1.29
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -131,6 +131,9 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Thu Nov 18 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Added python-requests
 
 * Wed Jul 18 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Added python-psutil

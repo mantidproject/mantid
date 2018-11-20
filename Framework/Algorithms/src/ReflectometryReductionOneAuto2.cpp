@@ -259,9 +259,6 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Monitor properties
   initMonitorProperties();
-  // Normalization by integrated monitors
-  declareProperty("NormalizeByIntegratedMonitors", true,
-                  "Normalize by dividing by the integrated monitors.");
 
   // Init properties for transmission normalization
   initTransmissionProperties();

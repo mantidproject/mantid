@@ -9,12 +9,12 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 import ISISCommandInterface as i
-import stresstesting
+import systemtesting
 
 
-class SANSMergedDetectorsTest(stresstesting.MantidStressTest):
+class SANSMergedDetectorsTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
 
     def runTest(self):
         # Select instrument and user file

@@ -449,7 +449,6 @@ void ProjectRecovery::startProjectSaving() {
 /// Stops any existing background threads which are running
 void ProjectRecovery::stopProjectSaving() {
   {
-
     std::lock_guard<std::mutex> lock(m_notifierMutex);
     m_stopBackgroundThread = true;
     m_threadNotifier.notify_all();
@@ -649,6 +648,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
     alg->setProperty("IgnoreTheseAlgs", m_algsToIgnore);
+    alg->setProperty("IgnoreTheseAlgProperties", m_propertiesToIgnore);
 
     alg->execute();
   }

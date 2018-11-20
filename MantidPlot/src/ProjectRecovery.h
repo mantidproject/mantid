@@ -141,10 +141,17 @@ private:
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
 
-  // The presenter of the recovery guis
+  // To ignore a property you need to first put the algorithm name in the first
+  // part of the vector for which you want to ignore the property for then the
+  // property name in the second part of the vector 0 and 1 as indexes
+  // respectively
+  std::vector<std::vector<std::string>> m_propertiesToIgnore = {
+      {"StartLiveData", "MonitorLiveData"}};
+
   ProjectRecoveryPresenter *m_recoveryGui;
 
   std::vector<std::string> m_algsToIgnore = {
+      "MonitorLiveData",
       "EnggSaveGSASIIFitResultsToHDF5",
       "EnggSaveSinglePeakFitResultsToHDF5",
       "ExampleSaveAscii",
@@ -206,7 +213,6 @@ private:
       "SaveYDA",
       "SaveZODS"};
 };
-
 } // namespace MantidQt
 
 #endif // PROJECT_RECOVERY_H_

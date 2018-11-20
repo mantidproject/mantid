@@ -46,8 +46,6 @@ class AddScansForUBDialog(QDialog):
 
         self.ui.pushButton_quit.clicked.connect(self.do_quit)
 
-        return
-
     def do_add_scans(self):
         """
         add all the scans list in the 'plainTextEdit_scanList'
@@ -57,8 +55,6 @@ class AddScansForUBDialog(QDialog):
         scan_list = guiutility.parse_integer_list(scans_str)
         self._myParent.add_scans_ub_table(scan_list)
 
-        return
-
     def do_add_single_scan(self):
         """
         add single scan to refine UB matrix
@@ -66,8 +62,6 @@ class AddScansForUBDialog(QDialog):
         """
         scan_number = int(self.ui.lineEdit_scanNumber.text())
         self._myParent.add_scans_ub_table([scan_number])
-
-        return
 
     def do_find_peak(self):
         """
@@ -102,8 +96,6 @@ class AddScansForUBDialog(QDialog):
             self.ui.lineEdit_sampleQz.setText('%.5E' % vec_q[2])
         # END-IF
 
-        return
-
     def do_load_scans(self):
         """
         load an ASCII file containing scan numbers,
@@ -120,16 +112,12 @@ class AddScansForUBDialog(QDialog):
 
         self.ui.plainTextEdit_scanList.setPlainText(scans_str)
 
-        return
-
     def do_quit(self):
         """
         quit
         :return:
         """
         self.close()
-
-        return
 
 
 class SelectUBMatrixScansDialog(QDialog):
@@ -154,16 +142,12 @@ class SelectUBMatrixScansDialog(QDialog):
         self.ui.pushButton_exportSelectedScans.clicked.connect(self.do_export_selected_scans)
         self.ui.pushButton_quit.clicked.connect(self.do_quit)
 
-        return
-
     def do_quit(self):
         """
 
         :return:
         """
         self.close()
-
-        return
 
     def do_export_selected_scans(self):
         """
@@ -184,15 +168,17 @@ class SelectUBMatrixScansDialog(QDialog):
 
         # get the output file name
         file_filter = 'Text Files (*.dat);;All Files (*.*)'
-        file_name = str(QFileDialog.getSaveFileName(self, 'File to export selected scans',
-                        self._myParent.working_directory, file_filter))
+        file_name = QFileDialog.getSaveFileName(self, 'File to export selected scans',
+                                                self._myParent.working_directory, file_filter)
+        if not file_name:
+            return
+        if isinstance(file_name, tuple):
+            file_name = file_name[0]
 
         # write file
         out_file = open(file_name, 'w')
         out_file.write(output_str)
         out_file.close()
-
-        return
 
     def do_revert_selection(self):
         """
@@ -200,8 +186,6 @@ class SelectUBMatrixScansDialog(QDialog):
         :return:
         """
         self._myParent.ub_matrix_processing_table.revert_selection()
-
-        return
 
     def do_select_scans(self):
         """
@@ -239,5 +223,3 @@ class SelectUBMatrixScansDialog(QDialog):
             # select with filters
             self._myParent.ub_matrix_processing_table.select_scans(**select_args)
         # END-IF-ELSE
-
-        return

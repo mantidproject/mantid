@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 
 import mantid  # noqa
 from mantid.api import AlgorithmManager
@@ -374,9 +374,9 @@ class SANSSingleReductionTest(unittest.TestCase):
         self._compare_workspace(output_workspace, reference_file_name)
 
 
-class SANSReductionRunnerTest(stresstesting.MantidStressTest):
+class SANSReductionRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

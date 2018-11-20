@@ -21,6 +21,15 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.errorreport_mock = errorreport_patcher.start()
         self.errorreport_mock.return_value = self.errorreport_mock_instance
 
+        zip_recovery_patcher = mock.patch('ErrorReporter.error_report_presenter.zip_recovery_directory')
+        self.addCleanup(zip_recovery_patcher.stop)
+        self.zip_recovery_mock = zip_recovery_patcher.start()
+        self.zip_recovery_mock.return_value = ('zipped_file', 'file_hash')
+
+        file_removal_patcher = mock.patch('ErrorReporter.error_report_presenter.remove_recovery_file')
+        self.addCleanup(file_removal_patcher.stop)
+        self.file_removal_mock = file_removal_patcher.start()
+
         self.view = mock.MagicMock()
         self.exit_code = 255
         self.error_report_presenter = ErrorReporterPresenter(self.view, self.exit_code)

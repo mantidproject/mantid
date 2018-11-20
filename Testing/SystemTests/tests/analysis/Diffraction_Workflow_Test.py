@@ -10,14 +10,14 @@ System test that loads TOPAZ single-crystal data,
 and runs Diffraction Workflow.
 """
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import numpy
 import os
 from mantid.simpleapi import *
 from mantid.api import FileFinder
 
 
-class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
+class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         Files = ["TOPAZ_3132.hkl",
