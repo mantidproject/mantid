@@ -92,14 +92,14 @@ class MuonLoadData:
     # Searching
 
     def _matches(self, **kwargs):
-        # If kwarg given which is not in params default checks to True, as we want to
-        # match to every data item in that case
-        checks = [kwargs.get(key, True) for key in self.params.keys()]
+        checks = [kwargs.get(key, None) for key in self.params.keys()]
+        data_values_zip = zip(*self.params.values())
+
         return [True if
                 sum([data_value == search_value for (data_value, search_value) in zip(list(data_values), checks)]) > 0
                 else False
                 for data_values in
-                zip(*self.params.values())]
+                data_values_zip]
 
     def contains_n(self, **kwargs):
         """Counts the number of matching entries where at least one of kwargs matches"""
