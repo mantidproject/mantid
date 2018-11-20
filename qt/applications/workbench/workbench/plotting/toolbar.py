@@ -85,6 +85,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def toggle_fit(self):
         self.sig_toggle_fit_triggered.emit()
 
+    def trigger_fit_toggle_action(self):
+        self._actions['toggle_fit'].trigger()
+
     def print_figure(self):
         printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
         printer.setOrientation(QtPrintSupport.QPrinter.Landscape)

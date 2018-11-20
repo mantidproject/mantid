@@ -102,6 +102,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.resize(cs.width(), height)
 
         self.fit_browser = FitPropertyBrowser()
+        self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
         self.fit_browser.hide()
@@ -193,10 +194,19 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas.draw_idle()
 
     def fit_toggle(self):
+        """
+        Toggle fit browser and tool on/off
+        """
         if self.fit_browser.isVisible():
             self.fit_browser.hide()
         else:
             self.fit_browser.show()
+
+    def handle_fit_browser_close(self):
+        """
+        Respond to a signal that user closed self.fit_browser by clicking the [x] button.
+        """
+        self.toolbar.trigger_fit_toggle_action()
 
     def hold(self):
         """
