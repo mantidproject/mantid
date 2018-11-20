@@ -21,7 +21,7 @@ from .observabledictionary import DictionaryAction, ObservableDictionary
 
 
 class FigureAction(Enum):
-    Unknown = 0
+    Update = 0
     New = 1
     Closed = 2
     Renamed = 3
@@ -46,10 +46,19 @@ class GlobalFigureManagerObserver(object):
             gcf.notify_observers(FigureAction.Renamed, key)
         elif action == DictionaryAction.Removed:
             gcf.notify_observers(FigureAction.Closed, key)
+        elif action == DictionaryAction.Update:
+            gcf.notify_observers(FigureAction.Update, key)
+        elif action == DictionaryAction.Clear:
+            # On Clear notify the observers to close all of the figures
+            # `figs.keys()` is safe to iterate and delete items at the same time
+            # because `keys` returns a new list, not referencing the original dict
+            for key in gcf.figs.keys():
+                gcf.notify_observers(FigureAction.Closed, key)
         else:
+            raise ValueError("Notifying for action {} is not supported".format(action))
+
             # Not expecting clear or update to be used, so we are
             # being lazy here and just updating the entire plot list
-            gcf.notify_observers(FigureAction.Unknown, key)
 
 
 class GlobalFigureManager(object):
