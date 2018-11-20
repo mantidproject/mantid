@@ -351,6 +351,8 @@ class StitcherWidget(BaseWidget):
                                                                    "Reduced XML files (*.xml);; Reduced Nexus files"
                                                                    " (*.nxs);; All files (*)")).filePath()
         if fname:
+            if isinstance(fname, tuple):
+                fname = fname[0]
             # Store the location of the loaded file
             self._output_dir = str(QtCore.QFileInfo(fname).path())
         return str(fname)
@@ -499,10 +501,14 @@ class StitcherWidget(BaseWidget):
         if self._stitcher is not None:
             if not os.path.isdir(self._output_dir):
                 self._output_dir = os.path.expanduser("~")
-            fname_qstr = QtGui.QFileDialog.getSaveFileName(self, "Save combined I(Q)",
-                                                           self._output_dir,
-                                                           "Data Files (*.xml)")
-            fname = str(QtCore.QFileInfo(fname_qstr).filePath())
+            fname = QtGui.QFileDialog.getSaveFileName(self, "Save combined I(Q)",
+                                                      self._output_dir,
+                                                      "Data Files (*.xml)")
+            if not fname:
+                return
+            if isinstance(fname, tuple):
+                fname = fname[0]
+            fname = str(QtCore.QFileInfo(fname).filePath())
             if len(fname) > 0:
                 if fname.endswith('.xml'):
                     self._stitcher.save_combined(fname, as_canSAS=True)

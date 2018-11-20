@@ -5,12 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 from mantid import *
 from mantid.simpleapi import *
 
 
-class LRPrimaryFractionTest(stresstesting.MantidStressTest):
+class LRPrimaryFractionTest(systemtesting.MantidSystemTest):
     scaling_factor = None
 
     def runTest(self):
@@ -28,7 +28,7 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
         return True
 
 
-class LRPrimaryFractionWithRangeTest(stresstesting.MantidStressTest):
+class LRPrimaryFractionWithRangeTest(systemtesting.MantidSystemTest):
     scaling_factor = None
 
     def runTest(self):
@@ -47,7 +47,7 @@ class LRPrimaryFractionWithRangeTest(stresstesting.MantidStressTest):
         return True
 
 
-class ApplyToReducedDataTest(stresstesting.MantidStressTest):
+class ApplyToReducedDataTest(systemtesting.MantidSystemTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")

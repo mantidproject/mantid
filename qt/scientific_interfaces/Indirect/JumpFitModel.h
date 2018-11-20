@@ -32,6 +32,8 @@ public:
 
   bool isMultiFit() const override;
 
+  std::vector<std::string> getSpectrumDependentAttributes() const override;
+
   std::string getFitParameterName(std::size_t dataIndex,
                                   std::size_t spectrum) const;
   std::vector<std::string> getWidths(std::size_t dataIndex) const;

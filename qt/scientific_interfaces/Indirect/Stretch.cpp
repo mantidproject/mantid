@@ -14,7 +14,22 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("Stretch");
+
+bool doesExistInADS(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().doesExist(workspaceName);
 }
+
+WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
+}
+
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -73,6 +88,8 @@ Stretch::Stretch(QWidget *parent)
   // Connect the plot and save push buttons
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
+  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this,
+          SLOT(plotContourClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
@@ -109,9 +126,6 @@ void Stretch::run() {
   auto const sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
   auto const resName =
       m_uiForm.dsResolution->getCurrentDataName().toStdString();
-
-  // Obtain save and plot state
-  m_plotType = m_uiForm.cbPlot->currentText().toStdString();
 
   // Collect input from options section
   auto const background = m_uiForm.cbBackground->currentText().toStdString();
@@ -152,8 +166,6 @@ void Stretch::run() {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
-
-  m_plotType = m_uiForm.cbPlot->currentText().toStdString();
 }
 
 /**
@@ -166,8 +178,22 @@ void Stretch::algorithmComplete(const bool &error) {
   setRunIsRunning(false);
   if (error) {
     setPlotResultEnabled(false);
+    setPlotContourEnabled(false);
     setSaveResultEnabled(false);
+  } else {
+    if (doesExistInADS(m_contourWorkspaceName))
+      populateContourWorkspaceComboBox();
+    else
+      setPlotContourEnabled(false);
   }
+}
+
+void Stretch::populateContourWorkspaceComboBox() {
+  m_uiForm.cbPlotContour->clear();
+  auto const contourGroup = getADSWorkspaceGroup(m_contourWorkspaceName);
+  auto const contourNames = contourGroup->getNames();
+  for (auto const &name : contourNames)
+    m_uiForm.cbPlotContour->addItem(QString::fromStdString(name));
 }
 
 /**
@@ -217,7 +243,7 @@ void Stretch::displayMessageAndRun(std::string const &saveDirectory) {
 
 int Stretch::displaySaveDirectoryMessage() {
   char const *textMessage =
-      "BayesQuasi requires a default save directory and "
+      "BayesStretch requires a default save directory and "
       "one is not currently set."
       " If run, the algorithm will default to saving files "
       "to the current working directory."
@@ -233,35 +259,34 @@ int Stretch::displaySaveDirectoryMessage() {
 void Stretch::plotWorkspaces() {
   setPlotResultIsPlotting(true);
   WorkspaceGroup_sptr fitWorkspace;
-  fitWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      m_fitWorkspaceName);
+  fitWorkspace = getADSWorkspaceGroup(m_fitWorkspaceName);
 
   auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
   auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
   // Check Sigma and Beta workspaces exist
-  if (sigma.right(5).compare("Sigma") == 0) {
-    if (beta.right(4).compare("Beta") == 0) {
+  if (sigma.right(5).compare("Sigma") == 0 &&
+      beta.right(4).compare("Beta") == 0) {
 
-      // Plot Beta workspace
-      QString pyInput = "from mantidplot import plot2D\n";
-      if (m_plotType.compare("All") == 0 || m_plotType.compare("Beta") == 0) {
-        pyInput += "importMatrixWorkspace('";
-        pyInput += beta;
-        pyInput += "').plotGraph2D()\n";
-      }
-      // Plot Sigma workspace
-      if (m_plotType.compare("All") == 0 || m_plotType.compare("Sigma") == 0) {
-        pyInput += "importMatrixWorkspace('";
-        pyInput += sigma;
-        pyInput += "').plotGraph2D()\n";
-      }
-      m_pythonRunner.runPythonCode(pyInput);
-    }
+    std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
+    if (plotType == "All" || plotType == "Beta")
+      plotSpectrum(beta);
+    if (plotType == "All" || plotType == "Sigma")
+      plotSpectrum(sigma);
   } else {
     g_log.error(
         "Beta and Sigma workspace were not found and could not be plotted.");
   }
   setPlotResultIsPlotting(false);
+}
+
+void Stretch::plotContourClicked() {
+  setPlotContourIsPlotting(true);
+
+  auto const workspaceName = m_uiForm.cbPlotContour->currentText();
+  if (checkADSForPlotSaveWorkspace(workspaceName.toStdString(), true))
+    plot2D(workspaceName);
+
+  setPlotContourIsPlotting(false);
 }
 
 /**
@@ -296,8 +321,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
 
   // set the max spectrum
   MatrixWorkspace_const_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          filename.toStdString());
+      getADSMatrixWorkspace(filename.toStdString());
   const int spectra = static_cast<int>(sampleWs->getNumberHistograms());
   m_uiForm.spPreviewSpectrum->setMaximum(spectra - 1);
 }
@@ -374,6 +398,11 @@ void Stretch::setPlotResultEnabled(bool enabled) {
   m_uiForm.cbPlot->setEnabled(enabled);
 }
 
+void Stretch::setPlotContourEnabled(bool enabled) {
+  m_uiForm.pbPlotContour->setEnabled(enabled);
+  m_uiForm.cbPlotContour->setEnabled(enabled);
+}
+
 void Stretch::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
@@ -381,6 +410,7 @@ void Stretch::setSaveResultEnabled(bool enabled) {
 void Stretch::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
   setPlotResultEnabled(enabled);
+  setPlotContourEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
@@ -391,6 +421,11 @@ void Stretch::setRunIsRunning(bool running) {
 
 void Stretch::setPlotResultIsPlotting(bool plotting) {
   m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
+}
+
+void Stretch::setPlotContourIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Contour");
   setButtonsEnabled(!plotting);
 }
 

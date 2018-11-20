@@ -11,14 +11,14 @@ Adapted from scripts provided by Max Skoda.
 import re
 import itertools
 import math
-import stresstesting
+import systemtesting
 from operator import itemgetter
 from mantid.simpleapi import *
 from mantid import ConfigService
 from isis_reflectometry.combineMulti import combineDataMulti, getWorkspace
 
 
-class ISISReflectometryAutoreductionTest(stresstesting.MantidStressTest):
+class ISISReflectometryAutoreductionTest(systemtesting.MantidSystemTest):
     # NOTE: When updating the run range used be sure to update the run_titles table below.
     # You may also find the regenerate functions useful.
     investigation_id = 1710262

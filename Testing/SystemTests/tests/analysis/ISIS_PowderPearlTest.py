@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-import stresstesting
+import systemtesting
 import shutil
 
 import mantid.simpleapi as mantid
@@ -44,7 +44,7 @@ calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
 
 
-class _CreateVanadiumTest(stresstesting.MantidStressTest):
+class _CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     existing_config = config['datasearch.directories']
     focus_mode = None
@@ -106,7 +106,7 @@ class CreateVanadiumModsTest(_CreateVanadiumTest):
         return False
 
 
-class FocusTest(stresstesting.MantidStressTest):
+class FocusTest(systemtesting.MantidSystemTest):
 
     focus_results = None
     existing_config = config['datasearch.directories']
@@ -136,7 +136,7 @@ class FocusTest(stresstesting.MantidStressTest):
             mantid.mtd.clear()
 
 
-class FocusWithAbsorbCorrectionsTest(stresstesting.MantidStressTest):
+class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
 
     focus_results = None
     existing_config = config["datasearch.directories"]
@@ -160,7 +160,7 @@ class FocusWithAbsorbCorrectionsTest(stresstesting.MantidStressTest):
             mantid.mtd.clear()
 
 
-class CreateCalTest(stresstesting.MantidStressTest):
+class CreateCalTest(systemtesting.MantidSystemTest):
 
     calibration_results = None
     existing_config = config["datasearch.directories"]

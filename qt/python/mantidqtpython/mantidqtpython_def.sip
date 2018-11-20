@@ -207,6 +207,7 @@ bool isValid();
 void setUserInput(const QVariant &);
 void setText(const QString&);
 signals:
+void fileEditingFinished();
 void fileFindingFinished();
 void liveButtonPressed(bool);
 };
