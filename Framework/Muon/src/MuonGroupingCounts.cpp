@@ -122,7 +122,7 @@ std::map<std::string, std::string> MuonGroupingCounts::validateInputs() {
 
   if (!std::all_of(
           std::begin(groupName), std::end(groupName),
-          Mantid::MuonAlgorithmHelper::is_alphanumeric_or_underscore)) {
+          Mantid::MuonAlgorithmHelper::isAlphanumericOrUnderscore)) {
     errors["GroupName"] =
         "The group name must contain alphnumeric characters and _ only.";
   }

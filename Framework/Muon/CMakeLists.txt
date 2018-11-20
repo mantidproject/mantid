@@ -10,7 +10,7 @@ set ( SRC_FILES
         src/ConvertFitFunctionForMuonTFAsymmetry.cpp
         src/LoadAndApplyMuonDetectorGrouping.cpp
 	src/EstimateMuonAsymmetryFromCounts.cpp
-        src/MuonAlgorithmHelper.cpp
+	src/MuonAlgorithmHelper.cpp
 	src/MuonAsymmetryHelper.cpp
 	src/MuonGroupDetectors.cpp
 	src/MuonGroupingCounts.cpp

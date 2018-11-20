@@ -139,7 +139,7 @@ DLLExport void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                             const std::string &logName,
                             const std::string &logValue);
 
-DLLExport bool is_alphanumeric_or_underscore(char character);
+DLLExport bool isAlphanumericOrUnderscore(char character);
 
 //
 ///// Saves grouping to the XML file specified

@@ -607,7 +607,7 @@ void addSampleLog(MatrixWorkspace_sptr workspace, const std::string &logName,
   alg->execute();
 }
 
-bool is_alphanumeric_or_underscore(char character) {
+bool isAlphanumericOrUnderscore(char character) {
   return (isalpha(character) || isdigit(character) || (character == '_'));
 }
 
