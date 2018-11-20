@@ -1935,12 +1935,38 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   // Get parameter values from the options tab
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
-
-  params["XAxisMin"] =
-      QString::number(m_uiForm.timeAxisStartAtInput->text().toDouble());
+  auto upper = m_uiForm.timeAxisFinishAtInput->text().toDouble();
   params["XAxisMax"] =
-      QString::number(m_uiForm.timeAxisFinishAtInput->text().toDouble());
+	  QString::number(upper);
 
+  Workspace_sptr ws_ptr =
+	  AnalysisDataService::Instance().retrieve(wsName.toStdString());
+  MatrixWorkspace_sptr matrix_workspace =
+	  boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+  const auto &xData = matrix_workspace->x(0);
+
+  auto lower =
+	  m_uiForm.timeAxisStartAtInput->text().toDouble();
+  if (lower > upper) {
+	  QMessageBox::warning(this, tr("Muon Analysis"),
+		  tr("Time max is less than time min.\n"
+			  "Will change time min."),
+		  QMessageBox::Ok, QMessageBox::Ok);
+	  lower = upper - 1.0; // we know it will always be lower
+						   //update UI
+	  m_uiForm.timeAxisStartAtInput->setText(QString::number(lower));
+  }
+  if (lower > *max_element(xData.begin(), xData.end())) {
+	  QMessageBox::warning(this, tr("Muon Analysis"),
+		  tr("No data in selected range.\n"
+			  "Setting start time to first time value."),
+		  QMessageBox::Ok, QMessageBox::Ok);
+	  lower = *min_element(xData.begin(), xData.end());
+	  m_uiForm.timeAxisStartAtInput->setText(QString::number(lower));
+
+  }
+  params["XAxisMin"] =
+	  QString::number(lower);
   // If autoscale disabled
   if (params["YAxisAuto"] == "False") {
     // Get specified min/max values for Y axis
@@ -1949,10 +1975,6 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
 
     // If any of those is not specified - get min and max by default
     if (min.isEmpty() || max.isEmpty()) {
-      Workspace_sptr ws_ptr =
-          AnalysisDataService::Instance().retrieve(wsName.toStdString());
-      MatrixWorkspace_sptr matrix_workspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
       const auto &yData = matrix_workspace->y(0);
 
       if (min.isEmpty())
