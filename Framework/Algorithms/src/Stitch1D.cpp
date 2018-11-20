@@ -141,10 +141,11 @@ void Stitch1D::init() {
                   "Rebinning Parameters. See Rebin for format. If only a "
                   "single value is provided, start and end are taken from "
                   "input workspaces.");
-  declareProperty(
-      make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
-                                           Direction::Input),
-      "If true, the RHSWorkspace will be scaled, if false the LHSWorkspace will be scaled; scaling means multiplied by the scale factor");
+  declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
+                                                       true, Direction::Input),
+                  "If true, the RHSWorkspace will be scaled, if false the "
+                  "LHSWorkspace will be scaled; scaling means multiplied by "
+                  "the scale factor");
   declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
                                                        false, Direction::Input),
                   "True to use a provided value for the scale factor.");
@@ -404,8 +405,18 @@ MatrixWorkspace_sptr Stitch1D::singleValueWS(const double val) {
 boost::tuple<int, int>
 Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
                               MatrixWorkspace_sptr &workspace) {
-  int a1 = static_cast<int>(workspace->binIndexOf(startOverlap));
-  int a2 = static_cast<int>(workspace->binIndexOf(endOverlap));
+  int a1 = 0;
+  int a2 = 0;
+  try {
+    a1 = static_cast<int>(workspace->binIndexOf(startOverlap));
+  } catch (std::out_of_range) {
+    throw std::runtime_error("StartOverlap is out of x value range.");
+  }
+  try {
+    a2 = static_cast<int>(workspace->binIndexOf(endOverlap));
+  } catch (std::out_of_range) {
+    throw std::runtime_error("EndOverlap is out of x value range.");
+  }
   if (a1 == ++a2) {
     throw std::runtime_error("The Params you have provided for binning yield a "
                              "workspace in which start and end overlap appear "
@@ -525,11 +536,11 @@ void Stitch1D::exec() {
     auto rhsOverlapIntegrated = integration(rhs, startOverlap, endOverlap);
     auto lhsOverlapIntegrated = integration(lhs, startOverlap, endOverlap);
     if (scaleRHS) {
-      auto scaleRHS = lhsOverlapIntegrated / rhsOverlapIntegrated;
-      scaleWorkspace(rhs, scaleRHS, rhsWS);
+      auto scaleFactor = lhsOverlapIntegrated / rhsOverlapIntegrated;
+      scaleWorkspace(rhs, scaleFactor, rhsWS);
     } else {
-      auto scaleLHS = rhsOverlapIntegrated / lhsOverlapIntegrated;
-      scaleWorkspace(lhs, scaleLHS, lhsWS);
+      auto scaleFactor = rhsOverlapIntegrated / lhsOverlapIntegrated;
+      scaleWorkspace(lhs, scaleFactor, lhsWS);
     }
   }
   // Provide log information about the scale factors used in the calculations.

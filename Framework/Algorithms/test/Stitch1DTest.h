@@ -40,7 +40,7 @@ using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
 
-double roundSix(double i) { return floor(i * 1000000. + 0.5) / 1000000.; }
+double roundSix(double i) { return floor(i * 1.e6 + 0.5) / 1.e6; }
 
 namespace {
 MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
@@ -69,9 +69,7 @@ MatrixWorkspace_sptr create1DWorkspace(const HistogramX &xData,
   outWS->initialize(1, xData.size(), yData.size());
   outWS->mutableY(0) = yData;
   outWS->mutableX(0) = xData;
-
   outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-
   return outWS;
 }
 } // namespace
@@ -80,7 +78,12 @@ class Stitch1DTest : public CxxTest::TestSuite {
 private:
   MatrixWorkspace_sptr a;
   MatrixWorkspace_sptr b;
-  std::vector<double> x;
+  const std::vector<double> x = {-1., -.8, -.6, -.4, -.2, 0.,
+                                 .2,  .4,  .6,  .8,  1.};
+  const std::vector<double> ya = {0., 0., 0., 3., 3., 3., 3., 3., 3., 3.};
+  const std::vector<double> yb = {2., 2., 2., 2., 2., 2., 2., 0., 0., 0.};
+  const std::vector<double> e = {4., 4., 4., 4., 4., 4., 4., 4., 4., 4.};
+  const std::vector<double> dx = {4., 4., 4., 4., 4., 4., 4., 4., 4., 4.};
   using ResultType = boost::tuple<MatrixWorkspace_sptr, double>;
 
   MatrixWorkspace_sptr make_arbitrary_point_ws() {
@@ -92,10 +95,10 @@ private:
   }
 
   MatrixWorkspace_sptr make_arbitrary_histogram_ws() {
-    const auto &x = HistogramX(3, LinearGenerator(-1., 0.2));
-    const auto &y = HistogramY(2, LinearGenerator(1., 1.0));
-    const auto &e = HistogramE(2, 1.);
-    const auto &dx = HistogramDx(2, LinearGenerator(-3., 0.1));
+    const auto &x = HistogramX(4, LinearGenerator(-1., 0.2));
+    const auto &y = HistogramY(3, LinearGenerator(1., 1.0));
+    const auto &e = HistogramE(3, 1.);
+    const auto &dx = HistogramDx(3, LinearGenerator(-3., 0.1));
     return createWorkspace(x, y, e, dx);
   }
 
@@ -123,19 +126,15 @@ public:
   static void destroySuite(Stitch1DTest *suite) { delete suite; }
 
   Stitch1DTest() {
-
-    HistogramX x(11, LinearGenerator(-1., 0.2));
-    HistogramY y({0., 0., 0., 3., 3., 3., 3., 3., 3., 3.});
-    HistogramE e(10, 0.);
-    HistogramDx dx(10, 0.);
-
+    const HistogramX binBoundaries(this->x);
+    const HistogramY y(this->ya);
+    const HistogramE e(this->e);
+    const HistogramDx dx(this->dx);
     // Pre-canned workspace to stitch
-    this->a = createWorkspace(x, y, e, dx);
-
-    y = {2., 2., 2., 2., 2., 2., 2., 0., 0., 0.};
+    this->a = createWorkspace(binBoundaries, y, e, dx);
     // Another pre-canned workspace to stitch
-    this->b = createWorkspace(x, y, e, dx);
-    this->x.assign(x.begin(), x.end());
+    const HistogramY y2(this->yb);
+    this->b = createWorkspace(binBoundaries, y2, e, dx);
   }
 
   ResultType do_stitch1D(MatrixWorkspace_sptr &lhs, MatrixWorkspace_sptr &rhs) {
@@ -147,6 +146,7 @@ public:
     alg.setProperty("RHSWorkspace", rhs);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
+    TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
@@ -163,6 +163,7 @@ public:
     alg.setProperty("Params", params);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
+    TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
@@ -187,6 +188,7 @@ public:
     alg.setProperty("ManualScaleFactor", manualScaleFactor);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
+    TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
@@ -208,6 +210,7 @@ public:
     alg.setProperty("ScaleRHSWorkspace", scaleRHS);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
+    TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
@@ -231,6 +234,7 @@ public:
     alg.setProperty("Params", params);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
     alg.execute();
+    TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr stitched = alg.getProperty("OutputWorkspace");
     double scaleFactor = alg.getProperty("OutScaleFactor");
     return ResultType(stitched, scaleFactor);
@@ -245,7 +249,7 @@ public:
   void test_startoverlap_greater_than_end_overlap_throws() {
     std::vector<double> params = {0., 0.2, .5};
     TSM_ASSERT_THROWS(
-        "Should have thrown with StartOverlap < x max",
+        "Invalid value for StartOverlap: Must be smaller than EndOverlap",
         do_stitch1D(this->a, this->b, this->x.back(), this->x.front(), params),
         std::runtime_error &);
   }
@@ -323,15 +327,15 @@ public:
   }
 
   void test_point_data_with_dx() {
-    const auto &x1 = HistogramX(3, LinearGenerator(1., 1.));
-    const auto &y1 = HistogramY(3, LinearGenerator(1., 1.));
-    const auto &e = HistogramE(3, 1.);
-    const auto &dx1 = HistogramDx(3, LinearGenerator(3., -1.));
+    const auto &x1 = HistogramX(4, LinearGenerator(1., 1.));
+    const auto &y1 = HistogramY(4, LinearGenerator(1., 1.));
+    const auto &e = HistogramE(4, 1.);
+    const auto &dx1 = HistogramDx(4, LinearGenerator(3., -1.));
     auto point_ws_1 = createWorkspace(x1, y1, e, dx1);
 
-    const auto &x2 = HistogramX(3, LinearGenerator(1.5, 1.));
-    const auto &y2 = HistogramY(3, LinearGenerator(5., 1.));
-    const auto &dx2 = HistogramDx(3, LinearGenerator(9., 0.));
+    const auto &x2 = HistogramX(4, LinearGenerator(1.5, 1.));
+    const auto &y2 = HistogramY(4, LinearGenerator(5., 1.));
+    const auto &dx2 = HistogramDx(4, LinearGenerator(9., 0.));
     auto point_ws_2 = createWorkspace(x2, y2, e, dx2);
 
     Stitch1D alg;
@@ -344,25 +348,26 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
     double scaleFactor = alg.getProperty("OutScaleFactor");
-    TS_ASSERT_EQUALS(scaleFactor, 1. / 3.);
+    TS_ASSERT_EQUALS(scaleFactor, 5. / 6.);
     MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
-    const std::vector<double> x_values{1., 1.5, 2., 2.5, 3., 3.5};
+    const std::vector<double> x_values{1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5};
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
     const std::vector<double> y_values{
-        1., 5. * scaleFactor, 2., 6. * scaleFactor, 3., 7. * scaleFactor};
+        1., 5. * scaleFactor, 2., 6. * scaleFactor,
+        3., 7. * scaleFactor, 4., 8. * scaleFactor};
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
-    const std::vector<double> dx_values{3., 9., 2., 9., 1., 9.};
+    const std::vector<double> dx_values{3., 9., 2., 9., 1., 9., 0., 9.};
     TS_ASSERT_EQUALS(stitched->dx(0).rawData(), dx_values);
   }
 
   void test_point_data_without_dx() {
-    const auto &x1 = Points(3, LinearGenerator(1., 1.));
-    const auto &y1 = Counts(3, LinearGenerator(1., 1.));
+    const auto &x1 = Points(4, LinearGenerator(1., 1.));
+    const auto &y1 = Counts(4, LinearGenerator(1., 1.));
     Workspace2D_sptr ws1 = boost::make_shared<Workspace2D>();
     Mantid::HistogramData::Histogram histogram1(x1, y1);
     ws1->initialize(1, histogram1);
-    const auto &x2 = Points(3, LinearGenerator(1.5, 1.));
-    const auto &y2 = Counts(3, LinearGenerator(5., 1.));
+    const auto &x2 = Points(4, LinearGenerator(1.5, 1.));
+    const auto &y2 = Counts(4, LinearGenerator(5., 1.));
     Mantid::HistogramData::Histogram histogram2(x2, y2);
     Workspace2D_sptr ws2 = boost::make_shared<Workspace2D>();
     ws2->initialize(1, histogram2);
@@ -376,12 +381,13 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
     double scaleFactor = alg.getProperty("OutScaleFactor");
-    TS_ASSERT_EQUALS(scaleFactor, 1. / 3.);
+    TS_ASSERT_EQUALS(scaleFactor, 5. / 6.);
     MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
-    const std::vector<double> x_values{1., 1.5, 2., 2.5, 3., 3.5};
+    const std::vector<double> x_values{1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5};
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
     const std::vector<double> y_values{
-        1., 5. * scaleFactor, 2., 6. * scaleFactor, 3., 7. * scaleFactor};
+        1., 5. * scaleFactor, 2., 6. * scaleFactor,
+        3., 7. * scaleFactor, 4., 8. * scaleFactor};
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
     TS_ASSERT(!stitched->hasDx(0));
   }
@@ -421,14 +427,14 @@ public:
   void test_histogram_data_input_workspaces_not_modified() {
     auto ws1 = make_arbitrary_histogram_ws();
     auto ws3 = make_arbitrary_histogram_ws();
-    const auto &x = HistogramX(3, LinearGenerator(-1., 0.2));
-    const auto &y = HistogramY(2, LinearGenerator(1., 1.0));
-    const auto &e = HistogramE(2, 1.);
-    const auto &dx = HistogramDx(2, LinearGenerator(3., 0.1));
+    const auto &x = HistogramX(5, LinearGenerator(-0.8, 0.2));
+    const auto &y = HistogramY(4, LinearGenerator(1., 1.0));
+    const auto &e = HistogramE(4, 1.);
+    const auto &dx = HistogramDx(4, LinearGenerator(3., 0.1));
     auto ws2 = createWorkspace(x, y, e, dx);
     auto ws4 = createWorkspace(x, y, e, dx);
     TSM_ASSERT_THROWS_NOTHING("Histogram workspaces should pass",
-                              do_stitch1D(ws2, ws1));
+                              do_stitch1D(ws1, ws2));
     Mantid::Algorithms::CompareWorkspaces compare;
     compare.initialize();
     compare.setRethrows(true);
@@ -574,129 +580,146 @@ public:
 
     double start_overlap_determined = stitched_x[overlap_indexes.front()];
     double end_overlap_determined = stitched_x[overlap_indexes.back()];
-    TS_ASSERT_DELTA(start_overlap_determined, -0.4, 0.000000001);
-    TS_ASSERT_DELTA(end_overlap_determined, 0.2, 0.000000001);
+    TS_ASSERT_DELTA(start_overlap_determined, -0.4, 1.e-9);
+    TS_ASSERT_DELTA(end_overlap_determined, 0.2, 1.e-9);
   }
 
   void test_stitching_scale_right() {
     std::vector<double> params = {0.2};
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params);
-
-    double scale = ret.get<1>();
-    // Check the scale factor
-    TS_ASSERT_DELTA(scale, 2.0 / 3.0, 0.000000001);
-    // Fetch the arrays from the output workspace
-    auto &stitched_x = ret.get<0>()->mutableX(0);
+    const double scale = ret.get<1>();
+    const double scaleExpected = 2. / 3.; // lhs / rhs
+    TSM_ASSERT_DELTA("Scaling factor", scale, scaleExpected, 1.e-9)
+    // Y values
     const auto &stitched_y = ret.get<0>()->y(0);
+    for (size_t i = 0; i < 7; ++i) { // lhs y not scaled before end overlap 0.4
+      TSM_ASSERT_DELTA("Y value " + std::to_string(i), stitched_y[i],
+                       this->b->y(0)[i], 1.e-9)
+    }
+    for (size_t i = 7; i < 10; ++i) { // rhs y scaled after end overlap 0.4
+      TSM_ASSERT_DELTA("Y value " + std::to_string(i), stitched_y[i],
+                       scale * this->a->y(0)[i], 1.e-9)
+    }
+    // E values
+    const double scaleE = 0.8975274679;
     const auto &stitched_e = ret.get<0>()->e(0);
-    // Output Y Values should all be 2.
-    for (auto itr = stitched_y.begin(); itr != stitched_y.end(); ++itr) {
-      TS_ASSERT_DELTA(2., *itr, 0.000001);
+    for (size_t i = 0; i < 4; ++i) { // lhs e not scaled before end overlap 0.4
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i], 4., 1.e-9)
     }
-    // Output Error values should all be zero
-    for (double temp : stitched_e) {
-      TS_ASSERT_EQUALS(temp, 0.);
+    for (size_t i = 7; i < 10; ++i) { // rhs e scaled after end overlap 0.4
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i],
+                       scaleE * 4., 1.e-9)
     }
-    // Check that the output X-Values are correct.
-    // truncate the input and oputput x values to 6 decimal places to
-    // eliminate insignificant error
-    auto xCopy = this->x;
-    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
-                   roundSix);
-    std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
-    TS_ASSERT(xCopy == stitched_x.rawData());
+    // X values
+    auto &stitched_x = ret.get<0>()->mutableX(0);
+    TSM_ASSERT_DELTA("X values unchanged", stitched_x.rawData(), this->x, 1.e-9)
   }
 
   void test_stitching_scale_left() {
     std::vector<double> params = {0.2};
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params, false);
-
-    double scale = ret.get<1>();
-    // Check the scale factor
-    TS_ASSERT_DELTA(scale, 3.0 / 2.0, 0.000000001);
-    // Fetch the arrays from the output workspace
-    auto &stitched_x = ret.get<0>()->mutableX(0);
+    const double scale = ret.get<1>();
+    const double scaleExpected = 3. / 2.; // rhs / lhs
+    TSM_ASSERT_DELTA("Scaling factor", scale, scaleExpected, 1.e-9)
+    // Y values
     const auto &stitched_y = ret.get<0>()->y(0);
+    for (size_t i = 0; i < 7; ++i) { // lhs y scaled before end overlap 0.4
+      TSM_ASSERT_DELTA("Y value " + std::to_string(i), stitched_y[i],
+                       scaleExpected * this->b->y(0)[i], 1.e-9)
+    }
+    for (size_t i = 7; i < 10; ++i) { // rhs y not scaled after end overlap 0.4
+      TSM_ASSERT_DELTA("Y value " + std::to_string(i), stitched_y[i],
+                       this->a->y(0)[i], 1.e-9)
+    }
+    // E values
+    const double scaleE = 1.75;
     const auto &stitched_e = ret.get<0>()->e(0);
-    // Output Y Values should all be 3.
-    for (auto itr = stitched_y.begin(); itr != stitched_y.end(); ++itr) {
-      TS_ASSERT_DELTA(3., *itr, 0.000001);
+    for (size_t i = 0; i < 4; ++i) { // lhs e scaled before end overlap 0.4
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i],
+                       scaleE * 4., 1.e-9)
     }
-    // Output Error values should all be zero
-    for (double temp : stitched_e) {
-      TS_ASSERT_EQUALS(temp, 0.);
+    // Overlap region
+    for (size_t i = 4; i < 7; ++i) {
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i],
+                       3.4729725686, 1.e-9)
     }
-    // Check that the output X-Values are correct.
-    // truncate the input and oputput x values to 6 decimal places to
-    // eliminate
-    // insignificant error
-    auto xCopy = this->x;
-    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
-                   roundSix);
-    std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
-    TS_ASSERT(xCopy == stitched_x.rawData());
+    for (size_t i = 7; i < 10; ++i) { // rhs e not scaled after end overlap 0.4
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i], 4., 1.e-9)
+    }
+    // X values
+    auto &stitched_x = ret.get<0>()->mutableX(0);
+    TSM_ASSERT_DELTA("X values unchanged", stitched_x.rawData(), this->x, 1.e-9)
   }
 
   void test_stitching_manual_scale_factor_scale_right() {
     std::vector<double> params = {0.2};
-    auto ret =
-        do_stitch1D(this->b, this->a, true, true, -0.4, 0.4, params, 2.0 / 3.0);
-
-    double scale = ret.get<1>();
-    // Check the scale factor
-    TS_ASSERT_DELTA(scale, 2.0 / 3.0, 0.000000001);
-    // Fetch the arrays from the output workspace
-    auto &stitched_x = ret.get<0>()->mutableX(0);
+    const double givenScale = 2. / 3.;
+    auto ret = do_stitch1D(this->b, this->a, true, true, -0.4, 0.4, params,
+                           givenScale);
+    const double scale = ret.get<1>();
+    TSM_ASSERT_DELTA("Scale factor", scale, givenScale, 1.e-9);
+    // Y values
     const auto &stitched_y = ret.get<0>()->y(0);
+    for (size_t i = 0; i < 7; ++i) { // lhs y not scaled before end overlap 0.4
+      TSM_ASSERT_DELTA("Y value " + std::to_string(i), stitched_y[i],
+                       this->b->y(0)[i], 1.e-9)
+    }
+    for (size_t i = 7; i < 10; ++i) { // rhs y scaled after end overlap 0.4
+      TSM_ASSERT_DELTA("Y value " + std::to_string(i), stitched_y[i],
+                       scale * this->a->y(0)[i], 1.e-9)
+    }
+    // E values
     const auto &stitched_e = ret.get<0>()->e(0);
-    // Output Y Values should all be 2.
-    for (auto itr = stitched_y.begin(); itr != stitched_y.end(); ++itr) {
-      TS_ASSERT_DELTA(2., *itr, 0.000001);
+    for (size_t i = 0; i < 4; ++i) { // lhs e not scaled before end overlap 0.4
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i], 4., 1.e-9)
     }
-    // Output Error values should all be zero
-    for (double temp : stitched_e) {
-      TS_ASSERT_EQUALS(temp, 0.);
+    // Overlap region
+    for (size_t i = 4; i < 7; ++i) {
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i],
+                       2.2188007849, 1.e-9)
     }
-    // Check that the output X-Values are correct.
-    // truncate the input and oputput x values to 6 decimal places to
-    // eliminate
-    // insignificant error
-    auto xCopy = this->x;
-    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
-                   roundSix);
-    std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
-    TS_ASSERT(xCopy == stitched_x.rawData());
+    for (size_t i = 7; i < 10; ++i) { // rhs e scaled after end overlap 0.4
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i],
+                       givenScale * 4., 1.e-9)
+    }
+    // X values
+    auto &stitched_x = ret.get<0>()->mutableX(0);
+    TSM_ASSERT_DELTA("X values unchanged", stitched_x.rawData(), this->x, 1.e-9)
   }
 
   void test_stitching_manual_scale_factor_scale_left() {
     std::vector<double> params = {0.2};
+    const double givenScale = 3. / 2.;
     auto ret = do_stitch1D(this->b, this->a, false, true, -0.4, 0.4, params,
-                           3.0 / 2.0);
-
+                           givenScale);
     double scale = ret.get<1>();
-    // Check the scale factor
-    TS_ASSERT_DELTA(scale, 3.0 / 2.0, 0.000000001);
-    // Fetch the arrays from the output workspace
-    auto &stitched_x = ret.get<0>()->mutableX(0);
+    TSM_ASSERT_DELTA("Scale factor", scale, givenScale, 1.e-9);
+    // Y values
     const auto &stitched_y = ret.get<0>()->y(0);
+    for (size_t i = 0; i < 7; ++i) { // lhs y scaled before end overlap 0.4
+      TSM_ASSERT_DELTA("Y value " + std::to_string(i), stitched_y[i],
+                       scale * this->b->y(0)[i], 1.e-9)
+    }
+    for (size_t i = 7; i < 10; ++i) { // rhs y not scaled after end overlap 0.4
+      TSM_ASSERT_DELTA("Y value " + std::to_string(i), stitched_y[i],
+                       this->a->y(0)[i], 1.e-9)
+    }
+    // E values
     const auto &stitched_e = ret.get<0>()->e(0);
-    // Output Y Values should all be 3.
-    for (auto itr = stitched_y.begin(); itr != stitched_y.end(); ++itr) {
-      TS_ASSERT_DELTA(3., *itr, 0.000001);
+    for (size_t i = 0; i < 4; ++i) { // lhs e scaled before end overlap 0.4
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i],
+                       givenScale * 4., 1.e-9)
     }
-    // Output Error values should all be zero
-    for (double temp : stitched_e) {
-      TS_ASSERT_EQUALS(temp, 0);
+    for (size_t i = 4; i < 7; ++i) {
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i],
+                       3.3282011771, 1.e-9)
     }
-    // Check that the output X-Values are correct.
-    // truncate the input and oputput x values to 6 decimal places to
-    // eliminate
-    // insignificant error
-    auto xCopy = this->x;
-    std::transform(stitched_x.begin(), stitched_x.end(), stitched_x.begin(),
-                   roundSix);
-    std::transform(xCopy.begin(), xCopy.end(), xCopy.begin(), roundSix);
-    TS_ASSERT(xCopy == stitched_x.rawData());
+    for (size_t i = 7; i < 10; ++i) { // rhs e not scaled after end overlap 0.4
+      TSM_ASSERT_DELTA("E value " + std::to_string(i), stitched_e[i], 4., 1.e-9)
+    }
+    // X values
+    auto &stitched_x = ret.get<0>()->mutableX(0);
+    TSM_ASSERT_DELTA("X values unchanged", stitched_x.rawData(), this->x, 1.e-9)
   }
 
   void test_params_causing_scaling_regression_test() {
@@ -774,9 +797,11 @@ public:
     y[5] = nan;
     MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e, dx);
 
-    // Remove NAN
-    y[5] = y[4];
-    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e, dx);
+    HistogramX x2(13, LinearGenerator(2., 1.));
+    HistogramY y2(12, 1.);
+    HistogramE e2(12, 1.);
+    HistogramDx dx2(12, 0.);
+    MatrixWorkspace_sptr rhsWS = createWorkspace(x2, y2, e2, dx2);
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 
@@ -796,9 +821,11 @@ public:
     y[5] = inf;
     MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e, dx);
 
-    // Remove infinity
-    y[5] = y[4];
-    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e, dx);
+    HistogramX x2(13, LinearGenerator(2., 1.));
+    HistogramY y2(12, 1.);
+    HistogramE e2(12, 1.);
+    HistogramDx dx2(12, 0.);
+    MatrixWorkspace_sptr rhsWS = createWorkspace(x2, y2, e2, dx2);
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 
@@ -818,9 +845,11 @@ public:
     y[0] = nan;
     MatrixWorkspace_sptr lhsWS = createWorkspace(x, y, e, dx);
 
-    // Remove infinity
-    y[0] = y[1];
-    MatrixWorkspace_sptr rhsWS = createWorkspace(x, y, e, dx);
+    HistogramX x2(13, LinearGenerator(2., 1.));
+    HistogramY y2(12, 1.);
+    HistogramE e2(12, 1.);
+    HistogramDx dx2(12, 0.);
+    MatrixWorkspace_sptr rhsWS = createWorkspace(x2, y2, e2, dx2);
 
     auto ret = do_stitch1D(lhsWS, rhsWS);
 
