@@ -279,7 +279,15 @@ public:
     Instrument_const_sptr nimrodInst = IDS.getObjects()[0];
     TS_ASSERT_EQUALS(nimrodInst->getName(), "NIM");
     TS_ASSERT_EQUALS(nimrodInst->getNumberDetectors(), 1521);
-    TS_ASSERT_EQUALS((nimrodInst->getDetector(20201001))->getID(), 20201001);
+    int a_random_id = 20201001;
+    TS_ASSERT_EQUALS((nimrodInst->getDetector(a_random_id))->getID(),
+                     a_random_id);
+    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().X(),
+                    -0.0909, 0.0001);
+    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Y(),
+                    0.3983, 0.0001);
+    TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Z(),
+                    4.8888, 0.0001);
   }
 
   void testExecMARIFromInstrName() {
