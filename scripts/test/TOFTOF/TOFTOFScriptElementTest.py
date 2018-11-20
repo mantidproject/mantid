@@ -180,7 +180,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         self.scriptElement.createDiff    = True
         self.scriptElement.keepSteps     = True
 
-        testhelpers.assertRaisesNothing(self, self.execScript, 'from mantid.simpleapi import *\n' + self.scriptElement.to_script())
+        testhelpers.assertRaisesNothing(self, self.execScript, self.scriptElement.to_script())
 
     def test_that_script_has_correct_syntax(self):
         self.scriptElement.binEon = False
