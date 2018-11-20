@@ -22,12 +22,21 @@
    <value val="None"/>
 </parameter>
 
-<!-- Preferred extension of the data files obtained from DAE, e.g. what to prefer if two 
-     files with the same name and different extension are found
- -->
 <parameter name="data_file_ext" type="string">
    <value val=".nxs"/>
+   <description is="Prefered extension of the data files obtained from DAE, e.g. what to prefer if two
+     files with the same name and different extensions are found"
+/>
 </parameter>
+
+<parameter name="fix_file_extension" type="bool">
+  <value val="False"/>
+  <description is="Usually one may want to pick up .raw file if, say .nxs file is not availible,
+    to look at the results of an inelastic experiment. If raw file is written in histogram mode
+    and nxs file stores events, the results will be different and there are situations (e.g. when reducing oncoming experiment data),
+    when making such substituation is undesirable. In this case, set this property to True "/>
+</parameter>
+
 <!-- The name of the hard mask file to use together with diag masking 4to1_124mod.msk-->
 <parameter name="hard_mask_file" type="string">
     <value val="None"/>

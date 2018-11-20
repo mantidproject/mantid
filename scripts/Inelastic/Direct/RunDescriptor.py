@@ -306,7 +306,7 @@ class RunList(object):
         return sum_ext
     #
 
-    def find_run_files(self,inst_name,run_list=None):
+    def find_run_files(self,inst_name,run_list=None,fix_file_extension=False):
         """Find run files correspondent to the run list provided
           and set path to these files as new internal parameters
           for the files in list
@@ -325,10 +325,16 @@ class RunList(object):
         found = []
         for run in run_list:
             file_hint,index = self.get_file_guess(inst_name,run)
+            if fix_file_extension:
+                fname,fex_original = os.path.splitext(file_hint)                
             try:
                 file_name = FileFinder.findRuns(file_hint)[0]
                 fpath,fname = os.path.split(file_name)
                 fname,fex = os.path.splitext(fname)
+                if fix_file_extension:
+                    if fex_original.lower()!=fex.lower():
+                        # file with the requested extension is not found
+                        raise RuntimeError('Found file but extension is incorrect')
                 self._fext[index] = fex
                 self._file_path[index] = fpath
                 #self._last_ind2sum = index
@@ -688,7 +694,7 @@ class RunDescriptor(PropDescriptor):
         return (runs2_sum,existing_sum_ws,n_existing_sums)
 #--------------------------------------------------------------------------------------------------------------------
 
-    def find_run_files(self,run_list=None):
+    def find_run_files(self,run_list=None,fix_file_extension=False):
         """Find run files correspondent to the run list provided
           and set path to these files as new internal parameters
           for the files in the list
@@ -696,6 +702,11 @@ class RunDescriptor(PropDescriptor):
           Returns True and empty list or False and
           the list of the runs, which files were not found
           or not belong to the existing run list.
+
+          fix_file_extension -if True find only the files with the extension specified as guess
+                            - if False Mantid file Manager would find a file closes to the
+                              file with the specified extension if the file with
+                              the guess extension does not exist.
         """
 
         if not self._run_list:
@@ -712,7 +723,7 @@ class RunDescriptor(PropDescriptor):
         not_found=[]
         found = []
         inst = RunDescriptor._holder.short_instr_name
-        not_found,found = self._run_list.find_run_files(inst,run_list)
+        not_found,found = self._run_list.find_run_files(inst,run_list,fix_file_extension)
         if len(not_found) == 0:
             Ok = True
         else:
@@ -1037,6 +1048,11 @@ class RunDescriptor(PropDescriptor):
         if not run_num:
             run_num = self.run_number()
 
+        if hasattr(propman,'fix_file_extension'):
+            fix_file_extension = propman.fix_file_extension
+        else:
+            fix_file_extension = False
+
         fac             = propman.facility
         zero_padding    = fac.instrument(inst_name).zeroPadding(run_num)
         run_num_str = str(run_num).zfill(zero_padding)
@@ -1046,9 +1062,12 @@ class RunDescriptor(PropDescriptor):
         def _check_ext(file_name):
             fname,fex = os.path.splitext(file_name)
             if old_ext != fex:
-                message = '*** Cannot find run-file with extension {0}.\n'\
-                          '    Found file {1} instead'.format(old_ext,file_name)
-                RunDescriptor._logger(message,'notice')
+                if fix_file_extension:
+                    raise RuntimeError('Can not find file with the extension requested')
+                else:
+                    message = '*** Cannot find run-file with extension {0}.\n'\
+                              '    Found file {1} instead'.format(old_ext,file_name)
+                    RunDescriptor._logger(message,'notice')
             self._run_file_path = os.path.dirname(fname)
             self._fext = fex
 
@@ -1058,6 +1077,12 @@ class RunDescriptor(PropDescriptor):
             _check_ext(file_name)
             return (True,file_name)
         except RuntimeError:
+            if fix_file_extension:            
+                message = '*** Cannot find file named: {0} on Mantid search paths'.\
+                        format(file_hint)
+                if 'be_quet' not in kwargs:
+                    RunDescriptor._logger(message,'warning')
+                return (False,message)
             try:
 #pylint: disable=unused-variable
                 file_hint,oext = os.path.splitext(file_hint)
@@ -1065,7 +1090,7 @@ class RunDescriptor(PropDescriptor):
                 _check_ext(file_name)
                 return (True,file_name)
             except RuntimeError:
-                message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
+                message = '*** Cannot find file matching hint: {0} on Mantid search paths'.\
                         format(file_hint)
                 if 'be_quet' not in kwargs:
                     RunDescriptor._logger(message,'warning')
