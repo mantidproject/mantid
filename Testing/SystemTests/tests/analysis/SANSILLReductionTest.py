@@ -124,3 +124,84 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
 
         # Integration
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', CalculateResolution='None')
+
+class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
+
+    def __init__(self):
+        super(ILL_D33_VTOF_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D33'
+        config.appendDataSearchSubDir('ILL/D33/')
+
+    def tearDown(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-5
+        return ['iq', 'ILL_SANS_D33_VTOF_IQ.nxs']
+
+    def runTest(self):
+        # Load the mask
+        LoadNexusProcessed(Filename='D33_mask.nxs', OutputWorkspace='mask')
+
+        # Beam
+        SANSILLReduction(Run='093406', ProcessAs='Beam', OutputWorkspace='beam')
+
+        # Container Transmission
+        SANSILLReduction(Run='093407', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='ctr')
+
+        # Container
+        SANSILLReduction(Run='093409', ProcessAs='Container', BeamInputWorkspace='beam', TransmissionInputWorkspace='ctr', OutputWorkspace='can')
+
+        # Sample transmission
+        SANSILLReduction(Run='093408', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='str')
+
+        # Sample
+        SANSILLReduction(Run='093410', ProcessAs='Sample', BeamInputWorkspace='beam', TransmissionInputWorkspace='str',
+                         ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample')
+        # I(Q)
+        SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1', OutputWorkspace='iq')
+
+class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
+
+    def __init__(self):
+        super(ILL_D33_LTOF_Test, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D33'
+        config.appendDataSearchSubDir('ILL/D33/')
+
+    def tearDown(self):
+        mtd.clear()
+
+    def validate(self):
+        self.tolerance = 1e-5
+        return ['iq', 'ILL_SANS_D33_LTOF_IQ.nxs']
+
+    def runTest(self):
+        # Load the mask
+        LoadNexusProcessed(Filename='D33_mask.nxs', OutputWorkspace='mask')
+
+        # Beam
+        SANSILLReduction(Run='093411', ProcessAs='Beam', OutputWorkspace='beam')
+
+        # Container Transmission
+        SANSILLReduction(Run='093412', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='ctr')
+
+        # Container
+        SANSILLReduction(Run='093414', ProcessAs='Container', BeamInputWorkspace='beam', TransmissionInputWorkspace='ctr', OutputWorkspace='can')
+
+        # Sample Transmission
+        SANSILLReduction(Run='093413', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='str')
+
+        # Sample
+        SANSILLReduction(Run='093415', ProcessAs='Sample', BeamInputWorkspace='beam', TransmissionInputWorkspace='str',
+                         ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample')
+
+        # I(Q)
+        SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1', OutputWorkspace='iq')
