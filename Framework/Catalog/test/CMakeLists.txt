@@ -2,11 +2,7 @@ if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} )
 
   include_directories ( ../../TestHelpers/inc )
-  # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
-  # It will go out of scope at the end of this file so doesn't need un-setting
-  # set ( TESTHELPER_SRCS CatalogICatTestHelper.cpp
-  #                       ../../TestHelpers/src/TearDownWorld.cpp
-  #     )
+  set ( TESTHELPER_SRCS ../../TestHelpers/src/ONCatHelper.cpp )
 
   # The actual test suite
   cxxtest_add_test ( CatalogTest ${TEST_FILES} )

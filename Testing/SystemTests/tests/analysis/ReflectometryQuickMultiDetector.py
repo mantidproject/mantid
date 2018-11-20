@@ -5,12 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from isis_reflectometry import quick
 
 
-class ReflectometryQuickMultiDetector(stresstesting.MantidStressTest):
+class ReflectometryQuickMultiDetector(systemtesting.MantidSystemTest):
     """
     This is a system test for the top-level quick routines. Quick is the name given to the
     ISIS reflectometry reduction scripts.

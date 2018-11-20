@@ -13,7 +13,7 @@ from __future__ import (absolute_import, unicode_literals)
 import sys
 import threading
 import time
-import traceback
+from traceback import extract_tb
 
 
 def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
@@ -58,7 +58,6 @@ def blocking_async_task(target, args=(), kwargs=None, blocking_cb=None,
 class AsyncTask(threading.Thread):
 
     def __init__(self, target, args=(), kwargs=None,
-                 stack_chop=0,
                  success_cb=None, error_cb=None,
                  finished_cb=None):
         """
@@ -79,7 +78,6 @@ class AsyncTask(threading.Thread):
         self.target = target
         self.args = args
         self.kwargs = kwargs if kwargs is not None else {}
-        self.stack_chop = stack_chop
 
         self.success_cb = success_cb if success_cb is not None else lambda x: None
         self.error_cb = error_cb if error_cb is not None else lambda x: None
@@ -99,7 +97,7 @@ class AsyncTask(threading.Thread):
             # user cancelled execution - we don't want a stack trace
             self.error_cb(AsyncTaskFailure(elapsed(time_start), KeyboardInterrupt, exc, None))
         except:  # noqa
-            self.error_cb(AsyncTaskFailure.from_excinfo(elapsed(time_start), self.stack_chop))
+            self.error_cb(AsyncTaskFailure.from_excinfo(elapsed(time_start)))
         else:
             self.success_cb(AsyncTaskSuccess(elapsed(time_start), out))
 
@@ -132,7 +130,7 @@ class AsyncTaskFailure(AsyncTaskResult):
     """
 
     @staticmethod
-    def from_excinfo(elapsed_time, chop=0):
+    def from_excinfo(elapsed_time):
         """
         Create an AsyncTaskFailure from the current exception info
 
@@ -143,13 +141,21 @@ class AsyncTaskFailure(AsyncTaskResult):
         """
         exc_type, exc_value, exc_tb = sys.exc_info()
         return AsyncTaskFailure(elapsed_time, exc_type, exc_value,
-                                traceback.extract_tb(exc_tb)[chop:])
+                                exc_tb)
 
     def __init__(self, elapsed_time, exc_type, exc_value, stack):
         super(AsyncTaskFailure, self).__init__(elapsed_time)
         self.exc_type = exc_type
         self.exc_value = exc_value
         self.stack = stack
+
+    def __str__(self):
+        error_name = type(self.exc_value).__name__
+        filename, lineno, _, _ = extract_tb(self.stack)[-1]
+        msg = self.exc_value.args
+        if isinstance(msg, tuple):
+            msg = msg[0]
+        return '{} on line {} of \'{}\': {}'.format(error_name, lineno, filename, msg)
 
     @property
     def success(self):

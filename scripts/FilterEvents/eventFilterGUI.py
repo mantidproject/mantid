@@ -560,11 +560,12 @@ class MainWindow(QMainWindow):
         """
         filename = QFileDialog.getOpenFileName(self, 'Input File Dialog',
                                                self._defaultdir, "Data (*.nxs *.dat);;All files (*)")
+        if isinstance(filename, tuple):
+            filename = filename[0]
 
-        self.ui.lineEdit.setText(str(filename))
+        self.ui.lineEdit.setText(filename)
 
-        info_msg = "Selected file: %s." % str(filename)
-        Logger("Filter_Events").information(info_msg)
+        Logger("Filter_Events").information('Selected file: "{}"'.format(filename))
 
     def load_File(self):
         """ Load the file by file name or run number

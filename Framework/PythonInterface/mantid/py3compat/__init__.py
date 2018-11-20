@@ -8,7 +8,7 @@
 #
 #
 """
-mantidqt.py3compat
+mantid.py3compat
 ------------------
 
 Transitional module providing compatibility functions intended to help
@@ -30,7 +30,7 @@ try:
     from enum import Enum
 except ImportError:
     # use a compatability layer
-    from mantidqt.py3compat.enum import Enum  # noqa
+    from mantid.py3compat.enum import Enum  # noqa
 
 # -----------------------------------------------------------------------------
 # Globals and constants
