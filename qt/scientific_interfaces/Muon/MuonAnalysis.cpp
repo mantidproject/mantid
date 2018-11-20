@@ -40,7 +40,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
-
+#include <math.h>
 #include <boost/lexical_cast.hpp>
 
 #include <algorithm>
@@ -1936,8 +1936,6 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   // Get parameter values from the options tab
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
   auto upper = m_uiForm.timeAxisFinishAtInput->text().toDouble();
-  params["XAxisMax"] =
-	  QString::number(upper);
 
   Workspace_sptr ws_ptr =
 	  AnalysisDataService::Instance().retrieve(wsName.toStdString());
@@ -1947,6 +1945,17 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
 
   auto lower =
 	  m_uiForm.timeAxisStartAtInput->text().toDouble();
+  if (upper < *min_element(xData.begin(), xData.end())) {
+	  QMessageBox::warning(this, tr("Muon Analysis"),
+		  tr("No data in selected range.\n"
+			  "Setting end time to last time value."),
+		  QMessageBox::Ok, QMessageBox::Ok);
+	  upper = *max_element(xData.begin(), xData.end());
+	  m_uiForm.timeAxisFinishAtInput->setText(QString::number(upper));
+
+  }
+  params["XAxisMax"] =
+	  QString::number(upper);
   if (lower > upper) {
 	  QMessageBox::warning(this, tr("Muon Analysis"),
 		  tr("Time max is less than time min.\n"
@@ -1967,6 +1976,7 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   }
   params["XAxisMin"] =
 	  QString::number(lower);
+
   // If autoscale disabled
   if (params["YAxisAuto"] == "False") {
     // Get specified min/max values for Y axis
