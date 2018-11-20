@@ -10,6 +10,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
@@ -671,6 +672,17 @@ NexusGeometryParser::createInstrument(const std::string &fileName) {
   const H5File file(fileName, H5F_ACC_RDONLY);
   auto rootGroup = file.openGroup("/");
   return extractInstrument(file, rootGroup);
+}
+
+// Create a unique instrument name from Nexus file
+std::string NexusGeometryParser::getMangledName(const std::string &fileName,
+    const std::string &instName) {
+  std::string mangledName = instName;
+  if (!fileName.empty()) {
+    std::string checksum = Mantid::Kernel::ChecksumHelper::sha1FromFile(fileName, false);
+    mangledName += checksum;
+  }
+  return mangledName;
 }
 } // namespace NexusGeometry
 } // namespace Mantid

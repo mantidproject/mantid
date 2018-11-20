@@ -11,6 +11,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/LoadGeometry.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -100,6 +101,7 @@ void LoadInstrument::exec() {
   boost::shared_ptr<API::MatrixWorkspace> ws = getProperty("Workspace");
   std::string filename = getPropertyValue("Filename");
   std::string instname = getPropertyValue("InstrumentName");
+  std::pair <std::string,std::string> loader_type;
 
   // If instrumentXML is not default (i.e. it has been defined), then use that
   // Note: this is part of the IDF loader
@@ -114,8 +116,9 @@ void LoadInstrument::exec() {
     // name
     if (filename.empty())
       filename = instname;
-    // Call IDF loader
-    idfInstrumentLoader(ws, filename, instname, InstrumentXML->value());
+
+    loader_type.first = "idf";
+    loader_type.second = "xml";
 
   } else {
     // This part of the loader searches through the instrument directories for
@@ -145,66 +148,73 @@ void LoadInstrument::exec() {
           "Unable to find an Instrument File for instrument: ", instname);
     }
 
+    // Remove the path from the filename for use with the InstrumentDataService
+    const std::string::size_type stripPath = filename.find_last_of("\\/");
+    std::string instrumentFile =
+        filename.substr(stripPath + 1, filename.size());
+    // Strip off "_Definition.xml"
+    instname = instrumentFile.substr(0, instrumentFile.find("_Def"));
+
     // Now that we have a file name, decide whether to use Nexus or IDF loading
     if (LoadGeometry::isIDF(filename)) {
-      // Remove the path from the filename for use with the
-      // InstrumentDataService
-      const std::string::size_type stripPath = filename.find_last_of("\\/");
-      std::string instrumentFile =
-          filename.substr(stripPath + 1, filename.size());
-      // Strip off "_Definition.xml"
-      instname = instrumentFile.substr(0, instrumentFile.find("_Def"));
       // Call theIDF loader  with the the XML text loaded from the IDF file
-      idfInstrumentLoader(ws, filename, instname, Strings::loadFile(filename));
+      loader_type.first = "idf";
+      loader_type.second = "idffile";
     } else if (LoadGeometry::isNexus(filename)) {
-      nexusInstrumentLoader(ws, filename);
+      // nexusInstrumentLoader(ws, filename, instname);
+      loader_type.first = "nxs";
+      loader_type.second = "nxsfile";
     } else {
       throw Kernel::Exception::FileError(
           "No valid loader found for instrument file ", filename);
     }
   }
 
-  // Set the monitors output property
-  setProperty("MonitorList", (ws->getInstrument())->getMonitors());
+  InstrumentDefinitionParser parser;
+  std::string instrumentNameMangled;
+  Instrument_sptr instrument;
 
-  // Rebuild the spectra map for this workspace so that it matches the
-  // instrument, if required
-  const OptionalBool RewriteSpectraMap = getProperty("RewriteSpectraMap");
-  if (RewriteSpectraMap == OptionalBool::True)
-    ws->rebuildSpectraMapping();
-}
-
-/// Load instrument from IDF XML file
-void LoadInstrument::idfInstrumentLoader(
-    const boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename,
-    std::string instname, const std::string &xmlString) {
-
-  auto parser = InstrumentDefinitionParser(filename, instname, xmlString);
+  // Define a parser if using IDFs
+  if (loader_type.second == "xml")
+    parser = InstrumentDefinitionParser(filename, instname, InstrumentXML->value());
+  else if (loader_type.second == "idffile")
+    parser = InstrumentDefinitionParser(filename, instname, Strings::loadFile(filename));
 
   // Find the mangled instrument name that includes the modified date
-  std::string instrumentNameMangled = parser.getMangledName();
+  if (loader_type.first == "idf")
+    instrumentNameMangled = parser.getMangledName();
+  else if (loader_type.first == "nxs")
+    instrumentNameMangled =
+      NexusGeometry::NexusGeometryParser::getMangledName(filename, instname);
+  else
+    throw std::runtime_error("Unknown instrument loader type");
 
-  Instrument_sptr instrument;
-  // Check whether the instrument is already in the InstrumentDataService
   {
     // Make InstrumentService access thread-safe
     std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
+    // Check whether the instrument is already in the InstrumentDataService
     if (InstrumentDataService::Instance().doesExist(instrumentNameMangled)) {
       // If it does, just use the one from the one stored there
       instrument =
           InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
-      // Really create the instrument
-      Progress prog(this, 0.0, 1.0, 100);
-      instrument = parser.parseXML(&prog);
-      // Parse the instrument tree (internally create ComponentInfo and
-      // DetectorInfo). This is an optimization that avoids duplicate parsing of
-      // the instrument tree when loading multiple workspaces with the same
-      // instrument. As a consequence less time is spent and less memory is
-      // used. Note that this is only possible since the tree in `instrument`
-      // will not be modified once we add it to the IDS.
-      instrument->parseTreeAndCacheBeamline();
+
+      if (loader_type.first == "idf") {
+        // Really create the instrument
+        Progress prog(this, 0.0, 1.0, 100);
+        instrument = parser.parseXML(&prog);
+        // Parse the instrument tree (internally create ComponentInfo and
+        // DetectorInfo). This is an optimization that avoids duplicate parsing of
+        // the instrument tree when loading multiple workspaces with the same
+        // instrument. As a consequence less time is spent and less memory is
+        // used. Note that this is only possible since the tree in `instrument`
+        // will not be modified once we add it to the IDS.
+        instrument->parseTreeAndCacheBeamline();
+      } else {
+        Instrument_const_sptr ins = NexusGeometry::NexusGeometryParser::createInstrument(filename);
+        instrument = boost::const_pointer_cast<Instrument>(ins);
+      }
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
@@ -216,18 +226,18 @@ void LoadInstrument::idfInstrumentLoader(
     // LoadParameterFile modifies the base instrument stored in the IDS so this
     // must also be protected by the lock until LoadParameterFile is fixed.
     // check if default parameter file is also present, unless loading from
-    if (!filename.empty())
+    if (!filename.empty() && (loader_type.first == "idf"))
       runLoadParameterFile(ws, filename);
-  }
-}
+  } // end of mutex scope
 
-/// Load instrument from Nexus file
-void LoadInstrument::nexusInstrumentLoader(
-    const boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename) {
-  Instrument_const_sptr instrument =
-      NexusGeometry::NexusGeometryParser::createInstrument(filename);
-  ws->setInstrument(instrument);
-  ws->populateInstrumentParameters();
+  // Set the monitors output property
+  setProperty("MonitorList", (ws->getInstrument())->getMonitors());
+
+  // Rebuild the spectra map for this workspace so that it matches the
+  // instrument, if required
+  const OptionalBool RewriteSpectraMap = getProperty("RewriteSpectraMap");
+  if (RewriteSpectraMap == OptionalBool::True)
+    ws->rebuildSpectraMapping();
 }
 
 //-----------------------------------------------------------------------------------------------------------------------

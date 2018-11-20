@@ -9,7 +9,6 @@
 
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 #include <mutex>
 
@@ -80,13 +79,6 @@ public:
   const std::string category() const override {
     return "DataHandling\\Instrument";
   }
-  /// Load instrument from IDF XML file
-  void idfInstrumentLoader(const boost::shared_ptr<API::MatrixWorkspace> &ws,
-                           std::string filename, std::string instname,
-                           const std::string &xmlString);
-  /// Load instrument from Nexus file
-  void nexusInstrumentLoader(const boost::shared_ptr<API::MatrixWorkspace> &ws,
-                             std::string filename);
 
 private:
   void init() override;

@@ -243,9 +243,6 @@ public:
     loaderNIMROD.execute();
     TS_ASSERT(loaderNIMROD.isExecuted());
 
-    // Get back the saved workspace
-    // MatrixWorkspace_sptr output = loaderNIMROD.getProperty("Workspace");
-
     const auto &detectorInfo = ws2D->detectorInfo();
     const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(20201001));
     TS_ASSERT_EQUALS(ptrDet.getName(), "det 1");
@@ -253,6 +250,36 @@ public:
     TS_ASSERT_DELTA(ptrDet.getPos().X(), -0.0909, 0.0001);
     TS_ASSERT_DELTA(ptrDet.getPos().Y(), 0.3983, 0.0001);
     TS_ASSERT_DELTA(ptrDet.getPos().Z(), 4.8888, 0.0001);
+  }
+
+  void testExecNIMRODandRetrieveFromIDS() {
+    // Make sure the IDS is empty
+    InstrumentDataServiceImpl &IDS = InstrumentDataService::Instance();
+    IDS.clear();
+
+    LoadInstrument loaderNIMROD;
+    loaderNIMROD.initialize();
+    loaderNIMROD.setChild(true);
+
+    // create a workspace with some sample data
+    MatrixWorkspace_sptr ws2D =
+        DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
+
+    const std::string instrFilename = "NIM_Definition.xml";
+    loaderNIMROD.setPropertyValue("Filename", instrFilename);
+    loaderNIMROD.setProperty("RewriteSpectraMap", OptionalBool(true));
+    loaderNIMROD.setProperty("Workspace", ws2D);
+    loaderNIMROD.execute();
+    TS_ASSERT(loaderNIMROD.isExecuted());
+
+    TS_ASSERT_EQUALS(IDS.size(), 1);
+    if (IDS.size() != 1)
+      return;
+    // Retrieve the instrument from the InstrumentDataService
+    Instrument_const_sptr nimrodInst = IDS.getObjects()[0];
+    TS_ASSERT_EQUALS(nimrodInst->getName(), "NIM");
+    TS_ASSERT_EQUALS(nimrodInst->getNumberDetectors(),1521);
+    TS_ASSERT_EQUALS((nimrodInst->getDetector(20201001))->getID(),20201001);
   }
 
   void testExecMARIFromInstrName() {
@@ -298,53 +325,6 @@ public:
     TS_ASSERT_DELTA(ptrDet2.getPos().Y(), 0.6330, 0.0001);
     TS_ASSERT_DELTA(ptrDet2.getPos().Z(), 3.9211, 0.0001);
   }
-
-  // // Test loading from XML
-  // void testExecFromXML() {
-  //   LoadInstrument loaderXML;
-  //   loaderXML.initialize();
-  //   loaderXML.setChild(true);
-  //
-  //   // create a workspace with some sample data
-  //   MatrixWorkspace_sptr ws2D =
-  //       DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
-  //
-  //
-  //   const std::string instrumentXML =
-  //   Kernel::Strings::loadFile(Kernel::ConfigService::Instance().getFullPath("REFL_Definition.xml"));
-  //   loaderMARI.setPropertyValue("InstrumentName", instrName);
-  //   loaderMARI.setProperty("RewriteSpectraMap", OptionalBool(true));
-  //   loaderMARI.setProperty("Workspace", ws2D);
-  //
-  //   loaderMARI.execute();
-  //   TS_ASSERT(loaderMARI.isExecuted());
-  //
-  //   std::string result = loaderMARI.getPropertyValue("Filename");
-  //   const std::string::size_type stripPath = result.find_last_of("\\/");
-  //   result = result.substr(stripPath + 1, result.size());
-  //   TS_ASSERT_EQUALS(result, "MARI_Definition.xml");
-  //
-  //   auto &componentInfo = ws2D->componentInfo();
-  //   auto &detectorInfo = ws2D->detectorInfo();
-  //   TS_ASSERT_EQUALS(componentInfo.name(componentInfo.root()), "MARI");
-  //   TS_ASSERT_EQUALS(detectorInfo.size(), 921);
-  //   TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[0]);
-  //   TS_ASSERT_EQUALS(4816, detectorInfo.detectorIDs()[920]);
-  //
-  //   const auto &ptrDet1 = detectorInfo.detector(detectorInfo.indexOf(1));
-  //   TS_ASSERT_EQUALS(ptrDet1.getName(), "monitor");
-  //   TS_ASSERT_EQUALS(ptrDet1.getID(), 1);
-  //   TS_ASSERT_DELTA(ptrDet1.getPos().X(), 0.0000, 0.0001);
-  //   TS_ASSERT_DELTA(ptrDet1.getPos().Y(), 0.0000, 0.0001);
-  //   TS_ASSERT_DELTA(ptrDet1.getPos().Z(), -4.7390, 0.0001);
-  //
-  //   const auto &ptrDet2 = detectorInfo.detector(detectorInfo.indexOf(4816));
-  //   TS_ASSERT_EQUALS(ptrDet2.getName(), "tall He3 element");
-  //   TS_ASSERT_EQUALS(ptrDet2.getID(), 4816);
-  //   TS_ASSERT_DELTA(ptrDet2.getPos().X(), 0.6330, 0.0001);
-  //   TS_ASSERT_DELTA(ptrDet2.getPos().Y(), 0.6330, 0.0001);
-  //   TS_ASSERT_DELTA(ptrDet2.getPos().Z(), 3.9211, 0.0001);
-  // }
 
   /// Common initialisation for Nexus loading tests
   MatrixWorkspace_sptr doLoadNexus(const std::string filename) {
@@ -427,6 +407,23 @@ public:
     TS_ASSERT_EQUALS(detectorInfo.size(), 8000);
     TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0]);
     TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1]);
+  }
+
+  /// Test the Nexus geometry loader from LOKI file
+  void testExecNexusLOKIandRetrieveFromIDS() {
+    // Make sure the IDS is empty
+    InstrumentDataServiceImpl &IDS = InstrumentDataService::Instance();
+    IDS.clear();
+    MatrixWorkspace_sptr outputWs = doLoadNexus("LOKI_Definition.hdf5");
+    TS_ASSERT_EQUALS(IDS.size(), 1);
+    if (IDS.size() != 1)
+      return;
+    // Retrieve the instrument from the InstrumentDataService
+    Instrument_const_sptr lokiInst = IDS.getObjects()[0];
+    TS_ASSERT_EQUALS(lokiInst->getName(), "LOKI");
+    TS_ASSERT_EQUALS(lokiInst->getNumberDetectors(),8000);
+    TS_ASSERT_EQUALS((lokiInst->getDetector(1001))->getID(),1001);
+    TS_ASSERT_EQUALS((lokiInst->getDetector(7777))->getID(),7777);
   }
 
   void testExecHRP2() {
