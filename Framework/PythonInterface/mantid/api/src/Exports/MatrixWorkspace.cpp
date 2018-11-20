@@ -187,11 +187,10 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
 }
 
 /**
- * @brief maskedBinsIndices This is an anonymous wrapper around the homonym
- * method of MatrixWorkspace. This takes int as argument and returns a vector of
- * ints to python, unlike the C++ size_t, since python does not speak unsigned
+ * This is an anonymous wrapper around the homonym method of MatrixWorkspace.
+ * This takes int as argument since python does not speak unsigned.
  * @param self
- * @param i : workspace index
+ * @param i : workspace index [int]
  * @return bin indices of masked bins at the workspace index given
  */
 std::vector<size_t> maskedBinsIndices(MatrixWorkspace &self, const int i) {
