@@ -13,6 +13,7 @@ valid_float_regex = "^[0-9]+([.][0-9]*)?$"
 valid_name_regex = "^\w+$"
 valid_alpha_regex = "^[0-9]*[.]?[0-9]+$"
 
+
 def _remove_duplicates_from_list(run_list):
     return list(set(run_list))
 

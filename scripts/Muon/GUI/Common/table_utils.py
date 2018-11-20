@@ -10,7 +10,6 @@ import os
 from functools import wraps
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import QVariant
 
 """
 This module contains the methods for
