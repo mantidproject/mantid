@@ -5,37 +5,21 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
-from MultiPlotting.subplot.subPlot_context import subPlotContext
-import mantid.simpleapi as mantid
-import numpy as np
 
-dummy = "dummy"
-subplots = "subplots"
+from MultiPlotting.multiPlotting_context import *
 
-def setUpSubplot():
-    xData=np.linspace(start=0,stop=10,num=200)
-    yData=np.sin(5.2*xData)
-    result = (1-yData )*3.1
-    ws= mantid.CreateWorkspace(DataX=xData, DataY=result,OutputWorkspace="ws")
-    return ws   
+# use axis changer object later
 
-class PlottingContext(object):
-    def __init__(self):
-        self.context = {}
-        self.context[dummy] = "plot test here init"
-        self.ws=setUpSubplot()
-        self.subplots = {}
+class QuickEditModel(object ):
+    def __init__(self,context):
+        self._context = context
 
-    def addSubplot(self, name):
-         self.subplots[name] = subPlotContext(name)
+    def getSubContext(self):
+        subContext = {}
+        subContext["x bounds"] = self._context.get(xBounds)
+        subContext["y bounds"] = self._context.get(yBounds)
+        return subContext
 
-    def addLine(self,subplot, label, lines,workspace):
-        if subplot not in self.subplots.keys():
-           self.addSubplot(subplot)
-        self.subplots[subplot].addLine(label, lines, workspace) 
-
-    def get(self, key):
-        return self.context[key]
-
-    def set(self,key,value):
-       self.context[key] = value
+    def updateContext(self, subContext):
+        self._context.set(xBounds, subContext["x bounds"]) 
+        self._context.set(yBounds, subContext["y bounds"]) 

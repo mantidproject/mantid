@@ -5,13 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-
 class AxisChangerPresenter(object):
     def __init__(self, view):
         self.view = view
-
-    def set_enabled(self,state):
-        self.view.set_enabled(state)
 
     def get_bounds(self):
         return self.view.get_bounds()
@@ -22,20 +18,11 @@ class AxisChangerPresenter(object):
     def clear_bounds(self):
         self.view.clear_bounds()
 
-    def on_upper_bound_changed(self, slot):
-        self.view.on_upper_bound_changed(slot)
+    def on_bound_changed(self, slot):
+        self.view.on_bound_changed(slot)
 
-    def on_lower_bound_changed(self, slot):
-        self.view.on_lower_bound_changed(slot)
-
-    def unreg_on_lower_bound_changed(self, slot):
+    def unreg_on_bound_changed(self, slot):
         try:
-            self.view.unreg_on_lower_bound_changed(slot)
-        except TypeError:
-            return
-
-    def unreg_on_upper_bound_changed(self, slot):
-        try:
-            self.view.unreg_on_upper_bound_changed(slot)
+            self.view.unreg_bound_changed(slot)
         except TypeError:
             return

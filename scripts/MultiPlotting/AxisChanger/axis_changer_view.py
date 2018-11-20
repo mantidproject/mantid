@@ -8,8 +8,7 @@ from qtpy import QtGui, QtCore, QtWidgets
 
 
 class AxisChangerView(QtWidgets.QWidget):
-    sig_lower_bound_changed = QtCore.Signal(object)
-    sig_upper_bound_changed = QtCore.Signal(object)
+    sig_bound_changed = QtCore.Signal(object)
 
     def __init__(self, label):
         super(AxisChangerView, self).__init__()
@@ -18,20 +17,16 @@ class AxisChangerView(QtWidgets.QWidget):
 
         self.lower_bound = QtWidgets.QLineEdit()
         self.lower_bound.setValidator(QtGui.QDoubleValidator())
-        self.lower_bound.returnPressed.connect(self._lower_bound_changed)
+        self.lower_bound.returnPressed.connect(self._bound_changed)
 
         self.upper_bound = QtWidgets.QLineEdit()
         self.upper_bound.setValidator(QtGui.QDoubleValidator())
-        self.upper_bound.returnPressed.connect(self._upper_bound_changed)
+        self.upper_bound.returnPressed.connect(self._bound_changed)
 
         layout.addWidget(self.lower_bound)
         layout.addWidget(QtWidgets.QLabel("to"))
         layout.addWidget(self.upper_bound)
         self.setLayout(layout)
-
-    def set_enabled(self,state):
-        self.lower_bound.setDisabled(state)
-        self.upper_bound.setDisabled(state)
 
     def get_bounds(self):
         bounds = [self.lower_bound, self.upper_bound]
@@ -47,20 +42,13 @@ class AxisChangerView(QtWidgets.QWidget):
         self.lower_bound.clear()
         self.upper_bound.clear()
 
-    def _lower_bound_changed(self):
-        self.sig_lower_bound_changed.emit(self.get_bounds()[0])
+    def _bound_changed(self):
+        self.sig_bound_changed.emit(self.get_bounds())
 
-    def _upper_bound_changed(self):
-        self.sig_upper_bound_changed.emit(self.get_bounds()[1])
+    def on_bound_changed(self, slot):
+        self.sig_bound_changed.connect(slot)
 
-    def on_lower_bound_changed(self, slot):
-        self.sig_lower_bound_changed.connect(slot)
+    def unreg_bound_changed(self, slot):
+        self.sig_bound_changed.disconnect(slot)
 
-    def on_upper_bound_changed(self, slot):
-        self.sig_upper_bound_changed.connect(slot)
-
-    def unreg_on_lower_bound_changed(self, slot):
-        self.sig_lower_bound_changed.disconnect(slot)
-
-    def unreg_on_upper_bound_changed(self, slot):
-        self.sig_upper_bound_changed.disconnect(slot)
+ 

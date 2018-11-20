@@ -5,37 +5,55 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
-from MultiPlotting.subplot.subPlot_context import subPlotContext
-import mantid.simpleapi as mantid
-import numpy as np
+from qtpy import QtWidgets, QtCore
 
-dummy = "dummy"
-subplots = "subplots"
+from MultiPlotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
+from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 
-def setUpSubplot():
-    xData=np.linspace(start=0,stop=10,num=200)
-    yData=np.sin(5.2*xData)
-    result = (1-yData )*3.1
-    ws= mantid.CreateWorkspace(DataX=xData, DataY=result,OutputWorkspace="ws")
-    return ws   
+class QuickEditView(QtWidgets.QWidget):
+    autoscale_signal = QtCore.Signal(object)
 
-class PlottingContext(object):
-    def __init__(self):
-        self.context = {}
-        self.context[dummy] = "plot test here init"
-        self.ws=setUpSubplot()
-        self.subplots = {}
+    def __init__(self, subcontext, parent = None):
+        super(QuickEditView,self).__init__(parent)
 
-    def addSubplot(self, name):
-         self.subplots[name] = subPlotContext(name)
+        button_layout = QtWidgets.QHBoxLayout()
+        self.plot_selector = QtWidgets.QComboBox()
 
-    def addLine(self,subplot, label, lines,workspace):
-        if subplot not in self.subplots.keys():
-           self.addSubplot(subplot)
-        self.subplots[subplot].addLine(label, lines, workspace) 
+        self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
 
-    def get(self, key):
-        return self.context[key]
+        self.autoscale = QtWidgets.QCheckBox("Autoscale y")
+        self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))
 
-    def set(self,key,value):
-       self.context[key] = value
+        self.errors = QtWidgets.QCheckBox("Errors")
+
+        button_layout.addWidget(self.plot_selector)
+        button_layout.addWidget(self.x_axis_changer.view)
+        button_layout.addWidget(self.autoscale)
+        button_layout.addWidget(self.y_axis_changer.view)
+        button_layout.addWidget(self.errors)
+        self.setLayout(button_layout)
+
+    def connect_errors_changed(self,slot):
+        self.errors.stateChanged.connect(slot)
+
+    def connect_autoscale_changed(self,slot):
+        self.autoscale.stateChanged.connect(slot)
+
+    def change_autoscale(self,state):
+        self.y_axis_changer.set_enabled(state)
+
+    def connect_x_range_changed(self,slot):
+        self.x_axis_changer.on_bound_changed(slot)
+
+    def connect_y_range_changed(self,slot):
+        self.y_axis_changer.on_bound_changed(slot)
+
+    def loadFromContext(self,context):
+        self.x_axis_changer.set_bounds(context["x bounds"])
+        self.y_axis_changer.set_bounds(context["y bounds"])
+
+    def getSubContext(self):
+        subcontext = {}
+        subcontext["x bounds"] = self.x_axis_changer.get_bounds()
+        subcontext["y bounds"] = self.y_axis_changer.get_bounds()
+        return subcontext

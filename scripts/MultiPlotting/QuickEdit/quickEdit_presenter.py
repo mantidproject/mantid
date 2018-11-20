@@ -5,37 +5,34 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
-from MultiPlotting.subplot.subPlot_context import subPlotContext
-import mantid.simpleapi as mantid
-import numpy as np
 
-dummy = "dummy"
-subplots = "subplots"
 
-def setUpSubplot():
-    xData=np.linspace(start=0,stop=10,num=200)
-    yData=np.sin(5.2*xData)
-    result = (1-yData )*3.1
-    ws= mantid.CreateWorkspace(DataX=xData, DataY=result,OutputWorkspace="ws")
-    return ws   
+class QuickEditPresenter(object):
+    def __init__(self,view,model):
+        self._view = view
+        self._model = model
+        self._view.connect_autoscale_changed(self.autoscale_changed)
+        self._view.connect_x_range_changed(self.updateContext)
 
-class PlottingContext(object):
-    def __init__(self):
-        self.context = {}
-        self.context[dummy] = "plot test here init"
-        self.ws=setUpSubplot()
-        self.subplots = {}
+    @property
+    def widget(self):
+        return self._view
+    @property
+    def model(self):
+        return self._model
 
-    def addSubplot(self, name):
-         self.subplots[name] = subPlotContext(name)
+    def connect_errors_changed(self,state):
+        self._view.connect_errors_changed(state)
 
-    def addLine(self,subplot, label, lines,workspace):
-        if subplot not in self.subplots.keys():
-           self.addSubplot(subplot)
-        self.subplots[subplot].addLine(label, lines, workspace) 
+    def autoscale_changed(self,state):
+        self._view.change_autoscale(state)
 
-    def get(self, key):
-        return self.context[key]
+    def connect_x_range_changed(self,slot):
+        self._view.connect_x_range_changed(slot)
 
-    def set(self,key,value):
-       self.context[key] = value
+    def connect_y_range_changed(self,slot):
+        self._view.connect_y_range_changed(slot)
+
+    def updateContext(self,range):
+        subContext = self._view.getSubContext()
+        self.model.updateContext(subContext)

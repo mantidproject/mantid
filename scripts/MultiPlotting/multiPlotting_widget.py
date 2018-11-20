@@ -20,13 +20,36 @@ class MultiPlotWidget(QtWidgets.QWidget):
         super(MultiPlotWidget,self).__init__()
         self._context = context
         layout = QtWidgets.QVBoxLayout()
+
+        self.quickEdit = QuickEditWidget(self._context,self)
+        self.quickEdit.connect_x_range_changed(self.x_range_changed)
+        self.quickEdit.connect_y_range_changed(self.y_range_changed)
+        self.quickEdit.connect_errors_changed(self.errors_changed)
         # add some dummy plot
         self.plots = subPlot("test", self._context)
+        self.plots.connect_quick_edit_signal(self.update_quick_edit)
+        # add dummy line
         self.plots.plot("test","first line", self._context.ws)
+
+        # create GUI layout
         layout.addWidget(self.plots)
-        self.quickEdit = QuickEditWidget()
-        layout.addWidget(self.quickEdit)
+        layout.addWidget(self.quickEdit.widget)
         self.setLayout(layout)
+
+    def errors_changed(self,state):
+        print("waaa ", state)
+        # get subplot selected....
+        self.plots.change_errors(state, "test")
+
+    def x_range_changed(self,range):
+        self.plots.set_plot_x_range("test", range)
+
+    def y_range_changed(self,range):
+        self.plots.set_plot_y_range("test", range)
+
+    def update_quick_edit(self):
+        self.quickEdit.loadFromContext()
+
 
 #    def getPresenter(self):
 #        return self._presenter
