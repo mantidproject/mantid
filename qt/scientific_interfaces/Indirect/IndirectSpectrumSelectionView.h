@@ -30,7 +30,7 @@ public:
   IndirectSpectrumSelectionView(QWidget *parent = nullptr);
   virtual ~IndirectSpectrumSelectionView() override;
 
-  virtual SpectrumSelectionMode selectionMode() const;
+  SpectrumSelectionMode selectionMode() const;
 
   virtual std::size_t minimumSpectrum() const;
   virtual std::size_t maximumSpectrum() const;
@@ -43,18 +43,18 @@ public:
 
   virtual void setSpectraRange(int minimum, int maximum);
 
-  virtual void setSpectraRegex(const std::string &regex);
-  virtual void setMaskBinsRegex(const std::string &regex);
+  void setSpectraRegex(const std::string &regex);
+  void setMaskBinsRegex(const std::string &regex);
 
-  virtual UserInputValidator &
+  UserInputValidator &
   validateSpectraString(UserInputValidator &uiv) const;
-  virtual UserInputValidator &
+  UserInputValidator &
   validateMaskBinsString(UserInputValidator &uiv) const;
 
   virtual void showSpectraErrorLabel();
-  virtual void showMaskBinErrorLabel();
+  void showMaskBinErrorLabel();
   virtual void hideSpectraErrorLabel();
-  virtual void hideMaskBinErrorLabel();
+  void hideMaskBinErrorLabel();
 
   virtual void setMaskSelectionEnabled(bool enabled);
   virtual void clear();
@@ -62,18 +62,18 @@ public:
 public slots:
   virtual void setMinimumSpectrum(std::size_t spectrum);
   virtual void setMaximumSpectrum(std::size_t spectrum);
-  virtual void setMaskSpectrum(std::size_t spectrum);
+  void setMaskSpectrum(std::size_t spectrum);
 
   virtual void setSpectraString(const std::string &spectraString);
   virtual void setMaskString(const std::string &maskString);
-  virtual void setMaskSpectraList(const std::vector<std::size_t> &maskSpectra);
+  void setMaskSpectraList(const std::vector<std::size_t> &maskSpectra);
 
-  virtual void hideSpectrumSelector();
-  virtual void showSpectrumSelector();
-  virtual void hideMaskSpectrumSelector();
-  virtual void showMaskSpectrumSelector();
+  void hideSpectrumSelector();
+  void showSpectrumSelector();
+  void hideMaskSpectrumSelector();
+  void showMaskSpectrumSelector();
 
-  virtual void clearMaskString();
+  void clearMaskString();
 
 signals:
   void selectedSpectraChanged(const std::string &);
