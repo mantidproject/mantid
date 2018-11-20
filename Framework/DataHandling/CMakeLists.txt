@@ -511,6 +511,7 @@ set ( TEST_FILES
 	ORNLDataArchiveTest.h
 	PDLoadCharacterizationsTest.h
 	RawFileInfoTest.h
+	ReadMaterialTest.h
 	RemoveLogsTest.h
 	RenameLogTest.h
 	RotateInstrumentComponentTest.h

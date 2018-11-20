@@ -21,7 +21,7 @@ namespace DataHandling {
 class DLLExport ReadMaterial {
 public:
   static std::map<std::string, std::string>
-  validateInputs(const std::string chemicalSymbol, const int z_number,
+  validateInputs(const std::string &chemicalSymbol, const int z_number,
                  const int a_number, const double sampleNumberDensity,
                  const double zParameter, const double unitCellVolume,
                  const double sampleMassDensity);

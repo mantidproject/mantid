@@ -11,12 +11,13 @@
 
 namespace Mantid {
 namespace DataHandling {
+using MaterialProperties = std::map<std::string, std::string>;
 
-std::map<std::string, std::string> ReadMaterial::validateInputs(
-    const std::string chemicalSymbol, const int z_number, const int a_number,
+MaterialProperties ReadMaterial::validateInputs(
+    const std::string &chemicalSymbol, const int z_number, const int a_number,
     const double sampleNumberDensity, const double zParameter,
     const double unitCellVolume, const double sampleMassDensity) {
-  std::map<std::string, std::string> result;
+  MaterialProperties result;
   if (chemicalSymbol.empty()) {
     if (z_number <= 0) {
       result["ChemicalFormula"] = "Need to specify the material";
