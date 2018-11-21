@@ -19,8 +19,9 @@ using namespace Mantid::API;
 
 namespace {
 
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) { 
-	return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
 }
 
 boost::optional<std::size_t>
@@ -172,21 +173,21 @@ boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
   }
 }
 
-MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS, 
-	                                  std::string const &outputName) {
+MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS,
+                                    std::string const &outputName) {
   auto cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
   cloneAlg->initialize();
   cloneAlg->setProperty("InputWorkspace", inputWS);
   cloneAlg->setProperty("OutputWorkspace", outputName);
   cloneAlg->execute();
-	return getADSMatrixWorkspace(outputName);
+  return getADSMatrixWorkspace(outputName);
 }
 
 MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
                                      MatrixWorkspace_sptr rightWS,
                                      int numHistograms,
-	                                   std::string const &outputName) {
+                                     std::string const &outputName) {
   auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendAlg->setLogging(false);
   appendAlg->initialize();
@@ -199,15 +200,15 @@ MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
 }
 
 void renameWorkspace(std::string const &name, std::string const &newName) {
-	auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
-	renamer->setProperty("InputWorkspace", name);
-	renamer->setProperty("OutputWorkspace", newName);
-	renamer->execute();
+  auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
+  renamer->setProperty("InputWorkspace", name);
+  renamer->setProperty("OutputWorkspace", newName);
+  renamer->execute();
 }
 
 void extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
                                std::size_t numberOfHistograms,
-	                             std::string const &outputName) {
+                               std::string const &outputName) {
   const auto resolutionNumHist = resolution->getNumberHistograms();
   if (resolutionNumHist != 1 && resolutionNumHist != numberOfHistograms) {
     std::string msg(
@@ -218,11 +219,11 @@ void extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
   auto resolutionWS = cloneWorkspace(resolution, "__cloned");
 
   // Append to cloned workspace if necessary
-	if (resolutionNumHist == 1 && numberOfHistograms > 1)
-		appendWorkspace(resolutionWS, resolution,
-			static_cast<int>(numberOfHistograms - 1), outputName);
-	else
-		renameWorkspace("__cloned", outputName);
+  if (resolutionNumHist == 1 && numberOfHistograms > 1)
+    appendWorkspace(resolutionWS, resolution,
+                    static_cast<int>(numberOfHistograms - 1), outputName);
+  else
+    renameWorkspace("__cloned", outputName);
 }
 
 void getParameterNameChanges(
@@ -563,7 +564,8 @@ void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
 void ConvFitModel::addExtendedResolution(std::size_t index) {
   const std::string name = "__ConvFitResolution" + std::to_string(index);
 
-	extendResolutionWorkspace(m_resolution[index].lock(), getNumberHistograms(index), name);
+  extendResolutionWorkspace(m_resolution[index].lock(),
+                            getNumberHistograms(index), name);
 
   if (m_extendedResolution.size() > index)
     m_extendedResolution[index] = name;

@@ -136,24 +136,23 @@ std::vector<std::string> getAxisLabels(MatrixWorkspace_sptr workspace,
   return std::vector<std::string>();
 }
 
-void renameWorkspace(std::string const &name, 
-	                   std::string const &newName) {
-	auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
-	renamer->setProperty("InputWorkspace", name);
-	renamer->setProperty("OutputWorkspace", newName);
-	renamer->execute();
+void renameWorkspace(std::string const &name, std::string const &newName) {
+  auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
+  renamer->setProperty("InputWorkspace", name);
+  renamer->setProperty("OutputWorkspace", newName);
+  renamer->execute();
 }
 
 void renameResult(Workspace_sptr resultWorkspace,
                   const std::string &workspaceName) {
-	renameWorkspace(resultWorkspace->getName(), workspaceName + "_Result");
+  renameWorkspace(resultWorkspace->getName(), workspaceName + "_Result");
 }
 
 void renameResult(Workspace_sptr resultWorkspace,
                   IndirectFitData const *fitData) {
   const auto name = resultWorkspace->getName();
   const auto newName = fitData->displayName("%1%_s%2%_Result", "_to_");
-	renameWorkspace(name, newName);
+  renameWorkspace(name, newName);
 }
 
 void renameResultWithoutSpectra(WorkspaceGroup_sptr resultWorkspace,

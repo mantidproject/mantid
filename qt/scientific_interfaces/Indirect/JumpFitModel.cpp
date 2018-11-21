@@ -81,30 +81,28 @@ JumpFitParameters createJumpFitParameters(MatrixWorkspace *workspace) {
 }
 
 void deleteTemporaryWorkspaces(std::vector<std::string> const &workspaceNames) {
-	auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
-	deleter->setLogging(false);
-	for (auto const name : workspaceNames) {
-		deleter->setProperty("Workspace", name);
-		deleter->execute();
-	}
+  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleter->setLogging(false);
+  for (auto const name : workspaceNames) {
+    deleter->setProperty("Workspace", name);
+    deleter->execute();
+  }
 }
 
 std::string scaleWorkspace(std::string const &inputName,
-	                         std::string const &outputName,
-	                         double factor) {
-	auto scaleAlg = AlgorithmManager::Instance().create("Scale");
-	scaleAlg->initialize();
-	scaleAlg->setLogging(false);
-	scaleAlg->setProperty("InputWorkspace", inputName);
-	scaleAlg->setProperty("OutputWorkspace", outputName);
-	scaleAlg->setProperty("Factor", factor);
-	scaleAlg->execute();
-	return outputName;
+                           std::string const &outputName, double factor) {
+  auto scaleAlg = AlgorithmManager::Instance().create("Scale");
+  scaleAlg->initialize();
+  scaleAlg->setLogging(false);
+  scaleAlg->setProperty("InputWorkspace", inputName);
+  scaleAlg->setProperty("OutputWorkspace", outputName);
+  scaleAlg->setProperty("Factor", factor);
+  scaleAlg->execute();
+  return outputName;
 }
 
-std::string extractSpectra(std::string const &inputName,
-                                    int startIndex, int endIndex,
-	                                  std::string const &outputName) {
+std::string extractSpectra(std::string const &inputName, int startIndex,
+                           int endIndex, std::string const &outputName) {
   auto extractAlg = AlgorithmManager::Instance().create("ExtractSpectra");
   extractAlg->initialize();
   extractAlg->setLogging(false);
@@ -113,27 +111,26 @@ std::string extractSpectra(std::string const &inputName,
   extractAlg->setProperty("EndWorkspaceIndex", endIndex);
   extractAlg->setProperty("OutputWorkspace", outputName);
   extractAlg->execute();
-	return outputName;
+  return outputName;
 }
 
-std::string extractSpectrum(MatrixWorkspace_sptr workspace,
-                                     int index, std::string const &outputName) {
+std::string extractSpectrum(MatrixWorkspace_sptr workspace, int index,
+                            std::string const &outputName) {
   return extractSpectra(workspace->getName(), index, index, outputName);
-
 }
 
-std::string extractHWHMSpectrum(MatrixWorkspace_sptr workspace,
-                                int index) {
-	auto const scaledName = "__scaled_" + std::to_string(index);
-	auto const extractedName = "__extracted_" + std::to_string(index);
-	auto const outputName = scaleWorkspace(extractSpectrum(workspace, index, extractedName), scaledName, 0.5);
-	deleteTemporaryWorkspaces({ extractedName });
+std::string extractHWHMSpectrum(MatrixWorkspace_sptr workspace, int index) {
+  auto const scaledName = "__scaled_" + std::to_string(index);
+  auto const extractedName = "__extracted_" + std::to_string(index);
+  auto const outputName = scaleWorkspace(
+      extractSpectrum(workspace, index, extractedName), scaledName, 0.5);
+  deleteTemporaryWorkspaces({extractedName});
   return outputName;
 }
 
 std::string appendWorkspace(std::string const &lhsName,
-	                                   std::string const &rhsName,
-                                     std::string const &outputName) {
+                            std::string const &rhsName,
+                            std::string const &outputName) {
   auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendAlg->initialize();
   appendAlg->setLogging(false);
@@ -144,12 +141,12 @@ std::string appendWorkspace(std::string const &lhsName,
   return outputName;
 }
 
-MatrixWorkspace_sptr
-appendAll(std::vector<std::string> const &workspaces, std::string const &outputName) {
+MatrixWorkspace_sptr appendAll(std::vector<std::string> const &workspaces,
+                               std::string const &outputName) {
   auto appended = workspaces[0];
   for (auto i = 1u; i < workspaces.size(); ++i)
     appended = appendWorkspace(appended, workspaces[i], outputName);
-	return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(appended);
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(appended);
 }
 
 MatrixWorkspace_sptr addToADS(MatrixWorkspace_sptr workspace,
@@ -167,20 +164,23 @@ subdivideWidthWorkspace(MatrixWorkspace_sptr workspace,
   int start = 0;
   for (auto i = 0u; i < widthSpectra.size(); ++i) {
     const auto spectrum = static_cast<int>(widthSpectra[i]);
-		if (spectrum > start) {
-			auto const outputName = "__extracted_" + std::to_string(start) + "_to_" + std::to_string(spectrum);
-			subworkspaces.emplace_back(
-				extractSpectra(workspace->getName(), start, spectrum - 1, outputName));
-		}
+    if (spectrum > start) {
+      auto const outputName = "__extracted_" + std::to_string(start) + "_to_" +
+                              std::to_string(spectrum);
+      subworkspaces.emplace_back(extractSpectra(workspace->getName(), start,
+                                                spectrum - 1, outputName));
+    }
     subworkspaces.emplace_back(extractHWHMSpectrum(workspace, spectrum));
     start = spectrum + 1;
   }
 
   const int end = static_cast<int>(workspace->getNumberHistograms());
-	if (start < end) {
-		auto const outputName = "__extracted_" + std::to_string(start) + "_to_" + std::to_string(end);
-		subworkspaces.emplace_back(extractSpectra(workspace->getName(), start, end - 1, outputName));
-	}
+  if (start < end) {
+    auto const outputName =
+        "__extracted_" + std::to_string(start) + "_to_" + std::to_string(end);
+    subworkspaces.emplace_back(
+        extractSpectra(workspace->getName(), start, end - 1, outputName));
+  }
   return subworkspaces;
 }
 
@@ -198,7 +198,7 @@ createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
   const auto axis = workspace->getAxis(1)->clone(hwhmWorkspace.get());
   hwhmWorkspace->replaceAxis(1, dynamic_cast<TextAxis *>(axis));
 
-	deleteTemporaryWorkspaces(subworkspaces);
+  deleteTemporaryWorkspaces(subworkspaces);
 
   return hwhmWorkspace;
 }
