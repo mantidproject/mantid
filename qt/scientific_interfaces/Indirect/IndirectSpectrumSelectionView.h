@@ -46,10 +46,8 @@ public:
   void setSpectraRegex(const std::string &regex);
   void setMaskBinsRegex(const std::string &regex);
 
-  UserInputValidator &
-  validateSpectraString(UserInputValidator &uiv) const;
-  UserInputValidator &
-  validateMaskBinsString(UserInputValidator &uiv) const;
+  UserInputValidator &validateSpectraString(UserInputValidator &uiv) const;
+  UserInputValidator &validateMaskBinsString(UserInputValidator &uiv) const;
 
   virtual void showSpectraErrorLabel();
   void showMaskBinErrorLabel();

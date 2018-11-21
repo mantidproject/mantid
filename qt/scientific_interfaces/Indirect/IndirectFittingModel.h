@@ -74,31 +74,26 @@ public:
   void setSpectra(const std::string &spectra, std::size_t dataIndex);
   void setSpectra(Spectra &&spectra, std::size_t dataIndex);
   void setSpectra(const Spectra &spectra, std::size_t dataIndex);
-  void setStartX(double startX, std::size_t dataIndex,
-                         std::size_t spectrum);
-  void setEndX(double endX, std::size_t dataIndex,
-                       std::size_t spectrum);
-  void setExcludeRegion(const std::string &exclude,
-                                std::size_t dataIndex, std::size_t spectrum);
+  void setStartX(double startX, std::size_t dataIndex, std::size_t spectrum);
+  void setEndX(double endX, std::size_t dataIndex, std::size_t spectrum);
+  void setExcludeRegion(const std::string &exclude, std::size_t dataIndex,
+                        std::size_t spectrum);
 
   void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
-                            const std::string &spectra);
-  void addWorkspace(const std::string &workspaceName,
-                            const Spectra &spectra);
+                    const std::string &spectra);
+  void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                            const Spectra &spectra); 
-  virtual void removeWorkspace(std::size_t index);   
+                            const Spectra &spectra);
+  virtual void removeWorkspace(std::size_t index);
   PrivateFittingData clearWorkspaces();
   void setFittingMode(FittingMode mode);
-  virtual void
-  setFitFunction(Mantid::API::IFunction_sptr function); 
+  virtual void setFitFunction(Mantid::API::IFunction_sptr function);
   void setDefaultParameterValue(const std::string &name, double value,
                                 std::size_t dataIndex);
   void addSingleFitOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
                           std::size_t index);
-  virtual void
-  addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   template <typename F>
   void applySpectra(std::size_t index, const F &functor) const;
@@ -114,8 +109,7 @@ public:
                                                     std::size_t spectrum) const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const;
-  virtual Mantid::API::IAlgorithm_sptr
-  getFittingAlgorithm() const;
+  virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const;
   Mantid::API::IAlgorithm_sptr getSingleFit(std::size_t dataIndex,
                                             std::size_t spectrum) const;
 
