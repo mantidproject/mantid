@@ -109,10 +109,9 @@ void SetSampleMaterial::init() {
 }
 
 std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
-  std::string formula = getProperty("ChemicalFormula");
-  ReadMaterial::MaterialParameters params = [&]() -> auto {
+  ReadMaterial::MaterialParameters params = [this]() -> auto {
     ReadMaterial::MaterialParameters setMaterial;
-    setMaterial.chemicalSymbol = formula;
+    setMaterial.chemicalSymbol = getPropertyValue("ChemicalFormula");
     setMaterial.atomicNumber = getProperty("AtomicNumber");
     setMaterial.massNumber = getProperty("MassNumber");
     setMaterial.sampleNumberDensity = getProperty("SampleNumberDensity");

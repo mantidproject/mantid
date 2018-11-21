@@ -19,7 +19,7 @@ public:
   static void destroySuite(ReadMaterialTest *suite) { delete suite; }
 
   void testSuccessfullValidateInputsFormula() {
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
       setMaterial.atomicNumber = 0;
@@ -36,7 +36,7 @@ public:
   }
 
   void testSuccessfullValidateInputsAtomicNumber() {
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = EMPTY;
       setMaterial.atomicNumber = 1;
@@ -53,7 +53,7 @@ public:
   }
 
   void testFailureValidateInputsFormulaPlusAtomicNumber() {
-    ReadMaterial::MaterialParameters params = [&](
+    ReadMaterial::MaterialParameters params = [this](
         const auto FORMULA, const auto EMPTY_DOUBLE_VAL) -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
@@ -72,7 +72,7 @@ public:
   }
 
   void testFailureValidateInputsNoMaterial() {
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = EMPTY;
       setMaterial.atomicNumber = 0;
@@ -89,7 +89,7 @@ public:
   }
 
   void testSuccessfullValidateInputsSampleNumber() {
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = EMPTY;
       setMaterial.atomicNumber = 1;
@@ -106,7 +106,7 @@ public:
   }
 
   void testSuccessfullValidateInputsZParam() {
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = EMPTY;
       setMaterial.atomicNumber = 1;
@@ -123,7 +123,7 @@ public:
   }
 
   void testSuccessfullValidateInputsSampleMass() {
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = EMPTY;
       setMaterial.atomicNumber = 1;
@@ -140,7 +140,7 @@ public:
   }
 
   void testFailureValidateInputsSampleNumberAndZParam() {
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = EMPTY;
       setMaterial.atomicNumber = 1;
@@ -158,7 +158,7 @@ public:
   }
 
   void testFailureValidateInputsZParamWithSampleMass() {
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = EMPTY;
       setMaterial.atomicNumber = 1;
@@ -176,7 +176,7 @@ public:
   }
 
   void testFailureValidateInputsZParamWithoutUnitCell() {
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = EMPTY;
       setMaterial.atomicNumber = 1;
@@ -194,7 +194,7 @@ public:
   }
 
   void testFailureValidateInputsSampleNumWithSampleMass() {
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = EMPTY;
       setMaterial.atomicNumber = 1;
