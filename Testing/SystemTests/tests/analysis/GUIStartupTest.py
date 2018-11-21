@@ -13,6 +13,11 @@ import mantid
 
 
 class GUIStartupTest(systemtesting.MantidSystemTest):
+    '''
+    This test is supposed to start MantidPlot, and execute a simple script
+    If the script is run correctly, the "Hello Mantid" will be printed to stdout
+    If the script fails, there will be a fatal error mesage in stderr
+    '''
 
     def __init__(self):
         super(GUIStartupTest, self).__init__()
@@ -43,7 +48,6 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
         # good startup
         p = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()
-
         self.assertEquals(out, b'Hello Mantid\n')
         self.assertFalse(b'Fatal' in err)
 
