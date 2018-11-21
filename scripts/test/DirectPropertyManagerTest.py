@@ -1230,25 +1230,32 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
     def test_fix_file_extension(self):
         propman = self.prop_man
+        # Request  files, one really exists, another one does not
         propman.sample_run = [11001,11111]
+        # put wrong extension (only file with extension .raw exist)
         propman.data_file_ext = '.nxs'
-        propman.fix_file_extension = False        
+        propman.fix_file_extension = False
         propman.sum_runs = True
 
         ok,not_found,found = propman.find_files_to_sum()
+        # verify that if fix_file_extension is False, the system finds
+        # file with extension raw to process further.
         self.assertFalse(ok)
         self.assertEqual(len(not_found),1)
         self.assertEqual(len(found),1)
         self.assertEqual(not_found[0],11111)
         self.assertEqual(found[0],11001)
 
-        # clear previously found file extensions, stored in the run list 
+        # clear previously found file extensions, stored in the run list
         propman.sample_run = []
-        propman.sample_run = [11001,11111]        
+        # Request  files, one really exists, another one does not        
+        propman.sample_run = [11001,11111]
         propman.fix_file_extension = True        
 
 
         ok,not_found,found = propman.find_files_to_sum()
+        # verify that if fix_file_extension is True, the system does not
+        # pick up the file with extension raw.
         self.assertFalse(ok)
         self.assertEqual(len(not_found),2)
         self.assertEqual(len(found),0)
