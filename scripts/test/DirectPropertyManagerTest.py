@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import os
-
+os.environ["PATH"] = r"c:\\mprogs\\MantidRelease\\bin;c:\\mprogs\\MantidRelease\\scripts\\Inelastic;c:\\mprogs\\MantidRelease\\lib\\paraview-5.4\\site-packages;c:\\mprogs\\MantidRelease\\lib\\paraview-5.4\\site-packages\\vtk"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -1237,6 +1237,13 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.fix_file_extension = False
         propman.sum_runs = True
 
+        # find file separately. Rinds raw file instead of nxs
+        srd = PropertyManager.sample_run
+        #
+        [ok,file_foud] = srd.find_file(propman,'MAR',11001)
+        self.assertTrue(ok)        
+        self.assertTrue(os.path.isfile(file_foud))
+
         ok,not_found,found = propman.find_files_to_sum()
         # verify that if fix_file_extension is False, the system finds
         # file with extension raw to process further.
@@ -1251,6 +1258,13 @@ class DirectPropertyManagerTest(unittest.TestCase):
         # Request  files, one really exists, another one does not        
         propman.sample_run = [11001,11111]
         propman.fix_file_extension = True        
+
+        # find file separately -- impossible due to wrong file extension
+        srd = PropertyManager.sample_run
+        #
+        [ok,message] = srd.find_file(propman,'MAR',11001)
+        self.assertFalse(ok)
+        self.assertEqual(message,'*** Cannot find file named: MAR11001.nxs on Mantid search paths')
 
 
         ok,not_found,found = propman.find_files_to_sum()
