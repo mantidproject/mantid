@@ -7,6 +7,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTPRESENTER_H_
 
+#include "DllConfig.h"
+
 #include "IndirectFitPlotModel.h"
 
 #include "IndirectFitPlotView.h"
@@ -16,7 +18,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectFitPlotPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 public:
   IndirectFitPlotPresenter(IndirectFittingModel *model,

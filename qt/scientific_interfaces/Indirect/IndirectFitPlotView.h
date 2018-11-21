@@ -9,6 +9,7 @@
 
 #include "ui_IndirectFitPreviewPlot.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidQtWidgets/Common/MantidWidget.h"
@@ -17,13 +18,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectFitPlotView : public API::MantidWidget {
+class MANTIDQT_INDIRECT_DLL IndirectFitPlotView : public API::MantidWidget {
   Q_OBJECT
 public:
-  IndirectFitPlotView(QWidget *parent);
-  ~IndirectFitPlotView() override;
+  IndirectFitPlotView(QWidget *parent = nullptr);
+  virtual ~IndirectFitPlotView() override;
 
-  std::size_t getSelectedSpectrum() const;
+  virtual std::size_t getSelectedSpectrum() const;
   int getSelectedSpectrumIndex() const;
   int getSelectedDataIndex() const;
   std::size_t dataSelectionSize() const;
