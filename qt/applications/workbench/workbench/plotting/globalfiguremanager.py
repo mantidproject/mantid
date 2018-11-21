@@ -116,16 +116,11 @@ class GlobalFigureManager(object):
         current_fig_manager = cls.figs[num]
         current_fig_manager.canvas.mpl_disconnect(current_fig_manager._cidgcf)
 
-        # There must be a good reason for the following careful
-        # rebuilding of the activeQue; what is it?
-
-        oldQue = cls._activeQue[:]
-        cls._activeQue = []
-        for old_fig_manager in oldQue:
-            if old_fig_manager != current_fig_manager:
-                cls._activeQue.append(old_fig_manager)
-
-        # del cls._activeQue[cls._activeQue.index(current_fig_manager)]
+        try:
+            del cls._activeQue[cls._activeQue.index(current_fig_manager)]
+        except ValueError:
+            # the figure manager was not in the active queue - no need to delete anything
+            pass
 
         del cls.figs[num]
         current_fig_manager.destroy()
@@ -192,12 +187,13 @@ class GlobalFigureManager(object):
         """
         Make the figure corresponding to *manager* the active one.
         """
-        oldQue = cls._activeQue[:]
-        cls._activeQue = []
 
-        for m in oldQue:
-            if m != manager:
-                cls._activeQue.append(m)
+        try:
+            del cls._activeQue[cls._activeQue.index(manager)]
+        except ValueError:
+            # the figure manager was not in the active queue - no need to delete anything
+            pass
+
         cls._activeQue.append(manager)
         cls.figs[manager.num] = manager
         cls.notify_observers(FigureAction.OrderChanged, manager.num)
