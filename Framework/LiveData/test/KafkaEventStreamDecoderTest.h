@@ -66,6 +66,7 @@ public:
     using namespace Mantid::LiveData;
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
+    Mock::VerifyAndClearExpectations(&mockBroker);
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
