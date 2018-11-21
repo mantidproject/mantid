@@ -87,6 +87,10 @@ endif ()
 
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
+
+    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
+    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
+    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_tableviewmodel.py
   )
 
   # Tests

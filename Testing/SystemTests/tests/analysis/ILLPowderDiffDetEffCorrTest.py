@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import stresstesting
+import systemtesting
 from mantid.simpleapi import PowderDiffILLDetEffCorr, GroupWorkspaces
 from mantid import config, mtd
 
 
-class ILLPowderDiffDetEffCorrTest(stresstesting.MantidStressTest):
+class ILLPowderDiffDetEffCorrTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
         super(ILLPowderDiffDetEffCorrTest, self).__init__()

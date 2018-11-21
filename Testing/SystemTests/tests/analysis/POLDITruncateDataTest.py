@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class POLDITruncateDataTest(stresstesting.MantidStressTest):
+class POLDITruncateDataTest(systemtesting.MantidSystemTest):
     """ This test checks that the results of PoldiAutoCorrelation match the expected outcome."""
 
     dataFileName = None

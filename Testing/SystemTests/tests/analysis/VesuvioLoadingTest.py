@@ -8,13 +8,13 @@
 """These are more integration tests as they will require that the test data is available
 and that mantid can be imported
 """
-import stresstesting
+import systemtesting
 
 from mantid.api import MatrixWorkspace # mantid must be imported first to set the script paths correctly
 from vesuvio.loading import VesuvioLoadHelper, VesuvioTOFFitInput
 
 
-class LoadSingleRunSingleSpectrumTest(stresstesting.MantidStressTest):
+class LoadSingleRunSingleSpectrumTest(systemtesting.MantidSystemTest):
     _tof_input = None
 
     def runTest(self):
@@ -33,7 +33,7 @@ class LoadSingleRunSingleSpectrumTest(stresstesting.MantidStressTest):
                          "for spectra field: '" + self._tof_input.spectra + "'.")
 
 
-class LoadMultipleRunSingleSpectrumTest(stresstesting.MantidStressTest):
+class LoadMultipleRunSingleSpectrumTest(systemtesting.MantidSystemTest):
     _tof_input = None
 
     def runTest(self):
@@ -52,7 +52,7 @@ class LoadMultipleRunSingleSpectrumTest(stresstesting.MantidStressTest):
                          "for spectra field: '" + self._tof_input.spectra + "'.")
 
 
-class LoadMultipleRunMultipleSpectrumTest(stresstesting.MantidStressTest):
+class LoadMultipleRunMultipleSpectrumTest(systemtesting.MantidSystemTest):
     _tof_input = None
 
     def runTest(self):
@@ -71,7 +71,7 @@ class LoadMultipleRunMultipleSpectrumTest(stresstesting.MantidStressTest):
                          "but found different value for spectra field: '" + self._tof_input.spectra + "'.")
 
 
-class LoadBackScatteringSpectrumTest(stresstesting.MantidStressTest):
+class LoadBackScatteringSpectrumTest(systemtesting.MantidSystemTest):
     _tof_input = None
 
     def runTest(self):

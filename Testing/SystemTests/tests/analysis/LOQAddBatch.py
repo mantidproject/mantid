@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.api import FileFinder
 from mantid import config
@@ -17,7 +17,7 @@ import SANSadd2 as sansadd
 import os
 
 
-class SANSAddBatch(stresstesting.MantidStressTest):
+class SANSAddBatch(systemtesting.MantidSystemTest):
     output_file = '99630sannotrans'
     csv_file = 'input.csv'
     result = ''

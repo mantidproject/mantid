@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import stresstesting
+import systemtesting
 
 
 from mantid.api import AlgorithmManager
@@ -422,9 +422,9 @@ class SANSMoveTest(unittest.TestCase):
                                        component_to_investigate, state.move, workspace)
 
 
-class SANSMoveRunnerTest(stresstesting.MantidStressTest):
+class SANSMoveRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

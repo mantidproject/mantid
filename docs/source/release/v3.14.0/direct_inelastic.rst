@@ -28,6 +28,9 @@ Improvements
   - The temperature sample log entry can be given in an instrument parameter ``temperature_sample_log``.
   - The temperature sample log can now be a time series.
 
+- :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` now supports computation from :math:`S(2\theta,E)` workspace.
+- The upper limit of the empty container scaling factor in :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` has been removed.
+
 Bugfixes
 ########
 

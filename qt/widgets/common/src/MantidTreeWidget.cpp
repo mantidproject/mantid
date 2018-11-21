@@ -36,6 +36,10 @@ MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui, QWidget *parent)
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setSortOrder(Qt::AscendingOrder);
   setAcceptDrops(true);
+
+  m_doubleClickAction = [&](QString wsName) {
+    m_mantidUI->importWorkspace(wsName, false);
+  };
 }
 
 /**
@@ -137,7 +141,7 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
         m_ads.retrieve(wsName.toStdString()));
     if (!grpWSPstr) {
       if (!wsName.isEmpty()) {
-        m_mantidUI->importWorkspace(wsName, false);
+        m_doubleClickAction(wsName);
         return;
       }
     }
