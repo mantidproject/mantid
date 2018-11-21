@@ -120,7 +120,7 @@ class GlobalFigureManager(object):
         current_fig_manager = cls.figs[num]
         current_fig_manager.canvas.mpl_disconnect(current_fig_manager._cidgcf)
 
-        cls.remove_manager_if_present(current_fig_manager)
+        cls._remove_manager_if_present(current_fig_manager)
 
         del cls.figs[num]
         current_fig_manager.destroy()
@@ -187,15 +187,13 @@ class GlobalFigureManager(object):
         """
         Make the figure corresponding to *manager* the active one.
         """
-
-        cls.remove_manager_if_present(manager)
-
+        cls._remove_manager_if_present(manager)
         cls._activeQue.append(manager)
         cls.figs[manager.num] = manager
         cls.notify_observers(FigureAction.OrderChanged, manager.num)
 
     @classmethod
-    def remove_manager_if_present(cls, manager):
+    def _remove_manager_if_present(cls, manager):
         """
         Removes the manager from the active queue, if it is present in it.
         :param manager: Manager to be removed from the active queue
