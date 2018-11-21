@@ -106,6 +106,8 @@ private:
     UNUSED_ARG(spectrum);
     return "";
   };
+
+  std::vector<std::string> getSpectrumDependentAttributes() const override { return {}; };
 };
 
 } // namespace
@@ -140,7 +142,7 @@ public:
 
     delete m_presenter;
     delete m_model;
-		// delete m_view; - produces view doesn't exist error
+		// delete m_view; - causes an error
   }
 
 	///----------------------------------------------------------------------
@@ -163,10 +165,9 @@ public:
 	void 
 	test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_model_and_view() {
 		std::string const excludeRegion("0-1");
-		m_model->setExcludeRegion(excludeRegion, 0, 0);
 
-		//ON_CALL(*m_model, getExcludeRegion(0, 0)).WillByDefault(Return(excludeRegion));
- 
+		ON_CALL(*m_model, getExcludeRegion(0, 0)).WillByDefault(Return(excludeRegion));
+
 		Expectation getMask = EXPECT_CALL(*m_model, getExcludeRegion(0, 0)).Times(1).WillOnce(Return(excludeRegion));
 		EXPECT_CALL(*m_view, setMaskString(excludeRegion)).Times(1).After(getMask);
 

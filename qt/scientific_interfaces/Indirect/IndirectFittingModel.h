@@ -51,7 +51,8 @@ public:
   Spectra getSpectra(std::size_t index) const;
   std::pair<double, double> getFittingRange(std::size_t dataIndex,
                                             std::size_t spectrum) const;
-  virtual std::string getExcludeRegion(std::size_t dataIndex, std::size_t index) const;
+  virtual std::string getExcludeRegion(std::size_t dataIndex,
+                                       std::size_t index) const;
   std::string createDisplayName(const std::string &formatString,
                                 const std::string &rangeDelimiter,
                                 std::size_t dataIndex) const;
