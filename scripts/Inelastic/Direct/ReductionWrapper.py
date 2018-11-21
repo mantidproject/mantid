@@ -455,8 +455,6 @@ class ReductionWrapper(object):
         #    fix_file_extension = False
         fix_file_extension = True
 
-
-
         timeToWait = self._wait_for_file
         wait_counter=0
         if timeToWait > 0:
