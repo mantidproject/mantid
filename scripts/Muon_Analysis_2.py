@@ -53,7 +53,6 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         self.dockWidget.updateContext()
         self.helpWidget.updateContext()
 
-        self._context.printContext()
         self.dockWidget.loadFromContext()
 
     def loadFromContext(self, project):
