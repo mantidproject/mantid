@@ -26,7 +26,7 @@ def saveToTSV(TSV, value):
     elif isinstance(value, str):
         TSV.storeString(value)
     else:
-        raise TypeError
+        raise TypeError("Value is not recognised by TSVSerialiser")
 
 
 def loadFromTSV(TSV, key, value):
@@ -46,7 +46,7 @@ def loadFromTSV(TSV, key, value):
     elif isinstance(value, str):
         return TSV.readString()
     else:
-        raise TypeError
+        raise TypeError("Value is not recognised by TSVSerialiser")
 
 """
 The line name cannot contain:

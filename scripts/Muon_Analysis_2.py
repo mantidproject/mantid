@@ -100,7 +100,6 @@ def main():
 
 
 def saveToProject():
-    print("waaa")
     widget = getWidgetIfOpen(Name)
     if widget is None:
         return ""
