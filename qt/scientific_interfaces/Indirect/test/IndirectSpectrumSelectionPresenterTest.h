@@ -16,6 +16,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
@@ -46,6 +47,8 @@ private:
 };
 
 static QApplicationHolder MAIN_QAPPLICATION;
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
 class MockIndirectSpectrumSelectionView : public IndirectSpectrumSelectionView {
@@ -113,6 +116,8 @@ private:
     return {};
   };
 };
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 } // namespace
 
