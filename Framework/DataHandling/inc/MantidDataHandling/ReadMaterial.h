@@ -13,25 +13,37 @@
 #include <map>
 namespace Mantid {
 namespace DataHandling {
-
+using ValidationErrors = std::map<std::string, std::string>;
 /**
     This class contains code for interpreting a material input for
    SetSampleMaterial
 */
+
+
 class DLLExport ReadMaterial {
 public:
-  static std::map<std::string, std::string>
-  validateInputs(const std::string &chemicalSymbol, const int z_number,
-                 const int a_number, const double sampleNumberDensity,
-                 const double zParameter, const double unitCellVolume,
-                 const double sampleMassDensity);
-  void determineMaterial(const std::string chemicalSymbol, const int z_number,
-                         const int a_number);
+  
+  struct MaterialParameters {
+    std::string chemicalSymbol;
+    int atomicNumber;
+    int massNumber;
+    double sampleNumberDensity;
+    double zParameter;
+    double unitCellVolume;
+    double sampleMassDensity;
+  };
+
+  static ValidationErrors
+  validateInputs(MaterialParameters params);
+  void setMaterial(const std::string chemicalSymbol, const int atomicNumber,
+                         const int massNumber);
   void setNumberDensity(const double rho_m, const double rho,
                         const double zParameter, const double unitCellVolume);
   void setScatteringInfo(double coherentXSection, double incoherentXSection,
                          double attenuationXSection, double scatteringXSection);
   std::unique_ptr<Kernel::Material> buildMaterial();
+
+  
 
 private:
   Kernel::MaterialBuilder builder;

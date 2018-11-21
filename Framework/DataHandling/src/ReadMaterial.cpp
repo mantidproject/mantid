@@ -11,41 +11,37 @@
 
 namespace Mantid {
 namespace DataHandling {
-using MaterialProperties = std::map<std::string, std::string>;
 
-MaterialProperties ReadMaterial::validateInputs(
-    const std::string &chemicalSymbol, const int z_number, const int a_number,
-    const double sampleNumberDensity, const double zParameter,
-    const double unitCellVolume, const double sampleMassDensity) {
-  MaterialProperties result;
-  if (chemicalSymbol.empty()) {
-    if (z_number <= 0) {
+ValidationErrors ReadMaterial::validateInputs(const MaterialParameters params) {
+  ValidationErrors result;
+  if (params.chemicalSymbol.empty()) {
+    if (params.atomicNumber <= 0) {
       result["ChemicalFormula"] = "Need to specify the material";
     }
   } else {
-    if (z_number > 0)
+    if (params.atomicNumber > 0)
       result["AtomicNumber"] =
           "Cannot specify both ChemicalFormula and AtomicNumber";
   }
 
-  if (a_number > 0 && z_number <= 0)
+  if (params.massNumber > 0 && params.atomicNumber <= 0)
     result["AtomicNumber"] = "Specified MassNumber without AtomicNumber";
 
-  if (!isEmpty(zParameter)) {
-    if (isEmpty(unitCellVolume)) {
+  if (!isEmpty(params.zParameter)) {
+    if (isEmpty(params.unitCellVolume)) {
       result["UnitCellVolume"] =
           "UnitCellVolume must be provided with ZParameter";
     }
-    if (!isEmpty(sampleNumberDensity)) {
+    if (!isEmpty(params.sampleNumberDensity)) {
       result["ZParameter"] =
           "Can not give ZParameter with SampleNumberDensity set";
     }
-    if (!isEmpty(sampleMassDensity)) {
+    if (!isEmpty(params.sampleMassDensity)) {
       result["SampleMassDensity"] =
           "Can not give SampleMassDensity with ZParameter set";
     }
-  } else if (!isEmpty(sampleNumberDensity)) {
-    if (!isEmpty(sampleMassDensity)) {
+  } else if (!isEmpty(params.sampleNumberDensity)) {
+    if (!isEmpty(params.sampleMassDensity)) {
       result["SampleMassDensity"] =
           "Can not give SampleMassDensity with SampleNumberDensity set";
     }
@@ -57,14 +53,14 @@ std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial() {
   return std::make_unique<Kernel::Material>(builder.build());
 }
 
-void ReadMaterial::determineMaterial(const std::string chemicalSymbol,
-                                     const int z_number, const int a_number) {
+void ReadMaterial::setMaterial(const std::string chemicalSymbol,
+                               const int atomicNumber, const int massNumber) {
   if (!chemicalSymbol.empty()) {
     std::cout << "CHEM: " << chemicalSymbol << std::endl;
     builder.setFormula(chemicalSymbol);
   } else {
-    builder.setAtomicNumber(z_number);
-    builder.setMassNumber(a_number);
+    builder.setAtomicNumber(atomicNumber);
+    builder.setMassNumber(massNumber);
   }
 }
 

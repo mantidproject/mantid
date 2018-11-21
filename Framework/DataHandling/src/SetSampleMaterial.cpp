@@ -109,11 +109,20 @@ void SetSampleMaterial::init() {
 }
 
 std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
-  auto result = ReadMaterial::validateInputs(
-      getProperty("ChemicalFormula"), getProperty("AtomicNumber"),
-      getProperty("MassNumber"), getProperty("SampleNumberDensity"),
-      getProperty("ZParameter"), getProperty("UnitCellVolume"),
-      getProperty("SampleMassDensity"));
+    std::string formula = getProperty("ChemicalFormula");
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = formula;
+      setMaterial.atomicNumber = getProperty("AtomicNumber");
+      setMaterial.massNumber = getProperty("MassNumber");
+      setMaterial.sampleNumberDensity = getProperty("SampleNumberDensity");
+      setMaterial.zParameter = getProperty("ZParameter");
+      setMaterial.unitCellVolume = getProperty("UnitCellVolume");
+      setMaterial.sampleMassDensity = getProperty("SampleMassDensity");
+      return setMaterial;
+    }();
+  auto result = ReadMaterial::validateInputs(params);
+
   return result;
 }
 
@@ -155,11 +164,9 @@ void SetSampleMaterial::exec() {
 
   ReadMaterial reader;
   const std::string chemicalSymbol = getProperty("ChemicalFormula");
-  reader.determineMaterial(chemicalSymbol, getProperty("AtomicNumber"),
-                           getProperty("MassNumber"));
-  // determine the material
+  reader.setMaterial(chemicalSymbol, getProperty("AtomicNumber"),
+                     getProperty("MassNumber"));
 
-  // determine the sample number density
   double rho = getProperty("SampleNumberDensity"); // in atoms / Angstroms^3
   reader.setNumberDensity(getProperty("SampleMassDensity"), rho,
                           getProperty("ZParameter"),

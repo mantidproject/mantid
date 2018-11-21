@@ -19,76 +19,194 @@ public:
   static void destroySuite(ReadMaterialTest *suite) { delete suite; }
 
   void testSuccessfullValidateInputsFormula() {
-    auto result = ReadMaterial::validateInputs(
-        FORMULA, 0, 0, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL,
-        EMPTY_DOUBLE_VAL);
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = FORMULA;
+      setMaterial.atomicNumber = 0;
+      setMaterial.massNumber = 0;
+      setMaterial.sampleNumberDensity = EMPTY_DOUBLE_VAL;
+      setMaterial.zParameter = EMPTY_DOUBLE_VAL;
+      setMaterial.unitCellVolume = EMPTY_DOUBLE_VAL;
+      setMaterial.sampleMassDensity = EMPTY_DOUBLE_VAL;
+      return setMaterial;
+    }
+    ();
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT(result.empty());
   }
 
   void testSuccessfullValidateInputsAtomicNumber() {
-    auto result = ReadMaterial::validateInputs(
-        EMPTY, 1, 1, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL,
-        EMPTY_DOUBLE_VAL);
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = EMPTY;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.sampleNumberDensity = EMPTY_DOUBLE_VAL;
+      setMaterial.zParameter = EMPTY_DOUBLE_VAL;
+      setMaterial.unitCellVolume = EMPTY_DOUBLE_VAL;
+      setMaterial.sampleMassDensity = EMPTY_DOUBLE_VAL;
+      return setMaterial;
+    }
+    ();
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT(result.empty());
   }
 
   void testFailureValidateInputsFormulaPlusAtomicNumber() {
-    auto result = ReadMaterial::validateInputs(
-        FORMULA, 1, 1, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL,
-        EMPTY_DOUBLE_VAL);
+    ReadMaterial::MaterialParameters params = [&](
+        const auto FORMULA, const auto EMPTY_DOUBLE_VAL) -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = FORMULA;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.sampleNumberDensity = EMPTY_DOUBLE_VAL;
+      setMaterial.zParameter = EMPTY_DOUBLE_VAL;
+      setMaterial.unitCellVolume = EMPTY_DOUBLE_VAL;
+      setMaterial.sampleMassDensity = EMPTY_DOUBLE_VAL;
+      return setMaterial;
+    }
+    (FORMULA, EMPTY_DOUBLE_VAL);
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result["AtomicNumber"],
                      "Cannot specify both ChemicalFormula and AtomicNumber")
   }
 
   void testFailureValidateInputsNoMaterial() {
-    auto result = ReadMaterial::validateInputs(
-        EMPTY, 0, 0, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL,
-        EMPTY_DOUBLE_VAL);
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = EMPTY;
+      setMaterial.atomicNumber = 0;
+      setMaterial.massNumber = 0;
+      setMaterial.sampleNumberDensity = EMPTY_DOUBLE_VAL;
+      setMaterial.zParameter = EMPTY_DOUBLE_VAL;
+      setMaterial.unitCellVolume = EMPTY_DOUBLE_VAL;
+      setMaterial.sampleMassDensity = EMPTY_DOUBLE_VAL;
+      return setMaterial;
+    }
+    ();
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result["ChemicalFormula"], "Need to specify the material")
   }
 
   void testSuccessfullValidateInputsSampleNumber() {
-    auto result = ReadMaterial::validateInputs(
-        EMPTY, 1, 1, 1, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL);
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = EMPTY;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.sampleNumberDensity = 1;
+      setMaterial.zParameter = EMPTY_DOUBLE_VAL;
+      setMaterial.unitCellVolume = EMPTY_DOUBLE_VAL;
+      setMaterial.sampleMassDensity = EMPTY_DOUBLE_VAL;
+      return setMaterial;
+    }
+    ();
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT(result.empty());
   }
 
   void testSuccessfullValidateInputsZParam() {
-    auto result = ReadMaterial::validateInputs(EMPTY, 1, 1, EMPTY_DOUBLE_VAL, 1,
-                                               1, EMPTY_DOUBLE_VAL);
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = EMPTY;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.sampleNumberDensity = EMPTY_DOUBLE_VAL;
+      setMaterial.zParameter = 1;
+      setMaterial.unitCellVolume = 1;
+      setMaterial.sampleMassDensity = EMPTY_DOUBLE_VAL;
+      return setMaterial;
+    }
+    ();
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT(result.empty());
   }
 
   void testSuccessfullValidateInputsSampleMass() {
-    auto result = ReadMaterial::validateInputs(
-        EMPTY, 1, 1, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL, 1);
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = EMPTY;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.sampleNumberDensity = EMPTY_DOUBLE_VAL;
+      setMaterial.zParameter = EMPTY_DOUBLE_VAL;
+      setMaterial.unitCellVolume = EMPTY_DOUBLE_VAL;
+      setMaterial.sampleMassDensity = 1;
+      return setMaterial;
+    }
+    ();
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT(result.empty());
   }
 
   void testFailureValidateInputsSampleNumberAndZParam() {
-    auto result =
-        ReadMaterial::validateInputs(EMPTY, 0, 0, 1, 1, 1, EMPTY_DOUBLE_VAL);
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = EMPTY;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.sampleNumberDensity = 1;
+      setMaterial.zParameter = 1;
+      setMaterial.unitCellVolume = 1;
+      setMaterial.sampleMassDensity = EMPTY_DOUBLE_VAL;
+      return setMaterial;
+    }
+    ();
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result["ZParameter"],
                      "Can not give ZParameter with SampleNumberDensity set")
   }
 
   void testFailureValidateInputsZParamWithSampleMass() {
-    auto result =
-        ReadMaterial::validateInputs(EMPTY, 0, 0, EMPTY_DOUBLE_VAL, 1, 1, 1);
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = EMPTY;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.sampleNumberDensity = EMPTY_DOUBLE_VAL;
+      setMaterial.zParameter = 1;
+      setMaterial.unitCellVolume = 1;
+      setMaterial.sampleMassDensity = 1;
+      return setMaterial;
+    }
+    ();
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result["SampleMassDensity"],
                      "Can not give SampleMassDensity with ZParameter set")
   }
 
   void testFailureValidateInputsZParamWithoutUnitCell() {
-    auto result = ReadMaterial::validateInputs(
-        EMPTY, 0, 0, EMPTY_DOUBLE_VAL, 1, EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL);
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = EMPTY;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.sampleNumberDensity = EMPTY_DOUBLE_VAL;
+      setMaterial.zParameter = 1;
+      setMaterial.unitCellVolume = EMPTY_DOUBLE_VAL;
+      setMaterial.sampleMassDensity = EMPTY_DOUBLE_VAL;
+      return setMaterial;
+    }
+    ();
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result["UnitCellVolume"],
                      "UnitCellVolume must be provided with ZParameter")
   }
 
   void testFailureValidateInputsSampleNumWithSampleMass() {
-    auto result = ReadMaterial::validateInputs(EMPTY, 0, 0, 1, EMPTY_DOUBLE_VAL,
-                                               EMPTY_DOUBLE_VAL, 1);
+    ReadMaterial::MaterialParameters params = [&]() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.chemicalSymbol = EMPTY;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.sampleNumberDensity = 1;
+      setMaterial.zParameter = EMPTY_DOUBLE_VAL;
+      setMaterial.unitCellVolume = EMPTY_DOUBLE_VAL;
+      setMaterial.sampleMassDensity = 1;
+      return setMaterial;
+    }
+    ();
+    auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(
         result["SampleMassDensity"],
         "Can not give SampleMassDensity with SampleNumberDensity set")
@@ -96,7 +214,7 @@ public:
 
   void testMaterialIsCorrect() {
     ReadMaterial reader;
-    reader.determineMaterial(FORMULA, 0, 0);
+    reader.setMaterial(FORMULA, 0, 0);
     reader.setNumberDensity(EMPTY_DOUBLE_VAL, 1, EMPTY_DOUBLE_VAL,
                             EMPTY_DOUBLE_VAL);
     reader.setScatteringInfo(1, 2, 3, 4);
@@ -106,7 +224,7 @@ public:
 
   void testGenerateScatteringInfo() {
     ReadMaterial reader;
-    reader.determineMaterial(FORMULA, 0, 0);
+    reader.setMaterial(FORMULA, 0, 0);
     reader.setNumberDensity(EMPTY_DOUBLE_VAL, 1, EMPTY_DOUBLE_VAL,
                             EMPTY_DOUBLE_VAL);
     auto material = reader.buildMaterial();
@@ -116,7 +234,7 @@ public:
 
   void testNoMaterialFailure() {
     ReadMaterial reader;
-    reader.determineMaterial(EMPTY, 0, 0);
+    reader.setMaterial(EMPTY, 0, 0);
     reader.setNumberDensity(EMPTY_DOUBLE_VAL, 1, EMPTY_DOUBLE_VAL,
                             EMPTY_DOUBLE_VAL);
     reader.setScatteringInfo(EMPTY_DOUBLE_VAL, EMPTY_DOUBLE_VAL,
