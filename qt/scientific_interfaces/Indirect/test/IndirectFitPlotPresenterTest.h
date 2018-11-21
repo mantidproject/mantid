@@ -15,6 +15,7 @@
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFittingModel.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/WarningSuppressions.h"
 //#include "MantidAPI/IAlgorithm.h"
 //#include "MantidAPI/IFunction.h"
 //#include "MantidAPI/MatrixWorkspace.h"
@@ -48,6 +49,8 @@ namespace {
 //};
 //
 //static QApplicationHolder MAIN_QAPPLICATION;
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
 class MockIndirectFitPlotView : public IndirectFitPlotView {
@@ -117,6 +120,8 @@ private:
 		return{};
 	};
 };
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 }
 
