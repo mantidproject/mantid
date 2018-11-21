@@ -149,12 +149,6 @@ MatrixWorkspace_sptr appendAll(std::vector<std::string> const &workspaces,
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(appended);
 }
 
-MatrixWorkspace_sptr addToADS(MatrixWorkspace_sptr workspace,
-                              const std::string &name) {
-  AnalysisDataService::Instance().addOrReplace(name, workspace);
-  return workspace;
-}
-
 std::vector<std::string>
 subdivideWidthWorkspace(MatrixWorkspace_sptr workspace,
                         const std::vector<std::size_t> &widthSpectra) {
