@@ -448,6 +448,15 @@ class ReductionWrapper(object):
         if output_directory:
             config['defaultsave.directory'] = str(output_directory)
 
+        #propman = self.reducer.prop_man
+        #if hasattr(propman,'fix_file_extension'):
+        #    fix_file_extension = propman.fix_file_extension
+        #else:
+        #    fix_file_extension = False
+        fix_file_extension = True
+
+
+
         timeToWait = self._wait_for_file
         wait_counter=0
         if timeToWait > 0:
@@ -461,7 +470,7 @@ class ReductionWrapper(object):
                 Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,file_hint=file_hint,be_quet=True)
                 if Found:
                     _,found_ext=os.path.splitext(input_file)
-                    if found_ext != fext:
+                    if fix_file_extension and (found_ext.lower() != fext.lower()):
                         wait_counter+=1
                         if wait_counter<2:
                             timeToWait =60

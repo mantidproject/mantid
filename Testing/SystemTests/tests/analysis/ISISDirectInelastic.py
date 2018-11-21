@@ -182,6 +182,8 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
         self.red._debug_wait_for_files_operation = self.prepare_test_file
         self._counter=0
         self._file_to_clear=""
+        self.red.reducer.prop_man.fix_file_extension = True
+        self.red.reducer.prop_man.data_file_ext = '.raw'
 
         self.red.reducer.prop_man.sample_run = [11001,11002]
        # self.red.reducer.background_range = (10000,12000)
@@ -369,6 +371,8 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
       files appearing on data search path
       """
         targ_path = config['defaultsave.directory']
+        self.red.reducer.prop_man.fix_file_extension = True
+        self.red.reducer.prop_man.data_file_ext = '.raw'
         self._file_to_clear = os.path.join(targ_path,'MAR11002.raw')
         if os.path.exists(self._file_to_clear):
             os.remove(self._file_to_clear)
