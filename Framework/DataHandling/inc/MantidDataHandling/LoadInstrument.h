@@ -8,9 +8,6 @@
 #define MANTID_DATAHANDLING_LOADINSTRUMENT_H_
 
 #include "MantidAPI/DistributedAlgorithm.h"
-#include "MantidAPI/ExperimentInfo.h"
-
-#include <mutex>
 
 /// @cond Exclude from doxygen documentation
 namespace Poco {
@@ -36,11 +33,10 @@ class Instrument;
 } // namespace Geometry
 
 namespace DataHandling {
-
 /** @class LoadInstrument LoadInstrument.h DataHandling/LoadInstrument.h
 
-Loads instrument data from a XML instrument description file and adds it
-to a workspace.
+Loads instrument data from an XML or Nexus instrument description file and adds
+it to a workspace.
 
 LoadInstrument is an algorithm and as such inherits
 from the Algorithm class and overrides the init() & exec()  methods.
@@ -48,7 +44,8 @@ from the Algorithm class and overrides the init() & exec()  methods.
 Required Properties:
 <UL>
 <LI> Workspace - The name of the workspace </LI>
-<LI> Filename - The name of the IDF file </LI>
+<LI> Filename - The name of the instrument file <b>OR</b> InstrumentName - The
+    name of the instrument</LI>
 </UL>
 
 @author Nick Draper, Tessella Support Services plc
