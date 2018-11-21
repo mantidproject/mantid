@@ -19,6 +19,10 @@ using namespace Mantid::API;
 
 namespace {
 
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) { 
+	return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+}
+
 boost::optional<std::size_t>
 getFirstInCategory(CompositeFunction_const_sptr composite,
                    const std::string &category) {
@@ -110,13 +114,11 @@ CompositeFunction_sptr addTemperatureCorrection(IFunction_sptr model,
   return applyTemperatureCorrection(model, correction, value);
 }
 
-IAlgorithm_sptr loadParameterFileAlgorithm(MatrixWorkspace_sptr workspace,
-                                           const std::string &filename) {
-  IAlgorithm_sptr loadParamFile =
-      AlgorithmManager::Instance().create("LoadParameterFile");
-  loadParamFile->setAlwaysStoreInADS(false);
+IAlgorithm_sptr loadParameterFileAlgorithm(std::string const &workspaceName,
+                                           std::string const &filename) {
+  auto loadParamFile = AlgorithmManager::Instance().create("LoadParameterFile");
   loadParamFile->initialize();
-  loadParamFile->setProperty("Workspace", workspace);
+  loadParamFile->setProperty("Workspace", workspaceName);
   loadParamFile->setProperty("Filename", filename);
   return loadParamFile;
 }
@@ -130,8 +132,8 @@ void readAnalyserFromFile(const std::string &analyser,
   auto const parameterFile = idfDirectory + instrument->getName() + "_" +
                              analyser + "_" + reflection + "_Parameters.xml";
 
-  IAlgorithm_sptr loadParamFile =
-      loadParameterFileAlgorithm(workspace, parameterFile);
+  auto loadParamFile =
+      loadParameterFileAlgorithm(workspace->getName(), parameterFile);
   loadParamFile->execute();
 
   if (!loadParamFile->isExecuted())
@@ -170,37 +172,42 @@ boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
   }
 }
 
-MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS) {
-  IAlgorithm_sptr cloneAlg =
-      AlgorithmManager::Instance().create("CloneWorkspace");
+MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS, 
+	                                  std::string const &outputName) {
+  auto cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
-  cloneAlg->setAlwaysStoreInADS(false);
   cloneAlg->initialize();
   cloneAlg->setProperty("InputWorkspace", inputWS);
-  cloneAlg->setProperty("OutputWorkspace", "__cloned");
+  cloneAlg->setProperty("OutputWorkspace", outputName);
   cloneAlg->execute();
-  Workspace_sptr workspace = cloneAlg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+	return getADSMatrixWorkspace(outputName);
 }
 
 MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
                                      MatrixWorkspace_sptr rightWS,
-                                     int numHistograms) {
-  IAlgorithm_sptr appendAlg =
-      AlgorithmManager::Instance().create("AppendSpectra");
+                                     int numHistograms,
+	                                   std::string const &outputName) {
+  auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendAlg->setLogging(false);
-  appendAlg->setAlwaysStoreInADS(false);
   appendAlg->initialize();
   appendAlg->setProperty("InputWorkspace1", leftWS);
   appendAlg->setProperty("InputWorkspace2", rightWS);
   appendAlg->setProperty("Number", numHistograms);
-  appendAlg->setProperty("OutputWorkspace", "__appended");
+  appendAlg->setProperty("OutputWorkspace", outputName);
   appendAlg->execute();
-  return appendAlg->getProperty("OutputWorkspace");
+  return getADSMatrixWorkspace(outputName);
 }
 
-MatrixWorkspace_sptr extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
-                                               std::size_t numberOfHistograms) {
+void renameWorkspace(std::string const &name, std::string const &newName) {
+	auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
+	renamer->setProperty("InputWorkspace", name);
+	renamer->setProperty("OutputWorkspace", newName);
+	renamer->execute();
+}
+
+void extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
+                               std::size_t numberOfHistograms,
+	                             std::string const &outputName) {
   const auto resolutionNumHist = resolution->getNumberHistograms();
   if (resolutionNumHist != 1 && resolutionNumHist != numberOfHistograms) {
     std::string msg(
@@ -208,13 +215,14 @@ MatrixWorkspace_sptr extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
     throw std::runtime_error(msg);
   }
 
-  auto resolutionWS = cloneWorkspace(resolution);
+  auto resolutionWS = cloneWorkspace(resolution, "__cloned");
 
   // Append to cloned workspace if necessary
-  if (resolutionNumHist == 1 && numberOfHistograms > 1)
-    return appendWorkspace(resolutionWS, resolution,
-                           static_cast<int>(numberOfHistograms - 1));
-  return resolutionWS;
+	if (resolutionNumHist == 1 && numberOfHistograms > 1)
+		appendWorkspace(resolutionWS, resolution,
+			static_cast<int>(numberOfHistograms - 1), outputName);
+	else
+		renameWorkspace("__cloned", outputName);
 }
 
 void getParameterNameChanges(
@@ -535,8 +543,7 @@ void ConvFitModel::removeWorkspace(std::size_t index) {
 }
 
 void ConvFitModel::setResolution(const std::string &name, std::size_t index) {
-  setResolution(
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name), index);
+  setResolution(getADSMatrixWorkspace(name), index);
 }
 
 void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
@@ -555,9 +562,8 @@ void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
 
 void ConvFitModel::addExtendedResolution(std::size_t index) {
   const std::string name = "__ConvFitResolution" + std::to_string(index);
-  AnalysisDataService::Instance().addOrReplace(
-      name, extendResolutionWorkspace(m_resolution[index].lock(),
-                                      getNumberHistograms(index)));
+
+	extendResolutionWorkspace(m_resolution[index].lock(), getNumberHistograms(index), name);
 
   if (m_extendedResolution.size() > index)
     m_extendedResolution[index] = name;
