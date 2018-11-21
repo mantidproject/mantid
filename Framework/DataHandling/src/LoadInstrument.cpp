@@ -41,6 +41,14 @@ using namespace Geometry;
 
 std::recursive_mutex LoadInstrument::m_mutex;
 
+// This enum class is used to remember easily which instrument loader should be
+// used. There are 3 different loaders: from XML string, from an IDF file and
+// from a Nexus file. Some parts of the exec() function are common to Xml and
+// Idf, some parts are common to Idf and Nxs, and some parts are common to all
+// three. Assigning numbers to the 3 types allows us to write statements like
+// if (loader_type < LoaderType::Nxs) then do all things common to Xml and Idf.
+enum class LoaderType { Xml = 1, Idf = 2, Nxs = 3 };
+
 /// Initialisation method.
 void LoadInstrument::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
@@ -101,7 +109,8 @@ void LoadInstrument::exec() {
   boost::shared_ptr<API::MatrixWorkspace> ws = getProperty("Workspace");
   std::string filename = getPropertyValue("Filename");
   std::string instname = getPropertyValue("InstrumentName");
-  std::pair<std::string, std::string> loader_type;
+  // std::pair<std::string, std::string> loader_type;
+  LoaderType loader_type;
 
   // If instrumentXML is not default (i.e. it has been defined), then use that
   // Note: this is part of the IDF loader
@@ -117,8 +126,8 @@ void LoadInstrument::exec() {
     if (filename.empty())
       filename = instname;
 
-    loader_type.first = "idf";
-    loader_type.second = "xml";
+    // Assign the loader type to Xml
+    loader_type = LoaderType::Xml;
 
   } else {
     // This part of the loader searches through the instrument directories for
@@ -157,13 +166,11 @@ void LoadInstrument::exec() {
 
     // Now that we have a file name, decide whether to use Nexus or IDF loading
     if (LoadGeometry::isIDF(filename)) {
-      // Call theIDF loader  with the the XML text loaded from the IDF file
-      loader_type.first = "idf";
-      loader_type.second = "idffile";
+      // Assign the loader type to Idf
+      loader_type = LoaderType::Idf;
     } else if (LoadGeometry::isNexus(filename)) {
-      // nexusInstrumentLoader(ws, filename, instname);
-      loader_type.first = "nxs";
-      loader_type.second = "nxsfile";
+      // Assign the loader type to Nxs
+      loader_type = LoaderType::Nxs;
     } else {
       throw Kernel::Exception::FileError(
           "No valid loader found for instrument file ", filename);
@@ -175,21 +182,21 @@ void LoadInstrument::exec() {
   Instrument_sptr instrument;
 
   // Define a parser if using IDFs
-  if (loader_type.second == "xml")
+  if (loader_type == LoaderType::Xml)
     parser =
         InstrumentDefinitionParser(filename, instname, InstrumentXML->value());
-  else if (loader_type.second == "idffile")
+  else if (loader_type == LoaderType::Idf)
     parser = InstrumentDefinitionParser(filename, instname,
                                         Strings::loadFile(filename));
 
   // Find the mangled instrument name that includes the modified date
-  if (loader_type.first == "idf")
+  if (loader_type < LoaderType::Nxs)
     instrumentNameMangled = parser.getMangledName();
-  else if (loader_type.first == "nxs")
+  else if (loader_type == LoaderType::Nxs)
     instrumentNameMangled =
         NexusGeometry::NexusGeometryParser::getMangledName(filename, instname);
   else
-    throw std::runtime_error("Unknown instrument loader type");
+    throw std::runtime_error("Unknown instrument LoaderType");
 
   {
     // Make InstrumentService access thread-safe
@@ -202,7 +209,7 @@ void LoadInstrument::exec() {
           InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
 
-      if (loader_type.first == "idf") {
+      if (loader_type < LoaderType::Nxs) {
         // Really create the instrument
         Progress prog(this, 0.0, 1.0, 100);
         instrument = parser.parseXML(&prog);
@@ -229,7 +236,7 @@ void LoadInstrument::exec() {
     // LoadParameterFile modifies the base instrument stored in the IDS so this
     // must also be protected by the lock until LoadParameterFile is fixed.
     // check if default parameter file is also present, unless loading from
-    if (!filename.empty() && (loader_type.first == "idf"))
+    if (!filename.empty() && (loader_type < LoaderType::Nxs))
       runLoadParameterFile(ws, filename);
   } // end of mutex scope
 

@@ -64,7 +64,6 @@ using namespace Poco::XML;
 namespace Mantid {
 
 namespace API {
-
 namespace {
 /// static logger object
 Kernel::Logger g_log("ExperimentInfo");
