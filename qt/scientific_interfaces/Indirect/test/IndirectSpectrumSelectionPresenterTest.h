@@ -25,8 +25,6 @@ using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
 
-namespace {
-
 /// This QApplication object is required to construct the view
 class QApplicationHolder : CxxTest::GlobalFixture {
 public:
@@ -118,8 +116,6 @@ private:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-} // namespace
 
 class IndirectSpectrumSelectionPresenterTest : public CxxTest::TestSuite {
 public:
