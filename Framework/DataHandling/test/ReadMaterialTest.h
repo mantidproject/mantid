@@ -53,8 +53,7 @@ public:
   }
 
   void testFailureValidateInputsFormulaPlusAtomicNumber() {
-    ReadMaterial::MaterialParameters params = [this](
-        const auto FORMULA, const auto EMPTY_DOUBLE_VAL) -> auto {
+    ReadMaterial::MaterialParameters params = [this]() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
       setMaterial.atomicNumber = 1;
@@ -65,7 +64,7 @@ public:
       setMaterial.sampleMassDensity = EMPTY_DOUBLE_VAL;
       return setMaterial;
     }
-    (FORMULA, EMPTY_DOUBLE_VAL);
+    ();
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result["AtomicNumber"],
                      "Cannot specify both ChemicalFormula and AtomicNumber")
