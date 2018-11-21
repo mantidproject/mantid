@@ -31,6 +31,10 @@ class FigureAction(Enum):
 
 class GlobalFigureManagerObserver(object):
     def __init__(self, figure_manager=None):
+        """
+        :param figure_manager: Figure manager that will be used to notify observers.
+                               Injected on initialisation for easy mocking
+        """
         self.figure_manager = figure_manager
 
     def notify(self, action, key):
@@ -86,8 +90,8 @@ class GlobalFigureManager(object):
     @classmethod
     def initialiseFiguresObserver(cls):
         """
-        This is used to inject the GlobalFigureManager into the observer,
-        as there is no way to reference the class name inside the class definition
+        This is used to inject the GlobalFigureManager into the GlobalFigureManagerObserver
+        as there is no way to reference the class' own name inside the class' own definition
         :return:
         """
         cls.figs.add_observer(GlobalFigureManagerObserver(cls))
@@ -116,11 +120,7 @@ class GlobalFigureManager(object):
         current_fig_manager = cls.figs[num]
         current_fig_manager.canvas.mpl_disconnect(current_fig_manager._cidgcf)
 
-        try:
-            del cls._activeQue[cls._activeQue.index(current_fig_manager)]
-        except ValueError:
-            # the figure manager was not in the active queue - no need to delete anything
-            pass
+        cls.remove_manager_if_present(current_fig_manager)
 
         del cls.figs[num]
         current_fig_manager.destroy()
@@ -188,15 +188,24 @@ class GlobalFigureManager(object):
         Make the figure corresponding to *manager* the active one.
         """
 
+        cls.remove_manager_if_present(manager)
+
+        cls._activeQue.append(manager)
+        cls.figs[manager.num] = manager
+        cls.notify_observers(FigureAction.OrderChanged, manager.num)
+
+    @classmethod
+    def remove_manager_if_present(cls, manager):
+        """
+        Removes the manager from the active queue, if it is present in it.
+        :param manager: Manager to be removed from the active queue
+        :return:
+        """
         try:
             del cls._activeQue[cls._activeQue.index(manager)]
         except ValueError:
             # the figure manager was not in the active queue - no need to delete anything
             pass
-
-        cls._activeQue.append(manager)
-        cls.figs[manager.num] = manager
-        cls.notify_observers(FigureAction.OrderChanged, manager.num)
 
     @classmethod
     def draw_all(cls, force=False):
