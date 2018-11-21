@@ -19,10 +19,8 @@ using ValidationErrors = std::map<std::string, std::string>;
    SetSampleMaterial
 */
 
-
 class DLLExport ReadMaterial {
 public:
-  
   struct MaterialParameters {
     std::string chemicalSymbol;
     int atomicNumber;
@@ -33,17 +31,14 @@ public:
     double sampleMassDensity;
   };
 
-  static ValidationErrors
-  validateInputs(MaterialParameters params);
+  static ValidationErrors validateInputs(MaterialParameters params);
   void setMaterial(const std::string chemicalSymbol, const int atomicNumber,
-                         const int massNumber);
+                   const int massNumber);
   void setNumberDensity(const double rho_m, const double rho,
                         const double zParameter, const double unitCellVolume);
   void setScatteringInfo(double coherentXSection, double incoherentXSection,
                          double attenuationXSection, double scatteringXSection);
   std::unique_ptr<Kernel::Material> buildMaterial();
-
-  
 
 private:
   Kernel::MaterialBuilder builder;

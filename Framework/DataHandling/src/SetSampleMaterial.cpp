@@ -109,18 +109,19 @@ void SetSampleMaterial::init() {
 }
 
 std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
-    std::string formula = getProperty("ChemicalFormula");
-    ReadMaterial::MaterialParameters params = [&]() -> auto {
-      ReadMaterial::MaterialParameters setMaterial;
-      setMaterial.chemicalSymbol = formula;
-      setMaterial.atomicNumber = getProperty("AtomicNumber");
-      setMaterial.massNumber = getProperty("MassNumber");
-      setMaterial.sampleNumberDensity = getProperty("SampleNumberDensity");
-      setMaterial.zParameter = getProperty("ZParameter");
-      setMaterial.unitCellVolume = getProperty("UnitCellVolume");
-      setMaterial.sampleMassDensity = getProperty("SampleMassDensity");
-      return setMaterial;
-    }();
+  std::string formula = getProperty("ChemicalFormula");
+  ReadMaterial::MaterialParameters params = [&]() -> auto {
+    ReadMaterial::MaterialParameters setMaterial;
+    setMaterial.chemicalSymbol = formula;
+    setMaterial.atomicNumber = getProperty("AtomicNumber");
+    setMaterial.massNumber = getProperty("MassNumber");
+    setMaterial.sampleNumberDensity = getProperty("SampleNumberDensity");
+    setMaterial.zParameter = getProperty("ZParameter");
+    setMaterial.unitCellVolume = getProperty("UnitCellVolume");
+    setMaterial.sampleMassDensity = getProperty("SampleMassDensity");
+    return setMaterial;
+  }
+  ();
   auto result = ReadMaterial::validateInputs(params);
 
   return result;
