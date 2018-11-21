@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import os
-os.environ["PATH"] = r"c:\\mprogs\\MantidRelease\\bin;c:\\mprogs\\MantidRelease\\scripts\\Inelastic;c:\\mprogs\\MantidRelease\\lib\\paraview-5.4\\site-packages;c:\\mprogs\\MantidRelease\\lib\\paraview-5.4\\site-packages\\vtk"+os.environ["PATH"]
+
 from mantid.simpleapi import *
 from mantid import api
 import unittest
