@@ -611,7 +611,7 @@ class PropertyManager(NonIDF_Properties):
         runs,sum_ws,added      = PropertyManager.sample_run.get_runs_to_sum(None,num_files)
         if len(runs) == 0:
             return (True,[],[])
-            
+        #
         if hasattr(self,'fix_file_extension'):
             fix_file_extension = self.fix_file_extension
         else:

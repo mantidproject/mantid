@@ -326,7 +326,7 @@ class RunList(object):
         for run in run_list:
             file_hint,index = self.get_file_guess(inst_name,run)
             if fix_file_extension:
-                fname,fex_original = os.path.splitext(file_hint)                
+                fname,fex_original = os.path.splitext(file_hint)
             try:
                 file_name = FileFinder.findRuns(file_hint)[0]
                 fpath,fname = os.path.split(file_name)
@@ -334,7 +334,7 @@ class RunList(object):
                 if fix_file_extension:
                     if fex_original.lower()!=fex.lower():
                         # file with the requested extension is not found
-                        raise RuntimeError('Found file but extension is incorrect')
+                        raise RuntimeError('Found file but the extension is incorrect')
                 self._fext[index] = fex
                 self._file_path[index] = fpath
                 #self._last_ind2sum = index
@@ -1077,7 +1077,7 @@ class RunDescriptor(PropDescriptor):
             _check_ext(file_name)
             return (True,file_name)
         except RuntimeError:
-            if fix_file_extension:            
+            if fix_file_extension: # no further search.
                 message = '*** Cannot find file named: {0} on Mantid search paths'.\
                         format(file_hint)
                 if 'be_quet' not in kwargs:
