@@ -5,7 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import os, subprocess
+import os
+import subprocess
 import systemtesting
 import mantid
 
@@ -47,4 +48,3 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
         out, err = p.communicate()
         self.assertEquals(out, b'Hello Mantid\n')
         self.assertTrue(b'Fatal' in err)
-
