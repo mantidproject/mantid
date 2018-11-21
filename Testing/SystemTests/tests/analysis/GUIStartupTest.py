@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import os
+import platform
 import subprocess
 import systemtesting
 import mantid
@@ -21,21 +22,26 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
             f.write('import mantid\n'
                     'mantid.config["logging.channels.consoleChannel.class"]="StdoutChannel"\n'
                     'print("Hello Mantid")\n')
-
-    def skipTests(self):
-        #we rely on finding launch_mantidplot.sh
-        import platform
-        return "Linux" not in platform.platform()
+        #get the mantidplot executable
+        current_platform = platform.platform()
+        mantid_init_dirname = os.path.dirname(os.path.abspath(mantid.__file__))
+        if 'Linux' in current_platform:
+            mantid_exe = os.path.join(mantid_init_dirname,"../launch_mantidplot.sh")
+        elif 'Darwin' in current_platform:
+            mantid_exe = os.path.join(mantid_init_dirname,"../MantidPlot")
+        elif 'Windows' in current_platform:
+            mantid_exe = 'wscript.exe {}'.format(os.path.join(mantid_init_dirname,"../bin/launch_mantidplot.vbs"))
+        else:
+            raise RuntimeError("Unknown operating system")
+        self.cmd='{0} -xq {1}'.format(mantid_exe,self.script)
 
     def cleanup(self):
         if os.path.exists(self.script):
             os.remove(self.script)
 
     def runTest(self):
-        mantid_exe = os.path.join(os.path.dirname(mantid.__file__),"../launch_mantidplot.sh")
-        cmd='{0} -xq {1}'.format(mantid_exe,self.script)
         # good startup
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        p = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()
 
         self.assertEquals(out, b'Hello Mantid\n')
@@ -44,7 +50,6 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
         # failing script
         with open(self.script,'a') as f:
             f.write('raise RuntimeError("GUITest")')
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        p = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()
-        self.assertEquals(out, b'Hello Mantid\n')
         self.assertTrue(b'Fatal' in err)
