@@ -6,15 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import os
+
 from mantid.simpleapi import *
 from mantid import api
 import unittest
 import inspect
 import numpy as np
 import sys
-import copy
-from Direct.PropertyManager import PropertyManager
 
+from Direct.PropertyManager import PropertyManager
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
@@ -1228,8 +1228,35 @@ class DirectPropertyManagerTest(unittest.TestCase):
         for valExp,valReal in zip(exp_rez,rez):
             self.assertAlmostEqual(valExp,valReal)
 
+    def test_fix_file_extension(self):
+        propman = self.prop_man
+        propman.sample_run = [11001,11111]
+        propman.data_file_ext = '.nxs'
+        propman.fix_file_extension = False        
+        propman.sum_runs = True
+
+        ok,not_found,found = propman.find_files_to_sum()
+        self.assertFalse(ok)
+        self.assertEqual(len(not_found),1)
+        self.assertEqual(len(found),1)
+        self.assertEqual(not_found[0],11111)
+        self.assertEqual(found[0],11001)
+
+        # clear previously found file extensions, stored in the run list 
+        propman.sample_run = []
+        propman.sample_run = [11001,11111]        
+        propman.fix_file_extension = True        
+
+
+        ok,not_found,found = propman.find_files_to_sum()
+        self.assertFalse(ok)
+        self.assertEqual(len(not_found),2)
+        self.assertEqual(len(found),0)
+        self.assertEqual(not_found[0],11001)        
+        self.assertEqual(not_found[1],11111)
+
 
 if __name__ == "__main__":
-    #tester = DirectPropertyManagerTest('test_average_accuracy')
+    #tester = DirectPropertyManagerTest('test_fix_file_extension')
     #tester.run()
     unittest.main()
