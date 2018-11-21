@@ -7,20 +7,20 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 import six
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QFrame, QMessageBox)  # noqa
+from qtpy.QtGui import (QDoubleValidator)  # noqa
 import reduction_gui.widgets.util as util
 import sys
 from reduction_gui.reduction.sans.hfir_detector_script import Detector
 from reduction_gui.widgets.base_widget import BaseWidget
-import ui.sans.ui_hfir_detector
-
-IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
-    from mantid.api import AnalysisDataService
-    IS_IN_MANTIDPLOT = True
-except:
-    pass
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("DetectorWidget").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from mantid.api import AnalysisDataService
+from reduction_gui.reduction.scripter import execute_script
 
 if six.PY3:
     unicode = str
@@ -39,10 +39,10 @@ class DetectorWidget(BaseWidget):
                  data_proxy=None, use_sample_dc=False, options_callback=None):
         super(DetectorWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
 
-        class DetFrame(QtGui.QFrame, ui.sans.ui_hfir_detector.Ui_Frame):
+        class DetFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/sans/hfir_detector.ui', baseinstance=self)
 
         self._content = DetFrame(self)
         self._layout.addWidget(self._content)
@@ -66,46 +66,46 @@ class DetectorWidget(BaseWidget):
             widgets loaded through the .ui file.
         """
         # Validators
-        self._content.x_pos_edit.setValidator(QtGui.QDoubleValidator(self._content.x_pos_edit))
-        self._content.y_pos_edit.setValidator(QtGui.QDoubleValidator(self._content.y_pos_edit))
-        self._content.beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._content.beam_radius_edit))
-        self._content.min_sensitivity_edit.setValidator(QtGui.QDoubleValidator(self._content.min_sensitivity_edit))
-        self._content.max_sensitivity_edit.setValidator(QtGui.QDoubleValidator(self._content.max_sensitivity_edit))
+        self._content.x_pos_edit.setValidator(QDoubleValidator(self._content.x_pos_edit))
+        self._content.y_pos_edit.setValidator(QDoubleValidator(self._content.y_pos_edit))
+        self._content.beam_radius_edit.setValidator(QDoubleValidator(self._content.beam_radius_edit))
+        self._content.min_sensitivity_edit.setValidator(QDoubleValidator(self._content.min_sensitivity_edit))
+        self._content.max_sensitivity_edit.setValidator(QDoubleValidator(self._content.max_sensitivity_edit))
 
-        self.connect(self._content.data_file_browse_button_2, QtCore.SIGNAL("clicked()"), self._flood_beam_finder_browse)
+        self._content.data_file_browse_button_2.clicked.connect(self._flood_beam_finder_browse)
 
-        self.connect(self._content.sensitivity_chk, QtCore.SIGNAL("clicked(bool)"), self._sensitivity_clicked)
-        self.connect(self._content.sensitivity_browse_button, QtCore.SIGNAL("clicked()"), self._sensitivity_browse)
-        self.connect(self._content.sensitivity_dark_browse_button, QtCore.SIGNAL("clicked()"), self._sensitivity_dark_browse)
+        self._content.sensitivity_chk.clicked.connect(self._sensitivity_clicked)
+        self._content.sensitivity_browse_button.clicked.connect(self._sensitivity_browse)
+        self._content.sensitivity_dark_browse_button.clicked.connect(self._sensitivity_dark_browse)
 
-        self.connect(self._content.use_beam_finder_checkbox, QtCore.SIGNAL("clicked(bool)"), self._use_beam_finder_changed)
-        self.connect(self._content.scattering_data, QtCore.SIGNAL("clicked()"), self._center_method_changed)
-        self.connect(self._content.direct_beam, QtCore.SIGNAL("clicked()"), self._center_method_changed)
+        self._content.use_beam_finder_checkbox.clicked.connect(self._use_beam_finder_changed)
+        self._content.scattering_data.clicked.connect(self._center_method_changed)
+        self._content.direct_beam.clicked.connect(self._center_method_changed)
 
-        self.connect(self._content.use_sample_center_checkbox, QtCore.SIGNAL("clicked(bool)"), self._use_sample_center_changed)
-        self.connect(self._content.scattering_data_2, QtCore.SIGNAL("clicked()"), self._flood_center_method_changed)
-        self.connect(self._content.direct_beam_2, QtCore.SIGNAL("clicked()"), self._flood_center_method_changed)
-        self.connect(self._content.use_beam_finder_checkbox_2, QtCore.SIGNAL("clicked(bool)"), self._flood_use_beam_finder_changed)
+        self._content.use_sample_center_checkbox.clicked.connect(self._use_sample_center_changed)
+        self._content.scattering_data_2.clicked.connect(self._flood_center_method_changed)
+        self._content.direct_beam_2.clicked.connect(self._flood_center_method_changed)
+        self._content.use_beam_finder_checkbox_2.clicked.connect(self._flood_use_beam_finder_changed)
 
-        self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._beam_finder_browse)
+        self._content.data_file_browse_button.clicked.connect(self._beam_finder_browse)
 
         self._use_beam_finder_changed(self._content.use_beam_finder_checkbox.isChecked())
         self._content.use_sample_center_checkbox.setChecked(True)
         self._sensitivity_clicked(self._content.sensitivity_chk.isChecked())
         self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
 
-        self.connect(self._content.sensitivity_plot_button, QtCore.SIGNAL("clicked()"), self._sensitivity_plot_clicked)
-        self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"), self._data_file_plot_clicked)
-        self.connect(self._content.sensitivity_dark_plot_button, QtCore.SIGNAL("clicked()"), self._sensitivity_dark_plot_clicked)
-        self.connect(self._content.data_file_plot_button_2, QtCore.SIGNAL("clicked()"), self._data_file_plot2_clicked)
+        self._content.sensitivity_plot_button.clicked.connect(self._sensitivity_plot_clicked)
+        self._content.data_file_plot_button.clicked.connect(self._data_file_plot_clicked)
+        self._content.sensitivity_dark_plot_button.clicked.connect(self._sensitivity_dark_plot_clicked)
+        self._content.data_file_plot_button_2.clicked.connect(self._data_file_plot2_clicked)
 
         # Patch sensitivity
-        self.connect(self._content.patch_sensitivity_check, QtCore.SIGNAL("clicked()"), self._patch_checked)
-        self.connect(self._content.draw_patch_button, QtCore.SIGNAL("clicked()"), self._draw_patch)
-        self.connect(self._content.create_sensitivity_button, QtCore.SIGNAL("clicked()"), self._create_sensitivity)
+        self._content.patch_sensitivity_check.clicked.connect(self._patch_checked)
+        self._content.draw_patch_button.clicked.connect(self._draw_patch)
+        self._content.create_sensitivity_button.clicked.connect(self._create_sensitivity)
         self._patch_checked()
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._content.sensitivity_plot_button.hide()
             self._content.sensitivity_dark_plot_button.hide()
             self._content.data_file_plot_button.hide()
@@ -143,28 +143,28 @@ class DetectorWidget(BaseWidget):
         self._content.create_sensitivity_button.setEnabled(enabled)
 
     def _draw_patch(self):
-        if IS_IN_MANTIDPLOT:
+        if self._has_instrument_view:
             self.show_instrument(self._content.sensitivity_file_edit.text,
                                  workspace=self.patch_ws, tab=2, reload=True, data_proxy=None)
 
     def _create_sensitivity(self):
-        if IS_IN_MANTIDPLOT and self.options_callback is not None:
-            # Get patch information
-            patch_ws = ""
-            if AnalysisDataService.doesExist(self.patch_ws):
-                patch_ws = self.patch_ws
+        # Get patch information
+        patch_ws = ""
+        if AnalysisDataService.doesExist(self.patch_ws):
+            patch_ws = self.patch_ws
 
-            try:
-                reduction_table_ws = self.options_callback()
-                filename = self._content.sensitivity_file_edit.text()
-                script  = "ComputeSensitivity(Filename='%s',\n" % filename
-                script += "                   ReductionProperties='%s',\n" % reduction_table_ws
-                script += "                   OutputWorkspace='sensitivity',\n"
-                script += "                   PatchWorkspace='%s')\n" % patch_ws
-                mantidplot.runPythonScript(script, True)
-            except:
-                print("Could not compute sensitivity")
-                print(sys.exc_info()[1])
+        try:
+            reduction_table_ws = self.options_callback()
+            filename = self._content.sensitivity_file_edit.text()
+            script  = "ComputeSensitivity(Filename='%s',\n" % filename
+            script += "                   ReductionProperties='%s',\n" % reduction_table_ws
+            script += "                   OutputWorkspace='sensitivity',\n"
+            script += "                   PatchWorkspace='%s')\n" % patch_ws
+
+            execute_script(script)
+        except:
+            print("Could not compute sensitivity")
+            print(sys.exc_info()[1])
 
     def _sensitivity_plot_clicked(self):
         self.show_instrument(file_name=self._content.sensitivity_file_edit.text)
@@ -234,7 +234,7 @@ class DetectorWidget(BaseWidget):
         self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
 
         if len(popup_warning)>0:
-            QtGui.QMessageBox.warning(self, "Turn ON advanced interface", popup_warning)
+            QMessageBox.warning(self, "Turn ON advanced interface", popup_warning)
 
     def get_state(self):
         """

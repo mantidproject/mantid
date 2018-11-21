@@ -5,29 +5,15 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UsageService.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/reference_existing_object.hpp>
 
 using Mantid::Kernel::UsageService;
 using Mantid::Kernel::UsageServiceImpl;
-using Mantid::PythonInterface::Converters::pyObjToStr;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(UsageServiceImpl)
-
-namespace {
-void setApplication(UsageServiceImpl *self, const object &name) {
-  self->setApplication(pyObjToStr(name));
-}
-
-void registerFeatureUsage(UsageServiceImpl *self, const object &type,
-                          const object &name, const bool internal) {
-  self->registerFeatureUsage(pyObjToStr(type), pyObjToStr(name), internal);
-}
-
-} // anonymous namespace
 
 void export_UsageService() {
 
@@ -47,13 +33,14 @@ void export_UsageService() {
       .def("setInterval", &UsageServiceImpl::setEnabled,
            (arg("self"), arg("seconds")),
            "Sets the interval that the timer checks for tasks.")
-      .def("setApplication", &setApplication, (arg("self"), arg("name")),
+      .def("setApplication", &UsageServiceImpl::setApplication,
+           (arg("self"), arg("name")),
            "Sets the application name that has invoked Mantid.")
       .def("getApplication", &UsageServiceImpl::getApplication, arg("self"),
            "Gets the application name that has invoked Mantid.")
       .def("registerStartup", &UsageServiceImpl::registerStartup, arg("self"),
            "Registers the startup of Mantid.")
-      .def("registerFeatureUsage", &registerFeatureUsage,
+      .def("registerFeatureUsage", &UsageServiceImpl::registerFeatureUsage,
            (arg("self"), arg("type"), arg("name"), arg("internal")),
            "Registers the use of a feature in Mantid.")
       .def("Instance", &UsageService::Instance,

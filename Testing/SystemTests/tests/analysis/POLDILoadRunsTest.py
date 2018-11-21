@@ -5,13 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,bare-except
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.api import *
 import numpy as np
 
 
-class POLDILoadRunsTest(stresstesting.MantidStressTest):
+class POLDILoadRunsTest(systemtesting.MantidSystemTest):
     """This assembly of test cases checks that the behavior of PoldiLoadRuns is correct."""
 
     def runTest(self):

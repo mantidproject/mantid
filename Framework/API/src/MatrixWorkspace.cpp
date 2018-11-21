@@ -23,6 +23,7 @@
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
@@ -32,7 +33,6 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
-
 #include <functional>
 #include <numeric>
 
@@ -48,6 +48,7 @@ using Kernel::V3D;
 namespace {
 /// static logger
 Kernel::Logger g_log("MatrixWorkspace");
+constexpr const double EPSILON{1.0e-9};
 } // namespace
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
@@ -962,47 +963,66 @@ bool MatrixWorkspace::isHistogramData() const {
  *  @return whether the workspace contains common X bins
  */
 bool MatrixWorkspace::isCommonBins() const {
-  if (!m_isCommonBinsFlagSet) {
-    m_isCommonBinsFlag = true;
+  if (m_isCommonBinsFlagSet) {
+    return m_isCommonBinsFlag;
+  }
+  m_isCommonBinsFlagSet = true;
+  m_isCommonBinsFlag = true;
+  const size_t numHist = this->getNumberHistograms();
+  // there being only one or zero histograms is accepted as not being an error
+  if (numHist <= 1) {
+    return m_isCommonBinsFlag;
+  }
 
-    const size_t numHist = getNumberHistograms();
-    // there being only one or zero histograms is accepted as not being an error
-    if (numHist > 1) {
-      const size_t numBins = x(0).size();
-      for (size_t i = 1; i < numHist; ++i) {
-        if (x(i).size() != numBins) {
+  // First check if the x-axis shares a common ptr.
+  const HistogramData::HistogramX *first = &x(0);
+  for (size_t i = 1; i < numHist; ++i) {
+    if (&x(i) != first) {
+      m_isCommonBinsFlag = false;
+      break;
+    }
+  }
+
+  // If true, we may return here.
+  if (m_isCommonBinsFlag) {
+    return m_isCommonBinsFlag;
+  }
+
+  m_isCommonBinsFlag = true;
+  // Check that that size of each histogram is identical.
+  const size_t numBins = x(0).size();
+  for (size_t i = 1; i < numHist; ++i) {
+    if (x(i).size() != numBins) {
+      m_isCommonBinsFlag = false;
+      break;
+    }
+  }
+
+  // Check that the values of each histogram are identical.
+  if (m_isCommonBinsFlag) {
+    const size_t numBins = x(0).size();
+    const size_t lastSpec = numHist - 1;
+    for (size_t i = 0; i < lastSpec; ++i) {
+      const auto &xi = x(i);
+      const auto &xip1 = x(i + 1);
+      for (size_t j = 0; j < numBins; ++j) {
+        const double a = xi[j];
+        const double b = xip1[j];
+        // Check for NaN and infinity before comparing for equality
+        if (std::isfinite(a) && std::isfinite(b)) {
+          if (std::abs(a - b) > EPSILON) {
+            m_isCommonBinsFlag = false;
+            break;
+          }
+          // Otherwise we check that both are NaN or both are infinity
+        } else if ((std::isnan(a) != std::isnan(b)) ||
+                   (std::isinf(a) != std::isinf(b))) {
           m_isCommonBinsFlag = false;
           break;
         }
       }
-
-      // there being only one or zero histograms is accepted as not being an
-      // error
-      if (m_isCommonBinsFlag) {
-        // otherwise will compare some of the data, to save time just check two
-        // the first and the last
-        const size_t lastSpec = numHist - 1;
-        // Quickest check is to see if they are actually the same vector
-        if (&(x(0)[0]) != &(x(lastSpec)[0])) {
-          // Now check numerically
-          const double first = std::accumulate(x(0).begin(), x(0).end(), 0.);
-          const double last =
-              std::accumulate(x(lastSpec).begin(), x(lastSpec).end(), 0.);
-          if (std::abs(first - last) / std::abs(first + last) > 1.0E-9) {
-            m_isCommonBinsFlag = false;
-          }
-
-          // handle Nan's and inf's
-          if ((std::isinf(first) != std::isinf(last)) ||
-              (std::isnan(first) != std::isnan(last))) {
-            m_isCommonBinsFlag = false;
-          }
-        }
-      }
     }
-    m_isCommonBinsFlagSet = true;
   }
-
   return m_isCommonBinsFlag;
 }
 
@@ -1098,6 +1118,25 @@ MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
   }
 
   return it->second;
+}
+
+const std::vector<size_t>
+MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
+  auto it = m_masks.find(workspaceIndex);
+  // Throw if there are no masked bins for this spectrum. The caller should
+  // check first using hasMaskedBins!
+  if (it == m_masks.end()) {
+    throw Kernel::Exception::IndexError(workspaceIndex, 0,
+                                        "MatrixWorkspace::maskedBins");
+  }
+
+  auto maskedBins = it->second;
+  std::vector<size_t> maskedIds;
+  maskedIds.reserve(maskedBins.size());
+  for (auto &mb : maskedBins) {
+    maskedIds.push_back(mb.first);
+  }
+  return maskedIds;
 }
 
 /** Set the list of masked bins for given workspaceIndex. Not thread safe.

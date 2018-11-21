@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
-import stresstesting
+import systemtesting
 
 from mantid.api import MatrixWorkspace, mtd
 from mantid.simpleapi import *
@@ -77,7 +77,7 @@ class ILLIN5Tests(unittest.TestCase):
 #====================================================================================
 
 
-class LoadILLIN5Test(stresstesting.MantidStressTest):
+class LoadILLIN5Test(systemtesting.MantidSystemTest):
     _success=False
 
     def runTest(self):

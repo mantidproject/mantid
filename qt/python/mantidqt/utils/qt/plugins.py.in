@@ -34,7 +34,7 @@ def setup_library_paths_win():
     at runtime.
     """
     QCoreApplication.addLibraryPath(
-        '@QT_PLUGINS_PATH@'.replace('%V', QT_VERSION[0])
+        os.path.abspath('@QT_PLUGINS_PATH@'.replace('%V', QT_VERSION[0]))
     )
 
 # Set the implementation appropriate for the platform

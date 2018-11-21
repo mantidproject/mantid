@@ -10,10 +10,10 @@
     in successive reductions.
 """
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 
 
-class ReuseExistingCalibration(stresstesting.MantidStressTest):
+class ReuseExistingCalibration(systemtesting.MantidSystemTest):
     det_pos_first_run = None
     det_pos_second_run = None
 

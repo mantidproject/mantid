@@ -244,6 +244,15 @@ void export_MatrixWorkspace() {
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
            "Returns the caption for the Y axis")
+      .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
+           (arg("self"), arg("workspaceIndex")),
+           "Returns true if this spectrum contains any masked bins")
+      .def("maskedBinsIndices", &MatrixWorkspace::maskedBinsIndices,
+           (arg("self"), arg("workspaceIndex")),
+           "Returns all the masked bins' IDs in this spectrum. "
+           ":class:`~mantid.api.MatrixWorkspace.hasMaskedBins` MUST be called "
+           "first to check if any bins are "
+           "masked, otherwise an exception will be thrown")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),

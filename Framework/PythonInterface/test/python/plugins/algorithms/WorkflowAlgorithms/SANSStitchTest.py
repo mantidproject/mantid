@@ -707,7 +707,6 @@ class SANSStitchTest(unittest.TestCase):
             expected_y_array = [0.5] * 5 + [1.5] * 4
             
             np.testing.assert_equal(y_array, expected_y_array)
-   
 
     def test_that_can_merge_2D_reduction_when_fitting_set_to_none(self):
         # create an input workspace that has multiple spectra
@@ -757,6 +756,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('ScaleFactor', 1.0)
         alg.setProperty('Mode', 'None')
         alg.setProperty('OutputWorkspace', 'dummy_name')
+
         errors = alg.validateInputs()
         self.assertEqual(0, len(errors))
 
