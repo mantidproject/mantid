@@ -93,6 +93,18 @@ Sample
 Full Treatment
 ##############
 
+Full treatment is built by stacking up unary reductions with corresponding **ProcessAs**. The diagram below illustrates the flow of processing.
+Letters denote absorber (A), beam (B), transmission (T), container (C), reference (R), sample (S).
+A is processed first, and passed to all the other processes.
+B takes only A as input, and the output of B is needed by the rest.
+T takes A and B as inputs, and the calculated transmission is used by C, R and S respectively.
+C takes A, B and the container T as input, and the output is supplied to R and S respectively.
+R takes A, B, its T, and C, and the output is seeded to S.
+S takes A, B, its T and C, as well as R as inputs.
+The output of S is passed to final step integration.
+
+.. diagram:: ILLSANS-v1_all_wkflw.dot
+
 This example below performs a complete reduction for D11 data.
 
 .. note::
