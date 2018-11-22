@@ -7,11 +7,13 @@
 #ifndef MANTID_DATAHANDLING_ReadMaterial_H_
 #define MANTID_DATAHANDLING_ReadMaterial_H_
 
-#include "MantidKernel/Material.h"
 #include "MantidKernel/MaterialBuilder.h"
 
 #include <map>
 namespace Mantid {
+namespace Kernel {
+class Material;
+}
 namespace DataHandling {
 using ValidationErrors = std::map<std::string, std::string>;
 /**
