@@ -104,8 +104,8 @@ class SANSILLIntegration(PythonAlgorithm):
                                              EnabledWhenProperty('NumberOfWedges',
                                                                  PropertyCriterion.IsNotDefault), LogicOperator.And)
 
-        self.declareProperty(WorkspaceGroupProperty('WedgeWorkspace', '', direction=Direction.Output,
-                                                    optional=PropertyMode.Optional), doc='WorkspaceGroup containing I(Q) for each azimuthal wedge.')
+        self.declareProperty(WorkspaceGroupProperty('WedgeWorkspace', '', direction=Direction.Output, optional=PropertyMode.Optional),
+                             doc='WorkspaceGroup containing I(Q) for each azimuthal wedge.')
         self.setPropertySettings('WedgeWorkspace', iq_with_wedges)
 
         self.declareProperty(name='WedgeAngle', defaultValue=30., validator=FloatBoundedValidator(lower=0.),

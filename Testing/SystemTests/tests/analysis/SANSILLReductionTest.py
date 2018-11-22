@@ -102,7 +102,8 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
         AddSampleLog(Workspace='ctr', LogName='ProcessedAs', LogText='Transmission')
 
         # Container
-        SANSILLReduction(Run='241239', ProcessAs='Container', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', TransmissionInputWorkspace='ctr', OutputWorkspace='can')
+        SANSILLReduction(Run='241239', ProcessAs='Container', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
+                         TransmissionInputWorkspace='ctr', OutputWorkspace='can')
 
         # Sample transmission known
         CreateSingleValuedWorkspace(DataValue=0.52163, ErrorValue=0.00090538, OutputWorkspace='str')
@@ -115,15 +116,18 @@ class ILL_D22_Test(systemtesting.MantidSystemTest):
                          OutputWorkspace='ref', SensitivityOutputWorkspace='sens')
 
         # remove the errors on the sensitivity, since they are too large because it is not water
-        CreateWorkspace(DataX=mtd['sens'].extractX(), DataY=mtd['sens'].extractY(), NSpec=mtd['sens'].getNumberHistograms(), OutputWorkspace='sens', ParentWorkspace='sens')
+        CreateWorkspace(DataX=mtd['sens'].extractX(), DataY=mtd['sens'].extractY(), NSpec=mtd['sens'].getNumberHistograms(),
+                        OutputWorkspace='sens', ParentWorkspace='sens')
         AddSampleLog(Workspace='sens', LogName='ProcessedAs', LogText='Reference')
 
         # Sample
-        SANSILLReduction(Run='241240', ProcessAs='Sample', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db', TransmissionInputWorkspace='str',
-                         ContainerInputWorkspace='can', MaskedInputWorkspace='mask', SensitivityInputWorkspace='sens', OutputWorkspace='sample')
+        SANSILLReduction(Run='241240', ProcessAs='Sample', AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
+                         TransmissionInputWorkspace='str', ContainerInputWorkspace='can', MaskedInputWorkspace='mask',
+                         SensitivityInputWorkspace='sens', OutputWorkspace='sample')
 
         # Integration
         SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', CalculateResolution='None')
+
 
 class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
 
@@ -154,7 +158,8 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='093407', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='ctr')
 
         # Container
-        SANSILLReduction(Run='093409', ProcessAs='Container', BeamInputWorkspace='beam', TransmissionInputWorkspace='ctr', OutputWorkspace='can')
+        SANSILLReduction(Run='093409', ProcessAs='Container', BeamInputWorkspace='beam',
+                         TransmissionInputWorkspace='ctr', OutputWorkspace='can')
 
         # Sample transmission
         SANSILLReduction(Run='093408', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='str')
@@ -163,7 +168,9 @@ class ILL_D33_VTOF_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='093410', ProcessAs='Sample', BeamInputWorkspace='beam', TransmissionInputWorkspace='str',
                          ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample')
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1', OutputWorkspace='iq')
+        SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1',
+                           OutputWorkspace='iq')
+
 
 class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
 
@@ -194,7 +201,8 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
         SANSILLReduction(Run='093412', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='ctr')
 
         # Container
-        SANSILLReduction(Run='093414', ProcessAs='Container', BeamInputWorkspace='beam', TransmissionInputWorkspace='ctr', OutputWorkspace='can')
+        SANSILLReduction(Run='093414', ProcessAs='Container', BeamInputWorkspace='beam',
+                         TransmissionInputWorkspace='ctr', OutputWorkspace='can')
 
         # Sample Transmission
         SANSILLReduction(Run='093413', ProcessAs='Transmission', BeamInputWorkspace='beam', OutputWorkspace='str')
@@ -204,7 +212,9 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
                          ContainerInputWorkspace='can', MaskedInputWorkspace='mask', OutputWorkspace='sample')
 
         # I(Q)
-        SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1', OutputWorkspace='iq')
+        SANSILLIntegration(InputWorkspace='sample', CalculateResolution='None', OutputBinning='0.005,-0.1,1',
+                           OutputWorkspace='iq')
+
 
 class ILL_D33_Test(systemtesting.MantidSystemTest):
 
