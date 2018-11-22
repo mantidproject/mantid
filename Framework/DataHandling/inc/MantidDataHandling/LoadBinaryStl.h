@@ -7,10 +7,15 @@
 #ifndef MANTID_DATAHANDLING_LOADBINARYSTL_H_
 #define MANTID_DATAHANDLING_LOADBINARYSTL_H_
 #include "MantidDataHandling/LoadStl.h"
-#include "MantidGeometry/Objects/MeshObject.h"
-#include "MantidKernel/BinaryStreamReader.h"
 
 namespace Mantid {
+namespace Kernel {
+class BinaryStreamReader;
+}
+
+namespace Geometry {
+class MeshObject;
+}
 namespace DataHandling {
 
 class DLLExport LoadBinaryStl : LoadStl {

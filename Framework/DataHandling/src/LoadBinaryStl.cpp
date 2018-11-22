@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadBinaryStl.h"
+#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidKernel/BinaryStreamReader.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <Poco/File.h>
 #include <boost/functional/hash.hpp>

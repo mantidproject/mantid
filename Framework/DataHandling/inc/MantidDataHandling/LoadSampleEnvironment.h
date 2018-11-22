@@ -8,10 +8,14 @@
 #define DATAHANDLING_LOAD_ENVIRONMENT_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Objects/MeshObject.h"
+
 namespace Mantid {
+namespace Geometry {
+class MeshObject;
+}
 namespace DataHandling {
-/**  Load Environment into the sample of a workspace, either replacing the current environment, or replacing it, you may also set the material
+/**  Load Environment into the sample of a workspace, either replacing the
+   current environment, or replacing it, you may also set the material
 
      The following file types are supported
 

@@ -7,7 +7,6 @@
 #ifndef MANTID_DATAHANDLING_LOADSTL_H_
 #define MANTID_DATAHANDLING_LOADSTL_H_
 
-#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include <boost/functional/hash.hpp>
@@ -17,6 +16,10 @@ namespace {
 Mantid::Kernel::Logger g_logstl("LoadStl");
 }
 namespace Mantid {
+
+namespace Geometry {
+class MeshObject;
+}
 namespace DataHandling {
 
 struct HashV3DPair {

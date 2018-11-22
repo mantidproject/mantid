@@ -22,8 +22,7 @@
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-#include <stdio.h>
-#include <string.h>
+
 
 namespace Mantid {
 namespace DataHandling {

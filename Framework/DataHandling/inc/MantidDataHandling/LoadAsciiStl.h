@@ -7,10 +7,16 @@
 #ifndef MANTID_DATAHANDLING_LOADASCIISTL_H_
 #define MANTID_DATAHANDLING_LOADASCIISTL_H_
 #include "MantidDataHandling/LoadStl.h"
-#include "MantidGeometry/Objects/MeshObject.h"
-#include "MantidKernel/V3D.h"
-#include <fstream>
+#include <iosfwd>
 namespace Mantid {
+
+namespace Kernel {
+class V3D;
+}
+
+namespace Geometry {
+class MeshObject;
+}
 namespace DataHandling {
 
 class DLLExport LoadAsciiStl : LoadStl {

@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadAsciiStl.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string.hpp>
