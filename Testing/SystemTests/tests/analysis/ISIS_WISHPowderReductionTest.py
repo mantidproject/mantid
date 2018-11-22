@@ -1,4 +1,4 @@
-from stresstesting import MantidStressTest
+from systemtesting import MantidSystemTest
 from wish.reduce import Wish_Run
 
 from mantid import config
@@ -29,7 +29,7 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 
 
-class WISHPowderReductionTest(MantidStressTest):
+class WISHPowderReductionTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
         input_files = ["WISHvana41865-1foc.nxs", "WISHvana41865-2foc.nxs", "WISHvana41865-3foc.nxs",

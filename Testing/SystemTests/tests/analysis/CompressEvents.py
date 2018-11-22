@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class CompressEventsTesting(stresstesting.MantidStressTest):
+class CompressEventsTesting(systemtesting.MantidSystemTest):
     event_files = ["PG3_4844_event.nxs"] # /SNS/PG3/IPTS-2767/0/ for 2.5 hours
 
     def requiredFiles(self):

@@ -30,6 +30,7 @@ public:
 public slots:
   void setStartX(double);
   void setEndX(double);
+  void setPlotSpectrum(int spectrum);
   void hideMultipleDataSelection();
   void showMultipleDataSelection();
   void updateRangeSelectors();

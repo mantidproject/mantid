@@ -5,7 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from sans.common.enums import SANSInstrument, ISISReductionMode, DetectorType
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QFileDialog)  # noqa
+from qtpy.QtCore import (QSettings)  # noqa
 import os
 
 
@@ -174,7 +175,7 @@ def get_instrument_from_gui_selection(gui_selection):
 
 def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func):
     # Get the last location of the user file
-    settings = QtCore.QSettings()
+    settings = QSettings()
     settings.beginGroup(q_settings_group_key)
     last_path = settings.value(q_settings_key, "", type=str)
     settings.endGroup()
@@ -185,13 +186,16 @@ def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settin
     # Save the new location
     new_path, _ = os.path.split(func())
     if new_path:
-        settings = QtCore.QSettings()
+        settings = QSettings()
         settings.beginGroup(q_settings_group_key)
         settings.setValue(q_settings_key, new_path)
         settings.endGroup()
 
 
 def open_file_dialog(line_edit, filter_text, directory):
-    file_name = QtGui.QFileDialog.getOpenFileName(None, 'Open', directory, filter_text)
-    if file_name:
-        line_edit.setText(file_name)
+    file_name = QFileDialog.getOpenFileName(None, 'Open', directory, filter_text)
+    if not file_name:
+        return
+    if isinstance(file_name, tuple):
+        file_name = file_name[0]
+    line_edit.setText(file_name)

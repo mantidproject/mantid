@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import sys
-import stresstesting
+import systemtesting
 from ErrorReporter.error_report_presenter import ErrorReporterPresenter # noqa
 
 if sys.version_info.major < 3:
@@ -15,7 +15,7 @@ else:
     from unittest import mock
 
 
-class ErrorReportServerTests(stresstesting.MantidStressTest):
+class ErrorReportServerTests(systemtesting.MantidSystemTest):
     def setUp(self):
         mock_view = mock.MagicMock()
         self.error_report_presenter = ErrorReporterPresenter(mock_view, '1')
