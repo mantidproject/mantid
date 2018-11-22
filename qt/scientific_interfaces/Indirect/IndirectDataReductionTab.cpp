@@ -158,8 +158,8 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 
   IAlgorithm_sptr createWsAlg =
       AlgorithmManager::Instance().create("CreateWorkspace");
-	createWsAlg->setChild(true);
-	createWsAlg->initialize();
+  createWsAlg->setChild(true);
+  createWsAlg->initialize();
   createWsAlg->setProperty("OutputWorkspace", "__energy");
   createWsAlg->setProperty("DataX", x);
   createWsAlg->setProperty("DataY", y);
@@ -171,8 +171,8 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 
   IAlgorithm_sptr convertHistAlg =
       AlgorithmManager::Instance().create("ConvertToHistogram");
-	convertHistAlg->setChild(true);
-	convertHistAlg->initialize();
+  convertHistAlg->setChild(true);
+  convertHistAlg->initialize();
   convertHistAlg->setProperty("InputWorkspace", energyWs);
   convertHistAlg->setProperty("OutputWorkspace", "__energy");
   convertHistAlg->execute();
@@ -180,8 +180,8 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 
   IAlgorithm_sptr loadInstAlg =
       AlgorithmManager::Instance().create("LoadInstrument");
-	loadInstAlg->setChild(true);
-	loadInstAlg->initialize();
+  loadInstAlg->setChild(true);
+  loadInstAlg->initialize();
   loadInstAlg->setProperty("Workspace", energyWs);
   loadInstAlg->setProperty("InstrumentName", instName.toStdString());
   loadInstAlg->setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -196,8 +196,8 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 
   IAlgorithm_sptr loadParamAlg =
       AlgorithmManager::Instance().create("LoadParameterFile");
-	loadParamAlg->setChild(true);
-	loadParamAlg->initialize();
+  loadParamAlg->setChild(true);
+  loadParamAlg->initialize();
   loadParamAlg->setProperty("Workspace", energyWs);
   loadParamAlg->setProperty("Filename", ipfFilename.toStdString());
   loadParamAlg->execute();
@@ -216,8 +216,8 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 
   IAlgorithm_sptr convUnitsAlg =
       AlgorithmManager::Instance().create("ConvertUnits");
-	convUnitsAlg->setChild(true);
-	convUnitsAlg->initialize();
+  convUnitsAlg->setChild(true);
+  convUnitsAlg->initialize();
   convUnitsAlg->setProperty("InputWorkspace", energyWs);
   convUnitsAlg->setProperty("OutputWorkspace", "__tof");
   convUnitsAlg->setProperty("Target", "TOF");
