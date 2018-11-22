@@ -92,6 +92,7 @@ public:
         histoWksp);
     checkWorkspaceMetadata(*histoWksp);
     checkWorkspaceHistoData(*histoWksp);
+    TS_ASSERT(Mock::VerifyAndClear(mockBroker.get()));
   }
 
 private:

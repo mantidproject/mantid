@@ -67,7 +67,7 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(2))
+        .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
@@ -93,7 +93,6 @@ public:
         eventWksp);
     checkWorkspaceMetadata(*eventWksp);
     checkWorkspaceEventData(*eventWksp);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockBroker));
   }
 
   void test_Multiple_Period_Event_Stream() {
