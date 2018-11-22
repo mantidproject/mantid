@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         WorkspaceGroup, WorkspaceGroupProperty, ITableWorkspaceProperty,
-                        Progress, PropertyMode, AnalysisDataService)
+                        Progress, PropertyMode)
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 
