@@ -218,8 +218,10 @@ void IndirectSqw::plotSpectrumClicked() {
 void IndirectSqw::plotContourClicked() {
   setPlotContourIsPlotting(true);
 
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
-    plot2D(QString::fromStdString(m_pythonExportWsName));
+	if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
+		QString pyInput = "from mantidplot import plot2D\nimportMatrixWorkspace('" + QString::fromStdString(m_pythonExportWsName) + "').plotGraph2D()\n";
+		m_pythonRunner.runPythonCode(pyInput);
+	}
 
   setPlotContourIsPlotting(false);
 }
