@@ -68,7 +68,7 @@ void LoadSampleEnvironment::init() {
 
   // Matrix to rotate mesh
   declareProperty(make_unique<ArrayProperty<double>>(
-                      "rotationMatrix", "1.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0"),
+                      "RotationMatrix", "1.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0"),
                   "Rotation Matrix in format x1,x2,x3,y1,y2,y3,z1,z2,z3");
 }
 
