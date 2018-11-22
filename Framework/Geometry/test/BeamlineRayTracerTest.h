@@ -2,6 +2,7 @@
 #define BEAMLINERAYTRACERTEST_H_
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
@@ -11,6 +12,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/make_shared.hpp>
@@ -23,8 +25,19 @@ using Mantid::Kernel::V3D;
 using namespace Mantid::Kernel::Strings;
 using namespace ComponentCreationHelper;
 namespace RayTracer = Mantid::Geometry::BeamlineRayTracer;
+// Define helper type alias for results of ray trace
+using RayTraces = std::vector<Links>;
 
 class BeamlineRayTracerTest : public CxxTest::TestSuite {
+
+private:
+  struct RayTraceTestSpec {
+    std::string message; // name of the direction being tested
+    V3D beamDirection;   // direction to test tracing towards
+    double pixelX; // x pixel index within the detector bank, -1 if not using
+    double pixelY; // y pixel index within the detector bank, -1 if not using
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -32,11 +45,6 @@ public:
     return new BeamlineRayTracerTest();
   }
   static void destroySuite(BeamlineRayTracerTest *suite) { delete suite; }
-
-  BeamlineRayTracerTest() {
-    // Start logging framework
-    Mantid::Kernel::ConfigService::Instance();
-  }
 
   void
   test_that_a_trace_for_a_ray_that_intersects_many_components_gives_these_components_as_a_result() {
@@ -50,13 +58,15 @@ public:
     Links results = RayTracer::traceFromSource(testDir, *m_compInfo);
 
     // Check size
-    TS_ASSERT_EQUALS(results.size(), 2);
+    // This should be equal to 2 as the ray will first intersect with the sample
+    // and then intersect with the detector
+    TSM_ASSERT_EQUALS("Ray did not intersect with both sample and detector",
+                      results.size(), 2);
 
     // Check they are actually what we expect: 1 with the sample and 1 with the
     // central detector
-    IComponent_const_sptr centralPixel =
-        m_testInstrument->getComponentByName("pixel-(0;0)");
-    IComponent_const_sptr sampleComp = m_testInstrument->getSample();
+    const auto centralPixel = m_compInfo->indexOfAny("pixel-(0;0)");
+    const auto sampleComp = m_compInfo->sample();
 
     if (!sampleComp) {
       TS_FAIL("Test instrument has been changed, the sample has been removed. "
@@ -91,7 +101,8 @@ public:
     TS_ASSERT_DELTA(firstIntersect.exitPoint.Z(), 0.001, 1e-6);
 
     // Component that should have been intersected
-    TS_ASSERT_EQUALS(firstIntersect.componentID, sampleComp->getComponentID());
+    TS_ASSERT_EQUALS(firstIntersect.componentID,
+                     m_compInfo->componentID(sampleComp));
 
     // Second intersection
     ++resultItr;
@@ -113,8 +124,8 @@ public:
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Z(), 5.004, 1e-6);
 
     // Component that should have been intersected
-    TS_ASSERT_EQUALS(secondIntersect.componentID,
-                     centralPixel->getComponentID());
+    TS_ASSERT_EQUALS(m_compInfo->indexOf(secondIntersect.componentID),
+                     centralPixel);
   }
 
   void
@@ -122,21 +133,20 @@ public:
     // Create the test objects to use
     create_instrument_and_componentInfo();
 
-    // Vector for a ray
+    // Test direction, offset in x to avoid intersection with the source
     V3D testDir(0.010, 0.0, 15.004);
 
     // Do a trace and store the results
-    Links results = RayTracer::traceFromSource(testDir, *m_compInfo);
+    auto results = RayTracer::traceFromSource(testDir, *m_compInfo);
 
     // Check size
     TS_ASSERT_EQUALS(results.size(), 1);
 
     // Check we have what we expect
-    const IComponent *interceptedPixel =
-        m_testInstrument->getComponentByName("pixel-(1;0)").get();
+    const auto interceptedPixel = m_compInfo->indexOfAny("pixel-(1;0)");
 
     // First (and only) intersection
-    Link intersect = results.front();
+    auto intersect = results.front();
 
     // Based on our test ray, the second intersection should occur at these
     // distances.
@@ -154,166 +164,307 @@ public:
     TS_ASSERT_DELTA(intersect.exitPoint.Z(), 5.003464, 1e-6);
 
     // Component that should have been intersected
-    TS_ASSERT_EQUALS(intersect.componentID, interceptedPixel->getComponentID());
+    TS_ASSERT_EQUALS(m_compInfo->indexOf(intersect.componentID),
+                     interceptedPixel);
   }
 
   /**
-   * Test ray tracing into a rectangular detector.
+   * Test ray tracing into a outlined detector.
    *
-   * @param message :: a string for debug information
-   * @param testDir :: direction of track
-   * @param expectX :: expected x index, -1 if off
-   * @param expectY :: expected y index, -1 if off
+   * @param spec :: Parameters for the ray to test
    */
-  void doTestOutlinedDetector(std::string message, V3D testDir,
-                              const double expectX, const double expectY) {
+  void doTestOutlinedDetector(const RayTraceTestSpec &spec) {
 
     // Force to be unit vector
+    auto testDir = spec.beamDirection;
     testDir.normalize();
 
     // Do a trace and store the results
-    Links results = RayTracer::traceFromSample(testDir, *m_compInfoOutlined);
+    auto results = RayTracer::traceFromSample(testDir, *m_compInfoOutlined);
 
     // Expect no intersection
-    if (expectY == -1) {
-      TSM_ASSERT_LESS_THAN(message, results.size(), 2);
+    if (spec.pixelX == -1) {
+      TSM_ASSERT_LESS_THAN(spec.message, results.size(), 2);
       return;
     }
 
     // Check size is correct, otherwise quit
-    TSM_ASSERT_EQUALS(message, results.size(), 2);
+    TSM_ASSERT_EQUALS(spec.message, results.size(), 2);
     if (results.size() < 2) {
       TS_FAIL("Did not hit a detector when we should have.");
       return;
     }
 
     // Get the first result
-    Link res = *results.begin();
+    auto res = *results.begin();
 
-    // Get the detector
-    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(
-        m_testInstrumentOutlined->getComponentByID(res.componentID));
-
-    if (!det) {
+    // Check if what we found was a detector
+    const auto detIndex = m_compInfoOutlined->indexOf(res.componentID);
+    if (!m_compInfoOutlined->isDetector(detIndex)) {
       TS_FAIL("Expected a detector but found none");
       return;
     }
 
+    const auto &det = m_detInfoOutlined->detector(detIndex);
+
     // Find the xy index from the detector ID
-    TSM_ASSERT_EQUALS(message, det->getPos().X(), expectX);
-    TSM_ASSERT_EQUALS(message, det->getPos().Y(), expectY);
+    TSM_ASSERT_EQUALS(spec.message, det.getPos().X(), spec.pixelX);
+    TSM_ASSERT_EQUALS(spec.message, det.getPos().Y(), spec.pixelY);
   }
 
   /**
    * Test ray tracing into a rectangular detector.
    *
-   * @param message :: a string for debug information
-   * @param testDir :: direction of track
-   * @param expectX :: expected x index, -1 if off
-   * @param expectY :: expected y index, -1 if off
+   * @param spec :: Parameters for the ray to test
    */
-  void doTestRectangularDetector(std::string message, V3D testDir, int expectX,
-                                 int expectY) {
+  void doTestRectangularDetector(const RayTraceTestSpec &params) {
 
     // Force to be unit vector
+    auto testDir = params.beamDirection;
     testDir.normalize();
 
     // Do a trace and store the results
-    Links results = RayTracer::traceFromSample(testDir, *m_compInfoRectangular);
+    auto results = RayTracer::traceFromSample(testDir, *m_compInfoRectangular);
 
     // Expect no intersection
-    if (expectX == -1) {
-      TSM_ASSERT_LESS_THAN(message, results.size(), 2);
+    if (params.pixelX == -1) {
+      TSM_ASSERT_LESS_THAN(params.message, results.size(), 2);
       return;
     }
 
     // Check size is correct, otherwise quit
-    TSM_ASSERT_EQUALS(message, results.size(), 2);
+    TSM_ASSERT_EQUALS(params.message, results.size(), 2);
     if (results.size() < 2)
       return;
 
     // Get the first result
-    Link res = *results.begin();
+    auto res = *results.begin();
 
     // Get the detector
-    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(
-        m_testInstrumentRectangular->getComponentByID(res.componentID));
+    const auto detIndex = m_compInfoRectangular->indexOf(res.componentID);
+    if (!m_compInfoRectangular->isDetector(detIndex)) {
+      TS_FAIL("Expected a detector but found none");
+      return;
+    }
 
-    // Parent bank
-    RectangularDetector_const_sptr rect =
-        boost::dynamic_pointer_cast<const RectangularDetector>(
-            det->getParent()->getParent());
+    const auto pixelIndex =
+        ComponentInfoBankHelpers::findRowColIndexForRectangularBank(
+            *m_compInfoRectangular, detIndex);
 
     // Find the xy index from the detector ID
-    std::pair<int, int> xy = rect->getXYForDetectorID(det->getID());
-    TSM_ASSERT_EQUALS(message, xy.first, expectX);
-    TSM_ASSERT_EQUALS(message, xy.second, expectY);
+    TSM_ASSERT_EQUALS(params.message, pixelIndex.first, params.pixelX);
+    TSM_ASSERT_EQUALS(params.message, pixelIndex.second, params.pixelY);
   }
 
   void test_RectangularDetector() {
     // Create the test objects to use
     create_rectangular_instrument();
 
-    // Towards the detector lower-left corner
+    // width of a detector pixel
     double w = 0.008;
-    doTestRectangularDetector("Pixel (0,0)", V3D(0.0, 0.0, 5.0), 0, 0);
 
-    // Move over some pixels
-    doTestRectangularDetector("Pixel (1,0)", V3D(w * 1, w * 0, 5.0), 1, 0);
-    doTestRectangularDetector("Pixel (1,2)", V3D(w * 1, w * 2, 5.0), 1, 2);
-    doTestRectangularDetector("Pixel (0.95, 0.95)",
-                              V3D(w * 0.45, w * 0.45, 5.0), 0, 0);
-    doTestRectangularDetector("Pixel (1.05, 2.05)",
-                              V3D(w * 0.55, w * 1.55, 5.0), 1, 2);
-    doTestRectangularDetector("Pixel (99,99)", V3D(w * 99, w * 99, 5.0), 99,
-                              99);
-    doTestRectangularDetector("Off to left", V3D(-w, 0, 5.0), -1, -1);
-    doTestRectangularDetector("Off to bottom", V3D(0, -w, 5.0), -1, -1);
-    doTestRectangularDetector("Off to top", V3D(0, w * 100, 5.0), -1, -1);
-    doTestRectangularDetector("Off to right", V3D(w * 100, w, 5.0), -1, -1);
-    doTestRectangularDetector("Beam parallel to panel", V3D(1.0, 0.0, 0.0), -1,
-                              -1);
-    doTestRectangularDetector("Beam parallel to panel", V3D(0.0, 1.0, 0.0), -1,
-                              -1);
-    doTestRectangularDetector("Zero-beam", V3D(0.0, 0.0, 0.0), -1, -1);
+    doTestRectangularDetector([]() {
+      RayTraceTestSpec p;
+      p.message = "Pixel (0,0)";
+      p.beamDirection = V3D(0.0, 0.0, 5.0);
+      p.pixelX = 0;
+      p.pixelY = 0;
+      return p;
+    }());
+
+    doTestRectangularDetector([&w]() {
+      RayTraceTestSpec p;
+      p.message = "Pixel (1,0)";
+      p.beamDirection = V3D(w * 1, w * 0, 5.0);
+      p.pixelX = 1;
+      p.pixelY = 0;
+      return p;
+    }());
+
+    doTestRectangularDetector([&w]() {
+      RayTraceTestSpec p;
+      p.message = "Pixel (1,2)";
+      p.beamDirection = V3D(w * 1, w * 2, 5.0);
+      p.pixelX = 1;
+      p.pixelY = 2;
+      return p;
+    }());
+
+    doTestRectangularDetector([&w]() {
+      RayTraceTestSpec p;
+      p.message = "Pixel (0.95,0.95)";
+      p.beamDirection = V3D(w * 0.45, w * 0.45, 5.0);
+      p.pixelX = 0;
+      p.pixelY = 0;
+      return p;
+    }());
+
+    doTestRectangularDetector([&w]() {
+      RayTraceTestSpec p;
+      p.message = "Pixel (1.05,1.05)";
+      p.beamDirection = V3D(w * 0.55, w * 1.55, 5.0);
+      p.pixelX = 1;
+      p.pixelY = 2;
+      return p;
+    }());
+
+    doTestRectangularDetector([&w]() {
+      RayTraceTestSpec p;
+      p.message = "Pixel (99, 99)";
+      p.beamDirection = V3D(w * 99, w * 99, 5.0);
+      p.pixelX = 99;
+      p.pixelY = 99;
+      return p;
+    }());
+
+    doTestRectangularDetector([&w]() {
+      RayTraceTestSpec p;
+      p.message = "Off to left";
+      p.beamDirection = V3D(-w, 0, 5.0);
+      p.pixelX = -1;
+      p.pixelY = -1;
+      return p;
+    }());
+
+    doTestRectangularDetector([&w]() {
+      RayTraceTestSpec p;
+      p.message = "Off to bottom";
+      p.beamDirection = V3D(0, -w, 5.0);
+      p.pixelX = -1;
+      p.pixelY = -1;
+      return p;
+    }());
+
+    doTestRectangularDetector([&w]() {
+      RayTraceTestSpec p;
+      p.message = "Off to top";
+      p.beamDirection = V3D(0, w * 100, 5.0);
+      p.pixelX = -1;
+      p.pixelY = -1;
+      return p;
+    }());
+
+    doTestRectangularDetector([&w]() {
+      RayTraceTestSpec p;
+      p.message = "Off to right";
+      p.beamDirection = V3D(w * 100, w, 5.0);
+      p.pixelX = -1;
+      p.pixelY = -1;
+      return p;
+    }());
+
+    doTestRectangularDetector([]() {
+      RayTraceTestSpec p;
+      p.message = "Beam parallel to panel";
+      p.beamDirection = V3D(1.0, 0.0, 0.0);
+      p.pixelX = -1;
+      p.pixelY = -1;
+      return p;
+    }());
+
+    doTestRectangularDetector([]() {
+      RayTraceTestSpec p;
+      p.message = "Beam parallel to panel";
+      p.beamDirection = V3D(0.0, 1.0, 0.0);
+      p.pixelX = -1;
+      p.pixelY = -1;
+      return p;
+    }());
+
+    doTestRectangularDetector([]() {
+      RayTraceTestSpec p;
+      p.message = "Zero-beam";
+      p.beamDirection = V3D(0.0, 0.0, 0.0);
+      p.pixelX = -1;
+      p.pixelY = -1;
+      return p;
+    }());
   }
 
   void test_OutlinedDetector() {
     // Create an instrument with some tubes
-    createOutlinedInstrument();
+    create_outlined_instrument();
 
     const size_t numPixels = 50;
 
     // Test valid cases of test ray pointing into tube pixels
     const double h = 0.003;
     for (size_t i = 0; i < numPixels; ++i) {
-      const double index = static_cast<double>(i);
+      const auto index = static_cast<double>(i);
       // Iterate over all pixels in each of the three tubes
-      doTestOutlinedDetector("Tube 1, Pixel " + std::to_string(i),
-                             V3D(0.0, index * h, 1.0), 0, index * h);
-      const double tube2XZ = sin((M_PI / 2.0) * 0.5);
-      doTestOutlinedDetector("Tube 2, Pixel " + std::to_string(index),
-                             V3D(tube2XZ, index * h, tube2XZ), tube2XZ,
-                             index * h);
-      doTestOutlinedDetector("Tube 3, Pixel " + std::to_string(index),
-                             V3D(1.0, index * h, 0.0), 1.0, index * h);
+      doTestOutlinedDetector([&index, &h]() {
+        RayTraceTestSpec s;
+        s.message = "Tube 1, Pixel " + std::to_string(index);
+        s.beamDirection = V3D(0.0, index * h, 1.0);
+        s.pixelX = 0;
+        s.pixelY = index * h;
+        return s;
+      }());
+
+      doTestOutlinedDetector([&index, &h]() {
+        const double tube2XZ = sin((M_PI / 2.0) * 0.5);
+        RayTraceTestSpec s;
+        s.message = "Tube 2, Pixel " + std::to_string(index);
+        s.beamDirection = V3D(tube2XZ, index * h, tube2XZ);
+        s.pixelX = tube2XZ;
+        s.pixelY = index * h;
+        return s;
+      }());
+
+      doTestOutlinedDetector([&index, &h]() {
+        RayTraceTestSpec s;
+        s.message = "Tube 3, Pixel " + std::to_string(index);
+        s.beamDirection = V3D(1.0, index * h, 0.0);
+        s.pixelX = 1.0;
+        s.pixelY = index * h;
+        return s;
+      }());
     }
 
     // Test boundries of tube
-    doTestOutlinedDetector("Just below tube detector", V3D(0.0, -h, 1.0), -1,
-                           -1);
-    doTestOutlinedDetector("Just above tube detector",
-                           V3D(0.0, numPixels * h, 1.0), -1, -1);
+    doTestOutlinedDetector([&h]() {
+      RayTraceTestSpec s;
+      s.message = "Just below tube detector";
+      s.beamDirection = V3D(0.0, -h, 1.0);
+      s.pixelX = -1;
+      s.pixelY = -1;
+      return s;
+    }());
 
-    // Test extreme cases
-    doTestOutlinedDetector("Beam parallel to panel", V3D(0.0, 1.0, 0.0), -1,
-                           -1);
-    doTestOutlinedDetector("Zero-beam", V3D(0.0, 0.0, 0.0), -1, -1);
+    GNU_DIAG_OFF("unused-lambda-capture")
+    doTestOutlinedDetector([&h, &numPixels]() {
+      RayTraceTestSpec s;
+      s.message = "Just above tube detector";
+      s.beamDirection = V3D(0.0, static_cast<double>(numPixels) * h, 1.0);
+      s.pixelX = -1;
+      s.pixelY = -1;
+      return s;
+    }());
+    GNU_DIAG_ON("unused-lambda-capture")
+
+    doTestOutlinedDetector([]() {
+      RayTraceTestSpec p;
+      p.message = "Beam parallel to panel";
+      p.beamDirection = V3D(0.0, 1.0, 0.0);
+      p.pixelX = -1;
+      p.pixelY = -1;
+      return p;
+    }());
+
+    doTestOutlinedDetector([]() {
+      RayTraceTestSpec p;
+      p.message = "Zero-beam";
+      p.beamDirection = V3D(0.0, 0.0, 0.0);
+      p.pixelX = -1;
+      p.pixelY = -1;
+      return p;
+    }());
   }
 
   void test_rectangular_detector_multiple_rays() {
-    using DetectorCoordinates = std::vector<std::pair<int, int>>;
+    using DetectorCoordinates = std::vector<std::pair<size_t, size_t>>;
     create_rectangular_instrument();
+
     // Towards the detector lower-left corner
     double w = 0.008;
     std::vector<V3D> testDirections = {V3D(0.0, 0.0, 5.0),
@@ -335,37 +486,20 @@ public:
         {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1},
     };
 
-    auto traces =
-        RayTracer::traceFromSample(testDirections, *m_compInfoRectangular);
+    // Ray trace from V3D test directions to Links of intersections
+    RayTraces traces;
+    traces.reserve(testDirections.size());
+    RayTracer::traceFromSample(testDirections.begin(), testDirections.end(),
+                               std::back_inserter(traces),
+                               *m_compInfoRectangular);
 
+    // Transform from ray tracer Links to a pair of XY detector coordinates
     DetectorCoordinates actualResults;
     actualResults.reserve(traces.size());
-
-    // Transform from ray tracer Links to XY detector coordinates
     std::transform(traces.begin(), traces.end(),
                    std::back_inserter(actualResults),
-                   [this](const Links &result) -> std::pair<int, int> {
-                     Link res = *result.begin();
-
-                     if (result.size() < 2)
-                       return {-1, -1};
-
-                     // Get the detector
-                     IDetector_const_sptr det =
-                         boost::dynamic_pointer_cast<const IDetector>(
-                             m_testInstrumentRectangular->getComponentByID(
-                                 res.componentID));
-
-                     if (!det)
-                       return {-1, -1};
-
-                     // Parent bank
-                     RectangularDetector_const_sptr rect =
-                         boost::dynamic_pointer_cast<const RectangularDetector>(
-                             det->getParent()->getParent());
-
-                     // Find the xy index from the detector ID
-                     return rect->getXYForDetectorID(det->getID());
+                   [this](const auto &trace) {
+                     return this->findRectangularDetectorXYFromTrace(trace);
                    });
 
     TS_ASSERT_EQUALS(expectedResults, actualResults);
@@ -375,7 +509,7 @@ private:
   /**
    * Helper methods for tests
    */
-  void createOutlinedInstrument() {
+  void create_outlined_instrument() {
 
     m_testInstrumentOutlined =
         ComponentCreationHelper::createInstrumentWithPSDTubes();
@@ -432,6 +566,23 @@ private:
     m_detInfoRectangular = std::move(infos.second);
   }
 
+  std::pair<size_t, size_t>
+  findRectangularDetectorXYFromTrace(const Links &traces) const {
+    Link res = *traces.begin();
+
+    if (traces.size() < 2)
+      return {-1, -1};
+
+    // Get the detector
+    const auto detIndex = m_compInfoRectangular->indexOf(res.componentID);
+
+    if (!m_compInfoRectangular->isDetector(detIndex))
+      return {-1, -1};
+
+    return ComponentInfoBankHelpers::findRowColIndexForRectangularBank(
+        *m_compInfoRectangular, detIndex);
+  }
+
   /**
    * Member variables
    */
@@ -462,7 +613,7 @@ public:
     delete suite;
   }
 
-  BeamlineRayTracerTestPerformance() {
+  BeamlineRayTracerTestPerformance() : m_testDirections(makeTestDirections()) {
     // Instrument
     m_inst = ComponentCreationHelper::createTestInstrumentRectangular(2, 100);
 
@@ -539,56 +690,52 @@ public:
   }
 
   void test_RectangularDetector() {
-    std::vector<V3D> testDirections;
-    testDirections.reserve(100);
-    V3D testDir(0.0, 0.0, 1.0);
-    for (size_t i = 0; i < 100; i++) {
-      testDirections.push_back(testDir);
-    }
-
+    RayTraces traces;
+    traces.reserve(m_testDirections.size());
     // Directly in Z+ = towards the detector center
-    auto results = RayTracer::traceFromSample(testDirections, *m_compInfo);
-    TS_ASSERT_EQUALS(results[0].size(), 3);
+    RayTracer::traceFromSample(m_testDirections.begin(), m_testDirections.end(),
+                               std::back_inserter(traces), *m_compInfo);
   }
 
   void test_RectangularDetector_instrument_v1() {
-
     InstrumentRayTracer tracer(m_inst);
     // Directly in Z+ = towards the detector center
-    V3D testDir(0.0, 0.0, 1.0);
-    for (size_t i = 0; i < 100; i++) {
+    for (const auto &testDir : m_testDirections) {
       tracer.traceFromSample(testDir);
       Links results = tracer.getResults();
-      TS_ASSERT_EQUALS(results.size(), 3);
     }
   }
 
   void test_TOPAZ() {
-    auto testDirections = makeTestDirections();
-    auto results = RayTracer::traceFromSample(testDirections, *m_compInfoTopaz);
+    RayTraces traces;
+    traces.reserve(m_testDirections.size());
+    // Directly in Z+ = towards the detector center
+    RayTracer::traceFromSample(m_testDirections.begin(), m_testDirections.end(),
+                               std::back_inserter(traces), *m_compInfoTopaz);
   }
 
   void test_TOPAZ_instrument_v1() {
     // Directly in Z+ = towards the detector center
     InstrumentRayTracer tracer(m_instTopaz);
 
-    auto testDirections = makeTestDirections();
-    for (const auto &testDir : testDirections) {
+    for (const auto &testDir : m_testDirections) {
       tracer.traceFromSample(testDir);
       Links results = tracer.getResults();
     }
   }
 
   void test_WISH() {
-    auto testDirections = makeTestDirections();
-    auto results = RayTracer::traceFromSample(testDirections, *m_compInfoWish);
+    RayTraces traces;
+    traces.reserve(m_testDirections.size());
+    // Directly in Z+ = towards the detector center
+    RayTracer::traceFromSample(m_testDirections.begin(), m_testDirections.end(),
+                               std::back_inserter(traces), *m_compInfoTopaz);
   }
 
   void test_WISH_instrument_v1() {
     // Directly in Z+ = towards the detector center
     InstrumentRayTracer tracer(m_instWish);
-    auto testDirections = makeTestDirections();
-    for (const auto &testDir : testDirections) {
+    for (const auto &testDir : m_testDirections) {
       // Track it
       tracer.traceFromSample(testDir);
       Links results = tracer.getResults();
@@ -610,6 +757,8 @@ private:
   Instrument_sptr m_instWish;
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_compInfoWish;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfoWish;
+
+  const std::vector<V3D> m_testDirections;
 };
 
 #endif /* BEAMLINERAYTRACERTEST_H_ */

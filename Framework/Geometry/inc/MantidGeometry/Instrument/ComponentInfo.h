@@ -74,6 +74,12 @@ public:
     size_t nY;
   };
 
+  struct TubeComponent {
+    size_t top;
+    size_t bottom;
+    size_t nY;
+  };
+
   ComponentInfo(
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>

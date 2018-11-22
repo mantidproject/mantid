@@ -1,23 +1,13 @@
 #include "MantidGeometry/Objects/BeamlineRayTracer.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Geometry {
-
-using Kernel::V3D;
-using Links = Track::LType;
-
-// Anonymous namespace
-// Contains helper functions
+namespace BeamlineRayTracer {
 namespace {
 using Mantid::Kernel::Matrix;
 using Mantid::Kernel::Quat;
 using Types = Mantid::Beamline::ComponentType;
-// Type alias for caching bounding boxes when making
-// multiple ray traces
-using BoundingBoxCache = std::unordered_map<size_t, BoundingBox>;
 
 /**
  * Tests the intersection of the ray with a rectangular bank of detectors.
@@ -92,36 +82,30 @@ void checkIntersectionWithRectangularBank(Track &track,
                 componentInfo.componentID(childrenY[yIndex])->getComponentID());
 }
 
-void checkIntersectionWithOutlineComposite(Track &track,
-                                           const ComponentInfo &componentInfo,
-                                           size_t componentIndex) {
+void checkIntersectionWithTube(Track &track, const ComponentInfo &componentInfo,
+                               size_t componentIndex) {
 
-  // Get the corners of the bank
-  ComponentInfo::QuadrilateralComponent corners;
+  // Get the top & bottom of the tube
   const auto &innerRangeComp = componentInfo.children(componentIndex);
   // nSubComponents, subtract off self hence -1. nSubComponents = number of
   // horizontal columns.
-  corners.nY = innerRangeComp.size();
-  corners.nX = 0;
-
-  corners.bottomLeft = innerRangeComp.front();
-  corners.topRight = innerRangeComp.back();
-  corners.topLeft = innerRangeComp.back();
-  corners.bottomRight = innerRangeComp.front();
+  ComponentInfo::TubeComponent tube;
+  tube.nY = innerRangeComp.size();
+  tube.bottom = innerRangeComp.front();
+  tube.top = innerRangeComp.back();
 
   // Store points of the bank
-  V3D bottomLeft = componentInfo.position(corners.bottomLeft);
-  V3D bottomRight = componentInfo.position(corners.bottomRight);
-  V3D topLeft = componentInfo.position(corners.topLeft);
+  const auto top = componentInfo.position(tube.top);
+  const auto bottom = componentInfo.position(tube.bottom);
 
   // Vertical (y-axis) basis vector of the detector
-  V3D vertical = topLeft - bottomLeft;
+  const auto vertical = top - bottom;
 
   // Horizontal (x-axis) basis vector of the detector
-  V3D horizontal = bottomRight.cross_prod(vertical);
+  const auto horizontal = bottom.cross_prod(vertical);
 
   // The beam direction
-  V3D beam = track.direction();
+  const auto beam = track.direction();
 
   // From: http://en.wikipedia.org/wiki/Line-plane_intersection (taken on May
   // 4, 2011), We build a matrix to solve the linear equation:
@@ -132,30 +116,25 @@ void checkIntersectionWithOutlineComposite(Track &track,
   mat.Invert();
 
   // Multiply by the inverted matrix to find t,u,v
-  V3D tuv = mat * (track.startPoint() - bottomLeft);
+  const auto tuv = mat * (track.startPoint() - bottom);
 
   // Intersection point
-  V3D intersec = beam;
+  auto intersec = beam;
   intersec *= tuv[0];
 
   // t = coordinate along the line
-  // u,v = coordinates along horizontal, vertical
+  // v = coordinates along the vertical
   // (and correct for it being between 0, xpixels-1).  The +0.5 is because the
-  // bottomLeft is at the CENTER of pixel 0,0.
-  /* double u = (double(corners.nX - 1) * tuv[1] + 0.5); */
-  double v = (double(corners.nY - 1) * tuv[2] + 0.5);
+  double v = (double(tube.nY - 1) * tuv[2] + 0.5);
 
   if (std::isnan(v))
     return;
 
   // In indices
-  /* size_t xIndex = size_t(u); */
   size_t yIndex = size_t(v);
 
   // Out of range?
-  /* if (xIndex >= corners.nX) */
-  /*   return; */
-  if (yIndex >= corners.nY)
+  if (yIndex >= tube.nY)
     return;
 
   // Get the componentIndex of the component in the assembly at the (X, Y)
@@ -261,11 +240,12 @@ bool addLink(Track &track, const ComponentInfo &componentInfo,
     checkIntersectionWithRectangularBank(track, componentInfo, index);
     return false; // Rectangular panel: we don't need to look at any children
   } else if (componentType == Types::OutlineComposite) {
-    checkIntersectionWithOutlineComposite(track, componentInfo, index);
+    checkIntersectionWithTube(track, componentInfo, index);
     return false; // Tube detector: we don't need to look at any children
   } else {
     checkIntersectionWithComponent(track, componentInfo, index);
-    return true; // We don't know what the children of this are
+    return true; // We don't know what the children of this are so check
+                 // children
   }
 }
 
@@ -326,6 +306,8 @@ void fireRayInner(Track &track, const ComponentInfo &componentInfo,
   }
 }
 
+// Anonymous namespace
+// Contains helper functions
 /**
  * Fire the test ray at the instrument and perform a bread-first search of the
  * object tree to find the objects that were intersected.
@@ -345,8 +327,6 @@ void fireRay(Track &track, const ComponentInfo &componentInfo,
 }
 
 } // namespace
-
-namespace BeamlineRayTracer {
 
 /**
  * Trace a given track from the source in the given direction.
@@ -377,20 +357,6 @@ Links traceFromSource(const Kernel::V3D &dir,
  * @param dir :: A directional vector. The starting point is defined by the
  * source.
  * @param componentInfo :: The object used to access the source position.
- * @return Links :: A collection of links defining intersection information.
- */
-Links traceFromSource(const Kernel::V3D &dir,
-                      const ComponentInfo &componentInfo) {
-  BoundingBoxCache cache;
-  return traceFromSource(dir, componentInfo, cache);
-}
-
-/**
- * Trace a given track from the sample position in the given direction.
- *
- * @param dir :: A directional vector. The starting point is defined by the
- * source.
- * @param componentInfo :: The object used to access the source position.
  * @param cache :: a cache of precomputed bounding boxes to help speed up the
  * trace.
  * @return Links :: A collection of links defining intersection information.
@@ -406,6 +372,20 @@ Links traceFromSample(const Kernel::V3D &dir,
   fireRay(resultsTrack, componentInfo, cache);
 
   return getResults(resultsTrack);
+}
+
+/**
+ * Trace a given track from the sample position in the given direction.
+ *
+ * @param dir :: A directional vector. The starting point is defined by the
+ * source.
+ * @param componentInfo :: The object used to access the source position.
+ * @return Links :: A collection of links defining intersection information.
+ */
+Links traceFromSource(const Kernel::V3D &dir,
+                      const ComponentInfo &componentInfo) {
+  BoundingBoxCache cache;
+  return traceFromSource(dir, componentInfo, cache);
 }
 
 /**
@@ -449,55 +429,6 @@ size_t getDetectorResult(const ComponentInfo &componentInfo,
   return -1;
 }
 
-/**
- * Trace a given track from the source position in the given directions.
- *
- * @param dirs :: A collections of direction vectors. The starting point for
- * each is defined by the source.
- * @param componentInfo :: The object used to access the source position.
- * @return Links :: A vector of collections of links defining intersection
- * information.
- */
-std::vector<Links> traceFromSource(const std::vector<Kernel::V3D> &dirs,
-                                   const ComponentInfo &componentInfo) {
-
-  std::vector<Links> results;
-  results.reserve(dirs.size());
-
-  BoundingBoxCache cache;
-  std::transform(dirs.begin(), dirs.end(), std::back_inserter(results),
-                 [&componentInfo, &cache](const auto &dir) {
-                   return traceFromSource(dir, componentInfo, cache);
-                 });
-
-  return results;
-}
-
-/**
- * Trace a given track from the sample position in the given directions.
- *
- * @param dirs :: A collections of direction vectors. The starting point for
- * each is defined by the sample.
- * @param componentInfo :: The object used to access the sample position.
- * @return Links :: A vector of collections of links defining intersection
- * information.
- */
-std::vector<Links> traceFromSample(const std::vector<Kernel::V3D> &dirs,
-                                   const ComponentInfo &componentInfo) {
-
-  std::vector<Links> results;
-  results.reserve(dirs.size());
-
-  BoundingBoxCache cache;
-  std::transform(dirs.begin(), dirs.end(), std::back_inserter(results),
-                 [&componentInfo, &cache](const auto &dir) {
-                   return traceFromSample(dir, componentInfo, cache);
-                 });
-
-  return results;
-}
-
 } // namespace BeamlineRayTracer
-
 } // namespace Geometry
 } // namespace Mantid

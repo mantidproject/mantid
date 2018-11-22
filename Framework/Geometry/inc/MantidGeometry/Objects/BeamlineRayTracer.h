@@ -1,9 +1,12 @@
 #ifndef MANTID_GEOMETRY_BEAMLINERAYTRACER_H_
 #define MANTID_GEOMETRY_BEAMLINERAYTRACER_H_
 
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 #include <vector>
 
 /**
@@ -12,7 +15,7 @@ tracking rays and accumulating a list of objects that are intersected along the
 way. These methods have been adapted from the original InstrumentRayTracer and
 are intended to be a replacement for InstrumentRayTracer.
 
-@author Bhuvan Bezawada, STFC
+@author Bhuvan Bezawada & Samuel Jackson, STFC
 @date 17/08/2018
 
 Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -47,41 +50,72 @@ namespace Geometry {
 class Track;
 using Links = Track::LType;
 
+// Type alias for caching bounding boxes when making
+// multiple ray traces
+using BoundingBoxCache = std::unordered_map<size_t, BoundingBox>;
+
 namespace BeamlineRayTracer {
 
-/**
- * Trace a given track from the instrument source in the given direction
- * and compile a list of results that this track intersects.
- */
+/// Trace a given track from the source in the given direction.
+MANTID_GEOMETRY_DLL Links traceFromSource(const Kernel::V3D &dir,
+                                          const ComponentInfo &componentInfo,
+                                          BoundingBoxCache &cache);
+
+/// Trace a given track from the sample position in the given direction.
+MANTID_GEOMETRY_DLL Links traceFromSample(const Kernel::V3D &dir,
+                                          const ComponentInfo &componentInfo,
+                                          BoundingBoxCache &cache);
+
+/// Trace a given track from the sample position in the given direction.
 MANTID_GEOMETRY_DLL Links traceFromSource(const Kernel::V3D &dir,
                                           const ComponentInfo &componentInfo);
-/**
- * Trace a given track from the instrument sample in the given direction
- * and compile a list of results that this track intersects.
- */
+
+/// Trace a given track from the sample position in the given direction.
 MANTID_GEOMETRY_DLL Links traceFromSample(const Kernel::V3D &dir,
                                           const ComponentInfo &componentInfo);
-/**
- * Using the results of the trace, return the first detector
- * (that is NOT a monitor) found in the results.
- */
+
+/// Gets the results of the trace, then returns the first detector index found
 MANTID_GEOMETRY_DLL size_t getDetectorResult(const ComponentInfo &componentInfo,
                                              const DetectorInfo &detectorInfo,
                                              Track &resultsTrack);
+
 /**
- * Trace a collection of tracks from the instrument source in the given
- * directions and compile a list of results that each track intersects.
+ * Trace a given track from the source position in the given directions.
+ *
+ * @param start :: beginning of the range of directions to test
+ * @param end :: end of the range of directions to test
+ * @param out :: beginning of the range to output ray trace results in
+ * @param componentInfo :: component info object containing the geometry to
+ * trace in
  */
-MANTID_GEOMETRY_DLL std::vector<Links>
-traceFromSource(const std::vector<Kernel::V3D> &dirs,
-                const ComponentInfo &componentInfo);
+template <class InputIt, class OutputIt>
+void traceFromSource(InputIt start, InputIt end, OutputIt out,
+                     const ComponentInfo &componentInfo) {
+
+  BoundingBoxCache cache;
+  std::transform(start, end, out, [&componentInfo, &cache](const auto &dir) {
+    return traceFromSource(dir, componentInfo, cache);
+  });
+}
+
 /**
- * Trace a collection of tracks from the instrument sample in the given
- * directions and compile a list of results that each track intersects.
+ * Trace a given track from the sample position in the given directions.
+ *
+ * @param start :: beginning of the range of directions to test
+ * @param end :: end of the range of directions to test
+ * @param out :: beginning of the range to output ray trace results in
+ * @param componentInfo :: component info object containing the geometry to
+ * trace in
  */
-MANTID_GEOMETRY_DLL std::vector<Links>
-traceFromSample(const std::vector<Kernel::V3D> &dirs,
-                const ComponentInfo &componentInfo);
+template <class InputIt, class OutputIt>
+void traceFromSample(InputIt start, InputIt end, OutputIt out,
+                     const ComponentInfo &componentInfo) {
+
+  BoundingBoxCache cache;
+  std::transform(start, end, out, [&componentInfo, &cache](const auto &dir) {
+    return traceFromSample(dir, componentInfo, cache);
+  });
+}
 
 } // namespace BeamlineRayTracer
 

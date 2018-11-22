@@ -70,6 +70,43 @@ public:
 
     TS_ASSERT(!isDetectorFixedInBank(componentInfo, componentInfo.root()));
   }
+
+  void test_FindRowColIndexForRectangularDetectorBankForValidIndex() {
+    auto rectInstr =
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
+    auto wrappers = InstrumentVisitor::makeWrappers(*rectInstr);
+    const auto &componentInfo = *wrappers.first;
+
+    const std::vector<std::pair<size_t, size_t>> pixelIndices = {
+        {0, 0}, {0, 1}, {1, 0}, {1, 1}};
+
+    size_t linearIndex = 0;
+    for (const auto &index : pixelIndices) {
+      TS_ASSERT_EQUALS(
+          findRowColIndexForRectangularBank(componentInfo, linearIndex), index);
+      linearIndex++;
+    }
+  }
+
+  void test_FindRowColIndexForRectangularDetectorBankThrowsOnInvalidIndex() {
+    auto rectInstr =
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
+    auto wrappers = InstrumentVisitor::makeWrappers(*rectInstr);
+    const auto &componentInfo = *wrappers.first;
+
+    TS_ASSERT_THROWS(findRowColIndexForRectangularBank(componentInfo,
+                                                       componentInfo.source()),
+                     std::runtime_error);
+  }
+
+  void test_FindRowColIndexForRectangularDetectorBankThrowsOnInvalidGeometry() {
+    auto instr = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instr);
+    const auto &componentInfo = *wrappers.first;
+
+    TS_ASSERT_THROWS(findRowColIndexForRectangularBank(componentInfo, 0),
+                     std::runtime_error);
+  }
 };
 
 #endif /* MANTID_GEOMETRY_COMPONENTINFOBANKHELPERSTEST_H_ */

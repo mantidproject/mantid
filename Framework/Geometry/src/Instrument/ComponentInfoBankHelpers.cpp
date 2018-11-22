@@ -32,6 +32,36 @@ bool isDetectorFixedInBank(const ComponentInfo &compInfo,
   return false;
 }
 
+/**
+ * Find the row/col index of a detector in a Rectangular detector bank
+ *
+ * @param compInfo :: ComponentInfo which defines instrument tree for searching
+ * @param detIndex :: Index of the detector to be searched for
+ */
+std::pair<size_t, size_t>
+findRowColIndexForRectangularBank(const ComponentInfo &compInfo,
+                                  const size_t detIndex) {
+  if (!compInfo.isDetector(detIndex)) {
+    throw std::runtime_error("The component at detIndex is not a detector");
+  }
+
+  auto parent = compInfo.parent(detIndex);
+  auto grandParent = compInfo.parent(parent);
+
+  if (compInfo.componentType(grandParent) != ComponentType::Rectangular) {
+    throw std::runtime_error(
+        "Cannot find row/col index for non-rectangular banks");
+  }
+
+  const auto numColumns = compInfo.children(grandParent).size();
+  const auto numRows = compInfo.children(parent).size();
+
+  const auto row = detIndex / numRows;
+  const auto col = detIndex % numColumns;
+
+  return {row, col};
+}
+
 } // namespace ComponentInfoBankHelpers
 } // namespace Geometry
 } // namespace Mantid
