@@ -40,8 +40,8 @@ calculateBinParameters(QString wsName, QString resName, double energyMin,
   try {
     auto toIqt = AlgorithmManager::Instance().createUnmanaged("TransformToIqt");
     toIqt->initialize();
-    toIqt->setAlwaysStoreInADS(false);
-    toIqt->setProperty("SampleWorkspace", wsName.toStdString());
+		toIqt->setChild(true); // record this as internal
+		toIqt->setProperty("SampleWorkspace", wsName.toStdString());
     toIqt->setProperty("ResolutionWorkspace", resName.toStdString());
     toIqt->setProperty("ParameterWorkspace", paramTableName);
     toIqt->setProperty("EnergyMin", energyMin);
@@ -54,8 +54,8 @@ calculateBinParameters(QString wsName, QString resName, double energyMin,
     IAlgorithm_sptr deleteAlg =
         AlgorithmManager::Instance().create("DeleteWorkspace");
     deleteAlg->initialize();
-    deleteAlg->setAlwaysStoreInADS(false);
-    deleteAlg->setProperty("Workspace", paramTableName);
+		deleteAlg->setChild(true);
+		deleteAlg->setProperty("Workspace", paramTableName);
     deleteAlg->execute();
   } catch (std::exception &) {
     return std::make_tuple(false, 0.0f, 0, 0);

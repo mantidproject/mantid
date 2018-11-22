@@ -469,8 +469,8 @@ ContainerSubtraction::shiftAlgorithm(MatrixWorkspace_sptr workspace,
                                      double shiftValue) const {
   IAlgorithm_sptr shift = AlgorithmManager::Instance().create("ScaleX");
   shift->initialize();
-  shift->setAlwaysStoreInADS(false);
-  shift->setLogging(false);
+	shift->setChild(true);
+	shift->setLogging(false);
   shift->setProperty("InputWorkspace", workspace);
   shift->setProperty("Operation", "Add");
   shift->setProperty("Factor", shiftValue);
@@ -483,8 +483,8 @@ ContainerSubtraction::scaleAlgorithm(MatrixWorkspace_sptr workspace,
                                      double scaleValue) const {
   IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
   scale->initialize();
-  scale->setAlwaysStoreInADS(false);
-  scale->setLogging(false);
+	scale->setChild(true);
+	scale->setLogging(false);
   scale->setProperty("InputWorkspace", workspace);
   scale->setProperty("Operation", "Multiply");
   scale->setProperty("Factor", scaleValue);
@@ -497,8 +497,8 @@ ContainerSubtraction::minusAlgorithm(MatrixWorkspace_sptr lhsWorkspace,
                                      MatrixWorkspace_sptr rhsWorkspace) const {
   IAlgorithm_sptr minus = AlgorithmManager::Instance().create("Minus");
   minus->initialize();
-  minus->setAlwaysStoreInADS(false);
-  minus->setLogging(false);
+	minus->setChild(true);
+	minus->setLogging(false);
   minus->setProperty("LHSWorkspace", lhsWorkspace);
   minus->setProperty("RHSWorkspace", rhsWorkspace);
   minus->setProperty("OutputWorkspace", "subtracted");
@@ -511,8 +511,8 @@ IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(
   IAlgorithm_sptr rebin =
       AlgorithmManager::Instance().create("RebinToWorkspace");
   rebin->initialize();
-  rebin->setAlwaysStoreInADS(false);
-  rebin->setLogging(false);
+	rebin->setChild(true);
+	rebin->setLogging(false);
   rebin->setProperty("WorkspaceToRebin", workspaceToRebin);
   rebin->setProperty("WorkspaceToMatch", workspaceToMatch);
   rebin->setProperty("OutputWorkspace", "rebinned");
@@ -524,8 +524,8 @@ IAlgorithm_sptr ContainerSubtraction::convertToHistogramAlgorithm(
   IAlgorithm_sptr convert =
       AlgorithmManager::Instance().create("ConvertToHistogram");
   convert->initialize();
-  convert->setAlwaysStoreInADS(false);
-  convert->setLogging(false);
+	convert->setChild(true);
+	convert->setLogging(false);
   convert->setProperty("InputWorkspace", workspace);
   convert->setProperty("OutputWorkspace", "converted");
   return convert;

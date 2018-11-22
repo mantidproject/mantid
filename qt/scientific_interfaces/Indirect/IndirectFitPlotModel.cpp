@@ -319,8 +319,8 @@ IAlgorithm_sptr IndirectFitPlotModel::createWorkspaceAlgorithm(
   IAlgorithm_sptr createWsAlg =
       AlgorithmManager::Instance().create("CreateWorkspace");
   createWsAlg->initialize();
-  createWsAlg->setAlwaysStoreInADS(false);
-  createWsAlg->setLogging(false);
+	createWsAlg->setChild(true);
+	createWsAlg->setLogging(false);
   createWsAlg->setProperty("OutputWorkspace", "__QENSGuess");
   createWsAlg->setProperty("NSpec", boost::numeric_cast<int>(numberOfSpectra));
   createWsAlg->setProperty("DataX", dataX);
@@ -335,8 +335,8 @@ IndirectFitPlotModel::extractSpectra(MatrixWorkspace_sptr inputWS,
   auto extractSpectraAlg =
       AlgorithmManager::Instance().create("ExtractSpectra");
   extractSpectraAlg->initialize();
-  extractSpectraAlg->setAlwaysStoreInADS(false);
-  extractSpectraAlg->setLogging(false);
+	extractSpectraAlg->setChild(true);
+	extractSpectraAlg->setLogging(false);
   extractSpectraAlg->setProperty("InputWorkspace", inputWS);
   extractSpectraAlg->setProperty("StartWorkspaceIndex", startIndex);
   extractSpectraAlg->setProperty("XMin", startX);
@@ -352,8 +352,8 @@ IndirectFitPlotModel::appendSpectra(MatrixWorkspace_sptr inputWS,
                                     MatrixWorkspace_sptr spectraWS) const {
   auto appendSpectraAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendSpectraAlg->initialize();
-  appendSpectraAlg->setAlwaysStoreInADS(false);
-  appendSpectraAlg->setLogging(false);
+	appendSpectraAlg->setChild(true);
+	appendSpectraAlg->setLogging(false);
   appendSpectraAlg->setProperty("InputWorkspace1", inputWS);
   appendSpectraAlg->setProperty("InputWorkspace2", spectraWS);
   appendSpectraAlg->setProperty("OutputWorkspace", "__appended");
@@ -367,8 +367,8 @@ IndirectFitPlotModel::cropWorkspace(MatrixWorkspace_sptr inputWS, double startX,
                                     int endIndex) const {
   const auto cropAlg = AlgorithmManager::Instance().create("CropWorkspace");
   cropAlg->initialize();
-  cropAlg->setAlwaysStoreInADS(false);
-  cropAlg->setLogging(false);
+	cropAlg->setChild(true);
+	cropAlg->setLogging(false);
   cropAlg->setProperty("InputWorkspace", inputWS);
   cropAlg->setProperty("XMin", startX);
   cropAlg->setProperty("XMax", endX);
@@ -383,8 +383,8 @@ void IndirectFitPlotModel::deleteWorkspace(const std::string &name) const {
   auto deleteWorkspaceAlg =
       AlgorithmManager::Instance().create("DeleteWorkspace");
   deleteWorkspaceAlg->initialize();
-  deleteWorkspaceAlg->setAlwaysStoreInADS(false);
-  deleteWorkspaceAlg->setLogging(false);
+	deleteWorkspaceAlg->setChild(true);
+	deleteWorkspaceAlg->setLogging(false);
   deleteWorkspaceAlg->setProperty("Workspace", name);
   deleteWorkspaceAlg->execute();
 }

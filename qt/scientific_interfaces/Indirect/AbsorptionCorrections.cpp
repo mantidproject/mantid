@@ -44,8 +44,8 @@ MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr workspace,
                                   std::string const &target) {
   auto convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
   convertAlg->initialize();
-  convertAlg->setAlwaysStoreInADS(false);
-  convertAlg->setProperty("InputWorkspace", workspace);
+	convertAlg->setChild(true);
+	convertAlg->setProperty("InputWorkspace", workspace);
   convertAlg->setProperty("OutputWorkspace", "__converted");
   convertAlg->setProperty(
       "EMode", Mantid::Kernel::DeltaEMode::asString(workspace->getEMode()));
@@ -60,8 +60,8 @@ WorkspaceGroup_sptr
 groupWorkspaces(std::vector<std::string> const &workspaceNames) {
   auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupAlg->initialize();
-  groupAlg->setAlwaysStoreInADS(false);
-  groupAlg->setProperty("InputWorkspaces", workspaceNames);
+	groupAlg->setChild(true);
+	groupAlg->setProperty("InputWorkspaces", workspaceNames);
   groupAlg->setProperty("OutputWorkspace", "__grouped");
   groupAlg->execute();
   return groupAlg->getProperty("OutputWorkspace");
