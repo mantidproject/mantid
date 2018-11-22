@@ -113,12 +113,10 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
     van = "van_{}".format(run_details.vanadium_run_numbers)
     if perform_vanadium_norm:
         if van not in mantid.mtd:
-            print ("load van")
             vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path,
                                                 OutputWorkspace=van)
         else:
             vanadium_splines = mantid.mtd[van]
-            print(vanadium_splines)
 
     output = None
     for ws in read_ws_list:
@@ -167,7 +165,6 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
     van = "van_{}".format(run_details.vanadium_run_numbers)
     if perform_vanadium_norm:
         if van not in mantid.mtd:
-            print("load van")
             vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path,
                                                 OutputWorkspace=van)
         else:
