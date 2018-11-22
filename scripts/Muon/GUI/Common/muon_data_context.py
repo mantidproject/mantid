@@ -15,9 +15,9 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_file_utils import format_run_for_file
 from Muon.GUI.Common.run_string_utils import run_list_to_string
 from Muon.Gui.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
-                                                          get_pair_data_workspace_name, get_base_data_directory,
-                                                          get_raw_data_directory, get_cached_data_directory,
-                                                          get_group_data_directory, get_pair_data_directory)
+                                                         get_pair_data_workspace_name, get_base_data_directory,
+                                                         get_raw_data_directory, get_group_data_directory,
+                                                         get_pair_data_directory)
 
 from Muon.Gui.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data
 
@@ -159,7 +159,7 @@ class MuonDataContext(object):
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
         if self._loaded_data.num_items() > 0:
-            self._current_data = self._loaded_data.get_latest_data()  # self._loaded_data.params["workspace"][-1]
+            self._current_data = self._loaded_data.get_latest_data()
             self.set_groups_and_pairs_to_default()
         else:
             self._current_data = {"workspace": load_utils.empty_loaded_data()}
