@@ -101,6 +101,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.model.execute = mock.Mock()
 
         self.Runner(self.thread)
+        self.thread._thread.wait()
         self.Runner.QT_APP.processEvents()
 
         self.assertEqual(self.model.execute.call_count, 1)
@@ -110,6 +111,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.model.output = mock.Mock()
 
         self.Runner(self.thread)
+        self.thread._thread.wait()
         self.Runner.QT_APP.processEvents()
 
         self.assertEqual(self.model.output.call_count, 1)
