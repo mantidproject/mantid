@@ -8,7 +8,7 @@
 #define LOADEVENTNEXUSTEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
+
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -53,7 +53,6 @@ load_reference_workspace(const std::string &filename) {
   Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
   return boost::dynamic_pointer_cast<const EventWorkspace>(out);
 }
-
 void run_MPI_load(const Parallel::Communicator &comm,
                   boost::shared_ptr<std::mutex> mutex,
                   const std::string &filename) {
@@ -149,6 +148,30 @@ private:
   }
 
 public:
+  void test_load_event_nexus() {
+    const std::string file = "SANS2D_ESS_example.nxs";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 14258850);
+    TS_ASSERT_EQUALS(eventWS->counts(0)[0], 0);
+    TS_ASSERT_EQUALS(eventWS->counts(1)[0], 2);
+    TS_ASSERT_EQUALS(eventWS->counts(2)[0], 1);
+    TS_ASSERT_EQUALS(eventWS->counts(122879), 4); // Regession test for miss
+                                                  // setting max detector and
+                                                  // subsequent incorrect event
+                                                  // count
+    TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(2), 3);
+  }
   void test_SingleBank_PixelsOnlyInThatBank() { doTestSingleBank(true, false); }
 
   void test_Normal_vs_Precount() {

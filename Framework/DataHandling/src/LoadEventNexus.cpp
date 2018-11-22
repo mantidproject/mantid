@@ -57,8 +57,7 @@ LoadEventNexus::LoadEventNexus()
     : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0),
       longest_tof(0), shortest_tof(0), bad_tofs(0), discarded_events(0),
       compressTolerance(0), m_instrument_loaded_correctly(false),
-      loadlogs(false), m_logs_loaded_correctly(false), event_id_is_spec(false) {
-}
+      loadlogs(false), event_id_is_spec(false) {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -389,6 +388,26 @@ void LoadEventNexus::exec() {
   }
 }
 
+std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file) {
+  std::vector<double> seconds;
+  file.openData("event_time_zero");
+  if (!file.hasAttr("offset"))
+    throw std::runtime_error("No ISO8601 offset attribute provided");
+  std::string isooffset;
+  file.getAttr("offset", isooffset);
+  DateAndTime offset(isooffset);
+  file.getDataCoerce(seconds);
+  file.closeData();
+  if (seconds.empty())
+    throw std::runtime_error(
+        "No event time zeros. Cannot establish run start or end");
+  auto absoluteFirst =
+      DateAndTime(seconds.front(), 0.0) + offset.totalNanoseconds();
+  auto absoluteLast =
+      DateAndTime(seconds.back(), 0.0) + offset.totalNanoseconds();
+  return std::make_pair(absoluteFirst, absoluteLast);
+}
+
 /**
  * Get the number of events in the currently opened group.
  *
@@ -486,12 +505,14 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     }
 
     // If successful, we can try to load the pulse times
-    Kernel::TimeSeriesProperty<double> *log =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            localWorkspace->mutableRun().getProperty("proton_charge"));
     std::vector<Types::Core::DateAndTime> temp;
-    if (log)
-      temp = log->timesAsVector();
+    if (localWorkspace->run().hasProperty("proton_charge")) {
+      Kernel::TimeSeriesProperty<double> *log =
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+              localWorkspace->mutableRun().getProperty("proton_charge"));
+      if (log)
+        temp = log->timesAsVector();
+    }
     // if (returnpulsetimes) out = new BankPulseTimes(temp);
     if (returnpulsetimes)
       out = boost::make_shared<BankPulseTimes>(temp);
@@ -576,33 +597,41 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   // The run_start will be loaded from the pulse times.
   DateAndTime run_start(0, 0);
+  bool takeTimesFromEvents = false;
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
   auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
-  if (!m_logs_loaded_correctly) {
-    if (loadlogs) {
-      prog->doReport("Loading DAS logs");
+  if (loadlogs) {
+    prog->doReport("Loading DAS logs");
 
-      m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
-          m_filename, m_ws, *this, true, nPeriods, periodLog);
+    m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(
+        m_filename, m_ws, *this, true, nPeriods, periodLog);
 
+    try {
       run_start = m_ws->getFirstPulseTime();
-      m_logs_loaded_correctly = true;
-    } else {
-      g_log.information() << "Skipping the loading of sample logs!\n"
-                          << "Reading the start time directly from /"
-                          << m_top_entry_name << "/start_time\n";
-      // start_time is read and set
-      m_file->openPath("/");
-      m_file->openGroup(m_top_entry_name, "NXentry");
-      std::string tmp;
-      m_file->readData("start_time", tmp);
-      m_file->closeGroup();
-      run_start = createFromSanitizedISO8601(tmp);
-      m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
-                                     true);
+    } catch (Kernel::Exception::NotFoundError &) {
+      /*
+        This is added to (a) support legacy behaviour of continuing to take
+        times from the proto_charge log, but (b) allowing a fall back of getting
+        run start and end from actual pulse times within the NXevent_data group.
+        Note that the latter is better Nexus compliant.
+      */
+      takeTimesFromEvents = true;
     }
+  } else {
+    g_log.information() << "Skipping the loading of sample logs!\n"
+                        << "Reading the start time directly from /"
+                        << m_top_entry_name << "/start_time\n";
+    // start_time is read and set
+    m_file->openPath("/");
+    m_file->openGroup(m_top_entry_name, "NXentry");
+    std::string tmp;
+    m_file->readData("start_time", tmp);
+    m_file->closeGroup();
+    run_start = createFromSanitizedISO8601(tmp);
+    m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
+                                   true);
   }
   m_ws->setNPeriods(
       nPeriods, periodLog); // This is how many workspaces we are going to make.
@@ -639,13 +668,25 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   bool oldNeXusFileNames(false);
   bool hasTotalCounts(true);
   bool haveWeights = false;
+  auto firstPulseT = DateAndTime::maximum();
+  auto lastPulseT = DateAndTime::minimum();
   for (; it != entries.end(); ++it) {
     std::string entry_name(it->first);
     std::string entry_class(it->second);
+
     if (entry_class == classType) {
       // open the group
       m_file->openGroup(entry_name, classType);
 
+      if (takeTimesFromEvents) {
+        /* If we are here, we are loading logs, but have failed to establish the
+         * run_start from the proton_charge log. We are going to get this from
+         * our event_time_zero instead
+         */
+        auto localFirstLast = firstLastPulseTimes(*m_file);
+        firstPulseT = std::min(firstPulseT, localFirstLast.first);
+        lastPulseT = std::max(firstPulseT, localFirstLast.second);
+      }
       // get the number of events
       std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames);
       bankNames.push_back(entry_name);
@@ -663,6 +704,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       m_file->closeGroup();
     }
   }
+  run_start = firstPulseT;
 
   loadSampleDataISIScompatibility(*m_file, *m_ws);
 

@@ -205,9 +205,6 @@ private:
 
   /// Do we load the sample logs?
   bool loadlogs;
-  /// have the logs been loaded?
-  bool m_logs_loaded_correctly;
-
   /// True if the event_id is spectrum no not pixel ID
   bool event_id_is_spec;
 };
