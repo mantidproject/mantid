@@ -107,7 +107,8 @@ class ResNorm(PythonAlgorithm):
                                          Target='ElasticQ',
                                          EMode='Indirect')
         else:
-            van_ws = AnalysisDataService.retrieve(self._van_ws)
+            van_ws = CloneWorkspace(InputWorkspace=self._van_ws,
+                                    OutputWorkspace='__ResNorm_vanadium')
 
         num_hist = van_ws.getNumberHistograms()
 
