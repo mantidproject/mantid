@@ -44,8 +44,7 @@ class ApplyDetectorScanEffCorr(PythonAlgorithm):
         input_ws = self.getProperty("InputWorkspace").value
         eff_ws = self.getProperty("DetectorEfficiencyWorkspace").value
         transposed = Transpose(InputWorkspace=eff_ws, StoreInADS=False)
-        y = transposed.extractY()
-        efficiencies = y.flatten()
+        efficiencies = transposed.extractY().flatten()
         errors = transposed.extractE().flatten()
         n_hist = input_ws.getNumberHistograms()
         if n_hist % efficiencies.size != 0:
