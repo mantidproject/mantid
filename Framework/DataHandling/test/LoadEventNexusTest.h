@@ -164,10 +164,11 @@ public:
     TS_ASSERT_EQUALS(eventWS->counts(0)[0], 0);
     TS_ASSERT_EQUALS(eventWS->counts(1)[0], 2);
     TS_ASSERT_EQUALS(eventWS->counts(2)[0], 1);
-    TS_ASSERT_EQUALS(eventWS->counts(122879), 4); // Regession test for miss
-                                                  // setting max detector and
-                                                  // subsequent incorrect event
-                                                  // count
+    TS_ASSERT_EQUALS(eventWS->counts(122879)[0],
+                     4); // Regession test for miss
+                         // setting max detector and
+                         // subsequent incorrect event
+                         // count
     TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(eventWS->indexInfo().spectrumNumber(2), 3);
