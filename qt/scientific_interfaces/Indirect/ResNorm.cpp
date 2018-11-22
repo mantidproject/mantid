@@ -9,16 +9,30 @@
 #include "../General/UserInputValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
+
+#include <string>
+#include <map>
 
 using namespace Mantid::API;
 
 namespace {
 
 MatrixWorkspace_sptr
-retrieveADSMatrixWorkspace(std::string const &workspaceName) {
+getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
+}
+
+WorkspaceGroup_sptr
+getADSGroupWorkspace(std::string const &workspaceName) {
+	return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+		workspaceName);
+}
+
+ITableWorkspace_sptr
+getADSTableWorkspace(std::string const &workspaceName) {
+	return AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+		workspaceName);
 }
 
 } // namespace
@@ -95,9 +109,9 @@ bool ResNorm::validate() {
     // Check Res and Vanadium are the same Run
     if (resValid) {
       // Check that Res file is still in ADS if not, load it
-      auto const resolutionWs = retrieveADSMatrixWorkspace(
+      auto const resolutionWs = getADSMatrixWorkspace(
           m_uiForm.dsResolution->getCurrentDataName().toStdString());
-      auto const vanadiumWs = retrieveADSMatrixWorkspace(vanName.toStdString());
+      auto const vanadiumWs = getADSMatrixWorkspace(vanName.toStdString());
 
       int const resRun = resolutionWs->getRunNumber();
       int const vanRun = vanadiumWs->getRunNumber();
@@ -109,8 +123,8 @@ bool ResNorm::validate() {
   }
 
   // check eMin and eMax values
-  auto const eMin = m_dblManager->value(m_properties["EMin"]);
-  auto const eMax = m_dblManager->value(m_properties["EMax"]);
+  auto const eMin = getDoubleManagerProperty("EMin");
+  auto const eMax = getDoubleManagerProperty("EMax");
   if (eMin >= eMax)
     errors.append("EMin must be strictly less than EMax.\n");
 
@@ -128,15 +142,15 @@ bool ResNorm::validate() {
  * Run the ResNorm v2 algorithm.
  */
 void ResNorm::run() {
-  const auto vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
-  const auto resWsName(m_uiForm.dsResolution->getCurrentDataName());
+  auto const vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
+  auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
 
-  const auto eMin(m_dblManager->value(m_properties["EMin"]));
-  const auto eMax(m_dblManager->value(m_properties["EMax"]));
+  auto const eMin(getDoubleManagerProperty("EMin"));
+  auto const eMax(getDoubleManagerProperty("EMax"));
 
-  const auto outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
+  auto const outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
 
-  IAlgorithm_sptr resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
+  auto resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
   resNorm->initialize();
   resNorm->setProperty("VanadiumWorkspace", vanWsName.toStdString());
   resNorm->setProperty("ResolutionWorkspace", resWsName.toStdString());
@@ -158,13 +172,84 @@ void ResNorm::run() {
  */
 void ResNorm::handleAlgorithmComplete(bool error) {
   setRunIsRunning(false);
-  if (!error)
-    // Update preview plot
-    previewSpecChanged(m_previewSpec);
+	if (!error) {
+		// Update preview plot
+		previewSpecChanged(m_previewSpec);
+		// Copy and add sample logs to result workspaces
+		processLogs();
+	}
   else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
   }
+}
+
+void ResNorm::processLogs() {
+	auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
+	auto const outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
+	auto const resolutionWorkspace = getADSMatrixWorkspace(resWsName.toStdString());
+	auto const resultWorkspace = getADSGroupWorkspace(outputWsName.toStdString());
+
+	copyLogs(resolutionWorkspace, resultWorkspace);
+	addAdditionalLogs(resultWorkspace);
+}
+
+void ResNorm::addAdditionalLogs(WorkspaceGroup_sptr resultGroup) const {
+	for (auto const &workspace : *resultGroup)
+		addAdditionalLogs(workspace);
+}
+
+void ResNorm::addAdditionalLogs(Workspace_sptr resultWorkspace) const {
+	auto logAdder = AlgorithmManager::Instance().create("AddSampleLog");
+	logAdder->setProperty("Workspace", resultWorkspace->getName());
+
+	logAdder->setProperty("LogType", "String");
+	for (auto const &log : getAdditionalLogStrings()) {
+		logAdder->setProperty("LogName", log.first);
+		logAdder->setProperty("LogText", log.second);
+		logAdder->execute();
+	}
+
+	logAdder->setProperty("LogType", "Number");
+	for (auto const &log : getAdditionalLogNumbers()) {
+		logAdder->setProperty("LogName", log.first);
+		logAdder->setProperty("LogText", log.second);
+		logAdder->execute();
+	}
+}
+
+std::map<std::string, std::string> ResNorm::getAdditionalLogStrings() const {
+	auto logs = std::map<std::string, std::string>();
+	logs["sample_filename"] = m_uiForm.dsVanadium->getCurrentDataName().toStdString();
+	logs["resolution_filename"] = m_uiForm.dsResolution->getCurrentDataName().toStdString();
+	logs["fit_program"] = "ResNorm";
+	logs["create_output"] = "true";
+	return logs;
+}
+
+std::map<std::string, std::string> ResNorm::getAdditionalLogNumbers() const {
+	auto logs = std::map<std::string, std::string>();
+	logs["e_min"] = boost::lexical_cast<std::string>(getDoubleManagerProperty("EMin"));
+	logs["e_max"] = boost::lexical_cast<std::string>(getDoubleManagerProperty("EMax"));
+	return logs;
+}
+
+double ResNorm::getDoubleManagerProperty(QString const &propName) const {
+	return m_dblManager->value(m_properties[propName]);
+}
+
+void ResNorm::copyLogs(MatrixWorkspace_sptr resultWorkspace,
+	                     WorkspaceGroup_sptr resultGroup) const {
+	for (auto const &workspace : *resultGroup) 
+		copyLogs(resultWorkspace, workspace);
+}
+
+void ResNorm::copyLogs(MatrixWorkspace_sptr resultWorkspace,
+	                     Workspace_sptr workspace) const {
+	auto logCopier = AlgorithmManager::Instance().create("CopyLogs");
+	logCopier->setProperty("InputWorkspace", resultWorkspace->getName());
+	logCopier->setProperty("OutputWorkspace", workspace->getName());
+	logCopier->execute();
 }
 
 /**
@@ -189,10 +274,9 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
   m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
 
   QPair<double, double> res;
-  QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Vanadium");
+  QPair<double, double> const range = m_uiForm.ppPlot->getCurveRange("Vanadium");
 
-  MatrixWorkspace_sptr vanWs =
-      retrieveADSMatrixWorkspace(filename.toStdString());
+  auto const vanWs = getADSMatrixWorkspace(filename.toStdString());
   m_uiForm.spPreviewSpectrum->setMaximum(
       static_cast<int>(vanWs->getNumberHistograms()) - 1);
 
@@ -260,8 +344,8 @@ void ResNorm::updateProperties(QtProperty *prop, double val) {
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
   if (prop == m_properties["EMin"] || prop == m_properties["EMax"]) {
-    auto bounds = qMakePair(m_dblManager->value(m_properties["EMin"]),
-                            m_dblManager->value(m_properties["EMax"]));
+    auto bounds = qMakePair(getDoubleManagerProperty("EMin"),
+			                      getDoubleManagerProperty("EMax"));
     setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
                      bounds);
   }
@@ -284,18 +368,14 @@ void ResNorm::previewSpecChanged(int value) {
   std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
   std::string fitParamsName(m_pythonExportWsName + "_Fit");
   if (AnalysisDataService::Instance().doesExist(fitWsGroupName)) {
-    WorkspaceGroup_sptr fitWorkspaces =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            fitWsGroupName);
-    ITableWorkspace_sptr fitParams =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-            fitParamsName);
+    auto const fitWorkspaces = getADSGroupWorkspace(fitWsGroupName);
+    auto const fitParams = getADSTableWorkspace(fitParamsName);
     if (fitWorkspaces && fitParams) {
       Column_const_sptr scaleFactors = fitParams->getColumn("Scaling");
       std::string fitWsName(fitWorkspaces->getItem(m_previewSpec)->getName());
-      MatrixWorkspace_const_sptr fitWs = retrieveADSMatrixWorkspace(fitWsName);
+      auto const fitWs = getADSMatrixWorkspace(fitWsName);
 
-      MatrixWorkspace_sptr fit = WorkspaceFactory::Instance().create(fitWs, 1);
+      auto fit = WorkspaceFactory::Instance().create(fitWs, 1);
       fit->setSharedX(0, fitWs->sharedX(1));
       fit->setSharedY(0, fitWs->sharedY(1));
       fit->setSharedE(0, fitWs->sharedE(1));
