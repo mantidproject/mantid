@@ -49,16 +49,16 @@ private slots:
   void plotCurrentPreview();
 
 private:
-	void processLogs();
-	void addAdditionalLogs(Mantid::API::WorkspaceGroup_sptr resultGroup) const;
-	void addAdditionalLogs(Mantid::API::Workspace_sptr resultWorkspace) const;
-	std::map<std::string, std::string> getAdditionalLogStrings() const;
-	std::map<std::string, std::string> getAdditionalLogNumbers() const;
-	double getDoubleManagerProperty(QString const &propName) const;
-	void copyLogs(Mantid::API::MatrixWorkspace_sptr resultWorkspace,
-		            Mantid::API::WorkspaceGroup_sptr resultGroup) const;
-	void copyLogs(Mantid::API::MatrixWorkspace_sptr resultWorkspace,
-		            Mantid::API::Workspace_sptr workspace) const;
+  void processLogs();
+  void addAdditionalLogs(Mantid::API::WorkspaceGroup_sptr resultGroup) const;
+  void addAdditionalLogs(Mantid::API::Workspace_sptr resultWorkspace) const;
+  std::map<std::string, std::string> getAdditionalLogStrings() const;
+  std::map<std::string, std::string> getAdditionalLogNumbers() const;
+  double getDoubleManagerProperty(QString const &propName) const;
+  void copyLogs(Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                Mantid::API::WorkspaceGroup_sptr resultGroup) const;
+  void copyLogs(Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                Mantid::API::Workspace_sptr workspace) const;
 
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);

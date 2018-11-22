@@ -10,29 +10,26 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include <string>
 #include <map>
+#include <string>
 
 using namespace Mantid::API;
 
 namespace {
 
-MatrixWorkspace_sptr
-getADSMatrixWorkspace(std::string const &workspaceName) {
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
 }
 
-WorkspaceGroup_sptr
-getADSGroupWorkspace(std::string const &workspaceName) {
-	return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-		workspaceName);
+WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+      workspaceName);
 }
 
-ITableWorkspace_sptr
-getADSTableWorkspace(std::string const &workspaceName) {
-	return AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-		workspaceName);
+ITableWorkspace_sptr getADSTableWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+      workspaceName);
 }
 
 } // namespace
@@ -172,84 +169,88 @@ void ResNorm::run() {
  */
 void ResNorm::handleAlgorithmComplete(bool error) {
   setRunIsRunning(false);
-	if (!error) {
-		// Update preview plot
-		previewSpecChanged(m_previewSpec);
-		// Copy and add sample logs to result workspaces
-		processLogs();
-	}
-  else {
+  if (!error) {
+    // Update preview plot
+    previewSpecChanged(m_previewSpec);
+    // Copy and add sample logs to result workspaces
+    processLogs();
+  } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
   }
 }
 
 void ResNorm::processLogs() {
-	auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
-	auto const outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
-	auto const resolutionWorkspace = getADSMatrixWorkspace(resWsName.toStdString());
-	auto const resultWorkspace = getADSGroupWorkspace(outputWsName.toStdString());
+  auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
+  auto const outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
+  auto const resolutionWorkspace =
+      getADSMatrixWorkspace(resWsName.toStdString());
+  auto const resultWorkspace = getADSGroupWorkspace(outputWsName.toStdString());
 
-	copyLogs(resolutionWorkspace, resultWorkspace);
-	addAdditionalLogs(resultWorkspace);
+  copyLogs(resolutionWorkspace, resultWorkspace);
+  addAdditionalLogs(resultWorkspace);
 }
 
 void ResNorm::addAdditionalLogs(WorkspaceGroup_sptr resultGroup) const {
-	for (auto const &workspace : *resultGroup)
-		addAdditionalLogs(workspace);
+  for (auto const &workspace : *resultGroup)
+    addAdditionalLogs(workspace);
 }
 
 void ResNorm::addAdditionalLogs(Workspace_sptr resultWorkspace) const {
-	auto logAdder = AlgorithmManager::Instance().create("AddSampleLog");
-	logAdder->setProperty("Workspace", resultWorkspace->getName());
+  auto logAdder = AlgorithmManager::Instance().create("AddSampleLog");
+  logAdder->setProperty("Workspace", resultWorkspace->getName());
 
-	logAdder->setProperty("LogType", "String");
-	for (auto const &log : getAdditionalLogStrings()) {
-		logAdder->setProperty("LogName", log.first);
-		logAdder->setProperty("LogText", log.second);
-		logAdder->execute();
-	}
+  logAdder->setProperty("LogType", "String");
+  for (auto const &log : getAdditionalLogStrings()) {
+    logAdder->setProperty("LogName", log.first);
+    logAdder->setProperty("LogText", log.second);
+    logAdder->execute();
+  }
 
-	logAdder->setProperty("LogType", "Number");
-	for (auto const &log : getAdditionalLogNumbers()) {
-		logAdder->setProperty("LogName", log.first);
-		logAdder->setProperty("LogText", log.second);
-		logAdder->execute();
-	}
+  logAdder->setProperty("LogType", "Number");
+  for (auto const &log : getAdditionalLogNumbers()) {
+    logAdder->setProperty("LogName", log.first);
+    logAdder->setProperty("LogText", log.second);
+    logAdder->execute();
+  }
 }
 
 std::map<std::string, std::string> ResNorm::getAdditionalLogStrings() const {
-	auto logs = std::map<std::string, std::string>();
-	logs["sample_filename"] = m_uiForm.dsVanadium->getCurrentDataName().toStdString();
-	logs["resolution_filename"] = m_uiForm.dsResolution->getCurrentDataName().toStdString();
-	logs["fit_program"] = "ResNorm";
-	logs["create_output"] = "true";
-	return logs;
+  auto logs = std::map<std::string, std::string>();
+  logs["sample_filename"] =
+      m_uiForm.dsVanadium->getCurrentDataName().toStdString();
+  logs["resolution_filename"] =
+      m_uiForm.dsResolution->getCurrentDataName().toStdString();
+  logs["fit_program"] = "ResNorm";
+  logs["create_output"] = "true";
+  return logs;
 }
 
 std::map<std::string, std::string> ResNorm::getAdditionalLogNumbers() const {
-	auto logs = std::map<std::string, std::string>();
-	logs["e_min"] = boost::lexical_cast<std::string>(getDoubleManagerProperty("EMin"));
-	logs["e_max"] = boost::lexical_cast<std::string>(getDoubleManagerProperty("EMax"));
-	return logs;
+  auto logs = std::map<std::string, std::string>();
+  logs["e_min"] =
+      boost::lexical_cast<std::string>(getDoubleManagerProperty("EMin"));
+  logs["e_max"] =
+      boost::lexical_cast<std::string>(getDoubleManagerProperty("EMax"));
+  return logs;
 }
 
 double ResNorm::getDoubleManagerProperty(QString const &propName) const {
-	return m_dblManager->value(m_properties[propName]);
+  return m_dblManager->value(m_properties[propName]);
 }
 
 void ResNorm::copyLogs(MatrixWorkspace_sptr resultWorkspace,
-	                     WorkspaceGroup_sptr resultGroup) const {
-	for (auto const &workspace : *resultGroup) 
-		copyLogs(resultWorkspace, workspace);
+                       WorkspaceGroup_sptr resultGroup) const {
+  for (auto const &workspace : *resultGroup)
+    copyLogs(resultWorkspace, workspace);
 }
 
 void ResNorm::copyLogs(MatrixWorkspace_sptr resultWorkspace,
-	                     Workspace_sptr workspace) const {
-	auto logCopier = AlgorithmManager::Instance().create("CopyLogs");
-	logCopier->setProperty("InputWorkspace", resultWorkspace->getName());
-	logCopier->setProperty("OutputWorkspace", workspace->getName());
-	logCopier->execute();
+                       Workspace_sptr workspace) const {
+  auto logCopier = AlgorithmManager::Instance().create("CopyLogs");
+  logCopier->setProperty("InputWorkspace", resultWorkspace->getName());
+  logCopier->setProperty("OutputWorkspace", workspace->getName());
+  logCopier->execute();
 }
 
 /**
@@ -274,7 +275,8 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
   m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
 
   QPair<double, double> res;
-  QPair<double, double> const range = m_uiForm.ppPlot->getCurveRange("Vanadium");
+  QPair<double, double> const range =
+      m_uiForm.ppPlot->getCurveRange("Vanadium");
 
   auto const vanWs = getADSMatrixWorkspace(filename.toStdString());
   m_uiForm.spPreviewSpectrum->setMaximum(
@@ -345,7 +347,7 @@ void ResNorm::updateProperties(QtProperty *prop, double val) {
 
   if (prop == m_properties["EMin"] || prop == m_properties["EMax"]) {
     auto bounds = qMakePair(getDoubleManagerProperty("EMin"),
-			                      getDoubleManagerProperty("EMax"));
+                            getDoubleManagerProperty("EMax"));
     setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
                      bounds);
   }
