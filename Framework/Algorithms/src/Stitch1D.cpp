@@ -18,6 +18,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Strings.h"
 
 #include <algorithm>
 #include <boost/format.hpp>
@@ -29,14 +30,6 @@ using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramY;
 
 namespace {
-/// Returns a tuple holding the first and last x value of the first spectrum and
-/// the lhs and rhs workspace, respectively
-using MinMaxTuple = boost::tuple<double, double>;
-MinMaxTuple calculateXIntersection(MatrixWorkspace_const_sptr &lhsWS,
-                                   MatrixWorkspace_const_sptr &rhsWS) {
-  return MinMaxTuple(rhsWS->x(0).front(), lhsWS->x(0).back());
-}
-
 /// Check if a double is not zero and returns a bool indicating success
 bool isNonzero(double i) { return (0. != i); }
 } // namespace
@@ -52,60 +45,63 @@ DECLARE_ALGORITHM(Stitch1D)
 // value value to be inclusive of bin boundaries if sitting ontop of the bin
 // boundaries.
 
-/** Zero out all y and e data that is not in the region a1 to a2.
- * @param a1 : Zero based bin index (first one)
- * @param a2 : Zero based bin index (last one inclusive)
+/** Zero out all y and e data outside the region starting from a1 to a2.
+ * @param a1 : start workspace index
+ * @param a2 : end workspace index
  * @param source : Workspace providing the source data.
  */
-MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
+MatrixWorkspace_sptr Stitch1D::maskAllBut(size_t a1, size_t a2,
                                           MatrixWorkspace_sptr &source) {
-  MatrixWorkspace_sptr product = source->clone();
-  const int histogramCount = static_cast<int>(source->getNumberHistograms());
-  PARALLEL_FOR_IF(Kernel::threadSafe(*source, *product))
-  for (int i = 0; i < histogramCount; ++i) {
+  MatrixWorkspace_sptr outWS = source->clone();
+  unsigned int histogramCount =
+      static_cast<unsigned int>(source->getNumberHistograms());
+  unsigned int start = static_cast<unsigned int>(a1);
+  unsigned int stop = static_cast<unsigned int>(a2);
+  PARALLEL_FOR_IF(Kernel::threadSafe(*source, *outWS))
+  for (unsigned int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the bin boundaries
-    product->setSharedX(i, source->sharedX(i));
+    outWS->setSharedX(i, source->sharedX(i));
     // Copy over the data
     const auto &sourceY = source->y(i);
     const auto &sourceE = source->e(i);
 
     // initially zero - out the data.
-    product->mutableY(i) = HistogramY(sourceY.size(), 0.);
-    product->mutableE(i) = HistogramE(sourceE.size(), 0.);
+    outWS->mutableY(i) = HistogramY(sourceY.size(), 0.);
+    outWS->mutableE(i) = HistogramE(sourceE.size(), 0.);
 
-    auto &newY = product->mutableY(i);
-    auto &newE = product->mutableE(i);
+    auto &newY = outWS->mutableY(i);
+    auto &newE = outWS->mutableE(i);
 
     // Copy over the non-zero stuff
-    std::copy(sourceY.begin() + a1 + 1, sourceY.begin() + a2,
-              newY.begin() + a1 + 1);
-    std::copy(sourceE.begin() + a1 + 1, sourceE.begin() + a2,
-              newE.begin() + a1 + 1);
+    std::copy(sourceY.begin() + start, sourceY.begin() + stop,
+              newY.begin() + start);
+    std::copy(sourceE.begin() + start, sourceE.begin() + stop,
+              newE.begin() + start);
 
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  return product;
+  return outWS;
 }
 
-/** Mask out data in the region between a1 and a2 with zeros. Operation
- * performed on the original workspace
- * @param a1 : start position in X
- * @param a2 : end position in X
+/** Zero out all y and e data inside the region starting from a1 to a2.
+ * @param a1 : start workspace index
+ * @param a2 : end workspace index
  * @param source : Workspace to mask.
- * @return Masked workspace.
  */
-void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
-  const int histogramCount = static_cast<int>(source->getNumberHistograms());
+void Stitch1D::maskInPlace(size_t a1, size_t a2, MatrixWorkspace_sptr &source) {
+  unsigned int histogramCount =
+      static_cast<unsigned int>(source->getNumberHistograms());
+  unsigned int start = static_cast<unsigned int>(a1);
+  unsigned int stop = static_cast<unsigned int>(a2);
   PARALLEL_FOR_IF(Kernel::threadSafe(*source))
-  for (int i = 0; i < histogramCount; ++i) {
+  for (unsigned int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the data
     auto &sourceY = source->mutableY(i);
     auto &sourceE = source->mutableE(i);
-
-    for (int i = a1; i < a2; ++i) {
+    for (unsigned int i = start; i < stop; ++i) {
       sourceY[i] = 0.;
       sourceE[i] = 0.;
     }
@@ -197,12 +193,12 @@ std::map<std::string, std::string> Stitch1D::validateInputs(void) {
     const auto rhsMax = rhsX.back();
     // A global view on x values
     const double minVal = std::min(lhsMin, rhsMin);
-    if (minVal > (startOverlap - 1.e-9))
+    if ((minVal - 1.e-9) > startOverlap)
       issues["StartOverlap"] =
           "Must be greater or equal than the minimum x value (" +
           std::to_string(minVal) + ")";
     const double maxVal = std::max(lhsMax, rhsMax);
-    if (maxVal < (endOverlap + 1.e-9))
+    if ((maxVal + 1.e-9) < endOverlap)
       issues["EndOverlap"] =
           "Must be smaller or equal than the maximum x value (" +
           std::to_string(maxVal) + ")";
@@ -231,37 +227,23 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
                                              const bool scaleRHS) const {
   const auto &lhsX = lhsWS->x(0);
   const double minLHSX = lhsX.front();
-
   const auto &rhsX = rhsWS->x(0);
   const double maxRHSX = rhsX.back();
-
   std::vector<double> result;
   if (isDefault("Params")) {
-    std::vector<double> calculatedParams;
-
-    // Calculate the step size based on the existing step size of the LHS
-    // workspace. That way scale factors should be reasonably maintained.
-    double calculatedStep = 0.;
-    if (scaleRHS) {
-      // Calculate the step from the workspace that will be scaled.
-      calculatedStep = lhsX[1] - lhsX[0];
-    } else {
-      // Calculate the step from the workspace that will not be scaled.
-      calculatedStep = rhsX[1] - rhsX[0];
+    result.emplace_back(minLHSX);
+    if (scaleRHS) { // Step from the workspace that will be scaled.
+      result.emplace_back(rhsX[1] - rhsX[0]);
+    } else { // Step from the workspace that will not be scaled.
+      result.emplace_back(lhsX[1] - lhsX[0]);
     }
-
-    calculatedParams.push_back(minLHSX);
-    calculatedParams.push_back(calculatedStep);
-    calculatedParams.push_back(maxRHSX);
-    result = calculatedParams;
+    result.emplace_back(maxRHSX);
   } else {
     std::vector<double> inputParams = this->getProperty("Params");
     if (inputParams.size() == 1) {
-      std::vector<double> calculatedParams;
-      calculatedParams.push_back(minLHSX);
-      calculatedParams.push_back(inputParams.front()); // Use the step supplied.
-      calculatedParams.push_back(maxRHSX);
-      result = calculatedParams;
+      result.emplace_back(minLHSX);
+      result.emplace_back(inputParams.front()); // Use the step supplied.
+      result.emplace_back(maxRHSX);
     } else {
       result = inputParams; // user has provided params. Use those.
     }
@@ -269,53 +251,58 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
   return result;
 }
 
-/** Runs the Rebin Algorithm as a child and replaces special values
+/** Runs the Rebin Algorithm as a child
  @param input :: The input workspace
  @param params :: a vector<double> containing rebinning parameters
- @return A shared pointer to the resulting MatrixWorkspace
  */
-MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
-                                     const std::vector<double> &params) {
+void Stitch1D::rebin(MatrixWorkspace_sptr &ws,
+                     const std::vector<double> &params) {
   auto rebin = this->createChildAlgorithm("Rebin");
-  rebin->setProperty("InputWorkspace", input);
+  rebin->setProperty("InputWorkspace", ws);
   rebin->setProperty("Params", params);
   std::stringstream ssParams;
-  ssParams << params[0] << "," << params[1] << "," << params[2];
+  ssParams << Mantid::Kernel::Strings::join(params.begin(), params.end(), ",");
   g_log.information("Rebinning Params: " + ssParams.str());
   rebin->execute();
-  MatrixWorkspace_sptr outWS = rebin->getProperty("OutputWorkspace");
+  ws = rebin->getProperty("OutputWorkspace");
+}
 
-  const int histogramCount = static_cast<int>(outWS->getNumberHistograms());
-
+/** Replaces special values
+ @param input :: The input workspace
+ @param params :: a vector<double> containing rebinning parameters
+ */
+void Stitch1D::replaceSpecialValues(MatrixWorkspace_sptr &ws) {
+  unsigned int histogramCount =
+      static_cast<unsigned int>(ws->getNumberHistograms());
   // Record special values and then mask them out as zeros. Special values are
   // remembered and then replaced post processing.
-  PARALLEL_FOR_IF(Kernel::threadSafe(*outWS))
-  for (int i = 0; i < histogramCount; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
+  for (unsigned int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     std::vector<size_t> &nanEIndexes = m_nanEIndexes[i];
     std::vector<size_t> &nanYIndexes = m_nanYIndexes[i];
     std::vector<size_t> &infEIndexes = m_infEIndexes[i];
     std::vector<size_t> &infYIndexes = m_infYIndexes[i];
     // Copy over the data
-    auto &sourceY = outWS->mutableY(i);
-    auto &sourceE = outWS->mutableE(i);
+    auto &sourceY = ws->mutableY(i);
+    auto &sourceE = ws->mutableE(i);
 
     for (size_t j = 0; j < sourceY.size(); ++j) {
       const double value = sourceY[j];
       if (std::isnan(value)) {
-        nanYIndexes.push_back(j);
+        nanYIndexes.emplace_back(j);
         sourceY[j] = 0.;
       } else if (std::isinf(value)) {
-        infYIndexes.push_back(j);
+        infYIndexes.emplace_back(j);
         sourceY[j] = 0.;
       }
 
       const double eValue = sourceE[j];
       if (std::isnan(eValue)) {
-        nanEIndexes.push_back(j);
+        nanEIndexes.emplace_back(j);
         sourceE[j] = 0.;
       } else if (std::isinf(eValue)) {
-        infEIndexes.push_back(j);
+        infEIndexes.emplace_back(j);
         sourceE[j] = 0.;
       }
     }
@@ -323,8 +310,6 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  return outWS;
 }
 
 /** Runs the Integration Algorithm as a child.
@@ -394,36 +379,6 @@ MatrixWorkspace_sptr Stitch1D::singleValueWS(const double val) {
   singleValueWS->setProperty("DataValue", val);
   singleValueWS->execute();
   return singleValueWS->getProperty("OutputWorkspace");
-}
-
-/** Finds the bins containing the ends of the overlapping region
- @param startOverlap :: The start of the overlapping region
- @param endOverlap :: The end of the overlapping region
- @param workspace :: The workspace to determine the overlaps inside
- @return a boost::tuple<int,int> containing the bin indexes of the overlaps
- */
-boost::tuple<int, int>
-Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
-                              MatrixWorkspace_sptr &workspace) {
-  int a1 = 0;
-  int a2 = 0;
-  try {
-    a1 = static_cast<int>(workspace->binIndexOf(startOverlap));
-  } catch (std::out_of_range) {
-    throw std::runtime_error("StartOverlap is out of x value range.");
-  }
-  try {
-    a2 = static_cast<int>(workspace->binIndexOf(endOverlap));
-  } catch (std::out_of_range) {
-    throw std::runtime_error("EndOverlap is out of x value range.");
-  }
-  if (a1 == ++a2) {
-    throw std::runtime_error("The Params you have provided for binning yield a "
-                             "workspace in which start and end overlap appear "
-                             "in the same bin. Make binning finer via input "
-                             "Params.");
-  }
-  return boost::tuple<int, int>(a1, a2);
 }
 
 /** Determines if a workspace has non zero errors
@@ -498,20 +453,11 @@ void Stitch1D::exec() {
   m_infEIndexes.resize(histogramCount);
 
   const bool scaleRHS = this->getProperty("ScaleRHSWorkspace");
-  MatrixWorkspace_sptr lhs = lhsWS->clone();
-  MatrixWorkspace_sptr rhs = rhsWS->clone();
-  if (lhsWS->isHistogramData()) {
-    MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
-    lhs = rebin(lhs, params);
-    rhs = rebin(rhs, params);
-  }
-
   // At this point, we know already that lhsWS contains the global minimum x
   // value and rhsWS the global maximum x value for binned data
-  const MinMaxTuple intesectionXRegion = calculateXIntersection(lhsWS, rhsWS);
   const double tol = 1.e-9;
-  const double intersectionMin = intesectionXRegion.get<0>() - tol;
-  const double intersectionMax = intesectionXRegion.get<1>() - tol;
+  const double intersectionMin = rhsWS->x(0).front() - tol;
+  const double intersectionMax = lhsWS->x(0).back() + tol;
   // We get the correct limits for binned data already
   double startOverlap =
       overlap(intersectionMin, "StartOverlap", std::greater<double>());
@@ -522,10 +468,18 @@ void Stitch1D::exec() {
     endOverlap =
         overlap(intersectionMin, "StartOverlap", std::greater<double>());
   }
-
   m_scaleFactor = this->getProperty("ManualScaleFactor");
   m_errorScaleFactor = m_scaleFactor;
   const bool useManualScaleFactor = this->getProperty("UseManualScaleFactor");
+  MatrixWorkspace_sptr lhs = lhsWS->clone();
+  MatrixWorkspace_sptr rhs = rhsWS->clone();
+  replaceSpecialValues(lhs);
+  replaceSpecialValues(rhs);
+  const MantidVec params = getRebinParams(lhsWS, rhsWS, scaleRHS);
+  if (lhsWS->isHistogramData()) {
+    rebin(lhs, params);
+    rebin(rhs, params);
+  }
   if (useManualScaleFactor) {
     MatrixWorkspace_sptr manualScaleFactorWS = singleValueWS(m_scaleFactor);
     if (scaleRHS)
@@ -550,28 +504,41 @@ void Stitch1D::exec() {
   g_log.notice(messageBuffer.str());
   MatrixWorkspace_sptr result;
   if (lhsWS->isHistogramData()) { // If the input workspaces are histograms ...
-    boost::tuple<int, int> startEnd =
-        findStartEndIndexes(startOverlap, endOverlap, lhs);
-    int a1 = boost::tuples::get<0>(startEnd);
-    int a2 = boost::tuples::get<1>(startEnd);
-    // Mask out everything BUT the overlap region as a new workspace.
-    MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, lhs);
-    MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rhs);
-    // Mask out everything AFTER the overlap region as a new workspace.
-    maskInPlace(a1 + 1, static_cast<int>(lhs->blocksize()), lhs);
-    // Mask out everything BEFORE the overlap region as a new workspace.
-    maskInPlace(0, a2, rhs);
-    MatrixWorkspace_sptr overlapave;
-    if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2)) {
-      overlapave = weightedMean(overlap1, overlap2);
-    } else {
-      g_log.information("Using un-weighted mean scaling for overlap mean");
-      MatrixWorkspace_sptr sum = overlap1 + overlap2;
-      MatrixWorkspace_sptr denominator = singleValueWS(2.0);
-      overlapave = sum / denominator;
+    try {
+      size_t a1 = lhs->binIndexOf(startOverlap + params[1]);
+      size_t a2 = lhs->binIndexOf(endOverlap);
+      if (a1 == a2) {
+        g_log.warning("The Params you have provided for binning yield a "
+                      "workspace in which start and end overlap appear "
+                      "in the same bin. Make binning finer via input "
+                      "Params.");
+      }
+      // Overlap region of lhs and rhs
+      MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, lhs);
+      MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rhs);
+      MatrixWorkspace_sptr overlapave;
+      if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2)) {
+        overlapave = weightedMean(overlap1, overlap2);
+      } else {
+        g_log.information("Using un-weighted mean scaling for overlap mean");
+        MatrixWorkspace_sptr sum = overlap1 + overlap2;
+        MatrixWorkspace_sptr denominator = singleValueWS(2.0);
+        overlapave = sum / denominator;
+      }
+      // Non-overlap region of lhs, rhs
+      maskInPlace(a1, lhs->blocksize(), lhs);
+      maskInPlace(0, a2, rhs);
+      result = lhs + overlapave + rhs;
+      reinsertSpecialValues(result);
+    } catch (std::range_error) {
+      g_log.error("It happens that the bin index is out of range. This likely "
+                  "appears when using Stitch1DMany and providing a full "
+                  "rebinning range. Please note that after stitching two "
+                  "workspaces, those workspaces are rebinned and start and end "
+                  "overlap values which are given may not anymore be valid. You"
+                  "may consider giving only a binning step, i.e. one parameter.");
+      throw(std::runtime_error("Bin out of range."));
     }
-    result = lhs + overlapave + rhs;
-    reinsertSpecialValues(result);
   } else { // The input workspaces are point data ... join & sort
     result = conjoinXAxis(lhs, rhs);
     if (!result)
@@ -582,6 +549,8 @@ void Stitch1D::exec() {
     childAlg->setProperty("InputWorkspace", result);
     childAlg->execute();
     result = childAlg->getProperty("OutputWorkspace");
+    if (!result)
+      g_log.error("Could not retrieve sorted workspace.");
   }
   setProperty("OutputWorkspace", result);
   setProperty("OutScaleFactor", m_scaleFactor);
@@ -591,9 +560,10 @@ void Stitch1D::exec() {
  * @param ws : MatrixWorkspace to resinsert special values into.
  */
 void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws) {
-  int histogramCount = static_cast<int>(ws->getNumberHistograms());
+  unsigned int histogramCount =
+      static_cast<unsigned int>(ws->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
-  for (int i = 0; i < histogramCount; ++i) {
+  for (unsigned int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the data
     auto &sourceY = ws->mutableY(i);
