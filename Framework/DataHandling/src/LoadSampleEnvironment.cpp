@@ -23,7 +23,6 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 
-
 namespace Mantid {
 namespace DataHandling {
 
