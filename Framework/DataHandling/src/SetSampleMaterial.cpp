@@ -157,7 +157,6 @@ void SetSampleMaterial::exec() {
   }
 
   ReadMaterial reader;
-  const std::string chemicalSymbol = getProperty("ChemicalFormula");
   params.coherentXSection = getProperty("CoherentXSection");
   params.incoherentXSection = getProperty("IncoherentXSection");
   params.attenuationXSection = getProperty("AttenuationXSection");
