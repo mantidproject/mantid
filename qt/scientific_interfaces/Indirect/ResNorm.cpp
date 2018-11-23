@@ -384,7 +384,7 @@ void ResNorm::previewSpecChanged(int value) {
 
       fit->mutableY(0) /= scaleFactors->cell<double>(m_previewSpec);
 
-      m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::red);
+      m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::green);
 
       AnalysisDataService::Instance().addOrReplace(
           "__" + fitWsGroupName + "_scaled", fit);
