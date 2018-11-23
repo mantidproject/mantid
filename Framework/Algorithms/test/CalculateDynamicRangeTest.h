@@ -63,8 +63,8 @@ public:
     TS_ASSERT(run.hasProperty("qmax"))
     const double qmin = run.getPropertyAsSingleValue("qmin");
     const double qmax = run.getPropertyAsSingleValue("qmax");
-    TS_ASSERT_DELTA(qmin, 0.03553, 1E-5)
-    TS_ASSERT_DELTA(qmax, 0.88199, 1E-5)
+    TS_ASSERT_DELTA(qmin, 0.03701, 1E-5)
+    TS_ASSERT_DELTA(qmax, 0.73499, 1E-5)
   }
 
   void test_components() {
@@ -85,20 +85,20 @@ public:
     TS_ASSERT(run.hasProperty("qmax"))
     double qmin = run.getPropertyAsSingleValue("qmin");
     double qmax = run.getPropertyAsSingleValue("qmax");
-    TS_ASSERT_DELTA(qmin, 0.01777, 1E-5)
-    TS_ASSERT_DELTA(qmax, 0.88199, 1E-5)
+    TS_ASSERT_DELTA(qmin, 0.01851, 1E-5)
+    TS_ASSERT_DELTA(qmax, 0.73499, 1E-5)
     TS_ASSERT(run.hasProperty("qmin_bank1"))
     TS_ASSERT(run.hasProperty("qmax_bank1"))
     qmin = run.getPropertyAsSingleValue("qmin_bank1");
     qmax = run.getPropertyAsSingleValue("qmax_bank1");
-    TS_ASSERT_DELTA(qmin, 0.03553, 1E-5)
-    TS_ASSERT_DELTA(qmax, 0.88199, 1E-5)
+    TS_ASSERT_DELTA(qmin, 0.03701, 1E-5)
+    TS_ASSERT_DELTA(qmax, 0.73499, 1E-5)
     TS_ASSERT(run.hasProperty("qmin_bank2"))
     TS_ASSERT(run.hasProperty("qmax_bank2"))
     qmin = run.getPropertyAsSingleValue("qmin_bank2");
     qmax = run.getPropertyAsSingleValue("qmax_bank2");
-    TS_ASSERT_DELTA(qmin, 0.01777, 1E-5)
-    TS_ASSERT_DELTA(qmax, 0.79491, 1E-5)
+    TS_ASSERT_DELTA(qmin, 0.01851, 1E-5)
+    TS_ASSERT_DELTA(qmax, 0.66242, 1E-5)
   }
 
 private:
