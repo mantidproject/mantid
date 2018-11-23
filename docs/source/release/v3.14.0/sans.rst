@@ -23,6 +23,7 @@ Improved
 * Updated file adding to prefix the instrument name
 * Updated file finding to be able to find added runs withour instrument name prefix
 * Updated GUI code so calculated merge scale and shift are shown after reduction.
+* Added display of current save directory.
 
 Bug fixes
 #########
@@ -32,6 +33,7 @@ Bug fixes
 * The GUI no longer hangs whilst searching the archive for files.
 * Updated the options and units displayed in wavelength and momentum range combo boxes.
 * Fixed a bug which crashed the beam centre finder if a phi mask was set.
+* Fixed normalisation discrepancy between Compatibility and Non-compatibility modes when time masking EventWorkspaces
 
 Improvements
 ############
