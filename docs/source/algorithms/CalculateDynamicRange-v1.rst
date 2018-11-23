@@ -44,8 +44,8 @@ Output:
 
 .. testoutput:: CalculateDynamicRangeExample
 
-  QMin = 0.03553
-  QMax = 0.88200
+  QMin = 0.03701
+  QMax = 0.73500
 
 .. categories::
 
