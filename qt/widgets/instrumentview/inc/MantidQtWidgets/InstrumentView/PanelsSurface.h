@@ -63,7 +63,7 @@ protected:
 
   void processStructured(size_t rootIndex);
 
-  void processTubes(size_t rootIndex);
+  boost::optional<size_t> processTubes(size_t rootIndex);
 
   void processGrid(size_t rootIndex);
 

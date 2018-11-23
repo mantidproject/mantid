@@ -372,17 +372,45 @@ void PanelsSurface::processGrid(size_t rootIndex) {
   processStructured(layers[layerIndex]);
 }
 
-void PanelsSurface::processTubes(size_t rootIndex) {
+boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   const auto &componentInfo = m_instrActor->componentInfo();
-  auto bankIndex = componentInfo.parent(
-      rootIndex); // findParentBank(componentInfo, rootIndex);
+  const auto bankIndex0 = componentInfo.parent(rootIndex);
+  auto bankIndex = bankIndex0;
+  auto *bankChildren = &componentInfo.children(bankIndex);
+  while (bankChildren->size() == 1) {
+    if (!componentInfo.hasParent(bankIndex)) {
+      return boost::none;
+    }
+    bankIndex = componentInfo.parent(bankIndex);
+    bankChildren = &componentInfo.children(bankIndex);
+  }
+
+  auto tubes = (bankIndex == bankIndex0) ? *bankChildren : std::vector<size_t>();
+  if (tubes.empty()) {
+    for(auto index: *bankChildren) {
+      boost::optional<size_t> tubeIndex = index;
+      while (componentInfo.componentType(tubeIndex.value()) != ComponentType::OutlineComposite) {
+        auto &children = componentInfo.children(tubeIndex.value());
+        if (children.empty()) {
+          tubeIndex = boost::none;
+          break;
+        }
+        tubeIndex = children[0];
+      }
+      if (tubeIndex) {
+        tubes.emplace_back(tubeIndex.value());
+      }
+    }
+    if (tubes.empty())
+      return bankIndex;
+  }
+
   auto name = componentInfo.name(bankIndex);
-  auto tubes = componentInfo.children(bankIndex);
   auto normal = tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();
 
   if (normal.nullVector() ||
       !isBankFlat(componentInfo, bankIndex, tubes, normal))
-    return;
+    return boost::none;
 
   // save bank info
   auto index = m_flatBanks.size();
@@ -428,6 +456,7 @@ void PanelsSurface::processTubes(size_t rootIndex) {
     p0 = p2;
     p1 = p3;
   }
+  return bankIndex;
 }
 
 std::pair<std::vector<size_t>, Mantid::Kernel::V3D>
@@ -502,8 +531,12 @@ PanelsSurface::findFlatPanels(size_t rootIndex, std::vector<bool> &visited) {
   }
 
   if (componentType == ComponentType::OutlineComposite) {
-    processTubes(rootIndex);
-    setBankVisited(componentInfo, parentIndex, visited);
+    const auto bankIndex = processTubes(rootIndex);
+    if (bankIndex) {
+      setBankVisited(componentInfo, bankIndex.value(), visited);
+    } else {
+      setBankVisited(componentInfo, parentIndex, visited);
+    }
     return boost::none;
   }
 
