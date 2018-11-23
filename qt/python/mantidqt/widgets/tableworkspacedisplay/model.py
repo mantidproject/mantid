@@ -11,9 +11,36 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.dataobjects import PeaksWorkspace, TableWorkspace
+from mantid.py3compat import Enum
 
 
-class TableWorkspaceDisplayModel(object):
+class ITableDisplayModel(object):
+    def get_name(self):
+        raise NotImplementedError("This is an interface and should be implemented.")
+
+    def get_column_headers(self):
+        raise NotImplementedError("This is an interface and should be implemented.")
+
+    def get_column(self, index):
+        raise NotImplementedError("This is an interface and should be implemented.")
+
+    def get_number_of_rows(self):
+        raise NotImplementedError("This is an interface and should be implemented.")
+
+    def get_number_of_columns(self):
+        raise NotImplementedError("This is an interface and should be implemented.")
+
+    @staticmethod
+    def is_peaks_workspace(ws):
+        return isinstance(ws, PeaksWorkspace)
+
+
+class TableDisplayColumnType(Enum):
+    NUMERIC = 1
+    TEST = 123
+
+
+class TableWorkspaceDisplayModel(ITableDisplayModel):
     SPECTRUM_PLOT_LEGEND_STRING = '{}-{}'
     BIN_PLOT_LEGEND_STRING = '{}-bin-{}'
 
@@ -26,10 +53,19 @@ class TableWorkspaceDisplayModel(object):
         self.ws = ws
         self.ws_num_rows = self.ws.rowCount()
         self.ws_num_cols = self.ws.columnCount()
+        self.column_types = [TableDisplayColumnType.NUMERIC] * self.ws_num_cols
+        self.set_column_type(0, TableDisplayColumnType.TEST)
 
-    @staticmethod
-    def is_peaks_workspace(ws):
-        return isinstance(ws, PeaksWorkspace)
+        #     TODO figure out a way to store column TYPE
+        # set to Numeric by default
+        # How can the type be set
+
+    def set_column_type(self, index, type):
+        # find a way to check if type is a TableDisplayColumnType?
+        self.column_types[index] = type
+
+    def get_column_type(self, index):
+        return self.column_types[index]
 
     def get_name(self):
         return self.ws.name()

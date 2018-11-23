@@ -23,11 +23,7 @@ class TableWorkspaceDisplay(object):
 
     def __init__(self, ws, plot=None, parent=None, model=None, view=None):
         # Create model and view, or accept mocked versions
-        if model:
-            self.model = model
-
-        self.model = TableWorkspaceDisplayModel(ws)
-
+        self.model = model if model else TableWorkspaceDisplayModel(ws)
         self.view = view if view else TableWorkspaceDisplayView(self, parent, self.model.get_name())
         self.plot = plot
         self.view.set_context_menu_actions(self.view)
@@ -75,7 +71,6 @@ class TableWorkspaceDisplay(object):
         selected_rows = selection_model.selectedRows()
         selected_rows_list = [index.row() for index in selected_rows]
         selected_rows_str = ",".join([str(row) for row in selected_rows_list])
-        print("Selected rows:", selected_rows_str)
 
         DeleteTableRows(self.model.ws, selected_rows_str)
         # Reverse the list so that we delete in order from bottom -> top
@@ -84,7 +79,15 @@ class TableWorkspaceDisplay(object):
             self.view.removeRow(row)
 
     def action_statistics_on_rows(self):
-        raise NotImplementedError("Not implemented")
+        selection_model = self.view.selectionModel()
+        if not selection_model.hasSelection():
+            show_no_selection_to_copy_toast()
+            return
+
+        selected_rows = selection_model.selectedRows()
+        selected_rows_list = [index.row() for index in selected_rows]
+        num_cols = self.model.get_number_of_columns()
+
     # def _do_action_plot(self, table, axis, get_index, plot_errors=False):
     #     if self.plot is None:
     #         raise ValueError("Trying to do a plot, but no plotting class dependency was injected in the constructor")

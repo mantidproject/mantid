@@ -21,8 +21,8 @@ from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDispl
 from workbench.plotting.functions import plot  # noqa: F402
 
 app = QApplication([])
-DEEE_WS_MON = Load("SavedTableWorkspace.nxs")
+# DEEE_WS_MON = Load("SavedTableWorkspace.nxs")
 # DEEE_WS_MON = Load("TOPAZ_3007.peaks.nxs")
-# DEEE_WS_MON = Load("SmallPeakWS10.nxs")
+DEEE_WS_MON = Load("SmallPeakWS10.nxs")
 window = TableWorkspaceDisplay(DEEE_WS_MON, plot)
 app.exec_()
