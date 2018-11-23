@@ -37,6 +37,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -96,6 +97,10 @@ public:
   size_t getMemorySize() const override {
     return readY().size() * sizeof(double) * 2;
   }
+
+  void applyBinWeight(const size_t &, const double &) override {
+    throw Mantid::Kernel::Exception::NotImplementedError("applyBinWeight not implemented.");
+  };
 
   /// Mask the spectrum to this value
   void clearData() override {
