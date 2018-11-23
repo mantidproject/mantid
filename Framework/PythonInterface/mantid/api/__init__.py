@@ -18,7 +18,6 @@ from __future__ import (absolute_import, division,
 from ..kernel import _shared_cextension
 with _shared_cextension():
     from ._api import *
-    from ._api import _declareCPPAlgorithms
 
 ###############################################################################
 # Make aliases accessible in this namespace

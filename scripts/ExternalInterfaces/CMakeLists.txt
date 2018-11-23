@@ -14,7 +14,7 @@ ExternalProject_Add ( mslice
   TEST_COMMAND ""
   INSTALL_COMMAND ""
 )
-set ( _mslice_src ${_mslice_external_root}/src/mslice )
+set ( MSLICE_DEV ${_mslice_external_root}/src/mslice PARENT_SCOPE )
 message ( STATUS "Fetching/updating mslice" )
 execute_process ( COMMAND ${CMAKE_COMMAND} ARGS -P ${_mslice_external_root}/tmp/mslice-gitclone.cmake
                   RESULT_VARIABLE _exit_code )
@@ -29,5 +29,5 @@ else ()
 endif()
 
 # Installation
-install ( DIRECTORY ${_mslice_external_root}/src/mslice/mslice/
+install ( DIRECTORY ${MSLICE_SRC_DEV}/mslice/
           DESTINATION ${INBUNDLE}scripts/ExternalInterfaces/mslice )

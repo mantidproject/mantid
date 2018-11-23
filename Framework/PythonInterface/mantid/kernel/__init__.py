@@ -53,7 +53,6 @@ from . import mpisetup
 with _shared_cextension():
     from ._kernel import *
 
-
 ###############################################################################
 # Make modules available in this namespace
 ###############################################################################
@@ -68,12 +67,4 @@ funcreturns = funcinspect
 # Do site-specific setup for packages
 ###############################################################################
 from . import packagesetup as _mantidsite
-
-_mantidsite.update_sys_paths(_os.environ.get('MANTIDPATH', ''))
 _mantidsite.set_NEXUSLIB_var()
-# Add directories to PYTHONPATH
-_path_keys = ['requiredpythonscript.directories','pythonscripts.directories']
-for key in _path_keys:
-    paths = config[key]
-    _mantidsite.update_sys_paths(paths)
-

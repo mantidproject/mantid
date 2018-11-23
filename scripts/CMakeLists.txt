@@ -19,13 +19,56 @@ set_property ( TARGET CompileUIErrorReporter PROPERTY FOLDER "CompilePyUI" )
 add_subdirectory ( ExternalInterfaces )
 
 # --------------------------------------------------------------------
+# .pth file
+# --------------------------------------------------------------------
+set ( _pth_dirs .
+  Calibration
+  DiamondAttenuationCorrection
+  Diffraction
+  Engineering
+  GSAS-II
+  Inelastic
+  Interface
+  Reflectometry
+  SANS
+  SCD_Reduction
+  TemporaryREF_MScripts
+  Vates
+)
+
+
+set ( _pth_list_dev )
+set ( _pth_list_install )
+foreach ( _dir ${_pth_dirs} )
+  list ( APPEND _pth_list_dev "${CMAKE_SOURCE_DIR}/scripts/${_dir}" )
+  list ( APPEND _pth_list_install "../scripts/${_dir}" )
+endforeach()
+list ( APPEND _pth_list_dev ${MSLICE_DEV} )
+list ( APPEND _pth_list_install "../scripts/Externalinterfaces" )
+
+# development copy
+set ( _scripts_pth_src "${CMAKE_CURRENT_BINARY_DIR}/mantid-scripts.pth.src" )
+set ( _scripts_pth_dest "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantid-scripts.pth" )
+string ( REPLACE ";" "\n" _pth_list_dev "${_pth_list_dev}" )
+file ( WRITE ${_scripts_pth_src} "${_pth_list_dev}\n" )
+add_custom_command ( OUTPUT ${_scripts_pth_dest}
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${_scripts_pth_src} ${_scripts_pth_dest}
+  DEPENDS ${_scripts_pth_src}
+  COMMENT "Generating scripts .pth file"
+)
+add_custom_target ( ScriptsDotPth ALL DEPENDS ${_scripts_pth_dest} )
+add_dependencies ( PythonInterface ScriptsDotPth )
+
+# install copy
+set ( _scripts_pth_install "${CMAKE_CURRENT_BINARY_DIR}/mantid-scripts.pth.install" )
+string ( REPLACE ";" "\n" _pth_list_install "${_pth_list_install}" )
+file ( WRITE ${_scripts_pth_install} "${_pth_list_install}\n" )
+install ( FILES ${_scripts_pth_install} DESTINATION ${BIN_DIR} )
+
+# --------------------------------------------------------------------
 # Testing
 # --------------------------------------------------------------------
-# All of the following tests (and those in subdirectories) require the
-# test format to import mantid to setup paths to the scripts
-# directory
-set ( PYUNITTEST_TESTRUNNER_IMPORT_MANTID 1 )
-
 set ( TEST_PY_FILES
       test/AbinsAtomsDataTest.py
       test/AbinsCalculateDWSingleCrystalTest.py

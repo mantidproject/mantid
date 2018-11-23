@@ -53,7 +53,6 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
 
 install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
-  ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth
   DESTINATION ${ETC_DIR}
 )
 
@@ -66,8 +65,13 @@ print(sc.get_python_lib(plat_specific=True))"
   OUTPUT_VARIABLE PYTHON_SITE
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
   "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+)
+
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
+  DESTINATION ${ETC_DIR}
+  RENAME mantid.pth
 )
 
 ############################################################################

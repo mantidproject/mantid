@@ -27,15 +27,12 @@ from ..kernel._aliases import lazy_instance_access
 # delete the python objects.
 # If you see a segfault late in a python process related to the GIL
 # it is likely an exit handler is missing.
-AnalysisDataService = lazy_instance_access(AnalysisDataServiceImpl,
-                                           onexit=AnalysisDataServiceImpl.clear)
+AnalysisDataService = lazy_instance_access(AnalysisDataServiceImpl)
 AlgorithmFactory = lazy_instance_access(AlgorithmFactoryImpl)
-AlgorithmManager = lazy_instance_access(AlgorithmManagerImpl,
-                                        onexit=AlgorithmManagerImpl.clear)
+AlgorithmManager = lazy_instance_access(AlgorithmManagerImpl)
 FileFinder = lazy_instance_access(FileFinderImpl)
 FileLoaderRegistry = lazy_instance_access(FileLoaderRegistryImpl)
-FrameworkManager = lazy_instance_access(FrameworkManagerImpl,
-                                        onexit=FrameworkManagerImpl.shutdown)
+FrameworkManager = lazy_instance_access(FrameworkManagerImpl)
 FunctionFactory = lazy_instance_access(FunctionFactoryImpl)
 WorkspaceFactory = lazy_instance_access(WorkspaceFactoryImpl)
 CatalogManager = lazy_instance_access(CatalogManagerImpl)

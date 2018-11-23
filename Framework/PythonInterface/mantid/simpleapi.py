@@ -1419,12 +1419,9 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
 
 # Initialization:
 #   - start FrameworkManager
-#   - create algorithm functions for C++ algorithms
 #   - loads the python plugins and create new algorithm functions
 
 _api.FrameworkManagerImpl.Instance()
-_api._declareCPPAlgorithms()
-_atexit.register(_api.FrameworkManagerImpl.Instance().shutdown)
 _translate()
 
 # Load the Python plugins
