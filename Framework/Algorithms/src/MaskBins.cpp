@@ -90,7 +90,7 @@ void MaskBins::exec() {
 
   if (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS)) {
     this->execEvent();
-  } // else {
+  }
     MantidVec::difference_type startBin(0), endBin(0);
 
     // If the binning is the same throughout, we only need to find the index
@@ -117,7 +117,6 @@ void MaskBins::exec() {
       }
       progress.report();
     }
-  // }
 }
 
 /** Execution code for EventWorkspaces
