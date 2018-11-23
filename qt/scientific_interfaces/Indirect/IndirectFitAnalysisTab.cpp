@@ -183,16 +183,16 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
           SLOT(updateAttributeValues()));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
           this, SLOT(updateAttributeValues()));
-	connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
-		      this, SLOT(updateParameterValues()));
-	connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
-		      SLOT(setBrowserWorkspaceIndex(std::size_t)));
-	// Update attributes before parameters as the parameters may depend on the 
-	// attribute values
-	connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
-		      SLOT(updateAttributeValues()));
-	connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
-		      SLOT(updateParameterValues()));
+  connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
+          this, SLOT(updateParameterValues()));
+  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+          SLOT(setBrowserWorkspaceIndex(std::size_t)));
+  // Update attributes before parameters as the parameters may depend on the
+  // attribute values
+  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+          SLOT(updateAttributeValues()));
+  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+          SLOT(updateParameterValues()));
 
   connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)),
           m_plotPresenter.get(), SLOT(setStartX(double)));
