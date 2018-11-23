@@ -18,6 +18,7 @@ import unittest
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
+from mantid.api import AlgorithmFactoryImpl
 from mantidqt.utils.qt.test import select_item_in_combo_box, select_item_in_tree, GuiTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
@@ -37,21 +38,7 @@ mock_get_algorithm_descriptors.return_value = [AlgorithmDescriptorMock(name='Reb
                                                ]
 
 
-class AlgorithmFactoryTest(unittest.TestCase):
-
-    def test_getDescriptors(self):
-        from mantid import AlgorithmFactory
-        descriptors = AlgorithmFactory.getDescriptors(True)
-        self.assertGreater(len(descriptors), 0)
-        d = descriptors[0]
-        self.assertFalse(isinstance(d, AlgorithmDescriptorMock))
-        self.assertTrue(hasattr(d, 'name'))
-        self.assertTrue(hasattr(d, 'alias'))
-        self.assertTrue(hasattr(d, 'category'))
-        self.assertTrue(hasattr(d, 'version'))
-
-
-@patch('mantid.AlgorithmFactory.getDescriptors', mock_get_algorithm_descriptors)
+@patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
 class ModelTest(unittest.TestCase):
 
     def test_get_algorithm_data(self):
@@ -74,7 +61,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True))
 
 
-@patch('mantid.AlgorithmFactory.getDescriptors', mock_get_algorithm_descriptors)
+@patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
 class WidgetTest(GuiTest):
 
     def _select_in_tree(self, widget, item_label):
@@ -120,7 +107,7 @@ class WidgetTest(GuiTest):
                           "and the default Qt behaviour is used")
         else:
             widget = AlgorithmSelectorWidget()
-            self.assertEquals(widget.search_box.completer().filterMode(), Qt.MatchContains)
+            self.assertEqual(widget.search_box.completer().filterMode(), Qt.MatchContains)
 
     def test_search_box_selection_ignores_tree_selection(self):
         widget = AlgorithmSelectorWidget()

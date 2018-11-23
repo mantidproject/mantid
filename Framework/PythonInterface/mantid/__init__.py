@@ -63,12 +63,11 @@ if _os.path.exists(_os.path.join(_bindir, 'Mantid.properties')):
     _os.environ['MANTIDPATH'] = _bindir
 
 ###############################################################################
-# Load all sub-packages that contain a C-extension. The boost.python
+# Load all subpackages that contain a C-extension. The boost.python
 # registry will be missing entries if all are not loaded.
 ###############################################################################
-from . import kernel as _geometry
-from . import api as _dataobjects
-from . import _plugins
+from . import kernel as _kernel
+from . import api as _api
 from . import geometry as _geometry
 from . import dataobjects as _dataobjects
 from . import _plugins

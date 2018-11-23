@@ -18,6 +18,8 @@ except ImportError:
 
 # third party imports
 from mantid.api import AnalysisDataService, WorkspaceFactory
+# register mantid projection
+import mantid.plots  # noqa
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
