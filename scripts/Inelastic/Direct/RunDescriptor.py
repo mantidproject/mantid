@@ -1080,7 +1080,7 @@ class RunDescriptor(PropDescriptor):
             if fix_file_extension: # no further search.
                 message = '*** Cannot find file named: {0} on Mantid search paths'.\
                         format(file_hint)
-                if 'be_quet' not in kwargs:
+                if 'be_quiet' not in kwargs:
                     RunDescriptor._logger(message,'warning')
                 return (False,message)
             try:
@@ -1092,7 +1092,7 @@ class RunDescriptor(PropDescriptor):
             except RuntimeError:
                 message = '*** Cannot find file matching hint: {0} on Mantid search paths'.\
                         format(file_hint)
-                if 'be_quet' not in kwargs:
+                if 'be_quiet' not in kwargs:
                     RunDescriptor._logger(message,'warning')
                 return (False,message)
 #--------------------------------------------------------------------------------------------------------------------
