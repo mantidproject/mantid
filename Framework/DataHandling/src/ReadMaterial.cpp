@@ -13,6 +13,13 @@
 namespace Mantid {
 namespace DataHandling {
 
+/**
+ * Validate the parameters to build the material from, this returns
+ * any errors in the inputs.
+ *
+ * @param params A struct containing all the parameters to be set.
+ * @returns A map containing the relevent failure messages, if any.
+ */
 ValidationErrors ReadMaterial::validateInputs(const MaterialParameters params) {
   ValidationErrors result;
   if (params.chemicalSymbol.empty()) {
@@ -50,6 +57,12 @@ ValidationErrors ReadMaterial::validateInputs(const MaterialParameters params) {
   return result;
 }
 
+/**
+ * Set the parameters to build the material to the builder,
+ * taking into account which values were and weren't set.
+ *
+ * @param params A struct containing all the parameters to be set.
+ */
 void ReadMaterial::setMaterialParameters(MaterialParameters params) {
   setMaterial(params.chemicalSymbol, params.atomicNumber, params.massNumber);
   setNumberDensity(params.sampleMassDensity, params.sampleNumberDensity,
@@ -58,6 +71,11 @@ void ReadMaterial::setMaterialParameters(MaterialParameters params) {
                     params.attenuationXSection, params.scatteringXSection);
 }
 
+/**
+ * Construct the material,
+ *
+ *  @returns A unique pointer to the newly made material
+ */
 std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial() {
   return std::make_unique<Kernel::Material>(builder.build());
 }
