@@ -1120,7 +1120,7 @@ MatrixWorkspace::maskedBins(const size_t &workspaceIndex) const {
   return it->second;
 }
 
-const std::vector<size_t>
+std::vector<size_t>
 MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
   auto it = m_masks.find(workspaceIndex);
   // Throw if there are no masked bins for this spectrum. The caller should

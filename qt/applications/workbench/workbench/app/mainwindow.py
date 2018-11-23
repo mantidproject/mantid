@@ -37,7 +37,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, QSettings)  # noqa
 from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -48,7 +48,7 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 # Pre-application setup
 plugins.setup_library_paths()
 
-from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
+from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION, set_config_format  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -72,6 +72,9 @@ def qapplication():
         app.setApplicationName(APPNAME)
         # not calling app.setApplicationVersion(mantid.kernel.version_str())
         # because it needs to happen after logging is monkey-patched in
+
+        # Set the config format to IniFormat globally
+        set_config_format(QSettings.IniFormat)
     return app
 
 

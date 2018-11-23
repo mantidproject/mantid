@@ -22,6 +22,7 @@ Improvements
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` has been change from using ResampleX to Rebin so that bin size can be specified instead of number of bins as requested by the instrument scientist.
 - :ref:`Le Bail concept page <Le Bail Fit>` moved from mediawiki
 - Rework of :ref:`powder diffraction calibration <Powder Diffraction Calibration>` documentation
 
@@ -39,6 +40,7 @@ Improvements
 - :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>` with Cylinder=True now has improved fits using BackToBackExponential and IkedaCarpenterPV functions.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now has option to renumber peaks sequentially.
 - SCD Event Data Reduction Diffraction Interface now has option to create MD HKL workspace.
+- :ref:`IntegratePeaksUsingClusters <algm-IntegratePeaksUsingClusters>` will now treat NaN's as background.
 
 Bugfixes
 ########
