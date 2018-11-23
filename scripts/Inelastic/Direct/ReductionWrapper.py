@@ -448,14 +448,23 @@ class ReductionWrapper(object):
         if output_directory:
             config['defaultsave.directory'] = str(output_directory)
 
-        #propman = self.reducer.prop_man
-        #if hasattr(propman,'fix_file_extension'):
-        #    fix_file_extension = propman.fix_file_extension
-        #else:
-        #    fix_file_extension = False
-        fix_file_extension = True
-
         timeToWait = self._wait_for_file
+
+        # There is opinion, that fix_file_extension should not ever been False
+        # in case, when you reduce in auto mode (with timeToWait > 0). 
+        # There is other opinion, on MARI, that it may be desirable.
+        # But they just got possibility of working in  
+        # event mode and have not worked in this mode yet.
+        # Let's block this possibility for the time being and see if it 
+        # would become necessary any time in a future (24/11/2018)
+        propman = self.reducer.prop_man
+        if hasattr(propman,'fix_file_extension') and timeToWait <= 0:
+            fix_file_extension = propman.fix_file_extension
+        else:
+            fix_file_extension = True
+
+
+
         wait_counter=0
         if timeToWait > 0:
             Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,be_quiet=True)

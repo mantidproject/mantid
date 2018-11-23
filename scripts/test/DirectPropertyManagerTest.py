@@ -1261,7 +1261,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         # find file separately -- impossible due to wrong file extension
         srd = PropertyManager.sample_run
-        #
+
         [ok,message] = srd.find_file(propman,'MAR',11001)
         self.assertFalse(ok)
         self.assertEqual(message,'*** Cannot find file named: MAR11001.nxs on Mantid search paths')

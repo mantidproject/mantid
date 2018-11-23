@@ -607,11 +607,10 @@ class PropertyManager(NonIDF_Properties):
 
         """
         # this returns only runs, left to sum with current sample_run sum settings
-#pylint: disable=unused-variable
-        runs,sum_ws,added      = PropertyManager.sample_run.get_runs_to_sum(None,num_files)
+        runs,_,_      = PropertyManager.sample_run.get_runs_to_sum(None,num_files)
         if len(runs) == 0:
             return (True,[],[])
-        #
+
         if hasattr(self,'fix_file_extension'):
             fix_file_extension = self.fix_file_extension
         else:
