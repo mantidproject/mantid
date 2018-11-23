@@ -277,7 +277,7 @@ signals:
   void functionRemoved();
   void algorithmFinished(const QString &);
   void workspaceIndexChanged(int index);
-	void updatePlotSpectrum(int index);
+  void updatePlotSpectrum(int index);
   void workspaceNameChanged(const QString &);
 
   void wsChangePPAssign(const QString &);

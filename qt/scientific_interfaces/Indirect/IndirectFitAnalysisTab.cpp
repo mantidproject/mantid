@@ -200,12 +200,12 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
           m_plotPresenter.get(), SLOT(setEndX(double)));
   connect(m_fitPropertyBrowser, SIGNAL(updatePlotSpectrum(int)),
           m_plotPresenter.get(), SLOT(updatePlotSpectrum(int)));
-	connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
-		      SLOT(setBrowserWorkspaceIndex(int)));
-	connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
-		      SLOT(updateAttributeValues()));
-	connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
-		      SLOT(updateParameterValues()));
+  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
+          SLOT(setBrowserWorkspaceIndex(int)));
+  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
+          SLOT(updateAttributeValues()));
+  connect(m_fitPropertyBrowser, SIGNAL(workspaceIndexChanged(int)), this,
+          SLOT(updateParameterValues()));
 
   connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this,
           SLOT(setBrowserStartX(double)));
@@ -416,11 +416,11 @@ void IndirectFitAnalysisTab::setBrowserWorkspace(std::size_t dataIndex) {
 }
 
 void IndirectFitAnalysisTab::setBrowserWorkspaceIndex(std::size_t spectrum) {
-	setBrowserWorkspaceIndex(boost::numeric_cast<int>(spectrum));
+  setBrowserWorkspaceIndex(boost::numeric_cast<int>(spectrum));
 }
 
 void IndirectFitAnalysisTab::setBrowserWorkspaceIndex(int spectrum) {
-	m_fitPropertyBrowser->setWorkspaceIndex(spectrum);
+  m_fitPropertyBrowser->setWorkspaceIndex(spectrum);
 }
 
 void IndirectFitAnalysisTab::tableStartXChanged(double startX,
