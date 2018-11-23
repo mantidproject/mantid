@@ -114,10 +114,6 @@ void IndirectFitAnalysisTab::setup() {
           SLOT(updateResultOptions()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateParameterValues()));
-  connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
-          this, SLOT(updateParameterValues()));
-  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
-          SLOT(updateParameterValues()));
 
   connect(m_plotPresenter.get(),
           SIGNAL(fitSingleSpectrum(std::size_t, std::size_t)), this,
@@ -183,14 +179,20 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
           SLOT(setBrowserWorkspaceIndex(std::size_t)));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
           this, SLOT(setBrowserWorkspace(std::size_t)));
-  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
-          SLOT(setBrowserWorkspaceIndex(std::size_t)));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
           SLOT(updateAttributeValues()));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
           this, SLOT(updateAttributeValues()));
-  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
-          SLOT(updateAttributeValues()));
+	connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
+		      this, SLOT(updateParameterValues()));
+	connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+		      SLOT(setBrowserWorkspaceIndex(std::size_t)));
+	// Update attributes before parameters as the parameters may depend on the 
+	// attribute values
+	connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+		      SLOT(updateAttributeValues()));
+	connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged(std::size_t)), this,
+		      SLOT(updateParameterValues()));
 
   connect(m_fitPropertyBrowser, SIGNAL(startXChanged(double)),
           m_plotPresenter.get(), SLOT(setStartX(double)));
