@@ -145,9 +145,8 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
 
-    delete m_presenter;
-    delete m_model;
-    // delete m_view; - causes an error
+    delete m_presenter; /// Note that the m_view destructor is called here
+		delete m_model;
   }
 
   ///----------------------------------------------------------------------
