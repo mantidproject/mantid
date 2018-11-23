@@ -66,15 +66,21 @@ def qapplication():
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
         argv = sys.argv[:]
         argv[0] = APPNAME  # replace application name
+        # Workaround a segfault with the IPython console when using Python 3.5 + PyQt 5
+        # Without this using this fix the above combination causes a segfault when the IPython
+        # console is started
+        # The workaround mentioned in https://groups.google.com/forum/#!topic/leo-editor/ghiIN7irzY0
+        # is to ensure readline is imported before the QApplication object is created
+        if sys.version_info[0] == 3 and sys.version_info[1] == 5:
+            importlib.import_module("readline")
         app = QApplication(argv)
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)
         # not calling app.setApplicationVersion(mantid.kernel.version_str())
-        # because it needs to happen after logging is monkey-patched in
-
         # Set the config format to IniFormat globally
         set_config_format(QSettings.IniFormat)
+
     return app
 
 
