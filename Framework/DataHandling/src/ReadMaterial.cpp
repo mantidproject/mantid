@@ -50,6 +50,11 @@ ValidationErrors ReadMaterial::validateInputs(const MaterialParameters params) {
   return result;
 }
 
+void ReadMaterial::setMaterialParameters(MaterialParameters params){
+  setMaterial(params.chemicalSymbol, params.atomicNumber, params.massNumber);
+  setNumberDensity(params.sampleMassDensity, params.sampleNumberDensity,params.zParameter,params.unitCellVolume);
+}
+
 std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial() {
   return std::make_unique<Kernel::Material>(builder.build());
 }

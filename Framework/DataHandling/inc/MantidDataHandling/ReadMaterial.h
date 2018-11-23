@@ -34,16 +34,17 @@ public:
   };
 
   static ValidationErrors validateInputs(MaterialParameters params);
+  void setMaterialParameters(MaterialParameters params);
+  std::unique_ptr<Kernel::Material> buildMaterial();
+  void setScatteringInfo(double coherentXSection, double incoherentXSection,
+                         double attenuationXSection, double scatteringXSection);
+private:
+  Kernel::MaterialBuilder builder;
   void setMaterial(const std::string chemicalSymbol, const int atomicNumber,
                    const int massNumber);
   void setNumberDensity(const double rho_m, const double rho,
                         const double zParameter, const double unitCellVolume);
-  void setScatteringInfo(double coherentXSection, double incoherentXSection,
-                         double attenuationXSection, double scatteringXSection);
-  std::unique_ptr<Kernel::Material> buildMaterial();
-
-private:
-  Kernel::MaterialBuilder builder;
+ 
   static bool isEmpty(const double toCheck);
 };
 } // namespace DataHandling

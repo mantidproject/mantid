@@ -9,7 +9,7 @@
 
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidKernel/NeutronAtom.h"
-
+#include "MantidDataHandling/ReadMaterial.h"
 namespace Mantid {
 namespace DataHandling {
 
@@ -48,6 +48,8 @@ private:
   /// Print out the list of information for the material
   void fixNeutron(PhysicalConstants::NeutronAtom &neutron, double coh_xs,
                   double inc_xs, double abs_xs, double tot_xs);
+
+  ReadMaterial::MaterialParameters params;
 };
 } // namespace DataHandling
 } // namespace Mantid

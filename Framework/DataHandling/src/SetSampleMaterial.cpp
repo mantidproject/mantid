@@ -8,7 +8,6 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataHandling/ReadMaterial.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -109,18 +108,13 @@ void SetSampleMaterial::init() {
 }
 
 std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
-  ReadMaterial::MaterialParameters params = [this]() -> auto {
-    ReadMaterial::MaterialParameters setMaterial;
-    setMaterial.chemicalSymbol = getPropertyValue("ChemicalFormula");
-    setMaterial.atomicNumber = getProperty("AtomicNumber");
-    setMaterial.massNumber = getProperty("MassNumber");
-    setMaterial.sampleNumberDensity = getProperty("SampleNumberDensity");
-    setMaterial.zParameter = getProperty("ZParameter");
-    setMaterial.unitCellVolume = getProperty("UnitCellVolume");
-    setMaterial.sampleMassDensity = getProperty("SampleMassDensity");
-    return setMaterial;
-  }
-  ();
+  params.chemicalSymbol = getPropertyValue("ChemicalFormula");
+  params.atomicNumber = getProperty("AtomicNumber");
+  params.massNumber = getProperty("MassNumber");
+  params.sampleNumberDensity = getProperty("SampleNumberDensity");
+  params.zParameter = getProperty("ZParameter");
+  params.unitCellVolume = getProperty("UnitCellVolume");
+  params.sampleMassDensity = getProperty("SampleMassDensity");
   auto result = ReadMaterial::validateInputs(params);
 
   return result;
@@ -164,13 +158,9 @@ void SetSampleMaterial::exec() {
 
   ReadMaterial reader;
   const std::string chemicalSymbol = getProperty("ChemicalFormula");
-  reader.setMaterial(chemicalSymbol, getProperty("AtomicNumber"),
-                     getProperty("MassNumber"));
+  reader.setMaterialParameters(params);
 
   double rho = getProperty("SampleNumberDensity"); // in atoms / Angstroms^3
-  reader.setNumberDensity(getProperty("SampleMassDensity"), rho,
-                          getProperty("ZParameter"),
-                          getProperty("UnitCellVolume"));
 
   // get the scattering information - this will override table values
   reader.setScatteringInfo(
