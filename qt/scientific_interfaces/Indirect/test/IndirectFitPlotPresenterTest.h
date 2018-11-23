@@ -18,11 +18,11 @@
 #include "MantidKernel/WarningSuppressions.h"
 //#include "MantidAPI/IAlgorithm.h"
 //#include "MantidAPI/IFunction.h"
-//#include "MantidAPI/MatrixWorkspace.h"
-//#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
-//using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
@@ -33,56 +33,64 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockIndirectFitPlotView : public IndirectFitPlotView {
 public:
 	/// Signals
-	//void emitSelectedFitDataChanged(std::size_t const &index) {
-	//	emit selectedFitDataChanged(index);
-	//}
+	void emitSelectedFitDataChanged(std::size_t const &index) {
+		emit selectedFitDataChanged(index);
+	}
 
-	//void emitPlotCurrentPreview() {
-	//	emit plotCurrentPreview();
-	//}
+	void emitPlotCurrentPreview() {
+		emit plotCurrentPreview();
+	}
 
-	//void emitPlotSpectrumChanged(std::size_t const &spectrum) {
-	//	emit plotSpectrumChanged(spectrum);
-	//}
+	void emitPlotSpectrumChanged(std::size_t const &spectrum) {
+		emit plotSpectrumChanged(spectrum);
+	}
 
-	//void emitPlotGuessChanged(bool doPlotGuess) {
-	//	emit plotGuessChanged(doPlotGuess);
-	//}
+	void emitPlotGuessChanged(bool doPlotGuess) {
+		emit plotGuessChanged(doPlotGuess);
+	}
 
-	//void emitFitSelectedSpectrum() {
-	//	emit fitSelectedSpectrum();
-	//}
+	void emitFitSelectedSpectrum() {
+		emit fitSelectedSpectrum();
+	}
 
-	//void emitStartXChanged(double const &value) {
-	//	emit startXChanged(value);
-	//}
+	void emitStartXChanged(double const &value) {
+		emit startXChanged(value);
+	}
 
-	//void emitEndXChanged(double const &value) {
-	//	emit endXChanged(value);
-	//}
+	void emitEndXChanged(double const &value) {
+		emit endXChanged(value);
+	}
 
-	//void emitHWHMMinimumChanged(double const &value) {
-	//	emit hwhmMinimumChanged(value);
-	//}
+	void emitHWHMMinimumChanged(double const &value) {
+		emit hwhmMinimumChanged(value);
+	}
 
-	//void emitHWHMMaximumChanged(double const &value) {
-	//	emit hwhmMaximumChanged(value);
-	//}
+	void emitHWHMMaximumChanged(double const &value) {
+		emit hwhmMaximumChanged(value);
+	}
 
-	//void emitHWHMChanged(double const &minimum, double const &maximum) {
-	//	emit hwhmChanged(minimum, maximum);
-	//}
+	void emitHWHMChanged(double const &minimum, double const &maximum) {
+		emit hwhmChanged(minimum, maximum);
+	}
 
-	//void emitBackgroundChanged(double const &value) {
-	//	emit backgroundChanged(value);
-	//}
+	void emitBackgroundChanged(double const &value) {
+		emit backgroundChanged(value);
+	}
 
-	// Public methods
-	//MOCK_CONST_METHOD0(getSelectedSpectrum, std::size_t());
+	/// Public methods
+	MOCK_CONST_METHOD0(getSelectedSpectrum, std::size_t());
+	MOCK_CONST_METHOD0(dataSelectionSize, std::size_t());
 };
 
 class MockIndirectFittingModel : public IndirectFittingModel {
 public:
+	/// Public methods
+	//MOCK_CONST_METHOD2(getExcludeRegion,
+	//	std::string(std::size_t dataIndex, std::size_t index));
+	MOCK_CONST_METHOD0(isMultiFit, bool());
+	MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
+
+
 private:
 	std::string sequentialFitOutputName() const override { return ""; };
 	std::string simultaneousFitOutputName() const override { return ""; };
@@ -118,8 +126,8 @@ public:
 		m_model = new NiceMock<MockIndirectFittingModel>();
 		m_presenter = new IndirectFitPlotPresenter(m_model, m_view);
 
-		//SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(10));
-		//m_model->addWorkspace("WorkspaceName");
+		SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(10));
+		m_model->addWorkspace("WorkspaceName");
 	}
 
 	void tearDown() override {
@@ -130,7 +138,41 @@ public:
 
 		delete m_presenter;
 		delete m_model;
-		// delete m_view; - causes an error
+		delete m_view;
+	}
+
+	///----------------------------------------------------------------------
+	/// Unit tests to check for successful presenter instantiation
+	///----------------------------------------------------------------------
+
+	void test_that_the_model_and_view_have_been_instantiated_correctly() {
+		std::size_t const selectedSpectrum(3);
+
+		ON_CALL(*m_view, getSelectedSpectrum()).WillByDefault(Return(selectedSpectrum));
+		ON_CALL(*m_model, isMultiFit()).WillByDefault(Return(false));
+
+		EXPECT_CALL(*m_view, getSelectedSpectrum())
+			.Times(1)
+			.WillOnce(Return(selectedSpectrum));
+		EXPECT_CALL(*m_model, isMultiFit()).Times(1).WillOnce(Return(false));
+
+		m_view->getSelectedSpectrum();
+		m_model->isMultiFit();
+	}
+
+	void
+	test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_model_and_view() {
+		std::size_t const selectionSize(2);
+
+		ON_CALL(*m_view, dataSelectionSize())
+			.WillByDefault(Return(selectionSize));
+
+    EXPECT_CALL(*m_model, numberOfWorkspaces())
+			.Times(1)
+			.WillOnce(Return(1));
+		EXPECT_CALL(*m_view, dataSelectionSize()).Times(1).WillOnce(Return(selectionSize));
+
+		m_presenter->appendLastDataToSelection();
 	}
 
 	void test_test() {}
