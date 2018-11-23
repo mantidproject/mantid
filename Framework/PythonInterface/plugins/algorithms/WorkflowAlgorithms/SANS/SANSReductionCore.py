@@ -167,16 +167,18 @@ class SANSReductionCore(DistributedDataProcessorAlgorithm):
         monitor_workspace = self._move(state_serialized, monitor_workspace, component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
-        # 5. Apply masking (pixel masking and time masking)
-        # --------------------------------------------------------------------------------------------------------------q
-        progress.report("Masking ...")
-        workspace = self._mask(state_serialized, workspace, component_as_string)
-
-        # --------------------------------------------------------------------------------------------------------------
-        # 6. Convert to Wavelength
+        # 5. Convert to Wavelength
+        #    Note (5) and (6) have swapped order to avoid EventWS mask rebinning issue
+        #    look to swap them back when/if this is fixed
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Converting to wavelength ...")
         workspace = self._convert_to_wavelength(state_serialized, workspace)
+
+        # --------------------------------------------------------------------------------------------------------------
+        # 6. Apply masking (pixel masking and time masking)
+        # --------------------------------------------------------------------------------------------------------------q
+        progress.report("Masking ...")
+        workspace = self._mask(state_serialized, workspace, component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Multiply by volume and absolute scale
