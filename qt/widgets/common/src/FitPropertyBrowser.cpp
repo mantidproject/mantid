@@ -1359,6 +1359,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
       h->setAttribute(prop);
       setWorkspaceIndex(index);
       emit workspaceIndexChanged(index);
+			emit updatePlotSpectrum(index);
     }
   } else if (prop == m_maxIterations || prop == m_peakRadius) {
     QSettings settings;

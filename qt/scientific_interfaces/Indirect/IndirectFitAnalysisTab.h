@@ -173,7 +173,8 @@ protected slots:
   void updateBrowserFittingRange();
   void setBrowserWorkspace();
   void setBrowserWorkspace(std::size_t dataIndex);
-  void setBrowserWorkspaceIndex(std::size_t spectrum);
+	void setBrowserWorkspaceIndex(std::size_t spectrum);
+  void setBrowserWorkspaceIndex(int spectrum);
   void tableStartXChanged(double startX, std::size_t dataIndex,
                           std::size_t spectrum);
   void tableEndXChanged(double endX, std::size_t dataIndex,
