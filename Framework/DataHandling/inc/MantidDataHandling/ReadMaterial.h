@@ -24,27 +24,33 @@ using ValidationErrors = std::map<std::string, std::string>;
 class DLLExport ReadMaterial {
 public:
   struct MaterialParameters {
-    std::string chemicalSymbol;
-    int atomicNumber;
-    int massNumber;
-    double sampleNumberDensity;
-    double zParameter;
-    double unitCellVolume;
-    double sampleMassDensity;
+    std::string chemicalSymbol = "";
+    int atomicNumber = 0;
+    int massNumber = 0;
+    double sampleNumberDensity = EMPTY_DOUBLE_VAL;
+    double zParameter = EMPTY_DOUBLE_VAL;
+    double unitCellVolume = EMPTY_DOUBLE_VAL;
+    double sampleMassDensity = EMPTY_DOUBLE_VAL;
+    double coherentXSection = EMPTY_DOUBLE_VAL;
+    double incoherentXSection = EMPTY_DOUBLE_VAL;
+    double attenuationXSection = EMPTY_DOUBLE_VAL;
+    double scatteringXSection = EMPTY_DOUBLE_VAL;
   };
 
   static ValidationErrors validateInputs(MaterialParameters params);
   void setMaterialParameters(MaterialParameters params);
   std::unique_ptr<Kernel::Material> buildMaterial();
-  void setScatteringInfo(double coherentXSection, double incoherentXSection,
-                         double attenuationXSection, double scatteringXSection);
+
 private:
   Kernel::MaterialBuilder builder;
+  static constexpr double EMPTY_DOUBLE_VAL = 8.9884656743115785e+307;
   void setMaterial(const std::string chemicalSymbol, const int atomicNumber,
                    const int massNumber);
   void setNumberDensity(const double rho_m, const double rho,
                         const double zParameter, const double unitCellVolume);
- 
+  void setScatteringInfo(double coherentXSection, double incoherentXSection,
+                         double attenuationXSection, double scatteringXSection);
+
   static bool isEmpty(const double toCheck);
 };
 } // namespace DataHandling

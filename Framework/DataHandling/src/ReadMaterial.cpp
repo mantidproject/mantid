@@ -50,9 +50,12 @@ ValidationErrors ReadMaterial::validateInputs(const MaterialParameters params) {
   return result;
 }
 
-void ReadMaterial::setMaterialParameters(MaterialParameters params){
+void ReadMaterial::setMaterialParameters(MaterialParameters params) {
   setMaterial(params.chemicalSymbol, params.atomicNumber, params.massNumber);
-  setNumberDensity(params.sampleMassDensity, params.sampleNumberDensity,params.zParameter,params.unitCellVolume);
+  setNumberDensity(params.sampleMassDensity, params.sampleNumberDensity,
+                   params.zParameter, params.unitCellVolume);
+  setScatteringInfo(params.coherentXSection, params.incoherentXSection,
+                    params.attenuationXSection, params.scatteringXSection);
 }
 
 std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial() {

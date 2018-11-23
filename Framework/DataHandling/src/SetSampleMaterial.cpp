@@ -158,15 +158,15 @@ void SetSampleMaterial::exec() {
 
   ReadMaterial reader;
   const std::string chemicalSymbol = getProperty("ChemicalFormula");
+  params.coherentXSection = getProperty("CoherentXSection");
+  params.incoherentXSection = getProperty("IncoherentXSection");
+  params.attenuationXSection = getProperty("AttenuationXSection");
+  params.scatteringXSection = getProperty("ScatteringXSection");
   reader.setMaterialParameters(params);
 
   double rho = getProperty("SampleNumberDensity"); // in atoms / Angstroms^3
 
   // get the scattering information - this will override table values
-  reader.setScatteringInfo(
-      getProperty("CoherentXSection"), getProperty("IncoherentXSection"),
-      getProperty("AttenuationXSection"), getProperty("ScatteringXSection"));
-
   // create the material
   auto material = reader.buildMaterial();
 
