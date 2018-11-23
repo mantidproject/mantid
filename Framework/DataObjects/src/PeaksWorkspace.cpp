@@ -659,6 +659,7 @@ void PeaksWorkspace::initColumns() {
   addPeakColumn("DSpacing");
   addPeakColumn("Intens");
   addPeakColumn("SigInt");
+  addPeakColumn("Int/SigInt");
   addPeakColumn("BinCount");
   addPeakColumn("BankName");
   addPeakColumn("Row");
@@ -722,6 +723,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<double> L(np);
   std::vector<double> intensity(np);
   std::vector<double> sigmaIntensity(np);
+  std::vector<double> intensityOverSigma(np);
   std::vector<double> binCount(np);
   std::vector<double> initialEnergy(np);
   std::vector<double> finalEnergy(np);
@@ -744,6 +746,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
     L[i] = p.getL();
     intensity[i] = p.getIntensity();
     sigmaIntensity[i] = p.getSigmaIntensity();
+    intensityOverSigma[i] = p.getIntensityOverSigma();
     binCount[i] = p.getBinCount();
     initialEnergy[i] = p.getInitialEnergy();
     finalEnergy[i] = p.getFinalEnergy();

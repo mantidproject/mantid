@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtGui
 from qtpy.QtCore import QPoint
 from qtpy.QtGui import QCursor, QFont, QFontMetrics
-from qtpy.QtWidgets import (QTableView, QToolTip)
+from qtpy.QtWidgets import (QMessageBox, QTableView, QToolTip)
 
 NO_SELECTION_MESSAGE = "No selection"
 COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
@@ -80,7 +80,6 @@ def copy_cells(table):
         return
 
     selection = selectionModel.selection()
-    # TODO show a warning if copying more cells than some number (100? 200? 300? 400??)
     selectionRange = selection.first()
 
     top = selectionRange.top()
@@ -135,3 +134,12 @@ def copy_to_clipboard(data):
     """
     cb = QtGui.QGuiApplication.clipboard()
     cb.setText(data, mode=cb.Clipboard)
+
+
+def ask_confirmation(self, message, title="Mantid Workbench"):
+    """
+    :param message:
+    :return:
+    """
+    reply = QMessageBox.question(self, title, message, QMessageBox.Yes, QMessageBox.No)
+    return True if reply == QMessageBox.Yes else False

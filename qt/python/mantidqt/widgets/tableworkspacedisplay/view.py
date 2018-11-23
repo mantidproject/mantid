@@ -12,9 +12,9 @@ from __future__ import (absolute_import, division, print_function)
 from functools import partial
 
 from qtpy import QtGui
-from qtpy.QtCore import QPoint, Qt
-from qtpy.QtGui import QCursor, QFont, QFontMetrics, QKeySequence
-from qtpy.QtWidgets import (QAction, QHeaderView, QMessageBox, QTableView, QTableWidget, QToolTip)
+from qtpy.QtCore import Qt
+from qtpy.QtGui import QKeySequence
+from qtpy.QtWidgets import (QAction, QHeaderView, QMessageBox, QTableView, QTableWidget)
 
 import mantidqt.icons
 
@@ -25,6 +25,8 @@ class TableWorkspaceDisplayView(QTableWidget):
 
         self.presenter = presenter
         self.COPY_ICON = mantidqt.icons.get_icon("fa.files-o")
+        self.DELETE_ROW = mantidqt.icons.get_icon("fa.minus-square-o")
+        self.STATISTICS_ON_ROW = mantidqt.icons.get_icon('fa.fighter-jet')
 
         # change the default color of the rows - makes them light blue
         # monitors and masked rows are colored in the table's custom model
@@ -38,10 +40,12 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.resize(600, 400)
         self.show()
 
+    def doubleClickedHeader(self):
+        print("Double clicked WOO")
+
     def keyPressEvent(self, event):
         if event.matches(QKeySequence.Copy):
             self.presenter.action_keypress_copy(self)
-        super(TableWorkspaceDisplayView, self).keyPressEvent(event)
 
     def set_context_menu_actions(self, table):
         """
@@ -64,7 +68,7 @@ class TableWorkspaceDisplayView(QTableWidget):
         horizontalHeader.setSectionResizeMode(QHeaderView.Fixed)
 
         copy_bin_values = QAction(self.COPY_ICON, "Copy", horizontalHeader)
-        copy_bin_values.triggered.connect(partial(self.presenter.action_copy_bin_values, table))
+        copy_bin_values.triggered.connect(self.presenter.action_copy_bin_values)
 
         horizontalHeader.addAction(copy_bin_values)
 
@@ -73,13 +77,24 @@ class TableWorkspaceDisplayView(QTableWidget):
         verticalHeader.setSectionResizeMode(QHeaderView.Fixed)
 
         copy_spectrum_values = QAction(self.COPY_ICON, "Copy", verticalHeader)
-        copy_spectrum_values.triggered.connect(partial(self.presenter.action_copy_spectrum_values, table))
+        copy_spectrum_values.triggered.connect(self.presenter.action_copy_spectrum_values)
+
+        delete_row = QAction(self.DELETE_ROW, "Delete Row", verticalHeader)
+        delete_row.triggered.connect(self.presenter.action_delete_row)
+
+        statistics_on_rows = QAction(self.STATISTICS_ON_ROW, "Statistics on Rows", verticalHeader)
+        statistics_on_rows.triggered.connect(self.presenter.action_statistics_on_rows)
 
         separator1 = QAction(verticalHeader)
         separator1.setSeparator(True)
+        separator2 = QAction(verticalHeader)
+        separator2.setSeparator(True)
 
         verticalHeader.addAction(copy_spectrum_values)
         verticalHeader.addAction(separator1)
+        verticalHeader.addAction(delete_row)
+        verticalHeader.addAction(separator2)
+        verticalHeader.addAction(statistics_on_rows)
 
     @staticmethod
     def copy_to_clipboard(data):
@@ -92,7 +107,6 @@ class TableWorkspaceDisplayView(QTableWidget):
         """
         cb = QtGui.QGuiApplication.clipboard()
         cb.setText(data, mode=cb.Clipboard)
-
 
     def ask_confirmation(self, message, title="Mantid Workbench"):
         """

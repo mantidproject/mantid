@@ -964,6 +964,8 @@ double Peak::getValueByColName(const std::string &name_in) const {
     return this->getIntensity();
   else if (name == "sigint")
     return this->getSigmaIntensity();
+  else if (name == "int/sigint")
+    return this->getIntensityOverSigma();
   else if (name == "bincount")
     return this->getBinCount();
   else if (name == "row")

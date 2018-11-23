@@ -53,6 +53,7 @@ const std::string typeFromName(const std::string &name) {
         TYPE_INDEX.emplace("DSpacing", "double");
         TYPE_INDEX.emplace("Intens", "double");
         TYPE_INDEX.emplace("SigInt", "double");
+        TYPE_INDEX.emplace("Int/SigInt", "double");
         TYPE_INDEX.emplace("BinCount", "double");
         TYPE_INDEX.emplace("BankName", "str");
         TYPE_INDEX.emplace("Row", "double");

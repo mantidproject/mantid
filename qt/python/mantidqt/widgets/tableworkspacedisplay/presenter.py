@@ -9,10 +9,10 @@
 #
 from __future__ import absolute_import, division, print_function
 
-from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QTableWidgetItem
 
-from mantidqt.widgets.common.table_copying import copy_cells
+from mantid.simpleapi import DeleteTableRows
+from mantidqt.widgets.common.table_copying import copy_cells, show_no_selection_to_copy_toast
 from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
 
@@ -23,26 +23,35 @@ class TableWorkspaceDisplay(object):
 
     def __init__(self, ws, plot=None, parent=None, model=None, view=None):
         # Create model and view, or accept mocked versions
-        self.model = model if model else TableWorkspaceDisplayModel(ws)
+        if model:
+            self.model = model
+
+        self.model = TableWorkspaceDisplayModel(ws)
+
         self.view = view if view else TableWorkspaceDisplayView(self, parent, self.model.get_name())
         self.plot = plot
         self.view.set_context_menu_actions(self.view)
         column_headers = self.model.get_column_headers()
+        # self.editable_columns = self.model.get_editable_columns(column_headers)
         self.view.setColumnCount(len(column_headers))
-        self.view.setHorizontalHeaderLabels(["{}[Y]".format(x) for x in column_headers])
-        self.load_data(self.view, self.model.is_peaks_workspace())
+        self.view.setHorizontalHeaderLabels(column_headers)
+        # self.view.setHorizontalHeaderLabels(["{}[Y]".format(x) for x in column_headers])
+        self.load_data(self.view)
 
-    def load_data(self, table, peaks_workspace=False):
+    def load_data(self, table):
         num_rows = self.model.get_number_of_rows()
         table.setRowCount(num_rows)
 
         num_cols = self.model.get_number_of_columns()
         for col in range(num_cols):
             column_data = self.model.get_column(col)
+            # editable = False
+            # if peaks_workspace and col in self.editable_columns:
+            #     editable = True
             for row in range(num_rows):
                 item = QTableWidgetItem(str(column_data[row]))
-                if not peaks_workspace or (col != 0 and col != 2 and col != 3 and col != 4):
-                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                # if not editable:
+                #     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 table.setItem(row, col, item)
 
     def action_copy_cells(self, table):
@@ -56,6 +65,26 @@ class TableWorkspaceDisplay(object):
 
     def action_keypress_copy(self, table):
         copy_cells(table)
+
+    def action_delete_row(self):
+        selection_model = self.view.selectionModel()
+        if not selection_model.hasSelection():
+            show_no_selection_to_copy_toast()
+            return
+
+        selected_rows = selection_model.selectedRows()
+        selected_rows_list = [index.row() for index in selected_rows]
+        selected_rows_str = ",".join([str(row) for row in selected_rows_list])
+        print("Selected rows:", selected_rows_str)
+
+        DeleteTableRows(self.model.ws, selected_rows_str)
+        # Reverse the list so that we delete in order from bottom -> top
+        # this prevents the row index from shifting up when deleting rows above
+        for row in reversed(selected_rows_list):
+            self.view.removeRow(row)
+
+    def action_statistics_on_rows(self):
+        raise NotImplementedError("Not implemented")
     # def _do_action_plot(self, table, axis, get_index, plot_errors=False):
     #     if self.plot is None:
     #         raise ValueError("Trying to do a plot, but no plotting class dependency was injected in the constructor")
