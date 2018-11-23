@@ -8,8 +8,8 @@
 #define MANTID_DATAHANDLING_SetSampleMaterial_H_
 
 #include "MantidAPI/DistributedAlgorithm.h"
-#include "MantidKernel/NeutronAtom.h"
 #include "MantidDataHandling/ReadMaterial.h"
+#include "MantidKernel/NeutronAtom.h"
 namespace Mantid {
 namespace DataHandling {
 
