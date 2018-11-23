@@ -25,6 +25,9 @@ algorithms and data objects that are:
 from __future__ import (absolute_import, division,
                         print_function)
 
+import os
+import site
+
 from .pyversion import check_python_version
 check_python_version()
 
@@ -35,8 +38,22 @@ def apiVersion():
     """
     return 2
 
-# Flag indicating whether mantidplot layer is loaded.
+
+# Bail out early if a Mantid.properties files is not found in the
+# parent directory - it indicates a broken installation or build.
+_moduledir = os.path.abspath(os.path.dirname(__file__))
+_bindir = os.path.dirname(_moduledir)
+if not os.path.exists(os.path.join(_bindir, 'Mantid.properties')):
+    raise ImportError("Unable to find Mantid.properties file next to this package - broken installation!")
+
+# Make sure the config service loads this properties file
+os.environ['MANTIDPATH'] = _bindir
+# Add directory as a site directory to process the .pth files
+site.addsitedir(_bindir)
+
+
 try:
+    # Flag indicating whether mantidplot layer is loaded.
     import _qti
     __gui__ = True
 except ImportError:
@@ -51,16 +68,6 @@ _warnings.filterwarnings("default",category=DeprecationWarning,
 # still used in other libraries, e.g scipy, so just ignore those
 _warnings.filterwarnings("ignore",category=DeprecationWarning,
                          module="numpy.oldnumeric")
-
-
-# Peek to see if a Mantid.properties file is in the parent directory,
-# if so assume that it is the required Mantid bin directory containing
-# the Mantid libraries and ignore any MANTIDPATH that has been set
-import os as _os
-_moduledir = _os.path.abspath(_os.path.dirname(__file__))
-_bindir = _os.path.dirname(_moduledir)
-if _os.path.exists(_os.path.join(_bindir, 'Mantid.properties')):
-    _os.environ['MANTIDPATH'] = _bindir
 
 ###############################################################################
 # Load all subpackages that contain a C-extension. The boost.python

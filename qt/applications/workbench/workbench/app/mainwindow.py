@@ -12,12 +12,16 @@ Defines the QMainWindow of the application and the main() entry point.
 """
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
+
+# std imports
 import argparse  # for command line options
 import atexit
-import imp
 import importlib
 import os
 import sys
+
+# third party imports
+from mantid.kernel import version_str as mantid_version_str
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -77,7 +81,7 @@ def qapplication():
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)
-        # not calling app.setApplicationVersion(mantid.kernel.version_str())
+        app.setApplicationVersion(mantid_version_str())
         # Set the config format to IniFormat globally
         set_config_format(QSettings.IniFormat)
 
@@ -518,12 +522,12 @@ def start_workbench(app, command_line_options):
     from workbench.plotting.config import initialize_matplotlib  # noqa
     initialize_matplotlib()
 
-    # Setup widget layouts etc. mantid cannot be imported before this
-    # or the log messages don't get through
+    # Setup widget layouts etc. mantid.simple cannot be used before this
+    # or the log messages don't get through to the widget
     main_window.setup()
     # start mantid
     main_window.set_splash('Preloading mantid')
-    importlib.import_module('mantid')
+    importlib.import_module('mantid.simpleapi')
     main_window.populateAfterMantidImport()
     main_window.show()
     main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
@@ -546,16 +550,6 @@ def start_workbench(app, command_line_options):
 
 def main():
     """Main entry point for the application"""
-    # Mantid needs to be able to find its .properties file. It looks
-    # in the application directory by default but this is
-    # the directory of python[.exe] and not guaranteed to be where
-    # the properties files is located. MANTIDPATH overrides this.
-    # If we allow a user to override MANTIDPATH then we could end up
-    # loading the wrong properties file and plugins built against
-    # a different version of Mantid and this would likely result in
-    # segfault.
-    _, pkgpath, _ = imp.find_module('mantid')
-    os.environ['MANTIDPATH'] = os.path.dirname(pkgpath)
 
     # setup command line arguments
     parser = argparse.ArgumentParser(description='Mantid Workbench')
