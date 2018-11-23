@@ -81,10 +81,10 @@ void CalculateDynamicRange::calculateQMinMax(MatrixWorkspace_sptr workspace,
   double min = std::numeric_limits<double>::max(),
          max = std::numeric_limits<double>::min();
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (auto index : indices) {
-    if (!spectrumInfo.isMonitor(index) && !spectrumInfo.isMasked(index)) {
-      const auto &spectrum = workspace->histogram(index);
-      const Kernel::V3D detPos = spectrumInfo.position(index);
+  for (auto index = indices.begin(); index != indices.end(); ++index) {
+    if (!spectrumInfo.isMonitor(*index) && !spectrumInfo.isMasked(*index)) {
+      const auto &spectrum = workspace->histogram(*index);
+      const Kernel::V3D detPos = spectrumInfo.position(*index);
       double r, theta, phi;
       detPos.getSpherical(r, theta, phi);
       // Use the bin centers
