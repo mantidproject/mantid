@@ -236,6 +236,7 @@ void PanelsSurface::init() {
 
   size_t ndet = m_instrActor->ndetectors();
   m_unwrappedDetectors.resize(ndet);
+  m_detector2bankMap.resize(ndet);
   if (ndet == 0)
     return;
 
@@ -316,11 +317,11 @@ void PanelsSurface::addFlatBankOfDetectors(
   QVector<QPointF> vert;
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
-#pragma omp parallel for
   for (int i = 0; i < static_cast<int>(detectors.size()); ++i) {
     auto detector = detectors[i];
     addDetector(detector, pos0, index, info->rotation);
     UnwrappedDetector &udet = m_unwrappedDetectors[detector];
+    // this isn't thread-safe
     info->polygon << QPointF(udet.u, udet.v);
   }
 }
@@ -377,7 +378,7 @@ void PanelsSurface::processTubes(size_t rootIndex) {
       rootIndex); // findParentBank(componentInfo, rootIndex);
   auto name = componentInfo.name(bankIndex);
   auto tubes = componentInfo.children(bankIndex);
-  auto normal = calculateBankNormal(componentInfo, tubes);
+  auto normal = tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();
 
   if (normal.nullVector() ||
       !isBankFlat(componentInfo, bankIndex, tubes, normal))
@@ -567,7 +568,7 @@ PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
 
 void PanelsSurface::addDetector(size_t detIndex,
                                 const Mantid::Kernel::V3D &refPos, int index,
-                                Mantid::Kernel::Quat &rotation) {
+                                const Mantid::Kernel::Quat &rotation) {
   const auto &detectorInfo = m_instrActor->detectorInfo();
 
   auto pos = detectorInfo.position(detIndex);
