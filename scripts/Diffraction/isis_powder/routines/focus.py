@@ -143,7 +143,7 @@ def _divide_one_spectrum_by_spline(spectrum, spline, instrument):
 def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
     if hasattr(vanadium_splines, "OutputWorkspace"):
         vanadium_splines = vanadium_splines.OutputWorkspace
-    if type(vanadium_splines)is WorkspaceGroup:  # vanadium splines is a workspacegroup
+    if type(vanadium_splines) is WorkspaceGroup:  # vanadium splines is a workspacegroup
         num_splines = len(vanadium_splines)
         num_spectra = len(spectra_list)
         if num_splines != num_spectra:
