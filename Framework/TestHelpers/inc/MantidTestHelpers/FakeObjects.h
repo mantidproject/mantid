@@ -99,7 +99,8 @@ public:
   }
 
   void applyBinWeight(const size_t &, const double &) override {
-    throw Mantid::Kernel::Exception::NotImplementedError("applyBinWeight not implemented.");
+    throw Mantid::Kernel::Exception::NotImplementedError(
+        "applyBinWeight not implemented.");
   };
 
   /// Mask the spectrum to this value

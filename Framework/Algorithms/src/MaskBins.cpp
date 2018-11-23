@@ -91,32 +91,32 @@ void MaskBins::exec() {
   if (boost::dynamic_pointer_cast<const EventWorkspace>(inputWS)) {
     this->execEvent();
   }
-    MantidVec::difference_type startBin(0), endBin(0);
+  MantidVec::difference_type startBin(0), endBin(0);
 
-    // If the binning is the same throughout, we only need to find the index
-    // limits once
-    const bool commonBins = WorkspaceHelpers::commonBoundaries(*inputWS);
-    if (commonBins) {
-      auto X = inputWS->binEdges(0);
-      this->findIndices(X, startBin, endBin);
+  // If the binning is the same throughout, we only need to find the index
+  // limits once
+  const bool commonBins = WorkspaceHelpers::commonBoundaries(*inputWS);
+  if (commonBins) {
+    auto X = inputWS->binEdges(0);
+    this->findIndices(X, startBin, endBin);
+  }
+
+  Progress progress(this, 0.0, 1.0, indexSet.size());
+  // Parallel running has problems with a race condition, leading to
+  // occaisional test failures and crashes
+
+  for (const auto wi : indexSet) {
+    MantidVec::difference_type startBinLoop(startBin), endBinLoop(endBin);
+    if (!commonBins)
+      this->findIndices(outputWS->binEdges(wi), startBinLoop, endBinLoop);
+
+    // Loop over masking each bin in the range
+    for (int j = static_cast<int>(startBinLoop);
+         j < static_cast<int>(endBinLoop); ++j) {
+      outputWS->maskBin(wi, j);
     }
-
-    Progress progress(this, 0.0, 1.0, indexSet.size());
-    // Parallel running has problems with a race condition, leading to
-    // occaisional test failures and crashes
-
-    for (const auto wi : indexSet) {
-      MantidVec::difference_type startBinLoop(startBin), endBinLoop(endBin);
-      if (!commonBins)
-        this->findIndices(outputWS->binEdges(wi), startBinLoop, endBinLoop);
-
-      // Loop over masking each bin in the range
-      for (int j = static_cast<int>(startBinLoop);
-           j < static_cast<int>(endBinLoop); ++j) {
-        outputWS->maskBin(wi, j);
-      }
-      progress.report();
-    }
+    progress.report();
+  }
 }
 
 /** Execution code for EventWorkspaces

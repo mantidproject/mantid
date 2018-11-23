@@ -53,8 +53,8 @@ void Histogram1D::clearData() {
   std::fill(eValues.begin(), eValues.end(), 0.0);
 }
 
-/// Moved from MatrixWorkspace. Separate implementations for Hist1D and EventList.
-/// Applies bin weighting for masking workspaces.
+/// Moved from MatrixWorkspace. Separate implementations for Hist1D and
+/// EventList. Applies bin weighting for masking workspaces.
 ///
 /// @param binIndex ::  The index of the bin in the spectrum
 /// @param weight   ::  How heavily the bin is to be masked. =1 for full
