@@ -80,7 +80,7 @@ void CalculateDynamicRange::calculateQMinMax(MatrixWorkspace_sptr workspace,
   const auto &spectrumInfo = workspace->spectrumInfo();
   double min = std::numeric_limits<double>::max(),
          max = std::numeric_limits<double>::min();
-  PARALLEL_FOR_NO_WSP_CHECK();
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (auto index : indices) {
     if (!spectrumInfo.isMonitor(index) && !spectrumInfo.isMasked(index)) {
       const auto &spectrum = workspace->histogram(index);
@@ -90,7 +90,7 @@ void CalculateDynamicRange::calculateQMinMax(MatrixWorkspace_sptr workspace,
       // Use the bin centers
       const double v1 = calculateQ(spectrum.begin()->center(), theta);
       const double v2 = calculateQ(std::prev(spectrum.end())->center(), theta);
-      PARALLEL_CRITICAL(CalculateDynamicRange);
+      PARALLEL_CRITICAL(CalculateDynamicRange)
       {
         min = std::min(min, std::min(v1, v2));
         max = std::max(max, std::max(v1, v2));
