@@ -359,7 +359,7 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
         if self._counter>= 3:
             source =  FileFinder.findRuns('MAR11015')[0]
             targ_path = config['defaultsave.directory']
-            targ_file = os.path.join(targ_path,'MAR11002.raw')
+            targ_file = os.path.join(targ_path,'MAR11010.raw')
             shutil.copy2(source ,targ_file )
 
             self._file_to_clear = targ_file
@@ -373,7 +373,7 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
         targ_path = config['defaultsave.directory']
         self.red.reducer.prop_man.fix_file_extension = True
         self.red.reducer.prop_man.data_file_ext = '.raw'
-        self._file_to_clear = os.path.join(targ_path,'MAR11002.raw')
+        self._file_to_clear = os.path.join(targ_path,'MAR11010.raw')
         if os.path.exists(self._file_to_clear):
             os.remove(self._file_to_clear)
             self._file_to_clear = ''
@@ -382,7 +382,7 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
         self.red._debug_wait_for_files_operation = self.prepare_test_file
         self._counter=0
 
-        self.red.reducer.prop_man.sample_run=[11001,11002]
+        self.red.reducer.prop_man.sample_run=[11001,11010]
         #pylint: disable=unused-variable
         outWS = self.red.run_reduction()
         self.ws_name = outWS.name()
