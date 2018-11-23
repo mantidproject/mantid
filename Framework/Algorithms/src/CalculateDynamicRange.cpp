@@ -90,8 +90,7 @@ void CalculateDynamicRange::calculateQMinMax(MatrixWorkspace_sptr workspace,
       // Use the bin centers
       const double v1 = calculateQ(spectrum.begin()->center(), theta);
       const double v2 = calculateQ(std::prev(spectrum.end())->center(), theta);
-      PARALLEL_CRITICAL(CalculateDynamicRange)
-      {
+      PARALLEL_CRITICAL(CalculateDynamicRange) {
         min = std::min(min, std::min(v1, v2));
         max = std::max(max, std::max(v1, v2));
       }
