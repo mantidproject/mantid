@@ -30,7 +30,6 @@ from __future__ import (absolute_import, division,
                         print_function)
 
 # stdlib imports
-import atexit as _atexit
 from collections import OrderedDict, namedtuple
 import os
 import six
@@ -45,14 +44,14 @@ from .kernel.packagesetup import update_sys_paths as _update_sys_paths
 from .kernel.funcinspect import lhs_info as _lhs_info
 from .kernel.funcinspect import replace_signature as _replace_signature
 from .kernel.funcinspect import customise_func as _customise_func
+# register matplotlib projection
+from . import plots  # noqa
 
 # This is a simple API so give access to the aliases by default as well
 from . import apiVersion, __gui__
 from .kernel._aliases import *
 from .api._aliases import *
 from .fitfunctions import *
-# register matplotlib projection
-from . import plots
 
 MODULE_NAME = 'simpleapi'
 
@@ -1411,17 +1410,17 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
         raise RuntimeError("simpleapi: '%s' has requested to be attached as a workspace method but "
                            "Algorithm::workspaceMethodInputProperty() has returned a property name that "
                            "does not exist on the algorithm." % algm_object.name())
-
     _api._workspaceops.attach_func_as_method(method_name, algorithm_wrapper, input_prop,
                                              algm_object.workspaceMethodOn())
 
-# -------------------------------------------------------------------------------------------------------------
 
 # Initialization:
-#   - start FrameworkManager
+#   - start FrameworkManager (if necessary). The check is necessary as
+#    _FrameworkManagerImpl.Instance() will import this module and deadlock if it
+#    calls Instance again while importing this module
 #   - loads the python plugins and create new algorithm functions
-
-_api.FrameworkManagerImpl.Instance()
+if not _api.FrameworkManagerImpl.hasInstance():
+    _api.FrameworkManagerImpl.Instance()
 _translate()
 
 # Load the Python plugins

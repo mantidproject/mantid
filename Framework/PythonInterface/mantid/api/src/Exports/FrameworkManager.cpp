@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 
 #include <boost/python/class.hpp>
@@ -13,7 +14,6 @@
 #include <boost/python/reference_existing_object.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-#include <iostream>
 #include <mutex>
 
 using Mantid::API::AlgorithmFactory;
@@ -25,6 +25,7 @@ using namespace boost::python;
 namespace {
 
 std::once_flag INIT_FLAG;
+bool INSTANCE_CALLED = false;
 constexpr auto PYTHONPATHS_KEY = "pythonscripts.directories";
 
 /**
@@ -56,15 +57,20 @@ void updatePythonPaths() {
  *   - registers the C++ algorithms declared in this library
  *   - updates the Python paths with any user-defined directories
  *     declared in the `pythonscripts.directories`
+ *   - import mantid.simpleapi (if not already imported) to load python plugins
  *   - register FrameworkManager.shutdown as an atexit function
+ * @param importSimpleApi If true the the mantid.simpleapi module is imported on
+ * first access
  * @return A reference to the FrameworkManagerImpl instance
  */
 FrameworkManagerImpl &instance() {
   // start the framework (if necessary)
   auto &frameworkMgr = FrameworkManager::Instance();
   std::call_once(INIT_FLAG, []() {
+    INSTANCE_CALLED = true;
     declareCPPAlgorithms();
     updatePythonPaths();
+    import("mantid.simpleapi");
     // Without a python-based exit handler the singletons are only cleaned
     // up after main() and this is too late to acquire the GIL to be able to
     // delete any python objects still stored in other singletons like the
@@ -73,6 +79,11 @@ FrameworkManagerImpl &instance() {
   });
   return frameworkMgr;
 }
+
+/**
+ * @return True if .instance has been called, false otherwise
+ */
+bool hasInstance() { return INSTANCE_CALLED; }
 } // namespace
 
 void export_FrameworkManager() {
@@ -114,8 +125,11 @@ void export_FrameworkManager() {
       .def("shutdown", &FrameworkManagerImpl::shutdown, arg("self"),
            "Effectively shutdown this service")
 
-      .def("Instance", instance,
-           return_value_policy<reference_existing_object>(),
-           "Return a reference to the singleton instance")
+      .def("hasInstance", hasInstance,
+           "Returns True if Instance has been called, false otherwise")
+      .staticmethod("hasInstance")
+
+      .def("Instance", instance, "Return a reference to the singleton instance",
+           return_value_policy<reference_existing_object>())
       .staticmethod("Instance");
 }
