@@ -29,11 +29,13 @@ std::once_flag INIT_FLAG;
  */
 AlgorithmManagerImpl &instance() {
   // start the framework (if necessary)
-  auto &ads = AlgorithmManager::Instance();
+  auto &mgr = AlgorithmManager::Instance();
   std::call_once(INIT_FLAG, []() {
-    Py_AtExit([]() { AlgorithmManager::Instance().clear(); });
+    PyRun_SimpleString("import atexit\n"
+                       "from mantid.api import AlgorithmManager\n"
+                       "atexit.register(lambda: AlgorithmManager.clear())");
   });
-  return ads;
+  return mgr;
 }
 
 /**

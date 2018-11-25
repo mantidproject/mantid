@@ -36,7 +36,9 @@ AnalysisDataServiceImpl &instance() {
   // start the framework (if necessary)
   auto &ads = AnalysisDataService::Instance();
   std::call_once(INIT_FLAG, []() {
-    Py_AtExit([]() { AnalysisDataService::Instance().clear(); });
+    PyRun_SimpleString("import atexit\n"
+                       "from mantid.api import AnalysisDataService\n"
+                       "atexit.register(lambda: AnalysisDataService.clear())");
   });
   return ads;
 }

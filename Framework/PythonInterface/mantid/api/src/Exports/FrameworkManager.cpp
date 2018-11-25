@@ -75,7 +75,10 @@ FrameworkManagerImpl &instance() {
     // up after main() and this is too late to acquire the GIL to be able to
     // delete any python objects still stored in other singletons like the
     // ADS or AlgorithmManager.
-    Py_AtExit([]() { FrameworkManager::Instance().shutdown(); });
+    PyRun_SimpleString("import atexit\n"
+                       "from mantid.api import FrameworkManager\n"
+                       "atexit.register(lambda: FrameworkManager.shutdown())");
+
   });
   return frameworkMgr;
 }
