@@ -1,17 +1,17 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEW_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEW_H_
 
-//#include "MantidKernel/System.h"
-
 #include "DllConfig.h"
-//#include "MantidAPI/IFunction.h"
-
-//#include "qwt_data.h"
-#include <QObject>
 #include "MantidQtWidgets/Common/MantidWidget.h"
-
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include <QObject>
 
 namespace MantidQt {
 	namespace CustomInterfaces {
