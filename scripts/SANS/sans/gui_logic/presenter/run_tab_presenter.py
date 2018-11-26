@@ -399,6 +399,7 @@ class RunTabPresenter(object):
                 self.on_processing_error(row, error)
 
             if not states:
+                self.sans_logger.warning("No states. Ending processing of batch table.")
                 self.on_processing_finished(None)
                 return
 
@@ -604,6 +605,12 @@ class RunTabPresenter(object):
         stop_time_state_generation = time.time()
         time_taken = stop_time_state_generation - start_time_state_generation
         self.sans_logger.information("The generation of all states took {}s".format(time_taken))
+
+        if errors:
+            self.sans_logger.warning("Errors in getting states...")
+            for _, v in errors.item():
+                self.sans_logger.warning("{}".format(v))
+
         return states, errors
 
     def get_state_for_row(self, row_index, file_lookup=True):
