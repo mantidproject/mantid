@@ -162,7 +162,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
 
-        presenter._view.set_out_default_user_file.assert_called_once()
+        presenter._view.set_out_default_user_file.assert_called_once_with()
         presenter._view._call_settings_listeners.assert_not_called()   # as default user file should be ""
 
     def test_fails_silently_when_user_file_does_not_exist(self):
