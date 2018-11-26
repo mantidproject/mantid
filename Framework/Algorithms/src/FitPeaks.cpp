@@ -1911,7 +1911,7 @@ void FitPeaks::setupParameterTableWorkspace(
       newRow << static_cast<int>(iws);   // workspace index
       newRow << static_cast<int>(ipeak); // peak number
       for (size_t iparam = 0; iparam < numParam; ++iparam)
-        newRow << 0.;    // parameters for each peak
+        newRow << 0.; // parameters for each peak
       if (with_chi2)
         newRow << DBL_MAX; // chisq
     }
