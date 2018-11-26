@@ -317,11 +317,12 @@ void PanelsSurface::addFlatBankOfDetectors(
   QVector<QPointF> vert;
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
+  #pragma omp parallel for ordered
   for (int i = 0; i < static_cast<int>(detectors.size()); ++i) {
     auto detector = detectors[i];
     addDetector(detector, pos0, index, info->rotation);
     UnwrappedDetector &udet = m_unwrappedDetectors[detector];
-    // this isn't thread-safe
+    #pragma omp ordered
     info->polygon << QPointF(udet.u, udet.v);
   }
 }
