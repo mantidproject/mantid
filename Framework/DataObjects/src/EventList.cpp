@@ -2586,7 +2586,10 @@ void EventList::addTof(const double offset) { this->convertTof(1.0, offset); }
  * @param binIndex ::  The index of the bin in the spectrum
  * @param weight   ::  How heavily the bin is to be masked. =1 for full
  */
-void EventList::applyBinWeight(const size_t &binIndex, const double &weight) {}
+void EventList::applyBinWeight(const size_t &binIndex, const double &weight) {
+  UNUSED_ARG(binIndex);
+  UNUSED_ARG(weight);
+}
 
 // --------------------------------------------------------------------------
 /** Add an offset to the pulsetime (wall-clock time) of each event in the list.

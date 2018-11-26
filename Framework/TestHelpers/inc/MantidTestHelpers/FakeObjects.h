@@ -98,9 +98,13 @@ public:
     return readY().size() * sizeof(double) * 2;
   }
 
-  void applyBinWeight(const size_t &, const double &) override {
-    throw Mantid::Kernel::Exception::NotImplementedError(
-        "applyBinWeight not implemented.");
+  void applyBinWeight(const size_t &binIndex, const double &weight) override {
+    if (weight != 0.) {
+    double &y = this->mutableY()[binIndex];
+    (std::isnan(y) || std::isinf(y)) ? y = 0. : y *= (1 - weight);
+    double &e = this->mutableE()[binIndex];
+    (std::isnan(e) || std::isinf(e)) ? e = 0. : e *= (1 - weight);
+  }
   };
 
   /// Mask the spectrum to this value
