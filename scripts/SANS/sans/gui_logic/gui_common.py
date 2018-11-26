@@ -191,6 +191,14 @@ def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settin
         settings.setValue(q_settings_key, new_path)
         settings.endGroup()
 
+def load_default_file(line_edit_field, q_settings_group_key, q_settings_key, default_file):
+    line_edit_field.setText(default_file)
+
+    settings = QSettings()
+    settings.beginGroup(q_settings_group_key)
+    settings.setValue(q_settings_key, default_file)
+    settings.endGroup()
+
 
 def open_file_dialog(line_edit, filter_text, directory):
     file_name = QFileDialog.getOpenFileName(None, 'Open', directory, filter_text)

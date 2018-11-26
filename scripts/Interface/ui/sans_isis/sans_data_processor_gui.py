@@ -35,7 +35,8 @@ from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SA
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file,
-                                       get_instrument_from_gui_selection, get_string_for_gui_from_instrument)
+                                       load_default_file, get_instrument_from_gui_selection,
+                                       get_string_for_gui_from_instrument)
 
 from sans.common.general_functions import get_instrument
 
@@ -484,6 +485,15 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
                   self.get_user_file_path)
 
         # Notify presenters
+        self._call_settings_listeners(lambda listener: listener.on_user_file_load())
+
+    def set_out_default_user_file(self, path):
+        """
+        Load a default user file, called on view set-up
+        :param path: string. The last accepted user file
+        """
+        load_default_file(self.user_file_line_edit, self.__generic_settings, self.__path_key, path)
+
         self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
     def _on_batch_file_load(self):
