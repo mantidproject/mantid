@@ -104,7 +104,7 @@ public:
       (std::isnan(y) || std::isinf(y)) ? y = 0. : y *= (1 - weight);
       double &e = this->mutableE()[binIndex];
       (std::isnan(e) || std::isinf(e)) ? e = 0. : e *= (1 - weight);
-  }
+    }
   };
 
   /// Mask the spectrum to this value
