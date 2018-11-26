@@ -2,6 +2,7 @@
 # Testing
 ###########################################################################
 set ( TEST_FILES
+  IndirectDataTablePresenterTest.h
   IndirectFitDataTest.h
   IndirectFitOutputTest.h
   IndirectFitPlotModelTest.h
