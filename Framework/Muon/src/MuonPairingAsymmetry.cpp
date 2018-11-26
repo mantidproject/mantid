@@ -215,7 +215,7 @@ std::map<std::string, std::string> MuonPairingAsymmetry::validateInputs() {
     errors["PairName"] = "Pair name must be specified.";
   }
   if (!std::all_of(std::begin(pairName), std::end(pairName),
-                   MuonAlgorithmHelper::is_alphanumerical_or_underscore)) {
+                   MuonAlgorithmHelper::isAlphanumericOrUnderscore)) {
     errors["PairName"] =
         "The pair name must contain alphnumeric characters and _ only.";
   }

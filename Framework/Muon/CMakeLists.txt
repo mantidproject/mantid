@@ -61,12 +61,7 @@ set ( TEST_FILES
         EstimateMuonAsymmetryFromCountsTest.h
         MuonGroupDetectorsTest.h
         MuonPairingAsymmetryTest.h
-        MuonPreProcessTest.h
-        PhaseQuadM
-        EstimateMuonAsymmetryFromCountsTest.h
-        MuonGroupDetectorsTest.h
-        MuonGroupingCountsTest.
-        MuonPairingAsymmetryTest.h
+        MuonGroupingCountsTest.h
         MuonPreProcessTest.h
         PhaseQuadMuonTest.h
         PlotAsymmetryByLogValueTest.h

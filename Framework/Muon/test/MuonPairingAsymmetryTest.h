@@ -67,18 +67,6 @@ setUpAlgorithmWithoutOptionalProperties(WorkspaceGroup_sptr ws,
   return alg;
 }
 
-// Set up algorithm with PairName applied
-IAlgorithm_sptr setUpAlgorithmWithPairNameAndGroups(WorkspaceGroup_sptr ws,
-                                                    const std::string &name) {
-  std::vector<int> group1 = {1, 2};
-  std::vector<int> group2 = {3, 4};
-
-  setUpADSWithWorkspace setup(ws);
-  IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(
-      setup.inputWSName, name, group1, group2);
-  return alg;
-}
-
 // Set up algorithm with groupings
 IAlgorithm_sptr setUpAlgorithmWithGroups(WorkspaceGroup_sptr ws,
                                          const std::vector<int> &group1,
@@ -360,29 +348,29 @@ public:
   // Correct Output : Single Period
   // --------------------------------------------------------------------------
 
-  void
-  test_that_single_period_data_combines_detectors_correctly_for_manually_specified_detectors() {
-    // 4 spectra per period, 10 bins
-    auto ws = createMultiPeriodAsymmetryData(1, 4, 10, "pairWS");
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+  // void
+  // test_that_single_period_data_combines_detectors_correctly_for_manually_specified_detectors() {
+  //   // 4 spectra per period, 10 bins
+  //   auto ws = createMultiPeriodAsymmetryData(1, 4, 10, "pairWS");
+  //   std::vector<int> group1 = {1, 2};
+  //   std::vector<int> group2 = {3, 4};
 
-    auto alg = setUpAlgorithmWithGroups(ws, group1, group2);
-    alg->execute();
-    auto wsOut = getOutputWorkspace(alg);
+  //   auto alg = setUpAlgorithmWithGroups(ws, group1, group2);
+  //   alg->execute();
+  //   auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+  //   TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
+  //   TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
+  //   TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.3889, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.8211, 0.001);
+  //   TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.3889, 0.001);
+  //   TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.000, 0.001);
+  //   TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.8211, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.04641, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 1.00000, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.19818, 0.0001);
-  }
+  //   TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.04641, 0.0001);
+  //   TS_ASSERT_DELTA(wsOut->readE(0)[4], 1.00000, 0.0001);
+  //   TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.19818, 0.0001);
+  // }
 
   void
   test_that_single_period_data_combines_detectors_correctly_for_two_group_workspaces() {
@@ -397,9 +385,9 @@ public:
 
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.05, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.45, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.95, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.3889, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.000, 0.001);
@@ -426,9 +414,9 @@ public:
 
     auto wsOut = getOutputWorkspace(alg);
 
-    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.000, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
-    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.450, 0.001);
+    TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.950, 0.001);
 
     TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.38484955, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.000, 0.001);
