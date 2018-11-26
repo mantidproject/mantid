@@ -52,7 +52,7 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 # Pre-application setup
 plugins.setup_library_paths()
 
-from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION, set_config_format  # noqa
+from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -82,8 +82,6 @@ def qapplication():
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)
         app.setApplicationVersion(mantid_version_str())
-        # Set the config format to IniFormat globally
-        set_config_format(QSettings.IniFormat)
 
     return app
 
