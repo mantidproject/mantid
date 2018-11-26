@@ -150,8 +150,13 @@ std::vector<int> orderProcessIDs(std::vector<Poco::Path> paths) {
       returnValues.emplace_back(std::stoi(c.directory(c.depth() - 1)));
     } catch (std::invalid_argument) {
       // The folder or file here is not a number (So shouldn't exist) so delete
-      // it recursively
-      Poco::File(c).remove(true);
+      // it recursively. However perform a sanity check as recursively removing
+      // files is dangerous
+      Poco::Path sanityCheckPath(getRecoveryFolderCheck());
+      if (sanityCheckPath.toString() ==
+          Poco::Path(c.toString()).popDirectory().toString()) {
+        Poco::File(c).remove(true);
+      }
     }
   }
   return returnValues;
