@@ -63,10 +63,14 @@ def create_widget(widget_path):
 
 class ScriptRunner(object):
 
-    def __init__(self, script, w, close_on_finish):
+    def __init__(self, script, w, close_on_finish, is_cli=False):
         self.widget = w
         self.close_on_finish = close_on_finish
-        ret = run_script(script, w)
+        self.is_cli = is_cli
+        self.error = None
+        ret = run_script(script, w, is_cli=is_cli)
+        if isinstance(ret, Exception):
+            raise ret
         self.script_iter = iter(ret) if inspect.isgenerator(ret) else None
         self.parent_iter = None
         self.pause_timer = QTimer()
@@ -95,12 +99,13 @@ class ScriptRunner(object):
                     self.parent_iter = None
                 elif self.close_on_finish:
                     self.widget.close()
-            except:
+            except Exception as e:
                 self.widget.close()
                 traceback.print_exc()
+                self.error = e
 
 
-def open_in_window(widget_name, script, attach_debugger=True, pause=0, close_on_finish=False):
+def open_in_window(widget_name, script, attach_debugger=True, pause=0, close_on_finish=False, is_cli=False):
     """
     Displays a widget in a window.
     :param widget_name:  A qualified name of a widget, ie mantidqt.mywidget.MyWidget
@@ -130,22 +135,27 @@ def open_in_window(widget_name, script, attach_debugger=True, pause=0, close_on_
         w.setWindowTitle('Widget to test')
     w.show()
 
+    script_runner = None
     if script is not None:
         try:
-            idle = ScriptRunner(script, w, close_on_finish)
+            script_runner = ScriptRunner(script, w, close_on_finish=close_on_finish, is_cli=is_cli)
             timer = QTimer()
             if pause != 0:
                 timer.setInterval(pause * 1000)
             # Zero-timeout timer runs idle() between Qt events
-            timer.timeout.connect(idle)
+            timer.timeout.connect(script_runner)
             timer.start()
-        except:
-            pass
+        except Exception as e:
+            if not is_cli:
+                raise e
 
-    return app.exec_()
+    ret = app.exec_()
+    if not is_cli and script_runner is not None and script_runner.error is not None:
+        raise script_runner.error
+    return ret
 
 
-def run_script(script_name, widget):
+def run_script(script_name, widget, is_cli=False):
     if isinstance(script_name, six.string_types):
         module_name, fun_name = split_qualified_name(script_name)
         m = __import__(module_name, fromlist=[fun_name])
@@ -156,8 +166,9 @@ def run_script(script_name, widget):
         if inspect.isclass(fun):
             fun = fun()
         return fun(widget)
-    except:
+    except Exception as e:
         traceback.print_exc()
+        return e
 
 
 if __name__ == "__main__":
@@ -171,4 +182,4 @@ if __name__ == "__main__":
                                          " The name must contain the python module where the function is defined,"
                                          " eg somepackage.somemodule.test_my_widget")
     args = parser.parse_args()
-    sys.exit(open_in_window(args.widget, args.script))
+    sys.exit(open_in_window(args.widget, args.script, is_cli=True))
