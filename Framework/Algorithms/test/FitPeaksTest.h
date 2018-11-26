@@ -740,7 +740,7 @@ public:
    * It is modified from test_multiple_peak_profiles
    * @brief test_outputFitError
    */
-  void test_outputFitError() {
+  void New_test_outputFitError() {
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -810,7 +810,7 @@ public:
     // shall be same number of rows to OutputPeakParametersWorkspace
     // (PeakParametersWS)
     TS_ASSERT_EQUALS(error_table->rowCount(), param_ws->rowCount());
-    TS_ASSERR_EQUALS(error_table->columnCount(), param_ws->columnCount());
+    TS_ASSERT_EQUALS(error_table->columnCount(), param_ws->columnCount());
 
     // check fit error
     for (size_t irow = 0; irow < param_ws->rowCount(); ++irow) {

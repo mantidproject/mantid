@@ -468,7 +468,10 @@ void FitPeaks::exec() {
 
   // create output workspaces
   generateOutputPeakPositionWS();
+
+  // generateFittedParametersValueWorkspace();
   generateFittedParametersValueWorkspaces();
+
   generateCalculatedPeaksWS();
 
   // fit peaks
@@ -1854,6 +1857,9 @@ FitPeaks::createMatrixWorkspace(const std::vector<double> &vec_x,
 }
 
 //----------------------------------------------------------------------------------------------
+/**
+ * @brief FitPeaks::generateOutputPeakPositionWS
+ */
 void FitPeaks::generateOutputPeakPositionWS() {
   // create output workspace for peak positions: can be partial spectra to input
   // workspace
@@ -1876,11 +1882,16 @@ void FitPeaks::generateOutputPeakPositionWS() {
   return;
 }
 
-API::ITableWorkspace_sptr
-FitPeaks::generateParameterTable(const std::vector<std::string> &param_names) {
-  // create
-  API::ITableWorkspace_sptr table_ws =
-      WorkspaceFactory::Instance().createTable("TableWorkspace");
+//----------------------------------------------------------------------------------------------
+/** Set up parameter table (parameter value or error)
+ * @brief FitPeaks::generateParameterTable
+ * @param table_ws:: an empty workspace
+ * @param param_names
+ */
+void FitPeaks::setupParameterTableWorkspace(
+    API::ITableWorkspace_sptr table_ws,
+    const std::vector<std::string> &param_names) {
+
   // add columns
   table_ws->addColumn("int", "wsindex");
   table_ws->addColumn("int", "peakindex");
@@ -1901,43 +1912,7 @@ FitPeaks::generateParameterTable(const std::vector<std::string> &param_names) {
     }
   }
 
-  //  // peaks
-  //  if (m_rawPeaksTable) {
-  //    // raw parameters for output table workspace
-  //    for (size_t iparam = 0; iparam < m_peakFunction->nParams(); ++iparam)
-  //      m_fittedParamTable->addColumn("double",
-  //                                    m_peakFunction->parameterName(iparam));
-  //  } else {
-  //    // effective parameters or output table worspace
-  //    m_fittedParamTable->addColumn("double", "centre");
-  //    m_fittedParamTable->addColumn("double", "width");
-  //    m_fittedParamTable->addColumn("double", "height");
-  //    m_fittedParamTable->addColumn("double", "intensity");
-  //  }
-  //  // background
-  //  for (size_t iparam = 0; iparam < m_bkgdFunction->nParams(); ++iparam)
-  //    m_fittedParamTable->addColumn("double",
-  //                                  m_bkgdFunction->parameterName(iparam));
-  //  // chi^2
-  //  m_fittedParamTable->addColumn("double", "chi2");
-
-  //  const size_t numParam = m_fittedParamTable->columnCount() - 3;
-  //  // replace: m_peakFunction->nParams() + m_bkgdFunction->nParams();
-
-  //  // add rows
-  //  for (size_t iws = m_startWorkspaceIndex; iws <= m_stopWorkspaceIndex;
-  //  ++iws) {
-  //    for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-  //      API::TableRow newRow = m_fittedParamTable->appendRow();
-  //      newRow << static_cast<int>(iws);   // workspace index
-  //      newRow << static_cast<int>(ipeak); // peak number
-  //      for (size_t iparam = 0; iparam < numParam; ++iparam)
-  //        newRow << 0.;    // parameters for each peak
-  //      newRow << DBL_MAX; // chisq
-  //    }
-  //  }
-
-  return table_ws;
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1966,65 +1941,26 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
   for (size_t iparam = 0; iparam < m_bkgdFunction->nParams(); ++iparam)
     param_vec.push_back(m_bkgdFunction->parameterName(iparam));
 
-  m_fittedParamTable = generateParameterTable(param_vec);
-
-  //  // create
-  //  m_fittedParamTable =
-  //      WorkspaceFactory::Instance().createTable("TableWorkspace");
-  //  // add columns
-  //  m_fittedParamTable->addColumn("int", "wsindex");
-  //  m_fittedParamTable->addColumn("int", "peakindex");
-  //  // peaks
-  //  if (m_rawPeaksTable) {
-  //    // raw parameters for output table workspace
-  //    for (size_t iparam = 0; iparam < m_peakFunction->nParams(); ++iparam)
-  //      m_fittedParamTable->addColumn("double",
-  //                                    m_peakFunction->parameterName(iparam));
-  //  } else {
-  //    // effective parameters or output table worspace
-  //    m_fittedParamTable->addColumn("double", "centre");
-  //    m_fittedParamTable->addColumn("double", "width");
-  //    m_fittedParamTable->addColumn("double", "height");
-  //    m_fittedParamTable->addColumn("double", "intensity");
-  //  }
-  //  // background
-  //  for (size_t iparam = 0; iparam < m_bkgdFunction->nParams(); ++iparam)
-  //    m_fittedParamTable->addColumn("double",
-  //                                  m_bkgdFunction->parameterName(iparam));
-  //  // chi^2
-  //  m_fittedParamTable->addColumn("double", "chi2");
-
-  //  const size_t numParam = m_fittedParamTable->columnCount() - 3;
-  //  // replace: m_peakFunction->nParams() + m_bkgdFunction->nParams();
-
-  //  // add rows
-  //  for (size_t iws = m_startWorkspaceIndex; iws <= m_stopWorkspaceIndex;
-  //  ++iws) {
-  //    for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
-  //      API::TableRow newRow = m_fittedParamTable->appendRow();
-  //      newRow << static_cast<int>(iws);   // workspace index
-  //      newRow << static_cast<int>(ipeak); // peak number
-  //      for (size_t iparam = 0; iparam < numParam; ++iparam)
-  //        newRow << 0.;    // parameters for each peak
-  //      newRow << DBL_MAX; // chisq
-  //    }
-  //  }
+  // parameter value table
+  m_fittedParamTable =
+      WorkspaceFactory::Instance().createTable("TableWorkspace");
+  setupParameterTableWorkspace(m_fittedParamTable, param_vec);
 
   // for error workspace
-  std::string fiterror_table_name =
-      getProperty("OutputParameterFitErrorsWorkspace");
-  // do nothing if user does not specifiy
-  if (fiterror_table_name == "") {
-    m_fitErrorTable = nullptr;
-  } else {
-    // check
-    if (!m_rawPeaksTable)
-      throw std::invalid_argument(
-          "FitPeaks must output RAW peak parameters if fitting error "
-          "is chosen to be output.");
+  //  std::string fiterror_table_name =
+  //      getProperty("OutputParameterFitErrorsWorkspace");
+  //  // do nothing if user does not specifiy
+  //  if (fiterror_table_name == "") {
+  //    m_fitErrorTable = nullptr;
+  //  } else {
+  //    // check
+  //    if (!m_rawPeaksTable)
+  //      throw std::invalid_argument(
+  //          "FitPeaks must output RAW peak parameters if fitting error "
+  //          "is chosen to be output.");
 
-    m_fitErrorTable = generateParameterTable(param_vec);
-  }
+  //    m_fitErrorTable = generateParameterTable(param_vec);
+  //  }
 
   return;
 }
