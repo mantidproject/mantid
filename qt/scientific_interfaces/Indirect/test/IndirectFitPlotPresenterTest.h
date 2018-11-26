@@ -10,13 +10,11 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectFitPlotModel.h"
 #include "IndirectFitPlotView.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFittingModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
-//#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
@@ -91,18 +89,31 @@ public:
 
 	/// Public methods
 	MOCK_CONST_METHOD0(getSelectedSpectrum, std::size_t());
+	MOCK_CONST_METHOD0(getSelectedSpectrumIndex, int());
 	MOCK_CONST_METHOD0(dataSelectionSize, std::size_t());
+
+	MOCK_METHOD0(hideMultipleDataSelection, void());
+	MOCK_METHOD0(showMultipleDataSelection, void());
+
 	MOCK_METHOD2(setAvailableSpectra, void(std::size_t minimum, std::size_t maximum));
 
-	MOCK_METHOD1(enableSpectrumSelection, void(bool enable));
-	MOCK_METHOD1(enableFitRangeSelection, void(bool enable));
+	MOCK_METHOD1(appendToDataSelection, void(std::string const &dataName));
+	MOCK_METHOD2(setNameInDataSelection, void(std::string const &dataName, std::size_t index));
+
 	MOCK_METHOD1(removeFromTopPreview, void(QString const &name));
 	MOCK_METHOD1(removeFromBottomPreview, void(QString const &name));
+
+	MOCK_METHOD1(enablePlotGuess, void(bool enable));
+	MOCK_METHOD1(enableSpectrumSelection, void(bool enable));
+	MOCK_METHOD1(enableFitRangeSelection, void(bool enable));
+
+	MOCK_METHOD1(setBackgroundLevel, void(double value));
 
 	MOCK_METHOD1(setFitRangeMinimum, void(double minimum));
 	MOCK_METHOD1(setFitRangeMaximum, void(double maximum));
 
-	MOCK_METHOD1(enablePlotGuess, void(bool enable));
+	MOCK_METHOD1(setBackgroundRangeVisible, void(bool visible));
+	MOCK_METHOD1(setHWHMRangeVisible, void(bool visible));
 
 	MOCK_CONST_METHOD1(displayMessage, void(std::string const &message));
 
@@ -116,18 +127,19 @@ public:
 class MockIndirectFittingModel : public IndirectFittingModel {
 public:
 	/// Public methods
-	//MOCK_CONST_METHOD2(getExcludeRegion,
-	//	std::string(std::size_t dataIndex, std::size_t index));
-	MOCK_CONST_METHOD0(isMultiFit, bool());
-	MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
-	//MOCK_CONST_METHOD1(getSpectra, Spectra(std::size_t index));
 	MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(std::size_t index));
 	MOCK_CONST_METHOD2(getFittingRange, std::pair<double, double>(std::size_t dataIndex,
 		std::size_t spectrum));
+	MOCK_CONST_METHOD3(createDisplayName, std::string(std::string const &formatString,
+		std::string const &rangeDelimiter,
+		std::size_t dataIndex));
+	MOCK_CONST_METHOD0(isMultiFit, bool());
+	MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
 	MOCK_CONST_METHOD0(getFittingFunction, IFunction_sptr());
-	//MOCK_METHOD1(setActiveIndex, void(std::size_t index));
+
 	MOCK_METHOD3(setStartX, void(double startX, std::size_t dataIndex, std::size_t spectrum));
 	MOCK_METHOD3(setEndX, void(double endX, std::size_t dataIndex, std::size_t spectrum));
+
 	MOCK_METHOD3(setDefaultParameterValue, void(std::string const &name, double value,
 		std::size_t dataIndex));
 
@@ -164,8 +176,7 @@ public:
 
 	void setUp() override {
 		/// Note that the IndirectFitPlotModel could not be mocked as the Presenter 
-		/// takes an IndirectFittingModel. This means I will instead mock the 
-		/// IndirectFittingModel.
+		/// takes an IndirectFittingModel. This means the IndirectFittingModel is mocked instead - which is a good substitute anyway
 		m_view = new NiceMock<MockIndirectFitPlotView>();
 		m_fittingModel = new NiceMock<MockIndirectFittingModel>();
 		m_presenter = new IndirectFitPlotPresenter(m_fittingModel, m_view);
@@ -212,7 +223,7 @@ public:
 			.WillByDefault(Return(selectionSize));
 
 		EXPECT_CALL(*m_fittingModel, numberOfWorkspaces())
-			.Times(3)
+			.Times(2)
 			.WillRepeatedly(Return(1));
 		EXPECT_CALL(*m_view, dataSelectionSize()).Times(1).WillOnce(Return(selectionSize));
 
@@ -416,7 +427,103 @@ public:
 	/// Unit Tests that test the methods and slots
 	///----------------------------------------------------------------------
 
-	void test_test() {}
+	void test_that_getSelectedSpectrumIndex_will_get_the_selected_spectrum_from_the_view() {
+		EXPECT_CALL(*m_view, getSelectedSpectrumIndex()).Times(1).WillOnce(Return(0));
+		m_presenter->getSelectedSpectrumIndex();
+	}
+
+	void test_that_isCurrentlySelected_returns_true_if_the_index_and_spectrum_given_are_selected() {
+		m_view->emitSelectedFitDataChanged(2);
+		TS_ASSERT(m_presenter->isCurrentlySelected(2, 0));
+	}
+
+	void test_that_isCurrentlySelected_returns_false_if_the_index_and_spectrum_given_are_not_selected() {
+		m_view->emitSelectedFitDataChanged(2);
+		TS_ASSERT(!m_presenter->isCurrentlySelected(0, 0));
+	}
+
+	void test_that_setStartX_will_set_the_fit_range_minimum_in_the_view() {
+		EXPECT_CALL(*m_view, setFitRangeMinimum(2.0)).Times(1);
+		m_presenter->setStartX(2.0);
+	}
+
+	void test_that_setEndX_will_set_the_fit_range_maximum_in_the_view() {
+		EXPECT_CALL(*m_view, setFitRangeMaximum(3.0)).Times(1);
+		m_presenter->setEndX(3.0);
+	}
+
+	void test_that_hideMultipleDataSelection_will_call_hideMultipleDataSelection_in_the_view() {
+		EXPECT_CALL(*m_view, hideMultipleDataSelection()).Times(1);
+		m_presenter->hideMultipleDataSelection();
+	}
+
+	void test_that_showMultipleDataSelection_will_call_showMultipleDataSelection_in_the_view() {
+		EXPECT_CALL(*m_view, showMultipleDataSelection()).Times(1);
+		m_presenter->showMultipleDataSelection();
+	}
+
+	void test_that_updateRangeSelectors_will_update_the_background_selector() {
+	  auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
+
+		ON_CALL(*m_fittingModel, getFittingFunction()).WillByDefault(Return(fitFunction));
+
+		Expectation setVisible = EXPECT_CALL(*m_view, setBackgroundRangeVisible(true)).Times(1);
+		EXPECT_CALL(*m_view, setBackgroundLevel(0.0)).Times(1).After(setVisible);
+	
+		m_presenter->updateRangeSelectors();
+	}
+
+	void test_that_updateRangeSelectors_will_update_the_hwhm_selector() {
+		auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
+
+		ON_CALL(*m_fittingModel, getFittingFunction()).WillByDefault(Return(fitFunction));
+
+		Expectation setVisible = EXPECT_CALL(*m_view, setHWHMRangeVisible(true)).Times(1);
+		EXPECT_CALL(*m_view, setHWHMMinimum(-0.00875)).Times(1).After(setVisible);
+		EXPECT_CALL(*m_view, setHWHMMaximum(0.00875)).Times(1).After(setVisible);
+
+		m_presenter->updateRangeSelectors();
+	}
+
+	void test_that_appendLastDataToSelection_will_set_the_name_of_the_data_selection_if_the_dataSelectionSize_and_numberOfWorkspaces_are_equal() {
+		std::size_t const index(1);
+
+		ON_CALL(*m_view, dataSelectionSize()).WillByDefault(Return(2));
+		ON_CALL(*m_fittingModel, numberOfWorkspaces()).WillByDefault(Return(2));
+		ON_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index)).WillByDefault(Return("DisplayName-1"));
+		ON_CALL(*m_fittingModel, getWorkspace(index)).WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
+
+		Expectation createName = EXPECT_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index)).Times(1);
+		EXPECT_CALL(*m_view, setNameInDataSelection("DisplayName-1", index)).Times(1).After(createName);
+
+		m_presenter->appendLastDataToSelection();
+	}
+
+	void test_that_appendLastDataToSelection_will_add_to_the_data_selection_if_the_dataSelectionSize_and_numberOfWorkspaces_are_not_equal() {
+		std::size_t const index(1);
+
+		ON_CALL(*m_view, dataSelectionSize()).WillByDefault(Return(1));
+		ON_CALL(*m_fittingModel, numberOfWorkspaces()).WillByDefault(Return(2));
+		ON_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index)).WillByDefault(Return("DisplayName-1"));
+		ON_CALL(*m_fittingModel, getWorkspace(index)).WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
+
+		Expectation createName = EXPECT_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index)).Times(1);
+		EXPECT_CALL(*m_view, appendToDataSelection("DisplayName-1")).Times(1).After(createName);
+
+		m_presenter->appendLastDataToSelection();
+	}
+
+	void test_that_updateSelectedDataName_will_update_the_name_in_the_data_selection() {
+		std::size_t const index(0);
+
+		ON_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index)).WillByDefault(Return("DisplayName-1"));
+		ON_CALL(*m_fittingModel, getWorkspace(index)).WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
+
+		Expectation createName = EXPECT_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index)).Times(1);
+		EXPECT_CALL(*m_view, setNameInDataSelection("DisplayName-1", 0)).Times(1).After(createName);
+
+		m_presenter->updateSelectedDataName();
+	}
 
 private:
 	MockIndirectFitPlotView *m_view;

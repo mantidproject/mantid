@@ -25,13 +25,13 @@ public:
   virtual ~IndirectFitPlotView() override;
 
   virtual std::size_t getSelectedSpectrum() const;
-  int getSelectedSpectrumIndex() const;
+  virtual int getSelectedSpectrumIndex() const;
   int getSelectedDataIndex() const;
   virtual std::size_t dataSelectionSize() const;
   bool isPlotGuessChecked() const;
 
-  void hideMultipleDataSelection();
-  void showMultipleDataSelection();
+  virtual void hideMultipleDataSelection();
+  virtual void showMultipleDataSelection();
 
 	virtual void setAvailableSpectra(std::size_t minimum, std::size_t maximum);
   void setAvailableSpectra(const std::vector<std::size_t>::const_iterator &from,
@@ -40,8 +40,8 @@ public:
   void setMinimumSpectrum(int minimum);
   void setMaximumSpectrum(int maximum);
   void setPlotSpectrum(int spectrum);
-  void appendToDataSelection(const std::string &dataName);
-  void setNameInDataSelection(const std::string &dataName, std::size_t index);
+  virtual void appendToDataSelection(const std::string &dataName);
+  virtual void setNameInDataSelection(const std::string &dataName, std::size_t index);
   void clearDataSelection();
 
   void plotInTopPreview(const QString &name,
@@ -59,20 +59,20 @@ public:
 	virtual void enableSpectrumSelection(bool enable);
 	virtual void enableFitRangeSelection(bool enable);
 
-  void setBackgroundLevel(double value);
+  virtual void setBackgroundLevel(double value);
 
   void setFitRange(double minimum, double maximum);
 	virtual void setFitRangeMinimum(double minimum);
 	virtual void setFitRangeMaximum(double maximum);
 
-  void setBackgroundRangeVisible(bool visible);
-  void setHWHMRangeVisible(bool visible);
+  virtual void setBackgroundRangeVisible(bool visible);
+  virtual void setHWHMRangeVisible(bool visible);
 
 	virtual void displayMessage(const std::string &message) const;
 
 public slots:
-  void clearTopPreview();
-  void clearBottomPreview();
+  virtual void clearTopPreview();
+  virtual void clearBottomPreview();
 	virtual void clear();
   void setHWHMRange(double minimum, double maximum);
 	virtual void setHWHMMaximum(double minimum);
