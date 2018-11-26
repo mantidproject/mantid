@@ -497,7 +497,7 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
         """
         load_default_file(self.user_file_line_edit, self.__generic_settings, self.__user_file_key)
 
-        if str(self.user_file_line_edit.text()) != "":
+        if self.get_user_file_path() != "":
             self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
     def _on_batch_file_load(self):

@@ -158,8 +158,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def test_that_checks_default_user_file(self):
         # Setup presenter and mock view
-        user_file_path = create_user_file(sample_user_file)
-        view, settings_diagnostic_tab, _ = create_mock_view(user_file_path)
+        view, settings_diagnostic_tab, _ = create_mock_view("")
         presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
 
