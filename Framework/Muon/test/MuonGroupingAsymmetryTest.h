@@ -365,7 +365,7 @@ public:
 
     std::string norm = wsOut->getLog("analysis_asymmetry_norm")->value();
 
-    TS_ASSERT_EQUALS(norm, "15.000000");
+    TS_ASSERT_EQUALS(std::stod(norm), 15.0);
   }
 };
 

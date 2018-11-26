@@ -77,7 +77,7 @@ Output:
 .. testoutput:: SinglePeriod
 
     X values are : [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
-    Y values are : [-0.777, -0.298, 0.661, 0.746, 0.376]
+    Y values are : [-0.864, -0.572, 0.011, 0.063, -0.162]
 
 **Example - Using MuonPreProcess followed by MuonGroupingAsymmetry on Multi Period Data**
 
