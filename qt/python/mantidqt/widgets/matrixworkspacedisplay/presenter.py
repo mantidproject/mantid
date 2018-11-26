@@ -10,6 +10,8 @@
 from __future__ import absolute_import, division, print_function
 
 from mantid.plots.utility import MantidAxType
+from mantidqt.widgets.common.table_copying import copy_bin_values, copy_cells, copy_spectrum_values, \
+    show_no_selection_to_copy_toast
 from mantidqt.widgets.matrixworkspacedisplay.table_view_model import MatrixWorkspaceTableViewModelType
 from .model import MatrixWorkspaceDisplayModel
 from .view import MatrixWorkspaceDisplayView
@@ -40,100 +42,23 @@ class MatrixWorkspaceDisplay(object):
         self.view.set_model(*self.model.get_item_model())
 
     def action_copy_spectrum_values(self, table):
-        """
-        Copies the values selected by the user to the system's clipboard
-
-        :param table: Table from which the selection will be read
-        :param ws_read: The workspace read function, that is used to access the data directly
-        """
-        selection_model = table.selectionModel()
-        if not selection_model.hasSelection():
-            self.show_no_selection_to_copy_toast()
-            return
         ws_read = self._get_ws_read_from_type(table.model().type)
-        selected_rows = selection_model.selectedRows()  # type: list
-        row_data = []
-
-        for index in selected_rows:
-            row = index.row()
-            data = "\t".join(map(str, ws_read(row)))
-
-            row_data.append(data)
-
-        self.view.copy_to_clipboard("\n".join(row_data))
-        self.show_successful_copy_toast()
-
-    def show_no_selection_to_copy_toast(self):
-        self.view.show_mouse_toast(self.NO_SELECTION_MESSAGE)
-
-    def show_successful_copy_toast(self):
-        self.view.show_mouse_toast(self.COPY_SUCCESSFUL_MESSAGE)
+        copy_spectrum_values(table, ws_read)
 
     def action_copy_bin_values(self, table):
-        selection_model = table.selectionModel()
-        if not selection_model.hasSelection():
-            self.show_no_selection_to_copy_toast()
-            return
         ws_read = self._get_ws_read_from_type(table.model().type)
-        selected_columns = selection_model.selectedColumns()  # type: list
-
-        # Qt gives back a QModelIndex, we need to extract the column from it
         num_rows = self.model._ws.getNumberHistograms()
-        column_data = []
-        for index in selected_columns:
-            column = index.column()
-            data = [str(ws_read(row)[column]) for row in range(num_rows)]
-            column_data.append(data)
-
-        all_string_rows = []
-        for i in range(num_rows):
-            # Appends ONE value from each COLUMN, this is because the final string is being built vertically
-            # the noqa disables a 'data' variable redefined warning
-            all_string_rows.append("\t".join([data[i] for data in column_data]))  # noqa: F812
-
-        # Finally all rows are joined together with a new line at the end of each row
-        final_string = "\n".join(all_string_rows)
-        self.view.copy_to_clipboard(final_string)
-        self.show_successful_copy_toast()
+        copy_bin_values(table, ws_read, num_rows)
 
     def action_copy_cells(self, table):
-        """
-        :type table: QTableView
-        :param table: The table from which the data will be copied.
-        :return:
-        """
-        selectionModel = table.selectionModel()
-        if not selectionModel.hasSelection():
-            self.show_no_selection_to_copy_toast()
-            return
-
-        selection = selectionModel.selection()
-        selectionRange = selection.first()
-
-        top = selectionRange.top()
-        bottom = selectionRange.bottom()
-        left = selectionRange.left()
-        right = selectionRange.right()
-
-        data = []
-        index = selectionModel.currentIndex()
-        for i in range(top, bottom + 1):
-            for j in range(left, right):
-                data.append(index.sibling(i, j).data())
-                data.append("\t")
-            data.append(index.sibling(i, right).data())
-            data.append("\n")
-
-        # strip the string to remove the trailing new line
-        self.view.copy_to_clipboard("".join(data).strip())
-        self.show_successful_copy_toast()
+        copy_cells(table)
 
     def _do_action_plot(self, table, axis, get_index, plot_errors=False):
         if self.plot is None:
             raise ValueError("Trying to do a plot, but no plotting class dependency was injected in the constructor")
         selection_model = table.selectionModel()
         if not selection_model.hasSelection():
-            self.show_no_selection_to_copy_toast()
+            show_no_selection_to_copy_toast()
             return
 
         if axis == MantidAxType.SPECTRUM:
@@ -167,7 +92,7 @@ class MatrixWorkspaceDisplay(object):
     def action_keypress_copy(self, table):
         selectionModel = table.selectionModel()
         if not selectionModel.hasSelection():
-            self.show_no_selection_to_copy_toast()
+            show_no_selection_to_copy_toast()
             return
 
         if len(selectionModel.selectedRows()) > 0:

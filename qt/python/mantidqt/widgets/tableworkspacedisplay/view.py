@@ -29,6 +29,7 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.DELETE_ROW = mantidqt.icons.get_icon("fa.minus-square-o")
         self.STATISTICS_ON_ROW = mantidqt.icons.get_icon('fa.fighter-jet')
         self.GRAPH_ICON = mantidqt.icons.get_icon('fa.line-chart')
+        self.TBD = mantidqt.icons.get_icon('fa.question')
 
         # change the default color of the rows - makes them light blue
         # monitors and masked rows are colored in the table's custom model
@@ -57,10 +58,7 @@ class TableWorkspaceDisplayView(QTableWidget):
         :param ws_read_function: The read function used to efficiently retrieve data directly from the workspace
         """
         copy_action = QAction(self.COPY_ICON, "Copy", table)
-        # sets the first (table) parameter of the copy action callback
-        # so that each context menu can copy the data from the correct table
-        decorated_copy_action_with_correct_table = partial(self.presenter.action_copy_cells, table)
-        copy_action.triggered.connect(decorated_copy_action_with_correct_table)
+        copy_action.triggered.connect(self.presenter.action_copy_cells)
 
         table.setContextMenuPolicy(Qt.ActionsContextMenu)
         table.addAction(copy_action)
@@ -106,17 +104,23 @@ class TableWorkspaceDisplayView(QTableWidget):
         copy_bin_values = QAction(self.COPY_ICON, "Copy", main_menu)
         copy_bin_values.triggered.connect(self.presenter.action_copy_bin_values)
 
-        set_as_x = QAction(self.COPY_ICON, "Set as X", main_menu)
+        set_as_x = QAction(self.TBD, "Set as X", main_menu)
         set_as_x.triggered.connect(self.presenter.action_set_as_x)
 
         statistics_on_columns = QAction(self.STATISTICS_ON_ROW, "Statistics on Columns", main_menu)
         statistics_on_columns.triggered.connect(self.presenter.action_statistics_on_columns)
 
-        hide_column = QAction(self.STATISTICS_ON_ROW, "Hide Column", main_menu)
-        hide_column.triggered.connect(self.presenter.action_hide_column)
+        hide_selected = QAction(self.TBD, "Hide Selected", main_menu)
+        hide_selected.triggered.connect(self.presenter.action_hide_selected)
 
-        show_all_columns = QAction(self.STATISTICS_ON_ROW, "Show All Columns", main_menu)
+        show_all_columns = QAction(self.TBD, "Show All Columns", main_menu)
         show_all_columns.triggered.connect(self.presenter.action_show_all_columns)
+
+        sort_ascending = QAction(self.TBD, "Sort Ascending", main_menu)
+        sort_ascending.triggered.connect(partial(self.presenter.action_sort_ascending, Qt.AscendingOrder))
+
+        sort_descending = QAction(self.TBD, "Sort Descending", main_menu)
+        sort_descending.triggered.connect(partial(self.presenter.action_sort_ascending, Qt.DescendingOrder))
 
         main_menu.addAction(copy_bin_values)
         main_menu.addAction(self.make_separator(main_menu))
@@ -124,8 +128,11 @@ class TableWorkspaceDisplayView(QTableWidget):
         main_menu.addAction(self.make_separator(main_menu))
         main_menu.addAction(statistics_on_columns)
         main_menu.addAction(self.make_separator(main_menu))
-        main_menu.addAction(hide_column)
+        main_menu.addAction(hide_selected)
         main_menu.addAction(show_all_columns)
+        main_menu.addAction(self.make_separator(main_menu))
+        main_menu.addAction(sort_ascending)
+        main_menu.addAction(sort_descending)
 
         main_menu.exec_(self.mapToGlobal(position))
 

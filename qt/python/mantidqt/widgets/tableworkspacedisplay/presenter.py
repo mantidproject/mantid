@@ -11,6 +11,7 @@ from __future__ import absolute_import, division, print_function
 
 from functools import partial
 
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QTableWidgetItem
 
 from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
@@ -20,9 +21,19 @@ from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
 
 
+class TableItem(QTableWidgetItem):
+    def __lt__(self, other):
+        try:
+            # if the data can be parsed as numbers then compare properly, otherwise default to the Qt implementation
+            return float(self.data(Qt.DisplayRole)) < float(other.data(Qt.DisplayRole))
+        except:
+            return super(TableItem, self).__lt__(other)
+
+
 class TableWorkspaceDisplay(object):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
     TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to set as X. Please select only 1."
+    TOO_MANY_SELECTED_TO_SORT = "Too many columns are selected to sort by. Please select only 1."
     TOO_MANY_SELECTED_FOR_PLOT = "Too many columns are selected to plot. Please select only 1."
     NUM_SELECTED_FOR_CONFIRMATION = 10
     NO_COLUMN_MARKED_AS_X = "No column marked as X."
@@ -66,7 +77,7 @@ class TableWorkspaceDisplay(object):
         for col in range(num_cols):
             column_data = self.model.get_column(col)
             for row in range(num_rows):
-                item = QTableWidgetItem(str(column_data[row]))
+                item = TableItem(str(column_data[row]))
                 table.setItem(row, col, item)
 
     def action_copy_cells(self):
@@ -97,26 +108,40 @@ class TableWorkspaceDisplay(object):
         for row in reversed(selected_rows_list):
             self.view.removeRow(row)
 
-    def action_statistics_on_columns(self):
+    def _get_selected_columns(self, max_selected=None, message_if_over_max=None):
         selection_model = self.view.selectionModel()
         if not selection_model.hasSelection():
             show_no_selection_to_copy_toast()
-            return
+            raise ValueError("No selection")
 
         selected_columns = selection_model.selectedColumns()
-        selected_columns_list = [index.column() for index in selected_columns]
-        stats = StatisticsOfTableWorkspace(self.model.ws, selected_columns_list)
+        num_selected_columns = len(selected_columns)
+
+        if max_selected and message_if_over_max and num_selected_columns > max_selected:
+            # if over the maximum allowed selection
+            show_mouse_toast(message_if_over_max)
+            raise ValueError("Too many selected")
+        elif num_selected_columns == 0:
+            # if no columns are selected
+            show_no_selection_to_copy_toast()
+            raise ValueError("No selection")
+        else:
+            return [index.column() for index in selected_columns]
+
+    def action_statistics_on_columns(self):
+        try:
+            selected_columns = self._get_selected_columns()
+        except ValueError:
+            return
+        stats = StatisticsOfTableWorkspace(self.model.ws, selected_columns)
         TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
 
-    def action_hide_column(self):
-        selection_model = self.view.selectionModel()
-        if not selection_model.hasSelection():
-            show_no_selection_to_copy_toast()
+    def action_hide_selected(self):
+        try:
+            selected_columns = self._get_selected_columns()
+        except ValueError:
             return
-
-        selected_columns = selection_model.selectedColumns()
-        selected_columns_list = [index.column() for index in selected_columns]
-        for column_index in selected_columns_list:
+        for column_index in selected_columns:
             self.view.hideColumn(column_index)
 
     def action_show_all_columns(self):
@@ -124,27 +149,32 @@ class TableWorkspaceDisplay(object):
             self.view.showColumn(column_index)
 
     def action_set_as_x(self):
-        selection_model = self.view.selectionModel()
-        if not selection_model.hasSelection():
-            show_no_selection_to_copy_toast()
+        try:
+            selected_columns = self._get_selected_columns(1, self.TOO_MANY_SELECTED_FOR_X)
+        except ValueError:
             return
 
-        selected_columns = selection_model.selectedColumns()
-        if len(selected_columns) > 1:
-            show_mouse_toast(self.TOO_MANY_SELECTED_FOR_X)
-            return
-        self.column_marked_as_x = selected_columns[0].column()
+        self.column_marked_as_x = selected_columns[0]
 
         self.update_column_headers([(self.column_marked_as_x, "[X]")])
+
+    def action_sort_ascending(self, order):
+        try:
+            selected_columns = self._get_selected_columns(1, self.TOO_MANY_SELECTED_TO_SORT)
+        except ValueError:
+            return
+
+        selected_column = selected_columns[0]
+        self.view.sortByColumn(selected_column, order)
 
     def action_plot(self, type):
         if self.column_marked_as_x is None:
             show_mouse_toast(self.NO_COLUMN_MARKED_AS_X)
             return
 
-        selection_model = self.view.selectionModel()
-        if not selection_model.hasSelection():
-            show_no_selection_to_copy_toast()
+        try:
+            selected_columns = self._get_selected_columns(1, self.TOO_MANY_SELECTED_TO_SORT)
+        except ValueError:
             return
 
         x = self.model.get_column(self.column_marked_as_x)
@@ -160,11 +190,10 @@ class TableWorkspaceDisplay(object):
         else:
             raise ValueError("Plot Type: {} not currently supported!".format(type))
 
-        selected_columns = [col_index.column() for col_index in selection_model.selectedColumns()]
         for column in selected_columns:
             if column == self.column_marked_as_x:
                 # TODO log that `column` has been skipped as it's the same as X
-                pass
+                continue
             y = self.model.get_column(column)
             column_label = self.model.get_column_header(column)
             plot_func(x, y, label='Column {}'.format(column_label))

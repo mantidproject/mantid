@@ -8,13 +8,17 @@ from qtpy.QtWidgets import (QMessageBox, QTableView, QToolTip)
 NO_SELECTION_MESSAGE = "No selection"
 COPY_SUCCESSFUL_MESSAGE = "Copy Successful"
 
+"""
+This module contains the common copying functionality between 
+the MatrixWorkspaceDisplay and the TableWorkspaceDisplay.
+"""
+
 
 def copy_spectrum_values(table, ws_read):
     """
     Copies the values selected by the user to the system's clipboard
 
     :param table: Table from which the selection will be read
-    :param view:
     :param ws_read: The workspace read function, that is used to access the data directly
     """
     selection_model = table.selectionModel()
@@ -34,15 +38,14 @@ def copy_spectrum_values(table, ws_read):
     show_successful_copy_toast()
 
 
-def show_no_selection_to_copy_toast():
-    show_mouse_toast(NO_SELECTION_MESSAGE)
-
-
-def show_successful_copy_toast():
-    show_mouse_toast(COPY_SUCCESSFUL_MESSAGE)
-
-
 def copy_bin_values(table, ws_read, num_rows):
+    """
+    Copies the values selected by the user to the system's clipboard
+
+    :param table: Table from which the selection will be read
+    :param ws_read: The workspace read function, that is used to access the data directly
+    :param num_rows: The number of rows in the column
+    """
     selection_model = table.selectionModel()
     if not selection_model.hasSelection():
         show_no_selection_to_copy_toast()
@@ -143,3 +146,11 @@ def ask_confirmation(self, message, title="Mantid Workbench"):
     """
     reply = QMessageBox.question(self, title, message, QMessageBox.Yes, QMessageBox.No)
     return True if reply == QMessageBox.Yes else False
+
+
+def show_no_selection_to_copy_toast():
+    show_mouse_toast(NO_SELECTION_MESSAGE)
+
+
+def show_successful_copy_toast():
+    show_mouse_toast(COPY_SUCCESSFUL_MESSAGE)
