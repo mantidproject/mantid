@@ -611,5 +611,9 @@ void addSampleLog(MatrixWorkspace_sptr workspace, const std::string &logName,
   alg->execute();
 }
 
+bool isAlphanumericOrUnderscore(char character) {
+  return (isalpha(character) || isdigit(character) || (character == '_'));
+}
+
 } // namespace MuonAlgorithmHelper
 } // namespace Mantid
