@@ -162,9 +162,9 @@ private:
                                    API::IPeakFunction_sptr peakfunction,
                                    API::IBackgroundFunction_sptr bkgdfunc);
 
-  void
-  setupParameterTableWorkspace(API::ITableWorkspace_sptr table_ws,
-                               const std::vector<std::string> &param_names);
+  void setupParameterTableWorkspace(API::ITableWorkspace_sptr table_ws,
+                                    const std::vector<std::string> &param_names,
+                                    bool with_chi2);
 
   /// get vector X, Y and E in a given range
   void getRangeData(size_t iws, const std::pair<double, double> &fit_window,

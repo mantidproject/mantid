@@ -740,7 +740,7 @@ public:
    * It is modified from test_multiple_peak_profiles
    * @brief test_outputFitError
    */
-  void New_test_outputFitError() {
+  void test_outputFitError() {
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -776,7 +776,8 @@ public:
 
     fitpeaks.setProperty("RawPeakParameters", true);
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS");
-    fitpeaks.setProperty("OutputParameterFitErrorsWorkspace", "FitErrorsWS");
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setPropertyValue(
+        "OutputParameterFitErrorsWorkspace", "FitErrorsWS"));
 
     fitpeaks.execute();
 
@@ -810,7 +811,8 @@ public:
     // shall be same number of rows to OutputPeakParametersWorkspace
     // (PeakParametersWS)
     TS_ASSERT_EQUALS(error_table->rowCount(), param_ws->rowCount());
-    TS_ASSERT_EQUALS(error_table->columnCount(), param_ws->columnCount());
+    // there is no Chi2 column in error table
+    TS_ASSERT_EQUALS(error_table->columnCount(), param_ws->columnCount() - 1);
 
     // check fit error
     for (size_t irow = 0; irow < param_ws->rowCount(); ++irow) {

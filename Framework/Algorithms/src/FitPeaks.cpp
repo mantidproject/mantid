@@ -1889,17 +1889,19 @@ void FitPeaks::generateOutputPeakPositionWS() {
  * @brief FitPeaks::generateParameterTable
  * @param table_ws:: an empty workspace
  * @param param_names
+ * @param with_chi2:: flag to append chi^2 to the table
  */
 void FitPeaks::setupParameterTableWorkspace(
     API::ITableWorkspace_sptr table_ws,
-    const std::vector<std::string> &param_names) {
+    const std::vector<std::string> &param_names, bool with_chi2) {
 
   // add columns
   table_ws->addColumn("int", "wsindex");
   table_ws->addColumn("int", "peakindex");
   for (size_t iparam = 0; iparam < param_names.size(); ++iparam)
     table_ws->addColumn("double", param_names[iparam]);
-  table_ws->addColumn("double", "chi2");
+  if (with_chi2)
+    table_ws->addColumn("double", "chi2");
 
   // add rows
   const size_t numParam = m_fittedParamTable->columnCount() - 3;
@@ -1910,7 +1912,8 @@ void FitPeaks::setupParameterTableWorkspace(
       newRow << static_cast<int>(ipeak); // peak number
       for (size_t iparam = 0; iparam < numParam; ++iparam)
         newRow << 0.;    // parameters for each peak
-      newRow << DBL_MAX; // chisq
+      if (with_chi2)
+        newRow << DBL_MAX; // chisq
     }
   }
 
@@ -1946,23 +1949,26 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
   // parameter value table
   m_fittedParamTable =
       WorkspaceFactory::Instance().createTable("TableWorkspace");
-  setupParameterTableWorkspace(m_fittedParamTable, param_vec);
+  setupParameterTableWorkspace(m_fittedParamTable, param_vec, true);
 
   // for error workspace
-  //  std::string fiterror_table_name =
-  //      getProperty("OutputParameterFitErrorsWorkspace");
-  //  // do nothing if user does not specifiy
-  //  if (fiterror_table_name == "") {
-  //    m_fitErrorTable = nullptr;
-  //  } else {
-  //    // check
-  //    if (!m_rawPeaksTable)
-  //      throw std::invalid_argument(
-  //          "FitPeaks must output RAW peak parameters if fitting error "
-  //          "is chosen to be output.");
-
-  //    m_fitErrorTable = generateParameterTable(param_vec);
-  //  }
+  std::string fiterror_table_name =
+      getPropertyValue("OutputParameterFitErrorsWorkspace");
+  // do nothing if user does not specifiy
+  if (fiterror_table_name == "") {
+    // not specified
+    m_fitErrorTable = nullptr;
+  } else {
+    // check
+    if (!m_rawPeaksTable)
+      throw std::invalid_argument(
+          "FitPeaks must output RAW peak parameters if fitting error "
+          "is chosen to be output.");
+    // create table and set up parameter table
+    m_fitErrorTable =
+        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    setupParameterTableWorkspace(m_fitErrorTable, param_vec, false);
+  }
 
   return;
 }
@@ -1999,10 +2005,14 @@ void FitPeaks::processOutputs(
     std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
         fit_result_vec) {
   setProperty("OutputWorkspace", m_outputPeakPositionWorkspace);
+  setProperty("OutputPeakParametersWorkspace", m_fittedParamTable);
 
-  // optional
-  if (m_fittedParamTable)
-    setProperty("OutputPeakParametersWorkspace", m_fittedParamTable);
+  if (m_fitErrorTable) {
+    g_log.warning("Output error table workspace");
+    setProperty("OutputParameterFitErrorsWorkspace", m_fitErrorTable);
+  } else {
+    g_log.warning("No error table output");
+  }
 
   // optional
   if (m_fittedPeakWS && m_fittedParamTable) {
