@@ -42,3 +42,9 @@ class PlottingContext(object):
 
     def set(self,key,value):
        self.context[key] = value
+
+    def get_xBounds(self):
+        return self.context[xBounds]
+
+    def get_yBounds(self):
+        return self.context[yBounds]

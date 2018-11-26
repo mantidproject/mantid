@@ -30,6 +30,12 @@ class plotTestGui(QtGui.QMainWindow):
         super(plotTestGui, self).__init__(parent)
         self._context = PlottingContext()
         self.test = MultiPlotWidget(self._context, self)
+        self.test.add_subplot("test",311)
+        self.test.add_subplot("bob",312)
+        self.test.add_subplot("moo",313)
+        self.test.plot("test",self._context.ws)
+        self.test.plot("bob",self._context.ws)
+        self.test.plot("moo",self._context.ws)
         self.setCentralWidget(self.test)
 
         self.setWindowTitle("plot test")

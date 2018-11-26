@@ -26,31 +26,54 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.quickEdit.connect_y_range_changed(self.y_range_changed)
         self.quickEdit.connect_errors_changed(self.errors_changed)
         self.quickEdit.connect_autoscale_changed(self.autoscale_changed)
+        self.quickEdit.connect_plot_selection(self.selection_changed)
 
         # add some dummy plot
-        self.plots = subPlot("test", self._context)
+        self.plots = subPlot(self._context)
         self.plots.connect_quick_edit_signal(self.update_quick_edit)
-        # add dummy line
-        self.plots.plot("test", self._context.ws)
 
         # create GUI layout
         layout.addWidget(self.plots)
         layout.addWidget(self.quickEdit.widget)
         self.setLayout(layout)
 
+    def selection_changed(self,index):
+        names = self.quickEdit.get_selection()
+        # make this a get method and do something clever
+        # to make sure the full data set is shown (min/max across all plots)
+        xrange = self._context.get_xBounds()
+        yrange = self._context.get_yBounds()
+        if len(names) == 1:
+           xrange = self._context.subplots[names[0]].xbounds
+           yrange = self._context.subplots[names[0]].ybounds
+        #self.plots.set_plot_x_range(names,xrange)
+        
+		#self.plots.set_plot_y_range(names,yrange)
+        self.quickEdit.set_plot_x_range(xrange)
+
+    def add_subplot(self, name,code):
+        self.plots.add_subplot(name,code)
+        self.quickEdit.add_subplot(name)
+
+    def plot(self,subplotName,ws,specNum=1):
+        self.plots.plot(subplotName, ws,specNum)
+
     def autoscale_changed(self,state):
-        # get subplot selected....
-        self.plots.set_y_autoscale("test",state)
+        names = self.quickEdit.get_selection()
+        self.plots.set_y_autoscale(names,state)
 
     def errors_changed(self,state):
-        # get subplot selected....
-        self.plots.change_errors(state, "test")
+        names = self.quickEdit.get_selection()
+        self.plots.change_errors(state, names)
 
     def x_range_changed(self,range):
-        self.plots.set_plot_x_range("test", range)
+        names = self.quickEdit.get_selection()
+        self.plots.set_plot_x_range(names, range)
+        self.quickEdit.set_plot_x_range(range)
 
     def y_range_changed(self,range):
-        self.plots.set_plot_y_range("test", range)
+        names = self.quickEdit.get_selection()
+        self.plots.set_plot_y_range(names, range)
 
     def update_quick_edit(self):
         self.quickEdit.loadFromContext()

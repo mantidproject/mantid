@@ -4,7 +4,8 @@ from mantid import plots
 from copy import copy
 
 # use this to manage lines and workspaces directly
-
+# may need to store if autoscale and errors in here
+# to recover when using the plot selector
 # subplot context ... 
 class subPlotContext(object):
 
@@ -13,7 +14,8 @@ class subPlotContext(object):
         self._ws = {}
         self._lines = {}
         self._specNum = {}
-        self._colours = {}
+        self.xbounds = []
+        self.ybounds = []
 
     # need to add if errors
     def addLine(self, subplot, ws, specNum=1):
@@ -27,6 +29,11 @@ class subPlotContext(object):
         else:
             self._ws[ws].append(label)
         self.lines[label] = [line]
+        if self.xbounds == []:
+            self.xbounds = subplot.get_xlim()
+        if self.ybounds == []:
+            self.ybounds = subplot.get_ylim()
+
 
     def change_errors(self,subplot,state):
          for label in self.lines.keys():

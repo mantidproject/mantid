@@ -17,7 +17,7 @@ from MultiPlotting.multiPlotting_context import *
 class subPlot(QtWidgets.QWidget):
     quickEditSignal = QtCore.Signal()
 
-    def __init__(self, name, context):
+    def __init__(self, context):
         super(subPlot,self).__init__()
         self._context = context
         self.figure = Figure()
@@ -53,9 +53,10 @@ class subPlot(QtWidgets.QWidget):
         if new:
              self.emit_subplot_range(subplotName)
 
-    def change_errors(self,state, subplotName):
-        self._context.subplots[subplotName].change_errors(self.plotObjects[subplotName],state)
-        self.canvas.draw()
+    def change_errors(self,state, subplotNames):
+        for subplotName in subplotNames:
+            self._context.subplots[subplotName].change_errors(self.plotObjects[subplotName],state)
+            self.canvas.draw()
 
     # adds plotted line to context and updates GUI
     def _add_plotted_line(self, subplotName, workspace,specNum):
@@ -64,8 +65,8 @@ class subPlot(QtWidgets.QWidget):
         self._context.addLine(subplotName,self.plotObjects[subplotName],workspace,specNum)
         self.canvas.draw()
 
-    def add_subplot(self,subplotName):
-     self.plotObjects[subplotName] = self.figure.add_subplot(111)
+    def add_subplot(self,subplotName,code=111):
+     self.plotObjects[subplotName] = self.figure.add_subplot(code)
      self._context.addSubplot(subplotName)
 
     def emit_subplot_range(self,subplotName):
@@ -73,13 +74,16 @@ class subPlot(QtWidgets.QWidget):
      self._context.set(yBounds,self.plotObjects[subplotName].get_ylim())
      self.quickEditSignal.emit()
  
-    def set_plot_x_range(self,subplotName,range):
-        self.plotObjects[subplotName].set_xlim(range)
-        self.canvas.draw() 
+    def set_plot_x_range(self,subplotNames,range):
+        for subplotName in subplotNames:
+            self.plotObjects[subplotName].set_xlim(range)
+            self._context.subplots[subplotName].xbounds =range 
+            self.canvas.draw() 
 
-    def set_plot_y_range(self,subplotName,range):
-        self.plotObjects[subplotName].set_ylim(range)
-        self.canvas.draw()
+    def set_plot_y_range(self,subplotNames,range):
+        for subplotName in subplotNames:
+            self.plotObjects[subplotName].set_ylim(range)
+            self.canvas.draw()
 
     def connect_quick_edit_signal(self,slot):
         self.quickEditSignal.connect(slot)
@@ -87,6 +91,7 @@ class subPlot(QtWidgets.QWidget):
     def disconnect_quick_edit_signal(self,slot):
         self.quickEditSignal.disconnect(slot)
 
-    def set_y_autoscale(self,subplotName,state):
-        self.plotObjects[subplotName].autoscale(enable=state,axis="y")
-        self.canvas.draw()
+    def set_y_autoscale(self,subplotNames,state):
+        for subplotName in subplotNames:
+            self.plotObjects[subplotName].autoscale(enable=state,axis="y")
+            self.canvas.draw()

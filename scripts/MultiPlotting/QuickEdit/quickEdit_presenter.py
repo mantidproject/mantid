@@ -35,7 +35,22 @@ class QuickEditPresenter(object):
 
     def connect_y_range_changed(self,slot):
         self._view.connect_y_range_changed(slot)
+		
+    def connect_plot_selection(self,slot):
+        self._view.connect_plot_selection(slot)
 
     def updateContext(self,range):
         subContext = self._view.getSubContext()
         self.model.updateContext(subContext)
+
+    def add_subplot(self,name):
+        current = self._view.current_selection()
+        self._view.add_subplot(name)
+        index = self._view.find_index(current)
+        self._view.set_index(index)
+
+    def all(self):
+        return [self._view.plot_at_index(index) for index in range(1,self._view.number_of_plots())]
+
+    def set_plot_x_range(self,range):
+        self._view.set_plot_x_range(range)

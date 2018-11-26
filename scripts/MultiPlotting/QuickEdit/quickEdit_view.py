@@ -12,12 +12,14 @@ from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 
 class QuickEditView(QtWidgets.QWidget):
     autoscale_signal = QtCore.Signal(object)
+    selection_signal = QtCore.Signal(object)
 
     def __init__(self, subcontext, parent = None):
         super(QuickEditView,self).__init__(parent)
 
         button_layout = QtWidgets.QHBoxLayout()
         self.plot_selector = QtWidgets.QComboBox()
+        self.plot_selector.addItem("All")
 
         self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
 
@@ -32,6 +34,24 @@ class QuickEditView(QtWidgets.QWidget):
         button_layout.addWidget(self.y_axis_changer.view)
         button_layout.addWidget(self.errors)
         self.setLayout(button_layout)
+
+    def current_selection(self):
+        return self.plot_selector.currentText()
+
+    def find_index(self,name):
+        return self.plot_selector.findText(name)
+
+    def set_index(self,index):
+        self.plot_selector.setCurrentIndex(index)
+
+    def plot_at_index(self,index):
+        return self.plot_selector.itemText(index)
+
+    def number_of_plots(self):
+        return self.plot_selector.count()
+
+    def add_subplot(self,name):
+        self.plot_selector.addItem(name)
 
     def connect_errors_changed(self,slot):
         self.errors.stateChanged.connect(slot)
@@ -48,6 +68,9 @@ class QuickEditView(QtWidgets.QWidget):
     def connect_y_range_changed(self,slot):
         self.y_axis_changer.on_bound_changed(slot)
 
+    def connect_plot_selection(self,slot):
+        self.plot_selector.currentIndexChanged.connect(slot)
+
     def loadFromContext(self,context):
         self.x_axis_changer.set_bounds(context["x bounds"])
         self.y_axis_changer.set_bounds(context["y bounds"])
@@ -57,3 +80,6 @@ class QuickEditView(QtWidgets.QWidget):
         subcontext["x bounds"] = self.x_axis_changer.get_bounds()
         subcontext["y bounds"] = self.y_axis_changer.get_bounds()
         return subcontext
+
+    def set_plot_x_range(self,range):
+        self.x_axis_changer.set_bounds(range)
