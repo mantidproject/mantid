@@ -14,9 +14,10 @@ from functools import partial
 from qtpy import QtGui
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import (QAction, QHeaderView, QMessageBox, QTableView, QTableWidget)
+from qtpy.QtWidgets import (QAction, QHeaderView, QMenu, QMessageBox, QTableView, QTableWidget)
 
 import mantidqt.icons
+from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 
 
 class TableWorkspaceDisplayView(QTableWidget):
@@ -27,6 +28,7 @@ class TableWorkspaceDisplayView(QTableWidget):
         self.COPY_ICON = mantidqt.icons.get_icon("fa.files-o")
         self.DELETE_ROW = mantidqt.icons.get_icon("fa.minus-square-o")
         self.STATISTICS_ON_ROW = mantidqt.icons.get_icon('fa.fighter-jet')
+        self.GRAPH_ICON = mantidqt.icons.get_icon('fa.line-chart')
 
         # change the default color of the rows - makes them light blue
         # monitors and masked rows are colored in the table's custom model
@@ -64,13 +66,9 @@ class TableWorkspaceDisplayView(QTableWidget):
         table.addAction(copy_action)
 
         horizontalHeader = table.horizontalHeader()
-        horizontalHeader.setContextMenuPolicy(Qt.ActionsContextMenu)
-        horizontalHeader.setSectionResizeMode(QHeaderView.Fixed)
-
-        copy_bin_values = QAction(self.COPY_ICON, "Copy", horizontalHeader)
-        copy_bin_values.triggered.connect(self.presenter.action_copy_bin_values)
-
-        horizontalHeader.addAction(copy_bin_values)
+        horizontalHeader.setContextMenuPolicy(Qt.CustomContextMenu)
+        horizontalHeader.customContextMenuRequested.connect(self.custom_context_menu)
+        # horizontalHeader.setSectionResizeMode(QHeaderView.Fixed)
 
         verticalHeader = table.verticalHeader()
         verticalHeader.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -82,19 +80,59 @@ class TableWorkspaceDisplayView(QTableWidget):
         delete_row = QAction(self.DELETE_ROW, "Delete Row", verticalHeader)
         delete_row.triggered.connect(self.presenter.action_delete_row)
 
-        statistics_on_rows = QAction(self.STATISTICS_ON_ROW, "Statistics on Rows", verticalHeader)
-        statistics_on_rows.triggered.connect(self.presenter.action_statistics_on_rows)
-
-        separator1 = QAction(verticalHeader)
-        separator1.setSeparator(True)
-        separator2 = QAction(verticalHeader)
-        separator2.setSeparator(True)
+        separator2 = self.make_separator(verticalHeader)
 
         verticalHeader.addAction(copy_spectrum_values)
-        verticalHeader.addAction(separator1)
-        verticalHeader.addAction(delete_row)
         verticalHeader.addAction(separator2)
-        verticalHeader.addAction(statistics_on_rows)
+        verticalHeader.addAction(delete_row)
+
+    def custom_context_menu(self, position):
+        main_menu = QMenu()
+        plot = QMenu("Plot...", main_menu)
+        plot_line = QAction(self.GRAPH_ICON, "Line", plot)
+        plot_line.triggered.connect(partial(self.presenter.action_plot, PlotType.LINEAR))
+
+        plot_scatter = QAction(self.GRAPH_ICON, "Scatter", plot)
+        plot_scatter.triggered.connect(partial(self.presenter.action_plot, PlotType.SCATTER))
+
+        plot_line_and_points = QAction(self.GRAPH_ICON, "Line + Symbol", plot)
+        plot_line_and_points.triggered.connect(partial(self.presenter.action_plot, PlotType.LINE_AND_SYMBOL))
+
+        plot.addAction(plot_line)
+        plot.addAction(plot_scatter)
+        plot.addAction(plot_line_and_points)
+        main_menu.addMenu(plot)
+
+        copy_bin_values = QAction(self.COPY_ICON, "Copy", main_menu)
+        copy_bin_values.triggered.connect(self.presenter.action_copy_bin_values)
+
+        set_as_x = QAction(self.COPY_ICON, "Set as X", main_menu)
+        set_as_x.triggered.connect(self.presenter.action_set_as_x)
+
+        statistics_on_columns = QAction(self.STATISTICS_ON_ROW, "Statistics on Columns", main_menu)
+        statistics_on_columns.triggered.connect(self.presenter.action_statistics_on_columns)
+
+        hide_column = QAction(self.STATISTICS_ON_ROW, "Hide Column", main_menu)
+        hide_column.triggered.connect(self.presenter.action_hide_column)
+
+        show_all_columns = QAction(self.STATISTICS_ON_ROW, "Show All Columns", main_menu)
+        show_all_columns.triggered.connect(self.presenter.action_show_all_columns)
+
+        main_menu.addAction(copy_bin_values)
+        main_menu.addAction(self.make_separator(main_menu))
+        main_menu.addAction(set_as_x)
+        main_menu.addAction(self.make_separator(main_menu))
+        main_menu.addAction(statistics_on_columns)
+        main_menu.addAction(self.make_separator(main_menu))
+        main_menu.addAction(hide_column)
+        main_menu.addAction(show_all_columns)
+
+        main_menu.exec_(self.mapToGlobal(position))
+
+    def make_separator(self, horizontalHeader):
+        separator1 = QAction(horizontalHeader)
+        separator1.setSeparator(True)
+        return separator1
 
     @staticmethod
     def copy_to_clipboard(data):

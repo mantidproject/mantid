@@ -18,11 +18,12 @@ from qtpy.QtWidgets import QApplication  # noqa: F402
 
 from mantid.simpleapi import Load  # noqa: F402
 from mantidqt.widgets.tableworkspacedisplay.presenter import TableWorkspaceDisplay  # noqa: F402
-from workbench.plotting.functions import plot  # noqa: F402
+# from workbench.plotting.functions import plot  # noqa: F402
+import matplotlib.pyplot as plt
 
 app = QApplication([])
 # DEEE_WS_MON = Load("SavedTableWorkspace.nxs")
 # DEEE_WS_MON = Load("TOPAZ_3007.peaks.nxs")
-DEEE_WS_MON = Load("SmallPeakWS10.nxs")
-window = TableWorkspaceDisplay(DEEE_WS_MON, plot)
+DEEE_WS_MON = Load("SmallPeakWS10_vals.nxs")
+window = TableWorkspaceDisplay(DEEE_WS_MON, plt)
 app.exec_()

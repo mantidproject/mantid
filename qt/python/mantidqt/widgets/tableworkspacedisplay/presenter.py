@@ -9,30 +9,54 @@
 #
 from __future__ import absolute_import, division, print_function
 
+from functools import partial
+
 from qtpy.QtWidgets import QTableWidgetItem
 
-from mantid.simpleapi import DeleteTableRows
-from mantidqt.widgets.common.table_copying import copy_cells, show_no_selection_to_copy_toast
+from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
+from mantidqt.widgets.common.table_copying import copy_cells, show_mouse_toast, show_no_selection_to_copy_toast
+from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
 
 
 class TableWorkspaceDisplay(object):
     A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
+    TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to set as X. Please select only 1."
+    TOO_MANY_SELECTED_FOR_PLOT = "Too many columns are selected to plot. Please select only 1."
     NUM_SELECTED_FOR_CONFIRMATION = 10
+    NO_COLUMN_MARKED_AS_X = "No column marked as X."
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None):
+    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None):
         # Create model and view, or accept mocked versions
         self.model = model if model else TableWorkspaceDisplayModel(ws)
-        self.view = view if view else TableWorkspaceDisplayView(self, parent, self.model.get_name())
+        self.name = self.model.get_name() if name is None else name
+        self.view = view if view else TableWorkspaceDisplayView(self, parent, self.name)
+        self.parent = parent
         self.plot = plot
         self.view.set_context_menu_actions(self.view)
-        column_headers = self.model.get_column_headers()
-        # self.editable_columns = self.model.get_editable_columns(column_headers)
-        self.view.setColumnCount(len(column_headers))
-        self.view.setHorizontalHeaderLabels(column_headers)
+        self.update_column_headers()
         # self.view.setHorizontalHeaderLabels(["{}[Y]".format(x) for x in column_headers])
         self.load_data(self.view)
+
+        self.column_marked_as_x = None
+
+    def update_column_headers(self, extra_labels=None):
+        """
+        :param extra_labels: Extra labels to be appended to the column headers.
+                             Expected format: [(id, label), (2, "X"),...]
+        :type extra_labels: List[Tuple[int, str]]
+        :return:
+        """
+        column_headers = self.model.get_column_headers()
+        num_headers = len(column_headers)
+        self.view.setColumnCount(num_headers)
+
+        if extra_labels:
+            for index, label in extra_labels:
+                column_headers[index] += label
+
+        self.view.setHorizontalHeaderLabels(column_headers)
 
     def load_data(self, table):
         num_rows = self.model.get_number_of_rows()
@@ -41,26 +65,21 @@ class TableWorkspaceDisplay(object):
         num_cols = self.model.get_number_of_columns()
         for col in range(num_cols):
             column_data = self.model.get_column(col)
-            # editable = False
-            # if peaks_workspace and col in self.editable_columns:
-            #     editable = True
             for row in range(num_rows):
                 item = QTableWidgetItem(str(column_data[row]))
-                # if not editable:
-                #     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 table.setItem(row, col, item)
 
-    def action_copy_cells(self, table):
-        copy_cells(table)
+    def action_copy_cells(self):
+        copy_cells(self.view)
 
-    def action_copy_bin_values(self, table):
-        copy_cells(table)
+    def action_copy_bin_values(self):
+        copy_cells(self.view)
 
-    def action_copy_spectrum_values(self, table):
-        copy_cells(table)
+    def action_copy_spectrum_values(self):
+        copy_cells(self.view)
 
-    def action_keypress_copy(self, table):
-        copy_cells(table)
+    def action_keypress_copy(self):
+        copy_cells(self.view)
 
     def action_delete_row(self):
         selection_model = self.view.selectionModel()
@@ -78,15 +97,80 @@ class TableWorkspaceDisplay(object):
         for row in reversed(selected_rows_list):
             self.view.removeRow(row)
 
-    def action_statistics_on_rows(self):
+    def action_statistics_on_columns(self):
         selection_model = self.view.selectionModel()
         if not selection_model.hasSelection():
             show_no_selection_to_copy_toast()
             return
 
-        selected_rows = selection_model.selectedRows()
-        selected_rows_list = [index.row() for index in selected_rows]
-        num_cols = self.model.get_number_of_columns()
+        selected_columns = selection_model.selectedColumns()
+        selected_columns_list = [index.column() for index in selected_columns]
+        stats = StatisticsOfTableWorkspace(self.model.ws, selected_columns_list)
+        TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
+
+    def action_hide_column(self):
+        selection_model = self.view.selectionModel()
+        if not selection_model.hasSelection():
+            show_no_selection_to_copy_toast()
+            return
+
+        selected_columns = selection_model.selectedColumns()
+        selected_columns_list = [index.column() for index in selected_columns]
+        for column_index in selected_columns_list:
+            self.view.hideColumn(column_index)
+
+    def action_show_all_columns(self):
+        for column_index in range(self.view.columnCount()):
+            self.view.showColumn(column_index)
+
+    def action_set_as_x(self):
+        selection_model = self.view.selectionModel()
+        if not selection_model.hasSelection():
+            show_no_selection_to_copy_toast()
+            return
+
+        selected_columns = selection_model.selectedColumns()
+        if len(selected_columns) > 1:
+            show_mouse_toast(self.TOO_MANY_SELECTED_FOR_X)
+            return
+        self.column_marked_as_x = selected_columns[0].column()
+
+        self.update_column_headers([(self.column_marked_as_x, "[X]")])
+
+    def action_plot(self, type):
+        if self.column_marked_as_x is None:
+            show_mouse_toast(self.NO_COLUMN_MARKED_AS_X)
+            return
+
+        selection_model = self.view.selectionModel()
+        if not selection_model.hasSelection():
+            show_no_selection_to_copy_toast()
+            return
+
+        x = self.model.get_column(self.column_marked_as_x)
+        fig, ax = self.plot.subplots(subplot_kw={'projection': 'mantid'})
+        ax.set_xlabel(self.model.get_column_header(self.column_marked_as_x))
+
+        if type == PlotType.LINEAR:
+            plot_func = ax.plot
+        elif type == PlotType.SCATTER:
+            plot_func = ax.scatter
+        elif type == PlotType.LINE_AND_SYMBOL:
+            plot_func = partial(ax.plot, marker='o')
+        else:
+            raise ValueError("Plot Type: {} not currently supported!".format(type))
+
+        selected_columns = [col_index.column() for col_index in selection_model.selectedColumns()]
+        for column in selected_columns:
+            if column == self.column_marked_as_x:
+                # TODO log that `column` has been skipped as it's the same as X
+                pass
+            y = self.model.get_column(column)
+            column_label = self.model.get_column_header(column)
+            plot_func(x, y, label='Column {}'.format(column_label))
+            ax.set_ylabel(column_label)
+        ax.legend()
+        fig.show()
 
     # def _do_action_plot(self, table, axis, get_index, plot_errors=False):
     #     if self.plot is None:
