@@ -21,11 +21,11 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
         super(GUIStartupTest, self).__init__()
+        self.maxDiff = None
         #create simple script
         self.script=os.path.join(mantid.config.getString('defaultsave.directory'),'GUIStartupTest_script.py')
         with open(self.script,'w') as f:
             f.write('import mantid\n'
-                    'mantid.config["logging.channels.consoleChannel.class"]="StdoutChannel"\n'
                     'print("Hello Mantid")\n')
         #get the mantidplot executable
         current_platform = platform.platform()
@@ -56,5 +56,5 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
             f.write('raise RuntimeError("GUITest")')
         p = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()
-        self.assertEquals(str(err),'some string')
+        self.assertEquals(str(out),"b'Hello Mantid\\n'")
         self.assertTrue(b'Fatal' in err)
