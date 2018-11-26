@@ -1692,26 +1692,28 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
     chi2 = fit->getProperty("OutputChi2overDoF");
     // fitfunc = fit->getProperty("Function");
 
-    // TODO - 20181114 - Write a section of codes to verify peak function and background function
+    // TODO - 20181114 - Write a section of codes to verify peak function and
+    // background function
     //                   have error set up same as fitfunc
-    g_log.warning() << "FitFunction (combo) has " << fitfunc->nParams() << " parameters\n";
+    g_log.warning() << "FitFunction (combo) has " << fitfunc->nParams()
+                    << " parameters\n";
 
     size_t peak_num_param = peak_function->nParams();
-    std::vector<std::string> peak_param_names = peak_function->getParameterNames();
+    std::vector<std::string> peak_param_names =
+        peak_function->getParameterNames();
     std::stringstream debugss;
     debugss << "Peak function parameters\n";
     for (size_t i = 0; i < peak_num_param; ++i)
-        debugss << peak_param_names[i] << ": " << peak_function->getParameter(i)
-                << "  (" << peak_function->getError(i) << ")\n";
+      debugss << peak_param_names[i] << ": " << peak_function->getParameter(i)
+              << "  (" << peak_function->getError(i) << ")\n";
 
     size_t combo_num_param = fitfunc->nParams();
     std::vector<std::string> combo_param_names = fitfunc->getParameterNames();
     debugss << "Combo function parameters\n";
     for (size_t i = 0; i < combo_num_param; ++i)
-        debugss << combo_param_names[i] << ": " << fitfunc->getParameter(i)
-                << "  (" << fitfunc->getError(i) << ")\n";
+      debugss << combo_param_names[i] << ": " << fitfunc->getParameter(i)
+              << "  (" << fitfunc->getError(i) << ")\n";
     g_log.warning(debugss.str());
-
   }
 
   return chi2;

@@ -881,9 +881,10 @@ public:
     bool ishist = false;
     double xval(0), yval(0), eval(0), dxval(1);
     std::set<int64_t> maskedws;
-    MatrixWorkspace_sptr center_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
-            nhist, nbins, ishist, xval, yval, eval, dxval, maskedws) );
+    MatrixWorkspace_sptr center_ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
+                nhist, nbins, ishist, xval, yval, eval, dxval, maskedws));
 
     std::cout << "Center workspace has " << center_ws->readX(0).size()
               << " bins"
