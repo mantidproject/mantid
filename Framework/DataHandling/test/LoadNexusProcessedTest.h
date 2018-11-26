@@ -726,7 +726,7 @@ public:
     // Loading a peaks workspace without a instrument from an IDF doesn't work
     // ...
     const std::string filename = FileFinder::Instance().getFullPath(
-        "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+        "unit_testing/MINITOPAZ_Definition.xml");
     InstrumentDefinitionParser parser(filename, "MINITOPAZ",
                                       Strings::loadFile(filename));
     auto instrument = parser.parseXML(nullptr);
@@ -771,7 +771,7 @@ public:
     // Loading a peaks workspace without a instrument from an IDF doesn't work
     // ...
     const std::string filename = FileFinder::Instance().getFullPath(
-        "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+        "unit_testing/MINITOPAZ_Definition.xml");
     InstrumentDefinitionParser parser(filename, "MINITOPAZ",
                                       Strings::loadFile(filename));
     auto instrument = parser.parseXML(nullptr);

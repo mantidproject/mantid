@@ -123,12 +123,12 @@ IAlgorithm_sptr loadParameterFileAlgorithm(MatrixWorkspace_sptr workspace,
 
 void readAnalyserFromFile(const std::string &analyser,
                           MatrixWorkspace_sptr workspace) {
-  auto instrument = workspace->getInstrument();
-  auto idfDirectory = Mantid::Kernel::ConfigService::Instance().getString(
+  auto const instrument = workspace->getInstrument();
+  auto const idfDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "instrumentDefinition.directory");
-  auto reflection = instrument->getStringParameter("reflection")[0];
-  auto parameterFile = idfDirectory + instrument->getName() + "_" + analyser +
-                       "_" + reflection + "_Parameters.xml";
+  auto const reflection = instrument->getStringParameter("reflection")[0];
+  auto const parameterFile = idfDirectory + instrument->getName() + "_" +
+                             analyser + "_" + reflection + "_Parameters.xml";
 
   IAlgorithm_sptr loadParamFile =
       loadParameterFileAlgorithm(workspace, parameterFile);
@@ -484,8 +484,15 @@ CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   return function;
 }
 
+std::vector<std::string> ConvFitModel::getSpectrumDependentAttributes() const {
+  /// Q value also depends on spectrum but is automatically updated when
+  /// the WorkspaceIndex is changed
+  return {"WorkspaceIndex"};
+}
+
 void ConvFitModel::setFitFunction(IFunction_sptr function) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto const composite =
+      boost::dynamic_pointer_cast<CompositeFunction>(function);
   m_backgroundIndex = getFirstInCategory(composite, "Background");
   setParameterNameChanges(*function, m_backgroundIndex);
 

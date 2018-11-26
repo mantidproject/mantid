@@ -253,6 +253,7 @@ public:
     return getSpectrum(index).dx();
   }
   HistogramData::HistogramX &mutableX(const size_t index) & {
+    invalidateCommonBinsFlag();
     return getSpectrum(index).mutableX();
   }
   HistogramData::HistogramDx &mutableDx(const size_t index) & {
@@ -436,8 +437,7 @@ public:
   /// index, weight>
   using MaskList = std::map<size_t, double>;
   const MaskList &maskedBins(const size_t &workspaceIndex) const;
-  const std::vector<size_t>
-  maskedBinsIndices(const size_t &workspaceIndex) const;
+  std::vector<size_t> maskedBinsIndices(const size_t &workspaceIndex) const;
   void setMaskedBins(const size_t workspaceIndex, const MaskList &maskedBins);
 
   // Methods handling the internal monitor workspace

@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import LoadEventNexus
 
 
-class ISISLoadingEventData(stresstesting.MantidStressTest):
+class ISISLoadingEventData(systemtesting.MantidSystemTest):
     """Older ISIS event files were actually, effectively, very finely-binned
     histograms where each "event" was assigned the TOF at the centre of a bin.
     Attempting to bin this type of data from event mode to histogram mode would

@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
-import stresstesting
+import systemtesting
 import os.path
 import numpy as np
 
 
-class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
+class WISHDiffractionFocussingReductionTest(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
         return ["WISH00035991.raw", "35922_h00_RW.cal", "35991-foc-h00.nxs"]
@@ -80,7 +80,7 @@ class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
         return ws, "35991-foc-h00.nxs"
 
 
-class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
+class WISHDiffractionFocussingAnalysisTest(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
         return ["35979-foc-h00.nxs",
