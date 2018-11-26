@@ -56,6 +56,5 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
             f.write('raise RuntimeError("GUITest")')
         p = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()
-        mantid.kernel.logger.error(str(out))
-        mantid.kernel.logger.error(str(err))
+        self.assertEquals(str(err),'some string')
         self.assertTrue(b'Fatal' in err)
