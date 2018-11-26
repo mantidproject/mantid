@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from multiprocessing import Process, Array, Manager, Value, Lock
 import optparse
@@ -39,7 +45,7 @@ if __name__ == "__main__":
     parser.add_option("-a", "--exec-args", dest="execargs",
                       help="Arguments passed to executable for each test Default=[]")
     parser.add_option("", "--frameworkLoc",
-                      help="location of the stress test framework (default=%s)" % DEFAULT_FRAMEWORK_LOC)
+                      help="location of the system test framework (default=%s)" % DEFAULT_FRAMEWORK_LOC)
     parser.add_option("", "--disablepropmake", action="store_false", dest="makeprop",
                       help="By default this will move your properties file out of the "
                       + "way and create a new one. This option turns off this behavior.")
@@ -73,9 +79,9 @@ if __name__ == "__main__":
                         loglevel="information", ncores=1, quiet=False, output_on_failure=False, clean=False)
     (options, args) = parser.parse_args()
 
-    # import the stress testing framework
+    # import the system testing framework
     sys.path.append(options.frameworkLoc)
-    import stresstesting
+    import systemtesting
 
     #########################################################################
     # Configure mantid
@@ -93,7 +99,7 @@ if __name__ == "__main__":
             save_dir = f_handle.read().strip()
 
     # Configure properties file
-    mtdconf = stresstesting.MantidFrameworkConfig(loglevel=options.loglevel,
+    mtdconf = systemtesting.MantidFrameworkConfig(loglevel=options.loglevel,
                                                   data_dirs=data_paths,
                                                   save_dir=save_dir,
                                                   archivesearch=options.archivesearch)
@@ -104,11 +110,11 @@ if __name__ == "__main__":
     # Generate list of tests
     #########################################################################
 
-    runner = stresstesting.TestRunner(executable=options.executable,
+    runner = systemtesting.TestRunner(executable=options.executable,
                                       exec_args=options.execargs,
                                       escape_quotes=True)
 
-    tmgr = stresstesting.TestManager(test_loc=mtdconf.testDir,
+    tmgr = systemtesting.TestManager(test_loc=mtdconf.testDir,
                                      runner=runner,
                                      quiet=options.quiet,
                                      testsInclude=options.testsInclude,
@@ -179,7 +185,7 @@ if __name__ == "__main__":
 
     # Prepare ncores processes
     for ip in range(options.ncores):
-        processes.append(Process(target=stresstesting.testThreadsLoop,args=(mtdconf.testDir, mtdconf.saveDir,
+        processes.append(Process(target=systemtesting.testThreadsLoop,args=(mtdconf.testDir, mtdconf.saveDir,
                          mtdconf.dataDir, options, tests_dict, tests_lock, tests_left, results_array,
                          status_dict, total_number_of_tests, maximum_name_length, tests_done, ip, lock,
                          required_files_dict, locked_files_dict)))

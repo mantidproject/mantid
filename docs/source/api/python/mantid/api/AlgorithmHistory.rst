@@ -2,7 +2,7 @@
  AlgorithmHistory
 ==================
 
-This a python binding to the C++ class Mantid::API::AlgorithmHistory.
+This is a Python binding to the C++ class Mantid::API::AlgorithmHistory.
 
 
 .. module:`mantid.api`

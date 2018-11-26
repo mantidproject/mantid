@@ -1,34 +1,27 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import
 
 # std imports
 import atexit
 import gc
 
-# 3rdparty imports
+# 3rd party imports
 import six
 
-from mantidqt.py3compat import Enum
+from mantid.py3compat import Enum
 from .observabledictionary import DictionaryAction, ObservableDictionary
 
 
 class FigureAction(Enum):
-    Unknown = 0
+    Update = 0
     New = 1
     Closed = 2
     Renamed = 3
@@ -37,6 +30,13 @@ class FigureAction(Enum):
 
 
 class GlobalFigureManagerObserver(object):
+    def __init__(self, figure_manager=None):
+        """
+        :param figure_manager: Figure manager that will be used to notify observers.
+                               Injected on initialisation for easy mocking
+        """
+        self.figure_manager = figure_manager
+
     def notify(self, action, key):
         """
         This method is called when a dictionary entry is added,
@@ -45,18 +45,23 @@ class GlobalFigureManagerObserver(object):
         :param key: The key in the dictionary that was changed
         :param old_value: Old value(s) removed
         """
-        gcf = GlobalFigureManager
 
         if action == DictionaryAction.Create:
-            gcf.notify_observers(FigureAction.New, key)
+            self.figure_manager.notify_observers(FigureAction.New, key)
         elif action == DictionaryAction.Set:
-            gcf.notify_observers(FigureAction.Renamed, key)
+            self.figure_manager.notify_observers(FigureAction.Renamed, key)
         elif action == DictionaryAction.Removed:
-            gcf.notify_observers(FigureAction.Closed, key)
+            self.figure_manager.notify_observers(FigureAction.Closed, key)
+        elif action == DictionaryAction.Update:
+            self.figure_manager.notify_observers(FigureAction.Update, key)
+        elif action == DictionaryAction.Clear:
+            # On Clear notify the observers to close all of the figures
+            # `figs.keys()` is safe to iterate and delete items at the same time
+            # because `keys` returns a new list, not referencing the original dict
+            for key in self.figure_manager.figs.keys():
+                self.figure_manager.notify_observers(FigureAction.Closed, key)
         else:
-            # Not expecting clear or update to be used, so we are
-            # being lazy here and just updating the entire plot list
-            gcf.notify_observers(FigureAction.Unknown, key)
+            raise ValueError("Notifying for action {} is not supported".format(action))
 
 
 class GlobalFigureManager(object):
@@ -80,8 +85,16 @@ class GlobalFigureManager(object):
     """
     _activeQue = []
     figs = ObservableDictionary({})
-    figs.add_observer(GlobalFigureManagerObserver())
     observers = []
+
+    @classmethod
+    def initialiseFiguresObserver(cls):
+        """
+        This is used to inject the GlobalFigureManager into the GlobalFigureManagerObserver
+        as there is no way to reference the class' own name inside the class' own definition
+        :return:
+        """
+        cls.figs.add_observer(GlobalFigureManagerObserver(cls))
 
     @classmethod
     def get_fig_manager(cls, num):
@@ -104,19 +117,13 @@ class GlobalFigureManager(object):
         """
         if not cls.has_fignum(num):
             return
-        manager = cls.figs[num]
-        manager.canvas.mpl_disconnect(manager._cidgcf)
+        current_fig_manager = cls.figs[num]
+        current_fig_manager.canvas.mpl_disconnect(current_fig_manager._cidgcf)
 
-        # There must be a good reason for the following careful
-        # rebuilding of the activeQue; what is it?
-        oldQue = cls._activeQue[:]
-        cls._activeQue = []
-        for f in oldQue:
-            if f != manager:
-                cls._activeQue.append(f)
+        cls._remove_manager_if_present(current_fig_manager)
 
         del cls.figs[num]
-        manager.destroy()
+        current_fig_manager.destroy()
         gc.collect(1)
         cls.notify_observers(FigureAction.OrderChanged, -1)
 
@@ -180,14 +187,23 @@ class GlobalFigureManager(object):
         """
         Make the figure corresponding to *manager* the active one.
         """
-        oldQue = cls._activeQue[:]
-        cls._activeQue = []
-        for m in oldQue:
-            if m != manager:
-                cls._activeQue.append(m)
+        cls._remove_manager_if_present(manager)
         cls._activeQue.append(manager)
         cls.figs[manager.num] = manager
         cls.notify_observers(FigureAction.OrderChanged, manager.num)
+
+    @classmethod
+    def _remove_manager_if_present(cls, manager):
+        """
+        Removes the manager from the active queue, if it is present in it.
+        :param manager: Manager to be removed from the active queue
+        :return:
+        """
+        try:
+            del cls._activeQue[cls._activeQue.index(manager)]
+        except ValueError:
+            # the figure manager was not in the active queue - no need to delete anything
+            pass
 
     @classmethod
     def draw_all(cls, force=False):
@@ -230,6 +246,7 @@ class GlobalFigureManager(object):
         notify() method
         :param observer: A class with a notify method
         """
+        assert "notify" in dir(observer), "An observer must have a notify method"
         cls.observers.append(observer)
 
     @classmethod
@@ -259,4 +276,5 @@ class GlobalFigureManager(object):
         cls.notify_observers(FigureAction.VisibilityChanged, figure_number)
 
 
+GlobalFigureManager.initialiseFiguresObserver()
 atexit.register(GlobalFigureManager.destroy_all)

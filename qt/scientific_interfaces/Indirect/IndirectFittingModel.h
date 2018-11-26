@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODEL_H_
 
 #include "IndirectFitData.h"
 #include "IndirectFitOutput.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IAlgorithm.h"
 
@@ -34,29 +41,8 @@ private:
 /*
     IndirectFittingModel - Provides methods for specifying and
     performing a QENS fit, as well as accessing the results of the fit.
-
-    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory, NScD Oak
-    Ridge National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IndirectFittingModel {
+class MANTIDQT_INDIRECT_DLL IndirectFittingModel {
 public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
@@ -65,7 +51,8 @@ public:
   Spectra getSpectra(std::size_t index) const;
   std::pair<double, double> getFittingRange(std::size_t dataIndex,
                                             std::size_t spectrum) const;
-  std::string getExcludeRegion(std::size_t dataIndex, std::size_t index) const;
+  virtual std::string getExcludeRegion(std::size_t dataIndex,
+                                       std::size_t index) const;
   std::string createDisplayName(const std::string &formatString,
                                 const std::string &rangeDelimiter,
                                 std::size_t dataIndex) const;
@@ -81,6 +68,8 @@ public:
   std::vector<std::string> getFitParameterNames() const;
   virtual Mantid::API::IFunction_sptr getFittingFunction() const;
 
+  virtual std::vector<std::string> getSpectrumDependentAttributes() const = 0;
+
   void setFittingData(PrivateFittingData &&fittingData);
   void setSpectra(const std::string &spectra, std::size_t dataIndex);
   void setSpectra(Spectra &&spectra, std::size_t dataIndex);
@@ -88,7 +77,7 @@ public:
   void setStartX(double startX, std::size_t dataIndex, std::size_t spectrum);
   void setEndX(double endX, std::size_t dataIndex, std::size_t spectrum);
   void setExcludeRegion(const std::string &exclude, std::size_t dataIndex,
-                        std::size_t index);
+                        std::size_t spectrum);
 
   void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
@@ -148,6 +137,8 @@ protected:
   void removeFittingData(std::size_t index);
 
 private:
+  void removeWorkspaceFromFittingData(std::size_t const &index);
+
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function,
                       const std::string &input,

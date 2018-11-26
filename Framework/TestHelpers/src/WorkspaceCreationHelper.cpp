@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
@@ -1534,6 +1540,12 @@ createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
     statusColumn->cell<std::string>(i) =
         row.fitStatus == EPPTableRow::FitStatus::SUCCESS ? "success" : "failed";
   }
+  return ws;
+}
+Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123WithMaskedBin(
+    int numHist, int numBins, int maskedWorkspaceIndex, int maskedBinIndex) {
+  auto ws = create2DWorkspace123(numHist, numBins);
+  ws->flagMasked(maskedWorkspaceIndex, maskedBinIndex);
   return ws;
 }
 } // namespace WorkspaceCreationHelper

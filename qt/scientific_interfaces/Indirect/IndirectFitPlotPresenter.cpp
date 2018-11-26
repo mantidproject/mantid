@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotPresenter.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -163,6 +169,10 @@ void IndirectFitPlotPresenter::setStartX(double startX) {
 
 void IndirectFitPlotPresenter::setEndX(double endX) {
   m_view->setFitRangeMaximum(endX);
+}
+
+void IndirectFitPlotPresenter::setPlotSpectrum(int spectrum) {
+  m_view->setPlotSpectrum(spectrum);
 }
 
 void IndirectFitPlotPresenter::updateRangeSelectors() {

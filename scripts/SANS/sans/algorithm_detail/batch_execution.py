@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from copy import deepcopy
 from mantid.api import AnalysisDataService, WorkspaceGroup
@@ -100,6 +106,10 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
                                                                                      "OutputWorkspaceCalculatedTransmissionCan")
         reduction_package.unfitted_transmission_can = get_workspace_from_algorithm(reduction_alg,
                                                                                    "OutputWorkspaceUnfittedTransmissionCan")
+
+        reduction_package.out_scale_factor = reduction_alg.getProperty("OutScaleFactor").value
+        reduction_package.out_shift_factor = reduction_alg.getProperty("OutShiftFactor").value
+
         if plot_results and mantidplot:
             plot_workspace(reduction_package, output_graph)
         # -----------------------------------
@@ -131,6 +141,11 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # -----------------------------------------------------------------------
     if not use_optimizations:
         delete_optimization_workspaces(reduction_packages, workspaces, monitors)
+
+    out_scale_factors = [reduction_package.out_scale_factor for reduction_package in reduction_packages]
+    out_shift_factors = [reduction_package.out_shift_factor for reduction_package in reduction_packages]
+
+    return out_scale_factors, out_shift_factors
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1121,3 +1136,6 @@ class ReductionPackage(object):
         self.reduced_hab_can_count_base_name = None
         self.reduced_hab_can_norm_name = None
         self.reduced_hab_can_norm_base_name = None
+
+        self.out_scale_factor = None
+        self.out_shift_factor = None

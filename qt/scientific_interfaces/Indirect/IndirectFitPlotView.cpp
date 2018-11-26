@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotView.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -98,6 +104,10 @@ void IndirectFitPlotView::setMinimumSpectrum(int minimum) {
 
 void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
   m_plotForm->spPlotSpectrum->setMaximum(maximum);
+}
+
+void IndirectFitPlotView::setPlotSpectrum(int spectrum) {
+  m_plotForm->spPlotSpectrum->setValue(spectrum);
 }
 
 void IndirectFitPlotView::setBackgroundLevel(double value) {

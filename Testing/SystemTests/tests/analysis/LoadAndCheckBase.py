@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 These system tests are to verify the behaviour of the ISIS reflectometry reduction scripts
 """
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import mantid.api
 
@@ -12,7 +18,7 @@ from abc import ABCMeta, abstractmethod
 from six import with_metaclass
 
 
-class LoadAndCheckBase(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
+class LoadAndCheckBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
 
     __comparison_out_workspace_name = 'a_integrated'
 

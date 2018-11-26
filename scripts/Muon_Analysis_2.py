@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
@@ -13,6 +19,7 @@ from Muon.GUI.Common.muon_context import MuonContext
 
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
+from Muon.GUI.Common.muon_context.muon_context import *#MuonContext
 
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 
@@ -226,80 +233,37 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
 
         self.add_table_workspace()
 
-        self.context = MuonContext()
-        self.data = self.context._loaded_data
+        self._context = MuonContext()
 
-        self.setup_load_widget()
-        self.dock_widget = DockWidget(self, self.context)
-        self.help_widget = DummyLabelWidget("Help dummy", self)
+        self.loadWidget = DummyLabelWidget(self._context ,LoadText, self)
+        self.dockWidget = DockWidget(self._context,self)
+
+        self.helpWidget = DummyLabelWidget(self._context,HelpText, self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter.addWidget(self.load_widget_view)
-        splitter.addWidget(self.dock_widget.widget)
-        splitter.addWidget(self.help_widget.widget)
+        splitter.addWidget(self.loadWidget.widget)
+        splitter.addWidget(self.dockWidget.widget)
+        splitter.addWidget(self.helpWidget.widget)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
 
-        # Set up the observer/observable pattern
-        self.dock_widget.instrument_widget.instrumentNotifier.add_subscriber(
-            self.load_widget.instrumentObserver)
-        self.dock_widget.instrument_widget.instrumentNotifier.add_subscriber(
-            self.dock_widget.group_tab_presenter.instrumentObserver)
+        self.dockWidget.setUpdateContext(self.update)
 
-        self.load_widget.loadNotifier.add_subscriber(
-            self.dock_widget.home_tab_widget.loadObserver)
-        self.load_widget.loadNotifier.add_subscriber(
-            self.dock_widget.group_tab_presenter.loadObserver)
+    def update(self):
+        # update load
+        self.loadWidget.updateContext()
+        self.dockWidget.updateContext()
+        self.helpWidget.updateContext()
 
-        self.dock_widget.group_tab_presenter.groupingNotifier.add_subscriber(
-            self.dock_widget.home_tab_widget.groupingObserver)
+        self._context.printContext()
+        self.dockWidget.loadFromContext(self._context)
 
-    def add_table_workspace(self):
-        # add dead time tables
-        correctTable = simpleapi.CreateEmptyTableWorkspace()
-        incorrectTable = simpleapi.CreateEmptyTableWorkspace()
-
-        correctTable.addColumn("int", "spectrum", 0)
-        correctTable.addColumn("float", "dead-time", 0)
-        for i in range(96):
-            correctTable.addRow([i + 1, 0.1])
-
-    def setup_load_widget(self):
-        # set up the views
-        self.load_file_view = BrowseFileWidgetView(self)
-        self.load_run_view = LoadRunWidgetView(self)
-        self.load_widget_view = LoadWidgetView(parent=self,
-                                               load_file_view=self.load_file_view,
-                                               load_run_view=self.load_run_view)
-        self.load_widget = LoadWidgetPresenter(self.load_widget_view,
-                                               LoadWidgetModel(self.data))
-
-        self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(self.data))
-        self.run_widget = LoadRunWidgetPresenter(self.load_run_view, LoadRunWidgetModel(self.data))
-
-        self.load_widget.set_load_file_widget(self.file_widget)
-        self.load_widget.set_load_run_widget(self.run_widget)
-
-    # # cancel algs if window is closed
-    # def closeEvent(self, event):
-    #     print("MuonAnalysis closeEvent")
-    #     self.dock_widget.closeEvent(event)
-    #     self.load_widget_view.close()
-    #     self.load_run_view.close()
-    #     self.load_file_view.close()
-    #     global muonGUI
-    #     muonGUI = None
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # EXTRAS
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def focusInEvent(self, event):
-        print("Muon analysis has focus")
-        self.setFocus()
-        self.raise_()
-        self.isActiveWindow()
+    # cancel algs if window is closed
+    def closeEvent(self, event):
+        self.dockWidget.closeEvent(event)
+        global muonGUI
+        muonGUI = None
 
 
 def qapp():
