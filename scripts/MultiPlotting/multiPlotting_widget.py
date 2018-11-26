@@ -46,10 +46,8 @@ class MultiPlotWidget(QtWidgets.QWidget):
         if len(names) == 1:
            xrange = self._context.subplots[names[0]].xbounds
            yrange = self._context.subplots[names[0]].ybounds
-        #self.plots.set_plot_x_range(names,xrange)
-        
-		#self.plots.set_plot_y_range(names,yrange)
         self.quickEdit.set_plot_x_range(xrange)
+        self.quickEdit.set_plot_y_range(yrange)
 
     def add_subplot(self, name,code):
         self.plots.add_subplot(name,code)
@@ -72,11 +70,20 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.quickEdit.set_plot_x_range(range)
 
     def y_range_changed(self,range):
-        names = self.quickEdit.get_selection()
+        names = self.quickEdit.get_selection()     
         self.plots.set_plot_y_range(names, range)
 
     def update_quick_edit(self):
+        # need to check if its correct subplot
         self.quickEdit.loadFromContext()
+        subplotNames = self.quickEdit.get_selection()
+        range = self.quickEdit.get_y_bounds()
+        for subplotName in subplotNames:
+            # need to do an autoscale y to record max/min values when errors on/off or add a line
+            # will then need to use the correct limits to set the y range correctly. 
+            if self.plots.plotObjects[subplotName].get_ybound() != range[0]:
+               self.quickEdit.set_y_autoscale(False)
+               self.quickEdit.set_plot_y_range(range)
 
 
 

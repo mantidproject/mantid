@@ -81,5 +81,13 @@ class QuickEditView(QtWidgets.QWidget):
         subcontext["y bounds"] = self.y_axis_changer.get_bounds()
         return subcontext
 
+    def set_y_autoscale(self,state):
+        self.autoscale.setCheckState(state)
+
     def set_plot_x_range(self,range):
         self.x_axis_changer.set_bounds(range)
+    def set_plot_y_range(self,range):
+        self.y_axis_changer.set_bounds(range)
+
+    def get_y_bounds(self):
+        return self.y_axis_changer.get_bounds()

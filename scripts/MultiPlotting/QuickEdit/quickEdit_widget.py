@@ -55,3 +55,13 @@ class QuickEditWidget(object):
 
     def set_plot_x_range(self,range):
         self._presenter.set_plot_x_range(range)
+
+    def set_plot_y_range(self,range):
+        self._presenter.set_plot_y_range(range)
+
+    def set_y_autoscale(self,state):
+        self._presenter.widget.set_y_autoscale(state)
+
+    def get_y_bounds(self):
+        view = self._presenter.widget
+        return view.get_y_bounds()

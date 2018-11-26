@@ -16,6 +16,8 @@ class subPlotContext(object):
         self._specNum = {}
         self.xbounds = []
         self.ybounds = []
+        self._auto_y_min = 1.e6
+        self._auto_y_max = -1.e6
 
     # need to add if errors
     def addLine(self, subplot, ws, specNum=1):
@@ -33,7 +35,17 @@ class subPlotContext(object):
             self.xbounds = subplot.get_xlim()
         if self.ybounds == []:
             self.ybounds = subplot.get_ylim()
+            self._auto_y = subplot.get_ylim()
+        if self._auto_y_min > subplot.get_ylim()[0]:
+            self._auto_y_min = subplot.get_ylim()[0]
+        if self._auto_y_max < subplot.get_ylim()[1]:
+            self._auto_y_max = subplot.get_ylim()[1]
 
+    @property
+    def auto_y(self):
+        print("boo", self._auto_y_min, self._auto_y_max)
+
+        return [self._auto_y_min,self._auto_y_max]
 
     def change_errors(self,subplot,state):
          for label in self.lines.keys():
@@ -59,6 +71,11 @@ class subPlotContext(object):
         else:
            line, = plots.plotfunctions.plot(subplot,self.get_ws(label),specNum=self.specNum[label],color=colour,marker=marker,label = label)
            self._lines[label] = [line]
+        #update auto scale values
+        print("moo", self._auto_y_min,self._auto_y_max,subplot.get_ylim())
+        # need to do something clever to record the best values
+        self._auto_y_min = subplot.get_ylim()[0]
+        self._auto_y_max = subplot.get_ylim()[1]
 
     @property
     def lines(self):

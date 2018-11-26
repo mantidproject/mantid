@@ -83,6 +83,7 @@ class subPlot(QtWidgets.QWidget):
     def set_plot_y_range(self,subplotNames,range):
         for subplotName in subplotNames:
             self.plotObjects[subplotName].set_ylim(range)
+
             self.canvas.draw()
 
     def connect_quick_edit_signal(self,slot):

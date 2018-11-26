@@ -54,3 +54,5 @@ class QuickEditPresenter(object):
 
     def set_plot_x_range(self,range):
         self._view.set_plot_x_range(range)
+    def set_plot_y_range(self,range):
+        self._view.set_plot_y_range(range)
