@@ -27,6 +27,7 @@ from __future__ import (absolute_import, division,
 
 import os
 import site
+import sys
 
 from .pyversion import check_python_version
 check_python_version()
@@ -46,11 +47,14 @@ _bindir = os.path.dirname(_moduledir)
 if not os.path.exists(os.path.join(_bindir, 'Mantid.properties')):
     raise ImportError("Unable to find Mantid.properties file next to this package - broken installation!")
 
+# Windows doesn"t have rpath settings so make sure the C-extensions can find the rest of the
+# mantid dlls. We assume they will be next to the properties file.
+if sys.platform == "win32":
+    os.environ["PATH"] = _bindir + ";" + os.environ.get("PATH", "")
 # Make sure the config service loads this properties file
-os.environ['MANTIDPATH'] = _bindir
+os.environ["MANTIDPATH"] = _bindir
 # Add directory as a site directory to process the .pth files
 site.addsitedir(_bindir)
-
 
 try:
     # Flag indicating whether mantidplot layer is loaded.
