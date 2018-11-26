@@ -317,12 +317,12 @@ void PanelsSurface::addFlatBankOfDetectors(
   QVector<QPointF> vert;
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
-  #pragma omp parallel for ordered
+#pragma omp parallel for ordered
   for (int i = 0; i < static_cast<int>(detectors.size()); ++i) {
     auto detector = detectors[i];
     addDetector(detector, pos0, index, info->rotation);
     UnwrappedDetector &udet = m_unwrappedDetectors[detector];
-    #pragma omp ordered
+#pragma omp ordered
     info->polygon << QPointF(udet.u, udet.v);
   }
 }
@@ -375,7 +375,7 @@ void PanelsSurface::processGrid(size_t rootIndex) {
 
 /// Find an assembly containing detector tubes placed next to each other
 /// and forming a flat surface.
-/// @param rootIndex :: Index of a component that contains at least on tube 
+/// @param rootIndex :: Index of a component that contains at least on tube
 ///   as a direct child.
 /// @return Optional index of the bank that contains all of the tubes forming
 ///   the surface. If the surface isn't flat return boost::none.
@@ -398,8 +398,8 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   auto tubes =
       (bankIndex == bankIndex0) ? *bankChildren : std::vector<size_t>();
   if (tubes.empty()) {
-    // If tubes is empty then the flat assembly includes the tubes as grand children.
-    // Go down the tree to find all these tubes.
+    // If tubes is empty then the flat assembly includes the tubes as grand
+    // children. Go down the tree to find all these tubes.
     for (auto index : *bankChildren) {
       boost::optional<size_t> tubeIndex = index;
       while (componentInfo.componentType(tubeIndex.get()) !=
@@ -425,7 +425,8 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   auto normal =
       tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();
 
-  // If some of the tubes are not perpendicular to the normal the structure isn't flat
+  // If some of the tubes are not perpendicular to the normal the structure
+  // isn't flat
   if (normal.nullVector() ||
       !isBankFlat(componentInfo, bankIndex, tubes, normal))
     return boost::none;
@@ -438,7 +439,8 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   info->startDetectorIndex = componentInfo.children(tubes.front()).front();
   info->endDetectorIndex = componentInfo.children(tubes.back()).back();
 
-  // Now go over all detectors in the tubes and put them onto the unwrapped surfeace.
+  // Now go over all detectors in the tubes and put them onto the unwrapped
+  // surfeace.
   auto pos0 =
       componentInfo.position(componentInfo.children(tubes.front()).front());
   auto pos1 =
