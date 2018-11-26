@@ -390,9 +390,9 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   if (tubes.empty()) {
     for (auto index : *bankChildren) {
       boost::optional<size_t> tubeIndex = index;
-      while (componentInfo.componentType(tubeIndex.value()) !=
+      while (componentInfo.componentType(tubeIndex.get()) !=
              ComponentType::OutlineComposite) {
-        auto &children = componentInfo.children(tubeIndex.value());
+        auto &children = componentInfo.children(tubeIndex.get());
         if (children.empty()) {
           tubeIndex = boost::none;
           break;
@@ -400,7 +400,7 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
         tubeIndex = children[0];
       }
       if (tubeIndex) {
-        tubes.emplace_back(tubeIndex.value());
+        tubes.emplace_back(tubeIndex.get());
       }
     }
     if (tubes.empty())
@@ -536,7 +536,7 @@ PanelsSurface::findFlatPanels(size_t rootIndex, std::vector<bool> &visited) {
   if (componentType == ComponentType::OutlineComposite) {
     const auto bankIndex = processTubes(rootIndex);
     if (bankIndex) {
-      setBankVisited(componentInfo, bankIndex.value(), visited);
+      setBankVisited(componentInfo, bankIndex.get(), visited);
     } else {
       setBankVisited(componentInfo, parentIndex, visited);
     }
