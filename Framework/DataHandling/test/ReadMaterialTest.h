@@ -219,7 +219,7 @@ public:
     builder.setTotalScatterXSection(4);
     auto check = builder.build();
 
-    compareMaterial(material, check);
+    compareMaterial(*material, check);
   }
 
   void testGenerateScatteringInfo() {
@@ -244,7 +244,7 @@ public:
     builder.setTotalScatterXSection(5.1000000044);
     auto check = builder.build();
 
-    compareMaterial(material, check);
+    compareMaterial(*material, check);
   }
 
   void testNoMaterialFailure() {
@@ -268,24 +268,25 @@ public:
 
 private:
   const double EMPTY_DOUBLE_VAL = 8.9884656743115785e+307;
+  const double PRECISION = 1e-8;
   const std::string EMPTY = "";
   const std::string FORMULA = "V";
 
-  void compareMaterial(const std::unique_ptr<Material> &material,
+  void compareMaterial(const Material &material,
                        const Material &check) {
     std::vector<Material::FormulaUnit> checkFormula = check.chemicalFormula();
     std::vector<Material::FormulaUnit> materialFormula =
-        material->chemicalFormula();
+        material.chemicalFormula();
 
-    TS_ASSERT_EQUALS(material->numberDensity(), check.numberDensity());
-    TS_ASSERT_DELTA(material->cohScatterXSection(), check.cohScatterXSection(),
-                    0.00000001);
-    TS_ASSERT_DELTA(material->incohScatterXSection(),
-                    check.incohScatterXSection(), 0.00000001);
-    TS_ASSERT_DELTA(material->absorbXSection(), check.absorbXSection(),
-                    0.00000001);
-    TS_ASSERT_DELTA(material->totalScatterXSection(),
-                    check.totalScatterXSection(), 0.00000001);
+    TS_ASSERT_EQUALS(material.numberDensity(), check.numberDensity());
+    TS_ASSERT_DELTA(material.cohScatterXSection(), check.cohScatterXSection(),
+                    PRECISION);
+    TS_ASSERT_DELTA(material.incohScatterXSection(),
+                    check.incohScatterXSection(), PRECISION);
+    TS_ASSERT_DELTA(material.absorbXSection(), check.absorbXSection(),
+                    PRECISION);
+    TS_ASSERT_DELTA(material.totalScatterXSection(),
+                    check.totalScatterXSection(), PRECISION);
     TS_ASSERT_EQUALS(checkFormula[0].multiplicity,
                      materialFormula[0].multiplicity);
     TS_ASSERT_EQUALS(checkFormula.size(), materialFormula.size())
