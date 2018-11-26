@@ -47,7 +47,7 @@ public:
    */
   EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
     FacilityHelper::ScopedFacilities loadTESTFacility(
-        "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+        "unit_testing/UnitTestFacilities.xml", "TEST");
 
     int numPixels = 10000;
     int numBins = 16;
@@ -61,8 +61,8 @@ public:
     // --------- Load the instrument -----------
     LoadInstrument *loadInst = new LoadInstrument();
     loadInst->initialize();
-    loadInst->setPropertyValue(
-        "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+    loadInst->setPropertyValue("Filename",
+                               "unit_testing/MINITOPAZ_Definition.xml");
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));

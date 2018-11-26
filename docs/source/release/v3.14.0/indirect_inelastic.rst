@@ -42,6 +42,8 @@ Improvements
 - In the I(Q,t) Tab, it is now possible to select which spectrum you want to plot for Plot Spectrum.
 - In the I(Q,t) Tab, it is now possible to select a range of spectra for a Tiled Plot. The interface allows a
   maximum of 18 plots.
+- The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed. 
+  This improvement can be seen in ConvFit when functions which depend on Q value are selected.
 
 Bugfixes
 ########
@@ -70,6 +72,8 @@ Improvements
   tries to be made to generate a scattering point.
 - In the Calculate Monte Carlo Absorption Tab, all of the options in the Monte Carlo section are now read from
   an instrument parameter files once a file has been loaded.
+- The option to choose which spectrum to Plot Spectrum for is now available in the ContainerSubtraction Tab and 
+  ApplyAbsorptionCorrections Tab.
 
 
 Data Reduction Interface

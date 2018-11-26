@@ -38,10 +38,14 @@ private:
   std::string simultaneousFitOutputName() const override { return ""; };
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override {
-    (void)index;
-    (void)spectrum;
+    UNUSED_ARG(index);
+    UNUSED_ARG(spectrum);
     return "";
   };
+
+  std::vector<std::string> getSpectrumDependentAttributes() const override {
+    return std::vector<std::string>();
+  }
 };
 
 std::unique_ptr<DummyModel> getEmptyModel() {
@@ -59,8 +63,8 @@ createModelWithSingleWorkspace(std::string const &workspaceName,
 
 void addWorkspacesToModel(std::unique_ptr<DummyModel> &model,
                           int const &numberOfSpectra) {
-  (void)model;
-  (void)numberOfSpectra;
+  UNUSED_ARG(model);
+  UNUSED_ARG(numberOfSpectra);
 }
 
 template <typename Name, typename... Names>

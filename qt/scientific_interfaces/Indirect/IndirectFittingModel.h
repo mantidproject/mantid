@@ -10,6 +10,7 @@
 #include "IndirectFitData.h"
 #include "IndirectFitOutput.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IAlgorithm.h"
 
@@ -41,7 +42,7 @@ private:
     IndirectFittingModel - Provides methods for specifying and
     performing a QENS fit, as well as accessing the results of the fit.
 */
-class DLLExport IndirectFittingModel {
+class MANTIDQT_INDIRECT_DLL IndirectFittingModel {
 public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
@@ -50,7 +51,8 @@ public:
   Spectra getSpectra(std::size_t index) const;
   std::pair<double, double> getFittingRange(std::size_t dataIndex,
                                             std::size_t spectrum) const;
-  std::string getExcludeRegion(std::size_t dataIndex, std::size_t index) const;
+  virtual std::string getExcludeRegion(std::size_t dataIndex,
+                                       std::size_t index) const;
   std::string createDisplayName(const std::string &formatString,
                                 const std::string &rangeDelimiter,
                                 std::size_t dataIndex) const;
@@ -65,6 +67,8 @@ public:
   std::size_t getNumberOfSpectra(std::size_t index) const;
   std::vector<std::string> getFitParameterNames() const;
   virtual Mantid::API::IFunction_sptr getFittingFunction() const;
+
+  virtual std::vector<std::string> getSpectrumDependentAttributes() const = 0;
 
   void setFittingData(PrivateFittingData &&fittingData);
   void setSpectra(const std::string &spectra, std::size_t dataIndex);

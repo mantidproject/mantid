@@ -24,6 +24,8 @@ algorithm will work on data loaded with :ref:`LoadEventNexus
 <algm-FilterEvents>` but you will need to specify `EFixed` if
 converting to anything except `Theta`.
 
+:ref:`Rebin <algm-Rebin>` is used to bin the data so see it's
+documentation for use of the `Params` parameter.
 
 MaskAngle
 #########
@@ -49,7 +51,7 @@ Usage
    WANDPowderReduction(InputWorkspace=silicon,
                        CalibrationWorkspace=vanadium,
                        Target='Theta',
-                       NumberBins=1000,
+                       Params=0.1,
                        OutputWorkspace='silicon_powder')
 
 .. figure:: /images/WANDPowderReduction_silicon_powder.png
@@ -64,9 +66,7 @@ Usage
    WANDPowderReduction(InputWorkspace=silicon,
                        CalibrationWorkspace=vanadium,
                        Target='ElasticQ',
-                       XMin=4.5,
-                       Xmax=6.25,
-                       NumberBins=500,
+                       Params='4.5,0.0035,6.25',
                        OutputWorkspace='silicon_powder_q')
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_q.png
@@ -81,7 +81,7 @@ Usage
    WANDPowderReduction(InputWorkspace=silicon2,
                        CalibrationWorkspace=vanadium,
                        Target='ElasticDSpacing',
-                       NumberBins=1000,
+                       Params=0.002,
                        OutputWorkspace='silicon_powder_d_spacing')
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_d.png
@@ -103,7 +103,7 @@ Usage
                        CalibrationWorkspace=vanadium,
                        BackgroundWorkspace=bkg,
                        Target='Theta',
-                       NumberBins=1000,
+                       Params=0.1,
                        OutputWorkspace='silicon_powder_background')
 
    # Scale background by 50%
@@ -112,7 +112,7 @@ Usage
                        BackgroundWorkspace=bkg,
                        BackgroundScale=0.5,
                        Target='Theta',
-                       NumberBins=1000,
+                       Params=0.1,
                        OutputWorkspace='silicon_powder_background_0.5')
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_bkg.png
