@@ -1542,4 +1542,10 @@ createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
   }
   return ws;
 }
+Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123WithMaskedBin(
+    int numHist, int numBins, int maskedWorkspaceIndex, int maskedBinIndex) {
+  auto ws = create2DWorkspace123(numHist, numBins);
+  ws->flagMasked(maskedWorkspaceIndex, maskedBinIndex);
+  return ws;
+}
 } // namespace WorkspaceCreationHelper

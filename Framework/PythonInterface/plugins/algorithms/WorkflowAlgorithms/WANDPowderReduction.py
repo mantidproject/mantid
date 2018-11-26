@@ -9,7 +9,7 @@ from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory,
                         MatrixWorkspaceProperty, PropertyMode)
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (ConvertSpectrumAxis, Transpose,
-                              ResampleX, CopyInstrumentParameters,
+                              Rebin, CopyInstrumentParameters,
                               Divide, DeleteWorkspace, Scale,
                               MaskAngle, ExtractMask, Minus,
                               ExtractUnmaskedSpectra, mtd,
@@ -63,7 +63,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         self.copyProperties('ConvertSpectrumAxis', ['Target', 'EFixed'])
 
-        self.copyProperties('ResampleX', ['XMin', 'XMax', 'NumberBins', 'LogBinning'])
+        self.copyProperties('Rebin', ['Params'])
 
         self.declareProperty('NormaliseBy', 'Monitor', StringListValidator(['None', 'Time', 'Monitor']), "Normalise to monitor or time. ")
 
@@ -81,9 +81,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         mask = self.getProperty("MaskWorkspace").value
         target = self.getProperty("Target").value
         eFixed = self.getProperty("EFixed").value
-        xMin = self.getProperty("XMin").value
-        xMax = self.getProperty("XMax").value
-        numberBins = self.getProperty("NumberBins").value
+        params = self.getProperty("Params").value
         normaliseBy = self.getProperty("NormaliseBy").value
         maskAngle = self.getProperty("MaskAngle").value
         outWS = self.getPropertyValue("OutputWorkspace")
@@ -109,15 +107,14 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         ExtractUnmaskedSpectra(InputWorkspace=data, MaskWorkspace='__mask_tmp', OutputWorkspace='__data_tmp', EnableLogging=False)
         ConvertSpectrumAxis(InputWorkspace='__data_tmp', Target=target, EFixed=eFixed, OutputWorkspace=outWS, EnableLogging=False)
         Transpose(InputWorkspace=outWS, OutputWorkspace=outWS, EnableLogging=False)
-        ResampleX(InputWorkspace=outWS, OutputWorkspace=outWS, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
+        Rebin(InputWorkspace=outWS, OutputWorkspace=outWS, Params=params, EnableLogging=False)
 
         if cal is not None:
             ExtractUnmaskedSpectra(InputWorkspace=cal, MaskWorkspace='__mask_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
             CopyInstrumentParameters(data, '__cal_tmp', EnableLogging=False)
             ConvertSpectrumAxis(InputWorkspace='__cal_tmp', Target=target, EFixed=eFixed, OutputWorkspace='__cal_tmp', EnableLogging=False)
             Transpose(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
-            ResampleX(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', XMin=xMin, XMax=xMax, NumberBins=numberBins,
-                      EnableLogging=False)
+            Rebin(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', Params=params, EnableLogging=False)
             Divide(LHSWorkspace=outWS, RHSWorkspace='__cal_tmp', OutputWorkspace=outWS, EnableLogging=False)
             if normaliseBy == "Monitor":
                 cal_scale = cal.run().getProtonCharge()
@@ -131,8 +128,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             CopyInstrumentParameters(data, '__bkg_tmp', EnableLogging=False)
             ConvertSpectrumAxis(InputWorkspace='__bkg_tmp', Target=target, EFixed=eFixed, OutputWorkspace='__bkg_tmp', EnableLogging=False)
             Transpose(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
-            ResampleX(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', XMin=xMin, XMax=xMax, NumberBins=numberBins,
-                      EnableLogging=False)
+            Rebin(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', Params=params, EnableLogging=False)
             if cal is not None:
                 Divide(LHSWorkspace='__bkg_tmp', RHSWorkspace='__cal_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
             if normaliseBy == "Monitor":
