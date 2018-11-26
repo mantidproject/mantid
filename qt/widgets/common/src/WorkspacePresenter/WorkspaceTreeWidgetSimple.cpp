@@ -32,8 +32,15 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
       m_overplotSpectrumWithErrs(
           new QAction("overplot spectrum with errors...", this)),
       m_plotColorfill(new QAction("colorfill", this)),
-      m_sampleLogs(new QAction("Sample Logs", this)) {
-  // connections
+      m_sampleLogs(new QAction("Sample Logs", this)),
+      m_showInstrument(new QAction("Show Instrument", this)),
+      m_showData(new QAction("Show Data", this)) {
+
+  // Replace the double click action on the MantidTreeWidget
+  m_tree->m_doubleClickAction = [&](QString wsName) {
+    emit workspaceDoubleClicked(wsName);
+  };
+
   connect(m_plotSpectrum, SIGNAL(triggered()), this,
           SLOT(onPlotSpectrumClicked()));
   connect(m_overplotSpectrum, SIGNAL(triggered()), this,
@@ -45,6 +52,9 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
   connect(m_plotColorfill, SIGNAL(triggered()), this,
           SLOT(onPlotColorfillClicked()));
   connect(m_sampleLogs, SIGNAL(triggered()), this, SLOT(onSampleLogsClicked()));
+  connect(m_showInstrument, SIGNAL(triggered()), this,
+          SLOT(onShowInstrumentClicked()));
+  connect(m_showData, SIGNAL(triggered()), this, SLOT(onShowDataClicked()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}
@@ -85,6 +95,9 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
       plotSubMenu->addAction(m_plotColorfill);
       menu->addMenu(plotSubMenu);
       menu->addSeparator();
+      menu->addAction(m_showData);
+      menu->addAction(m_showInstrument);
+      menu->addSeparator();
     }
     menu->addAction(m_rename);
     menu->addAction(m_saveNexus);
@@ -120,6 +133,13 @@ void WorkspaceTreeWidgetSimple::onPlotColorfillClicked() {
 
 void WorkspaceTreeWidgetSimple::onSampleLogsClicked() {
   emit sampleLogsClicked(getSelectedWorkspaceNamesAsQList());
+}
+
+void WorkspaceTreeWidgetSimple::onShowInstrumentClicked() {
+  emit showInstrumentClicked(getSelectedWorkspaceNamesAsQList());
+}
+void WorkspaceTreeWidgetSimple::onShowDataClicked() {
+  emit showDataClicked(getSelectedWorkspaceNamesAsQList());
 }
 
 } // namespace MantidWidgets

@@ -38,6 +38,7 @@ public:
 
   void setMinimumSpectrum(int minimum);
   void setMaximumSpectrum(int maximum);
+  void setPlotSpectrum(int spectrum);
   void appendToDataSelection(const std::string &dataName);
   void setNameInDataSelection(const std::string &dataName, std::size_t index);
   void clearDataSelection();

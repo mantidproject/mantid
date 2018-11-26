@@ -10,14 +10,14 @@ These system tests are to verify that the IDF and parameter files for POLREF, CR
 """
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import os
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
 
 
-class ISISReflInstrumentIDFTest(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
+class ISISReflInstrumentIDFTest(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
 
     @abstractmethod
     def get_IDF_name(self):

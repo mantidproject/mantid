@@ -153,6 +153,11 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/lib/src/SymbolDialog.cpp
                    src/lib/src/TextFormatButtons.cpp
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp
+                   src/ProjectRecoveryGUIs/ProjectRecoveryModel.cpp
+                   src/ProjectRecoveryGUIs/ProjectRecoveryPresenter.cpp
+                   src/ProjectRecoveryGUIs/ProjectRecoveryView.cpp
+                   src/ProjectRecoveryGUIs/RecoveryFailureView.cpp
+                   src/ProjectRecoveryGUIs/RecoveryThread.cpp
 )
 
 set ( QTIPLOT_C_SRC src/zlib123/minigzip.c )
@@ -355,6 +360,11 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/lib/include/SymbolDialog.h
                    src/lib/include/TextFormatButtons.h
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
+                   src/ProjectRecoveryGUIs/ProjectRecoveryModel.h
+                   src/ProjectRecoveryGUIs/ProjectRecoveryPresenter.h
+                   src/ProjectRecoveryGUIs/ProjectRecoveryView.h
+                   src/ProjectRecoveryGUIs/RecoveryFailureView.h
+                   src/ProjectRecoveryGUIs/RecoveryThread.h
 )
 
 set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
@@ -609,6 +619,9 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmDockWidget.h
 					   src/Mantid/SampleLogDialogBase.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
+                       src/ProjectRecoveryGUIs/ProjectRecoveryView.h
+                       src/ProjectRecoveryGUIs/RecoveryFailureView.h
+                       src/ProjectRecoveryGUIs/RecoveryThread.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
@@ -621,6 +634,8 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
                src/Mantid/MantidSampleMaterialDialog.ui
+               src/ProjectRecoveryGUIs/ProjectRecoveryWidget.ui
+               src/ProjectRecoveryGUIs/RecoveryFailure.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )
@@ -652,7 +667,6 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 ###########################################################################
 
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/images.qrc )
-qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images/MantidWidgets.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/images//fonts/fonts.qrc )
 qt4_add_resources ( RES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/icons/icons.qrc )
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/scripts/ErrorReporter/errorreporter.qrc )

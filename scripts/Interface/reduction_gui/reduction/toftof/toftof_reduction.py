@@ -535,7 +535,13 @@ class TOFTOFScriptElement(BaseScriptElement):
         # generated script
         self.script = ['']
 
+        self.l("from __future__ import (absolute_import, division, print_function, unicode_literals)")
+        self.l()
+        self.l("# import mantid algorithms, numpy and matplotlib")
+        self.l("from mantid.simpleapi import *")
+        self.l("import matplotlib.pyplot as plt")
         self.l("import numpy as np")
+        self.l()
         self.l("from os.path import join")
         self.l()
         self.l("config['default.facility'] = '{}'"   .format(self.facility_name))

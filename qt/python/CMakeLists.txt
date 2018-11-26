@@ -11,16 +11,15 @@ add_subdirectory ( mantidqtpython )
 ###########################################################################
 
 if ( ENABLE_WORKBENCH )
-
+  # The default value is just an empty string - this prevents a Python syntax error when not on Windows
   # Configure utils.qt.plugins file for build. It is placed in the source
   # directory and added to the .gitignore for simplicity.
   if ( WIN32 )
+    # Note: single quotes are added here to make this a Python string
     set ( QT_PLUGINS_PATH "${THIRD_PARTY_DIR}/lib/qt%V/plugins" )
   endif ()
-    configure_file ( mantidqt/utils/qt/plugins.py.in
-      ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py
-  )
-
+  # Configure the file necessary for DEVELOPMENT builds to run and detect Qt's plugins
+  configure_file ( mantidqt/utils/qt/plugins.py.in ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py )
   add_python_package ( mantidqt )
 
   # Configure resources data in place for ease of development. The output
@@ -40,9 +39,10 @@ if ( ENABLE_WORKBENCH )
 
   # Setup dependency chain
   add_dependencies ( mantidqt
+    mantidqt_resources
     mantidqt_commonqt4
     mantidqt_commonqt5
-    mantidqt_resources
+    mantidqt_instrumentviewqt5
   )
 
   if ( MSVC )
@@ -87,6 +87,10 @@ endif ()
 
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
+
+    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
+    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
+    mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_tableviewmodel.py
   )
 
   # Tests
