@@ -125,7 +125,7 @@ void IndirectDiffractionReduction::connectRunButtonValidation(
  * Runs a diffraction reduction when the user clicks Run.
  */
 void IndirectDiffractionReduction::run() {
-	setRunIsRunning(true);
+  setRunIsRunning(true);
 
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
@@ -179,36 +179,35 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
     deleteGroupingWorkspace();
   }
 
-	setRunIsRunning(false);
+  setRunIsRunning(false);
 
-	if (!error) {
-		// Ungroup the output workspace if generic reducer was used
-		if (AnalysisDataService::Instance().doesExist(
-			"IndirectDiffraction_Workspaces")) {
-			WorkspaceGroup_sptr diffResultsGroup =
-				AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-					"IndirectDiffraction_Workspaces");
+  if (!error) {
+    // Ungroup the output workspace if generic reducer was used
+    if (AnalysisDataService::Instance().doesExist(
+            "IndirectDiffraction_Workspaces")) {
+      WorkspaceGroup_sptr diffResultsGroup =
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+              "IndirectDiffraction_Workspaces");
 
-			m_plotWorkspaces.clear();
-			m_plotWorkspaces = diffResultsGroup->getNames();
+      m_plotWorkspaces.clear();
+      m_plotWorkspaces = diffResultsGroup->getNames();
 
-			diffResultsGroup->removeAll();
-			AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
-		}
-	}
-	else {
-		setPlotEnabled(false);
-		setSaveEnabled(false);
-		showInformationBox(
-			"Error running diffraction reduction.\nSee Results Log for details.");
-	}
+      diffResultsGroup->removeAll();
+      AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
+    }
+  } else {
+    setPlotEnabled(false);
+    setSaveEnabled(false);
+    showInformationBox(
+        "Error running diffraction reduction.\nSee Results Log for details.");
+  }
 }
 
 /**
  * Handles plotting result spectra from algorithm chains.
  */
 void IndirectDiffractionReduction::plotResults() {
-	setPlotIsPlotting(true);
+  setPlotIsPlotting(true);
 
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
@@ -243,7 +242,7 @@ void IndirectDiffractionReduction::plotResults() {
 
   runPythonCode(pyInput);
 
-	setPlotIsPlotting(false);
+  setPlotIsPlotting(false);
 }
 
 /**
@@ -921,35 +920,35 @@ void IndirectDiffractionReduction::manualGroupingToggled(int state) {
 }
 
 void IndirectDiffractionReduction::setRunIsRunning(bool running) {
-	m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-	setButtonsEnabled(!running);
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
 }
 
 void IndirectDiffractionReduction::setPlotIsPlotting(bool plotting) {
-	m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
-	setButtonsEnabled(!plotting);
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
 }
 
 void IndirectDiffractionReduction::setButtonsEnabled(bool enabled) {
-	setRunEnabled(enabled);
-	setPlotEnabled(enabled);
-	setSaveEnabled(enabled);
+  setRunEnabled(enabled);
+  setPlotEnabled(enabled);
+  setSaveEnabled(enabled);
 }
 
 void IndirectDiffractionReduction::setRunEnabled(bool enabled) {
-	m_uiForm.pbRun->setEnabled(enabled);
+  m_uiForm.pbRun->setEnabled(enabled);
 }
 
 void IndirectDiffractionReduction::setPlotEnabled(bool enabled) {
-	m_uiForm.pbPlot->setEnabled(enabled);
-	m_uiForm.cbPlotType->setEnabled(enabled);
+  m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.cbPlotType->setEnabled(enabled);
 }
 
 void IndirectDiffractionReduction::setSaveEnabled(bool enabled) {
-	m_uiForm.pbSave->setEnabled(enabled);
-	m_uiForm.ckAscii->setEnabled(enabled);
-	m_uiForm.ckGSS->setEnabled(enabled);
-	m_uiForm.ckNexus->setEnabled(enabled);
+  m_uiForm.pbSave->setEnabled(enabled);
+  m_uiForm.ckAscii->setEnabled(enabled);
+  m_uiForm.ckGSS->setEnabled(enabled);
+  m_uiForm.ckNexus->setEnabled(enabled);
 }
 
 } // namespace CustomInterfaces
