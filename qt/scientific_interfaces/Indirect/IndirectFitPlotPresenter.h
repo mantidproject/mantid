@@ -98,7 +98,7 @@ private:
   std::string getPlotString(std::size_t spectrum) const;
 
   std::unique_ptr<IndirectFitPlotModel> m_model;
-	IIndirectFitPlotView *m_view;
+  IIndirectFitPlotView *m_view;
 
   bool m_plotGuessInSeparateWindow;
   MantidQt::API::PythonRunner m_pythonRunner;

@@ -194,7 +194,7 @@ std::string IndirectFitPlotModel::getFitDataName() const {
 }
 
 std::string IndirectFitPlotModel::getLastFitDataName() const {
-	auto const numberOfWorkspaces = m_fittingModel->numberOfWorkspaces();
+  auto const numberOfWorkspaces = m_fittingModel->numberOfWorkspaces();
   if (numberOfWorkspaces)
     return getFitDataName(numberOfWorkspaces - 1);
   return "";

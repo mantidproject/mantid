@@ -35,15 +35,17 @@ public:
   void hideMultipleDataSelection() override;
   void showMultipleDataSelection() override;
 
-	void setAvailableSpectra(std::size_t minimum, std::size_t maximum) override;
-  void setAvailableSpectra(const std::vector<std::size_t>::const_iterator &from,
-                           const std::vector<std::size_t>::const_iterator &to) override;
+  void setAvailableSpectra(std::size_t minimum, std::size_t maximum) override;
+  void setAvailableSpectra(
+      const std::vector<std::size_t>::const_iterator &from,
+      const std::vector<std::size_t>::const_iterator &to) override;
 
   void setMinimumSpectrum(int minimum) override;
   void setMaximumSpectrum(int maximum) override;
   void setPlotSpectrum(int spectrum) override;
   void appendToDataSelection(const std::string &dataName) override;
-  void setNameInDataSelection(const std::string &dataName, std::size_t index) override;
+  void setNameInDataSelection(const std::string &dataName,
+                              std::size_t index) override;
   void clearDataSelection() override;
 
   void plotInTopPreview(const QString &name,
@@ -51,21 +53,22 @@ public:
                         std::size_t spectrum, Qt::GlobalColor colour) override;
   void plotInBottomPreview(const QString &name,
                            Mantid::API::MatrixWorkspace_sptr workspace,
-                           std::size_t spectrum, Qt::GlobalColor colour) override;
+                           std::size_t spectrum,
+                           Qt::GlobalColor colour) override;
 
-	void removeFromTopPreview(const QString &name) override;
-	void removeFromBottomPreview(const QString &name) override;
+  void removeFromTopPreview(const QString &name) override;
+  void removeFromBottomPreview(const QString &name) override;
 
   void enableFitSingleSpectrum(bool enable) override;
-	void enablePlotGuess(bool enable) override;
-	void enableSpectrumSelection(bool enable) override;
-	void enableFitRangeSelection(bool enable) override;
+  void enablePlotGuess(bool enable) override;
+  void enableSpectrumSelection(bool enable) override;
+  void enableFitRangeSelection(bool enable) override;
 
   void setBackgroundLevel(double value) override;
 
   void setFitRange(double minimum, double maximum);
-	void setFitRangeMinimum(double minimum) override;
-	void setFitRangeMaximum(double maximum) override;
+  void setFitRangeMinimum(double minimum) override;
+  void setFitRangeMaximum(double maximum) override;
 
   void setBackgroundRangeVisible(bool visible) override;
   void setHWHMRangeVisible(bool visible) override;
