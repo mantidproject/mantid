@@ -26,6 +26,8 @@ IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent)
     : IndirectToolsTab(parent) {
   m_uiForm.setupUi(parent);
 
+	connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
 }
@@ -130,6 +132,10 @@ void IndirectTransmissionCalc::algorithmComplete(bool error) {
  */
 void IndirectTransmissionCalc::loadSettings(const QSettings &settings) {
   UNUSED_ARG(settings);
+}
+
+void IndirectTransmissionCalc::runClicked() {
+	runTab();
 }
 
 } // namespace CustomInterfaces

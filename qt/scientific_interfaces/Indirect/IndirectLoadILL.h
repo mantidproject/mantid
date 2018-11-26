@@ -34,6 +34,7 @@ protected:
 private slots:
   /// Set the instrument based on the file name if possible
   void handleFilesFound();
+	void runClicked();
 
 private:
   /// Map to store instrument analysers and reflections for this instrument

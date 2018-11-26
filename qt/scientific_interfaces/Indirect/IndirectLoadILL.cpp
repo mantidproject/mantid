@@ -19,6 +19,8 @@ namespace CustomInterfaces {
 IndirectLoadILL::IndirectLoadILL(QWidget *parent) : IndirectToolsTab(parent) {
   m_uiForm.setupUi(parent);
 
+	connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+
   connect(m_uiForm.mwRun, SIGNAL(filesFound()), this, SLOT(handleFilesFound()));
   connect(m_uiForm.chkUseMap, SIGNAL(toggled(bool)), m_uiForm.mwMapFile,
           SLOT(setEnabled(bool)));
@@ -147,6 +149,10 @@ void IndirectLoadILL::handleFilesFound() {
     // Check if the first part of the name is in the instruments list
     m_uiForm.iicInstrumentConfiguration->setInstrument(fnameParts[0]);
   }
+}
+
+void IndirectLoadILL::runClicked() {
+	runTab();
 }
 
 } // namespace CustomInterfaces

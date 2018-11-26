@@ -34,6 +34,7 @@ protected:
 private slots:
   /// Handles completion of the algorithm
   void algorithmComplete(bool error);
+	void runClicked();
 
 private:
   /// The UI form
