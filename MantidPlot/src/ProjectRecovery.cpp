@@ -152,8 +152,8 @@ std::vector<int> orderProcessIDs(std::vector<Poco::Path> paths) {
       // The folder or file here is not a number (So shouldn't exist) so delete
       // it recursively. However perform a sanity check as recursively removing
       // files is dangerous
-      Poco::Path sanityCheckPath(getRecoveryFolderCheck());
-      if (sanityCheckPath.toString() ==
+      const auto sanityCheckPath(getRecoveryFolderCheck());
+      if (sanityCheckPath ==
           Poco::Path(c.toString()).popDirectory().toString()) {
         Poco::File(c).remove(true);
       }
@@ -807,7 +807,10 @@ void ProjectRecovery::repairCheckpointDirectory() {
 
   for (auto c : vectorToDelete) {
     // Remove c recursively
-    Poco::File(c).remove(true);
+    const auto sanityCheckPath(getRecoveryFolderCheck());
+    if (sanityCheckPath == Poco::Path(c).popDirectory().toString()) {
+      Poco::File(c).remove(true);
+    }
   }
 
   if (vectorToDelete.size() > 0) {
