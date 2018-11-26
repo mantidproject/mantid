@@ -272,8 +272,7 @@ private:
   const std::string EMPTY = "";
   const std::string FORMULA = "V";
 
-  void compareMaterial(const Material &material,
-                       const Material &check) {
+  void compareMaterial(const Material &material, const Material &check) {
     std::vector<Material::FormulaUnit> checkFormula = check.chemicalFormula();
     std::vector<Material::FormulaUnit> materialFormula =
         material.chemicalFormula();
