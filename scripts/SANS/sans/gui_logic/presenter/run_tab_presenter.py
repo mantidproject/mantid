@@ -237,9 +237,10 @@ class RunTabPresenter(object):
 
             self._view.setup_layout()
             self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
-            default_user_file = None
-            if default_user_file is not None:
-                self._view.set_out_default_user_file("Test")
+
+
+            self._view.set_out_default_user_file()
+
             self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('options_column_model'),
                 self._table_model.get_options_hint_strategy())
