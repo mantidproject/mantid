@@ -10,12 +10,13 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectFitPlotView.h"
+#include "IIndirectFitPlotView.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFittingModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
@@ -48,7 +49,7 @@ namespace {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectFitPlotView : public IndirectFitPlotView {
+class MockIndirectFitPlotView : public IIndirectFitPlotView {
 public:
 	/// Signals
 	void emitSelectedFitDataChanged(std::size_t index) {
@@ -90,25 +91,42 @@ public:
 	/// Public methods
 	MOCK_CONST_METHOD0(getSelectedSpectrum, std::size_t());
 	MOCK_CONST_METHOD0(getSelectedSpectrumIndex, int());
+	MOCK_CONST_METHOD0(getSelectedDataIndex, int());
 	MOCK_CONST_METHOD0(dataSelectionSize, std::size_t());
+	MOCK_CONST_METHOD0(isPlotGuessChecked, bool());
 
 	MOCK_METHOD0(hideMultipleDataSelection, void());
 	MOCK_METHOD0(showMultipleDataSelection, void());
 
 	MOCK_METHOD2(setAvailableSpectra, void(std::size_t minimum, std::size_t maximum));
+	MOCK_METHOD2(setAvailableSpectra, void(std::vector<std::size_t>::const_iterator const &from,
+		 std::vector<std::size_t>::const_iterator const &to));
 
+	MOCK_METHOD1(setMinimumSpectrum, void(int minimum));
+	MOCK_METHOD1(setMaximumSpectrum, void(int maximum));
+	MOCK_METHOD1(setPlotSpectrum, void(int spectrum));
 	MOCK_METHOD1(appendToDataSelection, void(std::string const &dataName));
 	MOCK_METHOD2(setNameInDataSelection, void(std::string const &dataName, std::size_t index));
+	MOCK_METHOD0(clearDataSelection, void());
+
+	MOCK_METHOD4(plotInTopPreview, void(QString const &name,
+		Mantid::API::MatrixWorkspace_sptr workspace,
+		std::size_t spectrum, Qt::GlobalColor colour));
+	MOCK_METHOD4(plotInBottomPreview, void(QString const &name,
+		Mantid::API::MatrixWorkspace_sptr workspace,
+		std::size_t spectrum, Qt::GlobalColor colour));
 
 	MOCK_METHOD1(removeFromTopPreview, void(QString const &name));
 	MOCK_METHOD1(removeFromBottomPreview, void(QString const &name));
 
+	MOCK_METHOD1(enableFitSingleSpectrum, void(bool enable));
 	MOCK_METHOD1(enablePlotGuess, void(bool enable));
 	MOCK_METHOD1(enableSpectrumSelection, void(bool enable));
 	MOCK_METHOD1(enableFitRangeSelection, void(bool enable));
 
 	MOCK_METHOD1(setBackgroundLevel, void(double value));
 
+	MOCK_METHOD2(setFitRange, void(double minimum, double maximum));
 	MOCK_METHOD1(setFitRangeMinimum, void(double minimum));
 	MOCK_METHOD1(setFitRangeMaximum, void(double maximum));
 
@@ -118,8 +136,11 @@ public:
 	MOCK_CONST_METHOD1(displayMessage, void(std::string const &message));
 
 	/// Public Slots
+	MOCK_METHOD0(clearTopPreview, void());
+	MOCK_METHOD0(clearBottomPreview, void());
 	MOCK_METHOD0(clear, void());
 
+	MOCK_METHOD2(setHWHMRange, void(double minimum, double maximum));
 	MOCK_METHOD1(setHWHMMinimum, void(double minimum));
 	MOCK_METHOD1(setHWHMMaximum, void(double maximum));
 };
