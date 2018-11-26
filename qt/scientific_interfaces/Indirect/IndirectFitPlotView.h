@@ -27,13 +27,13 @@ public:
   virtual std::size_t getSelectedSpectrum() const;
   int getSelectedSpectrumIndex() const;
   int getSelectedDataIndex() const;
-  std::size_t dataSelectionSize() const;
+  virtual std::size_t dataSelectionSize() const;
   bool isPlotGuessChecked() const;
 
   void hideMultipleDataSelection();
   void showMultipleDataSelection();
 
-  void setAvailableSpectra(std::size_t minimum, std::size_t maximum);
+	virtual void setAvailableSpectra(std::size_t minimum, std::size_t maximum);
   void setAvailableSpectra(const std::vector<std::size_t>::const_iterator &from,
                            const std::vector<std::size_t>::const_iterator &to);
 
@@ -51,32 +51,32 @@ public:
                            Mantid::API::MatrixWorkspace_sptr workspace,
                            std::size_t spectrum, Qt::GlobalColor colour);
 
-  void removeFromTopPreview(const QString &name);
-  void removeFromBottomPreview(const QString &name);
+	virtual void removeFromTopPreview(const QString &name);
+	virtual void removeFromBottomPreview(const QString &name);
 
   void enableFitSingleSpectrum(bool enable);
-  void enablePlotGuess(bool enable);
-  void enableSpectrumSelection(bool enable);
-  void enableFitRangeSelection(bool enable);
+	virtual void enablePlotGuess(bool enable);
+	virtual void enableSpectrumSelection(bool enable);
+	virtual void enableFitRangeSelection(bool enable);
 
   void setBackgroundLevel(double value);
 
   void setFitRange(double minimum, double maximum);
-  void setFitRangeMinimum(double minimum);
-  void setFitRangeMaximum(double maximum);
+	virtual void setFitRangeMinimum(double minimum);
+	virtual void setFitRangeMaximum(double maximum);
 
   void setBackgroundRangeVisible(bool visible);
   void setHWHMRangeVisible(bool visible);
 
-  void displayMessage(const std::string &message) const;
+	virtual void displayMessage(const std::string &message) const;
 
 public slots:
   void clearTopPreview();
   void clearBottomPreview();
-  void clear();
+	virtual void clear();
   void setHWHMRange(double minimum, double maximum);
-  void setHWHMMaximum(double minimum);
-  void setHWHMMinimum(double maximum);
+	virtual void setHWHMMaximum(double minimum);
+	virtual void setHWHMMinimum(double maximum);
 
 signals:
   void selectedFitDataChanged(std::size_t);

@@ -47,9 +47,9 @@ public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
 
-  Mantid::API::MatrixWorkspace_sptr getWorkspace(std::size_t index) const;
+	virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(std::size_t index) const;
   Spectra getSpectra(std::size_t index) const;
-  std::pair<double, double> getFittingRange(std::size_t dataIndex,
+	virtual std::pair<double, double> getFittingRange(std::size_t dataIndex,
                                             std::size_t spectrum) const;
   virtual std::string getExcludeRegion(std::size_t dataIndex,
                                        std::size_t index) const;
@@ -63,7 +63,7 @@ public:
   bool isPreviouslyFit(std::size_t dataIndex, std::size_t spectrum) const;
   bool hasZeroSpectra(std::size_t dataIndex) const;
   virtual boost::optional<std::string> isInvalidFunction() const;
-  std::size_t numberOfWorkspaces() const;
+	virtual std::size_t numberOfWorkspaces() const;
   std::size_t getNumberOfSpectra(std::size_t index) const;
   std::vector<std::string> getFitParameterNames() const;
   virtual Mantid::API::IFunction_sptr getFittingFunction() const;
@@ -74,8 +74,8 @@ public:
   void setSpectra(const std::string &spectra, std::size_t dataIndex);
   void setSpectra(Spectra &&spectra, std::size_t dataIndex);
   void setSpectra(const Spectra &spectra, std::size_t dataIndex);
-  void setStartX(double startX, std::size_t dataIndex, std::size_t spectrum);
-  void setEndX(double endX, std::size_t dataIndex, std::size_t spectrum);
+	virtual void setStartX(double startX, std::size_t dataIndex, std::size_t spectrum);
+	virtual void setEndX(double endX, std::size_t dataIndex, std::size_t spectrum);
   void setExcludeRegion(const std::string &exclude, std::size_t dataIndex,
                         std::size_t spectrum);
 
@@ -89,7 +89,7 @@ public:
   PrivateFittingData clearWorkspaces();
   void setFittingMode(FittingMode mode);
   virtual void setFitFunction(Mantid::API::IFunction_sptr function);
-  void setDefaultParameterValue(const std::string &name, double value,
+	virtual void setDefaultParameterValue(const std::string &name, double value,
                                 std::size_t dataIndex);
   void addSingleFitOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
                           std::size_t index);
