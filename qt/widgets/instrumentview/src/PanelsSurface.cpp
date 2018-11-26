@@ -385,11 +385,13 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     bankChildren = &componentInfo.children(bankIndex);
   }
 
-  auto tubes = (bankIndex == bankIndex0) ? *bankChildren : std::vector<size_t>();
+  auto tubes =
+      (bankIndex == bankIndex0) ? *bankChildren : std::vector<size_t>();
   if (tubes.empty()) {
-    for(auto index: *bankChildren) {
+    for (auto index : *bankChildren) {
       boost::optional<size_t> tubeIndex = index;
-      while (componentInfo.componentType(tubeIndex.value()) != ComponentType::OutlineComposite) {
+      while (componentInfo.componentType(tubeIndex.value()) !=
+             ComponentType::OutlineComposite) {
         auto &children = componentInfo.children(tubeIndex.value());
         if (children.empty()) {
           tubeIndex = boost::none;
@@ -406,7 +408,8 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   }
 
   auto name = componentInfo.name(bankIndex);
-  auto normal = tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();
+  auto normal =
+      tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();
 
   if (normal.nullVector() ||
       !isBankFlat(componentInfo, bankIndex, tubes, normal))
