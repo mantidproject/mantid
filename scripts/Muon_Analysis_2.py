@@ -14,63 +14,63 @@ import PyQt4.QtCore as QtCore
 
 from mantid.kernel import ConfigServiceImpl
 import mantid.simpleapi as simpleapi
-
-from Muon.GUI.Common.muon_context import MuonContext
-
-from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
-from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
-from Muon.GUI.Common.muon_context.muon_context import *#MuonContext
-
-from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
-
-from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
-from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
-
-from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
-from Muon.GUI.Common.load_run_widget.view import LoadRunWidgetView
-from Muon.GUI.Common.load_run_widget.presenter import LoadRunWidgetPresenter
-
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
-from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
-
-from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
-from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
-from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
-
-from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_model import HomeGroupingWidgetModel
-from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
-from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import HomeGroupingWidgetPresenter
-
-from Muon.GUI.Common.home_plot_widget.home_plot_widget_model import HomePlotWidgetModel
-from Muon.GUI.Common.home_plot_widget.home_plot_widget_view import HomePlotWidgetView
-from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
-
-from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRunInfoWidgetModel
-from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_view import HomeRunInfoWidgetView
-from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_presenter import HomeRunInfoWidgetPresenter
-
-from Muon.GUI.Common.home_tab.home_tab_model import HomeTabModel
-from Muon.GUI.Common.home_tab.home_tab_view import HomeTabView
-from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabPresenter
-
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
-
-from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
-from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
-
-from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
-from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import GroupingTabView
-
-from Muon.GUI.Common.help_widget.help_widget_model import HelpWidgetModel
-from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
-from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidgetPresenter
+#
+# from Muon.GUI.Common.muon_context import MuonContext
+#
+# from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
+# from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
+# from Muon.GUI.Common.muon_context.muon_context import *#MuonContext
+#
+# from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
+#
+# from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
+# from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+# from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+#
+# from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
+# from Muon.GUI.Common.load_run_widget.view import LoadRunWidgetView
+# from Muon.GUI.Common.load_run_widget.presenter import LoadRunWidgetPresenter
+#
+# from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
+# from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
+# from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
+#
+# from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
+# from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
+# from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import InstrumentWidgetPresenter
+#
+# from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_model import HomeGroupingWidgetModel
+# from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_view import HomeGroupingWidgetView
+# from Muon.GUI.Common.home_grouping_widget.home_grouping_widget_presenter import HomeGroupingWidgetPresenter
+#
+# from Muon.GUI.Common.home_plot_widget.home_plot_widget_model import HomePlotWidgetModel
+# from Muon.GUI.Common.home_plot_widget.home_plot_widget_view import HomePlotWidgetView
+# from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
+#
+# from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_model import HomeRunInfoWidgetModel
+# from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_view import HomeRunInfoWidgetView
+# from Muon.GUI.Common.home_runinfo_widget.home_runinfo_widget_presenter import HomeRunInfoWidgetPresenter
+#
+# from Muon.GUI.Common.home_tab.home_tab_model import HomeTabModel
+# from Muon.GUI.Common.home_tab.home_tab_view import HomeTabView
+# from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabPresenter
+#
+# from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView
+# from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
+#
+# from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
+# from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
+# from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
+#
+# from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
+# from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import GroupingTabView
+#
+# from Muon.GUI.Common.help_widget.help_widget_model import HelpWidgetModel
+# from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
+# from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidgetPresenter
 
 import Muon.GUI.Common.message_box as message_box
-from Muon.GUI.Common.muon_load_data import MuonLoadData
+# from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 muonGUI = None
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
@@ -108,34 +108,34 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
             self.warning_popup(error.args[0])
 
         # initialise the data storing classes of the interface
-        self.loaded_data = MuonLoadData()
-        self.context = MuonContext(load_data=self.loaded_data)
+        # self.loaded_data = MuonLoadData()
+        # self.context = MuonContext(load_data=self.loaded_data)
 
         # construct all the widgets.
         self.setup_load_widget()
-        self.setup_help_widget()
-        self.setup_home_tab()
-        self.setup_grouping_tab()
-        # set up the tabbing structure
-        self.setup_tabs()
-
-        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter.addWidget(self.load_widget_view)
-        splitter.addWidget(self.tabs)
-        splitter.addWidget(self.help_widget)
-        self.setCentralWidget(splitter)
+        # self.setup_help_widget()
+        # self.setup_home_tab()
+        # self.setup_grouping_tab()
+        # # set up the tabbing structure
+        # self.setup_tabs()
+        #
+        # splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        # splitter.addWidget(self.load_widget_view)
+        # splitter.addWidget(self.tabs)
+        # splitter.addWidget(self.help_widget)
+        # self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
 
         # Set up observer/observables
         #   - Home tab notifies if instrument changes
         #   - Home tab notifies if user changes alpha for a pair
-        self.group_widget.pairAlphaNotifier.add_subscriber(self.group_tab_presenter.loadObserver)
-        self.group_tab_presenter.groupingNotifier.add_subscriber(self.home_tab_widget.groupingObserver)
-        self.instrument_widget.instrumentNotifier.add_subscriber(self.home_tab_widget.instrumentObserver)
-        self.instrument_widget.instrumentNotifier.add_subscriber(self.load_widget.instrumentObserver)
-        self.instrument_widget.instrumentNotifier.add_subscriber(self.group_tab_presenter.instrumentObserver)
-        self.load_widget.loadNotifier.add_subscriber(self.home_tab_widget.loadObserver)
-        self.load_widget.loadNotifier.add_subscriber(self.group_tab_presenter.loadObserver)
+        # self.group_widget.pairAlphaNotifier.add_subscriber(self.group_tab_presenter.loadObserver)
+        # self.group_tab_presenter.groupingNotifier.add_subscriber(self.home_tab_widget.groupingObserver)
+        # self.instrument_widget.instrumentNotifier.add_subscriber(self.home_tab_widget.instrumentObserver)
+        # self.instrument_widget.instrumentNotifier.add_subscriber(self.load_widget.instrumentObserver)
+        # self.instrument_widget.instrumentNotifier.add_subscriber(self.group_tab_presenter.instrumentObserver)
+        # self.load_widget.loadNotifier.add_subscriber(self.home_tab_widget.loadObserver)
+        # self.load_widget.loadNotifier.add_subscriber(self.group_tab_presenter.loadObserver)
 
     def setup_load_widget(self):
         # set up the views
