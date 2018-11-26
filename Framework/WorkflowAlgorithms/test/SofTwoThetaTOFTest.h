@@ -102,7 +102,7 @@ public:
     auto const wfilename = tempXml.native();
     std::string const filename{wfilename.cbegin(), wfilename.cend()};
 #else
-    auto const filename{tempXml.native()};
+    std::string const filename{tempXml.native()};
 #endif
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingFilename", filename))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
