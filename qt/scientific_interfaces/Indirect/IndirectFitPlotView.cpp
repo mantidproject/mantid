@@ -107,6 +107,7 @@ void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
 }
 
 void IndirectFitPlotView::setPlotSpectrum(int spectrum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_plotForm->spPlotSpectrum);
   m_plotForm->spPlotSpectrum->setValue(spectrum);
 }
 
