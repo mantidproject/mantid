@@ -28,12 +28,13 @@ using Mantid::Types::Event::TofEvent;
 
 namespace {
 // Add A Fake 'Peak' to both the event data and to the peaks workspace
-void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
+void addFakeEllipsoid(const V3D &peakHKL, const V3D &peakMNP, const int &totalNPixels,
                       const int &nEvents, const double tofGap,
                       EventWorkspace_sptr &eventWS,
                       PeaksWorkspace_sptr &peaksWS) {
   // Create the peak and add it to the peaks ws
   Peak *peak = peaksWS->createPeakHKL(peakHKL);
+  peak->setIntMNP(peakMNP);
   peaksWS->addPeak(*peak);
   const int detectorId = peak->getDetectorID();
   const double tofExact = peak->getTOF();
@@ -65,6 +66,8 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
   // Set the oriented lattice for a cubic crystal
   OrientedLattice ol(6, 6, 6, 90, 90, 90);
   ol.setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
+  ol.setModHKL(0, 0.5, 0., 0., 0., 0., 0., 0., 0.);
+  ol.setMaxOrder(1);
   peaksWS->mutableSample().setOrientedLattice(&ol);
 
   // Make an event workspace and add fake peak data
@@ -82,18 +85,45 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
 
   // Add some peaks which should correspond to real reflections (could
   // calculate these). Same function also adds a fake ellipsoid
-  addFakeEllipsoid(V3D(1, -5, -3), nPixelsTotal, nEventsPerPeak,
+  addFakeEllipsoid(V3D(1, -5, -3), V3D(0, 0, 0), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -4, -4), nPixelsTotal, nEventsPerPeak,
+  addFakeEllipsoid(V3D(1, -4, -4), V3D(0, 0, 0), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -3, -5), nPixelsTotal, nEventsPerPeak,
+  addFakeEllipsoid(V3D(1, -3, -5), V3D(0, 0, 0), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -4, -2), nPixelsTotal, nEventsPerPeak,
+  addFakeEllipsoid(V3D(1, -4, -2), V3D(0, 0, 0), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -4, 0), nPixelsTotal, nEventsPerPeak,
+  addFakeEllipsoid(V3D(1, -4, 0), V3D(0, 0, 0), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(2, -3, -4), nPixelsTotal, nEventsPerPeak,
+  addFakeEllipsoid(V3D(2, -3, -4), V3D(0, 0, 0), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
+  // Add some peaks which should correspond to satellites
+  int nEventsPerPeak2 = nEventsPerPeak / 4;
+  double tofGapBetweenEvents2 = tofGapBetweenEvents / 4;
+  addFakeEllipsoid(V3D(1, -5, -3), V3D(0, 1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, -4), V3D(0, 1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -3, -5), V3D(0, 1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, -2), V3D(0, 1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, 0), V3D(0, 1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(2, -3, -4), V3D(0, 1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -3, -3), V3D(0, -1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, -4), V3D(0, -1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -3, -5), V3D(0, -1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, -2), V3D(0, -1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(1, -4, 0), V3D(0, -1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
+  addFakeEllipsoid(V3D(2, -3, -4), V3D(0, -1, 0), nPixelsTotal, nEventsPerPeak2,
+                   tofGapBetweenEvents2, eventWS, peaksWS);
 
   // Return test data.
   return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS,
@@ -251,9 +281,9 @@ public:
     const auto &peak2 = integratedPeaksWS->getPeak(1);
     const auto &peak3 = integratedPeaksWS->getPeak(2);
 
-    TS_ASSERT_DELTA(peak1.getIntensity(), 1., 1e-6);
+    TS_ASSERT_DELTA(peak1.getIntensity(), 6., 1e-6);
     TS_ASSERT_DELTA(peak2.getIntensity(), 1., 1e-6);
-    TS_ASSERT_DELTA(peak3.getIntensity(), 1., 1e-6);
+    TS_ASSERT_DELTA(peak3.getIntensity(), 11., 1e-6);
   }
 
   void test_execution_histograms_distribution_data() {
@@ -298,9 +328,9 @@ public:
     const auto &peak3 = integratedPeaksWS->getPeak(2);
 
     const double binWidth{10.};
-    TS_ASSERT_DELTA(peak1.getIntensity(), 1. / binWidth, 1e-6);
+    TS_ASSERT_DELTA(peak1.getIntensity(), 6. / binWidth, 1e-6);
     TS_ASSERT_DELTA(peak2.getIntensity(), 1. / binWidth, 1e-6);
-    TS_ASSERT_DELTA(peak3.getIntensity(), 1. / binWidth, 1e-6);
+    TS_ASSERT_DELTA(peak3.getIntensity(), 11. / binWidth, 1e-6);
   }
 
   void test_execution_events_adaptive() {
@@ -326,17 +356,17 @@ public:
                       m_peaksWS->getNumberPeaks());
 
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-                     integratedPeaksWS->getPeak(0).getIntensity(), 2, 0.01);
+                     integratedPeaksWS->getPeak(0).getIntensity(), 6, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-                     integratedPeaksWS->getPeak(1).getIntensity(), 0.8, 0.01);
+                     integratedPeaksWS->getPeak(1).getIntensity(), 10.8964, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-                     integratedPeaksWS->getPeak(2).getIntensity(), 2, 0.01);
+                     integratedPeaksWS->getPeak(2).getIntensity(), 9, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-                     integratedPeaksWS->getPeak(3).getIntensity(), 7, 0.01);
+                     integratedPeaksWS->getPeak(3).getIntensity(), 16, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
                      integratedPeaksWS->getPeak(4).getIntensity(), 0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-                     integratedPeaksWS->getPeak(5).getIntensity(), 5.83, 0.01);
+                     integratedPeaksWS->getPeak(5).getIntensity(), 20.9410, 0.01);
   }
 
   void test_execution_histograms_adaptive() {
@@ -361,17 +391,17 @@ public:
                       integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-                     integratedPeaksWS->getPeak(0).getIntensity(), 3, 0.01);
+                     integratedPeaksWS->getPeak(0).getIntensity(), 8, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
                      integratedPeaksWS->getPeak(1).getIntensity(), 3, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-                     integratedPeaksWS->getPeak(2).getIntensity(), 3, 0.01);
+                     integratedPeaksWS->getPeak(2).getIntensity(), 13, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-                     integratedPeaksWS->getPeak(3).getIntensity(), 10, 0.01);
+                     integratedPeaksWS->getPeak(3).getIntensity(), 20, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
                      integratedPeaksWS->getPeak(4).getIntensity(), 0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-                     integratedPeaksWS->getPeak(5).getIntensity(), 9.94, 0.01);
+                     integratedPeaksWS->getPeak(5).getIntensity(), 13.94, 0.01);
   }
 };
 
