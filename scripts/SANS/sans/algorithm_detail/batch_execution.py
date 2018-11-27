@@ -159,7 +159,7 @@ def load_workspaces_from_states(states):
     workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkspace",
                             SANSDataType.CanScatter: "CanScatterMonitorWorkspace"}
 
-    for state in states:
+    for key, state in states.items():
         workspaces, monitors = provide_loaded_data(state, True, workspace_to_name, workspace_to_monitor)
 
 # ----------------------------------------------------------------------------------------------------------------------

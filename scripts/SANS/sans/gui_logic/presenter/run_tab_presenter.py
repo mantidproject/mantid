@@ -393,10 +393,7 @@ class RunTabPresenter(object):
             self.sans_logger.information("Starting processing of batch table.")
 
             # 1. Set up the states and convert them into property managers
-            selected_rows = self._view.get_selected_rows()
-            selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
-            for row in selected_rows:
-                self._table_model.reset_row_state(row)
+            selected_rows = self._get_selected_rows()
             states, errors = self.get_states(row_index=selected_rows)
 
             for row, error in errors.items():
@@ -430,7 +427,7 @@ class RunTabPresenter(object):
             setattr(self._view, 'progress_bar_value', self.progress)
             setattr(self._view, 'progress_bar_maximum', len(states))
 
-            self.batch_process_runner.process_states(states,use_optimizations, output_mode, plot_results,
+            self.batch_process_runner.process_states(states, use_optimizations, output_mode, plot_results,
                                                      output_graph, save_can)
 
         except Exception as e:
@@ -439,15 +436,34 @@ class RunTabPresenter(object):
             self.display_warning_box('Warning', 'Process halted', str(e))
 
     def on_load_clicked(self):
-        states, errors = self.get_states(row_index=selected_rows)
+        try:
+            self._view.disable_buttons()
+            self._processing = True
+            self.sans_logger.information("Starting load of batch table.")
 
-        for row, error in errors.items():
-            self.on_processing_error(row, error)
+            selected_rows = self._get_selected_rows()
+            states, errors = self.get_states(row_index=selected_rows)
 
-        if not states:
-            self.on_processing_finished(None)
-            return
+            for row, error in errors.items():
+                self.on_processing_error(row, error)
 
+            if not states:
+                self.on_processing_finished(None)
+                return
+
+            use_optimizations = self._view.use_optimizations
+            output_mode = self._view.output_mode
+            plot_results = self._view.plot_results
+            save_can = self._view.save_can
+
+            self.progress = 0
+            setattr(self._view, 'progress_bar_value', self.progress)
+            setattr(self._view, 'progress_bar_maximum', len(states))
+            self.batch_process_runner.load_workspaces(states)
+        except Exception as e:
+            self._view.enable_buttons()
+            self.sans_logger.error("Process halted due to: {}".format(str(e)))
+            self.display_warning_box("Warning", "Process halted", str(e))
 
     def on_multiperiod_changed(self, show_periods):
         if show_periods:
@@ -600,6 +616,15 @@ class RunTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Table Model and state population
     # ------------------------------------------------------------------------------------------------------------------
+    def _get_selected_rows(self):
+        selected_rows = self._view.get_selected_rows()
+        selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
+        for row in selected_rows:
+            self._table_model.reset_row_state(row)
+        self.update_view_from_table_model()
+
+        return selected_rows
+
     def get_states(self, row_index=None, file_lookup=True):
         """
         Gathers the state information for all rows.

@@ -42,7 +42,7 @@ class BatchProcessRunner(QObject):
         QThreadPool.globalInstance().start(self._worker)
 
     def load_workspaces(self, states):
-        self._worker = Worker(self._process_states_on_thread, states)
+        self._worker = Worker(self._load_workspaces_on_thread, states)
         self._worker.signals.finished.connect(self.on_finished)
         self._worker.signals.error.connect(self.on_error)
 
