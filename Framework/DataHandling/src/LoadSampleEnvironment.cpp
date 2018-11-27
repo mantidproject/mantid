@@ -261,7 +261,7 @@ void LoadSampleEnvironment::exec() {
 
 /**
  * translates the environment by a provided matrix
- * @params environmentMesh The environment to translate
+ * @param environmentMesh The environment to translate
  * @returns a shared pointer to the newly translated environment
  */
 boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
@@ -283,7 +283,7 @@ boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
 
 /**
  * Rotates the environment by a provided matrix
- * @params environmentMesh The environment to rotate
+ * @param environmentMesh The environment to rotate
  * @returns a shared pointer to the newly rotated environment
  */
 boost::shared_ptr<MeshObject>
