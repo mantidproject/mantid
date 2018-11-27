@@ -40,6 +40,7 @@ Bug fixes
 - A bug has been fixed on the Settings tab where the IncludePartialBins check box had been hidden by a misplaced text entry box.
 - :ref:`algm-ReflectometryReductionOneAuto` No longer sums all of a transmission run's workspaces and instead will use the first run only
 - In :ref:`algm-ReflectometryReductionOneAuto` an issue where if you gave only one of either MomentumTransferMax or MomentumTransferMin were specified it would be ignored, this has been fixed.
+- Reverted property names for polarization correction coefficients in :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto-v2>` for backwards compatibility.
 
 Liquids Reflectometer
 ---------------------
