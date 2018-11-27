@@ -131,9 +131,10 @@ public:
   }
 
   void setUp() override {
-		m_view = std::make_unique<NiceMock<MockIndirectSpectrumSelectionView>>();
-		m_model = std::make_unique<NiceMock<MockIndirectFittingModel>>();
-		m_presenter = std::make_unique<IndirectSpectrumSelectionPresenter>(std::move(m_model.get()), std::move(m_view.get()));
+    m_view = std::make_unique<NiceMock<MockIndirectSpectrumSelectionView>>();
+    m_model = std::make_unique<NiceMock<MockIndirectFittingModel>>();
+    m_presenter = std::make_unique<IndirectSpectrumSelectionPresenter>(
+        std::move(m_model.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(10));
     m_model->addWorkspace("WorkspaceName");
@@ -359,10 +360,9 @@ public:
   }
 
 private:
-	std::unique_ptr<MockIndirectSpectrumSelectionView> m_view;
-	std::unique_ptr<MockIndirectFittingModel> m_model;
-	std::unique_ptr<IndirectSpectrumSelectionPresenter> m_presenter;
-
+  std::unique_ptr<MockIndirectSpectrumSelectionView> m_view;
+  std::unique_ptr<MockIndirectFittingModel> m_model;
+  std::unique_ptr<IndirectSpectrumSelectionPresenter> m_presenter;
 };
 
 #endif
