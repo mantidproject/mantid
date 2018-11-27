@@ -259,75 +259,75 @@ public:
   /// Unit Tests that test the signals (only the view emits signals here)
   ///----------------------------------------------------------------------
 
-  void test_that_the_selectedFitDataChanged_signal_will_set_the_activeIndex() {
-    m_view->emitSelectedFitDataChanged(1);
-    TS_ASSERT_EQUALS(m_presenter->getSelectedDataIndex(), 1);
-  }
+  //void test_that_the_selectedFitDataChanged_signal_will_set_the_activeIndex() {
+  //  m_view->emitSelectedFitDataChanged(1);
+  //  TS_ASSERT_EQUALS(m_presenter->getSelectedDataIndex(), 1);
+  //}
 
-  void
-  test_that_the_selectedFitDataChanged_signal_will_set_the_available_spectra() {
-    std::size_t const index(0);
-    ON_CALL(*m_fittingModel, getWorkspace(index))
-        .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
+  //void
+  //test_that_the_selectedFitDataChanged_signal_will_set_the_available_spectra() {
+  //  std::size_t const index(0);
+  //  ON_CALL(*m_fittingModel, getWorkspace(index))
+  //      .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
-    EXPECT_CALL(*m_view, setAvailableSpectra(0, 9)).Times(1);
+  //  EXPECT_CALL(*m_view, setAvailableSpectra(0, 9)).Times(1);
 
-    m_view->emitSelectedFitDataChanged(index);
-  }
+  //  m_view->emitSelectedFitDataChanged(index);
+  //}
 
-  void
-  test_that_the_selectedFitDataChanged_signal_will_disable_selectors_when_there_is_no_workspace() {
-    std::size_t const index(0);
-    ON_CALL(*m_fittingModel, getWorkspace(index))
-        .WillByDefault(Return(nullptr));
+  //void
+  //test_that_the_selectedFitDataChanged_signal_will_disable_selectors_when_there_is_no_workspace() {
+  //  std::size_t const index(0);
+  //  ON_CALL(*m_fittingModel, getWorkspace(index))
+  //      .WillByDefault(Return(nullptr));
 
-    EXPECT_CALL(*m_view, enableSpectrumSelection(false)).Times(1);
-    EXPECT_CALL(*m_view, enableFitRangeSelection(false)).Times(1);
+  //  EXPECT_CALL(*m_view, enableSpectrumSelection(false)).Times(1);
+  //  EXPECT_CALL(*m_view, enableFitRangeSelection(false)).Times(1);
 
-    m_view->emitSelectedFitDataChanged(index);
-  }
+  //  m_view->emitSelectedFitDataChanged(index);
+  //}
 
-  void
-  test_that_the_selectedFitDataChanged_signal_will_plot_the_input_when_there_is_only_an_input_workspace() {
-    std::size_t const index(0);
-    ON_CALL(*m_fittingModel, getWorkspace(index))
-        .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
+  //void
+  //test_that_the_selectedFitDataChanged_signal_will_plot_the_input_when_there_is_only_an_input_workspace() {
+  //  std::size_t const index(0);
+  //  ON_CALL(*m_fittingModel, getWorkspace(index))
+  //      .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
 
-    EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(3);
-    EXPECT_CALL(*m_view, removeFromBottomPreview(QString("Difference")))
-        .Times(1);
+  //  EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(3);
+  //  EXPECT_CALL(*m_view, removeFromBottomPreview(QString("Difference")))
+  //      .Times(1);
 
-    m_view->emitSelectedFitDataChanged(index);
-  }
+  //  m_view->emitSelectedFitDataChanged(index);
+  //}
 
-  void
-  test_that_the_selectedFitDataChanged_signal_will_clear_the_plots_when_there_is_no_input_workspace() {
-    std::size_t const index(0);
-    ON_CALL(*m_fittingModel, getWorkspace(index))
-        .WillByDefault(Return(nullptr));
+  //void
+  //test_that_the_selectedFitDataChanged_signal_will_clear_the_plots_when_there_is_no_input_workspace() {
+  //  std::size_t const index(0);
+  //  ON_CALL(*m_fittingModel, getWorkspace(index))
+  //      .WillByDefault(Return(nullptr));
 
-    EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(2);
-    EXPECT_CALL(*m_view, clear()).Times(1);
+  //  EXPECT_CALL(*m_fittingModel, getWorkspace(index)).Times(2);
+  //  EXPECT_CALL(*m_view, clear()).Times(1);
 
-    m_view->emitSelectedFitDataChanged(index);
-  }
+  //  m_view->emitSelectedFitDataChanged(index);
+  //}
 
-  void
-  test_that_the_selectedFitDataChanged_signal_will_set_the_minimum_and_maximum_of_the_fit_range() {
-    std::size_t const index(0);
-    auto const range = std::make_pair(1.0, 2.0);
-    ON_CALL(*m_fittingModel, getFittingRange(index, 0))
-        .WillByDefault(Return(range));
+  //void
+  //test_that_the_selectedFitDataChanged_signal_will_set_the_minimum_and_maximum_of_the_fit_range() {
+  //  std::size_t const index(0);
+  //  auto const range = std::make_pair(1.0, 2.0);
+  //  ON_CALL(*m_fittingModel, getFittingRange(index, 0))
+  //      .WillByDefault(Return(range));
 
-    EXPECT_CALL(*m_fittingModel, getFittingRange(index, 0))
-        .Times(2)
-        .WillRepeatedly(Return(range));
-    EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(2);
-    EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(2);
+  //  EXPECT_CALL(*m_fittingModel, getFittingRange(index, 0))
+  //      .Times(2)
+  //      .WillRepeatedly(Return(range));
+  //  EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(2);
+  //  EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(2);
 
-    m_view->emitSelectedFitDataChanged(index);
-  }
-
+  //  m_view->emitSelectedFitDataChanged(index);
+  //}
+	///First try
   // void
   // test_that_the_selectedFitDataChanged_signal_will_enable_PlotGuess_when_there_is_a_fit_function_and_workspace()
   // {
