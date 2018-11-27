@@ -259,13 +259,15 @@ public:
   /// Unit Tests that test the signals (only the view emits signals here)
   ///----------------------------------------------------------------------
 
-  //void test_that_the_selectedFitDataChanged_signal_will_set_the_activeIndex() {
+  // void test_that_the_selectedFitDataChanged_signal_will_set_the_activeIndex()
+  // {
   //  m_view->emitSelectedFitDataChanged(1);
   //  TS_ASSERT_EQUALS(m_presenter->getSelectedDataIndex(), 1);
   //}
 
-  //void
-  //test_that_the_selectedFitDataChanged_signal_will_set_the_available_spectra() {
+  // void
+  // test_that_the_selectedFitDataChanged_signal_will_set_the_available_spectra()
+  // {
   //  std::size_t const index(0);
   //  ON_CALL(*m_fittingModel, getWorkspace(index))
   //      .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
@@ -275,8 +277,9 @@ public:
   //  m_view->emitSelectedFitDataChanged(index);
   //}
 
-  //void
-  //test_that_the_selectedFitDataChanged_signal_will_disable_selectors_when_there_is_no_workspace() {
+  // void
+  // test_that_the_selectedFitDataChanged_signal_will_disable_selectors_when_there_is_no_workspace()
+  // {
   //  std::size_t const index(0);
   //  ON_CALL(*m_fittingModel, getWorkspace(index))
   //      .WillByDefault(Return(nullptr));
@@ -287,8 +290,9 @@ public:
   //  m_view->emitSelectedFitDataChanged(index);
   //}
 
-  //void
-  //test_that_the_selectedFitDataChanged_signal_will_plot_the_input_when_there_is_only_an_input_workspace() {
+  // void
+  // test_that_the_selectedFitDataChanged_signal_will_plot_the_input_when_there_is_only_an_input_workspace()
+  // {
   //  std::size_t const index(0);
   //  ON_CALL(*m_fittingModel, getWorkspace(index))
   //      .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
@@ -300,8 +304,9 @@ public:
   //  m_view->emitSelectedFitDataChanged(index);
   //}
 
-  //void
-  //test_that_the_selectedFitDataChanged_signal_will_clear_the_plots_when_there_is_no_input_workspace() {
+  // void
+  // test_that_the_selectedFitDataChanged_signal_will_clear_the_plots_when_there_is_no_input_workspace()
+  // {
   //  std::size_t const index(0);
   //  ON_CALL(*m_fittingModel, getWorkspace(index))
   //      .WillByDefault(Return(nullptr));
@@ -312,8 +317,9 @@ public:
   //  m_view->emitSelectedFitDataChanged(index);
   //}
 
-  //void
-  //test_that_the_selectedFitDataChanged_signal_will_set_the_minimum_and_maximum_of_the_fit_range() {
+  // void
+  // test_that_the_selectedFitDataChanged_signal_will_set_the_minimum_and_maximum_of_the_fit_range()
+  // {
   //  std::size_t const index(0);
   //  auto const range = std::make_pair(1.0, 2.0);
   //  ON_CALL(*m_fittingModel, getFittingRange(index, 0))
@@ -327,7 +333,7 @@ public:
 
   //  m_view->emitSelectedFitDataChanged(index);
   //}
-	///First try
+  /// First try
   // void
   // test_that_the_selectedFitDataChanged_signal_will_enable_PlotGuess_when_there_is_a_fit_function_and_workspace()
   // {
