@@ -57,11 +57,11 @@ void export_UsageService() {
       .def("setInterval", &UsageServiceImpl::setEnabled,
            (arg("self"), arg("seconds")),
            "Sets the interval that the timer checks for tasks.")
-      .def("setApplication", &UsageServiceImpl::setApplication,
+      .def("setApplicationName", &UsageServiceImpl::setApplicationName,
            (arg("self"), arg("name")),
            "Sets the application name that has invoked Mantid.")
-      .def("getApplication", &UsageServiceImpl::getApplication, arg("self"),
-           "Gets the application name that has invoked Mantid.")
+      .def("getApplicationName", &UsageServiceImpl::getApplicationName,
+           arg("self"), "Gets the application name that has invoked Mantid.")
       .def("registerStartup", &UsageServiceImpl::registerStartup, arg("self"),
            "Registers the startup of Mantid.")
       .def("registerFeatureUsage", &UsageServiceImpl::registerFeatureUsage,
