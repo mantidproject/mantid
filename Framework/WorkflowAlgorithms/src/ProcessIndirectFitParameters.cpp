@@ -127,6 +127,11 @@ std::vector<Column_const_sptr> extractColumns(ITableWorkspace const *table,
   return columns;
 }
 
+void populateChiSquaredErrorsWithZeros(std::vector<double> &e, std::size_t const &difference) {
+	for (auto i = 0u; i < difference; ++i)
+		e.emplace_back(0.0);
+}
+
 struct TableToMatrixWorkspaceConverter {
   template <typename YFilter, typename EFilter>
   TableToMatrixWorkspaceConverter(ITableWorkspace const *table,
@@ -138,7 +143,7 @@ struct TableToMatrixWorkspaceConverter {
         m_yAxis(extractColumnNames(m_yColumns)) {}
 
   MatrixWorkspace_sptr operator()(std::size_t startRow, std::size_t endRow,
-                                  std::string const &unitX) const {
+                                  std::string const &unitX, bool includeChiSquared) const {
     auto const x = repeat(m_x, m_yColumns.size());
 
     std::vector<double> y;
@@ -149,6 +154,9 @@ struct TableToMatrixWorkspaceConverter {
                                      std::back_inserter(y));
     extractValuesFromColumns<double>(startRow, endRow, m_eColumns,
                                      std::back_inserter(e));
+
+		if (includeChiSquared)
+			populateChiSquaredErrorsWithZeros(e, y.size() - e.size());
 
     return createWorkspace(x, y, e, static_cast<int>(m_yColumns.size()),
                            m_yAxis, unitX);
@@ -248,6 +256,8 @@ void ProcessIndirectFitParameters::init() {
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "List of the parameter names to add to the workspace.");
 
+	declareProperty("IncludeChiSquared", false, "Add Chi-squared to the output workspace.");
+
   declareProperty("XAxisUnit", "",
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis");
@@ -270,13 +280,17 @@ void ProcessIndirectFitParameters::init() {
 /** Execute the algorithm.
  */
 void ProcessIndirectFitParameters::exec() {
-  ITableWorkspace_sptr inputWs = getProperty("InputWorkspace");
-  std::string xColumn = getProperty("ColumnX");
-  std::string xUnit = getProperty("XAxisUnit");
+  ITableWorkspace_sptr const inputWs = getProperty("InputWorkspace");
+  std::string const xColumn = getProperty("ColumnX");
+  std::string const xUnit = getProperty("XAxisUnit");
+	bool const includeChiSquared = getProperty("IncludeChiSquared");
   std::vector<std::string> parameterNames = getProperty("ParameterNames");
   std::vector<std::string> errorNames = appendSuffix(parameterNames, "_Err");
   auto const startRow = getStartRow();
   auto const endRow = getEndRow(inputWs->rowCount() - 1);
+
+	if (includeChiSquared)
+		parameterNames.emplace_back("Chi_squared");
 
   auto const x = getNumericColumnValuesOrIndices(*inputWs->getColumn(xColumn),
                                                  startRow, endRow);
@@ -286,7 +300,7 @@ void ProcessIndirectFitParameters::exec() {
       makeColumnNameFilter(EndsWithOneOf(std::move(errorNames)));
 
   TableToMatrixWorkspaceConverter converter(inputWs.get(), x, yFilter, eFilter);
-  auto const output = converter(startRow, endRow, xUnit);
+  auto const output = converter(startRow, endRow, xUnit, includeChiSquared);
   setProperty("OutputWorkspace", output);
 }
 
