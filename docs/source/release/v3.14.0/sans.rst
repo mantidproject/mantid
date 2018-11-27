@@ -22,8 +22,10 @@ Improved
 * Added tabbing support to table.
 * Added error notifications on a row by row basis.
 * Updated file adding to prefix the instrument name
-* Updated file finding to be able to find added runs withour instrument name prefix
+* Updated file finding to be able to find added runs without instrument name prefix
 * Updated GUI code so calculated merge scale and shift are shown after reduction.
+* Automatically remembers last loaded user file
+* Added display of current save directory
 
 Bug fixes
 #########
