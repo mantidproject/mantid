@@ -24,12 +24,12 @@ namespace {
 std::vector<std::string> namesOfFacilitiesWithICAT() {
   const auto &config = Kernel::ConfigService::Instance();
 
-  const auto facilityHasICAT = [&](std::string name) {
-    return !config.getFacility(name).catalogInfo().soapEndPoint().empty();
+  const auto facilityDoesNotHaveICAT = [&](std::string name) {
+    return config.getFacility(name).catalogInfo().soapEndPoint().empty();
   };
 
   auto result = Kernel::ConfigService::Instance().getFacilityNames();
-  result.erase(std::remove_if(result.begin(), result.end(), facilityHasICAT),
+  result.erase(std::remove_if(result.begin(), result.end(), facilityDoesNotHaveICAT),
                result.end());
 
   return result;
