@@ -102,3 +102,12 @@ Improvements
 
 - The Run button is now above the output options.
 - The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+
+
+Tools Interface
+---------------
+
+Improvements
+############
+
+- The Run button has been moved in the Transmission tab, and is disabled while running.
