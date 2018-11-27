@@ -102,3 +102,13 @@ Improvements
 
 - The Run button is now above the output options.
 - The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
+
+
+Diffraction Interface
+---------------------
+
+Improvements
+############
+
+- The Run button is now above the output options.
+- The Run, Plot and Save buttons are now disabled while running and plotting is taking place.
