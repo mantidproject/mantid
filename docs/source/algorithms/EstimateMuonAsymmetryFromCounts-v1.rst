@@ -55,9 +55,9 @@ Output:
 
 .. testoutput:: ExSimple
 
-   Asymmetry   :  ['-0.57', '0.01', '-0.47', '-0.83', '-0.87']
+   Asymmetry   :  ['-0.45', '0.31', '-0.31', '-0.78', '-0.83']
    Unnormalized:  ['15.76', '37.28', '19.59', '6.18', '4.87']
-   Normalization constant: 37.04
+   Normalization constant: 28.56
 
 **Example - Setting the normalization:**
 

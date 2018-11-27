@@ -19,7 +19,7 @@ using namespace API;
 namespace TestHelpers {
 
 // Create a workspace equipped with fake instrument from
-// IDFs_for_UNIT_TESTING/REFL_Definition.xml IDF.
+// unit_testing/REFL_Definition.xml IDF.
 // @param nBins :: Number of bins in each spectrum.
 // @param startX :: Start value of the x-axis in TOF
 // @param endX :: End value of the x-axis in TOF

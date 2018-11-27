@@ -311,7 +311,7 @@ class BayesStretch(PythonAlgorithm):
             unitx.setLabel('beta', '')
             unity.setLabel('sigma', '')
         else:
-            if name[:4] == 'Beta':
+            if name[-4:] == 'Beta':
                 unitx.setLabel('beta', '')
             else:
                 unitx.setLabel('sigma', '')

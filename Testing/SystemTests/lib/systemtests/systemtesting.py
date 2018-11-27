@@ -4,13 +4,13 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-'''
-Mantid stress testing framework. This module contains all of the necessary code
-to run sets of stress tests on the Mantid framework by executing scripts directly
+"""
+Mantid system testing framework. This module contains all of the necessary code
+to run sets of system tests on the Mantid framework by executing scripts directly
 or by importing them into MantidPlot.
 
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
-'''
+"""
 from __future__ import (absolute_import, division, print_function)
 from six import PY3
 import datetime
@@ -44,8 +44,8 @@ TESTING_FRAMEWORK_DIR = THIS_MODULE_DIR.replace('\\', '\\\\')
 #########################################################################
 # The base test class.
 #########################################################################
-class MantidStressTest(unittest.TestCase):
-    '''Defines a base class for stress tests, providing functions
+class MantidSystemTest(unittest.TestCase):
+    '''Defines a base class for system tests, providing functions
     that should be overridden by inheriting classes to perform tests.
     '''
 
@@ -56,7 +56,7 @@ class MantidStressTest(unittest.TestCase):
     PREFIX = 'RESULT'
 
     def __init__(self):
-        super(MantidStressTest, self).__init__()
+        super(MantidSystemTest, self).__init__()
         # A list of things not to check when validating
         self.disableChecking = []
         # Whether or not to strip off whitespace when doing simple ascii diff
@@ -617,16 +617,34 @@ class TestScript(object):
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
     def asString(self, clean=False):
-        code = "import sys\n" + \
-               ("sys.path.append('%s')\n" % TESTING_FRAMEWORK_DIR) + \
-               ("sys.path.append('%s')\n" % self._test_dir) + \
-               ("from %s import %s\n" % (self._modname, self._test_cls_name)) + \
-               ("systest = %s()\n" % self._test_cls_name) + \
-               ("if %r:\n" % self._exclude_in_pr_builds) + \
-               ("    systest.excludeInPullRequests = lambda: False\n")
+        code = """
+# If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
+# Remove this when everything is switched to qtpy
+import sip
+try:
+    sip.setapi('QString', 2)
+    sip.setapi('QVariant', 2)
+    sip.setapi('QDate', 2)
+    sip.setapi('QDateTime', 2)
+    sip.setapi('QTextStream', 2)
+    sip.setapi('QTime', 2)
+    sip.setapi('QUrl', 2)
+except AttributeError:
+    # PyQt < v4.6
+    pass
+
+import sys
+for p in ('{test_framework}', '{test_dir}'):
+    sys.path.append(p)
+from {test_modname} import {test_cls}
+systest = {test_cls}()
+if {exclude_in_pr}:
+    systest.excludeInPullRequests = lambda: False
+""".format(test_framework=TESTING_FRAMEWORK_DIR, test_dir=self._test_dir, test_modname=self._modname,
+           test_cls=self._test_cls_name, exclude_in_pr=self._exclude_in_pr_builds)
         if (not clean):
             code += "systest.execute()\n" + \
-                    ("exitcode = systest.returnValidationCode(%i)\n" % TestRunner.VALIDATION_FAIL_CODE)
+                    "exitcode = systest.returnValidationCode({})\n".format(TestRunner.VALIDATION_FAIL_CODE)
         else:
             code += "exitcode = 0\n"
         code += "systest.cleanup()\nsys.exit(exitcode)\n"
@@ -721,8 +739,8 @@ class TestSuite(object):
         all_lines = output.split('\n')
         # Find the test results
         for line in all_lines:
-            entries = line.split(MantidStressTest.DELIMITER)
-            if len(entries) == 3 and entries[0] == MantidStressTest.PREFIX:
+            entries = line.split(MantidSystemTest.DELIMITER)
+            if len(entries) == 3 and entries[0] == MantidSystemTest.PREFIX:
                 self._result.addItem([entries[1], entries[2]])
 
     def setOutputMsg(self, msg=None):
@@ -797,7 +815,7 @@ class TestManager(object):
 
         if len(reduced_test_list) == 0:
             print('No tests defined in ' + test_dir +
-                  '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
+                  '. Please ensure all test classes sub class systemtesting.MantidSystemTest.')
             exit(2)
 
         test_stats[0] = len(reduced_test_list)
@@ -966,7 +984,7 @@ class TestManager(object):
                 mod_attrs = dir(mod)
                 for key in mod_attrs:
                     value = getattr(mod, key)
-                    if key is "MantidStressTest" or not inspect.isclass(value):
+                    if key is "MantidSystemTest" or not inspect.isclass(value):
                         continue
                     if self.isValidTestClass(value):
                         test_name = key
@@ -982,9 +1000,9 @@ class TestManager(object):
 
     def isValidTestClass(self, class_obj):
         """Returns true if the test is a valid test class. It is valid
-        if: the class subclassses MantidStressTest and has no abstract methods
+        if: the class subclassses MantidSystemTest and has no abstract methods
         """
-        if not issubclass(class_obj, MantidStressTest):
+        if not issubclass(class_obj, MantidSystemTest):
             return False
         # Check if the get_reference_file is abstract or not
         if hasattr(class_obj, "__abstractmethods__"):
@@ -1006,7 +1024,7 @@ class MantidFrameworkConfig:
                  loglevel='information', archivesearch=False):
         self.__sourceDir = self.__locateSourceDir(sourceDir)
 
-        # add location of stress tests
+        # add location of system tests
         self.__testDir = self.__locateTestsDir()
 
         # add location of the analysis tests

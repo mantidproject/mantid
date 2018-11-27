@@ -10,7 +10,7 @@ Test the SNS inelatic reduction scripts.
 """
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import os
 import shutil
 import glob
@@ -19,7 +19,7 @@ import mantid
 from mantid.simpleapi import *
 
 
-class DirectInelaticSNSTest(stresstesting.MantidStressTest):
+class DirectInelaticSNSTest(systemtesting.MantidSystemTest):
     _nxspe_filename=""
     customDataDir=""
 
@@ -148,7 +148,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         else:
             LoadNexus(Filename=os.path.join(self.customDataDir,"van.nx5"),OutputWorkspace="VAN")
 
-    #functions from stresstesting
+    #functions from systemtesting
     def requiredFiles(self):
         return ['SEQ_12384_event.nxs']
 
