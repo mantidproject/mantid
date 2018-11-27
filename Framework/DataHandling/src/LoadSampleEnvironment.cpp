@@ -253,10 +253,15 @@ void LoadSampleEnvironment::exec() {
       g_log.information("\n");
     }
   }
-  //get the material name and number density for debug
-  const auto outMaterial = outputWS->sample().getEnvironment().container()->material();
-  debugString += "\n" "Environment Material: " + outMaterial.name();
-  debugString += "\n" "Environment Material Number Density: " + std::to_string(outMaterial.numberDensity());
+  // get the material name and number density for debug
+  const auto outMaterial =
+      outputWS->sample().getEnvironment().container()->material();
+  debugString += "\n"
+                 "Environment Material: " +
+                 outMaterial.name();
+  debugString += "\n"
+                 "Environment Material Number Density: " +
+                 std::to_string(outMaterial.numberDensity());
   // Set output workspace
   setProperty("OutputWorkspace", outputWS);
   g_log.debug(debugString);
