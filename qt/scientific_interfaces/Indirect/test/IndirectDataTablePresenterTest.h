@@ -57,9 +57,9 @@ public:
 	}
 
 	void setUp() override {
-		m_model = new NiceMock<MockIndirectFittingModel>();
-		m_table = new QTableWidget();
-		m_presenter = new IndirectDataTablePresenter(m_model, m_table);
+		m_model = std::make_unique<NiceMock<MockIndirectFittingModel>>();
+		m_table = std::make_unique<QTableWidget>();
+		m_presenter = std::make_unique<IndirectDataTablePresenter>(std::move(m_model.get()), std::move(m_table.get()));
 
 		//SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(10));
 		//m_fittingModel->addWorkspace("WorkspaceName");
@@ -68,20 +68,20 @@ public:
 	void tearDown() override {
 		//AnalysisDataService::Instance().clear();
 
-		TS_ASSERT(Mock::VerifyAndClearExpectations(m_table));
-		TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
+		TS_ASSERT(Mock::VerifyAndClearExpectations(m_table.get()));
+		TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
 
-		delete m_presenter;
-		delete m_model;
-		delete m_table;
+		m_presenter.reset();
+		m_model.reset();
+		m_table.reset();
 	}
 
 	void test_test() {}
 
 private:
-	QTableWidget *m_table;
-	MockIndirectFittingModel *m_model;
-	IndirectDataTablePresenter *m_presenter;
+	std::unique_ptr<QTableWidget> m_table;
+	std::unique_ptr<MockIndirectFittingModel> m_model;
+	std::unique_ptr<IndirectDataTablePresenter> m_presenter;
 
 	//SetUpADSWithWorkspace *m_ads;
 };
