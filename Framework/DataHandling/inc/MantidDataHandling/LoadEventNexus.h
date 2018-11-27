@@ -177,8 +177,8 @@ private:
 
   /// Temporary fix to load ESS files which may have dynamic strings for the
   /// instrument name.
-  std::string tryLoadInstrumentNameH5(const std::string &nexusfilename,
-                                      const std::string &top_entry_name);
+  static std::string tryLoadInstrumentNameH5(const std::string &nexusfilename,
+                                             const std::string &top_entry_name);
 
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
