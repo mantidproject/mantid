@@ -171,6 +171,13 @@ void IndirectFitPlotPresenter::setEndX(double endX) {
   m_view->setFitRangeMaximum(endX);
 }
 
+void IndirectFitPlotPresenter::updatePlotSpectrum(int spectrum) {
+  m_view->setPlotSpectrum(spectrum);
+  setActiveSpectrum(static_cast<std::size_t>(spectrum));
+  updatePlots();
+  updateFitRangeSelector();
+}
+
 void IndirectFitPlotPresenter::updateRangeSelectors() {
   updateBackgroundSelector();
   updateHWHMSelector();

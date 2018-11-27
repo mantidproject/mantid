@@ -117,11 +117,12 @@ include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
+add_subdirectory (Catalog)
+
 add_subdirectory (Nexus)
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)
 add_subdirectory (WorkflowAlgorithms)
-add_subdirectory (Catalog)
 add_subdirectory (CurveFitting)
 add_subdirectory (Crystal)
 add_subdirectory (ICat)

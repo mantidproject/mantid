@@ -10,12 +10,12 @@ from mantid.simpleapi import *
 from mantid.api import FrameworkManager
 import os
 import glob
-import stresstesting
+import systemtesting
 
 EXPECTED_EXT = '.expected'
 
 
-class LoadLotsOfInstruments(stresstesting.MantidStressTest):
+class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
     def __getDataFileList__(self):
         # get a list of directories to look in
         direc = config['instrumentDefinition.directory']

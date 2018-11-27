@@ -134,6 +134,9 @@ class Pearl(AbstractInst):
 
         return new_workspace_names
 
+    def _get_instrument_bin_widths(self):
+        return self._inst_settings.focused_bin_widths
+
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:
             output_mode = self._inst_settings.focus_mode
