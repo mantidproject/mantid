@@ -7,7 +7,7 @@ from qtpy.QtWidgets import QMessageBox, QApplication
 from qtpy.QtCore import Qt, QMetaObject
 
 from mantid import FrameworkManager
-from mantidqt.utils.qt.test.test_window import GuiTestBase
+from mantidqt.utils.qt.test.gui_window_test import GuiWindowTest
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 
 
@@ -15,11 +15,11 @@ def skip_on_ubuntu():
     return 'Ubuntu' in platform.platform() and sys.version[0] == '2'
 
 
-class TestFitPropertyBrowser(GuiTestBase):
+@unittest.skipIf(skip_on_ubuntu(), "Popups don't show on ubuntu with python 2. Unskip when switched to xvfb")
+class TestFitPropertyBrowser(GuiWindowTest):
 
-    def __init__(self, test):
-        super(TestFitPropertyBrowser, self).__init__(FitPropertyBrowser)
-        self.test = test
+    def create_widget(self):
+        return FitPropertyBrowser()
 
     def start_setup_menu(self):
         self.click_button('button_Setup')
@@ -55,11 +55,11 @@ class TestFitPropertyBrowser(GuiTestBase):
     def test_find_peaks_no_workspace(self):
         yield self.start_setup_menu()
         m = self.get_menu('menu_Setup')
-        self.test.assertTrue(m.isVisible())
+        self.assertTrue(m.isVisible())
         yield self.start_find_peaks()
         box = self.get_active_modal_widget()
-        self.test.assertTrue(isinstance(box, QMessageBox))
-        self.test.assertEqual(box.text(), 'Workspace name is not set')
+        self.assertTrue(isinstance(box, QMessageBox))
+        self.assertEqual(box.text(), 'Workspace name is not set')
         box.close()
 
     def test_load_from_string_blah(self):
@@ -68,8 +68,8 @@ class TestFitPropertyBrowser(GuiTestBase):
         yield self.start_load_from_string()
         yield self.set_function_string_blah()
         box = self.get_active_modal_widget()
-        self.test.assertEqual(box.text(),
-                              "Unexpected exception caught:\n\nError in input string to FunctionFactory\nblah")
+        self.assertEqual(box.text(),
+                         "Unexpected exception caught:\n\nError in input string to FunctionFactory\nblah")
         box.close()
 
     def test_load_from_string_lb(self):
@@ -78,8 +78,8 @@ class TestFitPropertyBrowser(GuiTestBase):
         yield self.start_load_from_string()
         yield self.set_function_string_linear()
         a = self.widget.getFittingFunction()
-        self.test.assertEqual(a, 'name=LinearBackground,A0=0,A1=0')
-        self.test.assertEqual(self.widget.sizeOfFunctionsGroup(), 3)
+        self.assertEqual(a, 'name=LinearBackground,A0=0,A1=0')
+        self.assertEqual(self.widget.sizeOfFunctionsGroup(), 3)
 
     def test_copy_to_clipboard(self):
         self.widget.loadFunction('name=LinearBackground,A0=0,A1=0')
@@ -88,39 +88,16 @@ class TestFitPropertyBrowser(GuiTestBase):
         QApplication.clipboard().clear()
         self.trigger_action('action_CopyToClipboard')
         yield self.wait_for_true(lambda: QApplication.clipboard().text() != '')
-        self.test.assertEqual(QApplication.clipboard().text(), 'name=LinearBackground,A0=0,A1=0')
+        self.assertEqual(QApplication.clipboard().text(), 'name=LinearBackground,A0=0,A1=0')
 
     def test_clear_model(self):
         self.widget.loadFunction('name=LinearBackground,A0=0,A1=0')
-        self.test.assertEqual(self.widget.sizeOfFunctionsGroup(), 3)
+        self.assertEqual(self.widget.sizeOfFunctionsGroup(), 3)
         yield self.start_setup_menu()
         yield self.start_manage_setup()
         self.trigger_action('action_ClearModel')
         yield self.wait_for_true(lambda: self.widget.sizeOfFunctionsGroup() == 2)
-        self.test.assertEqual(self.widget.sizeOfFunctionsGroup(), 2)
-
-
-@unittest.skipIf(skip_on_ubuntu(), "Popups don't show on ubuntu with python 2. Unskip when switched to xvfb")
-class TestModalTester(unittest.TestCase):
-
-    def tearDown(self):
-        import time
-        time.sleep(0.2)
-
-    def test_find_peaks_no_workspace(self):
-        TestFitPropertyBrowser(self).run('test_find_peaks_no_workspace', pause=0.)
-
-    def test_load_from_string_blah(self):
-        TestFitPropertyBrowser(self).run('test_load_from_string_blah', pause=0.)
-
-    def test_load_from_string_lb(self):
-        TestFitPropertyBrowser(self).run('test_load_from_string_lb', pause=0.)
-
-    def test_copy_to_clipboard(self):
-        TestFitPropertyBrowser(self).run('test_copy_to_clipboard', pause=0.)
-
-    def test_clear_model(self):
-        TestFitPropertyBrowser(self).run('test_clear_model', pause=0.)
+        self.assertEqual(self.widget.sizeOfFunctionsGroup(), 2)
 
 
 if __name__ == '__main__':

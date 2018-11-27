@@ -1,19 +1,24 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+#  This file is part of the mantid workbench.
+#
+#
 from __future__ import print_function
+import inspect
+from unittest import TestCase
 
-from mantidqt.utils.qt.test.run_test_app import open_in_window
+from mantidqt.utils.qt.test.gui_test_runner import open_in_window
 from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication
-from qtpy.QtCore import QObject, Qt, QMetaObject
+from qtpy.QtCore import Qt, QMetaObject
 
 
-class GuiTestBase(QObject, object):
+class GuiTestBase(object):
 
-    def __init__(self, widget_class):
-        super(GuiTestBase, self).__init__()
-        self.widget_class = widget_class
-        self.widget = None
-        self.call_method = 'call'
-
-    def __call__(self, w):
+    def _call_test_method(self, w):
         self.widget = w
         if hasattr(self, self.call_method):
             return getattr(self, self.call_method)()
@@ -36,9 +41,9 @@ class GuiTestBase(QObject, object):
     def wait_for_popup(self):
         return self.wait_for_true(self.get_active_popup_widget)
 
-    def run(self, method='call', pause=0, close_on_finish=True, attach_debugger=False):
+    def run_test(self, method='call', pause=0, close_on_finish=True, attach_debugger=False):
         self.call_method = method
-        open_in_window(self.widget_class, self, attach_debugger=attach_debugger, pause=pause,
+        open_in_window(self.create_widget, self._call_test_method, attach_debugger=attach_debugger, pause=pause,
                        close_on_finish=close_on_finish)
 
     def get_child(self, child_class, name):
@@ -87,3 +92,26 @@ class GuiTestBase(QObject, object):
     def click_button(self, name):
         button = self.get_button(name)
         QMetaObject.invokeMethod(button, 'click', Qt.QueuedConnection)
+
+
+def is_test_method(value):
+    if not inspect.ismethod(value):
+        return False
+    return value.__name__.startswith('test_')
+
+
+def make_test_wrapper(name):
+    def wrapper(self):
+        self.run_test(method=name)
+    return wrapper
+
+
+class GuiWindowTest(TestCase, GuiTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        for test in inspect.getmembers(cls, is_test_method):
+            name = test[0]
+            wrapped_name = '_' + name
+            setattr(cls, wrapped_name, test[1])
+            setattr(cls, name, make_test_wrapper(wrapped_name))
