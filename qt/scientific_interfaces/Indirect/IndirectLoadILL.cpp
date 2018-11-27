@@ -19,7 +19,7 @@ namespace CustomInterfaces {
 IndirectLoadILL::IndirectLoadILL(QWidget *parent) : IndirectToolsTab(parent) {
   m_uiForm.setupUi(parent);
 
-	connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
   connect(m_uiForm.mwRun, SIGNAL(filesFound()), this, SLOT(handleFilesFound()));
   connect(m_uiForm.chkUseMap, SIGNAL(toggled(bool)), m_uiForm.mwMapFile,
@@ -151,9 +151,7 @@ void IndirectLoadILL::handleFilesFound() {
   }
 }
 
-void IndirectLoadILL::runClicked() {
-	runTab();
-}
+void IndirectLoadILL::runClicked() { runTab(); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

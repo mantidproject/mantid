@@ -26,7 +26,7 @@ IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent)
     : IndirectToolsTab(parent) {
   m_uiForm.setupUi(parent);
 
-	connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
@@ -63,7 +63,7 @@ bool IndirectTransmissionCalc::validate() {
  * Run the tab, invoking the IndirectTransmission algorithm.
  */
 void IndirectTransmissionCalc::run() {
-	setRunIsRunning(true);
+  setRunIsRunning(true);
 
   std::string instrumentName =
       m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
@@ -99,32 +99,31 @@ void IndirectTransmissionCalc::run() {
  * @param error If the algorithm encountered an error during execution
  */
 void IndirectTransmissionCalc::algorithmComplete(bool error) {
-	setRunIsRunning(false);
+  setRunIsRunning(false);
 
   if (!error) {
-		std::string const instrumentName =
-			m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
-		std::string const outWsName = instrumentName + "_transmission";
+    std::string const instrumentName =
+        m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
+    std::string const outWsName = instrumentName + "_transmission";
 
-		auto resultTable =
-			AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWsName);
-		Column_const_sptr propertyNames = resultTable->getColumn("Name");
-		Column_const_sptr propertyValues = resultTable->getColumn("Value");
+    auto resultTable =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outWsName);
+    Column_const_sptr propertyNames = resultTable->getColumn("Name");
+    Column_const_sptr propertyValues = resultTable->getColumn("Value");
 
-		// Update the table in the GUI
-		m_uiForm.tvResultsTable->clear();
+    // Update the table in the GUI
+    m_uiForm.tvResultsTable->clear();
 
-		for (auto i = 0u; i < resultTable->rowCount(); ++i) {
-			QTreeWidgetItem *item = new QTreeWidgetItem();
-			item->setText(0,
-				QString::fromStdString(propertyNames->cell<std::string>(i)));
-			item->setText(1, QString::number(propertyValues->cell<double>(i)));
-			m_uiForm.tvResultsTable->addTopLevelItem(item);
-		}
-  }
-	else
-		emit showMessageBox("Failed to execute IndirectTransmission "
-			"algorithm.\nSee Results Log for details.");
+    for (auto i = 0u; i < resultTable->rowCount(); ++i) {
+      QTreeWidgetItem *item = new QTreeWidgetItem();
+      item->setText(
+          0, QString::fromStdString(propertyNames->cell<std::string>(i)));
+      item->setText(1, QString::number(propertyValues->cell<double>(i)));
+      m_uiForm.tvResultsTable->addTopLevelItem(item);
+    }
+  } else
+    emit showMessageBox("Failed to execute IndirectTransmission "
+                        "algorithm.\nSee Results Log for details.");
 }
 
 /**
@@ -137,17 +136,15 @@ void IndirectTransmissionCalc::loadSettings(const QSettings &settings) {
   UNUSED_ARG(settings);
 }
 
-void IndirectTransmissionCalc::runClicked() {
-	runTab();
-}
+void IndirectTransmissionCalc::runClicked() { runTab(); }
 
 void IndirectTransmissionCalc::setRunIsRunning(bool running) {
-	m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-	setRunEnabled(!running);
+  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
+  setRunEnabled(!running);
 }
 
 void IndirectTransmissionCalc::setRunEnabled(bool enabled) {
-	m_uiForm.pbRun->setEnabled(enabled);
+  m_uiForm.pbRun->setEnabled(enabled);
 }
 
 } // namespace CustomInterfaces
