@@ -215,9 +215,9 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_fittingModel.get()));
 
-    m_presenter.release();
-    m_fittingModel.release();
-    m_view.release();
+    m_presenter.reset();
+    m_fittingModel.reset();
+    m_view.reset();
   }
 
   ///----------------------------------------------------------------------
