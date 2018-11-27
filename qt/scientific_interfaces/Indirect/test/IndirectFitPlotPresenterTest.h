@@ -223,9 +223,9 @@ public:
   /// Unit tests to check for successful presenter instantiation
   ///----------------------------------------------------------------------
 
-	void test_test() {}
+  void test_test() {}
 
-  //void test_that_the_model_and_view_have_been_instantiated_correctly() {
+  // void test_that_the_model_and_view_have_been_instantiated_correctly() {
   //  std::size_t const selectedSpectrum(3);
 
   //  ON_CALL(*m_view, getSelectedSpectrum())
@@ -235,17 +235,20 @@ public:
   //  EXPECT_CALL(*m_view, getSelectedSpectrum())
   //      .Times(1)
   //      .WillOnce(Return(selectedSpectrum));
-  //  EXPECT_CALL(*m_fittingModel, isMultiFit()).Times(1).WillOnce(Return(false));
+  //  EXPECT_CALL(*m_fittingModel,
+  //  isMultiFit()).Times(1).WillOnce(Return(false));
 
   //  m_view->getSelectedSpectrum();
   //  m_fittingModel->isMultiFit();
   //}
 
-  //void
-  //test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_model_and_view() {
+  // void
+  // test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_model_and_view()
+  // {
   //  std::size_t const selectionSize(2);
 
-  //  ON_CALL(*m_view, dataSelectionSize()).WillByDefault(Return(selectionSize));
+  //  ON_CALL(*m_view,
+  //  dataSelectionSize()).WillByDefault(Return(selectionSize));
 
   //  EXPECT_CALL(*m_fittingModel, numberOfWorkspaces())
   //      .Times(2)
