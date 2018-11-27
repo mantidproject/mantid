@@ -119,7 +119,8 @@ void MuonPairingAsymmetry::init() {
 
   // declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
   //                     "OutputWorkspace", emptyString, Direction::Output),
-  //                 "The workspace which will hold the results of the asymmetry "
+  //                 "The workspace which will hold the results of the asymmetry
+  //                 "
   //     "calculation.");
 
   declareProperty("PairName", emptyString,
@@ -286,9 +287,7 @@ void MuonPairingAsymmetry::validateGroupsWorkspaces(
   }
 }
 
-bool MuonPairingAsymmetry::checkGroups(){
-  return false;
-}
+bool MuonPairingAsymmetry::checkGroups() { return false; }
 
 void MuonPairingAsymmetry::exec() {
 
@@ -303,8 +302,9 @@ void MuonPairingAsymmetry::exec() {
   // outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
 
   setPairAsymmetrySampleLogs(outWS);
-  if(!outWS->isGroup()){
-    setProperty("OutputWorkspace", outWS);}
+  if (!outWS->isGroup()) {
+    setProperty("OutputWorkspace", outWS);
+  }
 }
 
 MatrixWorkspace_sptr MuonPairingAsymmetry::execGroupWorkspaceInput() {
