@@ -1,6 +1,6 @@
-.. _vates_testing:
+.. _vsi_testing:
 
-VATES Testing
+VSI Testing
 =============
 
 .. contents::
@@ -9,7 +9,7 @@ VATES Testing
 
 *Preparation*
 
-- Get the scripts from the Mantid repository `this directory <https://github.com/mantidproject/mantid/tree/master/scripts/Vates>`_.
+- Get the scripts from the Mantid repository `this directory <https://github.com/mantidproject/mantid/tree/master/scripts/vsi>`_.
 - Make sure that you have the Mantid system test data. You can do this by building a SystemTestData target of Mantid.
 - Put the system test data directory in your Mantid user directories
 
@@ -19,10 +19,10 @@ VATES Testing
 --------------
 
 #. Load the script SXD_NaCl.py in MantidPlot. Run it.
-#. This should load a workspace called QLab. Right-click this workspace and choose 'Show VATES simple interface'.
-#. This should open the VATES window. Like the picture below. Check that all tabs are present.
+#. This should load a workspace called QLab. Right-click this workspace and choose 'Show VSI simple interface'.
+#. This should open the VSI window. Like the picture below. Check that all tabs are present.
 
-.. figure:: ../../images/vates.png
+.. figure:: ../../images/vsi.png
    :alt: alternate text
    :align: right
    
@@ -51,11 +51,11 @@ VATES Testing
    #. In the properties tab click Delete and the plot alterations should be removed from the plot.
    #. Repeat the previous three steps for the different Rebin options.  
 
-#. Close the VATES interface and then reopen as before. You are now in scatter plot mode.
+#. Close the VSI interface and then reopen as before. You are now in scatter plot mode.
 
    #. Under Properties, change the Number of Points and Top Percentile settings and see that the plot changes.
-   #. Drag the peaks_qLab workspace from the main GUI onto VATES. This should show the peak position in the plot as points.
-   #. Drag the peaks_qLab_integrated workspace from the main GUI onto VATES. This should show the peak positions in the plot as spheres.
+   #. Drag the peaks_qLab workspace from the main GUI onto VSI. This should show the peak position in the plot as points.
+   #. Drag the peaks_qLab_integrated workspace from the main GUI onto VSI. This should show the peak positions in the plot as spheres.
 
-#. Close the VATES GUI.
+#. Close the VSI GUI.
 
