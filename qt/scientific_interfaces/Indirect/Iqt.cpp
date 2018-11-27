@@ -9,6 +9,7 @@
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 
 #include <qwt_plot.h>
@@ -137,6 +138,10 @@ void Iqt::setup() {
           SLOT(plotCurrentPreview()));
   connect(m_uiForm.cbCalculateErrors, SIGNAL(clicked()), this,
           SLOT(errorsClicked()));
+  connect(m_uiForm.spTiledPlotFirst, SIGNAL(valueChanged(int)), this,
+          SLOT(setTiledPlotFirstPlot(int)));
+  connect(m_uiForm.spTiledPlotLast, SIGNAL(valueChanged(int)), this,
+          SLOT(setTiledPlotLastPlot(int)));
 }
 
 void Iqt::run() {
@@ -180,6 +185,14 @@ void Iqt::run() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
+MatrixWorkspace_const_sptr Iqt::getADSWorkspace(std::string const &name) const {
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+}
+
+std::size_t Iqt::getOutWsNumberOfSpectra() const {
+  return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
+}
+
 /**
  * Handle algorithm completion.
  *
@@ -188,11 +201,16 @@ void Iqt::run() {
 void Iqt::algorithmComplete(bool error) {
   setRunIsRunning(false);
   if (error) {
-    setPlotResultEnabled(false);
+    setPlotSpectrumEnabled(false);
     setTiledPlotEnabled(false);
     setSaveResultEnabled(false);
+  } else {
+    setPlotSpectrumIndexMax(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
+    setPlotSpectrumIndex(selectedSpectrum());
+    setTiledPlotFirstIndex(selectedSpectrum());
+    setTiledPlotLastIndex(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
   }
-}
+} // namespace IDA
 /**
  * Handle saving of workspace
  */
@@ -207,10 +225,13 @@ void Iqt::saveClicked() {
  */
 void Iqt::plotClicked() {
   checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  setPlotResultIsPlotting(true);
-  plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-  setPlotResultIsPlotting(false);
+  setPlotSpectrumIsPlotting(true);
+  plotSpectrum(QString::fromStdString(m_pythonExportWsName),
+               getPlotSpectrumIndex());
+  setPlotSpectrumIsPlotting(false);
 }
+
+void Iqt::runClicked() { runTab(); }
 
 void Iqt::errorsClicked() {
   m_uiForm.spIterations->setEnabled(isErrorsEnabled());
@@ -218,25 +239,40 @@ void Iqt::errorsClicked() {
 
 bool Iqt::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
 
+std::size_t Iqt::getXMinIndex(Mantid::MantidVec const &yData,
+                              std::vector<double>::const_iterator iter) {
+  auto cropIndex = 0;
+  if (iter != yData.end()) {
+    auto const index = static_cast<int>(iter - yData.begin());
+    cropIndex = index > 0 ? index - 1 : index;
+  } else
+    showMessageBox(
+        "Incorrect data provided for Tiled Plot: y values are out of range");
+  return cropIndex;
+}
+
+double Iqt::getXMinValue(MatrixWorkspace_const_sptr workspace,
+                         std::size_t const &index) {
+  auto const firstSpectraYData = workspace->dataY(index);
+  auto const positionIter =
+      std::find_if(firstSpectraYData.begin(), firstSpectraYData.end(),
+                   [&](double const &value) { return value < 1.0; });
+  auto const cropIndex = getXMinIndex(firstSpectraYData, positionIter);
+  return workspace->dataX(index)[cropIndex];
+}
+
 void Iqt::plotTiled() {
   setTiledPlotIsPlotting(true);
 
-  MatrixWorkspace_const_sptr outWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_pythonExportWsName);
+  auto const outWs = getADSWorkspace(m_pythonExportWsName);
 
-  // Find x value where y > 1 in 0th spectra
-  const auto tiledPlotWsName = outWs->getName() + "_tiled";
-  const auto y_data = outWs->y(0);
-  const auto y_data_length = y_data.size();
-  auto crop_index = y_data.size();
-  for (size_t i = 0; i < y_data_length; i++) {
-    if (y_data[i] > 1) {
-      crop_index = i - 1;
-      break;
-    }
-  }
-  const auto crop_value = outWs->x(0)[crop_index];
+  auto const tiledPlotWsName = outWs->getName() + "_tiled";
+  auto const firstTiledPlot = m_uiForm.spTiledPlotFirst->text().toInt();
+  auto const lastTiledPlot = m_uiForm.spTiledPlotLast->text().toInt();
+
+  // Get first x value which corresponds to a y value below 1
+  auto const cropValue =
+      getXMinValue(outWs, static_cast<std::size_t>(firstTiledPlot));
 
   // Clone workspace before cropping to keep in ADS
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
@@ -245,34 +281,34 @@ void Iqt::plotTiled() {
   clone->setProperty("OutputWorkspace", tiledPlotWsName);
   clone->execute();
 
-  // Crop based on crop_value
+  // Crop based on selected first and last spectra
   IAlgorithm_sptr crop = AlgorithmManager::Instance().create("CropWorkspace");
   crop->initialize();
   crop->setProperty("InputWorkspace", tiledPlotWsName);
   crop->setProperty("OutputWorkspace", tiledPlotWsName);
-  crop->setProperty("XMax", crop_value);
+  crop->setProperty("StartWorkspaceIndex", firstTiledPlot);
+  crop->setProperty("EndWorkspaceIndex", lastTiledPlot);
+  crop->setProperty("XMin", cropValue);
   crop->execute();
-  MatrixWorkspace_const_sptr tiledPlotWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          tiledPlotWsName);
+
+  auto const tiledPlotWs = getADSWorkspace(tiledPlotWsName);
 
   // Plot tiledwindow
-  const size_t nPlots = tiledPlotWs->getNumberHistograms();
-  if (nPlots == 0)
-    return;
-  QString pyInput = "from mantidplot import newTiledWindow\n";
-  pyInput += "newTiledWindow(sources=[";
-  for (size_t index = 0; index < nPlots; ++index) {
-    if (index > 0) {
-      pyInput += ",";
+  std::size_t const numberOfPlots = lastTiledPlot - firstTiledPlot + 1;
+  if (numberOfPlots != 0) {
+    QString pyInput = "from mantidplot import newTiledWindow\n";
+    pyInput += "newTiledWindow(sources=[";
+    for (auto index = firstTiledPlot; index <= lastTiledPlot; ++index) {
+      if (index > firstTiledPlot) {
+        pyInput += ",";
+      }
+      std::string const pyInStr =
+          "(['" + tiledPlotWsName + "'], " + std::to_string(index) + ")";
+      pyInput += QString::fromStdString(pyInStr);
     }
-    const std::string pyInStr =
-        "(['" + tiledPlotWsName + "'], " + std::to_string(index) + ")";
-    pyInput += QString::fromStdString(pyInStr);
+    pyInput += "])\n";
+    runPythonCode(pyInput);
   }
-  pyInput += "])\n";
-  runPythonCode(pyInput);
-
   setTiledPlotIsPlotting(false);
 }
 
@@ -464,14 +500,75 @@ void Iqt::updateRS(QtProperty *prop, double val) {
     xRangeSelector->setMaximum(val);
 }
 
+void Iqt::setTiledPlotFirstPlot(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  auto lastPlotIndex = m_uiForm.spTiledPlotLast->text().toInt();
+  auto firstPlotMinimum = lastPlotIndex - m_maxTiledPlots >= 0
+                              ? lastPlotIndex - m_maxTiledPlots
+                              : 0;
+  setMinMaxOfTiledPlotFirstIndex(firstPlotMinimum, lastPlotIndex);
+  if (lastPlotIndex - value <= m_maxTiledPlots)
+    setMinMaxOfTiledPlotLastIndex(value, value + m_maxTiledPlots);
+  setTiledPlotFirstIndex(value);
+}
+
+void Iqt::setTiledPlotLastPlot(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  auto firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
+  setMinMaxOfTiledPlotLastIndex(firstPlotIndex,
+                                firstPlotIndex + m_maxTiledPlots);
+  if (value - firstPlotIndex <= m_maxTiledPlots && value - m_maxTiledPlots >= 0)
+    setMinMaxOfTiledPlotFirstIndex(value - m_maxTiledPlots, value);
+  setTiledPlotLastIndex(value);
+}
+
+void Iqt::setMinMaxOfTiledPlotFirstIndex(int minimum, int maximum) {
+  m_uiForm.spTiledPlotFirst->setMinimum(minimum);
+  m_uiForm.spTiledPlotFirst->setMaximum(maximum);
+}
+
+void Iqt::setMinMaxOfTiledPlotLastIndex(int minimum, int maximum) {
+  m_uiForm.spTiledPlotLast->setMinimum(minimum);
+  m_uiForm.spTiledPlotLast->setMaximum(maximum);
+}
+
+void Iqt::setTiledPlotFirstIndex(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
+  m_uiForm.spTiledPlotFirst->setValue(value);
+}
+
+void Iqt::setTiledPlotLastIndex(int value) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
+  auto firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
+  auto lastPlotIndex = value - m_maxTiledPlots > firstPlotIndex
+                           ? firstPlotIndex + m_maxTiledPlots
+                           : value;
+  m_uiForm.spTiledPlotLast->setValue(lastPlotIndex);
+}
+
+void Iqt::setPlotSpectrumIndexMax(int maximum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  m_uiForm.spSpectrum->setMaximum(maximum);
+}
+
+void Iqt::setPlotSpectrumIndex(int spectrum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSpectrum);
+  m_uiForm.spSpectrum->setValue(spectrum);
+}
+
+int Iqt::getPlotSpectrumIndex() { return m_uiForm.spSpectrum->text().toInt(); }
+
 void Iqt::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void Iqt::setPlotResultEnabled(bool enabled) {
+void Iqt::setPlotSpectrumEnabled(bool enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
+  m_uiForm.spSpectrum->setEnabled(enabled);
 }
 
 void Iqt::setTiledPlotEnabled(bool enabled) {
   m_uiForm.pbTile->setEnabled(enabled);
+  m_uiForm.spTiledPlotFirst->setEnabled(enabled);
+  m_uiForm.spTiledPlotLast->setEnabled(enabled);
 }
 
 void Iqt::setSaveResultEnabled(bool enabled) {
@@ -480,7 +577,7 @@ void Iqt::setSaveResultEnabled(bool enabled) {
 
 void Iqt::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
+  setPlotSpectrumEnabled(enabled);
   setSaveResultEnabled(enabled);
   setTiledPlotEnabled(enabled);
 }
@@ -490,8 +587,8 @@ void Iqt::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-void Iqt::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
+void Iqt::setPlotSpectrumIsPlotting(bool plotting) {
+  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Spectrum");
   setButtonsEnabled(!plotting);
 }
 
@@ -499,8 +596,6 @@ void Iqt::setTiledPlotIsPlotting(bool plotting) {
   m_uiForm.pbTile->setText(plotting ? "Plotting..." : "Tiled Plot");
   setButtonsEnabled(!plotting);
 }
-
-void Iqt::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

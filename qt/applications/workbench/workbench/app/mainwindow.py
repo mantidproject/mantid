@@ -43,6 +43,7 @@ from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
+from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -262,22 +263,19 @@ class MainWindow(QMainWindow):
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
 
-    def launchCustomGUI(self, script):
-        exec (open(script).read(), globals())
+    def launchCustomGUI(self, filename):
+        from mantid.kernel import logger  # noqa
+        executioner = PythonCodeExecution()
+        executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
+        executioner.execute(open(filename).read(), filename)
 
     def populateAfterMantidImport(self):
-        from mantid.kernel import ConfigService, logger
-        # TODO ConfigService should accept unicode strings https://github.com/mantidproject/mantid/pull/23826
-        interface_dir = ConfigService[str('mantidqt.python_interfaces_directory')]
-        items = ConfigService[str('mantidqt.python_interfaces')].split()
+        from mantid.kernel import ConfigService, logger  # noqa
+        interface_dir = ConfigService['mantidqt.python_interfaces_directory']
+        items = ConfigService['mantidqt.python_interfaces'].split()
 
         # list of custom interfaces that are not qt4/qt5 compatible
-        GUI_BLACKLIST = ['DGS_Reduction.py',
-                         'MSlice.py',
-                         'ORNL_SANS.py',
-                         'ISIS_Reflectometry_Old.py',
-                         'Powder_Diffraction_Reduction.py',
-                         'HFIR_4Circle_Reduction.py',
+        GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
                          'ISIS_SANS_v2_experimental.py',
                          'Frequency_Domain_Analysis.py',
                          'Elemental_Analysis.py']

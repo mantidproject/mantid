@@ -4,13 +4,13 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-'''
-Mantid stress testing framework. This module contains all of the necessary code
-to run sets of stress tests on the Mantid framework by executing scripts directly
+"""
+Mantid system testing framework. This module contains all of the necessary code
+to run sets of system tests on the Mantid framework by executing scripts directly
 or by importing them into MantidPlot.
 
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
-'''
+"""
 from __future__ import (absolute_import, division, print_function)
 from six import PY3
 import datetime
@@ -44,8 +44,8 @@ TESTING_FRAMEWORK_DIR = THIS_MODULE_DIR.replace('\\', '\\\\')
 #########################################################################
 # The base test class.
 #########################################################################
-class MantidStressTest(unittest.TestCase):
-    '''Defines a base class for stress tests, providing functions
+class MantidSystemTest(unittest.TestCase):
+    '''Defines a base class for system tests, providing functions
     that should be overridden by inheriting classes to perform tests.
     '''
 
@@ -56,7 +56,7 @@ class MantidStressTest(unittest.TestCase):
     PREFIX = 'RESULT'
 
     def __init__(self):
-        super(MantidStressTest, self).__init__()
+        super(MantidSystemTest, self).__init__()
         # A list of things not to check when validating
         self.disableChecking = []
         # Whether or not to strip off whitespace when doing simple ascii diff
@@ -721,8 +721,8 @@ class TestSuite(object):
         all_lines = output.split('\n')
         # Find the test results
         for line in all_lines:
-            entries = line.split(MantidStressTest.DELIMITER)
-            if len(entries) == 3 and entries[0] == MantidStressTest.PREFIX:
+            entries = line.split(MantidSystemTest.DELIMITER)
+            if len(entries) == 3 and entries[0] == MantidSystemTest.PREFIX:
                 self._result.addItem([entries[1], entries[2]])
 
     def setOutputMsg(self, msg=None):
@@ -797,7 +797,7 @@ class TestManager(object):
 
         if len(reduced_test_list) == 0:
             print('No tests defined in ' + test_dir +
-                  '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
+                  '. Please ensure all test classes sub class systemtesting.MantidSystemTest.')
             exit(2)
 
         test_stats[0] = len(reduced_test_list)
@@ -966,7 +966,7 @@ class TestManager(object):
                 mod_attrs = dir(mod)
                 for key in mod_attrs:
                     value = getattr(mod, key)
-                    if key is "MantidStressTest" or not inspect.isclass(value):
+                    if key is "MantidSystemTest" or not inspect.isclass(value):
                         continue
                     if self.isValidTestClass(value):
                         test_name = key
@@ -982,9 +982,9 @@ class TestManager(object):
 
     def isValidTestClass(self, class_obj):
         """Returns true if the test is a valid test class. It is valid
-        if: the class subclassses MantidStressTest and has no abstract methods
+        if: the class subclassses MantidSystemTest and has no abstract methods
         """
-        if not issubclass(class_obj, MantidStressTest):
+        if not issubclass(class_obj, MantidSystemTest):
             return False
         # Check if the get_reference_file is abstract or not
         if hasattr(class_obj, "__abstractmethods__"):
@@ -1006,7 +1006,7 @@ class MantidFrameworkConfig:
                  loglevel='information', archivesearch=False):
         self.__sourceDir = self.__locateSourceDir(sourceDir)
 
-        # add location of stress tests
+        # add location of system tests
         self.__testDir = self.__locateTestsDir()
 
         # add location of the analysis tests

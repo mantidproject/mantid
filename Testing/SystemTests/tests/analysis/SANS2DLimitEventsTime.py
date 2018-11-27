@@ -7,12 +7,12 @@
 #pylint: disable=no-init
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 
 
-class SANS2DLimitEventsTime(stresstesting.MantidStressTest):
+class SANS2DLimitEventsTime(systemtesting.MantidSystemTest):
 
     def runTest(self):
         SANS2D()

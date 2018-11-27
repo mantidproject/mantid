@@ -7,7 +7,7 @@
 #pylint: disable=no-init,too-few-public-methods
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import mantid  # noqa
 
 from mantid.api import (AnalysisDataService, FileFinder)
@@ -18,7 +18,7 @@ from sans.command_interface.ISISCommandInterface import (SANS2D, Set1D, Detector
 # test batch mode with sans2d and selecting a period in batch mode
 
 
-class SANS2DMultiPeriodSingleTest_V2(stresstesting.MantidStressTest):
+class SANS2DMultiPeriodSingleTest_V2(systemtesting.MantidSystemTest):
 
     reduced = ''
 
@@ -60,7 +60,7 @@ class SANS2DMultiPeriodBatchTest_V2(SANS2DMultiPeriodSingleTest_V2):
         self.reduced = '5512_SANS2DBatch'
 
 
-class LARMORMultiPeriodEventModeLoadingTest_V2(stresstesting.MantidStressTest):
+class LARMORMultiPeriodEventModeLoadingTest_V2(systemtesting.MantidSystemTest):
     """
     This test checks if the positioning of all workspaces of a
     multi-period event-type file are the same.

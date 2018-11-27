@@ -7,7 +7,7 @@
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 
 import unittest
-import stresstesting
+import systemtesting
 import os
 
 import mantid
@@ -556,9 +556,9 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         self._do_assert(workspace, expected_spectra)
 
 
-class SANSMaskWorkspaceRunnerTest(stresstesting.MantidStressTest):
+class SANSMaskWorkspaceRunnerTest(systemtesting.MantidSystemTest):
     def __init__(self):
-        stresstesting.MantidStressTest.__init__(self)
+        systemtesting.MantidSystemTest.__init__(self)
         self._success = False
 
     def runTest(self):

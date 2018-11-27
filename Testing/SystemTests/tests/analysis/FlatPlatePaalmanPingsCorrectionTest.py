@@ -4,11 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class FlatPlatePaalmanPingsCorrectionTest(stresstesting.MantidStressTest):
+class FlatPlatePaalmanPingsCorrectionTest(systemtesting.MantidSystemTest):
     def create_input_workspace(self, ws):
         # ws = ws with first two channels set to 2.602 AA and last two channels to 31.974AA
         LoadNexus(Filename='IN16B_felo_002K.nxs', OutputWorkspace=ws)
