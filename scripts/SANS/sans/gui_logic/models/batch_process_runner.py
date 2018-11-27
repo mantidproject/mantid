@@ -66,4 +66,9 @@ class BatchProcessRunner(QObject):
                 self.row_failed_signal.emit(key, str(e))
 
     def _load_workspaces_on_thread(self, states):
-        load_workspaces_from_states(states)
+        for key, state in states.items():
+            try:
+                load_workspaces_from_states(state)
+                self.row_processed_signal.emit(key)
+            except Exception as e:
+                self.row_failed_signal.emit(key, str(e))

@@ -148,7 +148,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     return out_scale_factors, out_shift_factors
 
 
-def load_workspaces_from_states(states):
+def load_workspaces_from_states(state):
     workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
                          SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
                          SANSDataType.SampleDirect: "SampleDirectWorkspace",
@@ -159,8 +159,7 @@ def load_workspaces_from_states(states):
     workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkspace",
                             SANSDataType.CanScatter: "CanScatterMonitorWorkspace"}
 
-    for key, state in states.items():
-        workspaces, monitors = provide_loaded_data(state, True, workspace_to_name, workspace_to_monitor)
+    workspaces, monitors = provide_loaded_data(state, True, workspace_to_name, workspace_to_monitor)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Function for plotting
