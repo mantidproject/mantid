@@ -101,7 +101,7 @@ public:
   template <typename F>
   void applySpectra(std::size_t index, const F &functor) const;
 
-  FittingMode getFittingMode() const;
+  virtual FittingMode getFittingMode() const;
   std::unordered_map<std::string, ParameterValue>
   getParameterValues(std::size_t dataIndex, std::size_t spectrum) const;
   std::unordered_map<std::string, ParameterValue>
