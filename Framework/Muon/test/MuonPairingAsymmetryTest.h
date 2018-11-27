@@ -33,7 +33,7 @@ public:
   };
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
 
-  static constexpr const char *inputWSName = "inputData";
+   std::string const inputWSName = "inputData";
 };
 
 // Set only mandatory fields
