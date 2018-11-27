@@ -744,6 +744,8 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
             reduction_mode_list = get_reduction_mode_strings_for_gui(instrument)
             self.set_reduction_modes(reduction_mode_list)
 
+            self.instrumentLabel.setText("{}".format(instrument_string))
+
     def update_gui_combo_box(self, value, expected_type, combo_box):
         # There are two types of values that can be passed:
         # Lists: we set the combo box to the values in the list

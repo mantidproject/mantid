@@ -17,7 +17,7 @@ from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, 
                                           monitor_spectrum, simple_range, monitor_file, det_fit_range,
                                           q_rebin_values, fit_general, mask_angle_entry, range_entry, position_entry)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SaveType,
-                               DetectorType, DataType, FitType)
+                               DetectorType, DataType, FitType, SANSInstrument)
 
 
 class StateGuiModel(object):
@@ -53,6 +53,9 @@ class StateGuiModel(object):
     # FRONT TAB
     # ==================================================================================================================
     # ==================================================================================================================
+    @property
+    def instrument_type(self):
+        return self.get_simple_element(element_id=DetectorId.instrument, default_value=SANSInstrument.NoInstrument)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Compatibility Mode Options

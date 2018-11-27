@@ -268,6 +268,8 @@ class RunTabPresenter(object):
             self._state_model = StateGuiModel(user_file_items)
             # 5. Update the views.
             self._update_view_from_state_model()
+            new_instr = getattr(self._state_model, "instrument_type")
+            self._view.set_instrument_settings(new_instr)
             self._beam_centre_presenter.update_centre_positions(self._state_model)
 
             self._beam_centre_presenter.on_update_rows()

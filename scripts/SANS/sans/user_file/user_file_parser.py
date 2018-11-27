@@ -12,7 +12,7 @@ import re
 from math import copysign
 
 
-from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType)
+from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument)
 from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
                                           single_entry_with_detector, mask_angle_entry, LimitsId,
                                           simple_range, complex_range, MaskId, mask_block, mask_block_cross,
@@ -249,6 +249,36 @@ class BackParser(UserFileComponentParser):
     @abc.abstractmethod
     def get_type_pattern():
         return "\\s*" + BackParser.get_type() + "\\s*/\\s*"
+
+
+class InstrParser(object):
+    """
+    InstrParser looks to find the instrument.
+    Compared to other parsers, this is a naive implementation
+    which expects a line in the user file to explicitly state the instrument,
+    with no other data.
+    """
+    Type = "INSTR"
+    _INSTRUMENTS = ["LOQ", "LARMOR", "SANS2D", "ZOOM", "NOINSTRUMENT"]
+
+    def __init__(self):
+        super(InstrParser, self).__init__()
+
+    def parse_line(self, line):
+        if line == "LOQ":
+            ret_val = SANSInstrument.LOQ
+        elif line == "LARMOR":
+            ret_val = SANSInstrument.LARMOR
+        elif line == "SANS2D":
+            ret_val = SANSInstrument.SANS2D
+        elif line == "ZOOM":
+            ret_val = SANSInstrument.ZOOM
+        elif line == "NOINSTRUMENT":
+            ret_val = SANSInstrument.NoInstrument
+        else:
+            raise RuntimeError("InstrParser: Unknown command for INSTR: {0}".format(line))
+
+        return {DetectorId.instrument: ret_val}
 
 
 class DetParser(UserFileComponentParser):
@@ -2306,6 +2336,10 @@ class UserFileParser(object):
     def _get_correct_parser(self, line):
         line = line.strip()
         line = line.upper()
+
+        if line in InstrParser._INSTRUMENTS:
+            return InstrParser()
+
         for key in self._parsers:
             parser = self._parsers[key]
             if re.match(parser.get_type_pattern(), line, re.IGNORECASE) is not None:
