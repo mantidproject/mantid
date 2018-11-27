@@ -34,7 +34,7 @@ set ( SRC_FILES
 	src/SANSSensitivityCorrection.cpp
 	src/SANSSolidAngleCorrection.cpp
 	src/SetupEQSANSReduction.cpp
-    src/SetupHFIRReduction.cpp
+	src/SetupHFIRReduction.cpp
 	src/StepScan.cpp
 	src/WorkflowAlgorithmHelpers.cpp
 )
@@ -78,7 +78,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
-    inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
+	inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
 	inc/MantidWorkflowAlgorithms/StepScan.h
 	inc/MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h
 )
