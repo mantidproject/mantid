@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import Muon.GUI.Common.load_utils as load_utils
+import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 class MuonLoadData:
