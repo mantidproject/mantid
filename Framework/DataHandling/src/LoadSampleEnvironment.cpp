@@ -238,8 +238,8 @@ void LoadSampleEnvironment::exec() {
   }
   // Put Environment into sample.
 
-  const std::string debugString =
-      "Enviroment has: " + std::to_string(environment->nelements()) +
+  std::string debugString =
+      "Environment has: " + std::to_string(environment->nelements()) +
       " elements.";
 
   sample.setEnvironment(std::move(environment));
@@ -253,8 +253,11 @@ void LoadSampleEnvironment::exec() {
       g_log.information("\n");
     }
   }
+  //get the material name and number density for debug
+  const auto outMaterial = outputWS->sample().getEnvironment().container()->material();
+  debugString += "\n" "Environment Material: " + outMaterial.name();
+  debugString += "\n" "Environment Material Number Density: " + std::to_string(outMaterial.numberDensity());
   // Set output workspace
-
   setProperty("OutputWorkspace", outputWS);
   g_log.debug(debugString);
 }
