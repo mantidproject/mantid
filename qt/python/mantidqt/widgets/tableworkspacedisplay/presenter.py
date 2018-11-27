@@ -173,7 +173,7 @@ class TableWorkspaceDisplay(object):
             return
 
         try:
-            selected_columns = self._get_selected_columns(1, self.TOO_MANY_SELECTED_TO_SORT)
+            selected_columns = self._get_selected_columns()
         except ValueError:
             return
 
