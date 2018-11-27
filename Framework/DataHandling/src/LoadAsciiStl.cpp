@@ -65,12 +65,11 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
     ReadMaterial reader;
     reader.setMaterialParameters(m_params);
     material = *(reader.buildMaterial());
-  }else{
+  } else {
     material = Mantid::Kernel::Material();
   }
   auto retVal = std::make_unique<Geometry::MeshObject>(
-      std::move(m_triangle), std::move(m_verticies),
-      material);
+      std::move(m_triangle), std::move(m_verticies), material);
   return retVal;
 }
 
