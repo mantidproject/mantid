@@ -19,7 +19,7 @@ from qtpy.QtWidgets import QApplication
 
 from mantidqt.utils.qt.plugins import setup_library_paths
 from .modal_tester import ModalTester
-from .test_window import GuiWindowTest
+from .gui_window_test import GuiWindowTest
 
 # Hold on to QAPP reference to avoid garbage collection
 _QAPP = None
