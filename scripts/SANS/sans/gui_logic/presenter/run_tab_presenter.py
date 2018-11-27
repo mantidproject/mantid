@@ -451,11 +451,6 @@ class RunTabPresenter(object):
                 self.on_processing_finished(None)
                 return
 
-            use_optimizations = self._view.use_optimizations
-            output_mode = self._view.output_mode
-            plot_results = self._view.plot_results
-            save_can = self._view.save_can
-
             self.progress = 0
             setattr(self._view, 'progress_bar_value', self.progress)
             setattr(self._view, 'progress_bar_maximum', len(states))

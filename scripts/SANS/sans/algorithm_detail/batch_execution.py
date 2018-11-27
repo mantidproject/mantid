@@ -161,6 +161,7 @@ def load_workspaces_from_states(state):
 
     workspaces, monitors = provide_loaded_data(state, True, workspace_to_name, workspace_to_monitor)
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Function for plotting
 # ----------------------------------------------------------------------------------------------------------------------

@@ -31,7 +31,6 @@ class SANSBatchReduction(object):
         """
         self.validate_inputs(states, use_optimizations, output_mode, plot_results, output_graph)
 
-
         return self._execute(states, use_optimizations, output_mode, plot_results, output_graph, save_can=save_can)
 
     @staticmethod
