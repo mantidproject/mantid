@@ -69,6 +69,6 @@ class BatchProcessRunner(QObject):
         for key, state in states.items():
             try:
                 load_workspaces_from_states(state)
-                self.row_processed_signal.emit(key)
+                self.row_processed_signal.emit(key, [], [])
             except Exception as e:
                 self.row_failed_signal.emit(key, str(e))

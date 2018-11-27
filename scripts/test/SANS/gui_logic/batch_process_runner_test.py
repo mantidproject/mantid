@@ -82,9 +82,9 @@ class BatchProcessRunnerTest(unittest.TestCase):
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(self.batch_process_runner.row_processed_signal.emit.call_count, 3)
-        self.batch_process_runner.row_processed_signal.emit.assert_any_call(0)
-        self.batch_process_runner.row_processed_signal.emit.assert_any_call(1)
-        self.batch_process_runner.row_processed_signal.emit.assert_any_call(2)
+        self.batch_process_runner.row_processed_signal.emit.assert_any_call(0, [], [])
+        self.batch_process_runner.row_processed_signal.emit.assert_any_call(1, [], [])
+        self.batch_process_runner.row_processed_signal.emit.assert_any_call(2, [], [])
         self.assertEqual(self.batch_process_runner.row_failed_signal.emit.call_count, 0)
 
     def test_that_load_workspaces_emits_row_failed_signal_after_each_failed_row(self):
