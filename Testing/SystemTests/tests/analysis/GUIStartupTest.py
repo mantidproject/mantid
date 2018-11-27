@@ -49,12 +49,12 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
         p = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()
         self.assertEquals(out, b'Hello Mantid\n')
-        self.assertFalse(b'Fatal' in err)
 
         # failing script
         with open(self.script,'a') as f:
             f.write('raise RuntimeError("GUITest")')
         p = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()
-        self.assertEquals(str(out),"b'Hello Mantid\\n'")
-        self.assertTrue(b'Fatal' in err)
+        out += err
+        self.assertTrue(b'Hello Mantid\n' in out)
+        self.assertTrue(b'RuntimeError: GUITest' in out)
