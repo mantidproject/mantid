@@ -610,21 +610,27 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // Get the run number
-  file.openData("run_number");
   std::string run;
-  if (file.getInfo().type == ::NeXus::CHAR) {
-    run = file.getStrData();
-  } else if (file.isDataInt()) {
-    // inside ISIS the run_number type is int32
-    std::vector<int> value;
-    file.getData(value);
-    if (!value.empty())
-      run = std::to_string(value[0]);
+  try {
+    file.openData("run_number");
+
+    if (file.getInfo().type == ::NeXus::CHAR) {
+      run = file.getStrData();
+    } else if (file.isDataInt()) {
+      // inside ISIS the run_number type is int32
+      std::vector<int> value;
+      file.getData(value);
+      if (!value.empty())
+        run = std::to_string(value[0]);
+    }
+    file.closeData();
+  } catch (::NeXus::Exception &) {
+    // let it drop on floor
   }
+
   if (!run.empty()) {
     WS->mutableRun().addProperty("run_number", run);
   }
-  file.closeData();
 
   // get the experiment identifier
   try {
