@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import os
 from mantid.simpleapi import *
 from six import string_types
@@ -23,7 +23,7 @@ def _skip_test():
     return "Linux" not in platform.platform()
 
 
-class PG3Calibration(stresstesting.MantidStressTest):
+class PG3Calibration(systemtesting.MantidSystemTest):
     def cleanup(self):
         os.remove(self.saved_cal_file)
 
@@ -71,7 +71,7 @@ class PG3Calibration(stresstesting.MantidStressTest):
         return ('PG3_2538_offsets','PG3_2538_golden_offsets')
 
 
-class PG3CCCalibration(stresstesting.MantidStressTest):
+class PG3CCCalibration(systemtesting.MantidSystemTest):
     def cleanup(self):
         os.remove(self.saved_cal_file)
 

@@ -10,7 +10,7 @@
    test to encompass the complex multi-file loading that the Load
    algorithm is capable of.
 """
-import stresstesting
+import systemtesting
 
 from mantid.api import AnalysisDataService, IEventWorkspace, MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import Load
@@ -20,7 +20,7 @@ import unittest
 DIFF_PLACES = 8
 
 
-class LoadTest(stresstesting.MantidStressTest):
+class LoadTest(systemtesting.MantidSystemTest):
 
     _success = False
 

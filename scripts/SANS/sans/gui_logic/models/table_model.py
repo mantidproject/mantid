@@ -389,13 +389,7 @@ class OptionsColumnModel(object):
         return parsed
 
     def _serialise_options_dict(self):
-        options_string = ''
-        for key, value in self._options.items():
-            if options_string:
-                options_string += ', {}={}'.format(key, value)
-            else:
-                options_string = '{}={}'.format(key, value)
-        return options_string
+        return ', '.join(['{}={}'.format(k,self._options[k]) for k in sorted(self._options)])
 
     @staticmethod
     def _get_options(options_column_string):

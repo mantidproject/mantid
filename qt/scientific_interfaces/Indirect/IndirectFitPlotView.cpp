@@ -106,6 +106,11 @@ void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
   m_plotForm->spPlotSpectrum->setMaximum(maximum);
 }
 
+void IndirectFitPlotView::setPlotSpectrum(int spectrum) {
+  MantidQt::API::SignalBlocker<QObject> blocker(m_plotForm->spPlotSpectrum);
+  m_plotForm->spPlotSpectrum->setValue(spectrum);
+}
+
 void IndirectFitPlotView::setBackgroundLevel(double value) {
   auto selector = m_plotForm->ppPlotTop->getRangeSelector("Background");
   MantidQt::API::SignalBlocker<QObject> blocker(selector);

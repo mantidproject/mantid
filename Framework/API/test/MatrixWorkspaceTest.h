@@ -471,6 +471,20 @@ public:
     TS_ASSERT_EQUALS(ws.size(), 0);
   }
 
+  void testIsCommonBins() {
+    WorkspaceTester ws;
+    ws.initialize(10, 10, 10);
+    // After initialization, ws should contain a shared HistogramX.
+    TS_ASSERT(ws.isCommonBins());
+    // Modifying the value of one Spectrum will cause this Histogram to detach.
+    // Since the value is identical, isCommonBins is still true.
+    ws.mutableX(0)[0] = 1.;
+    TS_ASSERT(ws.isCommonBins());
+    // Once we change the the value, however, isCommonsBins should return false
+    ws.mutableX(0)[0] = 2.;
+    TS_ASSERT_EQUALS(ws.isCommonBins(), false);
+  }
+
   void test_updateSpectraUsing() {
     WorkspaceTester testWS;
     testWS.initialize(3, 1, 1);

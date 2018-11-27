@@ -7,15 +7,21 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 import six
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QButtonGroup, QDialog, QFileDialog, QFrame)  # noqa
+from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 import reduction_gui.widgets.util as util
 import os
 from reduction_gui.reduction.sans.eqsans_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
-import ui.sans.ui_eqsans_instrument
-import ui.sans.ui_eqsans_info
-
+try:
+    from mantidqt.utils.qt import load_ui
+except ImportError:
+    from mantid.kernel import Logger
+    Logger("SANSInstrumentWidget").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import ExtractMask
 if six.PY3:
     unicode = str
 
@@ -41,10 +47,10 @@ class SANSInstrumentWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, name="EQSANS", data_type=None, data_proxy=None):
         super(SANSInstrumentWidget, self).__init__(parent, state, settings, data_type=data_type, data_proxy=data_proxy)
 
-        class SummaryFrame(QtGui.QFrame, ui.sans.ui_eqsans_instrument.Ui_Frame):
+        class SummaryFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/sans/eqsans_instrument.ui', baseinstance=self)
 
         self._summary = SummaryFrame(self)
         self.initialize_content()
@@ -89,31 +95,31 @@ class SANSInstrumentWidget(BaseWidget):
 
     def initialize_content(self):
         # Validators
-        self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
-        self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
-        self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
+        self._summary.detector_offset_edit.setValidator(QDoubleValidator(self._summary.detector_offset_edit))
+        self._summary.sample_dist_edit.setValidator(QDoubleValidator(self._summary.sample_dist_edit))
+        self._summary.n_q_bins_edit.setValidator(QIntValidator(self._summary.n_q_bins_edit))
 
         # Event connections
-        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
-        self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
-        self.connect(self._summary.help_button, QtCore.SIGNAL("clicked()"), self._show_help)
+        self._summary.detector_offset_chk.clicked.connect(self._det_offset_clicked)
+        self._summary.sample_dist_chk.clicked.connect(self._sample_dist_clicked)
+        self._summary.help_button.clicked.connect(self._show_help)
 
-        self.connect(self._summary.dark_current_check, QtCore.SIGNAL("clicked(bool)"), self._dark_clicked)
-        self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
-        self.connect(self._summary.dark_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot_clicked)
+        self._summary.dark_current_check.clicked.connect(self._dark_clicked)
+        self._summary.dark_browse_button.clicked.connect(self._dark_browse)
+        self._summary.dark_plot_button.clicked.connect(self._dark_plot_clicked)
 
         # Output directory
-        g2 = QtGui.QButtonGroup(self)
+        g2 = QButtonGroup(self)
         g2.addButton(self._summary.select_output_dir_radio)
         g2.addButton(self._summary.use_data_dir_radio)
         g2.setExclusive(True)
-        self.connect(self._summary.select_output_dir_radio, QtCore.SIGNAL("clicked()"), self._output_dir_clicked)
-        self.connect(self._summary.use_data_dir_radio, QtCore.SIGNAL("clicked()"), self._output_dir_clicked)
-        self.connect(self._summary.output_dir_browse_button, QtCore.SIGNAL("clicked()"), self._output_dir_browse)
+        self._summary.select_output_dir_radio.clicked.connect(self._output_dir_clicked)
+        self._summary.use_data_dir_radio.clicked.connect(self._output_dir_clicked)
+        self._summary.output_dir_browse_button.clicked.connect(self._output_dir_browse)
         self._output_dir_clicked()
 
         # Lin/log option
-        g3 = QtGui.QButtonGroup(self)
+        g3 = QButtonGroup(self)
         g3.addButton(self._summary.log_binning_radio)
         g3.addButton(self._summary.lin_binning_radio)
         g3.setExclusive(True)
@@ -127,34 +133,34 @@ class SANSInstrumentWidget(BaseWidget):
         self._dark_clicked(self._summary.dark_current_check.isChecked())
 
         # Mask Connections
-        self.connect(self._summary.mask_browse_button, QtCore.SIGNAL("clicked()"), self._mask_browse_clicked)
-        self.connect(self._summary.mask_plot_button, QtCore.SIGNAL("clicked()"), self._mask_plot_clicked)
-        self.connect(self._summary.mask_check, QtCore.SIGNAL("clicked(bool)"), self._mask_checked)
+        self._summary.mask_browse_button.clicked.connect(self._mask_browse_clicked)
+        self._summary.mask_plot_button.clicked.connect(self._mask_plot_clicked)
+        self._summary.mask_check.clicked.connect(self._mask_checked)
 
         # Absolute scale connections and validators
-        self._summary.scale_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_edit))
-        self._summary.scale_beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_beam_radius_edit))
-        self._summary.scale_att_trans_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_att_trans_edit))
-        self.connect(self._summary.scale_data_browse_button, QtCore.SIGNAL("clicked()"), self._scale_data_browse)
-        self.connect(self._summary.scale_data_plot_button, QtCore.SIGNAL("clicked()"), self._scale_data_plot_clicked)
-        self.connect(self._summary.beamstop_chk, QtCore.SIGNAL("clicked(bool)"), self._beamstop_clicked)
-        self.connect(self._summary.scale_chk, QtCore.SIGNAL("clicked(bool)"), self._scale_clicked)
+        self._summary.scale_edit.setValidator(QDoubleValidator(self._summary.scale_edit))
+        self._summary.scale_beam_radius_edit.setValidator(QDoubleValidator(self._summary.scale_beam_radius_edit))
+        self._summary.scale_att_trans_edit.setValidator(QDoubleValidator(self._summary.scale_att_trans_edit))
+        self._summary.scale_data_browse_button.clicked.connect(self._scale_data_browse)
+        self._summary.scale_data_plot_button.clicked.connect(self._scale_data_plot_clicked)
+        self._summary.beamstop_chk.clicked.connect(self._beamstop_clicked)
+        self._summary.scale_chk.clicked.connect(self._scale_clicked)
         self._scale_clicked(self._summary.scale_chk.isChecked())
 
         # TOF cut validator
-        self._summary.low_tof_edit.setValidator(QtGui.QDoubleValidator(self._summary.low_tof_edit))
-        self._summary.high_tof_edit.setValidator(QtGui.QDoubleValidator(self._summary.high_tof_edit))
+        self._summary.low_tof_edit.setValidator(QDoubleValidator(self._summary.low_tof_edit))
+        self._summary.high_tof_edit.setValidator(QDoubleValidator(self._summary.high_tof_edit))
 
         # TOF connections
-        self.connect(self._summary.tof_cut_chk, QtCore.SIGNAL("clicked(bool)"), self._tof_clicked)
+        self._summary.tof_cut_chk.clicked.connect(self._tof_clicked)
 
         # Monitor normalization
-        self.connect(self._summary.beam_monitor_chk, QtCore.SIGNAL("clicked(bool)"), self._beam_monitor_clicked)
-        self.connect(self._summary.beam_monitor_browse_button, QtCore.SIGNAL("clicked()"), self._beam_monitor_reference_browse)
+        self._summary.beam_monitor_chk.clicked.connect(self._beam_monitor_clicked)
+        self._summary.beam_monitor_browse_button.clicked.connect(self._beam_monitor_reference_browse)
 
         # Resolution validator
-        self._summary.sample_apert_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_apert_edit))
-        self.connect(self._summary.resolution_chk, QtCore.SIGNAL("clicked(bool)"), self._resolution_clicked)
+        self._summary.sample_apert_edit.setValidator(QDoubleValidator(self._summary.sample_apert_edit))
+        self._summary.resolution_chk.clicked.connect(self._resolution_clicked)
 
         # Since EQSANS does not currently use the absolute scale calculation, expose it in debug mode only for now
         if not self._settings.debug:
@@ -198,7 +204,7 @@ class SANSInstrumentWidget(BaseWidget):
 
         # We need the EQSANS data proxy for a quick load of a file for masking purposes, but
         # we don't want to show the plot button. Turn this off for the moment.
-        if True or not self._in_mantidplot:
+        if True or not self._has_instrument_view:
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
 
@@ -241,13 +247,16 @@ class SANSInstrumentWidget(BaseWidget):
             self._settings.emit_key_value("OUTPUT_DIR", str(self._summary.output_dir_edit.text()))
 
     def _output_dir_browse(self):
-        output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
+        output_dir = QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
                                                             os.path.expanduser('~'),
-                                                            QtGui.QFileDialog.ShowDirsOnly
-                                                            | QtGui.QFileDialog.DontResolveSymlinks)
-        if output_dir:
-            self._summary.output_dir_edit.setText(output_dir)
-            self._settings.emit_key_value("OUTPUT_DIR", output_dir)
+                                                            QFileDialog.ShowDirsOnly
+                                                            | QFileDialog.DontResolveSymlinks)
+        if not output_dir:
+            return
+        if isinstance(output_dir, tuple):
+            output_dir = output_dir[0]
+        self._summary.output_dir_edit.setText(output_dir)
+        self._settings.emit_key_value("OUTPUT_DIR", output_dir)
 
     def _tof_clicked(self, is_checked):
         self._summary.low_tof_edit.setEnabled(not is_checked)
@@ -334,8 +343,8 @@ class SANSInstrumentWidget(BaseWidget):
         """
         self._summary.instr_name_label.setText(state.instrument_name)
         #npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
-        #self._summary.n_pixel_label.setText(QtCore.QString(npixels))
-        #self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
+        #self._summary.n_pixel_label.setText(str(npixels))
+        #self._summary.pixel_size_label.setText(str(state.pixel_size))
 
         # Absolute scaling
         self._summary.scale_chk.setChecked(state.calculate_scale)
@@ -475,12 +484,9 @@ class SANSInstrumentWidget(BaseWidget):
         m.use_mask_file = self._summary.mask_check.isChecked()
         m.mask_file = unicode(self._summary.mask_edit.text())
         m.detector_ids = self._masked_detectors
-        if self._in_mantidplot:
-            from mantid.api import AnalysisDataService
-            import mantid.simpleapi as api
-            if AnalysisDataService.doesExist(self.mask_ws):
-                ws, masked_detectors = api.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
-                m.detector_ids = [int(i) for i in masked_detectors]
+        if AnalysisDataService.doesExist(self.mask_ws):
+            ws, masked_detectors = ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
+            m.detector_ids = [int(i) for i in masked_detectors]
 
         # Resolution parameters
         m.compute_resolution = self._summary.resolution_chk.isChecked()
@@ -500,9 +506,9 @@ class SANSInstrumentWidget(BaseWidget):
         return m
 
     def _show_help(self):
-        class HelpDialog(QtGui.QDialog, ui.sans.ui_eqsans_info.Ui_Dialog):
+        class HelpDialog(QDialog):
             def __init__(self, parent=None):
-                QtGui.QDialog.__init__(self, parent)
-                self.setupUi(self)
+                QDialog.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/sans/eqsans_info.ui', baseinstance=self)
         dialog = HelpDialog(self)
         dialog.exec_()

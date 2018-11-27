@@ -15,7 +15,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import copy
 import time
-from mantid.kernel import Logger
+from mantid.kernel import Logger, ConfigService
 from mantid.api import (FileFinder)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
@@ -25,6 +25,7 @@ from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
+from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_instrument_strings_for_gui)
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState)
 from sans.user_file.user_file_reader import UserFileReader
@@ -118,7 +119,7 @@ class RunTabPresenter(object):
         self._facility = facility
         # Logger
         self.sans_logger = Logger("SANS")
-        # Name of grpah to output to
+        # Name of graph to output to
         self.output_graph = 'SANS-Latest'
         self.progress = 0
 
@@ -153,6 +154,10 @@ class RunTabPresenter(object):
         # Workspace Diagnostic page presenter
         self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler, run_integral, create_state,
                                                                         self._facility)
+
+        # Check save dir for display
+        self._save_directory_observer = \
+            SaveDirectoryObserver(self._handle_output_directory_changed)
 
     def _default_gui_setup(self):
         """
@@ -192,6 +197,14 @@ class RunTabPresenter(object):
         self._view.transmission_sample_fit_type = fit_types
         self._view.transmission_can_fit_type = fit_types
 
+    def _handle_output_directory_changed(self, new_directory):
+        """
+        Update the gui to display the new save location for workspaces
+        :param new_directory: string. Current save directory for files
+        :return:
+        """
+        self._view.set_out_file_directory(new_directory)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Table + Actions
     # ------------------------------------------------------------------------------------------------------------------
@@ -223,6 +236,10 @@ class RunTabPresenter(object):
             self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view.instrument)
 
             self._view.setup_layout()
+            self._view.set_out_file_directory(ConfigService.Instance().getString("defaultsave.directory"))
+
+            self._view.set_out_default_user_file()
+
             self._view.set_hinting_line_edit_for_column(
                 self._table_model.column_name_converter.index('options_column_model'),
                 self._table_model.get_options_hint_strategy())
@@ -382,6 +399,7 @@ class RunTabPresenter(object):
                 self.on_processing_error(row, error)
 
             if not states:
+                self.sans_logger.warning("No states. Ending processing of batch table.")
                 self.on_processing_finished(None)
                 return
 
@@ -587,6 +605,12 @@ class RunTabPresenter(object):
         stop_time_state_generation = time.time()
         time_taken = stop_time_state_generation - start_time_state_generation
         self.sans_logger.information("The generation of all states took {}s".format(time_taken))
+
+        if errors:
+            self.sans_logger.warning("Errors in getting states...")
+            for _, v in errors.item():
+                self.sans_logger.warning("{}".format(v))
+
         return states, errors
 
     def get_state_for_row(self, row_index, file_lookup=True):

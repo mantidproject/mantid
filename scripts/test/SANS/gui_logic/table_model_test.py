@@ -207,8 +207,8 @@ class TableModelTest(unittest.TestCase):
 
         options_string = options_column_model.get_options_string()
 
-        self.assertEqual(options_string, 'MergeScale=1.5, EventSlices=1-6,5-9,4:5:89,'
-                                         ' WavelengthMin=9.0, WavelengthMax=78.0')
+        self.assertEqual(options_string, 'EventSlices=1-6,5-9,4:5:89, MergeScale=1.5,'
+                                         ' WavelengthMax=78.0, WavelengthMin=9.0')
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string
