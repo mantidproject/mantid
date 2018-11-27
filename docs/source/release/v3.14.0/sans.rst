@@ -38,4 +38,9 @@ Improvements
 
 - :ref:`Q1DWeighted <algm-Q1DWeighted>` now supports the option of asymmetric wedges for unisotropic scatterer.
 
+Removed
+#######
+
+- Obsolete *SetupILLD33Reduction* algorithm was removed.
+
 :ref:`Release 3.14.0 <v3.14.0>`
