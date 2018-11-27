@@ -9,7 +9,7 @@
 Description
 -----------
 
-Loads an environment into the sample of a workspace, either replacing the current environment, or adding to it.
+Loads an environment into the sample of a workspace, either replacing the current environment, or adding to it. you may also set a material for the environment to be loaded, this follows the same inputs as :ref:`algm-SetSampleMaterial`.
 
 The following types of input file are supported:
 
