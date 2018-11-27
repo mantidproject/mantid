@@ -255,11 +255,11 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 3.84580, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], 3.09495, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 2.18243, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], 1.68932, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0004425, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0004631, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0002906, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0003041, 0.00001);
   }
 
   void
@@ -277,11 +277,11 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 4.0990, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], 3.20449, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 2.2751, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], 1.7005, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0002208, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0002311, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0001418, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0001418, 0.00001);
   }
 
   void
@@ -304,11 +304,11 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.90039, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.21643, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], -0.29901, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], 0.06680, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0002351, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0002460, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0001497, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0001567, 0.00001);
   }
 
   void
@@ -330,11 +330,11 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.90039, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[1], 0.21643, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.29901, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.06680, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0002351, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0002460, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.0001497, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[1], 0.0001567, 0.00001);
   }
 
   void
