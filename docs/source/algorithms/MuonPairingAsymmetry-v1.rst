@@ -134,7 +134,7 @@ Output:
 
 .. testoutput:: SpecifyGroupsManuallyMultiPeriod
 
-	X values are : [0.5, 1.5, 2.5, 3.5, 4.5]
+    X values are : [0.5, 1.5, 2.5, 3.5, 4.5]
     Y values are : [-0.4, -0.286, -0.222, -0.286, -0.4]
 
 **Example - Using MuonPreProcess, MuonGroupingCounts for Single Period Data**
@@ -147,7 +147,6 @@ Output:
             [20, 30, 40, 30, 20] + \
             [30, 40, 50, 40, 30] + \
             [40, 50, 60, 50, 40]
-    print(dataY)
     input_workspace = CreateWorkspace(dataX, dataY, NSpec=4)
     for i in range(4):
         # set detector IDs to be 1,2,3,4
@@ -178,7 +177,7 @@ Output:
 
 .. testoutput:: SinglePeriod
 
-    X values are : [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+    X values are : [0.5, 1.5, 2.5, 3.5, 4.5]
     Y values are : [-0.4, -0.286, -0.222, -0.286, -0.4]
 
 .. categories::
