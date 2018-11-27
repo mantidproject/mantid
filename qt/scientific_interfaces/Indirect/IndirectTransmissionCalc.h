@@ -37,6 +37,9 @@ private slots:
 	void runClicked();
 
 private:
+	void setRunIsRunning(bool running);
+	void setRunEnabled(bool enabled);
+
   /// The UI form
   Ui::IndirectTransmissionCalc m_uiForm;
   /// The name of the current instrument
