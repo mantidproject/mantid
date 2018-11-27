@@ -66,7 +66,7 @@ public:
 
   void setBackgroundLevel(double value) override;
 
-  void setFitRange(double minimum, double maximum);
+  void setFitRange(double minimum, double maximum) override;
   void setFitRangeMinimum(double minimum) override;
   void setFitRangeMaximum(double maximum) override;
 
