@@ -10,6 +10,8 @@ are for use in unit tests only!
 from __future__ import (absolute_import, division,
                         print_function)
 
+# Import mantid to set MANTIDPATH for any ConfigService call that may be done
+import mantid  # noqa
 # Add workspace creation namespace
 from . import WorkspaceCreationHelper
 
