@@ -175,8 +175,6 @@ void IndirectFitAnalysisTab::connectSpectrumAndPlotPresenters() {
 }
 
 void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(setBrowserWorkspaceIndex(std::size_t)));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
           this, SLOT(setBrowserWorkspace(std::size_t)));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
