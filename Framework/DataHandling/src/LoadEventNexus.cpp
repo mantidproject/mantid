@@ -28,6 +28,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#include <H5Cpp.h>
 #include <boost/function.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
@@ -1407,6 +1408,20 @@ Parallel::ExecutionMode LoadEventNexus::getParallelExecutionMode(
     const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   static_cast<void>(storageModes);
   return Parallel::ExecutionMode::Distributed;
+}
+
+std::string
+LoadEventNexus::tryLoadInstrumentNameH5(const std::string &nexusfilename,
+                                        const std::string &top_entry_name) {
+  std::string instrument;
+  H5::H5File hfile(nexusfilename, H5F_ACC_RDONLY);
+  auto entry = hfile.openGroup(top_entry_name);
+  auto instrumentGroup = entry.openGroup("instrument");
+  auto nameData = instrumentGroup.openDataSet("name");
+
+  nameData.read(instrument, nameData.getDataType());
+  hfile.close();
+  return instrument;
 }
 
 } // namespace DataHandling

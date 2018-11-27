@@ -175,6 +175,11 @@ private:
                             const bool oldNeXusFileNames,
                             const std::string &classType) const;
 
+  /// Temporary fix to load ESS files which may have dynamic strings for the
+  /// instrument name.
+  std::string tryLoadInstrumentNameH5(const std::string &nexusfilename,
+                                      const std::string &top_entry_name);
+
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
   void loadEvents(API::Progress *const prog, const bool monitors);
@@ -459,7 +464,15 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   nxfile.openGroup("instrument", "NXinstrument");
   try {
     nxfile.openData("name");
-    instrument = nxfile.getStrData();
+    auto info = nxfile.getInfo();
+    if (info.dims.size() == 0) {
+      // If the string dimensions cannot be determined by the nexus library,
+      // attempting to parse the instrument name as a string will fail. The
+      // fallback is to use the H5Cpp library.
+      nxfile.close();
+      instrument = tryLoadInstrumentNameH5(nexusfilename, top_entry_name);
+    } else
+      instrument = nxfile.getStrData();
     alg->getLogger().debug()
         << "Instrument name read from NeXus file is " << instrument << '\n';
   } catch (::NeXus::Exception &) {
