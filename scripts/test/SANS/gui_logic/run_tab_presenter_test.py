@@ -162,8 +162,15 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
 
-        presenter._view.set_out_default_user_file.assert_called_once_with()
-        presenter._view._call_settings_listeners.assert_not_called()   # as default user file should be ""
+        self.assertEqual(
+            presenter._view.set_out_default_user_file.call_count, 1,
+            "Expected mock to have been called once. Called {} times.".format(
+                presenter._view.set_out_default_user_file.call_count))
+
+        self.assertEqual(
+            presenter._view._call_settings_listeners.call_count, 0,
+            "Expected mock to not have been called. Called {} times.".format(
+                presenter._view._call_settings_listeners.call_count))
 
     def test_fails_silently_when_user_file_does_not_exist(self):
         self.os_patcher.stop()
