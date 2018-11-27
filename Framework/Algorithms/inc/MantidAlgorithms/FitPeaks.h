@@ -205,7 +205,7 @@ private:
   int observePeakCenter(const HistogramData::Histogram &histogram,
                         API::FunctionValues &bkgd_values, size_t start_index,
                         size_t stop_index, double &peak_center,
-                        size_t &peak_center_index, double &peak_intensity);
+                        size_t &peak_center_index, double &peak_height);
 
   /// Observe peak width
   double observePeakWidth(const HistogramData::Histogram &histogram,
