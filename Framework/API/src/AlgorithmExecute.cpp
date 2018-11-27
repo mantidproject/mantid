@@ -20,8 +20,6 @@ namespace API {
  *executed
  *  @return true if executed successfully.
  */
-bool Algorithm::execute() {
-  return executeInternal();
-}
-}
-}
+bool Algorithm::execute() { return executeInternal(); }
+} // namespace API
+} // namespace Mantid

@@ -5,11 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgoTimeRegister.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
-Instrumentation::AlgoTimeRegister Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister;
+Instrumentation::AlgoTimeRegister
+    Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister;
 namespace API {
 
 //---------------------------------------------------------------------------------------------
@@ -24,9 +25,9 @@ namespace API {
  *  @return true if executed successfully.
  */
 bool Algorithm::execute() {
-  Instrumentation::AlgoTimeRegister::AlgoTimeRegister::Dump
-      dmp(Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister, name());
+  Instrumentation::AlgoTimeRegister::AlgoTimeRegister::Dump dmp(
+      Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister, name());
   return executeInternal();
 }
-}
-}
+} // namespace API
+} // namespace Mantid

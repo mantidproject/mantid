@@ -437,7 +437,6 @@ void Algorithm::unlockWorkspaces() {
 /** Invoced internally in execute()
  */
 
-
 bool Algorithm::executeInternal() {
   Timer timer;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
