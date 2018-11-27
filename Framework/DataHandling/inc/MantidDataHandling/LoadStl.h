@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADSTL_H_
 #define MANTID_DATAHANDLING_LOADSTL_H_
-
+#include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 #include <boost/functional/hash.hpp>
@@ -42,13 +42,17 @@ struct V3DTrueComparator {
 
 class DLLExport LoadStl {
 public:
-  LoadStl(std::string filename) : m_filename(filename) {}
+  LoadStl(std::string filename) : m_filename(filename), m_setMaterial(false) {}
+  LoadStl(std::string filename, ReadMaterial::MaterialParameters params)
+      : m_filename(filename), m_setMaterial(true), m_params(params) {}
   virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
 
 protected:
   bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const;
   void changeToVector();
   const std::string m_filename;
+  bool m_setMaterial;
+  const ReadMaterial::MaterialParameters m_params;
   std::vector<uint32_t> m_triangle;
   std::vector<Kernel::V3D> m_verticies;
   std::unordered_set<std::pair<Kernel::V3D, uint32_t>, HashV3DPair,

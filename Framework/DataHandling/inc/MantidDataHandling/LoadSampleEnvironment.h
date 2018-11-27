@@ -48,7 +48,7 @@ public:
   translate(boost::shared_ptr<Geometry::MeshObject> environmentMesh);
   boost::shared_ptr<Geometry::MeshObject>
   rotate(boost::shared_ptr<Geometry::MeshObject> environmentMesh);
-
+  std::map<std::string, std::string> validateInputs() override;
 private:
   // Implement abstract Algorithm methods
   void init() override;

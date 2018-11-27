@@ -83,9 +83,18 @@ std::unique_ptr<Geometry::MeshObject> LoadBinaryStl::readStl() {
   m_triangle.shrink_to_fit();
   g_logstl.debug("Read All");
   myFile.close();
+  Mantid::Kernel::Material material;
+  if (m_setMaterial) {
+    g_logstl.information("Setting Material");
+    ReadMaterial reader;
+    reader.setMaterialParameters(m_params);
+    material = *(reader.buildMaterial());
+  }else{
+    material = Mantid::Kernel::Material();
+  }
   auto retVal = std::make_unique<Geometry::MeshObject>(
       std::move(m_triangle), std::move(m_verticies),
-      Mantid::Kernel::Material());
+      material);
   return retVal;
 }
 

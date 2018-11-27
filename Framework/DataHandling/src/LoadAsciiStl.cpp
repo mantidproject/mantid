@@ -59,11 +59,18 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
     }
   }
   changeToVector();
-  // Use efficient constructor of MeshObject
-  std::unique_ptr<Geometry::MeshObject> retVal =
-      Kernel::make_unique<Geometry::MeshObject>(std::move(m_triangle),
-                                                std::move(m_verticies),
-                                                Mantid::Kernel::Material());
+  Mantid::Kernel::Material material;
+  if (m_setMaterial) {
+    g_logstl.information("Setting Material");
+    ReadMaterial reader;
+    reader.setMaterialParameters(m_params);
+    material = *(reader.buildMaterial());
+  }else{
+    material = Mantid::Kernel::Material();
+  }
+  auto retVal = std::make_unique<Geometry::MeshObject>(
+      std::move(m_triangle), std::move(m_verticies),
+      material);
   return retVal;
 }
 

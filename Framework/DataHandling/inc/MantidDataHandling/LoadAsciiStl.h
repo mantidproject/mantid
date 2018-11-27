@@ -22,6 +22,7 @@ namespace DataHandling {
 class DLLExport LoadAsciiStl : LoadStl {
 public:
   LoadAsciiStl(std::string filename) : LoadStl(filename) {}
+  LoadAsciiStl(std::string filename, ReadMaterial::MaterialParameters params) :LoadStl(filename, params) {}
   std::unique_ptr<Geometry::MeshObject> readStl() override;
   static bool isAsciiSTL(std::string filename);
 

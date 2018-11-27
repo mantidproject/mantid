@@ -7,6 +7,7 @@
 #include "MantidDataHandling/LoadSampleEnvironment.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
+#include "MantidDataHandling/ReadMaterial.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/MeshObject.h"
@@ -17,7 +18,10 @@
 #include "MantidAPI/Sample.h"
 
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
@@ -70,6 +74,89 @@ void LoadSampleEnvironment::init() {
   declareProperty(make_unique<ArrayProperty<double>>(
                       "RotationMatrix", "1.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0"),
                   "Rotation Matrix in format x1,x2,x3,y1,y2,y3,z1,z2,z3");
+
+  declareProperty("SetMaterial", false);
+
+  // properties for SetMaterial
+
+  declareProperty("ChemicalFormula", "",
+                  "The chemical formula, see examples in documentation");
+  
+  declareProperty("AtomicNumber", 0, "The atomic number");
+  declareProperty("MassNumber", 0,
+                  "Mass number if ion (use 0 for default mass sensity)");
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+  declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
+                  "This number density of the sample in number of "
+                  "atoms per cubic angstrom will be used instead of "
+                  "calculated");
+  declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
+                  "Number of formula units in unit cell");
+  declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
+                  "Unit cell volume in Angstoms^3. Will be calculated from the "
+                  "OrientedLattice if not supplied.");
+  declareProperty("CoherentXSection", EMPTY_DBL(), mustBePositive,
+                  "Optional:  This coherent cross-section for the sample "
+                  "material in barns will be used instead of tabulated");
+  declareProperty("IncoherentXSection", EMPTY_DBL(), mustBePositive,
+                  "Optional:  This incoherent cross-section for the sample "
+                  "material in barns will be used instead of tabulated");
+  declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
+                  "Optional:  This absorption cross-section for the sample "
+                  "material in barns will be used instead of tabulated");
+  declareProperty("ScatteringXSection", EMPTY_DBL(), mustBePositive,
+                  "Optional:  This total scattering cross-section (coherent + "
+                  "incoherent) for the sample material in barns will be used "
+                  "instead of tabulated");
+  declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
+                  "Measured mass density in g/cubic cm of the sample "
+                  "to be used to calculate the number density.");
+
+  // Perform Group Associations.
+  std::string formulaGrp("By Formula or Atomic Number");
+  setPropertyGroup("ChemicalFormula", formulaGrp);
+  setPropertyGroup("AtomicNumber", formulaGrp);
+  setPropertyGroup("MassNumber", formulaGrp);
+  setPropertySettings("ChemicalFormula", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("AtomicNumber", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("MassNumber", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+
+  std::string densityGrp("Sample Density");
+  setPropertyGroup("SampleNumberDensity", densityGrp);
+  setPropertyGroup("ZParameter", densityGrp);
+  setPropertyGroup("UnitCellVolume", densityGrp);
+  setPropertyGroup("SampleMassDensity", densityGrp);
+  setPropertySettings("SampleNumberDensity", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("ZParameter", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("UnitCellVolume", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("SampleMassDensity", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+
+  std::string specificValuesGrp("Override Cross Section Values");
+  setPropertyGroup("CoherentXSection", specificValuesGrp);
+  setPropertyGroup("IncoherentXSection", specificValuesGrp);
+  setPropertyGroup("AttenuationXSection", specificValuesGrp);
+  setPropertyGroup("ScatteringXSection", specificValuesGrp);
+  setPropertySettings("CoherentXSection", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("IncoherentXSection", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("AttenuationXSection", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("ScatteringXSection", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+}
+
+std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
+  std::map<std::string, std::string> result;
+  if (getProperty("SetMaterial")) {
+    ReadMaterial::MaterialParameters params;
+    params.chemicalSymbol = getPropertyValue("ChemicalFormula");
+    params.atomicNumber = getProperty("AtomicNumber");
+    params.massNumber = getProperty("MassNumber");
+    params.sampleNumberDensity = getProperty("SampleNumberDensity");
+    params.zParameter = getProperty("ZParameter");
+    params.unitCellVolume = getProperty("UnitCellVolume");
+    params.sampleMassDensity = getProperty("SampleMassDensity");
+    result = ReadMaterial::validateInputs(params);
+  }
+  return result;
 }
 
 void LoadSampleEnvironment::exec() {
@@ -90,12 +177,33 @@ void LoadSampleEnvironment::exec() {
 
   boost::shared_ptr<MeshObject> environmentMesh = nullptr;
 
-  auto asciiStlReader = LoadAsciiStl(filename);
-  auto binaryStlReader = LoadBinaryStl(filename);
-  if (binaryStlReader.isBinarySTL(filename)) {
-    environmentMesh = binaryStlReader.readStl();
-  } else if (asciiStlReader.isAsciiSTL(filename)) {
-    environmentMesh = asciiStlReader.readStl();
+  std::unique_ptr<LoadAsciiStl> asciiStlReader = nullptr; 
+  std::unique_ptr<LoadBinaryStl> binaryStlReader = nullptr;
+  
+  if(getProperty("SetMaterial")){
+    ReadMaterial::MaterialParameters params;
+    params.chemicalSymbol = getPropertyValue("ChemicalFormula");
+    params.atomicNumber = getProperty("AtomicNumber");
+    params.massNumber = getProperty("MassNumber");
+    params.sampleNumberDensity = getProperty("SampleNumberDensity");
+    params.zParameter = getProperty("ZParameter");
+    params.unitCellVolume = getProperty("UnitCellVolume");
+    params.sampleMassDensity = getProperty("SampleMassDensity");
+    params.coherentXSection = getProperty("CoherentXSection");
+    params.incoherentXSection = getProperty("IncoherentXSection");
+    params.attenuationXSection = getProperty("AttenuationXSection");
+    params.scatteringXSection = getProperty("ScatteringXSection");
+    binaryStlReader = std::make_unique<LoadBinaryStl>(filename, params);
+    asciiStlReader = std::make_unique<LoadAsciiStl>(filename, params);
+  }else{
+    binaryStlReader = std::make_unique<LoadBinaryStl>(filename);
+    asciiStlReader = std::make_unique<LoadAsciiStl>(filename);
+  }
+  
+  if (binaryStlReader->isBinarySTL(filename)) {
+    environmentMesh = binaryStlReader->readStl();
+  } else if (asciiStlReader->isAsciiSTL(filename)) {
+    environmentMesh = asciiStlReader->readStl();
   } else {
     throw Kernel::Exception::ParseError(
         "Could not read file, did not match either STL Format", filename, 0);
@@ -120,6 +228,7 @@ void LoadSampleEnvironment::exec() {
   const std::string debugString =
       "Enviroment has: " + std::to_string(environment->nelements()) +
       " elements.";
+  
   sample.setEnvironment(std::move(environment));
 
   auto translatedVertices = environmentMesh->getVertices();

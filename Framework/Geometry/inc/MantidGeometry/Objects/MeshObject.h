@@ -51,7 +51,7 @@ public:
   /// Constructor
   MeshObject(const std::vector<uint32_t> &faces,
              const std::vector<Kernel::V3D> &vertices,
-             const Kernel::Material &material);
+             const Kernel::Material material);
   /// Constructor
   MeshObject(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices,
              const Kernel::Material &&material);

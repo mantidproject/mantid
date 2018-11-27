@@ -22,7 +22,7 @@ namespace Geometry {
 
 MeshObject::MeshObject(const std::vector<uint32_t> &faces,
                        const std::vector<Kernel::V3D> &vertices,
-                       const Kernel::Material &material)
+                       const Kernel::Material material)
     : m_boundingBox(), m_id("MeshObject"), m_triangles(faces),
       m_vertices(vertices), m_material(material) {
 
