@@ -93,7 +93,7 @@ public:
 /// Note that there is limited (if any) interaction going from this model to the
 /// IndirectSpectrumSelectionView, meaning that not many methods are required
 /// for mocking.
-class MockIndirectFittingModel : public IndirectFittingModel {
+class MockIndirectSpectrumSelectionModel : public IndirectFittingModel {
 public:
   /// Public methods
   MOCK_CONST_METHOD2(getExcludeRegion,
@@ -132,7 +132,7 @@ public:
 
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockIndirectSpectrumSelectionView>>();
-    m_model = std::make_unique<NiceMock<MockIndirectFittingModel>>();
+    m_model = std::make_unique<NiceMock<MockIndirectSpectrumSelectionModel>>();
     m_presenter = std::make_unique<IndirectSpectrumSelectionPresenter>(
         std::move(m_model.get()), std::move(m_view.get()));
 
@@ -361,7 +361,7 @@ public:
 
 private:
   std::unique_ptr<MockIndirectSpectrumSelectionView> m_view;
-  std::unique_ptr<MockIndirectFittingModel> m_model;
+  std::unique_ptr<MockIndirectSpectrumSelectionModel> m_model;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_presenter;
 };
 
