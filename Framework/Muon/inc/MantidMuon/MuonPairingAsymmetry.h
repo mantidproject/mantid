@@ -36,6 +36,7 @@ public:
 private:
   void init() override;
   void exec() override;
+  bool checkGroups() override;
   // Validation split across several functions due to size
   std::map<std::string, std::string> validateInputs() override;
   void validateManualGroups(std::map<std::string, std::string> &errors);
