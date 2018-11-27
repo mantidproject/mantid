@@ -30,11 +30,9 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_mock = batch_patcher.start()
         self.batch_mock.return_value = self.sans_batch_instance
 
-        self.sans_load_instance = mock.MagicMock()
         load_patcher = mock.patch('sans.gui_logic.models.batch_process_runner.load_workspaces_from_states')
         self.addCleanup(load_patcher.stop)
         self.load_mock = load_patcher.start()
-        self.load_mock.return_value = self.sans_load_instance
 
         self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.notify_done, self.notify_error)
         self.states = {0: mock.MagicMock(), 1: mock.MagicMock(), 2: mock.MagicMock()}
@@ -92,7 +90,7 @@ class BatchProcessRunnerTest(unittest.TestCase):
     def test_that_load_workspaces_emits_row_failed_signal_after_each_failed_row(self):
         self.batch_process_runner.row_processed_signal = mock.MagicMock()
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
-        self.sans_load_instance.side_effect = Exception('failure')
+        self.load_mock.side_effect = Exception('failure')
 
         self.batch_process_runner.load_workspaces(self.states)
         QThreadPool.globalInstance().waitForDone()
