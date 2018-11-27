@@ -85,8 +85,8 @@ class TableWorkspaceDisplayView(QTableWidget):
         verticalHeader.addAction(delete_row)
 
     def custom_context_menu(self, position):
-        main_menu = QMenu()
-        plot = QMenu("Plot...", main_menu)
+        menu_main = QMenu()
+        plot = QMenu("Plot...", menu_main)
         plot_line = QAction(self.GRAPH_ICON, "Line", plot)
         plot_line.triggered.connect(partial(self.presenter.action_plot, PlotType.LINEAR))
 
@@ -99,42 +99,59 @@ class TableWorkspaceDisplayView(QTableWidget):
         plot.addAction(plot_line)
         plot.addAction(plot_scatter)
         plot.addAction(plot_line_and_points)
-        main_menu.addMenu(plot)
+        menu_main.addMenu(plot)
 
-        copy_bin_values = QAction(self.COPY_ICON, "Copy", main_menu)
+        copy_bin_values = QAction(self.COPY_ICON, "Copy", menu_main)
         copy_bin_values.triggered.connect(self.presenter.action_copy_bin_values)
 
-        set_as_x = QAction(self.TBD, "Set as X", main_menu)
+        set_as_x = QAction(self.TBD, "Set as X", menu_main)
         set_as_x.triggered.connect(self.presenter.action_set_as_x)
 
-        statistics_on_columns = QAction(self.STATISTICS_ON_ROW, "Statistics on Columns", main_menu)
+        set_as_y = QAction(self.TBD, "Set as Y", menu_main)
+        set_as_y.triggered.connect(self.presenter.action_set_as_y)
+
+        set_as_nein = QAction(self.TBD, "Set as None", menu_main)
+        set_as_nein.triggered.connect(self.presenter.action_set_as_none)
+
+        statistics_on_columns = QAction(self.STATISTICS_ON_ROW, "Statistics on Columns", menu_main)
         statistics_on_columns.triggered.connect(self.presenter.action_statistics_on_columns)
 
-        hide_selected = QAction(self.TBD, "Hide Selected", main_menu)
+        hide_selected = QAction(self.TBD, "Hide Selected", menu_main)
         hide_selected.triggered.connect(self.presenter.action_hide_selected)
 
-        show_all_columns = QAction(self.TBD, "Show All Columns", main_menu)
+        show_all_columns = QAction(self.TBD, "Show All Columns", menu_main)
         show_all_columns.triggered.connect(self.presenter.action_show_all_columns)
 
-        sort_ascending = QAction(self.TBD, "Sort Ascending", main_menu)
+        sort_ascending = QAction(self.TBD, "Sort Ascending", menu_main)
         sort_ascending.triggered.connect(partial(self.presenter.action_sort_ascending, Qt.AscendingOrder))
 
-        sort_descending = QAction(self.TBD, "Sort Descending", main_menu)
+        sort_descending = QAction(self.TBD, "Sort Descending", menu_main)
         sort_descending.triggered.connect(partial(self.presenter.action_sort_ascending, Qt.DescendingOrder))
 
-        main_menu.addAction(copy_bin_values)
-        main_menu.addAction(self.make_separator(main_menu))
-        main_menu.addAction(set_as_x)
-        main_menu.addAction(self.make_separator(main_menu))
-        main_menu.addAction(statistics_on_columns)
-        main_menu.addAction(self.make_separator(main_menu))
-        main_menu.addAction(hide_selected)
-        main_menu.addAction(show_all_columns)
-        main_menu.addAction(self.make_separator(main_menu))
-        main_menu.addAction(sort_ascending)
-        main_menu.addAction(sort_descending)
+        menu_main.addAction(copy_bin_values)
+        menu_main.addAction(self.make_separator(menu_main))
+        menu_main.addAction(set_as_x)
+        menu_main.addAction(set_as_y)
+        num_y_cols = self.presenter.get_num_columns_marked_as_y()
+        if num_y_cols>0:
+            menu_set_as_y_err = QMenu("Set error for Y...")
+            for col in range(num_y_cols):
+                set_as_y_err = QAction(self.TBD, "Y{}".format(col), menu_main)
+                set_as_y_err.triggered.connect(partial(self.presenter.action_set_as_y_err, col))
+                menu_set_as_y_err.addAction(set_as_y_err)
+            menu_main.addMenu(menu_set_as_y_err)
 
-        main_menu.exec_(self.mapToGlobal(position))
+        menu_main.addAction(set_as_nein)
+        menu_main.addAction(self.make_separator(menu_main))
+        menu_main.addAction(statistics_on_columns)
+        menu_main.addAction(self.make_separator(menu_main))
+        menu_main.addAction(hide_selected)
+        menu_main.addAction(show_all_columns)
+        menu_main.addAction(self.make_separator(menu_main))
+        menu_main.addAction(sort_ascending)
+        menu_main.addAction(sort_descending)
+
+        menu_main.exec_(self.mapToGlobal(position))
 
     def make_separator(self, horizontalHeader):
         separator1 = QAction(horizontalHeader)
