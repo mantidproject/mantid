@@ -670,7 +670,7 @@ WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
   pifp->setProperty("ColumnX", "axis-1");
   pifp->setProperty("XAxisUnit", xAxisUnit);
   pifp->setProperty("ParameterNames", getFitParameterNames());
-	pifp->setProperty("IncludeChiSquared", true);
+  pifp->setProperty("IncludeChiSquared", true);
   return runParameterProcessingWithGrouping(*pifp, grouping);
 }
 
