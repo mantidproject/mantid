@@ -32,13 +32,13 @@ calibration_dir = os.path.join(input_dir, calibration_folder_name)
 class WISHPowderReductionTest(MantidSystemTest):
     # still missing required files check with ./systemtest -R PowderReduction --showskipped
     def requiredFiles(self):
-        input_files = ["WISHvana41865-1foc.nxs", "WISHvana41865-2foc.nxs", "WISHvana41865-3foc.nxs",
-                       "WISHvana41865-4foc.nxs", "WISHvana41865-5foc.nxs", "WISHvana41865-6foc.nxs",
-                       "WISHvana41865-7foc.nxs", "WISHvana41865-8foc.nxs", "WISHvana41865-9foc.nxs",
-                       "WISHvana41865-10foc.nxs", "emptyinst38581-1foc.nxs", "emptyinst38581-2foc.nxs",
-                       "emptyinst38581-3foc.nxs", "emptyinst38581-4foc.nxs", "emptyinst38581-5foc.nxs",
-                       "emptyinst38581-6foc.nxs", "emptyinst38581-7foc.nxs", "emptyinst38581-8foc.nxs",
-                       "emptyinst38581-9foc.nxs", "emptyinst38581-10foc.nxs"]
+        input_files = ["vana19612-1foc-SF-SS.nxs", "vana19612-2foc-SF-SS.nxs", "vana19612-3foc-SF-SS.nxs",
+                       "vana19612-4foc-SF-SS.nxs", "vana19612-5foc-SF-SS.nxs", "vana19612-6foc-SF-SS.nxs",
+                       "vana19612-7foc-SF-SS.nxs", "vana19612-8foc-SF-SS.nxs", "vana19612-9foc-SF-SS.nxs",
+                       "vana19612-10foc-SF-SS.nxs", "emptyinst19618-1foc-SF-S.nxs", "emptyinst19618-2foc-SF-S.nxs",
+                       "emptyinst19618-3foc-SF-S.nxs", "emptyinst19618-4foc-SF-S.nxs", "emptyinst19618-5foc-SF-S.nxs",
+                       "emptyinst19618-6foc-SF-S.nxs", "emptyinst19618-7foc-SF-S.nxs", "emptyinst19618-8foc-SF-S.nxs",
+                       "emptyinst19618-9foc-SF-S.nxs", "emptyinst19618-10foc-SF-S.nxs"]
 
         input_files = [os.path.join(calibration_dir, files) for files in input_files]
         return input_files
@@ -52,17 +52,18 @@ class WISHPowderReductionTest(MantidSystemTest):
         self.clearWorkspaces()
 
     def validate(self):
-        return "w41870-2_9foc", "WISH41870-2_9raw.nxs", \
-               "w41870-3_8foc", "WISH41870-3_8raw.nxs", \
-               "w41870-4_7foc", "WISH41870-4_7raw.nxs", \
-               "w41870-5_6foc", "WISH41870-5_6raw.nxs"
+        return "w40503-1_10foc", "WISH40503-1_10raw.nxs", \
+               "w40503-2_9foc",  "WISH40503-2_9raw.nxs", \
+               "w40503-3_8foc",  "WISH40503-3_8raw.nxs", \
+               "w40503-4_7foc",  "WISH40503-4_7raw.nxs", \
+               "w40503-5_6foc",  "WISH40503-5_6raw.nxs"
 
     def clearWorkspaces(self):
-        deletews = ["w41870-" + str(i) + "foc" for i in range(1, 11)]
+        deletews = ["w40503-" + str(i) + "foc" for i in range(1, 11)]
         for ws in deletews:
             mantid.DeleteWorkspace(ws)
             mantid.DeleteWorkspace(ws + "-d")
 
     # Skip test when on builds as extremely slow, run only as reversion test for wish script
     def skipTests(self):
-        return True
+        return False
