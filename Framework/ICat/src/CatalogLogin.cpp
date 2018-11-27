@@ -29,8 +29,9 @@ std::vector<std::string> namesOfFacilitiesWithICAT() {
   };
 
   auto result = Kernel::ConfigService::Instance().getFacilityNames();
-  result.erase(std::remove_if(result.begin(), result.end(), facilityDoesNotHaveICAT),
-               result.end());
+  result.erase(
+      std::remove_if(result.begin(), result.end(), facilityDoesNotHaveICAT),
+      result.end());
 
   return result;
 }
