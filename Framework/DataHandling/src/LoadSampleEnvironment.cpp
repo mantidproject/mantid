@@ -81,7 +81,7 @@ void LoadSampleEnvironment::init() {
 
   declareProperty("ChemicalFormula", "",
                   "The chemical formula, see examples in documentation");
-  
+
   declareProperty("AtomicNumber", 0, "The atomic number");
   declareProperty("MassNumber", 0,
                   "Mass number if ion (use 0 for default mass sensity)");
@@ -118,29 +118,42 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("ChemicalFormula", formulaGrp);
   setPropertyGroup("AtomicNumber", formulaGrp);
   setPropertyGroup("MassNumber", formulaGrp);
-  setPropertySettings("ChemicalFormula", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("AtomicNumber", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("MassNumber", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("ChemicalFormula", make_unique<EnabledWhenProperty>(
+                                             "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("AtomicNumber", make_unique<EnabledWhenProperty>(
+                                          "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("MassNumber", make_unique<EnabledWhenProperty>(
+                                        "SetMaterial", IS_NOT_DEFAULT));
 
   std::string densityGrp("Sample Density");
   setPropertyGroup("SampleNumberDensity", densityGrp);
   setPropertyGroup("ZParameter", densityGrp);
   setPropertyGroup("UnitCellVolume", densityGrp);
   setPropertyGroup("SampleMassDensity", densityGrp);
-  setPropertySettings("SampleNumberDensity", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("ZParameter", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("UnitCellVolume", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("SampleMassDensity", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "SampleNumberDensity",
+      make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("ZParameter", make_unique<EnabledWhenProperty>(
+                                        "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("UnitCellVolume", make_unique<EnabledWhenProperty>(
+                                            "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("SampleMassDensity", make_unique<EnabledWhenProperty>(
+                                               "SetMaterial", IS_NOT_DEFAULT));
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
   setPropertyGroup("IncoherentXSection", specificValuesGrp);
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
-  setPropertySettings("CoherentXSection", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("IncoherentXSection", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("AttenuationXSection", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("ScatteringXSection", make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("CoherentXSection", make_unique<EnabledWhenProperty>(
+                                              "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("IncoherentXSection", make_unique<EnabledWhenProperty>(
+                                                "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "AttenuationXSection",
+      make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("ScatteringXSection", make_unique<EnabledWhenProperty>(
+                                                "SetMaterial", IS_NOT_DEFAULT));
 }
 
 std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
@@ -177,10 +190,10 @@ void LoadSampleEnvironment::exec() {
 
   boost::shared_ptr<MeshObject> environmentMesh = nullptr;
 
-  std::unique_ptr<LoadAsciiStl> asciiStlReader = nullptr; 
+  std::unique_ptr<LoadAsciiStl> asciiStlReader = nullptr;
   std::unique_ptr<LoadBinaryStl> binaryStlReader = nullptr;
-  
-  if(getProperty("SetMaterial")){
+
+  if (getProperty("SetMaterial")) {
     ReadMaterial::MaterialParameters params;
     params.chemicalSymbol = getPropertyValue("ChemicalFormula");
     params.atomicNumber = getProperty("AtomicNumber");
@@ -195,11 +208,11 @@ void LoadSampleEnvironment::exec() {
     params.scatteringXSection = getProperty("ScatteringXSection");
     binaryStlReader = std::make_unique<LoadBinaryStl>(filename, params);
     asciiStlReader = std::make_unique<LoadAsciiStl>(filename, params);
-  }else{
+  } else {
     binaryStlReader = std::make_unique<LoadBinaryStl>(filename);
     asciiStlReader = std::make_unique<LoadAsciiStl>(filename);
   }
-  
+
   if (binaryStlReader->isBinarySTL(filename)) {
     environmentMesh = binaryStlReader->readStl();
   } else if (asciiStlReader->isAsciiSTL(filename)) {
@@ -228,7 +241,7 @@ void LoadSampleEnvironment::exec() {
   const std::string debugString =
       "Enviroment has: " + std::to_string(environment->nelements()) +
       " elements.";
-  
+
   sample.setEnvironment(std::move(environment));
 
   auto translatedVertices = environmentMesh->getVertices();
@@ -246,6 +259,11 @@ void LoadSampleEnvironment::exec() {
   g_log.debug(debugString);
 }
 
+/**
+ * translates the environment by a provided matrix
+ * @params environmentMesh The environment to translate
+ * @returns a shared pointer to the newly translated environment
+ */
 boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
     boost::shared_ptr<MeshObject> environmentMesh) {
   const std::vector<double> translationVector =
@@ -263,6 +281,11 @@ boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
   return environmentMesh;
 }
 
+/**
+ * Rotates the environment by a provided matrix
+ * @params environmentMesh The environment to rotate
+ * @returns a shared pointer to the newly rotated environment
+ */
 boost::shared_ptr<MeshObject>
 LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh) {
   const std::vector<double> rotationMatrix = getProperty("RotationMatrix");

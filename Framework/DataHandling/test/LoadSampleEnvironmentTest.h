@@ -14,7 +14,9 @@
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadSampleEnvironment.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -35,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    TSM_ASSERT_EQUALS("should be 7 properties here", 7,
+    TSM_ASSERT_EQUALS("should be 19 properties here", 19,
                       (size_t)(alg.getProperties().size()));
   }
 
@@ -57,7 +59,7 @@ public:
   void testRotate() {
     LoadSampleEnvironment alg;
     alg.initialize();
-    alg.setProperty("rotationMatrix", "0,-1,0,1,0,0,0,0,1");
+    alg.setProperty("RotationMatrix", "0,-1,0,1,0,0,0,0,1");
     boost::shared_ptr<MeshObject> environmentMesh = nullptr;
     environmentMesh = loadCube();
     alg.rotate(environmentMesh);
@@ -69,11 +71,53 @@ public:
     TS_ASSERT(rotatedVertices == vectorToMatch);
   }
 
+  void testSetMaterial() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
+    alg.setProperty("Filename", path);
+    alg.setPropertyValue("EnvironmentName", "testName");
+    alg.setProperty("SetMaterial", true);
+    alg.setProperty("AtomicNumber", 1);
+    alg.setProperty("MassNumber", 1);
+    alg.setProperty("SampleNumberDensity", 1.0);
+    prepareWorkspaces(alg, true);
+
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
+    const auto &sample(ws->sample());
+    const Geometry::SampleEnvironment environment = sample.getEnvironment();
+    const auto can = environment.container();
+    const auto material = can->material();
+    TSM_ASSERT_EQUALS(("expected elements"), environment.nelements(), 1);
+    TS_ASSERT(can->hasValidShape());
+    TS_ASSERT_EQUALS(environment.name(), "testName");
+    TS_ASSERT_EQUALS(material.numberDensity(), 1);
+    TS_ASSERT_EQUALS(material.name(), "");
+  }
+
+private:
+  // load a cube into a meshobject
   std::unique_ptr<MeshObject> loadCube() {
     std::string path = FileFinder::Instance().getFullPath("cubeBin.stl");
     auto loader = LoadBinaryStl(path);
     auto cube = loader.readStl();
     return cube;
+  }
+  // Create workspaces and add them to algorithm properties
+  void prepareWorkspaces(LoadSampleEnvironment &alg,
+                         bool outputWsSameAsInputWs) {
+    const int nvectors(2), nbins(10);
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
+                                                                     nbins);
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setPropertyValue("OutputWorkspace", "__dummy_unused");
+    if (outputWsSameAsInputWs) {
+      alg.setProperty("OutputWorkspace", inputWS);
+    }
   }
 };
 
