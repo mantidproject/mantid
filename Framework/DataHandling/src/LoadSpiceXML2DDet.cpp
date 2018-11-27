@@ -191,7 +191,10 @@ void LoadSpiceXML2DDet::init() {
   declareProperty(
       make_unique<ArrayProperty<size_t>>("DetectorGeometry"),
       "A size-2 unsigned integer array [X, Y] for detector geometry. "
-      "Such that the detector contains X x Y pixels.");
+      "Such that the detector contains X x Y pixels."
+      "If the input data is a binary file, input for DetectorGeometry will be "
+      "overridden "
+      "by detector geometry specified in the binary file");
 
   declareProperty(
       "LoadInstrument", true,
@@ -490,6 +493,10 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
 
   size_t num_unsigned_int =
       static_cast<size_t>(end - begin) / sizeof(unsigned int);
+  if (num_unsigned_int <= 2)
+    throw std::runtime_error(
+        "Input binary file size is too small (<= 2 unsigned int)");
+
   size_t num_dets = num_unsigned_int - 2;
   g_log.information() << "File contains " << num_unsigned_int
                       << " unsigned integers and thus " << num_dets
@@ -510,6 +517,17 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
   size_t num_rows = static_cast<size_t>(buffer);
   infile.read((char *)&buffer, sizeof(buffer));
   size_t num_cols = static_cast<size_t>(buffer);
+  if (num_rows * num_cols != num_dets) {
+    g_log.error() << "Input binary file " << binary_file_name
+                  << " has inconsistent specification "
+                  << "on detector size. "
+                  << "First 2 unsigned integers are " << num_rows << ", "
+                  << num_cols
+                  << ", while the detector number specified in the file is "
+                  << num_dets << "\n";
+    throw std::runtime_error(
+        "Input binary file has inconsistent specification on detector size.");
+  }
 
   for (size_t i = 0; i < num_dets; ++i) {
     // infile.read(buffer, sizeof(int));
