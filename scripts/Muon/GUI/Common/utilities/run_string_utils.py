@@ -50,7 +50,8 @@ def run_list_to_string(run_list):
         raise IndexError("Too many runs ({}) must be <{}".format(len(run_list), max_run_list_size))
 
     range_list = []
-    # use groupby to group run_list into sublists of sequential integers
+    # use groupby to group run_list into sublists of sequential integers. e.g. [50, 49, 48, 3, 2, 1] will turn into
+    # "1-3,48-50"
     for _, grouped_list in groupby(enumerate(run_list), key=lambda_tuple_unpacking(lambda i, x: i - x)):
         concurrent_range = list(map(itemgetter(1), grouped_list))
         if len(concurrent_range) > 1:
