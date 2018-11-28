@@ -646,12 +646,15 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   if (!m_ws->getInstrument() || !m_instrument_loaded_correctly) {
     // Load the instrument (if not loaded before)
     prog->report("Loading instrument");
+    m_file->close();
     m_instrument_loaded_correctly =
         loadInstrument(m_filename, m_ws, m_top_entry_name, this);
 
     if (!m_instrument_loaded_correctly)
       throw std::runtime_error(
           "Instrument was not initialized correctly! Loading cannot continue.");
+    // reopen file
+    safeOpenFile(m_filename);
   }
 
   // top level file information
@@ -1414,13 +1417,19 @@ std::string
 LoadEventNexus::tryLoadInstrumentNameH5(const std::string &nexusfilename,
                                         const std::string &top_entry_name) {
   std::string instrument;
-  H5::H5File hfile(nexusfilename, H5F_ACC_RDONLY);
-  auto entry = hfile.openGroup(top_entry_name);
-  auto instrumentGroup = entry.openGroup("instrument");
-  auto nameData = instrumentGroup.openDataSet("name");
+  try {
+    std::cout << "Made it here" << std::endl;
+    H5::H5File hfile(nexusfilename, H5F_ACC_RDONLY);
 
-  nameData.read(instrument, nameData.getDataType());
-  hfile.close();
+    auto entry = hfile.openGroup(top_entry_name);
+    auto instrumentGroup = entry.openGroup("instrument");
+    auto nameData = instrumentGroup.openDataSet("name");
+
+    nameData.read(instrument, nameData.getDataType());
+    hfile.close();
+  } catch (H5::Exception &) {
+    // do nothing
+  }
   return instrument;
 }
 
