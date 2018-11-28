@@ -117,12 +117,6 @@ void MuonPairingAsymmetry::init() {
       "The workspace which will hold the results of the asymmetry "
       "calculation.");
 
-  // declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
-  //                     "OutputWorkspace", emptyString, Direction::Output),
-  //                 "The workspace which will hold the results of the asymmetry
-  //                 "
-  //     "calculation.");
-
   declareProperty("PairName", emptyString,
                   "The name of the pair. Must "
                   "contain at least one alphanumeric "
