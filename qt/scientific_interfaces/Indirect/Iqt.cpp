@@ -8,6 +8,7 @@
 #include "../General/UserInputValidator.h"
 
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
@@ -16,8 +17,39 @@
 
 #include <tuple>
 
+using namespace Mantid::API;
+
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");
+
+MatrixWorkspace_sptr getADSWorkspace(std::string const &workspaceName) {
+	return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+}
+
+std::size_t getWsNumberOfSpectra(std::string const &workspaceName) {
+	return getADSWorkspace(workspaceName)->getNumberHistograms();
+}
+
+bool checkADSForWorkspace(std::string const &workspaceName) { 
+	return AnalysisDataService::Instance().doesExist(workspaceName); 
+}
+
+void cloneWorkspace(std::string const &workspaceName, std::string const &cloneName) {
+	auto cloner = AlgorithmManager::Instance().create("CloneWorkspace");
+	cloner->initialize();
+	cloner->setProperty("InputWorkspace", workspaceName);
+	cloner->setProperty("OutputWorkspace", cloneName);
+	cloner->execute();
+}
+
+void cropWorkspace(std::string const &name, std::string const &newName, double const &cropValue) {
+	auto croper = AlgorithmManager::Instance().create("CropWorkspace");
+	croper->initialize();
+	croper->setProperty("InputWorkspace", name);
+	croper->setProperty("OutputWorkspace", newName);
+	croper->setProperty("XMin", cropValue);
+	croper->execute();
+}
 
 /**
  * Calculate the number of bins in the sample & resolution workspaces
@@ -67,8 +99,6 @@ calculateBinParameters(QString wsName, QString resName, double energyMin,
       propsTable->getColumn("ResolutionBins")->cell<int>(0));
 }
 } // namespace
-
-using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -145,28 +175,25 @@ void Iqt::setup() {
 }
 
 void Iqt::run() {
-  using namespace Mantid::API;
-
   setRunIsRunning(true);
 
   updateDisplayedBinParameters();
 
   // Construct the result workspace for Python script export
-  QString sampleName = m_uiForm.dsInput->getCurrentDataName();
+  QString const sampleName = m_uiForm.dsInput->getCurrentDataName();
   m_pythonExportWsName =
       sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
 
-  QString wsName = m_uiForm.dsInput->getCurrentDataName();
-  QString resName = m_uiForm.dsResolution->getCurrentDataName();
-  QString nIterations = m_uiForm.spIterations->cleanText();
-  bool calculateErrors = m_uiForm.cbCalculateErrors->isChecked();
+  QString const wsName = m_uiForm.dsInput->getCurrentDataName();
+  QString const resName = m_uiForm.dsResolution->getCurrentDataName();
+  QString const nIterations = m_uiForm.spIterations->cleanText();
+  bool const calculateErrors = m_uiForm.cbCalculateErrors->isChecked();
 
-  double energyMin = m_dblManager->value(m_properties["ELow"]);
-  double energyMax = m_dblManager->value(m_properties["EHigh"]);
-  double numBins = m_dblManager->value(m_properties["SampleBinning"]);
+  double const energyMin = m_dblManager->value(m_properties["ELow"]);
+  double const energyMax = m_dblManager->value(m_properties["EHigh"]);
+  double const numBins = m_dblManager->value(m_properties["SampleBinning"]);
 
-  IAlgorithm_sptr IqtAlg =
-      AlgorithmManager::Instance().create("TransformToIqt");
+  auto IqtAlg = AlgorithmManager::Instance().create("TransformToIqt");
   IqtAlg->initialize();
 
   IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
@@ -185,14 +212,6 @@ void Iqt::run() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-MatrixWorkspace_const_sptr Iqt::getADSWorkspace(std::string const &name) const {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-}
-
-std::size_t Iqt::getOutWsNumberOfSpectra() const {
-  return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
-}
-
 /**
  * Handle algorithm completion.
  *
@@ -205,10 +224,15 @@ void Iqt::algorithmComplete(bool error) {
     setTiledPlotEnabled(false);
     setSaveResultEnabled(false);
   } else {
-    setPlotSpectrumIndexMax(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
-    setPlotSpectrumIndex(selectedSpectrum());
-    setTiledPlotFirstIndex(selectedSpectrum());
-    setTiledPlotLastIndex(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
+		auto const lastSpectrumIndex = static_cast<int>(getWsNumberOfSpectra(m_pythonExportWsName)) - 1;
+		auto const selectedSpec = selectedSpectrum();
+
+    setPlotSpectrumIndexMax(lastSpectrumIndex);
+    setPlotSpectrumIndex(selectedSpec);
+		setMinMaxOfTiledPlotFirstIndex(0, lastSpectrumIndex);
+		setMinMaxOfTiledPlotLastIndex(0, lastSpectrumIndex);
+    setTiledPlotFirstIndex(selectedSpec);
+    setTiledPlotLastIndex(lastSpectrumIndex);
   }
 } // namespace IDA
 /**
@@ -270,26 +294,14 @@ void Iqt::plotTiled() {
   auto const firstTiledPlot = m_uiForm.spTiledPlotFirst->text().toInt();
   auto const lastTiledPlot = m_uiForm.spTiledPlotLast->text().toInt();
 
-  // Get first x value which corresponds to a y value below 1
-  auto const cropValue =
-      getXMinValue(outWs, static_cast<std::size_t>(firstTiledPlot));
+	// Clone workspace before cropping to keep in ADS
+	if (!checkADSForWorkspace(tiledPlotWsName))
+		cloneWorkspace(outWs->getName(), tiledPlotWsName);
 
-  // Clone workspace before cropping to keep in ADS
-  IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-  clone->initialize();
-  clone->setProperty("InputWorkspace", outWs->getName());
-  clone->setProperty("OutputWorkspace", tiledPlotWsName);
-  clone->execute();
-
-  // Crop based on selected first and last spectra
-  IAlgorithm_sptr crop = AlgorithmManager::Instance().create("CropWorkspace");
-  crop->initialize();
-  crop->setProperty("InputWorkspace", tiledPlotWsName);
-  crop->setProperty("OutputWorkspace", tiledPlotWsName);
-  crop->setProperty("StartWorkspaceIndex", firstTiledPlot);
-  crop->setProperty("EndWorkspaceIndex", lastTiledPlot);
-  crop->setProperty("XMin", cropValue);
-  crop->execute();
+	// Get first x value which corresponds to a y value below 1
+	auto const cropValue =
+		getXMinValue(outWs, static_cast<std::size_t>(firstTiledPlot));
+	cropWorkspace(tiledPlotWsName, tiledPlotWsName, cropValue);
 
   auto const tiledPlotWs = getADSWorkspace(tiledPlotWsName);
 
@@ -502,24 +514,27 @@ void Iqt::updateRS(QtProperty *prop, double val) {
 
 void Iqt::setTiledPlotFirstPlot(int value) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotFirst);
-  auto lastPlotIndex = m_uiForm.spTiledPlotLast->text().toInt();
-  auto firstPlotMinimum = lastPlotIndex - m_maxTiledPlots >= 0
-                              ? lastPlotIndex - m_maxTiledPlots
-                              : 0;
-  setMinMaxOfTiledPlotFirstIndex(firstPlotMinimum, lastPlotIndex);
-  if (lastPlotIndex - value <= m_maxTiledPlots)
-    setMinMaxOfTiledPlotLastIndex(value, value + m_maxTiledPlots);
-  setTiledPlotFirstIndex(value);
+  auto const lastPlotIndex = m_uiForm.spTiledPlotLast->text().toInt();
+	auto const rangeSize = lastPlotIndex - value;
+	if (value > lastPlotIndex)
+		setTiledPlotFirstIndex(lastPlotIndex);
+	else if (rangeSize > m_maxTiledPlots) {
+		auto const lastSpectrumIndex = static_cast<int>(getWsNumberOfSpectra(m_pythonExportWsName)) - 1;
+		auto const lastIndex = value + m_maxTiledPlots <= lastSpectrumIndex ? value + m_maxTiledPlots : lastSpectrumIndex;
+		setTiledPlotLastIndex(lastIndex);
+	}
 }
 
 void Iqt::setTiledPlotLastPlot(int value) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
-  auto firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
-  setMinMaxOfTiledPlotLastIndex(firstPlotIndex,
-                                firstPlotIndex + m_maxTiledPlots);
-  if (value - firstPlotIndex <= m_maxTiledPlots && value - m_maxTiledPlots >= 0)
-    setMinMaxOfTiledPlotFirstIndex(value - m_maxTiledPlots, value);
-  setTiledPlotLastIndex(value);
+  auto const firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
+	auto const rangeSize = value - firstPlotIndex;
+	if (value < firstPlotIndex)
+    setTiledPlotLastIndex(firstPlotIndex);
+	else if (rangeSize > m_maxTiledPlots) {
+		auto const firstIndex = value - m_maxTiledPlots >= 0 ? value - m_maxTiledPlots : 0;
+		setTiledPlotFirstIndex(firstIndex);
+	}
 }
 
 void Iqt::setMinMaxOfTiledPlotFirstIndex(int minimum, int maximum) {
@@ -539,8 +554,8 @@ void Iqt::setTiledPlotFirstIndex(int value) {
 
 void Iqt::setTiledPlotLastIndex(int value) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spTiledPlotLast);
-  auto firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
-  auto lastPlotIndex = value - m_maxTiledPlots > firstPlotIndex
+  auto const firstPlotIndex = m_uiForm.spTiledPlotFirst->text().toInt();
+  auto const lastPlotIndex = value - m_maxTiledPlots > firstPlotIndex
                            ? firstPlotIndex + m_maxTiledPlots
                            : value;
   m_uiForm.spTiledPlotLast->setValue(lastPlotIndex);
