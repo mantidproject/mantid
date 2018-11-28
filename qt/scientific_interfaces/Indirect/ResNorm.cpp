@@ -198,20 +198,22 @@ void ResNorm::addAdditionalLogs(WorkspaceGroup_sptr resultGroup) const {
 
 void ResNorm::addAdditionalLogs(Workspace_sptr resultWorkspace) const {
   auto logAdder = AlgorithmManager::Instance().create("AddSampleLog");
-  logAdder->setProperty("Workspace", resultWorkspace->getName());
+	auto const name = resultWorkspace->getName();
 
-  logAdder->setProperty("LogType", "String");
   for (auto const &log : getAdditionalLogStrings()) {
+		logAdder->setProperty("Workspace", name);
+		logAdder->setProperty("LogType", "String");
     logAdder->setProperty("LogName", log.first);
     logAdder->setProperty("LogText", log.second);
     logAdder->execute();
   }
 
-  logAdder->setProperty("LogType", "Number");
   for (auto const &log : getAdditionalLogNumbers()) {
-    logAdder->setProperty("LogName", log.first);
-    logAdder->setProperty("LogText", log.second);
-    logAdder->execute();
+		logAdder->setProperty("Workspace", name);
+		logAdder->setProperty("LogType", "Number");
+		logAdder->setProperty("LogName", log.first);
+		logAdder->setProperty("LogText", log.second);
+		logAdder->execute();
   }
 }
 
