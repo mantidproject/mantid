@@ -109,7 +109,7 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
 
         # initialise the data storing classes of the interface
         self.loaded_data = MuonLoadData()
-        self.context = MuonContext(load_data=self.loaded_data)
+        self.context = MuonDataContext(load_data=self.loaded_data)
 
         # construct all the widgets.
         self.setup_load_widget()
