@@ -19,7 +19,7 @@ VSI Testing
 --------------
 
 #. Load the script SXD_NaCl.py in MantidPlot. Run it.
-#. This should load a workspace called QLab. Right-click this workspace and choose 'Show VSI simple interface'.
+#. This should load a workspace called QLab. Right-click this workspace and choose 'Show Vates simple interface'.
 #. This should open the VSI window. Like the picture below. Check that all tabs are present.
 
 .. figure:: ../../images/vsi.png
