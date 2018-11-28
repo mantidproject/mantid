@@ -1418,7 +1418,6 @@ LoadEventNexus::tryLoadInstrumentNameH5(const std::string &nexusfilename,
                                         const std::string &top_entry_name) {
   std::string instrument;
   try {
-    std::cout << "Made it here" << std::endl;
     H5::H5File hfile(nexusfilename, H5F_ACC_RDONLY);
 
     auto entry = hfile.openGroup(top_entry_name);
