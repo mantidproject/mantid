@@ -23,6 +23,7 @@ Improved
 * Updated file adding to prefix the instrument name
 * Updated file finding to be able to find added runs withour instrument name prefix
 * Updated GUI code so calculated merge scale and shift are shown after reduction.
+* Removed instrument selection box. Instrument is now determined by User File.
 
 Bug fixes
 #########

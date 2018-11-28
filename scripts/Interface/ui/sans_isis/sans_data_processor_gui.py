@@ -37,8 +37,6 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, ge
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file,
                                        get_instrument_from_gui_selection, get_string_for_gui_from_instrument)
 
-from sans.common.general_functions import get_instrument
-
 from sans.gui_logic.models.run_summation import RunSummation
 from sans.gui_logic.models.run_selection import RunSelection
 from sans.gui_logic.models.run_finder import SummableRunFinder
@@ -167,7 +165,6 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
         # Q Settings
         self.__generic_settings = GENERIC_SETTINGS
         self.__path_key = "sans_path"
-        self.__instrument_name = "sans_instrument"
         self.__mask_file_input_path_key = "mask_files"
 
         # Logger
@@ -179,14 +176,8 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
                                                                   SANSInstrument.LOQ,
                                                                   SANSInstrument.LARMOR,
                                                                   SANSInstrument.ZOOM]])
-        settings = QSettings()
-        settings.beginGroup(self.__generic_settings)
-        instrument_name = settings.value(self.__instrument_name,
-                                         SANSInstrument.to_string(SANSInstrument.NoInstrument),
-                                         type=str)
-        settings.endGroup()
 
-        self.instrument = SANSInstrument.from_string(instrument_name)
+        self.instrument = SANSInstrument.NoInstrument
 
         self.paste_button.setIcon(QIcon(":/paste.png"))
         self.copy_button.setIcon(QIcon(":/copy.png"))
@@ -272,8 +263,6 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)
 
-        self._setup_add_runs_page()
-
         # --------------------------------------------------------------------------------------------------------------
         # Main Tab
         # --------------------------------------------------------------------------------------------------------------
@@ -285,8 +274,6 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
         self.sample_geometry_checkbox.stateChanged.connect(self._on_sample_geometry_selection)
 
         self.wavelength_step_type_combo_box.currentIndexChanged.connect(self._on_wavelength_step_type_changed)
-
-        self.instrument_combo_box.currentIndexChanged.connect(self._instrument_changed)
 
         self.process_button.clicked.connect(self._processed_clicked)
 
@@ -385,14 +372,6 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
             self.show_period_columns()
         else:
             self.hide_period_columns()
-
-        # Set the list of available instruments in the widget and the default instrument
-        instrument_name = config.getString("default.instrument")
-        instrument_name_enum = get_instrument(instrument_name)
-
-        if instrument_name_enum:
-            self.set_instrument_settings(instrument_name_enum)
-            self._instrument_changed()
 
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
         self.table_signals.cellTextChanged.connect(self._data_changed)
@@ -494,35 +473,24 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 
-    def _set_mantid_instrument(self, instrument_string):
-        # Add the instrument to the settings
-        settings = QSettings()
-        settings.beginGroup(self.__generic_settings)
-        settings.setValue(self.__instrument_name, instrument_string)
-        settings.endGroup()
-
-        # Set the default instrument on Mantid
-        config.setFacility("ISIS")
-        config.setString("default.instrument", instrument_string)
-
-    def _handle_instrument_change(self):
-        instrument_string = str(self.data_processor_table.getCurrentInstrument())
-        instrument = get_instrument_from_gui_selection(instrument_string)
-        self.instrument = instrument
 
     def disable_buttons(self):
         self.process_button.setEnabled(False)
-        self.instrument_combo_box.setEnabled(False)
         self.batch_button.setEnabled(False)
         self.user_file_button.setEnabled(False)
         self.manage_directories_button.setEnabled(False)
 
     def enable_buttons(self):
         self.process_button.setEnabled(True)
-        self.instrument_combo_box.setEnabled(True)
         self.batch_button.setEnabled(True)
         self.user_file_button.setEnabled(True)
         self.manage_directories_button.setEnabled(True)
+
+    def disable_process_buttons(self):
+        self.process_button.setEnabled(False)
+
+    def enable_process_buttons(self):
+        self.process_button.setEnabled(True)
 
     def display_message_box(self, title, message, details):
         msg = QMessageBox()
@@ -738,13 +706,11 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
     # ------------------------------------------------------------------------------------------------------------------
     def set_instrument_settings(self, instrument):
         if instrument:
-            self.instrument = instrument
-            instrument_string = SANSInstrument.to_string(instrument)
-            self._set_mantid_instrument(instrument_string)
             reduction_mode_list = get_reduction_mode_strings_for_gui(instrument)
             self.set_reduction_modes(reduction_mode_list)
 
-            self.instrumentLabel.setText("{}".format(instrument_string))
+            if instrument != SANSInstrument.NoInstrument:
+                self._setup_add_runs_page()
 
     def update_gui_combo_box(self, value, expected_type, combo_box):
         # There are two types of values that can be passed:
@@ -931,24 +897,13 @@ class SANSDataProcessorGui(QMainWindow, ui_sans_data_processor_window.Ui_SansDat
 
     @property
     def instrument(self):
-        instrument_as_string = self.instrument_combo_box.currentText()
-        return get_instrument_from_gui_selection(instrument_as_string)
+        return get_instrument_from_gui_selection(self.instrument_type.text())
 
     @instrument.setter
     def instrument(self, value):
-        instrument_as_string = get_string_for_gui_from_instrument(value)
-        if instrument_as_string:
-            index = self.instrument_combo_box.findText(instrument_as_string)
-            if index != -1:
-                self.instrument_combo_box.setCurrentIndex(index)
-
-    def set_instruments(self, instrument_list):
-        current_index = self.instrument_combo_box.currentIndex()
-        self.instrument_combo_box.clear()
-        for element in instrument_list:
-            self.instrument_combo_box.addItem(element)
-        if current_index != -1:
-            self.instrument_combo_box.setCurrentIndex(current_index)
+        instrument_string = SANSInstrument.to_string(value)
+        self.instrument_type.setText("{}".format(instrument_string))
+        self._instrument_changed()
 
     # ==================================================================================================================
     # ==================================================================================================================

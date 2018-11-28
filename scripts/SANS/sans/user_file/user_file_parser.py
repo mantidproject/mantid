@@ -257,14 +257,13 @@ class InstrParser(object):
     Compared to other parsers, this is a naive implementation
     which expects a line in the user file to explicitly state the instrument,
     with no other data.
+    Because of this, we are trying to match exact strings, and so do not use regex.
     """
     Type = "INSTR"
     _INSTRUMENTS = ["LOQ", "LARMOR", "SANS2D", "ZOOM", "NOINSTRUMENT"]
 
-    def __init__(self):
-        super(InstrParser, self).__init__()
-
-    def parse_line(self, line):
+    @staticmethod
+    def parse_line(line):
         if line == "LOQ":
             ret_val = SANSInstrument.LOQ
         elif line == "LARMOR":
@@ -273,12 +272,21 @@ class InstrParser(object):
             ret_val = SANSInstrument.SANS2D
         elif line == "ZOOM":
             ret_val = SANSInstrument.ZOOM
-        elif line == "NOINSTRUMENT":
-            ret_val = SANSInstrument.NoInstrument
         else:
             raise RuntimeError("InstrParser: Unknown command for INSTR: {0}".format(line))
 
         return {DetectorId.instrument: ret_val}
+
+    @staticmethod
+    def get_type():
+        return InstrParser.Type
+
+    @staticmethod
+    def get_type_pattern(line):
+        if line in InstrParser._INSTRUMENTS:
+            return True
+        else:
+            return False
 
 
 class DetParser(UserFileComponentParser):
@@ -2337,7 +2345,7 @@ class UserFileParser(object):
         line = line.strip()
         line = line.upper()
 
-        if line in InstrParser._INSTRUMENTS:
+        if InstrParser.get_type_pattern(line):
             return InstrParser()
 
         for key in self._parsers:

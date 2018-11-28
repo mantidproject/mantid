@@ -169,6 +169,8 @@ def get_instrument_from_gui_selection(gui_selection):
         return SANSInstrument.SANS2D
     elif gui_selection == 'ZOOM':
         return SANSInstrument.ZOOM
+    elif gui_selection == 'NoInstrument':
+        return SANSInstrument.NoInstrument
     else:
         raise RuntimeError("Instrument selection is not valid.")
 
