@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm is to import SPICE-generated XML file that
+This algorithm is to import SPICE-generated XML file and bindary file that
 records data of one measurement by a (two-dimensional) Anger camera
 and create a MatrixWorkspace to contain the detectors' counts, monitor counts 
 and other sample log data.
@@ -39,6 +39,25 @@ Counts of an :math:`n\times m` 2D detectors  are recorded in XML file as below::
   X(n,1)  X(n,2) X(n,3) ... X(n,m)
 
 And the (1,1) position is the bottom left corner of the Anger camera as seen from the sample position.
+
+
+Format of SPICE bindary data file
+#################################
+
+The SPICE binary data file contains 2 + N unsigned integers, where N is the number of detector pixels.
+
+Here is the specification of the SPICE 2D detector bindary file.
+
+  int0: number of rows in 2D detector
+  int1: number of columns in 2D detector
+  int2: counts of pixel on the lower left corner facing to detector from sample
+  int3: counts of pixel just above the lower left corner
+  .
+  .
+  .
+  int(N+2): counts of pixel on the upper right corner
+
+Note: int0 x int1 must be equal to N.
 
 
 HB3A instrument facts
