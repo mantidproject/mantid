@@ -9,12 +9,16 @@
 
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
+#include "MantidDataObjects/MortonIndex/BitInterleaving.h"
+#include "MantidDataObjects/MortonIndex/CoordinateConversion.h"
 #include <algorithm>
 #include <cmath>
 #include <numeric>
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <boost/multiprecision/cpp_int.hpp>
+#include <cstring>
 
 namespace Mantid {
 namespace DataObjects {
@@ -38,6 +42,81 @@ namespace DataObjects {
  * @date Dec 3, 2010
  *
  * */
+
+
+template <size_t SZ>
+struct MortonIndex {
+};
+
+template <>
+struct MortonIndex<4> {
+  using intType = uint8_t;
+  using type = uint32_t;
+};
+
+template <>
+struct MortonIndex<8> {
+  using intType = uint16_t;
+  using type = uint64_t;
+};
+
+#pragma pack(push, 1)
+struct uint96_t {
+  uint64_t int64;
+  uint32_t int32;
+};
+#pragma pack(pop)
+
+template <>
+struct MortonIndex<12> {
+  using intType = uint32_t;
+//  using type = uint96_t;
+  using type = boost::multiprecision::uint128_t;
+};
+
+template <>
+struct MortonIndex<16> {
+  using intType = uint32_t;
+  using type = boost::multiprecision::uint128_t;
+};
+
+template <>
+struct MortonIndex<20> {
+  using intType = uint64_t;
+  using type = boost::multiprecision::uint256_t;
+};
+
+template <>
+struct MortonIndex<24> {
+  using intType = uint64_t;
+  using type = boost::multiprecision::uint256_t;
+};
+
+template <>
+struct MortonIndex<28> {
+  using intType = uint64_t;
+  using type = boost::multiprecision::uint256_t;
+};
+
+
+template <>
+struct MortonIndex<32> {
+  using intType = uint64_t;
+  using type = boost::multiprecision::uint256_t;
+};
+
+template <>
+struct MortonIndex<36> {
+  using intType = uint64_t;
+  using type = boost::multiprecision::uint256_t;
+};
+
+template <size_t nd>
+class MDLeanEvent;
+
+template <size_t nd>
+void swap(MDLeanEvent<nd>& first, MDLeanEvent<nd>& second);
+
 template <size_t nd> class DLLExport MDLeanEvent {
 protected:
   /** The signal (aka weight) from the neutron event.
@@ -51,11 +130,25 @@ protected:
    */
   float errorSquared;
 
+  using IntT = typename MortonIndex<nd*sizeof(coord_t)>::intType;
+  using MortonT = typename MortonIndex<nd*sizeof(coord_t)>::type;
   /** The N-dimensional coordinates of the center of the event.
    * A simple fixed-sized array of (floats or doubles).
    */
-  coord_t center[nd];
+  union {
+    coord_t center[nd];
+    MortonT index;
+  };
 
+protected:
+  void retrieveIndex(const MDSpaceBounds<nd>& space) {
+    index = interleave<nd, IntT, MortonT>(ConvertCoordinatesToIntegerRange<nd, IntT>(space, center));
+  }
+  void retrieveCoordinates(const MDSpaceBounds<nd>& space) {
+    auto coords = ConvertCoordinatesFromIntegerRange<nd, IntT>
+        (space, deinterleave<nd, IntT, MortonT>(index)).data();
+    std::memcpy(center, &coords[0], nd);
+  }
 public:
   /* Will be keeping functions inline for (possible?) performance improvements
    */
@@ -141,6 +234,15 @@ public:
   }
 
   //---------------------------------------------------------------------------------------------
+  friend void swap<nd>(MDLeanEvent& first, MDLeanEvent& second);
+//  MDLeanEvent(const MDLeanEvent& other) : m_signal(other.m_signal), m_errorSquared(other.m_errorSquared), m_morton(other.m_morton) {}
+
+  MDLeanEvent& operator=(MDLeanEvent other) {
+    swap(*this, other);
+    return *this;
+  }
+
+
   /** @return the n-th coordinate axis value.
    * @param n :: index (0-based) of the dimension you want.
    * */
@@ -308,6 +410,17 @@ public:
     }
   }
 };
+
+template <size_t ND>
+void swap(MDLeanEvent<ND>& first, MDLeanEvent<ND>& second) {
+  std::swap(first.signal, second.signal);
+  std::swap(first.errorSquared, second.errorSquared);
+  if(sizeof(first.center) > sizeof(first.index))
+    for(unsigned i = 0; i < ND; ++i)
+      std::swap(first.center[i], second.center[i]);
+  else
+    std::swap(first.index, second.index);
+}
 
 } // namespace DataObjects
 } // namespace Mantid
