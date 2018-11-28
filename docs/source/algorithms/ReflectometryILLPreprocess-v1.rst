@@ -117,13 +117,15 @@ Usage
 
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
-       OutputBeamPositionWorkspace='direct_beam_pos',  # For reflected angle calibration.
        **settings
    )
+   # For reflected angle calibration:
+   directLogs = SampleLogs(direct)
+   peakX = directLogs.peak_position
 
    reflected = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectBeamPositionWorkspace='direct_beam_pos',
+       BeamCentre=peakX,
        **settings
    )
 

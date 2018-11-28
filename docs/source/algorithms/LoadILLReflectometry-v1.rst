@@ -24,7 +24,7 @@ with the following variables: channel width :math:`w_{\mathrm{channel}}`, time-o
 Detector position
 -----------------
 
-This loader will update the detector position from what is defined in the instrument definition files. The detector will be moved to the current distance from origin and rotated around the it either on the horizontal or vertical plane.
+This loader will update the detector position from what is defined in the instrument definition files. The detector will be moved to the current distance from origin and rotated around it either on the horizontal or vertical plane.
 
 The rotation angle can be one of the following:
 

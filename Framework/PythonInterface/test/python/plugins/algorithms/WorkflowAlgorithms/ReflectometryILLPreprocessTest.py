@@ -19,10 +19,9 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         mtd.clear()
 
     def testDefaultRunExecutesSuccessfully(self):
-        outWSName = 'outWS'
         args = {
             'Run': 'ILL/D17/317370.nxs',
-            'OutputWorkspace': outWSName,
+            'OutputWorkspace': 'outWS',
             'rethrow': True,
             'child': True
         }
@@ -245,7 +244,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
                                  '_monitors_', '_transposed_clone_', '_water_calibrated_']
         outWSName = 'outWS'
         inWSName = 'inWS'
-        self.create_sample_workspace(inWSName, NumMonitors=3)
+        self.create_sample_workspace(inWSName, numMonitors=3)
         waterName = 'water'
         self.create_sample_workspace(waterName)
 
@@ -289,17 +288,30 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         outWS = alg.getProperty('OutputWorkspace').value
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
 
-    def create_sample_workspace(self, name, NumMonitors=0):
+    def create_sample_workspace(self, name, numMonitors=0):
         args = {
             'OutputWorkspace': name,
             'Function': 'Flat background',
-            'NumMonitors': NumMonitors,
+            'NumMonitors': numMonitors,
             'NumBanks': 1,
         }
         alg = create_algorithm('CreateSampleWorkspace', **args)
         alg.setLogging(False)
         alg.execute()
 
+    def testBeamCentreBraggAngelInput(self):
+        args = {
+            'Run': 'ILL/D17/317369',
+            'BeamCentre': 0.4,
+            'BraggAngle': 20.,
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
 
 if __name__ == "__main__":
     unittest.main()
