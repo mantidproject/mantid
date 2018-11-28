@@ -3,6 +3,7 @@ import platform
 import sys
 import unittest
 
+from qtpy import PYQT_VERSION
 from qtpy.QtWidgets import QMessageBox, QApplication
 from qtpy.QtCore import Qt, QMetaObject
 
@@ -11,11 +12,13 @@ from mantidqt.utils.qt.test.gui_window_test import GuiWindowTest
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 
 
-def skip_on_ubuntu():
-    return 'Ubuntu' in platform.platform() and sys.version[0] == '2'
+def on_ubuntu_or_darwin():
+    return ('Ubuntu' in platform.platform() and sys.version[0] == '2' or
+            sys.platform == 'darwin' and PYQT_VERSION[0] == '4')
 
 
-@unittest.skipIf(skip_on_ubuntu(), "Popups don't show on ubuntu with python 2. Unskip when switched to xvfb")
+@unittest.skipIf(on_ubuntu_or_darwin(), "Popups don't show on ubuntu with python 2. Unskip when switched to xvfb."
+                                        "Qt4 has a bug on macs which is fixed in Qt5.")
 class TestFitPropertyBrowser(GuiWindowTest):
 
     def create_widget(self):
