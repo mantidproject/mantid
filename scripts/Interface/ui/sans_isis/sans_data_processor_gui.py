@@ -19,7 +19,7 @@ from qtpy.QtWidgets import (QListWidget, QListWidgetItem, QMainWindow, QMessageB
 from qtpy.QtCore import (QRegExp, QSettings)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
 
-from mantid.kernel import (Logger, config)
+from mantid.kernel import (Logger)
 from mantidqtpython import MantidQt
 
 try:
