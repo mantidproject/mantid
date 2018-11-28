@@ -16,6 +16,7 @@ import argparse  # for command line options
 import atexit
 import imp
 import importlib
+import glob
 import os
 import sys
 
@@ -40,10 +41,13 @@ requirements.check_qt()
 from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, QSettings)  # noqa
 from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
-                            QMainWindow, QSplashScreen)  # noqa
+                            QMainWindow, QSplashScreen, QMessageBox)  # noqa
+from mantidqt.io import open_a_file_dialog  # noqa
+from mantidqt.project import projectsaver, projectloader  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
+from mantid.api import AnalysisDataService  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -155,6 +159,9 @@ class MainWindow(QMainWindow):
         # Layout
         self.setDockOptions(self.DOCKOPTIONS)
 
+        # Last save locations
+        self.last_project_location = None
+
     def setup(self):
         # menus must be done first so they can be filled by the
         # plugins in register_plugin
@@ -222,26 +229,29 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         # --- general application menu options --
         # file menu
-        action_open = create_action(self, "Open",
+        action_open = create_action(self, "Open Script",
                                     on_triggered=self.open_file,
                                     shortcut="Ctrl+O",
-                                    shortcut_context=Qt.ApplicationShortcut,
-                                    icon_name="fa.folder-open")
-        action_save = create_action(self, "Save",
-                                    on_triggered=self.save_file,
-                                    shortcut="Ctrl+S",
-                                    shortcut_context=Qt.ApplicationShortcut,
-                                    icon_name="fa.save")
+                                    shortcut_context=Qt.ApplicationShortcut)
+        action_load_project = create_action(self, "Open Project",
+                                            on_triggered=self.load_project)
+        action_save_script = create_action(self, "Save Script",
+                                           on_triggered=self.save_script,
+                                           shortcut="Ctrl+S",
+                                           shortcut_context=Qt.ApplicationShortcut)
+        action_save_project = create_action(self, "Save Project",
+                                            on_triggered=self.save_project)
+        action_save_project_as = create_action(self, "Save Project as...",
+                                               on_triggered=self.save_project_as)
+
         action_manage_directories = create_action(self, "Manage User Directories",
-                                                  on_triggered=self.open_manage_directories,
-                                                  icon_name="fa.folder")
+                                                  on_triggered=self.open_manage_directories)
 
         action_quit = create_action(self, "&Quit", on_triggered=self.close,
                                     shortcut="Ctrl+Q",
-                                    shortcut_context=Qt.ApplicationShortcut,
-                                    icon_name="fa.power-off")
-        self.file_menu_actions = [action_open, action_save, action_manage_directories, None, action_quit]
-
+                                    shortcut_context=Qt.ApplicationShortcut)
+        self.file_menu_actions = [action_open, action_load_project, None, action_save_script, action_save_project,
+                                  action_save_project_as, None, action_manage_directories, None, action_quit]
         # view menu
         action_restore_default = create_action(self, "Restore Default Layout",
                                                on_triggered=self.prep_window_for_reset,
@@ -414,9 +424,53 @@ class MainWindow(QMainWindow):
             return
         self.editor.open_file_in_new_tab(filepath)
 
-    def save_file(self):
-        # todo: how should this interact with project saving and workspaces when they are implemented?
+    def save_script(self):
         self.editor.save_current_file()
+
+    def save_project(self):
+        if self.last_project_location is None:
+            self.save_project_as()
+        else:
+            # Clear directory before saving to remove old workspaces
+            files = glob.glob(self.last_project_location + '/.*')
+            for f in files:
+                os.remove(f)
+            # Actually save
+            workspaces_to_save = AnalysisDataService.getObjectNames()
+            project_saver = projectsaver.ProjectSaver()
+            project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
+                                       interfaces_to_save=None)
+
+    def save_project_as(self):
+        directory = ""
+        # Check if it exists
+        first_pass = True
+        while first_pass or (not os.path.isdir(directory) or not os.path.exists(directory)):
+            first_pass = False
+            directory = open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.DirectoryOnly)
+            if directory is None:
+                # Cancel close dialogs
+                return
+
+        # todo: get a list of workspaces but to be implemented on GUI implementation
+        self.last_project_location = directory
+        workspaces_to_save = AnalysisDataService.getObjectNames()
+        project_saver = projectsaver.ProjectSaver()
+        project_saver.save_project(directory=directory, workspace_to_save=workspaces_to_save, interfaces_to_save=None)
+
+    def load_project(self):
+        directory = ""
+        # Check if it exists
+        first_pass = True
+        while first_pass or not os.path.isdir(directory):
+            first_pass = False
+            directory = open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.DirectoryOnly)
+            if directory is None:
+                # Cancel close dialogs
+                return
+        project_loader = projectloader.ProjectLoader()
+        project_loader.load_project(directory)
+        self.last_project_location = directory
 
     def open_manage_directories(self):
         ManageUserDirectories(self).exec_()
