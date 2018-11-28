@@ -15,18 +15,19 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
+using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectFittingModel : public IndirectFittingModel {
+class MockIndirectDataTableModel : public IndirectFittingModel {
 public:
 	MOCK_CONST_METHOD0(isMultiFit, bool());
-	MOCK_CONST_METHOD0(getFittingMode, FittingMode());
 
 private:
 	std::string sequentialFitOutputName() const override { return ""; };
@@ -59,17 +60,23 @@ public:
 	}
 
 	void setUp() override {
-		m_model = std::make_unique<NiceMock<MockIndirectFittingModel>>();
-		m_table = std::make_unique<QTableWidget>(10, 10);
-		//m_table->item(0, 0)->setText("test");
+		m_model = std::make_unique<NiceMock<MockIndirectDataTableModel>>();
+		createEmptyTableWidget(5, 5);
 		m_presenter = std::make_unique<IndirectDataTablePresenter>(std::move(m_model.get()), std::move(m_table.get()));
 
-		//SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(10));
-		//m_fittingModel->addWorkspace("WorkspaceName");
+		SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
+		m_model->addWorkspace("WorkspaceName");
+	}
+
+	void createEmptyTableWidget(int const &columns, int const &rows) {
+		m_table = std::make_unique<QTableWidget>(columns, rows);
+		for (auto i = 0; i < columns; ++i)
+			for (auto j = 0; j < rows; ++j)
+				m_table->setItem(j, i, new QTableWidgetItem("test"));
 	}
 
 	void tearDown() override {
-		//AnalysisDataService::Instance().clear();
+		AnalysisDataService::Instance().clear();
 
 		TS_ASSERT(Mock::VerifyAndClearExpectations(m_table.get()));
 		TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
@@ -93,28 +100,33 @@ public:
 	}
 
 	void
-		test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_model_and_view() {
-		//ON_CALL(*m_model, getFittingMode())
-		//	.WillByDefault(Return(FittingMode::SEQUENTIAL));
+	test_that_invoking_setStartX_will_alter_the_relevant_column_in_the_table() {
+		int const startXColumn(2);
 
-		//EXPECT_CALL(*m_model, getFittingMode())
-		//	.Times(1)
-		//	.WillOnce(Return(FittingMode::SEQUENTIAL));
-		//EXPECT_CALL(*m_view, setMaskString(excludeRegion)).Times(1).After(getMask);
-		m_presenter->setStartX(2.0, 0, 0);
-		auto ggg = m_table->size();
+		m_presenter->setStartX(2.2, 0, 0);
 
-
+		for (auto i = 0; i < m_table->rowCount(); ++i)
+			TS_ASSERT_EQUALS(m_table->item(i, startXColumn)->text().toStdString(), "2.2")
 	}
+
+	///----------------------------------------------------------------------
+	/// Unit Tests that test the signals (only the view emits signals here)
+	///----------------------------------------------------------------------
 
 	void test_test() {}
 
+	///----------------------------------------------------------------------
+	/// Unit Tests that test the methods and slots of the view
+	///----------------------------------------------------------------------
+
+	void test_test2() {}
+
 private:
 	std::unique_ptr<QTableWidget> m_table;
-	std::unique_ptr<MockIndirectFittingModel> m_model;
+	std::unique_ptr<MockIndirectDataTableModel> m_model;
 	std::unique_ptr<IndirectDataTablePresenter> m_presenter;
 
-	//SetUpADSWithWorkspace *m_ads;
+	SetUpADSWithWorkspace *m_ads;
 };
 
 #endif
