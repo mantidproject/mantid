@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <QMessageBox>
 #include <QPalette>
@@ -628,34 +629,53 @@ void MantidWSIndexWidget::populateLogComboBox() {
   // First item should be "Workspace index"
   m_logSelector->addItem(WORKSPACE_NAME);
 
-  // Create a table of all single-value numeric log names versus
-  // how many workspaces they appear in
-  std::map<std::string, int> logCounts;
+  // Create a map of all logs and their double represenation to compare against.
+  // Only logs that can be converted to a double and are not all equal will make
+  // the final cut
+  // it is map[logname] = (isconstantvalue, value)
+  std::map<std::string, std::pair<bool, double>> usableLogs;
+
+  // add the logs that are present in the first workspace
+  auto ws = getWorkspace(m_wsNames[0]);
+  if (ws) {
+    const auto runObj = ws->run();
+    const std::vector<Mantid::Kernel::Property *> &logData =
+        runObj.getLogData();
+    for (auto &log : logData) {
+      try {
+        const std::string &name = log->name();
+        usableLogs[name] = std::make_pair(
+            true, runObj.getLogAsSingleValue(
+                      name, Mantid::Kernel::Math::TimeAveragedMean));
+      } catch (std::invalid_argument &) {
+        // it can't be represented as a double so ignore it
+      }
+    }
+  }
+
+  // loop over all of the workspaces in the group to see that the value has
+  // changed
   for (auto &wsName : m_wsNames) {
     auto ws = getWorkspace(wsName);
     if (ws) {
-      const std::vector<Mantid::Kernel::Property *> &logData =
-          ws->run().getLogData();
-      for (auto &log : logData) {
-        // If this is a single-value numeric log, add it to the list of counts
-        if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
-            dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
-          const std::string &name = log->name();
-          if (logCounts.find(name) != logCounts.end()) {
-            logCounts[name]++;
-          } else {
-            logCounts[name] = 1;
-          }
+      const auto runObj = ws->run();
+      for (auto &logItem : usableLogs) {
+        if (runObj.hasProperty(logItem.first)) {
+          const auto value = runObj.getLogAsSingleValue(
+              logItem.first, Mantid::Kernel::Math::TimeAveragedMean);
+          // set the bool to whether the value is the same
+          logItem.second.first = (value == logItem.second.second);
+        } else { // delete it from the list using the name
+          usableLogs.erase(logItem.first);
         }
       }
     }
   }
 
   // Add the log names to the combo box if they appear in all workspaces
-  const int nWorkspaces = m_wsNames.size();
-  for (auto &logCount : logCounts) {
-    if (logCount.second == nWorkspaces) {
-      m_logSelector->addItem(logCount.first.c_str());
+  for (auto &logItem : usableLogs) {
+    if (!(logItem.second.first)) { // values are non-constant
+      m_logSelector->addItem(logItem.first.c_str());
     }
   }
 
