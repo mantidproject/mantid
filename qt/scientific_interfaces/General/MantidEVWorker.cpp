@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include <iostream>
 #include <sstream>
 
@@ -222,6 +228,97 @@ bool MantidEVWorker::loadAndConvertToMD(
     alg->setProperty("Q3DFrames", "Q_sample");
     alg->setProperty("LorentzCorrection", do_lorentz_corr);
     alg->setProperty("AbsMinQ", modQ);
+    alg->setProperty("MinValues", min_str.str());
+    alg->setProperty("MaxValues", max_str.str());
+    alg->setProperty("SplitInto", "2");
+    alg->setProperty("SplitThreshold", "50");
+    alg->setProperty("MaxRecursionDepth", "13");
+    alg->setProperty("MinRecursionDepth", "7");
+
+    if (!alg->execute())
+      return false;
+  } catch (std::exception &e) {
+    g_log.error() << "Error:" << e.what() << '\n';
+    return false;
+  } catch (...) {
+    g_log.error() << "Error: Could Not load file and convert to MD\n";
+    return false;
+  }
+  return true;
+}
+
+/**
+ *  Take the specified EventWorkspace
+ *  and convert it to the specified MD workspace.
+ *
+ *  @param ev_ws_name       Name of the event workspace to create
+ *  @param md_ws_name       Name of the MD workspace to create
+ *  @param minQ             The smallest value of any component
+ *                          of Q to include.
+ *  @param maxQ             The largest absolute value of any component
+ *                          of Q to include. When ConvertToMD is called,
+ *  @return true if the file was loaded and MD workspace was
+ *          successfully created.
+ */
+bool MantidEVWorker::convertToHKL(const std::string &ev_ws_name,
+                                  const std::string &md_ws_name,
+                                  const double minQ, const double maxQ) {
+  try {
+    IAlgorithm_sptr alg;
+    const auto &ADS = AnalysisDataService::Instance();
+    Mantid::API::MatrixWorkspace_sptr ev_ws =
+        ADS.retrieveWS<MatrixWorkspace>(ev_ws_name);
+    double Q = maxQ;
+    if (minQ != Mantid::EMPTY_DBL()) {
+      Q = std::max(Q, -minQ);
+    }
+    Mantid::Geometry::OrientedLattice o_lattice =
+        ev_ws->mutableSample().getOrientedLattice();
+    std::vector<V3D> hkl;
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, Q, -Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, -Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(Q, -Q, -Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, -Q, Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, Q, -Q)));
+    hkl.push_back(o_lattice.hklFromQ(V3D(-Q, -Q, -Q)));
+    double hmin = 0;
+    double kmin = 0;
+    double lmin = 0;
+    double hmax = 0;
+    double kmax = 0;
+    double lmax = 0;
+    for (int i = 0; i < 8; i++) {
+      if (hkl[i][0] < hmin)
+        hmin = hkl[i][0];
+      if (hkl[i][1] < kmin)
+        kmin = hkl[i][1];
+      if (hkl[i][2] < lmin)
+        lmin = hkl[i][2];
+      if (hkl[i][0] > hmax)
+        hmax = hkl[i][0];
+      if (hkl[i][1] > kmax)
+        kmax = hkl[i][1];
+      if (hkl[i][2] > lmax)
+        lmax = hkl[i][2];
+    }
+
+    std::ostringstream min_str;
+    min_str << hmin << "," << kmin << "," << lmin;
+
+    std::ostringstream max_str;
+    max_str << hmax << "," << kmax << "," << lmax;
+
+    alg = AlgorithmManager::Instance().create("ConvertToMD");
+    alg->setProperty("InputWorkspace", ev_ws_name);
+    alg->setProperty("OutputWorkspace", md_ws_name + "_HKL");
+    alg->setProperty("OverwriteExisting", true);
+    alg->setProperty("QDimensions", "Q3D");
+    alg->setProperty("dEAnalysisMode", "Elastic");
+    alg->setProperty("QConversionScales", "HKL");
+    alg->setProperty("Q3DFrames", "HKL");
+    alg->setProperty("LorentzCorrection", true);
     alg->setProperty("MinValues", min_str.str());
     alg->setProperty("MaxValues", max_str.str());
     alg->setProperty("SplitInto", "2");

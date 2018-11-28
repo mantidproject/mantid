@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -117,12 +123,12 @@ IAlgorithm_sptr loadParameterFileAlgorithm(MatrixWorkspace_sptr workspace,
 
 void readAnalyserFromFile(const std::string &analyser,
                           MatrixWorkspace_sptr workspace) {
-  auto instrument = workspace->getInstrument();
-  auto idfDirectory = Mantid::Kernel::ConfigService::Instance().getString(
+  auto const instrument = workspace->getInstrument();
+  auto const idfDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "instrumentDefinition.directory");
-  auto reflection = instrument->getStringParameter("reflection")[0];
-  auto parameterFile = idfDirectory + instrument->getName() + "_" + analyser +
-                       "_" + reflection + "_Parameters.xml";
+  auto const reflection = instrument->getStringParameter("reflection")[0];
+  auto const parameterFile = idfDirectory + instrument->getName() + "_" +
+                             analyser + "_" + reflection + "_Parameters.xml";
 
   IAlgorithm_sptr loadParamFile =
       loadParameterFileAlgorithm(workspace, parameterFile);
@@ -223,9 +229,10 @@ void getParameterNameChanges(
     const CompositeFunction &model, const std::string &prefixPrefix,
     const std::string &prefixSuffix, std::size_t from, std::size_t to,
     std::unordered_map<std::string, std::string> &changes) {
+  size_t di = from > 0 ? 1 : 0;
   for (auto i = from; i < to; ++i) {
     const auto oldPrefix = "f" + std::to_string(i) + ".";
-    const auto functionPrefix = "f" + std::to_string(i) + ".";
+    const auto functionPrefix = "f" + std::to_string(i - di) + ".";
     const auto function = model.getFunction(i);
     auto newPrefix = prefixPrefix + functionPrefix;
 
@@ -240,15 +247,29 @@ std::unordered_map<std::string, std::string> parameterNameChanges(
     const CompositeFunction &model, const std::string &prefixPrefix,
     const std::string &prefixSuffix, std::size_t backgroundIndex) {
   std::unordered_map<std::string, std::string> changes;
-  getParameterNameChanges(model, prefixPrefix, prefixSuffix, 0, backgroundIndex,
-                          changes);
+  auto const nFunctions = model.nFunctions();
+  if (nFunctions > 2) {
+    getParameterNameChanges(model, prefixPrefix, prefixSuffix, 0,
+                            backgroundIndex, changes);
 
-  const auto backgroundPrefix = "f" + std::to_string(backgroundIndex) + ".";
-  getParameterNameChanges(*model.getFunction(backgroundIndex), backgroundPrefix,
-                          "f0.", changes);
+    const auto backgroundPrefix = "f" + std::to_string(backgroundIndex) + ".";
+    getParameterNameChanges(*model.getFunction(backgroundIndex),
+                            backgroundPrefix, "f0.", changes);
 
-  getParameterNameChanges(model, prefixPrefix, prefixSuffix,
-                          backgroundIndex + 1, model.nFunctions(), changes);
+    getParameterNameChanges(model, prefixPrefix, prefixSuffix,
+                            backgroundIndex + 1, model.nFunctions(), changes);
+  } else if (nFunctions == 2) {
+    const auto backgroundPrefix = "f" + std::to_string(backgroundIndex) + ".";
+    getParameterNameChanges(*model.getFunction(backgroundIndex),
+                            backgroundPrefix, "f0.", changes);
+    size_t otherIndex = backgroundIndex == 0 ? 1 : 0;
+    const auto otherPrefix = "f" + std::to_string(otherIndex) + ".";
+    getParameterNameChanges(*model.getFunction(otherIndex), otherPrefix,
+                            prefixPrefix, changes);
+  } else {
+    throw std::runtime_error(
+        "Composite function is expected to have more than 1 member.");
+  }
   return changes;
 }
 
@@ -350,6 +371,12 @@ IFunction_sptr createConvolutionFitModel(IFunction_sptr model,
   if (!(model &&
         AnalysisDataService::Instance().doesExist("__ConvFitResolution0")))
     return model ? model : comp;
+
+  if (auto compModel = boost::dynamic_pointer_cast<CompositeFunction>(model)) {
+    if (compModel->nFunctions() == 1) {
+      model = compModel->getFunction(0);
+    }
+  }
 
   auto conv = boost::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createFunction("Convolution"));
@@ -457,8 +484,15 @@ CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   return function;
 }
 
+std::vector<std::string> ConvFitModel::getSpectrumDependentAttributes() const {
+  /// Q value also depends on spectrum but is automatically updated when
+  /// the WorkspaceIndex is changed
+  return {"WorkspaceIndex"};
+}
+
 void ConvFitModel::setFitFunction(IFunction_sptr function) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto const composite =
+      boost::dynamic_pointer_cast<CompositeFunction>(function);
   m_backgroundIndex = getFirstInCategory(composite, "Background");
   setParameterNameChanges(*function, m_backgroundIndex);
 

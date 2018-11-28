@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init, invalid-name, bare-except
 """
     Magnetism reflectometry reduction
@@ -536,7 +542,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Wavelength uncertainty
         lambda_min = ws.getRun().getProperty("lambda_min").value
         lambda_max = ws.getRun().getProperty("lambda_max").value
-        dq_over_q = min(res) / np.tan(theta)
+        dq_over_q = np.min(res) / np.tan(theta)
 
         data_x = ws.dataX(0)
         data_dx = ws.dataDx(0)

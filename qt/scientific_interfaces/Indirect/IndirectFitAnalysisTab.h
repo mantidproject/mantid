@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 
@@ -68,6 +74,7 @@ public:
   void addComboBoxFunctionGroup(
       const QString &groupName,
       const std::vector<Mantid::API::IFunction_sptr> &functions);
+  void clearFitTypeComboBox();
 
   void setBackgroundOptions(const QStringList &backgrounds);
 
@@ -151,6 +158,7 @@ signals:
   void functionChanged();
   void parameterChanged(const Mantid::API::IFunction *);
   void customBoolChanged(const QString &key, bool value);
+  void updateFitTypes();
 
 protected slots:
 
@@ -163,8 +171,10 @@ protected slots:
   void setBrowserStartX(double startX);
   void setBrowserEndX(double endX);
   void updateBrowserFittingRange();
+  void setBrowserWorkspace();
   void setBrowserWorkspace(std::size_t dataIndex);
   void setBrowserWorkspaceIndex(std::size_t spectrum);
+  void setBrowserWorkspaceIndex(int spectrum);
   void tableStartXChanged(double startX, std::size_t dataIndex,
                           std::size_t spectrum);
   void tableEndXChanged(double endX, std::size_t dataIndex,
@@ -180,15 +190,30 @@ protected slots:
   void singleFit(std::size_t dataIndex, std::size_t spectrum);
   void executeFit();
 
-  void updateFitBrowserParameterValues();
+  void updateAttributeValues();
+  void updateAttributeValues(Mantid::API::IFunction_sptr function,
+                             std::vector<std::string> const &attributeNames);
+  void updateAttributeValues(
+      Mantid::API::IFunction_sptr function,
+      std::vector<std::string> const &attributeNames,
+      std::unordered_map<std::string, Mantid::API::IFunction::Attribute> const
+          &attributes);
+  void updateFitBrowserAttributeValues();
+  std::unordered_map<std::string, Mantid::API::IFunction::Attribute>
+  getAttributes(Mantid::API::IFunction_sptr const &function,
+                std::vector<std::string> const &attributeNames);
   void updateParameterValues();
   void updateParameterValues(
       const std::unordered_map<std::string, ParameterValue> &parameters);
+  void updateFitBrowserParameterValues();
 
   virtual void updatePlotOptions() = 0;
 
   void updateResultOptions();
   void saveResult();
+
+private slots:
+  void emitUpdateFitTypes();
 
 private:
   /// Overidden by child class.

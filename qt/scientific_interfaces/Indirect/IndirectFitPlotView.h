@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTVIEW_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTVIEW_H_
 
@@ -32,6 +38,7 @@ public:
 
   void setMinimumSpectrum(int minimum);
   void setMaximumSpectrum(int maximum);
+  void setPlotSpectrum(int spectrum);
   void appendToDataSelection(const std::string &dataName);
   void setNameInDataSelection(const std::string &dataName, std::size_t index);
   void clearDataSelection();

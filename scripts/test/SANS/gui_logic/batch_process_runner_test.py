@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 import unittest
@@ -18,13 +24,14 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.notify_error = mock.MagicMock()
 
         self.sans_batch_instance = mock.MagicMock()
+        self.sans_batch_instance.return_value = (mock.MagicMock(), mock.MagicMock())
         batch_patcher = mock.patch('sans.gui_logic.models.batch_process_runner.SANSBatchReduction')
         self.addCleanup(batch_patcher.stop)
         self.batch_mock = batch_patcher.start()
         self.batch_mock.return_value = self.sans_batch_instance
 
         self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.notify_done, self.notify_error)
-        self.states = {0: 0, 1: 1, 2: 2}
+        self.states = {0: mock.MagicMock(), 1: mock.MagicMock(), 2: mock.MagicMock()}
 
     def test_that_notify_done_method_set_correctly(self):
         self.batch_process_runner.notify_done()
@@ -40,14 +47,13 @@ class BatchProcessRunnerTest(unittest.TestCase):
     def test_that_process_states_emits_row_processed_signal_after_each_row(self):
         self.batch_process_runner.row_processed_signal = mock.MagicMock()
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
-
         self.batch_process_runner.process_states(self.states, False, OutputMode.Both, False, '')
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(self.batch_process_runner.row_processed_signal.emit.call_count, 3)
-        self.batch_process_runner.row_processed_signal.emit.assert_any_call(0)
-        self.batch_process_runner.row_processed_signal.emit.assert_any_call(1)
-        self.batch_process_runner.row_processed_signal.emit.assert_any_call(2)
+        self.batch_process_runner.row_processed_signal.emit.assert_any_call(0, [], [])
+        self.batch_process_runner.row_processed_signal.emit.assert_any_call(1, [], [])
+        self.batch_process_runner.row_processed_signal.emit.assert_any_call(2, [], [])
         self.assertEqual(self.batch_process_runner.row_failed_signal.emit.call_count, 0)
 
     def test_that_process_states_emits_row_failed_signal_after_each_failed_row(self):

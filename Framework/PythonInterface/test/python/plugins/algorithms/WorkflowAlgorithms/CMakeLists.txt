@@ -49,6 +49,8 @@ set ( TEST_PY_FILES
   ResNorm2Test.py
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py
+  SANSILLIntegrationTest.py
+  SANSILLReductionTest.py
   SANSMaskTest.py
   SANSStitchTest.py
   SavePlot1DTest.py

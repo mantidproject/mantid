@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 import math
 import os
 from mantid.simpleapi import *
@@ -20,7 +26,7 @@ def do_cleanup():
     return True
 
 
-class EQSANSIQOutput(stresstesting.MantidStressTest):
+class EQSANSIQOutput(systemtesting.MantidSystemTest):
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
@@ -63,7 +69,7 @@ class EQSANSIQOutput(stresstesting.MantidStressTest):
         return "EQSANS_1466_event_Iq", 'EQSANSIQOutput.nxs'
 
 
-class EQSANSBeamMonitor(stresstesting.MantidStressTest):
+class EQSANSBeamMonitor(systemtesting.MantidSystemTest):
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
@@ -94,7 +100,7 @@ class EQSANSBeamMonitor(stresstesting.MantidStressTest):
         return "EQSANS_1466_event_Iq", 'EQSANSBeamMonitor.nxs'
 
 
-class EQSANSDQPositiveOutput(stresstesting.MantidStressTest):
+class EQSANSDQPositiveOutput(systemtesting.MantidSystemTest):
     """
         Analysis Tests for EQSANS
         Testing that the Q resolution output of is correct
@@ -132,7 +138,7 @@ class EQSANSDQPositiveOutput(stresstesting.MantidStressTest):
         return True
 
 
-class EQSANSDQOutput(stresstesting.MantidStressTest):
+class EQSANSDQOutput(systemtesting.MantidSystemTest):
     """
         Analysis Tests for EQSANS
         Testing that the Q resolution output of is correct
@@ -198,7 +204,7 @@ class EQSANSDQOutput(stresstesting.MantidStressTest):
         return output
 
 
-class EQSANSDQOutput_FS(stresstesting.MantidStressTest):
+class EQSANSDQOutput_FS(systemtesting.MantidSystemTest):
     """
         Analysis Tests for EQSANS
         Testing that the Q resolution output of is correct

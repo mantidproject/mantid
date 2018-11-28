@@ -45,6 +45,25 @@ If more than one constraint is defined, then for each violated
 constraint a penalty of the type defined above is added to the
 calculated fitting function.
 
+If the penalty C is not the default value of 1000, then the 
+constraint penalty value will be included whenever the function
+is converted to a string.  For example:
 
+.. code-block:: python
+
+    from mantid.simpleapi import *
+    myFunction = Gaussian(Height=1.0, PeakCentre=3.0, Sigma=1.0)
+    myFunction.constrain("PeakCentre < 6")
+    print(myFunction)
+    myFunction.setConstraintPenaltyFactor("PeakCentre", 10.0)
+    print(myFunction)
+    myFunction.constrain('Sigma > 0')
+    print(myFunction)
+
+will output::
+
+    name=Gaussian,Height=1,PeakCentre=3,Sigma=1,constraints=(PeakCentre<6)
+    name=Gaussian,Height=1,PeakCentre=3,Sigma=1,constraints=(PeakCentre<6,penalty=10)
+    name=Gaussian,Height=1,PeakCentre=3,Sigma=1,constraints=(PeakCentre<6,penalty=10,0<Sigma)`
 
 .. categories:: Concepts

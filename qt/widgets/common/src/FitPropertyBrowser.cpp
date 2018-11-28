@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
@@ -1346,6 +1352,15 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     if (!h)
       return;
     h->setFunctionWorkspace();
+  } else if (prop->propertyName() == "WorkspaceIndex") {
+    PropertyHandler *h = getHandler()->findHandler(prop);
+    auto const index = prop->valueText().toInt();
+    if (h && index != workspaceIndex()) {
+      h->setAttribute(prop);
+      setWorkspaceIndex(index);
+      emit workspaceIndexChanged(index);
+      emit updatePlotSpectrum(index);
+    }
   } else if (prop == m_maxIterations || prop == m_peakRadius) {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
@@ -1628,9 +1643,17 @@ Mantid::API::IFunction_sptr FitPropertyBrowser::getFittingFunction() const {
   if (m_compositeFunction->nFunctions() > 1) {
     function = m_compositeFunction;
   } else {
-    function = m_compositeFunction->getFunction(0);
+    function = getFunctionAtIndex(0);
   }
   return function;
+}
+
+/**
+ * Return the function within a composite function at the position specified
+ */
+Mantid::API::IFunction_sptr
+FitPropertyBrowser::getFunctionAtIndex(std::size_t const &index) const {
+  return m_compositeFunction->getFunction(index);
 }
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
@@ -1901,6 +1924,13 @@ void FitPropertyBrowser::vectorSizeChanged(QtProperty *prop) {
  */
 void FitPropertyBrowser::updateParameters() {
   getHandler()->updateParameters();
+}
+
+/**
+ * Update the function attributes which have changed
+ */
+void FitPropertyBrowser::updateAttributes() {
+  getHandler()->updateAttributes();
 }
 
 /**
@@ -2211,7 +2241,7 @@ void FitPropertyBrowser::addConstraint(int f, bool lo, bool up) {
   if (!h)
     return;
 
-  double x = m_doubleManager->value(parProp);
+  double x = parProp->valueText().toDouble();
   double loBound = x * (1 - 0.01 * f);
   double upBound = x * (1 + 0.01 * f);
 
@@ -2775,7 +2805,7 @@ void FitPropertyBrowser::setupMultifit() {
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 workspaceName()));
     if (mws) {
-      auto fun = m_compositeFunction->getFunction(0);
+      auto fun = getFunctionAtIndex(0);
       QString fun1Ini = QString::fromStdString(fun->asString());
       QString funIni = "composite=MultiBG;" + fun1Ini + ",Workspace=" + wsName +
                        ",WSParam=(WorkspaceIndex=0);";
@@ -2812,7 +2842,7 @@ void FitPropertyBrowser::processMultiBGResults() {
 
   // check if member functions are the same
   QStringList parNames;
-  auto fun0 = compositeFunction()->getFunction(0);
+  auto fun0 = getFunctionAtIndex(0);
   if (!fun0) {
     throw std::runtime_error(
         "IFunction expected but func function of another type");
@@ -2822,7 +2852,7 @@ void FitPropertyBrowser::processMultiBGResults() {
   }
 
   for (size_t i = 1; i < compositeFunction()->nFunctions(); ++i) {
-    auto fun = compositeFunction()->getFunction(i);
+    auto fun = getFunctionAtIndex(i);
     if (!fun) {
       throw std::runtime_error(
           "IFunction expected but func function of another type");

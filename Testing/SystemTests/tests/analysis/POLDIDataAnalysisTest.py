@@ -1,11 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from mantid.api import *
 import numpy as np
 
 
-class POLDIDataAnalysisTestSi(stresstesting.MantidStressTest):
+class POLDIDataAnalysisTestSi(systemtesting.MantidSystemTest):
     """Base class that loads/generates data for the tests, which is identical.
     """
 
@@ -159,7 +165,7 @@ class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
         self.assertLessThan(np.abs(a_val - 5.4311946) / a_err, 1.5)
 
 
-class POLDIDataAnalysisEmptyFile(stresstesting.MantidStressTest):
+class POLDIDataAnalysisEmptyFile(systemtesting.MantidSystemTest):
     """This test runs PoldiDataAnalysis with Si data, using an empty workspace."""
 
     def runTest(self):

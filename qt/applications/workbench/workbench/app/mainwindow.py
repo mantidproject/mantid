@@ -1,25 +1,18 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-#  Copyright (C) 2017 mantidproject
 #
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
-import argparse     # for command line options
+import argparse  # for command line options
 import atexit
 import imp
 import importlib
@@ -44,17 +37,18 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QSettings, QPoint, QSize)  # noqa
-from qtpy.QtGui import (QColor, QPixmap)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, QSettings)  # noqa
+from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
+from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
 
-from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
+from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION, set_config_format  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -71,13 +65,16 @@ def qapplication():
     if app is None:
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
         argv = sys.argv[:]
-        argv[0] = APPNAME # replace application name
+        argv[0] = APPNAME  # replace application name
         app = QApplication(argv)
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)
         # not calling app.setApplicationVersion(mantid.kernel.version_str())
         # because it needs to happen after logging is monkey-patched in
+
+        # Set the config format to IniFormat globally
+        set_config_format(QSettings.IniFormat)
     return app
 
 
@@ -89,13 +86,25 @@ MAIN_APP = qapplication()
 # -----------------------------------------------------------------------------
 # Importing resources loads the data in
 from workbench.app.resources import qCleanupResources  # noqa
+
 atexit.register(qCleanupResources)
 
-SPLASH = QSplashScreen(QPixmap(':/images/MantidSplashScreen.png'),
+
+def _get_splash_image_name():
+    # gets the width of the screen where the main window was initialised
+    width = QGuiApplication.primaryScreen().size().width()
+
+    if width > 2048:
+        return ':/images/MantidSplashScreen_4k.jpg'
+    else:
+        return ':/images/MantidSplashScreen.png'
+
+
+SPLASH = QSplashScreen(QPixmap(_get_splash_image_name()),
                        Qt.WindowStaysOnTopHint)
 SPLASH.show()
-SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft |
-                   Qt.AlignAbsolute, QColor(Qt.black))
+SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
+                   | Qt.AlignAbsolute, QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
 
@@ -105,13 +114,13 @@ QApplication.processEvents(QEventLoop.AllEvents)
 from mantidqt.utils.qt import add_actions, create_action  # noqa
 from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 
+
 # -----------------------------------------------------------------------------
 # MainWindow
 # -----------------------------------------------------------------------------
 
 
 class MainWindow(QMainWindow):
-
     DOCKOPTIONS = QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks
 
     def __init__(self):
@@ -119,9 +128,6 @@ class MainWindow(QMainWindow):
 
         # -- instance attributes --
         self.setWindowTitle("Mantid Workbench")
-
-        # uses default configuration as necessary
-        self.readSettings(CONF)
 
         # widgets
         self.messagedisplay = None
@@ -141,6 +147,7 @@ class MainWindow(QMainWindow):
         self.editor_menu = None
         self.view_menu = None
         self.view_menu_actions = None
+        self.interfaces_menu = None
 
         # Allow splash screen text to be overridden in set_splash
         self.splash = SPLASH
@@ -191,6 +198,9 @@ class MainWindow(QMainWindow):
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
 
+        # uses default configuration as necessary
+        self.readSettings(CONF)
+
         self.setup_layout()
         self.create_actions()
         self.populate_menus()
@@ -207,6 +217,7 @@ class MainWindow(QMainWindow):
         self.file_menu = self.menuBar().addMenu("&File")
         self.editor_menu = self.menuBar().addMenu("&Editor")
         self.view_menu = self.menuBar().addMenu("&View")
+        self.interfaces_menu = self.menuBar().addMenu('&Interfaces')
 
     def create_actions(self):
         # --- general application menu options --
@@ -255,6 +266,49 @@ class MainWindow(QMainWindow):
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
 
+    def launchCustomGUI(self, filename):
+        from mantid.kernel import logger  # noqa
+        executioner = PythonCodeExecution()
+        executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
+        executioner.execute(open(filename).read(), filename)
+
+    def populateAfterMantidImport(self):
+        from mantid.kernel import ConfigService, logger  # noqa
+        interface_dir = ConfigService['mantidqt.python_interfaces_directory']
+        items = ConfigService['mantidqt.python_interfaces'].split()
+
+        # list of custom interfaces that are not qt4/qt5 compatible
+        GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
+                         'ISIS_SANS_v2_experimental.py',
+                         'Frequency_Domain_Analysis.py',
+                         'Elemental_Analysis.py']
+
+        # detect the python interfaces
+        interfaces = {}
+        for item in items:
+            key, scriptname = item.split('/')
+            if not os.path.exists(os.path.join(interface_dir, scriptname)):
+                logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
+                continue
+            if scriptname in GUI_BLACKLIST:
+                logger.information('Not adding gui "{}"'.format(scriptname))
+                continue
+            temp = interfaces.get(key, [])
+            temp.append(scriptname)
+            interfaces[key] = temp
+
+        # add the interfaces to the menu
+        keys = list(interfaces.keys())
+        keys.sort()
+        for key in keys:
+            submenu = self.interfaces_menu.addMenu(key)
+            names = interfaces[key]
+            names.sort()
+            for name in names:
+                action = submenu.addAction(name.replace('.py', '').replace('_', ' '))
+                script = os.path.join(interface_dir, name)
+                action.triggered.connect(lambda checked, script=script: self.launchCustomGUI(script))
+
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
         dockwidget, location = plugin.create_dockwidget()
@@ -293,12 +347,12 @@ class MainWindow(QMainWindow):
                 # column 2
                 [[logmessages]]
             ],
-            'width-fraction': [0.25,            # column 0 width
-                               0.50,            # column 1 width
-                               0.25],           # column 2 width
-            'height-fraction': [[0.5, 0.5],     # column 0 row heights
-                                [1.0],          # column 1 row heights
-                                [1.0]]          # column 2 row heights
+            'width-fraction': [0.25,  # column 0 width
+                               0.50,  # column 1 width
+                               0.25],  # column 2 width
+            'height-fraction': [[0.5, 0.5],  # column 0 row heights
+                                [1.0],  # column 1 row heights
+                                [1.0]]  # column 2 row heights
         }
 
         with widget_updates_disabled(self):
@@ -310,13 +364,13 @@ class MainWindow(QMainWindow):
                 w.toggle_view(True)
             # split everything on the horizontal
             for i in range(len(widgets) - 1):
-                first, second = widgets[i], widgets[i+1]
+                first, second = widgets[i], widgets[i + 1]
                 self.splitDockWidget(first.dockwidget, second.dockwidget,
                                      Qt.Horizontal)
             # now arrange the rows
             for column in widgets_layout:
                 for i in range(len(column) - 1):
-                    first_row, second_row = column[i], column[i+1]
+                    first_row, second_row = column[i], column[i + 1]
                     self.splitDockWidget(first_row[0].dockwidget,
                                          second_row[0].dockwidget,
                                          Qt.Vertical)
@@ -324,7 +378,7 @@ class MainWindow(QMainWindow):
             for column in widgets_layout:
                 for row in column:
                     for i in range(len(row) - 1):
-                        first, second = row[i], row[i+1]
+                        first, second = row[i], row[i + 1]
                         self.tabifyDockWidget(first.dockwidget, second.dockwidget)
 
                     # Raise front widget per row
@@ -335,12 +389,16 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         # Close editors
         if self.editor.app_closing():
-            self.writeSettings(CONF) # write current window information to global settings object
+            self.writeSettings(CONF)  # write current window information to global settings object
 
             # Close all open plots
             # We don't want this at module scope here
-            import matplotlib.pyplot as plt  #noqa
+            import matplotlib.pyplot as plt  # noqa
             plt.close('all')
+
+            app = QApplication.instance()
+            if app is not None:
+                app.closeAllWindows()
 
             event.accept()
         else:
@@ -367,13 +425,13 @@ class MainWindow(QMainWindow):
         qapp = QApplication.instance()
         qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
         if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('main/high_dpi_scaling'))
+            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('high_dpi_scaling'))
 
         # get the saved window geometry
-        window_size = settings.get('main/window/size')
+        window_size = settings.get('MainWindow/size')
         if not isinstance(window_size, QSize):
             window_size = QSize(*window_size)
-        window_pos = settings.get('main/window/position')
+        window_pos = settings.get('MainWindow/position')
         if not isinstance(window_pos, QPoint):
             window_pos = QPoint(*window_pos)
 
@@ -399,21 +457,27 @@ class MainWindow(QMainWindow):
         self.move(window_pos)
 
         # restore window state
-        if settings.has('main/window/state'):
-            self.restoreState(settings.get('main/window/state'))
+        if settings.has('MainWindow/state'):
+            self.restoreState(settings.get('MainWindow/state'))
         else:
             self.setWindowState(Qt.WindowMaximized)
 
-        # have algorithm dialogs do their thing
+        # read in settings for children
         AlgorithmInputHistory().readSettings(settings)
+        for widget in self.widgets:
+            if hasattr(widget, 'readSettings'):
+                widget.readSettings(settings)
 
     def writeSettings(self, settings):
-        settings.set('main/window/size', self.size()) # QSize
-        settings.set('main/window/position', self.pos()) # QPoint
-        settings.set('main/window/state', self.saveState()) # QByteArray
+        settings.set('MainWindow/size', self.size())  # QSize
+        settings.set('MainWindow/position', self.pos())  # QPoint
+        settings.set('MainWindow/state', self.saveState())  # QByteArray
 
-        # have algorithm dialogs do their thing
+        # write out settings for children
         AlgorithmInputHistory().writeSettings(settings)
+        for widget in self.widgets:
+            if hasattr(widget, 'writeSettings'):
+                widget.writeSettings(settings)
 
 
 def initialize():
@@ -454,14 +518,17 @@ def start_workbench(app, command_line_options):
     # start mantid
     main_window.set_splash('Preloading mantid')
     importlib.import_module('mantid')
+    main_window.populateAfterMantidImport()
     main_window.show()
+    main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 
     if main_window.splash:
         main_window.splash.hide()
 
-    if command_line_options.exe_script is not None:
-        main_window.editor.open_file_in_new_tab(command_line_options.exe_script)
-        main_window.editor.execute_current()  # TODO use the result as an exit code
+    if command_line_options.script is not None:
+        main_window.editor.open_file_in_new_tab(command_line_options.script)
+        if command_line_options.execute:
+            main_window.editor.execute_current()  # TODO use the result as an exit code
 
         if command_line_options.quit:
             main_window.close()
@@ -486,9 +553,10 @@ def main():
 
     # setup command line arguments
     parser = argparse.ArgumentParser(description='Mantid Workbench')
-    parser.add_argument('-x', '--execute', metavar='SCRIPT', dest='exe_script',
+    parser.add_argument('script', nargs='?')
+    parser.add_argument('-x', '--execute', action='store_true',
                         help='execute the script file given as argument')
-    parser.add_argument('-q', '--quit', dest='quit', action='store_true',
+    parser.add_argument('-q', '--quit', action='store_true',
                         help='execute the script file with \'-x\' given as argument and then exit')
     # TODO -a or --about: show about dialog and exit
     # TODO -d or --default-settings: start MantidPlot with the default settings
@@ -512,13 +580,13 @@ def main():
     # TODO handle options that don't require starting the workbench e.g. --help --version
 
     # fix/validate arguments
-    if options.exe_script is not None:
+    if options.script is not None:
         # convert into absolute path
-        options.exe_script = os.path.abspath(os.path.expanduser(options.exe_script))
-        if not os.path.exists(options.exe_script):
+        options.script = os.path.abspath(os.path.expanduser(options.script))
+        if not os.path.exists(options.script):
             # TODO should be logged
-            print('script "{}" does not exist'.format(options.exe_script))
-            options.exe_script = None
+            print('script "{}" does not exist'.format(options.script))
+            options.script = None
 
     app = initialize()
     # the default sys check interval leads to long lags
