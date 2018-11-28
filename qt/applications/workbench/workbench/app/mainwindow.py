@@ -21,7 +21,8 @@ import os
 import sys
 
 # third party imports
-from mantid.kernel import version_str as mantid_version_str
+from mantid.kernel import ConfigService, logger, version_str as mantid_version_str
+from mantid.api import FrameworkManagerImpl
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -45,9 +46,11 @@ from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, QSetti
 from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
-from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
+from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
+from mantidqt.utils.qt import (add_actions, create_action, plugins,
+                               widget_updates_disabled)  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -115,12 +118,6 @@ SPLASH.showMessage("Starting...", Qt.AlignBottom | Qt.AlignLeft
                    | Qt.AlignAbsolute, QColor(Qt.black))
 # The event loop has not started - force event processing
 QApplication.processEvents(QEventLoop.AllEvents)
-
-# -----------------------------------------------------------------------------
-# Utilities/Widgets
-# -----------------------------------------------------------------------------
-from mantidqt.utils.qt import add_actions, create_action  # noqa
-from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -213,6 +210,13 @@ class MainWindow(QMainWindow):
         self.create_actions()
         self.populate_menus()
 
+    def post_mantid_init(self):
+        """Run any setup that requires mantid
+        to have been initialized
+        """
+        self.populate_interfaces_menu()
+        self.algorithm_selector.refresh()
+
     def set_splash(self, msg=None):
         if not self.splash:
             return
@@ -274,14 +278,12 @@ class MainWindow(QMainWindow):
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
 
-    def launchCustomGUI(self, filename):
-        from mantid.kernel import logger  # noqa
+    def launch_custom_gui(self, filename):
         executioner = PythonCodeExecution()
         executioner.sig_exec_error.connect(lambda errobj: logger.warning(str(errobj)))
         executioner.execute(open(filename).read(), filename)
 
-    def populateAfterMantidImport(self):
-        from mantid.kernel import ConfigService, logger  # noqa
+    def populate_interfaces_menu(self):
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
         items = ConfigService['mantidqt.python_interfaces'].split()
 
@@ -315,7 +317,7 @@ class MainWindow(QMainWindow):
             for name in names:
                 action = submenu.addAction(name.replace('.py', '').replace('_', ' '))
                 script = os.path.join(interface_dir, name)
-                action.triggered.connect(lambda checked, script=script: self.launchCustomGUI(script))
+                action.triggered.connect(lambda checked, script=script: self.launch_custom_gui(script))
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
@@ -524,9 +526,9 @@ def start_workbench(app, command_line_options):
     # or the log messages don't get through to the widget
     main_window.setup()
     # start mantid
-    main_window.set_splash('Preloading mantid')
-    importlib.import_module('mantid.simpleapi')
-    main_window.populateAfterMantidImport()
+    main_window.set_splash('Initializing mantid framework')
+    FrameworkManagerImpl.Instance()
+    main_window.post_mantid_init()
     main_window.show()
     main_window.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
 

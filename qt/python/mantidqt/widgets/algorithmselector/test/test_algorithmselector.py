@@ -25,17 +25,21 @@ from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 
 AlgorithmDescriptorMock = namedtuple('AlgorithmDescriptorMock', ['name', 'alias', 'category', 'version'])
 mock_get_algorithm_descriptors = Mock()
-mock_get_algorithm_descriptors.return_value = [AlgorithmDescriptorMock(name='Rebin', version=1,
-                                                                       category='Transform', alias=''),
-                                               AlgorithmDescriptorMock(name='Rebin', version=1,
-                                                                       category='Transform\\Rebin', alias=''),
-                                               AlgorithmDescriptorMock(name='Load', version=1,
-                                                                       category='Data', alias=''),
-                                               AlgorithmDescriptorMock(name='DoStuff', version=1,
-                                                                       category='Stuff', alias=''),
-                                               AlgorithmDescriptorMock(name='DoStuff', version=2,
-                                                                       category='Stuff', alias=''),
-                                               ]
+mock_get_algorithm_descriptors.return_value = [
+    AlgorithmDescriptorMock(name='Rebin', version=1,
+                            category='Transform', alias=''),
+    AlgorithmDescriptorMock(name='Rebin', version=1,
+                            category='Transform\\Rebin', alias=''),
+    AlgorithmDescriptorMock(name='Load', version=1,
+                            category='Data', alias=''),
+    AlgorithmDescriptorMock(name='DoStuff', version=1,
+                            category='Stuff', alias=''),
+    AlgorithmDescriptorMock(name='DoStuff', version=2,
+                            category='Stuff', alias=''),
+]
+
+empty_mock_get_algorithm_descriptors = Mock()
+empty_mock_get_algorithm_descriptors.return_value = []
 
 
 @patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
@@ -63,6 +67,13 @@ class ModelTest(unittest.TestCase):
 
 @patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
 class WidgetTest(GuiTest):
+
+    # def setUp(self):
+    #     self.getDescriptors_orig = AlgorithmFactoryImpl.getDescriptors
+    #     AlgorithmFactoryImpl.getDescriptors = mock_get_algorithm_descriptors
+    #
+    # def tearDown(self):
+    #     AlgorithmFactoryImpl.getDescriptors = self.getDescriptors_orig
 
     def _select_in_tree(self, widget, item_label):
         select_item_in_tree(widget.tree, item_label)
@@ -145,6 +156,18 @@ class WidgetTest(GuiTest):
             self._select_in_tree(widget, 'DoStuff v.2')
             QTest.keyClick(widget.search_box, Qt.Key_Return)
             createDialog.assert_called_once_with('DoStuff', 2)
+
+    def test_refresh(self):
+        # Set a mock to return an empty descriptor list
+        getDescriptors_orig = AlgorithmFactoryImpl.getDescriptors
+        AlgorithmFactoryImpl.getDescriptors = empty_mock_get_algorithm_descriptors
+
+        widget = AlgorithmSelectorWidget()
+        self.assertEqual(0, widget.tree.topLevelItemCount())
+        # put back the original
+        AlgorithmFactoryImpl.getDescriptors = getDescriptors_orig
+        widget.refresh()
+        self.assertEqual(3, widget.tree.topLevelItemCount())
 
 
 if __name__ == '__main__':
