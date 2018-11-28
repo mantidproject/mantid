@@ -19,6 +19,14 @@ def lazy_instance_access(cls):
     """
     Takes a singleton class and wraps it in an LazySingletonHolder
     that constructs the instance on first access.
+
+     Historically, mantid <= v3.13, the singleton aliases mapped to the
+    instances rather than the class types, i.e. UsageService is the instance and not the type.
+    To preserve compatibility with existing scripts, where users have not called UsageService.Instance(),
+    but also allow the singleton instance startup to be delayed we create a thin wrapper that
+    delays the first .Instance() call until an attribute is accessed on the wrapper.
+
+
     :param cls: The singleton class type
     :return: A new LazySingletonHolder wrapping cls
     """
@@ -51,9 +59,6 @@ def lazy_instance_access(cls):
     return LazySingletonHolder()
 
 
-# Historically the singleton aliases mapped to the instances rather than
-# the class types, i.e. AnalysisDataService is the instance and not the type,
-# which doesn't match the C++ behaviour.
 UsageService = lazy_instance_access(UsageServiceImpl)
 ConfigService = lazy_instance_access(ConfigServiceImpl)
 PropertyManagerDataService = lazy_instance_access(PropertyManagerDataServiceImpl)
