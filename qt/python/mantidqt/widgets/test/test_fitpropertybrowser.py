@@ -4,7 +4,7 @@ import sys
 import unittest
 
 from qtpy import PYQT_VERSION
-from qtpy.QtWidgets import QMessageBox, QApplication
+from qtpy.QtWidgets import QApplication
 from qtpy.QtCore import Qt, QMetaObject
 
 from mantid import FrameworkManager
@@ -61,7 +61,6 @@ class TestFitPropertyBrowser(GuiWindowTest):
         self.assertTrue(m.isVisible())
         yield self.start_find_peaks()
         box = self.get_active_modal_widget()
-        # self.assertTrue(isinstance(box, QMessageBox))
         self.assertEqual(box.text(), 'Workspace name is not set')
         box.close()
 
