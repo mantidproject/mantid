@@ -542,7 +542,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Wavelength uncertainty
         lambda_min = ws.getRun().getProperty("lambda_min").value
         lambda_max = ws.getRun().getProperty("lambda_max").value
-        dq_over_q = min(res) / np.tan(theta)
+        dq_over_q = np.min(res) / np.tan(theta)
 
         data_x = ws.dataX(0)
         data_dx = ws.dataDx(0)
