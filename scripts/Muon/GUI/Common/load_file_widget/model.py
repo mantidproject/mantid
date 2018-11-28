@@ -7,7 +7,7 @@ from mantid.kernel import ConfigService
 from mantid.api import WorkspaceGroup
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-import Muon.GUI.Common.load_utils as load_utils
+import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 def is_workspace_group(workspace):

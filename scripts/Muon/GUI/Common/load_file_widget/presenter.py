@@ -3,9 +3,9 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 
 from Muon.GUI.Common import thread_model
-import Muon.GUI.Common.muon_file_utils as file_utils
-import Muon.GUI.Common.load_utils as load_utils
-from Muon.GUI.Common.muon_workspace import MuonWorkspace
+import Muon.GUI.Common.utilities.muon_file_utils as file_utils
+import Muon.GUI.Common.utilities.load_utils as load_utils
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 class BrowseFileWidgetPresenter(object):
@@ -194,6 +194,6 @@ class BrowseFileWidgetPresenter(object):
             self._model._loaded_data_store.remove_data(run=run)
         self._model._loaded_data_store.remove_data(run=run_list[0])
         # run_string = runUtils.run_list_to_string(run_list)
-        return_ws["OutputWorkspace"] = MuonWorkspace(running_total)
+        return_ws["OutputWorkspace"] = MuonWorkspaceWrapper(running_total)
         self._model._loaded_data_store.add_data(run=self.flatten_run_list(run_list), workspace=return_ws,
                                                 filename="Co-added")

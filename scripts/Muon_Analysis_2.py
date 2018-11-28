@@ -14,26 +14,26 @@ import PyQt4.QtCore as QtCore
 
 from mantid.kernel import ConfigServiceImpl
 import mantid.simpleapi as simpleapi
-#
-# from Muon.GUI.Common.muon_context import MuonContext
-#
-# from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
-# from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
-# from Muon.GUI.Common.muon_context.muon_context import *#MuonContext
-#
+
+from Muon.GUI.Common.muon_data_context import MuonDataContext
+
+from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
+from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
+from Muon.GUI.Common.muon_context.muon_context import *#MuonContext
+
 # from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
-#
-# from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
-# from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
-# from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
-#
-# from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
-# from Muon.GUI.Common.load_run_widget.view import LoadRunWidgetView
-# from Muon.GUI.Common.load_run_widget.presenter import LoadRunWidgetPresenter
-#
-# from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
-# from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
-# from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
+
+from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
+from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
+from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
+
+from Muon.GUI.Common.load_run_widget.model import LoadRunWidgetModel
+from Muon.GUI.Common.load_run_widget.view import LoadRunWidgetView
+from Muon.GUI.Common.load_run_widget.presenter import LoadRunWidgetPresenter
+
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 #
 # from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
 # from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
@@ -70,7 +70,7 @@ import mantid.simpleapi as simpleapi
 # from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidgetPresenter
 
 import Muon.GUI.Common.message_box as message_box
-# from Muon.GUI.Common.muon_load_data import MuonLoadData
+from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 muonGUI = None
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
@@ -108,8 +108,8 @@ class MuonAnalysis4Gui(QtGui.QMainWindow):
             self.warning_popup(error.args[0])
 
         # initialise the data storing classes of the interface
-        # self.loaded_data = MuonLoadData()
-        # self.context = MuonContext(load_data=self.loaded_data)
+        self.loaded_data = MuonLoadData()
+        self.context = MuonContext(load_data=self.loaded_data)
 
         # construct all the widgets.
         self.setup_load_widget()

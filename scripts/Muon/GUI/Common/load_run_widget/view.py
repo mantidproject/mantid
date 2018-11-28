@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import pyqtSignal as Signal
 
-import Muon.GUI.Common.run_string_utils as run_utils
+import Muon.GUI.Common.utilities.run_string_utils as run_utils
 from Muon.GUI.Common.message_box import warning
 
 

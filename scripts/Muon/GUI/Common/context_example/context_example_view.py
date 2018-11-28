@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 
-from Muon.GUI.Common import table_utils
+from Muon.GUI.Common.utilities import table_utils
 
 
 class ContextExampleView(QtGui.QWidget):

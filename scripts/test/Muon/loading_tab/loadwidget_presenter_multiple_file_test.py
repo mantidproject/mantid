@@ -8,9 +8,9 @@ except ImportError:
 from PyQt4 import QtGui
 from PyQt4.QtGui import QApplication
 
-from Muon.GUI.MuonAnalysis.loadwidget.load_widget_model import LoadWidgetModel
-from Muon.GUI.MuonAnalysis.loadwidget.load_widget_view import LoadWidgetView
-from Muon.GUI.MuonAnalysis.loadwidget.load_widget_presenter import LoadWidgetPresenter
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_model import LoadWidgetModel
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
+from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPresenter
 
 from Muon.GUI.MuonAnalysis.loadrun.load_run_model import LoadRunWidgetModel
 from Muon.GUI.MuonAnalysis.loadrun.load_run_presenter import LoadRunWidgetPresenter

@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import WorkspaceGroup
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-import Muon.GUI.Common.load_utils as load_utils
+import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 def is_workspace_group(workspace):
