@@ -90,6 +90,9 @@ class TableWorkspaceDisplayView(QTableWidget):
         plot_line = QAction(self.GRAPH_ICON, "Line", plot)
         plot_line.triggered.connect(partial(self.presenter.action_plot, PlotType.LINEAR))
 
+        plot_line_with_yerr = QAction(self.GRAPH_ICON, "Line with Y Errors", plot)
+        plot_line_with_yerr.triggered.connect(partial(self.presenter.action_plot, PlotType.LINEAR_WITH_ERR))
+
         plot_scatter = QAction(self.GRAPH_ICON, "Scatter", plot)
         plot_scatter.triggered.connect(partial(self.presenter.action_plot, PlotType.SCATTER))
 
@@ -97,6 +100,7 @@ class TableWorkspaceDisplayView(QTableWidget):
         plot_line_and_points.triggered.connect(partial(self.presenter.action_plot, PlotType.LINE_AND_SYMBOL))
 
         plot.addAction(plot_line)
+        plot.addAction(plot_line_with_yerr)
         plot.addAction(plot_scatter)
         plot.addAction(plot_line_and_points)
         menu_main.addMenu(plot)
@@ -132,12 +136,18 @@ class TableWorkspaceDisplayView(QTableWidget):
         menu_main.addAction(self.make_separator(menu_main))
         menu_main.addAction(set_as_x)
         menu_main.addAction(set_as_y)
-        num_y_cols = self.presenter.get_num_columns_marked_as_y()
-        if num_y_cols>0:
+
+        # get the columns marked as Y
+        marked_y_cols = self.presenter.get_columns_marked_as_y()
+        num_y_cols = len(marked_y_cols)
+        if num_y_cols > 0:
             menu_set_as_y_err = QMenu("Set error for Y...")
             for col in range(num_y_cols):
+                # get the real index of the column
+                # display the real index in the menu
                 set_as_y_err = QAction(self.TBD, "Y{}".format(col), menu_main)
-                set_as_y_err.triggered.connect(partial(self.presenter.action_set_as_y_err, col))
+                real_column_index = marked_y_cols[col]
+                set_as_y_err.triggered.connect(partial(self.presenter.action_set_as_y_err, real_column_index, col))
                 menu_set_as_y_err.addAction(set_as_y_err)
             menu_main.addMenu(menu_set_as_y_err)
 

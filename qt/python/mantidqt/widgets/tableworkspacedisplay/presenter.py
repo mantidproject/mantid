@@ -14,7 +14,6 @@ from functools import partial
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QTableWidgetItem
 
-from mantid.py3compat import Enum
 from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
 from mantidqt.widgets.common.table_copying import copy_cells, show_mouse_toast, show_no_selection_to_copy_toast
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
@@ -31,72 +30,146 @@ class TableItem(QTableWidgetItem):
             return super(TableItem, self).__lt__(other)
 
 
-class ColumnState(Enum):
-    Y = 1
-    X = 2
-    Y_ERR = 3
-
-
-class TableColumn:
-    def __init__(self):
-        self.state = ColumnState.Y
-        # If the column is marked as an error column,
-        # this will store the index of the column for which the error is being stored
-        self.error_for_column = None
-
+# class ColumnState(Enum):
+#     NONE = 0
+#     Y = 1
+#     X = 2
+#     Y_ERR = 3
+#
+#
+# class TableColumn:
+#     X_LABEL = "[X]"
+#     Y_LABEL = "[Y]"
+#     Y_ERR_LABEL = "[YErr->Y{}]"
+#
+#     def __init__(self, state=ColumnState.NONE, error_for_column=None):
+#         self.state = state
+#         # If the column is marked as an error column,
+#         # this will store the index of the column for which the error is being stored
+#         self.error_for_column = error_for_column
+#
+#     def __str__(self):
+#         if self.state == ColumnState.X:
+#             return self.X_LABEL
+#         elif self.state == ColumnState.Y:
+#             return self.Y_LABEL
+#         elif self.state == ColumnState.Y_ERR:
+#             return self.Y_ERR_LABEL
+#         elif self.state == ColumnState.NONE:
+#             return ""
+#
 
 class ErrorColumn:
-    def __init__(self, source_column, error_for_column):
+    def __init__(self, source_column, error_for_column, label_index):
         self.source_column = source_column
         self.error_for_column = error_for_column
+        self.label_index = label_index
+
+    def __eq__(self, other):
+        if isinstance(other, ErrorColumn):
+            return self.error_for_column == other.error_for_column or self.source_column == other.source_column
+        elif isinstance(other, int):
+            return self.source_column == other
+        else:
+            raise RuntimeError("Unhandled comparison logic with type {}".format(type(other)))
+
+    def __cmp__(self, other):
+        if isinstance(other, ErrorColumn):
+            return self.source_column == other.source_column or self.error_for_column == other.error_for_column
+        elif isinstance(other, int):
+            return self.source_column == other
+        else:
+            raise RuntimeError("Unhandled comparison logic with type {}".format(type(other)))
 
 
 class MarkedColumns:
+    X_LABEL = "[X{}]"
+    Y_LABEL = "[Y{}]"
+    Y_ERR_LABEL = "[Y{}_YErr]"
+
     def __init__(self):
         self.as_x = []
         self.as_y = []
-        self.as_y_err = []  # type: [ErrorColumn]
-        self.as_x_err = []
+        self.as_y_err = []  # type: list[ErrorColumn]
+        # self.as_x_err = []
 
     def _add(self, col_index, add_to, remove_from):
         assert all(
             add_to is not remove for remove in remove_from), "Can't add and remove from the same list at the same time!"
+        self._remove(col_index, remove_from)
+
         if col_index not in add_to:
             add_to.append(col_index)
 
+    def _remove(self, col_index, remove_from):
         for list in remove_from:
-            try:
-                list.remove(col_index)
-            except ValueError:
-                pass
+            num_contained = list.count(col_index)
+            for i in range(num_contained):
+                try:
+                    list.remove(col_index)
+                except ValueError:
+                    break
+        # if the column previously had a Y Err associated with it -> this will remove it from the YErr list
+        self._remove_associated_yerr_columns(col_index)
 
     def add_x(self, col_index):
-        self._add(col_index, self.as_x, [self.as_y, self.as_y_err, self.as_x_err])
+        self._add(col_index, self.as_x, [self.as_y, self.as_y_err])
 
     def add_y(self, col_index):
-        self._add(col_index, self.as_y, [self.as_x, self.as_y_err, self.as_x_err])
+        self._add(col_index, self.as_y, [self.as_x, self.as_y_err])
 
-    def add_y_err(self, col_index, error_for_column):
-        err_column = ErrorColumn(col_index, error_for_column)
-        self._add(err_column, self.as_y_err, [self.as_x, self.as_y, self.as_x_err])
+    def add_y_err(self, err_column):
+        # remove all labels for the column index
+        len_before_remove = len(self.as_y)
+        self._remove(err_column, [self.as_x, self.as_y, self.as_y_err])
 
-    # def add_x_err(self, col_index):
-    #     self._add(col_index, self.as_x_err, [self.as_x, self.as_y, self.as_y_err])
+        # Check if the length of the list with columns marked Y has shrunk
+        # -> This means that columns have been removed, and the label_index is now _wrong_
+        # and has to be decremented to match the new label index correctly
+        # TODO test this edge case: mark all columns Y, remove one that is not the last one!
+        # TODO test: mark 3 columns as Y, set the first one to YErr it should have label YErr->Y1
+        # TODO test: mark 3 columns as Y, set the middle one to YErr it should have label YErr->Y1
+        len_after_remove = len(self.as_y)
+        if err_column.error_for_column > err_column.source_column and len_after_remove < len_before_remove:
+            err_column.label_index -= (len_before_remove - len_after_remove)
+        self.as_y_err.append(err_column)
 
     def remove_from_all(self, col_index):
-        self._add(col_index, [], [self.as_x, self.as_y, self.as_y_err, self.as_x_err])
+        self._remove(col_index, [self.as_x, self.as_y, self.as_y_err])
+
+    def _remove_associated_yerr_columns(self, col_index):
+        # we can only have 1 Y Err for Y, so iterating and removing's iterator invalidation is not an
+        # issue as the code will exit immediately after the removal
+        for col in self.as_y_err:
+            if col.error_for_column == col_index:
+                self.as_y_err.remove(col)
+                break
 
     def _make_labels(self, list, label):
         return [(col_num, label.format(index),) for index, col_num in enumerate(list)]
 
     def build_labels(self):
         extra_labels = []
-        extra_labels.extend(self._make_labels(self.as_x, "[X{}]"))
-        extra_labels.extend(self._make_labels(self.as_y, "[Y{}]"))
-        err_labels = [(col_num.source_column, "[YErr->Y{}]".format(col_num.error_for_column),) for index, col_num
-                      in enumerate(self.as_y_err)]
+        extra_labels.extend(self._make_labels(self.as_x, self.X_LABEL))
+        extra_labels.extend(self._make_labels(self.as_y, self.Y_LABEL))
+        err_labels = [(err_col.source_column, self.Y_ERR_LABEL.format(err_col.label_index),) for index, err_col in
+                      enumerate(self.as_y_err)]
         extra_labels.extend(err_labels)
         return extra_labels
+
+    def find_yerr(self, selected_columns):
+        yerr_for_col = {}
+
+        # for each selected column
+        for col in selected_columns:
+            # find the marked error column
+            for yerr_col in self.as_y_err:
+                # if found append the YErr's source column - so that the data from the columns
+                # can be retrieved for plotting the errors
+                if yerr_col.error_for_column == col:
+                    yerr_for_col[col] = yerr_col.source_column
+
+        return yerr_for_col
 
 
 class TableWorkspaceDisplay(object):
@@ -118,6 +191,7 @@ class TableWorkspaceDisplay(object):
 
         self.marked_columns = MarkedColumns()
         self.original_column_headers = self.model.get_column_headers()
+        # self.column_states = [TableColumn() for i in range(len(self.original_column_headers))]
         self.update_column_headers()
         self.load_data(self.view)
 
@@ -236,14 +310,25 @@ class TableWorkspaceDisplay(object):
     def action_set_as_y(self):
         self._action_set_as(self.marked_columns.add_y)
 
-    def action_set_as_y_err(self, error_for_column):
+    def action_set_as_y_err(self, error_for_column, label_index):
+        """
+
+        :param error_for_column: The real index of the column for which the error is being marked
+        :param label_index: The index present in the label of the column for which the error is being marked
+                            This will be the number in <ColumnName>[Y10] -> the 10
+        """
         try:
-            selected_columns = self._get_selected_columns()
+            selected_columns = self._get_selected_columns(1, "Too many selected to set as Y Error")
         except ValueError:
             return
 
-        for col in selected_columns:
-            self.marked_columns.add_y_err(col, error_for_column)
+        selected_column = selected_columns[0]
+        if selected_column == error_for_column:
+            show_mouse_toast("Cannot set Y column to be its own YErr.")
+            return
+
+        err_column = ErrorColumn(selected_column, error_for_column, label_index)
+        self.marked_columns.add_y_err(err_column)
 
         self.update_column_headers()
 
@@ -265,6 +350,11 @@ class TableWorkspaceDisplay(object):
         except ValueError:
             return
 
+        # TODO check if the selected column for plotting is YERR and NOPE out if so
+        # better check: if the selected columns IS NOT Y then nope out
+        # currently it silently ignores it -> maybe we want to do that so people can spam PLOT EVERYTHING
+        # if -> a column in the selection is X or YErr ABORT MISSION with a toast :cheer:
+        # it should be possible to reuse the check below as it is similar (is it really tho -> only part of it is similar)
         x_cols = list(set(selected_columns).intersection(self.marked_columns.as_x))
         num_x_cols = len(x_cols)
         # if there is more than 1 column marked as X in the selection
@@ -299,6 +389,12 @@ class TableWorkspaceDisplay(object):
         self._do_plot(selected_columns, selected_x, type)
 
     def _do_plot(self, selected_columns, selected_x, type):
+
+        if type == PlotType.LINEAR_WITH_ERR:
+            yerr = self.marked_columns.find_yerr(selected_columns)  # type: dict[(int, int)]
+            if len(yerr) != len(selected_columns):
+                show_mouse_toast("There is no associated YErr for each selected Y column.")
+                return
         x = self.model.get_column(selected_x)
         fig, ax = self.plot.subplots(subplot_kw={'projection': 'mantid'})
         ax.set_xlabel(self.model.get_column_header(selected_x))
@@ -306,7 +402,12 @@ class TableWorkspaceDisplay(object):
         for column in selected_columns:
             y = self.model.get_column(column)
             column_label = self.model.get_column_header(column)
-            plot_func(x, y, label='Column {}'.format(column_label))
+            if type == PlotType.LINEAR_WITH_ERR:
+                yerr_column = yerr[column]
+                yerr_column_data = self.model.get_column(yerr_column)
+                plot_func(x, y, label='Column {}'.format(column_label), yerr=yerr_column_data)
+            else:
+                plot_func(x, y, label='Column {}'.format(column_label))
             ax.set_ylabel(column_label)
         ax.legend()
         fig.show()
@@ -318,54 +419,11 @@ class TableWorkspaceDisplay(object):
             plot_func = ax.scatter
         elif type == PlotType.LINE_AND_SYMBOL:
             plot_func = partial(ax.plot, marker='o')
+        elif type == PlotType.LINEAR_WITH_ERR:
+            plot_func = ax.errorbar
         else:
             raise ValueError("Plot Type: {} not currently supported!".format(type))
         return plot_func
 
-    def get_num_columns_marked_as_y(self):
-        return len(self.marked_columns.as_y)
-    # def _do_action_plot(self, table, axis, get_index, plot_errors=False):
-    #     if self.plot is None:
-    #         raise ValueError("Trying to do a plot, but no plotting class dependency was injected in the constructor")
-    #     selection_model = table.selectionModel()
-    #     if not selection_model.hasSelection():
-    #         self.show_no_selection_to_copy_toast()
-    #         return
-    #
-    #     if axis == MantidAxType.SPECTRUM:
-    #         selected = selection_model.selectedRows()  # type: list
-    #     else:
-    #         selected = selection_model.selectedColumns()  # type: list
-    #
-    #     if len(selected) > self.NUM_SELECTED_FOR_CONFIRMATION and not self.view.ask_confirmation(
-    #             self.A_LOT_OF_THINGS_TO_PLOT_MESSAGE.format(len(selected))):
-    #         return
-    #
-    #     plot_kwargs = {"capsize": 3} if plot_errors else {}
-    #     plot_kwargs["axis"] = axis
-    #
-    #     ws_list = [self.model._ws]
-    #     self.plot(ws_list, wksp_indices=[get_index(index) for index in selected], errors=plot_errors,
-    #               plot_kwargs=plot_kwargs)
-    #
-    # def action_plot_spectrum(self, table):
-    #     self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row())
-    #
-    # def action_plot_spectrum_with_errors(self, table):
-    #     self._do_action_plot(table, MantidAxType.SPECTRUM, lambda index: index.row(), plot_errors=True)
-    #
-    # def action_plot_bin(self, table):
-    #     self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column())
-    #
-    # def action_plot_bin_with_errors(self, table):
-    #     self._do_action_plot(table, MantidAxType.BIN, lambda index: index.column(), plot_errors=True)
-
-    # def _get_ws_read_from_type(self, type):
-    #     if type == TableWorkspaceTableViewModelType.y:
-    #         return self.model._ws.readY
-    #     elif type == TableWorkspaceTableViewModelType.x:
-    #         return self.model._ws.readX
-    #     elif type == TableWorkspaceTableViewModelType.e:
-    #         return self.model._ws.readE
-    #     else:
-    #         raise ValueError("Unknown TableViewModel type {}".format(type))
+    def get_columns_marked_as_y(self):
+        return self.marked_columns.as_y
