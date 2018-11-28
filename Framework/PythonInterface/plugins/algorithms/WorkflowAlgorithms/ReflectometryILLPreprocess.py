@@ -112,6 +112,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws, monWS = self._extractMonitors(ws)
 
+        ws = self._peakFitting(ws)
+
         ws = self._waterCalibration(ws)
 
         ws = self._normaliseToSlits(ws)
@@ -247,14 +249,17 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             if beamCentre < 0. or beamCentre > 255.:
                 issues[Prop.BEAM_CENTRE] = "Value should be between 0 and 255."
         # Early input validation to prevent FindReflectometryLines to fail its validation
-        xmin = self.getPropertyValue(Prop.XMIN)
-        xmax = self.getPropertyValue(Prop.XMAX)
-        if xmax < xmin:
-            issues[Prop.XMIN] = "Must be smaller than RangeUpper."
-        minIndex = self.getPropertyValue(Prop.START_WS_INDEX)
-        maxIndex = self.getPropertyValue(Prop.END_WS_INDEX)
-        if maxIndex < minIndex:
-            issues[Prop.START_WS_INDEX] = "Must be smaller then EndWorkspaceIndex."
+        if not self.getProperty(Prop.XMIN).isDefault and not self.getProperty(Prop.XMAX).isDefault:
+            xmin = self.getProperty(Prop.XMIN).value
+            xmax = self.getProperty(Prop.XMAX).value
+            if xmax < xmin:
+                issues[Prop.XMIN] = "Must be smaller than RangeUpper."
+        if not self.getProperty(Prop.START_WS_INDEX).isDefault \
+                and not self.getProperty(Prop.END_WS_INDEX).isDefault:
+            minIndex = self.getProperty(Prop.START_WS_INDEX).value
+            maxIndex = self.getProperty(Prop.END_WS_INDEX).value
+            if maxIndex < minIndex:
+                issues[Prop.START_WS_INDEX] = "Must be smaller then EndWorkspaceIndex."
         return issues
 
     def _convertToWavelength(self, ws):
@@ -337,7 +342,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         return halfWidths
 
     def _inputWS(self):
-        """Return a raw input workspace with sample log information."""
+        """Return a raw input workspace."""
         beamPos = 0.
         inputFiles = self.getPropertyValue(Prop.RUN)
         inputFiles = inputFiles.replace(',', '+')
@@ -359,33 +364,48 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                               EnableLogging=self._subalgLogging)
         else:
             ws = self.getProperty(Prop.INPUT_WS).value
-        # Fit peak position
+        return ws
+
+    def _peakFitting(self, ws):
+        """Return the raw input workspace with sample log information."""
+        peakWSName = self._names.withSuffix('peak')
+        args = {'InputWorkspace': ws, 'OutputWorkspace': peakWSName, 'EnableLogging': self._subalgLogging}
         # Convert to wavelength
-        FindReflectometryLines(InputWorkspace=ws,
-                               LineCentre=beamPos,
-                               RangeLower=self.getPropertyValue(Prop.XMIN),
-                               RangeUpper=self.getPropertyValue(Prop.XMAX),
-                               StartWorkspaceIndex=self.getPropertyValue(Prop.START_WS_INDEX),
-                               EndWorkspaceIndex=self.getPropertyValue(Prop.END_WS_INDEX),
-                               EnableLogging=self._subalgLogging)  # exclude monitors
+        l1 = ws.spectrumInfo().l1()
+        hists = ws.getNumberHistograms()
+        mindex = int(hists / 2)
+        l2 = ws.spectrumInfo().l2(mindex)
+        theta = ws.spectrumInfo().twoTheta(mindex) / 2.
+        if not self.getProperty(Prop.XMIN).isDefault:
+            xmin = self.getProperty(Prop.XMIN).value
+            args['RangeLower'] = common.inWavelength(xmin, l1, l2, theta)
+        if not self.getProperty(Prop.XMAX).isDefault:
+            xmax = self.getProperty(Prop.XMAX).value
+            args['RangeUpper'] = common.inWavelength(xmax, l1, l2, theta)
+        if not self.getProperty(Prop.START_WS_INDEX).isDefault:
+            args['StartWorkspaceIndex'] = self.getProperty(Prop.START_WS_INDEX).value
+        if not self.getProperty(Prop.END_WS_INDEX).isDefault:
+            args['EndWorkspaceIndex'] = self.getPropertyValue(Prop.END_WS_INDEX).value
+        # Fit peak position
+        FindReflectometryLines(**args)
+        beamPos = mtd[peakWSName].readY(0)[0]
         if self.getProperty(Prop.RUN).isDefault:
-            if self.getProperty(Prop.BEAM_POS_WS).isDefault:
-                if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
-                    beamPos = self.getProperty(Prop.BEAM_CENTRE).value
-            else:
+            if not self.getProperty(Prop.BEAM_POS_WS).isDefault:
                 tableWithBeamPos = self.getProperty(Prop.BEAM_POS_WS).value
                 beamPos = tableWithBeamPos.cell('PeakCentre', 0)
+        if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
+            beamPos = self.getProperty(Prop.BEAM_CENTRE).value
         # Write beam position to sample logs
-        # Convert to wavelength
         AddSampleLog(ws,
                      LogName='peak_position',
                      LogText=str(beamPos),
                      LogType='Number',
-                     LogUnit='Wavelength',
                      NumberType='Double')
         # Add foreground start and end workspace indices to the sample logs of ws.
         hws = self._foregroundWidths()
         beamPosIndex = int(numpy.rint(beamPos))
+        if beamPosIndex > 255:
+            beamPosIndex = 255
         sign = self._workspaceIndexDirection(ws)
         start = beamPosIndex - sign * hws[0]
         end = beamPosIndex + sign * hws[1]

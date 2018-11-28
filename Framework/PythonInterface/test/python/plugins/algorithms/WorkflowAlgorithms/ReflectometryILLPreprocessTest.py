@@ -302,8 +302,8 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
     def testBeamCentreBraggAngelInput(self):
         args = {
             'Run': 'ILL/D17/317369',
-            'BeamCentre': 0.4,
-            'BraggAngle': 20.,
+            'BeamCentre': 10.23,
+            'BraggAngle': 20.23,
             'OutputWorkspace': 'outWS',
             'rethrow': True,
             'child': True
@@ -311,6 +311,22 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getRun().getProperty('peak_position').value, 10.23)
+        self.assertEquals(outWS.getRun().getProperty('foreground.centre_workspace_index').value, 10)
+        self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
+
+    def testBeamCentreFit(self):
+        args = {
+            'Run': 'ILL/D17/317369',
+            'OutputWorkspace': 'outWS',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getRun().getProperty('peak_position').value, 202.177340754)
+        self.assertEquals(outWS.getRun().getProperty('foreground.centre_workspace_index').value, 202)
         self.assertEquals(outWS.getAxis(0).getUnit().caption(), 'Wavelength')
 
 if __name__ == "__main__":
