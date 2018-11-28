@@ -214,5 +214,5 @@ double SANSSolidAngleCorrection::calculateSolidAngleCorrection(
   return corr;
 }
 
-} // namespace WorkflowAlgorithms
+} // namespace Algorithms
 } // namespace Mantid
