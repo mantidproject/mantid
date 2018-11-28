@@ -8,7 +8,7 @@
 #
 
 from os import path, listdir
-from mantid.simpleapi import LoadNexusProcessed, LoadMD
+from mantid.simpleapi import LoadNexusProcessed, LoadMD, Load
 from mantid import logger
 
 
@@ -19,11 +19,7 @@ class WorkspaceLoader(object):
             workspace_name, file_ext = path.splitext(filename)
             if file_ext != u'.project':
                 try:
-                    # Attempt to load but if failed, fail with a warning
-                    if file_ext is ".md":
-                        LoadMD(directory + "/" + filename, outputworkspace=workspace_name)
-                    else:
-                        LoadNexusProcessed(directory + "/" + filename, outputworkspace=workspace_name)
+                    Load(directory + "/" + filename, OutputWorkspace=workspace_name)
                 except Exception as exception:
                     if isinstance(exception, KeyboardInterrupt):
                         raise KeyboardInterrupt

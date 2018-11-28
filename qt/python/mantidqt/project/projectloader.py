@@ -18,8 +18,11 @@ ENCODED_FILE_NAME = "mantidsave.project"
 
 def _confirm_all_workspaces_loaded(workspaces_to_confirm):
     current_workspaces = ADS.getObjectNames()
-    if current_workspaces != workspaces_to_confirm:
-        logger.warning("Project Loader was unable to load back all of project workspaces")
+    for ws in workspaces_to_confirm:
+        if ws not in current_workspaces:
+            logger.warning("Project Loader was unable to load back all of project workspaces")
+            return False
+    return True
 
 
 class ProjectLoader(object):
@@ -33,7 +36,7 @@ class ProjectLoader(object):
 
         # Load in the workspaces
         self.workspace_loader.load_workspaces(directory=directory)
-        _confirm_all_workspaces_loaded(workspaces_to_confirm=self.project_reader.workspace_names)
+        return _confirm_all_workspaces_loaded(workspaces_to_confirm=self.project_reader.workspace_names)
 
 
 class ProjectReader(object):

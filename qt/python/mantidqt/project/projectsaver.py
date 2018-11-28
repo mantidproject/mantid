@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from json import dumps
+from json import dump
 from os import makedirs
 from os.path import isdir
 
@@ -48,16 +48,6 @@ class ProjectSaver(object):
         writer.write_out()
 
 
-# Static private method to create JSON from objects and return a string
-def _create_out_string_json(dictionary):
-    """
-
-    :param dictionary:
-    :return:
-    """
-    return dumps(dictionary)
-
-
 class ProjectWriter(object):
     def __init__(self, dicts, save_location, workspace_names):
         """
@@ -76,11 +66,10 @@ class ProjectWriter(object):
         """
         # Get the JSON string versions
         workspace_interface_dict = {"workspaces": self.workspace_names, "interfaces": self.dicts_to_save}
-        json_string = _create_out_string_json(workspace_interface_dict)
 
         # Open file and save the string to it alongside the workspace_names
         file_name = self.directory + '/' + ENCODED_FILE_NAME
         if not isdir(self.directory):
             makedirs(self.directory)
         f = open(file_name, 'w+')
-        f.write(json_string)
+        dump(obj=workspace_interface_dict, fp=f)
