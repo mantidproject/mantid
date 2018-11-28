@@ -61,7 +61,7 @@ class TestFitPropertyBrowser(GuiWindowTest):
         self.assertTrue(m.isVisible())
         yield self.start_find_peaks()
         box = self.get_active_modal_widget()
-        self.assertTrue(isinstance(box, QMessageBox))
+        # self.assertTrue(isinstance(box, QMessageBox))
         self.assertEqual(box.text(), 'Workspace name is not set')
         box.close()
 
