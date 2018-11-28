@@ -1,4 +1,4 @@
-import Muon.GUI.Common.muon_file_utils as utils
+import Muon.GUI.Common.utilities.muon_file_utils as utils
 import sys
 import os
 

@@ -1,4 +1,4 @@
-import Muon.GUI.Common.run_string_utils as utils
+import Muon.GUI.Common.utilities.run_string_utils as utils
 import unittest
 
 
