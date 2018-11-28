@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import Muon.GUI.Common.load_utils as load_utils
+import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 class MuonLoadData:
@@ -92,14 +98,24 @@ class MuonLoadData:
     # Searching
 
     def _matches(self, **kwargs):
+<<<<<<< HEAD
         # If kwarg given which is not in params default checks to True, as we want to
         # match to every data item in that case
         checks = [kwargs.get(key, True) for key in self.params.keys()]
+=======
+        checks = [kwargs.get(key, None) for key in self.params.keys()]
+        data_values_zip = zip(*self.params.values())
+
+>>>>>>> origin/23642_MuonUtilsUpdate
         return [True if
                 sum([data_value == search_value for (data_value, search_value) in zip(list(data_values), checks)]) > 0
                 else False
                 for data_values in
+<<<<<<< HEAD
                 zip(*self.params.values())]
+=======
+                data_values_zip]
+>>>>>>> origin/23642_MuonUtilsUpdate
 
     def contains_n(self, **kwargs):
         """Counts the number of matching entries where at least one of kwargs matches"""

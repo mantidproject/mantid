@@ -22,6 +22,7 @@ set ( TEST_PY_FILES
    utilities/muon_workspace_wrapper_test.py
    utilities/muon_workspace_wrapper_directory_test.py
    subplotObject_test.py
+   muon_load_data_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
