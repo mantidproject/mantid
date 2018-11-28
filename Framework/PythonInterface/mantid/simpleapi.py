@@ -1424,7 +1424,10 @@ if not _api.FrameworkManagerImpl.hasInstance():
 _translate()
 
 # Load the Python plugins
-#
+# The exported C++ plugins
+from . import _plugins  # noqa
+
+# Now the algorithms
 # There is a chicken and egg problem with what we want to achieve here.
 # The simpleapi module should contain function definitions for all algorithms
 # and fit function classes but a python plugin can choose to import

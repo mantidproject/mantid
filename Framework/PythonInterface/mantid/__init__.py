@@ -74,14 +74,13 @@ _warnings.filterwarnings("ignore",category=DeprecationWarning,
                          module="numpy.oldnumeric")
 
 ###############################################################################
-# Load all subpackages that contain a C-extension. The boost.python
+# Load all non-plugin subpackages that contain a C-extension. The boost.python
 # registry will be missing entries if all are not loaded.
 ###############################################################################
 from . import kernel as _kernel
 from . import api as _api
 from . import geometry as _geometry
 from . import dataobjects as _dataobjects
-from . import _plugins
 
 # Make the aliases from each module accessible in a the mantid namespace
 from .kernel._aliases import *
