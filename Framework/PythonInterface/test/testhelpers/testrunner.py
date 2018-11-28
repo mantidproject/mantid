@@ -16,6 +16,21 @@ import os
 import sys
 import unittest
 
+# If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
+# Remove this when everything is switched to qtpy
+import sip
+try:
+    sip.setapi('QString', 2)
+    sip.setapi('QVariant', 2)
+    sip.setapi('QDate', 2)
+    sip.setapi('QDateTime', 2)
+    sip.setapi('QTextStream', 2)
+    sip.setapi('QTime', 2)
+    sip.setapi('QUrl', 2)
+except AttributeError:
+    # PyQt < v4.6
+    pass
+
 from xmlrunner import XMLTestRunner
 from xmlrunner.result import _TestInfo, _XMLTestResult, safe_unicode
 
