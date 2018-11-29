@@ -54,6 +54,8 @@ private:
   /**function converts particular type of events into MD space and add these
    * events to the workspace itself    */
   template <class T> size_t convertEventList(size_t workspaceIndex);
+
+  void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
 };
 
 } // namespace MDAlgorithms
