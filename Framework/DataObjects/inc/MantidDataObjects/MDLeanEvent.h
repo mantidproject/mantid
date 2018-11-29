@@ -143,7 +143,6 @@ protected:
 public:
   void retrieveIndex(const MDSpaceBounds<nd>& space) {
     index = interleave<nd, IntT, MortonT>(ConvertCoordinatesToIntegerRange<nd, IntT>(space, center));
-    std::cerr << "index = " << index << "\n";
   }
   void retrieveCoordinates(const MDSpaceBounds<nd>& space) {
     auto coords = ConvertCoordinatesFromIntegerRange<nd, IntT>
