@@ -13,8 +13,10 @@ from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReduction
 from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    LAB_CAN_SUFFIX, LAB_CAN_COUNT_SUFFIX, LAB_CAN_NORM_SUFFIX,
                                    HAB_CAN_SUFFIX, HAB_CAN_COUNT_SUFFIX, HAB_CAN_NORM_SUFFIX,
+                                   LAB_SAMPLE_SUFFIX, HAB_SAMPLE_SUFFIX,
                                    REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION,
-                                   REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
+                                   REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION,
+                                   CAN_AND_SAMPLE_WORKSPACE)
 from sans.common.file_information import (get_extension_for_file_type, SANSFileInformationFactory)
 from sans.state.data import StateData
 try:
@@ -38,7 +40,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     settings which require on reduction per time slice.
     :param state: a SANSState object
     :param use_optimizations: if true then the optimizations of child algorithms are enabled.
-    :param output_mode: the output mode
+    :param output_mode: output_workspaces_non_mergedthe output mode
     :param save_can: whether to save out can workspaces
     """
     # ------------------------------------------------------------------------------------------------------------------
@@ -66,7 +68,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # Run reductions (one at a time)
     # ------------------------------------------------------------------------------------------------------------------
     single_reduction_name = "SANSSingleReduction"
-    single_reduction_options = {"UseOptimizations": use_optimizations}
+    single_reduction_options = {"UseOptimizations": use_optimizations,
+                                "SaveCan": save_can}
     reduction_alg = create_managed_non_child_algorithm(single_reduction_name, **single_reduction_options)
     reduction_alg.setChild(False)
     # Perform the data reduction
@@ -107,6 +110,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
                                                                                      "OutputWorkspaceCalculatedTransmissionCan")
         reduction_package.unfitted_transmission_can = get_workspace_from_algorithm(reduction_alg,
                                                                                    "OutputWorkspaceUnfittedTransmissionCan")
+
+        reduction_package.reduced_lab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLABSample")
+        reduction_package.reduced_hab_sample = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHABSample")
 
         reduction_package.out_scale_factor = reduction_alg.getProperty("OutScaleFactor").value
         reduction_package.out_shift_factor = reduction_alg.getProperty("OutShiftFactor").value
@@ -705,6 +711,10 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
                          "OutputWorkspaceLABCanNorm", "reduced_lab_can_norm_name", "reduced_lab_can_norm_base_name",
                          multi_reduction_type, LAB_CAN_NORM_SUFFIX)
 
+        _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.LAB,
+                         "OutputWorkspaceLABSample", "reduced_lab_sample_name", "reduced_lab_sample_base_name",
+                         multi_reduction_type, LAB_SAMPLE_SUFFIX)
+
     def _set_hab(_reduction_alg, _reduction_package, _is_group):
         # Hab Can Workspace
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
@@ -720,6 +730,10 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
                          "OutputWorkspaceHABCanNorm", "reduced_hab_can_norm_name", "reduced_hab_can_norm_base_name",
                          multi_reduction_type, HAB_CAN_NORM_SUFFIX)
+
+        _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.HAB,
+                         "OutputWorkspaceHABSample", "reduced_hab_sample_name", "reduced_hab_sample_base_name",
+                         multi_reduction_type, HAB_SAMPLE_SUFFIX)
 
     # Go through the elements of the reduction package and set them on the reduction algorithm
     # Set the SANSState
@@ -837,6 +851,7 @@ def get_workspace_from_algorithm(alg, output_property_name):
 
     if not output_workspace_name:
         return None
+    print(output_workspace_name)
 
     if AnalysisDataService.doesExist(output_workspace_name):
         return AnalysisDataService.retrieve(output_workspace_name)
@@ -883,13 +898,16 @@ def group_workspaces_if_required(reduction_package):
             add_to_group(reduced_hab, reduction_package.reduced_hab_base_name)
 
     # Add the can workspaces (used for optimizations) to a Workspace Group (if they exist)
-    add_to_group(reduction_package.reduced_lab_can, REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
-    add_to_group(reduction_package.reduced_lab_can_count, REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
-    add_to_group(reduction_package.reduced_lab_can_norm, REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
+    add_to_group(reduction_package.reduced_lab_can, CAN_AND_SAMPLE_WORKSPACE)
+    add_to_group(reduction_package.reduced_lab_can_count, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
+    add_to_group(reduction_package.reduced_lab_can_norm, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
 
-    add_to_group(reduction_package.reduced_hab_can, REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
-    add_to_group(reduction_package.reduced_hab_can_count, REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
-    add_to_group(reduction_package.reduced_hab_can_norm, REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
+    add_to_group(reduction_package.reduced_hab_can, CAN_AND_SAMPLE_WORKSPACE)
+    add_to_group(reduction_package.reduced_hab_can_count, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
+    add_to_group(reduction_package.reduced_hab_can_norm, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
+
+    add_to_group(reduction_package.reduced_lab_sample, CAN_AND_SAMPLE_WORKSPACE)
+    add_to_group(reduction_package.reduced_hab_sample, CAN_AND_SAMPLE_WORKSPACE)
 
     if reduction_package.state.adjustment.show_transmission:
         add_to_group(reduction_package.calculated_transmission, reduction_package.calculated_transmission_base_name)
@@ -937,6 +955,7 @@ def save_to_file(reduction_packages, save_can=False):
     Extracts all workspace names which need to be saved and saves them into a file.
 
     @param reduction_packages: a list of reduction packages which contain all the relevant information for saving
+    @param save_can: a bool. When true save the unsubtracted can and sample workspaces
     """
     workspaces_names_to_save = get_all_names_to_save(reduction_packages, save_can=save_can)
 
@@ -1020,6 +1039,7 @@ def get_all_names_to_save(reduction_packages, save_can=False):
     Extracts all the output names from a list of reduction packages. The main
 
     @param reduction_packages: a list of reduction packages
+    @param save_can: a bool, whether or not to save unsubtracted can workspace
     @return: a list of workspace names to save.
     """
     names_to_save = []
