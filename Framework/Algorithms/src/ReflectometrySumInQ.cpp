@@ -107,44 +107,6 @@ void shareCounts(
     }
   }
 }
-
-/**
- * Return the angular 2theta width of a pixel.
- *
- * @param wsIndex [in] :: a workspace index to spectrumInfo
- * @param spectrumInfo [in] :: a spectrum info structure
- * @return :: the pixel's angular width in radians
- */
-Mantid::Algorithms::ReflectometrySumInQ::MinMax
-twoThetaWidth(const size_t wsIndex,
-              const Mantid::API::SpectrumInfo &spectrumInfo) {
-  const double twoTheta = spectrumInfo.twoTheta(wsIndex);
-  Mantid::Algorithms::ReflectometrySumInQ::MinMax range;
-  if (wsIndex == 0) {
-    if (spectrumInfo.size() <= 1) {
-      throw std::runtime_error("Cannot calculate pixel widths from a workspace "
-                               "containing a single histogram.");
-    }
-    const auto nextTwoTheta = spectrumInfo.twoTheta(1);
-    const auto d = std::abs(nextTwoTheta - twoTheta) / 2.;
-    range.min = twoTheta - d;
-    range.max = twoTheta + d;
-  } else if (wsIndex == spectrumInfo.size() - 1) {
-    const auto previousTwoTheta = spectrumInfo.twoTheta(wsIndex - 1);
-    const auto d = std::abs(twoTheta - previousTwoTheta) / 2.;
-    range.min = twoTheta - d;
-    range.max = twoTheta + d;
-  } else {
-    const auto t1 = spectrumInfo.twoTheta(wsIndex - 1);
-    const auto t2 = spectrumInfo.twoTheta(wsIndex + 1);
-    Mantid::Algorithms::ReflectometrySumInQ::MinMax neighbours(t1, t2);
-    const auto d1 = std::abs(twoTheta - neighbours.min) / 2.;
-    const auto d2 = std::abs(neighbours.max - twoTheta) / 2.;
-    range.min = twoTheta - d1;
-    range.max = twoTheta + d2;
-  }
-  return range;
-}
 } // namespace
 
 namespace Mantid {
@@ -326,12 +288,15 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
   // Neither BeamCentre and ThetaIn can be defined at the same time.
   if (!beamCentreProperty->isDefault() && !thetaInProperty->isDefault()) {
     // Both are defined
-    issues[Prop::BEAM_CENTRE] = "Defined whilst " + Prop::THETA_IN + " is also defined";
-    issues[Prop::THETA_IN] = "Defined whilst " + Prop::BEAM_CENTRE + " is also defined";
+    issues[Prop::BEAM_CENTRE] =
+        "Defined whilst " + Prop::THETA_IN + " is also defined";
+    issues[Prop::THETA_IN] =
+        "Defined whilst " + Prop::BEAM_CENTRE + " is also defined";
   } else if (beamCentreProperty->isDefault() && thetaInProperty->isDefault()) {
     // Neither are defined
     // Need to throw here with how issues are handled
-    throw std::runtime_error("Neither BeamCentre or ThetaIn are defined in ReflectometrySumInQ");
+    throw std::runtime_error(
+        "Neither BeamCentre or ThetaIn are defined in ReflectometrySumInQ");
   }
 
   return issues;
@@ -348,7 +313,6 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
 API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
     const API::MatrixWorkspace &detectorWS,
     const Indexing::SpectrumIndexSet &indices, const Angles &refAngles) {
-
   // Calculate the number of bins based on the min/max wavelength, using
   // the same bin width as the input workspace
   int twoThetaRIdx;
@@ -541,13 +505,13 @@ ReflectometrySumInQ::Angles
 ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
   const auto beamCentreProperty = getPointerToProperty(Prop::BEAM_CENTRE);
   const auto thetaInProperty = getPointerToProperty(Prop::THETA_IN);
+  const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
   Angles a;
   // If BeamCentre is defined use that else use ThetaIn
   if (!beamCentreProperty->isDefault()) {
     const int beamCentre = getProperty(Prop::BEAM_CENTRE);
     const double centreTwoTheta =
         spectrumInfo.twoTheta(static_cast<size_t>(beamCentre));
-    const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
     if (isFlat) {
       a.horizon = centreTwoTheta / 2.;
     } else {
@@ -558,16 +522,12 @@ ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
     return a;
   } else if (!thetaInProperty->isDefault()) {
     const double thetaIn = getProperty(Prop::THETA_IN);
-    double twoTheta;
-    try{
-      twoTheta = spectrumInfo.twoTheta(static_cast<size_t>(thetaIn));
-    } catch (std::runtime_error &e){
-      // Occurs when thetaIn is not equal to a monitor
-      g_log.information(std::string(e.what()) + ", this error occurred when getting twoTheta from spectrumInfo");
-      twoTheta = thetaIn;
+    if (isFlat) {
+      a.horizon = thetaIn;
+    } else {
+      a.horizon = 0.;
     }
-    a.horizon = thetaIn;
-    a.twoTheta = twoTheta;
+    a.twoTheta = thetaIn * 2;
     a.delta = a.twoTheta - a.horizon;
     return a;
   } else {
@@ -632,6 +592,51 @@ ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS,
   std::transform(outputE.begin(), outputE.end(), outputE.begin(), rs);
 
   return IvsLam;
+}
+
+/**
+ * Return the angular 2theta width of a pixel.
+ *
+ * @param wsIndex [in] :: a workspace index to spectrumInfo
+ * @param spectrumInfo [in] :: a spectrum info structure
+ * @return :: the pixel's angular width in radians
+ */
+Mantid::Algorithms::ReflectometrySumInQ::MinMax
+ReflectometrySumInQ::twoThetaWidth(
+    const size_t wsIndex, const Mantid::API::SpectrumInfo &spectrumInfo) {
+  double twoTheta;
+  if (!getPointerToProperty(Prop::BEAM_CENTRE)->isDefault()) {
+    twoTheta = spectrumInfo.twoTheta(wsIndex);
+  } else {
+    const double thetaIn = getProperty(Prop::THETA_IN);
+    twoTheta = thetaIn * 2;
+  }
+
+  Mantid::Algorithms::ReflectometrySumInQ::MinMax range;
+  if (wsIndex == 0) {
+    if (spectrumInfo.size() <= 1) {
+      throw std::runtime_error("Cannot calculate pixel widths from a workspace "
+                               "containing a single histogram.");
+    }
+    const auto nextTwoTheta = spectrumInfo.twoTheta(1);
+    const auto d = std::abs(nextTwoTheta - twoTheta) / 2.;
+    range.min = twoTheta - d;
+    range.max = twoTheta + d;
+  } else if (wsIndex == spectrumInfo.size() - 1) {
+    const auto previousTwoTheta = spectrumInfo.twoTheta(wsIndex - 1);
+    const auto d = std::abs(twoTheta - previousTwoTheta) / 2.;
+    range.min = twoTheta - d;
+    range.max = twoTheta + d;
+  } else {
+    const auto t1 = spectrumInfo.twoTheta(wsIndex - 1);
+    const auto t2 = spectrumInfo.twoTheta(wsIndex + 1);
+    Mantid::Algorithms::ReflectometrySumInQ::MinMax neighbours(t1, t2);
+    const auto d1 = std::abs(twoTheta - neighbours.min) / 2.;
+    const auto d2 = std::abs(neighbours.max - twoTheta) / 2.;
+    range.min = twoTheta - d1;
+    range.max = twoTheta + d2;
+  }
+  return range;
 }
 
 } // namespace Algorithms
