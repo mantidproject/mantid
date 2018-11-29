@@ -40,8 +40,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     settings which require on reduction per time slice.
     :param state: a SANSState object
     :param use_optimizations: if true then the optimizations of child algorithms are enabled.
-    :param output_mode: output_workspaces_non_mergedthe output mode
-    :param save_can: whether to save out can workspaces
+    :param output_mode: the output mode
+    :param save_can: bool. whether or not to save out can workspaces
     """
     # ------------------------------------------------------------------------------------------------------------------
     # Load the data
@@ -122,7 +122,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
-        group_workspaces_if_required(reduction_package)
+        group_workspaces_if_required(reduction_package, save_can)
 
     # --------------------------------
     # Perform output of all workspaces
@@ -851,7 +851,6 @@ def get_workspace_from_algorithm(alg, output_property_name):
 
     if not output_workspace_name:
         return None
-    print(output_workspace_name)
 
     if AnalysisDataService.doesExist(output_workspace_name):
         return AnalysisDataService.retrieve(output_workspace_name)
@@ -862,7 +861,7 @@ def get_workspace_from_algorithm(alg, output_property_name):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for outputs to the ADS and saving the file
 # ----------------------------------------------------------------------------------------------------------------------
-def group_workspaces_if_required(reduction_package):
+def group_workspaces_if_required(reduction_package, save_can):
     """
     The output workspaces have already been published to the ADS by the algorithm. Now we might have to
     bundle them into a group if:
@@ -870,6 +869,7 @@ def group_workspaces_if_required(reduction_package):
     * They are reduced LAB and HAB workspaces of a Merged reduction
     * They are can workspaces - they are all grouped into a single group
     :param reduction_package: a list of reduction packages
+    :param save_can: a bool. If true save out can and sample workspaces.
     """
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
@@ -897,12 +897,18 @@ def group_workspaces_if_required(reduction_package):
             add_to_group(reduced_lab, reduction_package.reduced_lab_base_name)
             add_to_group(reduced_hab, reduction_package.reduced_hab_base_name)
 
+    # Can group workspace depends on if save_can is checked
+    if not save_can:
+        CAN_WORKSPACE_GROUP = CAN_COUNT_AND_NORM_FOR_OPTIMIZATION
+    else:
+        CAN_WORKSPACE_GROUP = CAN_AND_SAMPLE_WORKSPACE
+
     # Add the can workspaces (used for optimizations) to a Workspace Group (if they exist)
-    add_to_group(reduction_package.reduced_lab_can, CAN_AND_SAMPLE_WORKSPACE)
+    add_to_group(reduction_package.reduced_lab_can, CAN_WORKSPACE_GROUP)
     add_to_group(reduction_package.reduced_lab_can_count, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
     add_to_group(reduction_package.reduced_lab_can_norm, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
 
-    add_to_group(reduction_package.reduced_hab_can, CAN_AND_SAMPLE_WORKSPACE)
+    add_to_group(reduction_package.reduced_hab_can, CAN_WORKSPACE_GROUP)
     add_to_group(reduction_package.reduced_hab_can_count, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
     add_to_group(reduction_package.reduced_hab_can_norm, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION)
 
@@ -950,7 +956,7 @@ def add_to_group(workspace, name_of_group_workspace):
         group_alg.execute()
 
 
-def save_to_file(reduction_packages, save_can=False):
+def save_to_file(reduction_packages, save_can):
     """
     Extracts all workspace names which need to be saved and saves them into a file.
 
@@ -1034,7 +1040,7 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors):
         _delete_workspaces(delete_alg, optimizations_to_delete)
 
 
-def get_all_names_to_save(reduction_packages, save_can=False):
+def get_all_names_to_save(reduction_packages, save_can):
     """
     Extracts all the output names from a list of reduction packages. The main
 
@@ -1049,6 +1055,8 @@ def get_all_names_to_save(reduction_packages, save_can=False):
         reduced_merged = reduction_package.reduced_merged
         reduced_lab_can = reduction_package.reduced_lab_can
         reduced_hab_can = reduction_package.reduced_hab_can
+        reduced_lab_sample = reduction_package.reduced_lab_sample
+        reduced_hab_sample = reduction_package.reduced_hab_sample
 
         if save_can:
             if reduced_merged:
@@ -1061,6 +1069,10 @@ def get_all_names_to_save(reduction_packages, save_can=False):
                 names_to_save.append(reduced_lab_can.name())
             if reduced_hab_can:
                 names_to_save.append(reduced_hab_can.name())
+            if reduced_lab_sample:
+                names_to_save.append(reduced_lab_sample.name())
+            if reduced_hab_sample:
+                names_to_save.append(reduced_hab_sample.name())
 
         # If we have merged reduction then store the
         elif reduced_merged:

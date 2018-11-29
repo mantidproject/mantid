@@ -647,7 +647,7 @@ class RunTabPresenter(object):
 
         if errors:
             self.sans_logger.warning("Errors in getting states...")
-            for _, v in errors.item():
+            for _, v in errors.items():
                 self.sans_logger.warning("{}".format(v))
 
         return states, errors

@@ -437,28 +437,26 @@ class SANSSingleReduction(DistributedDataProcessorAlgorithm):
                 output_workspace = output_bundle.output_workspace
 
                 if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                    if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                        if reduction_mode is ISISReductionMode.LAB:
-                            self.setProperty("OutputWorkspaceLABCan", output_workspace)
-                        elif reduction_mode is ISISReductionMode.HAB:
-                            self.setProperty("OutputWorkspaceHABCan", output_bundle.output_workspace)
-                        else:
-                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                               " be set with a can.".format(reduction_mode))
+                    if reduction_mode is ISISReductionMode.LAB:
+                        self.setProperty("OutputWorkspaceLABCan", output_workspace)
+                    elif reduction_mode is ISISReductionMode.HAB:
+                        self.setProperty("OutputWorkspaceHABCan", output_bundle.output_workspace)
+                    else:
+                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                                           " be set with a can.".format(reduction_mode))
 
             elif output_bundle.data_type is DataType.Sample:
                 reduction_mode = output_bundle.reduction_mode
                 output_workspace = output_bundle.output_workspace
 
-                if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                    if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                        if reduction_mode is ISISReductionMode.LAB:
-                            self.setProperty("OutputWorkspaceLABSample", output_workspace)
-                        elif reduction_mode is ISISReductionMode.HAB:
-                            self.setProperty("OutputWorkspaceHABSample", output_bundle.output_workspace)
-                        else:
-                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                               " be set with a sample.".format(reduction_mode))
+                if output_workspace is not None:
+                    if reduction_mode is ISISReductionMode.LAB:
+                        self.setProperty("OutputWorkspaceLABSample", output_workspace)
+                    elif reduction_mode is ISISReductionMode.HAB:
+                        self.setProperty("OutputWorkspaceHABSample", output_bundle.output_workspace)
+                    else:
+                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                                           " be set with a sample.".format(reduction_mode))
 
     def set_transmission_workspaces_on_output(self, transmission_bundles, fit_state):
         for transmission_bundle in transmission_bundles:
