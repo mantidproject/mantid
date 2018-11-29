@@ -15,7 +15,7 @@ from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    HAB_CAN_SUFFIX, HAB_CAN_COUNT_SUFFIX, HAB_CAN_NORM_SUFFIX,
                                    LAB_SAMPLE_SUFFIX, HAB_SAMPLE_SUFFIX,
                                    REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION,
-                                   REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION, CAN_COUNT_AND_NORM_FOR_OPTIMIZATION,
+                                   CAN_COUNT_AND_NORM_FOR_OPTIMIZATION,
                                    CAN_AND_SAMPLE_WORKSPACE)
 from sans.common.file_information import (get_extension_for_file_type, SANSFileInformationFactory)
 from sans.state.data import StateData
