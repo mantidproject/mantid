@@ -402,7 +402,6 @@ class RunTabPresenter(object):
                 self._view.show_period_columns()
         self._view.remove_rows([0])
         self._view.clear_selection()
-        self.enable_process_all_button()
 
     def on_data_changed(self, row, column, new_value, old_value):
         self._table_model.update_table_entry(row, column, new_value)
@@ -410,7 +409,6 @@ class RunTabPresenter(object):
         self._view.set_row_tooltip('', row)
         self._beam_centre_presenter.on_update_rows()
         self._masking_table_presenter.on_update_rows()
-        self.enable_process_all_button()
 
     def on_instrument_changed(self):
         self._setup_instrument_specific_settings()
@@ -418,19 +416,6 @@ class RunTabPresenter(object):
     # ----------------------------------------------------------------------------------------------
     # Processing
     # ----------------------------------------------------------------------------------------------
-
-    def enable_process_all_button(self):
-        """
-        Determines whether to enable/disable process all based on whether there are non-empty rows
-        in the table.
-        """
-        rows = self._table_model.get_number_of_rows()
-        for row in range(rows):
-            # If any rows are not empty, enable the button
-            if not self._table_model.is_empty_row(row):
-                self._view.set_process_all_enabled(True)
-                return
-        self._view.set_process_all_enabled(False)
 
     def _handle_get_states(self, rows):
         """

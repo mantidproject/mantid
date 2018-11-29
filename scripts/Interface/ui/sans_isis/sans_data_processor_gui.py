@@ -293,7 +293,6 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.process_selected_button.clicked.connect(self._process_selected_clicked)
         self.process_all_button.clicked.connect(self._process_all_clicked)
-        self.set_process_all_enabled(False)
 
         self.help_button.clicked.connect(self._on_help_button_clicked)
 
@@ -2043,17 +2042,3 @@ class SANSDataProcessorGui(QMainWindow,
         self.data_processor_table.hideColumn(15)
         self.data_processor_table.hideColumn(16)
         self.data_processor_table.hideColumn(17)
-
-    def enable_process_all(self):
-        """
-        Determines whether to enable/disable process all based
-        on whether there are rows in the table or not.
-        """
-        cell_text = self.data_processor_table.cellAt(self.row([0]),0).contentText()
-        if cell_text != "":
-            self.set_process_all_enabled(True)
-        else:
-            self.set_process_all_enabled(False)
-
-    def set_process_all_enabled(self, enabled=True):
-        self.process_all_button.setEnabled(enabled)
