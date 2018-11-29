@@ -43,14 +43,11 @@ public:
   }
 
   void testInit() {
-    Mantid::DataHandling::LoadHFIRSANS spice2d;
     TS_ASSERT_THROWS_NOTHING(spice2d.initialize());
     TS_ASSERT(spice2d.isInitialized());
   }
 
-  void _testExec() {
-    Mantid::DataHandling::LoadHFIRSANS spice2d;
-
+  void testExec() {
     if (!spice2d.isInitialized())
       spice2d.initialize();
 
@@ -63,6 +60,12 @@ public:
     std::string outputSpace = "outws";
     // Set an output workspace
     spice2d.setPropertyValue("OutputWorkspace", outputSpace);
+
+    // check that retrieving the filename gets the correct value
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING(result =
+                                 spice2d.getPropertyValue("OutputWorkspace"))
+    TS_ASSERT(result == outputSpace);
 
     // Should now throw nothing
     TS_ASSERT_THROWS_NOTHING(spice2d.execute());
@@ -86,7 +89,7 @@ public:
     TS_ASSERT_EQUALS((ws2d->e(0).size()), 1);
 
     double tolerance(1e-04);
-    int nmon = spice2d.getNumberOfMonitors();
+    int nmon =spice2d.getNumberOfMonitors();
     TS_ASSERT_DELTA(ws2d->x(0 + nmon)[0], 5.93, tolerance);
     TS_ASSERT_DELTA(ws2d->x(2 + nmon)[0], 5.93, tolerance);
     TS_ASSERT_DELTA(ws2d->x(192 + nmon)[0], 5.93, tolerance);
@@ -144,8 +147,11 @@ public:
 
     TS_ASSERT_EQUALS(
         ws2d->run().getProperty("sample-detector-distance")->type(), "number");
-    Mantid::Kernel::Property *prop;
-    Mantid::Kernel::PropertyWithValue<double> *dp;
+    Mantid::Kernel::Property *prop =
+        ws2d->run().getProperty("sample-detector-distance");
+    Mantid::Kernel::PropertyWithValue<double> *dp =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    TS_ASSERT_EQUALS(*dp, 6000.0);
 
     prop = ws2d->run().getProperty("beam-trap-diameter");
     TS_ASSERT_EQUALS(prop->type(), "number");
@@ -172,6 +178,7 @@ public:
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     TS_ASSERT_EQUALS(i->getComponentByName("detector1")->getPos().Z(),
                      *tsdd * 1e-3);
+    assertDetectorDistances(ws2d);
   }
 
   void testExecChooseWavelength() {
@@ -216,7 +223,28 @@ public:
     TS_ASSERT_DELTA(ws2d->x(192 + nmon)[0], 4.5, tolerance);
   }
 
+  void assertDetectorDistances(Mantid::DataObjects::Workspace2D_sptr ws2d) {
+    Mantid::Kernel::Property *prop =
+        ws2d->run().getProperty("sample-detector-distance");
+    Mantid::Kernel::PropertyWithValue<double> *sdd =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    prop = ws2d->run().getProperty("sample-detector-distance-offset");
+    Mantid::Kernel::PropertyWithValue<double> *sddo =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    prop = ws2d->run().getProperty("sample-si-window-distance");
+    Mantid::Kernel::PropertyWithValue<double> *siwo =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    prop = ws2d->run().getProperty("total-sample-detector-distance");
+    Mantid::Kernel::PropertyWithValue<double> *tsdd =
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    double total_sample_detector_distance = *tsdd;
+    TS_ASSERT_EQUALS((*sdd) + (*sddo) + (*siwo),
+                     total_sample_detector_distance);
+    TS_ASSERT_EQUALS(6811.4, total_sample_detector_distance);
+  }
+
 private:
   std::string inputFile;
+  Mantid::DataHandling::LoadHFIRSANS spice2d;
 };
 #endif
