@@ -107,7 +107,7 @@ class Wish:
                                      EndWorkspaceIndex=spectra_max - 6)
                 mantid.MaskBins(InputWorkspace=output, OutputWorkspace=output, XMin=99900, XMax=106000)
                 print ("full nexus eventfile loaded")
-            if ext[0:10] == "nxs_event_":
+            if ext[:10] == "nxs_event_":
                 label, tmin, tmax = split_string_event(ext)
                 output = output + "_" + label
                 if tmax == "end":
@@ -183,9 +183,9 @@ class Wish:
             self.focus_onepanel(work, focus, panel)
             split(focus)
 
-    def process(self, number, panel, ext, cyclevana="09_4", absorb=False, number_density=0.0, scattering=0.0,
-                attenuation=0.0, height=0.0, radius=0.0):
-        w = self.read(number, panel, ext)
+    def process_run(self, number, panel, extension, cyclevana="09_4", absorb=False, number_density=0.0, scattering=0.0,
+                    attenuation=0.0, height=0.0, radius=0.0):
+        w = self.read(number, panel, extension)
         print ("file read and normalized")
         if absorb:
             mantid.ConvertUnits(InputWorkspace=w, OutputWorkspace=w, Target="Wavelength", EMode="Elastic")
@@ -219,7 +219,6 @@ class Wish:
             for i in range(Wish.NUM_PANELS):
                 wfocname = "w" + str(number) + "-" + str(i) + "foc"
                 mantid.CropWorkspace(InputWorkspace=wfocname, OutputWorkspace=wfocname, XMin=d_min, XMax=d_max)
-            for i in range(Wish.NUM_PANELS):
                 wfocname = "w" + str(number) + "-" + str(i) + "foc"
                 print ("will try to load a vanadium with the name:" + self.get_vanadium(i,  cyclevana))
                 mantid.LoadNexusProcessed(Filename=self.get_vanadium(i,  cyclevana), OutputWorkspace="vana")
@@ -231,10 +230,10 @@ class Wish:
                                             NaNError=0.0,
                                             InfinityValue=0.0, InfinityError=0.0)
                 mantid.SaveGSS(InputWorkspace=wfocname,
-                               Filename=self.user_directory + str(number) + "-" + str(i) + ext + ".gss",
+                               Filename=self.user_directory + str(number) + "-" + str(i) + extension + ".gss",
                                Append=False, Bank=1)
-                mantid.SaveFocusedXYE(wfocname, self.user_directory + str(number) + "-" + str(i) + ext + ".dat")
-                mantid.SaveNexusProcessed(wfocname, self.user_directory + str(number) + "-" + str(i) + ext + ".nxs")
+                mantid.SaveFocusedXYE(wfocname, self.user_directory + str(number) + "-" + str(i) + extension + ".dat")
+                mantid.SaveNexusProcessed(wfocname, self.user_directory + str(number) + "-" + str(i) + extension + ".nxs")
         else:
             print ("will try to load a vanadium with the name:" + self.get_vanadium(panel,  cyclevana))
             mantid.LoadNexusProcessed(Filename=self.get_vanadium(panel, cyclevana), OutputWorkspace="vana")
@@ -245,10 +244,10 @@ class Wish:
             mantid.ReplaceSpecialValues(InputWorkspace=wfocname, OutputWorkspace=wfocname, NaNValue=0.0, NaNError=0.0,
                                         InfinityValue=0.0, InfinityError=0.0)
             mantid.SaveGSS(InputWorkspace=wfocname,
-                           Filename=self.user_directory + str(number) + "-" + str(panel) + ext + ".gss",
+                           Filename=self.user_directory + str(number) + "-" + str(panel) + extension + ".gss",
                            Append=False, Bank=1)
-            mantid.SaveFocusedXYE(wfocname, self.user_directory + str(number) + "-" + str(panel) + ext + ".dat")
-            mantid.SaveNexusProcessed(wfocname, self.user_directory + str(number) + "-" + str(panel) + ext + ".nxs")
+            mantid.SaveFocusedXYE(wfocname, self.user_directory + str(number) + "-" + str(panel) + extension + ".dat")
+            mantid.SaveNexusProcessed(wfocname, self.user_directory + str(number) + "-" + str(panel) + extension + ".nxs")
         return wfocname
 
     # Create a corrected vanadium (normalise,corrected for attenuation and empty, strip peaks) and
@@ -284,42 +283,41 @@ class Wish:
         mantid.ConvertToDistribution(wout)
         return wout
 
-    def process_incidentmon(self, number, ext, spline_terms=20):
+    def process_incidentmon(self, number, extension, spline_terms=20):
         if type(number) is int:
-            fname = self.get_file_name(number, ext)
+            filename = self.get_file_name(number, extension)
             works = "monitor" + str(number)
-            shared_load_files(ext, fname, works, 4, 4, True)
-            if ext[:9] == "nxs_event":
+            shared_load_files(extension, filename, works, 4, 4, True)
+            if extension[:9] == "nxs_event":
                 temp = "w" + str(number) + "_monitors"
                 works = "w" + str(number) + "_monitor4"
                 mantid.Rebin(InputWorkspace=temp, OutputWorkspace=temp, Params='6000,-0.00063,110000',
                              PreserveEvents=False)
                 mantid.ExtractSingleSpectrum(InputWorkspace=temp, OutputWorkspace=works, WorkspaceIndex=3)
         else:
-            n1, n2 = split_string(number)
-            works = "monitor" + str(n1) + "_" + str(n2)
-            fname = self.get_file_name(n1, ext)
-            works1 = "monitor" + str(n1)
-            mantid.LoadRaw(Filename=fname, OutputWorkspace=works1, SpectrumMin=4, SpectrumMax=4, LoadLogFiles="0")
-            fname = self.get_file_name(n2, ext)
-            works2 = "monitor" + str(n2)
-            mantid.LoadRaw(Filename=fname, OutputWorkspace=works2, SpectrumMin=4, SpectrumMax=4, LoadLogFiles="0")
+            num_1, num_2 = split_string(number)
+            works = "monitor" + str(num_1) + "_" + str(num_2)
+            filename = self.get_file_name(num_1, extension)
+            works1 = "monitor" + str(num_1)
+            mantid.LoadRaw(Filename=filename, OutputWorkspace=works1, SpectrumMin=4, SpectrumMax=4, LoadLogFiles="0")
+            filename = self.get_file_name(num_2, extension)
+            works2 = "monitor" + str(num_2)
+            mantid.LoadRaw(Filename=filename, OutputWorkspace=works2, SpectrumMin=4, SpectrumMax=4, LoadLogFiles="0")
             mantid.MergeRuns(InputWorkspaces=works1 + "," + works2, OutputWorkspace=works)
             mantid.DeleteWorkspace(works1)
             mantid.DeleteWorkspace(works2)
         mantid.ConvertUnits(InputWorkspace=works, OutputWorkspace=works, Target="Wavelength", Emode="Elastic")
         lmin, lmax = Wish.LAMBDA_RANGE
         mantid.CropWorkspace(InputWorkspace=works, OutputWorkspace=works, XMin=lmin, XMax=lmax)
-        ex_regions = n.zeros((2, 4))
-        ex_regions[:, 0] = [4.57, 4.76]
-        ex_regions[:, 1] = [3.87, 4.12]
-        ex_regions[:, 2] = [2.75, 2.91]
-        ex_regions[:, 3] = [2.24, 2.50]
+        ex_regions = n.array([[4.57, 4.76],
+                              [3.87, 4.12],
+                              [2.75, 2.91],
+                              [2.24, 2.50]])
         mantid.ConvertToDistribution(works)
 
         for reg in range(0, 4):
-            mantid.MaskBins(InputWorkspace=works, OutputWorkspace=works, XMin=ex_regions[0, reg],
-                            XMax=ex_regions[1, reg])
+            mantid.MaskBins(InputWorkspace=works, OutputWorkspace=works, XMin=ex_regions[reg, 0],
+                            XMax=ex_regions[reg, 1])
 
         mantid.SplineBackground(InputWorkspace=works, OutputWorkspace=works, WorkspaceIndex=0, NCoeff=spline_terms)
 
@@ -327,19 +325,19 @@ class Wish:
         mantid.ConvertFromDistribution(works)
         return works
     
-    def reduce(self):
+    def reduce(self, run_numbers, panels):
 
         self.startup("18_1")
-        for i in range(40503, 40504):
-            self.datafile = self.get_file_name(i, "raw")
-            for j in range(5, 7):
-                wout = self.process(i, j, "raw", "11_4", absorb=True, number_density=0.025, scattering=5.463,
-                                    attenuation=2.595, height=4.0, radius=0.55)
+        for run in run_numbers:
+            self.datafile = self.get_file_name(run, "raw")
+            for panel in panels:
+                wout = self.process_run(run, panel, "raw", "11_4", absorb=True, number_density=0.025, scattering=5.463,
+                                        attenuation=2.595, height=4.0, radius=0.55)
                 mantid.ConvertUnits(InputWorkspace=wout, OutputWorkspace=wout + "-d", Target="dSpacing",
                                     EMode="Elastic")
 
-            for panel in range(5, 6):
-                self.save_combined_panel(i, panel)
+            for panel in panels:
+                self.save_combined_panel(run, panel)
 
     def save_combined_panel(self, run, panel):
         panel_combination = {
@@ -369,26 +367,6 @@ class Wish:
         mantid.SaveFocusedXYE(combined_ws,
                               os.path.join(self.user_directory, combined_save.format("raw.dat")))
         mantid.SaveNexusProcessed(combined_ws, os.path.join(self.user_directory, combined_save.format("raw.nxs")))
-        
-
-# removes the peaks in a vanadium  run, then performs a spline and a smooth
-def removepeaks_spline_smooth_empty(works, panel):
-    smoothterms = {
-        1: 30,
-        2: 10,
-        3: 15,
-        4: 15,
-        5: 10,
-        6: 10,
-        7: 15,
-        8: 15,
-        9: 10,
-        10: 30
-    }
-    smooth_term = smoothterms.get(panel)
-
-    mantid.SmoothData(InputWorkspace=works, OutputWorkspace=works, NPoints=smooth_term)
-    return works
 
 
 def split(focus):
@@ -407,16 +385,13 @@ def split_string(t):
         return int(t[0:indxp]), int(t[indxp + 1:len(t)])
 
 
-def split_string_event(t):
+def split_string_event(input_string):
     # this assumes the form nxs_event_label_tmin_tmax
-    indx_ = []
-    for i in range(10, len(t)):
-        if t[i] == "_":
-            indx_.append(i)
-    label = t[10:indx_[0]]
-    tmin = t[indx_[0] + 1:indx_[1]]
-    tmax = t[indx_[1] + 1:len(t)]
-    return label, tmin, tmax
+    section = input_string.split('_')
+    label = section[2]
+    t_min = section[3]
+    t_max = section[4]
+    return label, t_min, t_max
 
 
 def shared_load_files(extension, filename, output, spectrum_max, spectrum_min, is_monitor):

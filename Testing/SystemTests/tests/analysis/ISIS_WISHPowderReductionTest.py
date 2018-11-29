@@ -49,7 +49,9 @@ class WISHPowderReductionTest(MantidSystemTest):
     def runTest(self):
         os.makedirs(output_dir)
         wish_test = Wish("__main__", calibration_dir+"/", output_dir + "/", True, input_dir)
-        wish_test.reduce()
+        runs = [40503]
+        panels = [5, 6]
+        wish_test.reduce(runs, panels)
         self.clearWorkspaces()
 
     def validate(self):
