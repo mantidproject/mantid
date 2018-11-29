@@ -378,7 +378,7 @@ class ChopperSystem(object):
         else:
             Eis, chop_times, lastChopDist, lines, all_times = tuple(self._saved_state[1:])
         if calc_res:
-            res_el, percent, chop_width, mod_width = MulpyRep.calcRes(Eis, chop_times, lastChopDist, self.chop_sam, self.sam_det)
+            res_el, percent, chop_width, mod_width = MulpyRep.calcRes(Eis, chop_times, lastChopDist, self.chop_sam, self.sam_det, self.guide_width[-1], self.slot_width[-1])
             return res_el, percent, chop_width, mod_width
         else:
             return [Eis, chop_times, lastChopDist, lines, all_times]

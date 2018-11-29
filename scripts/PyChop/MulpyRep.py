@@ -98,7 +98,7 @@ def calcEnergy(lines, samDist):
     return Ei
 
 
-def calcRes(ei, chop_times, lastChopDist, samDist, detDist):
+def calcRes(ei, chop_times, lastChopDist, samDist, detDist, guide, slot):
     """
     # for each incident energy work out the moderator and chopper component of the resolution
     """
@@ -110,7 +110,17 @@ def calcRes(ei, chop_times, lastChopDist, samDist, detDist):
     # The chopper opening times are the full opening, for the resolution we want FWHM
     # consequently divide each by a factor of 2 here
     # END IMPORTANT POINT
-    chop_width = [(chop_times[0][1]-chop_times[0][0])/2., (chop_times[1][1]-chop_times[1][0])/2.]
+    #IMPORTANT POINT 2
+    #important point 1 is only valid when guide>=slot
+    #if slot>guide the transmission function is a trapezium and it is more complex
+    #END  IMPORTANT POINT2
+    if guide>=slot:
+        chop_width=[(chop_times[0][1]-chop_times[0][0])/2.,(chop_times[1][1]-chop_times[1][0])/2.]
+    else:
+        totalOpen=(chop_times[1][1]-chop_times[1][0])
+        flat_time=(slot-guide)*totalOpen/slot
+        triangleTime=guide*totalOpen/slot/2. #/2 for FWHM of the triangles
+        chop_width=[(chop_times[0][1]-chop_times[0][0])/2.,(flat_time+triangleTime)]
     for energy in ei:
         lamba = np.sqrt(81.81/energy)
         # this is the experimentally determined FWHM of moderator
