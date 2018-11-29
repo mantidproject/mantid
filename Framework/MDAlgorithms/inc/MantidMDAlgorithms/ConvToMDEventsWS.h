@@ -55,7 +55,7 @@ private:
    * events to the workspace itself    */
   template <class T> size_t convertEventList(size_t workspaceIndex);
 
-  void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
+  virtual void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
 };
 
 } // namespace MDAlgorithms
