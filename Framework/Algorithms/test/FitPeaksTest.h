@@ -911,9 +911,10 @@ public:
   //--------------------------------------------------------------------------------------------------------------
   /** create a fit window workspace compatibel to the workspace created by
    * createTestData()
-   * @brief genFitWindowWorkspace
-   * @param peak_index_vec
-   * @param workspace_name
+   * @brief genFitWindowWorkspace :: generate a matrix work for peak fitting
+   * window
+   * @param peak_index_vec :: vector for peak indexes
+   * @param workspace_name :: name of the output workspace registered to ADS
    */
   std::string genFitWindowWorkspace(std::vector<int> &peak_index_vec,
                                     const std::string &workspace_name) {

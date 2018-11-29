@@ -80,10 +80,10 @@ size_t PeakFitResult::getNumberPeaks() const {
 
 //----------------------------------------------------------------------------------------------
 /** get the fitting error of a particular parameter
- * @brief PeakFitResult::getParameterError
- * @param ipeak
- * @param iparam
- * @return
+ * @param ipeak :: index of the peak in given peak position vector
+ * @param iparam :: index of the parameter in its corresponding peak profile
+ * function
+ * @return :: fitting error/uncertain of the specified parameter
  */
 double PeakFitResult::getParameterError(size_t ipeak, size_t iparam) const {
   return m_function_errors_vector[ipeak][iparam];
@@ -91,10 +91,10 @@ double PeakFitResult::getParameterError(size_t ipeak, size_t iparam) const {
 
 //----------------------------------------------------------------------------------------------
 /** get the fitted value of a particular parameter
- * @brief PeakFitResult::getParameterValue
- * @param ipeak
- * @param iparam
- * @return
+ * @param ipeak :: index of the peak in given peak position vector
+ * @param iparam :: index of the parameter in its corresponding peak profile
+ * function
+ * @return :: fitted value of the specified parameter
  */
 double PeakFitResult::getParameterValue(size_t ipeak, size_t iparam) const {
   return m_function_parameters_vector[ipeak][iparam];
@@ -143,9 +143,8 @@ void PeakFitResult::setRecord(size_t ipeak, const double cost,
 
 //----------------------------------------------------------------------------------------------
 /** The peak postition should be negative and indicates what went wrong
- * @brief PeakFitResult::setBadRecord
- * @param ipeak
- * @param peak_position
+ * @param ipeak :: index of the peak in user-specified peak position vector
+ * @param peak_position :: bad peak position indicating reason of bad fit
  */
 void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
   // check input
@@ -396,8 +395,6 @@ void FitPeaks::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Validate inputs
- * @brief FitPeaks::validateInputs
- * @return
  */
 std::map<std::string, std::string> FitPeaks::validateInputs() {
   map<std::string, std::string> issues;
@@ -471,7 +468,7 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
     if (!use_raw_params) {
       std::string msg =
           "FitPeaks must output RAW peak parameters if fitting error "
-          "is chosen to be output.";
+          "is chosen to be output";
       issues["RawPeakParameters"] = msg;
     }
   }
@@ -785,17 +782,14 @@ void FitPeaks::processInputPeakCenters() {
         m_peakCenterWorkspace->getNumberHistograms();
     if (peak_center_ws_spectra_number ==
         m_inputMatrixWS->getNumberHistograms()) {
-      g_log.warning("case 1");
+      // full spectra
       m_partialSpectra = false;
     } else if (peak_center_ws_spectra_number ==
                m_stopWorkspaceIndex - m_startWorkspaceIndex + 1) {
+      // partial spectra
       m_partialSpectra = true;
     } else {
-      bool equal = peak_center_ws_spectra_number ==
-                   m_inputMatrixWS->getNumberHistograms();
-      g_log.warning()
-          << "peak_center_ws_spectra_number == m_inputMatrixWS->size() = "
-          << equal << "\n";
+      // a case indicating programming error
       g_log.error() << "Peak center workspace has "
                     << peak_center_ws_spectra_number << " spectra; "
                     << "Input workspace has "
@@ -963,11 +957,10 @@ double numberCounts(const Histogram &histogram) {
 
 //----------------------------------------------------------------------------------------------
 /** Get number of counts in a specified range of a histogram
- * @brief numberCounts
- * @param histogram
- * @param xmin
- * @param xmax
- * @return
+ * @param histogram :: histogram instance
+ * @param xmin :: left boundary
+ * @param xmax :: right boundary
+ * @return :: counts
  */
 double numberCounts(const Histogram &histogram, const double xmin,
                     const double xmax) {
@@ -1099,10 +1092,10 @@ void FitPeaks::fitSpectrumPeaks(
 //----------------------------------------------------------------------------------------------
 /** Decide whether to estimate peak width.  If not, then set the width related
  * peak parameters from user specified starting value
- * @brief FitPeaks::decideToEstimatePeakWidth
- * @param firstPeakInSpectrum
- * @param peak_function
- * @return
+ * @param firstPeakInSpectrum :: flag whether the given peak is the first peak
+ * in the spectrum
+ * @param peak_function :: peak function to set parameter values to
+ * @return :: flag whether the peak width shall be observed
  */
 bool FitPeaks::decideToEstimatePeakWidth(
     const bool firstPeakInSpectrum, API::IPeakFunction_sptr peak_function) {
@@ -1111,7 +1104,7 @@ bool FitPeaks::decideToEstimatePeakWidth(
   if (!m_initParamIndexes.empty()) {
     // user specifies starting value of peak parameters
     if (firstPeakInSpectrum) {
-      // TODO just set the parameter values in a vector and loop over it
+      // set the parameter values in a vector and loop over it
       // first peak.  using the user-specified value
       for (size_t i = 0; i < m_initParamIndexes.size(); ++i) {
         size_t param_index = m_initParamIndexes[i];
@@ -1123,7 +1116,7 @@ bool FitPeaks::decideToEstimatePeakWidth(
       // do noting
     }
   } else {
-    // by observation
+    // no previously defined peak parameters: observation is thus required
     observe_peak_width = true;
   }
 
@@ -1133,13 +1126,13 @@ bool FitPeaks::decideToEstimatePeakWidth(
 //----------------------------------------------------------------------------------------------
 /** retrieve the fitted peak information from functions and set to output
  * vectors
- * @brief FitPeaks::processSinglePeakFitResult
- * @param wsindex
- * @param peakindex
- * @param cost
- * @param expected_peak_positions
- * @param fitfunction
- * @param fit_result
+ * @param wsindex :: workspace index
+ * @param peakindex :: index of peak in given peak position vector
+ * @param cost :: cost function value (i.e., chi^2)
+ * @param expected_peak_positions :: vector of the expected peak positions
+ * @param fitfunction :: pointer to function to retrieve information from
+ * @param fit_result :: (output) PeakFitResult instance to set the fitting
+ * result to
  */
 void FitPeaks::processSinglePeakFitResult(
     size_t wsindex, size_t peakindex, const double cost,
@@ -1401,13 +1394,15 @@ void FitPeaks::estimateBackground(const Histogram &histogram,
 /** Estimate peak profile's parameters values via observation
  * including
  * (1) peak center (2) peak intensity  (3) peak width depending on peak type
- * @brief FitPeaks::estimatePeakParameters
- * @param histogram
- * @param peak_window
- * @param peakfunction
- * @param bkgdfunction
+ * In order to make the estimation better, a pre-defined background function is
+ * used to remove
+ * the background from the obervation data
+ * @param histogram :: Histogram instance containing experimental data
+ * @param peak_window :: pair of X-value to specify the peak range
+ * @param peakfunction :: (in/out) peak function to set observed value to
+ * @param bkgdfunction :: background function previously defined
  * @param observe_peak_width :: flag to estimate peak width from input data
- * @return
+ * @return :: obervation success or not
  */
 int FitPeaks::estimatePeakParameters(
     const Histogram &histogram, const std::pair<double, double> &peak_window,
@@ -1470,7 +1465,7 @@ int FitPeaks::estimatePeakParameters(
 /** check whether a peak profile is allowed to observe peak width and set width
  * @brief isObservablePeakProfile
  * @param peakprofile : name of peak profile to check against
- * @return
+ * @return :: flag whether the specified peak profile observable
  */
 bool FitPeaks::isObservablePeakProfile(const std::string &peakprofile) {
   return (std::find(supported_peak_profiles.begin(),
@@ -1480,16 +1475,16 @@ bool FitPeaks::isObservablePeakProfile(const std::string &peakprofile) {
 
 //----------------------------------------------------------------------------------------------
 /** Guess/estimate peak center and thus height by observation
- * @brief FitPeaks::observePeakCenter
- * @param histogram
- * @param bkgd_values
- * @param start_index
- * @param stop_index
+ * @param histogram :: Histogram instance
+ * @param bkgd_values :: calculated background value to removed from observed
+ * data
+ * @param start_index :: X index of the left boundary of observation widow
+ * @param stop_index :: X index of the right boundary of the observation window
  * @param peak_center :: estiamted peak center (output)
  * @param peak_center_index :: estimated peak center's index in histogram
  * (output)
  * @param peak_height :: estimated peak height (output)
- * @return
+ * @return :: state whether peak center can be found by obervation
  */
 int FitPeaks::observePeakCenter(const Histogram &histogram,
                                 FunctionValues &bkgd_values, size_t start_index,
@@ -1537,9 +1532,9 @@ int FitPeaks::observePeakCenter(const Histogram &histogram,
 
 //----------------------------------------------------------------------------------------------
 /** estimate peak width from 'observation'
- * @brief FitPeaks::observePeakWidth
- * @param histogram
- * @param bkgd_values
+ * @param histogram :: Histogram instance
+ * @param bkgd_values :: (output) background values calculated from X in given
+ * histogram
  * @param ipeak :: array index for the peak center in histogram
  * @param istart :: array index for the left boundary of the peak
  * @param istop :: array index for the right boundary of the peak
@@ -1745,7 +1740,7 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
 
   // Retrieve result
   std::string fitStatus = fit->getProperty("OutputStatus");
-  double chi2(DBL_MAX);
+  double chi2{DBL_MAX};
   if (fitStatus == "success") {
     chi2 = fit->getProperty("OutputChi2overDoF");
   }
@@ -1893,8 +1888,7 @@ FitPeaks::createMatrixWorkspace(const std::vector<double> &vec_x,
 }
 
 //----------------------------------------------------------------------------------------------
-/**
- * @brief FitPeaks::generateOutputPeakPositionWS
+/** generate output workspace for peak positions
  */
 void FitPeaks::generateOutputPeakPositionWS() {
   // create output workspace for peak positions: can be partial spectra to input
@@ -2192,10 +2186,9 @@ void FitPeaks::getRangeData(size_t iws,
 
 //----------------------------------------------------------------------------------------------
 /** Reduce Y value with given background function
- * @brief FitPeaks::reduceByBackground
- * @param bkgd_func
- * @param vec_x
- * @param vec_y
+ * @param bkgd_func :: bacground function pointer
+ * @param vec_x :: vector of X valye
+ * @param vec_y :: (input/output) vector Y to be reduced by background function
  */
 void FitPeaks::reduceByBackground(API::IBackgroundFunction_sptr bkgd_func,
                                   const std::vector<double> &vec_x,
@@ -2215,13 +2208,13 @@ void FitPeaks::reduceByBackground(API::IBackgroundFunction_sptr bkgd_func,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Estimate linear background from observation
+/** Estimate linear background from observation in a given fit window
  *  This assumes that there are significantly more background bins than peak
  *  bins
- * @brief FitPeaks::estimateLinearBackground
- * @param histogram
- * @param left_window_boundary
- * @param right_window_boundary
+ * @param histogram :: Histogram instance
+ * @param left_window_boundary :: x value as the left boundary of the fit window
+ * @param right_window_boundary :: x value as the right boundary of the fit
+ * window
  * @param bkgd_a0 :: constant factor (output)
  * @param bkgd_a1 :: linear factor (output)
  */
