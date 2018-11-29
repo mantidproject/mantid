@@ -239,7 +239,7 @@ public:
     auto tooManyVertices = std::vector<V3D>(1e8);
     auto triangles = std::vector<uint32_t>(1000);
     TS_ASSERT_THROWS_ANYTHING(
-       MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
+        MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
   }
 
   void testMaterial() {
@@ -968,28 +968,34 @@ public:
   /* Test Rotating a mesh */
   {
     auto lShape = createLShape();
-    const double valueList[] = {0,-1,0,1,0,0,0,0,1};
-    const std::vector<double> rotationMatrix = std::vector<double>(std::begin(valueList), std::end(valueList));
-    const Kernel::Matrix<double> rotation = Kernel::Matrix<double>(rotationMatrix);
+    const double valueList[] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
+    const std::vector<double> rotationMatrix =
+        std::vector<double>(std::begin(valueList), std::end(valueList));
+    const Kernel::Matrix<double> rotation =
+        Kernel::Matrix<double>(rotationMatrix);
 
-    const double checkList[] = {0,0,0,0,2,0,-1,2,0,-1,1,0,-2,1,0,-2,0,0,0,0,1,0,2,1,-1,2,1,-1,1,1,-2,1,1,-2,0,1};
-    auto checkVector = std::vector<double>(std::begin(checkList), std::end(checkList));
+    const double checkList[] = {0,  0, 0, 0,  2, 0, -1, 2, 0, -1, 1, 0,
+                                -2, 1, 0, -2, 0, 0, 0,  0, 1, 0,  2, 1,
+                                -1, 2, 1, -1, 1, 1, -2, 1, 1, -2, 0, 1};
+    auto checkVector =
+        std::vector<double>(std::begin(checkList), std::end(checkList));
 
     TS_ASSERT_THROWS_NOTHING(lShape->rotate(rotation));
     auto rotated = lShape->getVertices();
-    TS_ASSERT_DELTA(rotated, checkVector,1e-8);
-
+    TS_ASSERT_DELTA(rotated, checkVector, 1e-8);
   }
   void testTranslation()
   /* Test Translating a mesh */
   {
     auto octahedron = createOctahedron();
-    V3D translation = V3D(1,2,3);
-    const double checkList[] = {2,2,3,1,3,3,1,2,4,0,2,3,1,1,3,1,2,2};
-    auto checkVector = std::vector<double>(std::begin(checkList), std::end(checkList));
+    V3D translation = V3D(1, 2, 3);
+    const double checkList[] = {2, 2, 3, 1, 3, 3, 1, 2, 4,
+                                0, 2, 3, 1, 1, 3, 1, 2, 2};
+    auto checkVector =
+        std::vector<double>(std::begin(checkList), std::end(checkList));
     TS_ASSERT_THROWS_NOTHING(octahedron->translate(translation));
     auto moved = octahedron->getVertices();
-    TS_ASSERT_DELTA(moved, checkVector,1e-8);
+    TS_ASSERT_DELTA(moved, checkVector, 1e-8);
   }
 };
 
@@ -1014,14 +1020,14 @@ public:
     rotation = create_rotation_matrix();
   }
 
-  void test_rotate(const Kernel::Matrix<double> &){
+  void test_rotate(const Kernel::Matrix<double> &) {
     const size_t number(10000);
     for (size_t i = 0; i < number; ++i) {
       octahedron->rotate(rotation);
     }
   }
-  
-  void test_translate(Kernel::V3D){
+
+  void test_translate(Kernel::V3D) {
     const size_t number(10000);
     for (size_t i = 0; i < number; ++i) {
       octahedron->translate(translation);
@@ -1165,14 +1171,15 @@ public:
     return output;
   }
 
-  V3D create_translation_vector(){
-    V3D translate = Kernel::V3D(5,5,15);
+  V3D create_translation_vector() {
+    V3D translate = Kernel::V3D(5, 5, 15);
     return translate;
   }
 
-  Kernel::Matrix<double> create_rotation_matrix(){
-    double valueList[] = {0,-1,0,1,0,0,0,0,1};
-    const std::vector<double> rotationMatrix = std::vector<double>(std::begin(valueList), std::end(valueList));
+  Kernel::Matrix<double> create_rotation_matrix() {
+    double valueList[] = {0, -1, 0, 1, 0, 0, 0, 0, 1};
+    const std::vector<double> rotationMatrix =
+        std::vector<double>(std::begin(valueList), std::end(valueList));
     Kernel::Matrix<double> rotation = Kernel::Matrix<double>(rotationMatrix);
     return rotation;
   }
