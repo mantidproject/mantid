@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/LoadSpice2D2.h"
+#include "MantidDataHandling/LoadHFIRSANS.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -63,7 +63,7 @@ using namespace Geometry;
 using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_FILELOADER_ALGORITHM(LoadSpice2D2)
+DECLARE_FILELOADER_ALGORITHM(LoadHFIRSANS)
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -71,7 +71,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadSpice2D2)
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadSpice2D2::confidence(Kernel::FileDescriptor &descriptor) const {
+int LoadHFIRSANS::confidence(Kernel::FileDescriptor &descriptor) const {
   if (descriptor.extension() != ".xml")
     return 0;
 
@@ -106,7 +106,7 @@ int LoadSpice2D2::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 /// Overwrites Algorithm Init method.
-void LoadSpice2D2::init() {
+void LoadHFIRSANS::init() {
   declareProperty(Kernel::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the input xml file to load");
@@ -135,7 +135,7 @@ void LoadSpice2D2::init() {
 /*******************************************************************************
  * Main method.
  */
-void LoadSpice2D2::exec() {
+void LoadHFIRSANS::exec() {
 
   // Parse the XML metadata
   setInputFileAsHandler();
@@ -163,7 +163,7 @@ void LoadSpice2D2::exec() {
  * - Stores everything in an XML handler
  * - The metadata is stored in a map
  */
-void LoadSpice2D2::setInputFileAsHandler() {
+void LoadHFIRSANS::setInputFileAsHandler() {
   // Set up the XmlHandler handler and parse xml file
   std::string fileName = getPropertyValue("Filename");
   try {
@@ -181,7 +181,7 @@ void LoadSpice2D2::setInputFileAsHandler() {
  * Useful to test tags rather than using the date.
  * @param metadata
  */
-void LoadSpice2D2::setSansSpiceXmlFormatVersion() {
+void LoadHFIRSANS::setSansSpiceXmlFormatVersion() {
 
   if (m_metadata.find("Header/sans_spice_xml_format_version") !=
       m_metadata.end()) {
@@ -192,7 +192,7 @@ void LoadSpice2D2::setSansSpiceXmlFormatVersion() {
                 << m_sansSpiceXmlFormatVersion << "\n";
 }
 
-void LoadSpice2D2::setTimes() {
+void LoadHFIRSANS::setTimes() {
   // start_time
   std::map<std::string, std::string> attributes =
       m_xmlHandler.get_attributes_from_tag("/");
@@ -204,7 +204,7 @@ void LoadSpice2D2::setTimes() {
 /**
  * Sets the wavelength as class atributes
  * */
-void LoadSpice2D2::setWavelength() {
+void LoadHFIRSANS::setWavelength() {
 
   double wavelength_input = getProperty("Wavelength");
   double wavelength_spread_input = getProperty("WavelengthSpread");
@@ -238,7 +238,7 @@ void LoadSpice2D2::setWavelength() {
  * @param dims_str : INT32[192,256]
  */
 std::pair<int, int>
-LoadSpice2D2::parseDetectorDimensions(const std::string &dims_str) {
+LoadHFIRSANS::parseDetectorDimensions(const std::string &dims_str) {
 
   // Read in the detector dimensions from the Detector tag
 
@@ -261,7 +261,7 @@ LoadSpice2D2::parseDetectorDimensions(const std::string &dims_str) {
  * Loads the data from the XML file
  */
 
-std::vector<int> LoadSpice2D2::getData(const std::string &dataXpath) {
+std::vector<int> LoadHFIRSANS::getData(const std::string &dataXpath) {
 
   // data container
   std::vector<int> data;
@@ -331,7 +331,7 @@ std::vector<int> LoadSpice2D2::getData(const std::string &dataXpath) {
  * @param wavelength: wavelength value [Angstrom]
  * @param dwavelength: error on the wavelength [Angstrom]
  */
-void LoadSpice2D2::storeValue(int specID, double value, double error,
+void LoadHFIRSANS::storeValue(int specID, double value, double error,
                               double wavelength, double dwavelength) {
   auto &X = m_workspace->mutableX(specID);
   auto &Y = m_workspace->mutableY(specID);
@@ -345,10 +345,10 @@ void LoadSpice2D2::storeValue(int specID, double value, double error,
   m_workspace->getSpectrum(specID).setSpectrumNo(specID);
 }
 
-void LoadSpice2D2::createWorkspace() {
+void LoadHFIRSANS::createWorkspace() {
 
   std::vector<int> data = getData("//Data");
-  int numSpectra = static_cast<int>(data.size()) + LoadSpice2D2::nMonitors;
+  int numSpectra = static_cast<int>(data.size()) + m_nMonitors;
 
   m_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, 2,
@@ -382,7 +382,7 @@ void LoadSpice2D2::createWorkspace() {
 }
 
 template <class T>
-void LoadSpice2D2::addRunProperty(const std::string &name, const T &value,
+void LoadHFIRSANS::addRunProperty(const std::string &name, const T &value,
                                   const std::string &units) {
   m_workspace->mutableRun().addProperty(name, value, units, true);
 }
@@ -402,7 +402,7 @@ void LoadSpice2D2::addRunProperty(const std::string &name, const T &value,
  * GPSANS: 548.999969
  * BIOSANS: 544.999977
  */
-void LoadSpice2D2::setBeamTrapRunProperty() {
+void LoadHFIRSANS::setBeamTrapRunProperty() {
 
   std::vector<double> trapDiameters = {76.2, 50.8, 76.2, 101.6};
   // default use the shortest trap
@@ -454,7 +454,7 @@ void LoadSpice2D2::setBeamTrapRunProperty() {
  * Add all metadata parsed values as log entries
  * Add any other metadata needed
  * */
-void LoadSpice2D2::storeMetaDataIntoWS() {
+void LoadHFIRSANS::storeMetaDataIntoWS() {
 
   for (const auto &keyValuePair : m_metadata) {
     std::string key = keyValuePair.first;
@@ -514,7 +514,7 @@ void LoadSpice2D2::storeMetaDataIntoWS() {
 /**
  * Run the Child Algorithm LoadInstrument
  */
-void LoadSpice2D2::runLoadInstrument() {
+void LoadHFIRSANS::runLoadInstrument() {
 
   const std::string &instrumentName = m_metadata["Header/Instrument"];
 
@@ -542,7 +542,7 @@ void LoadSpice2D2::runLoadInstrument() {
  *
  * @param angle in degrees
  */
-void LoadSpice2D2::rotateDetector() {
+void LoadHFIRSANS::rotateDetector() {
 
   // The angle is negative!
   double angle = -boost::lexical_cast<double>(
@@ -578,7 +578,7 @@ void LoadSpice2D2::rotateDetector() {
  * If SDD tag is available in the metadata set that as sample detector distance
  * @return : sample_detector_distance
  */
-void LoadSpice2D2::setDetectorDistance() {
+void LoadHFIRSANS::setDetectorDistance() {
 
   m_sampleDetectorDistance = getProperty("SampleDetectorDistance");
 
@@ -624,7 +624,7 @@ void LoadSpice2D2::setDetectorDistance() {
 /**
  * Places the detector at the right sample_detector_distance
  */
-void LoadSpice2D2::moveDetector() {
+void LoadHFIRSANS::moveDetector() {
 
   setDetectorDistance();
   double translation_distance =
@@ -663,7 +663,7 @@ void LoadSpice2D2::moveDetector() {
  * From the parameters file get a string parameter
  * */
 std::string
-LoadSpice2D2::getInstrumentStringParameter(const std::string &parameter) {
+LoadHFIRSANS::getInstrumentStringParameter(const std::string &parameter) {
   std::vector<std::string> pars =
       m_workspace->getInstrument()->getStringParameter(parameter);
   if (pars.empty()) {
@@ -681,7 +681,7 @@ LoadSpice2D2::getInstrumentStringParameter(const std::string &parameter) {
  * From the parameters file get a double parameter
  * */
 double
-LoadSpice2D2::getInstrumentDoubleParameter(const std::string &parameter) {
+LoadHFIRSANS::getInstrumentDoubleParameter(const std::string &parameter) {
   std::vector<double> pars =
       m_workspace->getInstrument()->getNumberParameter(parameter);
   if (pars.empty()) {
@@ -695,7 +695,7 @@ LoadSpice2D2::getInstrumentDoubleParameter(const std::string &parameter) {
   }
 }
 
-double LoadSpice2D2::getSourceToSampleDistance() {
+double LoadHFIRSANS::getSourceToSampleDistance() {
   const int nguides = static_cast<int>(
       boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
   // m_workspace->run().getPropertyValueAsType<int>("number-of-guides");
@@ -733,7 +733,7 @@ double LoadSpice2D2::getSourceToSampleDistance() {
 /**
  * Compute beam diameter at the detector
  * */
-void LoadSpice2D2::setBeamDiameter() {
+void LoadHFIRSANS::setBeamDiameter() {
 
   double SourceToSampleDistance = 0.0;
 
