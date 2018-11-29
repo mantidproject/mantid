@@ -190,10 +190,10 @@ bool rayIntersectsTriangle(const Kernel::V3D &start,
 }
 
 void checkVertexLimit(size_t nVertices) {
-  if (nVertices > std::numeric_limits<uint32_t>::max()) {
+  if (nVertices >= 100000000) {
     throw std::invalid_argument(
         "Too many vertices (" + std::to_string(nVertices) +
-        "). MeshObject cannot have more than 2^32 vertices.");
+        "). MeshObject cannot have 1e8 or more vertices.");
   }
 }
 

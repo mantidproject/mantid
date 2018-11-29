@@ -25,6 +25,7 @@
 
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
+#include <cmath>
 #include <fstream>
 
 namespace Mantid {
@@ -279,7 +280,7 @@ boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
   std::vector<double> checkVector = std::vector<double>(3, 0.0);
   if (translationVector != checkVector) {
     if (translationVector.size() != 3) {
-      throw std::runtime_error(
+      throw std::invalid_argument(
           "Invalid Translation vector, must have exactly 3 dimensions");
     }
     Kernel::V3D translate = Kernel::V3D(
@@ -303,11 +304,15 @@ LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh) {
   if (rotationMatrix != checkVector1) {
     if (rotationMatrix.size() != 9) {
 
-      throw std::runtime_error(
+      throw std::invalid_argument(
           "Invalid Rotation Matrix, must have exactly 9 values, not: " +
           std::to_string(rotationMatrix.size()));
     }
     Kernel::Matrix<double> rotation = Kernel::Matrix<double>(rotationMatrix);
+    double determinant = rotation.determinant();
+    if (!(std::abs(determinant) == 1.0)) {
+      throw std::invalid_argument("Invalid Rotation Matrix");
+    }
     environmentMesh->rotate(rotation);
   }
   return environmentMesh;

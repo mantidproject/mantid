@@ -56,6 +56,15 @@ public:
     TS_ASSERT(translatedVertices == vectorToMatch);
   }
 
+  void testTranslateFailWrongSize() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setProperty("TranslationVector", "-1,0,1,0,0,0,0,1");
+    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
+    environmentMesh = loadCube();
+    TS_ASSERT_THROWS(alg.translate(environmentMesh), std::invalid_argument);
+  }
+
   void testRotate() {
     LoadSampleEnvironment alg;
     alg.initialize();
@@ -71,6 +80,24 @@ public:
     TS_ASSERT(rotatedVertices == vectorToMatch);
   }
 
+  void testRotateFailWrongSize() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setProperty("RotationMatrix", "-1,0,1,0,0,0,0,1");
+    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
+    environmentMesh = loadCube();
+    TS_ASSERT_THROWS(alg.rotate(environmentMesh), std::invalid_argument);
+  }
+
+  void testRotateFailInvalidMatrix() {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setProperty("RotationMatrix", "6,1,1,4,-2,5,2,8,7");
+    boost::shared_ptr<MeshObject> environmentMesh = nullptr;
+    environmentMesh = loadCube();
+    TS_ASSERT_THROWS(alg.rotate(environmentMesh), std::invalid_argument);
+  }
+
   void testSetMaterial() {
     LoadSampleEnvironment alg;
     alg.initialize();
@@ -81,7 +108,10 @@ public:
     alg.setProperty("AtomicNumber", 1);
     alg.setProperty("MassNumber", 1);
     alg.setProperty("SampleNumberDensity", 1.0);
-    prepareWorkspaces(alg, true);
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("OutputWorkspace", inputWS);
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
@@ -104,20 +134,6 @@ private:
     auto loader = LoadBinaryStl(path);
     auto cube = loader.readStl();
     return cube;
-  }
-  // Create workspaces and add them to algorithm properties
-  void prepareWorkspaces(LoadSampleEnvironment &alg,
-                         bool outputWsSameAsInputWs) {
-    const int nvectors(2), nbins(10);
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
-                                                                     nbins);
-    alg.setChild(true);
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.setPropertyValue("OutputWorkspace", "__dummy_unused");
-    if (outputWsSameAsInputWs) {
-      alg.setProperty("OutputWorkspace", inputWS);
-    }
   }
 };
 
