@@ -395,40 +395,35 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 beamPos = tableWithBeamPos.cell('PeakCentre', 0)
         if not self.getProperty(Prop.BEAM_CENTRE).isDefault:
             beamPos = self.getProperty(Prop.BEAM_CENTRE).value
-        # Write beam position to sample logs
-        AddSampleLog(ws,
-                     LogName='peak_position',
-                     LogText=str(beamPos),
-                     LogType='Number',
-                     NumberType='Double')
+        # Add spectrum number of beam position to sample logs
+        # Convert workspace index to spectrum number
+        peak_position = beamPos + 1
+        logargs = {'Workspace': ws, 'LogType': 'Number', 'EnableLogging': self._subalgLogging}
+        logargs['LogName'] = 'peak_position'
+        logargs['LogText'] = str(peak_position)
+        logargs['NumberType'] = 'Double'
+        AddSampleLog(**logargs)
         # Add foreground start and end workspace indices to the sample logs of ws.
         hws = self._foregroundWidths()
         beamPosIndex = int(numpy.rint(beamPos))
         if beamPosIndex > 255:
             beamPosIndex = 255
+            self.log().warning('Is it a monitor spectrum?')
         sign = self._workspaceIndexDirection(ws)
-        start = beamPosIndex - sign * hws[0]
-        end = beamPosIndex + sign * hws[1]
-        if start > end:
-            end, start = start, end
-        AddSampleLog(ws,
-                     LogName=common.SampleLogs.FOREGROUND_START,
-                     LogText=str(start),
-                     LogType='Number',
-                     NumberType='Int',
-                     EnableLogging=self._subalgLogging)
-        AddSampleLog(ws,
-                     LogName=common.SampleLogs.FOREGROUND_CENTRE,
-                     LogText=str(beamPosIndex),
-                     logType='Number',
-                     NumberType='Int',
-                     EnableLogging=self._subalgLogging)
-        AddSampleLog(ws,
-                     LogName=common.SampleLogs.FOREGROUND_END,
-                     LogText=str(end),
-                     LogType='Number',
-                     NumberType='Int',
-                     EnableLogging=self._subalgLogging)
+        startIndex = beamPosIndex - sign * hws[0]
+        endIndex = beamPosIndex + sign * hws[1]
+        if startIndex > endIndex:
+            endIndex, startIndex = startIndex, endIndex
+        logargs['LogName'] = common.SampleLogs.FOREGROUND_START
+        logargs['LogText'] = str(startIndex)
+        logargs['NumberType'] = 'Int'
+        AddSampleLog(**logargs)
+        logargs['LogName'] = common.SampleLogs.FOREGROUND_CENTRE
+        logargs['LogText'] = str(beamPosIndex)
+        AddSampleLog(**logargs)
+        logargs['LogName'] = common.SampleLogs.FOREGROUND_END
+        logargs['LogText'] = str(endIndex)
+        AddSampleLog(**logargs)
         return ws
 
     def _normaliseToFlux(self, detWS, monWS):
