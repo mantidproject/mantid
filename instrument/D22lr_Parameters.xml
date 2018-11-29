@@ -2,7 +2,7 @@
 <parameter-file instrument = "D22lr" valid-from="2017-10-01 23:59:59">
 
     <!-- This should be removed when the new way of correction is in the workflow-->
-    <component-link name="D22">
+    <component-link name="D22lr">
 
       <!-- This is the formula to model the theta dependency of the
       detector sensitivities because of varying path lengths in the
@@ -10,7 +10,7 @@
       Note that the np stands for the numpy, p must be the parallax:
       p = arctan(x/l2) [in radians], where x is the coordinate of the
       detector pixel, l2 is the sample to detector distance. -->
-      <parameter name="parallax" type="string">
+      <parameter name="parallax_old" type="string">
         <value val="1+0.14*np.exp(-4*np.log(2.)*((np.abs(p)-0.588)/0.414)**2)"/>
       </parameter>
 
