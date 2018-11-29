@@ -122,7 +122,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
-        group_workspaces_if_required(reduction_package, save_can)
+        group_workspaces_if_required(reduction_package, output_mode, save_can)
 
     # --------------------------------
     # Perform output of all workspaces
@@ -861,7 +861,7 @@ def get_workspace_from_algorithm(alg, output_property_name):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for outputs to the ADS and saving the file
 # ----------------------------------------------------------------------------------------------------------------------
-def group_workspaces_if_required(reduction_package, save_can):
+def group_workspaces_if_required(reduction_package, output_mode, save_can):
     """
     The output workspaces have already been published to the ADS by the algorithm. Now we might have to
     bundle them into a group if:
@@ -869,6 +869,7 @@ def group_workspaces_if_required(reduction_package, save_can):
     * They are reduced LAB and HAB workspaces of a Merged reduction
     * They are can workspaces - they are all grouped into a single group
     :param reduction_package: a list of reduction packages
+    :param output_mode: one of OutputMode. SaveToFile, PublishToADS, Both.
     :param save_can: a bool. If true save out can and sample workspaces.
     """
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
@@ -897,11 +898,19 @@ def group_workspaces_if_required(reduction_package, save_can):
             add_to_group(reduced_lab, reduction_package.reduced_lab_base_name)
             add_to_group(reduced_hab, reduction_package.reduced_hab_base_name)
 
-    # Can group workspace depends on if save_can is checked
-    if not save_can:
-        CAN_WORKSPACE_GROUP = CAN_COUNT_AND_NORM_FOR_OPTIMIZATION
-    else:
+    # Can group workspace depends on if save_can is checked and output_mode
+    # Logic table for which group to save CAN into
+    # CAN | FILE | In OPTIMIZATION group
+    # ----------------------------------
+    #  Y  |   Y  | YES
+    #  N  |   Y  | YES
+    #  Y  |   N  | NO
+    #  N  |   N  | YES
+
+    if save_can and output_mode is not OutputMode.SaveToFile:
         CAN_WORKSPACE_GROUP = CAN_AND_SAMPLE_WORKSPACE
+    else:
+        CAN_WORKSPACE_GROUP = CAN_COUNT_AND_NORM_FOR_OPTIMIZATION
 
     # Add the can workspaces (used for optimizations) to a Workspace Group (if they exist)
     add_to_group(reduction_package.reduced_lab_can, CAN_WORKSPACE_GROUP)
@@ -993,7 +1002,23 @@ def delete_reduced_workspaces(reduction_packages):
         reduced_lab = reduction_package.reduced_lab
         reduced_hab = reduction_package.reduced_hab
         reduced_merged = reduction_package.reduced_merged
-        _delete_workspaces(delete_alg, [reduced_lab, reduced_hab, reduced_merged])
+
+        # Remove samples
+        reduced_lab_sample = reduction_package.reduced_lab_sample
+        reduced_hab_sample = reduction_package.reduced_hab_sample
+
+        # Remove transmissions
+        calculated_transmission = reduction_package.calculated_transmission
+        unfitted_transmission = reduction_package.unfitted_transmission
+        calculated_transmission_can = reduction_package.calculated_transmission_can
+        unfitted_transmission_can = reduction_package.unfitted_transmission_can
+
+        workspaces_to_delete = [reduced_lab, reduced_hab, reduced_merged,
+                                reduced_lab_sample, reduced_hab_sample,
+                                calculated_transmission, unfitted_transmission,
+                                calculated_transmission_can, unfitted_transmission_can]
+
+        _delete_workspaces(delete_alg, workspaces_to_delete)
 
 
 def delete_optimization_workspaces(reduction_packages, workspaces, monitors):
