@@ -4,14 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LoadSpice2D2TEST_H
-#define LoadSpice2D2TEST_H
+#ifndef LoadHFIRSANSTEST_H
+#define LoadHFIRSANSTEST_H
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
-#include "MantidDataHandling/LoadSpice2D2.h"
+#include "MantidDataHandling/LoadHFIRSANS.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Parameter.h"
@@ -25,15 +25,15 @@
  * TODO: check that an exception is thrown when the geometry file doesn't define
  * all monitors
  */
-class LoadSpice2D2Test : public CxxTest::TestSuite {
+class LoadHFIRSANSTest : public CxxTest::TestSuite {
 public:
-  static LoadSpice2D2Test *createSuite() { return new LoadSpice2D2Test(); }
-  static void destroySuite(LoadSpice2D2Test *suite) { delete suite; }
+  static LoadHFIRSANSTest *createSuite() { return new LoadHFIRSANSTest(); }
+  static void destroySuite(LoadHFIRSANSTest *suite) { delete suite; }
 
-  LoadSpice2D2Test() { inputFile = "BioSANS_exp61_scan0004_0001.xml"; }
+  LoadHFIRSANSTest() { inputFile = "BioSANS_exp61_scan0004_0001.xml"; }
 
   void testConfidence() {
-    Mantid::DataHandling::LoadSpice2D2 loader;
+    Mantid::DataHandling::LoadHFIRSANS loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
 
@@ -81,7 +81,7 @@ public:
 
     // We have 192*192 + 2 channels, for the PSD + timer + monitor
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(),
-                     36864 + Mantid::DataHandling::LoadSpice2D2::nMonitors);
+                     36864 + spice2d.getNumberOfMonitors());
 
     // Test the size of the data vectors
     TS_ASSERT_EQUALS((ws2d->x(0).size()), 2);
@@ -89,7 +89,7 @@ public:
     TS_ASSERT_EQUALS((ws2d->e(0).size()), 1);
 
     double tolerance(1e-04);
-    int nmon = Mantid::DataHandling::LoadSpice2D2::nMonitors;
+    int nmon =spice2d.getNumberOfMonitors();
     TS_ASSERT_DELTA(ws2d->x(0 + nmon)[0], 5.93, tolerance);
     TS_ASSERT_DELTA(ws2d->x(2 + nmon)[0], 5.93, tolerance);
     TS_ASSERT_DELTA(ws2d->x(192 + nmon)[0], 5.93, tolerance);
@@ -182,7 +182,7 @@ public:
   }
 
   void testExecChooseWavelength() {
-    Mantid::DataHandling::LoadSpice2D2 spice2d;
+    Mantid::DataHandling::LoadHFIRSANS spice2d;
 
     if (!spice2d.isInitialized())
       spice2d.initialize();
@@ -217,7 +217,7 @@ public:
     TS_ASSERT_EQUALS((ws2d->e(0).size()), 1);
 
     double tolerance(1e-04);
-    int nmon = Mantid::DataHandling::LoadSpice2D2::nMonitors;
+    int nmon = spice2d.getNumberOfMonitors();
     TS_ASSERT_DELTA(ws2d->x(0 + nmon)[0], 4.5, tolerance);
     TS_ASSERT_DELTA(ws2d->x(2 + nmon)[0], 4.5, tolerance);
     TS_ASSERT_DELTA(ws2d->x(192 + nmon)[0], 4.5, tolerance);
@@ -245,6 +245,6 @@ public:
 
 private:
   std::string inputFile;
-  Mantid::DataHandling::LoadSpice2D2 spice2d;
+  Mantid::DataHandling::LoadHFIRSANS spice2d;
 };
 #endif

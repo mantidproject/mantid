@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LoadSpice2D2_H
-#define MANTID_DATAHANDLING_LoadSpice2D2_H
+#ifndef MANTID_DATAHANDLING_LoadHFIRSANS_H
+#define MANTID_DATAHANDLING_LoadHFIRSANS_H
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/XmlHandler.h"
@@ -24,7 +24,7 @@ class Element;
 
 namespace Mantid {
 namespace DataHandling {
-/** @class LoadSpice2D2  DataHandling/LoadSpice2D2.h
+/** @class LoadHFIRSANS  DataHandling/LoadHFIRSANS.h
 
  This algorithm loads a SPICE2D file for HFIR SANS into a workspace.
 
@@ -56,11 +56,11 @@ namespace DataHandling {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport LoadSpice2D2 : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadHFIRSANS : public API::IFileLoader<Kernel::FileDescriptor> {
 
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "LoadSpice2D2"; }
+  const std::string name() const override { return "LoadHFIRSANS"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Loads a SANS data file produce by the HFIR instruments at ORNL. "
@@ -80,6 +80,8 @@ public:
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
+
+  int getNumberOfMonitors() const { return m_nMonitors; }
 
 private:
   /// Overwrites Algorithm method.
@@ -114,7 +116,7 @@ private:
 
   /* constants */
   /// Number of monitors
-  static const int nMonitors = 2;
+  static const int m_nMonitors = 2;
   // when parsing the metadata ignore those tags
   const std::vector<std::string> m_tags_to_ignore{"Detector", "DetectorWing"};
 
