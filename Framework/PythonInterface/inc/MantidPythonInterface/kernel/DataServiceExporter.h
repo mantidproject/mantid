@@ -1,30 +1,13 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_PYTHONINTERFACE_DATASERVICEEXPORTER_H_
 #define MANTID_PYTHONINTERFACE_DATASERVICEEXPORTER_H_
 
-/*
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
 #include "MantidKernel/Exception.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToString.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
@@ -110,15 +93,9 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param name The name to assign to this in the service
    * @param item A boost.python wrapped SvcHeldType object
    */
-  static void addItem(SvcType &self, const boost::python::object &name,
+  static void addItem(SvcType &self, const std::string &name,
                       const boost::python::object &item) {
-    std::string namestr;
-    try {
-      namestr = PythonInterface::Converters::pyObjToStr(name);
-    } catch (std::invalid_argument &) {
-      throw std::invalid_argument("Failed to convert name to a string");
-    }
-    self.add(namestr, extractCppValue(item));
+    self.add(name, extractCppValue(item));
   }
 
   /**
@@ -128,15 +105,9 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param name The name to assign to this in the service
    * @param item A boost.python wrapped SvcHeldType object
    */
-  static void addOrReplaceItem(SvcType &self, const boost::python::object &name,
+  static void addOrReplaceItem(SvcType &self, const std::string &name,
                                const boost::python::object &item) {
-    std::string namestr;
-    try {
-      namestr = PythonInterface::Converters::pyObjToStr(name);
-    } catch (std::invalid_argument &) {
-      throw std::invalid_argument("Failed to convert name to a string");
-    }
-    self.addOrReplace(namestr, extractCppValue(item));
+    self.addOrReplace(name, extractCppValue(item));
   }
 
   /**
@@ -169,23 +140,15 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @return A shared_ptr to the named object. If the name does not exist it
    * sets a KeyError error indicator.
    */
-  static WeakPtr retrieveOrKeyError(SvcType &self,
-                                    const boost::python::object &name) {
+  static WeakPtr retrieveOrKeyError(SvcType &self, const std::string &name) {
     using namespace Mantid::Kernel;
-
-    std::string namestr;
-    try {
-      namestr = PythonInterface::Converters::pyObjToStr(name);
-    } catch (std::invalid_argument &) {
-      throw std::invalid_argument("Failed to convert name to a string");
-    }
 
     SvcPtrType item;
     try {
-      item = self.retrieve(namestr);
+      item = self.retrieve(name);
     } catch (Exception::NotFoundError &) {
       // Translate into a Python KeyError
-      std::string err = "'" + namestr + "' does not exist.";
+      std::string err = "'" + name + "' does not exist.";
       PyErr_SetString(PyExc_KeyError, err.c_str());
       throw boost::python::error_already_set();
     }
@@ -198,7 +161,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @param self :: A reference to the ADS object that called this method
    * @returns A python list created from the set of strings
    */
-  static boost::python::object getObjectNamesAsList(SvcType &self) {
+  static boost::python::list getObjectNamesAsList(SvcType &self) {
     boost::python::list names;
     const auto keys = self.getObjectNames();
     for (auto itr = keys.begin(); itr != keys.end(); ++itr) {

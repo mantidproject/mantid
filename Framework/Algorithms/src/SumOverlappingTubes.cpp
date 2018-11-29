@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SumOverlappingTubes.h"
 
 #include "MantidAPI/ADSValidator.h"
@@ -290,7 +296,7 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
     // loop over spectra
     const auto &specInfo = ws->spectrumInfo();
     for (size_t i = 0; i < specInfo.size(); ++i) {
-      if (specInfo.isMonitor(i))
+      if (specInfo.isMonitor(i) || specInfo.isMasked(i))
         continue;
 
       const auto &pos = specInfo.position(i);
@@ -366,9 +372,7 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         yData[angleIndex] += counts;
         eData[angleIndex] =
             sqrt(eData[angleIndex] * eData[angleIndex] + error * error);
-        if (counts != 0.) {
-          normalisation[heightIndex][angleIndex]++;
-        }
+        normalisation[heightIndex][angleIndex]++;
       }
     }
   }

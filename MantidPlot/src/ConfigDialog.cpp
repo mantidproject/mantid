@@ -85,6 +85,10 @@ Description          : Preferences dialog
 using namespace MantidQt::API;
 using Mantid::Kernel::ConfigService;
 
+namespace {
+Mantid::Kernel::Logger g_log("ConfigDialog");
+}
+
 ConfigDialog::ConfigDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {
   // get current values from app window
@@ -734,6 +738,61 @@ void ConfigDialog::initMantidPage() {
   initCurveFittingTab();
   initSendToProgramTab();
   initMantidOptionsTab();
+  initProjectRecoveryTab();
+}
+
+void ConfigDialog::initProjectRecoveryTab() {
+  projectRecovery = new QWidget();
+  QVBoxLayout *projRecLayout = new QVBoxLayout(projectRecovery);
+  QGroupBox *frame = new QGroupBox();
+  projRecLayout->addWidget(frame);
+  QGridLayout *grid = new QGridLayout(frame);
+  mtdTabWidget->addTab(projectRecovery, "Project Recovery");
+
+  ckEnableProjectRecovery = new QCheckBox("Enable Project Recovery");
+  ckEnableProjectRecovery->setChecked(
+      ConfigService::Instance().getString("projectRecovery.enabled") == "true");
+  ckEnableProjectRecovery->setToolTip(
+      "Requires a restart of mantid to take effect");
+  grid->addWidget(ckEnableProjectRecovery, 0, 0);
+
+  lblTimeBetweenCheckpoints = new QLabel("Time between recovery checkpoints");
+  lblTimeBetweenCheckpoints->setToolTip(
+      "Requires a restart of mantid to take effect");
+  grid->addWidget(lblTimeBetweenCheckpoints, 1, 0);
+  boxTimeBetweenCheckpoints = new QSpinBox();
+  boxTimeBetweenCheckpoints->setRange(1, 1000);
+  boxTimeBetweenCheckpoints->setSingleStep(1);
+  auto secondsBetween = 60;
+  try {
+    secondsBetween = std::stoi(
+        ConfigService::Instance().getString("projectRecovery.secondsBetween"));
+  } catch (...) {
+    g_log.warning("projectRecovery.secondsBetween is set to a none number "
+                  "value in the properties file");
+  }
+  boxTimeBetweenCheckpoints->setValue(secondsBetween);
+  boxTimeBetweenCheckpoints->setToolTip(
+      "Requires a restart of mantid to take effect");
+  grid->addWidget(boxTimeBetweenCheckpoints, 1, 1);
+
+  lblNumCheckpoints = new QLabel("Total number of checkpoints to be made");
+  lblNumCheckpoints->setToolTip("Requires a restart of mantid to take effect");
+  grid->addWidget(lblNumCheckpoints, 2, 0);
+  boxNumCheckpoint = new QSpinBox();
+  boxNumCheckpoint->setRange(1, 10);
+  boxNumCheckpoint->setSingleStep(1);
+  auto numCheckpoint = 5;
+  try {
+    numCheckpoint = std::stoi(ConfigService::Instance().getString(
+        "projectRecovery.numberOfCheckpoints"));
+  } catch (...) {
+    g_log.warning("projectRecovery.numberOfCheckpoints is set to a none number "
+                  "value in the properties file");
+  }
+  boxNumCheckpoint->setValue(numCheckpoint);
+  boxNumCheckpoint->setToolTip("Requires a restart of mantid to take effect");
+  grid->addWidget(boxNumCheckpoint, 2, 1);
 }
 
 /**
@@ -1192,7 +1251,7 @@ void ConfigDialog::populateProgramTree() {
 void ConfigDialog::updateProgramTree() {
   // Store into a map ready to go into config service when apply is clicked
   for (const auto &itr : m_sendToSettings) {
-    // creating the map of kvps needs to happen first as createing the item
+    // creating the map of kvps needs to happen first as creating the item
     // requires them.
     std::map<std::string, std::string> programKeysAndDetails = itr.second;
 
@@ -2436,9 +2495,10 @@ void ConfigDialog::languageChange() {
 
   mdPlottingGeneralFrame->setTitle(
       "Use same default color map for Slice Viewer and VSI");
-  mdPlottingGeneralFrame->setToolTip("The specifed color map will be available "
-                                     "for the Slice Viewer and the VSI when a "
-                                     "new instance of either is started.");
+  mdPlottingGeneralFrame->setToolTip(
+      "The specified color map will be available "
+      "for the Slice Viewer and the VSI when a "
+      "new instance of either is started.");
 }
 
 void ConfigDialog::accept() {
@@ -2682,6 +2742,7 @@ void ConfigDialog::apply() {
   updateDirSearchSettings();
   updateCurveFitSettings();
   updateMantidOptionsTab();
+  updateProjectRecovery();
   updateSendToTab();
 
   try {
@@ -2695,6 +2756,19 @@ void ConfigDialog::apply() {
   // MD Plotting
   updateMdPlottingSettings();
   emit app->configModified();
+}
+
+void ConfigDialog::updateProjectRecovery() {
+  auto &cfgSvc = Mantid::Kernel::ConfigService::Instance();
+  if (ckEnableProjectRecovery->isChecked()) {
+    cfgSvc.setString("projectRecovery.enabled", "true");
+  } else {
+    cfgSvc.setString("projectRecovery.enabled", "false");
+  }
+  cfgSvc.setString("projectRecovery.secondsBetween",
+                   std::to_string(boxTimeBetweenCheckpoints->value()));
+  cfgSvc.setString("projectRecovery.numberOfCheckpoints",
+                   std::to_string(boxNumCheckpoint->value()));
 }
 
 /**

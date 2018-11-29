@@ -1,16 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid import config
 import os
-import stresstesting
+import systemtesting
 import glob
 
 
 EXPECTED_EXT = '.expected'
 
 
-class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
+class ValidateInstrumentDefinitionFiles(systemtesting.MantidSystemTest):
 
     xsdFile=''
     # Explicitly specify single file to test. If None, test all.
@@ -96,7 +102,7 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
             raise RuntimeError("Failed Validation for %d of %d files"
                                % (len(failed), len(files)))
         else:
-            print("Succesfully Validated %d files" % len(files))
+            print("Successfully Validated %d files" % len(files))
 
 
 if __name__ == '__main__':

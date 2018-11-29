@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-lines
 #pylint: disable=too-many-instance-attributes,non-parent-init-called,abstract-method,too-few-public-methods
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
@@ -15,7 +21,7 @@ For diagrams on the intended work flow of the IDR and IDA interfaces see:
 
 System test class hierarchy as shown below:
 
-stresstesting.MantidStressTest
+systemtesting.MantidSystemTest
  |
  +--ISISIndirectInelasticBase
      |
@@ -68,7 +74,7 @@ stresstesting.MantidStressTest
 '''
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from abc import ABCMeta, abstractmethod
 
 from mantid.simpleapi import *
@@ -79,7 +85,7 @@ import platform
 from six import with_metaclass
 
 
-class ISISIndirectInelasticBase(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
+class ISISIndirectInelasticBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
     '''
     A common base class for the ISISIndirectInelastic* base classes.
     '''
@@ -412,7 +418,7 @@ class ISISIndirectInelasticResolution(with_metaclass(ABCMeta, ISISIndirectInelas
     The workflow is defined in the _run() method, simply
     define an __init__ method and set the following properties
     on the object
-        - self.instrument: a string giving the intrument name
+        - self.instrument: a string giving the instrument name
         - self.analyser: a string giving the name of the analyser
         - self.reflection: a string giving the name of the reflection
         - self.detector_range: a list of two integers, giving the range of detectors

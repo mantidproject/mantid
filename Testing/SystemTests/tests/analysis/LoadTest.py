@@ -1,10 +1,16 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
    Extends the basic test of the Load algorithm done by the LoadLotsOfFiles
    test to encompass the complex multi-file loading that the Load
    algorithm is capable of.
 """
-import stresstesting
+import systemtesting
 
 from mantid.api import AnalysisDataService, IEventWorkspace, MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import Load
@@ -14,7 +20,7 @@ import unittest
 DIFF_PLACES = 8
 
 
-class LoadTest(stresstesting.MantidStressTest):
+class LoadTest(systemtesting.MantidSystemTest):
 
     _success = False
 

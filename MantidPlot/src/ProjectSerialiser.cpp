@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 // clang-format off
 #include "PythonScripting.h"
 // clang-format on
@@ -19,10 +25,10 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
-#include "MantidQtWidgets/Common/PythonThreading.h"
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
@@ -37,6 +43,7 @@
 #include <vector>
 
 using namespace Mantid::API;
+namespace Python = Mantid::PythonInterface;
 using namespace MantidQt::API;
 using Mantid::Kernel::Logger;
 
@@ -123,7 +130,7 @@ constexpr auto PY_INTERFACE_SECTION = "pythoninterface";
 //     w = MainWindow()
 //     w.show()
 //
-QStringList SERIALISABLE_PY_INTERFACES;
+QStringList SERIALISABLE_PY_INTERFACES = {"Muon_Analysis_2"};
 
 } // namespace
 
@@ -750,7 +757,7 @@ QString ProjectSerialiser::savePythonInterfaces() {
 QString
 ProjectSerialiser::savePythonInterface(const QString &launcherModuleName) {
   assert(!launcherModuleName.isEmpty());
-  ScopedGIL<PythonGIL> gil;
+  Python::GlobalInterpreterLock gil;
   auto state = callPythonModuleAttr(launcherModuleName.toLatin1().data(),
                                     "saveToProject", nullptr);
   if (!STR_CHECK(state)) {
@@ -1079,7 +1086,7 @@ void ProjectSerialiser::loadPythonInterface(
     throw std::runtime_error("Interface not whitelisted as saveable.");
   }
 
-  ScopedGIL<PythonGIL> gil;
+  Python::GlobalInterpreterLock gil;
   PyObject *fnArg = Py_BuildValue("(s)", pySection.c_str());
   PyObject *result(nullptr);
   try {

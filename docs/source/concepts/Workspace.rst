@@ -31,7 +31,7 @@ Workspaces Types
       dimensional histogram data in memory, this is the most commonly used
       workspace.
    -  :ref:`Event Workspace <EventWorkspace>` - A workspace that retains the
-      individual neutron event data often including the pulse time correponding to the reading.
+      individual neutron event data often including the pulse time corresponding to the reading.
 
 -  :ref:`Table Workspace <Table Workspaces>` - A workspace holding data in
    rows of columns having a particular type (e.g. text, integer, ...).
@@ -81,7 +81,7 @@ This :ref:`page <WorkingWithWorkspaces>` describes how you can work with workspa
 Writing you own Workspace
 -------------------------
 
-:ref:`Table Workspace <Table Workspaces>` is the best solution at present for customising the data structures you need. Changes beyond that are at present not trivial. For specialisation of exisiting data structures, or new data requirements, please contact the Mantid Team for help.
+:ref:`Table Workspace <Table Workspaces>` is the best solution at present for customising the data structures you need. Changes beyond that are at present not trivial. For specialisation of existing data structures, or new data requirements, please contact the Mantid Team for help.
 
 
 .. categories:: Concepts

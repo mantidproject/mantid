@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_
 
@@ -9,27 +15,6 @@ namespace Algorithms {
 
 /** ReflectometryReductionOneAuto2 : Algorithm to run ReflectometryReductionOne,
 attempting to pick instrument parameters for missing properties. Version 2.
-
-Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ReflectometryReductionOneAuto2
     : public ReflectometryWorkflowBase2 {
@@ -56,16 +41,13 @@ private:
   void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions
   std::vector<std::string>
-  getDetectorNames(const std::string &instructions,
-                   Mantid::API::MatrixWorkspace_sptr inputWS);
+  getDetectorNames(Mantid::API::MatrixWorkspace_sptr inputWS);
   /// Correct detector positions vertically
   Mantid::API::MatrixWorkspace_sptr
-  correctDetectorPositions(const std::string &instructions,
-                           Mantid::API::MatrixWorkspace_sptr inputWS,
+  correctDetectorPositions(Mantid::API::MatrixWorkspace_sptr inputWS,
                            const double twoTheta);
   /// Calculate theta
-  double calculateTheta(const std::string &instructions,
-                        Mantid::API::MatrixWorkspace_sptr inputWS);
+  double calculateTheta(Mantid::API::MatrixWorkspace_sptr inputWS);
   /// Rebin and scale a workspace in Q
   Mantid::API::MatrixWorkspace_sptr
   rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS, double theta,
@@ -79,8 +61,8 @@ private:
   getPolarizationEfficiencies();
   void applyPolarizationCorrection(std::string const &outputIvsLam);
   API::MatrixWorkspace_sptr getFloodWorkspace();
-  void applyFloodCorrection(API::MatrixWorkspace_sptr flood,
-                            std::string const &prop);
+  void applyFloodCorrection(API::MatrixWorkspace_sptr const &flood,
+                            const std::string &propertyName);
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
                               const double defaultValue);

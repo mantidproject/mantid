@@ -1,11 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 from isis_reflectometry import quick
 from isis_reflectometry import combineMulti
 
 
-class ReflectometryQuickCombineMulti(stresstesting.MantidStressTest):
+class ReflectometryQuickCombineMulti(systemtesting.MantidSystemTest):
     """
     This is a system test for the top-level CombineMulti routines. Quick is the name given to the
     ISIS reflectometry reduction scripts. CombineMulti is used for stitching together runs converted Into I/I0 vs |Q| taken at
@@ -48,7 +54,7 @@ class ReflectometryQuickCombineMulti(stresstesting.MantidStressTest):
         IvsQ2 = self.doQuickOnRun(runNumber=13462, transmissionNumbers=[13463,13464], instrument='INTER', incidentAngle=2.3)
         IvsQ2Binned = Rebin(InputWorkspace=IvsQ2, Params=self.createBinningParam(run2QLow, -step, run2QHigh))
 
-        # Peform the stitching
+        # Perform the stitching
         combineMulti.combineDataMulti([IvsQ1Binned.name(), IvsQ2Binned.name()], self.__stitchedWorkspaceName,
                                       [run1QLow, run2QLow], [run1QHigh, run2QHigh], run1QLow, run2QHigh, -step, 1)
 

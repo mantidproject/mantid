@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeakStatisticsTools.h"
 
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
@@ -283,11 +289,6 @@ void PeaksStatistics::calculatePeaksStatistics(
         // Collect sum of intensities for R-value calculation
         intensitySumRValues +=
             std::accumulate(intensities.begin(), intensities.end(), 0.0);
-
-        // The original algorithm sets the intensities and sigmas to the mean.
-        double sqrtOfMeanSqrSigma = getRMS(sigmas);
-        outliersRemoved.setPeaksIntensityAndSigma(meanIntensity,
-                                                  sqrtOfMeanSqrSigma);
       }
 
       const std::vector<Peak> &reflectionPeaks = outliersRemoved.getPeaks();

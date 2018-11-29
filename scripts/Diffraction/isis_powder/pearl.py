@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from contextlib import contextmanager
@@ -72,7 +78,8 @@ class Pearl(AbstractInst):
 
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs):
-        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
+        if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
+            self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         yield
         self._inst_settings = copy.deepcopy(self._default_inst_settings)
@@ -126,6 +133,9 @@ class Pearl(AbstractInst):
             new_workspace_names.append(mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace=new_name))
 
         return new_workspace_names
+
+    def _get_instrument_bin_widths(self):
+        return self._inst_settings.focused_bin_widths
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:

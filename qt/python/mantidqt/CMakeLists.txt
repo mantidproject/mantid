@@ -1,7 +1,7 @@
 include ( SipQtTargetFunctions )
 
-set ( COMMON_INC_DIR ../../../widgets/common/inc )
-set ( HEADER_DEPENDS
+set ( COMMON_INC_DIR ../../widgets/common/inc )
+set ( _header_depends
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/AlgorithmDialog.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Message.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/MessageDisplay.h
@@ -23,15 +23,16 @@ mtd_add_sip_module (
   MODULE_NAME _commonqt4
   TARGET_NAME mantidqt_commonqt4
   SIP_SRCS _common.sip
-  HEADER_DEPS ${HEADER_DEPENDS}
+  HEADER_DEPS ${_header_depends}
   PYQT_VERSION 4
+  INCLUDE_DIRS
+    ${PYTHON_INCLUDE_PATH}
   LINK_LIBS
     ${common_link_libs}
     MantidQtWidgetsCommonQt4
     Qt4::QtCore
     Qt4::QtGui
     Qt4::Qscintilla
-    ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     API
   FOLDER Qt4
@@ -46,17 +47,17 @@ mtd_add_sip_module (
   MODULE_NAME _commonqt5
   TARGET_NAME mantidqt_commonqt5
   SIP_SRCS _common.sip
-  HEADER_DEPS ${HEADER_DEPENDS}
+  HEADER_DEPS ${_header_depends}
   PYQT_VERSION 5
+  INCLUDE_DIRS
+    ${PYTHON_INCLUDE_PATH}
   LINK_LIBS
     ${common_link_libs}
     MantidQtWidgetsCommonQt5
-    ${POCO_LIBRARIES}
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
     Qt5::Qscintilla
-    ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     API
   INSTALL_DIR
@@ -65,3 +66,5 @@ mtd_add_sip_module (
     "\$ORIGIN/.."
   FOLDER Qt5
 )
+
+add_subdirectory ( widgets/instrumentview )

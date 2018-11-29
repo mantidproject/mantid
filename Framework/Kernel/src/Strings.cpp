@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitLabel.h"
@@ -111,6 +117,22 @@ MANTID_KERNEL_DLL std::string replaceAll(const std::string &input,
     }
   }
   return replaced;
+}
+
+/** Convert all characters in string to lowercase
+ */
+MANTID_KERNEL_DLL std::string toLower(const std::string &input) {
+  std::string output(input);
+  std::transform(output.begin(), output.end(), output.begin(), ::tolower);
+  return output;
+}
+
+/** Convert all characters in string to uppercase
+ */
+MANTID_KERNEL_DLL std::string toUpper(const std::string &input) {
+  std::string output(input);
+  std::transform(output.begin(), output.end(), output.begin(), ::toupper);
+  return output;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -741,20 +763,12 @@ template <> MANTID_KERNEL_DLL std::string toString(const UnitLabel &value) {
   return value;
 }
 
+/// Template overload for a vector of strings.
+/// @param value :: A value to convert to a string.
+/// @return :: A string with comma separated items of the value vector.
 template <>
 MANTID_KERNEL_DLL std::string toString(const std::vector<std::string> &value) {
-  if (value.empty()) {
-    return "";
-  }
-  std::ostringstream mess;
-  auto it = value.begin();
-  auto last = value.end();
-  mess << *it;
-  ++it;
-  for (; it != last; ++it) {
-    mess << ',' << *it;
-  }
-  return mess.str();
+  return join(value.begin(), value.end(), ",");
 }
 
 //------------------------------------------------------------------------------------------------

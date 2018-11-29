@@ -36,7 +36,7 @@ expansion coefficients:
 where the Chebyshev coefficients :math:`c_{s}(m,n)` up to  m + n 
 :math:`\leqslant` 5 have been tabulated and are stored as an array by the algorithm.
 
-This version of the correction follows the implemenation in [1]_ in that it only calculates for the correction in-plane, unlike [2]_, [3]_ that generalizes the correction to out-of-plane.
+This version of the correction follows the implementation in [1]_ in that it only calculates for the correction in-plane, unlike [2]_, [3]_ that generalizes the correction to out-of-plane.
 
 This algorithm calls :ref:`algm-CalculateCarpenterSampleCorrection` to calculate both absorption and multiple scattering corrections and then applies both to the sample workspace.
 

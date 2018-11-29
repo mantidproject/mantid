@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotPresenter.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
@@ -165,6 +171,13 @@ void IndirectFitPlotPresenter::setEndX(double endX) {
   m_view->setFitRangeMaximum(endX);
 }
 
+void IndirectFitPlotPresenter::updatePlotSpectrum(int spectrum) {
+  m_view->setPlotSpectrum(spectrum);
+  setActiveSpectrum(static_cast<std::size_t>(spectrum));
+  updatePlots();
+  updateFitRangeSelector();
+}
+
 void IndirectFitPlotPresenter::updateRangeSelectors() {
   updateBackgroundSelector();
   updateHWHMSelector();
@@ -226,13 +239,13 @@ void IndirectFitPlotPresenter::updateAvailableSpectra() {
 }
 
 void IndirectFitPlotPresenter::disableAllDataSelection() {
-  m_view->disableSpectrumSelection();
-  m_view->disableFitRangeSelection();
+  m_view->enableSpectrumSelection(false);
+  m_view->enableFitRangeSelection(false);
 }
 
 void IndirectFitPlotPresenter::enableAllDataSelection() {
-  m_view->enableSpectrumSelection();
-  m_view->enableFitRangeSelection();
+  m_view->enableSpectrumSelection(true);
+  m_view->enableFitRangeSelection(true);
 }
 
 void IndirectFitPlotPresenter::updatePlots() {
@@ -304,25 +317,28 @@ void IndirectFitPlotPresenter::updateFitRangeSelector() {
 }
 
 void IndirectFitPlotPresenter::plotCurrentPreview() {
-  const auto plotString = getPlotString(m_model->getActiveSpectrum());
-  m_pythonRunner.runPythonCode(QString::fromStdString(plotString));
+  if (m_model->getWorkspace()) {
+    const auto plotString = getPlotString(m_model->getActiveSpectrum());
+    m_pythonRunner.runPythonCode(QString::fromStdString(plotString));
+  } else
+    m_view->displayMessage("Workspace not found - data may not be loaded.");
 }
 
 void IndirectFitPlotPresenter::updateGuess() {
   if (m_model->canCalculateGuess()) {
-    m_view->enablePlotGuess();
+    m_view->enablePlotGuess(true);
     updateGuess(m_view->isPlotGuessChecked());
   } else {
-    m_view->disablePlotGuess();
+    m_view->enablePlotGuess(false);
     clearGuess();
   }
 }
 
 void IndirectFitPlotPresenter::updateGuessAvailability() {
   if (m_model->canCalculateGuess())
-    m_view->enablePlotGuess();
+    m_view->enablePlotGuess(true);
   else
-    m_view->disablePlotGuess();
+    m_view->enablePlotGuess(false);
 }
 
 void IndirectFitPlotPresenter::updateGuess(bool doPlotGuess) {

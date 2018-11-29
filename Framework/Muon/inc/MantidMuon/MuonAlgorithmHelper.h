@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MUON_MUONALGORITHMHELPER_H_
 #define MANTID_MUON_MUONALGORITHMHELPER_H_
 
@@ -117,6 +123,24 @@ DLLExport bool checkValidPair(const std::string &name1,
 
 /// Check whether a group or pair name is valid
 DLLExport bool checkValidGroupPairName(const std::string &name);
+
+DLLExport Mantid::API::MatrixWorkspace_sptr
+sumPeriods(const Mantid::API::WorkspaceGroup_sptr &inputWS,
+           const std::vector<int> &periodsToSum);
+
+DLLExport Mantid::API::MatrixWorkspace_sptr
+subtractWorkspaces(const Mantid::API::MatrixWorkspace_sptr &lhs,
+                   const Mantid::API::MatrixWorkspace_sptr &rhs);
+
+DLLExport Mantid::API::MatrixWorkspace_sptr
+extractSpectrum(const Mantid::API::Workspace_sptr &inputWS, const int index);
+
+DLLExport void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
+                            const std::string &logName,
+                            const std::string &logValue);
+
+DLLExport bool isAlphanumericOrUnderscore(char character);
+
 //
 ///// Saves grouping to the XML file specified
 // DLLExport std::string groupingToXML(const Mantid::API::Grouping &grouping);

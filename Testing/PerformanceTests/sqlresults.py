@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 try:
@@ -246,7 +252,7 @@ def setup_database():
 
 
 ###########################################################################
-# A class to report the results of stress tests to the Mantid Test database
+# A class to report the results of system tests to the Mantid Test database
 # (requires sqlite3 module)
 ###########################################################################
 class SQLResultReporter(reporters.ResultReporter):
@@ -260,7 +266,7 @@ class SQLResultReporter(reporters.ResultReporter):
 
     def dispatchResults(self, result):
         '''
-        Construct the SQL commands and send them to the databse
+        Construct the SQL commands and send them to the database
         '''
         dbcxn = SQLgetConnection()
         cur = dbcxn.cursor()

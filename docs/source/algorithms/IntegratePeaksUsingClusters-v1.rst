@@ -9,7 +9,7 @@
 Description
 -----------
 
-Integrates arbitary shaped single crystal peaks defined on an
+Integrates arbitrary shaped single crystal peaks defined on an
 :ref:`MDHistoWorkspace <MDHistoWorkspace>` using connected component
 analysis to determine regions of interest around each peak of the
 :ref:`PeaksWorkspace <PeaksWorkspace>`. The output is an integrated
@@ -17,8 +17,8 @@ analysis to determine regions of interest around each peak of the
 labels assigned to each cluster for diagnostic and visualisation
 purposes.
 
-**The algorithm makes no assmptions about Peak shape or size** and can
-therfore be used where integration over defined shapes
+**The algorithm makes no assumptions about Peak shape or size** and can
+therefore be used where integration over defined shapes
 :ref:`algm-IntegratePeaksMD` and
 :ref:`algm-IntegrateEllipsoids`, for example, will not
 work.
@@ -32,14 +32,15 @@ A threshold for the Peak should be defined below which, parts of the
 image are treated as background. The normalization method in combination
 with the threshold may both be used to define a background. We suggest
 keeping the default of VolumeNormalization so that changes in the
-effective bin size do not affect the background filtering.
+effective bin size do not affect the background filtering. NaN is always
+considered background.
 
 This algorithm uses an imaging technique, and it is therefore important
 that the MDHistoWorkspace you are using is binned to a sufficient
-resolution via :ref:`algm-BinMD`. You can overlay the intergrated peaks
+resolution via :ref:`algm-BinMD`. You can overlay the integrated peaks
 workspace in the `Slice
 Viewer <MantidPlot:_SliceViewer#Viewing_Peaks_Workspaces>`__ over the
-generated Cluster Labeled OutputWorkspaceMD to see what the interation
+generated Cluster Labeled OutputWorkspaceMD to see what the iteration
 region used for each peak amounts to.
 
 Notes for running
@@ -104,11 +105,11 @@ Usage
       # Predict peaks
       predicted = PredictPeaks(sxd)
       # Keep every 20th predicted peak for speed
-      rows_to_delete = set(range(predicted.getNumberPeaks())) - set([i for i in range(predicted.getNumberPeaks()) if i % 20 == 0]) 
+      rows_to_delete = set(range(predicted.getNumberPeaks())) - set([i for i in range(predicted.getNumberPeaks()) if i % 20 == 0])
       DeleteTableRows(predicted, Rows=list(rows_to_delete))
 
       # Set the Frame to QLab
-      mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', 
+      mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10',
                                              Names='Q_lab_x,Q_lab_y,Q_lab_z', Frames = "QLab,QLab,QLab",
                                              Units='U,U,U')
       qlab = predicted.column('QLab')

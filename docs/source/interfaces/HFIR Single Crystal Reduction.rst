@@ -105,7 +105,7 @@ Here is a typical use case to calculate UB matrix after initial setup.
 7.  GUI finds the peak center and load HKL
 8.  User pushes button *Add peak* to add the peak to table
 9.  User repeats step 2 to 9 to add other peaks
-10.  User select the peaks that are linearly independent and pushes *Calcualte UB*
+10.  User select the peaks that are linearly independent and pushes *Calculate UB*
 11.  GUI calculates UB matrix and show the result
 12.  User may push *Index peak* to use the calculated UB matrix to index peaks in the table to check UB matrix;
 13.  User may refine the UB matrix and thus lattice parameters
@@ -140,6 +140,36 @@ Here is a typical use case to merge all the measuring points (Pt.) in a scan
 9.  User goes to MantidPlot to view the merged scan by SliceView or Vates.
 
 
+Workflow to calculate peak intensity of a single measurement scan
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+It is a common practice to have one measurement in a scan for a peak.  The only reason to do so is that the signal is too weak for users to have enough beam time to have multiple measurements in a single peak's scan.  Therefore, it is not straight forward to calculate peak intensity from this type of measurement.
+
+1. A user specifies the range of scan numbers that include all the neutron peaks regardless whether they are single-point measurement or multiple-points measurement.
+
+2. The user pushes button *Survey*.  Mantid will load all the SPICE files of the scans.
+
+3. The users selects *All* single-point-measurement scans by checking *Single Pt Scans*.
+
+4. The user launches single-point peak integration window from menu *Peak Integraton* and sub menu *Single Pt Integration*. Mantid will add all the single-point scans to the popped out window.
+
+5. The user will be prompted with the information about how to map single-point scan to a complete nuclear peak scan with same 2theta.
+
+6. The user may load a CSV file to which integrated peak table was exported previously.
+
+7. The user pushes button *Retrieve FWHM*. Mantid then will gather FWHM value from integrated peak.
+
+8. The user add mapped scans for each single-pt scan to peak processint tab, and integrate peaks.
+
+9. The user pushes *Retrieve FHWHM* again to make sure every scan to have an FWHM.
+
+10. The user pushes *Integrate* to integrate peaks.
+
+11. The user pushes *Export to Table* to add the integrated peaks to peak processing table for final output.
+
+
+
+
 Peak Integration with automatic background subtraction by approximation
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -168,7 +198,7 @@ and scaled up by same factor (e.g, 1500).
 
 
 
-UB Matrix Calcualtion and Refinement
+UB Matrix Calculation and Refinement
 ------------------------------------
 
 
@@ -241,11 +271,11 @@ The error can be calculated as
 Estimating background
 ^^^^^^^^^^^^^^^^^^^^^
 
-For each measurment, the background :math:`B_i` is calculated as
+For each measurement, the background :math:`B_i` is calculated as
 
 .. math:: B^{(e)} = \frac{\sum_i^{<pt>}C_i}{|<pt>|}
 
-where :math:`<pt>` is a set of measurment points that are specified by users.
+where :math:`<pt>` is a set of measurement points that are specified by users.
 Usually they are the first and last several measurements in a scan.
 
 Then this estimated **normalized** background value can be applied to each measuremnt, whose counts are normalized.
@@ -346,7 +376,7 @@ normalization type of :math:`F_i`.
 Estimating background
 ^^^^^^^^^^^^^^^^^^^^^
 
-For each measurment, the background :math:`B_i` is calculated as
+For each measurement, the background :math:`B_i` is calculated as
 
 .. math:: B_i = \frac{\sum^{(pt)}_{\{d_i\}}n_{d_i}}{F^{(a)}_{d_i}}
 

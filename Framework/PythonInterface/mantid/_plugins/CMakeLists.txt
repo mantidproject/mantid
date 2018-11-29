@@ -51,6 +51,7 @@ set_target_output_directory ( PythonCurveFittingModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
 target_link_libraries ( PythonCurveFittingModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            PythonInterfaceCore
             PythonAPIModule
             PythonGeometryModule
             PythonKernelModule

@@ -114,7 +114,7 @@ scripts.
   %Note about modularization: this is mainly about internal reorganizations.
   Most of the current features should remain part of the main executable, but
 use interfaces similar or
-  identical to those used by plug-ins. This should ease maintanance and make
+  identical to those used by plug-ins. This should ease maintenance and make
 adding new features
   to the core application a no-brainer once they're available as plug-ins.
   Support for Python, liborigin and zlib could be real, external plug-ins since
@@ -154,6 +154,11 @@ the indentation depth for him/herself.
 */
 
 int main(int argc, char **argv) {
+  // Force the qtpy package to use the PyQt4 bindings. QtPy < v1.4 does not
+  // check whether a particular binding is imported and selects PyQt5 by default
+  // causing MantidPlot to segfault.
+  qputenv("QT_API", "pyqt");
+
   // First, look for command-line arguments that we want to deal with before
   // launching anything
   if (argc == 2) {

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 """Provides a runner to execute unit tests with a given runner
 
 It is intended to be used as a launcher script for a given unit test file.
@@ -9,6 +15,21 @@ import imp
 import os
 import sys
 import unittest
+
+# If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
+# Remove this when everything is switched to qtpy
+import sip
+try:
+    sip.setapi('QString', 2)
+    sip.setapi('QVariant', 2)
+    sip.setapi('QDate', 2)
+    sip.setapi('QDateTime', 2)
+    sip.setapi('QTextStream', 2)
+    sip.setapi('QTime', 2)
+    sip.setapi('QUrl', 2)
+except AttributeError:
+    # PyQt < v4.6
+    pass
 
 from xmlrunner import XMLTestRunner
 from xmlrunner.result import _TestInfo, _XMLTestResult, safe_unicode

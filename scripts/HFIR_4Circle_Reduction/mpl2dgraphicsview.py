@@ -1,18 +1,22 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0901,R0902,too-many-branches,C0302
 from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
-
-from PyQt4 import QtGui
-
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar2
+from qtpy.QtWidgets import (QWidget, QVBoxLayout, QSizePolicy)
+from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from MPLwidgets import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
 from matplotlib import pyplot as plt
 
 
-class Mpl2dGraphicsView(QtGui.QWidget):
+class Mpl2dGraphicsView(QWidget):
     """ A combined graphics view including matplotlib canvas and
     a navigation tool bar for 2D image specifically
     """
@@ -21,14 +25,14 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         """ Initialization
         """
         # Initialize parent
-        QtGui.QWidget.__init__(self, parent)
+        QWidget.__init__(self, parent)
 
         # set up canvas
         self._myCanvas = Qt4Mpl2dCanvas(self)
         self._myToolBar = MyNavigationToolbar(self, self._myCanvas)
 
         # set up layout
-        self._vBox = QtGui.QVBoxLayout(self)
+        self._vBox = QVBoxLayout(self)
         self._vBox.addWidget(self._myCanvas)
         self._vBox.addWidget(self._myToolBar)
 
@@ -112,6 +116,24 @@ class Mpl2dGraphicsView(QtGui.QWidget):
 
         return
 
+    def save_figure(self, file_name):
+        """
+        save the current on-canvas figure to a file
+        :param file_name:
+        :return:
+        """
+        self._myCanvas.fig.savefig(file_name)
+
+        return
+
+    def set_title(self, title):
+        """
+        set title to image
+        :param title:
+        :return:
+        """
+        self._myCanvas.axes.set_title(title)
+
     @property
     def x_min(self):
         """
@@ -145,7 +167,7 @@ class Mpl2dGraphicsView(QtGui.QWidget):
 
 class Qt4Mpl2dCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib 2D image.
-    It can be used to replace GraphicsView of QtGui
+    It can be used to replace GraphicsView
     """
 
     def __init__(self, parent):
@@ -162,7 +184,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
         # legend and color bar

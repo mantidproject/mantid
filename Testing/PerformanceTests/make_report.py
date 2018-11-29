@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import argparse
 import sys
 import os
@@ -48,7 +54,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--path', dest='path',
                         default="./Report",
-                        help='Path to the ouput HTML. Default "./Report".')
+                        help='Path to the output HTML. Default "./Report".')
 
     parser.add_argument('--x_field', dest='x_field',
                         default="revision",

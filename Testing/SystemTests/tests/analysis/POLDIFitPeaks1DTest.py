@@ -1,11 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import numpy as np
 
 
-class POLDIFitPeaks1DTest(stresstesting.MantidStressTest):
+class POLDIFitPeaks1DTest(systemtesting.MantidSystemTest):
     '''Checking results of PoldiFitPeaks1D.'''
 
     # The errors of fitted parameters in version 2 are a bit small

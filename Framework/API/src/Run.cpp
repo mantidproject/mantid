@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DateAndTime.h"
@@ -462,16 +468,18 @@ void Run::calculateGoniometerMatrix() {
         getLogAsSingleValue(axisName, Kernel::Math::Minimum);
     const double maxAngle =
         getLogAsSingleValue(axisName, Kernel::Math::Maximum);
-    const double angle = getLogAsSingleValue(axisName, Kernel::Math::Mean);
+    const double angle =
+        getLogAsSingleValue(axisName, Kernel::Math::TimeAveragedMean);
+
     if (minAngle != maxAngle &&
         !(std::isnan(minAngle) && std::isnan(maxAngle))) {
       const double lastAngle =
           getLogAsSingleValue(axisName, Kernel::Math::LastValue);
-      g_log.warning(
-          "Goniometer angle changed in " + axisName + " log from " +
-          boost::lexical_cast<std::string>(minAngle) + " to " +
-          boost::lexical_cast<std::string>(maxAngle) +
-          ".  Used mean = " + boost::lexical_cast<std::string>(angle) + ".");
+      g_log.warning("Goniometer angle changed in " + axisName + " log from " +
+                    boost::lexical_cast<std::string>(minAngle) + " to " +
+                    boost::lexical_cast<std::string>(maxAngle) +
+                    ".  Used time averaged value = " +
+                    boost::lexical_cast<std::string>(angle) + ".");
       if (axisName == "omega") {
         g_log.warning("To set to last angle, replace omega with " +
                       boost::lexical_cast<std::string>(lastAngle) +

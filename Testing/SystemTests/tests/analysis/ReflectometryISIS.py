@@ -1,17 +1,23 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 """
 These system tests are to verify the behaviour of the ISIS reflectometry reduction scripts
 """
 
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
 
 
-class ReflectometryISIS(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
+class ReflectometryISIS(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
 
     @abstractmethod
     def get_workspace_name(self):
@@ -36,7 +42,7 @@ class ReflectometryISIS(with_metaclass(ABCMeta, stresstesting.MantidStressTest))
         Io=mtd['Io']
         D=mtd['D']
 
-        # Peform the normaisation step
+        # Perform the normaisation step
         Divide(LHSWorkspace=D,RHSWorkspace=Io,OutputWorkspace='I',
                AllowDifferentNumberSpectra='1',ClearRHSWorkspace='1')
         I=mtd['I'][0]
@@ -55,7 +61,7 @@ class ReflectometryISIS(with_metaclass(ABCMeta, stresstesting.MantidStressTest))
         # Should now have signed theta vs Lambda
         ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
 
-        # Check that signed two theta is being caluclated correctly (not normalised)
+        # Check that signed two theta is being calculated correctly (not normalised)
         ws1 = mtd['SignedTheta_vs_Wavelength']
         upperHistogram = ws1.getNumberHistograms()-1
         for i in range(0, upperHistogram):

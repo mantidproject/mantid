@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
@@ -6,11 +12,11 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
@@ -20,6 +26,7 @@
 #include <boost/python/implicit.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
@@ -28,10 +35,10 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace Mantid::PythonInterface;
 using namespace Mantid::PythonInterface::Converters;
 using namespace Mantid::PythonInterface::Policies;
 using namespace Mantid::PythonInterface::Registry;
-namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(MatrixWorkspace)
@@ -71,7 +78,7 @@ GNU_DIAG_ON("unused-local-typedef")
 void setSpectrumFromPyObject(MatrixWorkspace &self, data_modifier accessor,
                              const size_t wsIndex,
                              const boost::python::object &values) {
-  if (NumPy::NdArray::check(values)) {
+  if (NDArray::check(values)) {
     NDArrayToVector<double> converter(values);
     converter.copyTo((self.*accessor)(wsIndex));
   } else {
@@ -140,7 +147,7 @@ void setYFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  * @param values :: A numpy array. The length must match the size of the
  */
 void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
-                      const NumPy::NdArray &values) {
+                      const NDArray &values) {
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataE, wsIndex, values);
 }
 
@@ -178,6 +185,18 @@ Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
              "``getSampleDetails`` is deprecated, use ``getRun`` instead.");
   return self.mutableRun();
 }
+
+/**
+ * This is an anonymous wrapper around the homonym method of MatrixWorkspace.
+ * This takes int as argument since python does not speak unsigned.
+ * @param self
+ * @param i : workspace index [int]
+ * @return bin indices of masked bins at the workspace index given
+ */
+std::vector<size_t> maskedBinsIndices(MatrixWorkspace &self, const int i) {
+  return self.maskedBinsIndices(i);
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -238,6 +257,15 @@ void export_MatrixWorkspace() {
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
            "Returns the caption for the Y axis")
+      .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
+           (arg("self"), arg("workspaceIndex")),
+           "Returns true if this spectrum contains any masked bins")
+      .def("maskedBinsIndices", &maskedBinsIndices,
+           (arg("self"), arg("workspaceIndex")),
+           "Returns all the masked bins' indices at the workspace index. "
+           ":class:`~mantid.api.MatrixWorkspace.hasMaskedBins` MUST be called "
+           "first to check if any bins are "
+           "masked, otherwise an exception will be thrown")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
@@ -364,7 +392,9 @@ void export_MatrixWorkspace() {
            "some subsequent algorithms may expect it to be "
            "monitor workspace later.")
       .def("clearMonitorWorkspace", &clearMonitorWorkspace, args("self"),
-           "Forget about monitor workspace, attached to the current workspace");
+           "Forget about monitor workspace, attached to the current workspace")
+      .def("isCommonBins", &MatrixWorkspace::isCommonBins,
+           "Returns true if the workspace has common X bins.");
 
   RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }

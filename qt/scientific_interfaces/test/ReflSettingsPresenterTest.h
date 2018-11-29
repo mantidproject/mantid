@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTERTEST_H
 
@@ -493,7 +499,7 @@ public:
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(0));
 
     // Instrument settings should be called
-    EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(2));
     EXPECT_CALL(mockView, getMonitorIntegralMin()).Times(Exactly(2));
     EXPECT_CALL(mockView, getMonitorIntegralMax()).Times(Exactly(2));
     EXPECT_CALL(mockView, getMonitorBackgroundMin()).Times(Exactly(2));
