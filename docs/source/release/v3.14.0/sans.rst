@@ -28,7 +28,7 @@ Improved
 * Automatically remembers last loaded user file
 * Added display of current save directory
 * Added a load button to load selected workspaces without processing.
-* Added save_can button to save unsubtracted can and sample
+* Added save_can option to output unsubtracted can and sample workspaces.
 
 Bug fixes
 #########
