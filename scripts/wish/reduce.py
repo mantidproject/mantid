@@ -99,13 +99,7 @@ class Wish:
             shared_load_files(ext, filename, output, spectra_max, spectra_min, False)
             if ext == "nxs_event":
                 mantid.LoadEventNexus(Filename=filename, OutputWorkspace=output, LoadMonitors='1')
-                mantid.RenameWorkspace(output + "_monitors", "w" + str(number) + "_monitors")
-                mantid.Rebin(InputWorkspace=output, OutputWorkspace=output, Params='6000,-0.00063,110000')
-                mantid.ConvertToMatrixWorkspace(output, output)
-                spectra_min, spectra_max = self.return_panel.get(panel)
-                mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, StartWorkspaceIndex=spectra_min - 6,
-                                     EndWorkspaceIndex=spectra_max - 6)
-                mantid.MaskBins(InputWorkspace=output, OutputWorkspace=output, XMin=99900, XMax=106000)
+                self.read_event_nexus(number, output, panel)
                 print ("full nexus eventfile loaded")
             if ext[:10] == "nxs_event_":
                 label, tmin, tmax = split_string_event(ext)
@@ -119,30 +113,13 @@ class Wish:
                                           FilterByTimeStop=tmax,
                                           LoadMonitors='1', MonitorsAsEvents='1', FilterMonByTimeStart=tmin,
                                           FilterMonByTimeStop=tmax)
-                    mantid.RenameWorkspace(output + "_monitors", "w" + str(number) + "_monitors")
-                print ("renaming monitors done!")
-                mantid.Rebin(InputWorkspace=output, OutputWorkspace=output, Params='6000,-0.00063,110000')
-                mantid.ConvertToMatrixWorkspace(output, output)
-                spectra_min, spectra_max = self.return_panel.get(panel)
-                mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, StartWorkspaceIndex=spectra_min - 6,
-                                     EndWorkspaceIndex=spectra_max - 6)
-                mantid.MaskBins(output, output, XMin=99900, XMax=106000)
+                self.read_event_nexus(number, output, panel)
                 print ("nexus event file chopped")
         else:
-            n1, n2 = split_string(number)
-            output = "w" + str(n1) + "_" + str(n2) + "-" + str(panel)
-            filename = self.get_file_name(n1, ext)
-            print ("reading filename..." + filename)
-            spectra_min, spectra_max = self.return_panel.get(panel)
-            output1 = "w" + str(n1) + "-" + str(panel)
-            mantid.LoadRaw(Filename=filename, OutputWorkspace=output1, SpectrumMin=str(spectra_min),
-                           SpectrumMax=str(spectra_max), LoadLogFiles="0")
-            filename = self.get_file_name(n2, ext)
-            print ("reading filename..." + filename)
-            spectra_min, spectra_max = self.return_panel.get(panel)
-            output2 = "w" + str(n2) + "-" + str(panel)
-            mantid.LoadRaw(Filename=filename, OutputWorkspace=output2, SpectrumMin=str(spectra_min),
-                           SpectrumMax=str(spectra_max), LoadLogFiles="0")
+            num_1, num_2 = split_string(number)
+            output = "w" + str(num_1) + "_" + str(num_2) + "-" + str(panel)
+            output1 = self.load_multi_run_part(ext, num_1, panel)
+            output2 = self.load_multi_run_part(ext, num_2, panel)
             mantid.MergeRuns(output1 + "," + output2, output)
             mantid.DeleteWorkspace(output1)
             mantid.DeleteWorkspace(output2)
@@ -165,6 +142,24 @@ class Wish:
                                     InfinityError=0.0)
         return output
 
+    def load_multi_run_part(self, ext, run, panel):
+        filename = self.get_file_name(run, ext)
+        print("reading filename..." + filename)
+        spectra_min, spectra_max = self.return_panel.get(panel)
+        output1 = "w" + str(run) + "-" + str(panel)
+        mantid.LoadRaw(Filename=filename, OutputWorkspace=output1, SpectrumMin=str(spectra_min),
+                       SpectrumMax=str(spectra_max), LoadLogFiles="0")
+        return output1
+
+    def read_event_nexus(self, number, output, panel):
+        mantid.RenameWorkspace(output + "_monitors", "w" + str(number) + "_monitors")
+        mantid.Rebin(InputWorkspace=output, OutputWorkspace=output, Params='6000,-0.00063,110000')
+        mantid.ConvertToMatrixWorkspace(output, output)
+        spectra_min, spectra_max = self.return_panel.get(panel)
+        mantid.CropWorkspace(InputWorkspace=output, OutputWorkspace=output, StartWorkspaceIndex=spectra_min - 6,
+                             EndWorkspaceIndex=spectra_max - 6)
+        mantid.MaskBins(InputWorkspace=output, OutputWorkspace=output, XMin=99900, XMax=106000)
+
     # Focus dataset for a given panel and return the workspace
     def focus_onepanel(self, work, focus, panel):
         mantid.AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationFile=self.get_cal())
@@ -185,19 +180,11 @@ class Wish:
 
     def process_run(self, number, panel, extension, cyclevana="09_4", absorb=False, number_density=0.0, scattering=0.0,
                     attenuation=0.0, height=0.0, radius=0.0):
-        w = self.read(number, panel, extension)
+        workspace_to_focus = self.read(number, panel, extension)
         print ("file read and normalized")
         if absorb:
-            mantid.ConvertUnits(InputWorkspace=w, OutputWorkspace=w, Target="Wavelength", EMode="Elastic")
-            mantid.CylinderAbsorption(InputWorkspace=w, OutputWorkspace="absorptionWS",
-                                      CylinderSampleHeight=height, CylinderSampleRadius=radius,
-                                      AttenuationXSection=attenuation, ScatteringXSection=scattering,
-                                      SampleNumberDensity=number_density, NumberOfSlices="10", NumberOfAnnuli="10",
-                                      NumberOfWavelengthPoints="25", ExpMethod="Normal")
-            mantid.Divide(LHSWorkspace=w, RHSWorkspace="absorptionWS", OutputWorkspace=w)
-            mantid.DeleteWorkspace("absorptionWS")
-            mantid.ConvertUnits(InputWorkspace=w, OutputWorkspace=w, Target="TOF", EMode="Elastic")
-        wfocname = self.focus(w, panel)
+            absorption_corrections(attenuation, height, number_density, radius, scattering, workspace_to_focus)
+        wfocname = self.focus(workspace_to_focus, panel)
         print ("focussing done!")
 
         panel_crop = {
@@ -219,36 +206,34 @@ class Wish:
             for i in range(Wish.NUM_PANELS):
                 wfocname = "w" + str(number) + "-" + str(i) + "foc"
                 mantid.CropWorkspace(InputWorkspace=wfocname, OutputWorkspace=wfocname, XMin=d_min, XMax=d_max)
-                wfocname = "w" + str(number) + "-" + str(i) + "foc"
                 print ("will try to load a vanadium with the name:" + self.get_vanadium(i,  cyclevana))
-                mantid.LoadNexusProcessed(Filename=self.get_vanadium(i,  cyclevana), OutputWorkspace="vana")
-                mantid.RebinToWorkspace(WorkspaceToRebin="vana", WorkspaceToMatch=wfocname, OutputWorkspace="vana")
-                mantid.Divide(LHSWorkspace=wfocname, RHSWorkspace="vana", OutputWorkspace=wfocname)
-                mantid.DeleteWorkspace("vana")
-                mantid.ConvertUnits(InputWorkspace=wfocname, OutputWorkspace=wfocname, Target="TOF", EMode="Elastic")
-                mantid.ReplaceSpecialValues(InputWorkspace=wfocname, OutputWorkspace=wfocname, NaNValue=0.0,
-                                            NaNError=0.0,
-                                            InfinityValue=0.0, InfinityError=0.0)
+                self.apply_vanadium_corrections(cyclevana, i, wfocname)
                 mantid.SaveGSS(InputWorkspace=wfocname,
                                Filename=self.user_directory + str(number) + "-" + str(i) + extension + ".gss",
                                Append=False, Bank=1)
                 mantid.SaveFocusedXYE(wfocname, self.user_directory + str(number) + "-" + str(i) + extension + ".dat")
-                mantid.SaveNexusProcessed(wfocname, self.user_directory + str(number) + "-" + str(i) + extension + ".nxs")
+                mantid.SaveNexusProcessed(wfocname, self.user_directory + str(number) + "-" + str(i) + extension +
+                                          ".nxs")
         else:
             print ("will try to load a vanadium with the name:" + self.get_vanadium(panel,  cyclevana))
-            mantid.LoadNexusProcessed(Filename=self.get_vanadium(panel, cyclevana), OutputWorkspace="vana")
-            mantid.RebinToWorkspace(WorkspaceToRebin="vana", WorkspaceToMatch=wfocname, OutputWorkspace="vana")
-            mantid.Divide(LHSWorkspace=wfocname, RHSWorkspace="vana", OutputWorkspace=wfocname)
-            mantid.DeleteWorkspace("vana")
-            mantid.ConvertUnits(InputWorkspace=wfocname, OutputWorkspace=wfocname, Target="TOF", EMode="Elastic")
-            mantid.ReplaceSpecialValues(InputWorkspace=wfocname, OutputWorkspace=wfocname, NaNValue=0.0, NaNError=0.0,
-                                        InfinityValue=0.0, InfinityError=0.0)
+            self.apply_vanadium_corrections(cyclevana, panel, wfocname)
             mantid.SaveGSS(InputWorkspace=wfocname,
                            Filename=self.user_directory + str(number) + "-" + str(panel) + extension + ".gss",
                            Append=False, Bank=1)
             mantid.SaveFocusedXYE(wfocname, self.user_directory + str(number) + "-" + str(panel) + extension + ".dat")
-            mantid.SaveNexusProcessed(wfocname, self.user_directory + str(number) + "-" + str(panel) + extension + ".nxs")
+            mantid.SaveNexusProcessed(wfocname, self.user_directory + str(number) + "-" + str(panel) + extension +
+                                      ".nxs")
         return wfocname
+
+    def apply_vanadium_corrections(self, cyclevana, i, wfocname):
+        mantid.LoadNexusProcessed(Filename=self.get_vanadium(i, cyclevana), OutputWorkspace="vana")
+        mantid.RebinToWorkspace(WorkspaceToRebin="vana", WorkspaceToMatch=wfocname, OutputWorkspace="vana")
+        mantid.Divide(LHSWorkspace=wfocname, RHSWorkspace="vana", OutputWorkspace=wfocname)
+        mantid.DeleteWorkspace("vana")
+        mantid.ConvertUnits(InputWorkspace=wfocname, OutputWorkspace=wfocname, Target="TOF", EMode="Elastic")
+        mantid.ReplaceSpecialValues(InputWorkspace=wfocname, OutputWorkspace=wfocname, NaNValue=0.0,
+                                    NaNError=0.0,
+                                    InfinityValue=0.0, InfinityError=0.0)
 
     # Create a corrected vanadium (normalise,corrected for attenuation and empty, strip peaks) and
     # save a a nexus processed file.
@@ -335,7 +320,10 @@ class Wish:
                                         attenuation=2.595, height=4.0, radius=0.55)
                 mantid.ConvertUnits(InputWorkspace=wout, OutputWorkspace=wout + "-d", Target="dSpacing",
                                     EMode="Elastic")
-
+            if 0 in panels:
+                panels = [1, 2, 3, 4, 5]
+            else:
+                panels = [x for x in panels if x < 6]
             for panel in panels:
                 self.save_combined_panel(run, panel)
 
@@ -369,8 +357,20 @@ class Wish:
         mantid.SaveNexusProcessed(combined_ws, os.path.join(self.user_directory, combined_save.format("raw.nxs")))
 
 
+def absorption_corrections(attenuation, height, number_density, radius, scattering, w):
+    mantid.ConvertUnits(InputWorkspace=w, OutputWorkspace=w, Target="Wavelength", EMode="Elastic")
+    mantid.CylinderAbsorption(InputWorkspace=w, OutputWorkspace="absorptionWS",
+                              CylinderSampleHeight=height, CylinderSampleRadius=radius,
+                              AttenuationXSection=attenuation, ScatteringXSection=scattering,
+                              SampleNumberDensity=number_density, NumberOfSlices="10", NumberOfAnnuli="10",
+                              NumberOfWavelengthPoints="25", ExpMethod="Normal")
+    mantid.Divide(LHSWorkspace=w, RHSWorkspace="absorptionWS", OutputWorkspace=w)
+    mantid.DeleteWorkspace("absorptionWS")
+    mantid.ConvertUnits(InputWorkspace=w, OutputWorkspace=w, Target="TOF", EMode="Elastic")
+
+
 def split(focus):
-    for i in range(0, 11):
+    for i in range(Wish.NUM_PANELS):
         out = focus[0:len(focus) - 3] + "-" + str(i + 1) + "foc"
         mantid.ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=out, WorkspaceIndex=i)
         mantid.DeleteWorkspace(focus)
