@@ -8,7 +8,7 @@
 #
 
 from os import path, listdir
-from mantid.simpleapi import LoadNexusProcessed, LoadMD, Load
+from mantid.simpleapi import LoadNexusProcessed, LoadMD, Load  # noqa
 from mantid import logger
 
 

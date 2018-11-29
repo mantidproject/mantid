@@ -41,7 +41,7 @@ requirements.check_qt()
 from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, QSettings)  # noqa
 from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
-                            QMainWindow, QSplashScreen, QMessageBox)  # noqa
+                            QMainWindow, QSplashScreen)  # noqa
 from mantidqt.io import open_a_file_dialog  # noqa
 from mantidqt.project import projectsaver, projectloader  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa

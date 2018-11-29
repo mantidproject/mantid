@@ -13,10 +13,11 @@ from os import listdir, mkdir
 from os.path import isdir, expanduser
 from shutil import rmtree
 
-from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace
-from mantid.dataobjects import MDHistoWorkspace, MaskWorkspace
+from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace  # noqa
+from mantid.dataobjects import MDHistoWorkspace, MaskWorkspace  # noqa
 from mantidqt.project import workspacesaver
-from mantid.simpleapi import CreateSampleWorkspace, CreateMDHistoWorkspace, LoadMD, LoadMask, MaskDetectors, ExtractMask
+from mantid.simpleapi import (CreateSampleWorkspace, CreateMDHistoWorkspace, LoadMD, LoadMask, MaskDetectors,
+                              ExtractMask)  # noqa
 
 working_directory = expanduser("~") + "/workspace_saver_test_directory"
 
@@ -79,4 +80,3 @@ class WorkspaceSaverTest(unittest.TestCase):
         ws = LoadMD(Filename=filename)
         ws_is_a_mdworkspace = isinstance(ws, IMDEventWorkspace) or isinstance(ws, MDHistoWorkspace)
         self.assertEqual(ws_is_a_mdworkspace, True)
-
