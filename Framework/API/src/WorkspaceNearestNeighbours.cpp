@@ -35,7 +35,8 @@ WorkspaceNearestNeighbours::WorkspaceNearestNeighbours(
     std::vector<specnum_t> spectrumNumbers, bool ignoreMaskedDetectors)
     : m_spectrumInfo(spectrumInfo),
       m_spectrumNumbers(std::move(spectrumNumbers)),
-      m_noNeighbours(nNeighbours), m_cutoff(std::numeric_limits<double>::lowest()), m_radius(0.),
+      m_noNeighbours(nNeighbours),
+      m_cutoff(std::numeric_limits<double>::lowest()), m_radius(0.),
       m_bIgnoreMaskedDetectors(ignoreMaskedDetectors) {
   this->build(m_noNeighbours);
 }
@@ -166,8 +167,8 @@ void WorkspaceNearestNeighbours::build(const int noNeighbours) {
     ANNpoint scaledPos = dataPoints[pointNo];
     annTree->annkSearch(scaledPos,      // Point to search nearest neighbours of
                         m_noNeighbours, // Number of neighbours to find (8)
-                        nnIndexList.data(),    // Index list of results
-                        nnDistList.data(),     // List of distances to each of these
+                        nnIndexList.data(), // Index list of results
+                        nnDistList.data(), // List of distances to each of these
                         0.0 // Error bound (?) is this the radius to search in?
     );
     // The distances that are returned are in our scaled coordinate
@@ -234,7 +235,8 @@ std::vector<size_t> WorkspaceNearestNeighbours::getSpectraDetectors() {
   indices.reserve(nSpec);
   for (size_t i = 0; i < nSpec; ++i) {
     // Always ignore monitors and ignore masked detectors if requested.
-    const bool heedMasking = m_bIgnoreMaskedDetectors && m_spectrumInfo.isMasked(i);
+    const bool heedMasking =
+        m_bIgnoreMaskedDetectors && m_spectrumInfo.isMasked(i);
     if (!m_spectrumInfo.isMonitor(i) && !heedMasking) {
       indices.emplace_back(i);
     }

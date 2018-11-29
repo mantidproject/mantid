@@ -20,7 +20,8 @@ struct AreaInfo {
   size_t wsIndex;
   size_t binIndex;
   double weight;
-  AreaInfo(const size_t xi, const size_t yi, const double w) : wsIndex(yi), binIndex(xi), weight(w) {}
+  AreaInfo(const size_t xi, const size_t yi, const double w)
+      : wsIndex(yi), binIndex(xi), weight(w) {}
 };
 /**
  * Private function to calculate polygon area directly to avoid the overhead
@@ -34,7 +35,7 @@ double polyArea(T &v1, T &v2, Ts &&... vertices) {
   return v2.X() * v1.Y() - v2.Y() * v1.X() +
          polyArea(v2, std::forward<Ts>(vertices)...);
 }
-}
+} // namespace
 
 namespace Mantid {
 
@@ -108,7 +109,8 @@ bool getIntersectionRegion(const std::vector<double> &xAxis,
   }
 
   // Q region
-  start_it = std::upper_bound(verticalAxis.cbegin(), verticalAxis.cend(), yn_lo);
+  start_it =
+      std::upper_bound(verticalAxis.cbegin(), verticalAxis.cend(), yn_lo);
   end_it = std::upper_bound(start_it, verticalAxis.cend(), yn_hi);
   qstart = 0;
   if (start_it != verticalAxis.begin()) {
@@ -134,11 +136,12 @@ bool getIntersectionRegion(const std::vector<double> &xAxis,
  * @param x_end The starting x-axis index
  * @param areaInfos Output vector of indices and areas of overlapping bins
  */
-void calcRectangleIntersections(
-    const std::vector<double> &xAxis, const std::vector<double> &yAxis,
-    const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
-    const size_t x_start, const size_t x_end,
-    std::vector<AreaInfo> &areaInfos) {
+void calcRectangleIntersections(const std::vector<double> &xAxis,
+                                const std::vector<double> &yAxis,
+                                const Quadrilateral &inputQ,
+                                const size_t y_start, const size_t y_end,
+                                const size_t x_start, const size_t x_end,
+                                std::vector<AreaInfo> &areaInfos) {
   std::vector<double> width;
   width.reserve(x_end - x_start);
   for (size_t xi = x_start; xi < x_end; ++xi) {
@@ -170,11 +173,12 @@ void calcRectangleIntersections(
  * @param x_end The ending x-axis index
  * @param areaInfos Output vector of indices and areas of overlapping bins
  */
-void calcTrapezoidYIntersections(
-    const std::vector<double> &xAxis, const std::vector<double> &yAxis,
-    const Quadrilateral &inputQ, const size_t y_start, const size_t y_end,
-    const size_t x_start, const size_t x_end,
-    std::vector<AreaInfo> &areaInfos) {
+void calcTrapezoidYIntersections(const std::vector<double> &xAxis,
+                                 const std::vector<double> &yAxis,
+                                 const Quadrilateral &inputQ,
+                                 const size_t y_start, const size_t y_end,
+                                 const size_t x_start, const size_t x_end,
+                                 std::vector<AreaInfo> &areaInfos) {
   // The algorithm proceeds as follows:
   // 1. Determine the left/right bin boundaries on the x- (horizontal)-grid.
   // 2. Loop along x, for each 1-output-bin wide strip construct a new input Q.
@@ -208,7 +212,8 @@ void calcTrapezoidYIntersections(
       (ul_y >= yAxis[y_start] && ul_y <= yAxis[y_start + 1]) &&
       (ur_y >= yAxis[y_start] && ur_y <= yAxis[y_start + 1]) &&
       (lr_y >= yAxis[y_start] && lr_y <= yAxis[y_start + 1])) {
-    areaInfos.emplace_back(x_start, y_start, 0.5 * polyArea(ll, ul, ur, lr, ll));
+    areaInfos.emplace_back(x_start, y_start,
+                           0.5 * polyArea(ll, ul, ur, lr, ll));
     return;
   }
 
@@ -461,11 +466,12 @@ void calcTrapezoidYIntersections(
  * @param x_end The starting x-axis index
  * @param areaInfos Output vector of indices and areas of overlapping bins
  */
-void calcGeneralIntersections(
-    const std::vector<double> &xAxis, const std::vector<double> &yAxis,
-    const Quadrilateral &inputQ, const size_t qstart, const size_t qend,
-    const size_t x_start, const size_t x_end,
-    std::vector<AreaInfo> &areaInfos) {
+void calcGeneralIntersections(const std::vector<double> &xAxis,
+                              const std::vector<double> &yAxis,
+                              const Quadrilateral &inputQ, const size_t qstart,
+                              const size_t qend, const size_t x_start,
+                              const size_t x_end,
+                              std::vector<AreaInfo> &areaInfos) {
   ConvexPolygon intersectOverlap;
   areaInfos.reserve((qend - qstart) * (x_end - x_start));
   for (size_t yi = qstart; yi < qend; ++yi) {
