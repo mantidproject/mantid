@@ -96,7 +96,7 @@ class Wish:
                 output = "w{0}-{1}".format(number, panel)
             else:
                 output = "w{}".format(number)
-            shared_load_files(ext, filename,output,spectra_max,spectra_min,False)
+            shared_load_files(ext, filename, output, spectra_max, spectra_min, False)
             if ext == "nxs_event":
                 mantid.LoadEventNexus(Filename=filename, OutputWorkspace=output, LoadMonitors='1')
                 mantid.RenameWorkspace(output + "_monitors", "w" + str(number) + "_monitors")
@@ -135,14 +135,14 @@ class Wish:
             print ("reading filename..." + filename)
             spectra_min, spectra_max = self.return_panel.get(panel)
             output1 = "w" + str(n1) + "-" + str(panel)
-            mantid.LoadRaw(Filename=filename, OutputWorkspace=output1, SpectrumMin=str(spectra_min), SpectrumMax=str(spectra_max),
-                           LoadLogFiles="0")
+            mantid.LoadRaw(Filename=filename, OutputWorkspace=output1, SpectrumMin=str(spectra_min),
+                           SpectrumMax=str(spectra_max), LoadLogFiles="0")
             filename = self.get_file_name(n2, ext)
             print ("reading filename..." + filename)
             spectra_min, spectra_max = self.return_panel.get(panel)
             output2 = "w" + str(n2) + "-" + str(panel)
-            mantid.LoadRaw(Filename=filename, OutputWorkspace=output2, SpectrumMin=str(spectra_min), SpectrumMax=str(spectra_max),
-                           LoadLogFiles="0")
+            mantid.LoadRaw(Filename=filename, OutputWorkspace=output2, SpectrumMin=str(spectra_min),
+                           SpectrumMax=str(spectra_max), LoadLogFiles="0")
             mantid.MergeRuns(output1 + "," + output2, output)
             mantid.DeleteWorkspace(output1)
             mantid.DeleteWorkspace(output2)
@@ -175,33 +175,27 @@ class Wish:
             mantid.CropWorkspace(InputWorkspace=focus, OutputWorkspace=focus, XMin=0.3)
         return focus
 
-    def split(self, focus):
-        for i in range(0, 11):
-            out = focus[0:len(focus) - 3] + "-" + str(i + 1) + "foc"
-            mantid.ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=out, WorkspaceIndex=i)
-            mantid.DeleteWorkspace(focus)
-        return
-
     def focus(self, work, panel):
         focus = work + "foc"
         if panel != 0:
             return self.focus_onepanel(work, focus, panel)
         else:
             self.focus_onepanel(work, focus, panel)
-            self.split(focus)
+            split(focus)
 
-    def process(self, number, panel, ext, cyclevana="09_4", absorb=False, nd=0.0, Xs=0.0, Xa=0.0, h=0.0, r=0.0):
+    def process(self, number, panel, ext, cyclevana="09_4", absorb=False, number_density=0.0, scattering=0.0,
+                attenuation=0.0, height=0.0, radius=0.0):
         w = self.read(number, panel, ext)
         print ("file read and normalized")
         if absorb:
             mantid.ConvertUnits(InputWorkspace=w, OutputWorkspace=w, Target="Wavelength", EMode="Elastic")
-            mantid.CylinderAbsorption(InputWorkspace=w, OutputWorkspace="T",
-                                      CylinderSampleHeight=h, CylinderSampleRadius=r, AttenuationXSection=Xa,
-                                      ScatteringXSection=Xs, SampleNumberDensity=nd,
-                                      NumberOfSlices="10", NumberOfAnnuli="10", NumberOfWavelengthPoints="25",
-                                      ExpMethod="Normal")
-            mantid.Divide(LHSWorkspace=w, RHSWorkspace="T", OutputWorkspace=w)
-            mantid.DeleteWorkspace("T")
+            mantid.CylinderAbsorption(InputWorkspace=w, OutputWorkspace="absorptionWS",
+                                      CylinderSampleHeight=height, CylinderSampleRadius=radius,
+                                      AttenuationXSection=attenuation, ScatteringXSection=scattering,
+                                      SampleNumberDensity=number_density, NumberOfSlices="10", NumberOfAnnuli="10",
+                                      NumberOfWavelengthPoints="25", ExpMethod="Normal")
+            mantid.Divide(LHSWorkspace=w, RHSWorkspace="absorptionWS", OutputWorkspace=w)
+            mantid.DeleteWorkspace("absorptionWS")
             mantid.ConvertUnits(InputWorkspace=w, OutputWorkspace=w, Target="TOF", EMode="Elastic")
         wfocname = self.focus(w, panel)
         print ("focussing done!")
@@ -339,7 +333,8 @@ class Wish:
         for i in range(40503, 40504):
             self.datafile = self.get_file_name(i, "raw")
             for j in range(5, 7):
-                wout = self.process(i, j, "raw", "11_4", absorb=True, nd=0.025, Xs=5.463, Xa=2.595, h=4.0, r=0.55)
+                wout = self.process(i, j, "raw", "11_4", absorb=True, number_density=0.025, scattering=5.463,
+                                    attenuation=2.595, height=4.0, radius=0.55)
                 mantid.ConvertUnits(InputWorkspace=wout, OutputWorkspace=wout + "-d", Target="dSpacing",
                                     EMode="Elastic")
 
@@ -394,6 +389,13 @@ def removepeaks_spline_smooth_empty(works, panel):
 
     mantid.SmoothData(InputWorkspace=works, OutputWorkspace=works, NPoints=smooth_term)
     return works
+
+
+def split(focus):
+    for i in range(0, 11):
+        out = focus[0:len(focus) - 3] + "-" + str(i + 1) + "foc"
+        mantid.ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=out, WorkspaceIndex=i)
+        mantid.DeleteWorkspace(focus)
 
 
 def split_string(t):
