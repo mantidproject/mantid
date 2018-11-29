@@ -842,12 +842,12 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_that_process_selected_only_processes_selected_rows(self):
         # Naive test. Doesn't check that we are processing the correct processed rows,
         # just that we are processing the same number of rows as we have selected.
-        # This would only really fail if on_process_selected_clicked and on_process_all_clicked
+        # This would only really fail if on_process_selected_clicked and on_process_all_clicked 
         # get muddled-up
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
         view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
-
+        
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
 
@@ -856,7 +856,7 @@ class RunTabPresenterTest(unittest.TestCase):
             presenter._table_model.reset_row_state.call_count, 3,
             "Expected reset_row_state to have been called 3 times. Called {} times.".format(
                 presenter._table_model.reset_row_state.call_count))
-
+        
     def test_that_process_all_ignores_selected_rows(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
@@ -865,7 +865,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter._table_model.get_number_of_rows = mock.MagicMock(return_value=7)
         presenter.set_view(view)
         presenter._table_model.reset_row_state = mock.MagicMock()
-
+        
         presenter.on_process_all_clicked()
         self.assertEqual(
             presenter._table_model.reset_row_state.call_count, 7,

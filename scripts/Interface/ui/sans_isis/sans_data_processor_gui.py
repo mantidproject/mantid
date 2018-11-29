@@ -31,7 +31,7 @@ from reduction_gui.reduction.scripter import execute_script
 
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
-                               RangeStepType, ReductionMode, FitType, SampleShape)
+                               RangeStepType, ReductionMode, FitType)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.common.general_functions import get_instrument
 from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
