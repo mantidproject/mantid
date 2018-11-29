@@ -27,11 +27,10 @@ from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresen
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui)
-from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState)
+from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import SANSInstrument
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
