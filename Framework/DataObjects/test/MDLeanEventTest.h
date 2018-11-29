@@ -106,6 +106,31 @@ public:
     TS_ASSERT_EQUALS(a.getSignal(), 2.0);
     TS_ASSERT_EQUALS(a.getError(), 2.0);
   }
+
+  void test_retrieve_coordinates() {
+    constexpr size_t ND(4);
+
+    MDSpaceBounds<ND> bounds;
+    // clang-format off
+    bounds <<
+           0.0f, 2.0f,
+        0.0f, 10.0f,
+        3.0f, 7.0f,
+        5.0f, 15.0f;
+    // clang-format on
+
+    MDCoordinate<ND> floatCoord;
+    floatCoord << 1.5f, 10.0f, 5.0f, 5.0f;
+
+    MDLeanEvent<ND> event(0.0f, 0.0f, &floatCoord[0]);
+    event.retrieveIndex(bounds);
+    event.retrieveCoordinates(bounds);
+
+    TS_ASSERT_EQUALS(event.getCenter(0), 1.5);
+    TS_ASSERT_EQUALS(event.getCenter(1), 10);
+    TS_ASSERT_EQUALS(event.getCenter(2), 5);
+    TS_ASSERT_EQUALS(event.getCenter(3), 5);
+  }
 };
 
 #endif /* MANTID_DATAOBJECTS_MDLEANEVENTTEST_H_ */

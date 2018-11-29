@@ -69,34 +69,7 @@ bool CheckCoordinatesInMDSpace(const MDSpaceBounds<ND> &bounds,
   return true;
 }
 
-template <typename CoordT, int ND, typename IntT>
-AffineND<CoordT, ND>
-GenerateFloatToIntTransformation(const MDSpaceBounds<ND> &bounds) {
-  using Array = Eigen::Array<CoordT, ND, 1>;
-  using Vector = Eigen::Matrix<CoordT, ND, 1>;
 
-  const MDSpaceDimensions<ND> mdSpaceSize = bounds.col(1) - bounds.col(0);
-
-  Array scale(Array::Constant(std::numeric_limits<IntT>::max()) / mdSpaceSize);
-
-  return Eigen::Translation<float, ND>(Array(-bounds.col(0) * scale)) *
-         Eigen::Scaling(Vector(scale));
-}
-
-template <typename CoordT, int ND, typename IntT>
-AffineND<CoordT, ND>
-GenerateIntToFloatTransformation(const MDSpaceBounds<ND> &bounds) {
-  using Array = Eigen::Array<CoordT, ND, 1>;
-  using Vector = Eigen::Matrix<CoordT, ND, 1>;
-
-  const MDSpaceDimensions<ND> mdSpaceSize = bounds.col(1) - bounds.col(0);
-
-  Array scale(Array::Constant(std::numeric_limits<IntT>::max()) / mdSpaceSize);
-
-  return Eigen::Translation<float, ND>(Array(bounds.col(0))) *
-         Eigen::Scaling(Vector(
-             mdSpaceSize / Array::Constant(std::numeric_limits<IntT>::max())));
-}
 
 /**
  * Converts a point to integer range given a range of floating point
@@ -106,10 +79,16 @@ template <int ND, typename IntT>
 Eigen::Array<IntT, ND, 1> ConvertCoordinatesToIntegerRange(const MDSpaceBounds<ND> &bounds,
                                                            const float* crd) {
   MDCoordinate<ND> coord(crd);
-  const auto range = bounds.col(1) - bounds.col(0);
-  const auto coordFactorOfRange = (coord - bounds.col(0)) / range;
-  const auto n = coordFactorOfRange * std::numeric_limits<IntT>::max();
-  return n.template cast<IntT>();
+  const MDCoordinate<ND> range = bounds.col(1) - bounds.col(0);
+  const MDCoordinate<ND> coordFactorOfRange = (coord - bounds.col(0)) / range;
+  const MDCoordinate<ND> n = coordFactorOfRange * std::numeric_limits<IntT>::max();
+  Eigen::Array<IntT, ND, 1> res = n.template cast<IntT>();
+  for(unsigned i = 0; i < ND; ++i)
+    if(coord[i] == bounds(i, 1))
+      res[i] = std::numeric_limits<IntT>::max();
+    else if(coord[i] == bounds(i, 0))
+      res[i] = 0;
+  return res;
 }
 
 /**

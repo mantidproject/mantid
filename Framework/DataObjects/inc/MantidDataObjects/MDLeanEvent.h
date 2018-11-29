@@ -140,14 +140,16 @@ protected:
     MortonT index;
   };
 
-protected:
+public:
   void retrieveIndex(const MDSpaceBounds<nd>& space) {
     index = interleave<nd, IntT, MortonT>(ConvertCoordinatesToIntegerRange<nd, IntT>(space, center));
+    std::cerr << "index = " << index << "\n";
   }
   void retrieveCoordinates(const MDSpaceBounds<nd>& space) {
     auto coords = ConvertCoordinatesFromIntegerRange<nd, IntT>
         (space, deinterleave<nd, IntT, MortonT>(index)).data();
-    std::memcpy(center, &coords[0], nd);
+    for(unsigned i = 0; i < nd; ++i)
+      center[i] = coords[i];
   }
 public:
   /* Will be keeping functions inline for (possible?) performance improvements
