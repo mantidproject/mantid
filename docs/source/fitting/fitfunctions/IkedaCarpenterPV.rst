@@ -63,6 +63,62 @@ References:
    A239, 536 (1985) <http://dx.doi.org/10.1016/0168-9002(85)90033-6>`_
 #. Fullprof manual, see http://www.ill.eu/sites/fullprof/
 
+
+TODO
+
+Native parameters
+=================
+  declareParameter("I", 0.0,
+                   "The integrated intensity of the peak. I.e. "
+                   "approximately equal to HWHM times height of "
+                   "peak");
+  this->lowerConstraint0("I");
+  declareParameter("Alpha0", 1.6, "Used to model fast decay constant");
+  this->lowerConstraint0("Alpha0");
+  declareParameter("Alpha1", 1.5, "Used to model fast decay constant");
+  this->lowerConstraint0("Alpha1");
+  declareParameter("Beta0", 31.9, "Inverse of slow decay constant");
+  this->lowerConstraint0("Beta0");
+  declareParameter("Kappa", 46.0, "Controls contribution of slow decay term");
+  this->lowerConstraint0("Kappa");
+  declareParameter("SigmaSquared", 1.0,
+                   "standard deviation squared (Voigt Guassian broadening)");
+  this->lowerConstraint0("SigmaSquared");
+  declareParameter("Gamma", 1.0, "Voigt Lorentzian broadening");
+  this->lowerConstraint0("Gamma");
+  declareParameter("X0", 0.0, "Peak position");
+  this->lowerConstraint0("X0");
+
+Definition
+==========
+
+- FWHM:   if (sigmaSquared < 0) {
+    g_log.debug()
+        << "SigmaSquared NEGATIVE!.\n"
+        << "Likely due to a fit not converging properly\n"
+        << "If this is frequent problem please report to Mantid team.\n"
+        << "For now to calculate width force SigmaSquared positive.\n";
+    sigmaSquared = -sigmaSquared;
+  }
+  if (gamma < 0) {
+    g_log.debug()
+        << "Gamma NEGATIVE!.\n"
+        << "Likely due to a fit not converging properly\n"
+        << "If this is frequent problem please report to Mantid team.\n"
+        << "For now to calculate width force Gamma positive.\n";
+    gamma = -gamma;
+    ;
+  }
+  return sqrt(8.0 * M_LN2 * sigmaSquared) + gamma;
+
+- center: X0
+
+- height
+
+- intensity:   API::IntegrationResult result =
+      integrator.integrate(*this, interval.first, interval.second);
+
+
 The figure below illustrate this peakshape function fitted to a TOF
 peak:
 

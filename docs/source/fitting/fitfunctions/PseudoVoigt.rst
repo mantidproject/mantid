@@ -15,6 +15,29 @@ Instead of convoluting those two functions, the Pseudo-Voigt function is defined
 
 .. math:: PV(x) = \eta G(x) + (1 - \eta)L(x)
 
+"""  TODO
+  double h = getParameter("Height");
+  double x0 = getParameter("PeakCentre");
+  double f = getParameter("FWHM");
+
+  double gFraction = getParameter("Mixing");
+  double lFraction = 1.0 - gFraction;
+
+  // Lorentzian parameter gamma...fwhm/2
+  double g = f / 2.0;
+  double gSquared = g * g;
+
+  // Gaussian parameter sigma...fwhm/(2*sqrt(2*ln(2)))...gamma/sqrt(2*ln(2))
+  double sSquared = gSquared / (2.0 * M_LN2);
+
+  for (size_t i = 0; i < nData; ++i) {
+    double xDiffSquared = (xValues[i] - x0) * (xValues[i] - x0);
+
+    out[i] = h * (gFraction * exp(-0.5 * xDiffSquared / sSquared) +
+                  (lFraction * gSquared / (xDiffSquared + gSquared)));
+
+"""
+
 Both functions share three parameters: Height (height of the peak at the maximum), PeakCentre (position of the maximum) and FWHM (full width at half maximum of the peak).
 
 The figure below shows data together with a fitted Pseudo-Voigt function, as well as Gaussian and Lorentzian with equal parameters. The mixing parameter for that example is 0.7, which means that the function is behaving more like a Gaussian.

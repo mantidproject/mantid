@@ -23,6 +23,10 @@ where
 Note that the FWHM (Full Width Half Maximum) of a Gaussian equals
 :math:`2\sqrt{2\ln 2}*\mbox{Sigma}`.
 
+- Intesity:  TODO FIXME
+m_intensityCache =
+        getParameter("Height") * getParameter("Sigma") * sqrt(2.0 * M_PI);
+
 The figure below illustrate this symmetric peakshape function fitted to
 a TOF peak:
 

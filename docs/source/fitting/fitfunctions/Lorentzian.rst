@@ -21,6 +21,10 @@ where:
 -  :math:`x_0` (PeakCentre) - centre of peak
 -  :math:`\Gamma/2` (HWHM) - half-width at half-maximum
 
+
+Effective: TODO FIXME
+- Height:  getParameter("Amplitude") * 2.0 / (gamma * M_PI);
+
 Note that the FWHM (Full Width Half Maximum) equals two times HWHM, and
 the integral over the Lorentzian equals the intensity scaling A.
 

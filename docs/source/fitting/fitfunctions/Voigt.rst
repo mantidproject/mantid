@@ -31,6 +31,50 @@ described in
 The approximation uses a combination of 4 Lorentzians in two variables
 to generate good approximation to the true function.
 
+
+TODO FIXME
+
+Native parameters:
+  declareParameter(LORENTZ_AMP, 0.0, "Value of the Lorentzian amplitude");
+  declareParameter(LORENTZ_POS, 0.0, "Position of the Lorentzian peak");
+  declareParameter(LORENTZ_FWHM, 0.0,
+                   "Value of the full-width half-maximum for the Lorentzian");
+  declareParameter(GAUSSIAN_FWHM, 0.0,
+                   "Value of the full-width half-maximum for the Gaussian");
+
+
+- FWHM: return (getParameter(LORENTZ_FWHM) + getParameter(GAUSSIAN_FWHM));
+- center: double Voigt::centre() const { return getParameter(LORENTZ_POS); }
+- height: Y(center)
+- intensity: return M_PI * getParameter(LORENTZ_AMP) * getParameter(LORENTZ_FWHM) / 2.0;
+
+
+""" V(X, Y) = 
+    const double xoffset = xValues[i] - lorentzPos;
+
+    const double X = xoffset * 2.0 * rtln2oGammaG;
+    const double Y = gamma_L * rtln2oGammaG;
+
+    double fx(0.0), dFdx(0.0), dFdy(0.0);
+    for (size_t j = 0; j < NLORENTZIANS; ++j) {
+      const double ymA(Y - COEFFA[j]);
+      const double xmB(X - COEFFB[j]);
+      const double alpha = COEFFC[j] * ymA + COEFFD[j] * xmB;
+      const double beta = ymA * ymA + xmB * xmB;
+      const double ratioab = alpha / beta;
+      fx += ratioab;
+      dFdx += (COEFFD[j] / beta) - 2.0 * (X - COEFFB[j]) * ratioab / beta;
+      dFdy += (COEFFC[j] / beta) - 2.0 * (Y - COEFFA[j]) * ratioab / beta;
+    }
+    if (functionValues) {
+      functionValues[i] = prefactor * fx;
+
+
+
+"""
+
+
+
 .. attributes::
 
 .. properties::
