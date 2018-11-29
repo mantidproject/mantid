@@ -16,7 +16,7 @@ from shutil import rmtree
 from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace  # noqa
 from mantid.dataobjects import MDHistoWorkspace, MaskWorkspace  # noqa
 from mantidqt.project import workspacesaver
-from mantid.simpleapi import (CreateSampleWorkspace, CreateMDHistoWorkspace, LoadMD, LoadMask, MaskDetectors,
+from mantid.simpleapi import (CreateSampleWorkspace, CreateMDHistoWorkspace, LoadMD, LoadMask, MaskDetectors,  # noqa
                               ExtractMask)  # noqa
 
 working_directory = expanduser("~") + "/workspace_saver_test_directory"

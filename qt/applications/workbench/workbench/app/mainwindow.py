@@ -16,7 +16,6 @@ import argparse  # for command line options
 import atexit
 import imp
 import importlib
-import glob
 import os
 import sys
 
@@ -42,12 +41,9 @@ from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, QSetti
 from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
-from mantidqt.io import open_a_file_dialog  # noqa
-from mantidqt.project import projectsaver, projectloader  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
-from mantid.api import AnalysisDataService  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -159,8 +155,8 @@ class MainWindow(QMainWindow):
         # Layout
         self.setDockOptions(self.DOCKOPTIONS)
 
-        # Last save locations
-        self.last_project_location = None
+        # Project
+        self.project = None
 
     def setup(self):
         # menus must be done first so they can be filled by the
@@ -204,6 +200,10 @@ class MainWindow(QMainWindow):
         self.workspacewidget = WorkspaceWidget(self)
         self.workspacewidget.register_plugin()
         self.widgets.append(self.workspacewidget)
+
+        # Set up the project object
+        from mantidqt.project.project import Project
+        self.project = Project()
 
         # uses default configuration as necessary
         self.readSettings(CONF)
@@ -397,6 +397,12 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
+        # Check whether or not to save project
+        if not self.project.saved:
+            # Offer save
+            if self.project.offer_save(self):
+                return
+
         # Close editors
         if self.editor.app_closing():
             self.writeSettings(CONF)  # write current window information to global settings object
@@ -428,49 +434,13 @@ class MainWindow(QMainWindow):
         self.editor.save_current_file()
 
     def save_project(self):
-        if self.last_project_location is None:
-            self.save_project_as()
-        else:
-            # Clear directory before saving to remove old workspaces
-            files = glob.glob(self.last_project_location + '/.*')
-            for f in files:
-                os.remove(f)
-            # Actually save
-            workspaces_to_save = AnalysisDataService.getObjectNames()
-            project_saver = projectsaver.ProjectSaver()
-            project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
-                                       interfaces_to_save=None)
+        self.project.save()
 
     def save_project_as(self):
-        directory = ""
-        # Check if it exists
-        first_pass = True
-        while first_pass or (not os.path.isdir(directory) or not os.path.exists(directory)):
-            first_pass = False
-            directory = open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.DirectoryOnly)
-            if directory is None:
-                # Cancel close dialogs
-                return
-
-        # todo: get a list of workspaces but to be implemented on GUI implementation
-        self.last_project_location = directory
-        workspaces_to_save = AnalysisDataService.getObjectNames()
-        project_saver = projectsaver.ProjectSaver()
-        project_saver.save_project(directory=directory, workspace_to_save=workspaces_to_save, interfaces_to_save=None)
+        self.project.save_as()
 
     def load_project(self):
-        directory = ""
-        # Check if it exists
-        first_pass = True
-        while first_pass or not os.path.isdir(directory):
-            first_pass = False
-            directory = open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.DirectoryOnly)
-            if directory is None:
-                # Cancel close dialogs
-                return
-        project_loader = projectloader.ProjectLoader()
-        project_loader.load_project(directory)
-        self.last_project_location = directory
+        self.project.load()
 
     def open_manage_directories(self):
         ManageUserDirectories(self).exec_()

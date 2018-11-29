@@ -55,6 +55,9 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(QWidget *parent)
   connect(m_showInstrument, SIGNAL(triggered()), this,
           SLOT(onShowInstrumentClicked()));
   connect(m_showData, SIGNAL(triggered()), this, SLOT(onShowDataClicked()));
+
+  connect(this, SIGNAL(workspaceTreeWidgetUpdated()), this,
+          SLOT(onWorkspaceTreeWidgetUpdated()));
 }
 
 WorkspaceTreeWidgetSimple::~WorkspaceTreeWidgetSimple() {}

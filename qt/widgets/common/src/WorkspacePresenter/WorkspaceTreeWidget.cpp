@@ -804,6 +804,7 @@ void WorkspaceTreeWidget::populateChildData(QTreeWidgetItem *item) {
 void WorkspaceTreeWidget::updateTree(const TopLevelItems &items) {
   incrementUpdateCount();
   emit signalUpdateTree(items);
+  emit workspaceTreeWidgetUpdated();
 }
 
 /**

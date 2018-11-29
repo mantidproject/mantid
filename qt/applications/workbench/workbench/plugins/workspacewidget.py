@@ -55,6 +55,8 @@ class WorkspaceWidget(PluginWidget):
 
         self.workspacewidget.workspaceDoubleClicked.connect(self._action_double_click_workspace)
 
+        self.workspacewidget.workspaceTreeWidgetUpdatedSimple.connect(parent.modified_project)
+
     # ----------------- Plugin API --------------------
 
     def register_plugin(self):
