@@ -16,6 +16,8 @@ from qtpy.QtWidgets import QTableWidgetItem
 
 from mantid.simpleapi import DeleteTableRows, StatisticsOfTableWorkspace
 from mantidqt.widgets.common.table_copying import copy_cells, show_mouse_toast, show_no_selection_to_copy_toast
+from mantidqt.widgets.tableworkspacedisplay.error_column import ErrorColumn
+from mantidqt.widgets.tableworkspacedisplay.marked_columns import MarkedColumns
 from mantidqt.widgets.tableworkspacedisplay.plot_type import PlotType
 from .model import TableWorkspaceDisplayModel
 from .view import TableWorkspaceDisplayView
@@ -28,148 +30,6 @@ class TableItem(QTableWidgetItem):
             return float(self.data(Qt.DisplayRole)) < float(other.data(Qt.DisplayRole))
         except:
             return super(TableItem, self).__lt__(other)
-
-
-# class ColumnState(Enum):
-#     NONE = 0
-#     Y = 1
-#     X = 2
-#     Y_ERR = 3
-#
-#
-# class TableColumn:
-#     X_LABEL = "[X]"
-#     Y_LABEL = "[Y]"
-#     Y_ERR_LABEL = "[YErr->Y{}]"
-#
-#     def __init__(self, state=ColumnState.NONE, error_for_column=None):
-#         self.state = state
-#         # If the column is marked as an error column,
-#         # this will store the index of the column for which the error is being stored
-#         self.error_for_column = error_for_column
-#
-#     def __str__(self):
-#         if self.state == ColumnState.X:
-#             return self.X_LABEL
-#         elif self.state == ColumnState.Y:
-#             return self.Y_LABEL
-#         elif self.state == ColumnState.Y_ERR:
-#             return self.Y_ERR_LABEL
-#         elif self.state == ColumnState.NONE:
-#             return ""
-#
-
-class ErrorColumn:
-    def __init__(self, source_column, error_for_column, label_index):
-        self.source_column = source_column
-        self.error_for_column = error_for_column
-        self.label_index = label_index
-
-    def __eq__(self, other):
-        if isinstance(other, ErrorColumn):
-            return self.error_for_column == other.error_for_column or self.source_column == other.source_column
-        elif isinstance(other, int):
-            return self.source_column == other
-        else:
-            raise RuntimeError("Unhandled comparison logic with type {}".format(type(other)))
-
-    def __cmp__(self, other):
-        if isinstance(other, ErrorColumn):
-            return self.source_column == other.source_column or self.error_for_column == other.error_for_column
-        elif isinstance(other, int):
-            return self.source_column == other
-        else:
-            raise RuntimeError("Unhandled comparison logic with type {}".format(type(other)))
-
-
-class MarkedColumns:
-    X_LABEL = "[X{}]"
-    Y_LABEL = "[Y{}]"
-    Y_ERR_LABEL = "[Y{}_YErr]"
-
-    def __init__(self):
-        self.as_x = []
-        self.as_y = []
-        self.as_y_err = []  # type: list[ErrorColumn]
-        # self.as_x_err = []
-
-    def _add(self, col_index, add_to, remove_from):
-        assert all(
-            add_to is not remove for remove in remove_from), "Can't add and remove from the same list at the same time!"
-        self._remove(col_index, remove_from)
-
-        if col_index not in add_to:
-            add_to.append(col_index)
-
-    def _remove(self, col_index, remove_from):
-        for list in remove_from:
-            num_contained = list.count(col_index)
-            for i in range(num_contained):
-                try:
-                    list.remove(col_index)
-                except ValueError:
-                    break
-        # if the column previously had a Y Err associated with it -> this will remove it from the YErr list
-        self._remove_associated_yerr_columns(col_index)
-
-    def add_x(self, col_index):
-        self._add(col_index, self.as_x, [self.as_y, self.as_y_err])
-
-    def add_y(self, col_index):
-        self._add(col_index, self.as_y, [self.as_x, self.as_y_err])
-
-    def add_y_err(self, err_column):
-        # remove all labels for the column index
-        len_before_remove = len(self.as_y)
-        self._remove(err_column, [self.as_x, self.as_y, self.as_y_err])
-
-        # Check if the length of the list with columns marked Y has shrunk
-        # -> This means that columns have been removed, and the label_index is now _wrong_
-        # and has to be decremented to match the new label index correctly
-        # TODO test this edge case: mark all columns Y, remove one that is not the last one!
-        # TODO test: mark 3 columns as Y, set the first one to YErr it should have label YErr->Y1
-        # TODO test: mark 3 columns as Y, set the middle one to YErr it should have label YErr->Y1
-        len_after_remove = len(self.as_y)
-        if err_column.error_for_column > err_column.source_column and len_after_remove < len_before_remove:
-            err_column.label_index -= (len_before_remove - len_after_remove)
-        self.as_y_err.append(err_column)
-
-    def remove_from_all(self, col_index):
-        self._remove(col_index, [self.as_x, self.as_y, self.as_y_err])
-
-    def _remove_associated_yerr_columns(self, col_index):
-        # we can only have 1 Y Err for Y, so iterating and removing's iterator invalidation is not an
-        # issue as the code will exit immediately after the removal
-        for col in self.as_y_err:
-            if col.error_for_column == col_index:
-                self.as_y_err.remove(col)
-                break
-
-    def _make_labels(self, list, label):
-        return [(col_num, label.format(index),) for index, col_num in enumerate(list)]
-
-    def build_labels(self):
-        extra_labels = []
-        extra_labels.extend(self._make_labels(self.as_x, self.X_LABEL))
-        extra_labels.extend(self._make_labels(self.as_y, self.Y_LABEL))
-        err_labels = [(err_col.source_column, self.Y_ERR_LABEL.format(err_col.label_index),) for index, err_col in
-                      enumerate(self.as_y_err)]
-        extra_labels.extend(err_labels)
-        return extra_labels
-
-    def find_yerr(self, selected_columns):
-        yerr_for_col = {}
-
-        # for each selected column
-        for col in selected_columns:
-            # find the marked error column
-            for yerr_col in self.as_y_err:
-                # if found append the YErr's source column - so that the data from the columns
-                # can be retrieved for plotting the errors
-                if yerr_col.error_for_column == col:
-                    yerr_for_col[col] = yerr_col.source_column
-
-        return yerr_for_col
 
 
 class TableWorkspaceDisplay(object):
@@ -333,7 +193,7 @@ class TableWorkspaceDisplay(object):
         self.update_column_headers()
 
     def action_set_as_none(self):
-        self._action_set_as(self.marked_columns.remove_from_all)
+        self._action_set_as(self.marked_columns.remove_column)
 
     def action_sort_ascending(self, order):
         try:

@@ -91,6 +91,8 @@ endif ()
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_model.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_presenter.py
     mantidqt/widgets/matrixworkspacedisplay/test/test_matrixworkspacedisplay_tableviewmodel.py
+
+    mantidqt/widgets/tableworkspacedisplay/test/test_marked_columns.py
   )
 
   # Tests
