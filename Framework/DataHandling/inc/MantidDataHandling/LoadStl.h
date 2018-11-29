@@ -52,7 +52,7 @@ protected:
   void changeToVector();
   const std::string m_filename;
   bool m_setMaterial;
-  const ReadMaterial::MaterialParameters m_params;
+  ReadMaterial::MaterialParameters m_params;
   std::vector<uint32_t> m_triangle;
   std::vector<Kernel::V3D> m_verticies;
   std::unordered_set<std::pair<Kernel::V3D, uint32_t>, HashV3DPair,
