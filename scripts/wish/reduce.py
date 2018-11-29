@@ -55,11 +55,11 @@ class Wish:
 
     # Returns the calibration filename
     def get_cal(self):
-        return self.cal_dir + "cycle_10_3_noends_10to10.cal"
+        return self.cal_dir + "WISH_cycle_10_3_noends_10to10.cal"
 
     # Returns the grouping filename
     def get_group_file(self):
-        return self.cal_dir + "cycle_10_3_noends_10to10.cal"
+        return self.cal_dir + "WISH_cycle_10_3_noends_10to10.cal"
 
     def get_vanadium(self, panel, cycle="09_4"):
         vanadium_string = {
