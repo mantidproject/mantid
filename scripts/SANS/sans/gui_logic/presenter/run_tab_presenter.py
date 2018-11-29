@@ -547,15 +547,10 @@ class RunTabPresenter(object):
         if nothing is selected).
         """
         selected_rows = self._view.get_selected_rows()
-        selected_row = selected_rows[
-                           0] + 1 if selected_rows else self._table_model.get_number_of_rows()
-        table_entry_row = self._table_model.create_empty_row()
-        self._table_model.add_table_entry(selected_row, table_entry_row)
 
-        '''selected_row = selected_rows[0] + 1 if selected_rows else self.num_rows()
+        selected_row = selected_rows[0] + 1 if selected_rows else self.num_rows()
         empty_row = self._table_model.create_empty_row()
         self._table_model.add_table_entry(selected_row, empty_row)
-        self.update_view_from_table_model()'''
 
     def on_erase_rows(self):
         """
