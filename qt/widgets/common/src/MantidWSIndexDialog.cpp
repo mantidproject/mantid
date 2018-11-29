@@ -620,6 +620,18 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   }
 }
 
+namespace {
+struct LogTestStruct {
+  LogTestStruct()
+      : isconstantvalue(true), value(std::numeric_limits<double>::quiet_NaN()) {
+  }
+  LogTestStruct(bool isconstantvalue, double value)
+      : isconstantvalue(isconstantvalue), value(value) {}
+  bool isconstantvalue;
+  double value;
+};
+} // namespace
+
 /**
  * Populate the log combo box with all log names that
  * have single numeric value per workspace (and occur
@@ -633,7 +645,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
   // Only logs that can be converted to a double and are not all equal will make
   // the final cut
   // it is map[logname] = (isconstantvalue, value)
-  std::map<std::string, std::pair<bool, double>> usableLogs;
+  std::map<std::string, LogTestStruct> usableLogs;
 
   // add the logs that are present in the first workspace
   auto ws = getWorkspace(m_wsNames[0]);
@@ -644,7 +656,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
     for (auto &log : logData) {
       try {
         const std::string &name = log->name();
-        usableLogs[name] = std::make_pair(
+        usableLogs[name] = LogTestStruct(
             true, runObj.getLogAsSingleValue(
                       name, Mantid::Kernel::Math::TimeAveragedMean));
       } catch (std::invalid_argument &) {
@@ -661,10 +673,13 @@ void MantidWSIndexWidget::populateLogComboBox() {
       const auto runObj = ws->run();
       for (auto &logItem : usableLogs) {
         if (runObj.hasProperty(logItem.first)) {
-          const auto value = runObj.getLogAsSingleValue(
-              logItem.first, Mantid::Kernel::Math::TimeAveragedMean);
-          // set the bool to whether the value is the same
-          logItem.second.first = (value == logItem.second.second);
+          // check the value if it is still considered constant
+          if (logItem.second.isconstantvalue) {
+            const auto value = runObj.getLogAsSingleValue(
+                logItem.first, Mantid::Kernel::Math::TimeAveragedMean);
+            // set the bool to whether the value is the same
+            logItem.second.isconstantvalue = (value == logItem.second.value);
+          }
         } else { // delete it from the list using the name
           usableLogs.erase(logItem.first);
         }
@@ -674,7 +689,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
 
   // Add the log names to the combo box if they appear in all workspaces
   for (auto &logItem : usableLogs) {
-    if (!(logItem.second.first)) { // values are non-constant
+    if (!(logItem.second.isconstantvalue)) { // values are non-constant
       m_logSelector->addItem(logItem.first.c_str());
     }
   }
