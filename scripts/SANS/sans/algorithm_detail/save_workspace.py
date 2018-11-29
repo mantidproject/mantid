@@ -5,10 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+import numpy as np
 from collections import namedtuple
 from mantid.api import MatrixWorkspace
 from mantid.dataobjects import EventWorkspace
 from sans.common.general_functions import create_unmanaged_algorithm
+from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import SaveType
 
@@ -107,4 +109,5 @@ def remove_zero_errors_from_workspace(workspace):
     errors = workspace.dataE
     for index in range(0, number_of_spectra):
         spectrum = errors(index)
+        spectrum = np.nan_to_num(spectrum)
         spectrum[spectrum <= 0.0] = ZERO_ERROR_DEFAULT
