@@ -15,7 +15,7 @@ SCRIPT_DIR=$(dirname "$0")
 # System discovery
 ###############################################################################
 USE_CORE_DUMPS=true
-X11_RUNNER=""
+X11_RUNNER="eval"
 X11_RUNNER_ARGS=""
 if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]]; then
   ON_RHEL7=true
