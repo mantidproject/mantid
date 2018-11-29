@@ -173,6 +173,7 @@ class RunTabPresenter(object):
         # Beam centre presenter
         self._beam_centre_presenter = BeamCentrePresenter(self, WorkHandler, BeamCentreModel,
                                                           SANSCentreFinder)
+        self._table_model.subscribe_to_model_changes(self._beam_centre_presenter)
 
         # Workspace Diagnostic page presenter
         self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler,
