@@ -622,13 +622,8 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
 
 namespace {
 struct LogTestStruct {
-  LogTestStruct()
-      : isconstantvalue(true), value(std::numeric_limits<double>::quiet_NaN()) {
-  }
-  LogTestStruct(bool isconstantvalue, double value)
-      : isconstantvalue(isconstantvalue), value(value) {}
-  bool isconstantvalue;
-  double value;
+  bool isconstantvalue = true;
+  double value = std::numeric_limits<double>::quiet_NaN();
 };
 } // namespace
 
@@ -646,7 +641,6 @@ void MantidWSIndexWidget::populateLogComboBox() {
   // the final cut
   // it is map[logname] = (isconstantvalue, value)
   std::map<std::string, LogTestStruct> usableLogs;
-
   // add the logs that are present in the first workspace
   auto ws = getWorkspace(m_wsNames[0]);
   if (ws) {
@@ -654,11 +648,11 @@ void MantidWSIndexWidget::populateLogComboBox() {
     const std::vector<Mantid::Kernel::Property *> &logData =
         runObj.getLogData();
     for (auto &log : logData) {
+      const std::string &name = log->name();
       try {
-        const std::string &name = log->name();
-        usableLogs[name] = LogTestStruct(
-            true, runObj.getLogAsSingleValue(
-                      name, Mantid::Kernel::Math::TimeAveragedMean));
+        const auto value = runObj.getLogAsSingleValue(
+            name, Mantid::Kernel::Math::TimeAveragedMean);
+        usableLogs[name] = LogTestStruct{true, value};
       } catch (std::invalid_argument &) {
         // it can't be represented as a double so ignore it
       }
