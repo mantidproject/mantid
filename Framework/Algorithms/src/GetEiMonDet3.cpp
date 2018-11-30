@@ -194,45 +194,28 @@ void GetEiMonDet3::averageDetectorDistanceAndTOF(
                              Prop::DETECTOR_EPP_TABLE +
                              " doesn't seem to contain the expected table");
   }
-
-  const auto sample = m_detectorWs->getInstrument()->getSample();
   double distanceSum = 0;
   double eppSum = 0;
   size_t n = 0;
   auto &spectrumInfo = m_detectorWs->spectrumInfo();
-  // cppcheck-suppress syntaxError
-  PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
-             reduction(+: n, distanceSum, eppSum))
   for (int i = 0; i < static_cast<int>(detectorIndices.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
     const size_t index = detectorIndices[i];
-    interruption_point();
     if (fitStatusColumn->cell<std::string>(index) ==
         EPPTableLiterals::FIT_STATUS_SUCCESS) {
-      if (spectrumInfo.isMonitor(index)) {
-        g_log.warning() << "Workspace index " << index
-                        << " should be detector, but is marked as monitor.\n";
+      if (spectrumInfo.isMasked(index) || spectrumInfo.isMonitor(index)) {
+        continue;
       }
-      if (!spectrumInfo.isMasked(index)) {
-        const double d = spectrumInfo.detector(index).getDistance(*sample);
-        distanceSum += d;
-        const double epp = (*peakPositionColumn)[index];
-        eppSum += epp;
-        ++n;
-        g_log.debug() << "Including detector at workspace index " << index
-                      << " - distance: " << d << " EPP: " << epp << ".\n";
-      } else {
-        g_log.debug() << "Excluding masked detector at workspace index "
-                      << index << ".\n";
-      }
+      const double d = spectrumInfo.l2(index);
+      distanceSum += d;
+      const double epp = (*peakPositionColumn)[index];
+      eppSum += epp;
+      ++n;
     } else {
       g_log.debug()
           << "Excluding detector with unsuccessful fit at workspace index "
           << index << ".\n";
     }
-    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
   if (n == 0) {
     throw std::runtime_error("No successful detector fits found in " +
                              Prop::DETECTOR_EPP_TABLE);
