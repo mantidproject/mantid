@@ -82,14 +82,14 @@ public:
   virtual void setExcludeRegion(const std::string &exclude,
                                 std::size_t dataIndex, std::size_t spectrum);
 
-  void addWorkspace(const std::string &workspaceName);
+  virtual void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
                     const std::string &spectra);
   void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
   virtual void removeWorkspace(std::size_t index);
-  PrivateFittingData clearWorkspaces();
+  virtual PrivateFittingData clearWorkspaces();
   void setFittingMode(FittingMode mode);
   virtual void setFitFunction(Mantid::API::IFunction_sptr function);
   virtual void setDefaultParameterValue(const std::string &name, double value,
@@ -209,7 +209,8 @@ private:
 template <typename F>
 void IndirectFittingModel::applySpectra(std::size_t index,
                                         const F &functor) const {
-  m_fittingData[index]->applySpectra(functor);
+	if (m_fittingData.size() > 0)
+    m_fittingData[index]->applySpectra(functor);
 }
 
 } // namespace IDA

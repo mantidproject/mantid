@@ -16,18 +16,66 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
+
+#include <QObject>
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
 
+class SignalCatcher : public QObject{
+Q_OBJECT
+public:
+	SignalCatcher(IndirectFitDataPresenter *presenter) {
+		connect(presenter, SIGNAL(singleSampleLoaded()), this,
+			SLOT(singleSampleLoadedSlot()));
+		connect(presenter, SIGNAL(dataChanged()), this,
+			SLOT(dataChanged()));
+	}
+
+public slots:
+ void singleSampleLoadedSlot() {}
+ void dataChangedSlot() {}
+};
+
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
+class MockSignalCatcher : public SignalCatcher {
+public:
+	/// Public slots
+	MOCK_METHOD0(singleSampleLoadedSlot, void());
+	MOCK_METHOD0(dataChangedSlot, void());
+};
 
 class MockIndirectFitDataView : public IndirectFitDataView {
 public:
 	/// Signals
+	void emitSampleLoaded(QString const &name) {
+		emit sampleLoaded(name);
+	}
+
+	void emitResolutionLoaded(QString const &name) {
+		emit resolutionLoaded(name);
+	}
+
+	void emitAddClicked() {
+		emit addClicked();
+	}
+
+	void emitRemoveClicked() {
+		emit removeClicked();
+	}
+
+	void emitMultipleDataViewSelected() {
+		emit multipleDataViewSelected();
+	}
+
+	void emitSingleDataViewSelected() {
+		emit singleDataViewSelected();
+	}
 
 	/// Public Methods
 	MOCK_CONST_METHOD0(getSelectedSample, std::string());
@@ -42,6 +90,7 @@ public:
 	MOCK_CONST_METHOD0(isMultiFit, bool());
 	MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
 
+	MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
 
 private:
 	std::string sequentialFitOutputName() const override { return ""; };
@@ -78,6 +127,8 @@ public:
 		m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
 		m_presenter = std::make_unique<IndirectFitDataPresenter>(
 			std::move(m_model.get()), std::move(m_view.get()));
+
+		m_signalCatcher = std::make_unique<NiceMock<MockSignalCatcher>>(std::move(m_presenter.get()));
 
 		SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
 		m_model->addWorkspace("WorkspaceName");
@@ -130,6 +181,15 @@ public:
 	/// Unit Tests that test the signals call the correct methods
 	///----------------------------------------------------------------------
 
+	void test_that_the_sampleLoaded_signal_will_add_the_loaded_workspace_to_the_model() {
+	  std::string const workspaceName("WorkspaceName2");
+		m_ads->addOrReplace(workspaceName, createWorkspace(5));
+
+		EXPECT_CALL(*m_model, addWorkspace(workspaceName)).Times(1);
+		
+		m_view->emitSampleLoaded(QString::fromStdString(workspaceName));
+	}
+
 	void test_test() {}
 
 private:
@@ -137,6 +197,9 @@ private:
 	std::unique_ptr<MockIndirectFitDataModel> m_model;
 	std::unique_ptr<IndirectFitDataPresenter> m_presenter;
 
+	std::unique_ptr<MockSignalCatcher> m_signalCatcher;
+
+	SetUpADSWithWorkspace *m_ads;
 };
 
 #endif
