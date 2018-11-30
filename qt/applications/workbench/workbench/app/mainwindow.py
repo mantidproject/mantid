@@ -21,7 +21,8 @@ import os
 import sys
 
 # third party imports
-from mantid.kernel import ConfigService, logger, version_str as mantid_version_str
+from mantid.kernel import (ConfigService, logger, UsageService,
+                           version_str as mantid_version_str)
 from mantid.api import FrameworkManagerImpl
 
 # -----------------------------------------------------------------------------
@@ -85,6 +86,9 @@ def qapplication():
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)
         app.setApplicationVersion(mantid_version_str())
+        # Spin up the usage service and set the name for the usage reporting
+        # The report is sent when the FrameworkManager kicks up
+        UsageService.setApplicationName(APPNAME)
 
     return app
 
