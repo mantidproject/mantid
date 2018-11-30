@@ -33,15 +33,15 @@ public:
   virtual std::string getSelectedSample() const;
   std::string getSelectedResolution() const;
 
-  QStringList getSampleWSSuffices() const;
-  QStringList getSampleFBSuffices() const;
+  virtual QStringList getSampleWSSuffices() const;
+  virtual QStringList getSampleFBSuffices() const;
   QStringList getResolutionWSSuffices() const;
   QStringList getResolutionFBSuffices() const;
 
-  void setSampleWSSuffices(const QStringList &suffices);
-  void setSampleFBSuffices(const QStringList &suffices);
-  void setResolutionWSSuffices(const QStringList &suffices);
-  void setResolutionFBSuffices(const QStringList &suffices);
+  virtual void setSampleWSSuffices(const QStringList &suffices);
+  virtual void setSampleFBSuffices(const QStringList &suffices);
+  virtual void setResolutionWSSuffices(const QStringList &suffices);
+  virtual void setResolutionFBSuffices(const QStringList &suffices);
 
   void readSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);

@@ -37,17 +37,17 @@ public:
 	//	emit resolutionLoaded(name);
 	//}
 
-	void emitAddClicked() {
-		emit addClicked();
-	}
+	//void emitAddClicked() {
+	//	emit addClicked();
+	//}
 
-	void emitRemoveClicked() {
-		emit removeClicked();
-	}
+	//void emitRemoveClicked() {
+	//	emit removeClicked();
+	//}
 
-	void emitMultipleDataViewSelected() {
-		emit multipleDataViewSelected();
-	}
+	//void emitMultipleDataViewSelected() {
+	//	emit multipleDataViewSelected();
+	//}
 
 	void emitSingleDataViewSelected() {
 		emit singleDataViewSelected();
@@ -56,6 +56,14 @@ public:
 	/// Public Methods
 	MOCK_CONST_METHOD0(getSelectedSample, std::string());
 	MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
+
+	MOCK_CONST_METHOD0(getSampleWSSuffices, QStringList());
+	MOCK_CONST_METHOD0(getSampleFBSuffices, QStringList());
+
+	MOCK_METHOD1(setSampleWSSuffices, void(QStringList const &suffices));
+	MOCK_METHOD1(setSampleFBSuffices, void(QStringList const &suffices));
+	MOCK_METHOD1(setResolutionWSSuffices, void(QStringList const &suffices));
+	MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
 
 	/// Public Slots
 
@@ -152,7 +160,7 @@ public:
 	}
 
 	///----------------------------------------------------------------------
-	/// Unit Tests that test the signals call the correct methods
+	/// Unit Tests that test the signals, methods and slots of the presenter
 	///----------------------------------------------------------------------
 
 	void test_that_the_sampleLoaded_signal_will_add_the_loaded_workspace_to_the_model() {
@@ -163,6 +171,49 @@ public:
 		
 		m_view->emitSampleLoaded(QString::fromStdString(workspaceName));
 	}
+
+	void test_that_setSampleWSSuffices_will_set_the_sample_workspace_suffices_in_the_view() {
+		QStringList const suffices{"suffix1", "suffix2"};
+		
+		EXPECT_CALL(*m_view, setSampleWSSuffices(suffices)).Times(1);
+
+		m_presenter->setSampleWSSuffices(suffices);
+	}
+
+	void test_that_setSampleFBSuffices_will_set_the_sample_file_browser_suffices_in_the_view() {
+		QStringList const suffices{ "suffix1", "suffix2" };
+
+		EXPECT_CALL(*m_view, setSampleFBSuffices(suffices)).Times(1);
+
+		m_presenter->setSampleFBSuffices(suffices);
+	}
+
+	void test_that_setResolutionWSSuffices_will_set_the_resolution_workspace_suffices_in_the_view() {
+		QStringList const suffices{ "suffix1", "suffix2" };
+
+		EXPECT_CALL(*m_view, setResolutionWSSuffices(suffices)).Times(1);
+
+		m_presenter->setResolutionWSSuffices(suffices);
+	}
+
+	void test_that_setSampleFBSuffices_will_set_the_resolution_file_browser_suffices_in_the_view() {
+		QStringList const suffices{ "suffix1", "suffix2" };
+
+		EXPECT_CALL(*m_view, setResolutionFBSuffices(suffices)).Times(1);
+
+		m_presenter->setResolutionFBSuffices(suffices);
+	}
+
+
+	//void test_that_the_addClicked_signal_will_get_the_allowed_workspace_suffixes_from_the_view() {
+	//
+	//	EXPECT_CALL(*m_view, getSampleWSSuffices()).Times(1);
+	//	EXPECT_CALL(*m_view, getSampleFBSuffices()).Times(1);
+
+	//	m_view->emitAddClicked();
+	//}
+
+
 
 	void test_test() {}
 
