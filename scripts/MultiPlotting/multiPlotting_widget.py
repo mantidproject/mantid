@@ -43,11 +43,30 @@ class MultiPlotWidget(QtWidgets.QWidget):
         # to make sure the full data set is shown (min/max across all plots)
         xrange = self._context.get_xBounds()
         yrange = self._context.get_yBounds()
+        errors = True
+
         if len(names) == 1:
            xrange = self._context.subplots[names[0]].xbounds
            yrange = self._context.subplots[names[0]].ybounds
+           errors = self._context.subplots[names[0]].errors
+           self.quickEdit.set_errors(errors)
+
+        else:
+           #pass
+           errors = self._check_all_errors(names)
+           print("mioo", errors)
+           self.quickEdit.set_errors(errors)
+           self._change_errors(errors,names)
+            
         self.quickEdit.set_plot_x_range(xrange)
         self.quickEdit.set_plot_y_range(yrange)
+
+    def _check_all_errors(self, names):
+       for name in names:
+           print(name, self._context.subplots[name].errors)
+           if self._context.subplots[name].errors is False:
+              return False
+       return True
 
     def add_subplot(self, name,code):
         self.plots.add_subplot(name,code)
@@ -60,9 +79,13 @@ class MultiPlotWidget(QtWidgets.QWidget):
         names = self.quickEdit.get_selection()
         self.plots.set_y_autoscale(names,state)
 
+    def _change_errors(self,state,names):
+        print("dfsadfasdfas",state)
+        self.plots.change_errors(state, names)
+
     def errors_changed(self,state):
         names = self.quickEdit.get_selection()
-        self.plots.change_errors(state, names)
+        self._change_errors(state, names)
 
     def x_range_changed(self,range):
         names = self.quickEdit.get_selection()

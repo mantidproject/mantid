@@ -62,6 +62,12 @@ class QuickEditWidget(object):
     def set_y_autoscale(self,state):
         self._presenter.widget.set_y_autoscale(state)
 
+    def set_errors(self,state):
+        self._presenter.set_errors(state)
+
+    def set_errors_silently(self,state):
+        self._presenter.widget.set_errors_silently(state)
+
     def get_y_bounds(self):
         view = self._presenter.widget
         return view.get_y_bounds()

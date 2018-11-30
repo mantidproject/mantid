@@ -13,6 +13,7 @@ from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 class QuickEditView(QtWidgets.QWidget):
     autoscale_signal = QtCore.Signal(object)
     selection_signal = QtCore.Signal(object)
+    error_signal = QtCore.Signal(object)
 
     def __init__(self, subcontext, parent = None):
         super(QuickEditView,self).__init__(parent)
@@ -27,6 +28,7 @@ class QuickEditView(QtWidgets.QWidget):
         self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))
 
         self.errors = QtWidgets.QCheckBox("Errors")
+        self.errors.stateChanged.connect(self._emit_errors)
 
         button_layout.addWidget(self.plot_selector)
         button_layout.addWidget(self.x_axis_changer.view)
@@ -34,6 +36,11 @@ class QuickEditView(QtWidgets.QWidget):
         button_layout.addWidget(self.y_axis_changer.view)
         button_layout.addWidget(self.errors)
         self.setLayout(button_layout)
+
+    # need our own signal that sends a bool
+    def _emit_errors(self):
+        state = self.get_errors()
+        self.error_signal.emit(state)
 
     def current_selection(self):
         return self.plot_selector.currentText()
@@ -54,7 +61,7 @@ class QuickEditView(QtWidgets.QWidget):
         self.plot_selector.addItem(name)
 
     def connect_errors_changed(self,slot):
-        self.errors.stateChanged.connect(slot)
+        self.error_signal.connect(slot)
 
     def connect_autoscale_changed(self,slot):
         self.autoscale.stateChanged.connect(slot)
@@ -89,5 +96,11 @@ class QuickEditView(QtWidgets.QWidget):
     def set_plot_y_range(self,range):
         self.y_axis_changer.set_bounds(range)
 
+    def get_errors(self):
+        return self.errors.isChecked()
+
     def get_y_bounds(self):
         return self.y_axis_changer.get_bounds()
+
+    def set_errors(self,state):
+        self.errors.setChecked(state)
