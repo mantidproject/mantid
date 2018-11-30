@@ -52,8 +52,7 @@ minMaxTheta(const Mantid::Geometry::DetectorInfo &detInfo,
   const auto topAngle = top.angle(beamDir);
   const auto centre = position - samplePos;
   const auto centreAngle = centre.angle(beamDir);
-  return std::pair<double, double>(std::min(topAngle, centreAngle),
-                                   std::max(topAngle, centreAngle));
+  return std::minmax(topAngle, centreAngle);
 }
 } // namespace
 
