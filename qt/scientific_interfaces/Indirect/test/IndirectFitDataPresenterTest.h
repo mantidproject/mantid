@@ -19,36 +19,12 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
-#include <QObject>
-
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
 
-class SignalCatcher : public QObject{
-Q_OBJECT
-public:
-	SignalCatcher(IndirectFitDataPresenter *presenter) {
-		connect(presenter, SIGNAL(singleSampleLoaded()), this,
-			SLOT(singleSampleLoadedSlot()));
-		connect(presenter, SIGNAL(dataChanged()), this,
-			SLOT(dataChanged()));
-	}
-
-public slots:
- void singleSampleLoadedSlot() {}
- void dataChangedSlot() {}
-};
-
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
-
-class MockSignalCatcher : public SignalCatcher {
-public:
-	/// Public slots
-	MOCK_METHOD0(singleSampleLoadedSlot, void());
-	MOCK_METHOD0(dataChangedSlot, void());
-};
 
 class MockIndirectFitDataView : public IndirectFitDataView {
 public:
@@ -57,9 +33,9 @@ public:
 		emit sampleLoaded(name);
 	}
 
-	void emitResolutionLoaded(QString const &name) {
-		emit resolutionLoaded(name);
-	}
+	//void emitResolutionLoaded(QString const &name) {
+	//	emit resolutionLoaded(name);
+	//}
 
 	void emitAddClicked() {
 		emit addClicked();
@@ -128,8 +104,6 @@ public:
 		m_presenter = std::make_unique<IndirectFitDataPresenter>(
 			std::move(m_model.get()), std::move(m_view.get()));
 
-		m_signalCatcher = std::make_unique<NiceMock<MockSignalCatcher>>(std::move(m_presenter.get()));
-
 		SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
 		m_model->addWorkspace("WorkspaceName");
 	}
@@ -196,8 +170,6 @@ private:
 	std::unique_ptr<MockIndirectFitDataView> m_view;
 	std::unique_ptr<MockIndirectFitDataModel> m_model;
 	std::unique_ptr<IndirectFitDataPresenter> m_presenter;
-
-	std::unique_ptr<MockSignalCatcher> m_signalCatcher;
 
 	SetUpADSWithWorkspace *m_ads;
 };
