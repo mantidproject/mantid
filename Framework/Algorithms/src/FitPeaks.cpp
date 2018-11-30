@@ -461,7 +461,7 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
   }
 
   // check inputs for uncertainty (fitting error)
-  std::string error_table_name =
+  const std::string error_table_name =
       getPropertyValue("OutputParameterFitErrorsWorkspace");
   if (error_table_name != "") {
     bool use_raw_params = getProperty("RawPeakParameters");
