@@ -21,7 +21,6 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
         super(GUIStartupTest, self).__init__()
-        self.maxDiff = None
         # create simple script
         self.script = os.path.join(mantid.config.getString('defaultsave.directory'),
                                    'GUIStartupTest_script.py')
@@ -36,8 +35,7 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
         elif 'Darwin' in current_platform:
             mantid_exe = os.path.join(mantid_init_dirname, "../MantidPlot")
         elif 'Windows' in current_platform:
-            mantid_exe = 'wscript.exe {}'.format(os.path.join(mantid_init_dirname,
-                                                              "../bin/launch_mantidplot.vbs"))
+            mantid_exe = os.path.join(mantid_init_dirname, "..", "launch_mantidplot.bat")
         else:
             raise RuntimeError("Unknown operating system")
 
@@ -58,7 +56,8 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
         # good startup
         p = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()
-        self.assertEquals(out, b'Hello Mantid\n')
+        # Do not check line ending as it's different on Windows
+        self.assertTrue(b'Hello Mantid' in out)
 
         # failing script
         with open(self.script, 'a') as f:
@@ -66,5 +65,5 @@ class GUIStartupTest(systemtesting.MantidSystemTest):
         p = subprocess.Popen(self.cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         out, err = p.communicate()
         out += err
-        self.assertTrue(b'Hello Mantid\n' in out)
+        self.assertTrue(b'Hello Mantid' in out)
         self.assertTrue(b'RuntimeError: GUITest' in out)
