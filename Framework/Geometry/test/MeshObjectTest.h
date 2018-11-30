@@ -235,12 +235,6 @@ public:
     TS_ASSERT(cloned);
   }
 
-  void testTooManyVertices() {
-
-    TS_ASSERT_THROWS_ANYTHING(MeshObjectCommon::checkVertexLimit(
-                                  std::numeric_limits<uint32_t>::max());)
-  }
-
   void testMaterial() {
     using Mantid::Kernel::Material;
     std::vector<V3D> vertices;

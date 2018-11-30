@@ -62,7 +62,7 @@ public:
     alg.setProperty("TranslationVector", "-1,0,1,0,0,0,0,1");
     boost::shared_ptr<MeshObject> environmentMesh = nullptr;
     environmentMesh = loadCube();
-    TS_ASSERT_THROWS(alg.translate(environmentMesh), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.translate(environmentMesh), std::invalid_argument &);
   }
 
   void testRotate() {
