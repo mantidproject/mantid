@@ -1,0 +1,41 @@
+@echo off
+setlocal enableextensions
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Launch script for MantidPlot
+::
+:: Sets the required environment variables for MantidPlot to run correctly.
+:: All variables that are passed to this script are passed directly to
+:: MantidPlot.exe
+::
+:: It is not advised to start MantidPlot.exe directly as this is unlikely
+:: to work.
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Assume this is placed next to the dlls and executable
+set _SCRIPT_DIR=%~dp0
+set _BIN_DIR=%_SCRIPT_DIR:~,-1%
+set _QT_PLUGINS=@QT_PLUGINS@
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Required environment variables for Mantid
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+set PATH=%_BIN_DIR%;%_QT_PLUGINS%;%PATH%
+set PV_PLUGIN_PATH=@PV_PLUGINS@
+
+:: Matplotlib backend should default to Qt if not set (requires matplotlib >= 1.5)
+if "%MPLBACKEND%"=="" (
+  set MPLBACKEND=qt4agg
+)
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Start MantidPlot
+:: The working directory is whatever is set by the caller
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+start "MantidPlot" /B /WAIT %_BIN_DIR%\MantidPlot.exe %*
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Check if Mantidplot exited correctly
+:: If not launch the error reporter
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+if %errorlevel% NEQ 0 (
+  python %_INSTALL_DIR%\scripts\ErrorReporter\error_dialog_app.py --exitcode=%1 --directory=%_BIN_DIR%
+)

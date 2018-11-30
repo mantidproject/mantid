@@ -128,6 +128,7 @@ else ()
   set (PARAVIEW_PYTHON_PATHS "" )
 endif ()
 
+# mantidpython
 configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
     ${PROJECT_BINARY_DIR}/mantidpython.bat.in @ONLY )
 # place it in the appropriate directory
@@ -139,7 +140,6 @@ file(GENERATE
   )
 # install version
 set ( MANTIDPYTHON_PREAMBLE "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%" )
-
 if (MAKE_VATES)
   set ( PV_LIBS "%_BIN_DIR%\\..\\lib\\paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}")
   set ( PARAVIEW_PYTHON_PATHS ";${PV_LIBS}\\site-packages;${PV_LIBS}\\site-packages\\vtk" )
@@ -149,6 +149,33 @@ endif ()
 
 configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
     ${PROJECT_BINARY_DIR}/mantidpython.bat.install @ONLY )
+
+# launch_mantidplot
+set ( QT_PLUGINS "")
+if ( MAKE_VATES )
+  set ( PV_PLUGINS "" )
+else ()
+  set ( PV_PLUGINS "%_BIN_DIR%\\plugins\\paraview\\qt4" )
+endif ()
+configure_file ( ${PACKAGING_DIR}/launch_mantidplot.bat.in
+    ${PROJECT_BINARY_DIR}/launch_mantidplot.bat.in @ONLY )
+# place it in the appropriate directory
+file(GENERATE
+     OUTPUT
+     ${PROJECT_BINARY_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/launch_mantidplot.bat
+     INPUT
+     ${PROJECT_BINARY_DIR}/launch_mantidplot.bat.in
+  )
+
+# install version
+set ( QT_PLUGINS "%_BIN_DIR%\\..\\plugins\\qt4")
+if ( MAKE_VATES )
+  set ( PV_PLUGINS "" )
+else ()
+  set ( PV_PLUGINS "%_BIN_DIR%\\..\\plugins\\paraview\\qt4" )
+endif ()
+configure_file ( ${PACKAGING_DIR}/launch_mantidplot.bat.in
+    ${PROJECT_BINARY_DIR}/launch_mantidplot.bat.install @ONLY )
 
 ###########################################################################
 # (Fake) installation variables to keep windows sweet

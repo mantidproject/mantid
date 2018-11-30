@@ -140,9 +140,9 @@ include( WindowsNSISQt5 )
 ###########################################################################
 # Startup files
 ###########################################################################
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
+install ( FILES ${PROJECT_BINARY_DIR}/launch_mantidplot.bat.install DESTINATION bin )
 install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin RENAME mantidpython.bat )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
 
 # On Windows we don't use the setuptools install executable at the moment, because it is
 # generated with a hard coded path to the build Python, that fails to run on
