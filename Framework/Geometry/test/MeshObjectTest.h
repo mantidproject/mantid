@@ -7,9 +7,9 @@
 #ifndef MANTID_TESTMESHOBJECT__
 #define MANTID_TESTMESHOBJECT__
 
+#include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
-#include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
@@ -236,9 +236,9 @@ public:
   }
 
   void testTooManyVertices() {
-    
-    TS_ASSERT_THROWS_ANYTHING(
-        MeshObjectCommon::checkVertexLimit((2^32)+1);
+
+    TS_ASSERT_THROWS_ANYTHING(MeshObjectCommon::checkVertexLimit(
+                                  std::numeric_limits<uint32_t>::max());)
   }
 
   void testMaterial() {
