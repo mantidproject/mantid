@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui
 from PyQt4.QtCore import pyqtSignal
 
-import ui_summation_settings_widget
+from . import ui_summation_settings_widget
 from sans.gui_logic.models.binning_type import BinningType
 
 
