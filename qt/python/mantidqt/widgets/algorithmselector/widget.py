@@ -54,6 +54,10 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         QWidget.__init__(self, parent)
         IAlgorithmSelectorView.__init__(self, include_hidden)
 
+    def refresh(self):
+        """Update the algorithms list"""
+        self.presenter.refresh()
+
     def _make_execute_button(self):
         """
         Make the button that starts the algorithm.
