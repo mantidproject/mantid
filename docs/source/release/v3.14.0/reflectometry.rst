@@ -51,6 +51,7 @@ Magnetism Reflectometer
 -----------------------
 
 - Added option to overwrite :literal:`DIRPIX` and :literal:`DANGLE0`.
+- Added option to skip the final rebinning.
 
 ISIS Reflectometry Interface
 ----------------------------
