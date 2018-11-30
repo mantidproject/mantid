@@ -27,15 +27,15 @@ bool checkPeriodInWorkspaceGroup(const int &period,
   return period <= workspace->getNumberOfEntries();
 }
 
-int countPeriods(Workspace_sptr ws) {
-  if (auto tmp = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+int countPeriods(Workspace_const_sptr ws) {
+  if (auto tmp = boost::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
     return tmp->getNumberOfEntries();
   } else {
     return 1;
   }
 }
 
-bool checkConsistentPeriods(Workspace_sptr ws1, Workspace_sptr ws2) {
+bool checkConsistentPeriods(Workspace_const_sptr ws1, Workspace_const_sptr ws2) {
   if (ws1->isGroup()) {
     if (!ws2->isGroup()) {
       return false;
@@ -257,7 +257,7 @@ void MuonPairingAsymmetry::validateGroupsWorkspaces(
     std::map<std::string, std::string> &errors) {
   Workspace_sptr ws1 = this->getProperty("InputWorkspace1");
   Workspace_sptr ws2 = this->getProperty("InputWorkspace2");
-  if (ws1->isGroup() && !ws2->isGroup())) {
+  if (ws1->isGroup() && !ws2->isGroup()) {
       errors["InputWorkspace1"] =
           "InputWorkspace2 should be multi period to match InputWorkspace1";
     }
