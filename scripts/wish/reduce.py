@@ -238,25 +238,27 @@ class Wish:
     # Create a corrected vanadium (normalise,corrected for attenuation and empty, strip peaks) and
     # save a a nexus processed file.
     # It looks like smoothing of 100 works quite well
-    # def createvan(self, van, empty, panel, smoothing, vh, vr, cycle_van="09_3", cycle_empty="09_3"):
-    #    setdatadir("/archive/ndxwish/Instrument/data/cycle_" + cycle_van + "/")
-    #    wvan = read(van, panel, "nxs_event")
-    #    setdatadir("/archive/ndxwish/Instrument/data/cycle_" + cycle_empty + "/")
-    #    mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="Wavelength", EMode="Elastic")
-    #    mantid.CylinderAbsorption(InputWorkspace=wvan, OutputWorkspace="T",
-    #                              CylinderSampleHeight=str(vh), CylinderSampleRadius=str(vr),
-    #                              AttenuationXSection="4.8756",
-    #                              ScatteringXSection="5.16", SampleNumberDensity="0.07118",
-    #                              NumberOfSlices="10", NumberOfAnnuli="10", NumberOfWavelengthPoints="25",
-    #                              ExpMethod="Normal")
-    #    mantid.Divide(LHSWorkspace=wvan, RHSWorkspace="T", OutputWorkspave=wvan)
-    #    mantid.DeleteWorkspace("T")
-    #    mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="TOF", EMode="Elastic")
-    #    vanfoc = focus(wvan, panel)
-    #    mantid.DeleteWorkspace(wvan)
-    #    # StripPeaks(vanfoc,vanfoc)
-    #    # SmoothData(vanfoc,vanfoc,str(smoothing))
-    #    return
+    def createvan(self, van, empty, panel, smoothing, vh, vr, cycle_van="09_3", cycle_empty="09_3"):
+        self.data_directory = "/archive/ndxwish/Instrument/data/cycle_" + cycle_van + "/"
+        self.datafile = self.get_file_name(van, "raw")
+        wvan = self.read(van, panel, "raw")
+        self.data_directory = "/archive/ndxwish/Instrument/data/cycle_" + cycle_empty + "/"
+        self.datafile = self.get_file_name(empty, "raw")
+        mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="Wavelength", EMode="Elastic")
+        mantid.CylinderAbsorption(InputWorkspace=wvan, OutputWorkspace="T",
+                                  CylinderSampleHeight=str(vh), CylinderSampleRadius=str(vr),
+                                  AttenuationXSection="4.8756",
+                                  ScatteringXSection="5.16", SampleNumberDensity="0.07118",
+                                  NumberOfSlices="10", NumberOfAnnuli="10", NumberOfWavelengthPoints="25",
+                                  ExpMethod="Normal")
+        mantid.Divide(LHSWorkspace=wvan, RHSWorkspace="T", OutputWorkspace=wvan)
+        mantid.DeleteWorkspace("T")
+        mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="TOF", EMode="Elastic")
+        vanfoc = self.focus(wvan, panel)
+        mantid.DeleteWorkspace(wvan)
+        # StripPeaks(vanfoc,vanfoc)
+        # SmoothData(vanfoc,vanfoc,str(smoothing))
+        return
 
     def monitors(self, rb, ext):
         monitor_file = self.get_file_name(rb, ext)
