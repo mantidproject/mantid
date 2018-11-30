@@ -31,16 +31,22 @@ described in
 The approximation uses a combination of 4 Lorentzians in two variables
 to generate good approximation to the true function.
 
+Approximation
+-------------
 
-TODO FIXME
+Native peak parameters
+======================
 
-Native parameters:
-  declareParameter(LORENTZ_AMP, 0.0, "Value of the Lorentzian amplitude");
-  declareParameter(LORENTZ_POS, 0.0, "Position of the Lorentzian peak");
-  declareParameter(LORENTZ_FWHM, 0.0,
-                   "Value of the full-width half-maximum for the Lorentzian");
-  declareParameter(GAUSSIAN_FWHM, 0.0,
-                   "Value of the full-width half-maximum for the Gaussian");
+- A: Value of the Lorentzian amplitude
+- position :math:`x_0`: Position of the Lorentzian peak
+- Lorentizian FWHM :math:`\Gamma_L`: Value of the full-width half-maximum for the Lorentzian
+- Gaussian FWHM :math:`\Gamma_G`: Value of the full-width half-maximum for the Gaussian
+
+
+Effective peak parameters
+=========================
+
+
 
 
 - FWHM: return (getParameter(LORENTZ_FWHM) + getParameter(GAUSSIAN_FWHM));

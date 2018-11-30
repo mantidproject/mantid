@@ -15,6 +15,19 @@ Instead of convoluting those two functions, the Pseudo-Voigt function is defined
 
 .. math:: PV(x) = \eta G(x) + (1 - \eta)L(x)
 
+
+Implementation In Mantid
+------------------------
+
+
+Native peak parameters
+++++++++++++++++++++++
+
+Pseudo-voigt function in Mantid has the following native parameters
+
+- Peak height :math:`h`
+- 
+
 """  TODO
   double h = getParameter("Height");
   double x0 = getParameter("PeakCentre");
