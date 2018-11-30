@@ -27,10 +27,6 @@ bool checkPeriodInWorkspaceGroup(const int &period,
   return period <= workspace->getNumberOfEntries();
 }
 
-bool isMultiPeriod(Workspace_const_sptr ws) {
-  return ws->isGroup();
-}
-
 int countPeriods(Workspace_sptr ws) {
   if(auto tmp = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)){
     return tmp->getNumberOfEntries();
