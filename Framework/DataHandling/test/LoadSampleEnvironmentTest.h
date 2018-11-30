@@ -108,11 +108,13 @@ public:
     alg.setProperty("AtomicNumber", 1);
     alg.setProperty("MassNumber", 1);
     alg.setProperty("SampleNumberDensity", 1.0);
+        const int nvectors(2), nbins(10);
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
+                                                                     nbins);
+    alg.setChild(true);
     alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("OutputWorkspace", inputWS);
-
+    alg.setPropertyValue("OutputWorkspace", "outputWorkspace");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
