@@ -24,6 +24,18 @@
 using Mantid::Geometry::rad2deg;
 
 namespace {
+/**
+ * @brief Calculate the min and max 2theta of a detector.
+ * The 2theta are calculated only for the centre point and the 'top'
+ * point, assuming that the width is zero. This works adequately well
+ * for high aspect ratio detectors.
+ * @param detInfo a DetectorInfo object
+ * @param detIndex index of the detector within detInfo
+ * @param samplePos a V3D pointing to the sample position
+ * @param beamDir a unit vector pointing along the beam axis
+ * @param upDir a unit vector pointing up
+ * @return a pair (min(2theta), max(2theta)
+ */
 std::pair<double, double>
 minMaxTheta(const Mantid::Geometry::DetectorInfo &detInfo,
             const size_t detIndex, const Mantid::Kernel::V3D &samplePos,
