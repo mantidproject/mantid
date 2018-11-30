@@ -101,14 +101,9 @@ Service" has completed you should
 Linux
 -----
 
-Install an ssh server.
+Install an ssh server, ``ccache``, ``curl`` and ``xvfb``.
 
-Install ``ccache``. After installing run ``ccache --max-size=20G`` from the ``builder`` account.
-
-Install a vnc server and from the ``builder`` account run ``vncpasswd`` to set a password on the VNC server. It
-can be any password.
-
-Ensure ``curl`` is installed
+From the ``builder`` account run ``ccache --max-size=20G``.
 
 Any machines acting as performance test servers will require ``mysqldb`` to be installed.
 
