@@ -255,6 +255,8 @@ public:
    * */
   const coord_t *getCenter() const { return center; }
 
+  const MortonT getIndex() const { return index; }
+
   //---------------------------------------------------------------------------------------------
   /** Returns the array of coordinates, as a pointer to a non-const
    * array.
@@ -417,8 +419,9 @@ void swap(MDLeanEvent<ND>& first, MDLeanEvent<ND>& second) {
   std::swap(first.signal, second.signal);
   std::swap(first.errorSquared, second.errorSquared);
   if(sizeof(first.center) > sizeof(first.index))
-    for(unsigned i = 0; i < ND; ++i)
+    for(unsigned i = 0; i < ND; ++i) {
       std::swap(first.center[i], second.center[i]);
+    }
   else
     std::swap(first.index, second.index);
 }
