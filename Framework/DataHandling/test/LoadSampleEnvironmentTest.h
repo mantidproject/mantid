@@ -108,7 +108,7 @@ public:
     alg.setProperty("AtomicNumber", 1);
     alg.setProperty("MassNumber", 1);
     alg.setProperty("SampleNumberDensity", 1.0);
-        const int nvectors(2), nbins(10);
+    const int nvectors(2), nbins(10);
     MatrixWorkspace_sptr inputWS =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
                                                                      nbins);
