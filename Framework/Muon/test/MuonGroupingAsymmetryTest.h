@@ -150,7 +150,8 @@ public:
     const std::vector<int> group = {1};
     auto ws = createMultiPeriodWorkspaceGroup(1, 1, 10, "group1");
 
-    const std::vector<std::string> invalidNames = {"@", "fwd!", "#1", "fwd @", "   "};
+    const std::vector<std::string> invalidNames = {"@", "fwd!", "#1", "fwd @",
+                                                   "   "};
     for (auto &&invalidName : invalidNames) {
       auto alg =
           setUpAlgorithmWithoutOptionalProperties(ws, invalidName, group);
