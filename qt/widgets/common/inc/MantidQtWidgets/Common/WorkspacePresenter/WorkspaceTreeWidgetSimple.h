@@ -53,9 +53,6 @@ signals:
   void showDataClicked(const QStringList &workspaceNames);
   void workspaceDoubleClicked(const QString &workspaceName);
 
-  // Not Button signals
-  void workspaceTreeWidgetUpdatedSimple();
-
 private slots:
   void onPlotSpectrumClicked();
   void onOverplotSpectrumClicked();
@@ -65,7 +62,6 @@ private slots:
   void onSampleLogsClicked();
   void onShowInstrumentClicked();
   void onShowDataClicked();
-  void onWorkspaceTreeWidgetUpdated();
 
 private:
   QAction *m_plotSpectrum, *m_overplotSpectrum, *m_plotSpectrumWithErrs,

@@ -254,13 +254,13 @@ class WorkspaceObserver {
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 %End
 public:
-  WorkspaceObserver()
-  observePreDelete(bool on = true);
-  observePostDelete(bool on = true);
-  observeAfterReplace(bool on = true);
-  observeRename(bool on = true);
-  observeAdd(bool on = true);
-  observeADSClear(bool on = true);
+  WorkspaceObserver();
+  void observePreDelete(bool on = true);
+  void observePostDelete(bool on = true);
+  void observeAfterReplace(bool on = true);
+  void observeRename(bool on = true);
+  void observeAdd(bool on = true);
+  void observeADSClear(bool on = true);
 };
 
 // ---------------------------------
