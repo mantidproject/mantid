@@ -17,6 +17,7 @@
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 
 #include <vector>
+#include <tbb/parallel_sort.h>
 
 namespace Mantid {
 // Forward declarations
@@ -44,19 +45,216 @@ public:
                     bool ignoreZeros) override;
   void runConversion(API::Progress *pProgress) override;
 
+protected:
+  DataObjects::EventWorkspace_const_sptr m_EventWS;
 private:
   // function runs the conversion on
   size_t conversionChunk(size_t workspaceIndex) override;
   // the pointer to the source event workspace as event ws does not work through
   // the public Matrix WS interface
-  DataObjects::EventWorkspace_const_sptr m_EventWS;
-
   /**function converts particular type of events into MD space and add these
    * events to the workspace itself    */
   template <class T> size_t convertEventList(size_t workspaceIndex);
 
   virtual void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc);
 };
+
+
+
+class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
+  enum MD_EVENT_TYPE {
+    LEAN,
+    REGULAR,
+    NONE
+  };
+
+  template <size_t ND>
+  MD_EVENT_TYPE mdEventType();
+
+  void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) override;
+
+  template <size_t maxDim>
+  void appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+    auto ndim = m_OutWSWrapper->nDimensions();
+    if(ndim < 2)
+      throw std::runtime_error("Can't convert to MD workspace with dims " + std::to_string(ndim) + "less than 2");
+    if(ndim > maxDim)
+      return;
+    if(ndim == maxDim) {
+      appendEvents<maxDim>(pProgress, bc);
+      return;
+    }
+    else
+      appendEventsFromInputWS<maxDim - 1>(pProgress, bc);
+  }
+
+  template<typename EventType, size_t ND, template <size_t> class MDEventType>
+  void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc);
+
+  template<size_t ND, template <size_t> class MDEventType>
+  void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+    switch (m_EventWS->getSpectrum(0).getEventType()) {
+    case Mantid::API::TOF:
+      appendEvents<Mantid::Types::Event::TofEvent, ND, MDEventType>(pProgress, bc);
+      break;
+    case Mantid::API::WEIGHTED:
+      appendEvents<Mantid::DataObjects::WeightedEvent, ND, MDEventType>(pProgress, bc);
+      break;
+    case Mantid::API::WEIGHTED_NOTIME:
+      appendEvents<Mantid::DataObjects::WeightedEventNoTime, ND, MDEventType>(pProgress, bc);
+      break;
+    default:
+      throw std::runtime_error("Events in event workspace had an unexpected data type!");
+    }
+  }
+
+  template <size_t ND>
+  void appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+    switch(mdEventType<ND>()) {
+    case LEAN:
+      appendEvents<ND, DataObjects::MDLeanEvent>(pProgress, bc);
+      break;
+    case REGULAR:
+      appendEvents<ND, DataObjects::MDEvent>(pProgress, bc);
+      break;
+    default:
+      throw std::runtime_error("MDD events in md event workspace had an unexpected data type!");
+    }
+  }
+
+  template<size_t ND, template <size_t> class MDEventType>
+  void appendSortedEvents(API::Progress *pProgress, const API::BoxController_sptr &bc,
+      const std::vector<MDEventType<ND>>& mdEvents);
+
+  template<typename EventType, size_t ND, template <size_t> class MDEventType>
+  std::vector<MDEventType<ND>> convertEvents();
+
+  template <size_t ND, template <size_t> class MDEventType>
+  struct MDEventMaker {
+    static MDEventType<ND> makeMDEvent(const double &sig,
+                                       const double &err,
+                                       const uint16_t &run_index,
+                                       const uint32_t &det_id,
+                                       coord_t *coord) {
+      return MDEventType<ND>(sig, err, run_index, det_id, coord);
+    }
+  };
+};
+
+
+template<typename EventType, size_t ND, template <size_t> class MDEventType>
+std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
+  size_t numEvents{0};
+  for (size_t workspaceIndex = 0; workspaceIndex < m_NSpectra; ++workspaceIndex) {
+    const Mantid::DataObjects::EventList &el = m_EventWS->getSpectrum(workspaceIndex);
+    numEvents += el.getNumberEvents();
+  }
+  std::vector<MDEventType<ND>> mdEvents;
+  mdEvents.reserve(numEvents);
+
+#pragma omp parallel for
+  for (size_t workspaceIndex = 0; workspaceIndex < m_NSpectra; ++workspaceIndex) {
+    const Mantid::DataObjects::EventList &el = m_EventWS->getSpectrum(workspaceIndex);
+
+    size_t numEvents = el.getNumberEvents();
+    if (numEvents == 0)
+      continue;
+
+    // create local unit conversion class
+    UnitsConversionHelper localUnitConv(m_UnitConversion);
+    // create local QConverter
+    MDTransf_sptr localQConverter(m_QConverter->clone());
+
+    uint32_t detID = m_detID[workspaceIndex];
+    uint16_t runIndexLoc = m_RunIndex;
+
+    std::vector<coord_t> locCoord(m_Coord);
+    // set up unit conversion and calculate up all coordinates, which depend on
+    // spectra index only
+    if (!localQConverter->calcYDepCoordinates(locCoord, workspaceIndex))
+      continue; // skip if any y outsize of the range of interest;
+    localUnitConv.updateConversion(workspaceIndex);
+    // This little dance makes the getting vector of events more general (since
+    // you can't overload by return type).
+    typename std::vector<EventType> const *events_ptr;
+    getEventsFrom(el, events_ptr);
+    const typename std::vector<EventType> &events = *events_ptr;
+    std::vector<MDEventType<ND>> mdEventsForSpectrum;
+    // Iterators to start/end
+    for (auto it = events.cbegin(); it != events.cend(); it++) {
+      double val = localUnitConv.convertUnits(it->tof());
+      double signal = it->weight();
+      double errorSq = it->errorSquared();
+
+      if (!localQConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
+        continue; // skip ND outside the range
+      mdEventsForSpectrum.emplace_back(MDEventMaker<ND, MDEventType>::makeMDEvent(signal, errorSq, runIndexLoc, detID, &locCoord[0]));
+    }
+
+#pragma omp critical
+    {
+      /* Add to event list */
+      mdEvents.insert(mdEvents.cend(), mdEventsForSpectrum.begin(),
+                      mdEventsForSpectrum.end());
+    }
+  }
+
+  return mdEvents;
+}
+
+template<size_t ND, template <size_t> class MDEventType>
+void ConvToMDEventsWSIndexing::appendSortedEvents(API::Progress *pProgress, const API::BoxController_sptr &bc,
+                        const std::vector<MDEventType<ND>>& mdEvents) {
+
+}
+
+template<typename EventType, size_t ND, template <size_t> class MDEventType>
+void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+  std::vector<MDEventType<ND>> mdEvents = convertEvents<EventType, ND, MDEventType>();
+  MDSpaceBounds<ND> space;
+  for(size_t ax = 0; ax < ND; ++ ax) {
+    space(ax, 0) = -10000;
+    space(ax, 1) = 10000;
+  }
+#pragma omp parallel for
+  for(size_t i = 0; i < mdEvents.size(); ++i)
+    mdEvents[i].retrieveIndex(space);
+  tbb::parallel_sort(mdEvents.begin(), mdEvents.end(), [] (const MDEventType<ND>& a, const MDEventType<ND>& b) {
+    return a.getIndex() < b.getIndex();
+  });
+
+  appendSortedEvents(pProgress, bc, mdEvents);
+}
+
+
+template <size_t ND>
+struct ConvToMDEventsWSIndexing::MDEventMaker<ND, Mantid::DataObjects::MDLeanEvent> {
+  static Mantid::DataObjects::MDLeanEvent<ND> makeMDEvent(const double &sig,
+                                                         const double &err,
+                                                         const uint16_t &run_index,
+                                                         const uint32_t &det_id,
+                                                         coord_t *coord) {
+    return Mantid::DataObjects::MDLeanEvent<ND>(sig, err, coord);
+  }
+};
+
+template <size_t ND>
+ConvToMDEventsWSIndexing::MD_EVENT_TYPE ConvToMDEventsWSIndexing::mdEventType() {
+  if(
+      dynamic_cast<
+          DataObjects::MDEventWorkspace<DataObjects::MDEvent<ND>, ND> *>(
+          m_OutWSWrapper->pWorkspace().get())
+      )
+    return REGULAR;
+
+  if(
+      dynamic_cast<
+          DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<ND>, ND> *>(
+          m_OutWSWrapper->pWorkspace().get())
+      )
+    return LEAN;
+  return NONE;
+}
 
 } // namespace MDAlgorithms
 } // namespace Mantid

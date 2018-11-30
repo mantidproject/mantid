@@ -4,6 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <MantidMDAlgorithms/ConvToMDEventsWS.h>
+
 #include "MantidMDAlgorithms/ConvToMDEventsWS.h"
 
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
@@ -201,6 +203,18 @@ void ConvToMDEventsWS::appendEventsFromInputWS(API::Progress *pProgress, const A
     m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(nullptr);
   }
 }
+
+template <>
+void ConvToMDEventsWSIndexing::appendEventsFromInputWS<2>(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+  if(m_OutWSWrapper->nDimensions() == 2)
+    appendEvents<2>(pProgress, bc);
+}
+
+void ConvToMDEventsWSIndexing::appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) {
+  appendEventsFromInputWS<8>(pProgress, bc);
+}
+
+
 
 } // namespace MDAlgorithms
 } // namespace Mantid
