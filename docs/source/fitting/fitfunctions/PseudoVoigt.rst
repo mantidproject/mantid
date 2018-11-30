@@ -19,7 +19,7 @@ Both functions share three parameters: Height (height of the peak at the maximum
 
 Thus pseudo-voigt can be expressed in such way
 
-.. math:: pV(x) = I \codt (\eta \cdot g(x, \Gamma) + (1 - \eta) \cdot l(x, \Gamma))
+.. math:: pV(x) = I \cdot (\eta \cdot g(x, \Gamma) + (1 - \eta) \cdot l(x, \Gamma))
 
 where :math:`g(x, \Gamma)` and `l(x, \Gamma)` are normalized Gaussian and Lorentzian.
 
