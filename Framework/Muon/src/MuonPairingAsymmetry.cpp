@@ -28,10 +28,9 @@ bool checkPeriodInWorkspaceGroup(const int &period,
 }
 
 int countPeriods(Workspace_sptr ws) {
-  if(auto tmp = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)){
+  if (auto tmp = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     return tmp->getNumberOfEntries();
-  }
-  else {
+  } else {
     return 1;
   }
 }
@@ -245,7 +244,7 @@ void MuonPairingAsymmetry::validateManualGroups(
     errors["Group2"] =
         "A valid grouping must be supplied (e.g. \"1,2,3,4,5\").";
   }
-  
+
   if (std::is_permutation(group1.begin(), group1.end(), group2.begin())) {
     errors["Group1"] = "The two groups must be different.";
   }
@@ -259,9 +258,9 @@ void MuonPairingAsymmetry::validateGroupsWorkspaces(
   Workspace_sptr ws1 = this->getProperty("InputWorkspace1");
   Workspace_sptr ws2 = this->getProperty("InputWorkspace2");
   if (ws1->isGroup() && !ws2->isGroup())) {
-    errors["InputWorkspace1"] =
-        "InputWorkspace2 should be multi period to match InputWorkspace1";
-  }
+      errors["InputWorkspace1"] =
+          "InputWorkspace2 should be multi period to match InputWorkspace1";
+    }
   if (ws2->isGroup() && !ws1->isGroup()) {
     errors["InputWorkspace2"] =
         "InputWorkspace1 should be multi period to match InputWorkspace2";
