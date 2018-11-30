@@ -159,8 +159,6 @@ void SaveIsawUB::exec() {
 
     out << "\n";
     if (ModDim >= 1) {
-      out << "Max Order:        " << lattice.getMaxOrder() << " \n";
-      out << "Cross Terms:      " << lattice.getCrossTerm() << " \n";
       out << "Modulation Vector 1:   " << setw(12) << setprecision(4)
           << lattice.getdh(0) << setw(12) << setprecision(4) << lattice.getdk(0)
           << setw(12) << setprecision(4) << lattice.getdl(0) << " \n";
@@ -189,6 +187,10 @@ void SaveIsawUB::exec() {
           << lattice.getdherr(2) << setw(12) << setprecision(4)
           << lattice.getdkerr(2) << setw(12) << setprecision(4)
           << lattice.getdlerr(2) << " \n\n";
+    }
+    if (ModDim >= 1) {
+      out << "Max Order:        " << lattice.getMaxOrder() << " \n";
+      out << "Cross Terms:      " << lattice.getCrossTerm() << " \n";
     }
 
     out << "\n";
