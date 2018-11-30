@@ -42,8 +42,6 @@ protected slots:
   void runClicked();
 
 protected:
-  bool shouldEnablePlotResult() override { return true; };
-
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 

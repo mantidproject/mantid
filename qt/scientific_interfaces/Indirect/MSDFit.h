@@ -29,8 +29,6 @@ protected slots:
   void updateModelFitTypeString();
 
 protected:
-  bool shouldEnablePlotResult() override;
-
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 

@@ -74,13 +74,6 @@ void MSDFit::plotClicked() {
   setPlotResultIsPlotting(false);
 }
 
-bool MSDFit::shouldEnablePlotResult() {
-  for (auto i = 0u; i < m_msdFittingModel->numberOfWorkspaces(); ++i)
-    if (m_msdFittingModel->getNumberOfSpectra(i) > 1)
-      return true;
-  return false;
-}
-
 void MSDFit::setRunEnabled(bool enabled) {
   m_uiForm->pbRun->setEnabled(enabled);
 }

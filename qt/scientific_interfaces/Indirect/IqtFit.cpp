@@ -15,6 +15,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Workspace.h"
 
 #include <QMenu>
 
@@ -135,6 +136,25 @@ void IqtFit::plotResult() {
   setPlotResultIsPlotting(false);
 }
 
+void IqtFit::runClicked() { runTab(); }
+
+void IqtFit::setRunIsRunning(bool running) {
+	m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+	setButtonsEnabled(!running);
+}
+
+void IqtFit::setPlotResultIsPlotting(bool plotting) {
+	m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+	setButtonsEnabled(!plotting);
+}
+
+void IqtFit::setButtonsEnabled(bool enabled) {
+	setRunEnabled(enabled);
+	setPlotResultEnabled(enabled);
+	setSaveResultEnabled(enabled);
+	setFitSingleSpectrumEnabled(enabled);
+}
+
 void IqtFit::setRunEnabled(bool enabled) {
   m_uiForm->pbRun->setEnabled(enabled);
 }
@@ -144,32 +164,13 @@ void IqtFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->cbPlotType->setEnabled(enabled);
 }
 
-void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
-}
-
 void IqtFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
 
-void IqtFit::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
-  setSaveResultEnabled(enabled);
-  setFitSingleSpectrumEnabled(enabled);
+void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
+	m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
 }
-
-void IqtFit::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
-
-void IqtFit::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
-void IqtFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

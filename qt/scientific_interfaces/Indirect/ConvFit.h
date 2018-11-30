@@ -33,8 +33,6 @@ protected slots:
   void fitFunctionChanged();
 
 protected:
-  bool shouldEnablePlotResult() override { return true; };
-
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 

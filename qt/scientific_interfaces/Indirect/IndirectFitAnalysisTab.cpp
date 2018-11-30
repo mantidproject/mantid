@@ -29,6 +29,10 @@ using namespace Mantid::API;
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
+MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
+	return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+}
+
 void updateParameters(
     IFunction_sptr function,
     std::unordered_map<std::string, ParameterValue> const &parameters) {
@@ -880,25 +884,23 @@ void IndirectFitAnalysisTab::plotParameter(
 
 void IndirectFitAnalysisTab::plotAll(
     Mantid::API::MatrixWorkspace_sptr workspace, const std::size_t &index) {
-  const std::size_t numberOfSpectra =
-      m_fittingModel->getWorkspace(index)->getNumberHistograms();
-  if (numberOfSpectra > 1)
+  auto const numberOfDataPoints = workspace->blocksize();
+  if (numberOfDataPoints > 1)
     plotSpectrum(workspace);
   else
-    showMessageBox("Plotting the result of a workspace failed:\n\n "
-                   "Workspace result has only one data point");
+    showMessageBox("The plotting of data in one of the result workspaces failed:\n\n "
+                   "Workspace has only one data point");
 }
 
 void IndirectFitAnalysisTab::plotParameter(
     Mantid::API::MatrixWorkspace_sptr workspace,
     const std::string &parameterToPlot, const std::size_t &index) {
-  const std::size_t numberOfSpectra =
-      m_fittingModel->getWorkspace(index)->getNumberHistograms();
-  if (numberOfSpectra > 1)
+	auto const numberOfDataPoints = workspace->blocksize();
+  if (numberOfDataPoints > 1)
     plotSpectrum(workspace, parameterToPlot);
   else
-    showMessageBox("Plotting the result of a workspace failed:\n\n "
-                   "Workspace result has only one data point");
+		showMessageBox("The plotting of data in one of the result workspaces failed:\n\n "
+			"Workspace has only one data point");
 }
 
 void IndirectFitAnalysisTab::plotSpectrum(
@@ -1029,8 +1031,26 @@ void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
 }
 
 void IndirectFitAnalysisTab::enablePlotResult(bool error) {
-  setPlotResultEnabled(!shouldEnablePlotResult() ? false : !error);
+	if (!error)
+		setPlotResultEnabled(isResultWorkspacePlottable());
+	else
+		setPlotResultEnabled(!error);
 }
+
+bool IndirectFitAnalysisTab::isResultWorkspacePlottable() const {
+	auto const resultWorkspaces = m_fittingModel->getResultWorkspace();
+	if (resultWorkspaces)
+		return isResultWorkspacePlottable(resultWorkspaces);
+};
+
+bool IndirectFitAnalysisTab::isResultWorkspacePlottable(WorkspaceGroup_sptr resultWorkspaces) const {
+	for (auto const &workspace : *resultWorkspaces) {
+		auto const numberOfDataPoints = convertToMatrixWorkspace(workspace)->blocksize();
+		if (numberOfDataPoints > 1)
+			return true;
+	}
+	return false;
+};
 
 /**
  * Fills the specified combo box, with the specified parameters.
