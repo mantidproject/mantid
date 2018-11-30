@@ -58,8 +58,8 @@ IAlgorithm_sptr algorithmWithoutOptionalPropertiesSet(
 IAlgorithm_sptr
 setUpAlgorithmWithoutOptionalProperties(WorkspaceGroup_sptr ws,
                                         const std::string &name) {
-  std::vector<int> group1 = {1, 2};
-  std::vector<int> group2 = {3, 4};
+  const std::vector<int> group1 = {1, 2};
+  const std::vector<int> group2 = {3, 4};
 
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg = algorithmWithoutOptionalPropertiesSet(
@@ -222,8 +222,8 @@ public:
   }
 
   void test_that_non_empty_pair_name_must_be_supplied() {
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+    const std::vector<int> group1 = {1, 2};
+    const std::vector<int> group2 = {3, 4};
 
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "pair1");
     setUpADSWithWorkspace setup(ws);
@@ -235,8 +235,8 @@ public:
 
   void
   test_that_pair_names_with_alphanumeric_characters_or_underscores_are_allowed() {
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+    const std::vector<int> group1 = {1, 2};
+    const std::vector<int> group2 = {3, 4};
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "pairWS");
 
     std::vector<std::string> validNames = {"fwd", "fwd2", "bwd_2"};
@@ -248,8 +248,8 @@ public:
   }
 
   void test_that_exec_throws_if_pair_name_is_not_alphanumeric_or_underscored() {
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+    const std::vector<int> group1 = {1, 2};
+    const std::vector<int> group2 = {3, 4};
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "pair1");
 
     std::vector<std::string> invalidNames = {"@", "fwd!", "#1", "fwd @", "   "};
@@ -265,8 +265,8 @@ public:
   // --------------------------------------------------------------------------
 
   void test_that_exec_throws_if_alpha_is_negative() {
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+    const std::vector<int> group1 = {1, 2};
+    const std::vector<int> group2 = {3, 4};
     auto ws = createMultiPeriodWorkspaceGroup(2, 1, 10, "pairWS");
     auto alg =
         algorithmWithoutOptionalPropertiesSet("pairWS", "pair", group1, group2);
@@ -312,7 +312,7 @@ public:
 
   void test_that_at_least_one_period_must_be_specified() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-    std::vector<int> detectors = {1, 2};
+    const std::vector<int> detectors = {1, 2};
     auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "pair1");
 
     std::vector<int> summedPeriods = {};
@@ -353,8 +353,8 @@ public:
   test_that_single_period_data_combines_detectors_correctly_for_manually_specified_detectors() {
     // 4 spectra per period, 10 bins
     auto ws = createMultiPeriodAsymmetryData(1, 4, 10, "pairWS");
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+    const std::vector<int> group1 = {1, 2};
+    const std::vector<int> group2 = {3, 4};
 
     auto alg = setUpAlgorithmWithGroups(ws, group1, group2);
     alg->execute();
@@ -376,8 +376,8 @@ public:
   void
   test_that_single_period_data_combines_detectors_correctly_for_two_group_workspaces() {
 
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+    const std::vector<int> group1 = {1, 2};
+    const std::vector<int> group2 = {3, 4};
     auto ws1 = createGroupWorkspace("fwd", group1, 1);
     auto ws2 = createGroupWorkspace("bwd", group2, 1);
 
@@ -409,8 +409,8 @@ public:
   test_that_multi_period_data_combines_detectors_correctly_for_manually_specified_detectors_and_summed_periods() {
 
     auto ws = createMultiPeriodAsymmetryData(2, 4, 10, "pairWS");
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+    const std::vector<int> group1 = {1, 2};
+    const std::vector<int> group2 = {3, 4};
     auto alg = setUpAlgorithmWithGroups(ws, group1, group2);
     alg->setProperty("SummedPeriods", group1);
     alg->execute();
@@ -434,11 +434,11 @@ public:
   test_that_multi_period_data_combines_detectors_correctly_for_manually_specified_detectors_and_subtracted_periods() {
 
     auto ws = createMultiPeriodAsymmetryData(2, 4, 10, "pairWS");
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+    const std::vector<int> group1 = {1, 2};
+    const std::vector<int> group2 = {3, 4};
     auto alg = setUpAlgorithmWithGroups(ws, group1, group2);
-    std::vector<int> summedPeriods = {1};
-    std::vector<int> subtractedPeriods = {2};
+    const std::vector<int> summedPeriods = {1};
+    const std::vector<int> subtractedPeriods = {2};
     alg->setProperty("SummedPeriods", summedPeriods);
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
     alg->execute();
@@ -461,11 +461,11 @@ public:
   test_that_multi_period_data_combines_detectors_correctly_for_manually_specified_detectors_summed_and_subtracted_periods() {
 
     auto ws = createMultiPeriodAsymmetryData(3, 4, 10, "pairWS");
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+    const std::vector<int> group1 = {1, 2};
+    const std::vector<int> group2 = {3, 4};
     auto alg = setUpAlgorithmWithGroups(ws, group1, group2);
-    std::vector<int> summedPeriods = {1, 2};
-    std::vector<int> subtractedPeriods = {3};
+    const std::vector<int> summedPeriods = {1, 2};
+    const std::vector<int> subtractedPeriods = {3};
     alg->setProperty("SummedPeriods", summedPeriods);
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
     alg->execute();
@@ -487,14 +487,14 @@ public:
   void
   test_that_multi_period_data_combines_detectors_correctly_for_group_workspaces_summed_and_subtracted_periods() {
 
-    std::vector<int> group1 = {1, 2};
-    std::vector<int> group2 = {3, 4};
+    const std::vector<int> group1 = {1, 2};
+    const std::vector<int> group2 = {3, 4};
     auto ws1 = createMultiPeriodGroupedWorkspace("fwd", group1, 3);
     auto ws2 = createMultiPeriodGroupedWorkspace("bwd", group2, 3);
 
     auto alg = setUpAlgorithmWithGroupWorkspaceGroups(ws1, ws2);
-    std::vector<int> summedPeriods = {1, 2};
-    std::vector<int> subtractedPeriods = {3};
+    const std::vector<int> summedPeriods = {1, 2};
+    const std::vector<int> subtractedPeriods = {3};
     alg->setProperty("SummedPeriods", summedPeriods);
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
     alg->execute();

@@ -23,25 +23,26 @@ using namespace Mantid::Kernel;
 
 namespace {
 bool checkPeriodInWorkspaceGroup(const int &period,
-                                 WorkspaceGroup_sptr workspace) {
+                                 WorkspaceGroup_const_sptr workspace) {
   return period <= workspace->getNumberOfEntries();
 }
 
-bool isMultiPeriod(Workspace_sptr ws) {
-  if (auto tmp = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
-    return true;
-  }
-  return false;
+bool isMultiPeriod(Workspace_const_sptr ws) {
+  return ws->isGroup();
 }
 
 int countPeriods(Workspace_sptr ws) {
-  auto tmp = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-  return tmp->getNumberOfEntries();
+  if(auto tmp = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)){
+    return tmp->getNumberOfEntries();
+  }
+  else {
+    return 1;
+  }
 }
 
 bool checkConsistentPeriods(Workspace_sptr ws1, Workspace_sptr ws2) {
-  if (isMultiPeriod(ws1)) {
-    if (!isMultiPeriod(ws2)) {
+  if (ws1->isGroup()) {
+    if (!ws2->isGroup()) {
       return false;
     }
     if (countPeriods(ws1) != countPeriods(ws2)) {
@@ -89,7 +90,7 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
 WorkspaceGroup_sptr workspaceToWorkspaceGroup(Workspace_sptr workspace) {
 
   WorkspaceGroup_sptr ws1;
-  if (isMultiPeriod(workspace)) {
+  if (workspace->isGroup()) {
     ws1 = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   } else {
     ws1 = boost::make_shared<WorkspaceGroup>();
@@ -108,8 +109,8 @@ DECLARE_ALGORITHM(MuonPairingAsymmetry)
 
 void MuonPairingAsymmetry::init() {
   std::string emptyString("");
-  std::vector<int> defaultGrouping1 = {1};
-  std::vector<int> defaultGrouping2 = {2};
+  const std::vector<int> defaultGrouping1 = {1};
+  const std::vector<int> defaultGrouping2 = {2};
 
   declareProperty(
       Mantid::Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -160,7 +161,6 @@ void MuonPairingAsymmetry::init() {
   setPropertySettings("InputWorkspace",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
-
   declareProperty(make_unique<ArrayProperty<int>>(
                       "Group1", defaultGrouping1,
                       IValidator_sptr(new NullValidator), Direction::Input),
@@ -192,16 +192,16 @@ void MuonPairingAsymmetry::init() {
                           "SpecifyGroupsManually", Kernel::IS_EQUAL_TO, "1"));
 
   // Group common entries in the interface for clarity.
-  std::string workspaceGrp("Specify Group Workspaces");
+  const std::string workspaceGrp("Specify Group Workspaces");
   setPropertyGroup("InputWorkspace1", workspaceGrp);
   setPropertyGroup("InputWorkspace2", workspaceGrp);
 
-  std::string manualGroupGrp("Specify Detector ID Groups Manually");
+  const std::string manualGroupGrp("Specify Detector ID Groups Manually");
   setPropertyGroup("InputWorkspace", manualGroupGrp);
   setPropertyGroup("Group1", manualGroupGrp);
   setPropertyGroup("Group2", manualGroupGrp);
 
-  std::string periodGrp("Multi-period Data");
+  const std::string periodGrp("Multi-period Data");
   setPropertyGroup("SummedPeriods", periodGrp);
   setPropertyGroup("SubtractedPeriods", periodGrp);
 }
@@ -210,7 +210,7 @@ std::map<std::string, std::string> MuonPairingAsymmetry::validateInputs() {
   std::map<std::string, std::string> errors;
 
   // Pair name must be given, and must only contain characters, digits and "_"
-  std::string pairName = this->getProperty("PairName");
+  const std::string pairName = this->getProperty("PairName");
   if (pairName.empty()) {
     errors["PairName"] = "Pair name must be specified.";
   }
@@ -249,9 +249,8 @@ void MuonPairingAsymmetry::validateManualGroups(
     errors["Group2"] =
         "A valid grouping must be supplied (e.g. \"1,2,3,4,5\").";
   }
-  std::sort(group1.begin(), group1.end());
-  std::sort(group2.begin(), group2.end());
-  if (group1 == group2) {
+  
+  if (std::is_permutation(group1.begin(), group1.end(), group2.begin())) {
     errors["Group1"] = "The two groups must be different.";
   }
 
@@ -263,11 +262,11 @@ void MuonPairingAsymmetry::validateGroupsWorkspaces(
     std::map<std::string, std::string> &errors) {
   Workspace_sptr ws1 = this->getProperty("InputWorkspace1");
   Workspace_sptr ws2 = this->getProperty("InputWorkspace2");
-  if (isMultiPeriod(ws1) && !isMultiPeriod(ws2)) {
+  if (ws1->isGroup() && !ws2->isGroup())) {
     errors["InputWorkspace1"] =
         "InputWorkspace2 should be multi period to match InputWorkspace1";
   }
-  if (isMultiPeriod(ws2) && !isMultiPeriod(ws1)) {
+  if (ws2->isGroup() && !ws1->isGroup()) {
     errors["InputWorkspace2"] =
         "InputWorkspace1 should be multi period to match InputWorkspace2";
   }
@@ -275,7 +274,7 @@ void MuonPairingAsymmetry::validateGroupsWorkspaces(
     errors["InputWorkspace1"] = "InputWorkspace1 and InputWorkspace2 have "
                                 "inconsistent numbers of periods.";
   }
-  if (isMultiPeriod(ws1) && isMultiPeriod(ws2)) {
+  if (ws1->isGroup() && ws2->isGroup()) {
     validatePeriods(boost::dynamic_pointer_cast<WorkspaceGroup>(ws1), errors);
     validatePeriods(boost::dynamic_pointer_cast<WorkspaceGroup>(ws2), errors);
   }
@@ -328,8 +327,8 @@ MatrixWorkspace_sptr MuonPairingAsymmetry::execSpecifyGroupsManually() {
   auto groupedPeriods = createGroupWorkspace(inputWS);
 
   // Do the asymmetry calculation
-  std::vector<int> summedPeriods = getProperty("SummedPeriods");
-  std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
+  const std::vector<int> summedPeriods = getProperty("SummedPeriods");
+  const std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
   const double alpha = static_cast<double>(getProperty("Alpha"));
 
   return calcPairAsymmetryWithSummedAndSubtractedPeriods(
@@ -395,11 +394,10 @@ MuonPairingAsymmetry::pairAsymmetryCalc(MatrixWorkspace_sptr inputWS,
   // Ensure our specified spectra definitely point to the data
   inputWS->getSpectrum(0).setSpectrumNo(0);
   inputWS->getSpectrum(1).setSpectrumNo(1);
-  std::vector<int> fwdSpectra = {0};
-  std::vector<int> bwdSpectra = {1};
+  const std::vector<int> fwdSpectra = {0};
+  const std::vector<int> bwdSpectra = {1};
 
   IAlgorithm_sptr alg = this->createChildAlgorithm("AsymmetryCalc");
-  alg->setChild(true);
   alg->setProperty("InputWorkspace", inputWS);
   alg->setProperty("ForwardSpectra", fwdSpectra);
   alg->setProperty("BackwardSpectra", bwdSpectra);
@@ -442,8 +440,8 @@ MuonPairingAsymmetry::appendSpectra(MatrixWorkspace_sptr inputWS1,
 
 void MuonPairingAsymmetry::validatePeriods(
     WorkspaceGroup_sptr inputWS, std::map<std::string, std::string> &errors) {
-  std::vector<int> summedPeriods = getProperty("SummedPeriods");
-  std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
+  const std::vector<int> summedPeriods = getProperty("SummedPeriods");
+  const std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
   if (summedPeriods.empty() && subtractedPeriods.empty()) {
     errors["SummedPeriods"] = "At least one period must be specified";
   }
