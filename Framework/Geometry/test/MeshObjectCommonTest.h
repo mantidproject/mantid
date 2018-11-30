@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_MESHOBJECTCOMMONTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <limits>
 
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
 #include "MantidKernel/V3D.h"
