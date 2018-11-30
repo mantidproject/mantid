@@ -10,6 +10,7 @@
 #include "ui_IndirectFitDataView.h"
 
 #include "../General/UserInputValidator.h"
+#include "DllConfig.h"
 
 #include <QTabWidget>
 
@@ -17,7 +18,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectFitDataView : public QTabWidget {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataView : public QTabWidget {
   Q_OBJECT
 public:
   IndirectFitDataView(QWidget *parent);

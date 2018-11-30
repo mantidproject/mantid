@@ -12,6 +12,7 @@
 #include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <QObject>
@@ -20,10 +21,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-/**
-  A presenter.
-*/
-class DLLExport IndirectFitDataPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject {
   Q_OBJECT
 public:
   IndirectFitDataPresenter(IndirectFittingModel *model,

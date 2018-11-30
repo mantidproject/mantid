@@ -3,6 +3,7 @@
 ###########################################################################
 set ( TEST_FILES
   IndirectDataTablePresenterTest.h
+  IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
   IndirectFitOutputTest.h
   IndirectFitPlotModelTest.h
