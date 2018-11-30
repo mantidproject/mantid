@@ -25,7 +25,7 @@ using namespace Mantid::Kernel;
 namespace {
 
 bool checkPeriodInWorkspaceGroup(const int &period,
-                                 WorkspaceGroup_sptr workspace) {
+                                 WorkspaceGroup_const_sptr &workspace) {
   return period <= workspace->getNumberOfEntries();
 }
 
@@ -46,7 +46,7 @@ MatrixWorkspace_sptr estimateAsymmetry(const Workspace_sptr &inputWS,
   asym->setProperty("InputWorkspace", inputWS);
   asym->setProperty("WorkspaceName", inputWS->getName());
   if (index > -1) {
-    std::vector<int> spec(1, index);
+    const std::vector<int> spec(1, index);
     asym->setProperty("Spectra", spec);
   }
   asym->setProperty("OutputWorkspace", "__NotUsed__");
@@ -108,7 +108,7 @@ MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
 
   auto outputWS = WorkspaceFactory::Instance().create(workspace, 1);
 
-  std::vector<size_t> wsIndices =
+  const std::vector<size_t> wsIndices =
       workspace->getIndicesFromDetectorIDs(detectorIDs);
 
   if (wsIndices.size() != detectorIDs.size())
@@ -137,9 +137,9 @@ namespace Muon {
 DECLARE_ALGORITHM(MuonGroupingAsymmetry)
 
 void MuonGroupingAsymmetry::init() {
-  std::string emptyString("");
-  std::vector<int> defaultGrouping = {1};
-  std::vector<int> defaultPeriods = {1};
+  const std::string emptyString("");
+  const std::vector<int> defaultGrouping = {1};
+  const std::vector<int> defaultPeriods = {1};
 
   declareProperty(
       Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
@@ -204,7 +204,7 @@ void MuonGroupingAsymmetry::init() {
 std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
   std::map<std::string, std::string> errors;
 
-  std::string groupName = this->getProperty("GroupName");
+  const std::string groupName = this->getProperty("GroupName");
   if (groupName.empty()) {
     errors["GroupName"] = "Group name must be specified.";
   }
@@ -215,12 +215,9 @@ std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
         "The group name must contain alphnumeric characters and _ only.";
   }
 
-  WorkspaceGroup_sptr inputWS = getProperty("InputWorkspace");
-  std::vector<int> summedPeriods = getProperty("SummedPeriods");
-  std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
-
-  WorkspaceGroup_sptr inputGroup =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS);
+  WorkspaceGroup_const_sptr inputWS = getProperty("InputWorkspace");
+  const std::vector<int> summedPeriods = getProperty("SummedPeriods");
+  const std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
 
   if (summedPeriods.empty() && subtractedPeriods.empty()) {
     errors["SummedPeriods"] = "At least one period must be specified";
@@ -229,7 +226,7 @@ std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
   if (!summedPeriods.empty()) {
     const int highestSummedPeriod =
         *std::max_element(summedPeriods.begin(), summedPeriods.end());
-    if (!checkPeriodInWorkspaceGroup(highestSummedPeriod, inputGroup)) {
+    if (!checkPeriodInWorkspaceGroup(highestSummedPeriod, inputWS)) {
       errors["SummedPeriods"] = "Requested period (" +
                                 std::to_string(highestSummedPeriod) +
                                 ") exceeds periods in data";
@@ -243,7 +240,7 @@ std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
   if (!subtractedPeriods.empty()) {
     const int highestSubtractedPeriod =
         *std::max_element(subtractedPeriods.begin(), subtractedPeriods.end());
-    if (!checkPeriodInWorkspaceGroup(highestSubtractedPeriod, inputGroup)) {
+    if (!checkPeriodInWorkspaceGroup(highestSubtractedPeriod, inputWS)) {
       errors["SubtractedPeriods"] = "Requested period (" +
                                     std::to_string(highestSubtractedPeriod) +
                                     ") exceeds periods in data";
@@ -269,7 +266,7 @@ std::map<std::string, std::string> MuonGroupingAsymmetry::validateInputs() {
 
 WorkspaceGroup_sptr
 MuonGroupingAsymmetry::createGroupWorkspace(WorkspaceGroup_sptr inputWS) {
-  std::vector<int> group = this->getProperty("Grouping");
+  const std::vector<int> group = this->getProperty("Grouping");
   auto groupedPeriods = boost::make_shared<WorkspaceGroup>();
   // for each period
   for (auto &&workspace : *inputWS) {
@@ -289,8 +286,8 @@ void MuonGroupingAsymmetry::exec() {
   const double endX = getProperty("AsymmetryTimeMax");
   const double normalizationIn = getProperty("NormalizationIn");
 
-  std::vector<int> summedPeriods = getProperty("SummedPeriods");
-  std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
+  const std::vector<int> summedPeriods = getProperty("SummedPeriods");
+  const std::vector<int> subtractedPeriods = getProperty("SubtractedPeriods");
 
   WorkspaceGroup_sptr groupedWS = createGroupWorkspace(inputWS);
 

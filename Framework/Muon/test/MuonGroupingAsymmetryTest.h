@@ -89,7 +89,7 @@ public:
   }
 
   void test_algorithm_executes_with_default_arguments() {
-    std::vector<int> group = {1};
+    const std::vector<int> group = {1};
     auto ws = createMultiPeriodWorkspaceGroup(1, 5, 10, "asym");
     auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "asym", group);
 
@@ -135,10 +135,10 @@ public:
 
   void
   test_that_group_names_with_alphanumeric_characters_or_underscores_are_allowed() {
-    std::vector<int> group = {1};
+    const std::vector<int> group = {1};
     auto ws = createMultiPeriodWorkspaceGroup(1, 1, 10, "group1");
 
-    std::vector<std::string> validNames = {"fwd", "fwd2", "bwd_2"};
+    const std::vector<std::string> validNames = {"fwd", "fwd2", "bwd_2"};
     for (auto &&validName : validNames) {
       auto alg = setUpAlgorithmWithoutOptionalProperties(ws, validName, group);
       TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -147,10 +147,10 @@ public:
 
   void
   test_that_exec_throws_if_group_name_is_not_alphanumeric_or_underscored() {
-    std::vector<int> group = {1};
+    const std::vector<int> group = {1};
     auto ws = createMultiPeriodWorkspaceGroup(1, 1, 10, "group1");
 
-    std::vector<std::string> invalidNames = {"@", "fwd!", "#1", "fwd @", "   "};
+    const std::vector<std::string> invalidNames = {"@", "fwd!", "#1", "fwd @", "   "};
     for (auto &&invalidName : invalidNames) {
       auto alg =
           setUpAlgorithmWithoutOptionalProperties(ws, invalidName, group);
@@ -166,7 +166,7 @@ public:
   test_that_cannot_add_spectra_to_group_which_exceed_those_in_the_workspace() {
     auto ws = createMultiPeriodWorkspaceGroup(1, 5, 10, "asym");
 
-    std::vector<int> detectors = {6, 7, 8, 9, 10};
+    const std::vector<int> detectors = {6, 7, 8, 9, 10};
     auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "asym", detectors);
 
     alg->execute();
@@ -179,11 +179,11 @@ public:
 
   void test_that_at_least_one_period_must_be_specified() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-    std::vector<int> detectors = {1, 2};
+    const std::vector<int> detectors = {1, 2};
     auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group", detectors);
 
-    std::vector<int> summedPeriods = {};
-    std::vector<int> subtractedPeriods = {};
+    const std::vector<int> summedPeriods = {};
+    const std::vector<int> subtractedPeriods = {};
     alg->setProperty("SummedPeriods", summedPeriods);
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
@@ -193,10 +193,10 @@ public:
   void
   test_that_supplying_too_many_periods_to_SummedPeriods_throws_on_execute() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-    std::vector<int> detectors = {1, 2, 3};
+    const std::vector<int> detectors = {1, 2, 3};
     auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group", detectors);
 
-    std::vector<int> summedPeriods = {3};
+    const std::vector<int> summedPeriods = {3};
     alg->setProperty("SummedPeriods", summedPeriods);
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
@@ -205,10 +205,10 @@ public:
   void
   test_that_supplying_too_many_periods_to_SubtractedPeriods_throws_on_execute() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-    std::vector<int> detectors = {1, 2, 3};
+    const std::vector<int> detectors = {1, 2, 3};
     auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group", detectors);
 
-    std::vector<int> subtractedPeriods = {3};
+    const std::vector<int> subtractedPeriods = {3};
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
@@ -216,10 +216,10 @@ public:
 
   void test_algorithm_fails_if_summed_periods_has_negative_entry() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-    std::vector<int> detectors = {1, 2, 3};
+    const std::vector<int> detectors = {1, 2, 3};
     auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group", detectors);
 
-    std::vector<int> summedPeriods = {-1};
+    const std::vector<int> summedPeriods = {-1};
     alg->setProperty("SummedPeriods", summedPeriods);
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
@@ -227,10 +227,10 @@ public:
 
   void test_algorithm_fails_if_subtracted_periods_has_negative_entry() {
     auto ws = createMultiPeriodWorkspaceGroup(2, 3, 10, "group");
-    std::vector<int> detectors = {1, 2, 3};
+    const std::vector<int> detectors = {1, 2, 3};
     auto alg = setUpAlgorithmWithoutOptionalProperties(ws, "group", detectors);
 
-    std::vector<int> subtractedPeriods = {-1};
+    const std::vector<int> subtractedPeriods = {-1};
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
@@ -244,7 +244,7 @@ public:
   test_grouping_with_single_detector_and_asymmetry_analysis_gives_correct_values() {
 
     auto ws = createMultiPeriodAsymmetryData(1, 3, 10, "group_asym");
-    std::vector<int> detectors = {1};
+    const std::vector<int> detectors = {1};
     auto alg =
         setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
     alg->execute();
@@ -266,7 +266,7 @@ public:
   test_grouping_with_multiple_detectors_and_asymmetry_analysis_gives_correct_values() {
 
     auto ws = createMultiPeriodAsymmetryData(1, 2, 10, "group_asym");
-    std::vector<int> detectors = {1, 2};
+    const std::vector<int> detectors = {1, 2};
     auto alg =
         setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
     alg->execute();
@@ -292,8 +292,8 @@ public:
     auto alg =
         setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
 
-    std::vector<int> summedPeriods = {1};
-    std::vector<int> subtractedPeriods = {2, 3};
+    const std::vector<int> summedPeriods = {1};
+    const std::vector<int> subtractedPeriods = {2, 3};
     alg->setProperty("SummedPeriods", summedPeriods);
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
     alg->execute();
@@ -318,8 +318,8 @@ public:
     auto alg =
         setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
 
-    std::vector<int> summedPeriods = {3, 2};
-    std::vector<int> subtractedPeriods = {1};
+    const std::vector<int> summedPeriods = {3, 2};
+    const std::vector<int> subtractedPeriods = {1};
     alg->setProperty("SummedPeriods", summedPeriods);
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
     alg->execute();
@@ -344,8 +344,8 @@ public:
     auto alg =
         setUpAlgorithmWithoutOptionalProperties(ws, "group_asym", detectors);
 
-    std::vector<int> summedPeriods = {3, 2};
-    std::vector<int> subtractedPeriods = {1};
+    const std::vector<int> summedPeriods = {3, 2};
+    const std::vector<int> subtractedPeriods = {1};
     alg->setProperty("SummedPeriods", summedPeriods);
     alg->setProperty("SubtractedPeriods", subtractedPeriods);
     alg->setProperty("NormalizationIn", 15.0);
