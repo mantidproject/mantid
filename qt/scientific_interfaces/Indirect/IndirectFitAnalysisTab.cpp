@@ -1043,7 +1043,7 @@ bool IndirectFitAnalysisTab::isResultWorkspacePlottable() const {
 		return isResultWorkspacePlottable(resultWorkspaces);
 };
 
-bool IndirectFitAnalysisTab::isResultWorkspacePlottable(WorkspaceGroup_sptr resultWorkspaces) const {
+bool IndirectFitAnalysisTab::isResultWorkspacePlottable(Mantid::API::WorkspaceGroup_sptr resultWorkspaces) const {
 	for (auto const &workspace : *resultWorkspaces) {
 		auto const numberOfDataPoints = convertToMatrixWorkspace(workspace)->blocksize();
 		if (numberOfDataPoints > 1)
