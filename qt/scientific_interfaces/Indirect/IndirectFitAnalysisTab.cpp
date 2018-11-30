@@ -30,7 +30,7 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
 MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
-	return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 void updateParameters(
@@ -888,19 +888,21 @@ void IndirectFitAnalysisTab::plotAll(
   if (numberOfDataPoints > 1)
     plotSpectrum(workspace);
   else
-    showMessageBox("The plotting of data in one of the result workspaces failed:\n\n "
-                   "Workspace has only one data point");
+    showMessageBox(
+        "The plotting of data in one of the result workspaces failed:\n\n "
+        "Workspace has only one data point");
 }
 
 void IndirectFitAnalysisTab::plotParameter(
     Mantid::API::MatrixWorkspace_sptr workspace,
     const std::string &parameterToPlot, const std::size_t &index) {
-	auto const numberOfDataPoints = workspace->blocksize();
+  auto const numberOfDataPoints = workspace->blocksize();
   if (numberOfDataPoints > 1)
     plotSpectrum(workspace, parameterToPlot);
   else
-		showMessageBox("The plotting of data in one of the result workspaces failed:\n\n "
-			"Workspace has only one data point");
+    showMessageBox(
+        "The plotting of data in one of the result workspaces failed:\n\n "
+        "Workspace has only one data point");
 }
 
 void IndirectFitAnalysisTab::plotSpectrum(
@@ -1031,25 +1033,27 @@ void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
 }
 
 void IndirectFitAnalysisTab::enablePlotResult(bool error) {
-	if (!error)
-		setPlotResultEnabled(isResultWorkspacePlottable());
-	else
-		setPlotResultEnabled(!error);
+  if (!error)
+    setPlotResultEnabled(isResultWorkspacePlottable());
+  else
+    setPlotResultEnabled(!error);
 }
 
 bool IndirectFitAnalysisTab::isResultWorkspacePlottable() const {
-	auto const resultWorkspaces = m_fittingModel->getResultWorkspace();
-	if (resultWorkspaces)
-		return isResultWorkspacePlottable(resultWorkspaces);
+  auto const resultWorkspaces = m_fittingModel->getResultWorkspace();
+  if (resultWorkspaces)
+    return isResultWorkspacePlottable(resultWorkspaces);
 };
 
-bool IndirectFitAnalysisTab::isResultWorkspacePlottable(Mantid::API::WorkspaceGroup_sptr resultWorkspaces) const {
-	for (auto const &workspace : *resultWorkspaces) {
-		auto const numberOfDataPoints = convertToMatrixWorkspace(workspace)->blocksize();
-		if (numberOfDataPoints > 1)
-			return true;
-	}
-	return false;
+bool IndirectFitAnalysisTab::isResultWorkspacePlottable(
+    Mantid::API::WorkspaceGroup_sptr resultWorkspaces) const {
+  for (auto const &workspace : *resultWorkspaces) {
+    auto const numberOfDataPoints =
+        convertToMatrixWorkspace(workspace)->blocksize();
+    if (numberOfDataPoints > 1)
+      return true;
+  }
+  return false;
 };
 
 /**

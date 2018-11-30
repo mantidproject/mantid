@@ -138,20 +138,20 @@ void IqtFit::plotResult() {
 void IqtFit::runClicked() { runTab(); }
 
 void IqtFit::setRunIsRunning(bool running) {
-	m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-	setButtonsEnabled(!running);
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
 }
 
 void IqtFit::setPlotResultIsPlotting(bool plotting) {
-	m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-	setButtonsEnabled(!plotting);
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
 }
 
 void IqtFit::setButtonsEnabled(bool enabled) {
-	setRunEnabled(enabled);
-	setPlotResultEnabled(enabled);
-	setSaveResultEnabled(enabled);
-	setFitSingleSpectrumEnabled(enabled);
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
 }
 
 void IqtFit::setRunEnabled(bool enabled) {
@@ -168,7 +168,7 @@ void IqtFit::setSaveResultEnabled(bool enabled) {
 }
 
 void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
-	m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
 }
 
 } // namespace IDA

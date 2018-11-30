@@ -87,10 +87,10 @@ calculateBinParameters(QString wsName, QString resName, double energyMin,
     propsTable = toIqt->getProperty("ParameterWorkspace");
     // the algorithm can create output even if it failed...
     auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
-		deleter->initialize();
-		deleter->setChild(true);
-		deleter->setProperty("Workspace", paramTableName);
-		deleter->execute();
+    deleter->initialize();
+    deleter->setChild(true);
+    deleter->setProperty("Workspace", paramTableName);
+    deleter->execute();
   } catch (std::exception &) {
     return std::make_tuple(false, 0.0f, 0, 0);
   }

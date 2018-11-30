@@ -140,8 +140,9 @@ protected:
 
   void updatePlotOptions(QComboBox *cbPlotType);
   void enablePlotResult(bool error);
-	bool isResultWorkspacePlottable() const;
-	bool isResultWorkspacePlottable(Mantid::API::WorkspaceGroup_sptr resultWorkspaces) const;
+  bool isResultWorkspacePlottable() const;
+  bool isResultWorkspacePlottable(
+      Mantid::API::WorkspaceGroup_sptr resultWorkspaces) const;
 
   void setPlotOptions(QComboBox *cbPlotType,
                       const std::vector<std::string> &parameters) const;
