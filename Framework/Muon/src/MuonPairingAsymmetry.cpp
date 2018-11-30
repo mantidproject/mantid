@@ -35,7 +35,8 @@ int countPeriods(Workspace_const_sptr ws) {
   }
 }
 
-bool checkConsistentPeriods(Workspace_const_sptr ws1, Workspace_const_sptr ws2) {
+bool checkConsistentPeriods(Workspace_const_sptr ws1,
+                            Workspace_const_sptr ws2) {
   if (ws1->isGroup()) {
     if (!ws2->isGroup()) {
       return false;
@@ -258,9 +259,9 @@ void MuonPairingAsymmetry::validateGroupsWorkspaces(
   Workspace_sptr ws1 = this->getProperty("InputWorkspace1");
   Workspace_sptr ws2 = this->getProperty("InputWorkspace2");
   if (ws1->isGroup() && !ws2->isGroup()) {
-      errors["InputWorkspace1"] =
-          "InputWorkspace2 should be multi period to match InputWorkspace1";
-    }
+    errors["InputWorkspace1"] =
+        "InputWorkspace2 should be multi period to match InputWorkspace1";
+  }
   if (ws2->isGroup() && !ws1->isGroup()) {
     errors["InputWorkspace2"] =
         "InputWorkspace1 should be multi period to match InputWorkspace2";
