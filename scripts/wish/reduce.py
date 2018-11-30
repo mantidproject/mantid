@@ -244,6 +244,8 @@ class Wish:
         wvan = self.read(van, panel, "raw")
         self.data_directory = "/archive/ndxwish/Instrument/data/cycle_" + cycle_empty + "/"
         self.datafile = self.get_file_name(empty, "raw")
+        wempty = self.read(empty, panel, "raw")
+        mantid.Minus(LHSWorkspace=wvan, RHSWorkspace=wempty, OutputWorkspace=wvan)
         mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="Wavelength", EMode="Elastic")
         mantid.CylinderAbsorption(InputWorkspace=wvan, OutputWorkspace="T",
                                   CylinderSampleHeight=str(vh), CylinderSampleRadius=str(vr),
@@ -255,7 +257,6 @@ class Wish:
         mantid.DeleteWorkspace("T")
         mantid.ConvertUnits(InputWorkspace=wvan, OutputWorkspace=wvan, Target="TOF", EMode="Elastic")
         vanfoc = self.focus(wvan, panel)
-        mantid.DeleteWorkspace(wvan)
         # StripPeaks(vanfoc,vanfoc)
         # SmoothData(vanfoc,vanfoc,str(smoothing))
         return
@@ -404,6 +405,7 @@ def shared_load_files(extension, filename, output, spectrum_max, spectrum_min, i
     else:
         mantid.LoadRaw(Filename=filename, OutputWorkspace=output, SpectrumMin=spectrum_min, SpectrumMax=spectrum_max,
                        LoadLogFiles="0")
+    mantid.Rebin(InputWorkspace=output, OutputWorkspace=output, Params='6000,-0.00063,110000')
     if not is_monitor:
         mantid.MaskBins(InputWorkspace=output,  OutputWorkspace=output, XMin=99900, XMax=106000)
     return True
