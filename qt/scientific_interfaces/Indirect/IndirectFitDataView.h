@@ -21,16 +21,16 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL IndirectFitDataView : public QTabWidget {
   Q_OBJECT
 public:
-  IndirectFitDataView(QWidget *parent);
+  IndirectFitDataView(QWidget *parent = nullptr);
   ~IndirectFitDataView() override = default;
 
   QTableWidget *getDataTable() const;
-  bool isMultipleDataTabSelected() const;
+  virtual bool isMultipleDataTabSelected() const;
   bool isResolutionHidden() const;
   void setResolutionHidden(bool hide);
   void disableMultipleDataTab();
 
-  std::string getSelectedSample() const;
+  virtual std::string getSelectedSample() const;
   std::string getSelectedResolution() const;
 
   QStringList getSampleWSSuffices() const;
