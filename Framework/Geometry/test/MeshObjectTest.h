@@ -8,7 +8,7 @@
 #define MANTID_TESTMESHOBJECT__
 
 #include "MantidGeometry/Objects/MeshObject.h"
-
+#include "MantidGeometry/Objects/MeshObjectCommon.h"
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -236,10 +236,9 @@ public:
   }
 
   void testTooManyVertices() {
-    auto tooManyVertices = std::vector<V3D>(1e8);
-    auto triangles = std::vector<uint32_t>(1000);
+    
     TS_ASSERT_THROWS_ANYTHING(
-        MeshObject(triangles, tooManyVertices, Mantid::Kernel::Material()));
+        MeshObjectCommon::checkVertexLimit((2^32)+1);
   }
 
   void testMaterial() {
