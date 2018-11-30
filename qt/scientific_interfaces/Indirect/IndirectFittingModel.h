@@ -79,8 +79,8 @@ public:
                          std::size_t spectrum);
   virtual void setEndX(double endX, std::size_t dataIndex,
                        std::size_t spectrum);
-  virtual void setExcludeRegion(const std::string &exclude, std::size_t dataIndex,
-                        std::size_t spectrum);
+  virtual void setExcludeRegion(const std::string &exclude,
+                                std::size_t dataIndex, std::size_t spectrum);
 
   void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
