@@ -80,7 +80,7 @@ public:
     m_presenter = std::make_unique<IndirectDataTablePresenter>(
         std::move(m_model.get()), std::move(m_table.get()));
 
-    SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
+    SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(5));
     m_model->addWorkspace("WorkspaceName");
   }
 
@@ -100,7 +100,6 @@ public:
   ///----------------------------------------------------------------------
 
   void test_that_the_model_has_been_instantiated_correctly() {
-    std::size_t const selectedSpectrum(3);
     ON_CALL(*m_model, isMultiFit()).WillByDefault(Return(false));
 
     EXPECT_CALL(*m_model, isMultiFit()).Times(1).WillOnce(Return(false));
@@ -364,8 +363,6 @@ private:
   std::unique_ptr<QTableWidget> m_table;
   std::unique_ptr<MockIndirectDataTableModel> m_model;
   std::unique_ptr<IndirectDataTablePresenter> m_presenter;
-
-  SetUpADSWithWorkspace *m_ads;
 };
 
 #endif
