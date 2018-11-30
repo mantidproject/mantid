@@ -102,6 +102,7 @@ def WorkspaceName(file_path):
 
 
 def RegenerateReferenceFile(reference_file_directory, output_filename):
+    '''Generate the reference file from a given folder of output workspaces'''
     files = os.listdir(reference_file_directory)
     workspace_names = []
     for file in files:
@@ -116,8 +117,7 @@ def RegenerateReferenceFile(reference_file_directory, output_filename):
 
 
 def RegenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers):
-    "This is used to generate the test input file from a range of run numbers"
-    "and transmission runs."
+    '''Generate the test input file from a range of run numbers and transmission runs.'''
     # Load transmission runs
     for run in transmission_run_names:
         Load('{}.raw'.format(run), OutputWorkspace=run)
@@ -150,107 +150,117 @@ def CreateTransmissionWorkspaces(runs1, runs2, output_names):
         DeleteWorkspace('TRANS_LAM_'+run2)
 
 
-def EventRef(runno,angle,stop=0,start=0,DB='TRANS'):
+def EventRef(run_number,angle,start=0,stop=0,DB='TRANS'):
     '''Event data time-slicing'''
-    runno=str(runno)
-    w1=mtd[runno]
-    total = w1.getRun().getLogData('gd_prtn_chrg').value
-    end = w1.getRun().getLogData('duration').value
+    # Filter the input workspace by the given start/stop time (or end time
+    # if stop time is not given)
+    run_name=str(run_number)
+    run_workspace=mtd[run_name]
     if stop==0:
-        stoptime=end
+        stoptime=run_workspace.getRun().getLogData('duration').value
     else:
         stoptime=stop
-    FilterByTime(InputWorkspace=runno, OutputWorkspace=runno+'_filter', StartTime=start, StopTime=stoptime)
-    wt=mtd[runno+'_filter']
-    slice = wt.getRun().getLogData('gd_prtn_chrg').value
-    fraction = slice/total
-    duration = wt.getRun().getLogData('duration').value
+    filter_ws_name=run_name+'_filter'
+    FilterByTime(InputWorkspace=run_name, OutputWorkspace=filter_ws_name, StartTime=start, StopTime=stoptime)
+    # Calculate the fraction of proton charge in this slice
+    filter_workspace=mtd[filter_ws_name]
+    slice_proton_charge = filter_workspace.getRun().getLogData('gd_prtn_chrg').value
+    total_proton_charge = run_workspace.getRun().getLogData('gd_prtn_chrg').value
+    fraction = slice_proton_charge/total_proton_charge
+    duration = filter_workspace.getRun().getLogData('duration').value
     print('Fraction:',fraction)
     print('Slice:',slice)
     print('Duration:',duration)
-
-    Scale(InputWorkspace=runno+'_monitors',Factor=fraction,OutputWorkspace='mon_slice')
-    Rebin(InputWorkspace=runno+'_filter', OutputWorkspace=runno+'_'+str(start)+'_'+str(stop), Params='0,100,100000', PreserveEvents=False)
+    # Scale monitors by proton charge and add them to the slice workspace
+    Scale(InputWorkspace=run_name+'_monitors',Factor=fraction,OutputWorkspace='mon_slice')
     Rebin(InputWorkspace='mon_slice', OutputWorkspace='mon_rebin', Params='0,100,100000', PreserveEvents=False)
-    AppendSpectra(InputWorkspace1='mon_rebin', InputWorkspace2=runno+'_'+str(start)+'_'+str(stop),
-                  OutputWorkspace=runno+'_'+str(start)+'_'+str(stop), MergeLogs=False)
-    ReflectometryReductionOneAuto(InputWorkspace=runno+'_'+str(start)+'_'+str(stop), FirstTransmissionRun=DB,
-                                  OutputWorkspaceBinned=runno+'_'+str(start)+'_'+str(stop)+'_ref_binned',
-                                  OutputWorkspace=runno+'_'+str(start)+'_'+str(stop)+'_ref',
-                                  OutputWorkspaceWavelength=runno+'_'+str(start)+'_'+str(stop)+'_lam',Debug=True)
+    slice_name = str(run_number) + '_' + str(start) + '_' + str(stop)
+    Rebin(InputWorkspace=filter_ws_name, OutputWorkspace=slice_name, Params='0,100,100000', PreserveEvents=False)
+    AppendSpectra(InputWorkspace1='mon_rebin', InputWorkspace2=slice_name,
+                  OutputWorkspace=slice_name, MergeLogs=False)
+    # Reduce this slice
+    ReflectometryReductionOneAuto(InputWorkspace=slice_name, FirstTransmissionRun=DB,
+                                  OutputWorkspaceBinned=slice_name+'_ref_binned',
+                                  OutputWorkspace=slice_name+'_ref',
+                                  OutputWorkspaceWavelength=slice_name+'_lam',Debug=True)
+    # Delete interim workspaces
+    DeleteWorkspace(slice_name+'_lam')
+    DeleteWorkspace(slice_name)
+    DeleteWorkspace(slice_name+'_ref')
+    DeleteWorkspace('mon_slice')
+    DeleteWorkspace('mon_rebin')
 
 
-def QuickRef(runs=[], trans=[], angles=[]):
+def QuickRef(run_numbers=[], trans_workspace_names=[], angles=[]):
     '''Use of "QuickRef" - scripted reduction'''
     list=''
     if not angles:
-        for i in range(len(runs)):
-            run1=runs[i]
-            trans1=trans[i]
-            ReflectometryReductionOneAuto(InputWorkspace=str(run1)+'.raw', FirstTransmissionRun=str(trans1),
-                                          OutputWorkspaceBinned=str(run1)+'_IvsQ_binned', OutputWorkspace=str(run1)+'_IvsQ',
-                                          OutputWorkspaceWavelength=str(run1)+'_IvsLam',Debug=True)
-            list=list+str(run1)+'_IvsQ_binned'+','
+        for run_index in range(len(run_numbers)):
+            run_number=run_numbers[run_index]
+            run_name=str(run_number)
+            trans_workspace_name=str(trans_workspace_names[run_index])
+            ReflectometryReductionOneAuto(InputWorkspace=run_name+'.raw', FirstTransmissionRun=trans_workspace_name,
+                                          OutputWorkspaceBinned=run_name+'_IvsQ_binned', OutputWorkspace=run_name+'_IvsQ',
+                                          OutputWorkspaceWavelength=run_name+'_IvsLam',Debug=True)
+            list=list+run_name+'_IvsQ_binned'+','
     else:
-        for i in range(len(runs)):
-            run1=runs[i]
-            trans1=trans[i]
-            theta=angles[i]
+        for run_index in range(len(run_numbers)):
+            run_number=run_numbers[run_index]
+            run_name=str(run_number)
+            trans_workspace_name=str(trans_workspace_names[run_index])
+            theta=angles[run_index]
             if theta == 0.8:
-                ReflectometryReductionOneAuto(InputWorkspace=str(run1)+'.raw', FirstTransmissionRun=str(trans1),
-                                              OutputWorkspaceBinned=str(run1)+'_IvsQ_binned', OutputWorkspace=str(run1)+'_IvsQ',
-                                              OutputWorkspaceWavelength=str(run1)+'_IvsLam', ThetaIn=theta, WavelengthMin=2.6,Debug=True)
+                ReflectometryReductionOneAuto(InputWorkspace=run_name+'.raw', FirstTransmissionRun=trans_workspace_name,
+                                              OutputWorkspaceBinned=run_name+'_IvsQ_binned', OutputWorkspace=run_name+'_IvsQ',
+                                              OutputWorkspaceWavelength=run_name+'_IvsLam', ThetaIn=theta, WavelengthMin=2.6,Debug=True)
             else:
-                ReflectometryReductionOneAuto(InputWorkspace=str(run1)+'.raw', FirstTransmissionRun=str(trans1),
-                                              OutputWorkspaceBinned=str(run1)+'_IvsQ_binned', OutputWorkspace=str(run1)+'_IvsQ',
-                                              OutputWorkspaceWavelength=str(run1)+'_IvsLam', ThetaIn=theta,Debug=True)
-            if i == len(runs)-1:
-                list=list+str(run1)+'_IvsQ_binned'
+                ReflectometryReductionOneAuto(InputWorkspace=run_name+'.raw', FirstTransmissionRun=trans_workspace_name,
+                                              OutputWorkspaceBinned=run_name+'_IvsQ_binned', OutputWorkspace=run_name+'_IvsQ',
+                                              OutputWorkspaceWavelength=run_name+'_IvsLam', ThetaIn=theta,Debug=True)
+            if run_index == len(run_numbers)-1:
+                list=list+run_name+'_IvsQ_binned'
             else:
-                list=list+str(run1)+'_IvsQ_binned'+','
-    runno2=str(runs[-1])
-    runno2=runno2[-2:]
-    dqq = NRCalculateSlitResolution(Workspace=str(runs[0])+'_IvsQ')
-    Stitch1DMany(InputWorkspaces=list, OutputWorkspace=str(runs[0])+'_'+str(runno2), Params='-'+str(dqq), ScaleRHSWorkspace=1)
+                list=list+run_name+'_IvsQ_binned'+','
+    first_run_name=str(run_numbers[0])
+    last_run_name=str(run_numbers[-1])
+    last_run_short_name=last_run_name[-2:]
+    dqq = NRCalculateSlitResolution(Workspace=first_run_name+'_IvsQ')
+    Stitch1DMany(InputWorkspaces=list, OutputWorkspace=first_run_name+'_'+last_run_short_name, Params='-'+str(dqq), ScaleRHSWorkspace=1)
 
 
-def twoangfit(run1,run2,scalefactor):
-    runno=str(run2)
-    runno=runno[-2:]
-    Scale(InputWorkspace=str(run1)+'_'+str(runno), OutputWorkspace=str(run1)+'_'+str(runno)+'_scaled', Factor=(1.0/scalefactor))
+def TwoAngleFit(run1_number,run2_number,scalefactor):
+    run1_name=str(run1_number)
+    run2_name=str(run2_number)
+    run2_short_name=run2_name[-2:]
+    combined_name=run1_name+'_'+run2_short_name
+    Scale(InputWorkspace=combined_name, OutputWorkspace=combined_name+'_scaled', Factor=(1.0/scalefactor))
     function_name='name=ReflectivityMulf,nlayer=1,Theta=2.3,ScaleFactor=1,AirSLD=0,BulkSLD=0,Roughness=0,BackGround=6.8e-06,'\
         'Resolution=5.0,SLD_Layer0=1.0e-6,d_Layer0=20.0,Rough_Layer0=0.0,constraints=(0<SLD_Layer0,0<d_Layer0),'\
         'ties=(Theta=2.3,AirSLD=0,BulkSLD=0,Resolution=5.0,ScaleFactor=1.0,Roughness=0,Rough_Layer0=0)'
     Fit(Function=function_name,
-        InputWorkspace=str(run1)+'_'+str(runno)+'_scaled',IgnoreInvalidData='1',
-        Output=str(run1)+'_'+str(runno)+'_fit',OutputCompositeMembers='1',ConvolveMembers='1')
-    sld=round(mtd[str(run1)+'_'+str(runno)+'_fit_Parameters'].cell(7,1),9)
-    thick=round(mtd[str(run1)+'_'+str(runno)+'_fit_Parameters'].cell(8,1),2)
+        InputWorkspace=combined_name+'_scaled',IgnoreInvalidData='1',
+        Output=combined_name+'_fit',OutputCompositeMembers='1',ConvolveMembers='1')
+    sld=round(mtd[combined_name+'_fit_Parameters'].cell(7,1),9)
+    thick=round(mtd[combined_name+'_fit_Parameters'].cell(8,1),2)
     dNb=sld*thick
-    print('run ',str(run1))
+    print('run ',run1_name)
     print('dNb ',dNb)
     print('SLD ',sld)
     print('Thick ',thick)
     print('-----------')
 
 
-def GenerateTimeSlices(run):
+def GenerateTimeSlices(run_number):
     '''Generate 60sec time slices'''
-    grouped=''
-    for ii in range(5):
-        slice_name = str(run) + '_' + str(60*ii) + '_' + str(60*(ii+1))
-        EventRef(run,0.5,(ii+1)*60,ii*60,DB='TRANS')
-        grouped=grouped+', ' + slice_name + '_ref_binned'
-        DeleteWorkspace(slice_name+'_lam')
-        DeleteWorkspace(slice_name)
-        DeleteWorkspace(slice_name+'_ref')
-        DeleteWorkspace('mon_slice')
-        DeleteWorkspace('mon_rebin')
+    for slice_index in range(5):
+        start=slice_index*60
+        stop=(slice_index+1)*60
+        EventRef(run_number,0.5,start,stop,DB='TRANS')
 
 
 def TestEventDataTimeSlicing(event_run_numbers):
-    for run in event_run_numbers:
-        GenerateTimeSlices(run)
+    for run_number in event_run_numbers:
+        GenerateTimeSlices(run_number)
 
 
 def TestReductionOfThreeAngleFringedSolidLiquidExample():
@@ -274,7 +284,7 @@ def TestFittingOfReducedData():
     #Create reduced workspace for test:
     QuickRef([44990,44991],['TRANS_SM','TRANS_noSM'], angles=[0.8,2.3])
     #Test fitting:
-    twoangfit(44990,44991,scalefactor)
+    TwoAngleFit(44990,44991,scalefactor)
 
 
 # If you want to re-run the test and save the result as a reference...
