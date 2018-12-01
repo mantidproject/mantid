@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
+#include "MantidDataHandling/LoadGeometry.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
@@ -455,56 +456,62 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
                                        const std::string &top_entry_name,
                                        Algorithm *alg) {
   std::string instrument;
+  std::string instFilename;
 
-  // Get the instrument name
-  ::NeXus::File nxfile(nexusfilename);
-  // Start with the base entry
-  nxfile.openGroup(top_entry_name, "NXentry");
-  // Open the instrument
-  nxfile.openGroup("instrument", "NXinstrument");
-  try {
-    nxfile.openData("name");
-    auto info = nxfile.getInfo();
-    if (info.dims.size() == 0) {
-      // If the string dimensions cannot be determined by the nexus library,
-      // attempting to parse the instrument name as a string will fail. The
-      // fallback is to use the H5Cpp library.
-      nxfile.close();
-      instrument = tryLoadInstrumentNameH5(nexusfilename, top_entry_name);
-    } else
-      instrument = nxfile.getStrData();
-    alg->getLogger().debug()
-        << "Instrument name read from NeXus file is " << instrument << '\n';
-  } catch (::NeXus::Exception &) {
-    // Try to fall back to isis compatibility options
-    nxfile.closeGroup();
-    instrument = readInstrumentFromISIS_VMSCompat(nxfile);
-    if (instrument.empty()) {
-      // Get the instrument name from the file instead
-      size_t n = nexusfilename.rfind('/');
-      if (n != std::string::npos) {
-        std::string temp =
-            nexusfilename.substr(n + 1, nexusfilename.size() - n - 1);
-        n = temp.find('_');
-        if (n != std::string::npos && n > 0) {
-          instrument = temp.substr(0, n);
+  // Check if the geometry can be loaded directly from the Nexus file
+  if (LoadGeometry::isNexus(nexusfilename)) {
+    instFilename = nexusfilename;
+  } else {
+    // Get the instrument name
+    ::NeXus::File nxfile(nexusfilename);
+    // Start with the base entry
+    nxfile.openGroup(top_entry_name, "NXentry");
+    // Open the instrument
+    nxfile.openGroup("instrument", "NXinstrument");
+    try {
+      nxfile.openData("name");
+      auto info = nxfile.getInfo();
+      if (info.dims.size() == 0) {
+        // If the string dimensions cannot be determined by the nexus library,
+        // attempting to parse the instrument name as a string will fail. The
+        // fallback is to use the H5Cpp library.
+        nxfile.close();
+        instrument = tryLoadInstrumentNameH5(nexusfilename, top_entry_name);
+      } else
+        instrument = nxfile.getStrData();
+      alg->getLogger().debug()
+          << "Instrument name read from NeXus file is " << instrument << '\n';
+    } catch (::NeXus::Exception &) {
+      // Try to fall back to isis compatibility options
+      nxfile.closeGroup();
+      instrument = readInstrumentFromISIS_VMSCompat(nxfile);
+      if (instrument.empty()) {
+        // Get the instrument name from the file instead
+        size_t n = nexusfilename.rfind('/');
+        if (n != std::string::npos) {
+          std::string temp =
+              nexusfilename.substr(n + 1, nexusfilename.size() - n - 1);
+          n = temp.find('_');
+          if (n != std::string::npos && n > 0) {
+            instrument = temp.substr(0, n);
+          }
         }
       }
     }
+    if (instrument == "POWGEN3") // hack for powgen b/c of bad long name
+      instrument = "POWGEN";
+    if (instrument == "NOM") // hack for nomad
+      instrument = "NOMAD";
+
+    if (instrument.empty())
+      throw std::runtime_error("Could not find the instrument name in the NXS "
+                               "file or using the filename. Cannot load "
+                               "instrument!");
+
+    // Now let's close the file as we don't need it anymore to load the
+    // instrument.
+    nxfile.close();
   }
-  if (instrument == "POWGEN3") // hack for powgen b/c of bad long name
-    instrument = "POWGEN";
-  if (instrument == "NOM") // hack for nomad
-    instrument = "NOMAD";
-
-  if (instrument.empty())
-    throw std::runtime_error("Could not find the instrument name in the NXS "
-                             "file or using the filename. Cannot load "
-                             "instrument!");
-
-  // Now let's close the file as we don't need it anymore to load the
-  // instrument.
-  nxfile.close();
 
   // do the actual work
   Mantid::API::IAlgorithm_sptr loadInst =
@@ -513,6 +520,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
   try {
+    loadInst->setPropertyValue("Filename", instFilename);
     loadInst->setPropertyValue("InstrumentName", instrument);
     loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace",
                                                              localWorkspace);
@@ -752,7 +760,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
     ::NeXus::File nxsfile(nexusfilename);
     nxsfile.openPath(top_entry_name + "/instrument/instrument_xml");
   } catch (::NeXus::Exception &) {
-    alg->getLogger().information("No instrument definition found in " +
+    alg->getLogger().information("No instrument XML definition found in " +
                                  nexusfilename + " at " + top_entry_name +
                                  "/instrument");
     return false;
@@ -772,9 +780,9 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
     alg->getLogger().error(
         "Invalid argument to LoadIDFFromNexus Child Algorithm ");
   } catch (std::runtime_error &) {
-    alg->getLogger().debug("No instrument definition found in " +
-                           nexusfilename + " at " + top_entry_name +
-                           "/instrument");
+    alg->getLogger().debug(
+        "No instrument definition found by LoadIDFFromNexus in " +
+        nexusfilename + " at " + top_entry_name + "/instrument");
   }
 
   if (!loadInst->isExecuted())
