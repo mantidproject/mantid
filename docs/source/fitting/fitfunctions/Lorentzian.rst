@@ -19,13 +19,13 @@ where:
 
 -  A (Amplitude or :math:`I`) - Intensity scaling (intensity)
 -  :math:`x_0` (PeakCentre) - centre of peak
--  FWHM :math:`\Gamma` 
+-  FWHM (:math:`\Gamma` or :math:`H` in other functions' definition)
 
 Note that the FWHM (Full Width Half Maximum) equals two times HWHM, and
 the integral over the Lorentzian equals the intensity scaling A.
 
 .. math::
-   \int_{-\infty}^{\infty}L(x) = A
+   \int_{-\infty}^{\infty}L(x) = A \int_{-\infty}^{\infty}L'(x)  = A
 
 Effective peak parameters
 +++++++++++++++++++++++++
