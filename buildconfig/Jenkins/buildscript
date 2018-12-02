@@ -382,11 +382,6 @@ fi
 # documentation
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
-  # Workaround so that the target can find the properties file
-  # CMake doesn't easily allow environment variables on custom targets
-  if [[ ${ON_MACOS} == true ]]; then
-    export MANTIDPATH=$PWD/bin
-  fi
   ${CMAKE_EXE} --build . --target docs-qthelp
   ${CPACK_EXE}
 
