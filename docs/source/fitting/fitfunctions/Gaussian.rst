@@ -28,7 +28,7 @@ Effective peak parameters
 Gaussian function has the following effective parameters
 
 - Intesity:  :math:`I = \sqrt{2\pi}\cdot h \cdot \sigma`
-- FWHM: :math:`FWHM = 2\sqrt{2\ln 2}*\mbox{Sigma}`.
+- FWHM (:math:`\Gamma` or :math:`H`): :math:`FWHM = 2\sqrt{2\ln 2}*\mbox{Sigma}`.
 
 The figure below illustrate this symmetric peakshape function fitted to
 a TOF peak:
