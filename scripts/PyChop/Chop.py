@@ -461,6 +461,12 @@ def sam0(sx, sy, sz, isam):
     # this contribution is small, and in any case this will be close enough for most geometries
     varx = 0
     # vary = ((sx)**2 + (sy)**2) # WRONG
-    vary = (sy**2)/12.00
+    vary = (sy**2)*sample_shape_scaling_factors[isam]
     varz = 0
     return varx, vary, varz
+
+
+# Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
+import collections
+sample_shape_scaling_factors = collections.defaultdict(lambda: 1./12)
+sample_shape_scaling_factors[2] = np.pi/16.
