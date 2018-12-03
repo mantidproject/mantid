@@ -273,7 +273,6 @@ private slots:
 signals:
   void signalClearView();
   void signalUpdateTree(const TopLevelItems &);
-  void workspaceTreeWidgetUpdated();
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
