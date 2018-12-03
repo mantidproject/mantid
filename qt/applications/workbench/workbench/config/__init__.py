@@ -41,8 +41,5 @@ DEFAULTS = {
 # -----------------------------------------------------------------------------
 # 'Singleton' instance
 # -----------------------------------------------------------------------------
+QSettings.setDefaultFormat(QSettings.IniFormat)
 CONF = UserConfig(ORGANIZATION, APPNAME, defaults=DEFAULTS)
-
-
-def set_config_format(format):
-    QSettings.setDefaultFormat(format)

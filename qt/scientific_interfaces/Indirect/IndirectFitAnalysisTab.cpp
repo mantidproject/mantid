@@ -264,7 +264,7 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
   m_dataPresenter = std::move(presenter);
 }
 
-void IndirectFitAnalysisTab::setPlotView(IndirectFitPlotView *view) {
+void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
   m_plotPresenter = Mantid::Kernel::make_unique<IndirectFitPlotPresenter>(
       m_fittingModel.get(), view);
 }

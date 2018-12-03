@@ -78,6 +78,38 @@ class MagnetismReflectometryReductionConstQTest(systemtesting.MantidSystemTest):
         return math.fabs(refl[1] - 0.648596877775159) < 0.002
 
 
+class MagnetismReflectometryReductionSkipRebinTest(systemtesting.MantidSystemTest):
+    def runTest(self):
+        wsg = MRFilterCrossSections(Filename="REF_M_24949")
+        MagnetismReflectometryReduction(InputWorkspace=wsg[0],
+                                        NormalizationRunNumber=24945,
+                                        SignalPeakPixelRange=[125, 129],
+                                        SubtractSignalBackground=True,
+                                        SignalBackgroundPixelRange=[15, 105],
+                                        ApplyNormalization=True,
+                                        NormPeakPixelRange=[201, 205],
+                                        SubtractNormBackground=True,
+                                        NormBackgroundPixelRange=[10,127],
+                                        CutLowResDataAxis=True,
+                                        LowResDataAxisPixelRange=[91, 161],
+                                        CutLowResNormAxis=True,
+                                        LowResNormAxisPixelRange=[86, 174],
+                                        CutTimeAxis=True,
+                                        UseWLTimeAxis=False,
+                                        FinalRebin=False,
+                                        QMin=0.005,
+                                        QStep=-0.01,
+                                        TimeAxisStep=40,
+                                        TimeAxisRange=[25000, 54000],
+                                        SpecularPixel=126.9,
+                                        ConstantQBinning=False,
+                                        OutputWorkspace="r_24949")
+
+    def validate(self):
+        q_values = mtd["r_24949"].dataX(0)
+        return math.fabs(q_values[0] - 0.005) > 0.001
+
+
 class MagnetismReflectometryReductionConstQWLCutTest(systemtesting.MantidSystemTest):
     def runTest(self):
         wsg = MRFilterCrossSections(Filename="REF_M_24949")
