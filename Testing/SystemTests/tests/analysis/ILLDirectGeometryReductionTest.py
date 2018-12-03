@@ -9,10 +9,10 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import (config, DeleteWorkspace, DirectILLApplySelfShielding, DirectILLCollectData, DirectILLDiagnostics,
                               DirectILLIntegrateVanadium, DirectILLReduction, DirectILLSelfShielding, DirectILLTubeBackground,
                               SetSample, Subtract)
-import stresstesting
+import systemtesting
 
 
-class IN4(stresstesting.MantidStressTest):
+class IN4(systemtesting.MantidSystemTest):
     # Sample in reference is not empty string but contains a single space: ' '.
     disableChecking = ['Sample']
     tolerance = 1e-5
@@ -74,7 +74,7 @@ class IN4(stresstesting.MantidStressTest):
         return ['SofQW', 'ILL_IN4_SofQW.nxs']
 
 
-class IN5(stresstesting.MantidStressTest):
+class IN5(systemtesting.MantidSystemTest):
     # Sample in reference is not empty string but contains a single space: ' '.
     disableChecking = ['Sample']
     tolerance = 1e-5
@@ -129,7 +129,7 @@ class IN5(stresstesting.MantidStressTest):
         return ['SofQW', 'ILL_IN5_SofQW.nxs']
 
 
-class IN6(stresstesting.MantidStressTest):
+class IN6(systemtesting.MantidSystemTest):
     def runTest(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'IN6'
