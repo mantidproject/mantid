@@ -498,7 +498,8 @@ public:
       // TSM_ASSERT_DELTA("Y(0)[" + istr + "]", y0[i], 1.5 * 0.5, 1.e-9)
       // TSM_ASSERT_DELTA("Y(1)[" + istr + "]", y1[i], 2.5 * 0.5, 1.e-9)
       // TSM_ASSERT_DELTA("E(0)[" + istr + "]", e0[i], std::sqrt(1.5) *
-      // 0.5, 1.e-9)  TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i], std::sqrt(2.5)
+      // 0.5, 1.e-9)  TSM_ASSERT_DELTA("E(1)[" + istr + "]", e1[i],
+      // std::sqrt(2.5)
       // * 0.5, 1.e-9)
     }
 
