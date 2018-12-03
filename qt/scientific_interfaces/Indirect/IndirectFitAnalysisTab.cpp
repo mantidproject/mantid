@@ -726,6 +726,7 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   setRunIsRunning(false);
+	setFitSingleSpectrumIsFitting(false);
   enablePlotResult(error);
   setSaveResultEnabled(!error);
   updateParameterValues();
@@ -931,8 +932,10 @@ void IndirectFitAnalysisTab::singleFit() {
 
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
-  if (validate())
-    runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
+	if (validate()) {
+		setFitSingleSpectrumIsFitting(true);
+		runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
+	}
 }
 
 /**

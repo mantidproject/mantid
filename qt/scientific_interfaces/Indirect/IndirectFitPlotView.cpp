@@ -180,6 +180,10 @@ void IndirectFitPlotView::enableFitSingleSpectrum(bool enable) {
   m_plotForm->pbFitSingle->setEnabled(enable);
 }
 
+void IndirectFitPlotView::setFitSingleSpectrumText(QString const &text) {
+	m_plotForm->pbFitSingle->setText(text);
+}
+
 void IndirectFitPlotView::enableSpectrumSelection(bool enable) {
   if (!enable)
     m_plotForm->spPlotSpectrum->setValue(0);

@@ -129,17 +129,22 @@ void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 
+void IqtFit::runClicked() { runTab(); }
+
 void IqtFit::plotResult() {
   setPlotResultIsPlotting(true);
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
   setPlotResultIsPlotting(false);
 }
 
-void IqtFit::runClicked() { runTab(); }
-
 void IqtFit::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
+}
+
+void IqtFit::setFitSingleSpectrumIsFitting(bool fitting) {
+	m_uiForm->pvFitPlotView->setFitSingleSpectrumText(fitting ? "Fitting..." : "Fit Single Spectrum");
+	setButtonsEnabled(!fitting);
 }
 
 void IqtFit::setPlotResultIsPlotting(bool plotting) {
@@ -163,12 +168,12 @@ void IqtFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->cbPlotType->setEnabled(enabled);
 }
 
-void IqtFit::setSaveResultEnabled(bool enabled) {
-  m_uiForm->pbSave->setEnabled(enabled);
+void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
+	m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
 }
 
-void IqtFit::setFitSingleSpectrumEnabled(bool enabled) {
-  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
+void IqtFit::setSaveResultEnabled(bool enabled) {
+  m_uiForm->pbSave->setEnabled(enabled);
 }
 
 } // namespace IDA

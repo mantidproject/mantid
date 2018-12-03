@@ -153,6 +153,7 @@ protected:
   virtual void setSaveResultEnabled(bool enabled) = 0;
 
   virtual void setRunIsRunning(bool running) = 0;
+	virtual void setFitSingleSpectrumIsFitting(bool fitting) = 0;
 
 signals:
   void functionChanged();
