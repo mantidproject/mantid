@@ -34,25 +34,25 @@ MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
 }
 
 std::size_t numberOfColumns(Workspace_sptr workspace) {
-	return convertToMatrixWorkspace(workspace)->blocksize();
+  return convertToMatrixWorkspace(workspace)->blocksize();
 }
 
 bool isWorkspacePlottable(Workspace_sptr workspace) {
-	return numberOfColumns(workspace) > 1 ? true : false;
+  return numberOfColumns(workspace) > 1 ? true : false;
 }
 
 bool containsPlottableWorkspace(WorkspaceGroup_sptr workspaceGroup) {
-	for (auto const &workspace : *workspaceGroup)
-		if (isWorkspacePlottable(workspace))
-			return true;
-	return false;
+  for (auto const &workspace : *workspaceGroup)
+    if (isWorkspacePlottable(workspace))
+      return true;
+  return false;
 }
 
 bool isGroupPlottable(WorkspaceGroup_sptr workspaceGroup) {
-	if (workspaceGroup)
-		return containsPlottableWorkspace(workspaceGroup);
-	else
-		return false;
+  if (workspaceGroup)
+    return containsPlottableWorkspace(workspaceGroup);
+  else
+    return false;
 };
 
 void updateParameters(
@@ -1055,7 +1055,8 @@ void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
 
 void IndirectFitAnalysisTab::enablePlotResult(bool error) {
   if (!error)
-    setPlotResultEnabled(isGroupPlottable(m_fittingModel->getResultWorkspace()));
+    setPlotResultEnabled(
+        isGroupPlottable(m_fittingModel->getResultWorkspace()));
   else
     setPlotResultEnabled(!error);
 }
