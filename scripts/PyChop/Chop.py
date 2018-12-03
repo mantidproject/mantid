@@ -24,7 +24,7 @@ technical reports:
 """
 
 from __future__ import (absolute_import, division, print_function)
-import numpy as np
+import numpy as np, collections
 import warnings
 warnings.simplefilter('always', UserWarning)
 
@@ -467,6 +467,5 @@ def sam0(sx, sy, sz, isam):
 
 
 # Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
-import collections
 sample_shape_scaling_factors = collections.defaultdict(lambda: 1./12)
 sample_shape_scaling_factors[2] = np.pi/16.
