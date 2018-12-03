@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
@@ -166,6 +167,8 @@ void SaveNexusProcessed::doExec(
       boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
   OffsetsWorkspace_const_sptr offsetsWorkspace =
       boost::dynamic_pointer_cast<const OffsetsWorkspace>(inputWorkspace);
+  MaskWorkspace_const_sptr maskWorkspace =
+      boost::dynamic_pointer_cast<const MaskWorkspace>(inputWorkspace);
   if (peaksWorkspace)
     g_log.debug("We have a peaks workspace");
   // check if inputWorkspace is something we know how to save
@@ -192,10 +195,11 @@ void SaveNexusProcessed::doExec(
   const std::string workspaceID = inputWorkspace->id();
   if ((workspaceID.find("Workspace2D") == std::string::npos) &&
       (workspaceID.find("RebinnedOutput") == std::string::npos) &&
-      !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace)
+      !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace &&
+      !maskWorkspace)
     throw Exception::NotImplementedError(
         "SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, "
-        "EventWorkspace, ITableWorkspace, or OffsetsWorkspace.");
+        "EventWorkspace, ITableWorkspace, OffsetsWorkspace or MaskWorkspace.");
 
   // Create progress object for initial part - depends on whether events are
   // processed
@@ -251,14 +255,18 @@ void SaveNexusProcessed::doExec(
     // Write out the data (2D or event)
     if (m_eventWorkspace && PreserveEvents) {
       this->execEvent(nexusFile.get(), uniformSpectra, spec);
-    } else if (offsetsWorkspace) {
-      g_log.warning() << "Writing SpecialWorkspace2D ID=" << workspaceID
-                      << "\n";
-      nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra,
-                                           spec, "offsets_workspace", true);
     } else {
+      std::string workspaceTypeGroupName;
+      if (offsetsWorkspace)
+        workspaceTypeGroupName = "offsets_workspace";
+      else if (maskWorkspace)
+        workspaceTypeGroupName = "mask_workspace";
+      else
+        workspaceTypeGroupName = "workspace";
+
       nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra,
-                                           spec, "workspace", true);
+                                           spec, workspaceTypeGroupName.c_str(),
+                                           true);
     }
 
     cppFile.openGroup("instrument", "NXinstrument");

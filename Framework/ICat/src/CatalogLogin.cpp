@@ -20,6 +20,42 @@ namespace Mantid {
 namespace ICat {
 DECLARE_ALGORITHM(CatalogLogin)
 
+namespace {
+std::vector<std::string> namesOfFacilitiesWithICAT() {
+  const auto &config = Kernel::ConfigService::Instance();
+
+  const auto facilityDoesNotHaveICAT = [&](std::string name) {
+    return config.getFacility(name).catalogInfo().soapEndPoint().empty();
+  };
+
+  auto result = Kernel::ConfigService::Instance().getFacilityNames();
+  result.erase(
+      std::remove_if(result.begin(), result.end(), facilityDoesNotHaveICAT),
+      result.end());
+
+  return result;
+}
+
+std::string defaultFacility() {
+  // If the currently-set facility has ICAT, then we should use it, else
+  // we'll just pick the first facility that supports ICAT in the list,
+  // else if our Facilities.xml has no ICATs registered, then return an
+  // empty string.
+  const auto facility = Kernel::ConfigService::Instance().getFacility().name();
+  const auto facilitiesWithICAT = namesOfFacilitiesWithICAT();
+  if (std::find(facilitiesWithICAT.begin(), facilitiesWithICAT.end(),
+                facility) != facilitiesWithICAT.end()) {
+    return facility;
+  }
+
+  if (facilitiesWithICAT.size() > 0) {
+    return facilitiesWithICAT[0];
+  }
+
+  return "";
+}
+} // namespace
+
 /// Init method to declare algorithm properties
 void CatalogLogin::init() {
   auto requireValue =
@@ -29,10 +65,9 @@ void CatalogLogin::init() {
   declareProperty(Kernel::make_unique<Kernel::MaskedProperty<std::string>>(
                       "Password", "", requireValue),
                   "The password of the related username to use.");
-  declareProperty("FacilityName",
-                  Kernel::ConfigService::Instance().getFacility().name(),
+  declareProperty("FacilityName", defaultFacility(),
                   boost::make_shared<Kernel::StringListValidator>(
-                      Kernel::ConfigService::Instance().getFacilityNames()),
+                      namesOfFacilitiesWithICAT()),
                   "Select a facility to log in to.");
   declareProperty(
       "KeepSessionAlive", true,

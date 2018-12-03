@@ -35,5 +35,7 @@ Improvements
 
 Bugfixes
 ########
+- :ref: `EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>` had a bug that meant the first good bin was excluded from calculating the normalization.   
+
 
 :ref:`Release 3.14.0 <v3.14.0>`

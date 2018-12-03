@@ -204,10 +204,10 @@ public:
 
     auto options = presenter.getReductionOptions();
     TS_ASSERT_EQUALS(variantToString(options["PolarizationAnalysis"]), "PNR");
-    TS_ASSERT_EQUALS(variantToString(options["Rho"]), "");
-    TS_ASSERT_EQUALS(variantToString(options["Alpha"]), "");
-    TS_ASSERT_EQUALS(variantToString(options["Ap"]), "100.0,17.0,44.0");
-    TS_ASSERT_EQUALS(variantToString(options["Pp"]), "0.54,0.33,1.81");
+    TS_ASSERT_EQUALS(variantToString(options["CRho"]), "");
+    TS_ASSERT_EQUALS(variantToString(options["CAlpha"]), "");
+    TS_ASSERT_EQUALS(variantToString(options["CAp"]), "100.0,17.0,44.0");
+    TS_ASSERT_EQUALS(variantToString(options["CPp"]), "0.54,0.33,1.81");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -499,7 +499,7 @@ public:
     EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(0));
 
     // Instrument settings should be called
-    EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(2));
     EXPECT_CALL(mockView, getMonitorIntegralMin()).Times(Exactly(2));
     EXPECT_CALL(mockView, getMonitorIntegralMax()).Times(Exactly(2));
     EXPECT_CALL(mockView, getMonitorBackgroundMin()).Times(Exactly(2));

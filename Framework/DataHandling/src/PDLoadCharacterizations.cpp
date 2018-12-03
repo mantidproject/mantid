@@ -622,7 +622,8 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
 
   g_log.debug() << "readExpIni(" << filename << ", wksp)\n";
 
-  if (wksp->rowCount() == 0)
+  const size_t rowCount = wksp->rowCount();
+  if (rowCount == 0)
     throw std::runtime_error("Characterizations file does not have any "
                              "characterizations information");
 
@@ -648,13 +649,15 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
     if (splitted.size() < 2)
       continue;
 
-    // update the various charaterization runs
-    if (splitted[0] == EXP_INI_VAN_KEY) {
-      wksp->getRef<std::string>("vanadium", 0) = splitted[1];
-    } else if (splitted[0] == EXP_INI_EMPTY_KEY) {
-      wksp->getRef<std::string>("vanadium_background", 0) = splitted[1];
-    } else if (splitted[0] == EXP_INI_CAN_KEY) {
-      wksp->getRef<std::string>("container", 0) = splitted[1];
+    // update the various charaterization runs in every row
+    for (size_t row = 0; row < rowCount; ++row) {
+      if (splitted[0] == EXP_INI_VAN_KEY) {
+        wksp->getRef<std::string>("vanadium", row) = splitted[1];
+      } else if (splitted[0] == EXP_INI_EMPTY_KEY) {
+        wksp->getRef<std::string>("vanadium_background", row) = splitted[1];
+      } else if (splitted[0] == EXP_INI_CAN_KEY) {
+        wksp->getRef<std::string>("container", row) = splitted[1];
+      }
     }
   }
 }

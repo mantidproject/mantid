@@ -7,21 +7,21 @@
 # pylint: disable=invalid-name,protected-access
 from __future__ import (absolute_import, division, print_function)
 import six
-from PyQt4 import QtGui, QtCore
+from qtpy.QtWidgets import (QFrame)  # noqa
+from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 import reduction_gui.widgets.util as util
 import os
 from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
-import ui.sans.ui_hfir_instrument
-
-IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot # noqa
-    IS_IN_MANTIDPLOT = True
+    from mantidqt.utils.qt import load_ui
 except ImportError:
-    pass
-
+    from mantid.kernel import Logger
+    Logger("SANSInstrumentWidget").information('Using legacy ui importer')
+    from mantidplot import load_ui
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import ExtractMask
 if six.PY3:
     unicode = str
 
@@ -53,10 +53,10 @@ class SANSInstrumentWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, name="BIOSANS", data_proxy=None):
         super(SANSInstrumentWidget, self).__init__(parent, state, settings, data_proxy=data_proxy)
 
-        class SummaryFrame(QtGui.QFrame, ui.sans.ui_hfir_instrument.Ui_Frame):
+        class SummaryFrame(QFrame):
             def __init__(self, parent=None):
-                QtGui.QFrame.__init__(self, parent)
-                self.setupUi(self)
+                QFrame.__init__(self, parent)
+                self.ui = load_ui(__file__, '../../../ui/sans/hfir_instrument.ui', baseinstance=self)
 
         self._summary = SummaryFrame(self)
         self.initialize_content()
@@ -123,37 +123,37 @@ class SANSInstrumentWidget(BaseWidget):
 
     def initialize_content(self):
         # Validators
-        self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
-        self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
-        self._summary.sample_si_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_si_dist_edit))
-        self._summary.total_detector_distance_edit.setValidator(QtGui.QDoubleValidator(self._summary.total_detector_distance_edit))
-        self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
-        self._summary.wavelength_spread_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_spread_edit))
-        self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
-        self._summary.n_sub_pix_edit.setValidator(QtGui.QIntValidator(self._summary.n_sub_pix_edit))
+        self._summary.detector_offset_edit.setValidator(QDoubleValidator(self._summary.detector_offset_edit))
+        self._summary.sample_dist_edit.setValidator(QDoubleValidator(self._summary.sample_dist_edit))
+        self._summary.sample_si_dist_edit.setValidator(QDoubleValidator(self._summary.sample_si_dist_edit))
+        self._summary.total_detector_distance_edit.setValidator(QDoubleValidator(self._summary.total_detector_distance_edit))
+        self._summary.wavelength_edit.setValidator(QDoubleValidator(self._summary.wavelength_edit))
+        self._summary.wavelength_spread_edit.setValidator(QDoubleValidator(self._summary.wavelength_spread_edit))
+        self._summary.n_q_bins_edit.setValidator(QIntValidator(self._summary.n_q_bins_edit))
+        self._summary.n_sub_pix_edit.setValidator(QIntValidator(self._summary.n_sub_pix_edit))
 
         # Event connections
-        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
-        self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
-        self.connect(self._summary.sample_si_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_si_dist_clicked)
-        self.connect(self._summary.total_detector_distance_chk, QtCore.SIGNAL("clicked(bool)"), self._total_dist_clicked)
-        self.connect(self._summary.wavelength_chk, QtCore.SIGNAL("clicked(bool)"), self._wavelength_clicked)
+        self._summary.detector_offset_chk.clicked.connect(self._det_offset_clicked)
+        self._summary.sample_dist_chk.clicked.connect(self._sample_dist_clicked)
+        self._summary.sample_si_dist_chk.clicked.connect(self._sample_si_dist_clicked)
+        self._summary.total_detector_distance_chk.clicked.connect(self._total_dist_clicked)
+        self._summary.wavelength_chk.clicked.connect(self._wavelength_clicked)
 
         self._summary.sample_dist_edit.textChanged.connect(self._update_total_distance)
         self._summary.sample_si_dist_edit.textChanged.connect(self._update_total_distance)
         self._summary.detector_offset_edit.textChanged.connect(self._update_total_distance)
 
-        self.connect(self._summary.dark_current_check, QtCore.SIGNAL("clicked(bool)"), self._dark_clicked)
-        self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
-        self.connect(self._summary.dark_plot_button, QtCore.SIGNAL("clicked()"), self._dark_plot_clicked)
-        self.connect(self._summary.normalization_none_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
-        self.connect(self._summary.normalization_time_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
-        self.connect(self._summary.normalization_monitor_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
+        self._summary.dark_current_check.clicked.connect(self._dark_clicked)
+        self._summary.dark_browse_button.clicked.connect(self._dark_browse)
+        self._summary.dark_plot_button.clicked.connect(self._dark_plot_clicked)
+        self._summary.normalization_none_radio.clicked.connect(self._normalization_clicked)
+        self._summary.normalization_time_radio.clicked.connect(self._normalization_clicked)
+        self._summary.normalization_monitor_radio.clicked.connect(self._normalization_clicked)
 
         # Q range
         self._summary.n_q_bins_edit.setText("100")
         self._summary.n_sub_pix_edit.setText("1")
-        self.connect(self._summary.log_binning_radio, QtCore.SIGNAL("clicked(bool)"), self._summary.align_check.setEnabled)
+        self._summary.log_binning_radio.clicked.connect(self._summary.align_check.setEnabled)
 
         self._summary.scale_edit.setText("1")
 
@@ -165,18 +165,18 @@ class SANSInstrumentWidget(BaseWidget):
         self._dark_clicked(self._summary.dark_current_check.isChecked())
 
         # Mask Connections
-        self.connect(self._summary.mask_browse_button, QtCore.SIGNAL("clicked()"), self._mask_browse_clicked)
-        self.connect(self._summary.mask_plot_button, QtCore.SIGNAL("clicked()"), self._mask_plot_clicked)
-        self.connect(self._summary.mask_check, QtCore.SIGNAL("clicked(bool)"), self._mask_checked)
+        self._summary.mask_browse_button.clicked.connect(self._mask_browse_clicked)
+        self._summary.mask_plot_button.clicked.connect(self._mask_plot_clicked)
+        self._summary.mask_check.clicked.connect(self._mask_checked)
 
         # Absolute scale connections and validators
-        self._summary.scale_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_edit))
-        self._summary.scale_beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_beam_radius_edit))
-        self._summary.scale_att_trans_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_att_trans_edit))
-        self.connect(self._summary.scale_data_browse_button, QtCore.SIGNAL("clicked()"), self._scale_data_browse)
-        self.connect(self._summary.scale_data_plot_button, QtCore.SIGNAL("clicked()"), self._scale_data_plot_clicked)
-        self.connect(self._summary.beamstop_chk, QtCore.SIGNAL("clicked(bool)"), self._beamstop_clicked)
-        self.connect(self._summary.scale_chk, QtCore.SIGNAL("clicked(bool)"), self._scale_clicked)
+        self._summary.scale_edit.setValidator(QDoubleValidator(self._summary.scale_edit))
+        self._summary.scale_beam_radius_edit.setValidator(QDoubleValidator(self._summary.scale_beam_radius_edit))
+        self._summary.scale_att_trans_edit.setValidator(QDoubleValidator(self._summary.scale_att_trans_edit))
+        self._summary.scale_data_browse_button.clicked.connect(self._scale_data_browse)
+        self._summary.scale_data_plot_button.clicked.connect(self._scale_data_plot_clicked)
+        self._summary.beamstop_chk.clicked.connect(self._beamstop_clicked)
+        self._summary.scale_chk.clicked.connect(self._scale_clicked)
         self._scale_clicked(self._summary.scale_chk.isChecked())
 
         # If we are not in debug/expert mode, hide some advanced options
@@ -187,7 +187,7 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.mask_side_front_radio.hide()
             self._summary.mask_side_back_radio.hide()
 
-        if not self._in_mantidplot:
+        if not self._has_instrument_view:
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
 
@@ -336,8 +336,8 @@ class SANSInstrumentWidget(BaseWidget):
 
         self._summary.instr_name_label.setText(state.instrument_name)
         # npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
-        # self._summary.n_pixel_label.setText(QtCore.QString(npixels))
-        # self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
+        # self._summary.n_pixel_label.setText(npixels)
+        # self._summary.pixel_size_label.setText(str(state.pixel_size))
 
         # Absolute scaling
         self._summary.scale_chk.setChecked(state.calculate_scale)
@@ -523,12 +523,9 @@ class SANSInstrumentWidget(BaseWidget):
         m.use_mask_file = self._summary.mask_check.isChecked()
         m.mask_file = unicode(self._summary.mask_edit.text())
         m.detector_ids = self._masked_detectors
-        if self._in_mantidplot:
-            from mantid.api import AnalysisDataService
-            import mantid.simpleapi as api
-            if AnalysisDataService.doesExist(self.mask_ws):
-                _, masked_detectors = api.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
-                m.detector_ids = [int(i) for i in masked_detectors]
+        if AnalysisDataService.doesExist(self.mask_ws):
+            _, masked_detectors = ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
+            m.detector_ids = [int(i) for i in masked_detectors]
 
         self._settings.emit_key_value("DARK_CURRENT", str(self._summary.dark_file_edit.text()))
         return m

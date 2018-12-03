@@ -12,10 +12,15 @@ We also deal with importing the mantidplot module outside of MantidPlot here.
 """
 
 from __future__ import (absolute_import, division, print_function)
-import numpy
+import numpy.core.setup_common as numpy_cfg
 import platform
 import sys
 from mantid import logger
+
+# This is the version of the numpy ABI used when compiling
+# the fortran modules with f2py. It must match the version of
+# the numpy ABI at runtime.
+F2PY_MODULES_REQUIRED_C_ABI = 0x01000009
 
 
 def import_mantidplot():
@@ -54,13 +59,13 @@ def _lib_suffix():
     return "_" + suffix + platform.architecture()[0][0:2]
 
 
-def _numpy_ver():
+def _numpy_abi_ver():
     """
-    Gets the version of Numpy installed on the host system.
+    Gets the ABI version of Numpy installed on the host system.
 
-    @return Version number
+    @return The C ABI version
     """
-    return numpy.version.short_version
+    return numpy_cfg.C_ABI_VERSION
 
 
 def unsupported_message():
@@ -76,7 +81,9 @@ def is_supported_f2py_platform():
     @returns True if we are currently on a platform that supports the F2Py
     libraries, else False.
     """
-    if _os_env().startswith("Windows") and _numpy_ver() == "1.9.3" and "python_d" not in sys.executable:
+    if (_os_env().startswith("Windows") and
+            _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI and
+            "python_d" not in sys.executable):
         return True
     return False
 

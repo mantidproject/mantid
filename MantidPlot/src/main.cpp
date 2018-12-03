@@ -154,6 +154,11 @@ the indentation depth for him/herself.
 */
 
 int main(int argc, char **argv) {
+  // Force the qtpy package to use the PyQt4 bindings. QtPy < v1.4 does not
+  // check whether a particular binding is imported and selects PyQt5 by default
+  // causing MantidPlot to segfault.
+  qputenv("QT_API", "pyqt");
+
   // First, look for command-line arguments that we want to deal with before
   // launching anything
   if (argc == 2) {

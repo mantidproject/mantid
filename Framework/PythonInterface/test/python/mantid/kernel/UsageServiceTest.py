@@ -10,6 +10,7 @@ import unittest
 
 from mantid.kernel import (UsageService, UsageServiceImpl)
 
+
 class UsageServiceTest(unittest.TestCase):
 
     def test_singleton_returns_instance_of_UsageService(self):
@@ -24,11 +25,11 @@ class UsageServiceTest(unittest.TestCase):
         self.assertEquals(UsageService.isEnabled(),False)
 
     def test_getSetApplication(self):
-        self.assertEquals(UsageService.getApplication(),"python")
-        UsageService.setApplication("python unit tests")
-        self.assertEquals(UsageService.getApplication(),"python unit tests")
-        UsageService.setApplication("python")
-        self.assertEquals(UsageService.getApplication(),"python")
+        self.assertEquals(UsageService.getApplicationName(), "python")
+        UsageService.setApplicationName("python unit tests")
+        self.assertEquals(UsageService.getApplicationName(), "python unit tests")
+        UsageService.setApplicationName("python")
+        self.assertEquals(UsageService.getApplicationName(), "python")
 
     def test_setInterval(self):
         UsageService.setEnabled(False)
@@ -42,7 +43,7 @@ class UsageServiceTest(unittest.TestCase):
     def test_registerFeatureUsage(self):
         UsageService.setEnabled(False)
         #this will do nothing as it is disabled
-        UsageService.registerFeatureUsage("Algorithm","Test.v1",True)
+        UsageService.registerFeatureUsage("Algorithm", "Test.v1", True)
 
 
     def test_Flush(self):
@@ -52,6 +53,7 @@ class UsageServiceTest(unittest.TestCase):
 
     def test_Shutdown(self):
         UsageService.shutdown()
+
 
 if __name__ == '__main__':
     unittest.main()

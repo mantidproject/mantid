@@ -44,6 +44,7 @@ public:
   getCurrentOffsets() override;
 
   static const std::string EVENT_TOPIC_SUFFIX;
+  static const std::string HISTO_TOPIC_SUFFIX;
   static const std::string RUN_TOPIC_SUFFIX;
   static const std::string DET_SPEC_TOPIC_SUFFIX;
   static const std::string SAMPLE_ENV_TOPIC_SUFFIX;

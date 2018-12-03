@@ -33,9 +33,8 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
         """
         return "CropWorkspaceForMDNorm"
 
-    #TODO: add here the new MDNorm and related
-    #def seeAlso(self):
-    #    return []
+    def seeAlso(self):
+        return ["RecalculateTrajectoriesExtents"]
 
     def summary(self):
         return "Crops an event workspace and store the information"+\
