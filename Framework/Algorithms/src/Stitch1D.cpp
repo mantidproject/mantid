@@ -21,7 +21,6 @@
 #include "MantidKernel/Strings.h"
 
 #include <algorithm>
-#include <boost/format.hpp>
 #include <boost/math/special_functions.hpp>
 
 using namespace Mantid::API;
@@ -91,17 +90,16 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(size_t a1, size_t a2,
  * @param source : Workspace to mask.
  */
 void Stitch1D::maskInPlace(size_t a1, size_t a2, MatrixWorkspace_sptr &source) {
-  unsigned int histogramCount =
-      static_cast<unsigned int>(source->getNumberHistograms());
-  unsigned int start = static_cast<unsigned int>(a1);
-  unsigned int stop = static_cast<unsigned int>(a2);
+  int histogramCount = static_cast<int>(source->getNumberHistograms());
+  int start = static_cast<int>(a1);
+  int stop = static_cast<int>(a2);
   PARALLEL_FOR_IF(Kernel::threadSafe(*source))
-  for (unsigned int i = 0; i < histogramCount; ++i) {
+  for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the data
     auto &sourceY = source->mutableY(i);
     auto &sourceE = source->mutableE(i);
-    for (unsigned int i = start; i < stop; ++i) {
+    for (int i = start; i < stop; ++i) {
       sourceY[i] = 0.;
       sourceE[i] = 0.;
     }
@@ -252,7 +250,7 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
 }
 
 /** Runs the Rebin Algorithm as a child
- @param input :: The input workspace
+ @param ws :: The input workspace
  @param params :: a vector<double> containing rebinning parameters
  */
 void Stitch1D::rebin(MatrixWorkspace_sptr &ws,
@@ -268,16 +266,14 @@ void Stitch1D::rebin(MatrixWorkspace_sptr &ws,
 }
 
 /** Replaces special values
- @param input :: The input workspace
- @param params :: a vector<double> containing rebinning parameters
+ @param ws :: The input workspace
  */
 void Stitch1D::replaceSpecialValues(MatrixWorkspace_sptr &ws) {
-  unsigned int histogramCount =
-      static_cast<unsigned int>(ws->getNumberHistograms());
+  int histogramCount = static_cast<int>(ws->getNumberHistograms());
   // Record special values and then mask them out as zeros. Special values are
   // remembered and then replaced post processing.
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
-  for (unsigned int i = 0; i < histogramCount; ++i) {
+  for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     std::vector<size_t> &nanEIndexes = m_nanEIndexes[i];
     std::vector<size_t> &nanYIndexes = m_nanYIndexes[i];
