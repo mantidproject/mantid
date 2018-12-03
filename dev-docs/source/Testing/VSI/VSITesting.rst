@@ -9,7 +9,7 @@ VSI Testing
 
 *Preparation*
 
-- Get the scripts from the Mantid repository `this directory <https://github.com/mantidproject/mantid/tree/master/scripts/vsi>`_.
+- Get the scripts from the Mantid repository `this directory <https://github.com/mantidproject/mantid/tree/master/scripts/Vates>`_.
 - Make sure that you have the Mantid system test data. You can do this by building a SystemTestData target of Mantid.
 - Put the system test data directory in your Mantid user directories
 
