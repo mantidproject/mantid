@@ -315,18 +315,42 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
     const Indexing::SpectrumIndexSet &indices, const Angles &refAngles) {
   // Calculate the number of bins based on the min/max wavelength, using
   // the same bin width as the input workspace
-  int twoThetaRIdx;
-  if (getPointerToProperty(Prop::BEAM_CENTRE)->isDefault()) {
+  Mantid::HistogramData::BinEdges edges;
+  int twoThetaRIdx = -1;
+  if (!getPointerToProperty(Prop::BEAM_CENTRE)->isDefault()) {
     twoThetaRIdx = getProperty(Prop::BEAM_CENTRE);
-  } else if (getPointerToProperty(Prop::THETA_IN)->isDefault()) {
-    twoThetaRIdx = getProperty(Prop::THETA_IN);
-  } else {
+
+    edges = detectorWS.binEdges(static_cast<size_t>(twoThetaRIdx));
+  } else if (!getPointerToProperty(Prop::THETA_IN)->isDefault()) {
+    const double thetaIn = getProperty(Prop::THETA_IN);
+    const auto spectrumInfo = detectorWS.spectrumInfo();
+    for (auto indexSpectrum = 0u; indexSpectrum < detectorWS.size();
+         ++indexSpectrum) {
+      try {
+        if (!spectrumInfo.isMonitor(indexSpectrum)) {
+          const auto twoTheta = spectrumInfo.twoTheta(indexSpectrum);
+          if (thetaIn == twoTheta) {
+            twoThetaRIdx = indexSpectrum;
+            break;
+          }
+        }
+      } catch (...) {
+        // Do nothing, it is expected to raise a few times.
+      }
+    }
+
+    if (twoThetaRIdx == -1) {
+      throw std::runtime_error(
+          "ThetaIn does not correlate to a spectrum in SumInQ");
+    }
+    edges = detectorWS.binEdges(static_cast<size_t>(twoThetaRIdx));
+  }
+  else {
     throw std::runtime_error("SumInQ: Neither " + Prop::BEAM_CENTRE + " or " +
                              Prop::THETA_IN +
                              " are defined but were valid at input time");
   }
-  const auto &edges = detectorWS.binEdges(static_cast<size_t>(twoThetaRIdx));
-  const double binWidth =
+  const auto binWidth =
       (edges.back() - edges.front()) / static_cast<double>(edges.size());
   const auto wavelengthRange =
       findWavelengthMinMax(detectorWS, indices, refAngles);
@@ -355,7 +379,7 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
   outSpec.setSpectrumNo(thetaSpec.getSpectrumNo());
 
   return outputWS;
-}
+} // namespace Mantid
 
 /**
  * Return the wavelength range of the output histogram.
