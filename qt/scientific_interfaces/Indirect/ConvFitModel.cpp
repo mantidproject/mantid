@@ -201,17 +201,17 @@ MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
 
 void renameWorkspace(std::string const &name, std::string const &newName) {
   auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
-	renamer->setLogging(false);
+  renamer->setLogging(false);
   renamer->setProperty("InputWorkspace", name);
   renamer->setProperty("OutputWorkspace", newName);
   renamer->execute();
 }
 
 void deleteWorkspace(std::string const &workspaceName) {
-	auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
-	deleter->setLogging(false);
-	deleter->setProperty("Workspace", workspaceName);
-	deleter->execute();
+  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleter->setLogging(false);
+  deleter->setProperty("Workspace", workspaceName);
+  deleter->execute();
 }
 
 void extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
@@ -227,11 +227,11 @@ void extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
   auto resolutionWS = cloneWorkspace(resolution, "__cloned");
 
   // Append to cloned workspace if necessary
-	if (resolutionNumHist == 1 && numberOfHistograms > 1) {
-		appendWorkspace(resolutionWS, resolution,
-			static_cast<int>(numberOfHistograms - 1), outputName);
-		deleteWorkspace("__cloned");
-	} else
+  if (resolutionNumHist == 1 && numberOfHistograms > 1) {
+    appendWorkspace(resolutionWS, resolution,
+                    static_cast<int>(numberOfHistograms - 1), outputName);
+    deleteWorkspace("__cloned");
+  } else
     renameWorkspace("__cloned", outputName);
 }
 
