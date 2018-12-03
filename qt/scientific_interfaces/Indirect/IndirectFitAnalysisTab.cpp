@@ -53,7 +53,7 @@ bool isGroupPlottable(WorkspaceGroup_sptr workspaceGroup) {
     return containsPlottableWorkspace(workspaceGroup);
   else
     return false;
-};
+}
 
 void updateParameters(
     IFunction_sptr function,
