@@ -123,18 +123,18 @@ class MarkedColumnsTest(unittest.TestCase):
         -> The new YErr must replace the old one
         """
         mc = MarkedColumns()
-        ec = ErrorColumn(source_column=2, error_for_column=4, label_index=0)
+        ec = ErrorColumn(column=2, error_for_column=4, label_index=0)
         mc.add_y_err(ec)
         self.assertEqual(1, len(mc.as_y_err))
-        self.assertEqual(2, mc.as_y_err[0].source_column)
+        self.assertEqual(2, mc.as_y_err[0].column)
         self.assertEqual(4, mc.as_y_err[0].error_for_column)
 
         # different source column but contains error for the same column
         # adding this one should replace the first one
-        ec2 = ErrorColumn(source_column=2, error_for_column=5, label_index=0)
+        ec2 = ErrorColumn(column=2, error_for_column=5, label_index=0)
         mc.add_y_err(ec2)
         self.assertEqual(1, len(mc.as_y_err))
-        self.assertEqual(2, mc.as_y_err[0].source_column)
+        self.assertEqual(2, mc.as_y_err[0].column)
         self.assertEqual(5, mc.as_y_err[0].error_for_column)
 
     def test_add_y_err_duplicate_column_different_reference_col(self):
@@ -143,18 +143,18 @@ class MarkedColumnsTest(unittest.TestCase):
         -> The new YErr must replace the old one
         """
         mc = MarkedColumns()
-        ec = ErrorColumn(source_column=2, error_for_column=4, label_index=0)
+        ec = ErrorColumn(column=2, error_for_column=4, label_index=0)
         mc.add_y_err(ec)
         self.assertEqual(1, len(mc.as_y_err))
-        self.assertEqual(2, mc.as_y_err[0].source_column)
+        self.assertEqual(2, mc.as_y_err[0].column)
         self.assertEqual(4, mc.as_y_err[0].error_for_column)
 
         # different source column but contains error for the same column
         # adding this one should replace the first one
-        ec2 = ErrorColumn(source_column=3, error_for_column=4, label_index=0)
+        ec2 = ErrorColumn(column=3, error_for_column=4, label_index=0)
         mc.add_y_err(ec2)
         self.assertEqual(1, len(mc.as_y_err))
-        self.assertEqual(3, mc.as_y_err[0].source_column)
+        self.assertEqual(3, mc.as_y_err[0].column)
         self.assertEqual(4, mc.as_y_err[0].error_for_column)
 
     def test_changing_y_to_x_removes_associated_yerr_columns(self):
@@ -164,7 +164,7 @@ class MarkedColumnsTest(unittest.TestCase):
         """
         mc = MarkedColumns()
         mc.add_y(4)
-        ec = ErrorColumn(source_column=2, error_for_column=4, label_index=0)
+        ec = ErrorColumn(column=2, error_for_column=4, label_index=0)
         mc.add_y_err(ec)
 
         # check that we have both a Y col and an associated YErr
@@ -184,7 +184,7 @@ class MarkedColumnsTest(unittest.TestCase):
         """
         mc = MarkedColumns()
         mc.add_y(4)
-        ec = ErrorColumn(source_column=2, error_for_column=4, label_index=0)
+        ec = ErrorColumn(column=2, error_for_column=4, label_index=0)
         mc.add_y_err(ec)
 
         # check that we have both a Y col and an associated YErr
@@ -201,7 +201,7 @@ class MarkedColumnsTest(unittest.TestCase):
         mc = MarkedColumns()
         mc.add_y(4)
         mc.add_x(3)
-        ec = ErrorColumn(source_column=2, error_for_column=6, label_index=0)
+        ec = ErrorColumn(column=2, error_for_column=6, label_index=0)
         mc.add_y_err(ec)
 
         self.assertEqual(1, len(mc.as_x))
@@ -223,11 +223,121 @@ class MarkedColumnsTest(unittest.TestCase):
         self.assertEqual(0, len(mc.as_y))
         self.assertEqual(0, len(mc.as_y_err))
 
-    def test_build_labels(self):
+    def test_build_labels_x_y(self):
         # TODO test this edge case: mark all columns Y, remove one that is not the last one!
-        # TODO test: mark 3 columns as Y, set the first one to YErr it should have label YErr->Y1
-        # TODO test: mark 3 columns as Y, set the middle one to YErr it should have label YErr->Y1
-        self.skipTest("Not Impl")
+        mc = MarkedColumns()
+        mc.add_y(0)
+        mc.add_y(1)
+        mc.add_y(2)
+        mc.add_y(3)
+
+        # note that the max Y label number will decrease as more Y columns are being changed to X
+        expected = [(0, '[Y0]'), (1, '[Y1]'), (2, '[Y2]'), (3, '[Y3]')]
+        self.assertEqual(expected, mc.build_labels())
+
+        expected = [(1, '[X0]'), (0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]')]
+        mc.add_x(1)
+        self.assertEqual(expected, mc.build_labels())
+        expected = [(1, '[X0]'), (3, '[X1]'), (0, '[Y0]'), (2, '[Y1]')]
+        mc.add_x(3)
+        self.assertEqual(expected, mc.build_labels())
+
+    def test_build_labels_y_and_yerr_change_middle(self):
+        mc = MarkedColumns()
+        mc.add_y(0)
+        mc.add_y(1)
+        mc.add_y(2)
+
+        # change one of the columns to YErr
+        mc.add_y_err(ErrorColumn(1, 0, 0))
+        expected = [(0, '[Y0]'), (2, '[Y1]'), (1, '[Y0_YErr]')]
+        self.assertEqual(expected, mc.build_labels())
+
+        # change the last Y column to YErr
+        mc.add_y_err(ErrorColumn(2, 0, 0))
+        expected = [(0, '[Y0]'), (2, '[Y0_YErr]')]
+        self.assertEqual(expected, mc.build_labels())
+
+    def test_build_labels_y_and_yerr_change_first(self):
+        mc = MarkedColumns()
+        mc.add_y(0)
+        mc.add_y(1)
+        mc.add_y(2)
+
+        # change one of the columns to YErr
+        mc.add_y_err(ErrorColumn(0, 1, 1))
+        # note: the first column is being set -> this decreases the label index of all columns to its right by 1
+        expected = [(1, '[Y0]'), (2, '[Y1]'), (0, '[Y0_YErr]')]
+        self.assertEqual(expected, mc.build_labels())
+
+        # change the last Y column to YErr
+        mc.add_y_err(ErrorColumn(2, 1, 0))
+        expected = [(1, '[Y0]'), (2, '[Y0_YErr]')]
+        self.assertEqual(expected, mc.build_labels())
+
+    def test_build_labels_x_y_and_yerr(self):
+        mc = MarkedColumns()
+        mc.add_y(0)
+        mc.add_y(1)
+        mc.add_y(2)
+        mc.add_y(3)
+
+        mc.add_y_err(ErrorColumn(1, 0, 0))
+        expected = [(0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]'), (1, '[Y0_YErr]')]
+        self.assertEqual(expected, mc.build_labels())
+
+        expected = [(1, '[X0]'), (0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]')]
+        mc.add_x(1)
+        self.assertEqual(expected, mc.build_labels())
+
+        expected = [(1, '[X0]'), (2, '[Y0]'), (3, '[Y1]'), (0, '[Y1_YErr]')]
+        mc.add_y_err(ErrorColumn(0, 3, 2))
+        self.assertEqual(expected, mc.build_labels())
+
+    def test_fail_to_add_yerr_for_x(self):
+        mc = MarkedColumns()
+        mc.add_y(0)
+        mc.add_y(1)
+        mc.add_y(2)
+        mc.add_y(3)
+
+        mc.add_y_err(ErrorColumn(1, 0, 0))
+        expected = [(0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]'), (1, '[Y0_YErr]')]
+        self.assertEqual(expected, mc.build_labels())
+
+        expected = [(1, '[X0]'), (0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]')]
+        mc.add_x(1)
+        self.assertEqual(expected, mc.build_labels())
+
+        self.assertRaises(ValueError, lambda: mc.add_y_err(ErrorColumn(0, 1, 2)))
+
+    def test_fail_to_add_yerr_for_another_yerr(self):
+        mc = MarkedColumns()
+        mc.add_y(0)
+        mc.add_y(1)
+        mc.add_y(2)
+        mc.add_y(3)
+
+        mc.add_y_err(ErrorColumn(1, 0, 0))
+        expected = [(0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]'), (1, '[Y0_YErr]')]
+        self.assertEqual(expected, mc.build_labels())
+
+        self.assertRaises(ValueError, lambda: mc.add_y_err(ErrorColumn(0, 1, 2)))
 
     def test_find_yerr(self):
-        self.skipTest("Not Impl")
+        mc = MarkedColumns()
+        mc.add_y(0)
+        mc.add_y(1)
+        mc.add_y(2)
+        mc.add_y(3)
+
+        mc.add_y_err(ErrorColumn(4, 1, 1))
+        expected = {1: 4}
+        self.assertEqual(expected, mc.find_yerr([1]))
+        # Replace the Y column, which has an associated YErr. This should remove the YErr as well
+        mc.add_y_err(ErrorColumn(1, 3, 1))
+        expected = {3: 1}
+        self.assertEqual(expected, mc.find_yerr([0, 1, 2, 3]))
+        mc.add_y_err(ErrorColumn(4, 2, 1))
+        expected = {2: 4, 3: 1}
+        self.assertEqual(expected, mc.find_yerr([0, 1, 2, 3]))

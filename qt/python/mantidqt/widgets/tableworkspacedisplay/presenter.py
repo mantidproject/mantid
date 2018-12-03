@@ -183,13 +183,13 @@ class TableWorkspaceDisplay(object):
             return
 
         selected_column = selected_columns[0]
-        if selected_column == error_for_column:
-            show_mouse_toast("Cannot set Y column to be its own YErr.")
+        try:
+            err_column = ErrorColumn(selected_column, error_for_column, label_index)
+        except ValueError as e:
+            show_mouse_toast(e.message)
             return
 
-        err_column = ErrorColumn(selected_column, error_for_column, label_index)
         self.marked_columns.add_y_err(err_column)
-
         self.update_column_headers()
 
     def action_set_as_none(self):

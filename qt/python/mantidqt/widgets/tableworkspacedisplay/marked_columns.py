@@ -45,6 +45,11 @@ class MarkedColumns:
         self._add(col_index, self.as_y, [self.as_x, self.as_y_err])
 
     def add_y_err(self, err_column):
+        # TODO consider adding checks of err_column.error_for_column is already in X or YErr and then error
+        if err_column.error_for_column in self.as_x:
+            raise ValueError("Trying to add YErr for column marked as X.")
+        elif err_column.error_for_column in self.as_y_err:
+            raise ValueError("Trying to add YErr for column marked as YErr.")
         # remove all labels for the column index
         len_before_remove = len(self.as_y)
         self._remove(err_column, [self.as_x, self.as_y, self.as_y_err])
@@ -53,7 +58,7 @@ class MarkedColumns:
         # -> This means that columns have been removed, and the label_index is now _wrong_
         # and has to be decremented to match the new label index correctly
         len_after_remove = len(self.as_y)
-        if err_column.error_for_column > err_column.source_column and len_after_remove < len_before_remove:
+        if err_column.error_for_column > err_column.column and len_after_remove < len_before_remove:
             err_column.label_index -= (len_before_remove - len_after_remove)
         self.as_y_err.append(err_column)
 
@@ -75,12 +80,17 @@ class MarkedColumns:
         extra_labels = []
         extra_labels.extend(self._make_labels(self.as_x, self.X_LABEL))
         extra_labels.extend(self._make_labels(self.as_y, self.Y_LABEL))
-        err_labels = [(err_col.source_column, self.Y_ERR_LABEL.format(err_col.label_index),) for index, err_col in
+        err_labels = [(err_col.column, self.Y_ERR_LABEL.format(err_col.label_index),) for index, err_col in
                       enumerate(self.as_y_err)]
         extra_labels.extend(err_labels)
         return extra_labels
 
     def find_yerr(self, selected_columns):
+        """
+        Retrieve the corresponding YErr column for each Y column, so that it can be plotted
+        :param selected_columns: Selected Y columns for which their YErr columns will be retrieved
+        :return: Dict[Selected Column] = Column with YErr
+        """
         yerr_for_col = {}
 
         # for each selected column
@@ -90,6 +100,6 @@ class MarkedColumns:
                 # if found append the YErr's source column - so that the data from the columns
                 # can be retrieved for plotting the errors
                 if yerr_col.error_for_column == col:
-                    yerr_for_col[col] = yerr_col.source_column
+                    yerr_for_col[col] = yerr_col.column
 
         return yerr_for_col
