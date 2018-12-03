@@ -726,7 +726,7 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   setRunIsRunning(false);
-	setFitSingleSpectrumIsFitting(false);
+  setFitSingleSpectrumIsFitting(false);
   enablePlotResult(error);
   setSaveResultEnabled(!error);
   updateParameterValues();
@@ -869,14 +869,14 @@ void IndirectFitAnalysisTab::plotResult(const QString &plotType) {
 
 void IndirectFitAnalysisTab::plotAll(
     Mantid::API::WorkspaceGroup_sptr workspaces) {
-	for (auto const &workspace : *workspaces)
-		plotAll(convertToMatrixWorkspace(workspace));
+  for (auto const &workspace : *workspaces)
+    plotAll(convertToMatrixWorkspace(workspace));
 }
 
 void IndirectFitAnalysisTab::plotParameter(
     Mantid::API::WorkspaceGroup_sptr workspaces, std::string const &parameter) {
-	for (auto const &workspace : *workspaces)
-		plotParameter(convertToMatrixWorkspace(workspace), parameter);
+  for (auto const &workspace : *workspaces)
+    plotParameter(convertToMatrixWorkspace(workspace), parameter);
 }
 
 void IndirectFitAnalysisTab::plotAll(
@@ -932,10 +932,10 @@ void IndirectFitAnalysisTab::singleFit() {
 
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
-	if (validate()) {
-		setFitSingleSpectrumIsFitting(true);
-		runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
-	}
+  if (validate()) {
+    setFitSingleSpectrumIsFitting(true);
+    runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
+  }
 }
 
 /**
@@ -1040,7 +1040,8 @@ void IndirectFitAnalysisTab::enablePlotResult(bool error) {
 
 bool IndirectFitAnalysisTab::isResultWorkspacePlottable() const {
   auto const resultWorkspaces = m_fittingModel->getResultWorkspace();
-	return resultWorkspaces ? isResultWorkspacePlottable(resultWorkspaces) : false;
+  return resultWorkspaces ? isResultWorkspacePlottable(resultWorkspaces)
+                          : false;
 };
 
 bool IndirectFitAnalysisTab::isResultWorkspacePlottable(

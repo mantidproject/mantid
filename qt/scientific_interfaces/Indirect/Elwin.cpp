@@ -21,14 +21,15 @@ namespace {
 Mantid::Kernel::Logger g_log("Elwin");
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-	return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
 }
 
 bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
-	return workspace->blocksize() > 1 ? true : false;
+  return workspace->blocksize() > 1 ? true : false;
 }
 
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -482,22 +483,23 @@ void Elwin::plotClicked() {
   auto const workspaceBaseName =
       getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 
-	plotResult(workspaceBaseName + "_eq");
-	plotResult(workspaceBaseName + "_eq2");
-	plotResult(workspaceBaseName + "_elf");
-	plotResult(workspaceBaseName + "_elt");
+  plotResult(workspaceBaseName + "_eq");
+  plotResult(workspaceBaseName + "_eq2");
+  plotResult(workspaceBaseName + "_elf");
+  plotResult(workspaceBaseName + "_elt");
 
   setPlotResultIsPlotting(false);
 }
 
 void Elwin::plotResult(QString const &workspaceName) {
-	auto const name = workspaceName.toStdString();
-	if (checkADSForPlotSaveWorkspace(name, true)) {
-		if (isWorkspacePlottable(getADSMatrixWorkspace(name)))
-		  plotSpectrum(workspaceName);
-		else
-			showMessageBox("Plotting a spectrum of the workspace " + workspaceName + " failed : Workspace only has one data point");
-	}
+  auto const name = workspaceName.toStdString();
+  if (checkADSForPlotSaveWorkspace(name, true)) {
+    if (isWorkspacePlottable(getADSMatrixWorkspace(name)))
+      plotSpectrum(workspaceName);
+    else
+      showMessageBox("Plotting a spectrum of the workspace " + workspaceName +
+                     " failed : Workspace only has one data point");
+  }
 }
 
 /**

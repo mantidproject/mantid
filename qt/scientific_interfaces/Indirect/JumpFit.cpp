@@ -116,25 +116,26 @@ void JumpFit::plotClicked() {
 }
 
 void JumpFit::setRunIsRunning(bool running) {
-	m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-	setButtonsEnabled(!running);
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
 }
 
 void JumpFit::setFitSingleSpectrumIsFitting(bool fitting) {
-	m_uiForm->pvFitPlotView->setFitSingleSpectrumText(fitting ? "Fitting..." : "Fit Single Spectrum");
-	setButtonsEnabled(!fitting);
+  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
+      fitting ? "Fitting..." : "Fit Single Spectrum");
+  setButtonsEnabled(!fitting);
 }
 
 void JumpFit::setPlotResultIsPlotting(bool plotting) {
-	m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-	setButtonsEnabled(!plotting);
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
 }
 
 void JumpFit::setButtonsEnabled(bool enabled) {
-	setRunEnabled(enabled);
-	setPlotResultEnabled(enabled);
-	setSaveResultEnabled(enabled);
-	setFitSingleSpectrumEnabled(enabled);
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
 }
 
 void JumpFit::setRunEnabled(bool enabled) {

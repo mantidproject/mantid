@@ -64,7 +64,7 @@ public:
   void enableSpectrumSelection(bool enable) override;
   void enableFitRangeSelection(bool enable) override;
 
-	void setFitSingleSpectrumText(QString const &text) override;
+  void setFitSingleSpectrumText(QString const &text) override;
 
   void setBackgroundLevel(double value) override;
 

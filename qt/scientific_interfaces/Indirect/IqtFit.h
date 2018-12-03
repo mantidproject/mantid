@@ -43,7 +43,7 @@ protected slots:
 
 protected:
   void setRunIsRunning(bool running) override;
-	void setFitSingleSpectrumIsFitting(bool fitting) override;
+  void setFitSingleSpectrumIsFitting(bool fitting) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 

@@ -191,7 +191,7 @@ void IndirectFitPlotView::enableFitRangeSelection(bool enable) {
 }
 
 void IndirectFitPlotView::setFitSingleSpectrumText(QString const &text) {
-	m_plotForm->pbFitSingle->setText(text);
+  m_plotForm->pbFitSingle->setText(text);
 }
 
 void IndirectFitPlotView::clearTopPreview() { m_plotForm->ppPlotTop->clear(); }

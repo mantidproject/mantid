@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
-#include "MantidAPI/MatrixWorkspace.h"
 
 #include <qwt_plot.h>
 
@@ -24,7 +23,8 @@ namespace {
 Mantid::Kernel::Logger g_log("Iqt");
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-	return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
 }
 
 std::size_t getWsNumberOfSpectra(std::string const &workspaceName) {
@@ -36,7 +36,7 @@ bool checkADSForWorkspace(std::string const &workspaceName) {
 }
 
 bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
-	return workspace->blocksize() > 1 ? true : false;
+  return workspace->blocksize() > 1 ? true : false;
 }
 
 void cloneWorkspace(std::string const &workspaceName,
@@ -254,21 +254,22 @@ void Iqt::saveClicked() {
  * Handle mantid plotting
  */
 void Iqt::plotClicked() {
-	setPlotSpectrumIsPlotting(true);
+  setPlotSpectrumIsPlotting(true);
 
-	plotResult(QString::fromStdString(m_pythonExportWsName));
+  plotResult(QString::fromStdString(m_pythonExportWsName));
 
   setPlotSpectrumIsPlotting(false);
 }
 
 void Iqt::plotResult(QString const &workspaceName) {
-	auto const name = workspaceName.toStdString();
-	if (checkADSForPlotSaveWorkspace(name, true)) {
-		if (isWorkspacePlottable(getADSMatrixWorkspace(name)))
-			plotSpectrum(workspaceName, getPlotSpectrumIndex());
-		else
-			showMessageBox("Plotting a spectrum of the workspace " + workspaceName + " failed : Workspace only has one data point");
-	}
+  auto const name = workspaceName.toStdString();
+  if (checkADSForPlotSaveWorkspace(name, true)) {
+    if (isWorkspacePlottable(getADSMatrixWorkspace(name)))
+      plotSpectrum(workspaceName, getPlotSpectrumIndex());
+    else
+      showMessageBox("Plotting a spectrum of the workspace " + workspaceName +
+                     " failed : Workspace only has one data point");
+  }
 }
 
 void Iqt::runClicked() { runTab(); }

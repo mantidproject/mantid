@@ -64,7 +64,7 @@ public:
   virtual void enableSpectrumSelection(bool enable) = 0;
   virtual void enableFitRangeSelection(bool enable) = 0;
 
-	virtual void setFitSingleSpectrumText(QString const &text) = 0;
+  virtual void setFitSingleSpectrumText(QString const &text) = 0;
 
   virtual void setBackgroundLevel(double value) = 0;
 

@@ -32,7 +32,7 @@ private:
   double getXMinValue(Mantid::API::MatrixWorkspace_const_sptr workspace,
                       std::size_t const &index);
 
-	void plotResult(QString const &workspaceName);
+  void plotResult(QString const &workspaceName);
 
   void setRunEnabled(bool enabled);
   void setPlotSpectrumEnabled(bool enabled);

@@ -121,7 +121,7 @@ public:
   MOCK_METHOD1(enableSpectrumSelection, void(bool enable));
   MOCK_METHOD1(enableFitRangeSelection, void(bool enable));
 
-	MOCK_METHOD1(setFitSingleSpectrumText, void(QString const &text));
+  MOCK_METHOD1(setFitSingleSpectrumText, void(QString const &text));
 
   MOCK_METHOD1(setBackgroundLevel, void(double value));
 

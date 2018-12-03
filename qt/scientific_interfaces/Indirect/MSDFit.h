@@ -29,16 +29,16 @@ protected slots:
   void updateModelFitTypeString();
 
 protected:
-	void setRunIsRunning(bool running) override;
-	void setFitSingleSpectrumIsFitting(bool fitting) override;
+  void setRunIsRunning(bool running) override;
+  void setFitSingleSpectrumIsFitting(bool fitting) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 
 private:
   void setupFitTab() override;
 
-	void setPlotResultIsPlotting(bool plotting);
-	void setButtonsEnabled(bool enabled);
+  void setPlotResultIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
   void setFitSingleSpectrumEnabled(bool enabled);
 

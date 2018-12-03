@@ -181,25 +181,26 @@ std::string ConvFit::fitTypeString() const {
 void ConvFit::runClicked() { runTab(); }
 
 void ConvFit::setRunIsRunning(bool running) {
-	m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-	setButtonsEnabled(!running);
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+  setButtonsEnabled(!running);
 }
 
 void ConvFit::setFitSingleSpectrumIsFitting(bool fitting) {
-	m_uiForm->pvFitPlotView->setFitSingleSpectrumText(fitting ? "Fitting..." : "Fit Single Spectrum");
-	setButtonsEnabled(!fitting);
+  m_uiForm->pvFitPlotView->setFitSingleSpectrumText(
+      fitting ? "Fitting..." : "Fit Single Spectrum");
+  setButtonsEnabled(!fitting);
 }
 
 void ConvFit::setPlotResultIsPlotting(bool plotting) {
-	m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
-	setButtonsEnabled(!plotting);
+  m_uiForm->pbPlot->setText(plotting ? "Plotting..." : "Plot");
+  setButtonsEnabled(!plotting);
 }
 
 void ConvFit::setButtonsEnabled(bool enabled) {
-	setRunEnabled(enabled);
-	setPlotResultEnabled(enabled);
-	setSaveResultEnabled(enabled);
-	setFitSingleSpectrumEnabled(enabled);
+  setRunEnabled(enabled);
+  setPlotResultEnabled(enabled);
+  setSaveResultEnabled(enabled);
+  setFitSingleSpectrumEnabled(enabled);
 }
 
 void ConvFit::setRunEnabled(bool enabled) {
