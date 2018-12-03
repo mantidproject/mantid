@@ -118,7 +118,7 @@ private:
   /// The spectra numbers that were skipped
   std::vector<specnum_t> m_spectraSkipped;
   /// Algorithm progress keeper
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithms
