@@ -64,6 +64,10 @@ public:
    */
   inline bool isAscii() const { return m_ascii; }
   /**
+   * Returns true if the descriptor is looking at an XML file
+   */
+  bool isXML() const;
+  /**
    * Access the open file stream. DO NOT CLOSE IT
    * @returns The current stream
    */

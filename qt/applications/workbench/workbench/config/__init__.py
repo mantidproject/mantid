@@ -19,6 +19,7 @@ and use it to access the settings
 from __future__ import (absolute_import, unicode_literals)
 
 from workbench.config.user import UserConfig
+from qtpy.QtCore import QSettings
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -40,4 +41,5 @@ DEFAULTS = {
 # -----------------------------------------------------------------------------
 # 'Singleton' instance
 # -----------------------------------------------------------------------------
+QSettings.setDefaultFormat(QSettings.IniFormat)
 CONF = UserConfig(ORGANIZATION, APPNAME, defaults=DEFAULTS)

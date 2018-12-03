@@ -19,7 +19,6 @@ namespace Mantid {
 namespace DataHandling {
 /**
  This class is for searching the SNS data archive
-
  @date 02/22/2012
  */
 

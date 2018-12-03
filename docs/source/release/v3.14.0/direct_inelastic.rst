@@ -17,6 +17,7 @@ New Algorithms
 ##############
 
 - Added a new algorithm to ILL's reduction workflow: :ref:`DirectILLTubeBackground <algm-DirectILLTubeBackground>` which can be used to calculate the time-independent backgrounds for instruments with PSD detectors such as IN5.
+- The new algorithm :ref:`SofTwoThetaTOF <algm-SofTwoThetaTOF>` can be used to convert a workspace from (spectrum number, TOF) units to (:math:`2\theta`, TOF) averaging the intensities over constant scattering angles.
 
 Improvements
 ############
@@ -29,6 +30,7 @@ Improvements
   - The temperature sample log can now be a time series.
 
 - :ref:`ComputeIncoherentDOS <algm-ComputeIncoherentDOS>` now supports computation from :math:`S(2\theta,E)` workspace.
+- The upper limit of the empty container scaling factor in :ref:`DirectILLApplySelfShielding <algm-DirectILLApplySelfShielding>` has been removed.
 
 Bugfixes
 ########

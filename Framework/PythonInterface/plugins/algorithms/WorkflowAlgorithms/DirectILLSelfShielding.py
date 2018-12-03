@@ -28,7 +28,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
         return common.CATEGORIES
 
     def seeAlso(self):
-        return [ "DirectILLReduction" ]
+        return [ 'DirectILLApplySelfShielding', 'DirectILLReduction' ]
 
     def name(self):
         """Return the algorithm's name."""
