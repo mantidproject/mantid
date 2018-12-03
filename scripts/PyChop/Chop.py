@@ -24,7 +24,8 @@ technical reports:
 """
 
 from __future__ import (absolute_import, division, print_function)
-import numpy as np, collections
+import numpy as np
+import collections
 import warnings
 warnings.simplefilter('always', UserWarning)
 
