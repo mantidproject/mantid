@@ -531,12 +531,14 @@ void Stitch1D::exec() {
       result = lhs + overlapave + rhs;
       reinsertSpecialValues(result);
     } catch (std::range_error) {
-      g_log.error("It happens that the bin index is out of range. This likely "
-                  "appears when using Stitch1DMany and providing a full "
-                  "rebinning range. Please note that after stitching two "
-                  "workspaces, those workspaces are rebinned and start and end "
-                  "overlap values which are given may not anymore be valid. You"
-                  "may consider giving only a binning step, i.e. one parameter.");
+      g_log.error(
+          "A bin boundary is out of range. This likely happens when using "
+          "Stitch1DMany and providing start, step, stop rebin parameters. "
+          "Please note that after stitching two workspaces, those workspaces "
+          "are rebinned and automatically determined start and end overlap "
+          "values may not be valid due to computational inaccuracies. "
+          "Consider giving only a binning step, i.e. one parameter or precise "
+          "the EndOverlap(s).");
       throw(std::runtime_error("Bin out of range."));
     }
   } else { // The input workspaces are point data ... join & sort
@@ -560,10 +562,9 @@ void Stitch1D::exec() {
  * @param ws : MatrixWorkspace to resinsert special values into.
  */
 void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws) {
-  unsigned int histogramCount =
-      static_cast<unsigned int>(ws->getNumberHistograms());
+  int histogramCount = static_cast<int>(ws->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
-  for (unsigned int i = 0; i < histogramCount; ++i) {
+  for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the data
     auto &sourceY = ws->mutableY(i);
