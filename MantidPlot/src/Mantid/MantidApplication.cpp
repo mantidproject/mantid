@@ -29,7 +29,7 @@ Mantid::Kernel::Logger g_log("MantidApplication");
 MantidApplication::MantidApplication(int &argc, char **argv)
     : QApplication(argc, argv) {
   try {
-    Mantid::Kernel::UsageService::Instance().setApplication("mantidplot");
+    Mantid::Kernel::UsageService::Instance().setApplicationName("mantidplot");
   } catch (std::runtime_error &rexc) {
     g_log.error() << "Failed to initialize the Mantid usage service. This "
                      "is probably a sign that this Mantid is not fully or "

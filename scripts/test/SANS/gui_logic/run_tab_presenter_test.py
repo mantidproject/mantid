@@ -16,10 +16,11 @@ from mantid.kernel import PropertyManagerDataService
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
                                RangeStepType, FitType, SANSInstrument, RowState)
-from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
+from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF,
+                                                    sample_user_file_with_instrument)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file)
-from sans.common.enums import BatchReductionEntry
+from sans.common.enums import BatchReductionEntry, SANSInstrument
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
@@ -67,7 +68,6 @@ class MultiPeriodMock(object):
 class RunTabPresenterTest(unittest.TestCase):
     def setUp(self):
         config.setFacility("ISIS")
-        config.setString("default.instrument", "SANS2D")
 
         patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.BatchCsvParser')
         self.addCleanup(patcher.stop)
@@ -89,7 +89,11 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.set_view(view)
 
         # Act
-        presenter.on_user_file_load()
+        try:
+            presenter.on_user_file_load()
+        except RuntimeError:
+            # Assert that RuntimeError from no instrument is caught
+            self.fail("on_user_file_load raises a RuntimeError which should be caught")
 
         # Assert
         # Note that the event slices are not set in the user file
@@ -155,6 +159,22 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # clean up
         remove_file(user_file_path)
+
+    def test_that_checks_default_user_file(self):
+        # Setup presenter and mock view
+        view, settings_diagnostic_tab, _ = create_mock_view("")
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        presenter.set_view(view)
+
+        self.assertEqual(
+            presenter._view.set_out_default_user_file.call_count, 1,
+            "Expected mock to have been called once. Called {} times.".format(
+                presenter._view.set_out_default_user_file.call_count))
+
+        self.assertEqual(
+            presenter._view._call_settings_listeners.call_count, 0,
+            "Expected mock to not have been called. Called {} times.".format(
+                presenter._view._call_settings_listeners.call_count))
 
     def test_fails_silently_when_user_file_does_not_exist(self):
         self.os_patcher.stop()

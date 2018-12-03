@@ -95,6 +95,7 @@ set ( SRC_FILES
 	src/CrossCorrelate.cpp
 	src/CuboidGaugeVolumeAbsorption.cpp
 	src/CylinderAbsorption.cpp
+	src/DeadTimeCorrection.cpp
 	src/DeleteLog.cpp
 	src/DeleteWorkspace.cpp
 	src/DeleteWorkspaces.cpp
@@ -430,6 +431,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CrossCorrelate.h
 	inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
 	inc/MantidAlgorithms/CylinderAbsorption.h
+	inc/MantidAlgorithms/DeadTimeCorrection.h
 	inc/MantidAlgorithms/DeleteLog.h
 	inc/MantidAlgorithms/DeleteWorkspace.h
 	inc/MantidAlgorithms/DeleteWorkspaces.h
@@ -779,6 +781,7 @@ set ( TEST_FILES
 	CrossCorrelateTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h
+	DeadTimeCorrectionTest.h
 	DeleteLogTest.h
 	DeleteWorkspaceTest.h
 	DeleteWorkspacesTest.h

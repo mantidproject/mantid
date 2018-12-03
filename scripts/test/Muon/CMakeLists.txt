@@ -17,9 +17,9 @@ set ( TEST_PY_FILES
    PlottingPresenter_test.py
    PlottingUtils_test.py
    PlottingView_test.py
-   #thread_model_test.py
    transformWidget_test.py
    utilities/load_utils_test.py
+   utilities/thread_model_test.py
    utilities/muon_workspace_wrapper_test.py
    utilities/muon_workspace_wrapper_directory_test.py
    subplotObject_test.py
