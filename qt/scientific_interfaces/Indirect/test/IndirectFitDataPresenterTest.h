@@ -11,66 +11,81 @@
 #include <gmock/gmock.h>
 
 #include "IndirectFitDataPresenter.h"
-#include "IndirectFitDataView.h"
+#include "IIndirectFitDataView.h"
 #include "IndirectFittingModel.h"
+#include "IndirectDataTablePresenter.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
+using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
 
+namespace {
+
+	struct TableItem {
+		TableItem(std::string const &value) : m_str(value), m_dbl(0.0) {}
+		TableItem(double const &value) : m_str(QString::number(value, 'g', 16).toStdString()), m_dbl(value) {}
+
+		std::string const &asString() const { return m_str; }
+		double const &asDouble() const { return m_dbl; }
+
+		bool operator==(std::string const &value) const {
+			return this->asString() == value;
+		}
+
+	private:
+		std::string m_str;
+		double m_dbl;
+	};
+
+}
+
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockIndirectFitDataView : public IndirectFitDataView {
+/// Mock object to mock the view
+class MockIIndirectFitDataView : public IIndirectFitDataView {
 public:
 	/// Signals
 	void emitSampleLoaded(QString const &name) {
 		emit sampleLoaded(name);
 	}
 
-	//void emitResolutionLoaded(QString const &name) {
-	//	emit resolutionLoaded(name);
-	//}
-
-	//void emitAddClicked() {
-	//	emit addClicked();
-	//}
-
-	//void emitRemoveClicked() {
-	//	emit removeClicked();
-	//}
-
-	//void emitMultipleDataViewSelected() {
-	//	emit multipleDataViewSelected();
-	//}
-
-	void emitSingleDataViewSelected() {
-		emit singleDataViewSelected();
-	}
-
 	/// Public Methods
-	MOCK_CONST_METHOD0(getSelectedSample, std::string());
+	MOCK_CONST_METHOD0(getDataTable, QTableWidget*());
 	MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
+	MOCK_CONST_METHOD0(isResolutionHidden, bool());
+	MOCK_METHOD1(setResolutionHidden, void(bool hide));
+	MOCK_METHOD0(disableMultipleDataTab, void());
+
+	MOCK_CONST_METHOD0(getSelectedSample, std::string());
+	MOCK_CONST_METHOD0(getSelectedResolution, std::string());
 
 	MOCK_CONST_METHOD0(getSampleWSSuffices, QStringList());
 	MOCK_CONST_METHOD0(getSampleFBSuffices, QStringList());
+	MOCK_CONST_METHOD0(getResolutionWSSuffices, QStringList());
+	MOCK_CONST_METHOD0(getResolutionFBSuffices, QStringList());
 
 	MOCK_METHOD1(setSampleWSSuffices, void(QStringList const &suffices));
 	MOCK_METHOD1(setSampleFBSuffices, void(QStringList const &suffices));
 	MOCK_METHOD1(setResolutionWSSuffices, void(QStringList const &suffices));
 	MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
 
-	/// Public Slots
+	MOCK_METHOD1(readSettings, void(QSettings const &settings));
+	MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
 
+	/// Public slots
+	MOCK_METHOD1(displayWarning, void(std::string const &warning));
 };
 
+/// Mock object to mock the model
 class MockIndirectFitDataModel : public IndirectFittingModel {
 public:
+	/// Public Methods
 	MOCK_CONST_METHOD0(isMultiFit, bool());
 	MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
 
@@ -107,10 +122,14 @@ public:
 	}
 
 	void setUp() override {
-		m_view = std::make_unique<NiceMock<MockIndirectFitDataView>>();
+		m_view = std::make_unique<NiceMock<MockIIndirectFitDataView>>();
 		m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
+		createEmptyTableWidget(5, 5);
+
+		m_dataTablePresenter = std::make_unique<IndirectDataTablePresenter>(
+			std::move(m_model.get()), std::move(m_table.get()));
 		m_presenter = std::make_unique<IndirectFitDataPresenter>(
-			std::move(m_model.get()), std::move(m_view.get()));
+			std::move(m_model.get()), std::move(m_view.get()), std::move(m_dataTablePresenter));
 
 		SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(5));
 		m_model->addWorkspace("WorkspaceName");
@@ -122,9 +141,7 @@ public:
 		TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
 		TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
 
-		m_presenter.reset();
-		m_model.reset();
-		m_view.reset();
+		deleteSetup();
 	}
 
 	///----------------------------------------------------------------------
@@ -140,7 +157,7 @@ public:
 	}
 
 	void test_that_the_view_has_been_instantiated_correctly() {
-	  std::string const sampleName("SampleName_red");
+		std::string const sampleName("SampleName_red");
 		ON_CALL(*m_view, getSelectedSample()).WillByDefault(Return(sampleName));
 
 		EXPECT_CALL(*m_view, getSelectedSample()).Times(1).WillOnce(Return(sampleName));
@@ -149,7 +166,7 @@ public:
 	}
 
 	void
-	test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_view_and_model() {
+		test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_view_and_model() {
 		ON_CALL(*m_view, isMultipleDataTabSelected()).WillByDefault(Return(true));
 		ON_CALL(*m_model, numberOfWorkspaces()).WillByDefault(Return(2));
 
@@ -164,18 +181,18 @@ public:
 	///----------------------------------------------------------------------
 
 	void test_that_the_sampleLoaded_signal_will_add_the_loaded_workspace_to_the_model() {
-	  std::string const workspaceName("WorkspaceName2");
+		std::string const workspaceName("WorkspaceName2");
 		m_ads->addOrReplace(workspaceName, createWorkspace(5));
 
-		EXPECT_CALL(*m_model, addWorkspace(workspaceName)).Times(1);
-		
+		EXPECT_CALL(*m_model, addWorkspace(workspaceName)).Times(Exactly(1));
+
 		m_view->emitSampleLoaded(QString::fromStdString(workspaceName));
 	}
 
 	void test_that_setSampleWSSuffices_will_set_the_sample_workspace_suffices_in_the_view() {
-		QStringList const suffices{"suffix1", "suffix2"};
-		
-		EXPECT_CALL(*m_view, setSampleWSSuffices(suffices)).Times(1);
+		QStringList const suffices{ "suffix1", "suffix2" };
+
+		EXPECT_CALL(*m_view, setSampleWSSuffices(suffices)).Times(Exactly(1));
 
 		m_presenter->setSampleWSSuffices(suffices);
 	}
@@ -183,7 +200,7 @@ public:
 	void test_that_setSampleFBSuffices_will_set_the_sample_file_browser_suffices_in_the_view() {
 		QStringList const suffices{ "suffix1", "suffix2" };
 
-		EXPECT_CALL(*m_view, setSampleFBSuffices(suffices)).Times(1);
+		EXPECT_CALL(*m_view, setSampleFBSuffices(suffices)).Times(Exactly(1));
 
 		m_presenter->setSampleFBSuffices(suffices);
 	}
@@ -191,34 +208,89 @@ public:
 	void test_that_setResolutionWSSuffices_will_set_the_resolution_workspace_suffices_in_the_view() {
 		QStringList const suffices{ "suffix1", "suffix2" };
 
-		EXPECT_CALL(*m_view, setResolutionWSSuffices(suffices)).Times(1);
+		EXPECT_CALL(*m_view, setResolutionWSSuffices(suffices)).Times(Exactly(1));
 
 		m_presenter->setResolutionWSSuffices(suffices);
 	}
 
-	void test_that_setSampleFBSuffices_will_set_the_resolution_file_browser_suffices_in_the_view() {
+	void test_that_setResolutionFBSuffices_will_set_the_resolution_file_browser_suffices_in_the_view() {
 		QStringList const suffices{ "suffix1", "suffix2" };
 
-		EXPECT_CALL(*m_view, setResolutionFBSuffices(suffices)).Times(1);
+		EXPECT_CALL(*m_view, setResolutionFBSuffices(suffices)).Times(Exactly(1));
 
 		m_presenter->setResolutionFBSuffices(suffices);
 	}
 
+	void
+		test_that_setStartX_will_alter_the_relevant_startX_column_in_the_data_table() {
+		int const startXColumn(2);
+		TableItem const startX(2.3);
 
-	//void test_that_the_addClicked_signal_will_get_the_allowed_workspace_suffixes_from_the_view() {
-	//
-	//	EXPECT_CALL(*m_view, getSampleWSSuffices()).Times(1);
-	//	EXPECT_CALL(*m_view, getSampleFBSuffices()).Times(1);
+		m_presenter->setStartX(startX.asDouble(), 0, 0);
 
-	//	m_view->emitAddClicked();
-	//}
+		assertValueIsGlobal(startXColumn, startX);
+	}
 
+	void
+		test_that_setEndX_will_alter_the_relevant_endX_column_in_the_data_table() {
+		int const endXColumn(3);
+		TableItem const endX(5.5);
 
+		m_presenter->setEndX(endX.asDouble(), 0, 0);
 
-	void test_test() {}
+		assertValueIsGlobal(endXColumn, endX);
+	}
+
+	void
+		test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
+		int const excludeRegionColumn(4);
+		TableItem const excludeRegion("2-3");
+
+		m_presenter->setExclude(excludeRegion.asString(), 0, 0);
+
+		assertValueIsGlobal(excludeRegionColumn, excludeRegion);
+	}
+
+	void test_that_loadSettings_will_read_the_settings_from_the_view() {
+		QSettings settings;
+		settings.beginGroup("/ISettings");
+
+		EXPECT_CALL(*m_view, readSettings(_)).Times(Exactly(1));
+
+		m_presenter->loadSettings(settings);
+	}
 
 private:
-	std::unique_ptr<MockIndirectFitDataView> m_view;
+	/// Used in setup
+	void createEmptyTableWidget(int rows, int columns) {
+		m_table = std::make_unique<QTableWidget>(rows, columns);
+		for (auto column = 0; column < rows; ++column)
+			for (auto row = 0; row < columns; ++row)
+				m_table->setItem(row, column, new QTableWidgetItem("item"));
+	}
+
+	void deleteSetup() {
+		m_presenter.reset();
+		m_model.reset();
+		m_view.reset();
+
+		m_dataTablePresenter.reset();
+		m_table.reset();
+	}
+
+	void assertValueIsGlobal(int column, TableItem const &value) const {
+		for (auto row = 0; row < m_table->rowCount(); ++row)
+			TS_ASSERT_EQUALS(value, getTableItem(row, column));
+	}
+
+	std::string getTableItem(int row, int column) const {
+		return m_table->item(row, column)->text().toStdString();
+	}
+
+	std::unique_ptr<QTableWidget> m_table;
+	std::unique_ptr<IndirectDataTablePresenter> m_dataTablePresenter;
+
+	std::unique_ptr<MockIIndirectFitDataView> m_view;
 	std::unique_ptr<MockIndirectFitDataModel> m_model;
 	std::unique_ptr<IndirectFitDataPresenter> m_presenter;
 
