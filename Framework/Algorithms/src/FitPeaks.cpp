@@ -463,10 +463,10 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
   // check inputs for uncertainty (fitting error)
   const std::string error_table_name =
       getPropertyValue("OutputParameterFitErrorsWorkspace");
-  if (error_table_name != "") {
-    bool use_raw_params = getProperty("RawPeakParameters");
+  if (!error_table_name.empty()) {
+    const bool use_raw_params = getProperty("RawPeakParameters");
     if (!use_raw_params) {
-      std::string msg =
+      const std::string msg =
           "FitPeaks must output RAW peak parameters if fitting error "
           "is chosen to be output";
       issues["RawPeakParameters"] = msg;
@@ -791,7 +791,7 @@ void FitPeaks::processInputPeakCenters() {
     } else {
       // a case indicating programming error
       g_log.error() << "Peak center workspace has "
-                    << peak_center_ws_spectra_number << " spectra; "
+                    << peak_center_ws_spectra_number << " spectra;"
                     << "Input workspace has "
                     << m_inputMatrixWS->getNumberHistograms() << " spectra;"
                     << "User specifies to fit peaks from "
@@ -1740,7 +1740,7 @@ double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit,
 
   // Retrieve result
   std::string fitStatus = fit->getProperty("OutputStatus");
-  double chi2{DBL_MAX};
+  double chi2{std::numeric_limits<double>::max()};
   if (fitStatus == "success") {
     chi2 = fit->getProperty("OutputChi2overDoF");
   }
@@ -1963,14 +1963,14 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
     for (size_t i = 0; i < peak_params.size(); ++i)
       param_vec.push_back(peak_params[i]);
   } else {
-    param_vec.push_back("centre");
-    param_vec.push_back("width");
-    param_vec.push_back("height");
-    param_vec.push_back("intensity");
+    param_vec.emplace_back("centre");
+    param_vec.emplace_back("width");
+    param_vec.emplace_back("height");
+    param_vec.emplace_back("intensity");
   }
   // background
   for (size_t iparam = 0; iparam < m_bkgdFunction->nParams(); ++iparam)
-    param_vec.push_back(m_bkgdFunction->parameterName(iparam));
+    param_vec.emplace_back(m_bkgdFunction->parameterName(iparam));
 
   // parameter value table
   m_fittedParamTable =
@@ -1981,7 +1981,7 @@ void FitPeaks::generateFittedParametersValueWorkspaces() {
   std::string fiterror_table_name =
       getPropertyValue("OutputParameterFitErrorsWorkspace");
   // do nothing if user does not specifiy
-  if (fiterror_table_name == "") {
+  if (fiterror_table_name.empty()) {
     // not specified
     m_fitErrorTable = nullptr;
   } else {

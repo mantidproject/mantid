@@ -63,7 +63,7 @@ public:
    */
   void test_singlePeaksPartialSpectra() {
     // Generate input workspace
-    std::string data_ws_name("Test1Data");
+    const std::string data_ws_name("Test1Data");
     createTestData(data_ws_name);
 
     // Generate peak and background parameters
@@ -74,10 +74,10 @@ public:
     // create a 1-value peak index vector for peak (0) at X=5
     std::vector<int> peak_index_vec;
     peak_index_vec.push_back(0);
-    std::string ws_name("peakcenter1");
-    std::string peak_center_ws_name =
+    const std::string ws_name("peakcenter1");
+    const std::string peak_center_ws_name =
         genPeakCenterWorkspace(peak_index_vec, ws_name);
-    std::string fit_window_ws_name =
+    const std::string fit_window_ws_name =
         genFitWindowWorkspace(peak_index_vec, "peakwindow1");
 
     // Initialize FitPeak
@@ -893,12 +893,8 @@ public:
               << "\n";
     for (size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < peak_index_vec.size(); ++j) {
-        int peak_index = peak_index_vec[j];
-        double peak_center(-1);
-        if (peak_index == 0)
-          peak_center = 5.0;
-        else
-          peak_center = 10.0;
+        const int peak_index = peak_index_vec[j];
+        const double peak_center = peak_index == 0 ? 5.0 : 10.0;
         center_ws->dataX(i)[j] = peak_center;
       }
     }
@@ -919,19 +915,15 @@ public:
   std::string genFitWindowWorkspace(std::vector<int> &peak_index_vec,
                                     const std::string &workspace_name) {
     // create the empty workspace containing 3 spectrum
-    size_t num_peaks = peak_index_vec.size();
+    const size_t num_peaks = peak_index_vec.size();
     MatrixWorkspace_sptr center_ws =
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             WorkspaceCreationHelper::create2DWorkspace(
                 3, static_cast<int>(num_peaks) * 2));
     for (size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < peak_index_vec.size(); ++j) {
-        int peak_index = peak_index_vec[j];
-        double peak_center(-1);
-        if (peak_index == 0)
-          peak_center = 5.0;
-        else
-          peak_center = 10.0;
+        const int peak_index = peak_index_vec[j];
+        const double peak_center = peak_index == 0 ? 5.0 : 10.0;
         center_ws->dataX(i)[j * 2] = peak_center - 2.0;
         center_ws->dataX(i)[j * 2 + 1] = peak_center + 2.0;
       }
