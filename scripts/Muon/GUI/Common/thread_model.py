@@ -36,6 +36,8 @@ class ThreadModelWorker(QtCore.QObject):
         self.signals = WorkerSignals()
         self.model = model
 
+    # This decorator is needed for the method to be successfully run on another thread.
+    # https://stackoverflow.com/questions/20752154/pyqt-connecting-a-signal-to-a-slot-to-start-a-background-operation/20818401#20818401
     @pyqtSlot()
     def run(self):
         self.signals.started.emit()
