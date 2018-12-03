@@ -73,7 +73,6 @@ void SANSSolidAngle::exec() {
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   const auto &componentInfo = inputWS->componentInfo();
-  const auto &instrument = inputWS->getInstrument();
   const double pixelSizeX =
       inputWS->getInstrument()->getNumberParameter("x-pixel-size")[0];
   const double pixelSizeY =
