@@ -125,10 +125,9 @@ protected:
   void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
   void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
                      const std::string &parameter);
-  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace,
-               const std::size_t &index);
+  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
-                     const std::string &parameter, const std::size_t &index);
+                     const std::string &parameter);
   void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
                     const std::string &parameterToPlot);

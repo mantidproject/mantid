@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <qwt_plot.h>
 
@@ -22,17 +23,20 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");
 
-MatrixWorkspace_sptr getADSWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName);
+MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
+	return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 }
 
 std::size_t getWsNumberOfSpectra(std::string const &workspaceName) {
-  return getADSWorkspace(workspaceName)->getNumberHistograms();
+  return getADSMatrixWorkspace(workspaceName)->getNumberHistograms();
 }
 
 bool checkADSForWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
+}
+
+bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
+	return workspace->blocksize() > 1 ? true : false;
 }
 
 void cloneWorkspace(std::string const &workspaceName,
@@ -45,13 +49,13 @@ void cloneWorkspace(std::string const &workspaceName,
 }
 
 void cropWorkspace(std::string const &name, std::string const &newName,
-                   double const &cropValue) {
-  auto croper = AlgorithmManager::Instance().create("CropWorkspace");
-  croper->initialize();
-  croper->setProperty("InputWorkspace", name);
-  croper->setProperty("OutputWorkspace", newName);
-  croper->setProperty("XMin", cropValue);
-  croper->execute();
+	double const &cropValue) {
+	auto croper = AlgorithmManager::Instance().create("CropWorkspace");
+	croper->initialize();
+	croper->setProperty("InputWorkspace", name);
+	croper->setProperty("OutputWorkspace", newName);
+	croper->setProperty("XMin", cropValue);
+	croper->execute();
 }
 
 /**
@@ -69,7 +73,6 @@ void cropWorkspace(std::string const &name, std::string const &newName,
 std::tuple<bool, float, int, int>
 calculateBinParameters(QString wsName, QString resName, double energyMin,
                        double energyMax, double binReductionFactor) {
-  using namespace Mantid::API;
   ITableWorkspace_sptr propsTable;
   const auto paramTableName = "__IqtProperties_temp";
   try {
@@ -251,11 +254,21 @@ void Iqt::saveClicked() {
  * Handle mantid plotting
  */
 void Iqt::plotClicked() {
-  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  setPlotSpectrumIsPlotting(true);
-  plotSpectrum(QString::fromStdString(m_pythonExportWsName),
-               getPlotSpectrumIndex());
+	setPlotSpectrumIsPlotting(true);
+
+	plotResult(QString::fromStdString(m_pythonExportWsName));
+
   setPlotSpectrumIsPlotting(false);
+}
+
+void Iqt::plotResult(QString const &workspaceName) {
+	auto const name = workspaceName.toStdString();
+	if (checkADSForPlotSaveWorkspace(name, true)) {
+		if (isWorkspacePlottable(getADSMatrixWorkspace(name)))
+			plotSpectrum(workspaceName, getPlotSpectrumIndex());
+		else
+			showMessageBox("Plotting a spectrum of the workspace " + workspaceName + " failed : Workspace only has one data point");
+	}
 }
 
 void Iqt::runClicked() { runTab(); }
@@ -291,7 +304,7 @@ double Iqt::getXMinValue(MatrixWorkspace_const_sptr workspace,
 void Iqt::plotTiled() {
   setTiledPlotIsPlotting(true);
 
-  auto const outWs = getADSWorkspace(m_pythonExportWsName);
+  auto const outWs = getADSMatrixWorkspace(m_pythonExportWsName);
 
   auto const tiledPlotWsName = outWs->getName() + "_tiled";
   auto const firstTiledPlot = m_uiForm.spTiledPlotFirst->text().toInt();
@@ -306,7 +319,7 @@ void Iqt::plotTiled() {
       getXMinValue(outWs, static_cast<std::size_t>(firstTiledPlot));
   cropWorkspace(tiledPlotWsName, tiledPlotWsName, cropValue);
 
-  auto const tiledPlotWs = getADSWorkspace(tiledPlotWsName);
+  auto const tiledPlotWs = getADSMatrixWorkspace(tiledPlotWsName);
 
   // Plot tiledwindow
   std::size_t const numberOfPlots = lastTiledPlot - firstTiledPlot + 1;

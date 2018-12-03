@@ -868,22 +868,18 @@ void IndirectFitAnalysisTab::plotResult(const QString &plotType) {
 
 void IndirectFitAnalysisTab::plotAll(
     Mantid::API::WorkspaceGroup_sptr workspaces) {
-  for (auto index = 0u; index < workspaces->size(); ++index)
-    plotAll(boost::dynamic_pointer_cast<MatrixWorkspace>(
-                workspaces->getItem(index)),
-            index);
+	for (auto const &workspace : *workspaces)
+		plotAll(convertToMatrixWorkspace(workspace));
 }
 
 void IndirectFitAnalysisTab::plotParameter(
-    Mantid::API::WorkspaceGroup_sptr workspaces, const std::string &parameter) {
-  for (auto index = 0u; index < workspaces->size(); ++index)
-    plotParameter(boost::dynamic_pointer_cast<MatrixWorkspace>(
-                      workspaces->getItem(index)),
-                  parameter, index);
+    Mantid::API::WorkspaceGroup_sptr workspaces, std::string const &parameter) {
+	for (auto const &workspace : *workspaces)
+		plotParameter(convertToMatrixWorkspace(workspace), parameter);
 }
 
 void IndirectFitAnalysisTab::plotAll(
-    Mantid::API::MatrixWorkspace_sptr workspace, const std::size_t &index) {
+    Mantid::API::MatrixWorkspace_sptr workspace) {
   auto const numberOfDataPoints = workspace->blocksize();
   if (numberOfDataPoints > 1)
     plotSpectrum(workspace);
@@ -895,7 +891,7 @@ void IndirectFitAnalysisTab::plotAll(
 
 void IndirectFitAnalysisTab::plotParameter(
     Mantid::API::MatrixWorkspace_sptr workspace,
-    const std::string &parameterToPlot, const std::size_t &index) {
+    const std::string &parameterToPlot) {
   auto const numberOfDataPoints = workspace->blocksize();
   if (numberOfDataPoints > 1)
     plotSpectrum(workspace, parameterToPlot);
@@ -1041,8 +1037,7 @@ void IndirectFitAnalysisTab::enablePlotResult(bool error) {
 
 bool IndirectFitAnalysisTab::isResultWorkspacePlottable() const {
   auto const resultWorkspaces = m_fittingModel->getResultWorkspace();
-  if (resultWorkspaces)
-    return isResultWorkspacePlottable(resultWorkspaces);
+	return resultWorkspaces ? isResultWorkspacePlottable(resultWorkspaces) : false;
 };
 
 bool IndirectFitAnalysisTab::isResultWorkspacePlottable(
