@@ -56,7 +56,8 @@ private:
                  const bool scaleRHS) const;
   void replaceSpecialValues(API::MatrixWorkspace_sptr &input);
   /// Perform rebin
-  void rebin(Mantid::API::MatrixWorkspace_sptr &ws, const std::vector<double> &params);
+  void rebin(Mantid::API::MatrixWorkspace_sptr &ws,
+             const std::vector<double> &params);
   /// Perform integration
   Mantid::API::MatrixWorkspace_sptr
   integration(Mantid::API::MatrixWorkspace_sptr &input, const double start,
@@ -78,7 +79,8 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   maskAllBut(size_t a1, size_t a2, API::MatrixWorkspace_sptr &source);
   /// Mask out everything but the data in the ranges, but do it inplace.
-  void maskInPlace(size_t a1, size_t a2, Mantid::API::MatrixWorkspace_sptr &source);
+  void maskInPlace(size_t a1, size_t a2,
+                   Mantid::API::MatrixWorkspace_sptr &source);
   /// Add back in any special values
   void reinsertSpecialValues(Mantid::API::MatrixWorkspace_sptr ws);
   /// Scaling factors
@@ -118,9 +120,9 @@ private:
       interSectionVal = overlapVal;
     } else {
       if (name == ("StartOverlap"))
-        interSectionVal-=1.e-9;
+        interSectionVal -= 1.e-9;
       else
-        interSectionVal+=1.e-9;
+        interSectionVal += 1.e-9;
     }
     g_log.information(name + ": " + std::to_string(interSectionVal));
     return interSectionVal;
