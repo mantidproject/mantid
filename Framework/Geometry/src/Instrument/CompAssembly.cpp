@@ -71,8 +71,6 @@ CompAssembly::CompAssembly(const CompAssembly &assem)
 /** Destructor
  */
 CompAssembly::~CompAssembly() {
-  if (m_cachedBoundingBox)
-    delete m_cachedBoundingBox;
   // Iterate over pointers in m_children, deleting them
   for (auto &child : m_children) {
     delete child;
@@ -383,7 +381,7 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
   else {
     // Not parametrized
     if (!m_cachedBoundingBox) {
-      m_cachedBoundingBox = new BoundingBox();
+      m_cachedBoundingBox = BoundingBox_sptr();
       // Loop over the children and define a box large enough for all of them
       for (auto child : m_children) {
         BoundingBox compBox;

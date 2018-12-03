@@ -105,7 +105,7 @@ protected:
   std::vector<IComponent *> m_children;
 
   /// A cached bounding box
-  mutable BoundingBox *m_cachedBoundingBox;
+  mutable BoundingBox_sptr m_cachedBoundingBox;
 };
 
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,

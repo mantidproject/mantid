@@ -521,7 +521,7 @@ void StructuredDetector::getBoundingBox(BoundingBox &assemblyBox) const {
     return;
   }
   if (!m_cachedBoundingBox) {
-    m_cachedBoundingBox = new BoundingBox();
+    m_cachedBoundingBox = std::make_unique<BoundingBox>();
     // Get all the corners
     BoundingBox compBox;
 
