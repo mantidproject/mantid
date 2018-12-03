@@ -622,8 +622,14 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
 
 namespace {
 struct LogTestStruct {
-  bool isconstantvalue = true;
-  double value = std::numeric_limits<double>::quiet_NaN();
+  LogTestStruct()
+      : isconstantvalue(true), value(std::numeric_limits<double>::quiet_NaN()) {
+  }
+  LogTestStruct(bool isconstantvalue, double value)
+      : isconstantvalue(isconstantvalue), value(value) {}
+
+  bool isconstantvalue;
+  double value;
 };
 } // namespace
 
