@@ -175,8 +175,6 @@ void IndirectFitAnalysisTab::connectSpectrumAndPlotPresenters() {
 }
 
 void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
-  connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
-          SLOT(setBrowserWorkspaceIndex(std::size_t)));
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(std::size_t)),
           this, SLOT(setBrowserWorkspace(std::size_t)));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this,
@@ -266,7 +264,7 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
   m_dataPresenter = std::move(presenter);
 }
 
-void IndirectFitAnalysisTab::setPlotView(IndirectFitPlotView *view) {
+void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
   m_plotPresenter = Mantid::Kernel::make_unique<IndirectFitPlotPresenter>(
       m_fittingModel.get(), view);
 }

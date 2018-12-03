@@ -23,8 +23,12 @@ except ImportError:
 
 
 class PeriodicTablePresenterTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.qapp = mock_widget.mockQapp()
+
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         self._model = mock.create_autospec(PeriodicTableModel)
         self.view = PeriodicTableView()
         self.presenter = PeriodicTablePresenter(
