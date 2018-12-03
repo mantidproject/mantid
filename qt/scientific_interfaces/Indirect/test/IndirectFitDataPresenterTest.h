@@ -84,7 +84,7 @@ public:
 /// Mock object to mock the model
 class MockIndirectFitDataModel : public IndirectFittingModel {
 public:
-	using IndirectFittingModel::addWorkspace;
+  using IndirectFittingModel::addWorkspace;
 
   /// Public Methods
   MOCK_CONST_METHOD0(isMultiFit, bool());

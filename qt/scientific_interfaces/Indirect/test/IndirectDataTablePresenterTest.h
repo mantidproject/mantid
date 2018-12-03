@@ -24,23 +24,23 @@ using namespace testing;
 
 namespace {
 
-	struct TableItem {
-		TableItem(std::string const &value) : m_str(value), m_dbl(0.0) {}
-		TableItem(double const &value)
-			: m_str(QString::number(value, 'g', 16).toStdString()), m_dbl(value) {}
+struct TableItem {
+  TableItem(std::string const &value) : m_str(value), m_dbl(0.0) {}
+  TableItem(double const &value)
+      : m_str(QString::number(value, 'g', 16).toStdString()), m_dbl(value) {}
 
-		std::string const &asString() const { return m_str; }
-		QString asQString() const { return QString::fromStdString(m_str); }
-		double const &asDouble() const { return m_dbl; }
+  std::string const &asString() const { return m_str; }
+  QString asQString() const { return QString::fromStdString(m_str); }
+  double const &asDouble() const { return m_dbl; }
 
-		bool operator==(std::string const &value) const {
-			return this->asString() == value;
-		}
+  bool operator==(std::string const &value) const {
+    return this->asString() == value;
+  }
 
-	private:
-		std::string m_str;
-		double m_dbl;
-	};
+private:
+  std::string m_str;
+  double m_dbl;
+};
 
 } // namespace
 
@@ -132,11 +132,11 @@ public:
   void
   test_that_invoking_setStartX_will_alter_the_relevant_column_in_the_table() {
     int const startXColumn(2);
-		TableItem const startX(2.2);
+    TableItem const startX(2.2);
 
     m_presenter->setStartX(startX.asDouble(), 0, 0);
 
-		assertValueIsGlobal(startXColumn, startX);
+    assertValueIsGlobal(startXColumn, startX);
   }
 
   ///----------------------------------------------------------------------
@@ -173,31 +173,31 @@ public:
   void
   test_that_the_cellChanged_signal_will_set_the_models_startX_in_every_row_when_the_relevant_column_is_changed() {
     int const startXColumn(2);
-		TableItem const startX(1.5);
+    TableItem const startX(1.5);
 
     m_table->item(0, startXColumn)->setText(startX.asQString());
 
-		assertValueIsGlobal(startXColumn, startX);
+    assertValueIsGlobal(startXColumn, startX);
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_endX_in_every_row_when_the_relevant_column_is_changed() {
     int const endXColumn(3);
-		TableItem const endX(2.5);
+    TableItem const endX(2.5);
 
     m_table->item(0, endXColumn)->setText(endX.asQString());
 
-		assertValueIsGlobal(endXColumn, endX);
+    assertValueIsGlobal(endXColumn, endX);
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_excludeRegion_in_every_row_when_the_relevant_column_is_changed() {
     int const excludeRegionColumn(4);
-		TableItem const excludeRegion("2-4");
+    TableItem const excludeRegion("2-4");
 
-		m_table->item(0, excludeRegionColumn)->setText(excludeRegion.asQString());
+    m_table->item(0, excludeRegionColumn)->setText(excludeRegion.asQString());
 
-		assertValueIsGlobal(excludeRegionColumn, excludeRegion);
+    assertValueIsGlobal(excludeRegionColumn, excludeRegion);
   }
 
   ///----------------------------------------------------------------------
@@ -244,31 +244,31 @@ public:
   void
   test_that_the_setStartX_slot_will_alter_the_relevant_startX_column_in_the_table() {
     int const startXColumn(2);
-		TableItem const startX(1.1);
+    TableItem const startX(1.1);
 
     m_presenter->setStartX(startX.asDouble(), 0);
 
-		assertValueIsGlobal(startXColumn, startX);
+    assertValueIsGlobal(startXColumn, startX);
   }
 
   void
   test_that_the_setEndX_slot_will_alter_the_relevant_endX_column_in_the_table() {
     int const endXColumn(3);
-		TableItem const endX(1.1);
+    TableItem const endX(1.1);
 
     m_presenter->setEndX(endX.asDouble(), 0);
 
-		assertValueIsGlobal(endXColumn, endX);
+    assertValueIsGlobal(endXColumn, endX);
   }
 
   void
   test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
     int const excludeRegionColumn(4);
-		TableItem const excludeRegion("2-3");
+    TableItem const excludeRegion("2-3");
 
     m_presenter->setExcludeRegion(excludeRegion.asString(), 0);
 
-		assertValueIsGlobal(excludeRegionColumn, excludeRegion);
+    assertValueIsGlobal(excludeRegionColumn, excludeRegion);
   }
 
   void
@@ -276,8 +276,8 @@ public:
     std::size_t const index(0);
     int const startXColumn(2);
     int const endXColumn(3);
-		TableItem const startX(1.0);
-		TableItem const endX(2.0);
+    TableItem const startX(1.0);
+    TableItem const endX(2.0);
     auto const range = std::make_pair(startX.asDouble(), endX.asDouble());
 
     ON_CALL(*m_model, getFittingRange(index, 0)).WillByDefault(Return(range));
@@ -286,15 +286,15 @@ public:
 
     m_presenter->setGlobalFittingRange(true);
 
-		assertValueIsGlobal(startXColumn, startX);
-		assertValueIsGlobal(endXColumn, endX);
+    assertValueIsGlobal(startXColumn, startX);
+    assertValueIsGlobal(endXColumn, endX);
   }
 
   void
   test_that_setGlobalFittingRange_will_set_the_excludeRegion_when_passed_true() {
     std::size_t const index(0);
     int const excludeRegionColumn(4);
-		TableItem const excludeRegion("1-2");
+    TableItem const excludeRegion("1-2");
 
     ON_CALL(*m_model, getExcludeRegion(index, 0)).WillByDefault(Return("1-2"));
 
@@ -302,42 +302,42 @@ public:
 
     m_presenter->setGlobalFittingRange(true);
 
-		assertValueIsGlobal(excludeRegionColumn, excludeRegion);
+    assertValueIsGlobal(excludeRegionColumn, excludeRegion);
   }
 
   void
   test_that_setGlobalFittingRange_will_connect_the_cellChanged_signal_to_updateAllFittingRangeFrom_when_passed_true() {
     int const startXColumn(2);
-		TableItem const startX(1.0);
+    TableItem const startX(1.0);
 
     m_presenter->setGlobalFittingRange(true);
     m_table->item(0, startXColumn)->setText(startX.asQString());
 
-		assertValueIsGlobal(startXColumn, startX);
+    assertValueIsGlobal(startXColumn, startX);
   }
 
   void
   test_that_setGlobalFittingRange_will_disconnect_the_cellChanged_signal_when_passed_false_so_that_startX_is_not_global() {
-		int const row(1);
+    int const row(1);
     int const startXColumn(2);
-		TableItem const startX(2.5);
+    TableItem const startX(2.5);
 
     m_presenter->setGlobalFittingRange(false);
     m_table->item(row, startXColumn)->setText(startX.asQString());
 
-		assertValueIsNotGlobal(row, startXColumn, startX);
+    assertValueIsNotGlobal(row, startXColumn, startX);
   }
 
   void
   test_that_setGlobalFittingRange_will_disconnect_the_cellChanged_signal_when_passed_false_so_that_endX_is_not_global() {
-		int const row(0);
+    int const row(0);
     int const endXColumn(3);
-		TableItem const endX(3.5);
+    TableItem const endX(3.5);
 
     m_presenter->setGlobalFittingRange(false);
     m_table->item(row, endXColumn)->setText(endX.asQString());
 
-		assertValueIsNotGlobal(row, endXColumn, endX);
+    assertValueIsNotGlobal(row, endXColumn, endX);
   }
 
   void test_the_enableTable_slot_will_enable_the_table() {
@@ -368,22 +368,23 @@ private:
         m_table->setItem(row, column, new QTableWidgetItem("item"));
   }
 
-	void assertValueIsGlobal(int column, TableItem const &value) const {
-		for (auto row = 0; row < m_table->rowCount(); ++row)
-			TS_ASSERT_EQUALS(value, getTableItem(row, column));
-	}
+  void assertValueIsGlobal(int column, TableItem const &value) const {
+    for (auto row = 0; row < m_table->rowCount(); ++row)
+      TS_ASSERT_EQUALS(value, getTableItem(row, column));
+  }
 
-	void assertValueIsNotGlobal(int valueRow, int column, TableItem const &value) const {
-		TS_ASSERT_EQUALS(value.asString(), getTableItem(valueRow, column));
+  void assertValueIsNotGlobal(int valueRow, int column,
+                              TableItem const &value) const {
+    TS_ASSERT_EQUALS(value.asString(), getTableItem(valueRow, column));
 
-		for (auto row = 0; row < m_table->rowCount(); ++row)
-			if (row != valueRow)
-			  TS_ASSERT_DIFFERS(value, getTableItem(row, column));
-	}
+    for (auto row = 0; row < m_table->rowCount(); ++row)
+      if (row != valueRow)
+        TS_ASSERT_DIFFERS(value, getTableItem(row, column));
+  }
 
-	std::string getTableItem(int row, int column) const {
-		return m_table->item(row, column)->text().toStdString();
-	}
+  std::string getTableItem(int row, int column) const {
+    return m_table->item(row, column)->text().toStdString();
+  }
 
   std::unique_ptr<QTableWidget> m_table;
   std::unique_ptr<MockIndirectDataTableModel> m_model;
