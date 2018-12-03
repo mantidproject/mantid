@@ -60,10 +60,11 @@ public:
   virtual void removeFromBottomPreview(const QString &name) = 0;
 
   virtual void enableFitSingleSpectrum(bool enable) = 0;
-	virtual void setFitSingleSpectrumText(QString const &text) = 0;
   virtual void enablePlotGuess(bool enable) = 0;
   virtual void enableSpectrumSelection(bool enable) = 0;
   virtual void enableFitRangeSelection(bool enable) = 0;
+
+	virtual void setFitSingleSpectrumText(QString const &text) = 0;
 
   virtual void setBackgroundLevel(double value) = 0;
 
