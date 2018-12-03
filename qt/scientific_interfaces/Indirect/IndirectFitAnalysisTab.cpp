@@ -33,6 +33,26 @@ MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
+bool isWorkspacePlottable(Workspace_sptr workspace) {
+	auto const numberOfDataPoints =
+		convertToMatrixWorkspace(workspace)->blocksize();
+	return numberOfDataPoints > 1 ? true : false;
+}
+
+bool containsPlottableWorkspace(WorkspaceGroup_sptr workspaceGroup) {
+	for (auto const &workspace : *workspaceGroup)
+		if (isWorkspacePlottable(workspace))
+			return true;
+	return false;
+}
+
+bool isGroupPlottable(WorkspaceGroup_sptr workspaceGroup) {
+	if (workspaceGroup)
+		return containsPlottableWorkspace(workspaceGroup);
+	else
+		return false;
+};
+
 void updateParameters(
     IFunction_sptr function,
     std::unordered_map<std::string, ParameterValue> const &parameters) {
@@ -1033,27 +1053,10 @@ void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
 
 void IndirectFitAnalysisTab::enablePlotResult(bool error) {
   if (!error)
-    setPlotResultEnabled(isResultWorkspacePlottable());
+    setPlotResultEnabled(isGroupPlottable(m_fittingModel->getResultWorkspace()));
   else
     setPlotResultEnabled(!error);
 }
-
-bool IndirectFitAnalysisTab::isResultWorkspacePlottable() const {
-  auto const resultWorkspaces = m_fittingModel->getResultWorkspace();
-  return resultWorkspaces ? isResultWorkspacePlottable(resultWorkspaces)
-                          : false;
-};
-
-bool IndirectFitAnalysisTab::isResultWorkspacePlottable(
-    Mantid::API::WorkspaceGroup_sptr resultWorkspaces) const {
-  for (auto const &workspace : *resultWorkspaces) {
-    auto const numberOfDataPoints =
-        convertToMatrixWorkspace(workspace)->blocksize();
-    if (numberOfDataPoints > 1)
-      return true;
-  }
-  return false;
-};
 
 /**
  * Fills the specified combo box, with the specified parameters.
