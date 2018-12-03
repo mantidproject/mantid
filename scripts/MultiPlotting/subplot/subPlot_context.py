@@ -17,6 +17,7 @@ class subPlotContext(object):
         self.xbounds = []
         self.ybounds = []
         self._errors = False
+        self._auto = True
         #self._auto_y_min = 1.e6
         #self._auto_y_max = -1.e6
 
@@ -51,8 +52,8 @@ class subPlotContext(object):
         #    self._auto_y_max = subplot.get_ylim()[1]
 
     @property
-    def auto_y(self):
-        return None
+    def auto(self):
+        return self._auto
         #print("boo", self._auto_y_min, self._auto_y_max)
 
         #return [self._auto_y_min,self._auto_y_max]
@@ -61,6 +62,12 @@ class subPlotContext(object):
          self._errors = state
          for label in self.lines.keys():
              self.redraw(subplot,label)
+
+    def change_auto(self,subplot,state):
+         self._auto = state
+         for label in self.lines.keys():
+             subplot.autoscale(enable=state,axis="y")
+             
 
     def get_ws(self,label):
         for ws in self._ws.keys():

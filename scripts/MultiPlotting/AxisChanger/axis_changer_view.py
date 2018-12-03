@@ -13,7 +13,8 @@ class AxisChangerView(QtWidgets.QWidget):
     def __init__(self, label):
         super(AxisChangerView, self).__init__()
         layout = QtWidgets.QHBoxLayout()
-        layout.addWidget(QtWidgets.QLabel(label))
+        self._label = QtWidgets.QLabel(label)
+        layout.addWidget(self._label)
 
         self.lower_bound = QtWidgets.QLineEdit()
         self.lower_bound.setValidator(QtGui.QDoubleValidator())
@@ -24,13 +25,26 @@ class AxisChangerView(QtWidgets.QWidget):
         self.upper_bound.returnPressed.connect(self._bound_changed)
 
         layout.addWidget(self.lower_bound)
-        layout.addWidget(QtWidgets.QLabel("to"))
+        self._to = QtWidgets.QLabel("to")
+        layout.addWidget(self._to)
         layout.addWidget(self.upper_bound)
         self.setLayout(layout)
 
     def set_enabled(self,state):
         self.lower_bound.setDisabled(state)
         self.upper_bound.setDisabled(state)
+
+    def show(self):
+        self.lower_bound.show()
+        self.upper_bound.show()
+        self._label.show()
+        self._to.show()
+
+    def hide(self):
+        self.lower_bound.hide()
+        self.upper_bound.hide()
+        self._label.hide()
+        self._to.hide()
 
     def get_bounds(self):
         bounds = [self.lower_bound, self.upper_bound]

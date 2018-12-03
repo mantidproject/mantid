@@ -11,6 +11,11 @@ class AxisChangerPresenter(object):
 
     def set_enabled(self,state):
         self.view.set_enabled(state)
+    def hide(self):
+        self.view.hide()
+
+    def show(self):
+        self.view.show()
 
     def get_bounds(self):
         return self.view.get_bounds()

@@ -40,8 +40,8 @@ class subPlot(QtWidgets.QWidget):
     or pan are used. We want to send a 
     signal to update the axis ranges """
     def draw_event_callback(self,event):
-        for subplot in self.plotObjects.keys():
-            self.emit_subplot_range(subplot)
+        #for subplot in self.plotObjects.keys():
+        self.emit_subplot_range()
 
     # plot a workspace, if a new subplot create it.
     def plot(self, subplotName, workspace,specNum=1):
@@ -51,7 +51,7 @@ class subPlot(QtWidgets.QWidget):
            new = True
         self._add_plotted_line(subplotName,workspace,specNum=specNum)
         if new:
-             self.emit_subplot_range(subplotName)
+             self.emit_subplot_range()
 
     def change_errors(self,state, subplotNames):
         for subplotName in subplotNames:
@@ -69,9 +69,7 @@ class subPlot(QtWidgets.QWidget):
      self.plotObjects[subplotName] = self.figure.add_subplot(code)
      self._context.addSubplot(subplotName)
 
-    def emit_subplot_range(self,subplotName):
-     self._context.set(xBounds,self.plotObjects[subplotName].get_xlim())
-     self._context.set(yBounds,self.plotObjects[subplotName].get_ylim())
+    def emit_subplot_range(self):
      self.quickEditSignal.emit()
  
     def set_plot_x_range(self,subplotNames,range):
@@ -83,7 +81,7 @@ class subPlot(QtWidgets.QWidget):
     def set_plot_y_range(self,subplotNames,range):
         for subplotName in subplotNames:
             self.plotObjects[subplotName].set_ylim(range)
-
+            self._context.subplots[subplotName].ybounds =range 
             self.canvas.draw()
 
     def connect_quick_edit_signal(self,slot):
@@ -94,5 +92,5 @@ class subPlot(QtWidgets.QWidget):
 
     def set_y_autoscale(self,subplotNames,state):
         for subplotName in subplotNames:
-            self.plotObjects[subplotName].autoscale(enable=state,axis="y")
+            self._context.subplots[subplotName].change_auto(self.plotObjects[subplotName],state)
             self.canvas.draw()

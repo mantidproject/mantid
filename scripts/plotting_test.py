@@ -36,6 +36,7 @@ class plotTestGui(QtGui.QMainWindow):
         self.test.plot("test",self._context.ws)
         self.test.plot("bob",self._context.ws)
         self.test.plot("moo",self._context.ws)
+        self.test.set_all_values()
         self.setCentralWidget(self.test)
 
         self.setWindowTitle("plot test")

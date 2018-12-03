@@ -28,7 +28,11 @@ class QuickEditPresenter(object):
         self._view.connect_errors_changed(slot)
 
     def autoscale_changed(self,state):
-        self._view.change_autoscale(state)
+        print("presenter",state)
+        if state:
+           self._view.hide()
+        else:
+           self._view.show()
 
     def connect_x_range_changed(self,slot):
         self._view.connect_x_range_changed(slot)
@@ -54,13 +58,18 @@ class QuickEditPresenter(object):
 
     def set_plot_x_range(self,range):
         self._view.set_plot_x_range(range)
+
     def set_plot_y_range(self,range):
         self._view.set_plot_y_range(range)
 
     def set_errors(self,state):
          previous = self._view.get_errors()
-         print("change", state,previous)
          if previous == state:
-            print("do nothing")
             return 
          self._view.set_errors(state)
+
+    def set_auto(self,state):
+         previous = self._view.get_auto()
+         if previous == state:
+            return 
+         self._view.set_y_autoscale(state)

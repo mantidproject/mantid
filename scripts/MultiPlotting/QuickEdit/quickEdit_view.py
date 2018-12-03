@@ -11,9 +11,8 @@ from MultiPlotting.AxisChanger.axis_changer_presenter import AxisChangerPresente
 from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 
 class QuickEditView(QtWidgets.QWidget):
-    autoscale_signal = QtCore.Signal(object)
-    selection_signal = QtCore.Signal(object)
     error_signal = QtCore.Signal(object)
+    auto_signal = QtCore.Signal(object)
 
     def __init__(self, subcontext, parent = None):
         super(QuickEditView,self).__init__(parent)
@@ -25,6 +24,8 @@ class QuickEditView(QtWidgets.QWidget):
         self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
 
         self.autoscale = QtWidgets.QCheckBox("Autoscale y")
+        self.autoscale.stateChanged.connect(self._emit_auto)
+
         self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))
 
         self.errors = QtWidgets.QCheckBox("Errors")
@@ -37,11 +38,7 @@ class QuickEditView(QtWidgets.QWidget):
         button_layout.addWidget(self.errors)
         self.setLayout(button_layout)
 
-    # need our own signal that sends a bool
-    def _emit_errors(self):
-        state = self.get_errors()
-        self.error_signal.emit(state)
-
+    """ plot selection """
     def current_selection(self):
         return self.plot_selector.currentText()
 
@@ -60,23 +57,66 @@ class QuickEditView(QtWidgets.QWidget):
     def add_subplot(self,name):
         self.plot_selector.addItem(name)
 
-    def connect_errors_changed(self,slot):
-        self.error_signal.connect(slot)
+    def connect_plot_selection(self,slot):
+        self.plot_selector.currentIndexChanged.connect(slot)
 
-    def connect_autoscale_changed(self,slot):
-        self.autoscale.stateChanged.connect(slot)
-
-    def change_autoscale(self,state):
-        self.y_axis_changer.set_enabled(state)
-
+    """ x axis selection """ 
     def connect_x_range_changed(self,slot):
         self.x_axis_changer.on_bound_changed(slot)
+
+    def set_plot_x_range(self,range):
+        self.x_axis_changer.set_bounds(range)
+
+    """ y axis selection """
 
     def connect_y_range_changed(self,slot):
         self.y_axis_changer.on_bound_changed(slot)
 
-    def connect_plot_selection(self,slot):
-        self.plot_selector.currentIndexChanged.connect(slot)
+    def set_plot_y_range(self,range):
+        self.y_axis_changer.set_bounds(range)
+
+    def get_y_bounds(self):
+        return self.y_axis_changer.get_bounds()
+
+    """ auto scale selection """
+    # need our own signal that sends a bool
+    def _emit_auto(self):
+        state = self.get_auto()
+        self.auto_signal.emit(state)
+
+    def connect_autoscale_changed(self,slot):
+        self.auto_signal.connect(slot)
+
+    def set_y_autoscale(self,state):
+        self.autoscale.setChecked(state)
+
+    def get_auto(self):
+        return self.autoscale.isChecked()
+
+    def change_autoscale(self,state):
+        self.y_axis_changer.set_enabled(state)
+
+    def hide(self):
+        self.y_axis_changer.hide()
+    def show(self):
+        self.y_axis_changer.show()
+    """ errors selection """
+
+    # need our own signal that sends a bool
+    def _emit_errors(self):
+        state = self.get_errors()
+        self.error_signal.emit(state)
+
+    def connect_errors_changed(self,slot):
+        self.error_signal.connect(slot)
+
+    def set_errors(self,state):
+        self.errors.setChecked(state)
+
+    def get_errors(self):
+        return self.errors.isChecked()
+
+    """ load/save from/to context """
 
     def loadFromContext(self,context):
         self.x_axis_changer.set_bounds(context["x bounds"])
@@ -88,19 +128,11 @@ class QuickEditView(QtWidgets.QWidget):
         subcontext["y bounds"] = self.y_axis_changer.get_bounds()
         return subcontext
 
-    def set_y_autoscale(self,state):
-        self.autoscale.setCheckState(state)
 
-    def set_plot_x_range(self,range):
-        self.x_axis_changer.set_bounds(range)
-    def set_plot_y_range(self,range):
-        self.y_axis_changer.set_bounds(range)
 
-    def get_errors(self):
-        return self.errors.isChecked()
 
-    def get_y_bounds(self):
-        return self.y_axis_changer.get_bounds()
 
-    def set_errors(self,state):
-        self.errors.setChecked(state)
+
+
+
+
