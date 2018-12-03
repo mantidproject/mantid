@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
 import glob
@@ -19,13 +20,14 @@ from mantidqt.project.projectsaver import ProjectSaver
 
 
 class Project(AnalysisDataServiceObserver):
-    def __init__(self):
+    def __init__(self, project_save_name):
         # Has the project been saved
         self.saved = False
 
         # Last save locations
         self.last_project_location = None
 
+        self.project_save_name = project_save_name
         self.ads_observer = AnalysisDataServiceObserver()
         self.ads_observer.observeAll(True)
 
@@ -42,7 +44,7 @@ class Project(AnalysisDataServiceObserver):
                     logger.debug("Whilst cleaning project directory error was thrown: " + e)
             # Actually save
             workspaces_to_save = AnalysisDataService.getObjectNames()
-            project_saver = ProjectSaver()
+            project_saver = ProjectSaver(self.project_save_name)
             project_saver.save_project(directory=self.last_project_location, workspace_to_save=workspaces_to_save,
                                        interfaces_to_save=None)
             self.saved = True
@@ -61,7 +63,7 @@ class Project(AnalysisDataServiceObserver):
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = directory
         workspaces_to_save = AnalysisDataService.getObjectNames()
-        project_saver = ProjectSaver()
+        project_saver = ProjectSaver(self.project_save_name)
         project_saver.save_project(directory=directory, workspace_to_save=workspaces_to_save, interfaces_to_save=None)
         self.saved = True
 
@@ -75,7 +77,7 @@ class Project(AnalysisDataServiceObserver):
             if directory is None:
                 # Cancel close dialogs
                 return
-        project_loader = ProjectLoader()
+        project_loader = ProjectLoader(self.project_save_name)
         project_loader.load_project(directory)
         self.last_project_location = directory
 

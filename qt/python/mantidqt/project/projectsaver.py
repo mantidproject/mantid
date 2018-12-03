@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+
 from json import dump
 from os import makedirs
 from os.path import isdir
@@ -14,10 +16,10 @@ from mantidqt.project import workspacesaver
 from mantid import logger
 
 
-ENCODED_FILE_NAME = "mantidsave.project"
-
-
 class ProjectSaver(object):
+    def __init__(self, project_save_name):
+        self.project_save_name = project_save_name
+
     def save_project(self, directory, workspace_to_save=None, interfaces_to_save=None):
         """
 
@@ -44,12 +46,13 @@ class ProjectSaver(object):
         dictionaries_to_save = {}
 
         # Pass dicts to Project Writer
-        writer = ProjectWriter(dictionaries_to_save, directory, workspace_saver.get_output_list())
+        writer = ProjectWriter(dictionaries_to_save, directory, workspace_saver.get_output_list(),
+                               self.project_save_name)
         writer.write_out()
 
 
 class ProjectWriter(object):
-    def __init__(self, dicts, save_location, workspace_names):
+    def __init__(self, dicts, save_location, workspace_names, project_save_name):
         """
 
         :param dicts:
@@ -59,6 +62,7 @@ class ProjectWriter(object):
         self.dicts_to_save = dicts
         self.workspace_names = workspace_names
         self.directory = save_location
+        self.project_save_name = project_save_name
 
     def write_out(self):
         """
@@ -68,7 +72,7 @@ class ProjectWriter(object):
         workspace_interface_dict = {"workspaces": self.workspace_names, "interfaces": self.dicts_to_save}
 
         # Open file and save the string to it alongside the workspace_names
-        file_name = self.directory + '/' + ENCODED_FILE_NAME
+        file_name = self.directory + '/' + self.project_save_name
         if not isdir(self.directory):
             makedirs(self.directory)
         f = open(file_name, 'w+')

@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace
 from mantid.dataobjects import MDHistoWorkspace
-from mantid.simpleapi import SaveMD, SaveNexusProcessed
 
 
 # Static method to get all workspaces to save
@@ -46,6 +46,8 @@ class WorkspaceSaver(object):
             # Get the workspace from the ADS
             workspace = ADS.retrieve(workspace_name)
             place_to_save_workspace = self.directory + '/' + workspace_name
+
+            from mantid.simpleapi import SaveMD, SaveNexusProcessed
 
             if isinstance(workspace, MDHistoWorkspace) or isinstance(workspace, IMDEventWorkspace):
                 # Save normally using SaveMD

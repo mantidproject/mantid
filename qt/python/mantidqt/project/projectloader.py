@@ -6,14 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+
 import json
 
 import workspaceloader
 from mantid import AnalysisDataService as ADS
 from mantid import logger
-
-
-ENCODED_FILE_NAME = "mantidsave.project"
 
 
 def _confirm_all_workspaces_loaded(workspaces_to_confirm):
@@ -26,8 +25,8 @@ def _confirm_all_workspaces_loaded(workspaces_to_confirm):
 
 
 class ProjectLoader(object):
-    def __init__(self):
-        self.project_reader = ProjectReader()
+    def __init__(self, project_load_name):
+        self.project_reader = ProjectReader(project_load_name)
         self.workspace_loader = workspaceloader.WorkspaceLoader()
 
     def load_project(self, directory):
@@ -40,13 +39,14 @@ class ProjectLoader(object):
 
 
 class ProjectReader(object):
-    def __init__(self):
+    def __init__(self, project_load_name):
         self.workspace_names = None
         self.interfaces_dicts = None
         self.plot_dicts = None
+        self.project_load_name = project_load_name
 
     def read_project(self, directory):
-        f = open(directory + "/" + ENCODED_FILE_NAME)
+        f = open(directory + "/" + self.project_load_name)
         json_data = json.load(f)
         self.workspace_names = json_data["workspaces"]
         self.interfaces_dicts = json_data["interfaces"]
