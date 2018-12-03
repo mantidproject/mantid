@@ -4,15 +4,12 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +from mantid.simpleapi import *
-# flake8: noqa
 
 import csv
 import math
 from itertools import product
 import sys
-from mantid.simpleapi import *
-
-# mtd.importAll()
+from mantid.simpleapi import MoveInstrumentComponent, CropWorkspace
 
 
 #######################################################################################
@@ -26,8 +23,8 @@ def string_boolean(line):
     elif line == 'true':
         bool_string = True
     else:
-        print "Check value of ", line
-        print  "It must be either True or False"
+        print("Check value of {}".format(line))
+        print("It must be either True or False")
         sys.exit()
     return bool_string
 
@@ -40,7 +37,7 @@ def read_convert_to_float(array_strings):
     array = [x.strip() for x in array_strings.split(',')]
     array = [float(x) for x in array]
     if (len(array) != 3):
-        print "Check input parameters; binning parameters shall be given in a format left_value, step, right_value."
+        print("Check input parameters; binning parameters shall be given in a format left_value, step, right_value.")
         sys.exit()
     return array
 
@@ -158,9 +155,10 @@ def AttenuationCorrection(att_pos, data_before_May_2016):
      Value of the attenuators are hard coded here and being used for the I(Q) scaling in Q1D """
 
     if (data_before_May_2016):
-        print "You stated data have been collected before May, 2016, i.e. using old attenuators. Please double check."
+        print("You stated data have been collected before May, 2016, i.e. using old attenuators. Please double check.")
         if (att_pos == 2.0 or att_pos == 4.0):
-            print "Wrong attenuators value; Either data have been collected after May, 2016, or something is wrong with hdf file"
+            print(
+                "Wrong attenuators value; Either data have been collected after May, 2016, or something is wrong with hdf file")
             sys.exit()
         if att_pos == 1.0:
             scale = 0.007655  # att 130
@@ -341,7 +339,5 @@ def DetShift_before2016(ws_to_correct):
     MoveInstrumentComponent(ws_to_correct, 'CurtainBottom', X=0, Y=shift_curtaind, Z=0)
 
     CorrectionBasedOnExperiment(ws_to_correct)
-
-    return ws
 
 #######################################################################################
