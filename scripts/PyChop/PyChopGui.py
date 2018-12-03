@@ -467,7 +467,10 @@ class PyChopGui(QMainWindow):
         msg.exec_()
 
     def loadYaml(self):
-        yaml_file = str(QFileDialog().getOpenFileName(self.mainWidget, 'Open Instrument YAML File', self.folder, 'Files (*.yaml)'))
+        yaml_file = QFileDialog().getOpenFileName(self.mainWidget, 'Open Instrument YAML File', self.folder, 'Files (*.yaml)')
+        if isinstance(yaml_file, tuple):
+            yaml_file = yaml_file[0]
+        yaml_file = str(yaml_file)
         new_folder = os.path.dirname(yaml_file)
         if new_folder != self.folder:
             self.folder = new_folder
@@ -624,6 +627,8 @@ class PyChopGui(QMainWindow):
         Saves the generated text to a file (opens file dialog).
         """
         fname = QFileDialog.getSaveFileName(self, 'Open file', '')
+        if isinstance(fname, tuple):
+            fname = fname[0]
         fid = open(fname, 'w')
         fid.write(self.genText())
         fid.close()

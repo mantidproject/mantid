@@ -16,7 +16,7 @@ from reduction_gui.reduction.scripter import BaseReductionScripter
 
 HAS_MANTID = False
 try:
-    import mantidplot
+    import mantidplot  # noqa
     HAS_MANTID = True
 except:
     pass
@@ -133,7 +133,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
                         script += item.state().options()
 
             script += "ReductionProperties='%s')" % table_ws
-            mantidplot.runPythonScript(script, True)
+            self.execute_script(script)
             return table_ws
         else:
             raise RuntimeError("Reduction could not be executed: Mantid could not be imported")

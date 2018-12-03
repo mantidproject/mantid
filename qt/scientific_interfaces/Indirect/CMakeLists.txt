@@ -10,7 +10,7 @@ set ( SRC_FILES
 	ConvFitDataTablePresenter.cpp
 	ConvFitModel.cpp
 	DensityOfStates.cpp
-        Elwin.cpp
+	Elwin.cpp
 	ILLEnergyTransfer.cpp
 	ISISCalibration.cpp
 	ISISDiagnostics.cpp
@@ -79,7 +79,7 @@ set ( INC_FILES
 	ConvFitModel.h
 	CorrectionsTab.h
 	DensityOfStates.h
-        Elwin.h
+	Elwin.h
 	IAddWorkspaceDialog.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h

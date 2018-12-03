@@ -21,6 +21,7 @@ import matplotlib.image as mimage
 # ================================================
 # Private 2D Helper functions
 # ================================================
+from mantid.plots.utility import MantidAxType
 
 
 def _setLabels1D(axes, workspace):
@@ -40,13 +41,33 @@ def _setLabels2D(axes, workspace):
     axes.set_xlabel(labels[1])
     axes.set_ylabel(labels[2])
 
+
+def _get_data_for_plot(axes, kwargs, workspace, with_dy=False, with_dx=False):
+    if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
+        (normalization, kwargs) = get_normalization(workspace, **kwargs)
+        (x, y, dy) = get_md_data1d(workspace, normalization)
+        dx = None
+    else:
+        axis = kwargs.pop("axis", MantidAxType.SPECTRUM)
+        workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
+        if axis == MantidAxType.BIN:
+            # Overwrite any user specified xlabel
+            axes.set_xlabel("Spectrum")
+            x, y, dy, dx = get_bins(workspace, workspace_index, with_dy)
+        elif axis == MantidAxType.SPECTRUM:
+            x, y, dy, dx = get_spectrum(workspace, workspace_index, distribution, with_dy, with_dx)
+        else:
+            raise ValueError("Axis {} is not a valid axis number.".format(axis))
+    return x, y, dy, dx, kwargs
+
+
 # ========================================================
 # Plot functions
 # ========================================================
 
 
 def plot(axes, workspace, *args, **kwargs):
-    '''
+    """
     Unpack mantid workspace and render it with matplotlib. ``args`` and
     ``kwargs`` are passed to :py:meth:`matplotlib.axes.Axes.plot` after special
     keyword arguments are removed. This will automatically label the
@@ -73,12 +94,16 @@ def plot(axes, workspace, *args, **kwargs):
                       instead of the time difference
     :param ExperimentInfo: for MD Workspaces with multiple :class:`mantid.api.ExperimentInfo` is the
                            ExperimentInfo object from which to extract the log. It's 0 by default
+    :param axis: Specify which axis will be plotted. Use axis=MantidAxType.BIN to plot a bin,
+                  and axis=MantidAxType.SPECTRUM to plot a spectrum.
+                  The default value is axis=1, plotting spectra by default.
+
 
     For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
     needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
-    '''
+    """
     if 'LogName' in kwargs:
         (x, y, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
         axes.set_ylabel('{0} ({1})'.format(LogName, units))
@@ -87,20 +112,16 @@ def plot(axes, workspace, *args, **kwargs):
             axes.xaxis_date()
             axes.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S\n%b-%d'))
             axes.set_xlabel('Time')
-        kwargs['linestyle']='steps-post'
+        kwargs['linestyle'] = 'steps-post'
         return axes.plot(x, y, *args, **kwargs)
-    if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
-        (x, y, dy) = get_md_data1d(workspace, normalization)
-    else:
-        (wkspIndex, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
-        (x, y, dy, dx) = get_spectrum(workspace, wkspIndex, distribution, withDy=False, withDx=False)
+
+    x, y, dy, dx, kwargs = _get_data_for_plot(axes, kwargs, workspace)
     _setLabels1D(axes, workspace)
     return axes.plot(x, y, *args, **kwargs)
 
 
 def errorbar(axes, workspace, *args, **kwargs):
-    '''
+    """
     Unpack mantid workspace and render it with matplotlib. ``args`` and
     ``kwargs`` are passed to :py:meth:`matplotlib.axes.Axes.errorbar` after special
     keyword arguments are removed. This will automatically label the
@@ -117,19 +138,16 @@ def errorbar(axes, workspace, *args, **kwargs):
     :param normalization: ``None`` (default) ask the workspace. Applies to MDHisto workspaces. It can override
                           the value from displayNormalizationHisto. It checks only if
                           the normalization is mantid.api.MDNormalization.NumEventsNormalization
+    :param axis: Specify which axis will be plotted. Use axis=MantidAxType.BIN to plot a bin,
+                  and axis=MantidAxType.SPECTRUM to plot a spectrum.
+                  The default value is axis=1, plotting spectra by default.
 
     For matrix workspaces with more than one spectra, either ``specNum`` or ``wkspIndex``
     needs to be specified. Giving both will generate a :class:`RuntimeError`. There is no similar
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
-    '''
-    if isinstance(workspace, mantid.dataobjects.MDHistoWorkspace):
-        (normalization, kwargs) = get_normalization(workspace, **kwargs)
-        (x, y, dy) = get_md_data1d(workspace, normalization)
-        dx = None
-    else:
-        (wkspIndex, distribution, kwargs) = get_wksp_index_dist_and_label(workspace, **kwargs)
-        (x, y, dy, dx) = get_spectrum(workspace, wkspIndex, distribution, withDy=True, withDx=True)
+    """
+    x, y, dy, dx, kwargs = _get_data_for_plot(axes, kwargs, workspace, with_dy=True, with_dx=True)
     _setLabels1D(axes, workspace)
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
@@ -359,10 +377,11 @@ def pcolormesh(axes, workspace, *args, **kwargs):
 
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
+
 def _imshow(axes, z, cmap=None, norm=None, aspect=None,
-           interpolation=None, alpha=None, vmin=None, vmax=None,
-           origin=None, extent=None, shape=None, filternorm=1,
-           filterrad=4.0, imlim=None, resample=None, url=None, **kwargs):
+            interpolation=None, alpha=None, vmin=None, vmax=None,
+            origin=None, extent=None, shape=None, filternorm=1,
+            filterrad=4.0, imlim=None, resample=None, url=None, **kwargs):
     """
     Copy of imshow in order to replace AxesImage artist with a custom artist.
 
@@ -432,8 +451,9 @@ def imshow(axes, workspace, *args, **kwargs):
     if not x_spacing_equal or not y_spacing_equal:
         raise Exception('Unevenly spaced bins are not supported by imshow')
     if 'extent' not in kwargs:
-        kwargs['extent'] = [x[0,0],x[0,-1],y[0,0],y[-1,0]]
+        kwargs['extent'] = [x[0, 0], x[0, -1], y[0, 0], y[-1, 0]]
     return _imshow(axes, z, *args, **kwargs)
+
 
 def tripcolor(axes, workspace, *args, **kwargs):
     '''

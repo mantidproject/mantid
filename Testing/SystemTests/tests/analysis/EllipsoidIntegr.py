@@ -9,14 +9,14 @@
 #
 #  Integrates a run using the ellipsoid technique
 
-import stresstesting
+import systemtesting
 
 from mantid.api import *
 #sys.path.append("/home/ruth/GIT_MantidBuild/bin/")
 from mantid.simpleapi import *
 
 
-class EllipsoidIntegr( stresstesting.MantidStressTest):
+class EllipsoidIntegr(systemtesting.MantidSystemTest):
 
     def requiredMemoryMB(self):
         """ Require about 12GB free """

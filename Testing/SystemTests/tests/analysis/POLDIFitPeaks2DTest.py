@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 import numpy as np
 
 
-class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
+class POLDIFitPeaks2DTest(systemtesting.MantidSystemTest):
     """The system test currently checks that the calculation of 2D spectra
     works correctly."""
 
@@ -95,7 +95,7 @@ class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
                 self.assertLessThan(maxDifference, 0.07)
 
 
-class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
+class POLDIFitPeaks2DPawleyTest(systemtesting.MantidSystemTest):
     def runTest(self):
         si = PoldiLoadRuns(2013, 6903, 6904, 2)
         corr = PoldiAutoCorrelation('si_data_6904')
@@ -129,7 +129,7 @@ class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
         DeleteWorkspace(peaks_ref_2d)
 
 
-class POLDIFitPeaks2DIntegratedIntensities(stresstesting.MantidStressTest):
+class POLDIFitPeaks2DIntegratedIntensities(systemtesting.MantidSystemTest):
     def runTest(self):
         si = PoldiLoadRuns(2013, 6903, 6904, 2)
         corr = PoldiAutoCorrelation('si_data_6904')

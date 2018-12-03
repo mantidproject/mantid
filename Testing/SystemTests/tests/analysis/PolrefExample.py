@@ -5,11 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-import stresstesting
+import systemtesting
 from mantid.simpleapi import *
 
 
-class PolrefExample(stresstesting.MantidStressTest):
+class PolrefExample(systemtesting.MantidSystemTest):
     ''' Sample script from Tim Charlton. Described as Mantid version of quick:lam
 
     Owen Arnold

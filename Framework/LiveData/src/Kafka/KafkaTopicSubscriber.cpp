@@ -34,9 +34,9 @@ std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
   conf->set("metadata.broker.list", brokerAddr, errorMsg);
   conf->set("session.timeout.ms", "10000", errorMsg);
   conf->set("group.id", "mantid", errorMsg);
-  conf->set("message.max.bytes", "10000000", errorMsg);
-  conf->set("fetch.message.max.bytes", "10000000", errorMsg);
-  conf->set("replica.fetch.max.bytes", "10000000", errorMsg);
+  conf->set("message.max.bytes", "25000000", errorMsg);
+  conf->set("fetch.message.max.bytes", "25000000", errorMsg);
+  conf->set("replica.fetch.max.bytes", "25000000", errorMsg);
   conf->set("enable.auto.commit", "false", errorMsg);
   conf->set("enable.auto.offset.store", "false", errorMsg);
   conf->set("offset.store.method", "none", errorMsg);
@@ -67,6 +67,7 @@ namespace LiveData {
 // -----------------------------------------------------------------------------
 
 const std::string KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX = "_events";
+const std::string KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX = "_eventSum";
 const std::string KafkaTopicSubscriber::RUN_TOPIC_SUFFIX = "_runInfo";
 const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
 const std::string KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX = "_sampleEnv";
