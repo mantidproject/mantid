@@ -10,6 +10,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidMDAlgorithms/ConvToMDBase.h"
@@ -154,6 +155,7 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
 
 #pragma omp parallel for
   for (size_t workspaceIndex = 0; workspaceIndex < m_NSpectra; ++workspaceIndex) {
+    const auto& pws{m_OutWSWrapper->pWorkspace()};
     const Mantid::DataObjects::EventList &el = m_EventWS->getSpectrum(workspaceIndex);
 
     size_t numEvents = el.getNumberEvents();
@@ -188,7 +190,25 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
 
       if (!localQConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
         continue; // skip ND outside the range
-      mdEventsForSpectrum.emplace_back(MDEventMaker<ND, MDEventType>::makeMDEvent(signal, errorSq, runIndexLoc, detID, &locCoord[0]));
+
+      MDEventType<ND> mdEvent = MDEventMaker<ND, MDEventType>::
+          makeMDEvent(signal, errorSq, runIndexLoc, detID, &locCoord[0]);
+
+
+      // Filter events before adding to the ndEvents vector to add in workspace
+      // The bounds of the resulting WS have to be already defined
+      bool isInOutWSBox = true;
+      for(size_t ax = 0; ax < ND; ++ ax) {
+        const coord_t& coord{mdEvent.getCenter(ax)};
+        if (
+         coord < pws->getDimension(ax)->getMinimum() ||
+         coord >pws->getDimension(ax)->getMaximum()
+        )
+          isInOutWSBox = false;
+      }
+
+      if(isInOutWSBox)
+        mdEventsForSpectrum.emplace_back();
     }
 
 #pragma omp critical
@@ -212,9 +232,10 @@ template<typename EventType, size_t ND, template <size_t> class MDEventType>
 void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
   std::vector<MDEventType<ND>> mdEvents = convertEvents<EventType, ND, MDEventType>();
   MDSpaceBounds<ND> space;
+  const auto& pws{m_OutWSWrapper->pWorkspace()};
   for(size_t ax = 0; ax < ND; ++ ax) {
-    space(ax, 0) = -10000;
-    space(ax, 1) = 10000;
+    space(ax, 0) = pws->getDimension(ax)->getMinimum();
+    space(ax, 1) = pws->getDimension(ax)->getMaximum();
   }
 #pragma omp parallel for
   for(size_t i = 0; i < mdEvents.size(); ++i)
