@@ -436,6 +436,7 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
                   << "', error description: " << e.what() << '\n';
     res = false;
   }
+  return res;
 }
 
 //------------------------------------------------------------------------------
