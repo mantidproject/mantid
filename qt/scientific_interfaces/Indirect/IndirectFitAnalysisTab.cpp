@@ -33,10 +33,12 @@ MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
+std::size_t numberOfColumns(Workspace_sptr workspace) {
+	return convertToMatrixWorkspace(workspace)->blocksize();
+}
+
 bool isWorkspacePlottable(Workspace_sptr workspace) {
-	auto const numberOfDataPoints =
-		convertToMatrixWorkspace(workspace)->blocksize();
-	return numberOfDataPoints > 1 ? true : false;
+	return numberOfColumns(workspace) > 1 ? true : false;
 }
 
 bool containsPlottableWorkspace(WorkspaceGroup_sptr workspaceGroup) {
