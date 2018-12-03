@@ -19,9 +19,13 @@ Both functions share three parameters: Height (height of the peak at the maximum
 
 Thus pseudo-voigt can be expressed in such way
 
-.. math:: pV(x) = I \cdot (\eta \cdot g(x, \Gamma) + (1 - \eta) \cdot l(x, \Gamma))
+.. math:: pV(x) = I \cdot (\eta \cdot G'(x, H) + (1 - \eta) \cdot (x, H))
 
-where :math:`g(x, \Gamma)` and `l(x, \Gamma)` are normalized Gaussian and Lorentzian.
+where :math:`G'(x, H)` and `L'(x, H)` are normalized Gaussian and Lorentzian.
+
+To be noticed that the Fullprof manual's way to define parameter names is following.
+In the code, in order to avoid confusion between :math:`H` and peak height :math:`h`, 
+*gamma* will be used instead of :math:`H`.
 
 
 
@@ -31,35 +35,40 @@ Native peak parameters
 Pseudo-voigt function in Mantid has the following native parameters
 
 - Peak intensity :math:`I`: shared peak height between Gaussian and Lorentzian.  
-- Peak width FWHM :math:`\Gamma` or :math:`H`: shared 
+- Peak width FWHM :math:`\Gamma` or :math:`H`: shared FWHM be between Gaussian and Lorentzian
 - Peak position :math:`x_0`
-- Gaussian ratio :math:`\eta`
+- Gaussian ratio :math:`\eta`: ratio of intensity of Gaussian.
 
 From given FWHM
 
-For Gaussian part:
+**Gaussian part** :math:`G'(x, H)`
 
-.. math:: \sigma = \frac{1}{2\sqrt{2\ln(2)}} * \Gamma
+.. math:: G'(x, H) = a_G \cdot exp(-b_G (x - x_0)^2) = \frac{1}{\sigma\sqrt{2\pi}} \exp{-\frac{(x-x_0)^2}{2\sigma^2}}
 
-.. math:: g(x, \Gamma) = A_G \cdot exp(-\frac{(x-x_0)^2}{2\sigma})
 
 where
 
-.. math:: A_G = \frac{2}{H}\sqrt{\frac{\ln{2}}{\pi}} = \frac{1}{\sigma\sqrt{2\pi}}
+.. math:: a_G = \frac{2}{H}\sqrt{\frac{\ln{2}}{\pi}} = \frac{1}{\sigma\sqrt{2\pi}}
 
-For Lorentzian part:
+.. math:: b_G = \frac{4\ln{2}}{H^2}
 
-.. math:: l(x) = \frac{1}{\pi} \cdot \frac{\Gamma/2}{(x-x_0)^2 + (\Gamma/2)^2}
+.. math:: \sigma = \frac{H}{2\sqrt{2\ln(2)}}
 
-Thus both :math:`g(x)` and :math:`l(x)` are normalized.
+**Lorentzian part** :math:`L'(x, H)`
+
+.. math:: L'(x) = \frac{1}{\pi} \cdot \frac{H/2}{(x-x_0)^2 + (H/2)^2}
+
+Thus both :math:`G'(x)` and :math:`L'(x)` are normalized.
 
 
-Effective peak parameter
-++++++++++++++++++++++++
+Effective peak parameters
++++++++++++++++++++++++++
 
 - Peak height :math:`h`: 
+.. math:: h = I \cdot (\eta \cdot a_G + (1 - \eta) \cdot \frac{2}{\pi\cdot H}) = (1 + (\sqrt{\ln{2}\pi}-1)\eta) \frac{2\cdot I}{\pi\cdot H}
 
-.. math:: h = I \cdot (\eta \cdot A_G + (1 - \eta) \cdot \frac{2}{\pi\cdot\Gamma}) = (1 + (\sqrt{\ln{2}\pi}-1)\eta) \frac{2\cdot I}{\pi\cdot H}
+- :math:`\sigma`:
+.. math:: \sigma = \frac{H}{2\sqrt{2\ln(2)}}
 
 
 About previous implementation
@@ -67,12 +76,12 @@ About previous implementation
 
 Before Mantid release v3.14, the equation of Pseudo-Voigt is defined as
 
-.. math:: pV(x) = h \cdot (\eta \cdot \exp(-\frac{(x-x_0)^2}{-2\sigma^2}) + \frac{(\Gamma/2)^2}{(x-x_0)^2 + (\Gamma/2)^2})
+.. math:: pV(x) = h \cdot [\eta \cdot \exp(-\frac{(x-x_0)^2}{-2\sigma^2}) + (1-\eta)\frac{(\Gamma/2)^2}{(x-x_0)^2 + (\Gamma/2)^2}]
 
 This equation has several issues:
 
 1. It does not have normalized Gaussian and Lorentzian. 
-2. At :math:`x = x_0`, :math:`pV = h`.  By this definition, the mixing ratio factor :math:`\eta` between Gaussian and Lorentzian is the the intensity ratio at :math:`x = x_0`.  But it does not make sense at any other :math:`x` value. According to the literature or manual (Fullprof and GSAS), :math:`\eta` shall be the ratio of the intensities between Gaussian and Lorentzian.
+2. At :math:`x = x_0`, :math:`pV(x_0) = h`.  By this definition, the mixing ratio factor :math:`\eta` between Gaussian and Lorentzian is the the intensity ratio at :math:`x = x_0`.  But it does not make sense with other :math:`x` value. According to the literature or manual (Fullprof and GSAS), :math:`\eta` shall be the ratio of the intensities between Gaussian and Lorentzian.
 
 
 The figure below shows data together with a fitted Pseudo-Voigt function, as well as Gaussian and Lorentzian with equal parameters. The mixing parameter for that example is 0.7, which means that the function is behaving more like a Gaussian.

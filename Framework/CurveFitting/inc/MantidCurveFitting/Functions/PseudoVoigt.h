@@ -36,7 +36,8 @@ namespace Functions {
 class DLLExport PseudoVoigt : public API::IPeakFunction {
 public:
   double centre() const override { return getParameter("PeakCentre"); }
-  double height() const override { return getParameter("Height"); }
+  double intensity() const override {return getParameter("Intensity"); }
+  double height() const override;
   double fwhm() const override { return getParameter("FWHM"); }
 
   void setCentre(const double c) override { setParameter("PeakCentre", c); }
@@ -54,6 +55,10 @@ protected:
                           const size_t nData) override;
 
   void init() override;
+
+private:
+  inline double cal_ag(const double gamma) const;
+  inline double cal_bg(const double gamma) const;
 };
 
 } // namespace Functions

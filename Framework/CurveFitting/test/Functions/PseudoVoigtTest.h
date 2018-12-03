@@ -15,6 +15,7 @@
 #include "MantidCurveFitting/Functions/PseudoVoigt.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
 
 #include <boost/make_shared.hpp>
 
@@ -238,6 +239,18 @@ public:
     for (size_t i = 0; i < valuesPV.size(); ++i) {
       TS_ASSERT_DELTA(valuesPV[i], valuesLorentzian[i], 1e-15);
     }
+  }
+
+  void testIntegrate() {
+      PseudoVoigt pv;
+      pv.setParameter(0, 1.0);
+      pv.setParameter(1, 4.78);
+    //   (1.0, 4.78, 0.05, 0.0);
+
+      PeakFunctionIntegrator integrator;
+      IntegrationResult result =
+          integrator.integrate(pv, -100., 100.);
+      std::cout << "Integrated value = " << result.result << "\n";
   }
 
 private:

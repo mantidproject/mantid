@@ -22,6 +22,24 @@ using namespace API;
 
 DECLARE_FUNCTION(PseudoVoigt)
 
+void PseudoVoigt::init() {
+  declareParameter("Mixing", 1.0);
+  declareParameter("Intensity");
+  declareParameter("PeakCentre");
+  declareParameter("FWHM");
+
+  auto mixingConstraint =
+      Kernel::make_unique<BoundaryConstraint>(this, "Mixing", 0.0, 1.0, true);
+  mixingConstraint->setPenaltyFactor(1e9);
+
+  auto fwhm_constraint = Kernel::make_unique<BoundaryConstraint>(this, "FWHM", 1.E-20, true);
+  fwhm_constraint->setPenaltyFactor(1e9);
+
+  // TODO - Add a constrain on FWHM too
+
+  addConstraint(std::move(mixingConstraint));
+}
+
 void PseudoVoigt::functionLocal(double *out, const double *xValues,
                                 const size_t nData) const {
   const double intensity = getParameter("Intensity");
@@ -35,7 +53,7 @@ void PseudoVoigt::functionLocal(double *out, const double *xValues,
   const double gFraction = getParameter("Mixing");
   const double lFraction = 1.0 - gFraction;
 
-  const double ag = 2. / gamma * sqrt(M_LN2 / pi);
+  const double ag = 2. / gamma * sqrt(M_LN2 / M_PI);
   // const double sigma = 0.5 / sqrt(2 * M_LN2) * gamma
   // const double sigmasq = sigma * sigma;
   const double gammasq = gamma * gamma;
@@ -52,15 +70,15 @@ void PseudoVoigt::functionLocal(double *out, const double *xValues,
 void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
                                      const size_t nData) {
 
-  double intensity = getParameter("Intensity");
+  double peak_intensity = getParameter("Intensity");
   double x0 = getParameter("PeakCentre");
-  double f = getParameter("FWHM");
+  double gamma = getParameter("FWHM");
 
   double gFraction = getParameter("Mixing");
   double lFraction = 1.0 - gFraction;
 
-  const double ag = 2. / gamma * sqrt(M_LN2 / pi);
-  const double sigmasq = gammasq * 0.25 / (2. * M_LN2);
+  const double ag = 2. / gamma * sqrt(M_LN2 / M_PI);
+  const double sigmasq = gamma * gamma * 0.25 / (2. * M_LN2);
 
   // // Lorentzian parameter gamma...fwhm/2
   // double g = f / 2.0;
@@ -74,41 +92,42 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
     double xDiffSquared = xDiff * xDiff;
 
     double gaussian_term = ag * exp(-0.5 * xDiffSquared / sigmasq);
-    double lorentzan_term = gamma / (xDiffSquared + gamma * gamma);
+    double lorentzian_term = gamma / (xDiffSquared + gamma * gamma);
 
     // mixing
-    out->set(i, 0, intensity * (gaussian_term - lorentzian_term));
+    out->set(i, 0, peak_intensity * (gaussian_term - lorentzian_term));
     // derivative on intensity
     out->set(i, 1, gFraction * gaussian_term + lFraction * lorentzian_term);
     // peak center: x0
     // TODO FIXME this is not correct
-    out->set(i, 2,
-             h * xDiff *
-                 (gFraction * expTerm / sSquared +
-                  lFraction * lorentzTerm * 2.0 / (xDiffSquared + gSquared)));
+    double derivx{1.0};
+    out->set(i, 2, derivx);
+//             peak_intensity * xDiff *
+//                 (gFraction * gaussian_term + // / (sSquared) +
+//                  lFraction * lorentzTerm * 2.0 / (xDiffSquared + gSquared)));
     // peak width
     // TODO FIXME this is not correct
-    out->set(i, 3,
-             h * (gFraction * expTerm * xDiffSquared / sSquared / f +
-                  lFraction * lorentzTerm *
-                      (1.0 / g - g / (xDiffSquared + gSquared))));
+    out->set(i, 3, derivx);
+//             h * (gFraction * expTerm * xDiffSquared / sSquared / f +
+//                  lFraction * lorentzTerm *
+//                      (1.0 / g - g / (xDiffSquared + gSquared))));
   }
 }
 
-void PseudoVoigt::init() {
-  declareParameter("Mixing", 1.0);
-  declareParameter("Intensity");
-  declareParameter("PeakCentre");
-  declareParameter("FWHM");
-
-  auto mixingConstraint =
-      Kernel::make_unique<BoundaryConstraint>(this, "Mixing", 0.0, 1.0, true);
-  mixingConstraint->setPenaltyFactor(1e9);
-
-  // TODO - Add a constrain on FWHM too
-
-  addConstraint(std::move(mixingConstraint));
+double PseudoVoigt::height() const {
+    // TODO FIXME - Implement
+    return 1.;
 }
+
+double PseudoVoigt::cal_ag(const double gamma) const {
+    return 1.;
+}
+
+double PseudoVoigt::cal_bg(const double gamma) const {
+    return 2.;
+}
+
+
 
 } // namespace Functions
 } // namespace CurveFitting
