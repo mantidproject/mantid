@@ -10,12 +10,11 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import os
 from abc import ABCMeta, abstractmethod
 from inspect import isclass
 
 from six import with_metaclass
-from qtpy.QtWidgets import (QListWidget, QListWidgetItem, QMainWindow, QMessageBox)  # noqa
+from qtpy.QtWidgets import (QListWidgetItem, QMainWindow, QMessageBox)  # noqa
 from qtpy.QtCore import (QRegExp, QSettings)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIcon, QIntValidator, QRegExpValidator)  # noqa
 

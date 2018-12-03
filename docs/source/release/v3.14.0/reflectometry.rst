@@ -43,7 +43,6 @@ Bug fixes
 - Algorithm :ref:`algm-Stitch1D-v3`: Tolerances were corrected for automatically determined EndOverlap values and overall sensible log messages will be present.
 - Reverted property names for polarization correction coefficients in :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto-v2>` for backwards compatibility.
 
-
 Liquids Reflectometer
 ---------------------
 
@@ -53,6 +52,7 @@ Magnetism Reflectometer
 -----------------------
 
 - Added option to overwrite :literal:`DIRPIX` and :literal:`DANGLE0`.
+- Added option to skip the final rebinning.
 
 ISIS Reflectometry Interface
 ----------------------------
