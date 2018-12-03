@@ -504,43 +504,37 @@ void Stitch1D::exec() {
   g_log.notice(messageBuffer.str());
   MatrixWorkspace_sptr result;
   if (lhsWS->isHistogramData()) { // If the input workspaces are histograms ...
+    size_t a1 = 0;
+    size_t a2 = 0;
+    a1 = lhs->binIndexOf(startOverlap + params[1]);
     try {
-      size_t a1 = lhs->binIndexOf(startOverlap + params[1]);
-      size_t a2 = lhs->binIndexOf(endOverlap);
-      if (a1 == a2) {
-        g_log.warning("The Params you have provided for binning yield a "
-                      "workspace in which start and end overlap appear "
-                      "in the same bin. Make binning finer via input "
-                      "Params.");
-      }
-      // Overlap region of lhs and rhs
-      MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, lhs);
-      MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rhs);
-      MatrixWorkspace_sptr overlapave;
-      if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2)) {
-        overlapave = weightedMean(overlap1, overlap2);
-      } else {
-        g_log.information("Using un-weighted mean scaling for overlap mean");
-        MatrixWorkspace_sptr sum = overlap1 + overlap2;
-        MatrixWorkspace_sptr denominator = singleValueWS(2.0);
-        overlapave = sum / denominator;
-      }
-      // Non-overlap region of lhs, rhs
-      maskInPlace(a1, lhs->blocksize(), lhs);
-      maskInPlace(0, a2, rhs);
-      result = lhs + overlapave + rhs;
-      reinsertSpecialValues(result);
-    } catch (std::range_error) {
-      g_log.error(
-          "A bin boundary is out of range. This likely happens when using "
-          "Stitch1DMany and providing start, step, stop rebin parameters. "
-          "Please note that after stitching two workspaces, those workspaces "
-          "are rebinned and automatically determined start and end overlap "
-          "values may not be valid due to computational inaccuracies. "
-          "Consider giving only a binning step, i.e. one parameter or precise "
-          "the EndOverlap(s).");
-      throw(std::runtime_error("Bin out of range."));
+      a2 = lhs->binIndexOf(endOverlap);
+    } catch (std::out_of_range) {
+      a2 = lhs->binIndexOf(endOverlap - params[1]);
     }
+    if (a1 == a2) {
+      g_log.warning("The Params you have provided for binning yield a "
+                    "workspace in which start and end overlap appear "
+                    "in the same bin. Make binning finer via input "
+                    "Params.");
+    }
+    // Overlap region of lhs and rhs
+    MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, lhs);
+    MatrixWorkspace_sptr overlap2 = maskAllBut(a1, a2, rhs);
+    MatrixWorkspace_sptr overlapave;
+    if (hasNonzeroErrors(overlap1) && hasNonzeroErrors(overlap2)) {
+      overlapave = weightedMean(overlap1, overlap2);
+    } else {
+      g_log.information("Using un-weighted mean scaling for overlap mean");
+      MatrixWorkspace_sptr sum = overlap1 + overlap2;
+      MatrixWorkspace_sptr denominator = singleValueWS(2.0);
+      overlapave = sum / denominator;
+    }
+    // Non-overlap region of lhs, rhs
+    maskInPlace(a1, lhs->blocksize(), lhs);
+    maskInPlace(0, a2, rhs);
+    result = lhs + overlapave + rhs;
+    reinsertSpecialValues(result);
   } else { // The input workspaces are point data ... join & sort
     result = conjoinXAxis(lhs, rhs);
     if (!result)
