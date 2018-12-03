@@ -324,7 +324,6 @@ std::vector<int> LoadHFIRSANS::getData(const std::string &dataXpath) {
  * Convenience function to store a detector value into a given spectrum.
  * Note that this type of data doesn't use TOD, so that we use a single dummy
  * bin in X. Each detector is defined as a spectrum of length 1.
- * @param ws: workspace
  * @param specID: ID of the spectrum to store the value in
  * @param value: value to store [count]
  * @param error: error on the value [count]
@@ -539,8 +538,6 @@ void LoadHFIRSANS::runLoadInstrument() {
 
 /**
  * This will rotate the detector named componentName around z-axis
- *
- * @param angle in degrees
  */
 void LoadHFIRSANS::rotateDetector() {
 
@@ -560,22 +557,6 @@ void LoadHFIRSANS::rotateDetector() {
 
 /**
  * Calculates the detector distances and sets them as Run properties
- * Here fog starts:
- * GPSANS: distance = sample_det_dist + offset!
- * BioSANS: distance = sample_det_dist + offset + sample_to_flange!
- * Mathieu is using sample_det_dist to move the detector later
- * So I'll do the same (Ricardo)
- * June 14th 2016:
- * New changes:
- * sample_det_dist is not available
- * flange_det_dist is new = old sample_det_dist + offset
- * offset is not used
- * GPSANS: distance = flange_det_dist! (sample_to_flange is 0 for GPSANS)
- * BioSANS: distance = flange_det_dist + sample_to_flange!
- * For back compatibility I'm setting the offset to 0 and not reading it from
- * the file
- * Last Changes:
- * If SDD tag is available in the metadata set that as sample detector distance
  * @return : sample_detector_distance
  */
 void LoadHFIRSANS::setDetectorDistance() {
@@ -713,6 +694,7 @@ double LoadHFIRSANS::getSourceToSampleDistance() {
           boost::algorithm::trim_copy(distance_as_string);
       SSD = boost::lexical_cast<double>(distance_as_string_copy);
     } catch (boost::bad_lexical_cast const &e) {
+      g_log.error(e.what());
       throw Kernel::Exception::InstrumentDefinitionError(
           "Bad value for source-to-sample distance");
     }
