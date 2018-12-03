@@ -124,8 +124,8 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
   }
 
   template<size_t ND, template <size_t> class MDEventType>
-  void appendSortedEvents(API::Progress *pProgress, const API::BoxController_sptr &bc,
-      const std::vector<MDEventType<ND>>& mdEvents);
+  void buildStructureFromSortedEvents(API::Progress *pProgress, const API::BoxController_sptr &bc,
+                                      const std::vector<MDEventType<ND>> &mdEvents);
 
   template<typename EventType, size_t ND, template <size_t> class MDEventType>
   std::vector<MDEventType<ND>> convertEvents();
@@ -222,11 +222,16 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
   return mdEvents;
 }
 
+
+
 template<size_t ND, template <size_t> class MDEventType>
-void ConvToMDEventsWSIndexing::appendSortedEvents(API::Progress *pProgress, const API::BoxController_sptr &bc,
-                        const std::vector<MDEventType<ND>>& mdEvents) {
+void ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(API::Progress *pProgress,
+                                                              const API::BoxController_sptr &bc,
+                                                              const std::vector<MDEventType<ND>> &mdEvents) {
 
 }
+
+
 
 template<typename EventType, size_t ND, template <size_t> class MDEventType>
 void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API::BoxController_sptr &bc) {
@@ -244,7 +249,7 @@ void ConvToMDEventsWSIndexing::appendEvents(API::Progress *pProgress, const API:
     return a.getIndex() < b.getIndex();
   });
 
-  appendSortedEvents(pProgress, bc, mdEvents);
+  buildStructureFromSortedEvents(pProgress, bc, mdEvents);
 }
 
 
