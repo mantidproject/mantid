@@ -7,6 +7,8 @@
 #include "MantidAlgorithms/ApplyFloodWorkspace.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Axis.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -74,9 +76,32 @@ void ApplyFloodWorkspace::init() {
 void ApplyFloodWorkspace::exec() {
   MatrixWorkspace_sptr input = getProperty(Prop::INPUT_WORKSPACE);
   MatrixWorkspace_sptr flood = getProperty(Prop::FLOOD_WORKSPACE);
+
+  auto const inputXUnitId = input->getAxis(0)->unit()->unitID();
+  bool const doConvertUnits = flood->getAxis(0)->unit()->unitID() != inputXUnitId;
+  bool const doRebin = flood->blocksize() > 1;
+
+  if (doRebin) {
+    if (doConvertUnits) {
+      auto convert = createChildAlgorithm("ConvertUnits", 0, 1);
+      convert->setProperty("InputWorkspace", flood);
+      convert->setProperty("Target", inputXUnitId);
+      convert->setProperty("OutputWorkspace", "dummy");
+      convert->execute();
+      flood = convert->getProperty("OutputWorkspace");
+    }
+    auto rebin = createChildAlgorithm("RebinToWorkspace", 0, 1);
+    rebin->setProperty("WorkspaceToRebin", flood);
+    rebin->setProperty("WorkspaceToMatch", input);
+    rebin->setProperty("OutputWorkspace", "dummy");
+    rebin->execute();
+    flood = rebin->getProperty("OutputWorkspace");
+  }
+
   auto divide = createChildAlgorithm("Divide", 0, 1);
   divide->setProperty("LHSWorkspace", input);
   divide->setProperty("RHSWorkspace", flood);
+  divide->setProperty("AllowDifferentNumberSpectra", true);
   divide->setProperty("OutputWorkspace", "dummy");
   divide->execute();
   MatrixWorkspace_sptr output = divide->getProperty("OutputWorkspace");

@@ -697,6 +697,7 @@ set ( TEST_FILES
 	AppendSpectraTest.h
 	ApplyCalibrationTest.h
 	ApplyDetailedBalanceTest.h
+	ApplyFloodWorkspaceTest.h
 	ApplyTransmissionCorrectionTest.h
 	AverageLogDataTest.h
 	Bin2DPowderDiffractionTest.h
