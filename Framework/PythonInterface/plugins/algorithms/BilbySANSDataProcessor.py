@@ -310,7 +310,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         ws_tran = self._multiply(ws_tran, f)
 
         transmission_fit = ws_tran
-        self.setProperty("OutputWorkspaceTransmission_Fit", transmission_fit)
+        self.setProperty("OutputWorkspaceTransmissionFit", transmission_fit)
 
         # -- Blocked Beam Subtraction -- only if blk workspace has been provided (obviously)
         if ws_blk:
