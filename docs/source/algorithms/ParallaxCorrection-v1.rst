@@ -29,6 +29,24 @@ The instrument parameters must be defined for detector components and without lo
 
 At least one component name must be given as input.
 
+Example of adding parameters in the IPF
+---------------------------------------
+
+.. code-block:: xml
+
+  <component-link name="some_bank">
+
+    <parameter name="parallax" type="string">
+      <!-- Normally, the function would be increasing with t -->
+      <value val="1 + 0.01 * t"/>
+    </parameter>
+
+    <parameter name="direction" type="string">
+      <value val="x"/>
+    </parameter>
+
+  </component-link>
+
 Usage
 -----
 

@@ -97,6 +97,44 @@ void ParallaxCorrection::init() {
 }
 
 //----------------------------------------------------------------------------------------------
+/**
+ * @brief ParallaxCorrection::performCorrection for the given bank
+ * @param outWS : the corrected workspace
+ * @param indices : the workspaces indices corresponding to the bank
+ * @param parallax : the correction formula for the bank
+ * @param direction : the tube direction in the bank
+ */
+void ParallaxCorrection::performCorrection(API::MatrixWorkspace_sptr outWS,
+                                           const std::vector<size_t> &indices,
+                                           const std::string &parallax,
+                                           const std::string &direction) {
+  double t;
+  mu::Parser muParser;
+  muParser.DefineVar("t", &t);
+  muParser.SetExpr(parallax);
+  const auto &detectorInfo = outWS->detectorInfo();
+  // note that this is intenionally serial
+  for (const auto wsIndex : indices) {
+    const Kernel::V3D pos = detectorInfo.position(wsIndex);
+    if (direction == "y") {
+      t = std::fabs(std::atan2(pos.X(), pos.Z()));
+    } else {
+      t = std::fabs(std::atan2(pos.Y(), pos.Z()));
+    }
+    const double correction = muParser.Eval();
+    if (correction > 0.) {
+      auto &spectrum = outWS->mutableY(wsIndex);
+      auto &errors = outWS->mutableE(wsIndex);
+      spectrum /= correction;
+      errors /= correction;
+    } else {
+      g_log.warning() << "Correction is <=0 for workspace index " << wsIndex
+                      << ". Skipping the correction.\n";
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ParallaxCorrection::exec() {
@@ -108,7 +146,6 @@ void ParallaxCorrection::exec() {
   }
   const std::vector<std::string> componentNames = getProperty("ComponentNames");
   const auto &instrument = inputWorkspace->getInstrument();
-  const auto &detectorInfo = inputWorkspace->detectorInfo();
   auto progress =
       Kernel::make_unique<API::Progress>(this, 0., 1., componentNames.size());
   for (const auto &componentName : componentNames) {
@@ -139,47 +176,26 @@ void ParallaxCorrection::exec() {
       }
       dets.emplace_back(det);
     }
-    if (!dets.empty()) {
-      detIDs.reserve(dets.size());
-      for (const auto &det : dets) {
-        detIDs.emplace_back(det->getID());
-      }
-      const auto indices = inputWorkspace->getIndicesFromDetectorIDs(detIDs);
-      const std::string parallax =
-          component->getStringParameter(PARALLAX_PARAMETER)[0];
-      const std::string direction =
-          component->getStringParameter(DIRECTION_PARAMETER)[0];
-      const auto valid = validateFormula(parallax, direction);
-      if (!valid.empty()) {
-        g_log.error() << "Unable to parse the parallax formula and direction "
-                         "for component "
-                      << componentName << ". Reason: " << valid << "\n";
-        continue;
-      }
-      double t;
-      mu::Parser muParser;
-      muParser.DefineVar("t", &t);
-      muParser.SetExpr(parallax);
-      // note that this is intenionally serial
-      for (auto wsIndex : indices) {
-        const Kernel::V3D pos = detectorInfo.position(wsIndex);
-        if (direction == "y") {
-          t = std::fabs(std::atan2(pos.X(), pos.Z()));
-        } else {
-          t = std::fabs(std::atan2(pos.Y(), pos.Z()));
-        }
-        const double correction = muParser.Eval();
-        if (correction > 0.) {
-          auto &spectrum = outputWorkspace->mutableY(wsIndex);
-          auto &errors = outputWorkspace->mutableE(wsIndex);
-          spectrum /= correction;
-          errors /= correction;
-        } else {
-          g_log.warning() << "Correction is <=0 for workspace index " << wsIndex
-                          << ". Skipping the correction.\n";
-        }
-      }
+    if (dets.empty()) {
+      continue;
     }
+    detIDs.reserve(dets.size());
+    for (const auto &det : dets) {
+      detIDs.emplace_back(det->getID());
+    }
+    const auto indices = inputWorkspace->getIndicesFromDetectorIDs(detIDs);
+    const std::string parallax =
+        component->getStringParameter(PARALLAX_PARAMETER)[0];
+    const std::string direction =
+        component->getStringParameter(DIRECTION_PARAMETER)[0];
+    const auto valid = validateFormula(parallax, direction);
+    if (!valid.empty()) {
+      g_log.error() << "Unable to parse the parallax formula and direction "
+                       "for component "
+                    << componentName << ". Reason: " << valid << "\n";
+      continue;
+    }
+    performCorrection(outputWorkspace, indices, parallax, direction);
   }
   setProperty("OutputWorkspace", outputWorkspace);
 }
