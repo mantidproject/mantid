@@ -8,8 +8,8 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_
 
 #include "IAddWorkspaceDialog.h"
-#include "IndirectDataTablePresenter.h"
 #include "IIndirectFitDataView.h"
+#include "IndirectDataTablePresenter.h"
 #include "IndirectFittingModel.h"
 
 #include "DllConfig.h"

@@ -209,7 +209,7 @@ private:
 template <typename F>
 void IndirectFittingModel::applySpectra(std::size_t index,
                                         const F &functor) const {
-	if (m_fittingData.size() > 0)
+  if (m_fittingData.size() > 0)
     m_fittingData[index]->applySpectra(functor);
 }
 
