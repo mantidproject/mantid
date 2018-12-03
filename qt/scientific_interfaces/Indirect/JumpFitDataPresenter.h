@@ -24,7 +24,7 @@ namespace IDA {
 class DLLExport JumpFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  JumpFitDataPresenter(JumpFitModel *model, IndirectFitDataView *view,
+  JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataView *view,
                        QComboBox *cbParameterType, QComboBox *cbParameter,
                        QLabel *lbParameterType, QLabel *lbParameter);
 

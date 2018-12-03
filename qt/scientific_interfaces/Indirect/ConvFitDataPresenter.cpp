@@ -25,7 +25,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
-                                           IndirectFitDataView *view)
+                                           IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
           model, view,
           Mantid::Kernel::make_unique<ConvFitDataTablePresenter>(
