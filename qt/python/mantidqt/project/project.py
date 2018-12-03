@@ -12,20 +12,22 @@ import glob
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
 from mantid import logger
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
 from mantidqt.io import open_a_file_dialog
 from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
-from mantidqt.workspaceobserver import WorkspaceObserver
 
 
-class Project(WorkspaceObserver):
+class Project(AnalysisDataServiceObserver):
     def __init__(self):
         # Has the project been saved
         self.saved = False
 
         # Last save locations
         self.last_project_location = None
+
+        self.ads_observer = AnalysisDataServiceObserver()
+        self.ads_observer.observeAll(True)
 
     def save(self):
         if self.last_project_location is None:
@@ -83,7 +85,8 @@ class Project(WorkspaceObserver):
         :return: Bool; Returns false if no save needed/save complete. Returns True if need to cancel closing.
         """
         result = QMessageBox.question(parent, 'Unsaved Project', "The project is currently unsaved would you like to "
-                                      "save?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+                                      "save before closing?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+                                      QMessageBox.Yes)
         if result == QMessageBox.Yes:
             self.save()
         elif result == QMessageBox.Cancel:
@@ -96,22 +99,5 @@ class Project(WorkspaceObserver):
             return
         self.saved = False
 
-    def observePostDelete(self, on=True):
-        if on:
-            self.modified_project()
-
-    def observeAfterReplace(self, on=True):
-        if on:
-            self.modified_project()
-
-    def observeRename(self, on=True):
-        if on:
-            self.modified_project()
-
-    def observeAdd(self, on=True):
-        if on:
-            self.modified_project()
-
-    def observeADSClear(self, on=True):
-        if on:
-            self.modified_project()
+    def anyChangeHandle(self):
+        self.modified_project()

@@ -81,6 +81,7 @@ set ( EXPORT_FILES
   src/Exports/SpectrumInfoItem.cpp
   src/Exports/SpectrumInfoIterator.cpp
   src/Exports/SpectrumInfoPythonIterator.cpp
+  src/Exports/AnalysisDataServiceObserver.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )

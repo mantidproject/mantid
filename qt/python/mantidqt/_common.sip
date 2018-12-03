@@ -246,24 +246,6 @@ signals:
 };
 
 // ---------------------------------
-// Workspace Observer
-// ---------------------------------
-
-class WorkspaceObserver {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
-%End
-public:
-  WorkspaceObserver();
-  void observePreDelete(bool on = true);
-  void observePostDelete(bool on = true);
-  void observeAfterReplace(bool on = true);
-  void observeRename(bool on = true);
-  void observeAdd(bool on = true);
-  void observeADSClear(bool on = true);
-};
-
-// ---------------------------------
 // Manage User Directories
 // ---------------------------------
 
