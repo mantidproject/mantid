@@ -37,6 +37,7 @@ class LoadUtils(object):
         self.options = [item.replace(" ", "") for item in self.options]
         self.N_points = len(tmpWS.readX(0))
         self.instrument = tmpWS.getInstrument().getName()
+
         self.runName = self.instrument + str(tmpWS.getRunNumber()).zfill(8)
 
     # get methods
@@ -106,7 +107,7 @@ class LoadUtils(object):
 def get_default_instrument():
     default_instrument = ConfigServiceImpl.Instance().getInstrument().name()
     if default_instrument not in file_utils.allowed_instruments:
-        default_instrument = "None"
+        default_instrument = 'MUSR'
     return default_instrument
 
 
