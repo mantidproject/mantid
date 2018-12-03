@@ -334,14 +334,15 @@ template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::init() {
  * overridden in the subclass by a function named PyExec
  */
 template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::exec() {
- try {
- callMethod<void>(getSelf(), "PyExec");
- } catch (Mantid::PythonInterface::PythonException&) {
-   if (BaseAlgorithm::getCancel()) throw Mantid::API::Algorithm::CancelException();
-   else throw;
- }
+  try {
+    callMethod<void>(getSelf(), "PyExec");
+  } catch (Mantid::PythonInterface::PythonException &) {
+    if (BaseAlgorithm::getCancel())
+      throw Mantid::API::Algorithm::CancelException();
+    else
+      throw;
+  }
 }
-
 
 //-----------------------------------------------------------------------------------------------------------------------------
 // Concete instantiations (avoids definitions being all in the headers)
