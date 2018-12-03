@@ -26,8 +26,8 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiag
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_instrument_strings_for_gui)
-from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui)
+from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
@@ -167,10 +167,6 @@ class RunTabPresenter(object):
         reduction_mode_list = get_reduction_mode_strings_for_gui()
         self._view.set_reduction_modes(reduction_mode_list)
 
-        # Set the possible instruments
-        instrument_list = get_instrument_strings_for_gui()
-        self._view.set_instruments(instrument_list)
-
         # Set the step type options for wavelength
         range_step_types = [RangeStepType.to_string(RangeStepType.Lin),
                             RangeStepType.to_string(RangeStepType.Log),
@@ -222,6 +218,7 @@ class RunTabPresenter(object):
 
             # Default gui setup
             self._default_gui_setup()
+            self._view.disable_process_buttons()
 
             # Set appropriate view for the state diagnostic tab presenter
             self._settings_diagnostic_tab_presenter.set_view(self._view.settings_diagnostic_tab)
@@ -276,6 +273,10 @@ class RunTabPresenter(object):
             self._beam_centre_presenter.on_update_rows()
             self._masking_table_presenter.on_update_rows()
             self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
+
+            # 6. Warning if user file did not contain a recognised instrument
+            if self._view.instrument == SANSInstrument.NoInstrument:
+                raise RuntimeError("User file did not contain a SANS Instrument.")
 
         except Exception as e:
             self.sans_logger.error("Loading of the user file failed. {}".format(str(e)))
@@ -630,6 +631,8 @@ class RunTabPresenter(object):
         return None
 
     def _update_view_from_state_model(self):
+        self._set_on_view("instrument")
+
         # Front tab view
         self._set_on_view("zero_error_free")
         self._set_on_view("save_types")
@@ -983,6 +986,10 @@ class RunTabPresenter(object):
         if not instrument:
             instrument = self._view.instrument
 
+        if instrument == SANSInstrument.NoInstrument:
+            self._view.disable_process_buttons()
+        else:
+            self._view.enable_process_buttons()
         self._view.set_instrument_settings(instrument)
         self._beam_centre_presenter.on_update_instrument(instrument)
         self._workspace_diagnostic_presenter.set_instrument_settings(instrument)

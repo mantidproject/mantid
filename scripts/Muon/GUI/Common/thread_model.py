@@ -36,6 +36,8 @@ class ThreadModelWorker(QtCore.QObject):
         self.signals = WorkerSignals()
         self.model = model
 
+    # This decorator is needed for the method to be successfully run on another thread.
+    # https://stackoverflow.com/questions/20752154/pyqt-connecting-a-signal-to-a-slot-to-start-a-background-operation/20818401#20818401
     @pyqtSlot()
     def run(self):
         self.signals.started.emit()
@@ -43,7 +45,7 @@ class ThreadModelWorker(QtCore.QObject):
             self.model.execute()
             self.model.output()
         except KeyboardInterrupt:
-            self.cancel.emit()
+            self.signals.cancel.emit()
         except Exception as error:
             try:
                 self.signals.error.emit(error.args[0])
@@ -110,7 +112,6 @@ class ThreadModel(QtGui.QWidget):
             raise self.exception
 
     def cancel(self):
-        self.user_cancel = True
         self.model.cancel()
 
     # if there is one set of inputs (1 alg)

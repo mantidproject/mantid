@@ -95,6 +95,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty("RoundUpPixel", True, doc="If True, round up pixel position of the specular reflectivity")
         self.declareProperty("UseSANGLE", False, doc="If True, use SANGLE as the scattering angle")
         self.declareProperty("SpecularPixel", 180.0, doc="Pixel position of the specular reflectivity")
+        self.declareProperty("FinalRebin", True, doc="If True, the final reflectivity will be rebinned")
         self.declareProperty("QMin", 0.005, doc="Minimum Q-value")
         self.declareProperty("QStep", 0.02, doc="Step size in Q. Enter a negative value to get a log scale")
         self.declareProperty("AngleOffset", 0.0, doc="angle offset (rad)")
@@ -442,13 +443,22 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         q_workspace = SortXAxis(InputWorkspace=q_workspace, OutputWorkspace=str(q_workspace))
 
         name_output_ws = str(workspace)+'_reflectivity'
-        try:
-            q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
-                            OutputWorkspace=name_output_ws)
-        except:
-            raise RuntimeError("Could not rebin with %s" % str(q_range))
+        do_q_rebin = self.getProperty("FinalRebin").value
 
-        AnalysisDataService.remove(str(q_workspace))
+        if do_q_rebin:
+            try:
+                q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
+                                OutputWorkspace=name_output_ws)
+                AnalysisDataService.remove(str(q_workspace))
+            except:
+                logger.error("Could not rebin with %s" % str(q_range))
+                do_q_rebin = False
+
+        # If we either didn't want to rebin or we failed to rebin,
+        # rename the reflectivity workspace and proceed with it.
+        if not do_q_rebin:
+            q_rebin = RenameWorkspace(InputWorkspace=q_workspace,
+                                      OutputWorkspace=name_output_ws)
 
         return q_rebin
 

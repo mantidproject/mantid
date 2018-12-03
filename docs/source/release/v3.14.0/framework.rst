@@ -45,6 +45,7 @@ Algorithms
 New Algorithms
 ##############
 
+- :ref:`DeadTimeCorrection <algm-DeadTimeCorrection>` will correct for the detector dead time.
 - :ref:`CalculateDynamicRange <algm-CalculateDynamicRange>` will calculate the Q range of a SANS workspace.
 - :ref:`MatchSpectra <algm-MatchSpectra>` is an algorithm that calculates factors to match all spectra to a reference spectrum.
 - :ref:`MaskBinsIf <algm-MaskBinsIf>` is an algorithm to mask bins according to criteria specified as a muparser expression.
@@ -67,6 +68,7 @@ Improvements
 - :ref:`LoadNexusLogs <algm-LoadNexusLogs-v1>` now will load files that have 1D arrays for each time value in the logs, but will not load this data.
 - :ref:`GroupDetectors <algm-GroupDetectors>` now takes masked bins correctly into account when processing histogram workspaces.
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` can now save and load a ``MaskWorkspace``.
+- :ref:`FitPeaks <algm-FitPeaks>` can output parameters' uncertainty (fitting error) in an optional workspace.
 
 Bugfixes
 ########
@@ -82,6 +84,7 @@ Bugfixes
 - Fixed a crash in :ref:`MaskDetectors <algm-MaskDetectors>` when a non-existent component was given in ``ComponentList``.
 - History for algorithms that took groups sometimes would get incorrect history causing history to be incomplete, so now full group history is saved for all items belonging to the group.
 - Fixed a bug in `SetGoniometer <algm-SetGoniometer>` where it would use the mean log value rather than the time series average value for goniometer angles.
+- `ConvertToMD <algm-ConvertToMD>` now uses the time-average value for logs when using them as ``OtherDimensions``
 
 
 Python
@@ -100,12 +103,17 @@ New
  * :class:`mantid.api.SpectrumInfo`
 
 - :class:`mantid.geometry.ComponentInfo` is exposed to allow the user to access geometric information about the components which are part of a beamline.
-
 - :class:`mantid.geometry.DetectorInfo` offers the user the ability to access geometric information about the detector(s) which are part of a beamline. ``DetectorInfo`` has also been given an iterator to allow users to write more Pythonic loops rather than normal index based loops.
-
 - :class:`mantid.api.SpectrumInfo` allows the user to access information about the spectra being used in a beamline. ``SpectrumInfo`` has also been given an iterator to allow users to write more Pythonic loops rather than normal index based loops. In addition to this ``SpectrumDefinition`` objects can also be accessed via a :class:`mantid.api.SpectrumInfo` object. The ``SpectrumDefinition`` object can be used to obtain information about the spectrum to detector mapping and provides a definition of what a spectrum comprises, i.e. indices of all detectors that contribute to the data stored in the spectrum.
-
 - Added new :ref:`unit <Unit Factory>` called ``Temperature`` which has units of Kelvin.
+- Importing ``mantid`` no longer initializes the ``FrameworkManager``. This allows separate classes to be imported without requiring a long delay in waiting for the framework to start. Amongst other things this allows the application name to be set correctly:
+
+.. code-block:: python
+
+   from mantid import FrameworkManager, UsageService
+   UsageService.setApplicationName('myapp')
+   FrameworkManager.Instance()
+
 
 Improvements
 ############
