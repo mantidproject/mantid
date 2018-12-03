@@ -5,9 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ApplyFloodWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Axis.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::Kernel;
@@ -78,7 +78,8 @@ void ApplyFloodWorkspace::exec() {
   MatrixWorkspace_sptr flood = getProperty(Prop::FLOOD_WORKSPACE);
 
   auto const inputXUnitId = input->getAxis(0)->unit()->unitID();
-  bool const doConvertUnits = flood->getAxis(0)->unit()->unitID() != inputXUnitId;
+  bool const doConvertUnits =
+      flood->getAxis(0)->unit()->unitID() != inputXUnitId;
   bool const doRebin = flood->blocksize() > 1;
 
   if (doRebin) {

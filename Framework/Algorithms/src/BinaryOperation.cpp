@@ -769,9 +769,9 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         outY = m_lhs->dataY(i);
         outE = m_lhs->dataE(i);
       } else {
-        performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i),
-                               m_rhs->readY(rhs_wi), m_rhs->readE(rhs_wi), outY,
-                               outE);
+        performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i),
+                               m_lhs->readE(i), m_rhs->readY(rhs_wi),
+                               m_rhs->readE(rhs_wi), outY, outE);
       }
 
       // Free up memory on the RHS if that is possible

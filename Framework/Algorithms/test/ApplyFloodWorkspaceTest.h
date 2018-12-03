@@ -11,9 +11,9 @@
 
 #include "MantidAlgorithms/ApplyFloodWorkspace.h"
 
-#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/ReflectometryHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -27,7 +27,6 @@ using namespace WorkspaceCreationHelper;
 
 class ApplyFloodWorkspaceTest : public CxxTest::TestSuite {
 public:
-
   void test_flood_same_x_units() {
     auto inputWS =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
@@ -69,14 +68,16 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr createFloodWorkspace(Mantid::Geometry::Instrument_const_sptr instrument, std::string const &xUnit = "TOF") {
+  MatrixWorkspace_sptr
+  createFloodWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
+                       std::string const &xUnit = "TOF") {
     MatrixWorkspace_sptr flood = create2DWorkspace(4, 1);
     flood->mutableY(0)[0] = 0.7;
     flood->mutableY(1)[0] = 1.0;
     flood->mutableY(2)[0] = 0.8;
     flood->mutableY(3)[0] = 0.9;
     flood->setInstrument(instrument);
-    for(size_t i = 0; i < flood->getNumberHistograms(); ++i) {
+    for (size_t i = 0; i < flood->getNumberHistograms(); ++i) {
       flood->getSpectrum(i).setDetectorID(Mantid::detid_t(i + 1));
     }
     flood->getAxis(0)->setUnit("TOF");
