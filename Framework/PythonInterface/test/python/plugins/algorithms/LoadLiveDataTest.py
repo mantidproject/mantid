@@ -20,7 +20,7 @@ class LoadLiveDataTest(unittest.TestCase):
 
     def setUp(self):
         FrameworkManager.clearData()
-        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"IDFs_for_UNIT_TESTING/UnitTestFacilities.xml"))
+        ConfigService.updateFacilities(os.path.join(ConfigService.getInstrumentDirectory(),"unit_testing/UnitTestFacilities.xml"))
         ConfigService.setFacility("TEST")
         pass
 
@@ -79,4 +79,3 @@ MyMethod(input, output)
 
 if __name__ == '__main__':
     unittest.main()
-

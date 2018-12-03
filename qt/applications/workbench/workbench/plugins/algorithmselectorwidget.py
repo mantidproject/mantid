@@ -32,6 +32,10 @@ class AlgorithmSelector(PluginWidget):
         layout.addWidget(self.algorithm_selector)
         self.setLayout(layout)
 
+    def refresh(self):
+        """Refreshes the algorithm list"""
+        self.algorithm_selector.refresh()
+
 # ----------------- Plugin API --------------------
 
     def register_plugin(self):

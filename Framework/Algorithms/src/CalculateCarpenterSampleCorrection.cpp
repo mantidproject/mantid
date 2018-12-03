@@ -149,9 +149,7 @@ void CalculateCarpenterSampleCorrection::exec() {
       coeff3 = sampleMaterial.totalScatterXSection(LAMBDA_REF);
   } else // Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, coeff3, 0.0, coeff3,
-                        coeff1);
+    NeutronAtom neutron(0, 0, 0.0, 0.0, coeff3, 0.0, coeff3, coeff1);
     auto shape = boost::shared_ptr<IObject>(
         inputWksp->sample().getShape().cloneWithMaterial(
             Material("SetInMultipleScattering", neutron, coeff2)));
