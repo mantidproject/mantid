@@ -35,6 +35,13 @@ public:
   void setHeight(const double h) override;
   void setFwhm(const double w) override;
 
+  /// Return the peak FWHM uncertainty
+  double fwhmUncertainty() const override;
+  /// Return the peak intensity uncertainty
+  virtual double intensityUncertainty() const override;
+  /// Return the peak height uncertainty
+  virtual double heightUncertainty() const override;
+
   /// overwrite IFunction base class methods
   std::string name() const override { return "Bk2BkExpConvPV"; }
   const std::string category() const override { return "Peak"; }

@@ -23,7 +23,9 @@ using namespace API;
 
 DECLARE_FUNCTION(Gaussian)
 
-Gaussian::Gaussian() : IPeakFunction(), m_intensityCache(0.0) {}
+Gaussian::Gaussian()
+    : IPeakFunction(), m_intensityCache(0.0), m_height_index(0),
+      m_center_index(1), m_sigma_index(2) {}
 
 void Gaussian::init() {
   declareParameter("Height", 0.0, "Height of peak");
@@ -98,6 +100,32 @@ double Gaussian::intensity() const {
   }
   return m_intensityCache;
 }
+
+/// Return the peak FWHM uncertainty
+double Gaussian::fwhmUncertainty() const {
+  const double sigma_error = getError(m_sigma_index);
+  const double fwhm_error = 2.0 * sqrt(2.0 * M_LN2) * sigma_error;
+  return fwhm_error;
+}
+
+/// Return the peak intensity uncertainty
+double Gaussian::intensityUncertainty() const {
+  const double peak_int = intensity();
+  const double sigma_error = getError(m_sigma_index);
+  const double height_error = getError(m_height_index);
+  const double sigma = getParameter("Sigma");
+  const double height = getParameter("Height");
+  const double sigma_height_error =
+      getCovariance(m_sigma_index, m_height_index);
+  const double intensity_error =
+      peak_int * sqrt(sigma_error * sigma_error / (sigma * sigma) +
+                      (height_error * height_error) / (height * height) +
+                      2. * sigma_height_error / (sigma * height));
+
+  return intensity_error;
+}
+/// Return the peak height uncertainty
+double Gaussian::heightUncertainty() const { return getError(m_height_index); }
 
 void Gaussian::setCentre(const double c) { setParameter("PeakCentre", c); }
 void Gaussian::setHeight(const double h) { setParameter("Height", h); }

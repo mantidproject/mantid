@@ -67,6 +67,8 @@ public:
   double getError(size_t i) const override;
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
+  ///
+  double getCovariance(size_t i, size_t j) const;
 
   /// Return parameter index from a parameter reference. Usefull for constraints
   /// and ties in composite functions

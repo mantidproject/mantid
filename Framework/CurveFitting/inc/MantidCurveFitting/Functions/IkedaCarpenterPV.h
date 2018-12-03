@@ -35,6 +35,13 @@ public:
   void setHeight(const double h) override;
   void setFwhm(const double w) override;
 
+  /// Return the peak FWHM uncertainty
+  double fwhmUncertainty() const override;
+  /// Return the peak intensity uncertainty
+  virtual double intensityUncertainty() const override;
+  /// Return the peak height uncertainty
+  virtual double heightUncertainty() const override;
+
   /// overwrite IFunction base class methods
   std::string name() const override { return "IkedaCarpenterPV"; }
   const std::string category() const override { return "Peak"; }
@@ -72,6 +79,16 @@ private:
 
   /// constrain all parameters to be non-negative
   void lowerConstraint0(std::string paramName);
+
+  size_t m_intensity_index;
+  size_t m_alpha0_index;
+  size_t m_alpha1_index;
+  size_t m_beta0_index;
+  size_t m_beta1_index;
+  size_t m_kapp_index;
+  size_t m_sigma2_index;
+  size_t m_gamma_index;
+  size_t m_center_index;
 };
 
 } // namespace Functions

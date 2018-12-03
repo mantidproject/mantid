@@ -41,6 +41,14 @@ public:
   double height() const override;
   double fwhm() const override;
   double intensity() const override;
+
+  /// Return the peak FWHM uncertainty
+  double fwhmUncertainty() const override;
+  /// Return the peak intensity uncertainty
+  virtual double intensityUncertainty() const override;
+  /// Return the peak height uncertainty
+  virtual double heightUncertainty() const override;
+
   void setCentre(const double c) override;
   void setHeight(const double h) override;
   void setFwhm(const double w) override;
@@ -73,6 +81,11 @@ protected:
                              const size_t nBins) const override;
   /// Intensity cache to help recover form Sigma==0 situation
   mutable double m_intensityCache;
+
+  /// indexes for parameters in ParamFunction
+  size_t m_height_index;
+  size_t m_center_index;
+  size_t m_sigma_index;
 };
 
 } // namespace Functions

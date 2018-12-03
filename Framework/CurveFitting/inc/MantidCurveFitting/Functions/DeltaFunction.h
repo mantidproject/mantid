@@ -36,6 +36,14 @@ public:
   void setCentre(const double c) override { UNUSED_ARG(c); }
   void setHeight(const double h) override { setParameter("Height", h); }
   void setFwhm(const double w) override { UNUSED_ARG(w); }
+
+  /// Return the peak FWHM uncertainty
+  double fwhmUncertainty() const override;
+  /// Return the peak intensity uncertainty
+  virtual double intensityUncertainty() const override;
+  /// Return the peak height uncertainty
+  virtual double heightUncertainty() const override;
+
   virtual double HeightPrefactor() const {
     return 1.0;
   } // modulates the Height of the Delta function

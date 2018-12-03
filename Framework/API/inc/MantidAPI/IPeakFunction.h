@@ -31,6 +31,15 @@ public:
   /// Returns the peak FWHM
   virtual double fwhm() const = 0;
 
+  /// Return the peak FWHM uncertainty
+  virtual double fwhmUncertainty() const = 0;
+
+  /// Return the peak intensity uncertainty
+  virtual double intensityUncertainty() const = 0;
+
+  /// Return the peak height uncertainty
+  virtual double heightUncertainty() const = 0;
+
   /// Sets the parameters such that FWHM = w
   virtual void setFwhm(const double w) = 0;
 

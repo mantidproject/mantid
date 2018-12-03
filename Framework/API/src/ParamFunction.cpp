@@ -197,6 +197,13 @@ double ParamFunction::getError(size_t i) const {
   return m_errors[i];
 }
 
+double ParamFunction::getCovariance(size_t i, size_t j) const {
+  checkParameterIndex(i);
+  checkParameterIndex(j);
+
+  return getCovarianceMatrix()->item(i, j);
+}
+
 /**
  * Set the fitting error for a parameter
  * @param i :: The index of a parameter

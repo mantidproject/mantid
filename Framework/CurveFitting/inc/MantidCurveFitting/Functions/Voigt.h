@@ -54,6 +54,13 @@ private:
   double intensity() const override;
   /// Sets the integral intensity of the peak
   void setIntensity(const double value) override;
+
+  /// Return the peak FWHM uncertainty
+  double fwhmUncertainty() const override;
+  /// Return the peak intensity uncertainty
+  virtual double intensityUncertainty() const override;
+  /// Return the peak height uncertainty
+  virtual double heightUncertainty() const override;
 };
 
 } // namespace Functions
