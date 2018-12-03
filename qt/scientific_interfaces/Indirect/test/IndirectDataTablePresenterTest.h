@@ -131,12 +131,11 @@ public:
 
   void
   test_that_invoking_setStartX_will_alter_the_relevant_column_in_the_table() {
-    int const startXColumn(2);
     TableItem const startX(2.2);
 
     m_presenter->setStartX(startX.asDouble(), 0, 0);
 
-    assertValueIsGlobal(startXColumn, startX);
+    assertValueIsGlobal(START_X_COLUMN, startX);
   }
 
   ///----------------------------------------------------------------------
@@ -163,32 +162,29 @@ public:
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_startX_in_every_row_when_the_relevant_column_is_changed() {
-    int const startXColumn(2);
     TableItem const startX(1.5);
 
-    m_table->item(0, startXColumn)->setText(startX.asQString());
+    m_table->item(0, START_X_COLUMN)->setText(startX.asQString());
 
-    assertValueIsGlobal(startXColumn, startX);
+    assertValueIsGlobal(START_X_COLUMN, startX);
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_endX_in_every_row_when_the_relevant_column_is_changed() {
-    int const endXColumn(3);
     TableItem const endX(2.5);
 
-    m_table->item(0, endXColumn)->setText(endX.asQString());
+    m_table->item(0, END_X_COLUMN)->setText(endX.asQString());
 
-    assertValueIsGlobal(endXColumn, endX);
+    assertValueIsGlobal(END_X_COLUMN, endX);
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_excludeRegion_in_every_row_when_the_relevant_column_is_changed() {
-    int const excludeRegionColumn(4);
     TableItem const excludeRegion("2-4");
 
-    m_table->item(0, excludeRegionColumn)->setText(excludeRegion.asQString());
+    m_table->item(0, EXCLUDE_REGION_COLUMN)->setText(excludeRegion.asQString());
 
-    assertValueIsGlobal(excludeRegionColumn, excludeRegion);
+    assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
   }
 
   ///----------------------------------------------------------------------
@@ -234,39 +230,34 @@ public:
 
   void
   test_that_the_setStartX_slot_will_alter_the_relevant_startX_column_in_the_table() {
-    int const startXColumn(2);
     TableItem const startX(1.1);
 
     m_presenter->setStartX(startX.asDouble(), 0);
 
-    assertValueIsGlobal(startXColumn, startX);
+    assertValueIsGlobal(START_X_COLUMN, startX);
   }
 
   void
   test_that_the_setEndX_slot_will_alter_the_relevant_endX_column_in_the_table() {
-    int const endXColumn(3);
     TableItem const endX(1.1);
 
     m_presenter->setEndX(endX.asDouble(), 0);
 
-    assertValueIsGlobal(endXColumn, endX);
+    assertValueIsGlobal(END_X_COLUMN, endX);
   }
 
   void
   test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
-    int const excludeRegionColumn(4);
     TableItem const excludeRegion("2-3");
 
     m_presenter->setExcludeRegion(excludeRegion.asString(), 0);
 
-    assertValueIsGlobal(excludeRegionColumn, excludeRegion);
+    assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
   }
 
   void
   test_that_setGlobalFittingRange_will_set_the_startX_and_endX_taken_from_the_fitting_range() {
     std::size_t const index(0);
-    int const startXColumn(2);
-    int const endXColumn(3);
     TableItem const startX(1.0);
     TableItem const endX(2.0);
     auto const range = std::make_pair(startX.asDouble(), endX.asDouble());
@@ -277,14 +268,13 @@ public:
 
     m_presenter->setGlobalFittingRange(true);
 
-    assertValueIsGlobal(startXColumn, startX);
-    assertValueIsGlobal(endXColumn, endX);
+    assertValueIsGlobal(START_X_COLUMN, startX);
+    assertValueIsGlobal(END_X_COLUMN, endX);
   }
 
   void
   test_that_setGlobalFittingRange_will_set_the_excludeRegion_when_passed_true() {
     std::size_t const index(0);
-    int const excludeRegionColumn(4);
     TableItem const excludeRegion("1-2");
 
     ON_CALL(*m_model, getExcludeRegion(index, 0)).WillByDefault(Return("1-2"));
@@ -293,42 +283,39 @@ public:
 
     m_presenter->setGlobalFittingRange(true);
 
-    assertValueIsGlobal(excludeRegionColumn, excludeRegion);
+    assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
   }
 
   void
   test_that_setGlobalFittingRange_will_connect_the_cellChanged_signal_to_updateAllFittingRangeFrom_when_passed_true() {
-    int const startXColumn(2);
     TableItem const startX(1.0);
 
     m_presenter->setGlobalFittingRange(true);
-    m_table->item(0, startXColumn)->setText(startX.asQString());
+    m_table->item(0, START_X_COLUMN)->setText(startX.asQString());
 
-    assertValueIsGlobal(startXColumn, startX);
+    assertValueIsGlobal(START_X_COLUMN, startX);
   }
 
   void
   test_that_setGlobalFittingRange_will_disconnect_the_cellChanged_signal_when_passed_false_so_that_startX_is_not_global() {
     int const row(1);
-    int const startXColumn(2);
     TableItem const startX(2.5);
 
     m_presenter->setGlobalFittingRange(false);
-    m_table->item(row, startXColumn)->setText(startX.asQString());
+    m_table->item(row, START_X_COLUMN)->setText(startX.asQString());
 
-    assertValueIsNotGlobal(row, startXColumn, startX);
+    assertValueIsNotGlobal(row, START_X_COLUMN, startX);
   }
 
   void
   test_that_setGlobalFittingRange_will_disconnect_the_cellChanged_signal_when_passed_false_so_that_endX_is_not_global() {
     int const row(0);
-    int const endXColumn(3);
     TableItem const endX(3.5);
 
     m_presenter->setGlobalFittingRange(false);
-    m_table->item(row, endXColumn)->setText(endX.asQString());
+    m_table->item(row, END_X_COLUMN)->setText(endX.asQString());
 
-    assertValueIsNotGlobal(row, endXColumn, endX);
+    assertValueIsNotGlobal(row, END_X_COLUMN, endX);
   }
 
   void test_the_enableTable_slot_will_enable_the_table() {
