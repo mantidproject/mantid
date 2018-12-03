@@ -37,13 +37,17 @@ Pseudo-voigt function in Mantid has the following native parameters
 
 From given FWHM
 
-.. math:: \sigma = 2\sqrt{2\ln(2)}
+For Gaussian part:
 
-.. math:: g(x) = A_G \cdot exp(-\frac{(x-x_0)^2}{2\sigma})
+.. math:: \sigma = \frac{1}{2\sqrt{2\ln(2)}} * \Gamma
+
+.. math:: g(x, \Gamma) = A_G \cdot exp(-\frac{(x-x_0)^2}{2\sigma})
 
 where
 
-.. math:: A_G = \frac{2}{H}\sqrt{\frac{\ln{2}}{\pi}} = \frac{\sqrt{2}}{\pi\sigma}
+.. math:: A_G = \frac{2}{H}\sqrt{\frac{\ln{2}}{\pi}} = \frac{1}{\sigma\sqrt{2\pi}}
+
+For Lorentzian part:
 
 .. math:: l(x) = \frac{1}{\pi} \cdot \frac{\Gamma/2}{(x-x_0)^2 + (\Gamma/2)^2}
 
@@ -55,7 +59,20 @@ Effective peak parameter
 
 - Peak height :math:`h`: 
 
-.. math:: h = I \cdot (\eta \cdot A_G + (1 - \eta) \cdot \frac{2}{\pi\cdot\Gamma})
+.. math:: h = I \cdot (\eta \cdot A_G + (1 - \eta) \cdot \frac{2}{\pi\cdot\Gamma}) = (1 + (\sqrt{\ln{2}\pi}-1)\eta) \frac{2\cdot I}{\pi\cdot H}
+
+
+About previous implementation
++++++++++++++++++++++++++++++
+
+Before Mantid release v3.14, the equation of Pseudo-Voigt is defined as
+
+.. math:: pV(x) = h \cdot (\eta \cdot \exp(-\frac{(x-x_0)^2}{-2\sigma^2}) + \frac{(\Gamma/2)^2}{(x-x_0)^2 + (\Gamma/2)^2})
+
+This equation has several issues:
+
+1. It does not have normalized Gaussian and Lorentzian. 
+2. At :math:`x = x_0`, :math:`pV = h`.  By this definition, the mixing ratio factor :math:`\eta` between Gaussian and Lorentzian is the the intensity ratio at :math:`x = x_0`.  But it does not make sense at any other :math:`x` value. According to the literature or manual (Fullprof and GSAS), :math:`\eta` shall be the ratio of the intensities between Gaussian and Lorentzian.
 
 
 The figure below shows data together with a fitted Pseudo-Voigt function, as well as Gaussian and Lorentzian with equal parameters. The mixing parameter for that example is 0.7, which means that the function is behaving more like a Gaussian.
