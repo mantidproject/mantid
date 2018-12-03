@@ -77,9 +77,9 @@ private:
                             std::string const &outputBaseName,
                             std::string const &endOfSuffix);
   void copyLogs(API::WorkspaceGroup_sptr resultWorkspaces,
-                const std::vector<API::MatrixWorkspace_sptr> &workspaces);
+                std::vector<API::MatrixWorkspace_sptr> const &workspaces);
   void copyLogs(API::Workspace_sptr resultWorkspace,
-                const std::vector<API::MatrixWorkspace_sptr> &workspaces);
+                std::vector<API::MatrixWorkspace_sptr> const &workspaces);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
                 API::WorkspaceGroup_sptr resultGroup);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,

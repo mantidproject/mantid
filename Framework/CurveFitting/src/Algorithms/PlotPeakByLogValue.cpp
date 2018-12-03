@@ -386,19 +386,19 @@ void PlotPeakByLogValue::exec() {
   if (createFitOutput) {
     // collect output of fit for each spectrum into workspace groups
     WorkspaceGroup_sptr covarianceGroup = boost::make_shared<WorkspaceGroup>();
-    for (auto workspace : covarianceWorkspaces)
+    for (auto const &workspace : covarianceWorkspaces)
       covarianceGroup->addWorkspace(workspace);
     AnalysisDataService::Instance().addOrReplace(
         m_baseName + "_NormalisedCovarianceMatrices", covarianceGroup);
 
     WorkspaceGroup_sptr parameterGroup = boost::make_shared<WorkspaceGroup>();
-    for (auto workspace : parameterWorkspaces)
+    for (auto const &workspace : parameterWorkspaces)
       parameterGroup->addWorkspace(workspace);
     AnalysisDataService::Instance().addOrReplace(m_baseName + "_Parameters",
                                                  parameterGroup);
 
     WorkspaceGroup_sptr fitGroup = boost::make_shared<WorkspaceGroup>();
-    for (auto workspace : fitWorkspaces)
+    for (auto const &workspace : fitWorkspaces)
       fitGroup->addWorkspace(workspace);
     AnalysisDataService::Instance().addOrReplace(m_baseName + "_Workspaces",
                                                  fitGroup);

@@ -83,7 +83,7 @@ JumpFitParameters createJumpFitParameters(MatrixWorkspace *workspace) {
 void deleteTemporaryWorkspaces(std::vector<std::string> const &workspaceNames) {
   auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
   deleter->setLogging(false);
-  for (auto const name : workspaceNames) {
+  for (auto const &name : workspaceNames) {
     deleter->setProperty("Workspace", name);
     deleter->execute();
   }
