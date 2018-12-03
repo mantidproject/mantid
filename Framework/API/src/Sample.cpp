@@ -48,16 +48,16 @@ Sample::Sample(const Sample &copy)
       m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), m_height(copy.m_height),
       m_width(copy.m_width) {
   if (copy.m_lattice)
-    m_lattice = new OrientedLattice(copy.getOrientedLattice());
+    m_lattice = std::make_unique<OrientedLattice>(copy.getOrientedLattice());
 
   if (copy.hasCrystalStructure()) {
-    m_crystalStructure.reset(
-        new Geometry::CrystalStructure(copy.getCrystalStructure()));
+    m_crystalStructure = std::make_unique<Geometry::CrystalStructure>(
+        copy.getCrystalStructure());
   }
 }
 
 /// Destructor
-Sample::~Sample() { delete m_lattice; }
+Sample::~Sample() {}
 
 /** Assignment operator
  * @param rhs :: const reference to the sample object
@@ -75,12 +75,10 @@ Sample &Sample::operator=(const Sample &rhs) {
   m_thick = rhs.m_thick;
   m_height = rhs.m_height;
   m_width = rhs.m_width;
-  if (m_lattice != nullptr)
-    delete m_lattice;
   if (rhs.m_lattice)
-    m_lattice = new OrientedLattice(rhs.getOrientedLattice());
+    m_lattice = std::make_unique<OrientedLattice>(rhs.getOrientedLattice());
   else
-    m_lattice = nullptr;
+    m_lattice.reset(nullptr);
 
   m_crystalStructure.reset();
   if (rhs.hasCrystalStructure()) {
@@ -179,13 +177,10 @@ OrientedLattice &Sample::getOrientedLattice() {
  * @param latt :: A pointer to a OrientedLattice.
  */
 void Sample::setOrientedLattice(OrientedLattice *latt) {
-  if (m_lattice != nullptr) {
-    delete m_lattice;
-  }
   if (latt != nullptr)
-    m_lattice = new OrientedLattice(*latt);
+    m_lattice = std::make_unique<OrientedLattice>(*latt);
   else
-    m_lattice = nullptr;
+    m_lattice.reset(nullptr);
 }
 
 /** @return true if the sample has an OrientedLattice  */
@@ -394,7 +389,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
     int num_oriented_lattice;
     file->readData("num_oriented_lattice", num_oriented_lattice);
     if (num_oriented_lattice > 0) {
-      m_lattice = new OrientedLattice;
+      m_lattice = std::make_unique<OrientedLattice>();
       m_lattice->loadNexus(file, "oriented_lattice");
     }
   }
@@ -418,8 +413,7 @@ int Sample::loadNexus(::NeXus::File *file, const std::string &group) {
  */
 void Sample::clearOrientedLattice() {
   if (m_lattice) {
-    delete m_lattice;
-    m_lattice = nullptr;
+    m_lattice.reset(nullptr);
   }
 }
 } // namespace API
