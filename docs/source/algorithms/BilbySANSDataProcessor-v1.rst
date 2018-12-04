@@ -36,7 +36,7 @@ The steps to make the Bilby data reduction work are listed below:
 
 * Two csv files, similar to (input_csv_example.csv and mantid_reduction_settings_example.csv) should be created during the experiment; the names can be different, the format (especially the top line in each) must stay the same
 * Download Mantid from http://download.mantidproject.org/
-* Add the folder with your *.tar files AND  the two csv files (input_csv_example.csv and mantid_reduction_settings_example.csv) to the path (added to “Mantid User Directories”)
+* Add the folder with your \*.tar files AND  the two csv files (input_csv_example.csv and mantid_reduction_settings_example.csv) to the path (added to “Mantid User Directories”)
    * To keep it simple, one can put tar and csv files in one folder, but you can add as many folders on the paths as you want
 * Open the Script menu in Mantid: press “View”, and then “Script window”; alternalively just press F3
 * The script below shows an example script to run the Bilby reduction the reduction_settings_file options should be changed to the correct .csv file file and save_files set to true.

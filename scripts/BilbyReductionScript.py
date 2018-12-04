@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # flake8: noqa
 
-from mantid.simpleapi import *
+import mantid.simpleapi as mantid_api
 import os
 from mantid.kernel import Logger
 import BilbyCustomFunctions_Reduction
@@ -21,7 +21,7 @@ ansto_logger = Logger("AnstoDataReduction")
 
 def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_index, tube_shift_correction_file,
                         save_files=True, use_default_save_directory=False):
-    red_settings = FileFinder.getFullPath(reduction_settings_file)
+    red_settings = mantid_api.FileFinder.getFullPath(reduction_settings_file)
 
     # INPUT - index of a line with reduction parameters
     index_reduction_settings = [reduction_settings_index]  # INDEX OF THE LINE WITH REDUCTION SETTINGS
@@ -33,7 +33,7 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
     index_files_to_reduce = file_index  # as per csv_files_to_reduce_list file - LINES' INDEXES FOR FILES TO BE REDUCED
 
     # Data file with numbers
-    path_tube_shift_correction = FileFinder.getFullPath(tube_shift_correction_file)
+    path_tube_shift_correction = mantid_api.FileFinder.getFullPath(tube_shift_correction_file)
 
     # settings - what to do - applied for all loaded files - not to be changed by a user
     correct_tubes_shift = True
@@ -52,9 +52,9 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
 
     # Read input csv file and define / create a folder for the output data
 
-    csv_files_to_reduce_list = FileFinder.getFullPath(current_reduction_settings[0]["csv_file_name"])
+    csv_files_to_reduce_list = mantid_api.FileFinder.getFullPath(current_reduction_settings[0]["csv_file_name"])
     if use_default_save_directory:
-        reduced_files_path_folder = ConfigService['defaultsave.directory']
+        reduced_files_path_folder = mantid_api.ConfigService['defaultsave.directory']
     else:
         reduced_files_path_folder = os.path.dirname(csv_files_to_reduce_list)
 
@@ -103,7 +103,8 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
 
     # Transmission fit parameters
     transmission_fit_ini = current_reduction_settings[0]["transmission_fit"]
-    if (transmission_fit_ini != "Linear") and (transmission_fit_ini != "Log") and (transmission_fit_ini != "Polynomial"):
+    if (transmission_fit_ini != "Linear") and (transmission_fit_ini != "Log") and (
+        transmission_fit_ini != "Polynomial"):
         raise ValueError("Check value of transmission_fit; it can be only \"Linear\", \"Log\" or \"Polynomial\","
                          " first letter is mandatory capital")
 
@@ -119,7 +120,8 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
     reduce_2D_input = current_reduction_settings[0]["reduce_2D"].lower()
     reduce_2D = BilbyCustomFunctions_Reduction.string_boolean(reduce_2D_input)
     if reduce_2D:
-        print("2D reduction is performing. Q interval and number of points are taking into account; Q-binning intervals are ignored.")
+        print(
+        "2D reduction is performing. Q interval and number of points are taking into account; Q-binning intervals are ignored.")
         try:
             # for 2D Q-binning is not intuitive, hence only number of points is needed
             number_data_points_2D = float(current_reduction_settings[0][
@@ -151,18 +153,18 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
             raise ValueError("Check StartTime and EndTime values; either both or none shall be intered.")
 
         if (not StartTime) and (not EndTime):
-            ws_sam = LoadBBY(sam_file)
+            ws_sam = mantid_api.LoadBBY(sam_file)
             time_range = ''
         elif (float(StartTime)) > (float(EndTime)):
             raise ValueError("Check StartTime and EndTime values; EndTime cannot be smaller than StartTime.")
         else:
-            ws_sam = LoadBBY(sam_file)  # test loader: to check if given StartTime and EndTime are reasonable
+            ws_sam = mantid_api.LoadBBY(sam_file)  # test loader: to check if given StartTime and EndTime are reasonable
             Real_EndTime_max = float(ws_sam.run().getProperty('bm_counts').value)
             if (float(EndTime) > Real_EndTime_max * 1.1):
                 raise ValueError(
                     'EndTime value is wrong, it is more than 10%% larger than the data collection time: %7.2f' % Real_EndTime_max)
-            ws_sam = LoadBBY(sam_file, FilterByTimeStart=StartTime,
-                             FilterByTimeStop=EndTime)  # now to load file within requested time slice if values are feasible
+            ws_sam = mantid_api.LoadBBY(sam_file, FilterByTimeStart=StartTime,
+                                        FilterByTimeStop=EndTime)  # now to load file within requested time slice if values are feasible
             time_range = '_' + StartTime + '_' + EndTime
 
         # To read the mode value: True - ToF; False - NVS; this will define some steps inside SANSDataProcessor
@@ -195,17 +197,18 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
 
         # empty beam scattering in transmission mode
         ws_emp_file = current_file["T_EmptyBeam"] + '.tar'
-        LoadBBY(ws_emp_file, OutputWorkspace='ws_emp')  # Note that this is of course a transmission measurement - shall be long
+        mantid_api.LoadBBY(ws_emp_file,
+                           OutputWorkspace='ws_emp')  # Note that this is of course a transmission measurement - shall be long
 
         # transmission workspaces and masks
         transm_file = current_file["T_Sample"] + '.tar'
-        ws_tranSam = LoadBBY(transm_file)
-        ws_tranEmp = LoadBBY(ws_emp_file)  # empty beam for transmission
+        ws_tranSam = mantid_api.LoadBBY(transm_file)
+        ws_tranEmp = mantid_api.LoadBBY(ws_emp_file)  # empty beam for transmission
         transm_mask = current_file["mask_transmission"] + '.xml'
-        ws_tranMsk = LoadMask('Bilby', transm_mask)
+        ws_tranMsk = mantid_api.LoadMask('Bilby', transm_mask)
 
         sam_mask_file = current_file["mask"] + '.xml'
-        ws_samMsk = LoadMask('Bilby', sam_mask_file)
+        ws_samMsk = mantid_api.LoadMask('Bilby', sam_mask_file)
 
         # scaling: attenuation
         att_pos = float(ws_tranSam.run().getProperty("att_pos").value)
@@ -225,7 +228,7 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
             # Blocked beam
         if blocked_beam:
             ws_blocked_beam = current_file["BlockedBeam"] + '.tar'
-            ws_blk = LoadBBY(ws_blocked_beam)
+            ws_blk = mantid_api.LoadBBY(ws_blocked_beam)
             if correct_tubes_shift:
                 BilbyCustomFunctions_Reduction.CorrectionTubesShift(ws_blk, path_tube_shift_correction)
         else:
@@ -235,9 +238,9 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
         ws_sen = None
 
         # empty beam normalisation
-        MaskDetectors("ws_emp",
-                      MaskedWorkspace=ws_tranMsk)  # does not have to be ws_tranMsk, can be a specific mask
-        ConvertUnits("ws_emp", Target="Wavelength", OutputWorkspace='ws_emp')
+        mantid_api.MaskDetectors("ws_emp",
+                                 MaskedWorkspace=ws_tranMsk)  # does not have to be ws_tranMsk, can be a specific mask
+        mantid_api.ConvertUnits("ws_emp", Target="Wavelength", OutputWorkspace='ws_emp')
 
         # wavelenth intervals: building  binning_wavelength list
         binning_wavelength, n = BilbyCustomFunctions_Reduction.wavelengh_slices(wavelength_intervals,
@@ -253,8 +256,8 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
         plot1Dgraph = None
 
         for i in range(n):
-            ws_emp_partial = Rebin("ws_emp", Params=binning_wavelength[i])
-            ws_emp_partial = SumSpectra(ws_emp_partial, IncludeMonitors=False)
+            ws_emp_partial = mantid_api.Rebin("ws_emp", Params=binning_wavelength[i])
+            ws_emp_partial = mantid_api.SumSpectra(ws_emp_partial, IncludeMonitors=False)
 
             if reduce_2D:
                 base_output_name = sam_file[0:10] + '_2D_' + str(binning_wavelength[i][0]) + '_' + str(
@@ -268,27 +271,29 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
             # needed here, otherwise SANSDataProcessor replaced it with "transmission_fit" string
             transmission_fit = transmission_fit_ini
 
-            output_workspace, transmission_fit = BilbySANSDataProcessor(InputWorkspace=ws_sam,
-                                                                        InputMaskingWorkspace=ws_samMsk,
-                                                                        BlockedBeamWorkspace=ws_blk,
-                                                                        EmptyBeamSpectrumShapeWorkspace=ws_emp_partial,
-                                                                        SensitivityCorrectionMatrix=ws_sen,
-                                                                        TransmissionWorkspace=ws_tranSam,
-                                                                        TransmissionEmptyBeamWorkspace=ws_tranEmp,
-                                                                        TransmissionMaskingWorkspace=ws_tranMsk,
-                                                                        ScalingFactor=scale, SampleThickness=thickness,
-                                                                        FitMethod=transmission_fit,
-                                                                        PolynomialOrder=PolynomialOrder,
-                                                                        BinningWavelength=binning_wavelength[i],
-                                                                        BinningWavelengthTransm=binning_wavelength_transmission,
-                                                                        BinningQ=binning_q,
-                                                                        TimeMode=external_mode,
-                                                                        AccountForGravity=account_for_gravity,
-                                                                        SolidAngleWeighting=solid_angle_weighting,
-                                                                        RadiusCut=RadiusCut, WaveCut=WaveCut,
-                                                                        WideAngleCorrection=wide_angle_correction,
-                                                                        Reduce2D=reduce_2D,
-                                                                        OutputWorkspace=base_output_name)
+            output_workspace, transmission_fit = mantid_api.BilbySANSDataProcessor(InputWorkspace=ws_sam,
+                                                                                   InputMaskingWorkspace=ws_samMsk,
+                                                                                   BlockedBeamWorkspace=ws_blk,
+                                                                                   EmptyBeamSpectrumShapeWorkspace=ws_emp_partial,
+                                                                                   SensitivityCorrectionMatrix=ws_sen,
+                                                                                   TransmissionWorkspace=ws_tranSam,
+                                                                                   TransmissionEmptyBeamWorkspace=ws_tranEmp,
+                                                                                   TransmissionMaskingWorkspace=ws_tranMsk,
+                                                                                   ScalingFactor=scale,
+                                                                                   SampleThickness=thickness,
+                                                                                   FitMethod=transmission_fit,
+                                                                                   PolynomialOrder=PolynomialOrder,
+                                                                                   BinningWavelength=binning_wavelength[
+                                                                                       i],
+                                                                                   BinningWavelengthTransm=binning_wavelength_transmission,
+                                                                                   BinningQ=binning_q,
+                                                                                   TimeMode=external_mode,
+                                                                                   AccountForGravity=account_for_gravity,
+                                                                                   SolidAngleWeighting=solid_angle_weighting,
+                                                                                   RadiusCut=RadiusCut, WaveCut=WaveCut,
+                                                                                   WideAngleCorrection=wide_angle_correction,
+                                                                                   Reduce2D=reduce_2D,
+                                                                                   OutputWorkspace=base_output_name)
 
             if not reduce_2D:
                 BilbyCustomFunctions_Reduction.strip_NaNs(output_workspace, base_output_name)
@@ -320,13 +325,13 @@ def run_bilby_reduction(reduction_settings_file, reduction_settings_index, file_
             if save_files:
                 if reduce_2D:
                     SaveNxs = os.path.join(os.path.expanduser(reduced_files_path), output_workspace.name() + '.nxs')
-                    SaveNISTDAT(output_workspace.name(), SaveNxs)
+                    mantid_api.SaveNISTDAT(output_workspace.name(), SaveNxs)
                 else:
                     n_1D = base_output_name + ".dat"  # 1D output file; name based on "base_output_name" construct
                     savefile = os.path.join(os.path.expanduser(reduced_files_path), n_1D)  # setting up full path
-                    SaveAscii(InputWorkspace=base_output_name, Filename=savefile, WriteXError=True,
-                              WriteSpectrumID=False,
-                              Separator="CSV")  # saving file
+                    mantid_api.SaveAscii(InputWorkspace=base_output_name, Filename=savefile, WriteXError=True,
+                                         WriteSpectrumID=False,
+                                         Separator="CSV")  # saving file
                     print("1D File Exists:{}".format(os.path.exists(savefile)))
 
             return output_workspace, transmission_fit

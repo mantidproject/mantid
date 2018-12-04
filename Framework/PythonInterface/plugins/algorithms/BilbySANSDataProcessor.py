@@ -367,19 +367,19 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
                 sourceapertureradius = float(ws_sam.run().getProperty("source_aperture").value) / 2.0
                 if sourceapertureradius > 40.0:
                     sourceapertureradius = 20.0
-                    print "sourceapertureradius value cannot be retrieved; generic value of 20mm taken"
+                    print("sourceapertureradius value cannot be retrieved; generic value of 20mm taken")
             else:
                 sourceapertureradius = 20.0  # radius in mm
-                print "sourceapertureradius value cannot be retrieved; generic value of 20mm taken"
+                print("sourceapertureradius value cannot be retrieved; generic value of 20mm taken")
 
             if (ws_sam.run().getProperty("sample_aperture").value):
                 sampleapertureradius = float(ws_sam.run().getProperty("source_aperture").value) / 2.0
                 if sampleapertureradius > 40.0:
                     sampleapertureradius = 6.25
-                    print "sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken"
+                    print("sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken")
             else:
                 sampleapertureradius = 6.25  # radius in mm
-                print "sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken"
+                print("sampleapertureradius value cannot be retrieved; generic value of 6.25mm taken")
 
                 # creating empty array for SigmaModerator
             # SigmaModerator is a mandatory parameter for ISIS, but not needed for the reactor facility
