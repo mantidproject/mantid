@@ -15,7 +15,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import copy
 import time
-from mantid.kernel import Logger, ConfigService
+from mantid.kernel import Logger, ConfigService, config
 from mantid.api import (FileFinder)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
@@ -26,8 +26,7 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiag
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.add_runs_presenter import OutputDirectoryObserver as SaveDirectoryObserver
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui,
-                                       get_instrument_strings_for_gui)
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui)
 from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState, SANSInstrument)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
@@ -273,6 +272,7 @@ class RunTabPresenter(object):
         Loads the user file. Populates the models and the view.
         """
         try:
+            #config.setString("default.instrument", "NoInstrument")
             # 1. Get the user file path from the view
             user_file_path = self._view.get_user_file_path()
 
