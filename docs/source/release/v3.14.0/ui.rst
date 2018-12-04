@@ -31,7 +31,7 @@ New
     :class: screenshot
     :align: right
     :figwidth: 70%
-    
+
 - Project Recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
 - Project Recovery now adds a lock file at the start of saving so if MantidPlot crashes when saving it will no longer use that checkpoint as it is incomplete.
 - Project Recovery now has the ability to be changed from inside of MantidPlot without using the config files directly, this can be found in view->preferences->mantid->projectrecovery
@@ -62,6 +62,7 @@ Bugfixes
 - Fixed an issue where Project Recovery would start regardless of the config options
 - Project recovery will now successfully recover live data, it will however be unable to recover any data that was up at the time, but will start the live data streams again from scratch.
 - If an empty group workspace is present in the ADS it will no longer crash the save thread of project recovery and instead will delete it from the ADS and ignore it.
+- A bug has been fixed in Indirect I(Q,t) interface when analyzing IN16B reduced data.
 
 MantidPlot
 ----------
