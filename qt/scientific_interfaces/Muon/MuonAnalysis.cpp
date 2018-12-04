@@ -1937,10 +1937,10 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
   auto upper = m_uiForm.timeAxisFinishAtInput->text().toDouble();
 
-  Workspace_sptr ws_ptr =
+  Workspace_const_sptr ws_ptr =
       AnalysisDataService::Instance().retrieve(wsName.toStdString());
   MatrixWorkspace_const_sptr matrix_workspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+      boost::dynamic_pointer_cast<const MatrixWorkspace>(ws_ptr);
   const auto &xData = matrix_workspace->x(0);
 
   auto lower = m_uiForm.timeAxisStartAtInput->text().toDouble();
