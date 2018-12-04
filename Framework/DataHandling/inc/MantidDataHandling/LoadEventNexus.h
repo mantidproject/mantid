@@ -620,7 +620,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     }
     file.closeData();
   } catch (::NeXus::Exception &) {
-    // let it drop on floor
+    // Nexus format does not require a run_number to be present
   }
 
   if (!run.empty()) {
