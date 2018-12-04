@@ -521,7 +521,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspaces", "ws1, ws2, ws3");
-    alg.setProperty("Params", "0.1, 0.1, 2.6");
+    alg.setProperty("Params", "0.1");
     alg.setProperty("OutputWorkspace", "outws");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());

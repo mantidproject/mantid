@@ -52,12 +52,9 @@ DECLARE_ALGORITHM(Stitch1D)
 MatrixWorkspace_sptr Stitch1D::maskAllBut(size_t a1, size_t a2,
                                           MatrixWorkspace_sptr &source) {
   MatrixWorkspace_sptr outWS = source->clone();
-  unsigned int histogramCount =
-      static_cast<unsigned int>(source->getNumberHistograms());
-  unsigned int start = static_cast<unsigned int>(a1);
-  unsigned int stop = static_cast<unsigned int>(a2);
+  int histogramCount = static_cast<int>(source->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*source, *outWS))
-  for (unsigned int i = 0; i < histogramCount; ++i) {
+  for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the bin boundaries
     outWS->setSharedX(i, source->sharedX(i));
@@ -73,10 +70,8 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(size_t a1, size_t a2,
     auto &newE = outWS->mutableE(i);
 
     // Copy over the non-zero stuff
-    std::copy(sourceY.begin() + start, sourceY.begin() + stop,
-              newY.begin() + start);
-    std::copy(sourceE.begin() + start, sourceE.begin() + stop,
-              newE.begin() + start);
+    std::copy(sourceY.begin() + a1, sourceY.begin() + a2, newY.begin() + a1);
+    std::copy(sourceE.begin() + a1, sourceE.begin() + a2, newE.begin() + a1);
 
     PARALLEL_END_INTERUPT_REGION
   }
@@ -502,17 +497,33 @@ void Stitch1D::exec() {
   if (lhsWS->isHistogramData()) { // If the input workspaces are histograms ...
     size_t a1 = 0;
     size_t a2 = 0;
-    a1 = lhs->binIndexOf(startOverlap + params[1]);
+    try {
+      a1 = lhs->binIndexOf(startOverlap + params[1]);
+    } catch (std::out_of_range) {
+      g_log.error(
+          "The bin boundary of the StartOverlap is smaller than the smallest "
+          "bin boundary (computational inaccuracy)."
+          "Consider to use only a rebin step (params) or precise the "
+          "StartOverlap(s).");
+      throw std::runtime_error("Minimum bin boundary is out of range.");
+    }
     try {
       a2 = lhs->binIndexOf(endOverlap);
     } catch (std::out_of_range) {
-      a2 = lhs->binIndexOf(endOverlap - params[1]);
+      g_log.error(
+          "The bin bounday of the EndOverlap is greater than the greatest bin "
+          "boundary (computational inaccuracy)."
+          "Consider to use only a rebin step (params) or precise the "
+          "EndOverlap(s).");
+      throw std::runtime_error("Maximum bin boundary is out of range.");
     }
-    if (a1 == a2) {
+    if (a1 >= a2) {
       g_log.warning("The Params you have provided for binning yield a "
                     "workspace in which start and end overlap appear "
                     "in the same bin. Make binning finer via input "
-                    "Params.");
+                    "Params. Stitching remains possible in the sense of "
+                    "scaling and joining.");
+      a1 = a2; // in case a1 > a2
     }
     // Overlap region of lhs and rhs
     MatrixWorkspace_sptr overlap1 = maskAllBut(a1, a2, lhs);
