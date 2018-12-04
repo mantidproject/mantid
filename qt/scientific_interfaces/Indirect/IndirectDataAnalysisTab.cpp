@@ -50,6 +50,10 @@ void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
   loadSettings(settings);
 }
 
+void IndirectDataAnalysisTab::setActiveWorkspace() {
+	setActiveBrowserWorkspace();
+}
+
 /**
  * Slot that can be called when a user edits an input.
  */

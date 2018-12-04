@@ -61,6 +61,9 @@ public:
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);
 
+	/// Sets the active workspace in the selected tab
+	void setActiveWorkspace();
+
 protected:
   /// Function to run a string as python code
   void runPythonScript(const QString &pyInput);
@@ -148,6 +151,8 @@ private:
 
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
+
+	virtual void setActiveBrowserWorkspace() = 0;
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;

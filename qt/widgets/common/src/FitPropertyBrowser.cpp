@@ -62,6 +62,21 @@ namespace MantidWidgets {
 
 namespace {
 Mantid::Kernel::Logger g_log("FitPropertyBrowser");
+
+using namespace Mantid::API;
+
+Workspace_sptr getADSWorkspace(std::string const &workspaceName) {
+	return AnalysisDataService::Instance().retrieve(workspaceName);
+}
+
+MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
+	return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+}
+
+int getNumberOfSpectra(MatrixWorkspace_sptr workspace) { 
+	return static_cast<int>(workspace->getNumberHistograms());
+}
+
 }
 
 /**
@@ -1331,22 +1346,23 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
-    Mantid::API::MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                workspaceName()));
-    if (!ws) {
-      setWorkspaceIndex(0);
-      return;
-    }
-    int n = static_cast<int>(ws->getNumberHistograms());
-    int wi = workspaceIndex();
-    if (wi < 0) {
-      setWorkspaceIndex(0);
-    } else if (wi >= n) {
-      setWorkspaceIndex(n - 1);
-    }
-    emit workspaceIndexChanged(wi);
+    auto const workspace = convertToMatrixWorkspace(getADSWorkspace(workspaceName()));
+
+		if (workspace) {
+			int const numberOfSpectra = getNumberOfSpectra(workspace);
+			int const currentIndex = workspaceIndex();
+
+			if (currentIndex < 0) {
+				setWorkspaceIndex(0);
+				emit workspaceIndexChanged(0);
+			}
+			else if (currentIndex >= numberOfSpectra) {
+				setWorkspaceIndex(numberOfSpectra - 1);
+				emit workspaceIndexChanged(numberOfSpectra - 1);
+			}
+		}
+		else
+			setWorkspaceIndex(0);
   } else if (prop->propertyName() == "Workspace Index") {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)

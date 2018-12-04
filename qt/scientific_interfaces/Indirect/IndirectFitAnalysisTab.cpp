@@ -400,8 +400,12 @@ void IndirectFitAnalysisTab::updateBrowserFittingRange() {
   setBrowserEndX(range.second);
 }
 
+void	IndirectFitAnalysisTab::setActiveBrowserWorkspace() {
+	setBrowserWorkspace();
+}
+
 void IndirectFitAnalysisTab::setBrowserWorkspace() {
-  if (m_fittingModel->numberOfWorkspaces() != 0) {
+  if (m_fittingModel->numberOfWorkspaces() > 0) {
     auto const name =
         m_fittingModel->getWorkspace(getSelectedDataIndex())->getName();
     m_fitPropertyBrowser->setWorkspaceName(QString::fromStdString(name));

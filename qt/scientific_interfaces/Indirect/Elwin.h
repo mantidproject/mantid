@@ -38,6 +38,7 @@ private:
   void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+	void setActiveBrowserWorkspace() override {};
   void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
                             const QPair<double, double> &range);
   void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);

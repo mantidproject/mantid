@@ -41,6 +41,8 @@ public:
   void
   setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
 
+	void setActiveBrowserWorkspace();
+
   std::size_t getSelectedDataIndex() const;
   std::size_t getSelectedSpectrum() const;
   bool isRangeCurrentlySelected(std::size_t dataIndex,
