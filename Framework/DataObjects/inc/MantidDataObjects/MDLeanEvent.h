@@ -118,6 +118,12 @@ template <size_t nd>
 void swap(MDLeanEvent<nd>& first, MDLeanEvent<nd>& second);
 
 template <size_t nd> class DLLExport MDLeanEvent {
+public:
+  /**
+   * Additional index type defenitions
+   */
+  using IntT = typename MortonIndex<nd*sizeof(coord_t)>::intType;
+  using MortonT = typename MortonIndex<nd*sizeof(coord_t)>::type;
 protected:
   /** The signal (aka weight) from the neutron event.
    * Will be exactly 1.0 unless modified at some point.
@@ -130,8 +136,6 @@ protected:
    */
   float errorSquared;
 
-  using IntT = typename MortonIndex<nd*sizeof(coord_t)>::intType;
-  using MortonT = typename MortonIndex<nd*sizeof(coord_t)>::type;
   /** The N-dimensional coordinates of the center of the event.
    * A simple fixed-sized array of (floats or doubles).
    */
