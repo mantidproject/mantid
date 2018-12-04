@@ -1289,7 +1289,7 @@ public:
   }
 
   void test_mergeSampleLogs_time_series_overwriting_tolerance_in_algorithm() {
-    std::string mergeType = MergeRuns::FAIL_MERGE;
+    const std::string mergeType = MergeRuns::FAIL_MERGE;
     auto ws = create_group_workspace_with_sample_logs<double>(
         mergeType, "prop1", 1.0, 2.0, 0.0, 0.0, "0.5");
 
