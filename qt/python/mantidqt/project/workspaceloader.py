@@ -13,13 +13,22 @@ from os import path, listdir
 from mantid import logger
 
 
+# List of extensions to ignore
+ignore_exts = [".py"]
+
+
 class WorkspaceLoader(object):
-    def load_workspaces(self, directory):
+    @staticmethod
+    def load_workspaces(directory, project_file_ext):
+        # Include passed project file extension in ignore_exts from projects
+        ignore_exts.append(project_file_ext)
+
         from mantid.simpleapi import Load  # noqa
         filenames = listdir(directory)
         for filename in filenames:
             workspace_name, file_ext = path.splitext(filename)
-            if file_ext != u'.project':
+            # if file_ext not in [".mtdproj", ".py"]:
+            if file_ext not in ignore_exts:
                 try:
                     Load(directory + "/" + filename, OutputWorkspace=workspace_name)
                 except BaseException as exception:

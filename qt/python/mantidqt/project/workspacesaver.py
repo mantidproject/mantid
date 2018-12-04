@@ -51,10 +51,10 @@ class WorkspaceSaver(object):
 
             if isinstance(workspace, MDHistoWorkspace) or isinstance(workspace, IMDEventWorkspace):
                 # Save normally using SaveMD
-                SaveMD(InputWorkspace=workspace_name, Filename=place_to_save_workspace)
+                SaveMD(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
             else:
                 # Save normally using SaveNexusProcessed
-                SaveNexusProcessed(InputWorkspace=workspace_name, Filename=place_to_save_workspace)
+                SaveNexusProcessed(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
 
             self.output_list.append(workspace_name)
 

@@ -9,23 +9,24 @@
 
 import unittest
 
-from os.path import isdir, expanduser
+from os.path import isdir
 from shutil import rmtree
+import tempfile
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.project import projectloader, projectsaver
 
 
-project_file_name = "mantidsave.project"
-working_directory = expanduser("~") + "/project_loader_test"
+project_file_ext = ".mtdproj"
+working_directory = tempfile.mkdtemp()
 
 
 class ProjectLoaderTest(unittest.TestCase):
     def setUp(self):
         ws1_name = "ws1"
         ADS.addOrReplace(ws1_name, CreateSampleWorkspace(OutputWorkspace=ws1_name))
-        project_saver = projectsaver.ProjectSaver(project_file_name)
+        project_saver = projectsaver.ProjectSaver(project_file_ext)
         project_saver.save_project(workspace_to_save=[ws1_name], directory=working_directory)
 
     def tearDown(self):
@@ -34,7 +35,7 @@ class ProjectLoaderTest(unittest.TestCase):
             rmtree(working_directory)
 
     def test_project_loading(self):
-        project_loader = projectloader.ProjectLoader(project_file_name)
+        project_loader = projectloader.ProjectLoader(project_file_ext)
 
         self.assertTrue(project_loader.load_project(working_directory))
 
@@ -50,7 +51,7 @@ class ProjectReaderTest(unittest.TestCase):
     def setUp(self):
         ws1_name = "ws1"
         ADS.addOrReplace(ws1_name, CreateSampleWorkspace(OutputWorkspace=ws1_name))
-        project_saver = projectsaver.ProjectSaver(project_file_name)
+        project_saver = projectsaver.ProjectSaver(project_file_ext)
         project_saver.save_project(workspace_to_save=[ws1_name], directory=working_directory)
 
     def tearDown(self):
@@ -59,7 +60,7 @@ class ProjectReaderTest(unittest.TestCase):
             rmtree(working_directory)
 
     def test_project_reading(self):
-        project_reader = projectloader.ProjectReader(project_file_name)
+        project_reader = projectloader.ProjectReader(project_file_ext)
         project_reader.read_project(working_directory)
         self.assertEqual(["ws1"], project_reader.workspace_names)
         self.assertEqual({}, project_reader.interfaces_dicts)

@@ -100,6 +100,7 @@ set ( SRC_FILES
   src/PythonAlgorithm/DataProcessorAdapter.cpp
   src/CloneMatrixWorkspace.cpp
   src/ExtractWorkspace.cpp
+  src/Exports/AnalysisDataServiceObserverAdapter.cpp
 )
 
 set ( INC_FILES
@@ -110,6 +111,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmAdapter.h
   ${HEADER_DIR}/api/PythonAlgorithm/DataProcessorAdapter.h
+  ${HEADER_DIR}/api/AnalysisDataServiceObserverAdapter.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
   ${HEADER_DIR}/api/ExtractWorkspace.h

@@ -9,16 +9,15 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from json import dump
-from os import makedirs
-from os.path import isdir
+import os
 
 from mantidqt.project import workspacesaver
 from mantid import logger
 
 
 class ProjectSaver(object):
-    def __init__(self, project_save_name):
-        self.project_save_name = project_save_name
+    def __init__(self, project_file_ext):
+        self.project_file_ext = project_file_ext
 
     def save_project(self, directory, workspace_to_save=None, interfaces_to_save=None):
         """
@@ -47,12 +46,12 @@ class ProjectSaver(object):
 
         # Pass dicts to Project Writer
         writer = ProjectWriter(dictionaries_to_save, directory, workspace_saver.get_output_list(),
-                               self.project_save_name)
+                               self.project_file_ext)
         writer.write_out()
 
 
 class ProjectWriter(object):
-    def __init__(self, dicts, save_location, workspace_names, project_save_name):
+    def __init__(self, dicts, save_location, workspace_names, project_file_ext):
         """
 
         :param dicts:
@@ -62,7 +61,7 @@ class ProjectWriter(object):
         self.dicts_to_save = dicts
         self.workspace_names = workspace_names
         self.directory = save_location
-        self.project_save_name = project_save_name
+        self.project_file_ext = project_file_ext
 
     def write_out(self):
         """
@@ -72,8 +71,8 @@ class ProjectWriter(object):
         workspace_interface_dict = {"workspaces": self.workspace_names, "interfaces": self.dicts_to_save}
 
         # Open file and save the string to it alongside the workspace_names
-        file_name = self.directory + '/' + self.project_save_name
-        if not isdir(self.directory):
-            makedirs(self.directory)
+        file_name = self.directory + '/' + (os.path.basename(self.directory) + self.project_file_ext)
+        if not os.path.isdir(self.directory):
+            os.makedirs(self.directory)
         f = open(file_name, 'w+')
         dump(obj=workspace_interface_dict, fp=f)

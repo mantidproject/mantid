@@ -9,30 +9,30 @@
 
 import unittest
 
-from os.path import isdir, expanduser
+from os.path import isdir
 from shutil import rmtree
+import tempfile
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.project import projectsaver, workspaceloader
 
 
-working_directory = expanduser("~") + "/workspace_loader_test"
-
-
 class WorkspaceLoaderTest(unittest.TestCase):
     def setUp(self):
-        ws1_name = "ws1"
-        ADS.addOrReplace(ws1_name, CreateSampleWorkspace(OutputWorkspace=ws1_name))
-        project_saver = projectsaver.ProjectSaver()
-        project_saver.save_project(workspace_to_save=[ws1_name], directory=working_directory)
+        self.working_directory = tempfile.mkdtemp()
+        self.ws1_name = "ws1"
+        self.project_ext = ".mtdproj"
+        ADS.addOrReplace(self.ws1_name, CreateSampleWorkspace(OutputWorkspace=self.ws1_name))
+        project_saver = projectsaver.ProjectSaver(self.project_ext)
+        project_saver.save_project(workspace_to_save=[self.ws1_name], directory=self.working_directory)
 
     def tearDown(self):
         ADS.clear()
-        if isdir(working_directory):
-            rmtree(working_directory)
+        if isdir(self.working_directory):
+            rmtree(self.working_directory)
 
     def test_workspace_loading(self):
         workspace_loader = workspaceloader.WorkspaceLoader()
-        workspace_loader.load_workspaces(working_directory)
-        self.assertEqual(ADS.getObjectNames(), ["ws1"])
+        workspace_loader.load_workspaces(self.working_directory, self.project_ext)
+        self.assertEqual(ADS.getObjectNames(), [self.ws1_name])

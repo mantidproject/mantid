@@ -203,8 +203,7 @@ class MainWindow(QMainWindow):
 
         # Set up the project object
         from mantidqt.project.project import Project
-        project_save_filename = "mantidsave.project"
-        self.project = Project(project_save_filename)
+        self.project = Project()
 
         # uses default configuration as necessary
         self.readSettings(CONF)
