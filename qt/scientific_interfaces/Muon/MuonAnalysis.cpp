@@ -1945,11 +1945,10 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
 
   auto lower = m_uiForm.timeAxisStartAtInput->text().toDouble();
   if (upper > *max_element(xData.begin(), xData.end())) {
-    QMessageBox::warning(
-        this, tr("Muon Analysis"),
-        tr("Upper bound is beyond data range.\n"
-           "Setting end time to last time value (minus 1)."),
-        QMessageBox::Ok, QMessageBox::Ok);
+    QMessageBox::warning(this, tr("Muon Analysis"),
+                         tr("Upper bound is beyond data range.\n"
+                            "Setting end time to last time value (minus 1)."),
+                         QMessageBox::Ok, QMessageBox::Ok);
     // subtract a small amount off to prevent a crash from using the exact end
     upper = *max_element(xData.begin(), xData.end()) - 1.;
     m_uiForm.timeAxisFinishAtInput->setText(QString::number(upper));
