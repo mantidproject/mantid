@@ -598,14 +598,14 @@ class PropertyManager(NonIDF_Properties):
     #
 
     def find_files_to_sum(self,num_files=None):
-        """ method searches for run files in run list to sum and returns
+        """ method searches for run files in the run list to sum and returns
             list of runs with run-files missing or ok and empty list if all files
-            are there
+            are there.
 
             if num_files is not None, find specified number of files out of total
-            file list to sum
-
+            file list to sum.
         """
+
         # this returns only runs, left to sum with current sample_run sum settings
         runs,_,_      = PropertyManager.sample_run.get_runs_to_sum(None,num_files)
         if len(runs) == 0:
