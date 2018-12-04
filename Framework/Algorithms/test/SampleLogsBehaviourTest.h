@@ -71,7 +71,8 @@ public:
     parameterNames.SUM_MERGE = "logs_sum";
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsSum = "A";
-    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
+    SampleLogsBehaviour sbh =
+        SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
     TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws))
     const std::string A = ws->run().getLogData("A")->value();
     const std::string B = ws->run().getLogData("B")->value();
