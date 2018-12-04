@@ -10,6 +10,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/MortonIndex/MDBox.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -124,6 +125,9 @@ class ConvToMDEventsWSIndexing : public ConvToMDEventsWS {
   }
 
   template<size_t ND, template <size_t> class MDEventType>
+  DataObjects::MDBoxBase<MDEventType<ND>, ND> *convertToNativeBoxStructure(const md_structure_ws::MDBox<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT, MDEventType>& mdBox);
+
+  template<size_t ND, template <size_t> class MDEventType>
   void buildStructureFromSortedEvents(API::Progress *pProgress, const API::BoxController_sptr &bc,
                                       const std::vector<MDEventType<ND>> &mdEvents);
 
@@ -222,13 +226,18 @@ std::vector<MDEventType<ND>> ConvToMDEventsWSIndexing::convertEvents() {
   return mdEvents;
 }
 
-
+template<size_t ND, template <size_t> class MDEventType>
+DataObjects::MDBoxBase<MDEventType<ND>, ND>* ConvToMDEventsWSIndexing::convertToNativeBoxStructure(const md_structure_ws::MDBox<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT, MDEventType>& mdBox) {
+  return nullptr;
+}
 
 template<size_t ND, template <size_t> class MDEventType>
 void ConvToMDEventsWSIndexing::buildStructureFromSortedEvents(API::Progress *pProgress,
                                                               const API::BoxController_sptr &bc,
                                                               const std::vector<MDEventType<ND>> &mdEvents) {
-
+  md_structure_ws::MDBox<ND, typename MDEventType<ND>::IntT, typename MDEventType<ND>::MortonT, MDEventType> rootMdBox(mdEvents.cbegin(), mdEvents.cend());
+  rootMdBox.distributeEvents(bc->getSplitThreshold(), bc->getMaxDepth());
+  m_OutWSWrapper->pWorkspace()->setBox(convertToNativeBoxStructure(rootMdBox));
 }
 
 
