@@ -170,7 +170,7 @@ class MaskingTablePresenter(object):
             state = self.get_state(row_index)
         except Exception as e:
             self.on_processing_error_masking_display(e)
-            raise Exception(e)  # propagate errors for run_tab_presenter to deal with
+            raise Exception(str(e))  # propagate errors for run_tab_presenter to deal with
         else:
             if not state:
                 self._logger.information("You can only show a masked workspace if a user file has been loaded and there"
