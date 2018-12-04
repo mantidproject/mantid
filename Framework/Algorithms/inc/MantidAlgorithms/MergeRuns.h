@@ -69,6 +69,15 @@ public:
   // Overriden MultiPeriodGroupAlgorithm method.
   bool useCustomInputPropertyName() const override;
 
+  /// MergeRuns parameter names of the paramter file for sample log merging
+  static const std::string SUM_MERGE;
+  static const std::string TIME_SERIES_MERGE;
+  static const std::string LIST_MERGE;
+  static const std::string WARN_MERGE;
+  static const std::string WARN_MERGE_TOLERANCES;
+  static const std::string FAIL_MERGE;
+  static const std::string FAIL_MERGE_TOLERANCES;
+
 protected:
   /// Overriden fillHistory method to correctly store history from merged
   /// workspaces

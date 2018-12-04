@@ -42,6 +42,16 @@ static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
 static const std::string OUTPUT_WORKSPACE_PROPERTY = "OutputWorkspace";
 static const std::string SAMPLE_LOG_X_AXIS_PROPERTY = "SampleLogAsXAxis";
 } // namespace
+const std::string ConjoinXRuns::SUM_MERGE = "conjoin_sample_logs_sum";
+const std::string ConjoinXRuns::TIME_SERIES_MERGE =
+    "conjoin_sample_logs_time_series";
+const std::string ConjoinXRuns::LIST_MERGE = "conjoin_sample_logs_list";
+const std::string ConjoinXRuns::WARN_MERGE = "conjoin_sample_logs_warn";
+const std::string ConjoinXRuns::WARN_MERGE_TOLERANCES =
+    "conjoin_sample_logs_warn_tolerances";
+const std::string ConjoinXRuns::FAIL_MERGE = "conjoin_sample_logs_fail";
+const std::string ConjoinXRuns::FAIL_MERGE_TOLERANCES =
+    "conjoin_sample_logs_fail_tolerances";
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConjoinXRuns)
@@ -345,14 +355,6 @@ void ConjoinXRuns::exec() {
   logEntries.sampleLogsFailTolerances =
       getPropertyValue(SampleLogsBehaviour::FAIL_TOL_PROP);
   const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
-  SampleLogsBehaviour::ParameterName parName = {};
-  parName.SUM_MERGE = "conjoin_sample_logs_sum";
-  parName.TIME_SERIES_MERGE = "conjoin_sample_logs_time_series";
-  parName.LIST_MERGE = "conjoin_sample_logs_list";
-  parName.WARN_MERGE = "conjoin_sample_logs_warn";
-  parName.WARN_MERGE_TOLERANCES = "conjoin_sample_logs_warn_tolerances";
-  parName.FAIL_MERGE = "conjoin_sample_logs_fail";
-  parName.FAIL_MERGE_TOLERANCES = "conjoin_sample_logs_fail_tolerances";
 
   m_inputWS.clear();
 
@@ -363,6 +365,16 @@ void ConjoinXRuns::exec() {
   }
 
   auto first = m_inputWS.front();
+
+  SampleLogsBehaviour::ParameterName parName = {
+      ConjoinXRuns::SUM_MERGE,
+      ConjoinXRuns::TIME_SERIES_MERGE,
+      ConjoinXRuns::LIST_MERGE,
+      ConjoinXRuns::WARN_MERGE,
+      ConjoinXRuns::WARN_MERGE_TOLERANCES,
+      ConjoinXRuns::FAIL_MERGE,
+      ConjoinXRuns::FAIL_MERGE_TOLERANCES};
+
   SampleLogsBehaviour sampleLogsBehaviour =
       SampleLogsBehaviour(first, g_log, logEntries, parName);
   auto it = m_inputWS.begin();

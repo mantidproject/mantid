@@ -18,6 +18,9 @@ namespace Algorithms {
 /** SampleLogsBehaviour : This class holds information relating to the
   behaviour of the sample log merging. It holds a map of all the sample log
   parameters to merge, how to merge them, and the associated tolerances.
+  Algorithms which already define paramter names for the instrument parameter
+  file are ConjoinXRuns and MergeRuns. Please use different names for new
+  algorithms.
 */
 class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
@@ -68,13 +71,8 @@ public:
   };
 
   SampleLogsBehaviour(API::MatrixWorkspace_sptr ws, Kernel::Logger &logger,
-                      const SampleLogNames &logEntries = {"", "", "", "", "",
-                                                          "", ""},
-                      const ParameterName &parName = {
-                          "sample_logs_sum", "sample_logs_time_series",
-                          "sample_logs_list", "sample_logs_warn",
-                          "sample_logs_warn_tolerances", "sample_logs_fail",
-                          "sample_logs_fail_tolerances"});
+                      const SampleLogNames &logEntries = {},
+                      const ParameterName &parName = {});
 
   /// Create and update sample logs according to instrument parameters
   void mergeSampleLogs(API::MatrixWorkspace_sptr addeeWS,

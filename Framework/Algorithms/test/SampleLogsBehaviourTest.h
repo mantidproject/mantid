@@ -32,12 +32,28 @@ public:
 
   // Please note that many tests are currently present in MergeRunsTest.
 
-  void testMergeRunsIPFNames() {
-    // Using default values of the constructor
+  void testConstructorDefaults() {
     Logger log("testLog");
     auto ws = createTestingWorkspace();
     SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log);
-    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws));
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws))
+    const std::string A = ws->run().getLogData("A")->value();
+    const std::string B = ws->run().getLogData("B")->value();
+    const std::string C = ws->run().getLogData("C")->value();
+    // A, B, C original values
+    TS_ASSERT_EQUALS(A, "2.6499999999999999")
+    TS_ASSERT_EQUALS(B, "1.5600000000000001")
+    TS_ASSERT_EQUALS(C, "8.5500000000000007")
+  }
+
+  void testSomeAlgorithmIPFNames() {
+    Logger log("testLog");
+    auto ws = createTestingWorkspace();
+    SampleLogsBehaviour::ParameterName parameterNames;
+    parameterNames.SUM_MERGE = "logs_sum";
+    parameterNames.LIST_MERGE = "logs_list";
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, {}, parameterNames);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws))
     const std::string A = ws->run().getLogData("A")->value();
     const std::string B = ws->run().getLogData("B")->value();
     const std::string C = ws->run().getLogData("C")->value();
@@ -47,14 +63,16 @@ public:
     TS_ASSERT_EQUALS(C, "8.5500000000000007")
   }
 
-  void testMergeRunsUserNames() {
+  void testSomeAlgorithmUserNames() {
     // Using default values of the constructor
     Logger log("testLog");
     auto ws = createTestingWorkspace();
+    SampleLogsBehaviour::ParameterName parameterNames;
+    parameterNames.SUM_MERGE = "logs_sum";
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsSum = "A";
-    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, sampleLogNames);
-    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws));
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws, ws))
     const std::string A = ws->run().getLogData("A")->value();
     const std::string B = ws->run().getLogData("B")->value();
     const std::string C = ws->run().getLogData("C")->value();
@@ -64,13 +82,12 @@ public:
     TS_ASSERT_EQUALS(C, "8.5500000000000007")
   }
 
-  void testConjoinXRunsIPFNames() {
-    // Using prefix conjoin_ + default value names for constructing
+  void testOtherAlgorithmIPFNames() {
     Logger log("testLog");
     auto ws = createTestingWorkspace();
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     SampleLogsBehaviour::ParameterName parameterNames;
-    parameterNames.SUM_MERGE = "conjoin_sample_logs_sum";
+    parameterNames.SUM_MERGE = "other_logs_sum";
     SampleLogsBehaviour sbh =
         SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
     sbh.mergeSampleLogs(ws, ws);
@@ -83,14 +100,13 @@ public:
     TS_ASSERT_EQUALS(C, "17.100000000000001")
   }
 
-  void testConjoinXRunsUserNames() {
-    // Using prefix conjoin_ + default value names for constructing
+  void testOtherAlgorithmUserNames() {
     Logger log("testLog");
     auto ws = createTestingWorkspace();
     SampleLogsBehaviour::SampleLogNames sampleLogNames;
     sampleLogNames.sampleLogsSum = "B";
     SampleLogsBehaviour::ParameterName parameterNames;
-    parameterNames.SUM_MERGE = "conjoin_sample_logs_sum";
+    parameterNames.SUM_MERGE = "other_logs_sum";
     SampleLogsBehaviour sbh =
         SampleLogsBehaviour(ws, log, sampleLogNames, parameterNames);
     sbh.mergeSampleLogs(ws, ws);
@@ -146,18 +162,18 @@ private:
       "<parameter-file instrument=\"INSTR\" valid-from=\"2018-11-07 "
       "12:00:00\">"
       "  <component-link name=\"INSTR\">"
-      "    <!-- For MergeRuns.-->"
-      "    <parameter name=\"sample_logs_sum\" type=\"string\">"
+      "    <!-- Some algorithm.-->"
+      "    <parameter name=\"logs_sum\" type=\"string\">"
       "	      <value val=\"B\" />"
       "    </parameter>"
-      "    <parameter name=\"sample_logs_list\" type=\"string\">"
+      "    <parameter name=\"logs_list\" type=\"string\">"
       "	      <value val=\"A\" />"
       "    </parameter>"
-      "    <parameter name=\"sample_logs_time_series\" type=\"string\">"
+      "    <parameter name=\"logs_time_series\" type=\"string\">"
       "	      <value val=\"D\" />"
       "    </parameter>"
-      "    <!-- For ConjoinXRuns. -->"
-      "    <parameter name=\"conjoin_sample_logs_sum\" type=\"string\">"
+      "    <!-- Some other algorithm. -->"
+      "    <parameter name=\"other_logs_sum\" type=\"string\">"
       "       <value val=\"A, C\" />"
       "    </parameter>"
       "  </component-link>"
