@@ -32,6 +32,15 @@ using Mantid::HistogramData::HistogramX;
 namespace Mantid {
 namespace Algorithms {
 
+// Register with the algorithm factory
+DECLARE_ALGORITHM(MergeRuns)
+
+using namespace Kernel;
+using namespace API;
+using namespace Geometry;
+using namespace DataObjects;
+using namespace RunCombinationOptions;
+
 const std::string MergeRuns::SUM_MERGE = "sample_logs_sum";
 const std::string MergeRuns::TIME_SERIES_MERGE = "sample_logs_time_series";
 const std::string MergeRuns::LIST_MERGE = "sample_logs_list";
@@ -41,15 +50,6 @@ const std::string MergeRuns::WARN_MERGE_TOLERANCES =
 const std::string MergeRuns::FAIL_MERGE = "sample_logs_fail";
 const std::string MergeRuns::FAIL_MERGE_TOLERANCES =
     "sample_logs_fail_tolerances";
-
-// Register with the algorithm factory
-DECLARE_ALGORITHM(MergeRuns)
-
-using namespace Kernel;
-using namespace API;
-using namespace Geometry;
-using namespace DataObjects;
-using namespace RunCombinationOptions;
 
 /// Initialisation method
 void MergeRuns::init() {

@@ -42,6 +42,10 @@ static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
 static const std::string OUTPUT_WORKSPACE_PROPERTY = "OutputWorkspace";
 static const std::string SAMPLE_LOG_X_AXIS_PROPERTY = "SampleLogAsXAxis";
 } // namespace
+
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(ConjoinXRuns)
+
 const std::string ConjoinXRuns::SUM_MERGE = "conjoin_sample_logs_sum";
 const std::string ConjoinXRuns::TIME_SERIES_MERGE =
     "conjoin_sample_logs_time_series";
@@ -52,9 +56,6 @@ const std::string ConjoinXRuns::WARN_MERGE_TOLERANCES =
 const std::string ConjoinXRuns::FAIL_MERGE = "conjoin_sample_logs_fail";
 const std::string ConjoinXRuns::FAIL_MERGE_TOLERANCES =
     "conjoin_sample_logs_fail_tolerances";
-
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ConjoinXRuns)
 
 //----------------------------------------------------------------------------------------------
 
