@@ -158,6 +158,31 @@ public:
     }
   }
 
+  void test_2D_denominator_with_fewer_spectra()
+  {
+    if(DO_DIVIDE)
+    {
+    int nHist = 5,nBins=5;
+    MatrixWorkspace_sptr numerator  = WorkspaceCreationHelper::create2DWorkspace123(nHist,nBins);
+    MatrixWorkspace_sptr denominator = WorkspaceCreationHelper::create2DWorkspace123(nHist-1, nBins); // Cropped
+    Divide alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("LHSWorkspace", numerator);
+    alg.setProperty("RHSWorkspace", denominator);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("AllowDifferentNumberSpectra", true);
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), nHist);
+    TS_ASSERT_EQUALS(outWS->readY(0)[0], 1.0);
+    TS_ASSERT_EQUALS(outWS->readY(1)[0], 1.0);
+    TS_ASSERT_EQUALS(outWS->readY(2)[0], 1.0);
+    TS_ASSERT_EQUALS(outWS->readY(3)[0], 1.0);
+    TS_ASSERT_EQUALS(outWS->readY(4)[0], 2.0); // Doesn't change
+    }
+  }
+
   void test_2D_1DColumn()
   {
     for (int inplace=0; inplace<2; inplace++)
