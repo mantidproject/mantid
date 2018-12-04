@@ -114,6 +114,10 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
   }
 }
 
+double PseudoVoigt::derivative_gaussian_x0(const double gamma, const double x_0, const double x) {
+  return 2. * (x - x_0) * cal_(gamma) * cal_gaussian(gamma, x_0, x);
+}
+
 double PseudoVoigt::height() const {
     // TODO FIXME - Implement
     return 1.;
@@ -126,6 +130,16 @@ double PseudoVoigt::cal_ag(const double gamma) const {
 double PseudoVoigt::cal_bg(const double gamma) const {
     return 2.;
 }
+
+/** calculate normalized Gaussian
+ * @brief PseudoVoigt::cal_gaussian
+ * @param gamma
+ * @param x_0
+ * @param x
+ * @return
+ */
+double PseudoVoigt::cal_gaussian(const double gamma, const double x_0, const double x) {
+  return
 
 
 

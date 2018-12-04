@@ -71,6 +71,56 @@ Effective peak parameters
 .. math:: \sigma = \frac{H}{2\sqrt{2\ln(2)}}
 
 
+Derivative
+++++++++++
+
+- To mixing paramter :math:`\eta`
+.. math:: \frac{\partial pV(x)}{\partial \eta} = I \cdot [G'(x, H) - L'(x, H)]
+
+
+- To intensity :math:`I`
+.. math:: \frac{\partial pV(x)}{\partial x} = \eta G'(x, H) + (1-\eta) L'(x, H)
+
+- To peak centre :math:`x_0`
+.. math:: \frac{\partial pV(x)}{\partial x_0} = I \cdot [\eta \frac{\partial G'(x, H)}{\partial x_0} + (1 - \eta) \frac{\partial L'(x, H)}{\partial x_0}]
+
+.. math:: \frac{\partial L'(x, H)}{\partial x_0} = a_G \exp{(-b_G(x-x_0)^2)} (-b_G) (-2) (x - x_0) = 2 b_G (x - x_0) G'(x, H)
+
+.. math:: \frac{\partial L'(x, H)}{\partial x_0} = \frac{H}{2} (-1) (-2) (x - x_0) \frac{1}{[(x - x_0)^2 + \frac{H^2}{4}]^2} = \frac{-(x-x_0)H}{[(x - x_0)^2 + \frac{H^2}{4}]^2}
+
+- To peak width :math:`H`
+.. math:: \frac{\partial pV(x)}{\partial H} = I \cdot [\eta \frac{\partial G'(x, H)}{\partial H} + (1 - \eta) \frac{\partial L'(x, H)}{\partial H}]
+
+For Gaussian part:
+.. math:: \frac{\partial G'(x, H)}{\partial H} = \frac{\partial a_G}{\patial H} e^{-b_G(x-x_0)^2} + a_G \frac{\partial\exp{(e^{-b_G(x-x_0)^2)}}}{\partial H} = t_1 + t_2
+
+.. math:: t_1 = \frac{-1}{H} a_G e^{-b_G(x-x_0)^2} = \frac{-1}{H} G'(x, H)
+
+.. math:: t_2 = a_G \exp{(e^{-b_G(x-x_0)^2)})} (-1) (x-x_0)^2 \frac{\partial b_G}{\partial H} = G'(x, H) (-1) (x-x_0)^2 \frac{-2}{H} b_G = 2 b_G (x-x_0)^2 G'(x, H)
+
+For Lorentzian part:
+.. math:: \frac{\partial L'(x, H)}{\partial H} = \frac{1}{\pi} (\frac{\partial H/2}{\partial H}\frac{1}{(x-x_0)^2} + (H/2)^2} + \frac{H}{2}\frac{\partial \frac{1}{(x-x_0)^2 + (H/2)^2}}{\partial H} = t_3 + t_4
+
+.. math:: t_3 = {1}{2\pi} \frac{1}{(x-x_0)^2 + (H/2)^2} = \frac{L'(x, H)}{H}
+
+.. math:: t_4 = \frac{H}{2\pi}\frac{-1}{[(x-x_0)^2} + (H/2)^2]^2} \frac{H}{2} = -\pi[L'(x, H)]^2
+
+
+Estimation of peak parameters
++++++++++++++++++++++++++++++
+
+- Peak width (FWHMW :math:`H`)
+
+- Peak intensity
+
+- Peak height
+
+- Peak centre
+
+- Mixing parameter :math:`\eta` then can be estimated by peak width, intensity and height at estimated peak centre. 
+
+
+
 About previous implementation
 +++++++++++++++++++++++++++++
 
