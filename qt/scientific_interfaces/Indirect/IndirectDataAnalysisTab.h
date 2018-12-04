@@ -148,11 +148,9 @@ private:
   void run() override = 0;
   /// Overidden by child class.
   bool validate() override = 0;
-
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
-
-	virtual void setActiveBrowserWorkspace() = 0;
+	virtual void setBrowserWorkspace() = 0;
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;

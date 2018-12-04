@@ -50,8 +50,11 @@ void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
   loadSettings(settings);
 }
 
+/**
+ * Sets the active browser workspace when the tab is changed
+ */
 void IndirectDataAnalysisTab::setActiveWorkspace() {
-	setActiveBrowserWorkspace();
+	setBrowserWorkspace();
 }
 
 /**

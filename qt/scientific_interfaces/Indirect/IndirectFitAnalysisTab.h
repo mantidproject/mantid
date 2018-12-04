@@ -41,8 +41,6 @@ public:
   void
   setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
 
-	void setActiveBrowserWorkspace();
-
   std::size_t getSelectedDataIndex() const;
   std::size_t getSelectedSpectrum() const;
   bool isRangeCurrentlySelected(std::size_t dataIndex,
@@ -114,6 +112,9 @@ public:
   void setCustomSettingChangesFunction(const QString &settingKey,
                                        bool changesFunction);
 
+public slots:
+	void setBrowserWorkspace();
+
 protected:
   IndirectFittingModel *fittingModel() const;
 
@@ -173,7 +174,6 @@ protected slots:
   void setBrowserStartX(double startX);
   void setBrowserEndX(double endX);
   void updateBrowserFittingRange();
-  void setBrowserWorkspace();
   void setBrowserWorkspace(std::size_t dataIndex);
   void setBrowserWorkspaceIndex(std::size_t spectrum);
   void setBrowserWorkspaceIndex(int spectrum);

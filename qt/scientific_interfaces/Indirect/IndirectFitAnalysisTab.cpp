@@ -400,10 +400,6 @@ void IndirectFitAnalysisTab::updateBrowserFittingRange() {
   setBrowserEndX(range.second);
 }
 
-void	IndirectFitAnalysisTab::setActiveBrowserWorkspace() {
-	setBrowserWorkspace();
-}
-
 void IndirectFitAnalysisTab::setBrowserWorkspace() {
   if (m_fittingModel->numberOfWorkspaces() > 0) {
     auto const name =
