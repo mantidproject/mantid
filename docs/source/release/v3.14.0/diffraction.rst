@@ -73,6 +73,7 @@ Bugfixes
 - multiple_scattering flag is now optional for Polaris focus when absorb_correction is true.
 - Normalisation is fixed in :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`, which was causing very low peak to background ratio for reduced D2B data.
 - sudden drops at either end of spectra in Pearl caused by partial bins are now cropped.
+- The Powder Diffraction GUI now remembers whether linear or logorithmic binning was selected between uses
 
 New
 ###
