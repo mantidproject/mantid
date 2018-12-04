@@ -7,8 +7,8 @@
 #include "MantidAlgorithms/MostLikelyMean.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include "boost/multi_array.hpp"
 
