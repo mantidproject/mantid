@@ -646,12 +646,19 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   if (!m_ws->getInstrument() || !m_instrument_loaded_correctly) {
     // Load the instrument (if not loaded before)
     prog->report("Loading instrument");
+    // Note that closing an re-opening the file is needed here for loading
+    // instruments directly from the nexus file containing the event data.
+    // This may not be needed in the future if both LoadEventNexus and
+    // LoadInstrument are made to use the same Nexus/HDF5 library
+    m_file->close();
     m_instrument_loaded_correctly =
         loadInstrument(m_filename, m_ws, m_top_entry_name, this);
 
     if (!m_instrument_loaded_correctly)
       throw std::runtime_error(
           "Instrument was not initialized correctly! Loading cannot continue.");
+    // reopen file
+    safeOpenFile(m_filename);
   }
 
   // top level file information
