@@ -149,11 +149,14 @@ std::string get1DStringDataset(const std::string &dataset, const Group &group) {
   return std::string(value.begin(), value.end());
 }
 
-/// Open subgroups of parent group
+/** Open subgroups of parent group
+*   If firstEntryOnly=true, only the first match is returned as a vector of
+*   size 1.
+*/
 std::vector<Group> openSubGroups(const Group &parentGroup,
-                                 const H5std_string &CLASS_TYPE) {
+                                 const H5std_string &CLASS_TYPE,
+                                 const bool firstEntryOnly = false) {
   std::vector<Group> subGroups;
-
   // Iterate over children, and determine if a group
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
@@ -175,6 +178,8 @@ std::vector<Group> openSubGroups(const Group &parentGroup,
           // If group of correct type, append to subGroup vector
           if (classType == CLASS_TYPE) {
             subGroups.push_back(childGroup);
+            if (firstEntryOnly)
+              return subGroups;
           }
         }
       }
@@ -183,45 +188,11 @@ std::vector<Group> openSubGroups(const Group &parentGroup,
   return subGroups;
 }
 
-/// Find a single group inside parent (returns first match)
-//  TODO: refactor most of this and openSubGroups() to avoid duplication
-Group findGroup(const Group &parentGroup, const H5std_string &CLASS_TYPE) {
-  Group childGroup;
-  // Iterate over children, and determine if a group
-  for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
-    if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
-      H5std_string childPath = parentGroup.getObjnameByIdx(i);
-      // Open the sub group
-      childGroup = parentGroup.openGroup(childPath);
-      // Iterate through attributes to find NX_class
-      for (uint32_t attribute_index = 0;
-           attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
-           ++attribute_index) {
-        // Test attribute at current index for NX_class
-        Attribute attribute = childGroup.openAttribute(attribute_index);
-        if (attribute.getName() == NX_CLASS) {
-          // Get attribute data type
-          DataType dataType = attribute.getDataType();
-          // Get the NX_class type
-          H5std_string classType;
-          attribute.read(dataType, classType);
-          // If group of correct type, return the childGroup
-          if (classType == CLASS_TYPE) {
-            return childGroup;
-          }
-        }
-      }
-    }
-  }
-  // TODO: would maybe be better to return boost::optional?
-  return childGroup;
-}
-
 // Get the instrument name
 std::string instrumentName(const Group &root) {
-  Group entryGroup = findGroup(root, NX_ENTRY);
-  Group instrumentGroup = findGroup(entryGroup, NX_INSTRUMENT);
-  return get1DStringDataset("name", instrumentGroup);
+  std::vector<Group> instrumentGroup = openSubGroups(
+      openSubGroups(root, NX_ENTRY, true)[0], NX_INSTRUMENT, true);
+  return get1DStringDataset("name", instrumentGroup[0]);
 }
 
 // Open all detector groups into a vector
@@ -601,11 +572,12 @@ parseNexusShape(const Group &detectorGroup, bool &searchTubes) {
 void parseAndAddSource(const H5File &file, const Group &root,
                        InstrumentBuilder &builder) {
   H5std_string sourcePath = "source";
-  Group entryGroup = findGroup(root, NX_ENTRY);
-  Group instrumentGroup = findGroup(entryGroup, NX_INSTRUMENT);
-  Group sourceGroup = findGroup(instrumentGroup, sourcePath);
-  auto sourceName = get1DStringDataset("name", sourceGroup);
-  auto sourceTransformations = getTransformations(file, sourceGroup);
+  std::vector<Group> sourceGroup =
+      openSubGroups(openSubGroups(openSubGroups(root, NX_ENTRY, true)[0],
+                                  NX_INSTRUMENT, true)[0],
+                    sourcePath, true);
+  auto sourceName = get1DStringDataset("name", sourceGroup[0]);
+  auto sourceTransformations = getTransformations(file, sourceGroup[0]);
   auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0);
   builder.addSource(sourceName, sourceTransformations * defaultPos);
 }
@@ -615,9 +587,9 @@ void parseAndAddSample(const H5File &file, const Group &root,
                        InstrumentBuilder &builder) {
   std::string sampleName = "sample";
   H5std_string samplePath = sampleName;
-  Group entryGroup = findGroup(root, NX_ENTRY);
-  Group sampleGroup = findGroup(entryGroup, samplePath);
-  auto sampleTransforms = getTransformations(file, sampleGroup);
+  std::vector<Group> sampleGroup =
+      openSubGroups(openSubGroups(root, NX_ENTRY, true)[0], samplePath, true);
+  auto sampleTransforms = getTransformations(file, sampleGroup[0]);
   Eigen::Vector3d samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
   builder.addSample(sampleName, samplePos);
 }
