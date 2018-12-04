@@ -125,7 +125,7 @@ public:
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockIIndirectFitDataView>>();
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
-    createEmptyTableWidget(5, 5);
+    m_table = createEmptyTableWidget(5, 5);
 
     m_dataTablePresenter = std::make_unique<IndirectDataTablePresenter>(
         std::move(m_model.get()), std::move(m_table.get()));
@@ -235,32 +235,29 @@ public:
 
   void
   test_that_setStartX_will_alter_the_relevant_startX_column_in_the_data_table() {
-    int const startXColumn(2);
     TableItem const startX(2.3);
 
     m_presenter->setStartX(startX.asDouble(), 0, 0);
 
-    assertValueIsGlobal(startXColumn, startX);
+    assertValueIsGlobal(START_X_COLUMN, startX);
   }
 
   void
   test_that_setEndX_will_alter_the_relevant_endX_column_in_the_data_table() {
-    int const endXColumn(3);
     TableItem const endX(5.5);
 
     m_presenter->setEndX(endX.asDouble(), 0, 0);
 
-    assertValueIsGlobal(endXColumn, endX);
+    assertValueIsGlobal(END_X_COLUMN, endX);
   }
 
   void
   test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
-    int const excludeRegionColumn(4);
     TableItem const excludeRegion("2-3");
 
     m_presenter->setExclude(excludeRegion.asString(), 0, 0);
 
-    assertValueIsGlobal(excludeRegionColumn, excludeRegion);
+    assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
   }
 
   void test_that_loadSettings_will_read_the_settings_from_the_view() {
@@ -274,12 +271,13 @@ public:
 
 private:
   /// Used in setup
-  void createEmptyTableWidget(int rows, int columns) {
-    m_table = std::make_unique<QTableWidget>(rows, columns);
-    for (auto column = 0; column < rows; ++column)
-      for (auto row = 0; row < columns; ++row)
-        m_table->setItem(row, column, new QTableWidgetItem("item"));
-  }
+	std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
+		auto table = std::make_unique<QTableWidget>(columns, rows);
+		for (auto column = 0; column < columns; ++column)
+			for (auto row = 0; row < rows; ++row)
+				table->setItem(row, column, new QTableWidgetItem("item"));
+		return table;
+	}
 
   void deleteSetup() {
     m_presenter.reset();
