@@ -86,7 +86,8 @@ void IndirectDataAnalysis::initLayout() {
             SLOT(showMessageBox(const QString &)));
   }
 
-	connect(m_uiForm.twIDATabs, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
+  connect(m_uiForm.twIDATabs, SIGNAL(currentChanged(int)), this,
+          SLOT(tabChanged(int)));
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
@@ -128,7 +129,7 @@ void IndirectDataAnalysis::loadSettings() {
  * Sets the active workspace in the selected tab
  */
 void IndirectDataAnalysis::tabChanged(int index) {
-	m_tabs[index]->setActiveWorkspace();
+  m_tabs[index]->setActiveWorkspace();
 }
 
 /**

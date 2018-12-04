@@ -66,18 +66,18 @@ Mantid::Kernel::Logger g_log("FitPropertyBrowser");
 using namespace Mantid::API;
 
 Workspace_sptr getADSWorkspace(std::string const &workspaceName) {
-	return AnalysisDataService::Instance().retrieve(workspaceName);
+  return AnalysisDataService::Instance().retrieve(workspaceName);
 }
 
 MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
-	return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
-int getNumberOfSpectra(MatrixWorkspace_sptr workspace) { 
-	return static_cast<int>(workspace->getNumberHistograms());
+int getNumberOfSpectra(MatrixWorkspace_sptr workspace) {
+  return static_cast<int>(workspace->getNumberHistograms());
 }
 
-}
+} // namespace
 
 /**
  * Constructor
@@ -1346,23 +1346,22 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
-    auto const workspace = convertToMatrixWorkspace(getADSWorkspace(workspaceName()));
+    auto const workspace =
+        convertToMatrixWorkspace(getADSWorkspace(workspaceName()));
 
-		if (workspace) {
-			int const numberOfSpectra = getNumberOfSpectra(workspace);
-			int const currentIndex = workspaceIndex();
+    if (workspace) {
+      int const numberOfSpectra = getNumberOfSpectra(workspace);
+      int const currentIndex = workspaceIndex();
 
-			if (currentIndex < 0) {
-				setWorkspaceIndex(0);
-				emit workspaceIndexChanged(0);
-			}
-			else if (currentIndex >= numberOfSpectra) {
-				setWorkspaceIndex(numberOfSpectra - 1);
-				emit workspaceIndexChanged(numberOfSpectra - 1);
-			}
-		}
-		else
-			setWorkspaceIndex(0);
+      if (currentIndex < 0) {
+        setWorkspaceIndex(0);
+        emit workspaceIndexChanged(0);
+      } else if (currentIndex >= numberOfSpectra) {
+        setWorkspaceIndex(numberOfSpectra - 1);
+        emit workspaceIndexChanged(numberOfSpectra - 1);
+      }
+    } else
+      setWorkspaceIndex(0);
   } else if (prop->propertyName() == "Workspace Index") {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)

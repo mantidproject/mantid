@@ -113,7 +113,7 @@ public:
                                        bool changesFunction);
 
 public slots:
-	void setBrowserWorkspace();
+  void setBrowserWorkspace();
 
 protected:
   IndirectFittingModel *fittingModel() const;
