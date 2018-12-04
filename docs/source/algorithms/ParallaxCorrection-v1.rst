@@ -67,6 +67,14 @@ Output:
 
   The correction is 1.0016 for the spectrum 1000
 
+Example of correction
+---------------------
+
+Below is an example of the corrections for the instrument D22. The tubes are vertical, the magnitude depends only on the horizontal coordinate.
+The correction increases with increasing angle from the beam, reaching about 10% for the outmost tube for detector distance of 1.5 meters.
+
+.. figure:: /images/parallax.png
+
 .. categories::
 
 .. sourcelink::
