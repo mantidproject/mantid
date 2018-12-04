@@ -11,23 +11,38 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/ParallaxCorrection.h"
 #include "MantidAlgorithms/SetInstrumentParameter.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/V3D.h"
 
-using Mantid::API::FrameworkManager;
-using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::Algorithms::CompareWorkspaces;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::ParallaxCorrection;
 using Mantid::Algorithms::SetInstrumentParameter;
+using Mantid::API::FrameworkManager;
+using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Geometry::DetectorInfo;
 using Mantid::Kernel::V3D;
 
 namespace {
+bool compare(MatrixWorkspace_sptr w1, MatrixWorkspace_sptr w2) {
+  CompareWorkspaces comparator;
+  comparator.initialize();
+  comparator.setChild(true);
+  comparator.setAlwaysStoreInADS(false);
+  comparator.setProperty("Workspace1", w1);
+  comparator.setProperty("Workspace2", w2);
+  comparator.execute();
+  bool result = comparator.getProperty("Result");
+  return result;
+}
+
 MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3,
-                                     const int nBins = 2) {
+                                     const int nBins = 2,
+                                     const bool withParameter = true) {
   CreateSampleWorkspace creator;
   creator.initialize();
   creator.setChild(true);
@@ -44,24 +59,26 @@ MatrixWorkspace_sptr createWorkspace(const int nPixelsPerBank = 3,
 
   MatrixWorkspace_sptr in = creator.getProperty("OutputWorkspace");
 
-  SetInstrumentParameter setter;
-  setter.initialize();
-  setter.setChild(true);
-  setter.setAlwaysStoreInADS(false);
+  if (withParameter) {
+    SetInstrumentParameter setter;
+    setter.initialize();
+    setter.setChild(true);
+    setter.setAlwaysStoreInADS(false);
 
-  setter.setProperty("Workspace", in);
-  setter.setProperty("ParameterName", "direction");
-  setter.setProperty("ParameterType", "String");
-  setter.setProperty("ComponentName", "bank1");
-  setter.setProperty("Value", "y");
-  setter.execute();
+    setter.setProperty("Workspace", in);
+    setter.setProperty("ParameterName", "direction");
+    setter.setProperty("ParameterType", "String");
+    setter.setProperty("ComponentName", "bank1");
+    setter.setProperty("Value", "y");
+    setter.execute();
 
-  setter.setProperty("Workspace", in);
-  setter.setProperty("ParameterName", "parallax");
-  setter.setProperty("ParameterType", "String");
-  setter.setProperty("ComponentName", "bank1");
-  setter.setProperty("Value", "1 + 0.1 * t");
-  setter.execute();
+    setter.setProperty("Workspace", in);
+    setter.setProperty("ParameterName", "parallax");
+    setter.setProperty("ParameterType", "String");
+    setter.setProperty("ComponentName", "bank1");
+    setter.setProperty("Value", "1 + 0.1 * t");
+    setter.execute();
+  }
 
   return in;
 }
@@ -82,6 +99,95 @@ public:
     ParallaxCorrection alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
+  }
+
+  void test_wrong_component() {
+    MatrixWorkspace_sptr in = createWorkspace();
+    const std::vector<std::string> components = {"bank-of-america"};
+
+    ParallaxCorrection alg;
+    alg.setChild(true);
+    alg.setAlwaysStoreInADS(false);
+    alg.initialize();
+    alg.isInitialized();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", in));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ComponentNames", components));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(out);
+    // No correction has been done, output is just a clone of the input
+    TS_ASSERT(compare(in, out))
+  }
+
+  void test_no_parameter() {
+    MatrixWorkspace_sptr in = createWorkspace(3, 2, false);
+    const std::vector<std::string> components = {"bank1"};
+
+    ParallaxCorrection alg;
+    alg.setChild(true);
+    alg.setAlwaysStoreInADS(false);
+    alg.initialize();
+    alg.isInitialized();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", in));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ComponentNames", components));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(out);
+    // No correction has been done, output is just a clone of the input
+    TS_ASSERT(compare(in, out))
+  }
+
+  void test_wrong_formula_parameter() {
+    MatrixWorkspace_sptr in = createWorkspace(3, 2);
+    const std::vector<std::string> components = {"bank1"};
+
+    SetInstrumentParameter setter;
+    setter.initialize();
+    setter.setChild(true);
+    setter.setAlwaysStoreInADS(false);
+
+    setter.setProperty("Workspace", in);
+    setter.setProperty("ParameterName", "direction");
+    setter.setProperty("ParameterType", "String");
+    setter.setProperty("ComponentName", "bank1");
+    setter.setProperty("Value", "y");
+    setter.execute();
+
+    setter.setProperty("Workspace", in);
+    setter.setProperty("ParameterName", "parallax");
+    setter.setProperty("ParameterType", "String");
+    setter.setProperty("ComponentName", "bank1");
+    // this is a wrong formula
+    setter.setProperty("Value", "1 + 0.1 * t + x");
+    setter.execute();
+
+    ParallaxCorrection alg;
+    alg.setChild(true);
+    alg.setAlwaysStoreInADS(false);
+    alg.initialize();
+    alg.isInitialized();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", in));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ComponentNames", components));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "__unused"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(out);
+    // No correction has been done, output is just a clone of the input
+    TS_ASSERT(compare(in, out))
   }
 
   void test_exec() {
@@ -113,7 +219,7 @@ public:
       const double expectation =
           1. + 0.1 * std::abs(std::atan2(pos.X(), pos.Z()));
       const double reality = in->y(index)[0];
-      TS_ASSERT_DELTA(expectation, reality, 1E-5);
+      TS_ASSERT_DELTA(expectation, reality, 1E-10);
     }
   }
 };

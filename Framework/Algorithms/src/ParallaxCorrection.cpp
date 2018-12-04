@@ -10,6 +10,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -146,6 +147,9 @@ void ParallaxCorrection::exec() {
   }
   const std::vector<std::string> componentNames = getProperty("ComponentNames");
   const auto &instrument = inputWorkspace->getInstrument();
+  const auto &detectorInfo = outputWorkspace->detectorInfo();
+  const auto &allDetIDs = detectorInfo.detectorIDs();
+  const auto &componentInfo = outputWorkspace->componentInfo();
   auto progress =
       Kernel::make_unique<API::Progress>(this, 0., 1., componentNames.size());
   for (const auto &componentName : componentNames) {
@@ -163,27 +167,6 @@ void ParallaxCorrection::exec() {
                     << componentName << "\n";
       continue;
     }
-    std::vector<detid_t> detIDs;
-    std::vector<Geometry::IDetector_const_sptr> dets;
-    instrument->getDetectorsInBank(dets, componentName);
-    if (dets.empty()) {
-      const auto det =
-          boost::dynamic_pointer_cast<const Geometry::IDetector>(component);
-      if (!det) {
-        g_log.error() << "No detectors found in component " << componentName
-                      << "\n";
-        continue;
-      }
-      dets.emplace_back(det);
-    }
-    if (dets.empty()) {
-      continue;
-    }
-    detIDs.reserve(dets.size());
-    for (const auto &det : dets) {
-      detIDs.emplace_back(det->getID());
-    }
-    const auto indices = inputWorkspace->getIndicesFromDetectorIDs(detIDs);
     const std::string parallax =
         component->getStringParameter(PARALLAX_PARAMETER)[0];
     const std::string direction =
@@ -195,6 +178,20 @@ void ParallaxCorrection::exec() {
                     << componentName << ". Reason: " << valid << "\n";
       continue;
     }
+    const auto componentIndex = componentInfo.indexOfAny(componentName);
+    const auto &detectorIndices =
+        componentInfo.detectorsInSubtree(componentIndex);
+    if (detectorIndices.empty()) {
+      g_log.error() << "No detectors found in component " << componentName
+                    << "\n";
+      continue;
+    }
+    std::vector<detid_t> detIDs;
+    detIDs.reserve(detectorIndices.size());
+    std::transform(detectorIndices.cbegin(), detectorIndices.cend(),
+                   std::back_inserter(detIDs),
+                   [&allDetIDs](size_t i) { return allDetIDs[i]; });
+    const auto indices = outputWorkspace->getIndicesFromDetectorIDs(detIDs);
     performCorrection(outputWorkspace, indices, parallax, direction);
   }
   setProperty("OutputWorkspace", outputWorkspace);
