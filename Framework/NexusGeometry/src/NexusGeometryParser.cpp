@@ -150,9 +150,9 @@ std::string get1DStringDataset(const std::string &dataset, const Group &group) {
 }
 
 /** Open subgroups of parent group
-*   If firstEntryOnly=true, only the first match is returned as a vector of
-*   size 1.
-*/
+ *   If firstEntryOnly=true, only the first match is returned as a vector of
+ *   size 1.
+ */
 std::vector<Group> openSubGroups(const Group &parentGroup,
                                  const H5std_string &CLASS_TYPE,
                                  const bool firstEntryOnly = false) {
