@@ -375,7 +375,6 @@ def pcolormesh(axes, workspace, *args, **kwargs):
             return _pcolorpieces(axes, workspace, distribution, *args, **kwargs)
         else:
             (x, y, z) = get_matrix_2d_data(workspace, distribution, histogram2D=True)
-
     return axes.pcolormesh(x, y, z, *args, **kwargs)
 
 
@@ -409,10 +408,8 @@ class ScalingAxesImage(mimage.AxesImage):
         dims = A.shape
         max_dims = (3840,2160) # 4K resolution
         if dims[0] > max_dims[0] or dims[1] > max_dims[1]:
-            new_dims = (max_dims[0], round(dims[1]*max_dims[0]/dims[0]))
-            if new_dims[1] > max_dims[1]:
-                new_dims = (round(dims[0]*max_dims[1]/dims[1]), max_dims[1])
-            self.unsampled_data = resize(A,new_dims,mode='constant',cval=numpy.nan)
+            new_dims = numpy.minimum(dims, max_dims)
+            self.unsampled_data = resize(A, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
         else:
             self.unsampled_data = A
         super(mimage.AxesImage, self).set_data(A)
@@ -427,7 +424,8 @@ class ScalingAxesImage(mimage.AxesImage):
         dims = self.unsampled_data.shape
         if dx != self.dx or dy != self.dy:
             if dims[0] > dx or dims[1] > dy:
-                sampled_data = resize(self.unsampled_data,(dx,dy),mode='constant',cval=numpy.nan)
+                new_dims = numpy.minimum(dims,[dx,dy])
+                sampled_data = resize(self.unsampled_data, new_dims, mode='constant', cval=numpy.nan, anti_aliasing=True)
                 self.dx = dx
                 self.dy = dy
                 super(mimage.AxesImage, self).set_data(sampled_data)
