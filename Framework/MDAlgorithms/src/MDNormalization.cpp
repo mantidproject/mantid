@@ -14,6 +14,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -50,7 +53,7 @@ void MDNormalization::init() {
                        "InputWorkspace", "", Kernel::Direction::Input),
                   "An input MDEventWorkspace. Must be in Q_sample frame.");
 
-  //RLU and settings
+  // RLU and settings
   declareProperty("RLU", true, "Use reciprocal lattice units. If false, use Q_sample");
   setPropertyGroup("RLU","Q projections RLU");
 
@@ -75,7 +78,26 @@ void MDNormalization::init() {
   setPropertySettings("QDimension3", make_unique<Kernel::VisibleWhenProperty>("RLU", IS_EQUAL_TO, "1"));
   setPropertyGroup("QDimension3","Q projections RLU");
 
-  //Define slicing
+  // vanadium
+  auto fluxValidator = boost::make_shared<CompositeValidator>();
+  fluxValidator->add<InstrumentValidator>();
+  fluxValidator->add<CommonBinsValidator>();
+  auto solidAngleValidator = fluxValidator->clone();
+  declareProperty(make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
+                                                   Direction::Input, API::PropertyMode::Optional,
+                                                   solidAngleValidator),
+                  "An input workspace containing integrated vanadium "
+                  "(a measure of the solid angle).\n"
+                  "Mandatory for diffraction, optional for direct geometry inelastic");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "FluxWorkspace", "", Direction::Input, API::PropertyMode::Optional,
+                      fluxValidator),
+                  "An input workspace containing momentum dependent flux.\n"
+                  "Mandatory for diffraction. No effect on direct geometry inelastic");
+  setPropertyGroup("SolidAngleWorkspace","Vanadium normalization");
+  setPropertyGroup("FluxWorkspace","Vanadium normalization");
+
+  // Define slicing
   for(std::size_t i=0;i<6;i++) {
     std::string propName = "Dimension"+Strings::toString(i)+"Name";
     std::string propBinning = "Dimension"+Strings::toString(i)+"Binning";
@@ -91,9 +113,33 @@ void MDNormalization::init() {
     setPropertyGroup(propBinning, "Binning");
   }
 
+  // symmetry operations
+  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>("SymmetryOps", "", Direction::Input),
+                  "If specified the symmetry will be applied, "
+                  "can be space group name or number, or list individual symmetries.");
+
+  // temporary workspaces
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate data from "
+                  "multiple MDEventWorkspaces. If unspecified a blank "
+                  "MDHistoWorkspace will be created.");
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryNormalizationWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate normalization "
+                  "from multiple MDEventWorkspaces. If unspecified a blank "
+                  "MDHistoWorkspace will be created.");
+  setPropertyGroup("TemporaryDataWorkspace", "Temporary workspaces");
+  setPropertyGroup("TemporaryNormalizationWorkspace", "Temporary workspaces");
+
   declareProperty(make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputNormalizationWorkspace", "", Direction::Output),
+                  "A name for the output normalization MDHistoWorkspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -117,6 +163,21 @@ MDNormalization::validateInputs() {
       }
     }
   }
+  // Check if the vanadium is available for diffraction
+  bool diffraction=true;
+  if ((inputWS->getNumDims() >3) && (inputWS->getDimension(3)->getMDFrame().name()=="DeltaE")) {
+    diffraction = false;
+  }
+  if (diffraction) {
+    API::MatrixWorkspace_const_sptr solidAngleWS = getProperty("SolidAngleWorkspace");
+    API::MatrixWorkspace_const_sptr fluxWS = getProperty("FluxWorkspace");
+    if (solidAngleWS == nullptr) {
+      errorMessage.emplace("SolidAngleWorkspace","SolidAngleWorkspace is required for diffraction");
+    }
+    if (fluxWS == nullptr) {
+      errorMessage.emplace("FluxWorkspace","FluxWorkspace is required for diffraction");
+    }
+  }
   // Check for property MDNorm_low and MDNorm_high
   size_t nExperimentInfos = inputWS->getNumExperimentInfo();
   if (nExperimentInfos == 0) {
@@ -137,6 +198,37 @@ MDNormalization::validateInputs() {
                              "CropWorkspaceForMDNorm before converting to MD");
       }
     }
+  }
+  // check projections
+  if (getProperty("RLU")) {
+    DblMatrix W = DblMatrix(3, 3);
+    std::vector<double> Q1Basis = getProperty("QDimension1");
+    std::vector<double> Q2Basis = getProperty("QDimension2");
+    std::vector<double> Q3Basis = getProperty("QDimension3");
+    W.setColumn(0, Q1Basis);
+    W.setColumn(1, Q2Basis);
+    W.setColumn(2, Q3Basis);
+    if (fabs(W.determinant()) < 1e-5) {
+      errorMessage.emplace("QDimension1",
+                           "The projection dimensions are coplanar or zero");
+      errorMessage.emplace("QDimension2",
+                           "The projection dimensions are coplanar or zero");
+      errorMessage.emplace("QDimension3",
+                           "The projection dimensions are coplanar or zero");
+    }
+  }
+  // check dimensions
+  std::vector<std::string> originalDimensionNames;
+  for (size_t i=3; i<inputWS->getNumDims(); i++) {
+    originalDimensionNames.push_back(inputWS->getDimension(i)->getName());
+  }
+  originalDimensionNames.push_back("QDimension1");
+  originalDimensionNames.push_back("QDimension2");
+  originalDimensionNames.push_back("QDimension3");
+  for(std::size_t i=0;i<6;i++) {
+    std::string propName = "Dimension"+Strings::toString(i)+"Name";
+    std::string dimName = getProperty(propName);
+    //auto it = std::find();
   }
   return errorMessage;
 }
