@@ -41,16 +41,6 @@ using namespace Geometry;
 using namespace DataObjects;
 using namespace RunCombinationOptions;
 
-const std::string MergeRuns::SUM_MERGE = "sample_logs_sum";
-const std::string MergeRuns::TIME_SERIES_MERGE = "sample_logs_time_series";
-const std::string MergeRuns::LIST_MERGE = "sample_logs_list";
-const std::string MergeRuns::WARN_MERGE = "sample_logs_warn";
-const std::string MergeRuns::WARN_MERGE_TOLERANCES =
-    "sample_logs_warn_tolerances";
-const std::string MergeRuns::FAIL_MERGE = "sample_logs_fail";
-const std::string MergeRuns::FAIL_MERGE_TOLERANCES =
-    "sample_logs_fail_tolerances";
-
 /// Initialisation method
 void MergeRuns::init() {
   // declare arbitrary number of input workspaces as a list of strings at the
@@ -379,13 +369,13 @@ void MergeRuns::execHistogram(const std::vector<std::string> &inputs) {
     outWS = this->rebinInput(outWS, *rebinParams);
   }
   SampleLogsBehaviour::ParameterName parName = {
-      MergeRuns::SUM_MERGE,
-      MergeRuns::TIME_SERIES_MERGE,
-      MergeRuns::LIST_MERGE,
-      MergeRuns::WARN_MERGE,
-      MergeRuns::WARN_MERGE_TOLERANCES,
-      MergeRuns::FAIL_MERGE,
-      MergeRuns::FAIL_MERGE_TOLERANCES};
+      MergeRunsParameter::SUM_MERGE,
+      MergeRunsParameter::TIME_SERIES_MERGE,
+      MergeRunsParameter::LIST_MERGE,
+      MergeRunsParameter::WARN_MERGE,
+      MergeRunsParameter::WARN_MERGE_TOLERANCES,
+      MergeRunsParameter::FAIL_MERGE,
+      MergeRunsParameter::FAIL_MERGE_TOLERANCES};
   Algorithms::SampleLogsBehaviour sampleLogsBehaviour =
       SampleLogsBehaviour(outWS, g_log, logEntries, parName);
 
