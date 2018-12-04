@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_INDIRECTFITDATACREATIONHELPER_H_
 #define MANTID_INDIRECTFITDATACREATIONHELPER_H_
 
@@ -13,6 +19,10 @@
 
 namespace Mantid {
 namespace IndirectFitDataCreationHelper {
+/// Commonly used constant variables
+int const START_X_COLUMN(2);
+int const END_X_COLUMN(3);
+int const EXCLUDE_REGION_COLUMN(4);
 
 /// Functions used in the creation of workspaces
 Mantid::API::MatrixWorkspace_sptr createWorkspace(int const &numberOfSpectra);

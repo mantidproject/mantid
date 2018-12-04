@@ -98,7 +98,7 @@ public:
 
   void setUp() override {
     m_model = std::make_unique<NiceMock<MockIndirectDataTableModel>>();
-    createEmptyTableWidget(5, 5);
+    m_table = createEmptyTableWidget(5, 5);
     m_presenter = std::make_unique<IndirectDataTablePresenter>(
         std::move(m_model.get()), std::move(m_table.get()));
 
@@ -145,29 +145,20 @@ public:
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_startX_when_the_relevant_column_is_changed() {
-    int const startXColumn(2);
-
     EXPECT_CALL(*m_model, setStartX(2.0, 0, 0)).Times(1);
-
-    m_table->item(0, startXColumn)->setText("2.0");
+    m_table->item(0, START_X_COLUMN)->setText("2.0");
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_endX_when_the_relevant_column_is_changed() {
-    int const endXColumn(3);
-
     EXPECT_CALL(*m_model, setEndX(2.0, 0, 0)).Times(1);
-
-    m_table->item(0, endXColumn)->setText("2.0");
+    m_table->item(0, END_X_COLUMN)->setText("2.0");
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_excludeRegion_when_the_relevant_column_is_changed() {
-    int const excludeRegionColumn(4);
-
     EXPECT_CALL(*m_model, setExcludeRegion("0-4", 0, 0)).Times(1);
-
-    m_table->item(0, excludeRegionColumn)->setText("0-4");
+    m_table->item(0, EXCLUDE_REGION_COLUMN)->setText("0-4");
   }
 
   void
@@ -342,15 +333,17 @@ public:
 
   void test_the_enableTable_slot_will_enable_the_table() {
     m_presenter->disableTable();
-    m_presenter->enableTable();
+    TS_ASSERT(!m_table->isEnabled());
 
+    m_presenter->enableTable();
     TS_ASSERT(m_table->isEnabled());
   }
 
   void test_the_disableTable_slot_will_enable_the_table() {
     m_presenter->enableTable();
-    m_presenter->disableTable();
+    TS_ASSERT(m_table->isEnabled());
 
+    m_presenter->disableTable();
     TS_ASSERT(!m_table->isEnabled());
   }
 
@@ -361,11 +354,12 @@ public:
 
 private:
   /// Used in setup
-  void createEmptyTableWidget(int columns, int rows) {
-    m_table = std::make_unique<QTableWidget>(columns, rows);
+  std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
+    auto table = std::make_unique<QTableWidget>(columns, rows);
     for (auto column = 0; column < columns; ++column)
       for (auto row = 0; row < rows; ++row)
-        m_table->setItem(row, column, new QTableWidgetItem("item"));
+        table->setItem(row, column, new QTableWidgetItem("item"));
+    return table;
   }
 
   void assertValueIsGlobal(int column, TableItem const &value) const {
