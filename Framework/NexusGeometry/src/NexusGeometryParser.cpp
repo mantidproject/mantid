@@ -184,6 +184,7 @@ std::vector<Group> openSubGroups(const Group &parentGroup,
 }
 
 /// Find a single group inside parent (returns first match)
+//  TODO: refactor most of this and openSubGroups() to avoid duplication
 Group findGroup(const Group &parentGroup, const H5std_string &CLASS_TYPE) {
   Group childGroup;
   // Iterate over children, and determine if a group
@@ -212,6 +213,7 @@ Group findGroup(const Group &parentGroup, const H5std_string &CLASS_TYPE) {
       }
     }
   }
+  // TODO: would maybe be better to return boost::optional?
   return childGroup;
 }
 
