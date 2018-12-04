@@ -154,9 +154,8 @@ class RunSetupWidget(BaseWidget):
 
         self._content.help_button.clicked.connect(self._show_help)
 
-        # Validated widgets
-
-        return
+        # mutex for whether to update the linear/log drop-down
+        self._content._binning_edit_mutex = False
 
     def set_state(self, state):
         """ Populate the UI elements with the data from the given state.
@@ -177,6 +176,7 @@ class RunSetupWidget(BaseWidget):
             binning_str = '%.6f' % abs(binning_float)
         except ValueError:
             binning_str = str(state.binning)
+        self._content._binning_edit_mutex = True
         self._content.binning_edit.setText(binning_str)
         # Set ResampleX
         try:
@@ -185,6 +185,7 @@ class RunSetupWidget(BaseWidget):
         except ValueError:
             resamplex_str = str(state.resamplex)
         self._content.resamplex_edit.setText(resamplex_str)
+        self._content._binning_edit_mutex = False
 
         # Set binning type (logarithm=1 or linear=0) - must be done after the
         # binning/resamplex boxes are set or it will be lost
@@ -354,6 +355,8 @@ class RunSetupWidget(BaseWidget):
     def _bintype_process(self):
         """ Handling bin type changed
         """
+        if self._content._binning_edit_mutex:
+            return
         currindex = self._content.bintype_combo.currentIndex()
         curbinning = self._content.binning_edit.text()
         if curbinning != "" and curbinning is not None:
