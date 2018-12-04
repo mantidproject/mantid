@@ -271,13 +271,13 @@ public:
 
 private:
   /// Used in setup
-	std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
-		auto table = std::make_unique<QTableWidget>(columns, rows);
-		for (auto column = 0; column < columns; ++column)
-			for (auto row = 0; row < rows; ++row)
-				table->setItem(row, column, new QTableWidgetItem("item"));
-		return table;
-	}
+  std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
+    auto table = std::make_unique<QTableWidget>(columns, rows);
+    for (auto column = 0; column < columns; ++column)
+      for (auto row = 0; row < rows; ++row)
+        table->setItem(row, column, new QTableWidgetItem("item"));
+    return table;
+  }
 
   void deleteSetup() {
     m_presenter.reset();
