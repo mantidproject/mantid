@@ -19,7 +19,7 @@ Both functions share three parameters: Height (height of the peak at the maximum
 
 Thus pseudo-voigt can be expressed in such way
 
-.. math:: pV(x) = I \cdot (\eta \cdot G'(x, H) + (1 - \eta) \cdot (x, H))
+.. math:: pV(x) = I \cdot (\eta \cdot G'(x, H) + (1 - \eta) \cdot L'(x, H))
 
 where :math:`G'(x, H)` and `L'(x, H)` are normalized Gaussian and Lorentzian.
 
@@ -43,16 +43,17 @@ From given FWHM
 
 **Gaussian part** :math:`G'(x, H)`
 
-.. math:: G'(x, H) = a_G \cdot exp(-b_G (x - x_0)^2) = \frac{1}{\sigma\sqrt{2\pi}} \exp{-\frac{(x-x_0)^2}{2\sigma^2}}
+.. math:: G'(x, H) = a_G \cdot e^{-b_G (x - x_0)^2} = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x-x_0)^2}{2\sigma^2}}
 
 
 where
+
+.. math:: \sigma = \frac{H}{2\sqrt{2\ln(2)}}
 
 .. math:: a_G = \frac{2}{H}\sqrt{\frac{\ln{2}}{\pi}} = \frac{1}{\sigma\sqrt{2\pi}}
 
 .. math:: b_G = \frac{4\ln{2}}{H^2}
 
-.. math:: \sigma = \frac{H}{2\sqrt{2\ln(2)}}
 
 **Lorentzian part** :math:`L'(x, H)`
 
@@ -65,7 +66,7 @@ Effective peak parameters
 +++++++++++++++++++++++++
 
 - Peak height :math:`h`: 
-.. math:: h = I \cdot (\eta \cdot a_G + (1 - \eta) \cdot \frac{2}{\pi\cdot H}) = (1 + (\sqrt{\ln{2}\pi}-1)\eta) \frac{2\cdot I}{\pi\cdot H}
+.. math:: h = I \cdot (\eta \cdot a_G + (1 - \eta) \cdot \frac{2}{\pi\cdot H}) = \frac{2 I}{\pi H} (1 + (\sqrt{\pi\ln{2}}-1)\eta)
 
 - :math:`\sigma`:
 .. math:: \sigma = \frac{H}{2\sqrt{2\ln(2)}}
@@ -79,31 +80,33 @@ Derivative
 
 
 - To intensity :math:`I`
-.. math:: \frac{\partial pV(x)}{\partial x} = \eta G'(x, H) + (1-\eta) L'(x, H)
+.. math:: \frac{\partial pV(x)}{\partial I} = \eta G'(x, H) + (1-\eta) L'(x, H)
 
 - To peak centre :math:`x_0`
 .. math:: \frac{\partial pV(x)}{\partial x_0} = I \cdot [\eta \frac{\partial G'(x, H)}{\partial x_0} + (1 - \eta) \frac{\partial L'(x, H)}{\partial x_0}]
 
-.. math:: \frac{\partial L'(x, H)}{\partial x_0} = a_G \exp{(-b_G(x-x_0)^2)} (-b_G) (-2) (x - x_0) = 2 b_G (x - x_0) G'(x, H)
+.. math:: \frac{\partial G'(x, H)}{\partial x_0} = a_G\cdot e^{(-b_G(x-x_0)^2)} (-b_G) (-2) (x - x_0) = 2 b_G (x - x_0) G'(x, H)
 
-.. math:: \frac{\partial L'(x, H)}{\partial x_0} = \frac{H}{2} (-1) (-2) (x - x_0) \frac{1}{[(x - x_0)^2 + \frac{H^2}{4}]^2} = \frac{-(x-x_0)H}{[(x - x_0)^2 + \frac{H^2}{4}]^2}
+.. math:: \frac{\partial L'(x, H)}{\partial x_0} = \frac{H}{2\pi} (-1) (-2) (x - x_0) \frac{1}{[(x - x_0)^2 + \frac{H^2}{4}]^2} = \frac{(x-x_0)H}{\pi[(x - x_0)^2 + \frac{H^2}{4}]^2} = \frac{4\pi(x-x_0)}{H}[L'(x, H)]^2
 
 - To peak width :math:`H`
 .. math:: \frac{\partial pV(x)}{\partial H} = I \cdot [\eta \frac{\partial G'(x, H)}{\partial H} + (1 - \eta) \frac{\partial L'(x, H)}{\partial H}]
 
 For Gaussian part:
-.. math:: \frac{\partial G'(x, H)}{\partial H} = \frac{\partial a_G}{\patial H} e^{-b_G(x-x_0)^2} + a_G \frac{\partial\exp{(e^{-b_G(x-x_0)^2)}}}{\partial H} = t_1 + t_2
+
+.. math:: \frac{\partial G'(x, H)}{\partial H} = \frac{\partial a_G}{\partial H} e^{-b_G(x-x_0)^2} + a_G \frac{\partial e^{-b_G(x-x_0)^2}}{\partial H} = t_1 + t_2
 
 .. math:: t_1 = \frac{-1}{H} a_G e^{-b_G(x-x_0)^2} = \frac{-1}{H} G'(x, H)
 
-.. math:: t_2 = a_G \exp{(e^{-b_G(x-x_0)^2)})} (-1) (x-x_0)^2 \frac{\partial b_G}{\partial H} = G'(x, H) (-1) (x-x_0)^2 \frac{-2}{H} b_G = 2 b_G (x-x_0)^2 G'(x, H)
+.. math:: t_2 = a_G e^{-b_G(x-x_0)^2} (-1) (x-x_0)^2 \frac{\partial b_G}{\partial H} = G'(x, H) (-1) (x-x_0)^2 \frac{-2}{H} b_G = \frac{2 b_G (x-x_0)^2 G'(x, H)}{H}
 
 For Lorentzian part:
-.. math:: \frac{\partial L'(x, H)}{\partial H} = \frac{1}{\pi} (\frac{\partial H/2}{\partial H}\frac{1}{(x-x_0)^2} + (H/2)^2} + \frac{H}{2}\frac{\partial \frac{1}{(x-x_0)^2 + (H/2)^2}}{\partial H} = t_3 + t_4
 
-.. math:: t_3 = {1}{2\pi} \frac{1}{(x-x_0)^2 + (H/2)^2} = \frac{L'(x, H)}{H}
+.. math:: \frac{\partial L'(x, H)}{\partial H} = \frac{1}{\pi} \frac{\partial (H/2)}{\partial H}\frac{1}{(x-x_0)^2 + (H/2)^2} + \frac{H}{2}\frac{\partial \frac{1}{(x-x_0)^2 + (H/2)^2}}{\partial H} = t_3 + t_4
 
-.. math:: t_4 = \frac{H}{2\pi}\frac{-1}{[(x-x_0)^2} + (H/2)^2]^2} \frac{H}{2} = -\pi[L'(x, H)]^2
+.. math:: t_3 = \frac{1}{2\pi} \frac{1}{(x-x_0)^2 + (H/2)^2} = \frac{L'(x, H)}{H}
+
+.. math:: t_4 = \frac{H}{2\pi}\frac{-1}{[(x-x_0)^2 + (H/2)^2]^2} \frac{H}{2} = -\pi[L'(x, H)]^2
 
 
 Estimation of peak parameters

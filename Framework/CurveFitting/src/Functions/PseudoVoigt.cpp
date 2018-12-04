@@ -114,9 +114,10 @@ void PseudoVoigt::functionDerivLocal(Jacobian *out, const double *xValues,
   }
 }
 
-double PseudoVoigt::derivative_gaussian_x0(const double gamma, const double x_0, const double x) {
-  return 2. * (x - x_0) * cal_(gamma) * cal_gaussian(gamma, x_0, x);
-}
+// double PseudoVoigt::derivative_gaussian_x0(const double gamma, const double
+// x_0, const double x) {
+//  return 2. * (x - x_0) * cal_(gamma) * cal_gaussian(gamma, x_0, x);
+//}
 
 double PseudoVoigt::height() const {
     // TODO FIXME - Implement
@@ -138,10 +139,14 @@ double PseudoVoigt::cal_bg(const double gamma) const {
  * @param x
  * @return
  */
-double PseudoVoigt::cal_gaussian(const double gamma, const double x_0, const double x) {
-  return
+double PseudoVoigt::cal_gaussian(const double ag, const double bg,
+                                 const double xdiffsq) {
+  return 0.;
+}
 
-
+double PseudoVoigt::cal_lorentzian(const double gamma, const double xdiffsq) {
+  return 0.;
+}
 
 } // namespace Functions
 } // namespace CurveFitting
