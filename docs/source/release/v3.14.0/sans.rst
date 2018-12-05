@@ -27,6 +27,8 @@ Improved
 * Removed instrument selection box. Instrument is now determined by user file.
 * Automatically remembers last loaded user file
 * Added display of current save directory
+* Added a load button to load selected workspaces without processing.
+* Added save_can option to output unsubtracted can and sample workspaces.
 
 Bug fixes
 #########
