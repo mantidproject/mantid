@@ -232,6 +232,13 @@ QGroupBox::title {
                 </property>
                </widget>
               </item>
+              <item row="4" column="5">
+               <widget class="QPushButton" name="load_botton">
+                <property name="text">
+                 <string>Load</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -454,6 +461,13 @@ QGroupBox::title {
                        </property>
                        <property name="checked">
                         <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QCheckBox" name="save_can_checkBox">
+                       <property name="text">
+                        <string>Save Can</string>
                        </property>
                       </widget>
                      </item>
@@ -806,8 +820,11 @@ QGroupBox::title {
                   </item>
                   <item>
                    <widget class="QGroupBox" name="event_binning_group_box">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
                     <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the data reduction will run in the compatibility mode. This means that the reduction workflow is equivalent to the previous legacy reduction workflow. Most of the time you don't want to have this checked as the unchecked state will provide more precise results.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the data reduction will run in the compatibility mode. This means that the reduction workflow is equivalent to the previous legacy reduction workflow. &lt;/p&gt;&lt;p&gt;ONLY UNCHECK THIS IF NOT PERFORMING BIN MASKING&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
                      <string>&amp;Use compatibility mode</string>
@@ -816,11 +833,14 @@ QGroupBox::title {
                      <bool>true</bool>
                     </property>
                     <property name="checked">
-                     <bool>false</bool>
+                     <bool>true</bool>
                     </property>
                     <layout class="QGridLayout" name="gridLayout_16">
                      <item row="0" column="0">
                       <widget class="QLabel" name="event_binning_label">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
                        <property name="toolTip">
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rebin string for the initial time-of-flight workspace. This is only needed when using the compaptibility mode (ie when following the old reduction model). Note that this will only have an effect on event workspaces.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
@@ -831,6 +851,9 @@ QGroupBox::title {
                      </item>
                      <item row="0" column="1">
                       <widget class="QLineEdit" name="event_binning_line_edit">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
                        <property name="toolTip">
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rebin string for the initial time-of-flight workspace. This is only needed when using the compaptibility mode (ie when following the old reduction model). Note that this will only have an effect on event workspaces.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>

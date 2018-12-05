@@ -114,6 +114,10 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
+        def on_load_clicked(self):
+            pass
+
+        @abstractmethod
         def on_multi_period_selection(self, show_periods):
             pass
 
@@ -291,6 +295,8 @@ class SANSDataProcessorGui(QMainWindow,
         self.process_selected_button.clicked.connect(self._process_selected_clicked)
         self.process_all_button.clicked.connect(self._process_all_clicked)
 
+        self.load_botton.clicked.connect(self._load_clicked)
+
         self.help_button.clicked.connect(self._on_help_button_clicked)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -441,6 +447,9 @@ class SANSDataProcessorGui(QMainWindow,
         """
         self._call_settings_listeners(lambda listener: listener.on_process_all_clicked())
 
+    def _load_clicked(self):
+        self._call_settings_listeners(lambda listener: listener.on_load_clicked())
+
     def _processing_finished(self):
         """
         Clean up
@@ -527,6 +536,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.batch_button.setEnabled(False)
         self.user_file_button.setEnabled(False)
         self.manage_directories_button.setEnabled(False)
+        self.load_botton.setEnabled(False)
 
     def enable_buttons(self):
         self.process_selected_button.setEnabled(True)
@@ -534,6 +544,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.batch_button.setEnabled(True)
         self.user_file_button.setEnabled(True)
         self.manage_directories_button.setEnabled(True)
+        self.load_botton.setEnabled(True)
 
     def disable_process_buttons(self):
         self.process_selected_button.setEnabled(False)
@@ -867,6 +878,14 @@ class SANSDataProcessorGui(QMainWindow,
     @zero_error_free.setter
     def zero_error_free(self, value):
         self.save_zero_error_free.setChecked(value)
+
+    @property
+    def save_can(self):
+        return self.save_can_checkBox.isChecked()
+
+    @save_can.setter
+    def save_can(self, value):
+        self.save_can_checkBox.setChecked(value)
 
     @property
     def progress_bar_minimum(self):
