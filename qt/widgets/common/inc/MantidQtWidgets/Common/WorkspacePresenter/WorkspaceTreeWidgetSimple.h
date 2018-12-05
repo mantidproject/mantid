@@ -52,6 +52,7 @@ signals:
   void showDataClicked(const QStringList &workspaceNames);
 
   void workspaceDoubleClicked(const QString &workspaceName);
+  void treeSelectionChanged();
 
 private slots:
   void onPlotSpectrumClicked();
